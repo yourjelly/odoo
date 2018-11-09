@@ -4,7 +4,7 @@ odoo.define('web.search_view_tests', function (require) {
 var FormView = require('web.FormView');
 var testUtils = require('web.test_utils');
 var createActionManager = testUtils.createActionManager;
-var patchDate = testUtils.patchDate;
+var patchDate = testUtils.mock.patchDate;
 var createView = testUtils.createView;
 
 QUnit.module('Search View', {
@@ -873,7 +873,7 @@ QUnit.module('Search View', {
         assert.strictEqual($('tr.o_data_row').length, 0, "should display 0 records");
 
         // Save this search
-        testUtils.intercept(form, 'create_filter', function (event) {
+        testUtils.mock.intercept(form, 'create_filter', function (event) {
             assert.strictEqual(event.data.filter.name, "Awesome Test Customer Filter", "filter name should be correct");
         });
         $('button:contains(Favorites)').click();

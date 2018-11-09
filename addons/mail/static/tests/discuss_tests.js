@@ -627,7 +627,7 @@ QUnit.test('do not crash when destroyed before start is completed', function (as
     assert.expect(3);
     var discuss;
 
-    testUtils.patch(Discuss, {
+    testUtils.mock.patch(Discuss, {
         init: function () {
             discuss = this;
             this._super.apply(this, arguments);
@@ -657,14 +657,14 @@ QUnit.test('do not crash when destroyed before start is completed', function (as
         "message_fetch"
     ]);
 
-    testUtils.unpatch(Discuss);
+    testUtils.mock.unpatch(Discuss);
 });
 
 QUnit.test('do not crash when destroyed between start en end of _renderSearchView', function (assert) {
     assert.expect(2);
     var discuss;
 
-    testUtils.patch(Discuss, {
+    testUtils.mock.patch(Discuss, {
         init: function () {
             discuss = this;
             this._super.apply(this, arguments);
@@ -673,7 +673,7 @@ QUnit.test('do not crash when destroyed between start en end of _renderSearchVie
 
     var def = $.Deferred();
 
-    testUtils.patch(SearchView, {
+    testUtils.mock.patch(SearchView, {
         willStart: function () {
             var result = this._super.apply(this, arguments);
             return def.then($.when(result));
@@ -700,8 +700,8 @@ QUnit.test('do not crash when destroyed between start en end of _renderSearchVie
         "load_views",
     ]);
 
-    testUtils.unpatch(Discuss);
-    testUtils.unpatch(SearchView);
+    testUtils.mock.unpatch(Discuss);
+    testUtils.mock.unpatch(SearchView);
 });
 
 QUnit.test('confirm dialog when administrator leave (not chat) channel', function (assert) {

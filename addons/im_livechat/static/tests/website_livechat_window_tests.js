@@ -45,7 +45,7 @@ QUnit.test('basic rendering', function (assert) {
     livechat.setMessages(messages);
 
     var chatWindow = new ChatWindow(parent, livechat);
-    testUtils.addMockEnvironment(parent, {});
+    testUtils.mock.addMockEnvironment(parent, {});
     chatWindow.appendTo($('#qunit-fixture'));
     chatWindow.render();
 

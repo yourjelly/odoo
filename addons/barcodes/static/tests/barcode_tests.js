@@ -11,7 +11,7 @@ var testUtils = require('web.test_utils');
 var NotificationService = require('web.NotificationService');
 
 var createView = testUtils.createView;
-var triggerKeypressEvent = testUtils.triggerKeypressEvent;
+var triggerKeypressEvent = testUtils.dom.triggerKeypressEvent;
 
 QUnit.module('Barcodes', {
     beforeEach: function () {
@@ -169,7 +169,7 @@ QUnit.test('do no update form twice after a command barcode scanned', function (
 
     var delay = barcodeEvents.BarcodeEvents.max_time_between_keys_in_ms;
     barcodeEvents.BarcodeEvents.max_time_between_keys_in_ms = 0;
-    testUtils.patch(FormController, {
+    testUtils.mock.patch(FormController, {
         update: function () {
             assert.step('update');
             return this._super.apply(this, arguments);
@@ -212,7 +212,7 @@ QUnit.test('do no update form twice after a command barcode scanned', function (
 
     form.destroy();
     barcodeEvents.BarcodeEvents.max_time_between_keys_in_ms = delay;
-    testUtils.unpatch(FormController);
+    testUtils.mock.unpatch(FormController);
 });
 
 QUnit.test('widget field_float_scannable', function (assert) {

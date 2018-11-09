@@ -60,7 +60,7 @@ QUnit.module('DomainSelector', {
             readonly: false,
             debugMode: true,
         });
-        testUtils.addMockEnvironment(domainSelector, {data: this.data});
+        testUtils.mock.addMockEnvironment(domainSelector, {data: this.data});
         domainSelector.appendTo($target);
 
         // As we gave an empty domain, there should be a visible button to add
@@ -159,7 +159,7 @@ QUnit.module('DomainSelector', {
         var domainSelector = new DomainSelector(null, "partner", [["nice_datetime", "=", "2017-03-27 15:42:00"]], {
             readonly: false,
         });
-        testUtils.addMockEnvironment(domainSelector, {data: this.data});
+        testUtils.mock.addMockEnvironment(domainSelector, {data: this.data});
         domainSelector.appendTo($target);
 
         // Check that there is a datepicker to choose the date
@@ -168,7 +168,7 @@ QUnit.module('DomainSelector', {
             "there should be a datepicker");
 
         var val = $datepicker.find('input').val();
-        testUtils.openDatepicker($datepicker);
+        testUtils.dom.openDatepicker($datepicker);
         $('.bootstrap-datetimepicker-widget :not(.today)[data-action="selectDay"]').click();
         assert.notEqual(domainSelector.$(".o_datepicker:visible input").val(), val,
             "datepicker value should have changed");
@@ -186,7 +186,7 @@ QUnit.module('DomainSelector', {
             debugMode: true,
             readonly: false,
         });
-        testUtils.addMockEnvironment(domainSelector, {data: this.data});
+        testUtils.mock.addMockEnvironment(domainSelector, {data: this.data});
         domainSelector.appendTo($target);
 
         domainSelector.$('.o_domain_leaf_value_input').val('pad').trigger('input').trigger('change');
@@ -206,7 +206,7 @@ QUnit.module('DomainSelector', {
             debugMode: true,
             readonly: false,
         });
-        testUtils.addMockEnvironment(domainSelector, {data: this.data});
+        testUtils.mock.addMockEnvironment(domainSelector, {data: this.data});
         domainSelector.appendTo($target);
 
         assert.strictEqual(domainSelector.$el.text(), "This domain is not supported.",
@@ -226,7 +226,7 @@ QUnit.module('DomainSelector', {
             debugMode: true,
             default: [["foo","=","kikou"]],
         });
-        testUtils.addMockEnvironment(domainSelector, {data: this.data});
+        testUtils.mock.addMockEnvironment(domainSelector, {data: this.data});
         domainSelector.appendTo($target);
 
         // Clicking on the button should add a visible field selector in the

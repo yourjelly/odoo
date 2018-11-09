@@ -44,7 +44,7 @@ QUnit.module('Blank', {
                 self.services.mail_service.prototype.THREAD_WINDOW_APPENDTO = '#qunit-fixture';
             }
 
-            testUtils.addMockEnvironment(widget, params);
+            testUtils.mock.addMockEnvironment(widget, params);
             return widget;
         };
 
@@ -147,7 +147,7 @@ QUnit.test('fold blank thread window', function (assert) {
     var HEIGHT_OPEN = AbstractThreadWindow.prototype.HEIGHT_OPEN;
 
     // Make fold animation instantaneous
-    testUtils.patch(AbstractThreadWindow, {
+    testUtils.mock.patch(AbstractThreadWindow, {
         FOLD_ANIMATION_DURATION: 0,
     });
 
@@ -164,7 +164,7 @@ QUnit.test('fold blank thread window', function (assert) {
         "blank thread window should be open");
 
     parent.destroy();
-    testUtils.unpatch(AbstractThreadWindow);
+    testUtils.mock.unpatch(AbstractThreadWindow);
 });
 
 QUnit.test('open new DM chat from blank thread window', function (assert) {

@@ -6,7 +6,7 @@ var PivotView = require('web.PivotView');
 var testUtils = require('web.test_utils');
 
 var createActionManager = testUtils.createActionManager;
-var patchDate = testUtils.patchDate;
+var patchDate = testUtils.mock.patchDate;
 
 var _t = core._t;
 var createView = testUtils.createView;

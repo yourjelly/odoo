@@ -60,7 +60,7 @@ QUnit.module('Views', {
     function createParent(params) {
         var widget = new Widget();
 
-        testUtils.addMockEnvironment(widget, params);
+        testUtils.mock.addMockEnvironment(widget, params);
         return widget;
     }
 
@@ -80,7 +80,7 @@ QUnit.module('Views', {
             },
         });
 
-        testUtils.intercept(parent, 'env_updated', function () {
+        testUtils.mock.intercept(parent, 'env_updated', function () {
             throw new Error("The environment should not be propagated to the action manager");
         });
 
@@ -367,7 +367,7 @@ QUnit.module('Views', {
     QUnit.test('SelectCreateDialog: save current search', function (assert) {
         assert.expect(4);
 
-        testUtils.patch(ListController, {
+        testUtils.mock.patch(ListController, {
             getContext: function () {
                 return {
                     shouldBeInFilterContext: true,
@@ -418,7 +418,7 @@ QUnit.module('Views', {
         dialog.$('.o_save_name input[type=text]').val('some name'); // name the filter
         dialog.$('.o_save_name button').click(); // click on 'Save'
 
-        testUtils.unpatch(ListController);
+        testUtils.mock.unpatch(ListController);
         parent.destroy();
     });
 });

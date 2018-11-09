@@ -122,7 +122,7 @@ QUnit.test('dashboard: click on a button to execute an action', function (assert
     });
 
 
-    testUtils.intercept(kanban, 'execute_action', function (event) {
+    testUtils.mock.intercept(kanban, 'execute_action', function (event) {
         assert.strictEqual(event.data.action_data.name, 'func_name',
             'execute_action should have been triggered with the correct data');
         assert.strictEqual(event.data.action_data.type, 'object',

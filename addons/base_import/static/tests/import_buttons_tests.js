@@ -35,7 +35,7 @@ QUnit.test('add import button in list', function(assert) {
     assert.ok(list.$buttons.find('.o_button_import:contains(Import)').is(':visible'),
         "should have a visible Import button");
 
-    testUtils.intercept(list, 'do_action', function() {
+    testUtils.mock.intercept(list, 'do_action', function() {
         assert.ok(true, "should have triggered a do_action");
     });
 
@@ -77,7 +77,7 @@ QUnit.test('add import button in kanban', function(assert) {
     assert.ok(kanban.$buttons.find('.o_button_import:contains(Import)').is(':visible'),
         "should have a visible Import button");
 
-    testUtils.intercept(kanban, 'do_action', function() {
+    testUtils.mock.intercept(kanban, 'do_action', function() {
         assert.ok(true, "should have triggered a do_action");
     });
 

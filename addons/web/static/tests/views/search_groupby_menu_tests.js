@@ -8,7 +8,7 @@ function createGroupByMenu(groupbys, fields, params) {
     params = params || {};
     var target = params.debug ? document.body :  $('#qunit-fixture');
     var menu = new GroupByMenu(null, groupbys, fields);
-    testUtils.addMockEnvironment(menu, params);
+    testUtils.mock.addMockEnvironment(menu, params);
     menu.appendTo(target);
     return menu;
 }

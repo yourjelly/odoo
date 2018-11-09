@@ -59,7 +59,7 @@ QUnit.module('ModelFieldSelector', {
             readonly: false,
             debugMode: true,
         });
-        testUtils.addMockEnvironment(fieldSelector, {data: this.data});
+        testUtils.mock.addMockEnvironment(fieldSelector, {data: this.data});
         fieldSelector.appendTo($target);
         var $value = fieldSelector.$("> .o_field_selector_value");
 
@@ -180,7 +180,7 @@ QUnit.module('ModelFieldSelector', {
                 return field.type === 'many2one';
             },
         });
-        testUtils.addMockEnvironment(fieldSelector, {data: this.data});
+        testUtils.mock.addMockEnvironment(fieldSelector, {data: this.data});
         fieldSelector.appendTo($target);
 
         fieldSelector.$el.trigger('focusin');
@@ -202,7 +202,7 @@ QUnit.module('ModelFieldSelector', {
             readonly: false,
             showSearchInput: true,
         });
-        testUtils.addMockEnvironment(fieldSelector, {data: this.data});
+        testUtils.mock.addMockEnvironment(fieldSelector, {data: this.data});
         fieldSelector.appendTo($target);
 
         fieldSelector.$el.trigger('focusin');

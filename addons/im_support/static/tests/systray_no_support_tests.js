@@ -38,7 +38,7 @@ QUnit.test('messaging menu does not display the Support channel if not available
     assert.expect(1);
 
     var messagingMenu = new MessagingMenu();
-    testUtils.addMockEnvironment(messagingMenu, {
+    testUtils.mock.addMockEnvironment(messagingMenu, {
         data: this.data,
         services: this.services,
     });

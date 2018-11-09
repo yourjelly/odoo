@@ -669,7 +669,7 @@ QUnit.module('Views', {
                         "should have 1 invisible stat buttons");
 
         var count = 0;
-        testUtils.intercept(form, "execute_action", function () {
+        testUtils.mock.intercept(form, "execute_action", function () {
             count++;
         });
         form.$('.oe_stat_button').first().click();
@@ -1088,7 +1088,7 @@ QUnit.module('Views', {
         assert.strictEqual(form.$('.o_form_statusbar button:visible').length, 1,
             "should have only 1 visible button in the statusbar");
 
-        testUtils.intercept(form, 'execute_action', function (event) {
+        testUtils.mock.intercept(form, 'execute_action', function (event) {
             assert.strictEqual(event.data.action_data.name, "post",
                 "should trigger execute_action with correct method name");
             assert.deepEqual(event.data.env.currentID, 2, "should have correct id in event data");
@@ -1100,7 +1100,7 @@ QUnit.module('Views', {
 
         assert.strictEqual(rpcCount, 1, "should have done 1 rpcs to reload");
 
-        testUtils.intercept(form, 'execute_action', function (event) {
+        testUtils.mock.intercept(form, 'execute_action', function (event) {
             event.data.on_fail();
         });
         form.$('.o_form_statusbar button.s').click();
@@ -1211,7 +1211,7 @@ QUnit.module('Views', {
             },
         });
 
-        testUtils.intercept(form, 'execute_action', function (event) {
+        testUtils.mock.intercept(form, 'execute_action', function (event) {
             assert.step('execute_action');
             assert.deepEqual(event.data.env.currentID, resID,
                 "execute action should be done on correct record id");
@@ -1261,7 +1261,7 @@ QUnit.module('Views', {
             },
         });
 
-        testUtils.intercept(form, 'execute_action', function (event) {
+        testUtils.mock.intercept(form, 'execute_action', function (event) {
             assert.step('execute_action');
             assert.deepEqual(event.data.env.currentID, resID,
                 "execute action should be done on correct record id");
@@ -1923,7 +1923,7 @@ QUnit.module('Views', {
         form.$buttons.find('.o_form_button_edit').click();
 
         var count = 0;
-        testUtils.intercept(form, "execute_action", function (event) {
+        testUtils.mock.intercept(form, "execute_action", function (event) {
             event.stopPropagation();
             count++;
         });
@@ -2006,7 +2006,7 @@ QUnit.module('Views', {
                 return this._super(route, args);
             }
         });
-        testUtils.intercept(form, "execute_action", function () {
+        testUtils.mock.intercept(form, "execute_action", function () {
             executeActionCount++;
         });
 
@@ -2830,7 +2830,7 @@ QUnit.module('Views', {
         form.sidebar.$('button.o_dropdown_toggler_btn').click();
         form.sidebar.$('a:contains(Delete)').click();
 
-        testUtils.intercept(form, 'history_back', function () {
+        testUtils.mock.intercept(form, 'history_back', function () {
             assert.step('history_back');
         });
         assert.strictEqual($('.modal').length, 1, 'a confirm modal should be displayed');
@@ -5008,7 +5008,7 @@ QUnit.module('Views', {
         var $customAction = $('.o_web_client .o_control_panel .btn-group .dropdown-menu:last .dropdown-item:nth(2)');
         assert.strictEqual($customAction.text().trim(), 'Action partner',
             "the custom action should have 'Action partner' as name");
-        testUtils.intercept(form, 'do_action', function (event) {
+        testUtils.mock.intercept(form, 'do_action', function (event) {
             var context = event.data.action.context.__contexts[1];
             assert.strictEqual(context.active_id, 1,
                 "the active_id shoud be 1.");
@@ -6726,7 +6726,7 @@ QUnit.module('Views', {
         assert.expect(1);
 
         var instanceNumber = 0;
-        testUtils.patch(mixins.ParentedMixin, {
+        testUtils.mock.patch(mixins.ParentedMixin, {
             init: function () {
                 instanceNumber++;
                 return this._super.apply(this, arguments);
@@ -6797,7 +6797,7 @@ QUnit.module('Views', {
 
         form.destroy();
 
-        testUtils.unpatch(mixins.ParentedMixin);
+        testUtils.mock.unpatch(mixins.ParentedMixin);
     });
 
     QUnit.test('do not change pager when discarding current record', function (assert) {
@@ -6832,7 +6832,7 @@ QUnit.module('Views', {
     QUnit.test('edition in form view on a "noCache" model', function (assert) {
         assert.expect(4);
 
-        testUtils.patch(BasicModel, {
+        testUtils.mock.patch(BasicModel, {
             noCacheModels: BasicModel.prototype.noCacheModels.concat(['partner']),
         });
 
@@ -6864,13 +6864,13 @@ QUnit.module('Views', {
         assert.verifySteps(['write', 'clear_cache']);
 
         form.destroy();
-        testUtils.unpatch(BasicModel);
+        testUtils.mock.unpatch(BasicModel);
     });
 
     QUnit.test('creation in form view on a "noCache" model', function (assert) {
         assert.expect(4);
 
-        testUtils.patch(BasicModel, {
+        testUtils.mock.patch(BasicModel, {
             noCacheModels: BasicModel.prototype.noCacheModels.concat(['partner']),
         });
 
@@ -6898,13 +6898,13 @@ QUnit.module('Views', {
         assert.verifySteps(['create', 'clear_cache']);
 
         form.destroy();
-        testUtils.unpatch(BasicModel);
+        testUtils.mock.unpatch(BasicModel);
     });
 
     QUnit.test('deletion in form view on a "noCache" model', function (assert) {
         assert.expect(4);
 
-        testUtils.patch(BasicModel, {
+        testUtils.mock.patch(BasicModel, {
             noCacheModels: BasicModel.prototype.noCacheModels.concat(['partner']),
         });
 
@@ -6935,7 +6935,7 @@ QUnit.module('Views', {
         assert.verifySteps(['unlink', 'clear_cache']);
 
         form.destroy();
-        testUtils.unpatch(BasicModel);
+        testUtils.mock.unpatch(BasicModel);
     });
 
     QUnit.test('a popup window should automatically close after a do_action event', function (assert) {

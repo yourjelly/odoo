@@ -338,7 +338,7 @@ QUnit.module('basic_fields', {
             hover_false: "Switch to production environment"
         };
         var form = createView({
-            view: 'form',
+            View: FormView,
             model: 'partner',
             data: this.data,
             arch: '<form>' +
@@ -1913,7 +1913,7 @@ QUnit.module('basic_fields', {
     QUnit.test("pdf_viewer: upload rendering", function (assert) {
         assert.expect(6);
 
-        testUtils.patch(field_registry.map.pdf_viewer, {
+        testUtils.mock.patch(field_registry.map.pdf_viewer, {
             on_file_change: function (ev) {
                 ev.target = {files: [new Blob()]};
                 this._super.apply(this, arguments);
@@ -1949,7 +1949,7 @@ QUnit.module('basic_fields', {
         form.$('input[type="file"]').trigger('change');
         assert.verifySteps(['_getURI', 'open']);
 
-        testUtils.unpatch(field_registry.map.pdf_viewer);
+        testUtils.mock.unpatch(field_registry.map.pdf_viewer);
         form.destroy();
     });
 
@@ -2256,7 +2256,7 @@ QUnit.module('basic_fields', {
         var done = assert.async();
         assert.expect(6);
 
-        testUtils.patch(JournalDashboardGraph, {
+        testUtils.mock.patch(JournalDashboardGraph, {
             on_attach_callback: function () {
                 assert.step('on_attach_callback');
             },
@@ -2294,7 +2294,7 @@ QUnit.module('basic_fields', {
             ]);
 
             kanban.destroy();
-            testUtils.unpatch(JournalDashboardGraph);
+            testUtils.mock.unpatch(JournalDashboardGraph);
             done();
         });
     });
@@ -2359,7 +2359,7 @@ QUnit.module('basic_fields', {
         // when being destroyed before nv has been loaded
         assert.expect(2);
 
-        testUtils.patch(basicFields.JournalDashboardGraph, {
+        testUtils.mock.patch(basicFields.JournalDashboardGraph, {
             destroy: function () {
                 assert.step('destroy');
                 var nv = window.nv;
@@ -2385,7 +2385,7 @@ QUnit.module('basic_fields', {
         });
 
         kanban.destroy();
-        testUtils.unpatch(basicFields.JournalDashboardGraph);
+        testUtils.mock.unpatch(basicFields.JournalDashboardGraph);
 
         assert.verifySteps(['destroy']);
 
@@ -2398,7 +2398,7 @@ QUnit.module('basic_fields', {
         // when being destroyed before nv has been completely loaded
         assert.expect(2);
 
-        testUtils.patch(basicFields.JournalDashboardGraph, {
+        testUtils.mock.patch(basicFields.JournalDashboardGraph, {
             destroy: function () {
                 assert.step('destroy');
                 // nv is fully loaded only when nvd3.js has been loaded
@@ -2427,7 +2427,7 @@ QUnit.module('basic_fields', {
         });
 
         kanban.destroy();
-        testUtils.unpatch(basicFields.JournalDashboardGraph);
+        testUtils.mock.unpatch(basicFields.JournalDashboardGraph);
 
         assert.verifySteps(['destroy']);
 
@@ -2608,7 +2608,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual($('.bootstrap-datetimepicker-widget:visible').length, 0,
             "datepicker should be closed initially");
 
-        testUtils.openDatepicker(form.$('.o_datepicker'));
+        testUtils.dom.openDatepicker(form.$('.o_datepicker'));
 
         assert.strictEqual($('.bootstrap-datetimepicker-widget:visible').length, 1,
             "datepicker should be opened");
@@ -2652,12 +2652,12 @@ QUnit.module('basic_fields', {
         form.$buttons.find('.o_form_button_edit').click();
 
         // open datepicker and select a date
-        testUtils.openDatepicker(form.$('.o_datepicker'));
+        testUtils.dom.openDatepicker(form.$('.o_datepicker'));
         assert.strictEqual(form.$('.o_datepicker_input').val(), '', "date field's input should be empty on first click");
         $('.day:contains(22)').click();
 
         // re-open datepicker
-        testUtils.openDatepicker(form.$('.o_datepicker'));
+        testUtils.dom.openDatepicker(form.$('.o_datepicker'));
         assert.strictEqual($('.day.active').text(), '22',
             "datepicker should be highlight with 22nd day of month");
 
@@ -2698,7 +2698,7 @@ QUnit.module('basic_fields', {
             'the date should be correct in edit mode');
 
         // open datepicker and select another value
-        testUtils.openDatepicker(form.$('.o_datepicker'));
+        testUtils.dom.openDatepicker(form.$('.o_datepicker'));
         assert.ok($('.bootstrap-datetimepicker-widget').length, 'datepicker should be open');
         assert.strictEqual($('.day.active').data('day'), '02/03/2017', 'datepicker should be highlight February 3');
         $('.bootstrap-datetimepicker-widget .picker-switch').first().click();  // Month selection
@@ -2763,7 +2763,7 @@ QUnit.module('basic_fields', {
         // switch to edit mode
         form.$buttons.find('.o_form_button_edit').click();
         // open datepicker and select another value
-        testUtils.openDatepicker(form.$('.o_datepicker'));
+        testUtils.dom.openDatepicker(form.$('.o_datepicker'));
         $('.bootstrap-datetimepicker-widget .picker-switch').first().click();  // Month selection
         $('.bootstrap-datetimepicker-widget .picker-switch').first().click();  // Year selection
         $('.bootstrap-datetimepicker-widget .year').eq(11).click();  // last year
@@ -2816,7 +2816,7 @@ QUnit.module('basic_fields', {
             'the date should be correct in edit mode');
 
         // open datepicker and select another value
-        testUtils.openDatepicker(list.$('.o_datepicker'));
+        testUtils.dom.openDatepicker(list.$('.o_datepicker'));
         assert.ok($('.bootstrap-datetimepicker-widget').length, 'datepicker should be open');
         $('.bootstrap-datetimepicker-widget .picker-switch').first().click();  // Month selection
         $('.bootstrap-datetimepicker-widget .picker-switch').first().click();  // Year selection

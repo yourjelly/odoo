@@ -13,7 +13,7 @@ QUnit.module('chrome', {}, function () {
 
         var parent = new Widget();
 
-        testUtils.addMockEnvironment(parent, {});
+        testUtils.mock.addMockEnvironment(parent, {});
         var userMenu = new UserMenu(parent);
         userMenu.appendTo($('body'));
 

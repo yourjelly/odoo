@@ -13,7 +13,7 @@ function createDashboard(params) {
     var dashboard = new Dashboard(widget);
     dashboard.all_dashboards = params.dashboards || ['invitations']; // test only user invitations
 
-    testUtils.addMockEnvironment(widget, params);
+    testUtils.mock.addMockEnvironment(widget, params);
 
     var originalDestroy = Dashboard.prototype.destroy;
     dashboard.destroy = function () {

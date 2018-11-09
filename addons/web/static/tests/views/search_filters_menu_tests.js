@@ -8,7 +8,7 @@ function createFiltersMenu(filters, fields, params) {
     params = params || {};
     var target = params.debug ? document.body :  $('#qunit-fixture');
     var menu = new FiltersMenu(null, filters, fields);
-    testUtils.addMockEnvironment(menu, params);
+    testUtils.mock.addMockEnvironment(menu, params);
     menu.appendTo(target);
     return menu;
 }

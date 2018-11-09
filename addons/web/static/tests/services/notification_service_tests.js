@@ -11,7 +11,7 @@ var createView = testUtils.createView;
 
 QUnit.module('Services', {
     beforeEach: function () {
-        testUtils.patch(Notification, {
+        testUtils.mock.patch(Notification, {
             _autoCloseDelay: 0,
             _animationDelay: 0,
         });
@@ -31,7 +31,7 @@ QUnit.module('Services', {
         };
     },
     afterEach: function () {
-        testUtils.unpatch(Notification);
+        testUtils.mock.unpatch(Notification);
     }
 }, function () {
     QUnit.module('Notification');
@@ -125,8 +125,8 @@ QUnit.module('Services', {
         var done = assert.async();
         assert.expect(2);
 
-        testUtils.unpatch(Notification);
-        testUtils.patch(Notification, {
+        testUtils.mock.unpatch(Notification);
+        testUtils.mock.patch(Notification, {
             _autoCloseDelay: 2500,
             _animationDelay: 0,
         });
@@ -211,8 +211,8 @@ QUnit.module('Services', {
         var done = assert.async();
         assert.expect(2);
 
-        testUtils.unpatch(Notification);
-        testUtils.patch(Notification, {
+        testUtils.mock.unpatch(Notification);
+        testUtils.mock.patch(Notification, {
             _autoCloseDelay: 2500,
             _animationDelay: 0,
         });

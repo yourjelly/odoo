@@ -234,7 +234,7 @@ QUnit.test('Activity Done keep feedback on blur', function (assert) {
 
     var shownDef = $.Deferred();
     var hiddenDef = $.Deferred();
-    testUtils.patch(Activity, {
+    testUtils.mock.patch(Activity, {
         _bindPopoverFocusout: function () {
             this._super.apply(this, arguments);
             shownDef.resolve();
@@ -284,7 +284,7 @@ QUnit.test('Activity Done keep feedback on blur', function (assert) {
                     "feedback should have been kept");
 
                 form.destroy();
-                testUtils.unpatch(Activity);
+                testUtils.mock.unpatch(Activity);
                 done();
             });
         });
@@ -1686,10 +1686,10 @@ QUnit.test('form activity widget: edit next activity', function (assert) {
             },
         },
     });
-    assert.strictEqual(form.$('.o_mail_activity .o_mail_info strong:eq(1)').text(), " Type 2", 
+    assert.strictEqual(form.$('.o_mail_activity .o_mail_info strong:eq(1)').text(), " Type 2",
         "Initial type should be Type 2");
     form.$('.o_mail_activity .o_edit_activity[data-activity-id=1]').click();
-    assert.strictEqual(form.$('.o_mail_activity .o_mail_info strong:eq(1)').text(), " Type 1", 
+    assert.strictEqual(form.$('.o_mail_activity .o_mail_info strong:eq(1)').text(), " Type 1",
         "After edit type should be Type 1");
     form.destroy();
 });

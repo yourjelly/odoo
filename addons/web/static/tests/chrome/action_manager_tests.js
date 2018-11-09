@@ -176,7 +176,7 @@ QUnit.module('ActionManager', {
         assert.expect(1);
 
         var delta = 0;
-        testUtils.patch(Widget, {
+        testUtils.mock.patch(Widget, {
             init: function () {
                 delta++;
                 this._super.apply(this, arguments);
@@ -206,14 +206,14 @@ QUnit.module('ActionManager', {
         assert.strictEqual(delta, n,
             "should have properly destroyed all other widgets");
         actionManager.destroy();
-        testUtils.unpatch(Widget);
+        testUtils.mock.unpatch(Widget);
     });
 
     QUnit.test('no widget memory leaks when executing actions in dialog', function (assert) {
         assert.expect(1);
 
         var delta = 0;
-        testUtils.patch(Widget, {
+        testUtils.mock.patch(Widget, {
             init: function () {
                 delta++;
                 this._super.apply(this, arguments);
@@ -240,7 +240,7 @@ QUnit.module('ActionManager', {
             "should have properly destroyed all widgets");
 
         actionManager.destroy();
-        testUtils.unpatch(Widget);
+        testUtils.mock.unpatch(Widget);
     });
 
     QUnit.test('no memory leaks when executing an action while switching view', function (assert) {
@@ -248,7 +248,7 @@ QUnit.module('ActionManager', {
 
         var def;
         var delta = 0;
-        testUtils.patch(Widget, {
+        testUtils.mock.patch(Widget, {
             init: function () {
                 delta += 1;
                 this._super.apply(this, arguments);
@@ -291,7 +291,7 @@ QUnit.module('ActionManager', {
             "all widgets of action 3 should have been destroyed");
 
         actionManager.destroy();
-        testUtils.unpatch(Widget);
+        testUtils.mock.unpatch(Widget);
     });
 
     QUnit.test('no memory leaks when executing an action while loading views', function (assert) {
@@ -299,7 +299,7 @@ QUnit.module('ActionManager', {
 
         var def;
         var delta = 0;
-        testUtils.patch(Widget, {
+        testUtils.mock.patch(Widget, {
             init: function () {
                 delta += 1;
                 this._super.apply(this, arguments);
@@ -339,7 +339,7 @@ QUnit.module('ActionManager', {
             "all widgets of action 3 should have been destroyed");
 
         actionManager.destroy();
-        testUtils.unpatch(Widget);
+        testUtils.mock.unpatch(Widget);
     });
 
     QUnit.test('no memory leaks when executing an action while loading data of default view', function (assert) {
@@ -347,7 +347,7 @@ QUnit.module('ActionManager', {
 
         var def;
         var delta = 0;
-        testUtils.patch(Widget, {
+        testUtils.mock.patch(Widget, {
             init: function () {
                 delta += 1;
                 this._super.apply(this, arguments);
@@ -387,7 +387,7 @@ QUnit.module('ActionManager', {
             "all widgets of action 3 should have been destroyed");
 
         actionManager.destroy();
-        testUtils.unpatch(Widget);
+        testUtils.mock.unpatch(Widget);
     });
 
     QUnit.test('action with "no_breadcrumbs" set to true', function (assert) {
@@ -1104,7 +1104,7 @@ QUnit.module('ActionManager', {
             },
         });
 
-        testUtils.intercept(actionManager, 'call_service', function (ev) {
+        testUtils.mock.intercept(actionManager, 'call_service', function (ev) {
             if (ev.data.service === 'session_storage') {
                 assert.step(ev.data.method);
             }
@@ -2013,7 +2013,7 @@ QUnit.module('ActionManager', {
         // usecase, using removeSRCAttribute doesn't work as the RPC is
         // triggered as soon as the iframe is in the DOM, even if its src
         // attribute is removed right after)
-        testUtils.patch(ReportClientAction, {
+        testUtils.mock.patch(ReportClientAction, {
             start: function () {
                 var self = this;
                 return this._super.apply(this, arguments).then(function () {
@@ -2064,7 +2064,7 @@ QUnit.module('ActionManager', {
         ]);
 
         actionManager.destroy();
-        testUtils.unpatch(ReportClientAction);
+        testUtils.mock.unpatch(ReportClientAction);
     });
 
     QUnit.module('Window Actions');
@@ -2963,7 +2963,7 @@ QUnit.module('ActionManager', {
     QUnit.test('save current search', function (assert) {
         assert.expect(4);
 
-        testUtils.patch(ListController, {
+        testUtils.mock.patch(ListController, {
             getContext: function () {
                 return {
                     shouldBeInFilterContext: true,
@@ -3013,7 +3013,7 @@ QUnit.module('ActionManager', {
         $('.o_control_panel .o_save_name input[type=text]').val('some name'); // name the filter
         $('.o_control_panel .o_save_name button').click(); // click on 'Save'
 
-        testUtils.unpatch(ListController);
+        testUtils.mock.unpatch(ListController);
         actionManager.destroy();
     });
 

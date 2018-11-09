@@ -56,7 +56,7 @@ odoo.define('partner_autocomplete.tests', function (require) {
                 vat: "BE0477472701",
             };
 
-            testUtils.patch(AutocompleteCore, {
+            testUtils.mock.patch(AutocompleteCore, {
                 _getBase64Image: function (url) {
                     return $.when(url === "odoo.com/logo.png" ? "odoobase64" : "");
                 },
@@ -87,7 +87,7 @@ odoo.define('partner_autocomplete.tests', function (require) {
                 },
             });
 
-            testUtils.patch(AutocompleteField, {
+            testUtils.mock.patch(AutocompleteField, {
                 debounceSuggestions: 0,
             });
         },
@@ -127,8 +127,8 @@ odoo.define('partner_autocomplete.tests', function (require) {
             };
         },
         after: function () {
-            testUtils.unpatch(AutocompleteField);
-            testUtils.unpatch(AutocompleteCore);
+            testUtils.mock.unpatch(AutocompleteField);
+            testUtils.mock.unpatch(AutocompleteCore);
         },
     });
 
@@ -361,7 +361,7 @@ odoo.define('partner_autocomplete.tests', function (require) {
             concurrency.delay(0).then(function () {
                 var $dropdown = $input.autocomplete('widget');
                 assert.strictEqual($dropdown.length, 1, "there should be an opened dropdown");
-                assert.ok($dropdown.is('.o_partner_autocomplete_dropdown'), 
+                assert.ok($dropdown.is('.o_partner_autocomplete_dropdown'),
                     "there should be a partner_autocomplete");
 
                 PartnerField.prototype.AUTOCOMPLETE_DELAY = M2O_DELAY;

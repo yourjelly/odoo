@@ -91,7 +91,7 @@ QUnit.test('open a document thread in a thread window', function (assert) {
     assert.expect(6);
 
     var messagingMenu = new MessagingMenu();
-    testUtils.addMockEnvironment(messagingMenu, {
+    testUtils.mock.addMockEnvironment(messagingMenu, {
         services: this.services,
         data: this.data,
         session: this.session,
@@ -129,7 +129,7 @@ QUnit.test('expand a document thread window', function (assert) {
     assert.expect(4);
 
     var messagingMenu = new MessagingMenu();
-    testUtils.addMockEnvironment(messagingMenu, {
+    testUtils.mock.addMockEnvironment(messagingMenu, {
         services: this.services,
         data: this.data,
         session: this.session,
@@ -177,7 +177,7 @@ QUnit.test('post messages in a document thread window', function (assert) {
         res_id: 1,
     };
     var messagingMenu = new MessagingMenu();
-    testUtils.addMockEnvironment(messagingMenu, {
+    testUtils.mock.addMockEnvironment(messagingMenu, {
         services: this.services,
         data: this.data,
         session: this.session,
@@ -198,7 +198,7 @@ QUnit.test('post messages in a document thread window', function (assert) {
             return this._super.apply(this, arguments);
         },
     });
-    testUtils.intercept(messagingMenu, 'call_service', function (ev) {
+    testUtils.mock.intercept(messagingMenu, 'call_service', function (ev) {
         if (ev.data.service === 'local_storage' && ev.data.method === 'setItem' &&
             ev.data.args[0] === 'mail.document_threads_last_message') {
             assert.deepEqual(ev.data.args[1], newMessage,
@@ -232,12 +232,12 @@ QUnit.test('open, fold, unfold and close a document thread window', function (as
     assert.expect(8);
 
     var messagingMenu = new MessagingMenu();
-    testUtils.addMockEnvironment(messagingMenu, {
+    testUtils.mock.addMockEnvironment(messagingMenu, {
         services: this.services,
         data: this.data,
         session: this.session,
     });
-    testUtils.intercept(messagingMenu, 'call_service', function (ev) {
+    testUtils.mock.intercept(messagingMenu, 'call_service', function (ev) {
         if (ev.data.service === 'local_storage' && ev.data.method === 'setItem') {
             assert.step(ev.data.args);
         }

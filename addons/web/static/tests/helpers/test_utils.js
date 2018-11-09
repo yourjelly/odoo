@@ -300,7 +300,7 @@ function createAsyncView(params) {
  * Usage:
  *
  *  ```
- *  var unpatchDate = testUtils.patchDate(2018, 0, 10, 17, 59, 30)
+ *  var unpatchDate = testUtils.mock.patchDate(2018, 0, 10, 17, 59, 30)
  *  new window.Date(); // "Wed Jan 10 2018 17:59:30 GMT+0100 (Central European Standard Time)"
  *  ... // 5 hours delay
  *  new window.Date(); // "Wed Jan 10 2018 22:59:30 GMT+0100 (Central European Standard Time)"
@@ -955,40 +955,38 @@ return $.when(
             patchDate: patchDate,
             unpatch: unpatch,
             fieldsViewGet: fieldsViewGet,
-
         },
-        DOM: {
-            removeSrcAttribute: removeSrcAttribute,
+        dom: {
             triggerKeypressEvent: triggerKeypressEvent,
             triggerMouseEvent: triggerMouseEvent,
             triggerPositionalMouseEvent: triggerPositionalMouseEvent,
             dragAndDrop: dragAndDrop,
             openDatepicker: openDatepicker,
-            click(el/selector),
-            input(el/selector),
-            focusOut(el/selector),
+            // click(el/selector),
+            // input(el/selector),
+            // focusOut(el/selector),
         },
-        form: {
-            clickEdit(form),
-            clickSave(form),
-        },
-        modal: {
-            clickPrimaryAction(),
-            clickSave(),
-        },
-        pager: {
-            clickNext(widget, selector),
-            clickPrevious(widget, selector),
-        },
-        fields: {
-            many2one: {
-                clickOpenRecord([fieldName]),
-                clickOpenDropdown([fieldName]),
-                clickMenuItem(text, [fieldname])
-            },
-            editInput(fieldName, value, [cssselector]),
-            focusOut(fieldName),
-        },
+        // form: {
+        //     clickEdit(form),
+        //     clickSave(form),
+        // },
+        // modal: {
+        //     clickPrimaryAction(),
+        //     clickSave(),
+        // },
+        // pager: {
+        //     clickNext(widget, selector),
+        //     clickPrevious(widget, selector),
+        // },
+        // fields: {
+        //     many2one: {
+        //         clickOpenRecord([fieldName]),
+        //         clickOpenDropdown([fieldName]),
+        //         clickMenuItem(text, [fieldname])
+        //     },
+        //     editInput(fieldName, value, [cssselector]),
+        //     focusOut(fieldName),
+        // },
 
         createActionManager: createActionManager,
         createDebugManager: createDebugManager,
@@ -1003,13 +1001,13 @@ return $.when(
 
 //
 
-assert.containsOnce(widget, selector, [msg]) // priority...
-assert.containsOnce($el, selector, [msg])
-assert.containsOnce(el, selector, [msg])
-assert.containsOnce(selector, [msg])
+// assert.containsOnce(widget, selector, [msg]) // priority...
+// assert.containsOnce($el, selector, [msg])
+// assert.containsOnce(el, selector, [msg])
+// assert.containsOnce(selector, [msg])
 
-assert.containsN(widget, selector, n, [msg]) // priority...
-assert.containsN($el, selector, n, [msg])
-assert.containsN(el, selector, n, [msg])
-assert.containsN(selector, n, [msg])
+// assert.containsN(widget, selector, n, [msg]) // priority...
+// assert.containsN($el, selector, n, [msg])
+// assert.containsN(el, selector, n, [msg])
+// assert.containsN(selector, n, [msg])
 

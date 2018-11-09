@@ -105,7 +105,7 @@ QUnit.test('messaging menu widget: menu with no records', function (assert) {
     assert.expect(1);
 
     var messagingMenu = new MessagingMenu();
-    testUtils.addMockEnvironment(messagingMenu, {
+    testUtils.mock.addMockEnvironment(messagingMenu, {
             services: this.services,
             mockRPC: function (route, args) {
                 if (args.method === 'message_fetch') {
@@ -123,7 +123,7 @@ QUnit.test('messaging menu widget: menu with no records', function (assert) {
 QUnit.test('messaging menu widget: messaging menu with 1 record', function (assert) {
     assert.expect(3);
     var messagingMenu = new MessagingMenu();
-    testUtils.addMockEnvironment(messagingMenu, {
+    testUtils.mock.addMockEnvironment(messagingMenu, {
         services: this.services,
         data: this.data,
     });
@@ -150,7 +150,7 @@ QUnit.test('messaging menu widget: no crash when clicking on inbox notification 
     assert.expect(3);
 
     var messagingMenu = new MessagingMenu();
-    testUtils.addMockEnvironment(messagingMenu, {
+    testUtils.mock.addMockEnvironment(messagingMenu, {
         services: this.services,
         data: this.data,
         session: {
@@ -206,7 +206,7 @@ QUnit.test('messaging menu widget: no crash when clicking on inbox notification 
 QUnit.test("messaging menu widget: mark as read on thread preview", function ( assert ) {
     assert.expect(8);
 
-    testUtils.patch(DocumentThread, {
+    testUtils.mock.patch(DocumentThread, {
             markAsRead: function () {
                 if (
                     this.getDocumentModel() === 'crm.lead' &&
@@ -230,7 +230,7 @@ QUnit.test("messaging menu widget: mark as read on thread preview", function ( a
     }];
 
     var messagingMenu = new MessagingMenu();
-    testUtils.addMockEnvironment(messagingMenu, {
+    testUtils.mock.addMockEnvironment(messagingMenu, {
         services: this.services,
         data: this.data,
     });
@@ -257,7 +257,7 @@ QUnit.test("messaging menu widget: mark as read on thread preview", function ( a
     assert.verifySteps(['markedAsRead'],
         "the document thread should be marked as read");
 
-    testUtils.unpatch(DocumentThread);
+    testUtils.mock.unpatch(DocumentThread);
     messagingMenu.destroy();
 });
 
@@ -293,7 +293,7 @@ QUnit.test('needaction messages in channels should appear, in addition to channe
     this.data['mail.message'].records = [needactionMessage, lastMessage];
 
     var messagingMenu = new MessagingMenu();
-    testUtils.addMockEnvironment(messagingMenu, {
+    testUtils.mock.addMockEnvironment(messagingMenu, {
         services: this.services,
         data: this.data,
         session: {
@@ -349,7 +349,7 @@ QUnit.test('preview of message on a document + mark as read', function (assert) 
     this.data['mail.message'].records.push(needactionMessage);
 
     var messagingMenu = new MessagingMenu();
-    testUtils.addMockEnvironment(messagingMenu, {
+    testUtils.mock.addMockEnvironment(messagingMenu, {
         services: this.services,
         data: this.data,
         session: {
@@ -385,7 +385,7 @@ QUnit.test('update messaging preview on receiving a new message in channel previ
     assert.expect(8);
 
     var messagingMenu = new MessagingMenu();
-    testUtils.addMockEnvironment(messagingMenu, {
+    testUtils.mock.addMockEnvironment(messagingMenu, {
         services: this.services,
         data: this.data,
     });

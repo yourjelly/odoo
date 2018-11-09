@@ -80,7 +80,7 @@ QUnit.test('activity menu widget: menu with no records', function (assert) {
     assert.expect(1);
 
     var activityMenu = new ActivityMenu();
-    testUtils.addMockEnvironment(activityMenu, {
+    testUtils.mock.addMockEnvironment(activityMenu, {
             services: this.services,
             mockRPC: function (route, args) {
                 if (args.method === 'systray_get_activities') {
@@ -98,7 +98,7 @@ QUnit.test('activity menu widget: activity menu with 3 records', function (asser
     assert.expect(10);
     var self = this;
     var activityMenu = new ActivityMenu();
-    testUtils.addMockEnvironment(activityMenu, {
+    testUtils.mock.addMockEnvironment(activityMenu, {
         services: this.services,
         mockRPC: function (route, args) {
             if (args.method === 'systray_get_activities') {
@@ -114,7 +114,7 @@ QUnit.test('activity menu widget: activity menu with 3 records', function (asser
     assert.strictEqual(parseInt(activityMenu.el.innerText), 8, "widget should have 8 notification counter");
 
     var context = {};
-    testUtils.intercept(activityMenu, 'do_action', function (event) {
+    testUtils.mock.intercept(activityMenu, 'do_action', function (event) {
         assert.deepEqual(event.data.action.context, context, "wrong context value");
     }, true);
 

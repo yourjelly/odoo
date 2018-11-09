@@ -424,7 +424,7 @@ QUnit.module('Views', {
             arch: '<tree><field name="foo"/></tree>',
         });
 
-        testUtils.intercept(list, "open_record", function () {
+        testUtils.mock.intercept(list, "open_record", function () {
             assert.ok("list view should trigger 'open_record' event");
         });
 
@@ -531,7 +531,7 @@ QUnit.module('Views', {
     QUnit.test('editable list: add a line and discard', function (assert) {
         assert.expect(11);
 
-        testUtils.patch(basicFields.FieldChar, {
+        testUtils.mock.patch(basicFields.FieldChar, {
             destroy: function () {
                 assert.step('destroy');
                 this._super.apply(this, arguments);
@@ -573,7 +573,7 @@ QUnit.module('Views', {
         assert.verifySteps(['destroy'],
             "should have destroyed the widget of the removed line");
 
-        testUtils.unpatch(basicFields.FieldChar);
+        testUtils.mock.unpatch(basicFields.FieldChar);
         list.destroy();
     });
 
@@ -589,7 +589,7 @@ QUnit.module('Views', {
         var $td = list.$('td:not(.o_list_record_selector)').first();
 
         var n = 0;
-        testUtils.intercept(list, "field_changed", function () {
+        testUtils.mock.intercept(list, "field_changed", function () {
             n += 1;
         });
         $td.click();
@@ -671,7 +671,7 @@ QUnit.module('Views', {
         var $thead_selector = list.$('thead .o_list_record_selector input');
 
         var n = 0;
-        testUtils.intercept(list, "selection_changed", function () {
+        testUtils.mock.intercept(list, "selection_changed", function () {
             n += 1;
         });
 
@@ -2345,7 +2345,7 @@ QUnit.module('Views', {
             arch: '<tree><field name="name"/></tree>',
         });
 
-        testUtils.intercept(list, 'switch_view', function (event) {
+        testUtils.mock.intercept(list, 'switch_view', function (event) {
             assert.deepEqual(_.pick(event.data, 'mode', 'model', 'res_id', 'view_type'), {
                 mode: 'readonly',
                 model: 'event',
@@ -3200,7 +3200,7 @@ QUnit.module('Views', {
             "default fourth record should have amount 0");
 
         // Drag and drop the fourth line in second position
-        testUtils.dragAndDrop(
+        testUtils.dom.dragAndDrop(
             list.$('.ui-sortable-handle').eq(3),
             list.$('tbody tr').first(),
             {position: 'bottom'}
@@ -3281,28 +3281,28 @@ QUnit.module('Views', {
         });
         assert.strictEqual(list.$('tbody tr td.o_list_number').text(), '1234',
             "default should be sorted by id");
-        testUtils.dragAndDrop(
+        testUtils.dom.dragAndDrop(
             list.$('.ui-sortable-handle').eq(3),
             list.$('tbody tr').eq(2),
             {position: 'top'}
         );
         assert.strictEqual(list.$('tbody tr td.o_list_number').text(), '1243',
             "the int_field (sequence) should have been correctly updated");
-        testUtils.dragAndDrop(
+        testUtils.dom.dragAndDrop(
             list.$('.ui-sortable-handle').eq(2),
             list.$('tbody tr').eq(1),
             {position: 'top'}
         );
         assert.deepEqual(list.$('tbody tr td.o_list_number').text(), '1423',
             "the int_field (sequence) should have been correctly updated");
-        testUtils.dragAndDrop(
+        testUtils.dom.dragAndDrop(
             list.$('.ui-sortable-handle').eq(1),
             list.$('tbody tr').eq(3),
             {position: 'top'}
         );
         assert.deepEqual(list.$('tbody tr td.o_list_number').text(), '1243',
             "the int_field (sequence) should have been correctly updated");
-        testUtils.dragAndDrop(
+        testUtils.dom.dragAndDrop(
             list.$('.ui-sortable-handle').eq(2),
             list.$('tbody tr').eq(1),
             {position: 'top'}
@@ -3352,7 +3352,7 @@ QUnit.module('Views', {
             "default fourth record should have amount 0");
 
         // Drag and drop the fourth line in second position
-        testUtils.dragAndDrop(
+        testUtils.dom.dragAndDrop(
             list.$('.ui-sortable-handle').eq(3),
             list.$('tbody tr').first(),
             {position: 'bottom'}
@@ -3400,7 +3400,7 @@ QUnit.module('Views', {
             "default should be sorted by int_field");
 
         // Drag and drop the fourth line in second position
-        testUtils.dragAndDrop(
+        testUtils.dom.dragAndDrop(
             list.$('.ui-sortable-handle').eq(3),
             list.$('tbody tr').first(),
             {position: 'bottom'}
@@ -3417,7 +3417,7 @@ QUnit.module('Views', {
             "should have been sorted by amount");
 
         // Drag and drop the fourth line in second position (not)
-        testUtils.dragAndDrop(
+        testUtils.dom.dragAndDrop(
             list.$('.ui-sortable-handle').eq(3),
             list.$('tbody tr').first(),
             {position: 'bottom'}
@@ -3433,7 +3433,7 @@ QUnit.module('Views', {
             "records should be ordered as per the previous resequence");
 
         // Drag and drop the fourth line in second position
-        testUtils.dragAndDrop(
+        testUtils.dom.dragAndDrop(
             list.$('.ui-sortable-handle').eq(3),
             list.$('tbody tr').first(),
             {position: 'bottom'}
@@ -3491,7 +3491,7 @@ QUnit.module('Views', {
             "default fourth record should have amount 0");
 
         // drag and drop the fourth line in second position
-        testUtils.dragAndDrop(
+        testUtils.dom.dragAndDrop(
             list.$('.ui-sortable-handle').eq(3),
             list.$('tbody tr').first(),
             {position: 'bottom'}
@@ -3780,7 +3780,7 @@ QUnit.module('Views', {
         assert.expect(1);
 
         var instanceNumber = 0;
-        testUtils.patch(mixins.ParentedMixin, {
+        testUtils.mock.patch(mixins.ParentedMixin, {
             init: function () {
                 instanceNumber++;
                 return this._super.apply(this, arguments);
@@ -3828,7 +3828,7 @@ QUnit.module('Views', {
 
         list.destroy();
 
-        testUtils.unpatch(mixins.ParentedMixin);
+        testUtils.mock.unpatch(mixins.ParentedMixin);
     });
 
     QUnit.test('concurrent reloads finishing in inverse order', function (assert) {
@@ -3875,7 +3875,7 @@ QUnit.module('Views', {
     QUnit.test('list view on a "noCache" model', function (assert) {
         assert.expect(8);
 
-        testUtils.patch(BasicModel, {
+        testUtils.mock.patch(BasicModel, {
             noCacheModels: BasicModel.prototype.noCacheModels.concat(['foo']),
         });
 
@@ -3923,7 +3923,7 @@ QUnit.module('Views', {
         ]);
 
         list.destroy();
-        testUtils.unpatch(BasicModel);
+        testUtils.mock.unpatch(BasicModel);
     });
 
     QUnit.test('list should ask to scroll to top on page changes', function (assert) {

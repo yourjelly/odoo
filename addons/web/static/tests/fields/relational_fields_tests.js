@@ -1846,7 +1846,7 @@ QUnit.module('relational_fields', {
             },
         });
 
-        testUtils.intercept(form, 'do_action', function (event) {
+        testUtils.mock.intercept(form, 'do_action', function (event) {
             assert.strictEqual(event.data.action.res_id, 17,
                 "should do a do_action with correct parameters");
         });

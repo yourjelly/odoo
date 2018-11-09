@@ -32,7 +32,7 @@ var createViewer = function (params) {
             return $.when();
         }
     };
-    testUtils.addMockEnvironment(parent, {
+    testUtils.mock.addMockEnvironment(parent, {
         mockRPC: function () {
             if (params.mockRPC) {
                 var _super = this._super;

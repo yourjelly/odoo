@@ -383,7 +383,7 @@ QUnit.module('core', {}, function () {
 
         var def;
         var parent = new Widget();
-        testUtils.addMockEnvironment(parent, {
+        testUtils.mock.addMockEnvironment(parent, {
             session: {
                 rpc: function () {
                     def = $.Deferred();

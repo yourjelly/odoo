@@ -413,7 +413,7 @@ QUnit.test('can drag and drop a view', function (assert) {
     assert.strictEqual(form.$('td.index_0 .oe_action').length, 1,
         "initial action is in column 0");
 
-    testUtils.dragAndDrop(form.$('.oe_dashboard_column.index_0 .oe_header'),
+    testUtils.dom.dragAndDrop(form.$('.oe_dashboard_column.index_0 .oe_header'),
         form.$('.oe_dashboard_column.index_1'));
     assert.strictEqual(form.$('td.index_0 .oe_action').length, 0,
         "initial action is not in column 0");
@@ -564,7 +564,7 @@ QUnit.test('subviews are aware of attach in or detach from the DOM', function (a
     assert.expect(2);
 
     // patch list renderer `on_attach_callback` for the test only
-    testUtils.patch(ListRenderer, {
+    testUtils.mock.patch(ListRenderer, {
         on_attach_callback: function () {
             assert.step('subview on_attach_callback');
         }
@@ -599,7 +599,7 @@ QUnit.test('subviews are aware of attach in or detach from the DOM', function (a
     assert.verifySteps(['subview on_attach_callback']);
 
     // restore on_attach_callback of ListRenderer
-    testUtils.unpatch(ListRenderer);
+    testUtils.mock.unpatch(ListRenderer);
 
     form.destroy();
 });
@@ -609,7 +609,7 @@ QUnit.test('dashboard intercepts custom events triggered by sub controllers', fu
 
     // we patch the ListController to force it to trigger the custom events that
     // we want the dashboard to intercept (to stop them or to tweak their data)
-    testUtils.patch(ListController, {
+    testUtils.mock.patch(ListController, {
         start: function () {
             this.trigger_up('update_filters');
             this.trigger_up('env_updated');
@@ -655,7 +655,7 @@ QUnit.test('dashboard intercepts custom events triggered by sub controllers', fu
         'env_updated', // triggered by the dashboard itself
     ]);
 
-    testUtils.unpatch(ListController);
+    testUtils.mock.unpatch(ListController);
     board.destroy();
 });
 

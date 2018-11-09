@@ -208,7 +208,7 @@ QUnit.test('fold Support channel', function (assert) {
         services: this.services,
         session: this.supportParams,
     });
-    testUtils.intercept(messagingMenu, 'call_service', function (ev) {
+    testUtils.mock.intercept(messagingMenu, 'call_service', function (ev) {
         if (ev.data.service === 'local_storage') {
             assert.step('LocalStorage: ' + ev.data.method + ' ' + ev.data.args);
         }

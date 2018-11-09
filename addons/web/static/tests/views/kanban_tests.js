@@ -2470,7 +2470,7 @@ QUnit.module('Views', {
         var $record = kanban.$('.o_kanban_group:nth-child(1) .o_kanban_record:first');
         var $group = kanban.$('.o_kanban_group:nth-child(2)');
         envIDs = [3, 2, 4, 1]; // first record of first column moved to the bottom of second column
-        testUtils.dragAndDrop($record, $group);
+        testUtils.dom.dragAndDrop($record, $group);
 
         assert.strictEqual(kanban.$('.o_kanban_group:nth-child(1) .o_kanban_record').length, 1,
                         "column should now contain 1 record(s)");
@@ -2513,7 +2513,7 @@ QUnit.module('Views', {
 
         var $record = kanban.$('.o_kanban_group:nth-child(1) .o_kanban_record:first');
         var $group = kanban.$('.o_kanban_group:nth-child(2)');
-        testUtils.dragAndDrop($record, $group);
+        testUtils.dom.dragAndDrop($record, $group);
 
         assert.strictEqual(kanban.$('.o_kanban_group:nth-child(1) .o_kanban_record').length, 0,
                         "column should now contain 0 record(s)");
@@ -2557,7 +2557,7 @@ QUnit.module('Views', {
         // drag&drop a record in another column
         var $record = kanban.$('.o_kanban_group:nth-child(1) .o_kanban_record:first');
         var $group = kanban.$('.o_kanban_group:nth-child(2)');
-        testUtils.dragAndDrop($record, $group);
+        testUtils.dom.dragAndDrop($record, $group);
         // should not be draggable
         assert.strictEqual(kanban.$('.o_kanban_group:nth-child(1) .o_kanban_record').length, 1,
                         "column should now contain 1 record(s)");
@@ -2573,7 +2573,7 @@ QUnit.module('Views', {
         // drag&drop a record in another column
         $record = kanban.$('.o_kanban_group:nth-child(1) .o_kanban_record:first');
         $group = kanban.$('.o_kanban_group:nth-child(2)');
-        testUtils.dragAndDrop($record, $group);
+        testUtils.dom.dragAndDrop($record, $group);
         // should not be draggable
         assert.strictEqual(kanban.$('.o_kanban_group:nth-child(1) .o_kanban_record').length, 1,
                         "column should now contain 1 record(s)");
@@ -2585,7 +2585,7 @@ QUnit.module('Views', {
         var $record2 = kanban.$('.o_kanban_group:nth-child(2) .o_kanban_record:eq(1)');
         assert.strictEqual($record1.text(), "blipDEF", "first record should be DEF");
         assert.strictEqual($record2.text(), "blipGHI", "second record should be GHI");
-        testUtils.dragAndDrop($record2, $record1, {position: 'top'});
+        testUtils.dom.dragAndDrop($record2, $record1, {position: 'top'});
         // should still be able to resequence
         assert.strictEqual(kanban.$('.o_kanban_group:nth-child(2) .o_kanban_record:eq(0)').text(), "blipGHI",
             "records should have been resequenced");
@@ -2671,7 +2671,7 @@ QUnit.module('Views', {
                 '</t></templates></kanban>',
         });
 
-        testUtils.intercept(kanban, 'switch_view', function (event) {
+        testUtils.mock.intercept(kanban, 'switch_view', function (event) {
             assert.deepEqual(event.data, {
                 view_type: 'form',
                 res_id: 1,
@@ -2893,7 +2893,7 @@ QUnit.module('Views', {
     QUnit.test('delete a column in grouped on m2o', function (assert) {
         assert.expect(36);
 
-        testUtils.patch(KanbanRenderer, {
+        testUtils.mock.patch(KanbanRenderer, {
             _renderGrouped: function () {
                 this._super.apply(this, arguments);
                 // set delay and revert animation time to 0 so dummy drag and drop works
@@ -2979,7 +2979,7 @@ QUnit.module('Views', {
             "the old widgets should have been correctly deleted");
 
         // test column drag and drop having an 'Undefined' column
-        testUtils.dragAndDrop(
+        testUtils.dom.dragAndDrop(
             kanban.$('.o_kanban_header_title:first'),
             kanban.$('.o_kanban_header_title:last'), {position: 'right'}
         );
@@ -2988,13 +2988,13 @@ QUnit.module('Views', {
         kanban.$('.o_column_quick_create input').val('once third column');
         kanban.$('.o_column_quick_create button.o_kanban_add').click();
         var newColumnID = kanban.$('.o_kanban_group:last').data('id');
-        testUtils.dragAndDrop(
+        testUtils.dom.dragAndDrop(
             kanban.$('.o_kanban_header_title:first'),
             kanban.$('.o_kanban_header_title:last'), {position: 'right'}
         );
         assert.deepEqual([3, newColumnID], resequencedIDs,
             "moving the Undefined column should not affect order of other columns")
-        testUtils.dragAndDrop(
+        testUtils.dom.dragAndDrop(
             kanban.$('.o_kanban_header_title:first'),
             kanban.$('.o_kanban_header_title:nth(1)'), {position: 'right'}
         );
@@ -3002,7 +3002,7 @@ QUnit.module('Views', {
             "moved column should be resequenced accordingly")
 
         kanban.destroy();
-        testUtils.unpatch(KanbanRenderer);
+        testUtils.mock.unpatch(KanbanRenderer);
     });
 
     QUnit.test('create a column, delete it and create another one', function (assert) {
@@ -3709,7 +3709,7 @@ QUnit.module('Views', {
             "kanban should have at least one button a1");
 
         var count = 0;
-        testUtils.intercept(kanban, 'execute_action', function (event) {
+        testUtils.mock.intercept(kanban, 'execute_action', function (event) {
             count++;
             event.data.on_closed();
         });
@@ -3751,7 +3751,7 @@ QUnit.module('Views', {
                 '</kanban>',
         });
 
-        testUtils.intercept(kanban, 'execute_action', function (event) {
+        testUtils.mock.intercept(kanban, 'execute_action', function (event) {
             data.partner.records[0].active = false;
             event.data.on_closed();
         });
@@ -3781,7 +3781,7 @@ QUnit.module('Views', {
                 '</kanban>',
         });
 
-        testUtils.intercept(kanban, 'execute_action', function (event) {
+        testUtils.mock.intercept(kanban, 'execute_action', function (event) {
             event.data.on_closed();
         });
 
@@ -4214,7 +4214,7 @@ QUnit.module('Views', {
 
         var $record = kanban.$('.o_kanban_group:eq(1) .o_kanban_record:eq(0)');
         var $group = kanban.$('.o_kanban_group:eq(0)');
-        testUtils.dragAndDrop($record, $group);
+        testUtils.dom.dragAndDrop($record, $group);
 
         assert.strictEqual(kanban.$('.o_kanban_group:eq(0) .o_kanban_record').length, 1,
                         "column should contain 1 records");
@@ -4224,7 +4224,7 @@ QUnit.module('Views', {
         $record = kanban.$('.o_kanban_group:eq(0) .o_kanban_record:eq(0)');
         $group = kanban.$('.o_kanban_group:eq(1)');
 
-        testUtils.dragAndDrop($record, $group);
+        testUtils.dom.dragAndDrop($record, $group);
 
         assert.strictEqual(kanban.$('.o_kanban_group:eq(0) .o_kanban_record').length, 0,
                         "column should contain 0 records");
@@ -4281,7 +4281,7 @@ QUnit.module('Views', {
 
         var $record1 = kanban.$('.o_kanban_group:eq(0) .o_kanban_record:eq(1)');
         var $record2 = kanban.$('.o_kanban_group:eq(0) .o_kanban_record:eq(0)');
-        testUtils.dragAndDrop($record1, $record2, {position: 'top'});
+        testUtils.dom.dragAndDrop($record1, $record2, {position: 'top'});
 
         assert.strictEqual(kanban.$('.o_kanban_group:eq(0) .o_kanban_record').length, 2,
                         "column should contain 2 records");
@@ -4290,7 +4290,7 @@ QUnit.module('Views', {
         assert.strictEqual(kanban.$('.o_kanban_group:eq(0) .o_kanban_record:eq(1)').text(), "record2",
                         "records should be correctly ordered");
 
-        testUtils.dragAndDrop($record2, $record1, {position: 'top'});
+        testUtils.dom.dragAndDrop($record2, $record1, {position: 'top'});
 
         assert.strictEqual(kanban.$('.o_kanban_group:eq(0) .o_kanban_record').length, 2,
                         "column should contain 2 records");
@@ -4615,15 +4615,15 @@ QUnit.module('Views', {
         assert.strictEqual(kanban.$('.o_kanban_group:eq(0) .o_kanban_counter_side').text(), "1",
             "counter should contain the correct value");
 
-        testUtils.dragAndDrop(kanban.$('.o_kanban_group:eq(0) .o_kanban_record:eq(0)'), kanban.$('.o_kanban_group:eq(1)'));
+        testUtils.dom.dragAndDrop(kanban.$('.o_kanban_group:eq(0) .o_kanban_record:eq(0)'), kanban.$('.o_kanban_group:eq(1)'));
         assert.strictEqual(kanban.$('.o_kanban_group:eq(0) .o_kanban_counter_side').text(), "0",
             "counter should contain the correct value");
 
-        testUtils.dragAndDrop(kanban.$('.o_kanban_group:eq(1) .o_kanban_record:eq(2)'), kanban.$('.o_kanban_group:eq(0)'));
+        testUtils.dom.dragAndDrop(kanban.$('.o_kanban_group:eq(1) .o_kanban_record:eq(2)'), kanban.$('.o_kanban_group:eq(0)'));
         assert.strictEqual(kanban.$('.o_kanban_group:eq(0) .o_kanban_counter_side').text(), "1",
             "counter should contain the correct value");
 
-        testUtils.dragAndDrop(kanban.$('.o_kanban_group:eq(0) .o_kanban_record:eq(0)'), kanban.$('.o_kanban_group:eq(1)'));
+        testUtils.dom.dragAndDrop(kanban.$('.o_kanban_group:eq(0) .o_kanban_record:eq(0)'), kanban.$('.o_kanban_group:eq(1)'));
         assert.strictEqual(kanban.$('.o_kanban_group:eq(0) .o_kanban_counter_side').text(), "0",
             "counter should contain the correct value");
 
@@ -4725,7 +4725,7 @@ QUnit.module('Views', {
         var $quickCreateGroup;
         var $groups;
         _quickCreateAndTest();
-        testUtils.dragAndDrop($groups.first().find('.o_kanban_record:first'), $groups.eq(1));
+        testUtils.dom.dragAndDrop($groups.first().find('.o_kanban_record:first'), $groups.eq(1));
         _quickCreateAndTest();
         kanban.destroy();
 
@@ -4768,7 +4768,7 @@ QUnit.module('Views', {
         assert.expect(1);
 
         var instanceNumber = 0;
-        testUtils.patch(mixins.ParentedMixin, {
+        testUtils.mock.patch(mixins.ParentedMixin, {
             init: function () {
                 instanceNumber++;
                 return this._super.apply(this, arguments);
@@ -4816,7 +4816,7 @@ QUnit.module('Views', {
 
         kanban.destroy();
 
-        testUtils.unpatch(mixins.ParentedMixin);
+        testUtils.mock.unpatch(mixins.ParentedMixin);
     });
 
     QUnit.test('grouped kanban becomes ungrouped when clearing domain then clearing groupby', function (assert) {
@@ -5037,7 +5037,7 @@ QUnit.module('Views', {
                 '</t></templates></kanban>',
         });
 
-        testUtils.intercept(kanban, 'switch_view', function (event) {
+        testUtils.mock.intercept(kanban, 'switch_view', function (event) {
             assert.deepEqual(event.data, {
                 view_type: 'form',
                 res_id: 1,

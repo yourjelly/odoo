@@ -595,7 +595,7 @@ QUnit.module('account', {
         assert.expect(11);
 
         var clientAction = new ReconciliationClientAction.StatementAction(null, this.params.options);
-        testUtils.addMockEnvironment(clientAction, {
+        testUtils.mock.addMockEnvironment(clientAction, {
             'data': this.params.data,
         });
         clientAction.appendTo($('#qunit-fixture'));
@@ -628,7 +628,7 @@ QUnit.module('account', {
         assert.expect(6);
 
         var clientAction = new ReconciliationClientAction.StatementAction(null, this.params.options);
-        testUtils.addMockEnvironment(clientAction, {
+        testUtils.mock.addMockEnvironment(clientAction, {
             data: this.params.data,
             session: {
                 currencies: {
@@ -663,7 +663,7 @@ QUnit.module('account', {
         assert.expect(17);
 
         var clientAction = new ReconciliationClientAction.StatementAction(null, this.params.options);
-        testUtils.addMockEnvironment(clientAction, {
+        testUtils.mock.addMockEnvironment(clientAction, {
             data: this.params.data,
             session: {
                 currencies: {
@@ -714,7 +714,7 @@ QUnit.module('account', {
         widget.$('.match .cell_account_code:first').trigger('click');
         widget.$('.match .cell_account_code:first').trigger('click');
 
-        testUtils.intercept(clientAction, 'call_service', function (event) {
+        testUtils.mock.intercept(clientAction, 'call_service', function (event) {
             assert.deepEqual(event.data.args[1].args,
                 [[5],[{partner_id: 8, counterpart_aml_dicts: [{
                                                                   "counterpart_aml_id": 109,
@@ -747,7 +747,7 @@ QUnit.module('account', {
         assert.expect(1);
         // Test added to prevent this issue happening again: https://github.com/odoo/odoo/commit/3549688b21eb65e16b9c3f2b6462eb8d8b52cd47
         var clientAction = new ReconciliationClientAction.StatementAction(null, this.params.options);
-        testUtils.addMockEnvironment(clientAction, {
+        testUtils.mock.addMockEnvironment(clientAction, {
             data: this.params.data,
             session: {
                 currencies: {
@@ -766,7 +766,7 @@ QUnit.module('account', {
         // Ensure that when we validate a line without any selection, it is the same
         // as when we manually create a line with the line.balance and that only one
         // line is send back to server.
-        testUtils.intercept(clientAction, 'call_service', function (event) {
+        testUtils.mock.intercept(clientAction, 'call_service', function (event) {
             assert.deepEqual(event.data.args[1].args,
                 [[5],[{partner_id: 8, counterpart_aml_dicts: [],
                                     payment_aml_ids: [], new_aml_dicts: [{
@@ -791,7 +791,7 @@ QUnit.module('account', {
         assert.expect(1);
         // Test added to check this functionality: https://github.com/odoo/odoo/commit/2f3b469dee6f18cbccce1cdf2a81cfe57960c533
         var clientAction = new ReconciliationClientAction.StatementAction(null, this.params.options);
-        testUtils.addMockEnvironment(clientAction, {
+        testUtils.mock.addMockEnvironment(clientAction, {
             data: this.params.data,
             session: {
                 currencies: {
@@ -815,7 +815,7 @@ QUnit.module('account', {
 
         // Ensure that when we validate a line with propositions and that there is a remaining balance
         // We also create a line which is the open balance.
-        testUtils.intercept(clientAction, 'call_service', function (event) {
+        testUtils.mock.intercept(clientAction, 'call_service', function (event) {
             assert.deepEqual(event.data.args[1].args,
                 [[5],[{partner_id: 8,
                                     counterpart_aml_dicts: [{
@@ -847,7 +847,7 @@ QUnit.module('account', {
         assert.expect(10);
 
         var clientAction = new ReconciliationClientAction.StatementAction(null, this.params.options);
-        testUtils.addMockEnvironment(clientAction, {
+        testUtils.mock.addMockEnvironment(clientAction, {
             data: this.params.data,
             mockRPC: function (route, args) {
                 console.log(args.method);
@@ -910,7 +910,7 @@ QUnit.module('account', {
         assert.expect(6);
 
         var clientAction = new ReconciliationClientAction.StatementAction(null, this.params.options);
-        testUtils.addMockEnvironment(clientAction, {
+        testUtils.mock.addMockEnvironment(clientAction, {
             'data': this.params.data,
         });
 
@@ -933,7 +933,7 @@ QUnit.module('account', {
 
         var clientAction = new ReconciliationClientAction.StatementAction(null, this.params.options);
 
-        testUtils.addMockEnvironment(clientAction, {
+        testUtils.mock.addMockEnvironment(clientAction, {
             'data': this.params.data,
             session: this.params.session,
             translateParameters: {
@@ -966,7 +966,7 @@ QUnit.module('account', {
 
         var clientAction = new ReconciliationClientAction.StatementAction(null, this.params.options);
 
-        testUtils.addMockEnvironment(clientAction, {
+        testUtils.mock.addMockEnvironment(clientAction, {
             data: this.params.data,
             archs: {
                 'res.partner,false,list': '<tree string="Partners"><field name="display_name"/></tree>',
@@ -1033,7 +1033,7 @@ QUnit.module('account', {
 
         var clientAction = new ReconciliationClientAction.StatementAction(null, this.params.options);
 
-        testUtils.addMockEnvironment(clientAction, {
+        testUtils.mock.addMockEnvironment(clientAction, {
             data: this.params.data,
             session: {
                 currencies: {
@@ -1063,14 +1063,14 @@ QUnit.module('account', {
             "the new line should have the selected account, name and amout");
         assert.ok(widget.$('caption button.btn-primary:visible').length, "should display the 'Reconcile' button");
 
-        testUtils.intercept(clientAction, 'do_action', function (event) {
+        testUtils.mock.intercept(clientAction, 'do_action', function (event) {
             assert.strictEqual(JSON.stringify(event.data.action),
                 '{"type":"ir.actions.act_window","res_model":"account.reconcile.model","views":[[false,"form"]],"target":"current"}',
                 "should open the reconcile model form view");
         });
         widget.$('.create .reconcile_model_create').trigger('click');
 
-        testUtils.intercept(clientAction, 'do_action', function (event) {
+        testUtils.mock.intercept(clientAction, 'do_action', function (event) {
             assert.strictEqual(JSON.stringify(event.data.action),
                 '{"type":"ir.actions.act_window","res_model":"account.reconcile.model","views":[[false,"list"],[false,"form"]],"view_type":"list","view_mode":"list","target":"current"}',
                 "should open the reconcile model list view");
@@ -1123,7 +1123,7 @@ QUnit.module('account', {
         var clientAction = new ReconciliationClientAction.StatementAction(null, this.params.options);
         var def = $.Deferred();
 
-        testUtils.addMockEnvironment(clientAction, {
+        testUtils.mock.addMockEnvironment(clientAction, {
             data: this.params.data,
             session: {
                 currencies: {
@@ -1177,7 +1177,7 @@ QUnit.module('account', {
 
         var clientAction = new ReconciliationClientAction.StatementAction(null, this.params.options);
 
-        testUtils.addMockEnvironment(clientAction, {
+        testUtils.mock.addMockEnvironment(clientAction, {
             data: this.params.data,
             session: {
                 currencies: {
@@ -1229,7 +1229,7 @@ QUnit.module('account', {
 
         var clientAction = new ReconciliationClientAction.StatementAction(null, this.params.options);
 
-        testUtils.addMockEnvironment(clientAction, {
+        testUtils.mock.addMockEnvironment(clientAction, {
             data: this.params.data,
         });
         clientAction.appendTo($('#qunit-fixture'));
@@ -1271,7 +1271,7 @@ QUnit.module('account', {
 
         var clientAction = new ReconciliationClientAction.ManualAction(null, this.params.options);
 
-        testUtils.addMockEnvironment(clientAction, {
+        testUtils.mock.addMockEnvironment(clientAction, {
             data: this.params.data,
             session: this.params.session,
         });
@@ -1336,7 +1336,7 @@ QUnit.module('account', {
              amount_str: "$ 999.00", debit: 999.0, account_code: "101200", ref: "", already_paid: false};
 
         var clientAction = new ReconciliationClientAction.StatementAction(null, this.params.options);
-        testUtils.addMockEnvironment(clientAction, {
+        testUtils.mock.addMockEnvironment(clientAction, {
             data: this.params.data,
             mockRPC: function (route, args) {
                 if (args.method === 'process_bank_statement_line') {
@@ -1429,7 +1429,7 @@ QUnit.module('account', {
              amount_str: "$ 1200.00", debit: 1200.0, account_code: "101200", ref: "", already_paid: false};
 
         var clientAction = new ReconciliationClientAction.StatementAction(null, this.params.options);
-        testUtils.addMockEnvironment(clientAction, {
+        testUtils.mock.addMockEnvironment(clientAction, {
             data: this.params.data,
             mockRPC: function (route, args) {
                 if (args.method === 'process_bank_statement_line') {
@@ -1524,7 +1524,7 @@ QUnit.module('account', {
         ];
 
         var clientAction = new ReconciliationClientAction.ManualAction(null, this.params.options);
-        testUtils.addMockEnvironment(clientAction, {
+        testUtils.mock.addMockEnvironment(clientAction, {
             data: this.params.data,
             mockRPC: function (route, args) {
                 if (args.method === 'process_move_lines') {
@@ -1587,7 +1587,7 @@ QUnit.module('account', {
         assert.expect(2);
 
         var clientAction = new ReconciliationClientAction.ManualAction(null, this.params.options);
-        testUtils.addMockEnvironment(clientAction, {
+        testUtils.mock.addMockEnvironment(clientAction, {
             data: this.params.data,
             session: {
                 currencies: {
