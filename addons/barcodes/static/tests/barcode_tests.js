@@ -403,7 +403,7 @@ QUnit.test('specification of widget barcode_handler', function (assert) {
     assert.strictEqual(form.$('.o_data_row:nth(1) .o_data_cell:nth(1)').text(), '1',
         "quantity of line one should have been incremented");
 
-    form.$buttons.find('.o_form_button_save').click();
+    testUtils.form.clickSave(form);
 
     form.destroy();
     barcodeEvents.BarcodeEvents.max_time_between_keys_in_ms = delay;

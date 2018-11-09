@@ -936,6 +936,15 @@ function openDatepicker($datepickerEl) {
 function clickEdit(form) {
     form.$buttons.find('.o_form_button_edit').click();
 }
+function clickSave(form) {
+    form.$buttons.find('.o_form_button_save').click();
+}
+function clickCreate(form) {
+    form.$buttons.find('.o_form_button_create').click();
+}
+function clickDiscard(form) {
+    form.$buttons.find('.o_form_button_cancel').click();
+}
 
 /**
  * @param {string} fieldName
@@ -987,7 +996,9 @@ return $.when(
         },
         form: {
             clickEdit: clickEdit,
-        //     clickSave(form),
+            clickSave: clickSave,
+            clickCreate: clickCreate,
+            clickDiscard: clickDiscard,
         },
         // modal: {
         //     clickPrimaryAction(),

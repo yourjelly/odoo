@@ -170,7 +170,7 @@ QUnit.module('basic_fields', {
         assert.verifySteps([], "_setValue shouldn't have been called yet");
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.verifySteps(['_setValue'], "_setValue should have been called once");
 
         // destroy the form view
@@ -216,7 +216,7 @@ QUnit.module('basic_fields', {
             "checkbox should no longer be checked");
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_boolean input:checked').length, 0,
             "checkbox should still no longer be checked");
 
@@ -260,7 +260,7 @@ QUnit.module('basic_fields', {
         $(document.activeElement).trigger({type: "keydown", which: $.ui.keyCode.ENTER});
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_boolean input:checked').length, 1,
             "checkbox should still be checked");
         form.destroy();
@@ -446,7 +446,7 @@ QUnit.module('basic_fields', {
         assert.verifySteps([]);
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
 
         assert.strictEqual(form.$('.o_field_widget[name=bar] i.text-muted:not(.o_toggle_button_success)').length,
             1, "should still be gray");
@@ -563,7 +563,7 @@ QUnit.module('basic_fields', {
             'The value should not be formated yet.');
 
         form.$('input').val('18.8958938598598').trigger('input');
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_widget').first().text(), '18.896',
             'The new value should be rounded properly.');
 
@@ -628,7 +628,7 @@ QUnit.module('basic_fields', {
         });
 
         testUtils.form.clickEdit(form);
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
 
         assert.verifySteps(['read']); // should not have save as nothing changed
 
@@ -702,7 +702,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('input').val(), '109.2458938598598',
             'The value should not be formated yet.');
 
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         // Non-breaking space between the currency and the amount
         assert.strictEqual(form.$('.o_field_widget').first().text(), '$\u00a0109.2',
             'The new value should be rounded properly.');
@@ -733,11 +733,11 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('.o_field_widget').attr('type'), 'number',
             'Float field with option type must have a type attribute equals to "number".');
         form.$('input').val('123456.7890').trigger('input');
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_field_widget').val(), '123456.789',
             'Float value must be not formatted if input type is number.');
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_widget').text(), '123,456.8',
             'Float value must be formatted in readonly view even if the input type is number.');
 
@@ -766,7 +766,7 @@ QUnit.module('basic_fields', {
             'Float field with option type must have a text type (default type).');
 
         form.$('input').val('123456.7890').trigger('input');
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_field_widget').val(), '123,456.8',
             'Float value must be formatted if input type isn\'t number.');
@@ -813,7 +813,7 @@ QUnit.module('basic_fields', {
         form.$('input[type="text"].o_field_widget').val('new').trigger('input');
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         $mailtoLink = form.$('a.o_form_uri.o_field_widget.o_text_overflow');
         assert.strictEqual($mailtoLink.text(), 'new',
             "new value should be displayed properly");
@@ -920,7 +920,7 @@ QUnit.module('basic_fields', {
         form.$('input[type="text"].o_field_widget').val('limbo').trigger('input');
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_widget').text(), 'limbo',
             'the new value should be displayed');
         form.destroy();
@@ -954,7 +954,7 @@ QUnit.module('basic_fields', {
         form.$('input[type="text"].o_field_widget').val('').trigger('input');
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         form.destroy();
     });
 
@@ -1089,7 +1089,7 @@ QUnit.module('basic_fields', {
         });
 
         form.$('input').val('<script>throw Error();</script>').trigger('input');
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_widget').text(), '<script>throw Error();</script>',
             'the value should have been properly escaped');
 
@@ -1122,7 +1122,7 @@ QUnit.module('basic_fields', {
         form.$('input[name="foo"]').val('  abc  ').trigger('input');
         form.$('input[name="foo2"]').val('  def  ').trigger('input');
 
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
 
         // edit mode
         testUtils.form.clickEdit(form);
@@ -1347,7 +1347,7 @@ QUnit.module('basic_fields', {
         form.$('input[type="text"].o_field_widget').val('limbo').trigger('input');
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('a.o_form_uri.o_field_widget.o_text_overflow').length, 1,
             "should still have a anchor with correct classes");
         assert.strictEqual(form.$('a.o_form_uri.o_field_widget.o_text_overflow').attr('href'), 'limbo',
@@ -1490,7 +1490,7 @@ QUnit.module('basic_fields', {
         $textarea.val('hello world').trigger('input');
         assert.strictEqual($textarea.val(), 'hello world', 'should be "hello world" after second edition');
 
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
 
         assert.strictEqual(form.$('.o_field_text').text(), 'hello world',
             'should be "hello world" after save');
@@ -1792,7 +1792,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('input.o_field_char').val(), '',
             "the filename field should be empty since we removed the file");
 
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('a.o_field_widget[name="document"] > .fa-download').length, 0,
             "the binary field should not render as a downloadable link since we removed the file");
         assert.strictEqual(form.$('a.o_field_widget[name="document"]').text().trim(), '',
@@ -1835,7 +1835,7 @@ QUnit.module('basic_fields', {
             res_id: 1,
         });
 
-        form.$buttons.find('.o_form_button_create').click();
+        testUtils.form.clickCreate(form);
         var $dropdown = form.$('.o_field_many2one input').autocomplete('widget');
 
         form.$('.o_field_many2one input').click();
@@ -2204,7 +2204,7 @@ QUnit.module('basic_fields', {
             },
         });
 
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
 
         assert.ok(form.$('.o_form_view').hasClass('o_form_editable'),
             "form view should still be editable");
@@ -2711,7 +2711,7 @@ QUnit.module('basic_fields', {
             'the selected date should be displayed in the input');
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_date').text(), '02/22/2017',
             'the selected date should be displayed after saving');
         form.destroy();
@@ -2865,7 +2865,7 @@ QUnit.module('basic_fields', {
             'should have correctly removed the value');
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_date').text(), '',
             'the selected date should be displayed after saving');
 
@@ -2899,7 +2899,7 @@ QUnit.module('basic_fields', {
 
         form.$('input[name="datetime"]').val('02/08/2017')
                                         .trigger('input').trigger('change').trigger('focusout');
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
 
         assert.verifySteps(['read']); // should not have save as nothing changed
 
@@ -2958,7 +2958,7 @@ QUnit.module('basic_fields', {
             'the selected date should be displayed in the input');
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_date').text(), newExpectedDateString,
             'the selected date should be displayed after saving');
 
@@ -3011,7 +3011,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('.o_field_date input').val(), expectedDateString,
             'the datetime should be correctly displayed in readonly');
 
-        form.$buttons.find('.o_form_button_cancel').click();
+        testUtils.form.clickDiscard(form);
 
         assert.strictEqual($('.modal').length, 0,
             "there should not be a Warning dialog");
@@ -3121,7 +3121,7 @@ QUnit.module('basic_fields', {
             "should have an empty input");
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_date').text(), '',
             'the selected date should be displayed after saving');
 
@@ -3233,7 +3233,7 @@ QUnit.module('basic_fields', {
             res_id: 1,
         });
 
-        form.$buttons.find('.o_form_button_create').click();
+        testUtils.form.clickCreate(form);
         assert.ok($('.day:last-child(),.day:nth-child(2)').hasClass('disabled'),
             'first and last days must be disabled');
         assert.notOk($('.day:not(:last-child()):not(:nth-child(2))').hasClass('disabled'),
@@ -3277,7 +3277,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('input').val(), '108.2458938598598',
             'The value should not be formated yet.');
 
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         // Non-breaking space between the currency and the amount
         assert.strictEqual(form.$('.o_field_widget').first().text(), '$\u00a0108.25',
             'The new value should be rounded properly.');
@@ -3318,7 +3318,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('input').first().val(), '108.2458938598598',
             'The value should not be formated yet.');
 
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         // Non-breaking space between the currency and the amount
         assert.strictEqual(form.$('.o_field_widget').first().text(), '108.25\u00a0€',
             'The new value should be rounded properly.');
@@ -3375,7 +3375,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('input').first().val(), '99.111111111',
             'The value should not be formated yet.');
 
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         // Non-breaking space between the currency and the amount
         assert.strictEqual(form.$('.o_field_widget').first().text(), '99.1111\u00a0Bs.F',
             'The new value should be rounded properly.');
@@ -3688,7 +3688,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('input').val(), '-18',
             'The value should be correctly displayed in the input.');
 
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_widget').text(), '-18',
             'The new value should be saved and displayed properly.');
 
@@ -3770,11 +3770,11 @@ QUnit.module('basic_fields', {
             'Integer field with option type must have a type attribute equals to "number".');
 
         form.$('input').val('1234567890').trigger('input');
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_field_widget').val(), '1234567890',
             'Integer value must be not formatted if input type is number.');
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_widget').text(), '1,234,567,890',
             'Integer value must be formatted in readonly view even if the input type is number.');
 
@@ -3803,7 +3803,7 @@ QUnit.module('basic_fields', {
             'Integer field without option type must have a text type (default type).');
 
         form.$('input').val('1234567890').trigger('input');
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_field_widget').val(), '1,234,567,890',
             'Integer value must be formatted if input type isn\'t number.');
@@ -3848,7 +3848,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('input').val(), '-11:48',
             'The new value should be displayed properly in the input.');
 
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_widget').first().text(), '-11:48',
             'The new value should be saved and displayed properly.');
 
@@ -3888,7 +3888,7 @@ QUnit.module('basic_fields', {
 
         form.$('input').val('2.3').trigger('input');
 
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_widget').first().text(), '2.30',
             'The new value should be saved and displayed properly.');
 
@@ -3931,7 +3931,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('button.o_field_float_toggle').text(), '1.000',
             'The value should be rendered correctly on the button.');
 
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
 
         assert.strictEqual(form.$('.o_field_widget').first().text(), '1.000',
             'The new value should be saved and displayed properly.');
@@ -3981,7 +3981,7 @@ QUnit.module('basic_fields', {
         form.$('input[type="text"].o_field_widget').val('new').trigger('input');
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('a.o_field_widget.o_form_uri').text(), 'new',
             "new value should be displayed properly");
 
@@ -4137,7 +4137,7 @@ QUnit.module('basic_fields', {
             "should still have one empty star since the value is the second value");
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star').length, 2,
             "should still have two stars");
         assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.fa-star').length, 1,
@@ -4165,7 +4165,7 @@ QUnit.module('basic_fields', {
             "should now have no empty star since the value is the third value");
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star').length, 2,
             "should still have two stars");
         assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.fa-star').length, 2,
@@ -4345,7 +4345,7 @@ QUnit.module('basic_fields', {
             "should have one green status since selection is the third, done state");
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.dropdown-menu.state:visible').length, 0,
             "there should still not be a dropdown anymore");
         assert.strictEqual(form.$('.o_field_widget.o_selection > a span.o_status.o_status_red').length, 0,
@@ -4546,7 +4546,7 @@ QUnit.module('basic_fields', {
             'the label should say "Remove from Favorites"');
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_widget.o_favorite > a i.fa.fa-star').length, 1,
             'should be favorite');
         assert.strictEqual(form.$('.o_field_widget.o_favorite > a').text(), ' Remove from Favorites',
@@ -4630,7 +4630,7 @@ QUnit.module('basic_fields', {
             "the label should say 'Blocked' since this is the label value for that state");
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_widget.badge.badge-warning').length, 1,
             "should have a warning status label since selection is the second, blocked state");
         assert.strictEqual(form.$('.o_field_widget.badge.badge-secondary').length, 0,
@@ -4785,7 +4785,7 @@ QUnit.module('basic_fields', {
             'int_field', "should have 'int_field' as text");
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.oe_stat_button .o_field_widget.o_stat_info').length, 1,
             "should have one stat button");
         assert.strictEqual(form.$('.oe_stat_button .o_field_widget.o_stat_info .o_stat_value').text(),
@@ -4837,7 +4837,7 @@ QUnit.module('basic_fields', {
             'yop', "should have 'yop' as text, since it is the value of field foo");
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.oe_stat_button .o_field_widget.o_stat_info').length, 1,
             "should have one stat button");
         assert.strictEqual(form.$('.oe_stat_button .o_field_widget.o_stat_info .o_stat_value').text(),
@@ -4888,7 +4888,7 @@ QUnit.module('basic_fields', {
             '', "should not have any label");
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.oe_stat_button .o_field_widget.o_stat_info').length, 1,
             "should have one stat button");
         assert.strictEqual(form.$('.oe_stat_button .o_field_widget.o_stat_info .o_stat_value').text(),
@@ -4940,7 +4940,7 @@ QUnit.module('basic_fields', {
             'transform: rotate(36deg);'), "right mask should be rotated from 360*(10/100) = 36 degrees");
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_percent_pie.o_field_widget .o_pie').length, 1,
             "should have a pie chart");
         assert.strictEqual(form.$('.o_field_percent_pie.o_field_widget .o_pie .o_pie_value').text(),
@@ -4991,7 +4991,7 @@ QUnit.module('basic_fields', {
             "right mask should be hidden since the value > 50%");
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_percent_pie.o_field_widget .o_pie').length, 1,
             "should have a pie chart");
         assert.strictEqual(form.$('.o_field_percent_pie.o_field_widget .o_pie .o_pie_value').text(),
@@ -5147,7 +5147,7 @@ QUnit.module('basic_fields', {
 
         // Saving the form view should show a readonly domain containing the
         // "color" field
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         $domain = form.$(".o_field_domain");
         assert.ok($domain.html().indexOf("Color index") >= 0,
             "field selector readonly value should now contain 'Color index'");

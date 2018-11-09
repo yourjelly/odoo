@@ -367,7 +367,7 @@ QUnit.test('chatter in create mode', function (assert) {
         "chatter should be displayed");
 
     // entering create mode
-    form.$buttons.find('.o_form_button_create').click();
+    testUtils.form.clickCreate(form);
     assert.ok(form.$el.find('.o_form_view').hasClass('o_form_editable'),
         "we should be in create mode");
     assert.strictEqual(form.$('.o_chatter').length, 1,
@@ -388,7 +388,7 @@ QUnit.test('chatter in create mode', function (assert) {
 
     // getting out of create mode by saving
     form.$('.o_field_char').val('coucou').trigger('input');
-    form.$buttons.find('.o_form_button_save').click();
+    testUtils.form.clickSave(form);
 
     assert.strictEqual(form.$('.o_chatter').length, 1,
         "chatter should still be displayed after saving from create mode");
@@ -433,7 +433,7 @@ QUnit.test('chatter rendering inside the sheet', function (assert) {
     assert.strictEqual(form.$('.o_chatter').length, 1,
         "chatter should be displayed");
 
-    form.$buttons.find('.o_form_button_create').click();
+    testUtils.form.clickCreate(form);
     assert.ok(form.$el.find('.o_form_view').hasClass('o_form_editable'),
         "we should be in create mode");
 
@@ -441,7 +441,7 @@ QUnit.test('chatter rendering inside the sheet', function (assert) {
         "chatter should be displayed");
 
     form.$('.o_field_char').val('coucou').trigger('input');
-    form.$buttons.find('.o_form_button_save').click();
+    testUtils.form.clickSave(form);
 
     assert.strictEqual(form.$('.o_chatter').length, 1,
         "chatter should be displayed");
@@ -1497,7 +1497,7 @@ QUnit.test('form activity widget: read RPCs', function (assert) {
         'Today', "the activity should be today");
 
     testUtils.form.clickEdit(form);
-    form.$buttons.find('.o_form_button_save').click();
+    testUtils.form.clickSave(form);
 
     assert.strictEqual(nbReads, 1, "should not have re-read the activities");
 
@@ -1803,7 +1803,7 @@ QUnit.test('form activity widget: schedule activity does not discard changes', f
     form.$('.o_chatter_button_schedule_activity').click();
 
     // save the record
-    form.$buttons.find('.o_form_button_save').click();
+    testUtils.form.clickSave(form);
 
     form.destroy();
 });

@@ -153,7 +153,7 @@ QUnit.module('pad widget', {
             "should display proper value");
 
         testUtils.form.clickEdit(form);
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         form.destroy();
         delete FieldPad.prototype.isPadConfigured;
     });
@@ -256,7 +256,7 @@ QUnit.module('pad widget', {
             },
         });
         testUtils.form.clickEdit(form);
-        form.$buttons.find('.o_form_button_cancel').click();
+        testUtils.form.clickDiscard(form);
         assert.strictEqual(form.$('.oe_pad_readonly').text(), this.data.task.pad_get_content(),
             "pad content should not have changed");
         form.destroy();

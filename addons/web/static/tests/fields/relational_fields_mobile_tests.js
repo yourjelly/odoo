@@ -111,7 +111,7 @@ QUnit.module('relational_fields', {
             'should contain 1 records');
 
         // save and check that the correct command has been generated
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         form.destroy();
     });
 });

@@ -89,7 +89,7 @@ QUnit.module('basic_fields', {
         form.$('input[type="text"].o_field_widget').val('new').trigger('input');
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         $phoneLink = form.$('a.o_form_uri.o_field_widget');
         assert.strictEqual($phoneLink.text(), 'new',
             "new value should be displayed properly");
@@ -167,7 +167,7 @@ QUnit.module('basic_fields', {
         form.$('input').val(val).trigger('input');
 
         // save
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_widget').text(), val,
             "value should have been correctly escaped");
 

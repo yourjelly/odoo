@@ -1239,7 +1239,7 @@ QUnit.module('Views', {
         assert.ok(form.$('tbody tr:eq(2) td input').val(),
             "Value 2 should be third (shouldn't be sorted)");
 
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.ok(form.$('tbody tr:first td:contains(Value 1)').length,
             "Value 1 should be first");
         assert.ok(form.$('tbody tr:eq(1) td:contains(Value 2)').length,

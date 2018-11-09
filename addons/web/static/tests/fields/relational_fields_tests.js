@@ -553,7 +553,7 @@ QUnit.module('relational_fields', {
         });
 
         form.$('select').val("false").trigger('change');
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
 
         form.destroy();
     });
@@ -773,7 +773,7 @@ QUnit.module('relational_fields', {
             "should not contain tag 'silver' anymore");
 
         // save the record (should do the write RPC with the correct commands)
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
 
         // checkbox 'Hide in Kanban'
         $input = form.$('.o_field_many2manytags .badge[data-id=13] .dropdown-toggle'); // selects 'red' tag
@@ -884,7 +884,7 @@ QUnit.module('relational_fields', {
             "should contain newly added tag 'gold'");
 
         // save the record (should do the write RPC with the correct commands)
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         form.destroy();
     });
 
@@ -1238,7 +1238,7 @@ QUnit.module('relational_fields', {
 
         assert.strictEqual(form.$('input:checked').length, 1, "one of the input should be checked");
 
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
 
         var newRecord = _.last(this.data.partner.records);
         assert.strictEqual(newRecord.product_id, 37, "should have saved record with correct value");
@@ -1294,7 +1294,7 @@ QUnit.module('relational_fields', {
         // click on 2nd option
         form.$("input.o_radio_input").eq(1).click();
 
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
 
         var newRecord = _.last(this.data.partner.records);
         assert.strictEqual(newRecord.color, 'black', "should have saved record with correct value");
@@ -1362,7 +1362,7 @@ QUnit.module('relational_fields', {
 
         form.$("input.o_radio_input:nth(1)").click(); // click on 2nd option
 
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
 
         assert.strictEqual(form.$('.o_field_widget').text(), 'Black',
             "value should be 'Black'");
@@ -1451,7 +1451,7 @@ QUnit.module('relational_fields', {
 
         assert.strictEqual(form.$('span.active').length, 1, "one of the input should be checked");
 
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
 
         var newRecord = _.last(this.data.partner.records);
         assert.strictEqual(newRecord.product_id, 37, "should have saved record with correct value");
@@ -1477,7 +1477,7 @@ QUnit.module('relational_fields', {
         // click on 2nd option
         form.$("span.o_selection_badge").eq(1).click();
 
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
 
         var newRecord = _.last(this.data.partner.records);
         assert.strictEqual(newRecord.color, 'black', "should have saved record with correct value");
@@ -1534,7 +1534,7 @@ QUnit.module('relational_fields', {
 
         // add a m2m value by clicking on input
         form.$('div.o_field_widget div.custom-checkbox input').eq(1).click();
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.deepEqual(this.data.partner.records[0].timmy, [12, 14],
             "should have added the second element to the many2many");
         assert.strictEqual(form.$('input:checked').length, 2,
@@ -1543,7 +1543,7 @@ QUnit.module('relational_fields', {
         // remove a m2m value by clinking on label
         testUtils.form.clickEdit(form);
         form.$('div.o_field_widget div.custom-checkbox > label').eq(0).click();
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.deepEqual(this.data.partner.records[0].timmy, [14],
             "should have removed the first element to the many2many");
         assert.notOk(form.$('div.o_field_widget div.custom-checkbox input').eq(0).prop('checked'),
@@ -1571,7 +1571,7 @@ QUnit.module('relational_fields', {
 
         form.$('div.o_field_widget div.custom-checkbox input').eq(0).click();
         form.$('div.o_field_widget div.custom-checkbox input').eq(1).click();
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.notOk(form.$('div.o_field_widget div.custom-checkbox input').eq(0).prop('checked'),
             "first checkbox should not be checked");
         assert.notOk(form.$('div.o_field_widget div.custom-checkbox input').eq(1).prop('checked'),
@@ -1652,7 +1652,7 @@ QUnit.module('relational_fields', {
             '/web/dataset/call_kw/ir.attachment/read',
         ]);
 
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
 
         assert.strictEqual(form.$('div.o_field_widget.oe_fileupload .oe_attachments').children().length, 0,
             "there should be no attachment");
@@ -1887,7 +1887,7 @@ QUnit.module('relational_fields', {
         form.$('.o_field_many2one input').click(); // will trigger a name_search on partner_type model
         $dropdown.find('li:first()').click();
 
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
         assert.strictEqual(form.$('a.o_form_uri:contains(gold)').length, 1,
                         "should contain a link with the new value");
 
@@ -2108,7 +2108,7 @@ QUnit.module('relational_fields', {
             'The display name field should have the right value');
 
         // Save the whole thing
-        form.$buttons.find('.o_form_button_save').click();
+        testUtils.form.clickSave(form);
 
         x2mList = form.$('.o_field_x2many_list[name=p]');
 
