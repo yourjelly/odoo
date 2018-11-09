@@ -277,6 +277,9 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
         }
     },
     _consume_tip: function(tip, tour_name) {
+        if (tour_name === 'web_studio_tests_tour') {
+            console.log(document.body.outerHTML);
+        }
         this._deactivate_tip(tip);
         this._to_next_step(tour_name);
 
