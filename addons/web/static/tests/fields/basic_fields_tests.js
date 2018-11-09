@@ -352,9 +352,9 @@ QUnit.module('basic_fields', {
             res_id: 2,
         });
 
-        assert.containsOnce(form, '.o_stat_text.o_not_hover:contains(Production Environment)',
+        assert.strictEqual(form.$('.o_stat_text.o_not_hover:contains(Production Environment)').length, 1,
             "button should contain correct string");
-        assert.containsOnce(form, '.o_stat_text.o_hover:contains(Switch to test environment)',
+        assert.strictEqual(form.$('.o_stat_text.o_hover:contains(Switch to test environment)').length, 1,
             "button should display correct string when hovering");
         form.destroy();
     });
