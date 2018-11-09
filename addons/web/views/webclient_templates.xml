@@ -428,6 +428,7 @@
         <link type="text/css" rel="stylesheet" href="/web/static/lib/qunit/qunit-2.3.0.css"/>
         <script type="text/javascript" src="/web/static/lib/qunit/qunit-2.3.0.js"></script>
         <script type="text/javascript" src="/web/static/tests/helpers/qunit_config.js"></script>
+        <script type="text/javascript" src="/web/static/tests/helpers/qunit_asserts.js"></script>
 
         <t t-call-assets="web.assets_common" t-js="false"/>
         <t t-call-assets="web.assets_backend" t-js="false"/>
@@ -621,6 +622,7 @@
                 <link type="text/css" rel="stylesheet" href="/web/static/lib/qunit/qunit-2.3.0.css"/>
                 <script type="text/javascript" src="/web/static/lib/qunit/qunit-2.3.0.js"></script>
                 <script type="text/javascript" src="/web/static/tests/helpers/qunit_config.js"></script>
+                <script type="text/javascript" src="/web/static/tests/helpers/qunit_asserts.js"></script>
                 <script type="text/javascript" src="/web/static/lib/benchmarkjs/lodash.js"></script>
                 <script type="text/javascript" src="/web/static/lib/benchmarkjs/benchmark.js"></script>
 

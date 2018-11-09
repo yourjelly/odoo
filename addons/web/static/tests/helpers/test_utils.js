@@ -998,16 +998,3 @@ return $.when(
 });
 
 });
-
-//
-
-// assert.containsOnce(widget, selector, [msg]) // priority...
-// assert.containsOnce($el, selector, [msg])
-// assert.containsOnce(el, selector, [msg])
-// assert.containsOnce(selector, [msg])
-
-// assert.containsN(widget, selector, n, [msg]) // priority...
-// assert.containsN($el, selector, n, [msg])
-// assert.containsN(el, selector, n, [msg])
-// assert.containsN(selector, n, [msg])
-
