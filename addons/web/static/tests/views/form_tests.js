@@ -375,7 +375,7 @@ QUnit.module('Views', {
         form.destroy();
     });
 
-    QUnit.test('invisible attrs on fields are re-evaluated on field change', function (assert) {
+    QUnit.only('invisible attrs on fields are re-evaluated on field change', function (assert) {
         assert.expect(3);
 
         // we set the value bar to simulate a falsy boolean value.
@@ -394,6 +394,7 @@ QUnit.module('Views', {
                     '</group></sheet>' +
                 '</form>',
             res_id: 1,
+            debug:1
         });
 
         testUtils.form.clickEdit(form);
@@ -401,9 +402,9 @@ QUnit.module('Views', {
         assert.ok(form.$('.bar_field').hasClass('o_invisible_modifier'), 'should not display bar field');
 
         // set a value on the m2o
+        testUtils.fields.many2one.clickOpenDropdown('product_id');
         var $dropdown = form.$('.o_field_many2one input').autocomplete('widget');
-        form.$('.o_field_many2one input').click();
-        $dropdown.find('li:first()').click();
+        $dropdown.find('li:last()').click();
         assert.ok(!form.$('.foo_field').hasClass('o_invisible_modifier'), 'should display foo field');
         form.destroy();
     });

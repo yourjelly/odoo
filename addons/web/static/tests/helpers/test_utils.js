@@ -961,6 +961,21 @@ function editInput(fieldName, value, selector) {
     matches[0].dispatchEvent(new Event('input'));
 }
 
+function clickOpenDropdown(fieldName, selector) {
+    var m2oSelector = `${selector || ''} .o_field_many2one[name=${fieldName}] input`;
+    var matches = document.querySelectorAll(m2oSelector);
+    if (matches.length != 1) {
+        throw new Error(`cannot open m2o: selector ${selector} has been found ${matches.length} instead of 1`);
+    }
+    matches[0].click();
+}
+function clickMenuItem(fieldName, selector) {
+
+    var $dropdown = form.$('.o_field_many2one input').autocomplete('widget');
+    $dropdown.find('li:first()').click();
+
+}
+
 // Loading static files cannot be properly simulated when their real content is
 // really needed. This is the case for static XML files so we load them here,
 // before starting the qunit test suite.
@@ -1009,11 +1024,11 @@ return $.when(
         //     clickPrevious(widget, selector),
         // },
         fields: {
-        //     many2one: {
+            many2one: {
         //         clickOpenRecord([fieldName]),
-        //         clickOpenDropdown([fieldName]),
-        //         clickMenuItem(text, [fieldname])
-        //     },
+                clickOpenDropdown:clickOpenDropdown,
+                clickMenuItem:clickMenuItem
+            },
             editInput: editInput,
         //     focusOut(fieldName),
         },
