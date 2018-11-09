@@ -31,7 +31,7 @@ odoo.define('web.qunit_asserts', function (require) {
         } else if (el) {
             matches = el.querySelectorAll(selector);
         }
-        message = message || `selector ${selector} should have exactly 1 match`;
+        message = message || `selector ${selector} should have exactly ${n} match(es)`;
         QUnit.assert.strictEqual(matches.length, n, message);
     };
     QUnit.assert.containsOnce = function (selector, w, message) {

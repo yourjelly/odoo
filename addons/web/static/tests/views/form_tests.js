@@ -375,12 +375,11 @@ QUnit.module('Views', {
         form.destroy();
     });
 
-    QUnit.only('invisible attrs on fields are re-evaluated on field change', function (assert) {
+    QUnit.only('invisible attrs on fields are re-evaluated on field change', async function (assert) {
         assert.expect(3);
 
         // we set the value bar to simulate a falsy boolean value.
         this.data.partner.records[0].bar = false;
-
         var form = createView({
             View: FormView,
             model: 'partner',
@@ -402,11 +401,10 @@ QUnit.module('Views', {
         assert.ok(form.$('.bar_field').hasClass('o_invisible_modifier'), 'should not display bar field');
 
         // set a value on the m2o
-        testUtils.fields.many2one.clickOpenDropdown('product_id');
-        var $dropdown = form.$('.o_field_many2one input').autocomplete('widget');
-        $dropdown.find('li:last()').click();
+        await testUtils.fields.many2one.searchAndClickItem('product_id', {search: 'xpa'}); // remove search here
         assert.ok(!form.$('.foo_field').hasClass('o_invisible_modifier'), 'should display foo field');
-        form.destroy();
+
+        // form.destroy();
     });
 
     QUnit.test('asynchronous fields can be set invisible', function (assert) {

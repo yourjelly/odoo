@@ -13,11 +13,13 @@ odoo.define('web.test_utils', function (require) {
 var ActionManager = require('web.ActionManager');
 var ajax = require('web.ajax');
 var basic_fields = require('web.basic_fields');
+var concurrency = require('web.concurrency');
 var config = require('web.config');
 var ControlPanel = require('web.ControlPanel');
 var core = require('web.core');
 var DebugManager = require('web.DebugManager');
 var dom = require('web.dom');
+var relationalFields = require('web.relational_fields');
 var session = require('web.session');
 var MockServer = require('web.MockServer');
 var Widget = require('web.Widget');
@@ -968,12 +970,34 @@ function clickOpenDropdown(fieldName, selector) {
         throw new Error(`cannot open m2o: selector ${selector} has been found ${matches.length} instead of 1`);
     }
     matches[0].click();
+    return matches[0];
 }
-function clickMenuItem(fieldName, selector) {
-
-    var $dropdown = form.$('.o_field_many2one input').autocomplete('widget');
+function clickHighlightedItem(fieldName, selector) {
+    var m2oSelector = `${selector || ''} .o_field_many2one[name=${fieldName}] input`;
+    var $dropdown = $(m2oSelector).autocomplete('widget');
+    // clicking on an li (no matter which one), will select the focussed one
     $dropdown.find('li:first()').click();
+}
+function searchAndClickItem(fieldName, options) {
+    options = options || {};
 
+    var input = clickOpenDropdown(fieldName, options.selector);
+
+    var def;
+    if (options.search) {
+        // jquery autocomplete refines the search in a setTimeout() parameterized
+        // with a delay, so we force this delay to 0 s.t. the dropdown is filtered
+        // directly on the next tick
+        // TODO: force delay to 0 here, and reset it in then handler
+        // $(input).autocomplete({delay: 0});
+        input.value = options.search;
+        input.dispatchEvent(new Event('input'));
+        def = concurrency.delay(0);
+    }
+
+    return $.when(def).then(function () {
+        clickHighlightedItem(fieldName, options.selector);
+    });
 }
 
 // Loading static files cannot be properly simulated when their real content is
@@ -1026,8 +1050,9 @@ return $.when(
         fields: {
             many2one: {
         //         clickOpenRecord([fieldName]),
-                clickOpenDropdown:clickOpenDropdown,
-                clickMenuItem:clickMenuItem
+                clickOpenDropdown: clickOpenDropdown,
+                clickHighlightedItem: clickHighlightedItem,
+                searchAndClickItem: searchAndClickItem,
             },
             editInput: editInput,
         //     focusOut(fieldName),
