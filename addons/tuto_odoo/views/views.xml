@@ -36,7 +36,10 @@
         <field name="arch" type="xml">
             <form string="Model first">
               <header>
-                  <!-- <button string='More' name="get_more" class="oe_highlight" type="object"/> -->
+                  <button name="action_validate" type="object" states="draft" class="btn-secondary" string="Validate"/>
+                  <button name="action_cancel" type="object" states="validate" class="btn-secondary" string="Cancel"/>
+                  <button name="action_reset" type="object" states="cancel" class="btn-secondary" string="Reset to Draft"/>
+                  <field name="state" widget="statusbar" />
               </header>
               <sheet>
                 <group col="2" string="Details">
