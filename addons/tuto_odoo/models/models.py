@@ -15,6 +15,20 @@ class model_first(models.Model):
     text = fields.Text("Contenu")
     style = fields.Selection(STYLE, required=True, default='music')
     date = fields.Date('Date', required=True, index=True, default=fields.Date.context_today)
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('cancel', 'Cancelled'),
+        ('validate', 'Validated'),
+        ], 'Status', default='draft', index=True, required=True, readonly=True, copy=False, track_visibility='always')
+
+    def action_validate(self):
+        self.state = 'validate'
+
+    def action_cancel(self):
+        self.state = 'cancel'
+
+    def action_reset(self):
+        self.state = 'draft'
 
 class GoogleAnalytics(models.Model):
     _name = 'model.second'
