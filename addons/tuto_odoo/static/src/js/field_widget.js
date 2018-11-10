@@ -53,6 +53,7 @@ var Dashboard = AbstractAction.extend(ControlPanelMixin, {
 
     events: {
         'click .js_link_analytics_settings': 'on_link_analytics_settings',
+        'click .js_authorize': 'on_authorize',
     },
 
     init: function(parent, context) {
@@ -71,6 +72,7 @@ var Dashboard = AbstractAction.extend(ControlPanelMixin, {
         var self = this;
         return this._super().then(function() {
             self.render_dashboards();
+            self.load_analytics_api();
         });
     },
 
@@ -86,10 +88,42 @@ var Dashboard = AbstractAction.extend(ControlPanelMixin, {
         });
     },
 
+    load_analytics_api: function() {
+        var self = this;
+        if (!("gapi" in window)) {
+            (function(w,d,s,g,js,fjs){
+                g=w.gapi||(w.gapi={});g.analytics={q:[],ready:function(cb){this.q.push(cb);}};
+                js=d.createElement(s);fjs=d.getElementsByTagName(s)[0];
+                js.src='https://apis.google.com/js/platform.js';
+                fjs.parentNode.insertBefore(js,fjs);js.onload=function(){g.load('analytics');};
+            }(window,document,'script'));
+        }
+    },
+
     render_dashboards: function() {
         var self = this;
         _.each(this.dashboards_templates, function(template) {
             self.$('.o_website_dashboard').append(QWeb.render(template, {widget: self}));
+        });
+    },
+
+    on_authorize: function(ev) {
+        var self = this;
+        var CLIENT_ID = self.dashboard_data.ga_client_id;
+        var SCOPES = ['https://www.googleapis.com/auth/analytics.readonly'];
+        var authData = {
+            client_id: CLIENT_ID,
+            scope: SCOPES,
+            immediate: false
+        };
+        gapi.auth.authorize(authData, function(response) {
+            var authButton = self.$('.js_authorize');
+            if (response.error) {
+                authButton.hide();
+            }
+            else {
+                authButton.show();
+            }
         });
     },
 
