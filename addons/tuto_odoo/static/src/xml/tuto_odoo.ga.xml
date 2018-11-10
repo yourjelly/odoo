@@ -41,8 +41,6 @@
             Where to get my Client ID and Client Secret
         </a>
         <br/><br/>
-        Your Client Secret: <input type="text" name="ga_client_secret" t-att-value="ga_client_secret" style="width: 100%"></input>
-        <br/><br/>
         Your Domain: <input type="text" name="domain" t-att-value="domain" style="width: 100%"></input>
     </div>
 

@@ -137,8 +137,7 @@ var Dashboard = AbstractAction.extend(ControlPanelMixin, {
             $content: QWeb.render('tuto_odoo.ga_dialog_content', {
                 ga_key: this.dashboard_data.ga_key || "",
                 ga_client_id: this.dashboard_data.ga_client_id || "",
-                ga_client_secret: this.dashboard_data.ga_client_secret || "",
-                domain: this.dashboard_data.domain || "",
+                domain: "http:// " + window.location.href.split('/')[2] || "",
             }),
             buttons: [
                 {
@@ -148,9 +147,8 @@ var Dashboard = AbstractAction.extend(ControlPanelMixin, {
                     click: function() {
                         var ga_key = dialog.$el.find('input[name="ga_key"]').val();
                         var ga_client_id = dialog.$el.find('input[name="ga_client_id"]').val();
-                        var ga_client_secret = dialog.$el.find('input[name="ga_client_secret"]').val();
                         var domain = dialog.$el.find('input[name="domain"]').val();
-                        self.on_save_ga_client_id(ga_key, ga_client_id, ga_client_secret, domain);
+                        self.on_save_ga_client_id(ga_key, ga_client_id, domain);
                     },
                 },
                 {
@@ -161,14 +159,13 @@ var Dashboard = AbstractAction.extend(ControlPanelMixin, {
         }).open();
     },
 
-    on_save_ga_client_id: function(ga_key, ga_client_id, ga_client_secret, domain) {
+    on_save_ga_client_id: function(ga_key, ga_client_id, domain) {
         var self = this;
         return this._rpc({
             route: '/tuto_odoo/dashboard/set_ga_data',
             params: {
                 'ga_key': ga_key,
                 'ga_client_id': ga_client_id,
-                'ga_client_secret': ga_client_secret,
                 'domain': domain,
                 'user_id': odoo.session_info.uid || false,
             },
@@ -177,6 +174,7 @@ var Dashboard = AbstractAction.extend(ControlPanelMixin, {
                 self.do_warn(result.error.title, result.error.message);
                 return;
             }
+            self.fetch_data();
         });
     },
 
