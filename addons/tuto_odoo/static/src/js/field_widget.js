@@ -138,7 +138,7 @@ var Dashboard = AbstractAction.extend(ControlPanelMixin, {
                 ga_key: this.dashboard_data.ga_key || "",
                 ga_client_id: this.dashboard_data.ga_client_id || "",
                 ga_client_secret: this.dashboard_data.ga_client_secret || "",
-                domain: this.dashboard_data.domain || "",
+                domain: "http:// " + window.location.href.split('/')[2] || "",
             }),
             buttons: [
                 {
@@ -177,6 +177,7 @@ var Dashboard = AbstractAction.extend(ControlPanelMixin, {
                 self.do_warn(result.error.title, result.error.message);
                 return;
             }
+            self.fetch_data();
         });
     },
 

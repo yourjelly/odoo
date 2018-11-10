@@ -24,7 +24,7 @@ QUnit.module('tuto_odoo', {
     }
 });
 
-QUnit.only('Check my-custom-field widget', function (assert) {
+QUnit.test('Check my-custom-field widget', function (assert) {
     assert.expect(2);
     var form = createView({
         View: FormView,

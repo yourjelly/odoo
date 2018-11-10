@@ -12,7 +12,7 @@ class WebsiteBackend(http.Controller):
     def fetch_dashboard_data(self, user_id):
         current_second = request.env['model.second']
         if user_id:
-            current_second = current_second.search([('user_id','=',user_id)])
+            current_second = current_second.search([('user_id','=',user_id)], limit=1)
         # from ipdb import set_trace; set_trace()
         result_data = {
             'is_configurated': current_second.is_configurated,
@@ -34,7 +34,7 @@ class WebsiteBackend(http.Controller):
                         'message': _('Please set it again...'),
                     }
                 }
-            current_second = current_second.search([('user_id','=',user_id)])
+            current_second = current_second.search([('user_id','=',user_id)], limit=1)
             if current_second:
                 current_second.write({
                     'ga_key': ga_key,
