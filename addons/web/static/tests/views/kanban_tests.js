@@ -222,7 +222,7 @@ QUnit.module('Views', {
         envIDs = [4];
         kanban.$('.o_kanban_group:last .o_column_archive_records').click(); // Click on 'Archive All'
         assert.ok($('.modal').length, 'a confirm modal should be displayed');
-        $('.modal-footer .btn-secondary').click(); // Click on 'Cancel'
+        testUtils.modal.clickButton('Cancel'); // Click on 'Cancel'
         assert.strictEqual(kanban.$('.o_kanban_group:last .o_kanban_record').length, 3, "still last column should contain 3 records");
         kanban.$('.o_kanban_group:last .o_column_archive_records').click();
         assert.ok($('.modal').length, 'a confirm modal should be displayed');
@@ -380,7 +380,7 @@ QUnit.module('Views', {
         assert.ok(kanban.$('.o_kanban_view > div:last').hasClass('o_column_quick_create'),
             "column quick create should be enabled when grouped by a many2one field)");
 
-        kanban.$buttons.find('.o-kanban-button-new').click(); // Click on 'Create'
+        testUtils.kanban.clickCreate(kanban); // Click on 'Create'
         assert.ok(kanban.$('.o_kanban_group:first() > div:nth(1)').hasClass('o_kanban_quick_create'),
             "clicking on create should open the quick_create in the first column");
 
@@ -441,7 +441,7 @@ QUnit.module('Views', {
             "first column should contain one record");
 
         // click on 'Create' -> should open the quick create in the first column
-        kanban.$buttons.find('.o-kanban-button-new').click();
+        testUtils.kanban.clickCreate(kanban);
         var $quickCreate = kanban.$('.o_kanban_group:first .o_kanban_quick_create');
 
         assert.strictEqual($quickCreate.length, 1,
@@ -512,7 +512,7 @@ QUnit.module('Views', {
             "first column should contain one record");
 
         // click on 'Create' -> should open the quick create in the first column
-        kanban.$buttons.find('.o-kanban-button-new').click();
+        testUtils.kanban.clickCreate(kanban);
         var $quickCreate = kanban.$('.o_kanban_group:first .o_kanban_quick_create');
 
         assert.strictEqual($quickCreate.length, 1,
@@ -583,7 +583,7 @@ QUnit.module('Views', {
             "first column should contain two records");
 
         // click on 'Create', fill the quick create and validate
-        kanban.$buttons.find('.o-kanban-button-new').click();
+        testUtils.kanban.clickCreate(kanban);
         var $quickCreate = kanban.$('.o_kanban_group:first .o_kanban_quick_create');
         $quickCreate.find('input').val('new partner').trigger('input');
         $quickCreate.find('button.o_kanban_add').click();
@@ -648,7 +648,7 @@ QUnit.module('Views', {
             "first column should contain two records");
 
         // click on 'Create', fill the quick create and validate
-        kanban.$buttons.find('.o-kanban-button-new').click();
+        testUtils.kanban.clickCreate(kanban);
         var $quickCreate = kanban.$('.o_kanban_group:first .o_kanban_quick_create');
         $quickCreate.find('.o_field_widget[name=foo]').val('new partner').trigger('input');
         $quickCreate.find('.o_field_widget[name=int_field]').val('4').trigger('input');
@@ -708,7 +708,7 @@ QUnit.module('Views', {
         });
 
         // click on 'Create' -> should open the quick create in the first column
-        kanban.$buttons.find('.o-kanban-button-new').click();
+        testUtils.kanban.clickCreate(kanban);
         var $quickCreate = kanban.$('.o_kanban_group:first .o_kanban_quick_create');
 
         assert.strictEqual($quickCreate.length, 1,
@@ -1255,7 +1255,7 @@ QUnit.module('Views', {
             "first column should be folded");
 
         // click on 'Create' to open the quick create in the first column
-        kanban.$buttons.find('.o-kanban-button-new').click();
+        testUtils.kanban.clickCreate(kanban);
 
         assert.notOk(kanban.$('.o_kanban_group:first').hasClass('o_column_folded'),
             "first column should no longer be folded");
@@ -1593,7 +1593,7 @@ QUnit.module('Views', {
         assert.strictEqual(kanban.$('.o_kanban_group:first .o_kanban_record').length, 2,
             "there should be 2 records in first column");
 
-        kanban.$buttons.find('.o-kanban-button-new').click(); // Click on 'Create'
+        testUtils.kanban.clickCreate(kanban); // Click on 'Create'
         assert.ok(kanban.$('.o_kanban_group:first() > div:nth(1)').hasClass('o_kanban_quick_create'),
             "clicking on create should open the quick_create in the first column");
 
@@ -1655,10 +1655,10 @@ QUnit.module('Views', {
                     }, $.Event());
                 }
                 return this._super.apply(this, arguments);
-            },
+            }
         });
 
-        kanban.$buttons.find('.o-kanban-button-new').click(); // Click on 'Create'
+        testUtils.kanban.clickCreate(kanban);
         assert.strictEqual(kanban.$('.o_kanban_quick_create').length, 1,
             "should have a quick create widget");
 
@@ -1673,8 +1673,7 @@ QUnit.module('Views', {
         assert.strictEqual($('.modal .o_form_view.o_form_editable').length, 1,
             "a form view dialog should have been opened (in edit)");
 
-        // discard
-        $('.modal-footer .btn-secondary').click();
+        testUtils.modal.clickButton('Discard');
 
         assert.strictEqual($('.modal').length, 0, "the modal should be closed");
         assert.strictEqual(kanban.$('.o_kanban_quick_create:not(.o_disabled)').length, 1,
@@ -1830,7 +1829,7 @@ QUnit.module('Views', {
         assert.strictEqual(kanban.$('.o_kanban_record').length, 0,
             "both columns should be empty");
 
-        kanban.$buttons.find('.o-kanban-button-new').click();
+        testUtils.kanban.clickCreate(kanban);
 
         assert.strictEqual(kanban.$('.o_kanban_group:first .o_kanban_quick_create').length, 1,
             "should have opened the quick create in the first column");
@@ -1865,7 +1864,7 @@ QUnit.module('Views', {
             "quick create should be disabled when grouped on a date field");
 
         // clicking on CREATE in control panel should not open a quick create
-        kanban.$buttons.find('.o-kanban-button-new').click();
+        testUtils.kanban.clickCreate(kanban);
         assert.strictEqual(kanban.$('.o_kanban_quick_create').length, 0,
             "should not have opened the quick create widget");
 
@@ -1875,7 +1874,7 @@ QUnit.module('Views', {
             "quick create should be disabled when grouped on a datetime field");
 
         // clicking on CREATE in control panel should not open a quick create
-        kanban.$buttons.find('.o-kanban-button-new').click();
+        testUtils.kanban.clickCreate(kanban);
         assert.strictEqual(kanban.$('.o_kanban_quick_create').length, 0,
             "should not have opened the quick create widget");
 
@@ -2370,7 +2369,7 @@ QUnit.module('Views', {
             },
         });
 
-        kanban.reload();
+        testUtils.kanban.reload(kanban);
         assert.verifySteps([
             'read_group',
             '/web/dataset/search_read',
@@ -2459,22 +2458,18 @@ QUnit.module('Views', {
                 },
             },
         });
-        assert.strictEqual(kanban.$('.o_kanban_group:nth-child(1) .o_kanban_record').length, 2,
-                        "column should contain 2 record(s)");
-        assert.strictEqual(kanban.$('.o_kanban_group:nth-child(2) .o_kanban_record').length, 2,
-                        "column should contain 2 record(s)");
+        assert.containsN('.o_kanban_group:nth-child(1) .o_kanban_record', 2, kanban);
+        assert.containsN('.o_kanban_group:nth-child(2) .o_kanban_record', 2, kanban);
+        assert.containsN('.thisiseditable', 4, kanban);
 
-        assert.strictEqual(kanban.$('.thisiseditable').length, 4, "all records should be editable");
         var $record = kanban.$('.o_kanban_group:nth-child(1) .o_kanban_record:first');
         var $group = kanban.$('.o_kanban_group:nth-child(2)');
         envIDs = [3, 2, 4, 1]; // first record of first column moved to the bottom of second column
         testUtils.dom.dragAndDrop($record, $group);
 
-        assert.strictEqual(kanban.$('.o_kanban_group:nth-child(1) .o_kanban_record').length, 1,
-                        "column should now contain 1 record(s)");
-        assert.strictEqual(kanban.$('.o_kanban_group:nth-child(2) .o_kanban_record').length, 3,
-                        "column should contain 3 record(s)");
-        assert.strictEqual(kanban.$('.thisiseditable').length, 4, "all records should be editable");
+        assert.containsN('.o_kanban_group:nth-child(1) .o_kanban_record', 1, kanban);
+        assert.containsN('.o_kanban_group:nth-child(2) .o_kanban_record', 3, kanban);
+        assert.containsN('.thisiseditable', 4, kanban);
         kanban.destroy();
     });
 
@@ -2504,19 +2499,15 @@ QUnit.module('Views', {
                 return this._super(route, args);
             },
         });
-        assert.strictEqual(kanban.$('.o_kanban_group:nth-child(1) .o_kanban_record').length, 1,
-                        "column should contain 1 record(s)");
-        assert.strictEqual(kanban.$('.o_kanban_group:nth-child(2) .o_kanban_record').length, 1,
-                        "column should contain 1 record(s)");
+        assert.containsN('.o_kanban_group:nth-child(1) .o_kanban_record', 1, kanban);
+        assert.containsN('.o_kanban_group:nth-child(2) .o_kanban_record', 1, kanban);
 
         var $record = kanban.$('.o_kanban_group:nth-child(1) .o_kanban_record:first');
         var $group = kanban.$('.o_kanban_group:nth-child(2)');
         testUtils.dom.dragAndDrop($record, $group);
 
-        assert.strictEqual(kanban.$('.o_kanban_group:nth-child(1) .o_kanban_record').length, 0,
-                        "column should now contain 0 record(s)");
-        assert.strictEqual(kanban.$('.o_kanban_group:nth-child(2) .o_kanban_record').length, 2,
-                        "column should contain 2 record(s)");
+        assert.containsN('.o_kanban_group:nth-child(1) .o_kanban_record', 0, kanban);
+        assert.containsN('.o_kanban_group:nth-child(2) .o_kanban_record', 2, kanban);
         kanban.destroy();
     });
 
@@ -2548,35 +2539,29 @@ QUnit.module('Views', {
         });
         // simulate an update coming from the searchview, with another groupby given
         kanban.update({groupBy: ['state']});
-        assert.strictEqual(kanban.$('.o_kanban_group:nth-child(1) .o_kanban_record').length, 1,
-                        "column should contain 1 record(s)");
-        assert.strictEqual(kanban.$('.o_kanban_group:nth-child(2) .o_kanban_record').length, 1,
-                        "column should contain 1 record(s)");
+        assert.containsN('.o_kanban_group:nth-child(1) .o_kanban_record', 1, kanban);
+        assert.containsN('.o_kanban_group:nth-child(2) .o_kanban_record', 1, kanban);
+
         // drag&drop a record in another column
         var $record = kanban.$('.o_kanban_group:nth-child(1) .o_kanban_record:first');
         var $group = kanban.$('.o_kanban_group:nth-child(2)');
         testUtils.dom.dragAndDrop($record, $group);
         // should not be draggable
-        assert.strictEqual(kanban.$('.o_kanban_group:nth-child(1) .o_kanban_record').length, 1,
-                        "column should now contain 1 record(s)");
-        assert.strictEqual(kanban.$('.o_kanban_group:nth-child(2) .o_kanban_record').length, 1,
-                        "column should contain 1 record(s)");
+        assert.containsN('.o_kanban_group:nth-child(1) .o_kanban_record', 1, kanban);
+        assert.containsN('.o_kanban_group:nth-child(2) .o_kanban_record', 1, kanban);
 
         // simulate an update coming from the searchview, with another groupby given
         kanban.update({groupBy: ['foo']});
-        assert.strictEqual(kanban.$('.o_kanban_group:nth-child(1) .o_kanban_record').length, 1,
-                        "column should contain 1 record(s)");
-        assert.strictEqual(kanban.$('.o_kanban_group:nth-child(2) .o_kanban_record').length, 2,
-                        "column should contain 2 record(s)");
+        assert.containsN('.o_kanban_group:nth-child(1) .o_kanban_record', 1, kanban);
+        assert.containsN('.o_kanban_group:nth-child(2) .o_kanban_record', 2, kanban);
+
         // drag&drop a record in another column
         $record = kanban.$('.o_kanban_group:nth-child(1) .o_kanban_record:first');
         $group = kanban.$('.o_kanban_group:nth-child(2)');
         testUtils.dom.dragAndDrop($record, $group);
         // should not be draggable
-        assert.strictEqual(kanban.$('.o_kanban_group:nth-child(1) .o_kanban_record').length, 1,
-                        "column should now contain 1 record(s)");
-        assert.strictEqual(kanban.$('.o_kanban_group:nth-child(2) .o_kanban_record').length, 2,
-                        "column should contain 2 record(s)");
+        assert.containsN('.o_kanban_group:nth-child(1) .o_kanban_record', 1, kanban);
+        assert.containsN('.o_kanban_group:nth-child(2) .o_kanban_record', 2, kanban);
 
         // drag&drop a record in the same column
         var $record1 = kanban.$('.o_kanban_group:nth-child(2) .o_kanban_record:eq(0)');
@@ -2625,8 +2610,7 @@ QUnit.module('Views', {
             },
         });
 
-        assert.ok(kanban.$('.o_kanban_view').hasClass('o_kanban_grouped'),
-                        "should have classname 'o_kanban_grouped'");
+        assert.hasClass('.o_kanban_view', 'o_kanban_grouped', kanban);
         assert.strictEqual(kanban.$('.o_kanban_group').length, 2, "should have " + 2 + " columns");
 
         // simulate an update coming from the searchview, with another groupby given
@@ -2707,12 +2691,12 @@ QUnit.module('Views', {
         // fold the second group and check that the res_ids it contains are no
         // longer in the environment
         envIDs = [1, 3];
-        kanban.$('.o_kanban_group:last .o_kanban_toggle_fold').click();
+        testUtils.dom.click(kanban.$('.o_kanban_group:last .o_kanban_toggle_fold'));
 
         // re-open the second group and check that the res_ids it contains are
         // back in the environment
         envIDs = [1, 3, 2, 4];
-        kanban.$('.o_kanban_group:last .o_kanban_toggle_fold').click();
+        testUtils.dom.click(kanban.$('.o_kanban_group:last .o_kanban_toggle_fold'));
 
         kanban.destroy();
     });
@@ -2782,19 +2766,18 @@ QUnit.module('Views', {
         assert.ok(kanban.$('.o_kanban_group:last').hasClass('o_column_folded'),
             'the created column should now be folded');
         kanban.$('.o_kanban_group:last').click();
-        assert.ok(!kanban.$('.o_kanban_group:last').hasClass('o_column_folded'),
-            'the created column should not be folded');
+        assert.doesNotHaveClass('.o_kanban_group:last', 'o_column_folded', kanban);
         assert.strictEqual(nbRPCs, 0, 'no rpc should have been done when folding/unfolding');
 
         // quick create a record
-        kanban.$buttons.find('.o-kanban-button-new').click(); // Click on 'Create'
+        testUtils.kanban.clickCreate(kanban);
         assert.ok(kanban.$('.o_kanban_group:first() > div:nth(1)').hasClass('o_kanban_quick_create'),
             "clicking on create should open the quick_create in the first column");
         kanban.destroy();
     });
 
     QUnit.test('auto fold group when reach the limit', function (assert) {
-        assert.expect(7);
+        assert.expect(9);
 
         var data = this.data;
         for (var i = 0; i < 12; i++) {
@@ -2833,28 +2816,19 @@ QUnit.module('Views', {
         });
 
         // we look if column are fold/unfold according what is expected
-        assert.notOk(kanban.$('.o_kanban_group:nth-child(2)').hasClass('o_column_folded'),
-            'second column must be unfolded by default');
-        assert.notOk(kanban.$('.o_kanban_group:nth-child(4)').hasClass('o_column_folded'),
-            'fourth column must be unfolded by default');
-        assert.notOk(kanban.$('.o_kanban_group:nth-child(10)').hasClass('o_column_folded'),
-            'tenth column must be unfolded by default');
-        assert.ok(
-            kanban.$('.o_kanban_group:nth-child(3)').hasClass('o_column_folded')
-            && kanban.$('.o_kanban_group:nth-child(9)').hasClass('o_column_folded'),
-            'third and ninth columns must be folded by default');
+        assert.doesNotHaveClass('.o_kanban_group:nth-child(2)','o_column_folded');
+        assert.doesNotHaveClass('.o_kanban_group:nth-child(4)','o_column_folded');
+        assert.doesNotHaveClass('.o_kanban_group:nth-child(10)','o_column_folded');
+        assert.hasClass('.o_kanban_group:nth-child(3)','o_column_folded');
+        assert.hasClass('.o_kanban_group:nth-child(9)','o_column_folded');
+
         // we look if columns are actually fold after we reached the limit
-        assert.ok(
-            kanban.$('.o_kanban_group:nth-child(13)').hasClass('o_column_folded')
-            && kanban.$('.o_kanban_group:nth-child(14)').hasClass('o_column_folded'),
-            'thirteenth and fourtheenth columns must be folded because we reached the limit');
+        assert.hasClass('.o_kanban_group:nth-child(13)','o_column_folded');
+        assert.hasClass('.o_kanban_group:nth-child(14)','o_column_folded');
+
         // we look if we have the right count of folded/unfolded column
-        assert.strictEqual(
-            kanban.$('.o_kanban_group:not(.o_column_folded)').length,
-            10, 'must have ten opened columns');
-        assert.strictEqual(
-            kanban.$('.o_kanban_group.o_column_folded').length,
-            4, 'must have four folded columns');
+        assert.containsN('.o_kanban_group:not(.o_column_folded)', 10, kanban);
+        assert.containsN('.o_kanban_group.o_column_folded', 4, kanban);
 
         kanban.destroy();
     });
@@ -2952,7 +2926,7 @@ QUnit.module('Views', {
         // delete second column (first cancel the confirm request, then confirm)
         kanban.$('.o_kanban_group:last .o_column_delete').click(); // click on delete
         assert.ok($('.modal').length, 'a confirm modal should be displayed');
-        $('.modal-footer .btn-secondary').click(); // click on cancel
+        testUtils.modal.clickButton('Cancel'); // click on cancel
         assert.strictEqual(kanban.$('.o_kanban_group:last').data('id'), 5,
             'column [5, "xmo"] should still be there');
         kanban.$('.o_kanban_group:last .o_column_delete').click(); // click on delete
@@ -3085,7 +3059,7 @@ QUnit.module('Views', {
         kanban.$('.o_kanban_group[data-id=5] .o_column_edit').click(); // click on 'Edit'
         $('.modal .o_form_editable input').val('ged').trigger('input'); // change the value
         nbRPCs = 0;
-        $('.modal-footer .btn-secondary').click(); // click on discard
+        testUtils.modal.clickButton('Discard');
         assert.ok(!$('.modal').length, 'the modal should be closed');
         assert.strictEqual(kanban.$('.o_kanban_group[data-id=5] .o_column_title').text(), 'xmo',
             'title of the column should still be "xmo"');
@@ -4682,8 +4656,8 @@ QUnit.module('Views', {
 
         var initialCount = parseInt(kanban.$('.o_kanban_counter_side:first').text());
 
-        // click on 'Create', fill the quick create and validate
-        kanban.$buttons.find('.o-kanban-button-new').click();
+        testUtils.kanban.clickCreate(kanban);
+        // fill the quick create and validate
         var $quickCreate = kanban.$('.o_kanban_group:first .o_kanban_quick_create');
         $quickCreate.find('.o_field_widget[name=int_field]').val('44').trigger('input');
         $quickCreate.find('button.o_kanban_add').click();
@@ -4726,7 +4700,7 @@ QUnit.module('Views', {
         kanban.destroy();
 
         function _quickCreateAndTest() {
-            kanban.$buttons.find('.o-kanban-button-new').click();
+            testUtils.kanban.clickCreate(kanban);
             $quickCreateGroup = kanban.$('.o_kanban_quick_create').closest('.o_kanban_group');
             $groups = kanban.$('.o_kanban_group');
             assert.strictEqual($quickCreateGroup[0], $groups[0],
@@ -4885,7 +4859,7 @@ QUnit.module('Views', {
                 },
             },
         });
-        kanban.$buttons.find('.o-kanban-button-new').click();
+        testUtils.kanban.clickCreate(kanban);
         kanban.destroy();
     });
 

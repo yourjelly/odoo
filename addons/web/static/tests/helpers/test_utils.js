@@ -978,6 +978,10 @@ function clickDiscard(form) {
     click(form.$buttons.find('.o_form_button_cancel'));
 }
 
+function clickCreateKanban(kanban) {
+    click(kanban.$buttons.find('.o-kanban-button-new'));
+}
+
 function clickModalButton(text) {
     var selector = `.modal-footer button:contains(${core._t(text)})`;
     var $button = $(selector);
@@ -1087,6 +1091,7 @@ return $.when(
         },
         kanban: {
             reload: reloadView,
+            clickCreate: clickCreateKanban,
         },
         modal: {
             clickButton: clickModalButton,
