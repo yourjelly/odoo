@@ -498,9 +498,7 @@ QUnit.module('Views', {
             'first tab should be visible');
 
         // set a value on the m2o
-        var $dropdown = form.$('.o_field_many2one input').autocomplete('widget');
-        form.$('.o_field_many2one input').click();
-        $dropdown.find('li:first()').click();
+        testUtils.fields.many2one.searchAndClickItem('product_id');
         assert.ok(!form.$('.o_notebook .nav .nav-link:first()').hasClass('active'),
             'first tab should not be active');
         assert.ok(form.$('.o_notebook .nav .nav-item:first()').hasClass('o_invisible_modifier'),
@@ -626,7 +624,7 @@ QUnit.module('Views', {
         form.destroy();
     });
 
-    QUnit.test('rendering stat buttons', function (assert) {
+    QUnit.only('rendering stat buttons', function (assert) {
         assert.expect(3);
 
         var form = createView({
@@ -660,7 +658,7 @@ QUnit.module('Views', {
         testUtils.mock.intercept(form, "execute_action", function () {
             count++;
         });
-        form.$('.oe_stat_button').first().click();
+        testUtils.dom.clickFirst('.oe_stat_button');
         assert.strictEqual(count, 1, "should have triggered a execute action");
         form.destroy();
     });

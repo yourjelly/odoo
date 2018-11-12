@@ -935,17 +935,48 @@ function openDatepicker($datepickerEl) {
     $datepickerEl.find('.o_datepicker_input').trigger('focus.datetimepicker');
 }
 
+function _click(el, all) {
+    var matches;
+    if (typeof el === 'string') {
+        matches = all ? document.querySelectorAll(el) : [document.querySelector(el)];
+    } else {
+        matches = el;
+    }
+    if (all && matches.length != 1) {
+        // throw new Error(`Found ${matches.length} elements to click on, instead of 1`);
+    }
+    matches[0].click();
+}
+
+/**
+ * Can be called with a DOM element, a jQuery element, or a selector. Checks tga
+ *
+ * @param {string|NodeList|jQuery} el
+ */
+function click(el) {
+    _click(el, true);
+}
+/**
+ * Can be called with a DOM element, a jQuery element, or a selector. Assumes
+ * that there is only one element.
+ *
+ * @param {string|NodeList|jQuery} el
+ */
+function clickFirst(el) {
+    _click(el, false);
+}
+
 function clickEdit(form) {
-    form.$buttons.find('.o_form_button_edit').click();
+    click(form.$buttons.find('.o_form_button_edit'));
 }
 function clickSave(form) {
-    form.$buttons.find('.o_form_button_save').click();
+    click(form.$buttons.find('.o_form_button_save'));
 }
 function clickCreate(form) {
-    form.$buttons.find('.o_form_button_create').click();
+    click(form.$buttons.find('.o_form_button_create'));
 }
 function clickDiscard(form) {
-    form.$buttons.find('.o_form_button_cancel').click();
+    click(form.$buttons.find('.o_form_button_cancel'));
 }
 
 /**
@@ -1035,7 +1066,8 @@ return $.when(
             triggerPositionalMouseEvent: triggerPositionalMouseEvent,
             dragAndDrop: dragAndDrop,
             openDatepicker: openDatepicker,
-            // click(el/selector),
+            click: click,
+            clickFirst: clickFirst,
             // input(el/selector),
             // focusOut(el/selector),
         },
