@@ -1107,22 +1107,22 @@ QUnit.module('Views', {
             res_id: 2,
         });
 
-        assert.checkAttrValue('button[name="0"]', 'class', 'btn btn-secondary', form);
-        assert.checkAttrValue('button[name="1"]', 'class', 'btn btn-primary', form);
-        assert.checkAttrValue('button[name="2"]', 'class', 'btn btn-primary', form);
-        assert.checkAttrValue('button[name="3"]', 'class', 'btn btn-secondary', form);
-        assert.checkAttrValue('button[name="4"]', 'class', 'btn btn-link', form);
-        assert.checkAttrValue('button[name="5"]', 'class', 'btn btn-link', form);
-        assert.checkAttrValue('button[name="6"]', 'class', 'btn btn-success', form);
-        assert.checkAttrValue('button[name="7"]', 'class', 'btn o_this_is_a_button btn-secondary', form);
-        assert.checkAttrValue('button[name="8"]', 'class', 'btn btn-secondary', form);
-        assert.checkAttrValue('button[name="9"]', 'class', 'btn btn-primary', form);
-        assert.checkAttrValue('button[name="10"]', 'class', 'btn btn-primary', form);
-        assert.checkAttrValue('button[name="11"]', 'class', 'btn btn-secondary', form);
-        assert.checkAttrValue('button[name="12"]', 'class', 'btn btn-link', form);
-        assert.checkAttrValue('button[name="13"]', 'class', 'btn btn-link', form);
-        assert.checkAttrValue('button[name="14"]', 'class', 'btn btn-success', form);
-        assert.checkAttrValue('button[name="15"]', 'class', 'btn o_this_is_a_button', form);
+        assert.hasAttrValue('button[name="0"]', 'class', 'btn btn-secondary', form);
+        assert.hasAttrValue('button[name="1"]', 'class', 'btn btn-primary', form);
+        assert.hasAttrValue('button[name="2"]', 'class', 'btn btn-primary', form);
+        assert.hasAttrValue('button[name="3"]', 'class', 'btn btn-secondary', form);
+        assert.hasAttrValue('button[name="4"]', 'class', 'btn btn-link', form);
+        assert.hasAttrValue('button[name="5"]', 'class', 'btn btn-link', form);
+        assert.hasAttrValue('button[name="6"]', 'class', 'btn btn-success', form);
+        assert.hasAttrValue('button[name="7"]', 'class', 'btn o_this_is_a_button btn-secondary', form);
+        assert.hasAttrValue('button[name="8"]', 'class', 'btn btn-secondary', form);
+        assert.hasAttrValue('button[name="9"]', 'class', 'btn btn-primary', form);
+        assert.hasAttrValue('button[name="10"]', 'class', 'btn btn-primary', form);
+        assert.hasAttrValue('button[name="11"]', 'class', 'btn btn-secondary', form);
+        assert.hasAttrValue('button[name="12"]', 'class', 'btn btn-link', form);
+        assert.hasAttrValue('button[name="13"]', 'class', 'btn btn-link', form);
+        assert.hasAttrValue('button[name="14"]', 'class', 'btn btn-success', form);
+        assert.hasAttrValue('button[name="15"]', 'class', 'btn o_this_is_a_button', form);
 
         form.destroy();
     });

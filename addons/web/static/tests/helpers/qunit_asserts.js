@@ -127,7 +127,7 @@ odoo.define('web.qunit_asserts', function (require) {
      * assert.hasClass(selector, attr, value, el, [msg])
      * assert.hasClass(selector, attr, value, [msg])
      */
-    QUnit.assert.checkAttrValue = function (selector, attr, value, w, msg) {
+    QUnit.assert.hasAttrValue = function (selector, attr, value, w, msg) {
         var widget, $el;
         if (w instanceof Widget) { // selector, attr, value, widget
             widget = w;
