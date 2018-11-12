@@ -183,12 +183,9 @@ QUnit.module('relational_fields', {
 
         assert.strictEqual(count, 1, 'once search_read should have been done to fetch the relational values');
         assert.strictEqual(nb_fields_fetched, 1, 'search_read should only fetch field id');
-        assert.strictEqual(form.$('.o_statusbar_status button:not(.dropdown-toggle)').length, 2, "should have 2 status");
-        assert.strictEqual(form.$('.o_statusbar_status button:disabled').length, 2,
-            "all status should be disabled");
-        assert.ok(form.$('.o_statusbar_status button[data-value="4"]').hasClass('btn-primary'),
-            "selected status should be btn-primary");
-
+        assert.containsN('.o_statusbar_status button:not(.dropdown-toggle)', 2, form);
+        assert.containsN('.o_statusbar_status button:disabled', 2, form);
+        assert.hasClass('.o_statusbar_status button[data-value="4"]', 'btn-primary', form);
         form.destroy();
     });
 
@@ -217,7 +214,7 @@ QUnit.module('relational_fields', {
     });
 
     QUnit.test('clickable statusbar widget on many2one field', function (assert) {
-        assert.expect(3);
+        assert.expect(5);
 
         var form = createView({
             View: FormView,
@@ -230,16 +227,17 @@ QUnit.module('relational_fields', {
             config: {device: {isMobile: false}},
         });
 
-        var $selectedStatus = form.$('.o_statusbar_status button[data-value="4"]');
-        assert.ok($selectedStatus.hasClass('btn-primary') && $selectedStatus.hasClass('disabled'),
-            "selected status should be btn-primary and disabled");
+
+        assert.hasClass('.o_statusbar_status button[data-value="4"]', 'btn-primary', form);
+        assert.hasClass('.o_statusbar_status button[data-value="4"]', 'disabled', form);
+
+        assert.containsN('.o_statusbar_status button.btn-secondary:not(.dropdown-toggle):not(:disabled)', 2, form);
+
         var $clickable = form.$('.o_statusbar_status button.btn-secondary:not(.dropdown-toggle):not(:disabled)');
-        assert.strictEqual($clickable.length, 2,
-            "other status should be btn-secondary and not disabled");
-        $clickable.last().click(); // (last is visually the first here (css))
-        var $status = form.$('.o_statusbar_status button[data-value="1"]');
-        assert.ok($status.hasClass("btn-primary") && $status.hasClass("disabled"),
-            "value should have been updated");
+        testUtils.dom.click($clickable.last()); // (last is visually the first here (css))
+
+        assert.hasClass('.o_statusbar_status button[data-value="1"]', "btn-primary", form);
+        assert.hasClass('.o_statusbar_status button[data-value="1"]', "disabled", form);
 
         form.destroy();
     });
@@ -259,8 +257,7 @@ QUnit.module('relational_fields', {
             config: {device: {isMobile: false}},
         });
 
-        assert.ok(form.$('.o_statusbar_status').hasClass('o_field_empty'),
-            'statusbar widget should have class o_field_empty');
+        assert.hasClass('.o_statusbar_status', 'o_field_empty', form);
         assert.strictEqual(form.$('.o_statusbar_status').children().length, 0,
             'statusbar widget should be empty');
         form.destroy();
@@ -282,8 +279,7 @@ QUnit.module('relational_fields', {
             config: {device: {isMobile: false}},
         });
 
-        assert.strictEqual(form.$('.o_statusbar_status button:disabled').length, 2, "should have 2 status");
-
+        assert.containsN('.o_statusbar_status button:disabled', 2, form);
         form.destroy();
     });
 
@@ -305,12 +301,9 @@ QUnit.module('relational_fields', {
         });
 
         testUtils.form.clickEdit(form);
-
-        var $buttons = form.$('.o_statusbar_status button:not(.dropdown-toggle)');
-        assert.strictEqual($buttons.length, 3, "there should be 3 status");
-        $buttons.last().click(); // (last is visually the first here (css))
-        assert.strictEqual(form.$('.o_statusbar_status button:not(.dropdown-toggle)').length, 2,
-            "there should be 2 status left");
+        assert.containsN('.o_statusbar_status button:not(.dropdown-toggle)', 3, form);
+        testUtils.dom.click(form.$('.o_statusbar_status button:not(.dropdown-toggle)').last());
+        assert.containsN('.o_statusbar_status button:not(.dropdown-toggle)', 2, form);
 
         form.destroy();
     });
@@ -335,13 +328,13 @@ QUnit.module('relational_fields', {
 
         testUtils.form.clickEdit(form);
 
-        assert.strictEqual(form.$('.o_statusbar_status:first .dropdown-menu button.disabled').length, 1, "should have 1 folded status");
-        assert.strictEqual(form.$('.o_statusbar_status:last button.disabled').length, 1, "should have 1 status (other discarded)");
+        assert.containsOnce('.o_statusbar_status:first .dropdown-menu button.disabled', form);
+        assert.containsOnce('.o_statusbar_status:last button.disabled', form);
 
         form.destroy();
     });
 
-    QUnit.test('statusbar with dynamic domain', function (assert) {
+    QUnit.only('statusbar with dynamic domain', function (assert) {
         assert.expect(5);
 
         this.data.partner.fields.trululu.domain = "[('int_field', '>', qux)]";
@@ -370,12 +363,12 @@ QUnit.module('relational_fields', {
 
         testUtils.form.clickEdit(form);
 
-        assert.strictEqual(form.$('.o_statusbar_status button.disabled').length, 3, "should have 3 status");
+        assert.containsN('.o_statusbar_status button.disabled', 3, form);
         assert.strictEqual(rpcCount, 1, "should have done 1 search_read rpc");
-        form.$('input:first').val(9.5).trigger("input").trigger("change");
-        assert.strictEqual(form.$('.o_statusbar_status button.disabled').length, 2, "should have 2 status");
+        testUtils.fields.editInput("qux", 9.5);
+        assert.containsN('.o_statusbar_status button.disabled', 2, form);
         assert.strictEqual(rpcCount, 2, "should have done 1 more search_read rpc");
-        form.$('input:last').val("hey").trigger("input").trigger("change");
+        testUtils.fields.editInput("qux", "hey");
         assert.strictEqual(rpcCount, 2, "should not have done 1 more search_read rpc");
 
         form.destroy();
