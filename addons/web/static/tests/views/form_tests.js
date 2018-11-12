@@ -908,10 +908,10 @@ QUnit.module('Views', {
 
         assert.strictEqual(form.$('input[name="foo"].o_required_modifier').length, 1,
             "the foo field widget should be required");
-        form.$('.o_field_boolean input').click();
+        testUtils.dom.click('.o_field_boolean input');
         assert.strictEqual(form.$('input[name="foo"]:not(.o_required_modifier)').length, 1,
             "the foo field widget should now have been marked as non-required");
-        form.$('.o_field_boolean input').click();
+        testUtils.dom.click('.o_field_boolean input');
         assert.strictEqual(form.$('input[name="foo"].o_required_modifier').length, 1,
             "the foo field widget should now have been marked as required again");
 
@@ -978,7 +978,7 @@ QUnit.module('Views', {
 
         testUtils.form.clickEdit(form);
 
-        form.$('input[name="qux"]').val("1").trigger('input');
+        testUtils.fields.editInput('qux', '1');
 
         testUtils.form.clickSave(form);
 
@@ -1031,8 +1031,9 @@ QUnit.module('Views', {
                 '</form>',
             res_id: 1,
         });
-        assert.strictEqual(form.$('div.o_horizontal_separator').hasClass('o_invisible_modifier'), true,
-                "separator div should be hidden");
+
+        assert.hasClass('div.o_horizontal_separator', 'o_invisible_modifier', form);
+
         form.destroy();
     });
 
