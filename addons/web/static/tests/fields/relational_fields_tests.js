@@ -334,7 +334,7 @@ QUnit.module('relational_fields', {
         form.destroy();
     });
 
-    QUnit.only('statusbar with dynamic domain', function (assert) {
+    QUnit.test('statusbar with dynamic domain', function (assert) {
         assert.expect(5);
 
         this.data.partner.fields.trululu.domain = "[('int_field', '>', qux)]";

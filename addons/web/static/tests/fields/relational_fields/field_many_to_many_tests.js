@@ -178,7 +178,7 @@ QUnit.module('fields', {}, function () {
 
             // the SelectCreateDialog requests the session, so intercept its custom
             // event to specify a fake session to prevent it from crashing
-            testUtils.intercept(form, 'get_session', function (event) {
+            testUtils.mock.intercept(form, 'get_session', function (event) {
                 event.data.callback({ user_context: {} });
             });
 
@@ -187,7 +187,7 @@ QUnit.module('fields', {}, function () {
             assert.ok(!form.$('.o_field_many2many .o-kanban-button-new').length,
                 '"Add" button should not be visible in readonly');
 
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
 
             assert.strictEqual(form.$('.o_kanban_record:not(.o_kanban_ghost)').length, 2,
                 'should contain 2 records');
@@ -262,7 +262,7 @@ QUnit.module('fields', {}, function () {
                 'the removed record should not be in kanban anymore');
 
             // save the record
-            form.$buttons.find('.o_form_button_save').click();
+            testUtils.form.clickSave(form);;
             form.destroy();
         });
 
@@ -291,7 +291,7 @@ QUnit.module('fields', {}, function () {
                 res_id: 1,
             });
 
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
             assert.strictEqual(form.$('.o_field_many2many[name="timmy"] .o-kanban-button-new').text().trim(),
                 "Add timmy", "In M2M Kanban, Add button should have 'Add timmy' label");
 
@@ -335,7 +335,7 @@ QUnit.module('fields', {}, function () {
             assert.ok(!form.$('.o-kanban-button-new').length,
                 '"Add" button should not be available in readonly');
 
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
 
             assert.ok(form.$('.o-kanban-button-new').length,
                 '"Add" button should be available in edit');
@@ -392,7 +392,7 @@ QUnit.module('fields', {}, function () {
             assert.ok(!form.$('.o_field_x2many_list_row_add').length,
                 '"Add an item" should not be visible in readonly');
 
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
 
             assert.strictEqual(form.$('.o_list_view td.o_list_number').length, 2,
                 'should contain 2 records');
@@ -431,7 +431,7 @@ QUnit.module('fields', {}, function () {
                 'the updated row still has the correct values');
 
             // save
-            form.$buttons.find('.o_form_button_save').click();
+            testUtils.form.clickSave(form);;
             assert.strictEqual(form.$('.o_list_view td.o_list_number').length, 2,
                 'should contain 2 subrecords');
             assert.strictEqual(form.$('.o_list_view .o_data_row td:first').text(),
@@ -494,7 +494,7 @@ QUnit.module('fields', {}, function () {
             assert.ok(!form.$('.o_field_x2many_list_row_add').length,
                 '"Add an item" should not be visible in readonly');
 
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
 
             assert.strictEqual(form.$('.o_list_view td.o_list_number').length, 2,
                 'should contain 2 records');
@@ -545,7 +545,7 @@ QUnit.module('fields', {}, function () {
                 'new name', 'the updated row still has the correct values');
 
             // save
-            form.$buttons.find('.o_form_button_save').click();
+            testUtils.form.clickSave(form);;
             assert.strictEqual(form.$('.o_list_view td.o_list_number').length, 2,
                 'should contain 2 subrecords');
             assert.strictEqual(form.$('.o_list_view .o_data_row td:first').text(),
@@ -583,7 +583,7 @@ QUnit.module('fields', {}, function () {
                 res_id: 1,
             });
 
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
 
             assert.strictEqual(form.$('.o_field_x2many_list_row_add').length, 1, "should have the 'Add an item' link");
             assert.strictEqual(form.$('.o_list_record_remove').length, 2, "should have the 'Add an item' link");
@@ -604,7 +604,7 @@ QUnit.module('fields', {}, function () {
                 res_id: 1,
             });
 
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
 
             assert.strictEqual(form.$('.o_field_x2many_list_row_add').length, 0, "should not have the 'Add an item' link");
             assert.strictEqual(form.$('.o_list_record_remove').length, 0, "should not have the 'Add an item' link");
@@ -631,7 +631,7 @@ QUnit.module('fields', {}, function () {
             assert.ok(!form.$('.o_field_x2many_list_row_add').length,
                 '"Add an item" link should not be available in readonly');
 
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
 
             assert.ok(!form.$('.o_field_x2many_list_row_add').length,
                 '"Add an item" link should not be available in edit either');
@@ -706,7 +706,7 @@ QUnit.module('fields', {}, function () {
             assert.notOk(form.$('.custom-checkbox input').eq(2).prop('checked'),
                 "third checkbox should not be checked");
 
-            form.$buttons.find('.o_form_button_save').click();
+            testUtils.form.clickSave(form);;
 
             form.destroy();
         });
@@ -753,7 +753,7 @@ QUnit.module('fields', {}, function () {
             assert.notOk(form.$('.custom-checkbox input').eq(2).prop('checked'),
                 "third checkbox should not be checked");
 
-            form.$buttons.find('.o_form_button_save').click();
+            testUtils.form.clickSave(form);;
 
             form.destroy();
         });
@@ -897,14 +897,14 @@ QUnit.module('fields', {}, function () {
                 },
             });
 
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
             form.$('td.o_data_cell:first').click();
 
             $('.modal-body input[type="checkbox"]').click();
             $('.modal .modal-footer .btn-primary').first().click();
 
             // there is nothing left to save -> should not do a 'write' RPC
-            form.$buttons.find('.o_form_button_save').click();
+            testUtils.form.clickSave(form);;
 
             assert.verifySteps([
                 'read', // read initial record (on partner)
@@ -987,7 +987,7 @@ QUnit.module('fields', {}, function () {
             assert.strictEqual(form.$('.o_kanban_record:not(".o_kanban_ghost")').length, 5,
                 'there should be 5 records displayed on page 2');
 
-            form.$buttons.find('.o_form_button_save').click();
+            testUtils.form.clickSave(form);;
 
             assert.strictEqual(form.$('.o_x2m_control_panel .o_pager_counter').text().trim(),
                 '1-40 / 45', "pager should be correct");

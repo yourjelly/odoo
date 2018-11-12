@@ -189,7 +189,7 @@ QUnit.module('fields', {}, function () {
                 },
             });
 
-            testUtils.intercept(form, 'do_action', function (event) {
+            testUtils.mock.intercept(form, 'do_action', function (event) {
                 assert.strictEqual(event.data.action.res_id, 17,
                     "should do a do_action with correct parameters");
             });
@@ -198,7 +198,7 @@ QUnit.module('fields', {}, function () {
                 "should contain a link");
             form.$('a.o_form_uri').click(); // click on the link in readonly mode (should trigger do_action)
 
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
 
             form.$('.o_external_button').click(); // click on the external button (should do an RPC)
 
@@ -237,14 +237,14 @@ QUnit.module('fields', {}, function () {
                 },
             });
 
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
 
             // click on the external button (should do an RPC)
             form.$('.o_external_button').click();
             // save and close modal
             $('.modal .modal-footer .btn-primary:first').click();
             // save form
-            form.$buttons.find('.o_form_button_save').click();
+            testUtils.form.clickSave(form);;
             // click next on pager
             form.pager.$('.o_pager_next').click();
 
@@ -306,7 +306,7 @@ QUnit.module('fields', {}, function () {
                 },
             });
 
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
 
             // click on the external button (should do an RPC)
             form.$('.o_external_button').click();
@@ -316,7 +316,7 @@ QUnit.module('fields', {}, function () {
             // save and close modal
             $('.modal .modal-footer .btn-primary:first').click();
             // save form
-            form.$buttons.find('.o_form_button_save').click();
+            testUtils.form.clickSave(form);;
             // click next on pager
             form.pager.$('.o_pager_next').click();
 
@@ -359,7 +359,7 @@ QUnit.module('fields', {}, function () {
 
             assert.strictEqual($('a.o_form_uri').html(), 'aaa<br>Street<br>City ZIP',
                 "input should have a multi-line content in readonly due to show_address");
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
             assert.strictEqual(form.$('button.o_external_button:visible').length, 1,
                 "should have an open record button");
 
@@ -501,7 +501,7 @@ QUnit.module('fields', {}, function () {
                 res_id: 1,
             });
 
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
             var $dropdown = form.$('.o_field_many2one input').autocomplete('widget');
             form.$('.o_field_many2one input').click();
             $dropdown.find('.o_m2o_dropdown_option:contains(Search)').mouseenter().click();  // Open Search More
@@ -552,7 +552,7 @@ QUnit.module('fields', {}, function () {
             });
 
             // open the many2one in form view and change something
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
             form.$('.o_external_button').click();
             $('.modal-body input[name="other_field"]').val('wood').trigger('input');
 
@@ -562,7 +562,7 @@ QUnit.module('fields', {}, function () {
 
             // save the main record, and check that no extra rpcs are done (record
             // is not dirty, only a related record was modified)
-            form.$buttons.find('.o_form_button_save').click();
+            testUtils.form.clickSave(form);;
             assert.verifySteps(['read', 'get_formview_id', 'load_views', 'read', 'write', 'onchange', 'read']);
             form.destroy();
         });
@@ -588,7 +588,7 @@ QUnit.module('fields', {}, function () {
                 "should be displayed inside a span (sanity check)");
             assert.strictEqual(form.$('span.o_form_uri').length, 0, "should not have an anchor");
 
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
             assert.strictEqual(form.$('.o_field_widget[name=trululu] .o_external_button').length,
                 0, "should not have the button to open the record");
 
@@ -632,11 +632,11 @@ QUnit.module('fields', {}, function () {
 
             // the SelectCreateDialog requests the session, so intercept its custom
             // event to specify a fake session to prevent it from crashing
-            testUtils.intercept(form, 'get_session', function (event) {
+            testUtils.mock.intercept(form, 'get_session', function (event) {
                 event.data.callback({ user_context: {} });
             });
 
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
             var $dropdown = form.$('.o_field_many2one input').autocomplete('widget');
 
             form.$('.o_field_many2one input').click();
@@ -681,7 +681,7 @@ QUnit.module('fields', {}, function () {
                 'value of the m2o should have been correctly updated');
 
             // save
-            form.$buttons.find('.o_form_button_save').click();
+            testUtils.form.clickSave(form);;
             assert.strictEqual(form.$('a.o_form_uri').text(), 'Partner 20',
                 "should display correct value after save");
 
@@ -707,9 +707,9 @@ QUnit.module('fields', {}, function () {
                 "href should contain id and model");
 
             // Remove value from many2one and then save, there should not have href with id and model on m2o anchor
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
             form.$('.o_field_many2one input').val('').trigger('keyup').trigger('focusout');
-            form.$buttons.find('.o_form_button_save').click();
+            testUtils.form.clickSave(form);;
 
             assert.strictEqual(form.$('a.o_form_uri').attr('href'), "#",
                 "href should have #");
@@ -793,12 +793,12 @@ QUnit.module('fields', {}, function () {
             assert.ok(form.$('a:contains(and some address)').length,
                 "should display additional result");
 
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
 
             assert.strictEqual(form.$('input').val(), "first record",
                 "actual field value should be displayed to be edited");
 
-            form.$buttons.find('.o_form_button_save').click();
+            testUtils.form.clickSave(form);;
 
             assert.ok(form.$('a:contains(and some address)').length,
                 "should still display additional result");
@@ -867,7 +867,7 @@ QUnit.module('fields', {}, function () {
                     },
                 });
                 var parent = new StandaloneWidget(model);
-                testUtils.addMockEnvironment(parent, {
+                testUtils.mock.addMockEnvironment(parent, {
                     data: self.data,
                     mockRPC: function (route, args) {
                         assert.step(args.method);
@@ -923,7 +923,7 @@ QUnit.module('fields', {}, function () {
         //             '</form>',
         //         res_id: 1,
         //     });
-        //     form.$buttons.find('.o_form_button_edit').click();
+        //     testUtils.form.clickEdit(form);
         //     assert.strictEqual(form.$('input').eq(1).val(), 'xpad', "initial product_id val should be xpad");
 
         //     form.$('input').eq(0).val("let us trigger an onchange").trigger('input');
@@ -969,7 +969,7 @@ QUnit.module('fields', {}, function () {
             form.$('.o_field_many2one input').val('b').trigger('keydown');
             concurrency.delay(0).then(function () {
                 $dropdown.find('li:first()').click(); // quick create 'b'
-                form.$buttons.find('.o_form_button_save').click();
+                testUtils.form.clickSave(form);;
 
                 assert.verifySteps(['name_create'],
                     "should wait for the name_create before creating the record");
@@ -1091,7 +1091,7 @@ QUnit.module('fields', {}, function () {
             form.$('.o_field_many2one input').val('b').trigger('keydown');
             concurrency.delay(0).then(function () {
                 $dropdown.find('li:first()').click(); // quick create 'b'
-                form.$buttons.find('.o_form_button_save').click();
+                testUtils.form.clickSave(form);;
 
                 assert.verifySteps(['name_create'],
                     "should wait for the name_create before creating the record");
@@ -1176,7 +1176,7 @@ QUnit.module('fields', {}, function () {
                 assert.ok(form.$('.o_data_row:nth(1)').hasClass('o_selected_row'),
                     "the second row should be in edition");
 
-                form.$buttons.find('.o_form_button_save').click();
+                testUtils.form.clickSave(form);;
 
                 assert.strictEqual(form.$('.o_data_row').length, 1,
                     "there should be 1 row saved (the second one was empty and invalid)");
@@ -1716,7 +1716,7 @@ QUnit.module('fields', {}, function () {
             displayName = 'new value';
             form.$('.o_data_cell').click();
             form.$('.o_data_cell input').val(displayName).trigger('input');
-            form.$buttons.find('.o_form_button_save').click();
+            testUtils.form.clickSave(form);;
 
             form.destroy();
         });
@@ -1769,7 +1769,7 @@ QUnit.module('fields', {}, function () {
                 },
             });
 
-            form.$buttons.find('.o_form_button_save').click();
+            testUtils.form.clickSave(form);;
 
             form.destroy();
         });
@@ -1819,7 +1819,7 @@ QUnit.module('fields', {}, function () {
                 },
             });
 
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
             form.$('td.o_data_cell:first').click();  // edit first one2many line
             form.$('.o_external_button').click();  // open product sub view in modal
             $('button:contains("Just do it !")').click(); // click on action button
@@ -1891,7 +1891,7 @@ QUnit.module('fields', {}, function () {
                     return this._super.apply(this, arguments);
                 },
             }).then(function (form) {
-                form.$buttons.find('.o_form_button_edit').click();
+                testUtils.form.clickEdit(form);
                 form.$('.o_data_cell').click();
                 form.$('.o_external_button').click();
 
@@ -1903,12 +1903,12 @@ QUnit.module('fields', {}, function () {
                 assert.equal($handles.length, 2,
                     'There should be 2 sequence handlers');
 
-                testUtils.dragAndDrop($handles.eq(1), $modal.find('tbody tr').first(),
+                testUtils.dom.dragAndDrop($handles.eq(1), $modal.find('tbody tr').first(),
                     { position: 'top' });
 
                 // Saving the modal and then the original model
                 $modal.find('.modal-footer .btn-primary').click();
-                form.$buttons.find('.o_form_button_save').click();
+                testUtils.form.clickSave(form);;
 
                 assert.verifySteps(['onchange sequence', 'partner_type write']);
 
@@ -1937,7 +1937,7 @@ QUnit.module('fields', {}, function () {
                     return this._super(route, args);
                 }
             });
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
 
             form.$('input').click();
             form.destroy();
@@ -1963,7 +1963,7 @@ QUnit.module('fields', {}, function () {
                     return this._super(route, args);
                 },
             });
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
 
             form.$('input:eq(2)').click();
             form.destroy();
@@ -2016,7 +2016,7 @@ QUnit.module('fields', {}, function () {
                 res_id: 1,
             });
             assert.strictEqual(form.$('a').text(), '', 'the tag a should be empty');
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
 
             form.$('.o_field_many2one input').click();
             form.$('.o_field_many2one input').autocomplete('widget').find('a').first().click();
@@ -2024,7 +2024,7 @@ QUnit.module('fields', {}, function () {
 
             assert.strictEqual(form.$('input').val(), "xphone", "should have selected xphone");
 
-            form.$buttons.find('.o_form_button_cancel').click();
+            testUtils.form.clickDiscard(form);;
             assert.strictEqual(form.$('a').text(), '', 'the tag a should be empty');
             form.destroy();
         });
@@ -2073,7 +2073,7 @@ QUnit.module('fields', {}, function () {
                 },
             });
 
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
             form.$('.o_field_widget[name=product_id] input').click();
 
             form.$('.o_field_widget[name=trululu] input').click();
@@ -2673,7 +2673,7 @@ QUnit.module('fields', {}, function () {
             });
 
             // Opening the modal
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
             form.$('.o_data_row td:contains(first record)').click();
             form.$('.o_external_button').click();
             assert.strictEqual($('.modal').length, 1,
@@ -2757,7 +2757,7 @@ QUnit.module('fields', {}, function () {
                 }
             });
 
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
 
             var x2mList = form.$('.o_field_x2many_list[name=p]');
 
@@ -2783,7 +2783,7 @@ QUnit.module('fields', {}, function () {
                 'The display name field should have the right value');
 
             // Save the whole thing
-            form.$buttons.find('.o_form_button_save').click();
+            testUtils.form.clickSave(form);;
 
             x2mList = form.$('.o_field_x2many_list[name=p]');
 
@@ -2915,7 +2915,7 @@ QUnit.module('fields', {}, function () {
             });
             assert.strictEqual(form.$('th').length, 2,
                 "should be 2 columns in the one2many");
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
             form.$('.o_field_many2one[name="product_id"] input').click();
             $('li.ui-menu-item a:contains(xpad)').trigger('mouseenter').click();
             assert.strictEqual(form.$('th').length, 1,
@@ -2963,7 +2963,7 @@ QUnit.module('fields', {}, function () {
                 "should be only 1 column ('foo') in the one2many");
             assert.strictEqual(form.$('.o_list_view .o_data_row').length, 1, "should contain one row");
 
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
 
             // add a new o2m record
             form.$('.o_field_x2many_list_row_add a').click();
@@ -3007,7 +3007,7 @@ QUnit.module('fields', {}, function () {
             });
             assert.strictEqual(form.$('th').length, 2,
                 "should be 2 columns in the one2many");
-            form.$buttons.find('.o_form_button_edit').click();
+            testUtils.form.clickEdit(form);
             form.$('.o_field_many2one[name="product_id"] input').click();
             $('li.ui-menu-item a:contains(xpad)').trigger('mouseenter').click();
             assert.strictEqual(form.$('th').length, 1,
