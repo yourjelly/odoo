@@ -65,8 +65,42 @@ odoo.define('web.qunit_asserts', function (require) {
         _checkClass(selector, className, false, w, msg);
     };
 
+    QUnit.assert.isVisible = function(selector, w, msg) {
+        _checkVisible(selector, true, w, msg);
+    };
+    QUnit.assert.isInvisible = function(selector, w, msg) {
+        _checkVisible(selector, false, w, msg);
+    };
+
+    function _checkVisible (selector, shouldBeVisible, w, msg) {
+        var args = _processArguments(selector, w, msg);
+        var matches = args.matches;
+        msg = args.msg;
+        if (matches.length != 1) {
+            QUnit.assert.ok(false, `${selector} matches ${matches.length} elements instead of 1`);
+        } else {
+            msg = msg || `${selector} should ${shouldBeVisible ? '' : 'not'} be visible`;
+            var isVisible = matches.is(':visible');
+            var condition = shouldBeVisible ? isVisible : !isVisible;
+            QUnit.assert.ok(condition, msg);
+        }
+    }
     function _checkClass (selector, className, shouldHaveClass, w, msg) {
-        var widget, $el;
+        var args = _processArguments(selector, w, msg);
+        var matches = args.matches;
+        msg = args.msg;
+
+        if (matches.length != 1) {
+            QUnit.assert.ok(false, `${selector} matches ${matches.length} elements instead of 1`);
+        } else {
+            msg = msg || `${selector} should ${shouldHaveClass ? '' : 'not'} have className ${className}`;
+            var hasClass = matches[0].classList.contains(className);
+            var condition = shouldHaveClass ? hasClass : !hasClass;
+            QUnit.assert.ok(condition, msg);
+        }
+    }
+    function _processArguments (selector, w, msg) {
+        var matches, widget, $el;
         if (w instanceof Widget) { // selector, className, widget
             widget = w;
         } else if (typeof w === 'string') { // selector, className, msg
@@ -79,21 +113,11 @@ odoo.define('web.qunit_asserts', function (require) {
         } else { // selector, className
             $el = $('body');
         }
-
-        var matches;
         if (widget) {
             matches = widget.$(selector);
         } else {
             matches = $el.find(selector);
         }
-
-        if (matches.length != 1) {
-            QUnit.assert.ok(false, `${selector} matches ${matches.length} elements instead of 1`);
-        } else {
-            msg = msg || `${selector} should ${shouldHaveClass ? '' : 'not'} have className ${className}`;
-            var hasClass = matches[0].classList.contains(className);
-            var condition = shouldHaveClass ? hasClass : !hasClass;
-            QUnit.assert.ok(condition, msg);
-        }
-    };
+        return {matches: matches, msg: msg};
+    }
 });
