@@ -1002,6 +1002,10 @@ function searchAndClickItem(fieldName, options) {
     });
 }
 
+function reloadView(view) {
+    view.reload();
+}
+
 // Loading static files cannot be properly simulated when their real content is
 // really needed. This is the case for static XML files so we load them here,
 // before starting the qunit test suite.
@@ -1040,6 +1044,9 @@ return $.when(
             clickSave: clickSave,
             clickCreate: clickCreate,
             clickDiscard: clickDiscard,
+        },
+        kanban: {
+            reload: reloadView,
         },
         // modal: {
         //     clickPrimaryAction(),
