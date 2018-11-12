@@ -937,7 +937,8 @@ function openDatepicker($datepickerEl) {
 function _click(el, all) {
     var matches;
     if (typeof el === 'string') {
-        matches = all ? document.querySelectorAll(el) : [document.querySelector(el)];
+        // matches = all ? document.querySelectorAll(el) : [document.querySelector(el)];
+        matches = all ? $(el) : $(el).eq(0);
     } else {
         matches = el;
     }
