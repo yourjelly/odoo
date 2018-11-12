@@ -942,7 +942,7 @@ function _click(el, all) {
         matches = el;
     }
     if (all && matches.length != 1) {
-        // throw new Error(`Found ${matches.length} elements to click on, instead of 1`);
+        throw new Error(`Found ${matches.length} elements to click on, instead of 1`);
     }
     matches[0].click();
 }
@@ -976,6 +976,15 @@ function clickCreate(form) {
 }
 function clickDiscard(form) {
     click(form.$buttons.find('.o_form_button_cancel'));
+}
+
+function clickModalButton(text) {
+    var selector = `.modal-footer button:contains(${core._t(text)})`;
+    var $button = $(selector);
+    if ($button.length !== 1) {
+        throw new Error(`Found ${$button.length} button(s) containing '${text}'`);
+    }
+    $button.click();
 }
 
 /**
@@ -1079,10 +1088,9 @@ return $.when(
         kanban: {
             reload: reloadView,
         },
-        // modal: {
-        //     clickPrimaryAction(),
-        //     clickSave(),
-        // },
+        modal: {
+            clickButton: clickModalButton,
+        },
         // pager: {
         //     clickNext(widget, selector),
         //     clickPrevious(widget, selector),
