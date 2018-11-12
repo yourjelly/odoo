@@ -191,7 +191,7 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
      */
     _check_for_tooltip: function (tip, tour_name) {
 
-        if ($('body').hasClass('o_ui_blocked')) {
+        if ($('.blockUI').length) {
             this._deactivate_tip(tip);
             this._log.push("blockUI is preventing the tip to be consumed");
             return false;
