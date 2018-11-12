@@ -89,11 +89,10 @@ QUnit.module('Views', {
         assert.ok(kanban.$('.o_kanban_view').hasClass('o_kanban_test'),
                         "should have classname 'o_kanban_test'");
 
-        assert.strictEqual(kanban.$('.o_kanban_record:not(.o_kanban_ghost)').length, 4,
+        assert.containsN('.o_kanban_record:not(.o_kanban_ghost)', 4, kanban,
                         "should have 4 records");
-        assert.strictEqual(kanban.$('.o_kanban_ghost').length, 6, "should have 6 ghosts");
-        assert.strictEqual(kanban.$('.o_kanban_record:contains(gnap)').length, 1,
-                        "should contain gnap");
+        assert.containsN('.o_kanban_ghost', 6, kanban, "should have 6 ghosts");
+        assert.containsOnce('.o_kanban_record:contains(gnap)', kanban);
         kanban.destroy();
     });
 
