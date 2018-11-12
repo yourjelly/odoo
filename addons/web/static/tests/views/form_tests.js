@@ -1300,19 +1300,15 @@ QUnit.module('Views', {
         testUtils.form.clickSave(form);
 
         // Save button should be disabled
-        // TO DO master-tests-ref
-        assert.strictEqual(
-            form.$buttons.find('.o_form_button_save').attr('disabled'),
-            'disabled', 'buttons should be disabled')
+        assert.hasAttrValue('.o_form_button_save', 'disabled', 'disabled',
+            'buttons should be disabled');
 
         // Release the 'read' call
         def.resolve();
 
         // Edit button should be enabled after the reload
-        // TO DO master-tests-ref
-        assert.strictEqual(
-            form.$buttons.find('.o_form_button_edit').attr('disabled'),
-            undefined, 'buttons should be enabled')
+        assert.hasAttrValue('.o_form_button_edit', 'disabled', null,
+            'buttons should be enabled');
 
         form.destroy();
     });
@@ -1859,7 +1855,6 @@ QUnit.module('Views', {
             },
         });
 
-// harpon
         testUtils.form.clickEdit(form);
 
         var count = 0;
@@ -1867,13 +1862,12 @@ QUnit.module('Views', {
             event.stopPropagation();
             count++;
         });
-        form.$('.oe_stat_button').first().click();
+        testUtils.dom.click('.oe_stat_button');
         assert.strictEqual(count, 1, "should have triggered a execute action");
         assert.strictEqual(form.mode, "edit", "form view should be in edit mode");
 
-
-        form.$('input').val("tralala").trigger('input');
-        form.$('.oe_stat_button').first().click();
+        testUtils.fields.editInput('foo', 'tralala');
+        testUtils.dom.click('.oe_stat_button:first');
 
         assert.strictEqual(form.mode, "edit", "form view should be in edit mode");
         assert.strictEqual(count, 2, "should have triggered a execute action");
@@ -1914,9 +1908,9 @@ QUnit.module('Views', {
         assert.strictEqual(form.getTitle(), 'second record',
             "should have correct display_name");
         testUtils.form.clickEdit(form);
-        form.$('input[name="name"]').val('some other name').trigger('input');
+        testUtils.fields.editInput('name', 'some other name');
 
-        form.$('.oe_stat_button').first().click();
+        testUtils.dom.clickFirst('.oe_stat_button');
         assert.strictEqual(form.getTitle(), 'GOLDORAK',
             "should have correct display_name");
 
@@ -1953,17 +1947,16 @@ QUnit.module('Views', {
         testUtils.form.clickEdit(form);
 
         // make the record dirty
-        form.$('input').val("tralala").trigger('input');
+        testUtils.fields.editInput('foo', 'tralala');
 
-
-        form.$('button').eq(0).click();
+        testUtils.dom.clickFirst(form.$('button'));
         assert.strictEqual(writeCount, 1, "should have triggered a write");
         assert.strictEqual(executeActionCount, 1, "should have triggered a execute action");
 
         testUtils.form.clickEdit(form);
-        form.$('input').val("abcdef").trigger('input');
+        testUtils.fields.editInput('foo', 'abcdef');
 
-        form.$('button').eq(1).click();
+        testUtils.dom.click(form.$('button').eq(1));
         assert.strictEqual(writeCount, 1, "should not have triggered a write");
         assert.strictEqual(executeActionCount, 2, "should have triggered a execute action");
 
@@ -1996,8 +1989,8 @@ QUnit.module('Views', {
             },
         });
 
-        form.$('input').val("tralala").trigger('input'); // make the record dirty
-        form.$('button').click(); // click on Save
+        testUtils.fields.editInput('foo', 'tralala');
+        testUtils.dom.click(form.$('button'));
         assert.verifySteps(['read', 'write', 'read', 'execute_action']);
 
         form.destroy();
@@ -2016,7 +2009,7 @@ QUnit.module('Views', {
                 '</form>',
             res_id: 1,
         });
-        assert.strictEqual(form.$('.o_field_widget').length, 1, "should have rendered an abstract field");
+        assert.containsOnce('.o_field_widget', form, "should have rendered an abstract field");
         form.destroy();
     });
 
@@ -2042,18 +2035,18 @@ QUnit.module('Views', {
             res_id: 1,
         });
 
-        assert.strictEqual(form.$("label.o_form_label").length, 2, "should have rendered only two label");
+        assert.containsN("label.o_form_label", 2, form, "should have rendered only two label");
         assert.strictEqual(form.$("label.o_form_label").first().text(), "Product",
             "one should be the one for the product field");
         assert.strictEqual(form.$("label.o_form_label").eq(1).text(), "Bar",
             "one should be the one for the bar field");
 
-        assert.strictEqual(form.$('.firstgroup td').first().attr('colspan'), undefined,
+        assert.hasAttrValue(form.$('.firstgroup td').first(), 'colspan', null,
             "foo td should have a default colspan (1)");
-        assert.strictEqual(form.$('.secondgroup tr').length, 2,
+        assert.containsN('.secondgroup tr', 2, form,
             "int_field and qux should have same tr");
 
-        assert.strictEqual(form.$('.secondgroup tr:first td').length, 2,
+        assert.containsN('.secondgroup tr:first td', 2, form,
             "product_id field should be on its own tr");
         form.destroy();
     });
@@ -2077,7 +2070,7 @@ QUnit.module('Views', {
                 '</form>',
             res_id: 1,
         });
-        assert.strictEqual(form.$('td:contains(xphone)').length, 1,
+        assert.containsOnce('td:contains(xphone)', form,
             "should display the name of the many2one");
         form.destroy();
     });
@@ -2112,17 +2105,17 @@ QUnit.module('Views', {
             res_id: 1,
         });
 
-        assert.strictEqual(form.$('td:contains(gold)').length, 1,
+        assert.containsOnce('td:contains(gold)', form,
             "should display the name of the many2many on the original form");
-        form.$('td:contains(gold)').click();
+        testUtils.dom.click(form.$('td:contains(gold)'));
 
-        assert.strictEqual($('.modal').length, 1,
+        assert.containsOnce('.modal',
             'The partner_type modal should have opened');
-        assert.strictEqual($('.modal').find('td:contains(first record)').length, 1,
+        assert.containsOnce('td:contains(first record)', $('.modal'),
             "should display the name of the many2many on the modal form");
 
-        $('.modal').find('td:contains(first record)').click();
-        assert.strictEqual($('.modal').length, 2,
+        testUtils.dom.click('.modal td:contains(first record)');
+        assert.containsN('.modal', 2,
             'There should be 2 modals (partner on top of partner_type) opened');
 
         form.destroy();
@@ -2152,7 +2145,7 @@ QUnit.module('Views', {
 
         // click on discard
         testUtils.form.clickDiscard(form);
-        assert.ok(!$('.modal:visible').length, 'no confirm modal should be displayed');
+        assert.containsNone('.modal', 'no confirm modal should be displayed');
         assert.strictEqual(form.$('.o_field_widget').text(), 'yop', 'field in readonly should display yop');
 
         assert.strictEqual(nbWrite, 0, 'no write RPC should have been done');
@@ -2180,19 +2173,19 @@ QUnit.module('Views', {
         // switch to edit mode and edit the foo field
         testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('input').val(), 'yop', 'input should contain yop');
-        form.$('input').val('new value').trigger('input');
+        testUtils.fields.editInput('foo', 'new value');
         assert.strictEqual(form.$('input').val(), 'new value', 'input should contain new value');
 
         // click on discard and cancel the confirm request
         testUtils.form.clickDiscard(form);
-        assert.ok($('.modal').length, 'a confirm modal should be displayed');
-        $('.modal-footer .btn-secondary').click(); // click on cancel
+        assert.containsOnce('.modal', 'a confirm modal should be displayed');
+        testUtils.dom.click('.modal-footer .btn-secondary');
         assert.strictEqual(form.$('input').val(), 'new value', 'input should still contain new value');
 
         // click on discard and confirm
         testUtils.form.clickDiscard(form);
-        assert.ok($('.modal').length, 'a confirm modal should be displayed');
-        $('.modal-footer .btn-primary').click(); // click on confirm
+        assert.containsOnce('.modal', 'a confirm modal should be displayed');
+        testUtils.dom.click('.modal-footer .btn-primary');
         assert.strictEqual(form.$('.o_field_widget').text(), 'yop', 'field in readonly should display yop');
 
         assert.strictEqual(nbWrite, 0, 'no write RPC should have been done');
@@ -2224,9 +2217,11 @@ QUnit.module('Views', {
         // really happens (mostly because the datepicker lib need that focus
         // event to properly focusout the input, otherwise it crashes later on
         // when the 'blur' event is triggered by the re-rendering)
-        form.$buttons.find('.o_form_button_cancel').focus().click();
-        form.$buttons.find('.o_form_button_save').focus().click();
-        assert.strictEqual(form.$('span:contains(2017)').length, 1,
+        form.$buttons.find('.o_form_button_cancel').focus();
+        testUtils.dom.click('.o_form_button_cancel');
+        form.$buttons.find('.o_form_button_save').focus();
+        testUtils.dom.click('.o_form_button_save');
+        assert.containsOnce('span:contains(2017)', form,
             "should have a span with the year somewhere");
 
         form.destroy();
@@ -2267,16 +2262,16 @@ QUnit.module('Views', {
 
         // switch to edit mode and edit the p field
         testUtils.form.clickEdit(form);
-        form.$('.o_field_x2many_list_row_add a').click();
-        form.$('.o_field_many2one input').click();
+        testUtils.dom.click(form.$('.o_field_x2many_list_row_add a'));
+        testUtils.dom.click(form.$('.o_field_many2one input'));
         var $dropdown = form.$('.o_field_many2one input').autocomplete('widget');
-        $dropdown.find('li:first()').click();
+        testUtils.dom.click($dropdown.find('li:first()'));
 
         assert.strictEqual(form.$('input').val(), 'xphone', 'input should contain xphone');
 
         // click on discard and confirm
         testUtils.form.clickDiscard(form);
-        $('.modal-footer .btn-primary').click(); // click on confirm
+        testUtils.dom.click('.modal-footer .btn-primary'); // click on confirm
 
         assert.notOk(form.$el.prop('outerHTML').match('xphone'),
             "the string xphone should not be present after discarding");
@@ -2306,8 +2301,7 @@ QUnit.module('Views', {
 
         testUtils.form.clickDiscard(form);
 
-        assert.strictEqual($('.modal').length, 0,
-            'there should not be a confirm modal');
+        assert.containsNone('.modal', 'there should not be a confirm modal');
 
         form.destroy();
     });
@@ -2335,22 +2329,21 @@ QUnit.module('Views', {
         });
 
         // edit the foo field
-        assert.strictEqual(form.$('input').val(), 'ABC', 'input should contain ABC');
-        form.$('input').val('DEF').trigger('input');
+        assert.strictEqual(form.$('input').val(), 'ABC',  'input should contain ABC');
+        testUtils.fields.editInput('foo', 'DEF');
 
         // discard the changes and check it has properly been discarded
         testUtils.form.clickDiscard(form);
-        assert.strictEqual($('.modal').length, 1,
-            'there should be a confirm modal');
+        assert.containsOnce('.modal', 'there should be a confirm modal');
         assert.strictEqual(form.$('input').val(), 'DEF', 'input should be DEF');
-        $('.modal-footer .btn-primary').click(); // click on confirm
+        testUtils.dom.click('.modal-footer .btn-primary'); // click on confirm
         assert.strictEqual(form.$('input').val(), 'ABC', 'input should now be ABC');
 
         // redirty and discard the field foo (to make sure initial changes haven't been lost)
-        form.$('input').val('GHI').trigger('input');
+        testUtils.fields.editInput('foo', 'GHI');
         testUtils.form.clickDiscard(form);
         assert.strictEqual(form.$('input').val(), 'GHI', 'input should be GHI');
-        $('.modal-footer .btn-primary').click(); // click on confirm
+        testUtils.dom.click('.modal-footer .btn-primary') // click on confirm
         assert.strictEqual(form.$('input').val(), 'ABC', 'input should now be ABC');
 
         form.destroy();
@@ -2373,19 +2366,17 @@ QUnit.module('Views', {
                 return this._super.apply(this, arguments);
             },
         });
-
         testUtils.form.clickEdit(form);
-        form.$('input').val("tralala").trigger('input');
+        testUtils.fields.editInput('foo', 'tralala');
         testUtils.form.clickSave(form);
 
-        form.sidebar.$('a:contains(Duplicate)').click();
+        testUtils.dom.click('a:contains(Duplicate)');
 
         assert.strictEqual(form.$('input').val(), 'tralala', 'input should contain ABC');
 
         testUtils.form.clickDiscard(form);
 
-        assert.strictEqual($('.modal').length, 0,
-            'there should not be a confirm modal');
+        assert.containsNone('.modal', 'there should not be a confirm modal');
 
         form.destroy();
     });
@@ -2420,20 +2411,20 @@ QUnit.module('Views', {
         assert.strictEqual(form.$('input').val(), 'yop', 'input should contain yop');
 
         // edit the foo field
-        form.$('input').val('new value').trigger('input');
+        testUtils.fields.editInput('foo', 'new value');
         assert.strictEqual(form.$('input').val(), 'new value', 'input should contain new value');
 
         // click on the pager to switch to the next record and cancel the confirm request
-        form.pager.$('.o_pager_next').click(); // click on next
-        assert.ok($('.modal').length, 'a confirm modal should be displayed');
-        $('.modal-footer .btn-secondary').click(); // click on cancel
+        testUtils.dom.click('.o_pager_next'); // click on next
+        assert.containsOnce('.modal', 'a confirm modal should be displayed');
+        testUtils.dom.click('.modal-footer .btn-secondary'); // click on cancel
         assert.strictEqual(form.$('input').val(), 'new value', 'input should still contain new value');
         assert.strictEqual(form.pager.$('.o_pager_value').text(), "1", 'pager value should still be 1');
 
         // click on the pager to switch to the next record and confirm
-        form.pager.$('.o_pager_next').click(); // click on next
-        assert.ok($('.modal').length, 'a confirm modal should be displayed');
-        $('.modal-footer .btn-primary').click(); // click on confirm
+        testUtils.dom.click('.o_pager_next'); // click on next
+        assert.containsOnce('.modal', 'a confirm modal should be displayed');
+        testUtils.dom.click('.modal-footer .btn-primary'); // click on confirm
         assert.strictEqual(form.$('input').val(), 'blip', 'input should contain blip');
         assert.strictEqual(form.pager.$('.o_pager_value').text(), "2", 'pager value should be 2');
 
@@ -2465,26 +2456,26 @@ QUnit.module('Views', {
         assert.strictEqual(form.$('input').val(), 'yop', 'input should contain yop');
 
         // edit the foo field
-        form.$('input').val('new value').trigger('input');
+        testUtils.fields.editInput('foo', 'new value');
         assert.strictEqual(form.$('input').val(), 'new value', 'input should contain new value');
 
         testUtils.form.clickSave(form);
 
         // click on the pager to switch to the next record and cancel the confirm request
-        form.pager.$('.o_pager_next').click(); // click on next
-        assert.strictEqual($('.modal:visible').length, 0, 'no confirm modal should be displayed');
+        testUtils.dom.click('.o_pager_next'); // click on next
+        assert.containsNone('.modal:visible', 'no confirm modal should be displayed');
         assert.strictEqual(form.pager.$('.o_pager_value').text(), "2", 'pager value should be 2');
 
-        assert.strictEqual(form.$('.o_priority .fa-star-o').length, 2,
+        assert.containsN('.o_priority .fa-star-o', 2, form,
             'priority widget should have been rendered with correct value');
 
         // edit the value in readonly
-        form.$('.o_priority .fa-star-o:first').click(); // click on the first star
-        assert.strictEqual(form.$('.o_priority .fa-star').length, 1,
+        testUtils.dom.click(form.$('.o_priority .fa-star-o:first')); // click on the first star
+        assert.containsOnce('.o_priority .fa-star', form,
             'priority widget should have been updated');
 
-        form.pager.$('.o_pager_next').click(); // click on next
-        assert.strictEqual($('.modal:visible').length, 0, 'no confirm modal should be displayed');
+        testUtils.dom.click('.o_pager_next'); // click on next
+        assert.containsNone('.modal:visible', 'no confirm modal should be displayed');
         assert.strictEqual(form.pager.$('.o_pager_value').text(), "1", 'pager value should be 1');
 
         // switch to edit mode
@@ -2492,12 +2483,12 @@ QUnit.module('Views', {
         assert.strictEqual(form.$('input').val(), 'new value', 'input should contain yop');
 
         // edit the foo field
-        form.$('input').val('wrong value').trigger('input');
+        testUtils.fields.editInput('foo', 'wrong value');
 
         testUtils.form.clickDiscard(form);
-        assert.strictEqual($('.modal').length, 1, 'a confirm modal should be displayed');
-        $('.modal-footer .btn-primary').click(); // click on confirm
-        form.pager.$('.o_pager_next').click(); // click on next
+        assert.containsOnce('.modal', 'a confirm modal should be displayed');
+        testUtils.dom.click('.modal-footer .btn-primary'); // click on confirm
+        testUtils.dom.click('.o_pager_next'); // click on next
         assert.strictEqual(form.pager.$('.o_pager_value').text(), "2", 'pager value should be 2');
         form.destroy();
     });
@@ -2527,19 +2518,19 @@ QUnit.module('Views', {
         });
 
         // click on second page tab
-        form.$('.o_notebook .nav-link:eq(1)').click();
+        testUtils.dom.click(form.$('.o_notebook .nav-link:eq(1)'));
 
-        assert.notOk(form.$('.o_notebook .nav-link:eq(0)').hasClass('active'),
+        assert.doesNotHaveClass('.o_notebook .nav-link:eq(0)', 'active', form,
             "first tab should not be active");
-        assert.ok(form.$('.o_notebook .nav-link:eq(1)').hasClass('active'),
+        assert.hasClass('.o_notebook .nav-link:eq(1)', 'active', form,
             "second tab should be active");
 
         // click on the pager to switch to the next record
-        form.pager.$('.o_pager_next').click();
+        testUtils.dom.click('.o_pager_next');
 
-        assert.notOk(form.$('.o_notebook .nav-link:eq(0)').hasClass('active'),
+        assert.doesNotHaveClass('.o_notebook .nav-link:eq(0)', 'active', form,
             "first tab should not be active");
-        assert.ok(form.$('.o_notebook .nav-link:eq(1)').hasClass('active'),
+        assert.hasClass('.o_notebook .nav-link:eq(1)', 'active', form,
             "second tab should be active");
         form.destroy();
     });
@@ -2561,6 +2552,7 @@ QUnit.module('Views', {
             },
         });
 
+        // TO DO master-tests-ref after review of isVisible API
         assert.ok(form.pager.$el.is(':visible'), "pager should be visible");
         assert.strictEqual(form.pager.$('.o_pager_value').text(), "1",
             "current pager value should be 1");
@@ -2568,9 +2560,11 @@ QUnit.module('Views', {
             "current pager limit should be 1");
         testUtils.form.clickCreate(form);
 
+        // TO DO master-tests-ref after review of isVisible API
         assert.notOk(form.pager.$el.is(':visible'), "pager should not be visible");
         testUtils.form.clickSave(form);
 
+        // TO DO master-tests-ref after review of isVisible API
         assert.ok(form.pager.$el.is(':visible'), "pager should be visible");
         assert.strictEqual(form.pager.$('.o_pager_value').text(), "3",
             "current pager value should be 3");
@@ -2628,18 +2622,16 @@ QUnit.module('Views', {
             res_id: 1,
         });
 
-        assert.strictEqual(form.$('span.foo_field').length, 1, "should have a span foo field");
+        assert.containsOnce('span.foo_field', form, "should have a span foo field");
 
-        assert.ok(!form.$('span.foo_field').is(':visible'),
-                        "foo field should not be visible");
+        assert.isInvisible('span.foo_field', form, "foo field should not be visible");
 
         testUtils.form.clickCreate(form);
 
-        assert.strictEqual(form.$('input.foo_field').length, 1,
+        assert.containsOnce('input.foo_field', form,
             "should have a visible input for foo field");
 
-        assert.ok(form.$('input.foo_field').is(':visible'),
-                        "foo field should be visible");
+        assert.isVisible('input.foo_field', form, "foo field should be visible");
         form.destroy();
     });
 
@@ -2662,12 +2654,12 @@ QUnit.module('Views', {
             res_id: 1,
         });
 
-        assert.strictEqual(form.$('.o_field_empty').length, 1,
+        assert.containsOnce('.o_field_empty', form,
             'readonly field should be invisible on an existing record');
 
         testUtils.form.clickCreate(form);
 
-        assert.strictEqual(form.$('.o_field_empty').length, 0,
+        assert.containsNone('.o_field_empty', form,
             'readonly field should be visible on a new record');
         form.destroy();
     });
@@ -2692,10 +2684,8 @@ QUnit.module('Views', {
             res_id: 1,
         });
 
-        assert.ok(form.$('.inner_group').hasClass('o_group_col_6'),
-            "inner groups should have classname 'o_group_col_6'");
-        assert.ok(form.$('.inner_div').hasClass('o_group_col_6'),
-            "divs inside groups should have classname 'o_group_col_6'");
+        assert.hasClass('.inner_group', 'o_group_col_6', form),
+        assert.hasClass('.inner_div', 'o_group_col_6', form),
         form.destroy();
     });
 
