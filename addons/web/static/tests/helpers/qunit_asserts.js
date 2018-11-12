@@ -10,7 +10,7 @@ odoo.define('web.qunit_asserts', function (require) {
      * assert.containsOnce(selector, n, el, [msg])
      * assert.containsOnce(selector, n, [msg])
      */
-    QUnit.assert.containsN = function (selector, n, w, message) {
+    QUnit.assert.containsN = function (selector, n, w, msg) {
         var widget, $el;
         if (w instanceof Widget) { // selector,, n, widget
             widget = w;
@@ -32,15 +32,15 @@ odoo.define('web.qunit_asserts', function (require) {
             matches = $el.find(selector);
         }
 
-        message = message || `selector ${selector} should have exactly ${n} match(es)`;
-        QUnit.assert.strictEqual(matches.length, n, message);
+        msg = msg || `selector ${selector} should have exactly ${n} match(es)`;
+        QUnit.assert.strictEqual(matches.length, n, msg);
     };
-    QUnit.assert.containsOnce = function (selector, w, message) {
-        QUnit.assert.containsN(selector, 1, w, message);
+    QUnit.assert.containsOnce = function (selector, w, msg) {
+        QUnit.assert.containsN(selector, 1, w, msg);
     };
 
-    QUnit.assert.containsNone = function (selector, w, message) {
-        QUnit.assert.containsN(selector, 0, w, message);
+    QUnit.assert.containsNone = function (selector, w, msg) {
+        QUnit.assert.containsN(selector, 0, w, msg);
     };
 
     /**
