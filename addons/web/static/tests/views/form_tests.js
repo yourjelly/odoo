@@ -624,7 +624,7 @@ QUnit.module('Views', {
         form.destroy();
     });
 
-    QUnit.only('rendering stat buttons', function (assert) {
+    QUnit.test('rendering stat buttons', function (assert) {
         assert.expect(3);
 
         var form = createView({
