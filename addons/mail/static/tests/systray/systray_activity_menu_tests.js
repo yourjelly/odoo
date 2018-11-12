@@ -153,7 +153,7 @@ QUnit.test('activity menu widget: activity view icon', function (assert) {
     assert.expect(8);
     var self = this;
     var activityMenu = new ActivityMenu();
-    testUtils.addMockEnvironment(activityMenu, {
+    testUtils.mock.addMockEnvironment(activityMenu, {
         services: this.services,
         mockRPC: function (route, args) {
             if (args.method === 'systray_get_activities') {
@@ -176,7 +176,7 @@ QUnit.test('activity menu widget: activity view icon', function (assert) {
                        "Second activity action should link to 'Note'");
     assert.ok($second.hasClass('fa-clock-o'), "should display the activity action icon");
 
-    testUtils.intercept(activityMenu, 'do_action', function (event) {
+    testUtils.mock.intercept(activityMenu, 'do_action', function (event) {
         assert.step('do_action:' +
                     (event.data.action.name ? event.data.action.name : event.data.action));
     }, true);
