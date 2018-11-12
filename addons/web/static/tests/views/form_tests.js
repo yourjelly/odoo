@@ -770,12 +770,10 @@ QUnit.module('Views', {
             model: 'partner',
             data: this.data,
             arch: '<form>' +
-                    '<sheet>' +
-                        '<group>' +
-                            '<field name="foo"/>' +
-                            '<field name="display_name" attrs="{\'readonly\': [[\'foo\', \'=\', \'readonly\']]}"/>' +
-                        '</group>' +
-                    '</sheet>' +
+                    '<group>' +
+                        '<field name="foo"/>' +
+                        '<field name="display_name" attrs="{\'readonly\': [[\'foo\', \'=\', \'readonly\']]}"/>' +
+                    '</group>' +
                 '</form>',
             res_id: 2,
         });
@@ -837,22 +835,19 @@ QUnit.module('Views', {
             View: FormView,
             model: 'partner',
             data: this.data,
-            arch: '<form string="Partners">' +
-                    '<sheet>' +
-                        '<group>' +
-                            '<field name="foo"/>' +
-                        '</group>' +
-                    '</sheet>' +
+            arch: '<form>' +
+                    '<field name="foo"/>' +
                 '</form>',
             res_id: 1,
         });
 
         assert.strictEqual(form.mode, 'readonly', 'form view should be in readonly mode');
         assert.hasClass('.o_form_view', 'o_form_readonly', form);
-        // To DO master-tests-ref
         assert.isVisible('.o_form_buttons_view', form.$buttons);
         assert.isInvisible('.o_form_buttons_edit', form.$buttons);
+
         testUtils.form.clickEdit(form);
+
         assert.strictEqual(form.mode, 'edit', 'form view should be in edit mode');
         assert.hasClass('.o_form_view', 'o_form_editable', form);
         assert.doesNotHaveClass('.o_form_view', 'o_form_readonly', form);

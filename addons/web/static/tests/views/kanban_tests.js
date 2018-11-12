@@ -3044,13 +3044,13 @@ QUnit.module('Views', {
 
         // edit the title of column [5, 'xmo'] and close without saving
         kanban.$('.o_kanban_group[data-id=5] .o_column_edit').click(); // click on 'Edit'
-        assert.ok($('.modal .o_form_editable').length, 'a form view should be open in a modal');
+        assert.containsOnce('.modal .o_form_editable', 'a form view should be open in a modal');
         assert.strictEqual($('.modal .o_form_editable input').val(), 'xmo',
             'the name should be "xmo"');
         $('.modal .o_form_editable input').val('ged').trigger('input'); // change the value
         nbRPCs = 0;
         $('.modal-header .close').click(); // click on the cross to close the modal
-        assert.ok(!$('.modal').length, 'the modal should be closed');
+        assert.containsNone('.modal');
         assert.strictEqual(kanban.$('.o_kanban_group[data-id=5] .o_column_title').text(), 'xmo',
             'title of the column should still be "xmo"');
         assert.strictEqual(nbRPCs, 0, 'no RPC should have been done');
@@ -3060,7 +3060,7 @@ QUnit.module('Views', {
         $('.modal .o_form_editable input').val('ged').trigger('input'); // change the value
         nbRPCs = 0;
         testUtils.modal.clickButton('Discard');
-        assert.ok(!$('.modal').length, 'the modal should be closed');
+        assert.containsNone('.modal');
         assert.strictEqual(kanban.$('.o_kanban_group[data-id=5] .o_column_title').text(), 'xmo',
             'title of the column should still be "xmo"');
         assert.strictEqual(nbRPCs, 0, 'no RPC should have been done');
