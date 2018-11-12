@@ -812,10 +812,10 @@ QUnit.module('Views', {
         assert.strictEqual(form.$('.o_form_label_empty').length, 0,
             "in edit mode, only labels associated to empty readonly fields should have the o_form_label_empty class");
 
-        form.$('input[name="foo"]').val("readonly").trigger("input"); // int_field is now rerendered as readonly
-        form.$('input[name="foo"]').val("edit").trigger("input"); // int_field is now rerendered as editable
-        form.$('input[name="int_field"]').val('1').trigger("input"); // int_field is now set
-        form.$('input[name="foo"]').val("readonly").trigger("input"); // int_field is now rerendered as readonly
+        testUtils.fields.editInput('foo', 'readonly');
+        testUtils.fields.editInput('foo', 'edit');
+        testUtils.fields.editInput('display_name', 'some name');
+        testUtils.fields.editInput('foo', 'readonly');
 
         assert.strictEqual(form.$('.o_field_empty').length, 0,
             "there still should not be any empty class on fields as the readonly one is now set");
