@@ -988,10 +988,12 @@ function searchAndClickItem(fieldName, options) {
         // jquery autocomplete refines the search in a setTimeout() parameterized
         // with a delay, so we force this delay to 0 s.t. the dropdown is filtered
         // directly on the next tick
-        // TODO: force delay to 0 here, and reset it in then handler
-        // $(input).autocomplete({delay: 0});
+        var $input = $(input);
+        var delay = $input.autocomplete('option', 'delay');
+        $input.autocomplete('option', 'delay', 0);
         input.value = options.search;
         input.dispatchEvent(new Event('input'));
+        $input.autocomplete('option', 'delay', delay);
         def = concurrency.delay(0);
     }
 
