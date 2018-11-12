@@ -211,7 +211,7 @@ QUnit.module('Views', {
                 '</form>',
             res_id: 2,
         });
-        assert.hasNotClass('span[name="display_name"]','text-danger', form);
+        assert.doesNotHaveClass('span[name="display_name"]','text-danger', form);
         assert.hasClass('span[name="foo"]', 'text-danger', form);
         form.destroy();
     });
@@ -230,7 +230,7 @@ QUnit.module('Views', {
             res_id: 2,
             viewOptions: {mode: 'edit'},
         });
-        assert.hasNotClass('input[name="display_name"]','text-danger', form);
+        assert.doesNotHaveClass('input[name="display_name"]','text-danger', form);
         testUtils.fields.editInput('int_field', 3);
         assert.hasClass('input[name="display_name"]', 'text-danger', form);
         form.destroy();
@@ -249,7 +249,7 @@ QUnit.module('Views', {
             res_id: 2,
             viewOptions: {mode: 'edit'},
         });
-        assert.hasNotClass('input[name="int_field"]', 'text-danger', form);
+        assert.doesNotHaveClass('input[name="int_field"]', 'text-danger', form);
         testUtils.fields.editInput('int_field', 3);
         assert.hasClass('input[name="int_field"]', 'text-danger', form);
         form.destroy();
@@ -394,7 +394,7 @@ QUnit.module('Views', {
 
         // set a value on the m2o
         await testUtils.fields.many2one.searchAndClickItem('product_id');
-        assert.hasNotClass('.foo_field', 'o_invisible_modifier', form);
+        assert.doesNotHaveClass('.foo_field', 'o_invisible_modifier', form);
 
         form.destroy();
     });
@@ -483,11 +483,11 @@ QUnit.module('Views', {
 
         testUtils.form.clickEdit(form);
         assert.hasClass('.o_notebook .nav .nav-link:first()', 'active', form);
-        assert.hasNotClass('.o_notebook .nav .nav-item:first()', 'o_invisible_modifier', form);
+        assert.doesNotHaveClass('.o_notebook .nav .nav-item:first()', 'o_invisible_modifier', form);
 
         // set a value on the m2o
         testUtils.fields.many2one.searchAndClickItem('product_id');
-        assert.hasNotClass('.o_notebook .nav .nav-link:first()', 'active');
+        assert.doesNotHaveClass('.o_notebook .nav .nav-link:first()', 'active');
         assert.hasClass('.o_notebook .nav .nav-item:first()', 'o_invisible_modifier', form);
         assert.hasClass('.o_notebook .nav .nav-link:nth(1)', 'active', form);
         assert.hasClass('.o_notebook .tab-content .tab-pane:nth(1)', 'active', form);
@@ -547,7 +547,7 @@ QUnit.module('Views', {
             res_id: 1,
         });
 
-        assert.hasNotClass('.o_notebook .nav .nav-link:first()', 'active', form);
+        assert.doesNotHaveClass('.o_notebook .nav .nav-link:first()', 'active', form);
         assert.hasClass('.o_notebook .nav .nav-link:nth(1)', 'active', form);
 
         form.destroy();
@@ -857,7 +857,7 @@ QUnit.module('Views', {
         testUtils.form.clickEdit(form);
         assert.strictEqual(form.mode, 'edit', 'form view should be in edit mode');
         assert.hasClass('.o_form_view', 'o_form_editable', form);
-        assert.hasNotClass('.o_form_view', 'o_form_readonly', form);
+        assert.doesNotHaveClass('.o_form_view', 'o_form_readonly', form);
         assert.ok(!form.$buttons.find('.o_form_buttons_view').is(':visible'),
             'readonly buttons should not be visible');
         assert.ok(form.$buttons.find('.o_form_buttons_edit').is(':visible'),

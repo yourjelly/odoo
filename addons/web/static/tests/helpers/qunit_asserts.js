@@ -61,7 +61,7 @@ odoo.define('web.qunit_asserts', function (require) {
      * assert.hasClass(selector, className, el, [msg])
      * assert.hasClass(selector, className, [msg])
      */
-    QUnit.assert.hasNotClass = function (selector, className, w, msg) {
+    QUnit.assert.doesNotHaveClass = function (selector, className, w, msg) {
         _checkClass(selector, className, false, w, msg);
     };
 
