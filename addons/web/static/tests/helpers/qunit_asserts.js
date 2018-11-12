@@ -120,4 +120,40 @@ odoo.define('web.qunit_asserts', function (require) {
         }
         return {matches: matches, msg: msg};
     }
+
+    /**
+     * assert.hasClass(selector, attr, value, widget, [msg]) // priority
+     * assert.hasClass(selector, attr, value, $el, [msg])
+     * assert.hasClass(selector, attr, value, el, [msg])
+     * assert.hasClass(selector, attr, value, [msg])
+     */
+    QUnit.assert.checkAttrValue = function (selector, attr, value, w, msg) {
+        var widget, $el;
+        if (w instanceof Widget) { // selector, attr, value, widget
+            widget = w;
+        } else if (typeof w === 'string') { // selector, attr, value, msg
+            $el = $('body');
+            msg = w;
+        } else if (typeof w === Array) { // selector, attr, value, $el
+            $el = w;
+        } else if (w !== undefined) { // selector, attr, value, el
+            $el = $(w);
+        } else { // selector, attr, value
+            $el = $('body');
+        }
+
+        var matches;
+        if (widget) {
+            matches = widget.$(selector);
+        } else {
+            matches = $el.find(selector);
+        }
+
+        if (matches.length != 1) {
+            QUnit.assert.ok(false, `${selector} matches ${matches.length} elements instead of 1`);
+        } else {
+            msg = msg || `attribute '${attr}' for ${selector} should be '${value}'`;
+            QUnit.assert.strictEqual(matches[0].getAttribute(attr), value, msg);
+        }
+    };
 });

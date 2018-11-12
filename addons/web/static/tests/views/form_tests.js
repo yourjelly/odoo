@@ -1107,38 +1107,22 @@ QUnit.module('Views', {
             res_id: 2,
         });
 
-        assert.strictEqual(form.$('button[name="0"]').attr('class'), 'btn btn-secondary',
-            "header buttons without any class should receive the correct classes");
-        assert.strictEqual(form.$('button[name="1"]').attr('class'), 'btn btn-primary',
-            "header buttons with bootstrap primary class should receive the correct classes");
-        assert.strictEqual(form.$('button[name="2"]').attr('class'), 'btn btn-primary',
-            "header buttons with oe_highlight class should receive the correct classes");
-        assert.strictEqual(form.$('button[name="3"]').attr('class'), 'btn btn-secondary',
-            "header buttons with bootstrap default class should receive the correct classes");
-        assert.strictEqual(form.$('button[name="4"]').attr('class'), 'btn btn-link',
-            "header buttons with bootstrap link class should receive the correct classes");
-        assert.strictEqual(form.$('button[name="5"]').attr('class'), 'btn btn-link',
-            "header buttons with oe_link class should receive the correct classes");
-        assert.strictEqual(form.$('button[name="6"]').attr('class'), 'btn btn-success',
-            "header buttons with bootstrap state class should receive the correct classes");
-        assert.strictEqual(form.$('button[name="7"]').attr('class'), 'btn o_this_is_a_button btn-secondary',
-            "header buttons with custom classes should receive the correct classes");
-        assert.strictEqual(form.$('button[name="8"]').attr('class'), 'btn btn-secondary',
-            "sheet header buttons without any class should receive the correct classes");
-        assert.strictEqual(form.$('button[name="9"]').attr('class'), 'btn btn-primary',
-            "sheet buttons with bootstrap primary class should receive the correct classes");
-        assert.strictEqual(form.$('button[name="10"]').attr('class'), 'btn btn-primary',
-            "sheet buttons with oe_highlight class should receive the correct classes");
-        assert.strictEqual(form.$('button[name="11"]').attr('class'), 'btn btn-secondary',
-            "sheet buttons with bootstrap default class should receive the correct classes");
-        assert.strictEqual(form.$('button[name="12"]').attr('class'), 'btn btn-link',
-            "sheet buttons with bootstrap link class should receive the correct classes");
-        assert.strictEqual(form.$('button[name="13"]').attr('class'), 'btn btn-link',
-            "sheet buttons with oe_link class should receive the correct classes");
-        assert.strictEqual(form.$('button[name="14"]').attr('class'), 'btn btn-success',
-            "sheet buttons with bootstrap state class should receive the correct classes");
-        assert.strictEqual(form.$('button[name="15"]').attr('class'), 'btn o_this_is_a_button',
-            "sheet buttons with custom classes should receive the correct classes");
+        assert.checkAttrValue('button[name="0"]', 'class', 'btn btn-secondary', form);
+        assert.checkAttrValue('button[name="1"]', 'class', 'btn btn-primary', form);
+        assert.checkAttrValue('button[name="2"]', 'class', 'btn btn-primary', form);
+        assert.checkAttrValue('button[name="3"]', 'class', 'btn btn-secondary', form);
+        assert.checkAttrValue('button[name="4"]', 'class', 'btn btn-link', form);
+        assert.checkAttrValue('button[name="5"]', 'class', 'btn btn-link', form);
+        assert.checkAttrValue('button[name="6"]', 'class', 'btn btn-success', form);
+        assert.checkAttrValue('button[name="7"]', 'class', 'btn o_this_is_a_button btn-secondary', form);
+        assert.checkAttrValue('button[name="8"]', 'class', 'btn btn-secondary', form);
+        assert.checkAttrValue('button[name="9"]', 'class', 'btn btn-primary', form);
+        assert.checkAttrValue('button[name="10"]', 'class', 'btn btn-primary', form);
+        assert.checkAttrValue('button[name="11"]', 'class', 'btn btn-secondary', form);
+        assert.checkAttrValue('button[name="12"]', 'class', 'btn btn-link', form);
+        assert.checkAttrValue('button[name="13"]', 'class', 'btn btn-link', form);
+        assert.checkAttrValue('button[name="14"]', 'class', 'btn btn-success', form);
+        assert.checkAttrValue('button[name="15"]', 'class', 'btn o_this_is_a_button', form);
 
         form.destroy();
     });
