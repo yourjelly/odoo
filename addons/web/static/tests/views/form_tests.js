@@ -197,7 +197,7 @@ QUnit.module('Views', {
         def.resolve();
     });
 
-    QUnit.only('decoration works on widgets', function (assert) {
+    QUnit.test('decoration works on widgets', function (assert) {
         assert.expect(2);
 
         var form = createView({
