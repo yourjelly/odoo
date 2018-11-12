@@ -197,7 +197,7 @@ QUnit.module('Views', {
         def.resolve();
     });
 
-    QUnit.test('decoration works on widgets', function (assert) {
+    QUnit.only('decoration works on widgets', function (assert) {
         assert.expect(2);
 
         var form = createView({
@@ -211,10 +211,8 @@ QUnit.module('Views', {
                 '</form>',
             res_id: 2,
         });
-        assert.ok(!form.$('span[name="display_name"]').hasClass('text-danger'),
-            'field display name should not have decoration');
-        assert.ok(form.$('span[name="foo"]').hasClass('text-danger'),
-            'field foo should have decoration');
+        assert.hasNotClass('span[name="display_name"]','text-danger', form);
+        assert.hasClass('span[name="foo"]', 'text-danger', form);
         form.destroy();
     });
 

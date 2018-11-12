@@ -24,7 +24,6 @@ odoo.define('web.qunit_asserts', function (require) {
         } else { // selector n
             $el = $('body');
         }
-
         var matches;
         if (widget) {
             matches = widget.$(selector);
@@ -44,12 +43,26 @@ odoo.define('web.qunit_asserts', function (require) {
     };
 
     /**
-     * assert.hasClass(selector, classNames, widget, [msg]) // priority
-     * assert.hasClass(selector, classNames, $el, [msg])
-     * assert.hasClass(selector, classNames, el, [msg])
-     * assert.hasClass(selector, classNames, [msg])
+     * assert.hasClass(selector, className, widget, [msg]) // priority
+     * assert.hasClass(selector, className, $el, [msg])
+     * assert.hasClass(selector, className, el, [msg])
+     * assert.hasClass(selector, className, [msg])
      */
     QUnit.assert.hasClass = function (selector, className, w, msg) {
+        _checkClass(selector, className, true, w, msg);
+
+    };
+    /**
+     * assert.hasClass(selector, className, widget, [msg]) // priority
+     * assert.hasClass(selector, className, $el, [msg])
+     * assert.hasClass(selector, className, el, [msg])
+     * assert.hasClass(selector, className, [msg])
+     */
+    QUnit.assert.hasNotClass = function (selector, className, w, msg) {
+        _checkClass(selector, className, false, w, msg);
+    };
+
+    var _checkClass = function (selector, className, shouldHaveClass, w, msg) {
         var widget, $el;
         if (w instanceof Widget) { // selector, className, widget
             widget = w;
@@ -74,8 +87,10 @@ odoo.define('web.qunit_asserts', function (require) {
         if (matches.length != 1) {
             QUnit.assert.ok(false, `${selector} matches ${matches.length} elements instead of 1`);
         } else {
-            msg = msg || `${selector} should have className ${className}`;
-            QUnit.assert.ok(matches[0].classList.contains(className), msg);
+            msg = msg || `${selector} should ${shouldHaveClass ? '' : 'not'} have className ${className}`;
+            var hasClass = matches[0].classList.contains(className);
+            var condition = shouldHaveClass ? hasClass : !hasClass;
+            QUnit.assert.ok(condition, msg);
         }
-    }
+    };
 });

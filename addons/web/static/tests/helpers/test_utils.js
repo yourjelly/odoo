@@ -19,7 +19,6 @@ var ControlPanel = require('web.ControlPanel');
 var core = require('web.core');
 var DebugManager = require('web.DebugManager');
 var dom = require('web.dom');
-var relationalFields = require('web.relational_fields');
 var session = require('web.session');
 var MockServer = require('web.MockServer');
 var Widget = require('web.Widget');
