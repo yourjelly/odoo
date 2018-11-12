@@ -12,8 +12,9 @@ odoo.define('web.qunit_asserts', function (require) {
      */
     QUnit.assert.containsN = function (selector, n, w, msg) {
         var widget, $el;
-        if (typeof n !== 'number')
+        if (typeof n !== 'number') {
             throw Error("containsN assert should be called with a number as second argument");
+        }
         if (w instanceof Widget) { // selector,, n, widget
             widget = w;
         } else if (typeof w === 'string') { // selector, n, msg
@@ -64,7 +65,7 @@ odoo.define('web.qunit_asserts', function (require) {
         _checkClass(selector, className, false, w, msg);
     };
 
-    var _checkClass = function (selector, className, shouldHaveClass, w, msg) {
+    function _checkClass (selector, className, shouldHaveClass, w, msg) {
         var widget, $el;
         if (w instanceof Widget) { // selector, className, widget
             widget = w;
