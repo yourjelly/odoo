@@ -11,29 +11,27 @@ odoo.define('web.qunit_asserts', function (require) {
      * assert.containsOnce(selector, n, [msg])
      */
     QUnit.assert.containsN = function (selector, n, w, message) {
-        var widget, $el, el;
-
-        if (w instanceof Widget) { // selector, n, widget
+        var widget, $el;
+        if (w instanceof Widget) { // selector,, n, widget
             widget = w;
-        } else if (typeof w === 'string') { // selector n, msg
-            message = w;
-        } else if (typeof w === Array) { // selector n, $el
+        } else if (typeof w === 'string') { // selector, n, msg
+            $el = $('body');
+            msg = w;
+        } else if (typeof w === Array) { // selector, n, $el
             $el = w;
-        } else if (w !== undefined) { // selector n, el
-            el = w;
+        } else if (w !== undefined) { // selector, n, el
+            $el = $(w);
         } else { // selector n
-            el = document;
+            $el = $('body');
         }
 
         var matches;
         if (widget) {
             matches = widget.$(selector);
-        } else if ($el) {
+        } else {
             matches = $el.find(selector);
-        } else if (el) {
-            // TODO: use jQuery? (see hasClass)
-            matches = el.querySelectorAll(selector);
         }
+
         message = message || `selector ${selector} should have exactly ${n} match(es)`;
         QUnit.assert.strictEqual(matches.length, n, message);
     };
@@ -55,14 +53,14 @@ odoo.define('web.qunit_asserts', function (require) {
         var widget, $el;
         if (w instanceof Widget) { // selector, className, widget
             widget = w;
-        } else if (typeof w === 'string') { // selector className, msg
+        } else if (typeof w === 'string') { // selector, className, msg
             $el = $('body');
             msg = w;
-        } else if (typeof w === Array) { // selector className, $el
+        } else if (typeof w === Array) { // selector, className, $el
             $el = w;
-        } else if (w !== undefined) { // selector className, el
+        } else if (w !== undefined) { // selector, className, el
             $el = $(w);
-        } else { // selector n
+        } else { // selector, className
             $el = $('body');
         }
 
