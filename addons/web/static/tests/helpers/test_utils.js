@@ -1006,6 +1006,21 @@ function editInput(fieldName, value, selector) {
     matches[0].dispatchEvent(new Event('input'));
 }
 
+/**
+ * @param {string} fieldName
+ * @param {string|number} value
+ * @param {string} [selector] css selector to restrict the search of the input
+ */
+function editSelect(fieldName, value, selector) {
+    selector = `${selector || ''} select[name=${fieldName}]`;
+    var matches = document.querySelectorAll(selector);
+    if (matches.length != 1) {
+        throw new Error(`${selector} has been found ${matches.length} instead of 1`);
+    }
+    matches[0].value = value;
+    matches[0].dispatchEvent(new Event('change'));
+}
+
 function clickOpenDropdown(fieldName, selector) {
     var m2oSelector = `${selector || ''} .o_field_many2one[name=${fieldName}] input`;
     var matches = document.querySelectorAll(m2oSelector);
@@ -1088,6 +1103,7 @@ return $.when(
             clickSave: clickSave,
             clickCreate: clickCreate,
             clickDiscard: clickDiscard,
+            reload: reloadView,
         },
         kanban: {
             reload: reloadView,
@@ -1108,6 +1124,7 @@ return $.when(
                 searchAndClickItem: searchAndClickItem,
             },
             editInput: editInput,
+            editSelect: editSelect,
         //     focusOut(fieldName),
         },
 
