@@ -11,30 +11,12 @@ odoo.define('web.qunit_asserts', function (require) {
      * assert.containsOnce(selector, n, [msg])
      */
     QUnit.assert.containsN = function (selector, n, w, msg) {
-        var widget, $el;
         if (typeof n !== 'number') {
             throw Error("containsN assert should be called with a number as second argument");
         }
-        if (w instanceof Widget) { // selector,, n, widget
-            widget = w;
-        } else if (typeof w === 'string') { // selector, n, msg
-            $el = $('body');
-            msg = w;
-        } else if (typeof w === Array) { // selector, n, $el
-            $el = w;
-        } else if (w !== undefined) { // selector, n, el
-            $el = $(w);
-        } else { // selector n
-            $el = $('body');
-        }
-        var matches;
-        if (widget) {
-            matches = widget.$(selector);
-        } else {
-            matches = $el.find(selector);
-        }
-
-        msg = msg || `selector ${selector} should have exactly ${n} match(es)`;
+        var args = _processArguments(selector, w, msg);
+        var matches = args.matches;
+        msg = args.msg || `selector ${selector} should have exactly ${n} match(es)`;
         QUnit.assert.strictEqual(matches.length, n, msg);
     };
     QUnit.assert.containsOnce = function (selector, w, msg) {
@@ -65,6 +47,24 @@ odoo.define('web.qunit_asserts', function (require) {
         _checkClass(selector, className, false, w, msg);
     };
 
+    /**
+     * assert.hasClass(selector, attr, value, widget, [msg]) // priority
+     * assert.hasClass(selector, attr, value, $el, [msg])
+     * assert.hasClass(selector, attr, value, el, [msg])
+     * assert.hasClass(selector, attr, value, [msg])
+     */
+    QUnit.assert.hasAttrValue = function (selector, attr, value, w, msg) {
+        var args = _processArguments(selector, w, msg);
+        var matches = args.matches;
+
+        if (matches.length != 1) {
+            QUnit.assert.ok(false, `${selector} matches ${matches.length} elements instead of 1`);
+        } else {
+            msg = args.msg || `attribute '${attr}' for ${selector} should be '${value}'`;
+            QUnit.assert.strictEqual(matches[0].getAttribute(attr), value, msg);
+        }
+    };
+
     QUnit.assert.isVisible = function(selector, w, msg) {
         _checkVisible(selector, true, w, msg);
     };
@@ -88,12 +88,11 @@ odoo.define('web.qunit_asserts', function (require) {
     function _checkClass (selector, className, shouldHaveClass, w, msg) {
         var args = _processArguments(selector, w, msg);
         var matches = args.matches;
-        msg = args.msg;
 
         if (matches.length != 1) {
             QUnit.assert.ok(false, `${selector} matches ${matches.length} elements instead of 1`);
         } else {
-            msg = msg || `${selector} should ${shouldHaveClass ? '' : 'not'} have className ${className}`;
+            msg = args.msg || `${selector} should ${shouldHaveClass ? '' : 'not'} have className ${className}`;
             var hasClass = matches[0].classList.contains(className);
             var condition = shouldHaveClass ? hasClass : !hasClass;
             QUnit.assert.ok(condition, msg);
@@ -120,40 +119,4 @@ odoo.define('web.qunit_asserts', function (require) {
         }
         return {matches: matches, msg: msg};
     }
-
-    /**
-     * assert.hasClass(selector, attr, value, widget, [msg]) // priority
-     * assert.hasClass(selector, attr, value, $el, [msg])
-     * assert.hasClass(selector, attr, value, el, [msg])
-     * assert.hasClass(selector, attr, value, [msg])
-     */
-    QUnit.assert.hasAttrValue = function (selector, attr, value, w, msg) {
-        var widget, $el;
-        if (w instanceof Widget) { // selector, attr, value, widget
-            widget = w;
-        } else if (typeof w === 'string') { // selector, attr, value, msg
-            $el = $('body');
-            msg = w;
-        } else if (typeof w === Array) { // selector, attr, value, $el
-            $el = w;
-        } else if (w !== undefined) { // selector, attr, value, el
-            $el = $(w);
-        } else { // selector, attr, value
-            $el = $('body');
-        }
-
-        var matches;
-        if (widget) {
-            matches = widget.$(selector);
-        } else {
-            matches = $el.find(selector);
-        }
-
-        if (matches.length != 1) {
-            QUnit.assert.ok(false, `${selector} matches ${matches.length} elements instead of 1`);
-        } else {
-            msg = msg || `attribute '${attr}' for ${selector} should be '${value}'`;
-            QUnit.assert.strictEqual(matches[0].getAttribute(attr), value, msg);
-        }
-    };
 });
