@@ -934,35 +934,42 @@ function openDatepicker($datepickerEl) {
     $datepickerEl.find('.o_datepicker_input').trigger('focus.datetimepicker');
 }
 
-function _click(el, all) {
-    var matches;
-    if (typeof el === 'string') {
-        matches = all ? $(el) : $(el).eq(0);
-    } else {
-        matches = el;
-    }
-    if (all && matches.length != 1) {
+/**
+ * @param {string|NodeList|jQuery} el
+ * @param {Object} [options]
+ * @param {boolean} [options.first=false] if true, clicks on the first element
+ * @param {boolean} [options.last=false] if true, clicks on the last element
+ */
+function _click(el, options) {
+    options = options || {};
+    var matches = typeof el === 'string' ? $(el) : el;
+    if (options.first) {
+        matches = matches.first();
+    } else if (options.last) {
+        matches = matches.last();
+    } else if (matches.length != 1) {
         throw new Error(`Found ${matches.length} elements to click on, instead of 1`);
     }
     matches[0].click();
 }
 
 /**
- * Can be called with a DOM element, a jQuery element, or a selector. Checks tga
- *
  * @param {string|NodeList|jQuery} el
  */
 function click(el) {
-    _click(el, true);
+    _click(el);
 }
 /**
- * Can be called with a DOM element, a jQuery element, or a selector. Assumes
- * that there is only one element.
- *
  * @param {string|NodeList|jQuery} el
  */
 function clickFirst(el) {
-    _click(el, false);
+    _click(el, {first: true});
+}
+/**
+ * @param {string|NodeList|jQuery} el
+ */
+function clickLast(el) {
+    _click(el, {last: true});
 }
 
 function clickEdit(form) {
@@ -1095,6 +1102,7 @@ return $.when(
             openDatepicker: openDatepicker,
             click: click,
             clickFirst: clickFirst,
+            clickLast: clickLast,
             // input(el/selector),
             // focusOut(el/selector),
         },
