@@ -395,12 +395,12 @@ QUnit.module('Views', {
         });
 
         // open dropdown to zoom into first row
-        pivot.$('tbody .o_pivot_header_cell_closed').first().click();
+        testUtils.dom.clickFirst(pivot.$('tbody .o_pivot_header_cell_closed'));
         // click on date by day
         pivot.$('.o_pivot_field_menu .dropdown-item[data-field="date"][data-interval="day"]').click();
 
         // open dropdown to zoom into second row
-        pivot.$('tbody td.o_pivot_header_cell_closed:eq(1)').first().click();
+        testUtils.dom.clickFirst(pivot.$('tbody td.o_pivot_header_cell_closed:eq(1)'));
 
         assert.strictEqual(pivot.$('tbody tr').length, 7,
             "should have 7 rows (1 for total, 1 for xphone, 1 for xpad, 4 for data)");
@@ -573,7 +573,7 @@ QUnit.module('Views', {
 
         // tries to open a field selection menu, to make sure it was not
         // removed from the dom.
-        pivot.$('.o_pivot_header_cell_closed').first().click();
+        testUtils.dom.clickFirst(pivot.$('.o_pivot_header_cell_closed'));
         assert.strictEqual(pivot.$('.o_pivot_field_menu').length, 1,
             "the field selector menu exists");
         pivot.destroy();
@@ -704,8 +704,8 @@ QUnit.module('Views', {
             "should have 7 rows (total + 3 for December and 2 for October and April)");
 
         // collapse the last two rows
-        pivot.$('.o_pivot_header_cell_opened').last().click();
-        pivot.$('.o_pivot_header_cell_opened').last().click();
+        testUtils.dom.clickLast(pivot.$('.o_pivot_header_cell_opened'));
+        testUtils.dom.clickLast(pivot.$('.o_pivot_header_cell_opened'));
 
         assert.strictEqual(pivot.$('tbody tr').length, 6,
             "should have 6 rows now");
@@ -749,8 +749,8 @@ QUnit.module('Views', {
             "should have 7 rows (total + 3 for December and 2 for October and April)");
 
         // collapse the last two rows
-        pivot.$('.o_pivot_header_cell_opened').last().click();
-        pivot.$('.o_pivot_header_cell_opened').last().click();
+        testUtils.dom.clickLast(pivot.$('.o_pivot_header_cell_opened'));
+        testUtils.dom.clickLast(pivot.$('.o_pivot_header_cell_opened'));
 
         assert.strictEqual(pivot.$('tbody tr').length, 6,
             "should have 6 rows now");
@@ -845,7 +845,7 @@ QUnit.module('Views', {
         }, "context should be correct");
 
         // expand row on field product_id
-        pivot.$('tbody .o_pivot_header_cell_closed').first().click();
+        testUtils.dom.clickFirst(pivot.$('tbody .o_pivot_header_cell_closed'));
         pivot.$('.o_pivot_field_menu .dropdown-item[data-field="product_id"]:first').click();
         assert.deepEqual(pivot.getContext(), {
             pivot_column_groupby: ['date:day', 'customer'],
@@ -1075,7 +1075,7 @@ QUnit.module('Views', {
                         '<field name="product_id" type="measure"/>' +
                 '</pivot>',
         });
-        pivot.$('tbody .o_pivot_header_cell_closed').first().click();
+        testUtils.dom.clickFirst(pivot.$('tbody .o_pivot_header_cell_closed'));
         // click on date by month
         pivot.$('.o_pivot_field_menu .dropdown-item[data-field="date"][data-interval="month"]').click();
 
@@ -1117,7 +1117,7 @@ QUnit.module('Views', {
                 '</pivot>',
         });
 
-        pivot.$('tbody .o_pivot_header_cell_closed').first().click();
+        testUtils.dom.clickFirst(pivot.$('tbody .o_pivot_header_cell_closed'));
 
         pivot.$('.o_pivot_field_menu .dropdown-item[data-field="product_id"]:first').click();
 
