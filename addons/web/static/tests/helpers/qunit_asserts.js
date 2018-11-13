@@ -26,32 +26,40 @@ odoo.define('web.qunit_asserts', function (require) {
         QUnit.assert.strictEqual($matches.length, n, msg);
     };
 
+    /**
+     * assert.containsOnce(widget, selector, [msg])
+     * assert.containsOnce($el, selector, [msg])
+     * assert.containsOnce(el, selector, [msg])
+     */
     QUnit.assert.containsOnce = function (w, selector, msg) {
         QUnit.assert.containsN(w, selector, 1, msg);
     };
 
+    /**
+     * assert.containsNone(widget, selector, [msg])
+     * assert.containsNone($el, selector, [msg])
+     * assert.containsNone(el, selector, [msg])
+     */
     QUnit.assert.containsNone = function (w, selector, msg) {
         QUnit.assert.containsN(w, selector, 0, msg);
     };
 
     /**
-     * assert.hasClass(selector, className, widget, [msg]) // priority
-     * assert.hasClass(selector, className, $el, [msg])
-     * assert.hasClass(selector, className, el, [msg])
-     * assert.hasClass(selector, className, [msg])
+     * assert.hasClass(widget, className, [msg])
+     * assert.hasClass($el, className, [msg])
+     * assert.hasClass(el, className, [msg])
      */
-    QUnit.assert.hasClass = function (selector, className, w, msg) {
-        _checkClass(selector, className, true, w, msg);
-
+    QUnit.assert.hasClass = function (w, className, msg) {
+        _checkClass(w, className, true, msg);
     };
+
     /**
-     * assert.hasClass(selector, className, widget, [msg]) // priority
-     * assert.hasClass(selector, className, $el, [msg])
-     * assert.hasClass(selector, className, el, [msg])
-     * assert.hasClass(selector, className, [msg])
+     * assert.hasClass(widget, className, [msg])
+     * assert.hasClass($el, className, [msg])
+     * assert.hasClass(el, className, [msg])
      */
-    QUnit.assert.doesNotHaveClass = function (selector, className, w, msg) {
-        _checkClass(selector, className, false, w, msg);
+    QUnit.assert.doesNotHaveClass = function (w, className, msg) {
+        _checkClass(w, className, false, msg);
     };
 
     /**
@@ -92,8 +100,16 @@ odoo.define('web.qunit_asserts', function (require) {
             QUnit.assert.ok(condition, msg);
         }
     }
-    function _checkClass (selector, className, shouldHaveClass, w, msg) {
-        var args = _processArguments(selector, w, msg);
+    function _checkClass (w, className, shouldHaveClass, msg) {
+        var $el = w instanceof Widget ? w.$el :
+                  w instanceof HTMLElement ? $(w) :
+                  w;  // jquery element
+
+        if ($el.length !== 1) {
+            QUnit.assert.ok(false, `Assertion targets ${selector} matches ${$el.length} elements instead of 1`);
+
+        }
+        // var args = _processArguments(selector, w, msg);
         var matches = args.matches;
 
         if (matches.length != 1) {
