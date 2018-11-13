@@ -1256,7 +1256,7 @@ QUnit.module('Views', {
         testUtils.form.clickEdit(form);
         testUtils.fields.editInput('foo', 'tralala');
         testUtils.form.clickSave(form);
-        assert.containsOnce('span:contains(apple)', form,
+        assert.containsOnce(form, 'span:contains(apple)',
                         "should contain span with field value");
         form.destroy();
     });
@@ -1640,11 +1640,11 @@ QUnit.module('Views', {
                 return this._super(route, args);
             },
         });
-        assert.containsOnce('td:contains(new foo1)', form,
+        assert.containsOnce(form, 'td:contains(new foo1)',
             "should have new foo1 value in one2many");
-        assert.containsOnce('td:contains(new foo2)', form,
+        assert.containsOnce(form, 'td:contains(new foo2)',
             "should have new foo2 value in one2many");
-        assert.containsOnce('td:contains(xphone)', form,
+        assert.containsOnce(form, 'td:contains(xphone)',
             "should have a cell with the name field 'product_id', set to xphone");
         assert.strictEqual(nameGetCount, 1, "should have done only 1 nameget");
         form.destroy();
@@ -1788,7 +1788,7 @@ QUnit.module('Views', {
 
         assert.strictEqual(form.get('title'), 'first record',
             "should have the display name of the record as  title");
-        assert.containsNone('a:contains(Duplicate)', form.sidebar,
+        assert.containsNone(form.sidebar, 'a:contains(Duplicate)',
             "should not contains a 'Duplicate' action");
         form.destroy();
     });
@@ -1811,8 +1811,8 @@ QUnit.module('Views', {
             viewOptions: {footerToButtons: true},
         });
 
-        assert.containsOnce('button.infooter', form.$buttons, "footer button should be in footer");
-        assert.containsNone('button.infooter', form, "footer button should not be in form");
+        assert.containsOnce(form.$buttons, 'button.infooter', "footer button should be in footer");
+        assert.containsNone(form, 'button.infooter', "footer button should not be in form");
         form.destroy();
     });
 
