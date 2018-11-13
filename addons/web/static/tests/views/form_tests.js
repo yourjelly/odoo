@@ -146,19 +146,19 @@ QUnit.module('Views', {
         });
 
 
-        assert.containsOnce('div.test', form);
+        assert.containsOnce(form, 'div.test');
         assert.strictEqual(form.$('div.test').css('opacity'), '0.5',
             "should keep the inline style on html elements");
-        assert.containsOnce('label:contains(Foo)', form);
-        assert.containsOnce('span:contains(blip)', form);
+        assert.containsOnce(form, 'label:contains(Foo)');
+        assert.containsOnce(form, 'span:contains(blip)');
         assert.strictEqual(form.$('.o_group .o_group:first').attr('style'), 'background-color: red',
             "should apply style attribute on groups");
         assert.strictEqual(form.$('.o_field_widget[name=foo]').attr('style'), 'color: blue',
             "should apply style attribute on fields");
         assert.containsNone('label:contains(something_id)', form);
-        assert.containsOnce('label:contains(f3_description)', form);
-        assert.containsOnce('div.o_field_one2many table', form);
-        assert.containsOnce('tbody td:not(.o_list_record_selector) .custom-checkbox input:checked', form);
+        assert.containsOnce(form, 'label:contains(f3_description)');
+        assert.containsOnce(form, 'div.o_field_one2many table');
+        assert.containsOnce(form, 'tbody td:not(.o_list_record_selector) .custom-checkbox input:checked');
         assert.strictEqual(form.get('title'), 'second record',
             "title should be display_name of record");
         assert.containsNone('label.o_form_label_empty:contains(timmy)', form);
@@ -296,7 +296,7 @@ QUnit.module('Views', {
             res_id: 1,
         });
 
-        assert.containsOnce('table.o_inner_group', form);
+        assert.containsOnce(form, 'table.o_inner_group');
 
         form.destroy();
     });
@@ -324,12 +324,9 @@ QUnit.module('Views', {
             res_id: 1,
         });
 
-        assert.containsOnce('label.o_invisible_modifier:contains(Foo)', form,
-            "should not contain label Foo");
-        assert.containsOnce('span.o_invisible_modifier:contains(yop)', form,
-                        "should not contain span with field value");
-        assert.containsOnce('.o_field_widget.o_invisible_modifier:contains(0.4)', form,
-                        "field qux should be invisible");
+        assert.containsOnce(form, 'label.o_invisible_modifier:contains(Foo)');
+        assert.containsOnce(form, 'span.o_invisible_modifier:contains(yop)');
+        assert.containsOnce(form, '.o_field_widget.o_invisible_modifier:contains(0.4)');
         assert.hasClass('.o_field_widget[name=p]', 'o_invisible_modifier', form);
         form.destroy();
     });
@@ -359,12 +356,9 @@ QUnit.module('Views', {
                 '</form>',
             res_id: 1,
         });
-        assert.containsOnce('.o_form_statusbar.o_invisible_modifier button:contains(coucou)', form,
-                        "should not display invisible header");
-        assert.containsOnce('.o_notebook li.o_invisible_modifier a:contains(invisible)', form,
-                        "should not display tab invisible");
-        assert.containsOnce('table.o_inner_group.o_invisible_modifier td:contains(invgroup)', form,
-                        "should not display invisible groups");
+        assert.containsOnce(form, '.o_form_statusbar.o_invisible_modifier button:contains(coucou)');
+        assert.containsOnce(form, '.o_notebook li.o_invisible_modifier a:contains(invisible)');
+        assert.containsOnce(form, 'table.o_inner_group.o_invisible_modifier td:contains(invgroup)');
         form.destroy();
     });
 
@@ -573,10 +567,10 @@ QUnit.module('Views', {
             res_id: 1
         });
 
-        assert.containsOnce('div.o_group:visible', form, "should display the group");
+        assert.containsOnce(form, 'div.o_group:visible');
         testUtils.form.clickEdit(form);
         testUtils.dom.click('.o_field_boolean input', form);
-        assert.containsOnce('div.o_group:hidden', form, "should not display the group");
+        assert.containsOnce(form, 'div.o_group:hidden');
         form.destroy();
     });
 
@@ -630,9 +624,8 @@ QUnit.module('Views', {
             res_id: 2,
         });
 
-        assert.containsN('button.oe_stat_button', 2, form, "should have 2 stat buttons");
-        assert.containsOnce('button.oe_stat_button.o_invisible_modifier', form,
-                        "should have 1 invisible stat buttons");
+        assert.containsN(form, 'button.oe_stat_button', 2);
+        assert.containsOnce(form, 'button.oe_stat_button.o_invisible_modifier');
 
         var count = 0;
         testUtils.mock.intercept(form, "execute_action", function () {
@@ -661,8 +654,7 @@ QUnit.module('Views', {
             res_id: 2,
         });
 
-        assert.containsOnce('label.o_form_label:contains(customstring)', form,
-                        "should have 1 label with correct string");
+        assert.containsOnce(form, 'label.o_form_label:contains(customstring)');
         form.destroy();
     });
 
@@ -685,16 +677,16 @@ QUnit.module('Views', {
         });
         testUtils.form.clickEdit(form);
 
-        assert.containsOnce('span[name="foo"]', form,
+        assert.containsOnce(form, 'span[name="foo"]',
             "the foo field widget should be readonly");
         form.$('.o_field_boolean input').click();
-        assert.containsOnce('input[name="foo"]', form,
+        assert.containsOnce(form, 'input[name="foo"]',
             "the foo field widget should have been rerendered to now be editable");
         form.$('.o_field_boolean input').click();
-        assert.containsOnce('span[name="foo"]', form,
+        assert.containsOnce(form, 'span[name="foo"]',
             "the foo field widget should have been rerendered to now be readonly again");
         form.$('.o_field_boolean input').click();
-        assert.containsOnce('input[name="foo"]', form,
+        assert.containsOnce(form, 'input[name="foo"]',
             "the foo field widget should have been rerendered to now be editable again");
 
         form.destroy();
@@ -729,16 +721,16 @@ QUnit.module('Views', {
             res_id: 2,
         });
 
-        assert.containsN('.o_field_widget.o_field_empty', 2, form,
+        assert.containsN(form, '.o_field_widget.o_field_empty', 2,
             "should have 2 empty fields with correct class");
-        assert.containsN('.o_form_label_empty', 2, form,
+        assert.containsN(form, '.o_form_label_empty', 2,
             "should have 2 muted labels (for the empty fieds) in readonly");
 
         testUtils.form.clickEdit(form);
 
-        assert.containsOnce('.o_field_empty', form,
+        assert.containsOnce(form, '.o_field_empty',
             "in edit mode, only empty readonly fields should have the o_field_empty class");
-        assert.containsOnce('.o_form_label_empty', form,
+        assert.containsOnce(form, '.o_form_label_empty',
             "in edit mode, only labels associated to empty readonly fields should have the o_form_label_empty class");
 
         testUtils.fields.editInput('foo', 'test');
@@ -750,9 +742,9 @@ QUnit.module('Views', {
 
         testUtils.fields.editInput('foo', 'hello');
 
-        assert.containsOnce('.o_field_empty', form,
+        assert.containsOnce(form, '.o_field_empty',
             "after value changed to false for a readonly field, the o_field_empty class should have been added");
-        assert.containsOnce('.o_form_label_empty', form,
+        assert.containsOnce(form, '.o_form_label_empty',
             "after value changed to false for a readonly field, the o_form_label_empty class should have been added");
 
         form.destroy();
@@ -875,13 +867,13 @@ QUnit.module('Views', {
         });
         testUtils.form.clickEdit(form);
 
-        assert.containsOnce('input[name="foo"].o_required_modifier', form,
+        assert.containsOnce(form, 'input[name="foo"].o_required_modifier',
             "the foo field widget should be required");
         testUtils.dom.click('.o_field_boolean input');
-        assert.containsOnce('input[name="foo"]:not(.o_required_modifier)', form,
+        assert.containsOnce(form, 'input[name="foo"]:not(.o_required_modifier)',
             "the foo field widget should now have been marked as non-required");
         testUtils.dom.click('.o_field_boolean input');
-        assert.containsOnce('input[name="foo"].o_required_modifier', form,
+        assert.containsOnce(form, 'input[name="foo"].o_required_modifier',
             "the foo field widget should now have been marked as required again");
 
         form.destroy();
@@ -905,12 +897,11 @@ QUnit.module('Views', {
             res_id: 1,
         });
 
-        assert.containsOnce('span.o_required_modifier', form,
-                            "should have 1 span with o_required_modifier class");
+        assert.containsOnce(form, 'span.o_required_modifier', form);
 
         testUtils.form.clickEdit(form);
-        assert.containsOnce('input.o_required_modifier', form,
-                            "in edit mode, should have 1 input with o_required_modifier");
+        assert.containsOnce(form, 'input.o_required_modifier',
+                    "in edit mode, should have 1 input with o_required_modifier");
         form.destroy();
     });
 
