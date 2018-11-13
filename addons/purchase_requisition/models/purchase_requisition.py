@@ -333,7 +333,9 @@ class ProcurementRule(models.Model):
     def _run_buy(self, product_id, product_qty, product_uom, location_id, name, origin, values):
         if product_id.purchase_requisition != 'tenders':
             return super(ProcurementRule, self)._run_buy(product_id, product_qty, product_uom, location_id, name, origin, values)
-        values = self.env['purchase.requisition']._prepare_tender_values(product_id, product_qty, product_uom, location_id, name, origin, values)
-        values['picking_type_id'] = self.picking_type_id.id
-        self.env['purchase.requisition'].create(values)
+        existing_pr = self.env['purchase.requisition'].search([('origin', '=', origin), ('state', '=', 'draft')])
+        if not existing_pr:
+            values = self.env['purchase.requisition']._prepare_tender_values(product_id, product_qty, product_uom, location_id, name, origin, values)
+            values['picking_type_id'] = self.picking_type_id.id
+            self.env['purchase.requisition'].create(values)
         return True
