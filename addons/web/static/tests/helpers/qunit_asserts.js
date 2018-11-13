@@ -30,7 +30,7 @@ odoo.define('web.qunit_asserts', function (require) {
         QUnit.assert.containsN(w, selector, 1, msg);
     };
 
-    QUnit.assert.containsNone = function (selector, w, msg) {
+    QUnit.assert.containsNone = function (w, selector, msg) {
         QUnit.assert.containsN(w, selector, 0, msg);
     };
 

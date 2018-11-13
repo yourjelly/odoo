@@ -155,13 +155,13 @@ QUnit.module('Views', {
             "should apply style attribute on groups");
         assert.strictEqual(form.$('.o_field_widget[name=foo]').attr('style'), 'color: blue',
             "should apply style attribute on fields");
-        assert.containsNone('label:contains(something_id)', form);
+        assert.containsNone(form, 'label:contains(something_id)');
         assert.containsOnce(form, 'label:contains(f3_description)');
         assert.containsOnce(form, 'div.o_field_one2many table');
         assert.containsOnce(form, 'tbody td:not(.o_list_record_selector) .custom-checkbox input:checked');
         assert.strictEqual(form.get('title'), 'second record',
             "title should be display_name of record");
-        assert.containsNone('label.o_form_label_empty:contains(timmy)', form);
+        assert.containsNone(form, 'label.o_form_label_empty:contains(timmy)');
 
         form.destroy();
     });
@@ -735,9 +735,9 @@ QUnit.module('Views', {
 
         testUtils.fields.editInput('foo', 'test');
 
-        assert.containsNone('.o_field_empty', form,
+        assert.containsNone(form, '.o_field_empty',
             "after readonly modifier change, the o_field_empty class should have been removed");
-        assert.containsNone('.o_form_label_empty', form,
+        assert.containsNone(form, '.o_form_label_empty',
             "after readonly modifier change, the o_form_label_empty class should have been removed");
 
         testUtils.fields.editInput('foo', 'hello');
@@ -770,16 +770,15 @@ QUnit.module('Views', {
             res_id: 2,
         });
 
-        assert.containsN('.o_field_widget.o_field_empty', 2, form,
-            "should have 1 empty field with correct class");
-        assert.containsN('.o_form_label_empty', 2, form,
+        assert.containsN(form, '.o_field_widget.o_field_empty', 2)
+        assert.containsN(form, '.o_form_label_empty', 2,
             "should have 1 muted label (for the empty fied) in readonly");
 
         testUtils.form.clickEdit(form);
 
-        assert.containsNone('.o_field_empty', form,
+        assert.containsNone(form, '.o_field_empty',
             "in edit mode, only empty readonly fields should have the o_field_empty class");
-        assert.containsNone('.o_form_label_empty', form,
+        assert.containsNone(form, '.o_form_label_empty',
             "in edit mode, only labels associated to empty readonly fields should have the o_form_label_empty class");
 
         testUtils.fields.editInput('foo', 'readonly');
@@ -787,9 +786,9 @@ QUnit.module('Views', {
         testUtils.fields.editInput('display_name', 'some name');
         testUtils.fields.editInput('foo', 'readonly');
 
-        assert.containsNone('.o_field_empty', form,
+        assert.containsNone(form, '.o_field_empty',
             "there still should not be any empty class on fields as the readonly one is now set");
-        assert.containsNone('.o_form_label_empty', form,
+        assert.containsNone(form, '.o_form_label_empty',
             "there still should not be any empty class on labels as the associated readonly field is now set");
 
         form.destroy();
@@ -813,9 +812,9 @@ QUnit.module('Views', {
                     '</sheet>' +
                 '</form>',
         });
-        assert.containsNone('.o_form_label_empty', form,
+        assert.containsNone(form, '.o_form_label_empty',
                 "no empty class on label");
-        assert.containsNone('.o_field_empty', form,
+        assert.containsNone(form, '.o_field_empty',
                 "no empty class on field");
         form.destroy();
     });
@@ -968,7 +967,7 @@ QUnit.module('Views', {
             res_id: 1,
         });
 
-        assert.containsOnce('div.o_horizontal_separator', form);
+        assert.containsOnce(form, 'div.o_horizontal_separator');
         form.destroy();
     });
 
@@ -1022,13 +1021,13 @@ QUnit.module('Views', {
                 return this._super.apply(this, arguments);
             },
         });
-        assert.containsOnce('button.btn i.fa.fa-check', form);
-        assert.containsN('.o_form_statusbar button', 2, form,
+        assert.containsOnce(form, 'button.btn i.fa.fa-check');
+        assert.containsN(form, '.o_form_statusbar button', 2,
             "should have 2 buttons in the statusbar");
-        assert.containsOnce('button[name="post"]', form,
+        assert.containsOnce(form, 'button[name="post"]',
             "'name' attribute of buttons is transmitted to the rendered html element");
 
-        assert.containsOnce('.o_form_statusbar button:visible', form,
+        assert.containsOnce(form, '.o_form_statusbar button:visible',
             "should have only 1 visible button in the statusbar");
 
         testUtils.mock.intercept(form, 'execute_action', function (event) {
@@ -1220,7 +1219,7 @@ QUnit.module('Views', {
         });
 
         assert.strictEqual(form.mode, 'readonly', 'form view should be in readonly mode');
-        assert.containsOnce('span:contains(blip)', form,
+        assert.containsOnce(form, 'span:contains(blip)',
                         "should contain span with field value");
 
         testUtils.form.clickEdit(form);
@@ -1230,7 +1229,7 @@ QUnit.module('Views', {
         testUtils.form.clickSave(form);
 
         assert.strictEqual(form.mode, 'readonly', 'form view should be in readonly mode');
-        assert.containsOnce('span:contains(tralala)', form,
+        assert.containsOnce(form, 'span:contains(tralala)',
                         "should contain span with field value");
         form.destroy();
     });
