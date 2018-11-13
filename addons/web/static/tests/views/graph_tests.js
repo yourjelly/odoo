@@ -310,7 +310,7 @@ QUnit.module('Views', {
                         "should contain a div with a svg element");
             assert.notOk(graph.$('div.o_view_nocontent').length,
                 "should not display the no content helper");
-            graph.update({domain: [['product_id', '=', 4]]});
+            testUtils.graph.reload(graph, {domain: [['product_id', '=', 4]]});
 
             assert.notOk(graph.$('div.o_graph_svg_container svg.nvd3-svg').length,
                         "should not contain a div with a svg element");
@@ -339,7 +339,7 @@ QUnit.module('Views', {
             assert.notOk(graph.$('text:contains(red)').length,
                         "should not contain a text element with color in legend");
 
-            graph.update({groupBy: ['color_id']});
+            testUtils.graph.reload(graph, {groupBy: ['color_id']});
 
             return concurrency.delay(0);
         }).then(function () {
@@ -394,7 +394,7 @@ QUnit.module('Views', {
                 graph_intervalMapping: {},
             }, "context should be correct");
 
-            graph.update({groupBy: ['product_id', 'color_id']}); // change groupbys
+            testUtils.graph.reload(graph, {groupBy: ['product_id', 'color_id']}); // change groupbys
 
             return concurrency.delay(0);
         }).then(function () {
@@ -508,7 +508,7 @@ QUnit.module('Views', {
                 graph_groupbys: ['color_id'],
             },
         };
-        graph.reload(reloadParams);
+        testUtils.graph.reload(graph, reloadParams);
         return concurrency.delay(0).then(function () {
             // check measure
             assert.strictEqual(graph.$('text.nv-legend-text:contains(Foo)').length, 1,
@@ -552,7 +552,7 @@ QUnit.module('Views', {
             },
         });
 
-        graph.reload({groupBy: []});
+        testUtils.graph.reload(graph, {groupBy: []});
 
         graph.destroy();
     });
@@ -583,7 +583,7 @@ QUnit.module('Views', {
             assert.strictEqual(graph.$('.nv-groups rect').length, 2,
                 "should display two groups");
 
-            graph.reload({groupBy: []});
+            testUtils.graph.reload(graph, {groupBy: []});
             return concurrency.delay(0).then(function () {
                 assert.strictEqual(graph.$('.nv-groups rect').length, 2,
                     "should still display two groups");

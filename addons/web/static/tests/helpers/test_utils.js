@@ -1060,8 +1060,8 @@ function searchAndClickItem(fieldName, options) {
     });
 }
 
-function reloadView(view) {
-    view.reload();
+function reloadView(view, params) {
+    view.reload(params);
 }
 
 // Loading static files cannot be properly simulated when their real content is
@@ -1105,6 +1105,9 @@ return $.when(
             clickDiscard: clickDiscard,
             reload: reloadView,
         },
+        graph: {
+            reload: reloadView,
+        },
         kanban: {
             reload: reloadView,
             clickCreate: clickCreateKanban,
@@ -1116,6 +1119,9 @@ return $.when(
         //     clickNext(widget, selector),
         //     clickPrevious(widget, selector),
         // },
+        pivot: {
+            reload: reloadView,
+        },
         fields: {
             many2one: {
         //         clickOpenRecord([fieldName]),

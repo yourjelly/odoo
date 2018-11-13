@@ -305,7 +305,7 @@ QUnit.module('Views', {
                     "should contain a pivot cell with the number of all records");
         assert.strictEqual(readGroupCount, 1, "should have done 1 rpc");
 
-        pivot.update({domain: [['foo', '>', 10]]});
+        testUtils.pivot.reload(pivot, {domain: [['foo', '>', 10]]});
         assert.strictEqual(pivot.$('td.o_pivot_cell_value:contains(2)').length, 1,
                     "should contain a pivot cell with the number of remaining records");
         assert.strictEqual(readGroupCount, 2, "should have done 2 rpcs");
@@ -523,7 +523,7 @@ QUnit.module('Views', {
         assert.strictEqual(pivot.$('table').length, 1,
             "should have a table in DOM");
 
-        pivot.update({domain: [['foo', '=', 12345]]});
+        testUtils.pivot.reload(pivot, {domain: [['foo', '=', 12345]]});
 
         assert.strictEqual(pivot.$('.o_view_nocontent').length, 1,
             "should have a no_content_helper");
@@ -564,10 +564,10 @@ QUnit.module('Views', {
 
         assert.strictEqual(pivot.$('.o_view_nocontent').length, 1,
             "should have a no_content_helper");
-        pivot.update({domain: [['foo', '=', 12345]]});
+        testUtils.pivot.reload(pivot, {domain: [['foo', '=', 12345]]});
         assert.strictEqual(pivot.$('.o_view_nocontent').length, 1,
             "should still have a no_content_helper");
-        pivot.update({domain: []});
+        testUtils.pivot.reload(pivot, {domain: []});
         assert.strictEqual(pivot.$('.o_view_nocontent').length, 0,
             "should not have a no_content_helper");
 
@@ -603,10 +603,10 @@ QUnit.module('Views', {
         assert.strictEqual(pivot.$('.o_pivot_measure_row:contains(Foo)').length, 1,
             "should have 1 row for measure Foo");
 
-        pivot.update({domain: [['foo', '=', 12345]]});
+        testUtils.pivot.reload(pivot, {domain: [['foo', '=', 12345]]});
 
         rpcCount = 0;
-        pivot.update({domain: []});
+        testUtils.pivot.reload(pivot, {domain: []});
 
         assert.equal(rpcCount, 2, "should have reloaded data");
         assert.strictEqual(pivot.$('.o_pivot_cell_value').length, 3,
@@ -633,7 +633,7 @@ QUnit.module('Views', {
         assert.strictEqual(pivot.$('tbody tr').length, 1,
             "should have 1 rows");
 
-        pivot.update({groupBy: ['product_id']});
+        testUtils.pivot.reload(pivot, {groupBy: ['product_id']});
 
         assert.strictEqual(pivot.$('.o_pivot_cell_value').length, 3,
             "should have 3 cells");
@@ -697,7 +697,7 @@ QUnit.module('Views', {
 
         // expand on date:days, product
         nbReadGroups = 0;
-        pivot.update({groupBy: ['date:days', 'product_id']});
+        testUtils.pivot.reload(pivot, {groupBy: ['date:days', 'product_id']});
 
         assert.strictEqual(nbReadGroups, 3, "should have done 3 read_group RPCS");
         assert.strictEqual(pivot.$('tbody tr').length, 8,
@@ -743,7 +743,7 @@ QUnit.module('Views', {
         });
 
         // expand on date:days, product
-        pivot.update({groupBy: ['date:days', 'product_id']});
+        testUtils.pivot.reload(pivot, {groupBy: ['date:days', 'product_id']});
 
         assert.strictEqual(pivot.$('tbody tr').length, 8,
             "should have 7 rows (total + 3 for December and 2 for October and April)");
@@ -923,7 +923,7 @@ QUnit.module('Views', {
                 pivot_row_groupby: ['product_id'],
             },
         };
-        pivot.reload(reloadParams);
+        testUtils.pivot.reload(pivot, reloadParams);
 
         assert.strictEqual(pivot.$('thead .o_pivot_header_cell_opened').length, 1,
             "column: should have one opened header");
@@ -1147,7 +1147,7 @@ QUnit.module('Views', {
         pivot.$('.o_pivot_field_menu .dropdown-item[data-field=product_id]:first').click();
 
         // Set a domain
-        pivot.update({domain: [['product_id', '=', 41]]});
+        testUtils.pivot.reload(pivot, {domain: [['product_id', '=', 41]]});
 
         var expectedContext = {pivot_column_groupby: ['customer'],
                                pivot_measures: ['foo'],
@@ -1189,8 +1189,8 @@ QUnit.module('Views', {
         });
 
         def = $.Deferred();
-        pivot.update({groupBy: ['product_id']});
-        pivot.update({groupBy: ['product_id', 'customer']});
+        testUtils.pivot.reload(pivot, {groupBy: ['product_id']});
+        testUtils.pivot.reload(pivot, {groupBy: ['product_id', 'customer']});
         def.resolve();
 
         assert.strictEqual(pivot.$('.o_pivot_cell_value').length, 6,
