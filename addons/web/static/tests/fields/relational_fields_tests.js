@@ -152,7 +152,7 @@ QUnit.module('relational_fields', {
 
     QUnit.module('FieldStatus');
 
-    QUnit.test('static statusbar widget on many2one field', function (assert) {
+    QUnit.only('static statusbar widget on many2one field', function (assert) {
         assert.expect(5);
 
         this.data.partner.fields.trululu.domain = "[('bar', '=', True)]";
@@ -183,8 +183,8 @@ QUnit.module('relational_fields', {
 
         assert.strictEqual(count, 1, 'once search_read should have been done to fetch the relational values');
         assert.strictEqual(nb_fields_fetched, 1, 'search_read should only fetch field id');
-        assert.containsN('.o_statusbar_status button:not(.dropdown-toggle)', 2, form);
-        assert.containsN('.o_statusbar_status button:disabled', 2, form);
+        assert.containsN(form, '.o_statusbar_status button:not(.dropdown-toggle)', 2);
+        assert.containsN(form, '.o_statusbar_status button:disabled', 2);
         assert.hasClass('.o_statusbar_status button[data-value="4"]', 'btn-primary', form);
         form.destroy();
     });

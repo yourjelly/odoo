@@ -4,27 +4,34 @@ odoo.define('web.qunit_asserts', function (require) {
     var Widget = require('web.Widget');
 
     /**
-     *
-     * assert.containsOnce(selector, n, widget, [msg]) // priority...
-     * assert.containsOnce(selector, n, $el, [msg])
-     * assert.containsOnce(selector, n, el, [msg])
-     * assert.containsOnce(selector, n, [msg])
+     * assert.containsN(widget, selector, n, [msg])
+     * assert.containsN($el, selector, n, [msg])
+     * assert.containsN(el, selector, n, [msg])
      */
-    QUnit.assert.containsN = function (selector, n, w, msg) {
+    QUnit.assert.containsN = function (w, selector, n, msg) {
         if (typeof n !== 'number') {
             throw Error("containsN assert should be called with a number as second argument");
         }
-        var args = _processArguments(selector, w, msg);
-        var matches = args.matches;
-        msg = args.msg || `selector ${selector} should have exactly ${n} match(es)`;
-        QUnit.assert.strictEqual(matches.length, n, msg);
+        var $el = w instanceof Widget ? w.$el :
+                  w instanceof HTMLElement ? $(w) :
+                  w;  // jquery element
+
+        var $matches = $el.find(selector);
+        if (!msg) {
+            msg = `Selector '${selector}' should have exactly ${n} matches`;
+            if ($el.selector) {
+                msg += ` (inside '${$el.selector}')`;
+            }
+        }
+        QUnit.assert.strictEqual($matches.length, n, msg);
     };
-    QUnit.assert.containsOnce = function (selector, w, msg) {
-        QUnit.assert.containsN(selector, 1, w, msg);
+
+    QUnit.assert.containsOnce = function (w, selector, msg) {
+        QUnit.assert.containsN(w, selector, 1, msg);
     };
 
     QUnit.assert.containsNone = function (selector, w, msg) {
-        QUnit.assert.containsN(selector, 0, w, msg);
+        QUnit.assert.containsN(w, selector, 0, msg);
     };
 
     /**
