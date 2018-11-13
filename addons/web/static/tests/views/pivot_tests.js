@@ -208,7 +208,7 @@ QUnit.module('Views', {
 
         assert.ok(pivot.$el.hasClass('o_enable_linking'),
             "root node should have classname 'o_enable_linking'");
-        pivot.$('.o_pivot_cell_value:contains(12)').click(); // should trigger a do_action
+        testUtils.dom.click(pivot.$('.o_pivot_cell_value:contains(12)')); // should trigger a do_action
 
         pivot.destroy();
     });
@@ -234,7 +234,7 @@ QUnit.module('Views', {
             "root node should not have classname 'o_enable_linking'");
         assert.strictEqual(pivot.$('.o_pivot_cell_value').length, 1,
             "should have one cell");
-        pivot.$('.o_pivot_cell_value').click(); // should not trigger a do_action
+        testUtils.dom.click(pivot.$('.o_pivot_cell_value')); // should not trigger a do_action
 
         pivot.destroy();
     });
@@ -357,12 +357,12 @@ QUnit.module('Views', {
             "should have 3 rows: 1 for the opened header, and 2 for data");
 
         // click on the opened header to close it
-        pivot.$('.o_pivot_header_cell_opened').click();
+        testUtils.dom.click(pivot.$('.o_pivot_header_cell_opened'));
 
         assert.strictEqual(pivot.$('tbody tr').length, 1, "should have 1 row");
 
         // click on closed header to open dropdown
-        pivot.$('tbody .o_pivot_header_cell_closed').click();
+        testUtils.dom.click(pivot.$('tbody .o_pivot_header_cell_closed'));
 
         assert.strictEqual(pivot.$('.o_pivot_field_menu .dropdown-item[data-field="date"]:first').length, 1,
             "should have the date field as proposition");
@@ -372,7 +372,7 @@ QUnit.module('Views', {
             "should not have the non_stored_m2o field as proposition");
 
 
-        pivot.$('.o_pivot_field_menu .dropdown-item[data-field="date"]:first').click();
+        testUtils.dom.click(pivot.$('.o_pivot_field_menu .dropdown-item[data-field="date"]:first'));
 
         assert.strictEqual(pivot.$('tbody tr').length, 4,
             "should have 4 rows: one for header, 3 for data");
@@ -397,7 +397,7 @@ QUnit.module('Views', {
         // open dropdown to zoom into first row
         testUtils.dom.clickFirst(pivot.$('tbody .o_pivot_header_cell_closed'));
         // click on date by day
-        pivot.$('.o_pivot_field_menu .dropdown-item[data-field="date"][data-interval="day"]').click();
+        testUtils.dom.click(pivot.$('.o_pivot_field_menu .dropdown-item[data-field="date"][data-interval="day"]'));
 
         // open dropdown to zoom into second row
         testUtils.dom.clickFirst(pivot.$('tbody td.o_pivot_header_cell_closed:eq(1)'));
@@ -429,7 +429,7 @@ QUnit.module('Views', {
             "should have 3 rows: 1 for the open header, and 2 for data");
 
         rpcCount = 0;
-        pivot.$buttons.find('.o_pivot_flip_button').click();
+        testUtils.dom.click(pivot.$buttons.find('.o_pivot_flip_button'));
 
         assert.strictEqual(rpcCount, 0, "should not have done any rpc");
         assert.strictEqual(pivot.$('tbody tr').length, 1,
@@ -462,7 +462,7 @@ QUnit.module('Views', {
             "the __count measure should not be selected");
 
         rpcCount = 0;
-        pivot.$buttons.find('.dropdown-item[data-field=__count]:first').click();
+        testUtils.dom.click(pivot.$buttons.find('.dropdown-item[data-field=__count]:first'));
 
         assert.ok(pivot.$buttons.find('.dropdown-item[data-field=__count]:first').hasClass('selected'),
             "the __count measure should be selected");
@@ -471,7 +471,7 @@ QUnit.module('Views', {
         assert.strictEqual(rpcCount, 2,
             "should have done 2 rpcs to reload data");
 
-        pivot.$buttons.find('.dropdown-item[data-field=__count]:first').click();
+        testUtils.dom.click(pivot.$buttons.find('.dropdown-item[data-field=__count]:first'));
 
         assert.ok(!pivot.$buttons.find('.dropdown-item[data-field=__count]:first').hasClass('selected'),
             "the __count measure should not be selected");
@@ -498,7 +498,7 @@ QUnit.module('Views', {
         assert.strictEqual(pivot.$('table').length, 1,
             "should have a table in DOM");
 
-        pivot.$buttons.find('.dropdown-item[data-field=__count]:first').click();
+        testUtils.dom.click(pivot.$buttons.find('.dropdown-item[data-field=__count]:first'));
 
         assert.strictEqual(pivot.$('.o_view_nocontent').length, 1,
             "should have a no_content_helper");
@@ -658,12 +658,12 @@ QUnit.module('Views', {
         assert.strictEqual($('td.o_pivot_cell_value').text(), "321220",
             "should have proper values in cells (total, result 1, result 2");
 
-        pivot.$('th.o_pivot_measure_row').click();
+        testUtils.dom.click(pivot.$('th.o_pivot_measure_row'));
 
         assert.strictEqual($('td.o_pivot_cell_value').text(), "322012",
             "should have proper values in cells (total, result 2, result 1");
 
-        pivot.$('th.o_pivot_measure_row').click();
+        testUtils.dom.click(pivot.$('th.o_pivot_measure_row'));
 
         assert.strictEqual($('td.o_pivot_cell_value').text(), "321220",
             "should have proper values in cells (total, result 1, result 2");
@@ -712,7 +712,7 @@ QUnit.module('Views', {
 
         // expand all
         nbReadGroups = 0;
-        pivot.$buttons.find('.o_pivot_expand_button').click();
+        testUtils.dom.click(pivot.$buttons.find('.o_pivot_expand_button'));
 
         assert.strictEqual(nbReadGroups, 3, "should have done 3 read_group RPCS");
         assert.strictEqual(pivot.$('tbody tr').length, 8,
@@ -757,7 +757,7 @@ QUnit.module('Views', {
 
         // expand all
         def = $.Deferred();
-        pivot.$buttons.find('.o_pivot_expand_button').click();
+        testUtils.dom.click(pivot.$buttons.find('.o_pivot_expand_button'));
         def.resolve();
 
         assert.strictEqual(pivot.$('tbody tr').length, 8,
@@ -786,7 +786,7 @@ QUnit.module('Views', {
             },
         });
 
-        pivot.$buttons.find('.o_pivot_download').click();
+        testUtils.dom.click(pivot.$buttons.find('.o_pivot_download'));
         pivot.destroy();
     });
 
@@ -830,8 +830,8 @@ QUnit.module('Views', {
         }, "context should be correct");
 
         // expand header on field customer
-        pivot.$('thead .o_pivot_header_cell_closed:nth(1)').click();
-        pivot.$('.o_pivot_field_menu .dropdown-item[data-field="customer"]:first').click();
+        testUtils.dom.click(pivot.$('thead .o_pivot_header_cell_closed:nth(1)'));
+        testUtils.dom.click(pivot.$('.o_pivot_field_menu .dropdown-item[data-field="customer"]:first'));
         assert.deepEqual(pivot.getContext(), {
             pivot_column_groupby: ['date:day', 'customer'],
             pivot_measures: ['foo'],
@@ -840,7 +840,7 @@ QUnit.module('Views', {
 
         // expand row on field product_id
         testUtils.dom.clickFirst(pivot.$('tbody .o_pivot_header_cell_closed'));
-        pivot.$('.o_pivot_field_menu .dropdown-item[data-field="product_id"]:first').click();
+        testUtils.dom.click(pivot.$('.o_pivot_field_menu .dropdown-item[data-field="product_id"]:first'));
         assert.deepEqual(pivot.getContext(), {
             pivot_column_groupby: ['date:day', 'customer'],
             pivot_measures: ['foo'],
@@ -1071,7 +1071,7 @@ QUnit.module('Views', {
         });
         testUtils.dom.clickFirst(pivot.$('tbody .o_pivot_header_cell_closed'));
         // click on date by month
-        pivot.$('.o_pivot_field_menu .dropdown-item[data-field="date"][data-interval="month"]').click();
+        testUtils.dom.click(pivot.$('.o_pivot_field_menu .dropdown-item[data-field="date"][data-interval="month"]'));
 
         assert.strictEqual(pivot.$('.o_pivot_cell_value').text(), '2211',
             'should have loaded the proper data');
@@ -1093,7 +1093,7 @@ QUnit.module('Views', {
             },
         });
 
-        pivot.$buttons.find('.dropdown-item[data-field=product_id]:first').click();
+        testUtils.dom.click(pivot.$buttons.find('.dropdown-item[data-field=product_id]:first'));
         assert.strictEqual(pivot.$('.o_pivot_cell_value').text(), '421131',
             'should have loaded the proper data');
         pivot.destroy();
@@ -1113,7 +1113,7 @@ QUnit.module('Views', {
 
         testUtils.dom.clickFirst(pivot.$('tbody .o_pivot_header_cell_closed'));
 
-        pivot.$('.o_pivot_field_menu .dropdown-item[data-field="product_id"]:first').click();
+        testUtils.dom.click(pivot.$('.o_pivot_field_menu .dropdown-item[data-field="product_id"]:first'));
 
         assert.strictEqual(pivot.$('.o_pivot_cell_value').text(), '211',
             'should have loaded the proper data');
@@ -1133,12 +1133,12 @@ QUnit.module('Views', {
         });
 
         // Set a column groupby
-        pivot.$('thead .o_pivot_header_cell_closed').click();
-        pivot.$('.o_field_selection .dropdown-item[data-field=customer]:first').click();
+        testUtils.dom.click(pivot.$('thead .o_pivot_header_cell_closed'));
+        testUtils.dom.click(pivot.$('.o_field_selection .dropdown-item[data-field=customer]:first'));
 
         // Set a Row groupby
-        pivot.$('tbody .o_pivot_header_cell_closed').click();
-        pivot.$('.o_pivot_field_menu .dropdown-item[data-field=product_id]:first').click();
+        testUtils.dom.click(pivot.$('tbody .o_pivot_header_cell_closed'));
+        testUtils.dom.click(pivot.$('.o_pivot_field_menu .dropdown-item[data-field=product_id]:first'));
 
         // Set a domain
         testUtils.pivot.reload(pivot, {domain: [['product_id', '=', 41]]});
@@ -1295,17 +1295,17 @@ QUnit.module('Views', {
 
         // with no data
 
-        $('.o_time_range_menu_button').click();
-        $('.o_time_range_menu .o_comparison_checkbox').click();
+        testUtils.dom.click($('.o_time_range_menu_button'));
+        testUtils.dom.click($('.o_time_range_menu .o_comparison_checkbox'));
         $('.o_time_range_selector').val('today');
-        $('.o_time_range_menu .o_apply_range').click();
+        testUtils.dom.click($('.o_time_range_menu .o_apply_range'));
 
         assert.strictEqual($('.o_pivot p.o_view_nocontent_empty_folder').length, 1);
 
         // with data, no row groupby
-        $('.o_time_range_menu_button').click();
+        testUtils.dom.click($('.o_time_range_menu_button'));
         $('.o_time_range_selector').val('this_month');
-        $('.o_time_range_menu .o_apply_range').click();
+        testUtils.dom.click($('.o_time_range_menu .o_apply_range'));
         results = [
             "13", "0", "100%", "0", "19", "-100%", "13", "19", "-31.58%"
         ];
@@ -1313,8 +1313,8 @@ QUnit.module('Views', {
 
         // with data, with row groupby
 
-        $('.o_pivot .o_pivot_header_cell_closed').eq(2).click();
-        $('.o_pivot .o_field_selection a[data-field="product_id"]').click();
+        testUtils.dom.click($('.o_pivot .o_pivot_header_cell_closed').eq(2));
+        testUtils.dom.click($('.o_pivot .o_field_selection a[data-field="product_id"]'));
         results = [
             "13", "0", "100%", "0", "19", "-100%", "13", "19", "-31.58%" ,
             "12", "0", "100%",                     "12", "0" , "100%"    ,
@@ -1322,9 +1322,9 @@ QUnit.module('Views', {
         ];
         checkCellValues(results);
 
-        $('.o_control_panel button.btn-primary').eq(0).click();
-        $('.o_control_panel div.o_pivot_measures_list a[data-field="foo"').click();
-        $('.o_control_panel div.o_pivot_measures_list a[data-field="product_id"').click();
+        testUtils.dom.clickFirst($('.o_control_panel button.btn-primary'));
+        testUtils.dom.click($('.o_control_panel div.o_pivot_measures_list a[data-field="foo"'));
+        testUtils.dom.click($('.o_control_panel div.o_pivot_measures_list a[data-field="product_id"'));
         results = [
             "2", "0", "100%", "0", "1", "-100%", "2", "1", "100%" ,
             "1", "0", "100%",                     "1", "0" , "100%"    ,
@@ -1332,9 +1332,9 @@ QUnit.module('Views', {
         ];
         checkCellValues(results);
 
-        $('.o_control_panel button.btn-primary').eq(0).click();
-        $('.o_control_panel div.o_pivot_measures_list a[data-field="__count"').click();
-        $('.o_control_panel div.o_pivot_measures_list a[data-field="product_id"').click();
+        testUtils.dom.clickFirst($('.o_control_panel button.btn-primary'));
+        testUtils.dom.click($('.o_control_panel div.o_pivot_measures_list a[data-field="__count"'));
+        testUtils.dom.click($('.o_control_panel div.o_pivot_measures_list a[data-field="product_id"'));
         results = [
             "2", "0", "100%", "0", "2", "-100%", "2", "2", "0%" ,
             "1", "0", "100%",                     "1", "0" , "100%"    ,
@@ -1342,7 +1342,7 @@ QUnit.module('Views', {
         ];
         checkCellValues(results);
 
-        $('.o_pivot .o_pivot_header_cell_opened').eq(0).click();
+        testUtils.dom.clickFirst($('.o_pivot .o_pivot_header_cell_opened'));
         results = [
             "2", "2", "0%"     ,
             "1", "0", "100%"   ,
@@ -1397,13 +1397,13 @@ QUnit.module('Views', {
         });
 
         // open time range menu
-        $('.o_control_panel .o_time_range_menu_button').click();
+        testUtils.dom.click($('.o_control_panel .o_time_range_menu_button'));
         // select 'Today' as range
         $('.o_control_panel .o_time_range_selector').val('today');
         // check checkbox 'Compare To'
-        $('.o_control_panel .o_time_range_menu .o_comparison_checkbox').click();
+        testUtils.dom.click($('.o_control_panel .o_time_range_menu .o_comparison_checkbox'));
         // Click on 'Apply' button
-        $('.o_control_panel .o_time_range_menu .o_apply_range').click();
+        testUtils.dom.click($('.o_control_panel .o_time_range_menu .o_apply_range'));
 
         // the time range menu configuration is by now: Date, Today, checkbox checked, Previous Period
         // With the data above, the time ranges contain no record.
@@ -1413,16 +1413,16 @@ QUnit.module('Views', {
         assert.ok($('.o_control_panel button.o_pivot_download').prop('disabled'));
 
         // open time range menu
-        $('.o_control_panel .o_time_range_menu_button').click();
+        testUtils.dom.click($('.o_control_panel .o_time_range_menu_button'));
         // select 'This Month' as date range
         $('.o_control_panel .o_time_range_selector').val('this_month');
 
         // Click on 'Apply' button
-        $('.o_control_panel .o_time_range_menu .o_apply_range').click();
+        testUtils.dom.click($('.o_control_panel .o_time_range_menu .o_apply_range'));
         // the time range menu configuration is by now: Date, This Month, checkbox checked, Previous Period
         // With the data above, the time ranges contain some records.
         // export data. Should execute 'get_file'
-        $('.o_control_panel button.o_pivot_download').click();
+        testUtils.dom.click($('.o_control_panel button.o_pivot_download'));
 
         assert.verifySteps([
             // Headers
@@ -1490,10 +1490,10 @@ QUnit.module('Views', {
         mockMock = true;
 
         // activate 'This Month' and 'Previous Period' in time range menu
-        $('.o_control_panel .o_time_range_menu_button').click();
+        testUtils.dom.click($('.o_control_panel .o_time_range_menu_button'));
         $('.o_control_panel .o_time_range_selector').val('this_month');
-        $('.o_control_panel .o_time_range_menu .o_comparison_checkbox').click();
-        $('.o_control_panel .o_time_range_menu .o_apply_range').click();
+        testUtils.dom.click($('.o_control_panel .o_time_range_menu .o_comparison_checkbox'));
+        testUtils.dom.click($('.o_control_panel .o_time_range_menu .o_apply_range'));
 
         var results = [
             "4", "0", "100%",
