@@ -41,8 +41,7 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
         /**
          * @private
          */
-        _addAccessKeyOverlays: function () {
-            var accesskeyElements = $(document).find('[accesskey]').filter(':visible');
+        _addAccessKeyOverlays: function (accesskeyElements) {
             _.each(accesskeyElements, function (elem) {
                 var overlay = $(_.str.sprintf("<div class='o_web_accesskey_overlay'>%s</div>", $(elem).attr('accesskey').toUpperCase()));
 
@@ -153,13 +152,13 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
                         .not('[disabled]')
                         .not('[tabindex="-1"]');
 
-                var accesskeyElements = $($modal[$modal.length - 1]).find('button.btn:visible')
+                var modalAccesskeyElements = $($modal[$modal.length - 1]).find('button.btn:visible')
 
-                var filteredButtons = this._filterAccessButtons(buttonsWithoutAccessKey, accesskeyElements);
+                var filteredButtons = this._filterAccessButtons(buttonsWithoutAccessKey, modalAccesskeyElements);
 
                 var assignAccesskey = this._toggleDisabled(filteredButtons, true);
 
-                _.each(accesskeyElements, function (elem) {
+                _.each(modalAccesskeyElements, function (elem) {
                     var buttonString = [elem.innerText, elem.title, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"].join('');
                     for (var letterIndex = 0; letterIndex < buttonString.length; letterIndex++) {
                         var candidateAccessKey = buttonString[letterIndex].toUpperCase();
@@ -171,10 +170,10 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
                         }
                     }
                 });
-                _.each(accesskeyElements, function (elem) {
+                _.each(modalAccesskeyElements, function (elem) {
                     elem.setAttribute('aria-keyshortcuts', 'Alt+Shift+' + elem.accessKey);
                 });
-                this._addAccessKeyOverlays();
+                this._addAccessKeyOverlays(modalAccesskeyElements);
             }
             else {
                 if (!this._areAccessKeyVisible &&
@@ -208,7 +207,8 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
                     _.each(elementsWithoutAriaKeyshortcut, function (elem) {
                         elem.setAttribute('aria-keyshortcuts', 'Alt+Shift+' + elem.accessKey);
                     });
-                    this._addAccessKeyOverlays();
+                    var accesskeyElements = $(document).find('[accesskey]').filter(':visible');
+                    this._addAccessKeyOverlays(accesskeyElements);
                 }
             }
             // on mac, there are a number of keys that are only accessible though the usage of
