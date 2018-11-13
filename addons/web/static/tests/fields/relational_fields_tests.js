@@ -152,7 +152,7 @@ QUnit.module('relational_fields', {
 
     QUnit.module('FieldStatus');
 
-    QUnit.only('static statusbar widget on many2one field', function (assert) {
+    QUnit.test('static statusbar widget on many2one field', function (assert) {
         assert.expect(5);
 
         this.data.partner.fields.trululu.domain = "[('bar', '=', True)]";
@@ -231,7 +231,7 @@ QUnit.module('relational_fields', {
         assert.hasClass('.o_statusbar_status button[data-value="4"]', 'btn-primary', form);
         assert.hasClass('.o_statusbar_status button[data-value="4"]', 'disabled', form);
 
-        assert.containsN('.o_statusbar_status button.btn-secondary:not(.dropdown-toggle):not(:disabled)', 2, form);
+        assert.containsN(form, '.o_statusbar_status button.btn-secondary:not(.dropdown-toggle):not(:disabled)', 2);
 
         var $clickable = form.$('.o_statusbar_status button.btn-secondary:not(.dropdown-toggle):not(:disabled)');
         testUtils.dom.click($clickable.last()); // (last is visually the first here (css))
@@ -279,7 +279,7 @@ QUnit.module('relational_fields', {
             config: {device: {isMobile: false}},
         });
 
-        assert.containsN('.o_statusbar_status button:disabled', 2, form);
+        assert.containsN(form, '.o_statusbar_status button:disabled', 2);
         form.destroy();
     });
 
@@ -301,9 +301,9 @@ QUnit.module('relational_fields', {
         });
 
         testUtils.form.clickEdit(form);
-        assert.containsN('.o_statusbar_status button:not(.dropdown-toggle)', 3, form);
+        assert.containsN(form, '.o_statusbar_status button:not(.dropdown-toggle)', 3);
         testUtils.dom.click(form.$('.o_statusbar_status button:not(.dropdown-toggle)').last());
-        assert.containsN('.o_statusbar_status button:not(.dropdown-toggle)', 2, form);
+        assert.containsN(form, '.o_statusbar_status button:not(.dropdown-toggle)', 2);
 
         form.destroy();
     });
@@ -328,8 +328,8 @@ QUnit.module('relational_fields', {
 
         testUtils.form.clickEdit(form);
 
-        assert.containsOnce('.o_statusbar_status:first .dropdown-menu button.disabled', form);
-        assert.containsOnce('.o_statusbar_status:last button.disabled', form);
+        assert.containsOnce(form, '.o_statusbar_status:first .dropdown-menu button.disabled');
+        assert.containsOnce(form, '.o_statusbar_status:last button.disabled');
 
         form.destroy();
     });
@@ -363,10 +363,10 @@ QUnit.module('relational_fields', {
 
         testUtils.form.clickEdit(form);
 
-        assert.containsN('.o_statusbar_status button.disabled', 3, form);
+        assert.containsN(form, '.o_statusbar_status button.disabled', 3);
         assert.strictEqual(rpcCount, 1, "should have done 1 search_read rpc");
         testUtils.fields.editInput("qux", 9.5);
-        assert.containsN('.o_statusbar_status button.disabled', 2, form);
+        assert.containsN(form, '.o_statusbar_status button.disabled', 2);
         assert.strictEqual(rpcCount, 2, "should have done 1 more search_read rpc");
         testUtils.fields.editInput("qux", "hey");
         assert.strictEqual(rpcCount, 2, "should not have done 1 more search_read rpc");
