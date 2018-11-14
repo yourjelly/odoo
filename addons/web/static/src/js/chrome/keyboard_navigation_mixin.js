@@ -148,15 +148,14 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
                 var usedAccessKey = [];
 
                 var buttonsWithoutAccessKey = this.$el.find('button.btn:visible')
-                        .not('[accesskey]')
                         .not('[disabled]')
                         .not('[tabindex="-1"]');
 
                 var modalAccesskeyElements = $($modal[$modal.length - 1]).find('button.btn:visible')
 
-                var filteredButtons = this._filterAccessButtons(buttonsWithoutAccessKey, modalAccesskeyElements);
+                this.filteredButtons = this._filterAccessButtons(buttonsWithoutAccessKey, modalAccesskeyElements);
 
-                var assignAccesskey = this._toggleDisabled(filteredButtons, true);
+                var assignAccesskey = this._toggleDisabled(this.filteredButtons, true);
 
                 _.each(modalAccesskeyElements, function (elem) {
                     var buttonString = [elem.innerText, elem.title, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"].join('');
@@ -278,16 +277,7 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
             if ((keyUpEvent.altKey || keyUpEvent.key === 'Alt') && !keyUpEvent.ctrlKey) {
                 var $modal = $(document).find('.modal-dialog');
                 if ($modal.length) {
-                    var buttonsWithoutAccessKey = this.$el.find('button.btn:visible')
-                        .not('[accesskey]')
-                        .not('[disabled]')
-                        .not('[tabindex="-1"]');
-
-                    var accesskeyElements = $($modal[$modal.length - 1]).find('button.btn:visible')
-
-                    var filteredButtons = this._filterAccessButtons(buttonsWithoutAccessKey, accesskeyElements);
-
-                    var assignAccesskey = this._toggleDisabled(filteredButtons, false);
+                    var assignAccesskey = this._toggleDisabled(this.filteredButtons, false);
                 }
                 this._hideAccessKeyOverlay();
                 if (keyUpEvent.preventDefault) keyUpEvent.preventDefault(); else keyUpEvent.returnValue = false;
