@@ -9,3 +9,4 @@ class ResConfigSettings(models.TransientModel):
 
     group_attendance_use_pin = fields.Boolean(string='Employee PIN',
         implied_group="hr_attendance.group_hr_attendance_use_pin")
+    module_hr_attendance_iot = fields.Boolean(string='RFID Readers')
