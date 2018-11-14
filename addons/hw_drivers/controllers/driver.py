@@ -25,6 +25,19 @@ from odoo.modules.module import get_resource_path
 _logger = logging.getLogger(__name__)
 
 
+    @http.route('/hw_drivers/methodcall', type='json', auth='none', cors='*', csrf=False)
+    def device_method_call(self):
+        data = httprequest.jsonrequest
+        for device in drivers:
+            if device.find(data.get('identifier')) != -1:
+                method = getattr(drivers[device], data.get('method'))
+                if method:
+                    if data.get('param'):
+                        return method(data['param'])
+                    else:
+                        return method()
+        return False
+
 #----------------------------------------------------------
 # Helper
 #----------------------------------------------------------
