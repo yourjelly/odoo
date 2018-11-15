@@ -26,7 +26,7 @@ class ResConfigSettings(models.TransientModel):
         ], related='company_id.tax_calculation_rounding_method', string='Tax calculation rounding method')
     module_account_accountant = fields.Boolean(string='Accounting')
     group_analytic_accounting = fields.Boolean(string='Analytic Accounting',
-        implied_group='analytic.group_analytic_accounting')
+        implied_group='sale.group_analytic_accounting')
     group_warning_account = fields.Boolean(string="Warnings", implied_group='account.group_warning_account')
     group_cash_rounding = fields.Boolean(string="Cash Rounding", implied_group='account.group_cash_rounding')
     module_account_asset = fields.Boolean(string='Assets Management')
