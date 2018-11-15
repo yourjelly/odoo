@@ -276,8 +276,8 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
         _onKeyUp: function (keyUpEvent) {
             if ((keyUpEvent.altKey || keyUpEvent.key === 'Alt') && !keyUpEvent.ctrlKey) {
                 var $modal = $(document).find('.modal-dialog');
-                if ($modal.length) {
-                    var assignAccesskey = this._toggleDisabled(this.filteredButtons, false);
+                if (this.filteredButtons) {
+                    this._toggleDisabled(this.filteredButtons, false);
                 }
                 this._hideAccessKeyOverlay();
                 if (keyUpEvent.preventDefault) keyUpEvent.preventDefault(); else keyUpEvent.returnValue = false;
