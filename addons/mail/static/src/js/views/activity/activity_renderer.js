@@ -4,6 +4,7 @@ odoo.define('mail.ActivityRenderer', function (require) {
 var AbstractRenderer = require('web.AbstractRenderer');
 var ActivityRecord = require('mail.ActivityRecord');
 var core = require('web.core');
+var dialogs = require('web.view_dialogs');
 var field_registry = require('web.field_registry');
 var qweb = require('web.QWeb');
 var session = require('web.session');
@@ -18,6 +19,7 @@ var ActivityRenderer = AbstractRenderer.extend({
     events: {
         'click .o_send_mail_template': '_onSenMailTemplateClicked',
         'click .o_activity_empty_cell': '_onEmptyCell',
+        'click .o_record_selector': '_onRecordSelector',
     },
 
     /**
@@ -82,22 +84,13 @@ var ActivityRenderer = AbstractRenderer.extend({
      * @private
      */
     _render: function () {
-        this.$el
-            .removeClass('table-responsive')
-            .empty();
-
-        if (this.state.activity_types.length === 0) {
-            this.$el.append(QWeb.render('ActivityView.nodata'));
-        } else {
-            var $table = $('<table>')
-                .addClass('table-bordered')
-                .append(this._renderHeader())
-                .append(this._renderBody());
-            this.$el
-                .addClass('table-responsive')
-                .append($table);
-        }
-        return this._super();
+        this.$el.addClass('table-responsive');
+        this.$el.html(QWeb.render('mail.ActivityView', { isEmpty: !this.state.activity_types.length }));
+        this.$('table')
+            .append(this._renderHeader())
+            .append(this._renderBody())
+            .append(this._renderFooter());
+        return this._super.apply(this, arguments);
     },
     /**
      * @private
@@ -106,6 +99,13 @@ var ActivityRenderer = AbstractRenderer.extend({
     _renderBody: function () {
         var $rows = _.map(this.state.activity_res_ids, this._renderRow.bind(this));
         return $('<tbody>').append($rows);
+    },
+    /**
+     * @private
+     * @returns {jQueryElement} a <tfoot> element
+     */
+    _renderFooter: function () {
+        return QWeb.render('mail.ActivityViewFooter', {name: _.str.sprintf(_t('Schedule activity for %s'), this.arch.attrs.string)});
     },
     /**
      * @private
@@ -213,6 +213,24 @@ var ActivityRenderer = AbstractRenderer.extend({
                 self.trigger_up('reload');
             },
         });
+    },
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onRecordSelector: function (ev) {
+        var self = this;
+        ev.stopPropagation();
+        return new dialogs.SelectCreateDialog(this, {
+            res_model: this.state.model,
+            domain: this.state.domain,
+            title: _.str.sprintf(_t("Search: %s"), this.arch.attrs.string),
+            disable_multiple_selection: true,
+            on_selected: function (record) {
+                var widget = new KanbanActivity(self, "activity_ids", self._getKanbanActivityData({}, record[0]), {});
+                widget.scheduleActivity();
+            },
+        }).open();
     },
     /**
      * @private
