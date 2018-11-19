@@ -3,8 +3,6 @@ odoo.define('web.favorites_submenus_registry', function (require) {
 
 var SortedRegistry = require('web.SortedRegistry');
 
-var sortFunction = function (key) {return key;};
-
-return new SortedRegistry(null, sortFunction);
+return new SortedRegistry();
 
 });

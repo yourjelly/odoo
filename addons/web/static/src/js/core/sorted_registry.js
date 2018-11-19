@@ -11,13 +11,18 @@ var SortedRegistry = Registry.extend({
      * @constructor
      * @param {Object} [mapping] the initial data in the registry
      */
-    init: function (mapping, sortFunction) {
+    init: function () {
         var self = this;
         this._super.apply(this, arguments);
-        this._scores = {};
-        this.sortedKeys = _.sortBy(Object.keys(this.map), sortFunction);
+        this._scores = [];
+        this._initialKeys = Object.keys(this.map);
+        this._sortedKeys = this._initialKeys;
         this.listeners.push(function () {
-            self.sortedKeys = _.sortBy(Object.keys(self.map), sortFunction);
+            self.sortedKeys = self._initialKeys.concat(
+                _.sortBy(self._scores, 'score').map(function (score) {
+                    return score.key;
+                })
+            );
         });
     },
 
@@ -37,8 +42,11 @@ var SortedRegistry = Registry.extend({
      * @returns {Registry} can be used to chain add calls.
      */
     add: function (key, value, score) {
+        this._scores.push({
+            key: key,
+            score: score || key,
+        });
         this._super.apply(this, arguments);
-        this._scores[key] = score;
     },
     /**
      * @overide
@@ -48,6 +56,7 @@ var SortedRegistry = Registry.extend({
     keys: function () {
         return this.sortedKeys;
     },
+
 });
 
 return SortedRegistry;

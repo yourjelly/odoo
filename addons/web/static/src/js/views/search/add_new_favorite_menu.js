@@ -1,4 +1,4 @@
-odoo.define('board.AddNewFavoriteMenu', function (require) {
+odoo.define('web.AddNewFavoriteMenu', function (require) {
 "use strict";
 
 var core = require('web.core');
@@ -7,7 +7,7 @@ var favorites_submenus_registry = require('web.favorites_submenus_registry');
 
 var _t = core._t;
 
-var AddToBoardMenu = Widget.extend({
+var AddNewFavoriteMenu = Widget.extend({
     template: 'AddNewFavoriteMenu',
     events: _.extend({}, Widget.prototype.events,
     {
@@ -122,8 +122,8 @@ var AddToBoardMenu = Widget.extend({
     },
 });
 
-favorites_submenus_registry.add('add_new_favorite_menu', AddToBoardMenu);
+favorites_submenus_registry.add('add_new_favorite_menu', AddNewFavoriteMenu, 0);
 
-return AddToBoardMenu;
+return AddNewFavoriteMenu;
 
 });

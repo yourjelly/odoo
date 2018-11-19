@@ -196,7 +196,7 @@ var AddToBoardMenu = Widget.extend({
 
 });
 
-favorites_submenus_registry.add('add_to_board_menu', AddToBoardMenu);
+favorites_submenus_registry.add('add_to_board_menu', AddToBoardMenu, 10);
 
 return AddToBoardMenu;
 

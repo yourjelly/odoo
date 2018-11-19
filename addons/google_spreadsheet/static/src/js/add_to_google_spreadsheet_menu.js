@@ -107,7 +107,7 @@ var AddToGoogleSpreadsheetMenu = Widget.extend({
      },
 });
 
-favorites_submenus_registry.add('add_to_google_spreadsheet_menu', AddToGoogleSpreadsheetMenu);
+favorites_submenus_registry.add('add_to_google_spreadsheet_menu', AddToGoogleSpreadsheetMenu, 20);
 
 return AddToGoogleSpreadsheetMenu;
 
