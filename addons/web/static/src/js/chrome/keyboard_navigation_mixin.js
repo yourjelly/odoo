@@ -41,7 +41,9 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
         /**
          * @private
          */
-        _addAccessKeyOverlays: function (accesskeyElements) {
+        // _addAccessKeyOverlays: function (accesskeyElements) {
+        _addAccessKeyOverlays: function () {
+            var accesskeyElements = $(document).find('[accesskey]').filter(':visible');
             _.each(accesskeyElements, function (elem) {
                 var overlay = $(_.str.sprintf("<div class='o_web_accesskey_overlay'>%s</div>", $(elem).attr('accesskey').toUpperCase()));
 
@@ -95,28 +97,28 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
             });
         },
 
-        _filterAccessButtons: function (buttonsWithoutAccessKey, accesskeyElements) {
-            this.reusableKeys = [];
-            var accessButtons = _.filter(buttonsWithoutAccessKey, function(el) {
-                if (!_.contains(accesskeyElements, el)) {
-                    return el;
-                }
-            });
-            return accessButtons;
-        },
+        // _filterAccessButtons: function (buttonsWithoutAccessKey, accesskeyElements) {
+        //     this.reusableKeys = [];
+        //     var accessButtons = _.filter(buttonsWithoutAccessKey, function(el) {
+        //         if (!_.contains(accesskeyElements, el)) {
+        //             return el;
+        //         }
+        //     });
+        //     return accessButtons;
+        // },
 
-        _toggleDisabled: function (accessButtons, disabled) {
-            if (disabled) {
-                _.each(accessButtons, function (el) {
-                    el.setAttribute("disabled", "1");
-                });
-            } else {
-                _.each(accessButtons, function (el) {
-                    el.removeAttribute("disabled");
-                });
-            }
-            return accessButtons;
-        },
+        // _toggleDisabled: function (accessButtons, disabled) {
+        //     if (disabled) {
+        //         _.each(accessButtons, function (el) {
+        //             el.setAttribute("disabled", "1");
+        //         });
+        //     } else {
+        //         _.each(accessButtons, function (el) {
+        //             el.removeAttribute("disabled");
+        //         });
+        //     }
+        //     return accessButtons;
+        // },
 
         //--------------------------------------------------------------------------
         // Handlers
@@ -142,39 +144,39 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
                 return false;
             }
             var $modal = $(document).find('.modal-dialog');
-            if ($modal.length) {
-                this._areAccessKeyVisible = true;
+            // if ($modal.length) {
+            //     this._areAccessKeyVisible = true;
 
-                var usedAccessKey = [];
+            //     var usedAccessKey = [];
 
-                var buttonsWithoutAccessKey = this.$el.find('button.btn:visible')
-                        .not('[disabled]')
-                        .not('[tabindex="-1"]');
+            //     var buttonsWithoutAccessKey = this.$el.find('button.btn:visible')
+            //             .not('[disabled]')
+            //             .not('[tabindex="-1"]');
 
-                var modalAccesskeyElements = $($modal[$modal.length - 1]).find('button.btn:visible')
+            //     var modalAccesskeyElements = $($modal[$modal.length - 1]).find('button.btn:visible')
 
-                this.filteredButtons = this._filterAccessButtons(buttonsWithoutAccessKey, modalAccesskeyElements);
+            //     this.filteredButtons = this._filterAccessButtons(buttonsWithoutAccessKey, modalAccesskeyElements);
 
-                var assignAccesskey = this._toggleDisabled(this.filteredButtons, true);
+            //     var assignAccesskey = this._toggleDisabled(this.filteredButtons, true);
 
-                _.each(modalAccesskeyElements, function (elem) {
-                    var buttonString = [elem.innerText, elem.title, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"].join('');
-                    for (var letterIndex = 0; letterIndex < buttonString.length; letterIndex++) {
-                        var candidateAccessKey = buttonString[letterIndex].toUpperCase();
-                        if (candidateAccessKey >= 'A' && candidateAccessKey <= 'Z' &&
-                            !_.includes(usedAccessKey, candidateAccessKey)) {
-                            elem.accessKey = candidateAccessKey;
-                            usedAccessKey.push(candidateAccessKey);
-                            break;
-                        }
-                    }
-                });
-                _.each(modalAccesskeyElements, function (elem) {
-                    elem.setAttribute('aria-keyshortcuts', 'Alt+Shift+' + elem.accessKey);
-                });
-                this._addAccessKeyOverlays(modalAccesskeyElements);
-            }
-            else {
+            //     _.each(modalAccesskeyElements, function (elem) {
+            //         var buttonString = [elem.innerText, elem.title, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"].join('');
+            //         for (var letterIndex = 0; letterIndex < buttonString.length; letterIndex++) {
+            //             var candidateAccessKey = buttonString[letterIndex].toUpperCase();
+            //             if (candidateAccessKey >= 'A' && candidateAccessKey <= 'Z' &&
+            //                 !_.includes(usedAccessKey, candidateAccessKey)) {
+            //                 elem.accessKey = candidateAccessKey;
+            //                 usedAccessKey.push(candidateAccessKey);
+            //                 break;
+            //             }
+            //         }
+            //     });
+            //     _.each(modalAccesskeyElements, function (elem) {
+            //         elem.setAttribute('aria-keyshortcuts', 'Alt+Shift+' + elem.accessKey);
+            //     });
+            //     this._addAccessKeyOverlays(modalAccesskeyElements);
+            // }
+            // else {
                 if (!this._areAccessKeyVisible &&
                     (keyDownEvent.altKey || keyDownEvent.key === 'Alt') &&
                     !keyDownEvent.ctrlKey) {
@@ -207,9 +209,10 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
                         elem.setAttribute('aria-keyshortcuts', 'Alt+Shift+' + elem.accessKey);
                     });
                     var accesskeyElements = $(document).find('[accesskey]').filter(':visible');
-                    this._addAccessKeyOverlays(accesskeyElements);
+                    this._addAccessKeyOverlays();
+                    // this._addAccessKeyOverlays(accesskeyElements);
                 }
-            }
+            // }
             // on mac, there are a number of keys that are only accessible though the usage of
             // the ALT key (like the @ sign in most keyboards)
             // for them we do not facilitate the access keys, so they will need to be activated classically
@@ -275,10 +278,10 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
          */
         _onKeyUp: function (keyUpEvent) {
             if ((keyUpEvent.altKey || keyUpEvent.key === 'Alt') && !keyUpEvent.ctrlKey) {
-                var $modal = $(document).find('.modal-dialog');
-                if (this.filteredButtons) {
-                    this._toggleDisabled(this.filteredButtons, false);
-                }
+                // var $modal = $(document).find('.modal-dialog');
+                // if (this.filteredButtons) {
+                //     this._toggleDisabled(this.filteredButtons, false);
+                // }
                 this._hideAccessKeyOverlay();
                 if (keyUpEvent.preventDefault) keyUpEvent.preventDefault(); else keyUpEvent.returnValue = false;
                 if (keyUpEvent.stopPropagation) keyUpEvent.stopPropagation();
