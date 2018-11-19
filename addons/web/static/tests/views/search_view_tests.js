@@ -886,5 +886,87 @@ QUnit.module('Search View', {
         form.destroy();
     });
 
+    QUnit.test('Saving a filter with an ordered list', function (assert) {
+        assert.expect(3);
+
+        this.archs['partner,false,list'] = '<tree>' +
+                                                '<field name="foo"/>' +
+                                                '<field name="date_field"/>' +
+                                            '</tree>';
+
+        var actionManager = createActionManager({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            mockRPC: function () {
+                //debugger;
+                return this._super.apply(this,arguments);
+            },
+            intercepts: {
+                create_filter: function (ev) {
+                    var sort = JSON.parse(ev.data.filter.sort);
+                    assert.strictEqual(sort, ['-foo', 'date_field'],
+                        'create_filter should contain the right sort attribute');
+                }
+            }
+        });
+
+        actionManager.doAction(1);
+
+        // Descending order on Foo
+        $('th.o_column_sortable:contains("Foo")').click();
+        $('th.o_column_sortable:contains("Foo")').click();
+
+        assert.strictEqual($('th.o_column_sortable:contains("Foo")').attr('aria-sort'), 'descending',
+            'The field foo should be of descending order');
+
+        // Ascending order on Date
+        $('th.o_column_sortable:contains("Date")').click();
+
+        assert.strictEqual($('th.o_column_sortable:contains("Date")').attr('aria-sort'), 'ascending',
+            'The field date should be of ascending order');
+
+        $('.o_search_options button:contains("Favorites")').click();
+        $('.o_search_options a.o_save_search').click();
+        $('.o_search_options div.o_save_name button').click();
+
+        actionManager.destroy();
+    });
+
+    QUnit.test('Loading a filter with a sort attribute', function (assert) {
+        assert.expect(1);
+
+        this.archs['partner,false,list'] = '<tree>' +
+                                                '<field name="foo"/>' +
+                                                '<field name="date_field"/>' +
+                                            '</tree>';
+
+        this.archs['partner,1,search'] = '<search>' +
+                                                '<filter string="custom" name="custom" sort="[\'-foo\',\'date_field\']"/>' +
+                                            '</search>'
+
+        var action = _.pick(this.actions, function(act) {
+            return act.id === 1;
+        });
+
+        action[0].context = {search_default_custom: 1};
+        action[0].search_view_id = [1, 'search'];
+
+        var actionManager = createActionManager({
+            actions: action,
+            archs: this.archs,
+            data: this.data,
+            mockRPC: function (route, args) {
+                if (args.method === 'search_read') {
+                    assert.strictEqual(args.args.sort, 'foo DESC, date_field ASC',
+                        'The sort attribute of the filter should be used by search_read');
+                }
+                return this._super.apply(this,arguments);
+            },
+        });
+
+        actionManager.doAction(1);
+    });
+
 });
 });
