@@ -660,7 +660,7 @@ QUnit.test('dashboard intercepts custom events triggered by sub controllers', fu
 });
 
 QUnit.test('save actions to dashboard', function (assert) {
-    assert.expect(4);
+    assert.expect(3);
 
     var actionManager = createActionManager({
         data: this.data,
@@ -689,13 +689,12 @@ QUnit.test('save actions to dashboard', function (assert) {
 
     assert.containsOnce(actionManager, '.o_list_view',
         "should display the list view");
-    assert.strictEqual($('.o_add_to_dashboard_link').length, 1,
-        "should allow the 'Add to dashboard' feature");
 
     // add this action to dashboard
     testUtils.dom.click($('.o_search_options .o_dropdown button:contains(Favorites)'));
-    testUtils.dom.click($('.o_add_to_dashboard_link'));
-    testUtils.dom.click($('.o_add_to_dashboard_button'));
+    testUtils.dom.click($('.o_add_to_board.o_menu_header'));
+    testUtils.fields.editInput($('input.o_add_to_board_input'), 'a name');
+    testUtils.dom.click($('.o_add_to_board_confirm_button'));
 
     actionManager.destroy();
 });
@@ -759,7 +758,7 @@ QUnit.test('save two searches to dashboard', function (assert) {
 });
 
 QUnit.test('save to dashboard actions with flag keepSearchView', function (assert) {
-    assert.expect(4);
+    assert.expect(3);
 
     var actionManager = createActionManager({
         data: this.data,
@@ -799,13 +798,12 @@ QUnit.test('save to dashboard actions with flag keepSearchView', function (asser
 
     assert.containsOnce(actionManager, '.o_graph',
         "should display the graph view");
-    assert.strictEqual($('.o_add_to_dashboard_link').length, 1,
-        "should allow the 'Add to dashboard' feature (this is the same searchview)");
 
     // add this action to dashboard
     testUtils.dom.click($('.o_search_options .o_dropdown button:contains(Favorites)'));
-    testUtils.dom.click($('.o_add_to_dashboard_link'));
-    testUtils.dom.click($('.o_add_to_dashboard_button'));
+    testUtils.dom.click($('.o_add_to_board.o_menu_header'));
+    testUtils.fields.editInput($('input.o_add_to_board_input'), 'a name');
+    testUtils.dom.click($('.o_add_to_board_confirm_button'));
 
     actionManager.destroy();
 });
