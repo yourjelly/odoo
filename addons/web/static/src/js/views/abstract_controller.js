@@ -506,24 +506,6 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
         });
     },
     /**
-     * FIXME: move this to dashboard_controller?
-     *
-     * Handles a request to add/remove search view filters.
-     *
-     * @param {OdooEvent} ev
-     * @param {string} ev.data.controllerID
-     * @param {Array[Object]} [ev.data.newFilters]
-     * @param {Array[Object]} [ev.data.filtersToRemove]
-     * @param {function} ev.data.callback called with the added filters as arg
-     */
-    // _onUpdateFilters: function (ev) {
-    //     var controller = this.controllers[ev.data.controllerID];
-    //     var action = this.actions[controller.actionID];
-    //     var data = ev.data;
-    //     var addedFilters = action.searchView.updateFilters(data.newFilters, data.filtersToRemove);
-    //     data.callback(addedFilters);
-    // },
-    /**
      * Called when there is a change in the search view, so the current action's
      * environment needs to be updated with the new domain, context and groupby.
      *
