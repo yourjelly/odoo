@@ -441,10 +441,12 @@ var ActionManager = Widget.extend({
 
         options.breadcrumbs = this._getBreadcrumbs(options);
         options.controllerID = controllerID;
+        var widget = new ClientAction(this, action, options);
         var controller = {
             actionID: action.jsID,
             jsID: controllerID,
-            widget: new ClientAction(this, action, options),
+            title: widget.getTitle(),
+            widget: widget,
         };
         this.controllers[controllerID] = controller;
         action.controllerID = controllerID;
@@ -575,8 +577,8 @@ var ActionManager = Widget.extend({
         var controllerIds = this.controllerStack.slice(0, index);
         return _.map(controllerIds, function (controllerID) {
             return {
-                title: self.controllers[controllerID].widget.getTitle(),
                 controllerID: controllerID,
+                title: self.controllers[controllerID].title,
             };
         });
     },

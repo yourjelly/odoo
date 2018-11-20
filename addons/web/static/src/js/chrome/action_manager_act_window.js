@@ -27,6 +27,21 @@ ActionManager.include({
     //--------------------------------------------------------------------------
 
     /**
+     * Override to handle the case of lazy-loaded controllers, which may be the
+     * last (and only) controller in the stack, but which should not be
+     * considered as current controller as they don't have an alive widget.
+     *
+     * @override
+     */
+    getCurrentController: function () {
+        var currentController = this._super.apply(this, arguments);
+        var action = currentController && this.actions[currentController.actionID];
+        if (action && action.type === 'ir.actions.act_window') {
+            return currentController.widget ? currentController : null;
+        }
+        return currentController;
+    },
+    /**
      * Overrides to handle the case where an 'ir.actions.act_window' has to be
      * loaded.
      *
@@ -122,6 +137,8 @@ ActionManager.include({
      * @param {Object} [viewOptions] dict of options passed to the initialization
      *   of the controller's widget
      * @param {Object} [options]
+     * @param {string} [options.controllerID=false] when the controller has
+     *   previously been lazy-loaded, we want to keep its jsID when loading it
      * @param {boolean} [options.lazy=false] set to true to differ the
      *   initialization of the controller's widget
      * @returns {Deferred<Object>} resolved with the created controller
@@ -136,16 +153,25 @@ ActionManager.include({
             return $.Deferred().reject();
         }
 
-        var controllerID = _.uniqueId('controller_');
+        options = options || {};
+        var controllerID = options.controllerID || _.uniqueId('controller_');
         var controller = {
             actionID: action.jsID,
             className: 'o_act_window', // used to remove the padding in dialogs
             jsID: controllerID,
             viewType: viewType,
         };
+        Object.defineProperty(controller, 'title', {
+            get: function () {
+                // handle the case where the widget is lazy loaded
+                return controller.widget ?
+                       controller.widget.getTitle() :
+                       (action.display_name || action.name);
+            },
+        });
         this.controllers[controllerID] = controller;
 
-        if (!options || !options.lazy) {
+        if (!options.lazy) {
             // build the view options from different sources
             viewOptions = _.extend({
                 action: action,
@@ -231,49 +257,54 @@ ActionManager.include({
             action.env = self._generateActionEnv(action, options);
             action.controllers = {};
 
-            // select the first view to display, and optionally the main view
-            // which will be lazyloaded
-            var firstView = options.viewType && _.findWhere(views, {type: options.viewType});
-            var mainView;
-            if (firstView) {
-                if (!firstView.multiRecord && views[0].multiRecord) {
-                    mainView = views[0];
+            // select the current view to display, and optionally the main view
+            // of the action which will be lazyloaded
+            var curView = options.viewType && _.findWhere(views, {type: options.viewType});
+            var lazyView;
+            if (curView) {
+                if (!curView.multiRecord && views[0].multiRecord) {
+                    lazyView = views[0];
                 }
             } else {
-                firstView = views[0];
+                curView = views[0];
             }
 
             // use mobile-friendly view by default in mobile, if possible
             if (config.device.isMobile) {
-                if (!firstView.isMobileFriendly) {
-                    firstView = self._findMobileView(views, firstView.multiRecord) || firstView;
+                if (!curView.isMobileFriendly) {
+                    curView = self._findMobileView(views, curView.multiRecord) || curView;
                 }
-                if (mainView && !mainView.isMobileFriendly) {
-                    mainView = self._findMobileView(views, mainView.multiRecord) || mainView;
+                if (lazyView && !lazyView.isMobileFriendly) {
+                    lazyView = self._findMobileView(views, lazyView.multiRecord) || lazyView;
                 }
             }
 
-            var def;
-            return $.when(def).then(function () {
-                var defs = [];
-                var viewOptions = {
-                    breadcrumbs: self._getBreadcrumbs(options),
-                };
-                defs.push(self._createViewController(action, firstView.type, viewOptions));
-                if (mainView) {
-                    defs.push(self._createViewController(action, mainView.type, {}, {lazy: true}));
-                }
-                return self.dp.add($.when.apply($, defs));
-            }).then(function (controller, lazyLoadedController) {
-                action.controllerID = controller.jsID;
-                return self._executeAction(action, options).done(function () {
-                    if (lazyLoadedController) {
-                        // controller should be placed just before the current one
-                        var index = self.controllerStack.length - 1;
-                        self.controllerStack.splice(index, 0, lazyLoadedController.jsID);
-                    }
-                });
-            }).fail(self._destroyWindowAction.bind(self, action));
+            var lazyViewDef;
+            if (lazyView) {
+                // if the main view is lazy-loaded, its (lazy-loaded) controller is inserted
+                // into the controller stack (so that breadcrumbs can be correctly computed),
+                // so we force clear_breadcrumbs to false so that it won't be removed when the
+                // current controller will be inserted afterwards
+                options.clear_breadcrumbs = false;
+                // this controller being lazy-loaded, this call is actually sync
+                lazyViewDef = self._createViewController(action, lazyView.type, {}, {lazy: true})
+                    .then(function (lazyLoadedController) {
+                        self.controllerStack.push(lazyLoadedController.jsID);
+                    });
+            }
+            return self.dp.add($.when(lazyViewDef))
+                .then(function () {
+                    var viewOptions = {
+                        breadcrumbs: self._getBreadcrumbs(options),
+                    };
+                    var curViewDef = self._createViewController(action, curView.type, viewOptions);
+                    return self.dp.add(curViewDef);
+                })
+                .then(function (controller) {
+                    action.controllerID = controller.jsID;
+                    return self._executeAction(action, options);
+                })
+                .fail(self._destroyWindowAction.bind(self, action));
         });
     },
     /**
@@ -537,9 +568,9 @@ ActionManager.include({
             breadcrumbs: this._getBreadcrumbs({index: index})
         }, viewOptions);
 
-        var newController = function () {
+        var newController = function (controllerID) {
             return self
-                ._createViewController(action, viewType, viewOptions)
+                ._createViewController(action, viewType, viewOptions, {controllerID: controllerID})
                 .then(function (controller) {
                     return self._startController(controller);
                 });
@@ -558,13 +589,8 @@ ActionManager.include({
         } else {
             controllerDef = controllerDef.then(function (controller) {
                 if (!controller.widget) {
-                    // lazy loaded -> load it now
-                    return newController().done(function (newController) {
-                        // replace the old controller (without widget) by the new one
-                        var index = self.controllerStack.indexOf(controller.jsID);
-                        self.controllerStack[index] = newController.jsID;
-                        delete self.controllers[controller.jsID];
-                    });
+                    // lazy loaded -> load it now (with same jsID)
+                    return newController(controller.jsID);
                 } else {
                     viewOptions = _.extend(viewOptions || {}, action.env);
                     return $.when(controller.widget.willRestore()).then(function () {
