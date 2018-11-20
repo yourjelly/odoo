@@ -37,11 +37,11 @@ var PERIOD_OPTIONS = [
 var GROUPABLE_TYPES = ['many2one', 'char', 'boolean', 'selection', 'date', 'datetime'];
 var DEFAULT_INTERVAL = 'month';
 var INTERVAL_OPTIONS = [
-        {description: 'Day', optionId: 'day', groupId: 1},
-        {description: 'Week', optionId: 'week', groupId: 1},
-        {description: 'Month', optionId: 'month', groupId: 1},
-        {description: 'Quarter', optionId: 'quarter', groupId: 1},
-        {description: 'Year', optionId: 'year', groupId: 1},
+        {description: _lt('Day'), optionId: 'day', groupId: 1},
+        {description: _lt('Week'), optionId: 'week', groupId: 1},
+        {description: _lt('Month'), optionId: 'month', groupId: 1},
+        {description: _lt('Quarter'), optionId: 'quarter', groupId: 1},
+        {description: _lt('Year'), optionId: 'year', groupId: 1},
     ];
 
 // for TimeRangeMenu

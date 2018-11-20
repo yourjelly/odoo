@@ -9,8 +9,9 @@ var controlPanelViewParameters = require('web.controlPanelViewParameters');
 var QWeb = core.qweb;
 var _t = core._t;
 
-var DEFAULT_INTERVAL =controlPanelViewParameters.DEFAULT_INTERVAL;
+var DEFAULT_INTERVAL = controlPanelViewParameters.DEFAULT_INTERVAL;
 var GROUPABLE_TYPES = controlPanelViewParameters.GROUPABLE_TYPES;
+var INTERVAL_OPTIONS = controlPanelViewParameters.INTERVAL_OPTIONS;
 
 var GroupByMenu = DropdownMenu.extend({
     events: _.extend({}, DropdownMenu.prototype.events,
@@ -76,6 +77,9 @@ var GroupByMenu = DropdownMenu.extend({
                 mainButton: {class: 'btn btn-primary dropdown-toggle'},
             };
         }
+        INTERVAL_OPTIONS = INTERVAL_OPTIONS.map(function (option) {
+            return _.extend(option, {description: option.description.toString()});
+        });
     },
 
     // /**
@@ -124,7 +128,7 @@ var GroupByMenu = DropdownMenu.extend({
         };
         if (_.contains(['date', 'datetime'], field.type)) {
             groupBy.hasOptions = true;
-            groupBy.options = controlPanelViewParameters.INTERVAL_OPTIONS;
+            groupBy.options = INTERVAL_OPTIONS;
             groupBy.defaultOptionId = DEFAULT_INTERVAL;
             groupBy.currentOptionId = false;
         }

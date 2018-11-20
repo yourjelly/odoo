@@ -19,6 +19,13 @@ var ControlPanelModel = mvc.Model.extend({
     init: function (parent, params) {
         this._super.apply(this, arguments);
 
+        TIME_RANGE_OPTIONS = TIME_RANGE_OPTIONS.map(function (option) {
+            return _.extend(option, {description: option.description.toString()});
+        });
+        COMPARISON_TIME_RANGE_OPTIONS = COMPARISON_TIME_RANGE_OPTIONS.map(function (option) {
+            return _.extend(option, {description: option.description.toString()});
+        });
+
         this.initialContext = params.context || {};
         this.initialDomain = params.domain || [];
 
@@ -28,10 +35,6 @@ var ControlPanelModel = mvc.Model.extend({
         this.fields = {};
         this.modelName = null;
         this.actionId = null;
-        this.groupOfFiltersIds = [];
-        this.groupOfGroupBysId = null;
-        this.groupOfFavoritesId = null;
-        this.groupOfTimeRangesId = null;
     },
 
     //--------------------------------------------------------------------------
@@ -43,25 +46,39 @@ var ControlPanelModel = mvc.Model.extend({
         this.fields = params.fields;
         this.modelName = params.modelName;
         this.actionId = params.actionId;
-        params.groups.forEach(function (group) {
-            self._createGroupOfFilters(group);
-        });
-        if (this.groupOfGroupBysId === null) {
-            this._createEmptyGroup('groupBy');
-        }
-        this._createGroupOfTimeRanges();
-        return this._loadFavorites().then(function () {
-            if (self.query.length === 0) {
-                self._activateDefaultFilters();
-                self._activateDefaultTimeRanges(params.timeRanges);
-            }
-        });
-    },
 
+        if (params.previousState) {
+            // TO DO: deactive filters of bad types (groupBy if view not groupable,...)
+            this._loadPreviousState(params.previousState);
+            return $.when();
+        } else {
+            params.groups.forEach(function (group) {
+                self._createGroupOfFilters(group);
+            });
+            if (this._getGroupIdOfType('groupBy') !== undefined) {
+                this._createEmptyGroup('groupBy');
+            }
+            this._createGroupOfTimeRanges();
+            return this._loadFavorites().then(function () {
+                if (self.query.length === 0) {
+                    self._activateDefaultFilters();
+                    self._activateDefaultTimeRanges(params.timeRanges);
+                }
+            });
+        }
+    },
+    _loadPreviousState: function (previousState) {
+        var state = JSON.parse(previousState);
+        this.filters = state.filters;
+        this.groups = state.groups;
+        this.query = state.query;
+    },
     reload: function (params) {
-        var self = this;
         var def;
         var id;
+        if (params.previousCPState) {
+            this._loadPreviousState(params.previousCPState);
+        }
         if (params.toggleFilter) {
             this._toggleFilter(params.toggleFilter.id);
         }
@@ -92,7 +109,7 @@ var ControlPanelModel = mvc.Model.extend({
             var newGroupBy = params.newGroupBy.groupBy;
             id = _.uniqueId('__filter__');
             newGroupBy.id = id;
-            newGroupBy.groupId = this.groupOfGroupBysId;
+            newGroupBy.groupId = this._getGroupIdOfType('groupBy');
             this.filters[id] = newGroupBy;
             if (_.contains(['date', 'datetime'], newGroupBy.fieldType)) {
                 this._toggleFilterWithOptions(newGroupBy.id);
@@ -234,7 +251,13 @@ var ControlPanelModel = mvc.Model.extend({
             groupBy: groupBy,
         };
     },
-
+    getSerializedState: function () {
+        return JSON.stringify({
+            filters: this.filters,
+            groups: this.groups,
+            query: this.query,
+        });
+    },
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -286,7 +309,7 @@ var ControlPanelModel = mvc.Model.extend({
     _addNewFavorite: function (favorite) {
         var id = _.uniqueId('__filter__');
         favorite.id = id;
-        favorite.groupId = this.groupOfFavoritesId;
+        favorite.groupId = this._getGroupIdOfType('favorite');
         this.filters[id] = favorite;
         this._toggleFilter(favorite.id);
     },
@@ -298,7 +321,6 @@ var ControlPanelModel = mvc.Model.extend({
             type: type,
             activeFilterIds: [],
         };
-        this._memorizeGroupId(id, type);
     },
     // group is a list of (pre) filters
     _createGroupOfFilters: function (group) {
@@ -317,7 +339,6 @@ var ControlPanelModel = mvc.Model.extend({
             type: type,
             activeFilterIds: [],
         };
-        this._memorizeGroupId(groupId, type);
     },
 
     _createGroupOfTimeRanges: function () {
@@ -516,10 +537,17 @@ var ControlPanelModel = mvc.Model.extend({
         );
         return groupNumber;
     },
+    _getGroupIdOfType: function (type) {
+        var self = this;
+        return Object.keys(this.groups).find(function (groupId) {
+            var group = self.groups[groupId];
+            return group.type === type;
+        });
+    },
     _getTimeRangeMenuData: function (evaluation) {
         var context = {};
 
-        var groupOfTimeRanges = this.groups[this.groupOfTimeRangesId];
+        var groupOfTimeRanges = this.groups[this._getGroupIdOfType('timeRange')];
         if (groupOfTimeRanges.activeFilterIds.length) {
             var filter = this.filters[groupOfTimeRanges.activeFilterIds[0]];
 
@@ -658,17 +686,6 @@ var ControlPanelModel = mvc.Model.extend({
             favorite.serverSideId = serverSideId;
             self._addNewFavorite(favorite);
         });
-    },
-    _memorizeGroupId: function (groupId, type) {
-        if (type === 'groupBy') {
-            this.groupOfGroupBysId = groupId;
-        } else if (type === 'favorite') {
-            this.groupOfFavoritesId = groupId;
-        } else if (type === 'timeRange') {
-            this.groupOfTimeRangesId = groupId;
-        } else if (type === 'filter') {
-            this.groupOfFiltersIds.push(groupId);
-        }
     },
     _toggleAutoCompletionFilter: function (params) {
         var filter = this.filters[params.filterId];

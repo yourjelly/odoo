@@ -565,7 +565,8 @@ ActionManager.include({
         }
 
         viewOptions = _.extend({
-            breadcrumbs: this._getBreadcrumbs({index: index})
+            breadcrumbs: this._getBreadcrumbs({index: index}),
+            previousCPState: currentController.widget._controlPanel.getSerializedState(),
         }, viewOptions);
 
         var newController = function (controllerID) {
@@ -594,7 +595,7 @@ ActionManager.include({
                 } else {
                     viewOptions = _.extend(viewOptions || {}, action.env);
                     return $.when(controller.widget.willRestore()).then(function () {
-                        return controller.widget.reload(viewOptions).then(function () {
+                        return controller.widget._controlPanel.update(viewOptions).then(function () {
                             return controller;
                         });
                     });

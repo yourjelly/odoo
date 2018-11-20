@@ -4,6 +4,7 @@ odoo.define('web.search_groupby_menu_tests', function (require) {
 var GroupByMenu = require('web.GroupByMenu');
 var testUtils = require('web.test_utils');
 var controlPanelViewParameters = require('web.controlPanelViewParameters');
+var INTERVAL_OPTIONS = controlPanelViewParameters.INTERVAL_OPTIONS;
 
 function createGroupByMenu(groupBys, fields, params) {
     params = params || {};
@@ -119,6 +120,10 @@ QUnit.module('GroupByMenu', {
 
     QUnit.test('select a groupBy of date type in Add Custom Group menu add properly that groupBy to menu', function (assert) {
         assert.expect(13);
+
+        INTERVAL_OPTIONS = INTERVAL_OPTIONS.map(function (option) {
+            return _.extend(option, {description: option.description.toString()});
+        });
 
         var groupByMenu = createGroupByMenu(
             [],

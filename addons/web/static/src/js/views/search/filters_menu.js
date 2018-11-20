@@ -82,7 +82,6 @@ var FiltersMenu = DropdownMenu.extend({
      * @private
      */
     _commitSearch: function () {
-
         var filters = _.invoke(this.propositions, 'get_filter').map(function (preFilter) {
             return {
                 type: 'filter',

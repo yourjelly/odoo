@@ -42,7 +42,6 @@ var ControlPanelView = Factory.extend({
         var viewInfo = params.viewInfo || {arch: '<controlpanel/>', fields: {}};
         var context = params.context || {};
 
-        var context = params.context || {};
         this.searchDefaults = {};
         Object.keys(context).forEach(function (key) {
             var match = /^search_default_(.*)$/.exec(key);
@@ -85,16 +84,29 @@ var ControlPanelView = Factory.extend({
         this.rendererParams.breadcrumbs = params.breadcrumbs;
         this.rendererParams.withBreadcrumbs = !context.no_breadcrumbs;
 
+
         this.loadParams.actionId = params.actionId;
         this.loadParams.fields = this.fields;
-        this.loadParams.groups = [];
         this.loadParams.modelName = params.modelName;
-        this.loadParams.timeRanges = context.time_ranges;
-        if (this.arch.tag === 'controlpanel') {
-            this._parseControlPanelArch();
+        if (!params.previousState) {
+            // groups are determined in _parseSearchArch.
+            this.loadParams.groups = [];
+            this.loadParams.timeRanges = context.time_ranges;
+            if (this.arch.tag === 'controlpanel') {
+                this._parseControlPanelArch();
+            } else {
+                this._parseSearchArch();
+            }
         } else {
-            this._parseSearchArch();
+            this.loadParams.previousState = params.previousState;
         }
+
+        PERIOD_OPTIONS = PERIOD_OPTIONS.map(function (option) {
+            return _.extend(option, {description: option.description.toString()});
+        });
+        INTERVAL_OPTIONS = INTERVAL_OPTIONS.map(function (option) {
+            return _.extend(option, {description: option.description.toString()});
+        });
 
         // don't forget to compute and rename:
         //  - groupable
@@ -195,7 +207,6 @@ var ControlPanelView = Factory.extend({
      */
     _parseSearchArch: function () {
         var self = this;
-        var groups = [];
         var preFilters = _.flatten(this.arch.children.map(function (child) {
             return child.tag !== 'group' ?
                     self._evalArchChild(child) :
@@ -215,7 +226,7 @@ var ControlPanelView = Factory.extend({
                     if (currentTag === 'groupBy') {
                         groupOfGroupBys = groupOfGroupBys.concat(currentGroup);
                     } else {
-                        groups.push(currentGroup);
+                        self.loadParams.groups.push(currentGroup);
                     }
                 }
                 currentTag = preFilter.tag;
@@ -238,8 +249,7 @@ var ControlPanelView = Factory.extend({
                 currentGroup.push(filter);
             }
         });
-        groups.push(groupOfGroupBys);
-        this.loadParams.groups = groups;
+        this.loadParams.groups.push(groupOfGroupBys);
     },
 });
 

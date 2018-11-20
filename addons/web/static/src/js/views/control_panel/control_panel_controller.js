@@ -44,6 +44,9 @@ var ControlPanelController = mvc.Controller.extend({
     getSearchState: function () {
         return this.model.getQuery();
     },
+    getSerializedState: function () {
+        return this.model.getSerializedState();
+    },
     update: function (params) {
         var self = this;
         return this.model.reload(params).then(function () {

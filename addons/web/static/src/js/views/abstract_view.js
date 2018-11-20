@@ -212,6 +212,7 @@ var AbstractView = Factory.extend({
             hasSearchView: action.flags && action.flags.hasSearchView,
             modelName: action.res_model,
             viewInfo: action.controlPanelFieldsView,
+            previousState: params.previousCPState,
         };
 
         this.userContext = params.userContext;
