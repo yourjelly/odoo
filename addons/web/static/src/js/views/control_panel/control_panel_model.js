@@ -77,12 +77,7 @@ var ControlPanelModel = mvc.Model.extend({
             );
         }
         if (params.newFilters) {
-            var newFilters = params.newFilters.filters;
-            this._createGroupOfFilters(newFilters);
-            newFilters.forEach(function (filter) {
-                self._toggleFilter(filter.id);
-            });
-
+            this._createNewFilters(params.newFilters.filters);
         }
         if (params.newGroupBy) {
             var newGroupBy = params.newGroupBy.groupBy;
@@ -304,6 +299,47 @@ var ControlPanelModel = mvc.Model.extend({
             this._createEmptyGroup('timeRange');
         }
     },
+    _createNewFilters: function (newFilters) {
+        // we need to create groupNumber somewhere
+        var self = this;
+        var filterIDs = [];
+        var groupNumber = this._generateNewGroupNumber();
+        this._createGroupOfFilters(newFilters);
+        newFilters.forEach(function (filter) {
+            filter.groupNumber = groupNumber;
+            self._toggleFilter(filter.id);
+            filterIDs.push(filter.id);
+        });
+        return filterIDs;
+    },
+    _deactivateFilters: function (filterIDs) {
+        var self = this;
+        filterIDs.forEach(function (filterID) {
+            var filter = self.filters[filterID];
+            var group = self.groups[filter.groupId];
+            if (_.contains(group.activeFilterIds, filterID)) {
+                self._toggleFilter(filterID);
+            }
+        });
+    },
+    /**
+     * Remove the group from the query.
+     *
+     * @private
+     * @param {string} groupId
+     */
+    _deactivateGroup: function (groupId) {
+        var self = this;
+        var group = this.groups[groupId];
+        _.each(group.activeFilterIds, function (filterId) {
+            var filter = self.filters[filterId];
+            if (filter.autoCompleteValues) {
+                filter.autoCompleteValues = [];
+            }
+        });
+        group.activeFilterIds = [];
+        this.query.splice(this.query.indexOf(groupId), 1);
+    },
     _deleteFilter: function (filterId) {
         var self = this;
         var filter = this.filters[filterId];
@@ -420,6 +456,17 @@ var ControlPanelModel = mvc.Model.extend({
             []
         );
         return _.compact(groupBys);
+    },
+    _generateNewGroupNumber: function () {
+        var self = this;
+        var groupNumber = 1 + Object.keys(this.filters).reduce(
+            function (max, filterId) {
+                var filter = self.filters[filterId];
+                return Math.max(filter.groupNumber, max);
+            },
+            1
+        );
+        return groupNumber;
     },
     _getTimeRangeMenuData: function (evaluation) {
         var context = {};
@@ -625,24 +672,6 @@ var ControlPanelModel = mvc.Model.extend({
                 this.query.splice(this.query.indexOf(group.id), 1);
             }
         }
-    },
-    /**
-     * Remove the group from the query.
-     *
-     * @private
-     * @param {string} groupId
-     */
-    _deactivateGroup: function (groupId) {
-        var self = this;
-        var group = this.groups[groupId];
-        _.each(group.activeFilterIds, function (filterId) {
-            var filter = self.filters[filterId];
-            if (filter.autoCompleteValues) {
-                filter.autoCompleteValues = [];
-            }
-        });
-        group.activeFilterIds = [];
-        this.query.splice(this.query.indexOf(groupId), 1);
     },
     // This method should work in batch too
     // TO DO: accept selection of multiple options?

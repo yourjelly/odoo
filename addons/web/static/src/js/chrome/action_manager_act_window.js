@@ -813,8 +813,8 @@ ActionManager.include({
         var controller = this.controllers[ev.data.controllerID];
         var action = this.actions[controller.actionID];
         var data = ev.data;
-        var addedFilters = action.searchView.updateFilters(data.newFilters, data.filtersToRemove);
-        data.callback(addedFilters);
+        var addedFilterIDs = action.controlPanel.updateFilters(data.newFilters, data.filtersToRemove);
+        data.callback(addedFilterIDs);
     },
     /**
      * Called when there is a change in the search view, so the current action's

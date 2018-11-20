@@ -84,6 +84,28 @@ var ControlPanelController = mvc.Controller.extend({
             query: this.model.getQuery(),
         });
     },
+    /**
+     * Updates the domain of the search view by adding and/or removing filters.
+     *
+     * @todo: the way it is done could be improved, but the actual state of the
+     * searchview doesn't allow to do much better.
+
+     * @param {Object[]} newFilters list of filters to add, described by
+     *   objects with keys domain (the domain as an Array), description (the text
+     *   to display in the facet) and type with value 'filter'.
+     * @param {string[]} filtersToRemove list of filter ids to remove
+     *   (previously added ones)
+     * @returns {string[]} list of added filters (to pass as filtersToRemove
+     *   for a further call to this function)
+     */
+    updateFilters: function (newFilters, filtersToRemove) {
+        var newFilterIDS = this.model._createNewFilters(newFilters);
+        this.model._deactivateFilters(filtersToRemove);
+        this._reportNewQuery();
+        var state = this.model.get();
+        this.renderer.updateState(state);
+        return newFilterIDS;
+    },
 
     //--------------------------------------------------------------------------
     // Handlers
