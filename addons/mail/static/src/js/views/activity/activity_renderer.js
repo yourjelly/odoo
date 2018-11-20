@@ -6,6 +6,7 @@ var ActivityRecord = require('mail.ActivityRecord');
 var core = require('web.core');
 var dialogs = require('web.view_dialogs');
 var field_registry = require('web.field_registry');
+var KanbanColumnProgressBar = require('web.KanbanColumnProgressBar');
 var qweb = require('web.QWeb');
 var session = require('web.session');
 var utils = require('web.utils');
@@ -16,6 +17,9 @@ var QWeb = core.qweb;
 
 var ActivityRenderer = AbstractRenderer.extend({
     className: 'o_activity_view',
+    custom_events: {
+        'set_progress_bar_state': '_onSetProgressBarState',
+    },
     events: {
         'click .o_send_mail_template': '_onSenMailTemplateClicked',
         'click .o_activity_empty_cell': '_onEmptyCell',
@@ -112,22 +116,39 @@ var ActivityRenderer = AbstractRenderer.extend({
      * @returns {jQueryElement} a jquery element <thead>
      */
     _renderHeader: function () {
-        var $tr = $('<tr>')
-                .append($('<th>')) //empty cell for name
-                .append(_.map(this.state.activity_types, this._renderHeaderCell.bind(this)));
-        return $('<thead>').append($tr);
+        var self = this;
+        var activityTypeIds = _.unique(_.flatten(_.map(this.state.grouped_activities, function (act) { return _.keys(act); })));
+        var $thead = $(QWeb.render('mail.ActivityViewHeader', {
+            types: this.state.activity_types,
+            activityTypeIDs: _.map(activityTypeIds, Number),
+        }));
+        activityTypeIds.forEach(function (typeId) {
+            self._renderProgressBar($thead, typeId);
+        });
+        return $thead;
     },
     /**
      * @private
-     * @param {Object} activity_type
-     * @returns {jQueryElement} a <th> element
      */
-    _renderHeaderCell: function (activity_type) {
-        return QWeb.render('mail.ActivityViewHeaderCell', {
-            id: activity_type[0],
-            name: activity_type[1],
-            template_list: activity_type[2] || [],
+    _renderProgressBar: function ($thead, typeId) {
+        var counts = { planned: 0, today: 0, overdue: 0 };
+        _.each(this.state.grouped_activities, function (act) {
+            if (_.contains(_.keys(act), typeId.toString())) {
+                counts[act[typeId].state] += 1;
+            }
         });
+        var progressBar = new KanbanColumnProgressBar(this, {
+            columnID: typeId,
+            progressBarStates: {},
+        }, {
+            count: _.reduce(_.values(counts), function (x, y) { return x + y; }),
+            progressBarValues: {
+                field: 'activity_state',
+                colors: { planned: 'success', today: 'warning', overdue: 'danger' },
+                counts: counts,
+            },
+        });
+        progressBar.appendTo($thead.find('th[data-activity-type-id=' + typeId + ']'));
     },
     /**
      * @private
@@ -152,6 +173,7 @@ var ActivityRenderer = AbstractRenderer.extend({
                 resId: resId,
                 activityGroup: activity_group,
                 activityTypeId: activity_type_id,
+                widget: self,
             }));
             if (activity_group.state) {
                 var record = self._getKanbanActivityData(activity_group, resId);
@@ -177,7 +199,7 @@ var ActivityRenderer = AbstractRenderer.extend({
             }
             return $td;
         });
-        var $tr = $('<tr/>', {class: 'o_data_row'})
+        var $tr = $('<tr/>', {class: 'o_data_row'}).attr('data-res-id', resId)
             .append($nameTD)
             .append($cells);
         return $tr;
@@ -246,6 +268,35 @@ var ActivityRenderer = AbstractRenderer.extend({
             activityTypeID: activityTypeID,
             templateID: templateID,
         });
+    },
+    /**
+     * Rearrange body part of table based on active filter.
+     *
+     * @private
+     * @param {OdooEvent} ev
+     */
+     _onSetProgressBarState: function (ev) {
+        var self = this;
+
+        this.$('th[class*="o_activity_filter_"]').attr('class', 'o_activity_type_cell');
+        this.$('.o_kanban_counter_progress div').removeClass('active progress-bar-striped');
+
+        var data = ev.data;
+        var arrangedRecords = this.state.activity_res_ids;
+        this.activeFilter = data.values.activeFilter;
+        if (this.activeFilter) {
+            var filteredResIds = _.map(_.keys(_.pick(this.state.grouped_activities, function (act) {
+                return act[data.columnID] && act[data.columnID].state === self.activeFilter;
+            })), Number);
+            arrangedRecords = _.union(_.intersection(this.state.activity_res_ids, filteredResIds), this.state.activity_res_ids);
+            this.filteredResIDs = filteredResIds;
+        }
+        this.$('tbody').html(_.map(arrangedRecords, this._renderRow.bind(this)));
+
+        if (this.activeFilter) {
+            var $header = this.$('th.o_activity_type_cell[data-activity-type-id=' + data.columnID + ']');
+            $header.addClass('o_activity_filter_' + this.activeFilter);
+        }
     },
 });
 
