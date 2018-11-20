@@ -115,8 +115,8 @@ function createAsyncView(params) {
     }
 
     // add mock environment: mock server, session, fieldviewget, ...
-    var mockServer = addMockEnvironment(widget, params);
-    var viewInfo = fieldsViewGet(mockServer, params);
+    var mockServer = testUtilsMock.addMockEnvironment(widget, params);
+    var viewInfo = testUtilsMock.fieldsViewGet(mockServer, params);
     // create the view
     var viewOptions = {
         modelName: params.model || 'foo',
