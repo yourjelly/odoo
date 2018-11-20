@@ -50,7 +50,9 @@ var BodyManager = rootWidget.RootWidget.extend(ServiceProviderMixin, {
                     params.kwargs.context = _.omit(params.kwargs.context, options.noContextKeys);
                     event.data.args[2] = _.omit(options, 'noContextKeys');
                 }
-                params.kwargs.context = JSON.parse(JSON.stringify(params.kwargs.context));
+                var strContext = JSON.stringify(params.kwargs.context);
+                console.log(strContext);
+                params.kwargs.context = JSON.parse(strContext);
             }
         }
         return ServiceProviderMixin._call_service.apply(this, arguments);
