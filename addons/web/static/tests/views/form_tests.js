@@ -1509,8 +1509,8 @@ QUnit.module('Views', {
         testUtils.form.clickCreate(form);
         assert.strictEqual(form.mode, 'edit', 'form view should be in edit mode');
 
-        assert.strictEqual(form.$('input:first').val(), "My little Foo Value",
-                "should have correct default_get value");
+        assert.strictEqual(form.$('input[name=foo]').val(), "My little Foo Value",
+            "should have correct default_get value");
         testUtils.form.clickSave(form);
         assert.strictEqual(form.mode, 'readonly', 'form view should be in readonly mode');
         assert.strictEqual(this.data.partner.records.length, n + 1, "should have created a record");
@@ -1661,9 +1661,9 @@ QUnit.module('Views', {
                 return this._super.apply(this, arguments);
             },
         }).then(function (form) {
-            assert.ok(form.$('input').val(), 'aaa',
-            'default value should be correctly displayed');
-            assert.strictEqual(nameGetCount, 1, 'should have done one name_get');
+            assert.strictEqual(form.$('.o_field_widget[name=trululu] input').val(), 'aaa',
+                "default value should be correctly displayed");
+            assert.strictEqual(nameGetCount, 1, "should have done one name_get");
             form.destroy();
             done();
         });
@@ -1896,7 +1896,7 @@ QUnit.module('Views', {
             arch: '<form string="Partners">' +
                         '<field name="foo"/>' +
                         '<button string="Do something" class="btn-primary" name="abc" type="object"/>' +
-                        '<button string="Discard" class="btn-secondary" special="cancel"/>' +
+                        '<button string="Or discard" class="btn-secondary" special="cancel"/>' +
                 '</form>',
             res_id: 1,
             mockRPC: function (route, args) {
@@ -1915,13 +1915,13 @@ QUnit.module('Views', {
         // make the record dirty
         testUtils.fields.editInput(form.$('input[name=foo]'), 'tralala');
 
-        testUtils.dom.clickFirst(form.$('button'));
+        testUtils.dom.click(form.$('button:contains(Do something)'));
         assert.strictEqual(writeCount, 1, "should have triggered a write");
         assert.strictEqual(executeActionCount, 1, "should have triggered a execute action");
 
         testUtils.fields.editInput(form.$('input[name=foo]'), 'abcdef');
 
-        testUtils.dom.click(form.$('button').eq(1));
+        testUtils.dom.click(form.$('button:contains(Or discard)'));
         assert.strictEqual(writeCount, 1, "should not have triggered a write");
         assert.strictEqual(executeActionCount, 2, "should have triggered a execute action");
 
