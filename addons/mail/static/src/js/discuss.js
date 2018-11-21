@@ -8,7 +8,6 @@ var ThreadWidget = require('mail.widget.Thread');
 var AbstractAction = require('web.AbstractAction');
 var config = require('web.config');
 var core = require('web.core');
-var data = require('web.data');
 var Dialog = require('web.Dialog');
 var dom = require('web.dom');
 var pyUtils = require('web.py_utils');
@@ -198,8 +197,8 @@ var Discuss = AbstractAction.extend({
         this._super.apply(this, arguments);
 
         this.action = action;
+        this.context = action.context;
         this.action_manager = parent;
-        this.dataset = new data.DataSetSearch(this, 'mail.message');
         this.domain = [];
         this.options = options || {};
 
@@ -222,7 +221,7 @@ var Discuss = AbstractAction.extend({
                         this.action.search_view_id &&
                         this.action.search_view_id[0];
         var def = this
-            .loadFieldView(this.dataset, viewID, 'search')
+            .loadFieldView('mail.message', this.context, viewID, 'search')
             .then(function (fieldsView) {
                 self.fields_view = fieldsView;
             });

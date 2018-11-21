@@ -139,8 +139,8 @@ var ServicesMixin = {
         promise.abort = abort.bind(def);
         return promise;
     },
-    loadFieldView: function (dataset, view_id, view_type, options) {
-        return this.loadViews(dataset.model, dataset.get_context().eval(), [[view_id, view_type]], options).then(function (result) {
+    loadFieldView: function (modelName, context, view_id, view_type, options) {
+        return this.loadViews(modelName, context, [[view_id, view_type]], options).then(function (result) {
             return result[view_type];
         });
     },
