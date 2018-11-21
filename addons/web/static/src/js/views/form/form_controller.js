@@ -132,7 +132,7 @@ var FormController = BasicController.extend({
      * @param {jQueryElement} $node
      */
     renderButtons: function ($node) {
-        var $footer = this.footerToButtons ? this.$('footer') : null;
+        var $footer = this.footerToButtons ? this.renderer.$('footer') : null;
         var mustRenderFooterButtons = $footer && $footer.length;
         if (!this.defaultButtons && !mustRenderFooterButtons) {
             return;
@@ -406,7 +406,7 @@ var FormController = BasicController.extend({
     _updateButtons: function () {
         if (this.$buttons) {
             if (this.footerToButtons) {
-                var $footer = this.$('footer');
+                var $footer = this.renderer.$('footer');
                 if ($footer.length) {
                     this.$buttons.empty().append($footer);
                 }

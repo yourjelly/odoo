@@ -1769,29 +1769,6 @@ QUnit.module('Views', {
         form.destroy();
     });
 
-    QUnit.test('buttons in footer are moved to $buttons if necessary', function (assert) {
-        // not sure about this test...
-        assert.expect(2);
-
-        var form = createView({
-            View: FormView,
-            model: 'partner',
-            data: this.data,
-            arch: '<form string="Partners">' +
-                        '<field name="foo"/>' +
-                        '<footer>' +
-                            '<button string="Create" type="object" class="infooter"/>' +
-                        '</footer>' +
-                '</form>',
-            res_id: 1,
-            viewOptions: {footerToButtons: true},
-        });
-
-        assert.containsOnce(form.$buttons, 'button.infooter', "footer button should be in footer");
-        assert.containsNone(form, 'button.infooter', "footer button should not be in form");
-        form.destroy();
-    });
-
     QUnit.test('clicking on stat buttons in edit mode', function (assert) {
         assert.expect(9);
 
@@ -4473,31 +4450,32 @@ QUnit.module('Views', {
         }
     });
 
-    QUnit.test('footers are not duplicated on rerender', function (assert) {
-        assert.expect(2);
+    QUnit.test('buttons in footer are moved to $buttons if necessary', function (assert) {
+        assert.expect(4);
 
         var form = createView({
             View: FormView,
             model: 'partner',
             data: this.data,
-            arch:
-                '<form>' +
-                    '<field name="foo"/>' +
-                    '<footer>' +
-                        '<button>Hello</button>' +
-                    '</footer>' +
+            arch: '<form string="Partners">' +
+                        '<field name="foo"/>' +
+                        '<footer>' +
+                            '<button string="Create" type="object" class="infooter"/>' +
+                        '</footer>' +
                 '</form>',
             res_id: 1,
-            viewOptions: {
-                footerToButtons: true,
-            },
+            viewOptions: {footerToButtons: true},
         });
 
-        assert.containsNone(form, 'footer',
-            "footer should have been moved outside of the form view");
-        form.reload();
-        assert.containsNone(form, 'footer',
-            "footer should still have been moved outside of the form view");
+        assert.containsOnce(form.$('.o_control_panel'), 'button.infooter');
+        assert.containsNone(form.$('.o_form_view'), 'button.infooter');
+
+        // check that this still works after a reload
+        testUtils.form.reload(form);
+
+        assert.containsOnce(form.$('.o_control_panel'), 'button.infooter');
+        assert.containsNone(form.$('.o_form_view'), 'button.infooter');
+
         form.destroy();
     });
 
