@@ -2177,7 +2177,7 @@ class _RelationalMulti(_Relational):
         """ Update the cached value of ``self`` for ``records`` with ``value``. """
         cache = records.env.cache
         for record in records:
-            if cache.contains(record, self):
+            if cache.contains_value(record, self):
                 try:
                     val = self.convert_to_cache(record[self.name] | value, record, validate=False)
                     cache.set(record, self, val)
@@ -2185,6 +2185,7 @@ class _RelationalMulti(_Relational):
                     # delay the failure until the field is necessary
                     cache.set_failed(record, [self], exc)
             else:
+                # TODO: If there is already a special value in the cache, we should combine the `specials` instead of replacing it.
                 cache.set_special(record, self, self._update_getter(record, value))
 
     def _update_getter(self, record, value):
