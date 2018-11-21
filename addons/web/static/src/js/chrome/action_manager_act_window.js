@@ -595,7 +595,7 @@ ActionManager.include({
                 } else {
                     viewOptions = _.extend(viewOptions || {}, action.env);
                     return $.when(controller.widget.willRestore()).then(function () {
-                        return controller.widget._controlPanel.update(viewOptions).then(function () {
+                        return controller.widget.reload(viewOptions).then(function () {
                             return controller;
                         });
                     });

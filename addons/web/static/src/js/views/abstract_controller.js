@@ -178,6 +178,10 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      * @returns {Deferred}
      */
     reload: function (params) {
+        if (this._controlPanel && params.previousCPState){
+            this._controlPanel.update({previousState: params.previousCPState});
+            return ;
+        }
         return this.update(params || {});
     },
     /**
