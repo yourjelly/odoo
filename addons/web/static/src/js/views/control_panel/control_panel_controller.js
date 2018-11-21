@@ -36,6 +36,16 @@ var ControlPanelController = mvc.Controller.extend({
     // Public
     //--------------------------------------------------------------------------
 
+    configure: function (configuration) {
+        var defs = [];
+        this.model.configure(configuration);
+        var state = this.model.get();
+        defs.push(this.getSearchState());
+        defs.push(this.renderer.updateState(state));
+        return $.when(defs).then(function (defsResults) {
+            return defsResults[0];
+        });
+    },
     /**
      * Compute the search related values that will be
      *
@@ -44,8 +54,8 @@ var ControlPanelController = mvc.Controller.extend({
     getSearchState: function () {
         return this.model.getQuery();
     },
-    getSerializedState: function () {
-        return this.model.getSerializedState();
+    getConfiguration: function () {
+        return this.model.getConfiguration();
     },
     /**
      * Called at each switch view. This is required until the control panel is

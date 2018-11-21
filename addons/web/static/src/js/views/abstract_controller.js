@@ -153,6 +153,11 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
     getContext: function () {
         return {};
     },
+    getControlPanelConfiguration: function () {
+        if (this._controlPanel) {
+            return this._controlPanel.getConfiguration();
+        }
+    },
     /**
      * Gives the focus to the renderer
      */
@@ -178,9 +183,13 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      * @returns {Deferred}
      */
     reload: function (params) {
-        if (this._controlPanel && params.previousCPState){
-            this._controlPanel.update({previousState: params.previousCPState});
-            return ;
+        var self = this;
+        if (this._controlPanel && params.currentControlPanelConfiguration) {
+            return this._controlPanel.configure(params.currentControlPanelConfiguration).then(
+                function (searchQuery) {
+                    return self.update({offset: 0}, searchQuery);
+                }
+            );
         }
         return this.update(params || {});
     },

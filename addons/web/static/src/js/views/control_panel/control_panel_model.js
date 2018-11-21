@@ -53,6 +53,12 @@ var ControlPanelModel = mvc.Model.extend({
             this.toggleFilter(filterId);
         }
     },
+    configure: function (configuration) {
+        var newConfiguration = JSON.parse(configuration);
+        this.filters = newConfiguration.filters;
+        this.groups = newConfiguration.groups;
+        this.query = newConfiguration.query;
+    },
     createNewFavorite: function (newFavorite) {
         return this._saveQuery(_.pick(
             newFavorite,
@@ -209,7 +215,7 @@ var ControlPanelModel = mvc.Model.extend({
             groupBys: groupBys,
         });
     },
-    getSerializedState: function () {
+    getConfiguration: function () {
         return JSON.stringify({
             filters: this.filters,
             groups: this.groups,
@@ -222,9 +228,9 @@ var ControlPanelModel = mvc.Model.extend({
         this.modelName = params.modelName;
         this.actionId = params.actionId;
 
-        if (params.previousState) {
+        if (params.initialConfiguration) {
             // TO DO: deactive filters of bad types (groupBy if view not groupable,...)
-            this.loadPreviousState(params.previousState);
+            this.configure(params.initialConfiguration);
             return $.when();
         } else {
             params.groups.forEach(function (group) {
@@ -241,12 +247,6 @@ var ControlPanelModel = mvc.Model.extend({
                 }
             });
         }
-    },
-    loadPreviousState: function (previousState) {
-        var state = JSON.parse(previousState);
-        this.filters = state.filters;
-        this.groups = state.groups;
-        this.query = state.query;
     },
     toggleAutoCompletionFilter: function (params) {
         var filter = this.filters[params.filterId];

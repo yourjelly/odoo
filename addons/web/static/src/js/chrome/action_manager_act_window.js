@@ -566,7 +566,7 @@ ActionManager.include({
 
         viewOptions = _.extend({
             breadcrumbs: this._getBreadcrumbs({index: index}),
-            previousCPState: currentController.widget._controlPanel.getSerializedState(),
+            currentControlPanelConfiguration: currentController.widget.getControlPanelConfiguration(),
         }, viewOptions);
 
         var newController = function (controllerID) {

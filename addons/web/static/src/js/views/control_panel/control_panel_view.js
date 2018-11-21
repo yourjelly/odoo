@@ -88,7 +88,7 @@ var ControlPanelView = Factory.extend({
         this.loadParams.actionId = params.actionId;
         this.loadParams.fields = this.fields;
         this.loadParams.modelName = params.modelName;
-        if (!params.previousState) {
+        if (!params.currentConfiguration) {
             // groups are determined in _parseSearchArch.
             this.loadParams.groups = [];
             this.loadParams.timeRanges = context.time_ranges;
@@ -98,7 +98,7 @@ var ControlPanelView = Factory.extend({
                 this._parseSearchArch();
             }
         } else {
-            this.loadParams.previousState = params.previousState;
+            this.loadParams.initialConfiguration = params.currentConfiguration;
         }
 
         PERIOD_OPTIONS = PERIOD_OPTIONS.map(function (option) {
