@@ -312,6 +312,9 @@ var Discuss = AbstractAction.extend(ControlPanelMixin, {
             this._threadWidget.scrollToPosition(this._threadsScrolltop[this._thread.getID()]);
         }
         this._loadEnoughMessages();
+        if(this.searchview){
+            this.searchview.$('input').focus();
+        }
     },
     /**
      * @override
