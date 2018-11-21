@@ -194,7 +194,10 @@ var ControlPanelModel = mvc.Model.extend({
             userContext
         );
         var context = _.extend(
-            pyUtils.eval('contexts', this._getQueryContext(), userContext),
+            pyUtils.eval('contexts',
+                this._getQueryContext(),
+                userContext
+            ),
             this._getTimeRangeMenuData(true)
         );
         // this must be done because pyUtils.eval does not know that it needs to evaluate domains within contexts

@@ -112,28 +112,11 @@ var AbstractView = Factory.extend({
         // as a subview. For now this is only used by the graph controller that appends a
         // 'Group By' button beside the 'Measures' button when the graph view is embedded.
         var isEmbedded = params.isEmbedded || false;
-
         this.rendererParams = {
             arch: this.arch,
             isEmbedded: isEmbedded,
             noContentHelp: params.action && params.action.help,
         };
-
-        var timeRangeMenuData = params.context.timeRangeMenuData;
-        var timeRange = [];
-        var comparisonTimeRange = [];
-        var compare = false;
-        var timeRangeDescription = "";
-        var comparisonTimeRangeDescription = "";
-        if (this.enableTimeRangeMenu && timeRangeMenuData) {
-            timeRange = timeRangeMenuData.timeRange;
-            comparisonTimeRange = timeRangeMenuData.comparisonTimeRange;
-            compare = comparisonTimeRange.length > 0;
-            timeRangeDescription = timeRangeMenuData.timeRangeDescription;
-            comparisonTimeRangeDescription = timeRangeMenuData.comparisonTimeRangeDescription;
-            this.rendererParams.timeRangeDescription = timeRangeDescription;
-            this.rendererParams.comparisonTimeRangeDescription = comparisonTimeRangeDescription;
-        }
 
         this.controllerParams = {
             modelName: params.modelName,
@@ -165,25 +148,6 @@ var AbstractView = Factory.extend({
             groupBy = [groupBy];
         }
 
-        this.loadParams = {
-            context: params.context,
-            count: params.count || ((this.controllerParams.ids !== undefined) &&
-                   this.controllerParams.ids.length) || 0,
-            domain: params.domain,
-            timeRange: timeRange,
-            timeRangeDescription: timeRangeDescription,
-            comparisonTimeRange: comparisonTimeRange,
-            comparisonTimeRangeDescription: comparisonTimeRangeDescription,
-            compare: compare,
-            groupedBy: groupBy,
-            modelName: params.modelName,
-            res_id: params.currentId,
-            res_ids: params.ids,
-            orderedBy: params.context ? params.context.orderedBy : [],
-        };
-        if (params.modelName) {
-            this.loadParams.modelName = params.modelName;
-        }
         // default_order is like:
         //   'name,id desc'
         // but we need it like:
@@ -202,7 +166,16 @@ var AbstractView = Factory.extend({
         } else if ('withControlPanel' in params) {
             this.withControlPanel = params.withControlPanel;
         }
+        this.loadParams = {
+            count: params.count || ((this.controllerParams.ids !== undefined) &&
+                   this.controllerParams.ids.length) || 0,
+            modelName: params.modelName,
+            res_id: params.currentId,
+            res_ids: params.ids,
+        };
+
         this.controlPanelParams = {
+            // rename
             actionId: action.id || false,
             actionName: action.name,
             actionType: action.type,
@@ -216,6 +189,10 @@ var AbstractView = Factory.extend({
         };
 
         this.userContext = params.userContext;
+
+        if (isEmbedded && params.searchQuery) {
+            this._updateMVCParams(params.searchQuery);
+        }
     },
 
     //--------------------------------------------------------------------------
@@ -241,6 +218,10 @@ var AbstractView = Factory.extend({
 
         var _super = this._super.bind(this);
         return $.when(def).then(function (controlPanel) {
+            if (controlPanel && self.searchable) {
+                var searchQuery = controlPanel.getSearchState();
+                self._updateMVCParams(searchQuery);
+            }
             // get the parent of the model if it already exists, as _super will
             // set the new controller as parent, which we don't want
             var modelParent = self.model && self.model.getParent();
@@ -295,6 +276,34 @@ var AbstractView = Factory.extend({
         fv.arch = viewUtils.parseArch(fv.arch);
         fv.viewFields = _.defaults({}, fv.viewFields, fv.fields);
         return fv;
+    },
+    _updateMVCParams: function (searchQuery) {
+        var timeRangeMenuData = searchQuery.context.timeRangeMenuData;
+        var timeRange = [];
+        var comparisonTimeRange = [];
+        var compare = false;
+        var timeRangeDescription = "";
+        var comparisonTimeRangeDescription = "";
+        if (this.enableTimeRangeMenu && timeRangeMenuData) {
+            _.extend(this.loadParams, timeRangeMenuData);
+            timeRange = timeRangeMenuData.timeRange;
+            comparisonTimeRange = timeRangeMenuData.comparisonTimeRange;
+            compare = comparisonTimeRange.length > 0;
+            timeRangeDescription = timeRangeMenuData.timeRangeDescription;
+            comparisonTimeRangeDescription = timeRangeMenuData.comparisonTimeRangeDescription;
+        }
+        _.extend(this.loadParams, {
+            context: searchQuery.context,
+            domain: searchQuery.domain,
+            timeRange: timeRange,
+            timeRangeDescription: timeRangeDescription,
+            comparisonTimeRange: comparisonTimeRange,
+            comparisonTimeRangeDescription: comparisonTimeRangeDescription,
+            compare: compare,
+            groupedBy: searchQuery.groupBy,
+        });
+        this.rendererParams.timeRangeDescription = timeRangeDescription;
+        this.rendererParams.comparisonTimeRangeDescription = comparisonTimeRangeDescription;
     },
 });
 
