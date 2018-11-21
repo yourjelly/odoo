@@ -923,6 +923,9 @@ class AccountTax(models.Model):
         domain=[('deprecated', '=', False)],
         string='Base Tax Received Account',
         help='Account that will be set on lines created in cash basis journal entry and used to keep track of the tax base amount.')
+    account_ids = fields.Many2many('account.account', 'account_account_tax_default_rel',
+        'tax_id', 'account_id', string='Default Accounts',
+        help="Accounts which are having current tax as it's one of default taxes.")
 
     _sql_constraints = [
         ('name_company_uniq', 'unique(name, company_id, type_tax_use)', 'Tax names must be unique !'),
