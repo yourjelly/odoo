@@ -105,7 +105,7 @@ QUnit.module('FiltersMenu', {
     });
 
     QUnit.test('adding a simple filter works', function (assert) {
-        assert.expect(7);
+        assert.expect(6);
 
         delete this.fields.date_field;
         var filtersMenu = createFiltersMenu([], this.fields, {
@@ -116,7 +116,6 @@ QUnit.module('FiltersMenu', {
                     assert.strictEqual(filter.type, 'filter');
                     assert.strictEqual(filter.description, 'Boolean Field is true');
                     assert.strictEqual(filter.domain, '[[\"boolean_field\",\"=\",True]]');
-                    assert.strictEqual(filter.groupNumber, 1);
                     filtersMenu.update([{
                         isActive: true,
                         description: '?',
@@ -130,7 +129,7 @@ QUnit.module('FiltersMenu', {
         testUtils.dom.click(filtersMenu.$('span.fa-filter'));
         testUtils.dom.click(filtersMenu.$('.o_add_custom_filter'));
         // click on apply to activate filter
-        testUtils.dom.click(filtersMenu.$('.o_apply_filter').click());
+        testUtils.dom.click(filtersMenu.$('.o_apply_filter'));
         assert.hasClass(filtersMenu.$('.o_add_custom_filter'), 'o_closed_menu');
         assert.containsNone(filtersMenu, '.o_filter_condition');
         assert.containsOnce(filtersMenu, '.dropdown-divider:visible',

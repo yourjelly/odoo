@@ -52,7 +52,7 @@ QUnit.module('Web', {
     });
 
     QUnit.test('click on an item without options should toggle it', function (assert) {
-        assert.expect(6);
+        assert.expect(7);
 
         var self = this;
         var dropdownMenu = createDropdownMenu(this.items, {
@@ -65,25 +65,22 @@ QUnit.module('Web', {
             },
         });
         testUtils.dom.click(dropdownMenu.$('button:first'));
-        assert.doesNotHaveClass(dropdownMenu.$('.o_menu_item:first > .dropdown-item'), 'selected');
+        assert.doesNotHaveClass(dropdownMenu.$('.o_menu_item:first > .dropdown-item').first(), 'selected');
         testUtils.dom.click(dropdownMenu.$('.o_menu_item a').first());
         assert.hasClass(dropdownMenu.$('.o_menu_item:first > .dropdown-item'), 'selected');
         assert.ok(dropdownMenu.$('.o_menu_item:first').is(':visible'),
             'item should still be visible');
         testUtils.dom.click(dropdownMenu.$('.o_menu_item a').first());
-        assert.hasClass(dropdownMenu.$('.o_menu_item:first > .dropdown-item').first(), 'selected');
+        assert.doesNotHaveClass(dropdownMenu.$('.o_menu_item:first > .dropdown-item').first(), 'selected');
         assert.ok(dropdownMenu.$('.o_menu_item:first').is(':visible'),
             'item should still be visible');
-        assert.ok(!dropdownMenu.$('.o_menu_item > .dropdown-item').first().hasClass('selected'),
-            'first element should not be selected');
-
         dropdownMenu.destroy();
     });
 
     QUnit.test('click on an item should not change url', function (assert) {
         assert.expect(0);
 
-        var dropdownMenu = createDropdownMenu(this.dropdownHeader);
+        var dropdownMenu = createDropdownMenu(this.items);
         testUtils.dom.click(dropdownMenu.$('.o_dropdown_toggler_btn'));
         dropdownMenu.$el.click(function () {
             // we do not want a click to get out and change the url, for example
@@ -171,7 +168,8 @@ QUnit.module('Web', {
         });
         // open dropdown menu
         testUtils.dom.click(dropdownMenu.$('button:first'));
-        assert.containsN(dropdownMenu, '.dropdown-divider, .dropdown-item, .dropdown-item-text', 7);
+        assert.containsN(dropdownMenu, '.dropdown-divider, .o_menu_item', 4);
+        testUtils.dom.clickFirst(dropdownMenu.$('.o_menu_item'));
         // click on first option
         testUtils.dom.click(dropdownMenu.$('.o_item_option > .dropdown-item').eq(0));
         assert.hasClass(dropdownMenu.$('.o_menu_item > .dropdown-item').first(), 'selected');
@@ -183,7 +181,7 @@ QUnit.module('Web', {
         assert.doesNotHaveClass(dropdownMenu.$('.o_item_option > .dropdown-item').eq(0), 'selected');
         assert.hasClass(dropdownMenu.$('.o_item_option > .dropdown-item').eq(1), 'selected');
         // click again on second option
-        testUtils.dom.click($('.o_item_option > .dropdown-item').eq(1).click());
+        testUtils.dom.click($('.o_item_option > .dropdown-item').eq(1));
         assert.doesNotHaveClass(dropdownMenu.$('.o_menu_item > .dropdown-item').first(), 'selected');
         assert.doesNotHaveClass(dropdownMenu.$('.o_item_option > .dropdown-item').eq(0), 'selected');
         assert.doesNotHaveClass(dropdownMenu.$('.o_item_option > .dropdown-item').eq(1), 'selected');
