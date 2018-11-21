@@ -527,7 +527,7 @@ class configmanager(object):
 
     def _test_enable_callback(self, option, opt, value, parser):
         if not parser.values.test_tags:
-            parser.values.test_tags = "+standard"
+            parser.values.test_tags = "+only"
 
     def load(self):
         outdated_options_map = {
