@@ -47,23 +47,6 @@ var ControlPanelController = mvc.Controller.extend({
     getSerializedState: function () {
         return this.model.getSerializedState();
     },
-    update: function (params) {
-        var self = this;
-        return this.model.reload(params).then(function () {
-            self._reportNewQuery();
-            var state = self.model.get();
-            return self.renderer.updateState(state);
-        });
-    },
-    /**
-     * Updates the content and displays the ControlPanel
-     *
-     * @see  ControlPanelRenderer (update)
-     */
-    updateContents: function (status, options) {
-        this.updateIndex++;
-        this.renderer.render(status, options);
-    },
     /**
      * Called at each switch view. This is required until the control panel is
      * shared between controllers of an action.
@@ -73,16 +56,14 @@ var ControlPanelController = mvc.Controller.extend({
     setControllerID: function (controllerID) {
         this.controllerID = controllerID;
     },
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    _getSubMenus: function () {
-        return this.renderer.$subMenus;
-    },
-    _reportNewQuery: function () {
-        this.trigger_up('search', this.model.getQuery());
+    /**
+     * Updates the content and displays the ControlPanel
+     *
+     * @see  ControlPanelRenderer (update)
+     */
+    updateContents: function (status, options) {
+        this.updateIndex++;
+        this.renderer.render(status, options);
     },
     /**
      * Updates the domain of the search view by adding and/or removing filters.
@@ -99,18 +80,41 @@ var ControlPanelController = mvc.Controller.extend({
      *   for a further call to this function)
      */
     updateFilters: function (newFilters, filtersToRemove) {
-        var newFilterIDS = this.model._createNewFilters(newFilters);
-        this.model._deactivateFilters(filtersToRemove);
-        this._reportNewQuery();
-        var state = this.model.get();
-        this.renderer.updateState(state);
+        var newFilterIDS = this.model.createNewFilters(newFilters);
+        this.model.deactivateFilters(filtersToRemove);
+        this._reportNewQueryAndRender();
         return newFilterIDS;
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    _getSubMenus: function () {
+        return this.renderer.$subMenus;
+    },
+    _reportNewQueryAndRender: function () {
+        this.trigger_up('search', this.model.getQuery());
+        var state = this.model.get();
+        return this.renderer.updateState(state);
     },
 
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
 
+    _onActivateTimeRange: function (event) {
+        this.model.activateTimeRange(
+            event.data.id,
+            event.data.timeRangeId,
+            event.data.comparisonTimeRangeId
+        );
+        this._reportNewQueryAndRender();
+    },
+    _onAutoCompletionFilter: function (event) {
+        this.model.toggleAutoCompletionFilter(event.data);
+        this._reportNewQueryAndRender();
+    },
     /**
      * @private
      * @param {OdooEvent} ev
@@ -125,40 +129,44 @@ var ControlPanelController = mvc.Controller.extend({
             },
         });
     },
-    _onFacetRemoved: function (ev) {
-        var group = ev.data.group;
+    _onFacetRemoved: function (event) {
+        var group = event.data.group;
         if (!group) {
             group = this.renderer.getLastFacet();
         }
-        this.update({deactivateGroup: group});
+        this.model.deactivateGroup(group.id);
+        this._reportNewQueryAndRender();
     },
     _onGetNonEvaluatedQuery: function (event) {
+        // getSearchState gives evaluated query! we should change methods
         var query = this.getSearchState();
         event.data.callback(query);
     },
     _onItemOptionClicked: function (event) {
-        return this.update({toggleOption: event.data});
+        this.model.toggleFilterWithOptions(event.data.id, event.data.optionId);
+        this._reportNewQueryAndRender();
     },
     _onItemTrashed: function (event) {
-        return this.update({trashItem: event.data});
+        var def = this.model.deleteFilterEverywhere(event.data.id);
+        def.then(this._reportNewQueryAndRender.bind(this));
     },
     _onMenuItemClicked: function (event) {
-        return this.update({toggleFilter: event.data});
+        // important in case of view graph. It uses the GroupByMenuInterfaceMixin!
+        event.stopPropagation();
+        this.model.toggleFilter(event.data.id);
+        this._reportNewQueryAndRender();
     },
     _onNewFavorite: function (event) {
-        return this.update({newFavorite: event.data});
+        var def = this.model.createNewFavorite(event.data);
+        def.then(this._reportNewQueryAndRender.bind(this));
     },
     _onNewFilters: function (event) {
-        return this.update({newFilters: event.data});
+        this.model.createNewFilters(event.data.filters);
+        this._reportNewQueryAndRender();
     },
     _onNewGroupBy: function (event) {
-        return this.update({newGroupBy: event.data});
-    },
-    _onActivateTimeRange: function (event) {
-        return this.update({activateTimeRange: event.data});
-    },
-    _onAutoCompletionFilter: function (ev) {
-        return this.update({toggleAutoCompletionFilter: ev.data});
+        this.model.createNewGroupBy(event.data);
+        this._reportNewQueryAndRender();
     },
 });
 

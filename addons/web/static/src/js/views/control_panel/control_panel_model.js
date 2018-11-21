@@ -41,100 +41,90 @@ var ControlPanelModel = mvc.Model.extend({
     // Public
     //--------------------------------------------------------------------------
 
-    load: function (params) {
-        var self = this;
-        this.fields = params.fields;
-        this.modelName = params.modelName;
-        this.actionId = params.actionId;
-
-        if (params.previousState) {
-            // TO DO: deactive filters of bad types (groupBy if view not groupable,...)
-            this._loadPreviousState(params.previousState);
-            return $.when();
+    activateTimeRange: function (filterId, timeRangeId, comparisonTimeRangeId) {
+        var filter = this.filters[filterId];
+        filter.timeRangeId = timeRangeId || filter.defaultTimeRangeId;
+        filter.comparisonTimeRangeId = comparisonTimeRangeId;
+        var group = this.groups[filter.groupId];
+        var groupActive = group.activeFilterIds.length;
+        if (groupActive) {
+            group.activeFilterIds = [filterId];
         } else {
-            params.groups.forEach(function (group) {
-                self._createGroupOfFilters(group);
-            });
-            if (this._getGroupIdOfType('groupBy') !== undefined) {
-                this._createEmptyGroup('groupBy');
+            this.toggleFilter(filterId);
+        }
+    },
+    createNewFavorite: function (newFavorite) {
+        return this._saveQuery(_.pick(
+            newFavorite,
+            ['description', 'isDefault', 'isShared', 'type']
+        )).then(function () {
+            newFavorite.on_success();
+        });
+    },
+    createNewFilters: function (newFilters) {
+        var self = this;
+        var filterIDs = [];
+        var groupNumber = this._generateNewGroupNumber();
+        this._createGroupOfFilters(newFilters);
+        newFilters.forEach(function (filter) {
+            filter.groupNumber = groupNumber;
+            self.toggleFilter(filter.id);
+            filterIDs.push(filter.id);
+        });
+        return filterIDs;
+    },
+    createNewGroupBy: function (newGroupBy) {
+        var id = _.uniqueId('__filter__');
+        newGroupBy.id = id;
+        newGroupBy.groupId = this._getGroupIdOfType('groupBy');
+        this.filters[id] = newGroupBy;
+        if (_.contains(['date', 'datetime'], newGroupBy.fieldType)) {
+            this.toggleFilterWithOptions(newGroupBy.id);
+        } else {
+            this.toggleFilter(newGroupBy.id);
+        }
+    },
+    deactivateFilters: function (filterIDs) {
+        var self = this;
+        filterIDs.forEach(function (filterID) {
+            var filter = self.filters[filterID];
+            var group = self.groups[filter.groupId];
+            if (_.contains(group.activeFilterIds, filterID)) {
+                self.toggleFilter(filterID);
             }
-            this._createGroupOfTimeRanges();
-            return this._loadFavorites().then(function () {
-                if (self.query.length === 0) {
-                    self._activateDefaultFilters();
-                    self._activateDefaultTimeRanges(params.timeRanges);
-                }
-            });
-        }
+        });
     },
-    _loadPreviousState: function (previousState) {
-        var state = JSON.parse(previousState);
-        this.filters = state.filters;
-        this.groups = state.groups;
-        this.query = state.query;
-    },
-    reload: function (params) {
-        var def;
-        var id;
-        if (params.previousCPState) {
-            this._loadPreviousState(params.previousCPState);
-        }
-        if (params.toggleFilter) {
-            this._toggleFilter(params.toggleFilter.id);
-        }
-        if (params.deactivateGroup) {
-            this._deactivateGroup(params.deactivateGroup.id);
-        }
-        if (params.toggleAutoCompletionFilter) {
-            this._toggleAutoCompletionFilter(params.toggleAutoCompletionFilter);
-        }
-        if (params.toggleOption) {
-            this._toggleFilterWithOptions(
-                // id is a filter id
-                params.toggleOption.id,
-                params.toggleOption.optionId
-            );
-        }
-        if (params.activateTimeRange) {
-            this._activateTimeRange(
-                params.activateTimeRange.id,
-                params.activateTimeRange.timeRangeId,
-                params.activateTimeRange.comparisonTimeRangeId
-            );
-        }
-        if (params.newFilters) {
-            this._createNewFilters(params.newFilters.filters);
-        }
-        if (params.newGroupBy) {
-            var newGroupBy = params.newGroupBy.groupBy;
-            id = _.uniqueId('__filter__');
-            newGroupBy.id = id;
-            newGroupBy.groupId = this._getGroupIdOfType('groupBy');
-            this.filters[id] = newGroupBy;
-            if (_.contains(['date', 'datetime'], newGroupBy.fieldType)) {
-                this._toggleFilterWithOptions(newGroupBy.id);
-            } else {
-                this._toggleFilter(newGroupBy.id);
+    /**
+     * Remove the group from the query.
+     *
+     * @private
+     * @param {string} groupId
+     */
+    deactivateGroup: function (groupId) {
+        var self = this;
+        var group = this.groups[groupId];
+        _.each(group.activeFilterIds, function (filterId) {
+            var filter = self.filters[filterId];
+            if (filter.autoCompleteValues) {
+                filter.autoCompleteValues = [];
             }
-        }
-        if (params.newFavorite) {
-            var newFavorite = params.newFavorite;
-            def = this._saveQuery(_.pick(
-                newFavorite,
-                ['description', 'isDefault', 'isShared', 'type']
-            )).then(function () {
-                newFavorite.on_success();
-            }).fail(function () {
-                return $.when();
-            });
-        }
-        if (params.trashItem) {
-            id = params.trashItem.id;
-            def = this._deleteFilter(id);
-        }
-        return $.when(def);
+        });
+        group.activeFilterIds = [];
+        this.query.splice(this.query.indexOf(groupId), 1);
     },
-
+    deleteFilterEverywhere: function (filterId) {
+        var self = this;
+        var filter = this.filters[filterId];
+        var def = this.deleteFilter(filter.serverSideId).then(function () {
+            var activeFavoriteId = self.groups[filter.groupId].activeFilterIds[0];
+            var isActive = activeFavoriteId === filterId;
+            if (isActive) {
+                self.toggleFilter(filterId);
+            }
+            delete self.filters[filterId];
+        });
+        return def;
+    },
     get: function () {
         var self = this;
         // we maintain a unique source activeFilterIds that contain information
@@ -191,18 +181,25 @@ var ControlPanelModel = mvc.Model.extend({
             fields: this.fields,
         };
     },
-
     getQuery: function () {
         var userContext = this.getSession().user_context;
         var domain = Domain.prototype.stringToArray(
             this._getDomain(),
             userContext
         );
-        var domainsEvaluation = true;
         var context = _.extend(
             pyUtils.eval('contexts', this._getQueryContext(), userContext),
-            this._getTimeRangeMenuData(domainsEvaluation)
+            this._getTimeRangeMenuData(true)
         );
+        // this must be done because pyUtils.eval does not know that it needs to evaluate domains within contexts
+        if (context.timeRangeMenuData) {
+            if (typeof context.timeRangeMenuData.timeRange === 'string') {
+                context.timeRangeMenuData.timeRange = pyUtils.eval('domain', context.timeRangeMenuData.timeRange);
+            }
+            if (typeof context.timeRangeMenuData.comparisonTimeRange === 'string') {
+                context.timeRangeMenuData.comparisonTimeRange = pyUtils.eval('domain', context.timeRangeMenuData.comparisonTimeRange);
+            }
+        }
         var groupBys = this._getGroupBys();
         return this._processSearchData({
             // for now action manager wants domains and contexts I would prefer
@@ -212,45 +209,6 @@ var ControlPanelModel = mvc.Model.extend({
             groupBys: groupBys,
         });
     },
-    /**
-     * Processes the search data sent by the search view.
-     *
-     * @private
-     * @param {Object} searchData
-     * @param {Object} [searchData.contexts=[]]
-     * @param {Object} [searchData.domains=[]]
-     * @param {Object} [searchData.groupbys=[]]
-     * @returns {Object} an object with keys 'context', 'domain', 'groupBy'
-     */
-    _processSearchData: function (searchData) {
-        var context = searchData.context;
-        var domain = searchData.domain;
-        // horrible! we should change that!
-        var groupBys = searchData.groupBys;
-        var action_context = this.initialContext;
-        var results = pyUtils.eval_domains_and_contexts({
-            domains: [this.initialDomain].concat([domain] || []),
-            contexts: [action_context].concat(context || []),
-            eval_context: this.userContext,
-        });
-        var groupBy = groupBys.length ?
-                        groupBys :
-                        (this.initialContext.group_by || []);
-        groupBy = (typeof groupBy === 'string') ? [groupBy] : groupBy;
-
-        if (results.error) {
-            throw new Error(_.str.sprintf(_t("Failed to evaluate search criterions")+": \n%s",
-                            JSON.stringify(results.error)));
-        }
-
-        var context = _.omit(results.context, 'time_ranges');
-
-        return {
-            context: context,
-            domain: results.domain,
-            groupBy: groupBy,
-        };
-    },
     getSerializedState: function () {
         return JSON.stringify({
             filters: this.filters,
@@ -258,6 +216,117 @@ var ControlPanelModel = mvc.Model.extend({
             query: this.query,
         });
     },
+    load: function (params) {
+        var self = this;
+        this.fields = params.fields;
+        this.modelName = params.modelName;
+        this.actionId = params.actionId;
+
+        if (params.previousState) {
+            // TO DO: deactive filters of bad types (groupBy if view not groupable,...)
+            this.loadPreviousState(params.previousState);
+            return $.when();
+        } else {
+            params.groups.forEach(function (group) {
+                self._createGroupOfFilters(group);
+            });
+            if (this._getGroupIdOfType('groupBy') !== undefined) {
+                this._createEmptyGroup('groupBy');
+            }
+            this._createGroupOfTimeRanges();
+            return this._loadFavorites().then(function () {
+                if (self.query.length === 0) {
+                    self._activateDefaultFilters();
+                    self._activateDefaultTimeRanges(params.timeRanges);
+                }
+            });
+        }
+    },
+    loadPreviousState: function (previousState) {
+        var state = JSON.parse(previousState);
+        this.filters = state.filters;
+        this.groups = state.groups;
+        this.query = state.query;
+    },
+    toggleAutoCompletionFilter: function (params) {
+        var filter = this.filters[params.filterId];
+        if (filter.type === 'field') {
+            // update domain & autoCompleteValues
+            // the autocompletion filter is dynamic
+            filter.domain = params.domain;
+            filter.autoCompleteValues = params.autoCompleteValues;
+            // active the filter
+            var group = this.groups[filter.groupId];
+            if (!group.activeFilterIds.includes(filter.id)) {
+                group.activeFilterIds.push(filter.id);
+                this.query.push(group.id);
+            }
+        } else {
+            if (filter.hasOptions) {
+                this.toggleFilterWithOptions(filter.id);
+            } else {
+                this.toggleFilter(filter.id);
+            }
+        }
+    },
+    // This method could work in batch and take a list of ids as args.
+    // (it would be useful for initialization and deletion of a facet/group)
+    toggleFilter: function (filterId) {
+        var self = this;
+        var filter = this.filters[filterId];
+        var group = this.groups[filter.groupId];
+        var index = group.activeFilterIds.indexOf(filterId);
+        var initiaLength = group.activeFilterIds.length;
+        if (index === -1) {
+            // we need to deactivate all groups when activating a favorite
+            if (filter.type === 'favorite') {
+                this.query.forEach(function (groupId) {
+                    self.groups[groupId].activeFilterIds = [];
+                });
+                this.query = [];
+            }
+            group.activeFilterIds.push(filterId);
+            // if initiaLength is 0, the group was not active.
+            if (filter.type === 'favorite' || initiaLength === 0) {
+                this.query.push(group.id);
+            }
+        } else {
+            group.activeFilterIds.splice(index, 1);
+            // if initiaLength is 1, the group is now inactive.
+            if (initiaLength === 1) {
+                this.query.splice(this.query.indexOf(group.id), 1);
+            }
+        }
+    },
+    // This method should work in batch too
+    // TO DO: accept selection of multiple options?
+    // for now: activate an option forces the deactivation of the others
+    // optionId optional: the method could be used at initialization...
+    // --> one falls back on defautlOptionId.
+    /**
+     * Used to toggle a given filter(Id) that has options with a given option(Id).
+     *
+     * @private
+     * @param {string} filterId
+     * @param {string} optionId
+     */
+    toggleFilterWithOptions: function (filterId, optionId) {
+        var filter = this.filters[filterId];
+        var group = this.groups[filter.groupId];
+        var alreadyActive = group.activeFilterIds.indexOf(filterId) !== -1;
+        if (alreadyActive) {
+            if (filter.currentOptionId === optionId) {
+                this.toggleFilter(filterId);
+                filter.currentOptionId = false;
+            } else {
+                filter.currentOptionId = optionId || filter.defaultOptionId;
+            }
+        } else {
+            this.toggleFilter(filterId);
+            filter.currentOptionId = optionId || filter.defaultOptionId;
+        }
+    },
+
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -270,9 +339,9 @@ var ControlPanelModel = mvc.Model.extend({
                 // if we are here, this means there is no favorite with isDefault set to true
                 if (filter.isDefault) {
                     if (filter.hasOptions) {
-                        self._toggleFilterWithOptions(filter.id);
+                        self.toggleFilterWithOptions(filter.id);
                     } else {
-                        self._toggleFilter(filter.id);
+                        self.toggleFilter(filter.id);
                     }
                 }
         });
@@ -285,7 +354,7 @@ var ControlPanelModel = mvc.Model.extend({
                 return filter.type === 'timeRange' && filter.fieldName === defaultTimeRanges.field;
             });
             if (filterId) {
-                this._activateTimeRange(
+                this.activateTimeRange(
                     filterId,
                     defaultTimeRanges.range,
                     defaultTimeRanges.comparisonRange
@@ -293,25 +362,12 @@ var ControlPanelModel = mvc.Model.extend({
             }
         }
     },
-    _activateTimeRange: function (filterId, timeRangeId, comparisonTimeRangeId) {
-        var filter = this.filters[filterId];
-        filter.timeRangeId = timeRangeId || filter.defaultTimeRangeId;
-        filter.comparisonTimeRangeId = comparisonTimeRangeId;
-        var group = this.groups[filter.groupId];
-        var groupActive = group.activeFilterIds.length;
-        if (groupActive) {
-            group.activeFilterIds = [filterId];
-        } else {
-            this._toggleFilter(filterId);
-        }
-    },
-    // if _saveQuery succeed we create a new favorite and activate it
     _addNewFavorite: function (favorite) {
         var id = _.uniqueId('__filter__');
         favorite.id = id;
         favorite.groupId = this._getGroupIdOfType('favorite');
         this.filters[id] = favorite;
-        this._toggleFilter(favorite.id);
+        this.toggleFilter(favorite.id);
     },
     // create empty group of a specific type
     _createEmptyGroup: function (type) {
@@ -340,7 +396,6 @@ var ControlPanelModel = mvc.Model.extend({
             activeFilterIds: [],
         };
     },
-
     _createGroupOfTimeRanges: function () {
         var self = this;
         var timeRanges = [];
@@ -368,59 +423,19 @@ var ControlPanelModel = mvc.Model.extend({
             this._createEmptyGroup('timeRange');
         }
     },
-    _createNewFilters: function (newFilters) {
-        // we need to create groupNumber somewhere
+    _generateNewGroupNumber: function () {
         var self = this;
-        var filterIDs = [];
-        var groupNumber = this._generateNewGroupNumber();
-        this._createGroupOfFilters(newFilters);
-        newFilters.forEach(function (filter) {
-            filter.groupNumber = groupNumber;
-            self._toggleFilter(filter.id);
-            filterIDs.push(filter.id);
-        });
-        return filterIDs;
-    },
-    _deactivateFilters: function (filterIDs) {
-        var self = this;
-        filterIDs.forEach(function (filterID) {
-            var filter = self.filters[filterID];
-            var group = self.groups[filter.groupId];
-            if (_.contains(group.activeFilterIds, filterID)) {
-                self._toggleFilter(filterID);
-            }
-        });
-    },
-    /**
-     * Remove the group from the query.
-     *
-     * @private
-     * @param {string} groupId
-     */
-    _deactivateGroup: function (groupId) {
-        var self = this;
-        var group = this.groups[groupId];
-        _.each(group.activeFilterIds, function (filterId) {
-            var filter = self.filters[filterId];
-            if (filter.autoCompleteValues) {
-                filter.autoCompleteValues = [];
-            }
-        });
-        group.activeFilterIds = [];
-        this.query.splice(this.query.indexOf(groupId), 1);
-    },
-    _deleteFilter: function (filterId) {
-        var self = this;
-        var filter = this.filters[filterId];
-        var def = this.deleteFilter(filter.serverSideId).then(function () {
-            var activeFavoriteId = self.groups[filter.groupId].activeFilterIds[0];
-            var isActive = activeFavoriteId === filterId;
-            if (isActive) {
-                self._toggleFilter(filterId);
-            }
-            delete self.filters[filterId];
-        });
-        return def;
+        var groupNumber = 1 + Object.keys(this.filters).reduce(
+            function (max, filterId) {
+                var filter = self.filters[filterId];
+                if (filter.groupNumber) {
+                    max = Math.max(filter.groupNumber, max);
+                }
+                return max;
+            },
+            1
+        );
+        return groupNumber;
     },
     // get context (without controller context (this is usefull only for favorite))
     _getQueryContext: function () {
@@ -526,17 +541,6 @@ var ControlPanelModel = mvc.Model.extend({
         );
         return _.compact(groupBys);
     },
-    _generateNewGroupNumber: function () {
-        var self = this;
-        var groupNumber = 1 + Object.keys(this.filters).reduce(
-            function (max, filterId) {
-                var filter = self.filters[filterId];
-                return Math.max(filter.groupNumber, max);
-            },
-            1
-        );
-        return groupNumber;
-    },
     _getGroupIdOfType: function (type) {
         var self = this;
         return Object.keys(this.groups).find(function (groupId) {
@@ -624,13 +628,51 @@ var ControlPanelModel = mvc.Model.extend({
                     return filter.type === 'favorite' && filter.isDefault;
                 });
                 if (defaultFavoriteId) {
-                    self._toggleFilter(defaultFavoriteId);
+                    self.toggleFilter(defaultFavoriteId);
                 }
             } else {
                 self._createEmptyGroup('favorite');
             }
         });
         return def;
+    },
+    /**
+     * Processes the search data sent by the search view.
+     *
+     * @private
+     * @param {Object} searchData
+     * @param {Object} [searchData.contexts=[]]
+     * @param {Object} [searchData.domains=[]]
+     * @param {Object} [searchData.groupbys=[]]
+     * @returns {Object} an object with keys 'context', 'domain', 'groupBy'
+     */
+    _processSearchData: function (searchData) {
+        var context = searchData.context;
+        var domain = searchData.domain;
+        var groupBys = searchData.groupBys;
+        var action_context = this.initialContext;
+        var results = pyUtils.eval_domains_and_contexts({
+            domains: [this.initialDomain].concat([domain] || []),
+            contexts: [action_context].concat(context || []),
+            eval_context: this.userContext,
+        });
+        var groupBy = groupBys.length ?
+                        groupBys :
+                        (this.initialContext.group_by || []);
+        groupBy = (typeof groupBy === 'string') ? [groupBy] : groupBy;
+
+        if (results.error) {
+            throw new Error(_.str.sprintf(_t("Failed to evaluate search criterions")+": \n%s",
+                            JSON.stringify(results.error)));
+        }
+
+        context = _.omit(results.context, 'time_ranges');
+
+        return {
+            context: context,
+            domain: results.domain,
+            groupBy: groupBy,
+        };
     },
     // save favorites should call this method. Here no evaluation of domains,...
     _saveQuery: function (favorite) {
@@ -686,85 +728,6 @@ var ControlPanelModel = mvc.Model.extend({
             favorite.serverSideId = serverSideId;
             self._addNewFavorite(favorite);
         });
-    },
-    _toggleAutoCompletionFilter: function (params) {
-        var filter = this.filters[params.filterId];
-
-        if (filter.type === 'field') {
-            // update domain & autoCompleteValues
-            // the autocompletion filter is dynamic
-            filter.domain = params.domain;
-            filter.autoCompleteValues = params.autoCompleteValues;
-            // active the filter
-            var group = this.groups[filter.groupId];
-            if (!group.activeFilterIds.includes(filter.id)) {
-                group.activeFilterIds.push(filter.id);
-                this.query.push(group.id);
-            }
-        } else {
-            if (filter.hasOptions) {
-                this._toggleFilterWithOptions(filter.id);
-            } else {
-                this._toggleFilter(filter.id);
-            }
-        }
-    },
-    // This method could work in batch and take a list of ids as args.
-    // (it would be useful for initialization and deletion of a facet/group)
-    _toggleFilter: function (filterId) {
-        var self = this;
-        var filter = this.filters[filterId];
-        var group = this.groups[filter.groupId];
-        var index = group.activeFilterIds.indexOf(filterId);
-        var initiaLength = group.activeFilterIds.length;
-        if (index === -1) {
-            // we need to deactivate all groups when activating a favorite
-            if (filter.type === 'favorite') {
-                this.query.forEach(function (groupId) {
-                    self.groups[groupId].activeFilterIds = [];
-                });
-                this.query = [];
-            }
-            group.activeFilterIds.push(filterId);
-            // if initiaLength is 0, the group was not active.
-            if (filter.type === 'favorite' || initiaLength === 0) {
-                this.query.push(group.id);
-            }
-        } else {
-            group.activeFilterIds.splice(index, 1);
-            // if initiaLength is 1, the group is now inactive.
-            if (initiaLength === 1) {
-                this.query.splice(this.query.indexOf(group.id), 1);
-            }
-        }
-    },
-    // This method should work in batch too
-    // TO DO: accept selection of multiple options?
-    // for now: activate an option forces the deactivation of the others
-    // optionId optional: the method could be used at initialization...
-    // --> one falls back on defautlOptionId.
-    /**
-     * Used to toggle a given filter(Id) that has options with a given option(Id).
-     *
-     * @private
-     * @param {string} filterId
-     * @param {string} optionId
-     */
-    _toggleFilterWithOptions: function (filterId, optionId) {
-        var filter = this.filters[filterId];
-        var group = this.groups[filter.groupId];
-        var alreadyActive = group.activeFilterIds.indexOf(filterId) !== -1;
-        if (alreadyActive) {
-            if (filter.currentOptionId === optionId) {
-                this._toggleFilter(filterId);
-                filter.currentOptionId = false;
-            } else {
-                filter.currentOptionId = optionId || filter.defaultOptionId;
-            }
-        } else {
-            this._toggleFilter(filterId);
-            filter.currentOptionId = optionId || filter.defaultOptionId;
-        }
     },
 });
 
