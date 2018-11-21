@@ -136,6 +136,7 @@ var Factory = Class.extend({
                 initialState: state,
             }, self.controllerParams);
             var controller = new Controller(parent, model, renderer, controllerParams);
+            model.setParent(controller);
             renderer.setParent(controller);
             return controller;
         });

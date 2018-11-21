@@ -241,17 +241,17 @@ var AbstractView = Factory.extend({
 
         var _super = this._super.bind(this);
         return $.when(def).then(function (controlPanel) {
-            // check if a model already exists, as if not, one will be created and
-            // we'll have to set the controller as its parent
+            // get the parent of the model if it already exists, as _super will
+            // set the new controller as parent, which we don't want
+            var modelParent = self.model && self.model.getParent();
             var alreadyHasModel = !!self.model;
             return _super(parent).done(function (controller) {
                 if (controlPanel) {
                     controlPanel.setParent(controller);
                 }
-                if (!alreadyHasModel) {
-                    // if we have a model, it already has a parent. Otherwise, we
-                    // set the controller, so the rpcs from the model actually work
-                    self.model.setParent(controller);
+                if (modelParent) {
+                    // if we already add a model, restore its parent
+                    self.model.setParent(modelParent);
                 }
             });
 
