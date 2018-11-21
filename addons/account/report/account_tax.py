@@ -17,13 +17,13 @@ class ReportTax(models.AbstractModel):
         }
 
     def _sql_from_amls_one(self):
-        sql = """SELECT "account_move_line".tax_line_id, COALESCE(SUM("account_move_line".debit-"account_move_line".credit), 0)
+        sql = """SELECT "account_move_line".tax_line_id, COALESCE(SUM("account_move_line".credit-"account_move_line".debit), 0)
                     FROM %s
                     WHERE %s AND "account_move_line".tax_exigible GROUP BY "account_move_line".tax_line_id"""
         return sql
 
     def _sql_from_amls_two(self):
-        sql = """SELECT r.account_tax_id, COALESCE(SUM("account_move_line".debit-"account_move_line".credit), 0)
+        sql = """SELECT r.account_tax_id, COALESCE(SUM("account_move_line".credit-"account_move_line".debit), 0)
                  FROM %s
                  INNER JOIN account_move_line_account_tax_rel r ON ("account_move_line".id = r.account_move_line_id)
                  INNER JOIN account_tax t ON (r.account_tax_id = t.id)
@@ -39,7 +39,7 @@ class ReportTax(models.AbstractModel):
         results = self.env.cr.fetchall()
         for result in results:
             if result[0] in taxes:
-                taxes[result[0]]['tax'] = abs(result[1])
+                taxes[result[0]]['tax'] = result[1]
 
         #compute the net amount
         sql2 = self._sql_from_amls_two()
@@ -48,7 +48,7 @@ class ReportTax(models.AbstractModel):
         results = self.env.cr.fetchall()
         for result in results:
             if result[0] in taxes:
-                taxes[result[0]]['net'] = abs(result[1])
+                taxes[result[0]]['net'] = result[1]
 
     @api.model
     def get_lines(self, options):
