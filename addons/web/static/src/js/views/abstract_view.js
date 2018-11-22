@@ -143,11 +143,27 @@ var AbstractView = Factory.extend({
         this.controllerParams.actionViews = params.action ? params.action.views : [];
         this.controllerParams.viewType = this.viewType;
 
-        var groupBy = params.groupBy;
-        if (typeof groupBy === 'string') {
-            groupBy = [groupBy];
+        // is this still necessary?
+        // var groupBy = params.groupBy;
+        // if (typeof groupBy === 'string') {
+        //     groupBy = [groupBy];
+        // }
+
+        var action = params.action || {};
+        if (action.flags) {
+            this.withControlPanel = !action.flags.headless;
+        } else if ('withControlPanel' in params) {
+            this.withControlPanel = params.withControlPanel;
         }
 
+        this.loadParams = {
+            context: params.context,
+            count: params.count || ((this.controllerParams.ids !== undefined) &&
+                   this.controllerParams.ids.length) || 0,
+            modelName: params.modelName,
+            res_id: params.currentId,
+            res_ids: params.ids,
+        };
         // default_order is like:
         //   'name,id desc'
         // but we need it like:
@@ -159,21 +175,6 @@ var AbstractView = Factory.extend({
                 return {name: order[0], asc: order[1] !== 'desc'};
             });
         }
-
-        var action = params.action || {};
-        if (action.flags) {
-            this.withControlPanel = !action.flags.headless;
-        } else if ('withControlPanel' in params) {
-            this.withControlPanel = params.withControlPanel;
-        }
-        this.loadParams = {
-            context: params.context,
-            count: params.count || ((this.controllerParams.ids !== undefined) &&
-                   this.controllerParams.ids.length) || 0,
-            modelName: params.modelName,
-            res_id: params.currentId,
-            res_ids: params.ids,
-        };
 
         this.controlPanelParams = {
             // rename

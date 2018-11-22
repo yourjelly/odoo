@@ -125,13 +125,15 @@ function createAsyncView(params) {
         currentId: 'res_id' in params ? params.res_id : undefined,
         domain: params.domain || [],
         context: params.context || {},
-        groupBy: params.groupBy || [],
     };
     if (params.hasSelectors) {
         viewOptions.hasSelectors = params.hasSelectors;
     }
 
     _.extend(viewOptions, params.viewOptions);
+    if (params.groupBy) {
+        viewOptions.context.group_by = params.groupBy;
+    }
 
     var view = new params.View(viewInfo, viewOptions);
 
