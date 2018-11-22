@@ -167,6 +167,7 @@ var AbstractView = Factory.extend({
             this.withControlPanel = params.withControlPanel;
         }
         this.loadParams = {
+            context: params.context,
             count: params.count || ((this.controllerParams.ids !== undefined) &&
                    this.controllerParams.ids.length) || 0,
             modelName: params.modelName,
