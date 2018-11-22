@@ -75,7 +75,7 @@ var CalendarController = AbstractController.extend({
      * @returns {string}
      */
     getTitle: function () {
-        return this.get('title');
+        return this._title;
     },
     /**
      * Render the buttons according to the CalendarView.buttons template and

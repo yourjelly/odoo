@@ -25,7 +25,7 @@ var ProjectPlan = AbstractAction.extend({
         this._super.apply(this, arguments);
         this.action = action;
         this.action_manager = parent;
-        this.set('title', action.name || _t('Overview'));
+        this._title = action.name || _t('Overview');
         this.project_ids = [];
     },
     /**

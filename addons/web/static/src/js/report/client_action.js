@@ -41,7 +41,7 @@ var ReportAction = AbstractAction.extend({
 
     start: function () {
         var self = this;
-        this.set('title', this.title);
+        this._setTitle(this.title);
         this.iframe = this.$('iframe')[0];
         return $.when(this._super.apply(this, arguments), session.is_bound).then(function () {
             var web_base_url = session['web.base.url'];
