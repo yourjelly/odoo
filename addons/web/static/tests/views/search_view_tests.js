@@ -337,7 +337,7 @@ QUnit.module('Search View', {
         actionManager.destroy();
     });
 
-    QUnit.skip('groupby selected within graph subview are not deleted when modifying search view content', function (assert) {
+    QUnit.test('groupby selected within graph subview are not deleted when modifying search view content', function (assert) {
         assert.expect(2);
 
         this.actions[3].flags = {isEmbedded: true};
@@ -348,14 +348,14 @@ QUnit.module('Search View', {
             data: this.data,
         });
         actionManager.doAction(4);
-        testUtils.dom.click($('.o_control_panel .o_cp_buttons > button').eq(1));
-        testUtils.dom.click($('div.o_graph_groupbys_menu .o_menu_item').eq(1));
-        testUtils.dom.click($('div.o_graph_groupbys_menu .o_menu_item .o_item_option > .dropdown-item').first());
-        assert.doesNotHaveClass($('div.o_graph_groupbys_menu .o_menu_item > .dropdown-item').eq(1), 'selected',
+        testUtils.dom.click($('.o_graph_controller .o_control_panel .o_cp_buttons button').eq(1));
+        testUtils.dom.click($('.o_graph_controller .o_group_by_menu .o_menu_item').eq(1));
+        testUtils.dom.click($('.o_graph_controller .o_group_by_menu .o_menu_item .o_item_option > .dropdown-item').first());
+        assert.doesNotHaveClass($('.o_graph_controller .o_group_by_menu .o_menu_item > .dropdown-item').eq(1), 'selected',
             'groupby should be unselected');
         testUtils.dom.click($('.o_search_options button span.fa-filter'));
         testUtils.dom.click($('.o_filters_menu .o_menu_item a').first());
-        assert.doesNotHaveClass($('div.o_graph_groupbys_menu .o_menu_item > .dropdown-item').eq(1), 'selected',
+        assert.doesNotHaveClass($('.o_graph_controller .o_group_by_menu .o_menu_item > .dropdown-item').eq(1), 'selected',
             'groupby should be still unselected');
         actionManager.destroy();
     });
@@ -879,7 +879,7 @@ QUnit.module('Search View', {
         actionManager.destroy();
     });
 
-    QUnit.skip('a default time range only in context is taken into account', function (assert) {
+    QUnit.test('a default time range only in context is taken into account', function (assert) {
         assert.expect(2);
 
         var actionManager = createActionManager({
@@ -902,11 +902,10 @@ QUnit.module('Search View', {
             views: [[false, 'pivot']],
             context: {time_ranges: {range: 'today', field: 'date_field'}}
         });
-
         actionManager.destroy();
     });
 
-    QUnit.skip('save search filter in modal', function (assert) {
+    QUnit.test('save search filter in modal', function (assert) {
         assert.expect(5);
         this.data.partner.records.push({
             id: 7,
@@ -960,11 +959,11 @@ QUnit.module('Search View', {
             assert.strictEqual(event.data.filter.name, "Awesome Test Customer Filter", "filter name should be correct");
         });
         testUtils.dom.click($('button:contains(Favorites)'));
-        testUtils.dom.click($('.o_save_search'));
-        var filterNameInput = $('.o_save_name .o_input[type="text"]:visible');
+        testUtils.dom.click($('.o_add_favorite'));
+        var filterNameInput = $('.o_favorite_name .o_input[type="text"]:visible');
         assert.strictEqual(filterNameInput.length, 1, "should display an input field for the filter name");
         testUtils.fields.editInput(filterNameInput, 'Awesome Test Customer Filter');
-        testUtils.dom.click($('.o_save_name button'));
+        testUtils.dom.click($('.o_save_favorite button'));
 
         form.destroy();
     });
@@ -1029,228 +1028,5 @@ QUnit.module('Search View', {
 
         form.destroy();
     });
-
-    // QUnit.module('search arch parsing');
-
-    // QUnit.test('empty arch', function (assert) {
-    //     assert.expect(2);
-
-    //     var viewInfo = {arch: "<search> </search>"};
-
-    //     var searchView = new SearchView(viewInfo, {context: {}});
-    //     assert.deepEqual(searchView.loadParams.filters, []);
-    //     assert.deepEqual(searchView.loadParams.groups, []);
-    // });
-
-    // QUnit.test('parse one field tag', function (assert) {
-    //     assert.expect(2);
-    //     var arch = "<search>" +
-    //                     "<field name=\"user_id\"/>" +
-    //                 "</search>";
-    //     var viewInfo = {arch:  arch};
-
-    //     var searchView = new SearchView(viewInfo, {context: {}});
-    //     assert.deepEqual(
-    //         searchView.loadParams.filters.map(function (filter) {
-    //             return _.omit(filter, 'id', 'groupId');
-    //         }),
-    //         [{attrs: {name: "user_id"}, type: "field"}]
-    //     );
-    //     assert.deepEqual(
-    //         searchView.loadParams.groups.map(function (group) {
-    //             return _.omit(group, 'id');
-    //         }),
-    //         [{}]
-    //     );
-    // });
-
-    // QUnit.test('parse one separator tag', function (assert) {
-    //     assert.expect(2);
-    //     var arch = "<search>" +
-    //                     "<separator/>" +
-    //                 "</search>";
-    //     var viewInfo = {arch:  arch};
-
-    //     var searchView = new SearchView(viewInfo, {context: {}});
-    //     assert.deepEqual(searchView.loadParams.filters, []);
-    //     assert.deepEqual(searchView.loadParams.groups, []);
-    // });
-
-    // QUnit.test('parse one separator tag and one field tag', function (assert) {
-    //     assert.expect(2);
-    //     var arch = "<search>" +
-    //                     "<separator/>" +
-    //                     "<field name=\"user_id\"/>" +
-    //                 "</search>";
-    //     var viewInfo = {arch:  arch};
-
-    //     var searchView = new SearchView(viewInfo, {context: {}});
-    //     assert.deepEqual(
-    //         searchView.loadParams.filters.map(function (filter) {
-    //             return _.omit(filter, 'id', 'groupId');
-    //         }),
-    //         [{attrs: {name: "user_id"}, type: "field"}]
-    //     );
-    //     assert.deepEqual(
-    //         searchView.loadParams.groups.map(function (group) {
-    //             return _.omit(group, 'id');
-    //         }),
-    //         [{}]
-    //     );
-    // });
-    // QUnit.test('parse one filter tag', function (assert) {
-    //     assert.expect(2);
-    //     var arch = "<search>" +
-    //                     "<filter name=\"filter\" string=\"Hello\" " +
-    //                     "domain=\"[]\"/>" +
-    //                 "</search>";
-    //     var viewInfo = {arch:  arch};
-
-    //     var searchView = new SearchView(viewInfo, {context: {}});
-    //     assert.deepEqual(
-    //         searchView.loadParams.filters.map(function (filter) {
-    //             return _.omit(filter, 'id', 'groupId');
-    //         }),
-    //         [{attrs: {domain: "[]", name: "filter", string: "Hello"}, type: "filter"}]
-    //     );
-    //     assert.deepEqual(
-    //         searchView.loadParams.groups.map(function (group) {
-    //             return _.omit(group, 'id');
-    //         }),
-    //         [{}]
-    //     );
-    // });
-    // QUnit.test('parse one groupBy tag', function (assert) {
-    //     assert.expect(2);
-    //     var arch = "<search>" +
-    //                     "<groupBy name=\"groupby\" string=\"Hi\" " +
-    //                     "context=\"{\'group_by\': \'date_field:day\'}\"/>" +
-    //                 "</search>";
-    //     var viewInfo = {arch:  arch};
-
-    //     var searchView = new SearchView(viewInfo, {context: {}});
-    //     assert.deepEqual(
-    //         searchView.loadParams.filters.map(function (filter) {
-    //             return _.omit(filter, 'id', 'groupId');
-    //         }),
-    //         [{
-    //             attrs: {
-    //                 context: "{'group_by': 'date_field:day'}",
-    //                 defaultInterval: "day",
-    //                 fieldName: "date_field",
-    //                 name: "groupby",
-    //                 string: "Hi"
-    //             },
-    //             type: "groupBy"
-    //         }]
-    //     );
-    //     assert.deepEqual(
-    //         searchView.loadParams.groups.map(function (group) {
-    //             return _.omit(group, 'id');
-    //         }),
-    //         [{}]
-    //     );
-    // });
-    // QUnit.test('parse two filter tags', function (assert) {
-    //     assert.expect(2);
-    //     var arch = "<search>" +
-    //                     "<filter name=\"filter_1\" string=\"Hello One\" " +
-    //                     "domain=\"[]\"/>" +
-    //                     "<filter name=\"filter_2\" string=\"Hello Two\" " +
-    //                     "domain=\"[(\'user_id\', \'=\', 3)]\"/>" +
-    //                 "</search>";
-    //     var viewInfo = {arch:  arch};
-
-    //     var searchView = new SearchView(viewInfo, {context: {}});
-    //     assert.deepEqual(
-    //         searchView.loadParams.filters.map(function (filter) {
-    //             return _.omit(filter, 'id', 'groupId');
-    //         }),
-    //         [{attrs: {domain: "[]", name: "filter_1", string: "Hello One"}, type: "filter"},
-    //             {attrs: {domain: "[('user_id', '=', 3)]", name: "filter_2", string: "Hello Two"}, type: "filter"}]
-    //     );
-    //     assert.deepEqual(
-    //         searchView.loadParams.groups.map(function (group) {
-    //             return _.omit(group, 'id');
-    //         }),
-    //         [{}]
-    //     );
-    // });
-    // QUnit.test('parse two filter tags separated by a separator', function (assert) {
-    //     assert.expect(2);
-    //     var arch = "<search>" +
-    //                     "<filter name=\"filter_1\" string=\"Hello One\" " +
-    //                     "domain=\"[]\"/>" +
-    //                     "<separator/>" +
-    //                     "<filter name=\"filter_2\" string=\"Hello Two\" " +
-    //                     "domain=\"[(\'user_id\', \'=\', 3)]\"/>" +
-    //                 "</search>";
-    //     var viewInfo = {arch:  arch};
-
-    //     var searchView = new SearchView(viewInfo, {context: {}});
-    //     assert.deepEqual(
-    //         searchView.loadParams.filters.map(function (filter) {
-    //             return _.omit(filter, 'id', 'groupId');
-    //         }),
-    //         [{attrs: {domain: "[]", name: "filter_1", string: "Hello One"}, type: "filter"},
-    //             {attrs: {domain: "[('user_id', '=', 3)]", name: "filter_2", string: "Hello Two"}, type: "filter"}]
-    //     );
-    //     assert.deepEqual(
-    //         searchView.loadParams.groups.map(function (group) {
-    //             return _.omit(group, 'id');
-    //         }),
-    //         [{}, {}]
-    //     );
-    // });
-    // QUnit.test('parse one filter tag and one field', function (assert) {
-    //     assert.expect(4);
-    //     var arch = "<search>" +
-    //                     "<filter name=\"filter\" string=\"Hello\" domain=\"[]\"/>" +
-    //                     "<field name=\"user_id\"/>" +
-    //                 "</search>";
-    //     var viewInfo = {arch:  arch};
-
-    //     var searchView = new SearchView(viewInfo, {context: {}});
-    //     assert.deepEqual(
-    //         searchView.loadParams.filters.map(function (filter) {
-    //             return _.omit(filter, 'id', 'groupId');
-    //         }),
-    //         [{attrs: {domain: "[]", name: "filter", string: "Hello"}, type: "filter"},
-    //             {attrs: {name: "user_id"}, type: "field"}]
-    //     );
-    //     assert.deepEqual(
-    //         searchView.loadParams.groups.map(function (group) {
-    //             return _.omit(group, 'id');
-    //         }),
-    //         [{}, {}]
-    //     );
-    //     assert.strictEqual(searchView.loadParams.filters[0].groupId, searchView.loadParams.groups[0].id);
-    //     assert.strictEqual(searchView.loadParams.filters[1].groupId, searchView.loadParams.groups[1].id);
-    // });
-    // change structure and modify test
-
-    // QUnit.test('parse two field tags', function (assert) {
-    //     assert.expect(2);
-    //     var arch = "<search>" +
-    //                     "<field name=\"field_1\"/>" +
-    //                     "<field name=\"field_2\"/>" +
-    //                 "</search>";
-    //     var viewInfo = {arch:  arch};
-
-    //     var searchView = new SearchView(viewInfo, {context: {}});
-    //     assert.deepEqual(
-    //         searchView.loadParams.filters.map(function (filter) {
-    //             return _.omit(filter, 'id', 'groupId');
-    //         }),
-    //         [{attrs: {domain: "[]", name: "filter_1", string: "Hello One"}, type: "filter"},
-    //             {attrs: {domain: "[('user_id', '=', 3)]", name: "filter_2", string: "Hello Two"}, type: "filter"}]
-    //     );
-    //     assert.deepEqual(
-    //         searchView.loadParams.groups.map(function (group) {
-    //             return _.omit(group, 'id');
-    //         }),
-    //         [{}]
-    //     );
-    // });
 });
 });
