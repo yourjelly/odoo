@@ -10,7 +10,6 @@ var config = require('web.config');
 var core = require('web.core');
 var Dialog = require('web.Dialog');
 var dom = require('web.dom');
-var pyUtils = require('web.py_utils');
 var session = require('web.session');
 
 var QWeb = core.qweb;
@@ -172,7 +171,6 @@ var ModeratorRejectMessageDialog = Dialog.extend({
 });
 
 var Discuss = AbstractAction.extend({
-    hasControlPanel: true,
     contentTemplate: 'mail.discuss',
     custom_events: {
         message_moderation: '_onMessageModeration',
@@ -188,6 +186,8 @@ var Discuss = AbstractAction.extend({
         'click .o_mail_open_channels': '_onPublicChannelsClick',
         'click .o_mail_partner_unpin': '_onUnpinChannel',
     },
+    hasControlPanel: true,
+    loadControlPanel: true,
 
     /**
      * @override
@@ -211,21 +211,15 @@ var Discuss = AbstractAction.extend({
         this._selectedMessage = null;
         this._throttledUpdateThreads = _.throttle(
             this._updateThreads.bind(this), 100, { leading: false });
+
+        this.controlPanelParams.modelName = 'mail.message';
+        // TODO: disable_groupby: true,
     },
     /**
      * @override
      */
     willStart: function () {
-        var self = this;
-        var viewID = this.action &&
-                        this.action.search_view_id &&
-                        this.action.search_view_id[0];
-        var def = this
-            .loadFieldView('mail.message', this.context, viewID, 'search')
-            .then(function (fieldsView) {
-                self.fields_view = fieldsView;
-            });
-        return $.when(this._super(), this.call('mail_service', 'isReady'), def);
+        return $.when(this._super(), this.call('mail_service', 'isReady'));
     },
     /**
      * @override
@@ -257,9 +251,9 @@ var Discuss = AbstractAction.extend({
             this._extendedComposer.appendTo(this.$('.o_mail_discuss_content')));
         defs.push(this._super.apply(this, arguments));
 
-        return this.alive($.when.apply($, defs))
+        return $.when.apply($, defs)
             .then(function () {
-                return self.alive(self._setThread(self._defaultThreadID));
+                return self._setThread(self._defaultThreadID);
             })
             .then(function () {
                 self._updateThreads();
@@ -646,26 +640,6 @@ var Discuss = AbstractAction.extend({
             .on('click', '.o_mail_discuss_button_select_all', this._onSelectAllClicked.bind(this))
             .on('click', '.o_mail_discuss_button_unselect_all', this._onUnselectAllClicked.bind(this));
     },
-    // /**
-    //  * @private
-    //  * @returns {Deferred}
-    //  */
-    // _renderSearchView: function () {
-    //     var self = this;
-    //     var options = {
-    //         $buttons: $('<div>'),
-    //         action: this.action,
-    //         disable_groupby: true,
-    //     };
-    //     this.searchview = new SearchView(this, this.dataset, this.fields_view, options);
-    //     return this.alive(this.searchview.appendTo($('<div>')))
-    //         .then(function () {
-    //             self.$searchview_buttons = self.searchview.$buttons;
-    //             // manually call do_search to generate the initial domain and filter
-    //             // the messages in the default thread
-    //             self.searchview.do_search();
-    //         });
-    // },
     /**
      * Render the sidebar of discuss app
      *
@@ -1361,12 +1335,7 @@ var Discuss = AbstractAction.extend({
      */
     _onSearch: function (ev) {
         ev.stopPropagation();
-        var session = this.getSession();
-        var result = pyUtils.eval_domains_and_contexts({
-            domains: ev.data.domains,
-            contexts: [session.user_context],
-        });
-        this.domain = result.domain;
+        this.domain = ev.data.domain;
         if (this._thread) {
             // initially (when _onSearch is called manually), there is no
             // thread set yet, so don't try to fetch and render the thread as

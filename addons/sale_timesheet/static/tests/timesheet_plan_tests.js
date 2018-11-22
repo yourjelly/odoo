@@ -64,7 +64,7 @@ QUnit.module('Timesheet Plan', {
             "/web/dataset/call_kw/project.project",
             "/timesheet/plan"
         ]);
-        assert.strictEqual(plan.$el.text(), 'Banach-Tarski', 'should have rendered html content');
+        assert.strictEqual(plan.$('.o_content').text(), 'Banach-Tarski', 'should have rendered html content');
         assert.strictEqual(plan.$('.o_control_panel .breadcrumb-item').text(), 'Overview',
             'default title should be set');
         plan.destroy();

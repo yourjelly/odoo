@@ -3,14 +3,15 @@ odoo.define('sale_timesheet.ProjectPlan', function (require) {
 
 var AbstractAction = require('web.AbstractAction');
 var core = require('web.core');
-var data = require('web.data');
 var pyUtils = require('web.py_utils');
-var SearchView = require('web.OldSearchView');
 
 var _t = core._t;
 var QWeb = core.qweb;
 
 var ProjectPlan = AbstractAction.extend({
+    custom_events: {
+        search: '_onSearch',
+    },
     events: {
         "click a[type='action']": "_onClickAction",
         "click .o_timesheet_plan_redirect": '_onRedirect',
@@ -18,64 +19,30 @@ var ProjectPlan = AbstractAction.extend({
         "click .o_timesheet_plan_non_billable_task": "_onClickNonBillableTask",
         "click .o_timesheet_plan_sale_timesheet_people_time .progress-bar": '_onClickEmployeeProgressbar',
     },
+    hasControlPanel: true,
+    loadControlPanel: true,
     /**
      * @override
      */
-     init: function (parent, action) {
+    init: function (parent, action) {
         this._super.apply(this, arguments);
         this.action = action;
+        this.context = action.context;
         this.action_manager = parent;
         this._title = action.name || _t('Overview');
         this.project_ids = [];
-    },
-    /**
-     * @override
-     */
-    willStart: function () {
-        var self = this;
-        var view_id = this.action && this.action.search_view_id && this.action.search_view_id[0];
-        var def = this
-            .loadViews('project.project', this.action.context || {}, [[view_id, 'search']])
-            .then(function (result) {
-                self.fields_view = result.search;
-            });
-        return $.when(this._super(), def);
+
+        this.controlPanelParams.modelName = 'project.project';
+        // TODO: disable_groupby: true,
     },
     /**
      * @override
      */
     start: function () {
         var self = this;
-
-        // find default search from context
-        var search_defaults = {};
-        var context = this.action.context || [];
-        _.each(context, function (value, key) {
-            var match = /^search_default_(.*)$/.exec(key);
-            if (match) {
-                search_defaults[match[1]] = value;
-            }
-        });
-
-        // create searchview
-        var options = {
-            $buttons: $("<div>"),
-            action: this.action,
-            disable_groupby: true,
-            search_defaults: search_defaults,
-        };
-
-        var dataset = new data.DataSetSearch(this, 'project.project');
-        this.searchview = new SearchView(this, dataset, this.fields_view, options);
-        this.searchview.on('search', this, this._onSearch);
-
-        var def1 = this._super.apply(this, arguments);
-        var def2 = this.searchview.appendTo($("<div>")).then(function () {
-            self.$searchview_buttons = self.searchview.$buttons.contents();
-        });
-
-        return $.when(def1, def2).then(function(){
-            self.searchview.do_search();
+        return this._super.apply(this, arguments).then(function () {
+            // TODO: maybe not the correct way
+            return self._controlPanel._reportNewQueryAndRender();
         });
     },
 
@@ -88,7 +55,7 @@ var ProjectPlan = AbstractAction.extend({
      */
     do_show: function () {
         this._super.apply(this, arguments);
-        this.searchview.do_search();
+        this._updateControlPanel();
         this.action_manager.do_push_state({
             action: this.action.id,
             active_id: this.action.context.active_id,
@@ -106,7 +73,7 @@ var ProjectPlan = AbstractAction.extend({
      * @param {string|html} dom
      */
     _refreshPlan: function (dom) {
-        this.$el.html(dom);
+        this.$('.o_content').html(dom);
     },
 
     /**
@@ -135,17 +102,15 @@ var ProjectPlan = AbstractAction.extend({
         if (this.$buttons) {
             this.$buttons.off().destroy();
         }
-        var buttons = buttons || [];
+        buttons = buttons || [];
         this.$buttons = $(QWeb.render("project.plan.ControlButtons", {'buttons': buttons}));
         this.$buttons.on('click', '.o_timesheet_plan_btn_action', this._onClickControlButton.bind(this));
         // refresh control panel
         this.updateControlPanel({
+            title: this._title,
             cp_content: {
                 $buttons: this.$buttons,
-                $searchview: this.searchview.$el,
-                $searchview_buttons: this.$searchview_buttons,
             },
-            searchview: this.searchview,
         });
     },
 
@@ -244,9 +209,9 @@ var ProjectPlan = AbstractAction.extend({
         var parameters = {
             domain: data.domain || [],
             res_model: data.resModel,
-        }
+        };
         if (data.resId) {
-            parameters['res_id'] = data.resId;
+            parameters.res_id = data.resId;
         }
         return this._rpc({
             route:"/timesheet/plan/action",
@@ -259,8 +224,7 @@ var ProjectPlan = AbstractAction.extend({
      * @private
      * @param {MouseEvent} event
      */
-    _onClickNonBillableTask: function (event) {
-        var self = this;
+    _onClickNonBillableTask: function () {
         this.do_action({
             name: _t('Non Billable Tasks'),
             type: 'ir.actions.act_window',
