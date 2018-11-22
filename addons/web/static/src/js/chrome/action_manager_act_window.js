@@ -591,7 +591,10 @@ ActionManager.include({
                     // lazy loaded -> load it now (with same jsID)
                     return newController(controller.jsID);
                 } else {
-                    viewOptions = _.extend(viewOptions || {}, action.env);
+                    // TODO: everything that is related to search should not be
+                    // managed here
+                    var actionEnv = _.omit(action.env, ['domain', 'groupBy']);
+                    viewOptions = _.extend(viewOptions || {}, actionEnv);
                     return $.when(controller.widget.willRestore()).then(function () {
                         return controller.widget.reload(viewOptions).then(function () {
                             return controller;
