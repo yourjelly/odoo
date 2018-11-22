@@ -86,7 +86,7 @@ QUnit.module('GroupByMenu', {
     });
 
     QUnit.test('select a groupBy of no date type in Add Custom Group menu add properly that groupBy to menu', function (assert) {
-        assert.expect(7);
+        assert.expect(6);
 
         var groupByMenu = createGroupByMenu(
             [],
@@ -96,10 +96,10 @@ QUnit.module('GroupByMenu', {
             {
                 intercepts: {
                     new_groupBy: function (ev) {
-                        assert.strictEqual(ev.data.groupBy.description, 'Candlelight');
-                        assert.strictEqual(ev.data.groupBy.fieldName, 'fieldName');
-                        assert.strictEqual(ev.data.groupBy.fieldType, 'boolean');
-                        assert.strictEqual(ev.data.groupBy.type, 'groupBy');
+                        assert.strictEqual(ev.data.description, 'Candlelight');
+                        assert.strictEqual(ev.data.fieldName, 'fieldName');
+                        assert.strictEqual(ev.data.fieldType, 'boolean');
+                        assert.strictEqual(ev.data.type, 'groupBy');
                         groupByMenu.update([{
                             description: 'Candlelight',
                             groupNumber: 1,
@@ -131,15 +131,14 @@ QUnit.module('GroupByMenu', {
             {
                 intercepts: {
                     new_groupBy: function (ev) {
-                        var groupBy = ev.data.groupBy;
-                        assert.strictEqual(groupBy.description, 'Super Date');
-                        assert.strictEqual(groupBy.fieldName, 'fieldName');
-                        assert.strictEqual(groupBy.fieldType, 'date');
-                        assert.strictEqual(groupBy.type, 'groupBy');
-                        assert.strictEqual(groupBy.hasOptions, true);
-                        assert.strictEqual(groupBy.options, controlPanelViewParameters.INTERVAL_OPTIONS);
-                        assert.strictEqual(groupBy.defaultOptionId, controlPanelViewParameters.DEFAULT_INTERVAL);
-                        assert.strictEqual(groupBy.currentOptionId, false);
+                        assert.strictEqual(ev.data.description, 'Super Date');
+                        assert.strictEqual(ev.data.fieldName, 'fieldName');
+                        assert.strictEqual(ev.data.fieldType, 'date');
+                        assert.strictEqual(ev.data.type, 'groupBy');
+                        assert.strictEqual(ev.data.hasOptions, true);
+                        assert.deepEqual(ev.data.options, controlPanelViewParameters.INTERVAL_OPTIONS);
+                        assert.strictEqual(ev.data.defaultOptionId, controlPanelViewParameters.DEFAULT_INTERVAL);
+                        assert.strictEqual(ev.data.currentOptionId, false);
                         groupByMenu.update([{
                             description: 'Super Date',
                             groupNumber: 1,
