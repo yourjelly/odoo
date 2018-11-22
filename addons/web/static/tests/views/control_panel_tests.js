@@ -52,14 +52,14 @@ QUnit.module('Views', {
             },
         });
 
-        assert.strictEqual(controlPanel.$('.o_cp_custom_buttons').length, 1,
+        assert.containsOnce(controlPanel, '.o_cp_custom_buttons',
             "should have rendered a custom button area");
-        assert.strictEqual(controlPanel.$('.o_cp_custom_buttons button').length, 1,
+        assert.containsOnce(controlPanel, '.o_cp_custom_buttons button',
             "should have rendered one custom button");
         assert.strictEqual(controlPanel.$('.o_cp_custom_buttons button.b').text(), 'Do it',
             "should have correctly rendered the custom button");
 
-        controlPanel.$('.o_cp_custom_buttons button').click();
+        testUtils.dom.click(controlPanel.$('.o_cp_custom_buttons button'));
 
         controlPanel.destroy();
     });

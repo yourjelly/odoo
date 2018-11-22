@@ -141,7 +141,17 @@ function createAsyncView(params) {
     if (params.hasSelectors) {
         viewOptions.hasSelectors = params.hasSelectors;
     }
-    var view = new View(viewInfo, viewOptions);
+
+    var view;
+    if (viewInfo.type === 'controlpanel') {
+        // TODO: probably needs to create an helper just for that
+        view = new params.View({
+            viewInfo: viewInfo,
+            modelName: params.model || 'foo',
+        });
+    } else {
+        view = new params.View(viewInfo, viewOptions);
+    }
 
     if (params.interceptsPropagate) {
         _.each(params.interceptsPropagate, function (cb, name) {
