@@ -340,7 +340,10 @@ var SelectCreateDialog = ViewDialog.extend({
         var self = this;
         var fragment = document.createDocumentFragment();
 
-        var domain = this.initialIDs ? [['id', 'in', this.initialIDs]] : [];
+        var domain = this.domain;
+        if (this.initialIDs) {
+            domain = domain.concat([['id', 'in', this.initialIDs]]);
+        }
         var listView = new ListView(fieldsViews.list, _.extend({
             action: {
                 controlPanelFieldsView: fieldsViews.search,
