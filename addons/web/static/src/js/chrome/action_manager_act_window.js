@@ -294,6 +294,7 @@ ActionManager.include({
                 .then(function () {
                     var viewOptions = {
                         breadcrumbs: self._getBreadcrumbs(options),
+                        currentControlPanelConfiguration: options.currentControlPanelConfiguration,
                     };
                     var curViewDef = self._createViewController(action, curView.type, viewOptions);
                     return self.dp.add(curViewDef);
@@ -564,7 +565,6 @@ ActionManager.include({
 
         viewOptions = _.extend({
             breadcrumbs: this._getBreadcrumbs({index: index}),
-            currentControlPanelConfiguration: currentController.widget.getControlPanelConfiguration(),
         }, viewOptions);
 
         var newController = function (controllerID) {
@@ -755,7 +755,9 @@ ActionManager.include({
             if ('res_id' in ev.data) {
                 action.env.currentId = ev.data.res_id;
             }
-            var options = {};
+            var options = {
+                currentControlPanelConfiguration: currentController.widget.getControlPanelConfiguration(),
+            };
             if (viewType === 'form' && !action.env.currentId) {
                 options.mode = 'edit';
             } else if (ev.data.mode) {
