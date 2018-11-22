@@ -471,9 +471,9 @@ QUnit.module('Views', {
 
         // save filter
         testUtils.dom.click(dialog.$('.o_dropdown_toggler_btn:contains(Favorites)'));
-        testUtils.dom.click(dialog.$('.o_save_search'));
-        dialog.$('.o_save_name input[type=text]').val('some name'); // name the filter
-        testUtils.dom.click(dialog.$('.o_save_name button'));
+        testUtils.dom.click(dialog.$('.o_add_favorite'));
+        dialog.$('.o_favorite_name input[type=text]').val('some name'); // name the filter
+        testUtils.dom.click(dialog.$('.o_save_favorite button'));
 
         testUtils.mock.unpatch(ListController);
         parent.destroy();

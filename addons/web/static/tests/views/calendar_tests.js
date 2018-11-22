@@ -2118,7 +2118,7 @@ QUnit.module('Views', {
         testUtils.mock.unpatch(Dialog);
     });
 
-    QUnit.test('calendar is configured to hide the groupby menu', function (assert) {
+    QUnit.skip('calendar is configured to hide the groupby menu', function (assert) {
         assert.expect(2);
 
         var archs = {
