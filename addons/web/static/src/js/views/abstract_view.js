@@ -218,7 +218,8 @@ var AbstractView = Factory.extend({
 
         var _super = this._super.bind(this);
         return $.when(def).then(function (controlPanel) {
-            if (controlPanel && self.searchable) {
+            // if (controlPanel && self.searchable) {
+            if (controlPanel) {
                 var searchQuery = controlPanel.getSearchState();
                 self._updateMVCParams(searchQuery);
             }

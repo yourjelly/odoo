@@ -339,7 +339,7 @@ ActionManager.include({
             modelName: action.res_model,
             ids: resID ? [resID] : undefined,
             currentId: resID || undefined,
-            domain: [],
+            domain: action.domain || [],
             context: action.context || {},
             groupBy: [],
         };
