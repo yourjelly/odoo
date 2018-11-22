@@ -184,6 +184,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      */
     reload: function (params) {
         var self = this;
+        params = params || {};
         if (this._controlPanel && params.currentControlPanelConfiguration) {
             return this._controlPanel.configure(params.currentControlPanelConfiguration).then(
                 function (searchQuery) {
@@ -191,7 +192,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
                 }
             );
         }
-        return this.update(params || {});
+        return this.update(params);
     },
     /**
      * For views that require a pager, this method will be called to allow the
