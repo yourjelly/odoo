@@ -2252,7 +2252,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('o2m loaded in only one batch', function (assert) {
-        assert.expect(9);
+        assert.expect(11);
 
         this.data.subtask = {
             fields: {
@@ -2294,10 +2294,12 @@ QUnit.module('Views', {
         assert.verifySteps([
             'read_group',
             '/web/dataset/search_read',
+            'read',
             '/web/dataset/search_read',
             'read',
             'read_group',
             '/web/dataset/search_read',
+            'read',
             '/web/dataset/search_read',
             'read',
         ]);
@@ -2305,7 +2307,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('m2m loaded in only one batch', function (assert) {
-        assert.expect(9);
+        assert.expect(11);
 
         var kanban = createView({
             View: KanbanView,
@@ -2330,10 +2332,12 @@ QUnit.module('Views', {
         assert.verifySteps([
             'read_group',
             '/web/dataset/search_read',
+            'read',
             '/web/dataset/search_read',
             'read',
             'read_group',
             '/web/dataset/search_read',
+            'read',
             '/web/dataset/search_read',
             'read',
         ]);
