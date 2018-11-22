@@ -3182,28 +3182,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test('if view was grouped at start, it stays grouped', function (assert) {
-        assert.expect(1);
-
-        var kanban = createView({
-            View: KanbanView,
-            model: 'partner',
-            data: this.data,
-            arch: '<kanban class="o_kanban_test" on_create="quick_create">' +
-                        '<field name="product_id"/>' +
-                        '<templates><t t-name="kanban-box">' +
-                            '<div><field name="foo"/></div>' +
-                        '</t></templates>' +
-                    '</kanban>',
-            groupBy: ['product_id'],
-        });
-        kanban.update({groupBy: []});
-
-        assert.hasClass(kanban.$('.o_kanban_view'), 'o_kanban_grouped');
-        kanban.destroy();
-    });
-
-    QUnit.skip('if view was not grouped at start, it can be grouped and ungrouped', function (assert) {
+    QUnit.test('if view was not grouped at start, it can be grouped and ungrouped', function (assert) {
         assert.expect(3);
 
         var kanban = createView({
@@ -3217,11 +3196,13 @@ QUnit.module('Views', {
                         '</t></templates>' +
                     '</kanban>',
         });
-        assert.doesNotHaveClass(kanban.$('.o_kanban_view'), 'o_kanban_grouped', "should not be grouped");
+
+        assert.doesNotHaveClass(kanban.$('.o_kanban_view'), 'o_kanban_grouped');
         kanban.update({groupBy: ['product_id']});
-        assert.hasClass(kanban.$('.o_kanban_view'),'o_kanban_grouped', "should be grouped");
+        assert.hasClass(kanban.$('.o_kanban_view'),'o_kanban_grouped');
         kanban.update({groupBy: []});
-        assert.doesNotHaveClass(kanban.$('.o_kanban_view'), 'o_kanban_grouped', "should not be grouped");
+        assert.doesNotHaveClass(kanban.$('.o_kanban_view'), 'o_kanban_grouped');
+
         kanban.destroy();
     });
 
