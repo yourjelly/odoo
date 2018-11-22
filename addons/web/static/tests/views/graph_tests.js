@@ -118,7 +118,8 @@ QUnit.module('Views', {
                         '<field name="bar"/>' +
                 '</graph>',
         });
-        assert.strictEqual(graph.$('label').text(), "Partners", "should have 'Partners as title'");
+        assert.strictEqual(graph.$('.o_graph_renderer label').text(), "Partners",
+            "should have 'Partners as title'");
         graph.destroy();
     });
 
