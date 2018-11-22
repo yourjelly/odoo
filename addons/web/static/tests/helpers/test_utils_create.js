@@ -12,7 +12,6 @@ odoo.define('web.test_utils_create', function (require) {
 
 var ActionManager = require('web.ActionManager');
 var config = require('web.config');
-var ControlPanelView = require('web.ControlPanelView');
 var dom = require('web.dom');
 var DebugManager = require('web.DebugManager');
 var testUtilsMock = require('web.test_utils_mock');
@@ -113,33 +112,36 @@ function createAsyncView(params) {
         $target = $('body');
         $target.addClass('debug');
     }
+    // reproduce the DOM environment of views
+    var $webClient = $('<div>').addClass('o_web_client').prependTo($target);
+    var $actionManager = $('<div>').addClass('o_action_manager').appendTo($webClient);
+
 
     // add mock environment: mock server, session, fieldviewget, ...
     var mockServer = testUtilsMock.addMockEnvironment(widget, params);
     var viewInfo = testUtilsMock.fieldsViewGet(mockServer, params);
 
     // create the view
-    var viewOptions = {
+    var View = params.View;
+    var viewOptions = _.defaults({}, params.viewOptions, {
         modelName: params.model || 'foo',
         ids: 'res_id' in params ? [params.res_id] : undefined,
         currentId: 'res_id' in params ? params.res_id : undefined,
         domain: params.domain || [],
         context: params.context || {},
-    };
+    });
+    // patch the View to handle the groupBy given in params, as we can't give it
+    // in init (unlike the domain and context which can be set in the action)
+    testUtilsMock.patch(View, {
+        _updateMVCParams: function () {
+            this._super.apply(this, arguments);
+            this.loadParams.groupedBy = params.groupBy || [];
+        },
+    });
     if (params.hasSelectors) {
         viewOptions.hasSelectors = params.hasSelectors;
     }
-
-    _.extend(viewOptions, params.viewOptions);
-    if (params.groupBy) {
-        viewOptions.context.group_by = params.groupBy;
-    }
-
-    var view = new params.View(viewInfo, viewOptions);
-
-    // reproduce the DOM environment of views
-    var $webClient = $('<div>').addClass('o_web_client').prependTo($target);
-    var $actionManager = $('<div>').addClass('o_action_manager').appendTo($webClient);
+    var view = new View(viewInfo, viewOptions);
 
     if (params.interceptsPropagate) {
         _.each(params.interceptsPropagate, function (cb, name) {
@@ -156,6 +158,8 @@ function createAsyncView(params) {
             // when it will be called the second time (by its parent)
             delete view.destroy;
             widget.destroy();
+
+            testUtilsMock.unpatch(View);
         };
 
         // render the view in a fragment as they must be able to render correctly

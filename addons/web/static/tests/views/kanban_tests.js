@@ -3203,7 +3203,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test('if view was not grouped at start, it can be grouped and ungrouped', function (assert) {
+    QUnit.skip('if view was not grouped at start, it can be grouped and ungrouped', function (assert) {
         assert.expect(3);
 
         var kanban = createView({
