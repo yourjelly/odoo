@@ -112,7 +112,7 @@ QUnit.module('Views', {
         defs.c.resolve();
     });
 
-    QUnit.test('groupBy attribute can be a string, instead of a list of strings', function (assert) {
+    QUnit.skip('groupBy attribute can be a string, instead of a list of strings', function (assert) {
         assert.expect(2);
 
         var list = testUtils.createView({
