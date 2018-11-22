@@ -112,7 +112,7 @@ var GroupByMenuInterfaceMixin = {
      * @private
      * @param {OdooEvent} ev
      */
-     _onItemOptionClicked: function (ev) {
+    _onItemOptionClicked: function (ev) {
         var fieldName = ev.data.id;
         var optionId = ev.data.optionId;
         var activeGroupBys = this.model.get().groupedBy;
@@ -138,13 +138,13 @@ var GroupByMenuInterfaceMixin = {
         }
         this._setGroupby(activeGroupBys);
         this.groupByMenu.update(this._getGroupBys(activeGroupBys));
-     },
+    },
     /**
      *
      * @private
      * @param {OdooEvent} ev
      */
-     _onMenuItemClicked: function (ev) {
+    _onMenuItemClicked: function (ev) {
         var fieldName = ev.data.id;
         var activeGroupBys = this.model.get().groupedBy;
         var groupByFieldNames = _.map(activeGroupBys, function (groupby) {
@@ -158,7 +158,7 @@ var GroupByMenuInterfaceMixin = {
         }
         this._setGroupby(activeGroupBys);
         this.groupByMenu.update(this._getGroupBys(activeGroupBys));
-     },
+    },
 };
 
 return GroupByMenuInterfaceMixin;

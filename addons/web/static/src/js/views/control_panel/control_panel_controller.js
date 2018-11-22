@@ -114,6 +114,7 @@ var ControlPanelController = mvc.Controller.extend({
     //--------------------------------------------------------------------------
 
     _onActivateTimeRange: function (event) {
+        event.stopPropagation();
         this.model.activateTimeRange(
             event.data.id,
             event.data.timeRangeId,
@@ -122,6 +123,7 @@ var ControlPanelController = mvc.Controller.extend({
         this._reportNewQueryAndRender();
     },
     _onAutoCompletionFilter: function (event) {
+        event.stopPropagation();
         this.model.toggleAutoCompletionFilter(event.data);
         this._reportNewQueryAndRender();
     },
@@ -140,6 +142,7 @@ var ControlPanelController = mvc.Controller.extend({
         });
     },
     _onFacetRemoved: function (event) {
+        event.stopPropagation();
         var group = event.data.group;
         if (!group) {
             group = this.renderer.getLastFacet();
@@ -148,33 +151,38 @@ var ControlPanelController = mvc.Controller.extend({
         this._reportNewQueryAndRender();
     },
     _onGetNonEvaluatedQuery: function (event) {
+        event.stopPropagation();
         // getSearchState gives evaluated query! we should change methods
         var query = this.getSearchState();
         event.data.callback(query);
     },
     _onItemOptionClicked: function (event) {
+        event.stopPropagation();
         this.model.toggleFilterWithOptions(event.data.id, event.data.optionId);
         this._reportNewQueryAndRender();
     },
     _onItemTrashed: function (event) {
+        event.stopPropagation();
         var def = this.model.deleteFilterEverywhere(event.data.id);
         def.then(this._reportNewQueryAndRender.bind(this));
     },
     _onMenuItemClicked: function (event) {
-        // important in case of view graph. It uses the GroupByMenuInterfaceMixin!
         event.stopPropagation();
         this.model.toggleFilter(event.data.id);
         this._reportNewQueryAndRender();
     },
     _onNewFavorite: function (event) {
+        event.stopPropagation();
         var def = this.model.createNewFavorite(event.data);
         def.then(this._reportNewQueryAndRender.bind(this));
     },
     _onNewFilters: function (event) {
+        event.stopPropagation();
         this.model.createNewFilters(event.data.filters);
         this._reportNewQueryAndRender();
     },
     _onNewGroupBy: function (event) {
+        event.stopPropagation();
         this.model.createNewGroupBy(event.data);
         this._reportNewQueryAndRender();
     },
