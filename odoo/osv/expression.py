@@ -515,6 +515,9 @@ class ExtendedLeaf(object):
         """
         assert isinstance(model, BaseModel), 'Invalid leaf creation without table'
         self.join_context = join_context or []
+        if isinstance(leaf, tuple) and str(leaf[0]).endswith('.id'):
+            # avoid sub-search on 'id': 'partner_id.id' -> 'partner_id'
+            leaf = (leaf[0][:-3], leaf[1], leaf[2])
         self.leaf = leaf
         # normalize the leaf's operator
         self.normalize_leaf()
