@@ -2058,8 +2058,8 @@ QUnit.module('Views', {
         // call destroy function of controller to ensure that it correctly destroys everything
         calendar.__destroy();
 
-        // + 4 (parent + ControlPanelModel/Renderer/Controller)
-        assert.strictEqual(instanceNumber, initialInstanceNumber + 4,
+        // + 1 (parent)
+        assert.strictEqual(instanceNumber, initialInstanceNumber + 1,
             "every widget must be destroyed exept the parent");
 
         calendar.destroy();

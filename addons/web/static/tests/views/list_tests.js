@@ -1443,7 +1443,7 @@ QUnit.module('Views', {
         });
 
         // Change page
-        testUtils.dom.click(form.$('.o_pager_next'));
+        testUtils.dom.click(form.$('.o_field_widget[name=o2m] .o_pager_next'));
         assert.strictEqual(form.$('tbody tr:first').text(), 'Value 44',
             "record 44 should be first");
         assert.strictEqual(form.$('tbody tr:eq(4)').text(), 'Value 48',
@@ -1712,9 +1712,8 @@ QUnit.module('Views', {
         assert.containsNone(list, '.o_view_nocontent',
             "should not have a no content helper displayed");
         assert.containsOnce(list, 'table', "should have rendered a table");
-        assert.strictEqual(list.$el.css('height'), list.$('div.table-responsive').css('height'),
+        assert.strictEqual(list.$('.o_content').css('height'), list.$('div.table-responsive').css('height'),
             "the div for the table should take the full height");
-
 
         assert.hasClass(list.$('tbody tr:eq(0)'),'o_selected_row',
             "the date field td should be in edit mode");
@@ -2202,14 +2201,14 @@ QUnit.module('Views', {
             "height of group header shouldn't have changed");
         assert.hasClass(list.$('.o_group_header td:last'),'o_group_pager',
             "last cell of open group header should have classname 'o_group_header'");
-        assert.strictEqual(list.$('.o_pager_value').text(), '1-3',
+        assert.strictEqual(list.$('.o_group_header .o_pager_value').text(), '1-3',
             "pager's value should be correct");
         assert.containsN(list, '.o_data_row', 3,
             "open group should display 3 records");
 
         // go to next page
-        testUtils.dom.click(list.$('.o_pager_next'));
-        assert.strictEqual(list.$('.o_pager_value').text(), '4-4',
+        testUtils.dom.click(list.$('.o_group_header .o_pager_next'));
+        assert.strictEqual(list.$('.o_group_header .o_pager_value').text(), '4-4',
             "pager's value should be correct");
         assert.containsOnce(list, '.o_data_row',
             "open group should display 1 record");
@@ -2584,7 +2583,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('display toolbar', function (assert) {
-        assert.expect(3);
+        assert.expect(6);
 
         var list = createView({
             View: ListView,
@@ -2605,13 +2604,20 @@ QUnit.module('Views', {
             },
         });
 
-        var $dropdowns = $('.o_web_client .o_control_panel .btn-group .o_dropdown_toggler_btn');
-        assert.strictEqual($dropdowns.length, 2,
-            "there should be 2 dropdowns in the toolbar.");
-        var $actions = $('.o_web_client .o_control_panel .btn-group .dropdown-menu')[1].children;
-        assert.strictEqual($actions.length, 3,
+        var $printMenu = list.$('.o_cp_sidebar .o_dropdown:contains(Print)');
+        assert.isNotVisible($printMenu);
+        var $actionMenu = list.$('.o_cp_sidebar .o_dropdown:contains(Action)');
+        assert.isNotVisible($actionMenu);
+
+        testUtils.dom.click(list.$('.o_list_record_selector:first input'));
+
+        assert.isNotVisible($printMenu);
+        assert.isVisible($actionMenu);
+
+        testUtils.dom.click($actionMenu.find('button')); // open Action menu
+        assert.strictEqual($actionMenu.find('.dropdown-item').length, 3,
             "there should be 3 actions");
-        var $customAction = $('.o_web_client .o_control_panel .btn-group .dropdown-item:nth(2)');
+        var $customAction = $actionMenu.find('.dropdown-item:last');
         assert.strictEqual($customAction.text().trim(), 'Action event',
             "the custom action should have 'Action event' as name");
 
@@ -3859,8 +3865,8 @@ QUnit.module('Views', {
         // call destroy function of controller to ensure that it correctly destroys everything
         list.__destroy();
 
-        // + 4 (parent + ControlPanelModel/Renderer/Controller)
-        assert.strictEqual(instanceNumber, initialInstanceNumber + 4,
+        // + 1 (parent)
+        assert.strictEqual(instanceNumber, initialInstanceNumber + 1,
             "every widget must be destroyed exept the parent");
 
         list.destroy();

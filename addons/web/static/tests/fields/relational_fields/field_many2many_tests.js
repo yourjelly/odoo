@@ -262,7 +262,7 @@ QUnit.module('fields', {}, function () {
                 'the removed record should not be in kanban anymore');
 
             // save the record
-            testUtils.form.clickSave(form);;
+            testUtils.form.clickSave(form);
             form.destroy();
         });
 
