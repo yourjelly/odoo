@@ -4261,6 +4261,7 @@ var BasicModel = AbstractModel.extend({
                     list.count += newGroup.count;
                     if (newGroup.isOpen && newGroup.count > 0) {
                         openGroupCount++;
+                        options = _.defaults({enableRelationalFetch: false}, options);
                         defs.push(self._load(newGroup, options));
                     }
                 });
