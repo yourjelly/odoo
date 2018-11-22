@@ -225,7 +225,6 @@ var AbstractView = Factory.extend({
             // get the parent of the model if it already exists, as _super will
             // set the new controller as parent, which we don't want
             var modelParent = self.model && self.model.getParent();
-            var alreadyHasModel = !!self.model;
             return _super(parent).done(function (controller) {
                 if (controlPanel) {
                     controlPanel.setParent(controller);
