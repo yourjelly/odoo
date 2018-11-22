@@ -117,6 +117,7 @@ function createAsyncView(params) {
     // add mock environment: mock server, session, fieldviewget, ...
     var mockServer = testUtilsMock.addMockEnvironment(widget, params);
     var viewInfo = testUtilsMock.fieldsViewGet(mockServer, params);
+
     // create the view
     var viewOptions = {
         modelName: params.model || 'foo',
@@ -140,13 +141,11 @@ function createAsyncView(params) {
 
     if (params.interceptsPropagate) {
         _.each(params.interceptsPropagate, function (cb, name) {
-            intercept(widget, name, cb, true);
+            testUtilsMock.intercept(widget, name, cb, true);
         });
     }
 
-    var viewDef = view.getController(widget);
-    var cpDef;
-    return $.when(viewDef, cpDef).then(function (view, controlPanel) {
+    return view.getController(widget).then(function (view) {
         // override the view's 'destroy' so that it calls 'destroy' on the widget
         // instead, as the widget is the parent of the view and the mockServer.
         view.__destroy = view.destroy;

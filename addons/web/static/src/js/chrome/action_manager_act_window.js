@@ -13,8 +13,6 @@ var core = require('web.core');
 var pyUtils = require('web.py_utils');
 var view_registry = require('web.view_registry');
 
-var _t = core._t;
-
 ActionManager.include({
     custom_events: _.extend({}, ActionManager.prototype.custom_events, {
         env_updated: '_onEnvUpdated',

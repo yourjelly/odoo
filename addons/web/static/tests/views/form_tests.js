@@ -5164,7 +5164,7 @@ QUnit.module('Views', {
         // client-side sort on edit
         testUtils.form.clickEdit(form);
         testUtils.dom.click(form.$('.o_field_one2many tbody tr:eq(1) td:contains(yop)'));
-        testUtils.fields.editInput($('.modal input[name="foo"]'), 'zzz')
+        testUtils.fields.editInput($('.modal input[name="foo"]'), 'zzz');
         testUtils.dom.click($('.modal-footer button:first'));
         assert.ok(form.$('.o_field_one2many tbody tr:eq(0) td:contains(zzz)').length,
             "record zzz should be first");
