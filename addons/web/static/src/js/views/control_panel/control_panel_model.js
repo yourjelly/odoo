@@ -1,10 +1,14 @@
 odoo.define('web.ControlPanelModel', function (require) {
 "use strict";
 
+var controlPanelViewParameters = require('web.controlPanelViewParameters');
+var core = require('web.core');
 var Domain = require('web.Domain');
 var mvc = require('web.mvc');
 var pyUtils = require('web.py_utils');
-var controlPanelViewParameters = require('web.controlPanelViewParameters');
+var session = require('web.session');
+
+var _t = core._t;
 
 var DEFAULT_TIMERANGE = controlPanelViewParameters.DEFAULT_TIMERANGE;
 var TIME_RANGE_OPTIONS = controlPanelViewParameters.TIME_RANGE_OPTIONS;
@@ -188,18 +192,12 @@ var ControlPanelModel = mvc.Model.extend({
         };
     },
     getQuery: function () {
-        var userContext = this.getSession().user_context;
-        var domain = Domain.prototype.stringToArray(
-            this._getDomain(),
-            userContext
-        );
+        var userContext = session.user_context;
         var context = _.extend(
-            pyUtils.eval('contexts',
-                this._getQueryContext(),
-                userContext
-            ),
+            pyUtils.eval('contexts', this._getQueryContext(), userContext),
             this._getTimeRangeMenuData(true)
         );
+        var domain = Domain.prototype.stringToArray(this._getDomain(), userContext);
         // this must be done because pyUtils.eval does not know that it needs to evaluate domains within contexts
         if (context.timeRangeMenuData) {
             if (typeof context.timeRangeMenuData.timeRange === 'string') {
@@ -604,7 +602,7 @@ var ControlPanelModel = mvc.Model.extend({
                 favorites = favorites.map(function (favorite) {
                     var userId = favorite.user_id ? favorite.user_id[0] : false;
                     var groupNumber = userId ? 1 : 2;
-                    var context = pyUtils.eval('context', favorite.context, self.getSession().user_context);
+                    var context = pyUtils.eval('context', favorite.context, session.user_context);
                     var groupBys = [];
                     if (context.group_by) {
                         groupBys = context.group_by;
@@ -657,7 +655,7 @@ var ControlPanelModel = mvc.Model.extend({
         var results = pyUtils.eval_domains_and_contexts({
             domains: [this.initialDomain].concat([domain] || []),
             contexts: [action_context].concat(context || []),
-            eval_context: this.userContext,
+            eval_context: session.user_context,
         });
         var groupBy = groupBys.length ?
                         groupBys :
@@ -680,7 +678,7 @@ var ControlPanelModel = mvc.Model.extend({
     // save favorites should call this method. Here no evaluation of domains,...
     _saveQuery: function (favorite) {
         var self = this;
-        var userContext = this.getSession().user_context;
+        var userContext = session.user_context;
         var controllerContext;
         this.trigger_up('get_controller_context', {
             callback: function (context) {
@@ -707,7 +705,7 @@ var ControlPanelModel = mvc.Model.extend({
         }
         // we need to remove keys in session.userContext from context.
         var domain = this._getDomain();
-        var userId = favorite.isShared ? false : this.getSession().uid;
+        var userId = favorite.isShared ? false : session.uid;
         var irFilter = {
             name: favorite.description,
             context: context,
