@@ -430,7 +430,7 @@ var CalendarController = AbstractController.extend({
             this.$buttons.find('.active').removeClass('active');
             this.$buttons.find('.o_calendar_button_' + this.mode).addClass('active');
         }
-        this.set({title: this.displayName + ' (' + event.data.title + ')'});
+        this._setTitle(this.displayName + ' (' + event.data.title + ')');
     },
 });
 
