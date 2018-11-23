@@ -155,10 +155,10 @@ QUnit.module('Views', {
             mockRPC: function (route, args) {
                 if (args.method === 'read_group') {
                     assert.deepEqual(args.kwargs, {
-                        context: {group_by: "bar"},
+                        context: {},
                         domain: [["display_name","like","a"], ["display_name","ilike","piou"], ["foo","ilike","piou"]],
-                        fields:["display_name","foo","bar"],
-                        groupby:["bar"],
+                        fields: ["display_name","foo","bar"],
+                        groupby: ["bar"],
                         orderby: '',
                         lazy: true
                     }, "should search with the complete domain (domain + search), and group by 'bar'");
@@ -168,7 +168,7 @@ QUnit.module('Views', {
                     assert.deepEqual(args, {
                         context: {},
                         domain: [["display_name","like","a"], ["display_name","ilike","piou"], ["foo","ilike","piou"]],
-                        fields:["display_name","foo"],
+                        fields: ["display_name","foo"],
                         model: "partner",
                         limit: 80,
                         sort: ""
@@ -177,7 +177,7 @@ QUnit.module('Views', {
                     assert.deepEqual(args, {
                         context: {},
                         domain: [["display_name","like","a"]],
-                        fields:["display_name","foo"],
+                        fields: ["display_name","foo"],
                         model: "partner",
                         limit: 80,
                         sort: ""

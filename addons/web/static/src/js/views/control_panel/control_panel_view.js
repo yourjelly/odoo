@@ -42,13 +42,14 @@ var ControlPanelView = Factory.extend({
         this._super();
         params = params || {};
         var viewInfo = params.viewInfo || {arch: '<controlpanel/>', fields: {}};
-        var context = params.context || {};
+        var context = _.extend({}, params.context);
 
         this.searchDefaults = {};
         Object.keys(context).forEach(function (key) {
             var match = /^search_default_(.*)$/.exec(key);
             if (match) {
                 self.searchDefaults[match[1]] = context[key];
+                delete context[key];
             }
         });
 
