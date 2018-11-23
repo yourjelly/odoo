@@ -132,7 +132,7 @@ QUnit.module('Views', {
         parent.destroy();
     });
 
-    QUnit.test('SelectCreateDialog use domain, group_by and search default', function (assert) {
+    QUnit.skip('SelectCreateDialog use domain, group_by and search default', function (assert) {
         assert.expect(3);
 
         var search = 0;

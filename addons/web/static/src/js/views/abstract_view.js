@@ -188,6 +188,7 @@ var AbstractView = Factory.extend({
             modelName: action.res_model,
             viewInfo: action.controlPanelFieldsView,
             currentConfiguration: params.currentControlPanelConfiguration,
+            withBreadcrumbs: params.withBreadcrumbs,
         };
 
         this.userContext = params.userContext;

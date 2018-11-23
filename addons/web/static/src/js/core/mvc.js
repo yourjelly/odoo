@@ -176,6 +176,7 @@ var Factory = Class.extend({
      *   the get method from the model
      */
     _loadData: function (model) {
+        // TODO: get rid of loadParams
         return model.load(this.loadParams).then(function () {
             return model.get.apply(model, arguments);
         });

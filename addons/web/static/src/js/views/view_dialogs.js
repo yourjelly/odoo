@@ -349,11 +349,12 @@ var SelectCreateDialog = ViewDialog.extend({
                 controlPanelFieldsView: fieldsViews.search,
             },
             action_buttons: false,
-            context: _.extend({no_breadcrumbs: true}, this.context),
+            context: this.context,
             domain: domain,
             hasSelectors: !this.options.disable_multiple_selection,
             modelName: this.res_model,
             readonly: true,
+            withBreadcrumbs: false,
         }, this.options.list_view_options));
         listView.setController(SelectCreateListController);
         return listView.getController(this).then(function (controller) {

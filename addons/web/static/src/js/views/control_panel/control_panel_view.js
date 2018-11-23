@@ -34,6 +34,8 @@ var ControlPanelView = Factory.extend({
      *   breadcrumbs won't be rendered
      * @param {string} [params.domain=[]]
      * @param {string} [params.template] the QWeb template to render
+     * @param {string} [params.withBreadcrumbs=true] if set to false,
+     *   breadcrumbs won't be rendered
      */
     init: function (params) {
         var self = this;
@@ -49,18 +51,6 @@ var ControlPanelView = Factory.extend({
                 self.searchDefaults[match[1]] = context[key];
             }
         });
-
-        // TODO: use this where necessary
-        // var searchDefaults = {};
-        // for (var key in context) {
-        //     var match = /^search_default_(.*)$/.exec(key);
-        //     if (match) {
-        //         searchDefaults[match[1]] = context[key];
-        //     }
-        // }
-        // var disableCustomFilters = context.search_disable_custom_filters;
-        // var hasSearchView = params.hasSearchView;
-
 
         this.arch = viewUtils.parseArch(viewInfo.arch);
         this.fields = viewInfo.fields;
@@ -81,15 +71,15 @@ var ControlPanelView = Factory.extend({
             actionName: params.actionName,
             modelName: params.modelName
         };
+        this.rendererParams.withBreadcrumbs = !context.no_breadcrumbs && // could we get rid of this ?
+                                              params.withBreadcrumbs !== false;
         this.rendererParams.breadcrumbs = params.breadcrumbs;
-        this.rendererParams.withBreadcrumbs = !context.no_breadcrumbs;
-
 
         this.loadParams.actionId = params.actionId;
         this.loadParams.fields = this.fields;
         this.loadParams.modelName = params.modelName;
         if (!params.currentConfiguration) {
-            // groups are determined in _parseSearchArch.
+            // groups are determined in _parseSearchArch
             this.loadParams.groups = [];
             this.loadParams.timeRanges = context.time_ranges;
             if (this.arch.tag === 'controlpanel') {
@@ -112,7 +102,10 @@ var ControlPanelView = Factory.extend({
         //  - groupable
         //  - enableTimeRangeMenu
         //  - search view visibility
-        //  - space available for breadcrumb (depends on visibility of search view and mobile mode)
+
+        // TODO: use this where necessary
+        // var disableCustomFilters = context.search_disable_custom_filters;
+        // var hasSearchView = params.hasSearchView;
     },
 
     //--------------------------------------------------------------------------
