@@ -262,14 +262,7 @@ var ProjectPlan = AbstractAction.extend({
      */
     _onSearch: function (event) {
         event.stopPropagation();
-        var session = this.getSession();
-        // group by are disabled, so we don't take care of them
-        var result = pyUtils.eval_domains_and_contexts({
-            domains: event.data.domains,
-            contexts: [session.user_context].concat(event.data.contexts)
-        });
-
-        this._fetchPlan(result.domain);
+        this._fetchPlan(event.data.domain);
     },
 });
 
