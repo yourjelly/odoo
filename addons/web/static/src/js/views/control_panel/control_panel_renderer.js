@@ -345,7 +345,9 @@ var ControlPanelRenderer = Renderer.extend({
         ev.data.callback(this.actionInfo);
     },
     _onMore: function () {
-        // TODO
+        this.displayMore = !this.displayMore;
+        this.$subMenus.toggle();
+        this._render();
     },
 });
 
