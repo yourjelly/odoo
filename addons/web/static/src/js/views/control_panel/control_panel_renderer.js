@@ -288,7 +288,7 @@ var ControlPanelRenderer = Renderer.extend({
                 this.timeRangeMenu.update(this.state.timeRanges);
             }
         } else {
-            this.$subMenus = this.$('.o_search_options');
+            this.$subMenus = $('<div>').appendTo(this.$('.o_search_options'));
             defs.push(this._setupFiltersMenu());
             defs.push(this._setupGroupByMenu());
             defs.push(this._setupTimeRangeMenu());
