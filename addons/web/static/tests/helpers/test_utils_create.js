@@ -143,7 +143,7 @@ function createAsyncView(params) {
     }
 
     var view;
-    if (viewInfo.type === 'controlpanel') {
+    if (viewInfo.type === 'controlpanel' || viewInfo.type === 'search') {
         // TODO: probably needs to create an helper just for that
         view = new params.View({
             viewInfo: viewInfo,

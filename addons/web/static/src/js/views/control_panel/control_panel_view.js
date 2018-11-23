@@ -243,7 +243,9 @@ var ControlPanelView = Factory.extend({
                 currentGroup.push(filter);
             }
         });
-        this.loadParams.groups.push(groupOfGroupBys);
+        if (groupOfGroupBys.length) {
+            this.loadParams.groups.push(groupOfGroupBys);
+        }
     },
 });
 
