@@ -17,6 +17,7 @@ var AbstractAction = Widget.extend(ActionMixin, {
         ControlPanelView: ControlPanelView,
     },
     hasControlPanel: false,
+    loadControlPanel: false,
 
     init: function (parent, action, options) {
         this._super(parent);
@@ -25,16 +26,30 @@ var AbstractAction = Widget.extend(ActionMixin, {
             actionId: action.id,
             context: action.context,
             breadcrumbs: options && options.breadcrumbs || [],
+            viewId: action.search_view_id && action.search_view_id[0],
         };
     },
     willStart: function () {
         var self = this;
         if (this.hasControlPanel) {
             var params = this.controlPanelParams;
-            var controlPanelView = new this.config.ControlPanelView(params);
-            return controlPanelView.getController(this).then(function (controlPanel) {
-                self._controlPanel = controlPanel;
-                return self._controlPanel.appendTo(document.createDocumentFragment());
+            var def;
+            if (this.loadControlPanel) {
+                def = this
+                    .loadFieldView(params.modelName, params.context || {}, params.viewId, 'search')
+                    .then(function (fieldsView) {
+                        params.viewInfo = {
+                            arch: fieldsView.arch,
+                            fields: fieldsView.fields,
+                        };
+                    });
+            }
+            return $.when(def).then(function () {
+                var controlPanelView = new self.config.ControlPanelView(params);
+                return controlPanelView.getController(self).then(function (controlPanel) {
+                    self._controlPanel = controlPanel;
+                    return self._controlPanel.appendTo(document.createDocumentFragment());
+                });
             });
         }
         return $.when();
