@@ -245,32 +245,10 @@ class IrHttp(models.AbstractModel):
         return env.ref(xmlid, False)
 
     @classmethod
-    def _check_access_mode(cls, env, id, access_mode, model, access_token=None, related_id=None):
-        """
-        Implemented by each module to define an additional way to check access.
-
-        :param env: the env of binary_content
-        :param id: id of the record from which to fetch the binary
-        :param access_mode: typically a string that describes the behaviour of the custom check
-        :param model: the model of the object for which binary_content was called
-        :param related_id: optional id to check security.
-        :return: True if the test passes, else False.
-        """
-        return False
-
-    @classmethod
-    def _get_special_models(cls):
-        """
-        :return: the set of models that have to pass through several specific fields checks:
-        used for the 'url' and the 'access_token' fields.
-        """
-        return {'ir.attachment'}
-
-    @classmethod
     def binary_content(cls, xmlid=None, model='ir.attachment', id=None, field='datas',
                        unique=False, filename=None, filename_field='datas_fname', download=False,
                        mimetype=None, default_mimetype='application/octet-stream',
-                       access_token=None, related_id=None, access_mode=None, env=None):
+                       access_token=None, env=None):
         """ Get file, attachment or downloadable content
 
         If the ``xmlid`` and ``id`` parameter is omitted, fetches the default value for the
@@ -286,8 +264,6 @@ class IrHttp(models.AbstractModel):
         :param str filename_field: if not create an filename with model-id-field
         :param bool download: apply headers to download the file
         :param str mimetype: mintype of the field (for headers)
-        :param related_id: the id of another record used for custom_check
-        :param  access_mode: if truthy, will call custom_check to fetch the object that contains the binary.
         :param str default_mimetype: default mintype if no mintype found
         :param str access_token: optional token for unauthenticated access
                                  only available  for ir.attachment
@@ -295,7 +271,7 @@ class IrHttp(models.AbstractModel):
         :returns: (status, headers, content)
         """
         env = env or request.env
-        attachment_models = cls._get_special_models()
+
         # get object and content
         obj = None
         if xmlid:
@@ -307,13 +283,9 @@ class IrHttp(models.AbstractModel):
             return (404, [], None)
 
         # access token grant access
-        if model in attachment_models and access_token:
+        if model == 'ir.attachment' and access_token:
             obj = obj.sudo()
-            if access_mode:
-                if not cls._check_access_mode(env, id, access_mode, model, access_token=access_token,
-                                             related_id=related_id):
-                    return (403, [], None)
-            elif not consteq(obj.access_token or u'', access_token):
+            if not consteq(obj.access_token or u'', access_token):
                 return (403, [], None)
 
         # check read access
@@ -322,39 +294,27 @@ class IrHttp(models.AbstractModel):
         except AccessError:
             return (403, [], None)
 
+        return cls._serve_data(obj, model=model, id=id, field=field,
+                               unique=unique, filename=filename, filename_field=filename_field, download=download,
+                               default_mimetype=default_mimetype, env=env)
+
+    @classmethod
+    def _serve_data(cls, obj, model='ir.attachment', id=None, field='datas',
+                    unique=False, filename=None, filename_field='datas_fname', download=False,
+                    default_mimetype='application/octet-stream', env=None):
+
         status, headers, content = None, [], None
 
-        # attachment by url check
-        module_resource_path = None
-        if model in attachment_models and obj.type == 'url' and obj.url:
-            url_match = re.match("^/(\w+)/(.+)$", obj.url)
-            if url_match:
-                module = url_match.group(1)
-                module_path = get_module_path(module)
-                module_resource_path = get_resource_path(module, url_match.group(2))
-                if module_path and module_resource_path:
-                    module_path = os.path.join(os.path.normpath(module_path), '')  # join ensures the path ends with '/'
-                    module_resource_path = os.path.normpath(module_resource_path)
-                    if module_resource_path.startswith(module_path):
-                        with open(module_resource_path, 'rb') as f:
-                            content = base64.b64encode(f.read())
-                        last_update = pycompat.text_type(os.path.getmtime(module_resource_path))
+        content, status, filename = cls._get_url(obj=obj, model=model, filename=filename,
+                                                 status=status, content=content)
 
-            if not module_resource_path:
-                module_resource_path = obj.url
-
-            if not content:
-                status = 301
-                content = module_resource_path
-        else:
+        if not content:
             content = obj[field] or ''
 
         # filename
         if not filename:
             if filename_field in obj:
                 filename = obj[filename_field]
-            elif module_resource_path:
-                filename = os.path.basename(module_resource_path)
             else:
                 filename = "%s-%s-%s" % (obj._name, obj.id, field)
 
@@ -365,7 +325,9 @@ class IrHttp(models.AbstractModel):
                 mimetype = mimetypes.guess_type(filename)[0]
             if not mimetype and getattr(env[model]._fields[field], 'attachment', False):
                 # for binary fields, fetch the ir_attachement for mimetype check
-                attach_mimetype = env['ir.attachment'].search_read(domain=[('res_model', '=', model), ('res_id', '=', id), ('res_field', '=', field)], fields=['mimetype'], limit=1)
+                attach_mimetype = env['ir.attachment'].search_read(
+                    domain=[('res_model', '=', model), ('res_id', '=', id), ('res_field', '=', field)],
+                    fields=['mimetype'], limit=1)
                 mimetype = attach_mimetype and attach_mimetype[0]['mimetype']
             if not mimetype:
                 mimetype = guess_mimetype(base64.b64decode(content), default=default_mimetype)
@@ -382,7 +344,38 @@ class IrHttp(models.AbstractModel):
         # content-disposition default name
         if download:
             headers.append(('Content-Disposition', cls.content_disposition(filename)))
+
         return (status, headers, content)
+
+    @classmethod
+    def _get_url(cls, obj, model='ir.attachment', filename=None, status=None, content=None):
+
+        if model == 'ir.attachment' and obj.type == 'url' and obj.url:
+
+            module_resource_path = None
+            url_match = re.match("^/(\w+)/(.+)$", obj.url)
+            if url_match:
+                module = url_match.group(1)
+                module_path = get_module_path(module)
+                module_resource_path = get_resource_path(module, url_match.group(2))
+                if module_path and module_resource_path:
+                    module_path = os.path.join(os.path.normpath(module_path), '')  # join ensures the path ends with '/'
+                    module_resource_path = os.path.normpath(module_resource_path)
+                    if module_resource_path.startswith(module_path):
+                        with open(module_resource_path, 'rb') as f:
+                            content = base64.b64encode(f.read())
+                        last_update = pycompat.text_type(os.path.getmtime(module_resource_path))
+
+            if not module_resource_path:
+                module_resource_path = obj.url
+
+            filename = os.path.basename(module_resource_path)
+
+            if not content:
+                status = 301
+                content = module_resource_path
+
+        return content, status, filename
 
 
 def convert_exception_to(to_type, with_message=False):
