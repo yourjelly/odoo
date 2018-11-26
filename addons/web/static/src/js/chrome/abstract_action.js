@@ -17,6 +17,8 @@ var AbstractAction = Widget.extend(ActionMixin, {
         ControlPanelView: ControlPanelView,
     },
     hasControlPanel: false,
+    withSearchBar: true, // set to false if you don't want the default search
+                         // bar (only makes sense if hasControlPanel is true)
     loadControlPanel: false,
 
     init: function (parent, action, options) {
@@ -27,6 +29,7 @@ var AbstractAction = Widget.extend(ActionMixin, {
             context: action.context,
             breadcrumbs: options && options.breadcrumbs || [],
             viewId: action.search_view_id && action.search_view_id[0],
+            withSearchBar: this.withSearchBar,
         };
     },
     willStart: function () {

@@ -112,7 +112,9 @@ var ActionMixin = {
     // TMP
     updateControlPanel: function (status, options) {
         if (this._controlPanel) {
-            this._controlPanel.updateContents(status || {}, options || {});
+            status = status || {};
+            status.title = status.title || this._title;
+            this._controlPanel.updateContents(status, options || {});
         }
     },
     // TODO: add hooks methods:

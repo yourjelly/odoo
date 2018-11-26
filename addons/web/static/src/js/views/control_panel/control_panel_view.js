@@ -36,6 +36,8 @@ var ControlPanelView = Factory.extend({
      * @param {string} [params.template] the QWeb template to render
      * @param {string} [params.withBreadcrumbs=true] if set to false,
      *   breadcrumbs won't be rendered
+     * @param {string} [params.withSearchBar=true] if set to false, no default
+     *   search bar will be rendered
      */
     init: function (params) {
         var self = this;
@@ -75,6 +77,7 @@ var ControlPanelView = Factory.extend({
         this.rendererParams.withBreadcrumbs = !context.no_breadcrumbs && // could we get rid of this ?
                                               params.withBreadcrumbs !== false;
         this.rendererParams.breadcrumbs = params.breadcrumbs;
+        this.rendererParams.withSearchBar = 'withSearchBar' in params ? params.withSearchBar : true;
 
         this.loadParams.actionId = params.actionId;
         this.loadParams.fields = this.fields;

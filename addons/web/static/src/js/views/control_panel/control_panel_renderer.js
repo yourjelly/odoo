@@ -29,6 +29,8 @@ var ControlPanelRenderer = Renderer.extend({
      * @param {Object[]} [params.breadcrumbs=[]] list of breadcrumbs elements
      * @param {boolean} [params.withBreadcrumbs=false] if false, breadcrumbs
      *   won't be rendered
+     * @param {boolean} [params.withSearchBar=false] if false, no search bar
+     *   is rendered
      * @param {String} [params.template] the QWeb template to render the
      *   ControlPanel. By default, the template 'ControlPanel' will be used.
      */
@@ -37,6 +39,7 @@ var ControlPanelRenderer = Renderer.extend({
         this.controls = params.controls || [];
         this._breadcrumbs = params.breadcrumbs || [];
         this.withBreadcrumbs = params.withBreadcrumbs;
+        this.withSearchBar = params.withSearchBar;
         if (params.template) {
             this.template = params.template;
         }
@@ -63,6 +66,13 @@ var ControlPanelRenderer = Renderer.extend({
             $switch_buttons: this.$('.o_cp_switch_buttons'),
         };
 
+        if (!this.withSearchBar) {
+            // we don't use the default search bar and buttons here, so we
+            // expose those area for custom content
+            this.nodes.$searchview = this.$('.o_cp_searchview');
+            this.nodes.$searchview_buttons = this.$('.o_search_options');
+        }
+
         this.$controls = $('<div>', {class: 'o_cp_custom_buttons'});
         var hasCustomButtons = false;
         this.controls.forEach(function (node) {
@@ -78,7 +88,7 @@ var ControlPanelRenderer = Renderer.extend({
 
         this.render({});
 
-        return $.when(this._super.apply(this, arguments), this._render());
+        return $.when(this._super.apply(this, arguments), this._renderSearch());
     },
 
     //--------------------------------------------------------------------------
@@ -143,7 +153,7 @@ var ControlPanelRenderer = Renderer.extend({
     },
     updateState: function (state) {
         this.state = state;
-        return this._render();
+        return this._renderSearch();
     },
 
     //--------------------------------------------------------------------------
@@ -273,9 +283,12 @@ var ControlPanelRenderer = Renderer.extend({
         return this.timeRangeMenu.appendTo(this.$subMenus);
     },
 
-    _render: function () {
-        var defs = [];
+    _renderSearch: function () {
+        if (!this.withSearchBar) {
+            return $.when();
+        }
 
+        var defs = [];
         // approx inDom
         if (this.$subMenus) {
             if (this.filtersMenu) {
@@ -306,7 +319,7 @@ var ControlPanelRenderer = Renderer.extend({
         return $.when(this, defs);
     },
     _renderSearchBar: function () {
-        // TODO: might need a reload instead of a destroy/instatiate
+        // TODO: might need a reload instead of a destroy/instantiate
         var oldSearchBar = this.searchBar;
         this.searchBar = new SearchBar(this, {
             context: this.context,
@@ -329,9 +342,8 @@ var ControlPanelRenderer = Renderer.extend({
 
     /**
      * @private
-     * @param {MouseEvent} ev
      */
-    _onButtonClicked: function (ev) {
+    _onButtonClicked: function () {
         this.trigger_up('button_clicked', {});
     },
     /**
@@ -350,7 +362,7 @@ var ControlPanelRenderer = Renderer.extend({
     _onMore: function () {
         this.displayMore = !this.displayMore;
         this.$subMenus.toggle();
-        this._render();
+        this._renderSearch();
     },
 });
 
