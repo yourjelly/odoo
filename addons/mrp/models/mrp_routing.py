@@ -1,7 +1,15 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+# import io
+import requests
+import re
+import base64
+# from PIL import Image
 
 from odoo import api, fields, models, _
+from odoo.exceptions import Warning
+from odoo.http import request
+from odoo.addons.http_routing.models.ir_http import url_for
 
 
 class MrpRouting(models.Model):
@@ -73,6 +81,12 @@ class MrpRoutingWorkcenter(models.Model):
         default='no', required=True)
     batch_size = fields.Float('Quantity to Process', default=1.0)
     workorder_ids = fields.One2many('mrp.workorder', 'operation_id', string="Work Orders")
+    url = fields.Char('worksheet URL')
+    # TODO: fix me
+    index_content = fields.Text('Transcript')
+    document_id = fields.Char('Document ID', help="Google Document ID")
+    mime_type = fields.Char('Mime-type')
+    embed_code = fields.Text('Embed Code', readonly=True, compute='_get_embed_code')
 
     @api.multi
     @api.depends('time_cycle_manual', 'time_mode', 'workorder_ids')
@@ -99,3 +113,114 @@ class MrpRoutingWorkcenter(models.Model):
         count_data = dict((item['operation_id'][0], item['operation_id_count']) for item in data)
         for operation in self:
             operation.workorder_count = count_data.get(operation.id, 0)
+
+    # POC work
+    def _get_embed_code(self):
+        base_url = request and request.httprequest.url_root or self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        if base_url[-1] == '/':
+            base_url = base_url[:-1]
+        for record in self:
+            if record.worksheet and (not record.document_id or record.slide_type in ['document', 'presentation']):
+                slide_url = base_url + url_for('/slides/embed/%s?page=1' % record.id)
+                record.embed_code = '<iframe src="%s" class="o_wslides_iframe_viewer" allowFullScreen="true" height="%s" width="%s" frameborder="0"></iframe>' % (slide_url, 315, 420)
+            elif record.slide_type == 'video' and record.document_id:
+                # TODO: fix me
+                if not record.mime_type:
+                    # embed youtube video
+                    record.embed_code = '<iframe src="//www.youtube.com/embed/%s?theme=light" allowFullScreen="true" frameborder="0"></iframe>' % (record.document_id)
+                else:
+                    # embed google doc video
+                    record.embed_code = '<iframe src="//drive.google.com/file/d/%s/preview" allowFullScreen="true" frameborder="0"></iframe>' % (record.document_id)
+            else:
+                record.embed_code = False
+
+    @api.model
+    def _fetch_data(self, base_url, data, content_type=False, extra_params=False):
+        result = {'values': dict()}
+        try:
+            response = requests.get(base_url, params=data)
+            response.raise_for_status()
+            if content_type == 'json':
+                result['values'] = response.json()
+            elif content_type in ('image', 'pdf'):
+                result['values'] = base64.b64encode(response.content)
+            else:
+                result['values'] = response.content
+        except requests.exceptions.HTTPError as e:
+            result['error'] = e.response.content
+        except requests.exceptions.ConnectionError as e:
+            result['error'] = str(e)
+        return result
+
+    def _find_document_data_from_url(self, url):
+        expr = re.compile(r'(^https:\/\/docs.google.com|^https:\/\/drive.google.com).*\/d\/([^\/]*)')
+        arg = expr.match(url)
+        document_id = arg and arg.group(2) or False
+        if document_id:
+            return ('google', document_id)
+
+        return (None, False)
+
+    def _parse_document_url(self, url, only_preview_fields=False):
+        document_source, document_id = self._find_document_data_from_url(url)
+        if document_source and hasattr(self, '_parse_%s_document' % document_source):
+            return getattr(self, '_parse_%s_document' % document_source)(document_id, only_preview_fields)
+        return {'error': _('Unknown document')}
+
+    @api.model
+    def _parse_google_document(self, document_id, only_preview_fields):
+        params = {}
+        params['projection'] = 'BASIC'
+        if 'google.drive.config' in self.env:
+            access_token = self.env['google.drive.config'].get_access_token()
+            if access_token:
+                params['access_token'] = access_token
+
+        fetch_res = self._fetch_data('https://www.googleapis.com/drive/v2/files/%s' % document_id, params, "json")
+        if fetch_res.get('error'):
+            return fetch_res
+
+        google_values = fetch_res['values']
+
+        values = {
+            'mime_type': google_values['mimeType'],
+            'document_id': document_id,
+        }
+
+        if google_values['mimeType'].startswith('image/'):
+            values['worksheet'] = values['image']
+        elif google_values['mimeType'].startswith('application/vnd.google-apps'):
+            if 'exportLinks' in google_values:
+                values['worksheet'] = self._fetch_data(google_values['exportLinks']['application/pdf'], params, 'pdf', extra_params=True)['values']
+        elif google_values['mimeType'] == 'application/pdf':
+            # TODO: Google Drive PDF document doesn't provide plain text transcript
+            values['worksheet'] = self._fetch_data(google_values['webContentLink'], {}, 'pdf')['values']
+
+        return {'values': values}
+
+    @api.model
+    def create(self, values):
+        if values.get('url'):
+            doc_data = self._parse_document_url(values['url']).get('values', dict())
+            if doc_data.get('error'):
+                raise Warning(_('Could not fetch data from url. Document or access right not available:\n%s') % doc_data['error'])
+            if not doc_data.get('document_id'):
+                raise Warning(_('Please enter valid Google Slide URL'))
+            values['worksheet'] = doc_data.get('worksheet')
+        return super(MrpRoutingWorkcenter, self).create(values)
+
+    @api.multi
+    def write(self, values):
+        if values.get('url') and values['url'] != self.url:
+            doc_data = self._parse_document_url(values['url']).get('values', dict())
+            if doc_data.get('error'):
+                raise Warning(_('Could not fetch data from url. Document or access right not available:\n%s') % doc_data['error'])
+            if not doc_data.get('document_id'):
+                raise Warning(_('Please enter valid Google Slide URL'))
+            for key, value in doc_data.items():
+                values.setdefault(key, value)
+        #     if not values.get('worksheet'):
+        #         values['worksheet'] = False
+        # if values.get('worksheet') and not values.get('url'):
+        #     values['url'] = False
+        return super(MrpRoutingWorkcenter, self).write(values)
