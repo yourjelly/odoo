@@ -115,10 +115,12 @@ var ControlPanelModel = mvc.Model.extend({
         var group = this.groups[groupId];
         _.each(group.activeFilterIds, function (filterId) {
             var filter = self.filters[filterId];
+            // TODO: put this logic in toggleFilter 'field' type
             if (filter.autoCompleteValues) {
                 filter.autoCompleteValues = [];
             }
         });
+        // TODO: use toggleFilter here
         group.activeFilterIds = [];
         this.query.splice(this.query.indexOf(groupId), 1);
     },
@@ -187,7 +189,7 @@ var ControlPanelModel = mvc.Model.extend({
             timeRanges: timeRanges,
             favorites: favorites,
             groups: this.groups,
-            query: this.query,
+            query: _.extend([], this.query),
             fields: this.fields,
         };
     },

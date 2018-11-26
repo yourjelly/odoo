@@ -2,9 +2,6 @@ odoo.define('web.TimeRangeMenu', function (require) {
 "use strict";
 
 var config = require('web.config');
-// var core = require('web.core');
-// var Domain = require('web.Domain');
-// var oldTimeRangeMenuOptions = require('web.oldTimeRangeMenuOptions');
 var Widget = require('web.Widget');
 var controlPanelViewParameters = require('web.controlPanelViewParameters');
 

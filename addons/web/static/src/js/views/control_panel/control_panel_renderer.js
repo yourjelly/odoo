@@ -172,6 +172,9 @@ var ControlPanelRenderer = Renderer.extend({
             content[$element].contents().detach();
         }
     },
+    _getSubMenusPlace: function () {
+        return $('<div>').appendTo(this.$('.o_search_options'));
+    },
     /**
      * @private
      * @param {string} title
@@ -288,7 +291,7 @@ var ControlPanelRenderer = Renderer.extend({
                 this.timeRangeMenu.update(this.state.timeRanges);
             }
         } else {
-            this.$subMenus = $('<div>').appendTo(this.$('.o_search_options'));
+            this.$subMenus = this._getSubMenusPlace();
             defs.push(this._setupFiltersMenu());
             defs.push(this._setupGroupByMenu());
             defs.push(this._setupTimeRangeMenu());

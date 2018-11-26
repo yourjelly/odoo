@@ -240,32 +240,9 @@
         <script type="text/javascript" src="/web/static/src/js/chrome/user_menu.js"></script>
         <script type="text/javascript" src="/web/static/src/js/chrome/menu.js"></script>
         <script type="text/javascript" src="/web/static/src/js/chrome/apps_menu.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/search/search_bar_autocomplete_widgets.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/search/search_bar_input.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/search/search_facet.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/search/search_bar.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/search/filters_menu.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/search/groupby_menu.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/search/time_range_menu.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/search/favorites_menu.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/search/add_new_favorite_menu.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/search/control_panel_view_parameters.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/search/favorites_submenus_registry.js"></script>
-
-        <script type="text/javascript" src="/web/static/src/js/views/search/old/search_view.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/search/old/search_view_mobile.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/search/old/search_filters.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/search/old/search_inputs.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/search/old/favorites_menu.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/search/old/groupby_menu.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/search/old/time_range_menu.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/search/old/time_range_menu_options.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/search/old/groupby_menu_interface_mixin.js"></script>
 
         <script type="text/javascript" src="/web/static/src/js/widgets/dropdown_menu.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/widgets/old/dropdown_menu.js"></script>
         <script type="text/javascript" src="/web/static/src/js/widgets/pie_chart.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/search/old/filters_menu.js"></script>
         <script type="text/javascript" src="/web/static/src/js/apps.js"></script>
 
         <script type="text/javascript" src="/web/static/src/js/fields/abstract_field.js"></script>
@@ -289,6 +266,21 @@
         <script type="text/javascript" src="/web/static/src/js/views/control_panel/control_panel_model.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/control_panel/control_panel_renderer.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/control_panel/control_panel_view.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/control_panel/mobile_control_panel_controller.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/control_panel/mobile_control_panel_renderer.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/search_bar_autocomplete_widgets.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/search_bar_input.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/search_facet.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/search_bar.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/filters_menu.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/groupby_menu.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/groupby_menu_interface_mixin.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/time_range_menu.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/favorites_menu.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/add_new_favorite_menu.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/control_panel_view_parameters.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/favorites_submenus_registry.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/search_filters.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/field_manager_mixin.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/standalone_field_manager_mixin.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/view_registry.js"></script>
@@ -582,7 +574,6 @@
                 <script type="text/javascript" src="/web/static/tests/core/dom_tests.js"></script>
 
                 <script type="text/javascript" src="/web/static/tests/chrome/action_manager_tests.js"></script>
-                <script type="text/javascript" src="/web/static/tests/chrome/search_tests.js"></script>
                 <script type="text/javascript" src="/web/static/tests/chrome/pager_tests.js"></script>
                 <script type="text/javascript" src="/web/static/tests/chrome/keyboard_navigation_mixin_tests.js"></script>
                 <script type="text/javascript" src="/web/static/tests/chrome/user_menu_tests.js"></script>
@@ -635,10 +626,10 @@
                 <script type="text/javascript" src="/base/static/tests/base_settings_mobile_tests.js"></script>
 
                 <script type="text/javascript" src="/web/static/tests/chrome/action_manager_mobile_tests.js"></script>
-                <script type="text/javascript" src="/web/static/tests/chrome/search_view_mobile_tests.js"></script>
                 <script type="text/javascript" src="/web/static/tests/views/calendar_mobile_tests.js"></script>
                 <script type="text/javascript" src="/web/static/tests/views/kanban_mobile_tests.js"></script>
                 <script type="text/javascript" src="/web/static/tests/views/form_mobile_tests.js"></script>
+                <script type="text/javascript" src="/web/static/tests/views/mobile_control_panel_tests.js"></script>
                 <script type="text/javascript" src="/web/static/tests/fields/basic_fields_mobile_tests.js"></script>
                 <script type="text/javascript" src="/web/static/tests/fields/relational_fields_mobile_tests.js"></script>
             </t>
