@@ -48,7 +48,9 @@
                                 <field name="note"/>
                             </page>
                             <page string="Work Sheet">
-                                <field name="worksheet" widget="pdf_viewer"/>
+                                <field name="url" placeholder="Google Slide Link"/>
+                                <div attrs="{'invisible': [('url', '!=', False),('worksheet', '!=', False)]}">OR</div>
+                                <field name="worksheet" widget="slide_viewer"/>
                             </page>
                         </notebook>
                     </sheet>

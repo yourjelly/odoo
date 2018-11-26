@@ -3,8 +3,10 @@ odoo.define('mrp.mrp_state', function (require) {
 
 var AbstractField = require('web.AbstractField');
 var core = require('web.core');
+var utils = require('web.utils');
 var field_registry = require('web.field_registry');
 var time = require('web.time');
+var FieldPdfViewer = require('web.basic_fields').FieldPdfViewer;
 
 var _t = core._t;
 
@@ -126,8 +128,81 @@ var TimeCounter = AbstractField.extend({
     },
 });
 
+var FieldSlideViewer = FieldPdfViewer.extend({
+    /**
+     * @private
+     * @param {string} [fileURI] file URI if specified
+     * @returns {string} the pdf viewer URI
+     */
+    // _getURI: function (fileURI) {
+    //     var page = this.recordData[this.name + '_page'] || 1;
+    //     // if (!fileURI) {
+    //     //
+    //     //     var queryObj = {
+    //     //         model: this.model,
+    //     //         field: this.name,
+    //     //         id: this.res_id,
+    //     //     };
+    //     //     var queryString = $.param(queryObj);
+    //     //     fileURI =  queryString
+    //     // }
+    //     // fileURI = encodeURIComponent(fileURI);
+    //     var modelinfo = this.model + '/' + this.res_id + '/' + this.name;
+    //     // var viewerURL = '/slides/embed/';
+    //     // var viewerURL = '/web/static/lib/pdfjs/web/viewer.html?file=';
+    //     return '/slides/embed/' + modelinfo + '#page=' + page;
+    // },
+    _getURI: function (fileURI) {
+        var page = this.recordData[this.name + '_page'] || 1;
+        if (!fileURI) {
+            var queryObj = {
+                model: this.model,
+                field: this.name,
+                id: this.res_id,
+            };
+            var queryString = $.param(queryObj);
+            fileURI = queryString;
+        }
+        fileURI = encodeURIComponent(fileURI);
+        var viewerURL = '/slides/embed?file=';
+        return viewerURL + fileURI + '#page=' + page;
+    },
+    /**
+     * @private
+     * @override
+     */
+    _render: function () {
+        var self = this;
+        var $pdfViewer = this.$('.o_form_pdf_controls').children().add(this.$('.o_pdfview_iframe'));
+        var $selectUpload = this.$('.o_select_file_button').first();
+        var $iFrame = this.$('.o_pdfview_iframe');
+
+        $iFrame.on('load', function () {
+            self.PDFViewerApplication = this.contentWindow.window.PDFViewerApplication;
+            self._disableButtons(this);
+        });
+        if (this.mode === "readonly" && this.value) {
+            $iFrame.attr('src', this._getURI());
+        } else {
+            if (this.value) {
+                var binSize = utils.is_bin_size(this.value);
+                $pdfViewer.removeClass('o_hidden');
+                $selectUpload.addClass('o_hidden');
+                if (binSize) {
+                    $iFrame.attr('src', this._getURI());
+                }
+            } else {
+                $pdfViewer.addClass('o_hidden');
+                $selectUpload.removeClass('o_hidden');
+            }
+        }
+    },
+});
+
+
 field_registry
     .add('bullet_state', SetBulletStatus)
+    .add('slide_viewer', FieldSlideViewer)
     .add('mrp_time_counter', TimeCounter);
 
 });

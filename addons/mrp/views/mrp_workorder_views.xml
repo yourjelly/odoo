@@ -135,7 +135,8 @@
                 </group>
                 <notebook>
                 <page string="Work Instruction" attrs="{'invisible': [('worksheet', '=', False)]}">
-                    <field name="worksheet" widget="pdf_viewer"/>
+                    <field name="url" invisible="1"/>
+                    <field name="worksheet" widget="slide_viewer"/>
                 </page>
                 <page string="Current Production">
                     <group>
