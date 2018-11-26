@@ -180,7 +180,7 @@
     </div>
 </form>
 
-<div t-name="Action" t-att-class="widget.className ? widget.className : o_action">
+<div t-name="Action" class="o_action">
     <!-- CP -->
     <div class="o_content"/>
 </div>
