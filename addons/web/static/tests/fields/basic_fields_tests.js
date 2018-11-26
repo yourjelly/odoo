@@ -18,9 +18,6 @@ var DebouncedField = basicFields.DebouncedField;
 var JournalDashboardGraph = basicFields.JournalDashboardGraph;
 var _t = core._t;
 
-var DOM = testUtils.DOM;
-var mock = testUtils.mock;
-
 QUnit.module('fields', {}, function () {
 
 QUnit.module('basic_fields', {
