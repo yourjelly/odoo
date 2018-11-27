@@ -2,8 +2,8 @@ odoo.define('web.ControlPanelRenderer', function (require) {
 "use strict";
 
 var data = require('web.data');
-var FavoritesMenu = require('web.FavoritesMenu');
-var FiltersMenu = require('web.FiltersMenu');
+var FilterMenu = require('web.FilterMenu');
+var FavoriteMenu = require('web.FavoriteMenu');
 var GroupByMenu = require('web.GroupByMenu');
 var TimeRangeMenu = require('web.TimeRangeMenu');
 var mvc = require('web.mvc');
@@ -271,17 +271,17 @@ var ControlPanelRenderer = Renderer.extend({
 
 
 
-    _setupFiltersMenu: function () {
-        this.filtersMenu = new FiltersMenu(this, this.state.filters, this.state.fields);
-        return this.filtersMenu.appendTo(this.$subMenus);
+    _setupFilterMenu: function () {
+        this.filterMenu = new FilterMenu(this, this.state.filters, this.state.fields);
+        return this.filterMenu.appendTo(this.$subMenus);
     },
     _setupGroupByMenu: function () {
         this.groupByMenu = new GroupByMenu(this, this.state.groupBys, this.state.fields);
         return this.groupByMenu.appendTo(this.$subMenus);
     },
-    _setupFavoritesMenu: function () {
-        this.favoritesMenu = new FavoritesMenu(this, this.state.favorites);
-        return this.favoritesMenu.appendTo(this.$subMenus);
+    _setupFavoriteMenu: function () {
+        this.favoriteMenu = new FavoriteMenu(this, this.state.favorites);
+        return this.favoriteMenu.appendTo(this.$subMenus);
     },
     _setupTimeRangeMenu: function () {
         this.timeRangeMenu = new TimeRangeMenu(this, this.state.timeRanges);
@@ -292,24 +292,24 @@ var ControlPanelRenderer = Renderer.extend({
         var defs = [];
         // approx inDom
         if (this.$subMenus) {
-            if (this.filtersMenu) {
-                this.filtersMenu.update(this.state.filters);
+            if (this.filterMenu) {
+                this.filterMenu.update(this.state.filters);
             }
             if (this.groupByMenu) {
                 this.groupByMenu.update(this.state.groupBys);
             }
-            if (this.favoritesMenu) {
-                this.favoritesMenu.update(this.state.favorites);
+            if (this.favoriteMenu) {
+                this.favoriteMenu.update(this.state.favorites);
             }
             if (this.timeRangeMenu) {
                 this.timeRangeMenu.update(this.state.timeRanges);
             }
         } else if (this.withSearchButtons) {
             this.$subMenus = this._getSubMenusPlace();
-            defs.push(this._setupFiltersMenu());
+            defs.push(this._setupFilterMenu());
             defs.push(this._setupGroupByMenu());
             defs.push(this._setupTimeRangeMenu());
-            defs.push(this._setupFavoritesMenu());
+            defs.push(this._setupFavoriteMenu());
         }
         if (this.withSearchBar) {
             defs.push(this._renderSearchBar());

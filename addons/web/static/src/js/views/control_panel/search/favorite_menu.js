@@ -1,4 +1,4 @@
-odoo.define('web.FavoritesMenu', function (require) {
+odoo.define('web.FavoriteMenu', function (require) {
 "use strict";
 
 var config = require('web.config');
@@ -8,7 +8,7 @@ var favorites_submenus_registry = require('web.favorites_submenus_registry');
 
 var _t = core._t;
 
-var FavoritesMenu = DropdownMenu.extend({
+var FavoriteMenu = DropdownMenu.extend({
     /*
      * override
      *
@@ -96,6 +96,6 @@ var FavoritesMenu = DropdownMenu.extend({
     },
 });
 
-return FavoritesMenu;
+return FavoriteMenu;
 
 });
