@@ -72,7 +72,9 @@ function dataFilteredQuery(q) {
 }
 
 var DataImport = AbstractAction.extend({
-    template: 'ImportView',
+    hasControlPanel: true,
+    withSearchBar: false,
+    contentTemplate: 'ImportView',
     opts: [
         {name: 'encoding', label: _lt("Encoding:"), value: ''},
         {name: 'separator', label: _lt("Separator:"), value: ''},
@@ -136,7 +138,7 @@ var DataImport = AbstractAction.extend({
         // import object id
         this.id = null;
         this.session = session;
-        action.display_name = _t('Import a File'); // Displayed in the breadcrumbs
+        this._title = _t('Import a File'); // Displayed in the breadcrumbs
         this.do_not_change_match = false;
     },
     /**
@@ -144,13 +146,14 @@ var DataImport = AbstractAction.extend({
      */
     willStart: function () {
         var self = this;
-        return this._rpc({
+        var def = this._rpc({
             model: this.res_model,
             method: 'get_import_templates',
             context: this.parent_context,
         }).then(function (result) {
             self.importTemplates = result;
         });
+        return $.when(this._super.apply(this, arguments), def);
     },
     start: function () {
         var self = this;
@@ -188,7 +191,7 @@ var DataImport = AbstractAction.extend({
         this.$buttons.filter('.o_import_import').on('click', this.import.bind(this));
         this.$buttons.filter('.o_import_file_reload').on('click', this.loaded_file.bind(this));
         this.$buttons.filter('.oe_import_file').on('click', function () {
-            self.$('.oe_import_file').click();
+            self.$('.o_content .oe_import_file').click();
         });
         this.$buttons.filter('.o_import_cancel').on('click', function(e) {
             e.preventDefault();
