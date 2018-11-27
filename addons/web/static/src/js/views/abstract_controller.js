@@ -183,16 +183,15 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      * @returns {Deferred}
      */
     reload: function (params) {
-        var self = this;
         params = params || {};
-        if (this._controlPanel && params.currentControlPanelConfiguration) {
-            return this._controlPanel.configure(params.currentControlPanelConfiguration).then(
-                function (searchQuery) {
-                    return self.update({offset: 0}, searchQuery);
-                }
-            );
+        var def;
+        var config = params.currentControlPanelConfiguration;
+        if (this._controlPanel && config) {
+            def = this._controlPanel.configure(config).then(function (searchQuery) {
+                params = _.extend({}, params, searchQuery);
+            });
         }
-        return this.update(params);
+        return $.when(def).then(this.update.bind(this, params, {}));
     },
     /**
      * For views that require a pager, this method will be called to allow the
