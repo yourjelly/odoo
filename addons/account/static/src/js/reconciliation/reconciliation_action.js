@@ -4,17 +4,17 @@ odoo.define('account.ReconciliationClientAction', function (require) {
 var AbstractAction = require('web.AbstractAction');
 var ReconciliationModel = require('account.ReconciliationModel');
 var ReconciliationRenderer = require('account.ReconciliationRenderer');
-var Widget = require('web.Widget');
 var core = require('web.core');
-var _t = core._t;
 
 
 /**
  * Widget used as action for 'account.bank.statement' reconciliation
  */
 var StatementAction = AbstractAction.extend({
+    hasControlPanel: true,
+    withSearchBar: false,
     title: core._t('Bank Reconciliation'),
-    template: 'reconciliation',
+    contentTemplate: 'reconciliation',
     custom_events: {
         change_mode: '_onAction',
         change_filter: '_onAction',
@@ -32,7 +32,7 @@ var StatementAction = AbstractAction.extend({
         close_statement: '_onCloseStatement',
         load_more: '_onLoadMore',
     },
-    config: {
+    config: _.extend({}, AbstractAction.prototype.config, {
         // used to instantiate the model
         Model: ReconciliationModel.StatementModel,
         // used to instantiate the action interface
@@ -43,7 +43,7 @@ var StatementAction = AbstractAction.extend({
         params: ['statement_ids'],
         // number of moves lines displayed in 'match' mode
         limitMoveLines: 15,
-    },
+    }),
 
     /**
      * @override
@@ -82,13 +82,14 @@ var StatementAction = AbstractAction.extend({
         var self = this;
         var def = this.model.load(this.params.context).then(this._super.bind(this));
         return def.then(function () {
-                self.title = self.model.bank_statement_id ? self.model.bank_statement_id.display_name : self.title;
+                var title = self.model.bank_statement_id  && self.model.bank_statement_id.display_name;
+                self._setTitle(title);
                 self.renderer = new self.config.ActionRenderer(self, self.model, {
                     'bank_statement_id': self.model.bank_statement_id,
                     'valuenow': self.model.valuenow,
                     'valuemax': self.model.valuemax,
                     'defaultDisplayQty': self.model.defaultDisplayQty,
-                    'title': self.title,
+                    'title': title,
                 });
             });
     },
@@ -100,9 +101,6 @@ var StatementAction = AbstractAction.extend({
      */
     start: function () {
         var self = this;
-
-        this.set("title", this.title);
-        this.updateControlPanel({search_view_hidden: true}, {clear: true});
 
         this.renderer.prependTo(self.$('.o_form_sheet'));
         this._renderLines();
@@ -118,6 +116,8 @@ var StatementAction = AbstractAction.extend({
                 this.renderer._renderNotifications(this.model.statement.notifications);
             this._openFirstLine();
         }
+
+        return this._super.apply(this, arguments);
     },
 
     /**
@@ -320,13 +320,13 @@ var StatementAction = AbstractAction.extend({
  */
 var ManualAction = StatementAction.extend({
     title: core._t('Journal Items to Reconcile'),
-    config: {
+    config: _.extend({}, StatementAction.prototype.config, {
         Model: ReconciliationModel.ManualModel,
         ActionRenderer: ReconciliationRenderer.ManualRenderer,
         LineRenderer: ReconciliationRenderer.ManualLineRenderer,
         params: ['company_ids', 'mode', 'partner_ids', 'account_ids'],
         limitMoveLines: 15,
-    },
+    }),
 
     //--------------------------------------------------------------------------
     // Handlers

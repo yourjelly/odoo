@@ -17,8 +17,9 @@ var AUTHORIZED_MESSAGES = [
 ];
 
 var ReportAction = AbstractAction.extend({
-
-    template: 'report.client_action',
+    hasControlPanel: true,
+    withSearchBar: false,
+    contentTemplate: 'report.client_action',
 
     init: function (parent, action, options) {
         this._super.apply(this, arguments);
@@ -26,7 +27,7 @@ var ReportAction = AbstractAction.extend({
         options = options || {};
 
         this.action_manager = parent;
-        this.title = options.display_name || options.name;
+        this._title = options.display_name || options.name;
 
         this.edit_mode_available = false;
         this.in_edit_mode = false;
@@ -41,7 +42,6 @@ var ReportAction = AbstractAction.extend({
 
     start: function () {
         var self = this;
-        this._setTitle(this.title);
         this.iframe = this.$('iframe')[0];
         return $.when(this._super.apply(this, arguments), session.is_bound).then(function () {
             var web_base_url = session['web.base.url'];

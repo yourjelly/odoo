@@ -13,7 +13,9 @@ var _t = core._t;
 var QWeb = core.qweb;
 
 var Dashboard = AbstractAction.extend({
-    template: 'website.WebsiteDashboardMain',
+    hasControlPanel: true,
+    withSearchBar: false,
+    contentTemplate: 'website.WebsiteDashboardMain',
     cssLibs: [
         '/web/static/lib/nvd3/nv.d3.css'
     ],
@@ -54,7 +56,6 @@ var Dashboard = AbstractAction.extend({
         return this._super().then(function() {
             self.update_cp();
             self.render_graphs();
-            self.$el.parent().addClass('oe_background_grey');
         });
     },
 

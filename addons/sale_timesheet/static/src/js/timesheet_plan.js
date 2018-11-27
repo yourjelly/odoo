@@ -3,7 +3,6 @@ odoo.define('sale_timesheet.ProjectPlan', function (require) {
 
 var AbstractAction = require('web.AbstractAction');
 var core = require('web.core');
-var pyUtils = require('web.py_utils');
 
 var _t = core._t;
 var QWeb = core.qweb;

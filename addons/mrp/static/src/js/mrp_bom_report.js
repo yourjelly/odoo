@@ -34,7 +34,7 @@ var MrpBomReport = stock_report_generic.extend({
     set_html: function() {
         var self = this;
         return this._super().then(function () {
-            self.$el.html(self.data.lines);
+            self.$('.o_content').html(self.data.lines);
             self.renderSearch();
             self.update_cp();
         });
@@ -187,7 +187,7 @@ var MrpBomReport = stock_report_generic.extend({
     _reload: function () {
         var self = this;
         return this.get_html().then(function () {
-            self.$el.html(self.data.lines);
+            self.$('.o_content').html(self.data.lines);
             self._reload_report_type();
         });
     },
