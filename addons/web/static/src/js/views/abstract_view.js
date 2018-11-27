@@ -189,6 +189,7 @@ var AbstractView = Factory.extend({
             viewInfo: action.controlPanelFieldsView,
             currentConfiguration: params.currentControlPanelConfiguration,
             withBreadcrumbs: params.withBreadcrumbs,
+            withSearchBar: this.searchable,
         };
 
         this.userContext = params.userContext;
