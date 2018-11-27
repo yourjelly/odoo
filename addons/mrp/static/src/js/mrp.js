@@ -134,24 +134,7 @@ var FieldSlideViewer = FieldPdfViewer.extend({
      * @param {string} [fileURI] file URI if specified
      * @returns {string} the pdf viewer URI
      */
-    // _getURI: function (fileURI) {
-    //     var page = this.recordData[this.name + '_page'] || 1;
-    //     // if (!fileURI) {
-    //     //
-    //     //     var queryObj = {
-    //     //         model: this.model,
-    //     //         field: this.name,
-    //     //         id: this.res_id,
-    //     //     };
-    //     //     var queryString = $.param(queryObj);
-    //     //     fileURI =  queryString
-    //     // }
-    //     // fileURI = encodeURIComponent(fileURI);
-    //     var modelinfo = this.model + '/' + this.res_id + '/' + this.name;
-    //     // var viewerURL = '/slides/embed/';
-    //     // var viewerURL = '/web/static/lib/pdfjs/web/viewer.html?file=';
-    //     return '/slides/embed/' + modelinfo + '#page=' + page;
-    // },
+    // TODO: FIX ME
     _getURI: function (fileURI) {
         var page = this.recordData[this.name + '_page'] || 1;
         if (!fileURI) {
@@ -171,6 +154,7 @@ var FieldSlideViewer = FieldPdfViewer.extend({
      * @private
      * @override
      */
+    // TODO: FIX ME
     _render: function () {
         var self = this;
         var $pdfViewer = this.$('.o_form_pdf_controls').children().add(this.$('.o_pdfview_iframe'));
