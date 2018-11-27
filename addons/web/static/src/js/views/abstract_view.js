@@ -210,7 +210,7 @@ var AbstractView = Factory.extend({
         var self = this;
         var def;
         if (this.withControlPanel) {
-            def = this._createControlPanel();
+            def = this._createControlPanel(parent);
         }
         var _super = this._super.bind(this);
         return $.when(def).then(function (controlPanel) {
@@ -259,7 +259,7 @@ var AbstractView = Factory.extend({
     // Private
     //--------------------------------------------------------------------------
 
-    _createControlPanel: function () {
+    _createControlPanel: function (parent) {
         var self = this;
         var controlPanelView = new ControlPanelView(this.controlPanelParams);
         return controlPanelView.getController(parent).then(function (controlPanel) {
