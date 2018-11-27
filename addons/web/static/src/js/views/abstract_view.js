@@ -208,18 +208,10 @@ var AbstractView = Factory.extend({
      */
     getController: function (parent) {
         var self = this;
-
         var def;
         if (this.withControlPanel) {
-            var controlPanelView = new ControlPanelView(this.controlPanelParams);
-            def = controlPanelView.getController(parent).then(function (controlPanel) {
-                self.controllerParams.controlPanel = controlPanel;
-                return controlPanel.appendTo(document.createDocumentFragment()).then(function () {
-                    return controlPanel;
-                });
-            });
+            def = this._createControlPanel();
         }
-
         var _super = this._super.bind(this);
         return $.when(def).then(function (controlPanel) {
             // if (controlPanel && self.searchable) {
@@ -267,6 +259,16 @@ var AbstractView = Factory.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    _createControlPanel: function () {
+        var self = this;
+        var controlPanelView = new ControlPanelView(this.controlPanelParams);
+        return controlPanelView.getController(parent).then(function (controlPanel) {
+            self.controllerParams.controlPanel = controlPanel;
+            return controlPanel.appendTo(document.createDocumentFragment()).then(function () {
+                return controlPanel;
+            });
+        });
+    },
     /**
      * Processes a fieldsView. In particular, parses its arch.
      *
