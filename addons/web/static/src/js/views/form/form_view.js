@@ -42,6 +42,8 @@ var FormView = BasicView.extend({
         this.controllerParams.defaultButtons = defaultButtons;
         this.controllerParams.mode = mode;
 
+        this.controlPanelParams.withSearchBar = false; // no search in form views
+
         this.rendererParams.mode = mode;
         if (config.device.isMobile) {
             this.jsLibs.push('/web/static/lib/jquery.touchSwipe/jquery.touchSwipe.js');
