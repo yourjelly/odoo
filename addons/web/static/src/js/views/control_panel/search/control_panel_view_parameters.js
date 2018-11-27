@@ -15,7 +15,7 @@ var DEFAULTS = _.extend({}, Widget.prototype.defaults, {
     disableTimeRangeMenu: true,
 });
 
-// for FiltersMenu
+// for FilterMenu
 var DEFAULT_PERIOD = 'this_month';
 var PERIOD_OPTIONS = [
     {description: _lt('Last 7 Days'), optionId: 'last_7_days', groupId: 1},

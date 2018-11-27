@@ -231,6 +231,9 @@ var ControlPanelModel = mvc.Model.extend({
         this.modelName = params.modelName;
         this.actionId = params.actionId;
 
+        if (!params.withSearchBar) {
+            return $.when();
+        }
         if (params.initialConfiguration) {
             // TO DO: deactive filters of bad types (groupBy if view not groupable,...)
             this.configure(params.initialConfiguration);
@@ -554,9 +557,9 @@ var ControlPanelModel = mvc.Model.extend({
     },
     _getTimeRangeMenuData: function (evaluation) {
         var context = {};
-
+        // groupOfTimeRanges can be undefined in case with withSearchBar is false
         var groupOfTimeRanges = this.groups[this._getGroupIdOfType('timeRange')];
-        if (groupOfTimeRanges.activeFilterIds.length) {
+        if (groupOfTimeRanges && groupOfTimeRanges.activeFilterIds.length) {
             var filter = this.filters[groupOfTimeRanges.activeFilterIds[0]];
 
             var comparisonTimeRange = "[]";

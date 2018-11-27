@@ -80,20 +80,23 @@ var ControlPanelView = Factory.extend({
         this.rendererParams.withSearchBar = 'withSearchBar' in params ? params.withSearchBar : true;
         this.rendererParams.withSearchButtons = 'withSearchButtons' in params ? params.withSearchButtons : true;
 
+        this.loadParams.withSearchBar = 'withSearchBar' in params ? params.withSearchBar : true;
         this.loadParams.actionId = params.actionId;
         this.loadParams.fields = this.fields;
         this.loadParams.modelName = params.modelName;
-        if (!params.currentConfiguration) {
-            // groups are determined in _parseSearchArch
-            this.loadParams.groups = [];
-            this.loadParams.timeRanges = context.time_ranges;
-            if (this.arch.tag === 'controlpanel') {
-                this._parseControlPanelArch();
+        if (this.loadParams.withSearchBar) {
+            if (!params.currentConfiguration) {
+                // groups are determined in _parseSearchArch
+                this.loadParams.groups = [];
+                this.loadParams.timeRanges = context.time_ranges;
+                if (this.arch.tag === 'controlpanel') {
+                    this._parseControlPanelArch();
+                } else {
+                    this._parseSearchArch();
+                }
             } else {
-                this._parseSearchArch();
+                this.loadParams.initialConfiguration = params.currentConfiguration;
             }
-        } else {
-            this.loadParams.initialConfiguration = params.currentConfiguration;
         }
 
         PERIOD_OPTIONS = PERIOD_OPTIONS.map(function (option) {
