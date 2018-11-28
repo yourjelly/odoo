@@ -18,7 +18,8 @@ var FormView = BasicView.extend({
     display_name: _lt('Form'),
     icon: 'fa-edit',
     multi_record: false,
-    searchable: false,
+    withSearchBar: false,
+    searchMenuTypes: [],
     jsLibs: [],
     viewType: 'form',
     /**

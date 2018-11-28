@@ -188,6 +188,7 @@ var Discuss = AbstractAction.extend({
     },
     hasControlPanel: true,
     loadControlPanel: true,
+    searchMenuTypes: ['filter', 'favorite'],
 
     /**
      * @override
@@ -213,7 +214,6 @@ var Discuss = AbstractAction.extend({
             this._updateThreads.bind(this), 100, { leading: false });
 
         this.controlPanelParams.modelName = 'mail.message';
-        // TODO: disable_groupby: true,
     },
     /**
      * @override

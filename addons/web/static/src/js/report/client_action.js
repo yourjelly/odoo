@@ -19,6 +19,7 @@ var AUTHORIZED_MESSAGES = [
 var ReportAction = AbstractAction.extend({
     hasControlPanel: true,
     withSearchBar: false,
+    searchMenuTypes: [],
     contentTemplate: 'report.client_action',
 
     init: function (parent, action, options) {

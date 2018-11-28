@@ -31,8 +31,7 @@ var ControlPanelRenderer = Renderer.extend({
      *   won't be rendered
      * @param {boolean} [params.withSearchBar=false] if false, no search bar
      *   is rendered
-     * @param {boolean} [params.withSearchButtons=false] if false, no search
-     *   buttons will be rendered
+     * @param {string[]} params.searchMenuTypes
      * @param {String} [params.template] the QWeb template to render the
      *   ControlPanel. By default, the template 'ControlPanel' will be used.
      */
@@ -42,15 +41,18 @@ var ControlPanelRenderer = Renderer.extend({
         this._breadcrumbs = params.breadcrumbs || [];
         this.withBreadcrumbs = params.withBreadcrumbs;
         this.withSearchBar = params.withSearchBar;
-        this.withSearchButtons = params.withSearchButtons;
         if (params.template) {
             this.template = params.template;
         }
         this.context = params.context;
 
         // TODO
-        this.displayMore = false;
+        this.$subMenus = null;
         this.actionInfo = params.actionInfo;
+        this.displaySearchMenu = true;
+        this.menusSetup = false;
+        this.searchMenuTypes = params.searchMenuTypes;
+        this.subMenus = {};
     },
     /**
      * Renders the control panel and creates a dictionnary of its exposed
@@ -74,7 +76,7 @@ var ControlPanelRenderer = Renderer.extend({
         if (!this.withSearchBar) {
             this.nodes.$searchview = this.$('.o_cp_searchview');
         }
-        if (!this.withSearchButtons) {
+        if (this.searchMenuTypes.length === 0) {
             this.nodes.$searchview_buttons = this.$('.o_search_options');
         }
 
@@ -93,7 +95,9 @@ var ControlPanelRenderer = Renderer.extend({
 
         this.render({});
 
-        return $.when(this._super.apply(this, arguments), this._renderSearch());
+        return $.when(this._super.apply(this, arguments), this._renderSearch()).then(function () {
+            self._setSearchMenusVisibility();
+        });
     },
 
     //--------------------------------------------------------------------------
@@ -111,7 +115,6 @@ var ControlPanelRenderer = Renderer.extend({
      * @param {Array} [status.breadcrumbs] the breadcrumbs to display (see _render_breadcrumbs() for
      * precise description)
      * @param {Object} [status.cp_content] dictionnary containing the new ControlPanel jQuery elements
-     * @param {Boolean} [status.search_view_hidden] true if the searchview is hidden, false otherwise
      * @param {Boolean} [options.clear] set to true to clear from control panel
      * elements that are not in status.cp_content
      */
@@ -130,17 +133,6 @@ var ControlPanelRenderer = Renderer.extend({
         if (this.withBreadcrumbs) {
             this._renderBreadcrumbs(status.title);
         }
-
-        if ('search_view_hidden' in status) {
-            if (status.search_view_hidden) {
-                this.$('.o_searchview').hide();
-                this.$('.o_search_options').hide();
-            } else {
-                this.$('.o_searchview').show();
-                this.$('.o_search_options').show();
-            }
-        }
-
         // Detach control_panel old content and attach new elements
         var toDetach = this.nodes;
         if (options.clear) {
@@ -187,6 +179,22 @@ var ControlPanelRenderer = Renderer.extend({
             content[$element].contents().detach();
         }
     },
+    _getMenuItems: function (menuType) {
+        var menuItems;
+        if (menuType === 'filter') {
+            menuItems = this.state.filters;
+        }
+        if (menuType === 'groupBy') {
+            menuItems = this.state.groupBys;
+        }
+        if (menuType === 'timeRange') {
+            menuItems = this.state.timeRanges;
+        }
+        if (menuType === 'favorite') {
+            menuItems = this.state.favorites;
+        }
+        return menuItems;
+    },
     _getSubMenusPlace: function () {
         return $('<div>').appendTo(this.$('.o_search_options'));
     },
@@ -203,22 +211,6 @@ var ControlPanelRenderer = Renderer.extend({
             return self._renderBreadcrumbsItem(bc, index, breadcrumbsDescriptors.length);
         });
         this.$('.breadcrumb').html(breadcrumbs);
-    },
-    /**
-     * Renders a button to display in the buttons area, given an arch's node.
-     *
-     * @private
-     * @param {Object} node
-     */
-    _renderButton: function (node) {
-        var self = this;
-        var $button = viewUtils.renderButtonFromNode(node);
-        $button.on('click', function () {
-            self.trigger_up('button_clicked', {
-                attrs: node.attrs,
-            });
-        });
-        return $button;
     },
     /**
      * Renders a breadcrumbs' li Jquery element
@@ -241,83 +233,32 @@ var ControlPanelRenderer = Renderer.extend({
         return $bc;
     },
     /**
-     * Toggles the visibility of the ControlPanel and detaches or attaches its
-     * contents to clean the DOM
+     * Renders a button to display in the buttons area, given an arch's node.
      *
      * @private
-     * @param {boolean} visible true to show the control panel, false to hide it
+     * @param {Object} node
      */
-    _toggleVisibility: function (visible) {
-        this.do_toggle(visible);
-        if (!visible && !this.$content) {
-            this.$content = this.$el.contents().detach();
-        } else if (this.$content) {
-            this.$content.appendTo(this.$el);
-            this.$content = null;
-        }
+    _renderButton: function (node) {
+        var self = this;
+        var $button = viewUtils.renderButtonFromNode(node);
+        $button.on('click', function () {
+            self.trigger_up('button_clicked', {
+                attrs: node.attrs,
+            });
+        });
+        return $button;
     },
-    /**
-     * Removes active class on all switch-buttons and adds it to the one of the
-     * active view
-     *
-     * @private
-     * @param {string} selector the selector of the div to activate
-     */
-    _updateSwitchButtons: function (selector) {
-        this.nodes.$switch_buttons.find('button').removeClass('active');
-        this.$(selector).addClass('active');
-    },
-
-
-
-
-    _setupFilterMenu: function () {
-        this.filterMenu = new FilterMenu(this, this.state.filters, this.state.fields);
-        return this.filterMenu.appendTo(this.$subMenus);
-    },
-    _setupGroupByMenu: function () {
-        this.groupByMenu = new GroupByMenu(this, this.state.groupBys, this.state.fields);
-        return this.groupByMenu.appendTo(this.$subMenus);
-    },
-    _setupFavoriteMenu: function () {
-        this.favoriteMenu = new FavoriteMenu(this, this.state.favorites);
-        return this.favoriteMenu.appendTo(this.$subMenus);
-    },
-    _setupTimeRangeMenu: function () {
-        this.timeRangeMenu = new TimeRangeMenu(this, this.state.timeRanges);
-        return this.timeRangeMenu.appendTo(this.$subMenus);
-    },
-
     _renderSearch: function () {
         var defs = [];
-        // approx inDom
-        if (this.$subMenus) {
-            if (this.filterMenu) {
-                this.filterMenu.update(this.state.filters);
-            }
-            if (this.groupByMenu) {
-                this.groupByMenu.update(this.state.groupBys);
-            }
-            if (this.favoriteMenu) {
-                this.favoriteMenu.update(this.state.favorites);
-            }
-            if (this.timeRangeMenu) {
-                this.timeRangeMenu.update(this.state.timeRanges);
-            }
-        } else if (this.withSearchButtons) {
-            this.$subMenus = this._getSubMenusPlace();
-            defs.push(this._setupFilterMenu());
-            defs.push(this._setupGroupByMenu());
-            defs.push(this._setupTimeRangeMenu());
-            defs.push(this._setupFavoriteMenu());
+        if (this.menusSetup) {
+            this._updateMenus();
+        } else {
+            this.menusSetup = true;
+            defs = defs.concat(this._setupMenus());
         }
         if (this.withSearchBar) {
             defs.push(this._renderSearchBar());
-            this.$('.o_searchview_more')
-                .toggleClass('fa-search-plus', this.displayMore)
-                .toggleClass('fa-search-minus', !this.displayMore);
         }
-
         return $.when(this, defs);
     },
     _renderSearchBar: function () {
@@ -336,6 +277,68 @@ var ControlPanelRenderer = Renderer.extend({
                 oldSearchBar.destroy();
             }
         });
+    },
+    _setupMenu: function (menuType) {
+        var Menu;
+        if (menuType === 'filter') {
+            Menu = FilterMenu;
+        }
+        if (menuType === 'groupBy') {
+            Menu = GroupByMenu;
+        }
+        if (menuType === 'timeRange') {
+            Menu = TimeRangeMenu;
+        }
+        if (menuType === 'favorite') {
+            Menu = FavoriteMenu;
+        }
+        var menu = new Menu(this, this._getMenuItems(menuType), this.state.fields);
+        this.subMenus[menuType] = menu;
+        return menu.appendTo(this.$subMenus);
+    },
+    _setupMenus: function () {
+        this.$subMenus = this._getSubMenusPlace();
+        return this.searchMenuTypes.map(this._setupMenu.bind(this));
+    },
+    _setSearchMenusVisibility: function () {
+        this.$('.o_searchview_more')
+            .toggleClass('fa-search-plus', !this.displaySearchMenu)
+            .toggleClass('fa-search-minus', this.displaySearchMenu);
+        this.$('.o_search_options')
+            .toggleClass('o_hidden', !this.displaySearchMenu);
+    },
+    /**
+     * Toggles the visibility of the ControlPanel and detaches or attaches its
+     * contents to clean the DOM
+     *
+     * @private
+     * @param {boolean} visible true to show the control panel, false to hide it
+     */
+    _toggleVisibility: function (visible) {
+        this.do_toggle(visible);
+        if (!visible && !this.$content) {
+            this.$content = this.$el.contents().detach();
+        } else if (this.$content) {
+            this.$content.appendTo(this.$el);
+            this.$content = null;
+        }
+    },
+    _updateMenus: function () {
+        var self = this;
+        this.searchMenuTypes.forEach(function (menuType) {
+            self.subMenus[menuType].update(self._getMenuItems(menuType));
+        });
+    },
+    /**
+     * Removes active class on all switch-buttons and adds it to the one of the
+     * active view
+     *
+     * @private
+     * @param {string} selector the selector of the div to activate
+     */
+    _updateSwitchButtons: function (selector) {
+        this.nodes.$switch_buttons.find('button').removeClass('active');
+        this.$(selector).addClass('active');
     },
 
     //--------------------------------------------------------------------------
@@ -362,9 +365,8 @@ var ControlPanelRenderer = Renderer.extend({
         ev.data.callback(this.actionInfo);
     },
     _onMore: function () {
-        this.displayMore = !this.displayMore;
-        this.$('.o_search_options').toggle();
-        this._renderSearch();
+        this.displaySearchMenu = !this.displaySearchMenu;
+        this._setSearchMenusVisibility();
     },
 });
 

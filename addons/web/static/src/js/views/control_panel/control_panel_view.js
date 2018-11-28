@@ -78,7 +78,7 @@ var ControlPanelView = Factory.extend({
                                               params.withBreadcrumbs !== false;
         this.rendererParams.breadcrumbs = params.breadcrumbs;
         this.rendererParams.withSearchBar = 'withSearchBar' in params ? params.withSearchBar : true;
-        this.rendererParams.withSearchButtons = 'withSearchButtons' in params ? params.withSearchButtons : true;
+        this.rendererParams.searchMenuTypes = params.searchMenuTypes || ['filter', 'groupBy', 'favorite'];
 
         this.loadParams.withSearchBar = 'withSearchBar' in params ? params.withSearchBar : true;
         this.loadParams.actionId = params.actionId;
@@ -106,14 +106,8 @@ var ControlPanelView = Factory.extend({
             return _.extend(option, {description: option.description.toString()});
         });
 
-        // don't forget to compute and rename:
-        //  - groupable
-        //  - enableTimeRangeMenu
-        //  - search view visibility
-
         // TODO: use this where necessary
         // var disableCustomFilters = context.search_disable_custom_filters;
-        // var hasSearchView = params.hasSearchView;
     },
 
     //--------------------------------------------------------------------------

@@ -2,18 +2,8 @@ odoo.define('web.controlPanelViewParameters', function (require) {
 "use strict";
 
 var core = require('web.core');
-var Widget = require('web.Widget');
-var _lt = core._lt;
 
-// for control panel
-var DEFAULTS = _.extend({}, Widget.prototype.defaults, {
-    hidden: false,
-    disableCustomFilters: false,
-    disableGroupBy: false,
-    disableFavorites: false,
-    disableFilters: false,
-    disableTimeRangeMenu: true,
-});
+var _lt = core._lt;
 
 // for FilterMenu
 var DEFAULT_PERIOD = 'this_month';
@@ -64,7 +54,6 @@ return {
     DEFAULT_INTERVAL: DEFAULT_INTERVAL,
     DEFAULT_PERIOD: DEFAULT_PERIOD,
     DEFAULT_TIMERANGE: DEFAULT_TIMERANGE,
-    DEFAULTS: DEFAULTS,
     GROUPABLE_TYPES: GROUPABLE_TYPES,
     INTERVAL_OPTIONS: INTERVAL_OPTIONS,
     PERIOD_OPTIONS: PERIOD_OPTIONS,

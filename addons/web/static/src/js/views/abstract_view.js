@@ -42,17 +42,12 @@ var AbstractView = Factory.extend({
     // multi_record is used to distinguish views displaying a single record
     // (e.g. FormView) from those that display several records (e.g. ListView)
     multi_record: true,
-    // determine if a search view should be displayed in the control panel and
-    // allowed to interact with the view.  Currently, the only not searchable
-    // views are the form view and the diagram view.
-    searchable: true,
     // viewType is the type of the view, like 'form', 'kanban', 'list'...
     viewType: undefined,
-    // if searchable, this flag determines if the search view will display a
-    // groupby menu or not.  This is useful for the views which do not support
-    // grouping data.
-    groupable: true,
-    enableTimeRangeMenu: false,
+    // determines if a search bar is available
+    withSearchBar: true,
+    // determines the search menus available and their orders
+    searchMenuTypes: ['filter', 'groupBy', 'favorite'],
     config: _.extend({}, Factory.prototype.config, {
         Model: AbstractModel,
         Renderer: AbstractRenderer,
@@ -117,7 +112,6 @@ var AbstractView = Factory.extend({
             isEmbedded: isEmbedded,
             noContentHelp: params.action && params.action.help,
         };
-
         this.controllerParams = {
             modelName: params.modelName,
             activeActions: {
@@ -126,8 +120,6 @@ var AbstractView = Factory.extend({
                 delete: this.arch.attrs.delete ? JSON.parse(this.arch.attrs.delete) : true,
                 duplicate: this.arch.attrs.duplicate ? JSON.parse(this.arch.attrs.duplicate) : true,
             },
-            groupable: this.groupable,
-            enableTimeRangeMenu: this.enableTimeRangeMenu,
             isEmbedded: isEmbedded,
             controllerID: params.controllerID,
             bannerRoute: this.arch.attrs.banner_route,
@@ -137,9 +129,7 @@ var AbstractView = Factory.extend({
         // be instantiated by the View
         this.controllerParams.displayName = params.action && (params.action.display_name || params.action.name);
         this.controllerParams.isMultiRecord = this.multi_record;
-        this.controllerParams.searchable = this.searchable;
         this.controllerParams.searchView = params.action && params.action.searchView;
-        this.controllerParams.searchViewHidden = this.searchview_hidden; // AAB: use searchable instead where it is used?
         this.controllerParams.actionViews = params.action ? params.action.views : [];
         this.controllerParams.viewType = this.viewType;
 
@@ -169,7 +159,10 @@ var AbstractView = Factory.extend({
                 return {name: order[0], asc: order[1] !== 'desc'};
             });
         }
-
+        if (action.flags && action.flags.hasSearchView === false) {
+            this.withSearchBar = false;
+            this.searchMenuTypes = [];
+        }
         this.controlPanelParams = {
             // rename
             actionId: action.id || false,
@@ -177,13 +170,13 @@ var AbstractView = Factory.extend({
             actionType: action.type,
             breadcrumbs: params.breadcrumbs,
             context: params.context,
-            domain: params.domain,
-            hasSearchView: action.flags && action.flags.hasSearchView,
-            modelName: action.res_model,
-            viewInfo: action.controlPanelFieldsView,
             currentConfiguration: params.currentControlPanelConfiguration,
+            domain: params.domain,
+            modelName: action.res_model,
+            searchMenuTypes: this.searchMenuTypes,
+            viewInfo: action.controlPanelFieldsView,
             withBreadcrumbs: params.withBreadcrumbs,
-            withSearchBar: this.searchable,
+            withSearchBar: this.withSearchBar,
         };
 
         this.userContext = params.userContext;
@@ -208,7 +201,7 @@ var AbstractView = Factory.extend({
         }
         var _super = this._super.bind(this);
         return $.when(def).then(function (controlPanel) {
-            if (controlPanel && self.searchable) {
+            if (controlPanel) {
                 var searchQuery = controlPanel.getSearchState();
                 self._updateMVCParams(searchQuery);
             }
@@ -283,7 +276,7 @@ var AbstractView = Factory.extend({
         var compare = false;
         var timeRangeDescription = "";
         var comparisonTimeRangeDescription = "";
-        if (this.enableTimeRangeMenu && timeRangeMenuData) {
+        if (timeRangeMenuData) {
             _.extend(this.loadParams, timeRangeMenuData);
             timeRange = timeRangeMenuData.timeRange;
             comparisonTimeRange = timeRangeMenuData.comparisonTimeRange;

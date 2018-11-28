@@ -13,6 +13,7 @@ var core = require('web.core');
 var StatementAction = AbstractAction.extend({
     hasControlPanel: true,
     withSearchBar: false,
+    searchMenuTypes: [],
     title: core._t('Bank Reconciliation'),
     contentTemplate: 'reconciliation',
     custom_events: {
@@ -128,7 +129,7 @@ var StatementAction = AbstractAction.extend({
     do_show: function () {
         this._super.apply(this, arguments);
         if (this.action_manager) {
-            this.updateControlPanel({search_view_hidden: true}, {clear: true});
+            this.updateControlPanel({clear: true});
             this.action_manager.do_push_state({
                 action: this.params.tag,
                 active_id: this.params.res_id,

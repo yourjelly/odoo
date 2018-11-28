@@ -74,6 +74,7 @@ function dataFilteredQuery(q) {
 var DataImport = AbstractAction.extend({
     hasControlPanel: true,
     withSearchBar: false,
+    searchMenuTypes: [],
     contentTemplate: 'ImportView',
     opts: [
         {name: 'encoding', label: _lt("Encoding:"), value: ''},

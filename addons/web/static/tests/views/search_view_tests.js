@@ -776,8 +776,8 @@ QUnit.module('Search View', {
         actionManager.destroy();
     });
 
-    QUnit.skip('time range menu stays hidden', function (assert) {
-        assert.expect(6);
+    QUnit.test('time range menu stays hidden', function (assert) {
+        assert.expect(4);
 
         var actionManager = createActionManager({
             actions: this.actions,
@@ -787,9 +787,8 @@ QUnit.module('Search View', {
 
         actionManager.doAction(1);
 
-        // check that the fifth dropdown is the time range menu and is hidden
-        assert.isNotVisible($('.btn-group.o_dropdown').eq(4));
-        assert.hasClass($('.btn-group.o_dropdown').eq(4).children().eq(1), 'o_time_range_menu');
+        // check that there is no time range menu
+        assert.containsNone(actionManager, '.o_control_panel .o_search_options .o_time_range_menu');
         // check if search view has no facets
         assert.strictEqual($('.o_facet_values').length, 0);
 
@@ -798,9 +797,8 @@ QUnit.module('Search View', {
         testUtils.dom.click($('.o_menu_item a').eq(0));
         // check that there is a facet
         assert.strictEqual($('div.o_facet_values').length, 1);
-        // check that the fifth dropdown is the time range menu and is still hidden
-        assert.isNotVisible($('.btn-group.o_dropdown').eq(4));
-        assert.hasClass($('.btn-group.o_dropdown').eq(4).children().eq(1), 'o_time_range_menu');
+        // check that there is still no time range menu
+        assert.containsNone(actionManager, '.o_control_panel .o_search_options .o_time_range_menu');
         actionManager.destroy();
     });
 

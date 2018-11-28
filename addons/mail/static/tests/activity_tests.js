@@ -337,7 +337,7 @@ QUnit.test('activity view: activity widget', function (assert) {
 
     activity.destroy();
 });
-QUnit.skip('activity view: no group_by_menu and no time_range_menu', function (assert) {
+QUnit.test('activity view: no group_by_menu and no time_range_menu', function (assert) {
     assert.expect(3);
 
     var actionManager = createActionManager({

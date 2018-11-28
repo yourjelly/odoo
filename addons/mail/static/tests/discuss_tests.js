@@ -117,16 +117,16 @@ QUnit.test('searchview options visibility', function (assert) {
         services: this.services,
     })
     .then(function (discuss) {
-        var $searchviewOptions = discuss.$('.o_search_options > div');
-        var $searchviewOptionsToggler = discuss.$('.o_searchview_more.fa.fa-search-minus');
-        assert.isVisible($searchviewOptions);
-        assert.strictEqual($searchviewOptions.length, 1,
+        assert.containsOnce(discuss, '.o_control_panel .o_search_options',
             "should have search options");
-        assert.strictEqual($searchviewOptionsToggler.length, 1,
+        assert.hasClass(discuss.$('.o_control_panel .o_searchview_more.fa'), 'fa-search-minus',
             "should have a button to toggle search options");
 
-        testUtils.dom.click($searchviewOptionsToggler);
-        assert.isNotVisible($searchviewOptions);
+        assert.strictEqual(discuss.$('.o_control_panel .o_search_options').css('display'), 'block',
+            "search options should be visible by default");
+        testUtils.dom.click(discuss.$('.o_control_panel .o_searchview_more.fa'));
+        assert.strictEqual(discuss.$('.o_control_panel .o_search_options').css('display'), 'none',
+            "search options should be hidden after clicking on search option toggler");
 
         discuss.destroy();
         done();

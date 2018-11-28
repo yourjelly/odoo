@@ -15,6 +15,7 @@ var QWeb = core.qweb;
 var Dashboard = AbstractAction.extend({
     hasControlPanel: true,
     withSearchBar: false,
+    searchMenuTypes: [],
     contentTemplate: 'website.WebsiteDashboardMain',
     cssLibs: [
         '/web/static/lib/nvd3/nv.d3.css'

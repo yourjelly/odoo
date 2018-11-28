@@ -58,11 +58,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
         // those arguments are temporary, they won't be necessary as soon as the
         // ControlPanel will be handled by the View
         this.isMultiRecord = params.isMultiRecord;
-        this.searchable = params.searchable;
         this.searchView = params.searchView;
-        this.searchViewHidden = params.searchViewHidden;
-        this.groupable = params.groupable;
-        this.enableTimeRangeMenu = params.enableTimeRangeMenu;
         this.actionViews = params.actionViews;
         this.viewType = params.viewType;
     },
@@ -415,7 +411,6 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
             active_view_selector: '.o_cp_switch_' + this.viewType,
             cp_content: cpContent,
             title: this.getTitle(),
-            search_view_hidden: !this.searchable || this.searchviewHidden,
         });
 
         this._pushState();

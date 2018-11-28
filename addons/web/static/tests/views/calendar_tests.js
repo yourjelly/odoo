@@ -2118,8 +2118,8 @@ QUnit.module('Views', {
         testUtils.mock.unpatch(Dialog);
     });
 
-    QUnit.skip('calendar is configured to hide the groupby menu', function (assert) {
-        assert.expect(2);
+    QUnit.test('calendar is configured to have no groupBy menu', function (assert) {
+        assert.expect(1);
 
         var archs = {
             'event,1,calendar': '<calendar class="o_calendar_test" '+
@@ -2146,9 +2146,8 @@ QUnit.module('Views', {
         });
 
         actionManager.doAction(1);
-        var $groupBy = $('.o_control_panel span.fa.fa-bars');
-        assert.strictEqual($groupBy.length, 1, 'just making sure we have the groupby menu');
-        assert.ok(!$groupBy.is(':visible'), 'groupby menu should not be visible');
+        assert.containsNone(actionManager.$('.o_control_panel .o_search_options span.fa.fa-bars'),
+            "the control panel has no groupBy menu");
         actionManager.destroy();
     });
 

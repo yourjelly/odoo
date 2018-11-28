@@ -28,7 +28,8 @@ var PivotView = AbstractView.extend({
         Renderer: PivotRenderer,
     },
     viewType: 'pivot',
-    enableTimeRangeMenu: 'true',
+    searchMenuTypes: ['filter', 'groupBy', 'timeRange', 'favorite'],
+
     /**
      * @override
      * @param {Object} params

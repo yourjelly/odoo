@@ -20,9 +20,7 @@ var AbstractAction = Widget.extend(ActionMixin, {
     loadControlPanel: false,
     withSearchBar: true, // set to false if you don't want the default search
                          // bar (only makes sense if hasControlPanel is true)
-    withSearchButtons: true, // set to false if you don't want the default search
-                             // buttons (only makes sense if hasControlPanel is
-                             // true)
+    searchMenuTypes: ['filter', 'groupBy', 'favorite'],
 
     init: function (parent, action, options) {
         this._super(parent);
@@ -33,7 +31,7 @@ var AbstractAction = Widget.extend(ActionMixin, {
             breadcrumbs: options && options.breadcrumbs || [],
             viewId: action.search_view_id && action.search_view_id[0],
             withSearchBar: this.withSearchBar,
-            withSearchButtons: this.withSearchButtons,
+            searchMenuTypes: this.searchMenuTypes,
         };
     },
     willStart: function () {

@@ -13,6 +13,8 @@ var QWeb = core.qweb;
 var stock_report_generic = AbstractAction.extend({
     hasControlPanel: true,
     withSearchBar: false,
+    searchMenuTypes: [],
+
     // Stores all the parameters of the action.
     init: function(parent, action) {
         this._super.apply(this, arguments);
