@@ -138,11 +138,9 @@ var SearchBar = Widget.extend({
         if (filter.type === 'field') {
             var values = filter.autoCompleteValues;
             values.push(ui.item.facet.values[0]);
-            var domain = ui.item.facet.getDomain(values);
             this.trigger_up('autocompletion_filter', {
                 filterId: filter.id,
                 autoCompleteValues: values,
-                domain: domain,
             });
         } else {
             this.trigger_up('autocompletion_filter', {

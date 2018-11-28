@@ -135,7 +135,6 @@ var Field = FilterInterface.extend({
     _getFacetValue: function (value) {
         return {
             filter: this.filter,
-            getDomain: this.getDomain.bind(this),
             values: [{label: value, value: value}],
         };
     },
@@ -283,7 +282,6 @@ var SelectionField = Field.extend({
     _getFacetValue: function (value) {
         return {
             filter: this.filter,
-            getDomain: this.getDomain.bind(this),
             values: [{label: value[1], value: value[0]}],
         };
     },
@@ -399,14 +397,12 @@ var ManyToOneField = CharField.extend({
     _getFacetValue: function (value) {
         return {
             filter: this.filter,
-            getDomain: this.getDomain.bind(this),
             values: [{label: value, value: value, operator: 'ilike'}],
         };
     },
     _getExpandedFacetValue: function (value) {
         return {
             filter: this.filter,
-            getDomain: this.getDomain.bind(this),
             values: [{label: value[1], value: value[0]}],
         };
     },

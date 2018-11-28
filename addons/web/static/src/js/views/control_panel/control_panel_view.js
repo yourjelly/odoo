@@ -143,6 +143,7 @@ var ControlPanelView = Factory.extend({
      * @param {Object} attrs
      */
     _extractAttributes: function (filter, attrs) {
+        filter.isDefault = this.searchDefaults[attrs.name] ? true : false;
         filter.description = attrs.string ||
                                 attrs.help ||
                                 attrs.name ||
@@ -172,14 +173,17 @@ var ControlPanelView = Factory.extend({
                 filter.currentOptionId = false;
             }
         } else if (filter.type === 'field') {
+            var field = this.fields[attrs.name];
             filter.attrs = attrs;
             filter.autoCompleteValues = [];
-            var field = this.fields[attrs.name];
+            if (filter.isDefault) {
+                // on field, default can be used with a value
+                filter.defaultValue = this.searchDefaults[filter.attrs.name];
+            }
             if (!attrs.string) {
                 attrs.string = field.string;
             }
         }
-        filter.isDefault = this.searchDefaults[attrs.name] ? true : false;
     },
     /**
      * Executed when the given arch has root node <controlpanel>.

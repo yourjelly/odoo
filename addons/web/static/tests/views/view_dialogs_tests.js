@@ -132,7 +132,7 @@ QUnit.module('Views', {
         parent.destroy();
     });
 
-    QUnit.skip('SelectCreateDialog use domain, group_by and search default', function (assert) {
+    QUnit.test('SelectCreateDialog use domain, group_by and search default', function (assert) {
         assert.expect(3);
 
         var search = 0;
@@ -156,7 +156,7 @@ QUnit.module('Views', {
                 if (args.method === 'read_group') {
                     assert.deepEqual(args.kwargs, {
                         context: {},
-                        domain: [["display_name","like","a"], ["display_name","ilike","piou"], ["foo","ilike","piou"]],
+                        domain: [["display_name","like","a"], "&", ["display_name","ilike","piou"], ["foo","ilike","piou"]],
                         fields: ["display_name","foo","bar"],
                         groupby: ["bar"],
                         orderby: '',
@@ -167,7 +167,7 @@ QUnit.module('Views', {
                     search++;
                     assert.deepEqual(args, {
                         context: {},
-                        domain: [["display_name","like","a"], ["display_name","ilike","piou"], ["foo","ilike","piou"]],
+                        domain: [["display_name","like","a"], "&", ["display_name","ilike","piou"], ["foo","ilike","piou"]],
                         fields: ["display_name","foo"],
                         model: "partner",
                         limit: 80,

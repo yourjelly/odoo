@@ -243,21 +243,22 @@ var ControlPanelModel = mvc.Model.extend({
                 this._createEmptyGroup('groupBy');
             }
             this._createGroupOfTimeRanges();
-            return this._loadFavorites().then(function () {
-                if (self.query.length === 0) {
-                    self._activateDefaultFilters();
-                    self._activateDefaultTimeRanges(params.timeRanges);
-                }
+            return $.when.apply($, self._loadSearchDefaults()).then(function () {
+                return self._loadFavorites().then(function () {
+                    if (self.query.length === 0) {
+                        self._activateDefaultFilters();
+                        self._activateDefaultTimeRanges(params.timeRanges);
+                    }
+                });
             });
         }
     },
     toggleAutoCompletionFilter: function (params) {
         var filter = this.filters[params.filterId];
         if (filter.type === 'field') {
-            // update domain & autoCompleteValues
-            // the autocompletion filter is dynamic
-            filter.domain = params.domain;
             filter.autoCompleteValues = params.autoCompleteValues;
+            // the autocompletion filter is dynamic
+            filter.domain = this._setFilterDomain(filter);
             // active the filter
             var group = this.groups[filter.groupId];
             if (!group.activeFilterIds.includes(filter.id)) {
@@ -640,6 +641,68 @@ var ControlPanelModel = mvc.Model.extend({
         return def;
     },
     /**
+     * Load search defaults and set the `domain` key on filter (of type `field`).
+     * Some search defaults need to fetch data (like m2o for example) so this
+     * is asynchronous.
+     *
+     * @private
+     * @returns {Deferred[]}
+     */
+    _loadSearchDefaults: function () {
+        var self = this;
+        var defs = [];
+        _.each(this.filters, function (filter) {
+            if (filter.type === 'field' && filter.isDefault) {
+                var def;
+                var field = self.fields[filter.attrs.name];
+                var value = filter.defaultValue;
+                if (field.type === 'many2one') {
+                    if (value instanceof Array) {
+                        // M2O search fields do not currently handle multiple default values
+                        // there are many cases of {search_default_$m2ofield: [id]}, need
+                        // to handle this as if it were a single value.
+                        value = value[0];
+                    }
+                    def = self._rpc({
+                        model: field.relation,
+                        method: 'name_get',
+                        args: [value],
+                        context: self.initialContext,
+                    }).then(function (result) {
+                        var autocompleteValue = {
+                            label: result[0][1],
+                            value: value,
+                        };
+                        filter.autoCompleteValues.push(autocompleteValue);
+                        filter.domain = self._setFilterDomain(filter);
+                    });
+                } else {
+                    var autocompleteValue;
+                    if (field.type === 'selection') {
+                        var match = _.find(this.attrs.selection, function (sel) {
+                            return sel[0] === value;
+                        });
+                        autocompleteValue = {
+                            label: match[1],
+                            value: match[0],
+                        };
+                    } else {
+                        autocompleteValue = {
+                            label: String(value),
+                            value: value,
+                        };
+                    }
+                    filter.autoCompleteValues.push(autocompleteValue);
+                    filter.domain = self._setFilterDomain(filter);
+                }
+                if (def) {
+                    defs.push(def);
+                }
+            }
+        });
+        return defs;
+    },
+    /**
      * Processes the search data sent by the search view.
      *
      * @private
@@ -731,6 +794,17 @@ var ControlPanelModel = mvc.Model.extend({
             favorite.serverSideId = serverSideId;
             self._addNewFavorite(favorite);
         });
+    },
+    _setFilterDomain: function (filter) {
+        var domain = "";
+        var field = this.fields[filter.attrs.name];
+        // TODO: should not do that, the domain logic should be put somewhere else
+        var Obj = core.search_widgets_registry.getAny([filter.attrs.widget, field.type]);
+        if (Obj) {
+            var obj = new (Obj) (this, filter, field, this.initialContext);
+            domain = obj.getDomain(filter.autoCompleteValues);
+        }
+        return domain;
     },
 });
 
