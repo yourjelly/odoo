@@ -26,16 +26,18 @@ ActionManager.include({
 
     /**
      * Override to handle the case of lazy-loaded controllers, which may be the
-     * last (and only) controller in the stack, but which should not be
-     * considered as current controller as they don't have an alive widget.
+     * last controller in the stack, but which should not be considered as
+     * current controller as they don't have an alive widget.
      *
      * @override
      */
     getCurrentController: function () {
         var currentController = this._super.apply(this, arguments);
         var action = currentController && this.actions[currentController.actionID];
-        if (action && action.type === 'ir.actions.act_window') {
-            return currentController.widget ? currentController : null;
+        if (action && action.type === 'ir.actions.act_window' && !currentController.widget) {
+            var lastControllerID = this.controllerStack.pop();
+            currentController = this._super.apply(this, arguments);
+            this.controllerStack.push(lastControllerID);
         }
         return currentController;
     },

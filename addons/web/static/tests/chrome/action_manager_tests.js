@@ -810,7 +810,7 @@ QUnit.module('ActionManager', {
         actionManager.destroy();
     });
 
-    QUnit.skip('lazy load multi record view with previous action', function (assert) {
+    QUnit.test('lazy load multi record view with previous action', function (assert) {
         assert.expect(6);
 
         var actionManager = createActionManager({
