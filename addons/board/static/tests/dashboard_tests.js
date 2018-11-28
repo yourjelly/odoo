@@ -605,7 +605,7 @@ QUnit.test('subviews are aware of attach in or detach from the DOM', function (a
 });
 
 QUnit.test('dashboard intercepts custom events triggered by sub controllers', function (assert) {
-    assert.expect(4);
+    assert.expect(3);
 
     // we patch the ListController to force it to trigger the custom events that
     // we want the dashboard to intercept (to stop them or to tweak their data)
@@ -613,7 +613,6 @@ QUnit.test('dashboard intercepts custom events triggered by sub controllers', fu
         start: function () {
             this.trigger_up('update_filters');
             this.trigger_up('env_updated');
-            this.do_action({}, {keepSearchView: true});
         },
     });
 
@@ -638,10 +637,6 @@ QUnit.test('dashboard intercepts custom events triggered by sub controllers', fu
             'partner,false,list': '<tree string="Partner"/>',
         },
         intercepts: {
-            do_action: function (ev) {
-                assert.strictEqual(ev.data.options.keepSearchView, false,
-                    "the 'keepSearchView' options should have been set to false");
-            },
             env_updated: function (ev) {
                 assert.strictEqual(ev.target.modelName, 'board',
                     "env_updated event should be triggered by the dashboard itself");
@@ -753,56 +748,6 @@ QUnit.test('save two searches to dashboard', function (assert) {
     $('.o_apply_filter').click();
     // Add it to dashboard
     $('.o_add_to_dashboard_button').click();
-
-    actionManager.destroy();
-});
-
-QUnit.test('save to dashboard actions with flag keepSearchView', function (assert) {
-    assert.expect(3);
-
-    var actionManager = createActionManager({
-        data: this.data,
-        archs: {
-            'partner,false,graph': '<graph><field name="foo"/></graph>',
-            'partner,false,list': '<list><field name="foo"/></list>',
-            'partner,false,search': '<search></search>',
-        },
-        mockRPC: function (route, args) {
-            if (route === '/board/add_to_dashboard') {
-                assert.strictEqual(args.action_id, 2,
-                    "should save the correct action");
-                assert.strictEqual(args.view_mode, 'graph',
-                    "should save the correct view type");
-                return $.when(true);
-            }
-            return this._super.apply(this, arguments);
-        },
-    });
-
-    // execute a first action
-    actionManager.doAction({
-        id: 1,
-        res_model: 'partner',
-        type: 'ir.actions.act_window',
-        views: [[false, 'list']],
-    });
-
-    // execute another action with flag 'keepSearchView' and add it to dashboard
-    var options = {keepSearchView: true};
-    actionManager.doAction({
-        id: 2,
-        res_model: 'partner',
-        type: 'ir.actions.act_window',
-        views: [[false, 'graph']],
-    }, options);
-
-    assert.containsOnce(actionManager, '.o_graph_controller');
-
-    // add this action to dashboard
-    testUtils.dom.click($('.o_search_options .o_dropdown button:contains(Favorites)'));
-    testUtils.dom.click($('.o_add_to_board.o_menu_header'));
-    testUtils.fields.editInput($('input.o_add_to_board_input'), 'a name');
-    testUtils.dom.click($('.o_add_to_board_confirm_button'));
 
     actionManager.destroy();
 });

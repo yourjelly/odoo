@@ -71,10 +71,6 @@ OldFavoritesMenu.include({
         var am = this.findAncestor(function (a) {
             return a instanceof ActionManager;
         });
-        // with options 'keepSearchView', it may happen that the action_id of
-        // the searchview (received in init) is not the one of the current
-        // action, which corresponds to the one we want to add to dashboard
-        var currentAction = am.getCurrentAction();
         var controller = am.getCurrentController();
         context.add(controller.widget.getContext());
         var c = pyUtils.eval('context', context);
@@ -90,7 +86,7 @@ OldFavoritesMenu.include({
         return self._rpc({
                 route: '/board/add_to_dashboard',
                 params: {
-                    action_id: currentAction.id || false,
+                    action_id: this.action_id || false,
                     context_to_save: c,
                     domain: domain,
                     view_mode: controller.viewType,

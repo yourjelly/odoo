@@ -378,20 +378,6 @@ var BoardRenderer = FormRenderer.extend({
         });
     },
     /**
-     * Intercepts (without stopping) 'do_action' events to force the
-     * 'keepSearchView' option to false, as the dashboard action has no search
-     * view, and thus there is no search view that could be re-used for the
-     * action to execute (a new one will be created instead).
-     *
-     * @private
-     * @param {OdooEvent} event
-     */
-    _onDoAction: function (event) {
-        if (event.data.options) {
-            event.data.options.keepSearchView = false;
-        }
-    },
-    /**
      * Stops the propagation of 'env_updated' events triggered by the controllers
      * instantiated by the dashboard.
      *

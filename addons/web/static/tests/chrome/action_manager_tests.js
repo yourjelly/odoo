@@ -3064,47 +3064,6 @@ QUnit.module('ActionManager', {
         actionManager.destroy();
     });
 
-    QUnit.skip("doAction with option 'keepSearchView'", function (assert) {
-        assert.expect(4);
-
-        this.actions.push({
-            id: 33,
-            name: 'Partners',
-            res_model: 'partner',
-            search_view_id: [1, 'a specific search view'],
-            type: 'ir.actions.act_window',
-            views: [[false, 'list']],
-        });
-
-        var checkRPC = false;
-        var actionManager = createActionManager({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            mockRPC: function (route, args) {
-                if (checkRPC && route === '/web/dataset/search_read') {
-                    assert.deepEqual(args.domain, [['bar', '=', 1]],
-                        "should search with the correct domain");
-                }
-                return this._super.apply(this, arguments);
-            },
-        });
-
-        actionManager.doAction(33);
-
-        checkRPC = true;
-        testUtils.dom.click($('.o_control_panel .o_search_options .o_dropdown_toggler_btn:contains(Filters)'));
-        testUtils.dom.click($('.o_control_panel .o_filters_menu a:contains(Bar)'));
-        assert.strictEqual($('.o_control_panel .o_facet_values').text().trim(), 'Bar',
-            "the filter on Bar should appear in the search view");
-
-        actionManager.doAction(3, {keepSearchView: true});
-        assert.strictEqual($('.o_control_panel .o_facet_values').text().trim(), 'Bar',
-            "the filter on Bar should still be in the search view");
-
-        actionManager.destroy();
-    });
-
     QUnit.test("current act_window action is stored in session_storage", function (assert) {
         assert.expect(1);
 

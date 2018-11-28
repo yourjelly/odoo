@@ -452,20 +452,6 @@ ActionManager.include({
         return this.loadViews(action.res_model, action.context, views, options);
     },
     /**
-     * Overrides to handle the 'keepSearchView' option. If set to true, the
-     * search view of the current action will be re-used in the new action, i.e.
-     * the environment (domain, context, groupby) will be shared between both
-     * actions.
-     *
-     * @override
-     */
-    _preprocessAction: function (action, options) {
-        this._super.apply(this, arguments);
-        if (action.type === 'ir.actions.act_window' && options.keepSearchView) {
-            action._keepSearchView = true;
-        }
-    },
-    /**
      * Overrides to handle the case of 'ir.actions.act_window' actions, i.e.
      * destroys all controllers associated to the given action, and its search
      * view.
