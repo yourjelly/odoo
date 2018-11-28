@@ -78,6 +78,7 @@ var ControlPanelView = Factory.extend({
                                               params.withBreadcrumbs !== false;
         this.rendererParams.breadcrumbs = params.breadcrumbs;
         this.rendererParams.withSearchBar = 'withSearchBar' in params ? params.withSearchBar : true;
+        this.rendererParams.withSearchButtons = 'withSearchButtons' in params ? params.withSearchButtons : true;
 
         this.loadParams.actionId = params.actionId;
         this.loadParams.fields = this.fields;

@@ -31,6 +31,8 @@ var ControlPanelRenderer = Renderer.extend({
      *   won't be rendered
      * @param {boolean} [params.withSearchBar=false] if false, no search bar
      *   is rendered
+     * @param {boolean} [params.withSearchButtons=false] if false, no search
+     *   buttons will be rendered
      * @param {String} [params.template] the QWeb template to render the
      *   ControlPanel. By default, the template 'ControlPanel' will be used.
      */
@@ -40,6 +42,7 @@ var ControlPanelRenderer = Renderer.extend({
         this._breadcrumbs = params.breadcrumbs || [];
         this.withBreadcrumbs = params.withBreadcrumbs;
         this.withSearchBar = params.withSearchBar;
+        this.withSearchButtons = params.withSearchButtons;
         if (params.template) {
             this.template = params.template;
         }
@@ -66,10 +69,12 @@ var ControlPanelRenderer = Renderer.extend({
             $switch_buttons: this.$('.o_cp_switch_buttons'),
         };
 
+        // if we don't use the default search bar and buttons, we expose the
+        // corresponding area for custom content
         if (!this.withSearchBar) {
-            // we don't use the default search bar and buttons here, so we
-            // expose those area for custom content
             this.nodes.$searchview = this.$('.o_cp_searchview');
+        }
+        if (!this.withSearchButtons) {
             this.nodes.$searchview_buttons = this.$('.o_search_options');
         }
 
@@ -284,10 +289,6 @@ var ControlPanelRenderer = Renderer.extend({
     },
 
     _renderSearch: function () {
-        if (!this.withSearchBar) {
-            return $.when();
-        }
-
         var defs = [];
         // approx inDom
         if (this.$subMenus) {
@@ -303,18 +304,19 @@ var ControlPanelRenderer = Renderer.extend({
             if (this.timeRangeMenu) {
                 this.timeRangeMenu.update(this.state.timeRanges);
             }
-        } else {
+        } else if (this.withSearchButtons) {
             this.$subMenus = this._getSubMenusPlace();
             defs.push(this._setupFiltersMenu());
             defs.push(this._setupGroupByMenu());
             defs.push(this._setupTimeRangeMenu());
             defs.push(this._setupFavoritesMenu());
         }
-        defs.push(this._renderSearchBar());
-
-        this.$('.o_searchview_more')
-            .toggleClass('fa-search-plus', this.displayMore)
-            .toggleClass('fa-search-minus', !this.displayMore);
+        if (this.withSearchBar) {
+            defs.push(this._renderSearchBar());
+            this.$('.o_searchview_more')
+                .toggleClass('fa-search-plus', this.displayMore)
+                .toggleClass('fa-search-minus', !this.displayMore);
+        }
 
         return $.when(this, defs);
     },
@@ -361,7 +363,7 @@ var ControlPanelRenderer = Renderer.extend({
     },
     _onMore: function () {
         this.displayMore = !this.displayMore;
-        this.$subMenus.toggle();
+        this.$('.o_search_options').toggle();
         this._renderSearch();
     },
 });
