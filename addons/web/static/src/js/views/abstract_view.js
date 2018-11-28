@@ -143,12 +143,6 @@ var AbstractView = Factory.extend({
         this.controllerParams.actionViews = params.action ? params.action.views : [];
         this.controllerParams.viewType = this.viewType;
 
-        // is this still necessary?
-        // var groupBy = params.groupBy;
-        // if (typeof groupBy === 'string') {
-        //     groupBy = [groupBy];
-        // }
-
         var action = params.action || {};
         if (action.flags) {
             this.withControlPanel = !action.flags.headless;
