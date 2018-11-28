@@ -144,10 +144,10 @@ var AbstractView = Factory.extend({
         this.controllerParams.viewType = this.viewType;
 
         var action = params.action || {};
-        if (action.flags) {
-            this.withControlPanel = !action.flags.headless;
-        } else if ('withControlPanel' in params) {
+        if ('withControlPanel' in params) {
             this.withControlPanel = params.withControlPanel;
+        } else if (action.flags) {
+            this.withControlPanel = !action.flags.headless;
         }
 
         this.loadParams = {
@@ -188,7 +188,7 @@ var AbstractView = Factory.extend({
 
         this.userContext = params.userContext;
 
-        if (isEmbedded && params.searchQuery) {
+        if (params.searchQuery) {
             this._updateMVCParams(params.searchQuery);
         }
     },

@@ -266,11 +266,14 @@ var BoardRenderer = FormRenderer.extend({
                     var View = viewRegistry.get(viewType);
                     var view = new View(viewInfo, {
                         action: action,
-                        context: context,
-                        domain: domain,
-                        groupBy: context.group_by || [],
-                        modelName: action.res_model,
                         hasSelectors: false,
+                        modelName: action.res_model,
+                        searchQuery: {
+                            context: context,
+                            domain: domain,
+                            groupBy: context.group_by || [],
+                        },
+                        withControlPanel: false,
                     });
                     return view.getController(self).then(function (controller) {
                         self._boardFormViewIDs[controller.handle] = _.first(

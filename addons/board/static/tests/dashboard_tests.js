@@ -193,6 +193,41 @@ QUnit.test('basic functionality, with one sub action', function (assert) {
     form.destroy();
 });
 
+QUnit.test('views in the dashboard do not have a control panel', function (assert) {
+    assert.expect(2);
+
+    var form = createView({
+        View: BoardView,
+        model: 'board',
+        data: this.data,
+        arch: '<form>' +
+                '<board style="2-1">' +
+                    '<column>' +
+                        '<action context="{}" view_mode="list" string="ABC" name="51" domain="[]"></action>' +
+                    '</column>' +
+                '</board>' +
+            '</form>',
+        mockRPC: function (route) {
+            if (route === '/web/action/load') {
+                return $.when({
+                    res_model: 'partner',
+                    views: [[4, 'list'], [5, 'form']],
+                });
+            }
+            return this._super.apply(this, arguments);
+        },
+        archs: {
+            'partner,4,list':
+                '<tree string="Partner"><field name="foo"/></tree>',
+        },
+    });
+
+    assert.containsOnce(form, '.o_action .o_list_view');
+    assert.containsNone(form, '.o_action .o_control_panel');
+
+    form.destroy();
+});
+
 QUnit.test('can render an action without view_mode attribute', function (assert) {
     // The view_mode attribute is automatically set to the 'action' nodes when
     // the action is added to the dashboard using the 'Add to dashboard' button
