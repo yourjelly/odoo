@@ -87,6 +87,7 @@ ListRenderer.include({
         // replace the trash icon by X in case of many2many relations
         // so that it means 'unlink' instead of 'remove'
         this.isMany2Many = params.isMany2Many;
+        this.isone2Many = params.isone2Many;
 
         this.currentRow = null;
         this.currentFieldIndex = null;
@@ -912,7 +913,11 @@ ListRenderer.include({
                 this.trigger_up('discard_changes', {
                     recordID: ev.target.dataPointID,
                 });
-                this.$('.o_field_x2many_list_row_add a:first').focus();
+                if(this.getParent() && this.getParent().searchView && !this.isMany2Many && !this.isone2Many){
+                    this.getParent().searchView.$('.o_searchview_input').focus();
+                } else {
+                    this.$('.o_field_x2many_list_row_add a:first').focus();
+                }
                 break;
         }
     },
