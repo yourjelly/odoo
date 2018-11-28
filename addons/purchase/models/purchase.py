@@ -358,26 +358,17 @@ class PurchaseOrder(models.Model):
     @api.multi
     def button_cancel(self):
         for order in self:
-            for pick in order.picking_ids:
-                if pick.state == 'done':
-                    raise UserError(_('Unable to cancel purchase order %s as some receptions have already been done.') % (order.name))
             for inv in order.invoice_ids:
                 if inv and inv.state not in ('cancel', 'draft'):
                     raise UserError(_("Unable to cancel this purchase order. You must first cancel related vendor bills."))
 
-            # If the product is MTO, change the procure_method of the the closest move to purchase to MTS.
-            # The purpose is to link the po that the user will manually generate to the existing moves's chain.
-            if order.state in ('draft', 'sent', 'to approve'):
+            if any(move.state == 'done' for move in order.order_line.mapped('move_ids')):
+                raise UserError(_('Unable to cancel purchase order %s as some receptions have already been done.') % (order.name))
+            else:
                 for order_line in order.order_line:
                     if order_line.move_dest_ids:
-                        move_dest_ids = order_line.move_dest_ids.filtered(lambda m: m.state not in ('done', 'cancel'))
-                        siblings_states = (move_dest_ids.mapped('move_orig_ids')).mapped('state')
-                        if all(state in ('done', 'cancel') for state in siblings_states):
-                            move_dest_ids.write({'procure_method': 'make_to_stock'})
-                            move_dest_ids._recompute_state()
-
-            for pick in order.picking_ids.filtered(lambda r: r.state != 'cancel'):
-                pick.action_cancel()
+                        move_dest_ids = order_line.move_dest_ids | order_line.move_ids
+                        move_dest_ids.filtered(lambda m: m.state not in ('cancel', 'done'))._action_cancel()
 
             order.order_line.write({'move_dest_ids':[(5,0,0)]})
 
