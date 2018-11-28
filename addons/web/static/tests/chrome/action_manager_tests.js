@@ -2576,7 +2576,7 @@ QUnit.module('ActionManager', {
         actionManager.destroy();
     });
 
-    QUnit.skip('can open different records from a multi record view', function (assert) {
+    QUnit.test('can open different records from a multi record view', function (assert) {
         assert.expect(11);
 
         var actionManager = createActionManager({
