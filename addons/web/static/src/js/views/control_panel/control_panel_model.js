@@ -699,7 +699,7 @@ var ControlPanelModel = mvc.Model.extend({
                 } else {
                     var autocompleteValue;
                     if (field.type === 'selection') {
-                        var match = _.find(this.attrs.selection, function (sel) {
+                        var match = _.find(field.selection, function (sel) {
                             return sel[0] === value;
                         });
                         autocompleteValue = {
