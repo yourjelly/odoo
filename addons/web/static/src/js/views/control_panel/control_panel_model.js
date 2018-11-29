@@ -478,7 +478,13 @@ var ControlPanelModel = mvc.Model.extend({
         // be adapted)
         if (filter.type === 'field' && filter.isDefault) {
             if (this.fields[filter.attrs.name].type === 'many2one') {
-                context['default_' + filter.attrs.name] = filter.defaultValue;
+                var value = filter.defaultValue;
+                // the following if required to make the main_flow_tour pass (see
+                // https://github.com/odoo/odoo/blob/master/addons/web/static/src/js/views/search/search_inputs.js#L461)
+                if (_.isArray(filter.defaultValue)) {
+                    value = filter.defaultValue[0];
+                }
+                context['default_' + filter.attrs.name] = value;
             }
         }
         return context;
