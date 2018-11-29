@@ -477,8 +477,8 @@ var ControlPanelModel = mvc.Model.extend({
         // we do it for other fields (my guess being that the test should simply
         // be adapted)
         if (filter.type === 'field' && filter.isDefault) {
-            if (this.fields[filter.description].type === 'many2one') {
-                context['default_' + filter.description] = filter.defaultValue;
+            if (this.fields[filter.attrs.name].type === 'many2one') {
+                context['default_' + filter.attrs.name] = filter.defaultValue;
             }
         }
         return context;
