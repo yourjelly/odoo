@@ -57,17 +57,17 @@ class Track(models.Model):
 
     name = fields.Char('Title', required=True, translate=True)
     active = fields.Boolean(default=True)
-    user_id = fields.Many2one('res.users', 'Responsible', track_visibility='onchange', default=lambda self: self.env.user)
+    user_id = fields.Many2one('res.users', 'Responsible', track_visibility='onchange', is_business_field=True, default=lambda self: self.env.user)
     partner_id = fields.Many2one('res.partner', 'Speaker')
     partner_name = fields.Char('Speaker Name')
     partner_email = fields.Char('Speaker Email')
     partner_phone = fields.Char('Speaker Phone')
     partner_biography = fields.Html('Speaker Biography')
-    tag_ids = fields.Many2many('event.track.tag', string='Tags')
+    tag_ids = fields.Many2many('event.track.tag', string='Tags', is_business_field=True)
     stage_id = fields.Many2one(
         'event.track.stage', string='Stage', ondelete='restrict',
         index=True, copy=False, default=_get_default_stage_id,
-        group_expand='_read_group_stage_ids',
+        group_expand='_read_group_stage_ids', is_business_field=True,
         required=True, track_visibility='onchange')
     kanban_state = fields.Selection([
         ('normal', 'Grey'),
@@ -79,10 +79,10 @@ class Track(models.Model):
              " * Red indicates something is preventing the progress of this track\n"
              " * Green indicates the track is ready to be pulled to the next stage")
     description = fields.Html('Track Description', translate=html_translate, sanitize_attributes=False)
-    date = fields.Datetime('Track Date')
+    date = fields.Datetime('Track Date', is_business_field=True)
     duration = fields.Float('Duration', default=1.5)
     location_id = fields.Many2one('event.track.location', 'Room')
-    event_id = fields.Many2one('event.event', 'Event', required=True)
+    event_id = fields.Many2one('event.event', 'Event', is_business_field=True, required=True)
     color = fields.Integer('Color Index')
     priority = fields.Selection([
         ('0', 'Low'), ('1', 'Medium'),
