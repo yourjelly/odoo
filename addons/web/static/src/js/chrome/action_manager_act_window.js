@@ -175,6 +175,8 @@ ActionManager.include({
             // build the view options from different sources
             viewOptions = _.extend({
                 action: action,
+                context: action.context || {},
+                domain: action.domain || [],
                 limit: action.limit,
             }, action.flags, action.flags[viewType], viewOptions, action.env);
             // pass the controllerID to the views as an hook for further
@@ -326,9 +328,8 @@ ActionManager.include({
     },
     /**
      * Generates the initial environment of a given action, which is a dict
-     * containing information like the model name, the domain, the context...
-     * That information is shared between the controllers of the corresponding
-     * action.
+     * containing the model name, the ids and the current id. That information
+     * is shared between the controllers of the corresponding action.
      *
      * @private
      * @param {Object} action
@@ -342,9 +343,6 @@ ActionManager.include({
             modelName: action.res_model,
             ids: resID ? [resID] : undefined,
             currentId: resID || undefined,
-            domain: action.domain || [],
-            context: action.context || {},
-            groupBy: [],
         };
     },
     /**
@@ -579,10 +577,7 @@ ActionManager.include({
                     // lazy loaded -> load it now (with same jsID)
                     return newController(controller.jsID);
                 } else {
-                    // TODO: everything that is related to search should not be
-                    // managed here
-                    var actionEnv = _.omit(action.env, ['context', 'domain', 'groupBy']);
-                    viewOptions = _.extend(viewOptions || {}, actionEnv);
+                    viewOptions = _.extend(viewOptions || {}, action.env);
                     return $.when(controller.widget.willRestore()).then(function () {
                         return controller.widget.reload(viewOptions).then(function () {
                             return controller;
