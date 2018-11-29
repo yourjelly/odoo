@@ -330,7 +330,7 @@ var ActionManager = Widget.extend({
                 }
 
                 // update the internal state and the DOM
-                self._pushController(controller, options);
+                self._pushController(controller);
 
                 // toggle the fullscreen mode for actions in target='fullscreen'
                 self._toggleFullscreen();
@@ -439,11 +439,13 @@ var ActionManager = Widget.extend({
 
         var controllerID = _.uniqueId('controller_');
 
-        options.breadcrumbs = this._getBreadcrumbs(options);
+        var index = this._getControllerStackIndex(options);
+        options.breadcrumbs = this._getBreadcrumbs(this.controllerStack.slice(0, index));
         options.controllerID = controllerID;
         var widget = new ClientAction(this, action, options);
         var controller = {
             actionID: action.jsID,
+            index: index,
             jsID: controllerID,
             title: widget.getTitle(),
             widget: widget,
@@ -548,39 +550,50 @@ var ActionManager = Widget.extend({
         return $.when();
     },
     /**
-     * Returns a description of the current stack of controllers, used to render
-     * the breadcrumbs. It is an array of Objects with keys 'title' (what to
-     * display in the breadcrumbs) and 'controllerID' (the ID of the
-     * corresponding controller, used to restore it when this part of the
+     * Returns a description of the controllers in the given  controller stack.
+     * It is used to render the breadcrumbs. It is an array of Objects with keys
+     * 'title' (what to display in the breadcrumbs) and 'controllerID' (the ID
+     * of the corresponding controller, used to restore it when this part of the
      * breadcrumbs is clicked).
      *
      * @private
-     * @param {Object} options
-     * @param {boolean} [options.clear_breadcrumbs]
-     * @param {boolean} [options.replace_last_action]
-     * @param {number} [options.index]
+     * @param {string[]} controllerStack
      * @returns {Object[]}
      */
-    _getBreadcrumbs: function (options) {
+    _getBreadcrumbs: function (controllerStack) {
         var self = this;
-        var index;
-        if (options.clear_breadcrumbs) {
-            index = 0;
-        } else {
-            index = this.controllerStack.length;
-            if (options.replace_last_action) {
-                index = index - 1;
-            } else if (options.index !== undefined) {
-                index = options.index;
-            }
-        }
-        var controllerIds = this.controllerStack.slice(0, index);
-        return _.map(controllerIds, function (controllerID) {
+        return _.map(controllerStack, function (controllerID) {
             return {
                 controllerID: controllerID,
                 title: self.controllers[controllerID].title,
             };
         });
+    },
+    /**
+     * Returns the index where a controller should be inserted in the controller
+     * stack according to the given options. By default, a controller is pushed
+     * on the top of the stack.
+     *
+     * @private
+     * @param {options} [options.clear_breadcrumbs=false] if true, insert at
+     *   index 0 and remove all other controllers
+     * @param {options} [options.index=null] if given, that index is returned
+     * @param {options} [options.replace_last_action=false] if true, replace the
+     *   last controller of the stack
+     * @returns {integer} index
+     */
+    _getControllerStackIndex: function (options) {
+        var index;
+        if ('index' in options) {
+            index = options.index;
+        } else if (options.clear_breadcrumbs) {
+            index = 0;
+        } else if (options.replace_last_action) {
+            index = this.controllerStack.length - 1;
+        } else {
+            index = this.controllerStack.length;
+        }
+        return index;
     },
     /**
      * Returns an object containing information about the given controller, like
@@ -675,41 +688,28 @@ var ActionManager = Widget.extend({
      * @param {Object} controller
      * @param {string} controller.jsID
      * @param {Widget} controller.widget
-     * @param {Object} [options]
-     * @param {Object} [options.clear_breadcrumbs=false] if true, destroys all
-     *   controllers from the controller stack before adding the given one
-     * @param {Object} [options.replace_last_action=false] if true, replaces the
-     *   last controller of the controller stack by the given one
-     * @param {integer} [options.index] if given, pushes the controller at that
-     *   position in the controller stack, and destroys the controllers with an
-     *   higher index
+     * @param {integer} controller.index the controller is pushed at that
+     *   position in the controller stack and controllers with an higher index
+     *   are destroyed
      */
-    _pushController: function (controller, options) {
-        options = options || {};
+    _pushController: function (controller) {
         var self = this;
 
         // detach the current controller
         this._detachCurrentController();
 
-        // empty the controller stack or replace the last controller as requested,
-        // destroy the removed controllers and push the new controller to the stack
-        var toDestroy;
-        if (options.clear_breadcrumbs) {
-            toDestroy = this.controllerStack;
-            this.controllerStack = [];
-        } else if (options.replace_last_action && this.controllerStack.length > 0) {
-            toDestroy = [this.controllerStack.pop()];
-        } else if (options.index !== undefined) {
-            toDestroy = this.controllerStack.splice(options.index);
-            // reject from the list of controllers to destroy the one that we are
-            // currently pushing, or those linked to the same action as the one
-            // linked to the controller that we are pushing
-            toDestroy = _.reject(toDestroy, function (controllerID) {
-                return controllerID === controller.jsID ||
-                       self.controllers[controllerID].actionID === controller.actionID;
-            });
-        }
+        // push the new controller to the stack at the given position, and
+        // destroy controllers with an higher index
+        var toDestroy = this.controllerStack.slice(controller.index);
+        // reject from the list of controllers to destroy the one that we are
+        // currently pushing, or those linked to the same action as the one
+        // linked to the controller that we are pushing
+        toDestroy = _.reject(toDestroy, function (controllerID) {
+            return controllerID === controller.jsID ||
+                   self.controllers[controllerID].actionID === controller.actionID;
+        });
         this._removeControllers(toDestroy);
+        this.controllerStack = this.controllerStack.slice(0, controller.index);
         this.controllerStack.push(controller.jsID);
 
         // append the new controller to the DOM
@@ -830,7 +830,7 @@ var ActionManager = Widget.extend({
         return $.when(def).then(function () {
             return $.when(controller.widget.do_show()).then(function () {
                 var index = _.indexOf(self.controllerStack, controllerID);
-                self._pushController(controller, {index: index});
+                self._pushController(controller, index);
             });
         });
     },

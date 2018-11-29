@@ -98,7 +98,7 @@ var ControlPanelRenderer = Renderer.extend({
         this.$controls.prependTo(this.nodes.$buttons);
 
         if (this.withBreadcrumbs) {
-            this._renderBreadcrumbs(this._title);
+            this._renderBreadcrumbs(this._breadcrumbs, this._title);
         }
 
         var superDef = this._super.apply(this, arguments);
@@ -142,7 +142,7 @@ var ControlPanelRenderer = Renderer.extend({
         var clear = 'clear' in (options || {}) ? options.clear : true;
 
         if (this.withBreadcrumbs) {
-            this._renderBreadcrumbs(status.title);
+            this._renderBreadcrumbs(status.breadcrumbs, status.title);
         }
 
         // detach custom controls so that they can be re-appended afterwards
@@ -221,15 +221,17 @@ var ControlPanelRenderer = Renderer.extend({
      * @private
      * @param {string} title
      */
-    _renderBreadcrumbs: function (title) {
+    _renderBreadcrumbs: function (breadcrumbs, title) {
         var self = this;
+        this._breadcrumbs = breadcrumbs || this._breadcrumbs;
+        this._title = title || this._title;
         var breadcrumbsDescriptors = this._breadcrumbs.concat({
-            title: title,
+            title: this._title,
         });
-        var breadcrumbs = breadcrumbsDescriptors.map(function (bc, index) {
+        var b = breadcrumbsDescriptors.map(function (bc, index) {
             return self._renderBreadcrumbsItem(bc, index, breadcrumbsDescriptors.length);
         });
-        this.$('.breadcrumb').html(breadcrumbs);
+        this.$('.breadcrumb').html(b);
     },
     /**
      * Renders a breadcrumbs' li Jquery element

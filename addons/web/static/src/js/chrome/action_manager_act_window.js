@@ -29,6 +29,9 @@ ActionManager.include({
      * last controller in the stack, but which should not be considered as
      * current controller as they don't have an alive widget.
      *
+     * Note: this function assumes that there can be at most one lazy loaded
+     * controller in the stack
+     *
      * @override
      */
     getCurrentController: function () {
@@ -139,6 +142,7 @@ ActionManager.include({
      * @param {Object} [options]
      * @param {string} [options.controllerID=false] when the controller has
      *   previously been lazy-loaded, we want to keep its jsID when loading it
+     * @param {integer} [options.index=0] the controller's index in the stack
      * @param {boolean} [options.lazy=false] set to true to differ the
      *   initialization of the controller's widget
      * @returns {Deferred<Object>} resolved with the created controller
@@ -154,10 +158,12 @@ ActionManager.include({
         }
 
         options = options || {};
+        var index = options.index || 0;
         var controllerID = options.controllerID || _.uniqueId('controller_');
         var controller = {
             actionID: action.jsID,
             className: 'o_act_window', // used to remove the padding in dialogs
+            index: index,
             jsID: controllerID,
             viewType: viewType,
         };
@@ -179,9 +185,10 @@ ActionManager.include({
                 domain: action.domain || [],
                 limit: action.limit,
             }, action.flags, action.flags[viewType], viewOptions, action.env);
-            // pass the controllerID to the views as an hook for further
-            // communication with trigger_up (e.g. for 'env_updated' event)
             viewOptions = _.extend(viewOptions, {
+                breadcrumbs: this._getBreadcrumbs(this.controllerStack.slice(0, index)),
+                // pass the controllerID to the views as an hook for further
+                // communication with trigger_up (e.g. for 'env_updated' event)
                 controllerID: controllerID,
             });
 
@@ -297,10 +304,11 @@ ActionManager.include({
             return self.dp.add($.when(lazyViewDef))
                 .then(function () {
                     var viewOptions = {
-                        breadcrumbs: self._getBreadcrumbs(options),
                         currentControlPanelConfiguration: options.currentControlPanelConfiguration,
                     };
-                    var curViewDef = self._createViewController(action, curView.type, viewOptions);
+                    var curViewDef = self._createViewController(action, curView.type, viewOptions, {
+                        index: self._getControllerStackIndex(options),
+                    });
                     return self.dp.add(curViewDef);
                 })
                 .then(function (controller) {
@@ -549,13 +557,13 @@ ActionManager.include({
             }
         }
 
-        viewOptions = _.extend({
-            breadcrumbs: this._getBreadcrumbs({index: index}),
-        }, viewOptions);
-
         var newController = function (controllerID) {
+            var options = {
+                controllerID: controllerID,
+                index: index,
+            };
             return self
-                ._createViewController(action, viewType, viewOptions, {controllerID: controllerID})
+                ._createViewController(action, viewType, viewOptions, options)
                 .then(function (controller) {
                     return self._startController(controller);
                 });
@@ -588,7 +596,7 @@ ActionManager.include({
         }
 
         return this.dp.add(controllerDef).then(function (controller) {
-            return self._pushController(controller, {index: index});
+            return self._pushController(controller);
         });
     },
 
