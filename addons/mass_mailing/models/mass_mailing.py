@@ -19,9 +19,13 @@ MASS_MAILING_BUSINESS_MODELS = [
     'crm.lead',
     'event.registration',
     'hr.applicant',
+    'hr.employee',
+    'helpdesk.team',
     'res.partner',
     'event.track',
     'sale.order',
+    'sale.subscription',
+    'membership.membership_line',
     'mail.mass_mailing.list',
     'mail.mass_mailing.contact'
 ]
