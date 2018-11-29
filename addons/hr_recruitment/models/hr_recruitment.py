@@ -116,29 +116,29 @@ class Applicant(models.Model):
         return company_id
 
     name = fields.Char("Subject / Application Name", required=True)
-    active = fields.Boolean("Active", default=True, help="If the active field is set to false, it will allow you to hide the case without removing it.")
-    description = fields.Text("Description")
+    active = fields.Boolean("Active", default=True, is_business_field=True, help="If the active field is set to false, it will allow you to hide the case without removing it.")
+    description = fields.Text("Description", is_business_field=True)
     email_from = fields.Char("Email", size=128, help="These people will receive email.")
     email_cc = fields.Text("Watchers Emails", size=252,
                            help="These email addresses will be added to the CC field of all inbound and outbound emails for this record before being sent. Separate multiple email addresses with a comma")
     probability = fields.Float("Probability")
     partner_id = fields.Many2one('res.partner', "Contact")
-    create_date = fields.Datetime("Creation Date", readonly=True, index=True)
+    create_date = fields.Datetime("Creation Date", readonly=True, index=True, is_business_field=True)
     stage_id = fields.Many2one('hr.recruitment.stage', 'Stage', ondelete='restrict', track_visibility='onchange',
                                domain="['|', ('job_id', '=', False), ('job_id', '=', job_id)]",
-                               copy=False, index=True,
+                               copy=False, index=True, is_business_field=True,
                                group_expand='_read_group_stage_ids',
                                default=_default_stage_id)
     last_stage_id = fields.Many2one('hr.recruitment.stage', "Last Stage",
                                     help="Stage of the applicant before being in the current stage. Used for lost cases analysis.")
-    categ_ids = fields.Many2many('hr.applicant.category', string="Tags")
+    categ_ids = fields.Many2many('hr.applicant.category', string="Tags", is_business_field=True)
     company_id = fields.Many2one('res.company', "Company", default=_default_company_id)
-    user_id = fields.Many2one('res.users', "Responsible", track_visibility="onchange", default=lambda self: self.env.uid)
-    date_closed = fields.Datetime("Closed", readonly=True, index=True)
+    user_id = fields.Many2one('res.users', "Responsible", is_business_field=True, track_visibility="onchange", default=lambda self: self.env.uid)
+    date_closed = fields.Datetime("Closed", readonly=True, index=True, is_business_field=True)
     date_open = fields.Datetime("Assigned", readonly=True, index=True)
     date_last_stage_update = fields.Datetime("Last Stage Update", index=True, default=fields.Datetime.now)
     priority = fields.Selection(AVAILABLE_PRIORITIES, "Appreciation", default='0')
-    job_id = fields.Many2one('hr.job', "Applied Job")
+    job_id = fields.Many2one('hr.job', "Applied Job", is_business_field=True)
     salary_proposed_extra = fields.Char("Proposed Salary Extra", help="Salary Proposed by the Organisation, extra advantages")
     salary_expected_extra = fields.Char("Expected Salary Extra", help="Salary Expected by Applicant, extra advantages")
     salary_proposed = fields.Float("Proposed Salary", group_operator="avg", help="Salary Proposed by the Organisation")
@@ -147,9 +147,9 @@ class Applicant(models.Model):
     partner_name = fields.Char("Applicant's Name")
     partner_phone = fields.Char("Phone", size=32)
     partner_mobile = fields.Char("Mobile", size=32)
-    type_id = fields.Many2one('hr.recruitment.degree', "Degree")
-    department_id = fields.Many2one('hr.department', "Department")
-    reference = fields.Char("Referred By")
+    type_id = fields.Many2one('hr.recruitment.degree', "Degree", is_business_field=True)
+    department_id = fields.Many2one('hr.department', "Department", is_business_field=True)
+    reference = fields.Char("Referred By", is_business_field=True)
     day_open = fields.Float(compute='_compute_day', string="Days to Open")
     day_close = fields.Float(compute='_compute_day', string="Days to Close")
     delay_close = fields.Float(compute="_compute_day", string='Delay to Close', readonly=True, group_operator="avg", help="Number of days to close", store=True)
