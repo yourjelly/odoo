@@ -184,7 +184,7 @@ class EventTicket(models.Model):
 class EventRegistration(models.Model):
     _inherit = 'event.registration'
 
-    event_ticket_id = fields.Many2one('event.event.ticket', string='Event Ticket', readonly=True, states={'draft': [('readonly', False)]})
+    event_ticket_id = fields.Many2one('event.event.ticket', string='Event Ticket', is_business_field=True, readonly=True, states={'draft': [('readonly', False)]})
     # in addition to origin generic fields, add real relational fields to correctly
     # handle attendees linked to sales orders and their lines
     # TDE FIXME: maybe add an onchange on sale_order_id + origin

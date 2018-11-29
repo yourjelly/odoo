@@ -342,22 +342,22 @@ class EventRegistration(models.Model):
         string='Source Document', readonly=True,
         help="Reference of the document that created the registration, for example a sales order")
     event_id = fields.Many2one(
-        'event.event', string='Event', required=True,
+        'event.event', string='Event', required=True, is_business_field=True,
         readonly=True, states={'draft': [('readonly', False)]})
     partner_id = fields.Many2one(
         'res.partner', string='Contact',
         states={'done': [('readonly', True)]})
-    date_open = fields.Datetime(string='Registration Date', readonly=True, default=lambda self: fields.Datetime.now())  # weird crash is directly now
-    date_closed = fields.Datetime(string='Attended Date', readonly=True)
-    event_begin_date = fields.Datetime(string="Event Start Date", related='event_id.date_begin', readonly=True)
-    event_end_date = fields.Datetime(string="Event End Date", related='event_id.date_end', readonly=True)
+    date_open = fields.Datetime(string='Registration Date', readonly=True, is_business_field=True, default=lambda self: fields.Datetime.now())  # weird crash is directly now
+    date_closed = fields.Datetime(string='Attended Date', readonly=True, is_business_field=True)
+    event_begin_date = fields.Datetime(string="Event Start Date", related='event_id.date_begin', is_business_field=True, readonly=True)
+    event_end_date = fields.Datetime(string="Event End Date", related='event_id.date_end', is_business_field=True, readonly=True)
     company_id = fields.Many2one(
         'res.company', string='Company', related='event_id.company_id',
         store=True, readonly=True, states={'draft': [('readonly', False)]})
     state = fields.Selection([
         ('draft', 'Unconfirmed'), ('cancel', 'Cancelled'),
         ('open', 'Confirmed'), ('done', 'Attended')],
-        string='Status', default='draft', readonly=True, copy=False, track_visibility='onchange')
+        string='Status', default='draft', is_business_field=True, readonly=True, copy=False, track_visibility='onchange')
     email = fields.Char(string='Email')
     phone = fields.Char(string='Phone')
     name = fields.Char(string='Attendee Name', index=True)
