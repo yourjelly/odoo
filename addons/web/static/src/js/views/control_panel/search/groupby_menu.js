@@ -23,7 +23,7 @@ var GroupByMenu = DropdownMenu.extend({
     /**
      * @override
      * @param {Widget} parent
-     * @param {Object[]} groupbys list of groupbys (type IGroupBy below)
+     * @param {Object[]} groupBys list of groupBys (type IGroupBy below)
      *   interface IGroupBy {
      *      itemId: string; unique id associated with the groupby
      *      fieldName: string; field name without interval!
@@ -40,13 +40,13 @@ var GroupByMenu = DropdownMenu.extend({
      * @param {Object} options
      * @param {string} options.headerStyle conditions the style of the main button
      */
-    init: function (parent, groupbys, fields, options) {
+    init: function (parent, groupBys, fields, options) {
         var self = this;
-        this._super(parent, groupbys);
+        this._super(parent, groupBys);
         this.fields = fields;
         // determines when the 'Add custom groupby' submenu is open
         this.generatorMenuIsOpen = false;
-        // determines list of options used by groupbys of type 'date'
+        // determines list of options used by groupBys of type 'date'
         this.groupableFields = [];
         _.each(fields, function (field, name) {
             if (field.sortable && _.contains(GROUPABLE_TYPES, field.type)) {
@@ -58,10 +58,7 @@ var GroupByMenu = DropdownMenu.extend({
         this.groupableFields = _.sortBy(this.groupableFields, 'string');
         // determines the list of field names that can be added to the menu
         // via the 'Add Custom Groupby' menu
-        this.presentedFields = this.groupableFields.filter(function (field) {
-            var groupByFields = _.pluck(groupbys, 'fieldName');
-            return !_.contains(groupByFields, field.name);
-        });
+        this.presentedFields = this._setPresentedFields(groupBys);
 
         // determines where the filter menu is displayed and partly its style
         this.isMobile = config.device.isMobile;
@@ -100,6 +97,14 @@ var GroupByMenu = DropdownMenu.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    update: function (groupBys) {
+        this._super.apply(this, arguments);
+        this.presentedFields = this._setPresentedFields(groupBys);
+    },
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
     /**
      * method called via the 'Add Custom Groupby' menu to create
      * a new groupby and add it (activated) to the menu
@@ -132,10 +137,6 @@ var GroupByMenu = DropdownMenu.extend({
             groupBy.defaultOptionId = DEFAULT_INTERVAL;
             groupBy.currentOptionId = false;
         }
-        var fieldIndex = this.presentedFields.indexOf(field);
-        this.presentedFields.splice(fieldIndex, 1);
-        this._renderGeneratorMenu();
-        this._renderMenuItems();
         this.trigger_up('new_groupBy', groupBy);
     },
     /**
@@ -147,6 +148,15 @@ var GroupByMenu = DropdownMenu.extend({
         this.$menu.append($generatorMenu);
         this.$addCustomGroup = this.$menu.find('.o_add_custom_group');
         this.$groupSelector = this.$menu.find('.o_group_selector');
+    },
+    /**
+     * @private
+     */
+    _setPresentedFields: function (groupBys) {
+        return this.groupableFields.filter(function (field) {
+            var groupByFields = _.pluck(groupBys, 'fieldName');
+            return !_.contains(groupByFields, field.name);
+        });
     },
     /**
      * @private

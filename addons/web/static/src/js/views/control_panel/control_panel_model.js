@@ -242,7 +242,7 @@ var ControlPanelModel = mvc.Model.extend({
             params.groups.forEach(function (group) {
                 self._createGroupOfFilters(group);
             });
-            if (this._getGroupIdOfType('groupBy') !== undefined) {
+            if (this._getGroupIdOfType('groupBy') === undefined) {
                 this._createEmptyGroup('groupBy');
             }
             this._createGroupOfTimeRanges();
