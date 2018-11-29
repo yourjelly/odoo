@@ -466,9 +466,20 @@ var ControlPanelModel = mvc.Model.extend({
         return pyUtils.assembleDomains(domains, 'AND');
     },
     _getFilterContext: function (filter) {
-        var context;
+        var context = {};
         if (filter.type === 'favorite') {
-            context = filter.context;
+            _.extend(context, filter.context);
+        }
+        // the following code aims to restore this:
+        // https://github.com/odoo/odoo/blob/master/addons/web/static/src/js/views/search/search_inputs.js#L498
+        // this is required for the helpdesk tour to pass
+        // this seems weird to only do that for m2o fields, but a test fails if
+        // we do it for other fields (my guess being that the test should simply
+        // be adapted)
+        if (filter.type === 'field' && filter.isDefault) {
+            if (this.fields[filter.description].type === 'many2one') {
+                context['default_' + filter.description] = filter.defaultValue;
+            }
         }
         return context;
     },

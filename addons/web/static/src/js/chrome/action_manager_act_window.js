@@ -581,7 +581,7 @@ ActionManager.include({
                 } else {
                     // TODO: everything that is related to search should not be
                     // managed here
-                    var actionEnv = _.omit(action.env, ['domain', 'groupBy']);
+                    var actionEnv = _.omit(action.env, ['context', 'domain', 'groupBy']);
                     viewOptions = _.extend(viewOptions || {}, actionEnv);
                     return $.when(controller.widget.willRestore()).then(function () {
                         return controller.widget.reload(viewOptions).then(function () {
