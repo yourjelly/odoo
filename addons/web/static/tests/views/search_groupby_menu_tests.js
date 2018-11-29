@@ -141,6 +141,7 @@ QUnit.module('GroupByMenu', {
                         assert.strictEqual(ev.data.currentOptionId, false);
                         groupByMenu.update([{
                             description: 'Super Date',
+                            fieldName: 'fieldName',
                             groupNumber: 1,
                             isActive: true,
                             hasOptions: true,

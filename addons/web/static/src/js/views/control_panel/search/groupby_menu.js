@@ -100,6 +100,7 @@ var GroupByMenu = DropdownMenu.extend({
     update: function (groupBys) {
         this._super.apply(this, arguments);
         this.presentedFields = this._setPresentedFields(groupBys);
+        this._renderGeneratorMenu();
     },
     //--------------------------------------------------------------------------
     // Private
@@ -202,8 +203,8 @@ var GroupByMenu = DropdownMenu.extend({
     _onButtonApplyClick: function (event) {
         event.stopPropagation();
         var fieldName = this.$groupSelector.val();
+        this.generatorMenuIsOpen = false;
         this._addGroupby(fieldName);
-        this._toggleCustomGroupMenu();
     },
     /**
      * @private
