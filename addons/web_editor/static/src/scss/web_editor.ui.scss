@@ -1616,6 +1616,9 @@ body .modal {
         .o_link_dialog_preview {
             border-left: 1px solid gray('200');
         }
+        .o_link_dialog_hint {
+            font-size: 0.9rem;
+        }
     }
     // Crop Dialog
     .o_crop_image_dialog .o_crop_area {

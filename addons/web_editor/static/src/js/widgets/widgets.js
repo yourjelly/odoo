@@ -1334,9 +1334,10 @@ var LinkDialog = Dialog.extend({
         ['/web_editor/static/src/xml/editor.xml']
     ),
     events: _.extend({}, Dialog.prototype.events || {}, {
-        'input': '_onAnyChange',
-        'change': '_onAnyChange',
+        'input': '_onChangeURL',
+        'change': '_onChangeURL',
         'input input[name="url"]': '_onURLInput',
+        'change select[name="link_style_anchor"]': '_onChangeAnchor',
     }),
 
     /**
@@ -1573,7 +1574,13 @@ var LinkDialog = Dialog.extend({
     /**
      * @private
      */
-    _onAnyChange: function () {
+    _onChangeURL: function () {
+        var urlInput = this.$('#o_link_dialog_url_input').val();
+        var $pageAnchor = this.$('.o_link_dialog_page_anchor');
+        var isSelectedFromWebsite = urlInput.startsWith('/');
+        var isEmpty = urlInput.length === 0;
+        isEmpty ? this.$('select[name="link_style_anchor"]').prop('selectedIndex', 0) : null;
+        $pageAnchor.toggleClass('d-none', !isSelectedFromWebsite);
         this._adaptPreview();
     },
     /**
@@ -1583,6 +1590,16 @@ var LinkDialog = Dialog.extend({
         $(ev.currentTarget).closest('.form-group').removeClass('o_has_error').find('.form-control, .custom-select').removeClass('is-invalid');
         var isLink = $(ev.currentTarget).val().indexOf('@') < 0;
         this.$('input[name="is_new_window"]').closest('.form-group').toggleClass('d-none', !isLink);
+    },
+    /**
+     * @private
+     */
+    _onChangeAnchor: function () {
+        var anchorValue = this.$('select[name="link_style_anchor"] option:selected').text();
+        var urlInput = this.$('#o_link_dialog_url_input').val();
+        var hasAnchor = urlInput.indexOf('#') > -1;
+        hasAnchor ? urlInput = urlInput.substr(0, this.$('#o_link_dialog_url_input').val().indexOf('#')) : null;
+        this.$('#o_link_dialog_url_input').val(urlInput + anchorValue);
     },
 });
 
