@@ -88,9 +88,7 @@ var GroupByMenu = DropdownMenu.extend({
     start: function () {
         this.$menu = this.$('.o_dropdown_menu');
         this.$menu.addClass('o_group_by_menu');
-        var $generatorMenu = QWeb.render('GroupByMenuGenerator', {widget: this});
-        this.$menu.append($generatorMenu);
-        this.$addCustomGroup = this.$menu.find('.o_add_custom_group');
+        this._renderGeneratorMenu();
     },
 
     //--------------------------------------------------------------------------

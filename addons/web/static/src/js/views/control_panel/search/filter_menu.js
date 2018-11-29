@@ -53,10 +53,7 @@ var FilterMenu = DropdownMenu.extend({
     start: function () {
         this.$menu = this.$('.o_dropdown_menu');
         this.$menu.addClass('o_filters_menu');
-        var generatorMenu = QWeb.render('FilterMenuGenerator', {widget: this});
-        this.$menu.append(generatorMenu);
-        this.$addCustomFilter = this.$menu.find('.o_add_custom_filter');
-        this.$addFilterMenu = this.$menu.find('.o_add_filter_menu');
+        this._renderGeneratorMenu();
     },
 
     //--------------------------------------------------------------------------
@@ -74,7 +71,7 @@ var FilterMenu = DropdownMenu.extend({
         var prop = new search_filters.ExtendedSearchProposition(this, this.fields);
         this.propositions.push(prop);
         this.$('.o_apply_filter').prop('disabled', false);
-        return prop.insertBefore(this.$addFilterMenu);
+        prop.insertBefore(this.$addFilterMenu);
     },
     /**
      * Confirm a filter proposition, creates it and add it to the menu
@@ -95,6 +92,22 @@ var FilterMenu = DropdownMenu.extend({
         _.invoke(this.propositions, 'destroy');
         this.propositions = [];
         this._toggleCustomFilterMenu();
+    },
+    /**
+     * @private
+     */
+    _renderGeneratorMenu: function () {
+        this.$el.find('.o_generator_menu').remove();
+        if (!this.generatorMenuIsOpen) {
+            _.invoke(this.propositions, 'destroy');
+            this.propositions = [];
+        }
+        var $generatorMenu = QWeb.render('FilterMenuGenerator', {widget: this});
+        this.$menu.append($generatorMenu);
+        this.$addFilterMenu = this.$menu.find('.o_add_filter_menu');
+        if (this.generatorMenuIsOpen && !this.propositions.length) {
+            this._appendProposition();
+        }
     },
     /**
      * override
@@ -133,23 +146,9 @@ var FilterMenu = DropdownMenu.extend({
      *
      * @private
      */
-    _toggleCustomFilterMenu: function (open) {
-        var self = this;
-        this.generatorMenuIsOpen = open || !this.generatorMenuIsOpen;
-        var def;
-        if (this.generatorMenuIsOpen && !this.propositions.length) {
-            def = this._appendProposition();
-        }
-        if (!this.generatorMenuIsOpen) {
-            _.invoke(this.propositions, 'destroy');
-            this.propositions = [];
-        }
-        $.when(def).then(function () {
-            self.$addCustomFilter
-                .toggleClass('o_closed_menu', !self.generatorMenuIsOpen)
-                .toggleClass('o_open_menu', self.generatorMenuIsOpen);
-            self.$('.o_add_filter_menu').toggle();
-        });
+    _toggleCustomFilterMenu: function () {
+        this.generatorMenuIsOpen = !this.generatorMenuIsOpen;
+        this._renderGeneratorMenu();
     },
 
     //--------------------------------------------------------------------------
@@ -187,7 +186,8 @@ var FilterMenu = DropdownMenu.extend({
      */
     _onBootstrapClose: function () {
         this._super.apply(this, arguments);
-        this._toggleCustomFilterMenu(false);
+        this.generatorMenuIsOpen = false;
+        this._renderGeneratorMenu();
     },
     /**
      * @private

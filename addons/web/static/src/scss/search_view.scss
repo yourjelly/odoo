@@ -183,7 +183,6 @@
         cursor: pointer;
     }
     .o_add_filter_menu { // apply and add buttons
-        display: none;  // Needed by the webclient
         @include o-search-options-dropdown-custom-item;
     }
 }

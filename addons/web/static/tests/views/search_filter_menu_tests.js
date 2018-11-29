@@ -32,15 +32,14 @@ QUnit.module('FilterMenu', {
 }, function () {
 
     QUnit.test('simple rendering with no filter', function (assert) {
-        assert.expect(4);
+        assert.expect(3);
 
         var filterMenu = createFilterMenu([], this.fields);
         testUtils.dom.click(filterMenu.$('span.fa-filter'));
-        assert.containsOnce(filterMenu, '.dropdown-divider');
-        assert.ok(!filterMenu.$('.dropdown-divider').is(':visible'));
-        assert.containsN(filterMenu, '.dropdown-divider, .dropdown-item, .dropdown-item-text', 3,
-            'should have 3 elements: a hidden divider, a add custom filter item, a apply button + add condition button');
-        assert.containsOnce(filterMenu, '.o_add_custom_filter.o_closed_menu');
+        assert.containsNone(filterMenu, '.dropdown-divider');
+        assert.containsNone(filterMenu, '.o_add_filter_menu');
+        assert.containsOnce(filterMenu, '.o_add_custom_filter',
+            'should have one element: a add custom filter item');
         filterMenu.destroy();
     });
 
@@ -48,9 +47,9 @@ QUnit.module('FilterMenu', {
         assert.expect(2);
 
         var filterMenu = createFilterMenu(this.filters, this.fields);
-        assert.containsN(filterMenu, '.dropdown-divider, .dropdown-item, .dropdown-item-text', 5,
-            'should have 4 elements: a hidden, separator, a filter, a separator, a add custom filter item, a apply button + add condition button');
-        assert.containsOnce(filterMenu, '.o_add_custom_filter.o_closed_menu');
+        assert.containsN(filterMenu, '.dropdown-divider, .dropdown-item, .o_add_custom_filter', 4,
+            'should have 4 elements: a hidden separator, a filter, a separator, a add custom filter item');
+        assert.containsOnce(filterMenu, '.o_add_custom_filter');
         filterMenu.destroy();
     });
 
@@ -62,10 +61,10 @@ QUnit.module('FilterMenu', {
         testUtils.dom.click(filterMenu.$('span.fa-filter'));
         // open add custom filter submenu
         testUtils.dom.click(filterMenu.$('.o_add_custom_filter'));
-        assert.hasClass(filterMenu.$('.o_add_custom_filter'), 'o_open_menu');
-        assert.ok(filterMenu.$('.o_add_filter_menu').is(':visible'));
-        assert.containsN(filterMenu, '.dropdown-divider, .dropdown-item, .dropdown-item-text', 4,
-            'should have 3 elements: a hidden divider, a add custom filter item, a proposition, a apply button + add condition button');
+        assert.containsNone(filterMenu, '.dropdown-divider');
+        assert.isVisible(filterMenu.$('.o_add_filter_menu'));
+        assert.containsN(filterMenu, '.dropdown-item, .dropdown-item-text', 3,
+            'should have 3 elements: a add custom filter item, a proposition, a apply button + add condition button');
 
         filterMenu.destroy();
     });
@@ -81,10 +80,9 @@ QUnit.module('FilterMenu', {
         // remove the current unique proposition
         testUtils.dom.click(filterMenu.$('.o_searchview_extended_delete_prop'));
 
-        assert.ok(filterMenu.$('.o_apply_filter').attr('disabled'));
-
-        assert.containsN(filterMenu, '.dropdown-divider, .dropdown-item, .dropdown-item-text', 3,
-            'should have 3 elements: a hidden separator, a add custom filter item, a apply button + add condition button');
+        assert.containsNone(filterMenu, '.dropdown-divider');
+        assert.containsN(filterMenu, '.dropdown-item, .dropdown-item-text', 2,
+            'should have 2 elements: a add custom filter item, a apply button + add condition button');
 
         filterMenu.destroy();
     });
@@ -130,10 +128,9 @@ QUnit.module('FilterMenu', {
         testUtils.dom.click(filterMenu.$('.o_add_custom_filter'));
         // click on apply to activate filter
         testUtils.dom.click(filterMenu.$('.o_apply_filter'));
-        assert.hasClass(filterMenu.$('.o_add_custom_filter'), 'o_closed_menu');
         assert.containsNone(filterMenu, '.o_filter_condition');
-        assert.containsOnce(filterMenu, '.dropdown-divider:visible',
-            'there should be a separator between filters and add custom filter menu');
+        assert.containsN(filterMenu, '.dropdown-divider', 2);
+        assert.isNotVisible(filterMenu.$('.dropdown-divider').eq(0));
         filterMenu.destroy();
     });
 });
