@@ -231,9 +231,6 @@ var ControlPanelModel = mvc.Model.extend({
         this.modelName = params.modelName;
         this.actionId = params.actionId;
 
-        if (!params.withSearchBar) {
-            return $.when();
-        }
         if (params.initialConfiguration) {
             // TO DO: deactive filters of bad types (groupBy if view not groupable,...)
             this.configure(params.initialConfiguration);
