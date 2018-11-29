@@ -88,8 +88,11 @@ PKGS_TO_INSTALL="
     python3-qrcode \
     python3-html2text \
     python3-unittest2 \
-    python3-simplejson"
-
+    python3-simplejson \
+    swig \
+    libpcsclite-dev \
+    pcscd \
+    pcsc-tools"
 echo "Acquire::Retries "16";" > /etc/apt/apt.conf.d/99acquire-retries
 # KEEP OWN CONFIG FILES DURING PACKAGE CONFIGURATION
 # http://serverfault.com/questions/259226/automatically-keep-current-version-of-config-files-when-apt-get-install
@@ -114,10 +117,10 @@ PIP_TO_INSTALL="
     evdev \
     gatt \
     v4l2 \
-    pycups"
+    pycups \
+    pyscard"
 
 pip3 install ${PIP_TO_INSTALL}
-
 
 groupadd usbusers
 usermod -a -G usbusers pi
