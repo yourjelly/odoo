@@ -98,8 +98,8 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      * Called each time the controller is attached into the DOM.
      */
     on_attach_callback: function () {
-        if (this.searchView) {
-            this.searchView.on_attach_callback();
+        if (this._controlPanel) {
+            this._controlPanel.on_attach_callback();
         }
         this.renderer.on_attach_callback();
     },

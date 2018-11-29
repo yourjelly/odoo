@@ -31,6 +31,12 @@ var ControlPanelController = mvc.Controller.extend({
         // panel depending on asynchronous code to be executed in the wrong order
         this.updateIndex = 0;
     },
+    /**
+     * @override
+     */
+    on_attach_callback: function () {
+        this.renderer.on_attach_callback();
+    },
 
     //--------------------------------------------------------------------------
     // Public

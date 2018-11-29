@@ -1,6 +1,7 @@
 odoo.define('web.ControlPanelRenderer', function (require) {
 "use strict";
 
+var config = require('web.config');
 var data = require('web.data');
 var FilterMenu = require('web.FilterMenu');
 var FavoriteMenu = require('web.FavoriteMenu');
@@ -98,6 +99,12 @@ var ControlPanelRenderer = Renderer.extend({
         return $.when(this._super.apply(this, arguments), this._renderSearch()).then(function () {
             self._setSearchMenusVisibility();
         });
+    },
+    /**
+     * @override
+     */
+    on_attach_callback: function () {
+        this._focusSearchInput();
     },
 
     //--------------------------------------------------------------------------
@@ -200,6 +207,17 @@ var ControlPanelRenderer = Renderer.extend({
     },
     /**
      * @private
+     */
+    _focusSearchInput: function () {
+        if (this.withSearchBar && !config.device.isMobile) {
+            // in mobile mode, we would rathor not focusing manually the
+            // input, because it opens up the integrated keyboard, which is
+            // not what you expect when you just selected a filter.
+            this.searchBar.input.$el.focus();
+        }
+    },
+    /**
+     * @private
      * @param {string} title
      */
     _renderBreadcrumbs: function (title) {
@@ -259,7 +277,7 @@ var ControlPanelRenderer = Renderer.extend({
         if (this.withSearchBar) {
             defs.push(this._renderSearchBar());
         }
-        return $.when(this, defs);
+        return $.when(this, defs).then(this._focusSearchInput.bind(this));
     },
     _renderSearchBar: function () {
         // TODO: might need a reload instead of a destroy/instantiate

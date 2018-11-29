@@ -255,10 +255,26 @@ QUnit.module('Search View', {
         ];
     },
 }, function () {
+    QUnit.test('basic rendering', function (assert) {
+        assert.expect(1);
+
+        var actionManager = createActionManager({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+        });
+        actionManager.doAction(1);
+
+        assert.strictEqual($('.o_searchview input.o_searchview_input')[0], document.activeElement,
+            "searchview input should be focused");
+
+        actionManager.destroy();
+    });
+
     QUnit.module('GroupByMenu');
 
     QUnit.test('click on groupby filter adds a facet', function (assert) {
-        assert.expect(1);
+        assert.expect(2);
 
         var actionManager = createActionManager({
             actions: this.actions,
@@ -270,6 +286,8 @@ QUnit.module('Search View', {
         testUtils.dom.click($('.o_menu_item a'));
         assert.strictEqual($('.o_searchview .o_searchview_facet .o_facet_values span').text().trim(), 'candle',
             'should have a facet with candle name');
+        assert.strictEqual($('.o_searchview input.o_searchview_input')[0], document.activeElement,
+            "searchview input should still be focused");
 
         actionManager.destroy();
     });
