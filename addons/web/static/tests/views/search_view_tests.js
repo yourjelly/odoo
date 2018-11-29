@@ -255,7 +255,7 @@ QUnit.module('Search View', {
         ];
     },
 }, function () {
-    QUnit.module('Groupby Menu');
+    QUnit.module('GroupByMenu');
 
     QUnit.test('click on groupby filter adds a facet', function (assert) {
         assert.expect(1);
@@ -449,7 +449,7 @@ QUnit.module('Search View', {
         actionManager.destroy();
     });
 
-    QUnit.module('Filters Menu');
+    QUnit.module('FilterMenu');
 
     QUnit.skip('Search date and datetime fields. Support of timezones', function (assert) {
         assert.expect(4);
@@ -674,6 +674,106 @@ QUnit.module('Search View', {
         actionManager.destroy();
     });
 
+    QUnit.test('save search filter in modal', function (assert) {
+        assert.expect(5);
+        this.data.partner.records.push({
+            id: 7,
+            display_name: "Partner 6",
+        }, {
+            id: 8,
+            display_name: "Partner 7",
+        }, {
+            id: 9,
+            display_name: "Partner 8",
+        }, {
+            id: 10,
+            display_name: "Partner 9",
+        });
+        this.data.partner.fields.date_field.searchable = true;
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                '<sheet>' +
+                '<group>' +
+                '<field name="bar"/>' +
+                '</group>' +
+                '</sheet>' +
+                '</form>',
+            archs: {
+                'partner,false,list': '<tree><field name="display_name"/></tree>',
+                'partner,false,search': '<search><field name="date_field"/></search>',
+            },
+            res_id: 1,
+        });
+
+        testUtils.form.clickEdit(form);
+
+        testUtils.fields.many2one.clickOpenDropdown('bar');
+        testUtils.fields.many2one.clickItem('bar','Search');
+
+        assert.strictEqual($('tr.o_data_row').length, 9, "should display 9 records");
+
+        testUtils.dom.click($('button:contains(Filters)'));
+        testUtils.dom.click($('.o_add_custom_filter:visible'));
+        assert.strictEqual($('.o_filter_condition select.o_searchview_extended_prop_field').val(), 'date_field',
+            "date field should be selected");
+        testUtils.dom.click($('.o_apply_filter'));
+
+        assert.strictEqual($('tr.o_data_row').length, 0, "should display 0 records");
+
+        // Save this search
+        testUtils.mock.intercept(form, 'create_filter', function (event) {
+            assert.strictEqual(event.data.filter.name, "Awesome Test Customer Filter", "filter name should be correct");
+        });
+        testUtils.dom.click($('button:contains(Favorites)'));
+        testUtils.dom.click($('.o_add_favorite'));
+        var filterNameInput = $('.o_favorite_name .o_input[type="text"]:visible');
+        assert.strictEqual(filterNameInput.length, 1, "should display an input field for the filter name");
+        testUtils.fields.editInput(filterNameInput, 'Awesome Test Customer Filter');
+        testUtils.dom.click($('.o_save_favorite button'));
+
+        form.destroy();
+    });
+
+    QUnit.test('save filters created via autocompletion works', function (assert) {
+        assert.expect(2);
+
+        var actionManager = createActionManager({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            intercepts: {
+                create_filter: function (ev) {
+                    assert.ok(ev.data.filter.domain === "[['foo', 'ilike', 'a']]");
+                },
+            },
+        });
+
+        actionManager.doAction(10);
+
+        $('.o_searchview_input').trigger($.Event('keypress', {
+            which: 97,
+        }));
+
+        $('.o_searchview_input').trigger($.Event('keyup', {
+            which: $.ui.keyCode.ENTER,
+            keyCode: $.ui.keyCode.ENTER,
+        }));
+
+        assert.strictEqual($('.o_searchview_input_container .o_facet_values span').text().trim(), "a");
+
+        testUtils.dom.click($('button .fa-star'));
+        testUtils.dom.click($('.o_favorites_menu .o_add_favorite'));
+        testUtils.fields.editInput($('div.o_favorite_name input'), 'name for favorite');
+        testUtils.dom.click($('.o_favorites_menu div.o_save_favorite button'));
+
+        actionManager.destroy();
+    });
+
+    QUnit.module('Search Arch');
+
     QUnit.test('arch order of groups of filters preserved', function (assert) {
         assert.expect(12);
 
@@ -691,6 +791,8 @@ QUnit.module('Search View', {
         }
         actionManager.destroy();
     });
+
+    QUnit.module('Autocompletion');
 
     QUnit.test('selection via autocompletion modifies appropriately submenus', function (assert) {
         assert.expect(4);
@@ -741,40 +843,7 @@ QUnit.module('Search View', {
         actionManager.destroy();
     });
 
-    QUnit.test('save filters created via autocompletion works', function (assert) {
-        assert.expect(2);
-
-        var actionManager = createActionManager({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            intercepts: {
-                create_filter: function (ev) {
-                    assert.ok(ev.data.filter.domain === "[['foo', 'ilike', 'a']]");
-                },
-            },
-        });
-
-        actionManager.doAction(10);
-
-        $('.o_searchview_input').trigger($.Event('keypress', {
-            which: 97,
-        }));
-
-        $('.o_searchview_input').trigger($.Event('keyup', {
-            which: $.ui.keyCode.ENTER,
-            keyCode: $.ui.keyCode.ENTER,
-        }));
-
-        assert.strictEqual($('.o_searchview_input_container .o_facet_values span').text().trim(), "a");
-
-        testUtils.dom.click($('button .fa-star'));
-        testUtils.dom.click($('.o_favorites_menu .o_add_favorite'));
-        testUtils.fields.editInput($('div.o_favorite_name input'), 'name for favorite');
-        testUtils.dom.click($('.o_favorites_menu div.o_save_favorite button'));
-
-        actionManager.destroy();
-    });
+    QUnit.module('TimeRangeMenu');
 
     QUnit.test('time range menu stays hidden', function (assert) {
         assert.expect(4);
@@ -901,69 +970,6 @@ QUnit.module('Search View', {
             context: {time_ranges: {range: 'today', field: 'date_field'}}
         });
         actionManager.destroy();
-    });
-
-    QUnit.test('save search filter in modal', function (assert) {
-        assert.expect(5);
-        this.data.partner.records.push({
-            id: 7,
-            display_name: "Partner 6",
-        }, {
-            id: 8,
-            display_name: "Partner 7",
-        }, {
-            id: 9,
-            display_name: "Partner 8",
-        }, {
-            id: 10,
-            display_name: "Partner 9",
-        });
-        this.data.partner.fields.date_field.searchable = true;
-        var form = createView({
-            View: FormView,
-            model: 'partner',
-            data: this.data,
-            arch: '<form string="Partners">' +
-                '<sheet>' +
-                '<group>' +
-                '<field name="bar"/>' +
-                '</group>' +
-                '</sheet>' +
-                '</form>',
-            archs: {
-                'partner,false,list': '<tree><field name="display_name"/></tree>',
-                'partner,false,search': '<search><field name="date_field"/></search>',
-            },
-            res_id: 1,
-        });
-
-        testUtils.form.clickEdit(form);
-
-        testUtils.fields.many2one.clickOpenDropdown('bar');
-        testUtils.fields.many2one.clickItem('bar','Search');
-
-        assert.strictEqual($('tr.o_data_row').length, 9, "should display 9 records");
-
-        testUtils.dom.click($('button:contains(Filters)'));
-        testUtils.dom.click($('.o_add_custom_filter:visible'));
-        assert.strictEqual($('.o_filter_condition select.o_searchview_extended_prop_field').val(), 'date_field',
-            "date field should be selected");
-        testUtils.dom.click($('.o_apply_filter'));
-
-        assert.strictEqual($('tr.o_data_row').length, 0, "should display 0 records");
-
-        // Save this search
-        testUtils.mock.intercept(form, 'create_filter', function (event) {
-            assert.strictEqual(event.data.filter.name, "Awesome Test Customer Filter", "filter name should be correct");
-        });
-        testUtils.dom.click($('button:contains(Favorites)'));
-        testUtils.dom.click($('.o_add_favorite'));
-        var filterNameInput = $('.o_favorite_name .o_input[type="text"]:visible');
-        assert.strictEqual(filterNameInput.length, 1, "should display an input field for the filter name");
-        testUtils.fields.editInput(filterNameInput, 'Awesome Test Customer Filter');
-        testUtils.dom.click($('.o_save_favorite button'));
-
-        form.destroy();
     });
 
     QUnit.test('Customizing filter does not close the filter dropdown', function (assert) {
