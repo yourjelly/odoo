@@ -4,26 +4,16 @@ odoo.define('web.SortedRegistry', function (require) {
 var Registry = require('web.Registry');
 
 /**
- * A sorted registry is a registry in whick items are sorted.
+ * A sorted registry is a registry in which items are sorted.
  */
 var SortedRegistry = Registry.extend({
     /**
-     * @constructor
-     * @param {Object} [mapping] the initial data in the registry
+     * @override
      */
     init: function () {
-        var self = this;
         this._super.apply(this, arguments);
-        this._scores = [];
-        this._initialKeys = Object.keys(this.map);
-        this._sortedKeys = this._initialKeys;
-        this.listeners.push(function () {
-            self.sortedKeys = self._initialKeys.concat(
-                _.sortBy(self._scores, 'score').map(function (score) {
-                    return score.key;
-                })
-            );
-        });
+        this._scoreMapping = Object.create(null);
+        this._sortedKeys = null;
     },
 
     //--------------------------------------------------------------------------
@@ -31,30 +21,34 @@ var SortedRegistry = Registry.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * overide
+     * @override
      *
-     *  Allows to attribute a score to the added key. This can be used to sort keys
-     *  using the scores.
+     * Allows to attribute a score to the added key. This can be used to sort
+     * keys using the scores.
      *
      * @param {string} key
      * @param {any} value
-     * @param {number} score
+     * @param {[number]} score
      * @returns {Registry} can be used to chain add calls.
      */
     add: function (key, value, score) {
-        this._scores.push({
-            key: key,
-            score: score || key,
-        });
-        this._super.apply(this, arguments);
+        this._scoreMapping[key] = score === undefined ? key : score;
+        this._sortedKeys = null;
+        return this._super.apply(this, arguments);
     },
     /**
-     * @overide
-     * returns the object map keys sorted according to this.sortFunction
-     * returns {string[]}
+     * @override
+     *
+     * @returns {string[]} sorted keys, according to their scores
      */
     keys: function () {
-        return this.sortedKeys;
+        var self = this;
+        if (!this._sortedKeys) {
+            this._sortedKeys = _.sortBy(this._super(), function (key) {
+                return self._scoreMapping[key] || 0;
+            });
+        }
+        return this._sortedKeys;
     },
 
 });

@@ -66,20 +66,6 @@ var Registry = Class.extend({
         return Object.create(this.map);
     },
     /**
-     * Creates and returns a copy of the current mapping, with the provided
-     * mapping argument added in (replacing existing keys if needed)
-     *
-     * Parent and child remain linked, a new key in the parent (which is not
-     * overwritten by the child) will appear in the child.
-     *
-     * @param {Object} [mapping={}] a mapping of keys to object-paths
-     */
-    extend: function (mapping) {
-        var child = new Registry(this.map);
-        _.extend(child.map, mapping);
-        return child;
-    },
-    /**
      * Returns the value associated to the given key.
      *
      * @param {string} key
