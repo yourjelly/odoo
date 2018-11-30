@@ -128,16 +128,18 @@ var ControlPanelRenderer = Renderer.extend({
      * This function is called when actions call 'updateControlPanel' with
      * custom contents to insert in the exposed areas.
      *
+     * @param {Object} status
      * @param {Object} [status.cp_content] dictionnary containing the jQuery
      *   elements to insert in the exposed areas
      * @param {string} [status.title] the title of the current controller, to
      *   display at the end of the breadcrumbs
+     * @param {Object} [options]
      * @param {Boolean} [options.clear=true] set to false to keep control panel
      *   elements that are not in status.cp_content (useful for partial updates)
      */
     updateContents: function (status, options) {
         var new_cp_content = status.cp_content || {};
-        var clear = 'clear' in options ? options.clear : true;
+        var clear = 'clear' in (options || {}) ? options.clear : true;
 
         if (this.withBreadcrumbs) {
             this._renderBreadcrumbs(status.title);
