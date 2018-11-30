@@ -40,7 +40,7 @@ class ProductTemplate(models.Model):
     def _get_default_volume_uom(self):
         return self._get_volume_uom_name_from_ir_config_parameter()
 
-    name = fields.Char('Name', index=True, required=True, translate=True)
+    name = fields.Char('Name', index=True, required=True, is_business_field=True, translate=True)
     sequence = fields.Integer('Sequence', default=1, help='Gives the sequence order when displaying a product list')
     description = fields.Text(
         'Description', translate=True)
@@ -59,7 +59,7 @@ class ProductTemplate(models.Model):
     rental = fields.Boolean('Can be Rent')
     categ_id = fields.Many2one(
         'product.category', 'Product Category',
-        change_default=True, default=_get_default_category_id,
+        change_default=True, default=_get_default_category_id, is_business_field=True,
         required=True, help="Select category for the current product")
 
     currency_id = fields.Many2one(
@@ -71,7 +71,7 @@ class ProductTemplate(models.Model):
         digits=dp.get_precision('Product Price'))
     list_price = fields.Float(
         'Sales Price', default=1.0,
-        digits=dp.get_precision('Product Price'),
+        digits=dp.get_precision('Product Price'), is_business_field=True,
         help="Price at which the product is sold to customers.")
     lst_price = fields.Float(
         'Public Price', related='list_price', readonly=False,
@@ -110,14 +110,14 @@ class ProductTemplate(models.Model):
     packaging_ids = fields.One2many(
         'product.packaging', string="Product Packages", compute="_compute_packaging_ids", inverse="_set_packaging_ids",
         help="Gives the different ways to package the same product.")
-    seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id', 'Vendors', help="Define vendor pricelists.")
+    seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id', 'Vendors', is_business_field=True, help="Define vendor pricelists.")
     variant_seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id')
 
     active = fields.Boolean('Active', default=True, help="If unchecked, it will allow you to hide the product without removing it.")
     color = fields.Integer('Color Index')
 
     is_product_variant = fields.Boolean(string='Is a product variant', compute='_compute_is_product_variant')
-    attribute_line_ids = fields.One2many('product.template.attribute.line', 'product_tmpl_id', 'Product Attributes')
+    attribute_line_ids = fields.One2many('product.template.attribute.line', 'product_tmpl_id', 'Product Attributes', is_business_field=True)
     product_variant_ids = fields.One2many('product.product', 'product_tmpl_id', 'Products', required=True)
     # performance: product_variant_id provides prefetching on the first product variant only
     product_variant_id = fields.Many2one('product.product', 'Product', compute='_compute_product_variant_id')
@@ -126,10 +126,10 @@ class ProductTemplate(models.Model):
         '# Product Variants', compute='_compute_product_variant_count')
 
     # related to display product product information if is_product_variant
-    barcode = fields.Char('Barcode', oldname='ean13', related='product_variant_ids.barcode', readonly=False)
+    barcode = fields.Char('Barcode', oldname='ean13', is_business_field=True, related='product_variant_ids.barcode', readonly=False)
     default_code = fields.Char(
         'Internal Reference', compute='_compute_default_code',
-        inverse='_set_default_code', store=True)
+        inverse='_set_default_code', is_business_field=True, store=True)
 
     item_ids = fields.One2many('product.pricelist.item', 'product_tmpl_id', 'Pricelist Items')
 

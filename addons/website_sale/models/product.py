@@ -122,7 +122,7 @@ class ProductTemplate(models.Model):
     website_style_ids = fields.Many2many('product.style', string='Styles')
     website_sequence = fields.Integer('Website Sequence', help="Determine the display order in the Website E-commerce",
                                       default=lambda self: self._default_website_sequence())
-    public_categ_ids = fields.Many2many('product.public.category', string='Website Product Category',
+    public_categ_ids = fields.Many2many('product.public.category', string='Website Product Category', is_business_field=True,
                                         help="The product will be available in each mentioned e-commerce category. Go to"
                                         "Shop > Customize and enable 'E-commerce categories' to view all e-commerce categories.")
     product_image_ids = fields.One2many('product.image', 'product_tmpl_id', string='Images')
