@@ -81,11 +81,14 @@ var ControlPanelView = Factory.extend({
         this.rendererParams.searchMenuTypes = params.searchMenuTypes || ['filter', 'groupBy', 'favorite'];
 
         this.loadParams.withSearchBar = 'withSearchBar' in params ? params.withSearchBar : true;
+        this.loadParams.searchMenuTypes = params.searchMenuTypes || ['filter', 'groupBy', 'favorite'];
         this.loadParams.actionId = params.actionId;
         this.loadParams.fields = this.fields;
         this.loadParams.modelName = params.modelName;
         if (this.loadParams.withSearchBar) {
-            if (!params.currentConfiguration) {
+            if (params.currentConfiguration) {
+                this.loadParams.initialConfiguration = params.currentConfiguration;
+            } else {
                 // groups are determined in _parseSearchArch
                 this.loadParams.groups = [];
                 this.loadParams.timeRanges = context.time_ranges;
@@ -94,8 +97,6 @@ var ControlPanelView = Factory.extend({
                 } else {
                     this._parseSearchArch();
                 }
-            } else {
-                this.loadParams.initialConfiguration = params.currentConfiguration;
             }
         }
 

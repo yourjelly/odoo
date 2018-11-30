@@ -23,6 +23,7 @@ var ControlPanelModel = mvc.Model.extend({
     init: function (parent, params) {
         this._super.apply(this, arguments);
 
+        // Tricks to avoid losing information on filter descriptions in control panel model configuration
         TIME_RANGE_OPTIONS = TIME_RANGE_OPTIONS.map(function (option) {
             return _.extend(option, {description: option.description.toString()});
         });
@@ -30,21 +31,34 @@ var ControlPanelModel = mvc.Model.extend({
             return _.extend(option, {description: option.description.toString()});
         });
 
-        this.initialContext = params.context || {};
-        this.initialDomain = params.domain || [];
 
+        this.modelName = null;
+        // info on fields of model this.modelName
+        this.fields = {};
+
+        // info on current action
+        this.actionId = null;
+        this.actionContext = params.context || {};
+        this.actionDomain = params.domain || [];
+
+        // triple determining a control panel model configuration
         this.filters = {};
         this.groups = {};
         this.query = [];
-        this.fields = {};
-        this.modelName = null;
-        this.actionId = null;
     },
 
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
 
+    /**
+     * Activate a given filter of type 'timeRange' with a timeRangeId
+     * and optionaly a comparsionTimeRangeId
+     *
+     * @param {string} filterId
+     * @param {string} timeRangeId
+     * @param {[string]} comparisonTimeRangeId
+     */
     activateTimeRange: function (filterId, timeRangeId, comparisonTimeRangeId) {
         var filter = this.filters[filterId];
         filter.timeRangeId = timeRangeId || filter.defaultTimeRangeId;
@@ -57,12 +71,24 @@ var ControlPanelModel = mvc.Model.extend({
             this.toggleFilter(filterId);
         }
     },
+    /**
+     * Set filters, groups, and query keys according to configuration parameter
+     *
+     * @param {string} configuration
+     */
     configure: function (configuration) {
         var newConfiguration = JSON.parse(configuration);
         this.filters = newConfiguration.filters;
         this.groups = newConfiguration.groups;
         this.query = newConfiguration.query;
     },
+    /**
+     * Tries to create an ir_filter server side.
+     * If the operation is successful, a new filter of type 'favorite'
+     * is created and activated.
+     *
+     * @param {Object} newFavorite
+     */
     createNewFavorite: function (newFavorite) {
         return this._saveQuery(_.pick(
             newFavorite,
@@ -71,22 +97,37 @@ var ControlPanelModel = mvc.Model.extend({
             newFavorite.on_success();
         });
     },
+    /**
+     * Create new filters of type 'filter' with same new groupId and groupNumber.
+     * They are activated.
+     *
+     * @param {Object[]} newFilters
+     * @returns {string[]} filterIds, ids of the newly created filters
+     */
     createNewFilters: function (newFilters) {
         var self = this;
-        var filterIDs = [];
+        var filterIds = [];
         var groupNumber = this._generateNewGroupNumber();
         this._createGroupOfFilters(newFilters);
         newFilters.forEach(function (filter) {
             filter.groupNumber = groupNumber;
             self.toggleFilter(filter.id);
-            filterIDs.push(filter.id);
+            filterIds.push(filter.id);
         });
-        return filterIDs;
+        return filterIds;
     },
+    /**
+     * Create a new groupBy with the groupId shared by all filters of type 'groupBy'
+     * but a new groupNumber
+     * It is activated.
+     *
+     * @param {Object} newGroupBy
+     */
     createNewGroupBy: function (newGroupBy) {
         var id = _.uniqueId('__filter__');
         newGroupBy.id = id;
         newGroupBy.groupId = this._getGroupIdOfType('groupBy');
+        newGroupBy.groupNumber = this._generateNewGroupNumber();
         this.filters[id] = newGroupBy;
         if (_.contains(['date', 'datetime'], newGroupBy.fieldType)) {
             this.toggleFilterWithOptions(newGroupBy.id);
@@ -94,25 +135,30 @@ var ControlPanelModel = mvc.Model.extend({
             this.toggleFilter(newGroupBy.id);
         }
     },
-    deactivateFilters: function (filterIDs) {
+    /**
+     * Ensure that the filters determined by the given filterIds are
+     * deactivated (if one or many of them are already deactivated, nothing bad happens)
+     *
+     * @param {string[]} filterIds
+     */
+    deactivateFilters: function (filterIds) {
         var self = this;
-        filterIDs.forEach(function (filterID) {
-            var filter = self.filters[filterID];
+        filterIds.forEach(function (filterId) {
+            var filter = self.filters[filterId];
             var group = self.groups[filter.groupId];
-            if (_.contains(group.activeFilterIds, filterID)) {
-                self.toggleFilter(filterID);
+            if (_.contains(group.activeFilterIds, filterId)) {
+                self.toggleFilter(filterId);
             }
         });
     },
     /**
-     * Remove the group from the query.
+     * Deactivate all filters in a given group with given id.
      *
-     * @private
      * @param {string} groupId
      */
-    deactivateGroup: function (groupId) {
-        var self = this;
-        var group = this.groups[groupId];
+     deactivateGroup: function (groupId) {
+         var self = this;
+         var group = this.groups[groupId];
         _.each(group.activeFilterIds, function (filterId) {
             var filter = self.filters[filterId];
             // TODO: put this logic in toggleFilter 'field' type
@@ -123,7 +169,13 @@ var ControlPanelModel = mvc.Model.extend({
         // TODO: use toggleFilter here
         group.activeFilterIds = [];
         this.query.splice(this.query.indexOf(groupId), 1);
-    },
+     },
+    /**
+     * Delete a filter of type 'favorite' with given filterId server side and in control panel model.
+     * Of course this forces the filter to be removed from the search query.
+     *
+     * @param {string} filterId
+     */
     deleteFilterEverywhere: function (filterId) {
         var self = this;
         var filter = this.filters[filterId];
@@ -137,14 +189,19 @@ var ControlPanelModel = mvc.Model.extend({
         });
         return def;
     },
+    /**
+     * @override
+     *
+     * @returns {Object}
+     */
     get: function () {
         var self = this;
         // we maintain a unique source activeFilterIds that contain information
         // on active filters. But the renderer can have more information since
-        // it does not change that.
-        // copy this.filters;
-        // we want to give a different structure to renderer.
-        // filters are filters of filter type only, groupbys are groupbys,...!
+        // it does not modifies filters activity.
+        // We thus give a different structure to renderer that may contain duplicated
+        // information.
+        // Note that filters are filters of filter type only, groupbys are groupbys,...!
         var filterFields = [];
         var filters = [];
         var groupBys = [];
@@ -193,6 +250,12 @@ var ControlPanelModel = mvc.Model.extend({
             fields: this.fields,
         };
     },
+    /**
+     * @override
+     *
+     * @returns {Object} An object called search query with keys domain, groupBy, and
+     *                   context (and soon timeRangeData?).
+     */
     getQuery: function () {
         var userContext = session.user_context;
         var context = _.extend(
@@ -209,15 +272,20 @@ var ControlPanelModel = mvc.Model.extend({
                 context.timeRangeMenuData.comparisonTimeRange = pyUtils.eval('domain', context.timeRangeMenuData.comparisonTimeRange);
             }
         }
-        var groupBys = this._getGroupBys();
+        var groupBys = this._getGroupBy();
         return this._processSearchData({
-            // for now action manager wants domains and contexts I would prefer
-            // to use domain and context.
             domain: domain,
             context: context,
             groupBys: groupBys,
         });
     },
+    /**
+     * Encode in a string the core content of the control panel. This content can then be used
+     * in an other control panel model (with same key modelName) via the configure method.
+     *
+     * @returns {string} An object called configuration, serialization of the core content of
+     *                   the control panel model.
+     */
     getConfiguration: function () {
         return JSON.stringify({
             filters: this.filters,
@@ -298,6 +366,9 @@ var ControlPanelModel = mvc.Model.extend({
                 this.query.push(group.id);
             }
         } else {
+            if (filter.type === 'field' && filter.autoCompleteValues) {
+                filter.autoCompleteValues = [];
+            }
             group.activeFilterIds.splice(index, 1);
             // if initiaLength is 1, the group is now inactive.
             if (initiaLength === 1) {
@@ -315,7 +386,7 @@ var ControlPanelModel = mvc.Model.extend({
      *
      * @private
      * @param {string} filterId
-     * @param {string} optionId
+     * @param {[string]} optionId
      */
     toggleFilterWithOptions: function (filterId, optionId) {
         var filter = this.filters[filterId];
@@ -525,12 +596,12 @@ var ControlPanelModel = mvc.Model.extend({
         return groupBys;
     },
 
-    _getGroupBys: function () {
+    _getGroupBy: function () {
         var self = this;
         var groupBys = this.query.reduce(
             function (acc, groupId) {
                 var group = self.groups[groupId];
-                return acc.concat(self._getGroupGroupbys(group));
+                return acc.concat(self._getGroupGroupBys(group));
             },
             []
         );
@@ -553,7 +624,7 @@ var ControlPanelModel = mvc.Model.extend({
         return pyUtils.assembleDomains(_.compact(domains), 'OR');
     },
 
-    _getGroupGroupbys: function (group) {
+    _getGroupGroupBys: function (group) {
         var self = this;
         var groupBys = group.activeFilterIds.reduce(
             function (acc, filterId) {
@@ -687,7 +758,7 @@ var ControlPanelModel = mvc.Model.extend({
                         model: field.relation,
                         method: 'name_get',
                         args: [value],
-                        context: self.initialContext,
+                        context: self.actionContext,
                     }).then(function (result) {
                         var autocompleteValue = {
                             label: result[0][1],
@@ -736,15 +807,15 @@ var ControlPanelModel = mvc.Model.extend({
         var context = searchData.context;
         var domain = searchData.domain;
         var groupBys = searchData.groupBys;
-        var action_context = this.initialContext;
+        var action_context = this.actionContext;
         var results = pyUtils.eval_domains_and_contexts({
-            domains: [this.initialDomain].concat([domain] || []),
+            domains: [this.actionDomain].concat([domain] || []),
             contexts: [action_context].concat(context || []),
             eval_context: session.user_context,
         });
         var groupBy = groupBys.length ?
                         groupBys :
-                        (this.initialContext.group_by || []);
+                        (this.actionContext.group_by || []);
         groupBy = (typeof groupBy === 'string') ? [groupBy] : groupBy;
 
         if (results.error) {
@@ -770,10 +841,6 @@ var ControlPanelModel = mvc.Model.extend({
                 controllerContext = context;
             },
         });
-         // var ctx = results.context;
-        // _(_.keys(session.user_context)).each(function (key) {
-        //     delete ctx[key];
-        // });
         var queryContext = this._getQueryContext();
         // TO DO: find a way to compose context as string without evaluate them (like for domains)
         // Or we could encode in favorite the timeRange menu data as fieldName, timeRangeId,...
@@ -784,7 +851,7 @@ var ControlPanelModel = mvc.Model.extend({
             [userContext, controllerContext, timeRangeMenuInfo].concat(queryContext)
         );
         context = _.omit(context, Object.keys(userContext));
-        var groupBys = this._getGroupBys();
+        var groupBys = this._getGroupBy();
         if (groupBys.length) {
             context.group_by = groupBys;
         }
@@ -821,7 +888,7 @@ var ControlPanelModel = mvc.Model.extend({
         // TODO: should not do that, the domain logic should be put somewhere else
         var Obj = core.search_widgets_registry.getAny([filter.attrs.widget, field.type]);
         if (Obj) {
-            var obj = new (Obj) (this, filter, field, this.initialContext);
+            var obj = new (Obj) (this, filter, field, this.actionContext);
             domain = obj.getDomain(filter.autoCompleteValues);
         }
         return domain;
