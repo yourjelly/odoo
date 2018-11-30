@@ -10,16 +10,16 @@ from . import membership
 class Partner(models.Model):
     _inherit = 'res.partner'
 
-    associate_member = fields.Many2one('res.partner', string='Associate Member',
+    associate_member = fields.Many2one('res.partner', string='Associate Member', is_business_field=True,
         help="A member with whom you want to associate your membership."
              "It will consider the membership state of the associated member.")
     member_lines = fields.One2many('membership.membership_line', 'partner', string='Membership')
-    free_member = fields.Boolean(string='Free Member',
+    free_member = fields.Boolean(string='Free Member', is_business_field=True,
         help="Select if you want to give free membership.")
     membership_amount = fields.Float(string='Membership Amount', digits=(16, 2),
         help='The price negotiated by the partner')
     membership_state = fields.Selection(membership.STATE, compute='_compute_membership_state',
-        string='Current Membership Status', store=True,
+        string='Current Membership Status', store=True, is_business_field=True,
         help='It indicates the membership state.\n'
              '-Non Member: A partner who has not applied for any membership.\n'
              '-Cancelled Member: A member who has cancelled his membership.\n'
@@ -34,7 +34,7 @@ class Partner(models.Model):
         string ='Membership End Date', store=True,
         help="Date until which membership remains active.")
     membership_cancel = fields.Date(compute='_compute_membership_cancel',
-        string ='Cancel Membership Date', store=True,
+        string ='Cancel Membership Date', store=True, is_business_field=True,
         help="Date on which membership has been cancelled")
 
     @api.depends('member_lines.account_invoice_line.invoice_id.state',
