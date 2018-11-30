@@ -9,7 +9,7 @@ import werkzeug
 from werkzeug import url_encode
 
 from odoo import api, http, registry, SUPERUSER_ID, _
-from odoo.addons.web.controllers.main import binary_content
+#from odoo.addons.web.controllers.main import binary_content
 from odoo.exceptions import AccessError
 from odoo.http import request
 from odoo.tools import consteq, pycompat
