@@ -1407,11 +1407,6 @@
     </div>
 </div>
 
-<div t-name="ConfirmationDialog">
-    <div> <t t-esc="widget.message"/></div>
-</div>
-
-
 <div t-name="ExportDialog" class="o_export">
     <div class="row">
         <div class="col-lg-6">

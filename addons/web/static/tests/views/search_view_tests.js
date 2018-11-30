@@ -819,7 +819,7 @@ QUnit.module('Search View', {
         testUtils.dom.click(actionManager.$('.o_control_panel .o_search_options button.o_favorites_menu_button'));
         assert.containsOnce(actionManager, '.o_control_panel .o_searchview_input_container .o_facet_values');
         testUtils.dom.click(actionManager.$('.o_control_panel .o_search_options .o_favorites_menu span.o_trash_button'));
-        testUtils.dom.click($('div.modal-dialog footer.modal-footer button.btn.btn-primary'));
+        testUtils.modal.clickButton('Ok');
         assert.containsNone(actionManager, '.o_control_panel .o_searchview_input_container .o_facet_values');
         actionManager.destroy();
     });
