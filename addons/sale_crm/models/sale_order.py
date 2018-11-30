@@ -8,5 +8,5 @@ class SaleOrder(models.Model):
     _name = "sale.order"
     _inherit = ['sale.order', 'utm.mixin']
 
-    tag_ids = fields.Many2many('crm.lead.tag', 'sale_order_tag_rel', 'order_id', 'tag_id', string='Tags')
+    tag_ids = fields.Many2many('crm.lead.tag', 'sale_order_tag_rel', 'order_id', 'tag_id', string='Tags', is_business_field=True)
     opportunity_id = fields.Many2one('crm.lead', string='Opportunity', domain="[('type', '=', 'opportunity')]")
