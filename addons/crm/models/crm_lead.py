@@ -70,41 +70,41 @@ class Lead(models.Model):
     date_action_last = fields.Datetime('Last Action', readonly=True)
     email_from = fields.Char('Email', help="Email address of the contact", track_visibility='onchange', track_sequence=4, index=True)
     website = fields.Char('Website', index=True, help="Website of the contact")
-    team_id = fields.Many2one('crm.team', string='Sales Team', oldname='section_id', default=lambda self: self.env['crm.team'].sudo()._get_default_team_id(user_id=self.env.uid),
+    team_id = fields.Many2one('crm.team', string='Sales Team', oldname='section_id', is_business_field=True, default=lambda self: self.env['crm.team'].sudo()._get_default_team_id(user_id=self.env.uid),
         index=True, track_visibility='onchange', help='When sending mails, the default email address is taken from the Sales Team.')
     kanban_state = fields.Selection([('grey', 'No next activity planned'), ('red', 'Next activity late'), ('green', 'Next activity is planned')],
         string='Kanban State', compute='_compute_kanban_state')
     email_cc = fields.Text('Global CC', help="These email addresses will be added to the CC field of all inbound and outbound emails for this record before being sent. Separate multiple email addresses with a comma")
-    description = fields.Text('Notes', track_visibility='onchange', track_sequence=6)
-    tag_ids = fields.Many2many('crm.lead.tag', 'crm_lead_tag_rel', 'lead_id', 'tag_id', string='Tags', help="Classify and analyze your lead/opportunity categories like: Training, Service")
+    description = fields.Text('Notes', track_visibility='onchange', is_business_field=True, track_sequence=6)
+    tag_ids = fields.Many2many('crm.lead.tag', 'crm_lead_tag_rel', 'lead_id', 'tag_id', string='Tags', is_business_field=True, help="Classify and analyze your lead/opportunity categories like: Training, Service")
     contact_name = fields.Char('Contact Name', track_visibility='onchange', track_sequence=3)
     partner_name = fields.Char("Customer Name", track_visibility='onchange', track_sequence=2, index=True, help='The name of the future partner company that will be created while converting the lead into opportunity')
-    type = fields.Selection([('lead', 'Lead'), ('opportunity', 'Opportunity')], index=True, required=True,
+    type = fields.Selection([('lead', 'Lead'), ('opportunity', 'Opportunity')], index=True, required=True, is_business_field=True,
         default=lambda self: 'lead' if self.env['res.users'].has_group('crm.group_use_lead') else 'opportunity',
         help="Type is used to separate Leads and Opportunities")
     priority = fields.Selection(crm_stage.AVAILABLE_PRIORITIES, string='Priority', index=True, default=crm_stage.AVAILABLE_PRIORITIES[0][0])
-    date_closed = fields.Datetime('Closed Date', readonly=True, copy=False)
+    date_closed = fields.Datetime('Closed Date', readonly=True, is_business_field=True, copy=False)
 
-    stage_id = fields.Many2one('crm.stage', string='Stage', ondelete='restrict', track_visibility='onchange', index=True,
+    stage_id = fields.Many2one('crm.stage', string='Stage', ondelete='restrict', is_business_field=True, track_visibility='onchange', index=True,
         domain="['|', ('team_id', '=', False), ('team_id', '=', team_id)]",
         group_expand='_read_group_stage_ids', default=lambda self: self._default_stage_id())
-    user_id = fields.Many2one('res.users', string='Salesperson', track_visibility='onchange', default=lambda self: self.env.user)
-    referred = fields.Char('Referred By')
+    user_id = fields.Many2one('res.users', string='Salesperson', is_business_field=True, track_visibility='onchange', default=lambda self: self.env.user)
+    referred = fields.Char('Referred By', is_business_field=True)
 
-    date_open = fields.Datetime('Assignation Date', readonly=True, default=fields.Datetime.now)
+    date_open = fields.Datetime('Assignation Date', is_business_field=True, readonly=True, default=fields.Datetime.now)
     day_open = fields.Float(compute='_compute_day_open', string='Days to Assign', store=True)
     day_close = fields.Float(compute='_compute_day_close', string='Days to Close', store=True)
     date_last_stage_update = fields.Datetime(string='Last Stage Update', index=True, default=fields.Datetime.now)
-    date_conversion = fields.Datetime('Conversion Date', readonly=True)
+    date_conversion = fields.Datetime('Conversion Date', is_business_field=True, readonly=True)
 
     # Messaging and marketing
     message_bounce = fields.Integer('Bounce', help="Counter of the number of bounced emails for this contact", default=0)
 
     # Only used for type opportunity
-    probability = fields.Float('Probability', group_operator="avg", default=lambda self: self._default_probability())
-    planned_revenue = fields.Monetary('Expected Revenue', currency_field='company_currency', track_visibility='always')
+    probability = fields.Float('Probability', group_operator="avg", is_business_field=True, default=lambda self: self._default_probability())
+    planned_revenue = fields.Monetary('Expected Revenue', currency_field='company_currency', is_business_field=True, track_visibility='always')
     expected_revenue = fields.Monetary('Prorated Revenue', currency_field='company_currency', store=True, compute="_compute_expected_revenue")
-    date_deadline = fields.Date('Expected Closing', help="Estimate of the date on which the opportunity will be won.")
+    date_deadline = fields.Date('Expected Closing', is_business_field=True, help="Estimate of the date on which the opportunity will be won.")
     color = fields.Integer('Color Index', default=0)
     partner_address_name = fields.Char('Partner Contact Name', related='partner_id.name', readonly=True)
     partner_address_email = fields.Char('Partner Contact Email', related='partner_id.email', readonly=True)
@@ -118,16 +118,16 @@ class Lead(models.Model):
     street = fields.Char('Street')
     street2 = fields.Char('Street2')
     zip = fields.Char('Zip', change_default=True)
-    city = fields.Char('City')
-    state_id = fields.Many2one("res.country.state", string='State')
-    country_id = fields.Many2one('res.country', string='Country')
+    city = fields.Char('City', is_business_field=True)
+    state_id = fields.Many2one("res.country.state", string='State', is_business_field=True)
+    country_id = fields.Many2one('res.country', string='Country', is_business_field=True)
     phone = fields.Char('Phone', track_visibility='onchange', track_sequence=5)
     mobile = fields.Char('Mobile')
-    function = fields.Char('Job Position')
-    title = fields.Many2one('res.partner.title')
+    function = fields.Char('Job Position', is_business_field=True)
+    title = fields.Many2one('res.partner.title', is_business_field=True)
     company_id = fields.Many2one('res.company', string='Company', index=True, default=lambda self: self.env.user.company_id.id)
     meeting_count = fields.Integer('# Meetings', compute='_compute_meeting_count')
-    lost_reason = fields.Many2one('crm.lost.reason', string='Lost Reason', index=True, track_visibility='onchange')
+    lost_reason = fields.Many2one('crm.lost.reason', string='Lost Reason', is_business_field=True, index=True, track_visibility='onchange')
 
     _sql_constraints = [
         ('check_probability', 'check(probability >= 0 and probability <= 100)', 'The probability of closing the deal should be between 0% and 100%!')
