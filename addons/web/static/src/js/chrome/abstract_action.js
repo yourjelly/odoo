@@ -29,6 +29,7 @@ var AbstractAction = Widget.extend(ActionMixin, {
             actionId: action.id,
             context: action.context,
             breadcrumbs: options && options.breadcrumbs || [],
+            title: this.getTitle(),
             viewId: action.search_view_id && action.search_view_id[0],
             withSearchBar: this.withSearchBar,
             searchMenuTypes: this.searchMenuTypes,

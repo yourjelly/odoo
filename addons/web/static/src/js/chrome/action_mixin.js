@@ -113,7 +113,7 @@ var ActionMixin = {
     updateControlPanel: function (status, options) {
         if (this._controlPanel) {
             status = status || {};
-            status.title = status.title || this._title;
+            status.title = status.title || this.getTitle();
             this._controlPanel.updateContents(status, options || {});
         }
     },

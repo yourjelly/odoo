@@ -106,7 +106,6 @@ var ProjectPlan = AbstractAction.extend({
         this.$buttons.on('click', '.o_timesheet_plan_btn_action', this._onClickControlButton.bind(this));
         // refresh control panel
         this.updateControlPanel({
-            title: this._title,
             cp_content: {
                 $buttons: this.$buttons,
             },

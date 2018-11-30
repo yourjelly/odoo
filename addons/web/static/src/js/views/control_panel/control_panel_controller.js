@@ -26,10 +26,6 @@ var ControlPanelController = mvc.Controller.extend({
         this._super.apply(this, arguments);
 
         this.modelName = params.modelName;
-
-        // the updateIndex is used to prevent concurrent updates of the control
-        // panel depending on asynchronous code to be executed in the wrong order
-        this.updateIndex = 0;
     },
     /**
      * @override
@@ -75,11 +71,10 @@ var ControlPanelController = mvc.Controller.extend({
     /**
      * Updates the content and displays the ControlPanel
      *
-     * @see  ControlPanelRenderer (update)
+     * @see  ControlPanelRenderer (updateContents)
      */
     updateContents: function (status, options) {
-        this.updateIndex++;
-        this.renderer.render(status, options);
+        this.renderer.updateContents(status, options);
     },
     /**
      * Updates the domain of the search view by adding and/or removing filters.

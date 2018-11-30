@@ -40,6 +40,7 @@ var ControlPanelRenderer = Renderer.extend({
         this._super.apply(this, arguments);
         this.controls = params.controls || [];
         this._breadcrumbs = params.breadcrumbs || [];
+        this._title = params.title || '';
         this.withBreadcrumbs = params.withBreadcrumbs;
         this.withSearchBar = params.withSearchBar;
         if (params.template) {
@@ -73,7 +74,7 @@ var ControlPanelRenderer = Renderer.extend({
         };
 
         // if we don't use the default search bar and buttons, we expose the
-        // corresponding area for custom content
+        // corresponding areas for custom content
         if (!this.withSearchBar) {
             this.nodes.$searchview = this.$('.o_cp_searchview');
         }
@@ -81,6 +82,7 @@ var ControlPanelRenderer = Renderer.extend({
             this.nodes.$searchview_buttons = this.$('.o_search_options');
         }
 
+        // render and append custom controls
         this.$controls = $('<div>', {class: 'o_cp_custom_buttons'});
         var hasCustomButtons = false;
         this.controls.forEach(function (node) {
@@ -93,10 +95,15 @@ var ControlPanelRenderer = Renderer.extend({
             this.$controls = $(); // fixme: this is to prevent the controlpanel
                                   // bottom row to take 5px height due to padding
         }
+        this.$controls.prependTo(this.nodes.$buttons);
 
-        this.render({});
+        if (this.withBreadcrumbs) {
+            this._renderBreadcrumbs(this._title);
+        }
 
-        return $.when(this._super.apply(this, arguments), this._renderSearch()).then(function () {
+        var superDef = this._super.apply(this, arguments);
+        var searchDef = this._renderSearch();
+        return $.when(superDef, searchDef).then(function () {
             self._setSearchMenusVisibility();
         });
     },
@@ -118,20 +125,18 @@ var ControlPanelRenderer = Renderer.extend({
         return this.state.facets.slice(-1)[0];
     },
     /**
+     * This function is called when actions call 'updateControlPanel' with
+     * custom contents to insert in the exposed areas.
+     *
      * @param {Object} [status.active_view] the current active view
-     * @param {Array} [status.breadcrumbs] the breadcrumbs to display (see _render_breadcrumbs() for
-     * precise description)
-     * @param {Object} [status.cp_content] dictionnary containing the new ControlPanel jQuery elements
-     * @param {Boolean} [options.clear] set to true to clear from control panel
-     * elements that are not in status.cp_content
+     * @param {Object} [status.cp_content] dictionnary containing the jQuery
+     *   elements to insert in the exposed areas
+     * @param {Boolean} [options.clear=true] set to false to keep control panel
+     *   elements that are not in status.cp_content (useful for partial updates)
      */
-    render: function (status, options) {
-        this._toggleVisibility(!status.hidden);
-
-        options = _.defaults({}, options, {
-            clear: true, // clear control panel by default
-        });
+    updateContents: function (status, options) {
         var new_cp_content = status.cp_content || {};
+        var clear = 'clear' in options ? options.clear : true;
 
         // Detach special controls
         this.$controls.detach();
@@ -142,7 +147,7 @@ var ControlPanelRenderer = Renderer.extend({
         }
         // Detach control_panel old content and attach new elements
         var toDetach = this.nodes;
-        if (options.clear) {
+        if (clear) {
             this._detachContent(toDetach);
         } else {
             this._detachContent(_.pick(toDetach, _.keys(new_cp_content)));
@@ -324,22 +329,6 @@ var ControlPanelRenderer = Renderer.extend({
             .toggleClass('fa-search-minus', this.displaySearchMenu);
         this.$('.o_search_options')
             .toggleClass('o_hidden', !this.displaySearchMenu);
-    },
-    /**
-     * Toggles the visibility of the ControlPanel and detaches or attaches its
-     * contents to clean the DOM
-     *
-     * @private
-     * @param {boolean} visible true to show the control panel, false to hide it
-     */
-    _toggleVisibility: function (visible) {
-        this.do_toggle(visible);
-        if (!visible && !this.$content) {
-            this.$content = this.$el.contents().detach();
-        } else if (this.$content) {
-            this.$content.appendTo(this.$el);
-            this.$content = null;
-        }
     },
     _updateMenus: function () {
         var self = this;
