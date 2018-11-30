@@ -352,6 +352,7 @@ var DateField = Field.extend({
     _getFacetValue: function (value, rawValue) {
         var facet = this._super.apply(this, arguments);
         facet.values[0].value = rawValue;
+        return facet;
     },
 });
 

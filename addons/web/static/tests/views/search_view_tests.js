@@ -469,7 +469,7 @@ QUnit.module('Search View', {
 
     QUnit.module('FilterMenu');
 
-    QUnit.skip('Search date and datetime fields. Support of timezones', function (assert) {
+    QUnit.test('Search date and datetime fields. Support of timezones', function (assert) {
         assert.expect(4);
 
         this.data.partner.fields.birth_datetime = {string: "Birth DateTime", type: "datetime", store: true, sortable: true};
