@@ -159,7 +159,7 @@ QUnit.module('FilterMenu', {
         // open custom filter submenu, select trululu field and enter string "'a'", then click apply
         testUtils.dom.click(filterMenu.$('.o_add_custom_filter'));
         testUtils.fields.editSelect(filterMenu.$('.o_filter_condition select.o_input.o_searchview_extended_prop_field'), 'many2one_field');
-        testUtils.fields.editInput(filterMenu.$('.o_filter_condition .o_searchview_extended_prop_value input'), "'a'");
+        testUtils.fields.editInput(filterMenu.$('.o_filter_condition .o_searchview_extended_prop_value input'), '"a"');
         testUtils.dom.click(filterMenu.$('.o_apply_filter'));
         filterMenu.destroy();
     });
