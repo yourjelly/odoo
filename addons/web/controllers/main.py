@@ -36,7 +36,7 @@ import odoo
 import odoo.modules.registry
 from odoo.api import call_kw, Environment
 from odoo.modules import get_resource_path
-from odoo.tools import crop_image, topological_sort, html_escape, pycompat
+from odoo.tools import crop_image, image_resize_image, topological_sort, html_escape, pycompat
 from odoo.tools.mimetypes import guess_mimetype
 from odoo.tools.translate import _
 from odoo.tools.misc import str2bool, xlwt, file_open
@@ -445,9 +445,9 @@ def limited_image_resize(content, width=None, height=None, crop=False, upper_lim
                 width = 500
             if height > 500:
                 height = 500
-        return odoo.tools.image_resize_image(base64_source=content, size=(width or None, height or None),
-                                             encoding='base64', upper_limit=upper_limit,
-                                             avoid_if_small=avoid_if_small)
+        return image_resize_image(
+            base64_source=content, size=(width or None, height or None), encoding='base64', upper_limit=upper_limit,
+            avoid_if_small=avoid_if_small)
     return content
 
 #----------------------------------------------------------
