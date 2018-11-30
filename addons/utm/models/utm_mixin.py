@@ -10,11 +10,11 @@ class UtmMixin(models.AbstractModel):
     _name = 'utm.mixin'
     _description = 'UTM Mixin'
 
-    campaign_id = fields.Many2one('utm.campaign', 'Campaign',
+    campaign_id = fields.Many2one('utm.campaign', 'Campaign', is_business_field=True,
                                   help="This is a name that helps you keep track of your different campaign efforts, e.g. Fall_Drive, Christmas_Special")
-    source_id = fields.Many2one('utm.source', 'Source',
+    source_id = fields.Many2one('utm.source', 'Source', is_business_field=True,
                                 help="This is the source of the link, e.g. Search Engine, another domain, or name of email list")
-    medium_id = fields.Many2one('utm.medium', 'Medium',
+    medium_id = fields.Many2one('utm.medium', 'Medium', is_business_field=True,
                                 help="This is the method of delivery, e.g. Postcard, Email, or Banner Ad", oldname='channel_id')
 
     @api.model
