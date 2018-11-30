@@ -28,7 +28,7 @@ var ControlPanelController = mvc.Controller.extend({
         this.modelName = params.modelName;
     },
     /**
-     * @override
+     * Called when the control panel is inserted into the DOM
      */
     on_attach_callback: function () {
         this.renderer.on_attach_callback();

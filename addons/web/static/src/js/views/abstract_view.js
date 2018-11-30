@@ -129,7 +129,6 @@ var AbstractView = Factory.extend({
         // be instantiated by the View
         this.controllerParams.displayName = params.action && (params.action.display_name || params.action.name);
         this.controllerParams.isMultiRecord = this.multi_record;
-        this.controllerParams.searchView = params.action && params.action.searchView;
         this.controllerParams.actionViews = params.action ? params.action.views : [];
         this.controllerParams.viewType = this.viewType;
 

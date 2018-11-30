@@ -58,7 +58,6 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
         // those arguments are temporary, they won't be necessary as soon as the
         // ControlPanel will be handled by the View
         this.isMultiRecord = params.isMultiRecord;
-        this.searchView = params.searchView;
         this.actionViews = params.actionViews;
         this.viewType = params.viewType;
     },
