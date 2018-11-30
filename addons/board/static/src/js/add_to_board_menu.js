@@ -81,7 +81,7 @@ var AddToBoardMenu = Widget.extend({
         });
         var controller = actionManager.getCurrentController();
 
-        var context = new Context(this.actionInfo.context);
+        var context = new Context(this.actionInfo.actionContext);
         context.add(searchQuery.context);
         context.add({
             group_by: pyUtils.eval('groupbys', searchQuery.groupBys || [])
@@ -93,7 +93,7 @@ var AddToBoardMenu = Widget.extend({
             }
         });
 
-        var domain = new Domain(this.actionInfo.domain || []);
+        var domain = new Domain(this.actionInfo.actionDomain || []);
         domain = Domain.prototype.normalizeArray(domain.toArray().concat(searchQuery.domain));
 
         var evalutatedContext = pyUtils.eval('context', context);
