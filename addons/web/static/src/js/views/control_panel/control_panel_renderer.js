@@ -128,9 +128,10 @@ var ControlPanelRenderer = Renderer.extend({
      * This function is called when actions call 'updateControlPanel' with
      * custom contents to insert in the exposed areas.
      *
-     * @param {Object} [status.active_view] the current active view
      * @param {Object} [status.cp_content] dictionnary containing the jQuery
      *   elements to insert in the exposed areas
+     * @param {string} [status.title] the title of the current controller, to
+     *   display at the end of the breadcrumbs
      * @param {Boolean} [options.clear=true] set to false to keep control panel
      *   elements that are not in status.cp_content (useful for partial updates)
      */
@@ -138,14 +139,12 @@ var ControlPanelRenderer = Renderer.extend({
         var new_cp_content = status.cp_content || {};
         var clear = 'clear' in options ? options.clear : true;
 
-        // Detach special controls
-        this.$controls.detach();
-
-        // Render the breadcrumbs
         if (this.withBreadcrumbs) {
             this._renderBreadcrumbs(status.title);
         }
-        // Detach control_panel old content and attach new elements
+
+        // detach custom controls so that they can be re-appended afterwards
+        this.$controls.detach();
         var toDetach = this.nodes;
         if (clear) {
             this._detachContent(toDetach);
@@ -153,11 +152,6 @@ var ControlPanelRenderer = Renderer.extend({
             this._detachContent(_.pick(toDetach, _.keys(new_cp_content)));
         }
         this._attachContent(new_cp_content);
-        if (status.active_view_selector) {
-            this._updateSwitchButtons(status.active_view_selector);
-        }
-
-        // Attach special controls
         this.$controls.prependTo(this.nodes.$buttons);
     },
     updateState: function (state) {
@@ -335,17 +329,6 @@ var ControlPanelRenderer = Renderer.extend({
         this.searchMenuTypes.forEach(function (menuType) {
             self.subMenus[menuType].update(self._getMenuItems(menuType));
         });
-    },
-    /**
-     * Removes active class on all switch-buttons and adds it to the one of the
-     * active view
-     *
-     * @private
-     * @param {string} selector the selector of the div to activate
-     */
-    _updateSwitchButtons: function (selector) {
-        this.nodes.$switch_buttons.find('button').removeClass('active');
-        this.$(selector).addClass('active');
     },
 
     //--------------------------------------------------------------------------

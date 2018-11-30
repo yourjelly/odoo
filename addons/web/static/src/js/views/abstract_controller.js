@@ -376,10 +376,13 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
             self.trigger_up('switch_view', {view_type: viewType});
         }, 200, true));
 
+        // highlight active view
         if (config.device.isMobile) {
             // set active view's icon as view switcher button's icon
             var activeView = _.findWhere(views, {type: this.viewType});
             $switchButtons.find('.o_switch_view_button_icon').addClass('fa fa-lg ' + activeView.icon);
+        } else {
+            $switchButtons.filter('.o_cp_switch_' + this.viewType).addClass('active');
         }
 
         return $switchButtons;
@@ -404,11 +407,10 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      * @param {Object} state the state given by the model
      * @returns {Deferred}
      */
-    _update: function (state) {
+    _update: function () {
         // AAB: update the control panel -> this will be moved elsewhere at some point
         var cpContent = _.extend({}, this.controlPanelElements);
         this.updateControlPanel({
-            active_view_selector: '.o_cp_switch_' + this.viewType,
             cp_content: cpContent,
             title: this.getTitle(),
         });
