@@ -3,10 +3,62 @@ odoo.define('web.FavoriteMenu', function (require) {
 
 var config = require('web.config');
 var core = require('web.core');
+var Dialog = require('web.Dialog');
 var DropdownMenu = require('web.DropdownMenu');
 var favorites_submenus_registry = require('web.favorites_submenus_registry');
 
 var _t = core._t;
+
+/**
+ * Widget : Confirmation dialog launched when a user tries to delete a favorite
+ *
+ * Popup containing a proper warning.
+ * It asked the user a confirmation.
+ */
+var ConfirmationDialog = Dialog.extend({
+    template: 'ConfirmationDialog',
+
+    /**
+     * @override
+     * @param {Widget} parent
+     * @param {Object} params
+     * @param {string} params.id, favorite id
+     * @param {function} params.message, warning to print on screen
+     */
+    init: function (parent, params) {
+        this.message = params.message;
+        this.id = params.id;
+        this._super(parent, {
+            title: _t("warning"),
+            size: 'medium',
+            buttons: [
+                {
+                    text: _t("Cancel"),
+                    close: true,
+                },
+                {
+                    text: _t("Ok"),
+                    close: true,
+                    classes: 'btn-primary',
+                    click: _.bind(this._onOkClicked, this),
+                }
+            ],
+        });
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * communicate to the control panel model the id of the favorite to delete
+     *
+     * @private
+     */
+    _onOkClicked: function () {
+        this.trigger_up('item_trashed', {id: this.id});
+    }
+});
 
 var FavoriteMenu = DropdownMenu.extend({
     /*
@@ -89,10 +141,10 @@ var FavoriteMenu = DropdownMenu.extend({
         });
         var globalWarning = _t("This filter is global and will be removed for everybody if you continue.");
         var warning = _t("Are you sure that you want to remove this filter?");
-        if (!confirm(favorite.userId ? warning : globalWarning)) {
-            return;
-        }
-        this.trigger_up('item_trashed', {id: id});
+        new ConfirmationDialog(this, {
+            id: id,
+            message: favorite.userId ? warning : globalWarning
+        }).open();
     },
 });
 

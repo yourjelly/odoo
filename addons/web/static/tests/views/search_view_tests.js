@@ -772,6 +772,40 @@ QUnit.module('Search View', {
         actionManager.destroy();
     });
 
+    QUnit.test('delete an active favorite remove it both in list of favorite and in search bar', function (assert) {
+        assert.expect(2);
+
+        var actionManager = createActionManager({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            intercepts: {
+                load_filters: function (event) {
+                    return $.when([{
+                        context: "{}",
+                        domain: "[]",
+                        id: 7,
+                        is_default: true,
+                        name: "My favorite",
+                        sort: "[]",
+                        user_id: [2, "Mitchell Admin"],
+                    }]).then(event.data.on_success);
+                },
+                delete_filter: function (event) {
+                    event.data.on_success();
+                }
+            },
+        });
+
+        actionManager.doAction(6);
+        testUtils.dom.click(actionManager.$('.o_control_panel .o_search_options button.o_favorites_menu_button'));
+        assert.containsOnce(actionManager, '.o_control_panel .o_searchview_input_container .o_facet_values');
+        testUtils.dom.click(actionManager.$('.o_control_panel .o_search_options .o_favorites_menu span.o_trash_button'));
+        testUtils.dom.click($('div.modal-dialog footer.modal-footer button.btn.btn-primary'));
+        assert.containsNone(actionManager, '.o_control_panel .o_searchview_input_container .o_facet_values');
+        actionManager.destroy();
+    });
+
     QUnit.module('Search Arch');
 
     QUnit.test('arch order of groups of filters preserved', function (assert) {
