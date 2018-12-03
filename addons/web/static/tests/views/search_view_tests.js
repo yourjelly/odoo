@@ -270,11 +270,47 @@ QUnit.module('Search View', {
 
         actionManager.destroy();
     });
+    QUnit.test('navigation with facets', function (assert) {
+        assert.expect(4);
+
+        var actionManager = createActionManager({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+        });
+        actionManager.doAction(1);
+
+        // add a facet
+        testUtils.dom.click(actionManager.$('.o_dropdown_toggler_btn:contains(Group By)'));
+        testUtils.dom.click(actionManager.$('.o_menu_item a'));
+        assert.strictEqual(actionManager.$('.o_searchview .o_searchview_facet').length, 1,
+            "there should be one facet");
+        assert.strictEqual(actionManager.$('.o_searchview input.o_searchview_input')[0], document.activeElement,
+            "searchview input should be focused");
+
+        // press left to focus the facet
+        actionManager.$('.o_searchview_input_container').trigger($.Event('keydown', {
+            which: $.ui.keyCode.LEFT,
+            keyCode: $.ui.keyCode.LEFT,
+        }));
+        assert.strictEqual(actionManager.$('.o_searchview .o_searchview_facet')[0], document.activeElement,
+            "the facet should be focused");
+
+        // press right to focus the facet
+        actionManager.$('.o_searchview_input_container').trigger($.Event('keydown', {
+            which: $.ui.keyCode.RIGHT,
+            keyCode: $.ui.keyCode.RIGHT,
+        }));
+        assert.strictEqual(actionManager.$('.o_searchview input.o_searchview_input')[0], document.activeElement,
+            "searchview input should be focused");
+
+        actionManager.destroy();
+    });
 
     QUnit.module('GroupByMenu');
 
     QUnit.test('click on groupby filter adds a facet', function (assert) {
-        assert.expect(2);
+        assert.expect(1);
 
         var actionManager = createActionManager({
             actions: this.actions,
@@ -286,8 +322,6 @@ QUnit.module('Search View', {
         testUtils.dom.click($('.o_menu_item a'));
         assert.strictEqual($('.o_searchview .o_searchview_facet .o_facet_values span').text().trim(), 'candle',
             'should have a facet with candle name');
-        assert.strictEqual($('.o_searchview input.o_searchview_input')[0], document.activeElement,
-            "searchview input should still be focused");
 
         actionManager.destroy();
     });

@@ -10,6 +10,9 @@ var Widget = require('web.Widget');
 
 var SearchBar = Widget.extend({
     template: 'SearchView.SearchBar',
+    events: _.extend({}, Widget.prototype.events, {
+        'keydown': '_onKeydown',
+    }),
     /**
      * @override
      * @param {Object} [params]
@@ -32,6 +35,7 @@ var SearchBar = Widget.extend({
         this.groupBys = params.groupBys;
 
         this.autoCompleteSources = [];
+        this.searchFacets = [];
     },
     /**
      * @override
@@ -51,6 +55,45 @@ var SearchBar = Widget.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    _getFocusedFacetIndex: function () {
+        return _.findIndex(this.searchFacets, function (searchFacet) {
+            return searchFacet.$el[0] === document.activeElement;
+        });
+    },
+    /**
+     * @private
+     */
+    _focusFollowing: function () {
+        var focusedIndex = this._getFocusedFacetIndex();
+        var $toFocus;
+        if (focusedIndex === this.searchFacets.length - 1) {
+            $toFocus = this.input.$el;
+        } else {
+            $toFocus = this.searchFacets.length && this.searchFacets[focusedIndex + 1].$el;
+        }
+
+        if ($toFocus.length) {
+            $toFocus.focus();
+        }
+    },
+    /**
+     * @private
+     */
+    _focusPreceding: function () {
+        var focusedIndex = this._getFocusedFacetIndex();
+        var $toFocus;
+        if (focusedIndex === -1) {
+            $toFocus = this.searchFacets.length && _.last(this.searchFacets).$el;
+        } else if (focusedIndex === 0) {
+            $toFocus = this.input.$el;
+        } else {
+            $toFocus = this.searchFacets.length && this.searchFacets[focusedIndex - 1].$el;
+        }
+
+        if ($toFocus.length) {
+            $toFocus.focus();
+        }
+    },
     /**
      * Provide auto-completion result for req.term.
      *
@@ -73,8 +116,9 @@ var SearchBar = Widget.extend({
      * @private
      */
     _renderFacet: function (facet) {
-        this.searchFacet = new SearchFacet(this, facet);
-        return this.searchFacet.appendTo(this.$el);
+        var searchFacet = new SearchFacet(this, facet);
+        this.searchFacets.push(searchFacet);
+        return searchFacet.appendTo(this.$el);
     },
     /**
      * @private
@@ -142,6 +186,22 @@ var SearchBar = Widget.extend({
             this.trigger_up('autocompletion_filter', {
                 filterId: filter.id,
             });
+        }
+    },
+    /**
+     * @private
+     * @param {Event} e
+     */
+    _onKeydown: function (e) {
+        switch(e.which) {
+            case $.ui.keyCode.LEFT:
+                this._focusPreceding();
+                e.preventDefault();
+                break;
+            case $.ui.keyCode.RIGHT:
+                this._focusFollowing();
+                e.preventDefault();
+                break;
         }
     },
 });
