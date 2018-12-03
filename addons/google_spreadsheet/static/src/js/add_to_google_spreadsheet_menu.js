@@ -12,8 +12,7 @@ var Widget = require('web.Widget');
 var QWeb = core.qweb;
 
 var AddToGoogleSpreadsheetMenu = Widget.extend({
-    events: _.extend({}, Widget.prototype.events,
-    {
+    events: _.extend({}, Widget.prototype.events, {
         'click .add_to_spreadsheet': '_onAddToSpreadsheetClick',
     }),
 

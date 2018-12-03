@@ -26,31 +26,31 @@ var ActionMixin = {
     template: 'Action',
 
     /**
-    * The action mixin assumes that it is rendered with the 'Action' template.
-    * This template has a special zone ('.o_content') where the content should
-    * be added.  Actions that want to automatically render a template there
-    * should define the contentTemplate key.  In short, client actions should
-    * probably define a contentTemplate key, and not a template key.
-    */
+     * The action mixin assumes that it is rendered with the 'Action' template.
+     * This template has a special zone ('.o_content') where the content should
+     * be added.  Actions that want to automatically render a template there
+     * should define the contentTemplate key.  In short, client actions should
+     * probably define a contentTemplate key, and not a template key.
+     */
     contentTemplate: null,
 
     /**
-    * If an action want to use a control panel, it will be created and
-    * registered in this _controlPanel key (the widget).  The way this control
-    * panel is created is up to the implementation (so, view controllers or
-    * client actions may have different needs).
-    *
-    * Note that most of the time, this key should be set by the framework, not
-    * by the code of the client action.
-    */
+     * If an action want to use a control panel, it will be created and
+     * registered in this _controlPanel key (the widget).  The way this control
+     * panel is created is up to the implementation (so, view controllers or
+     * client actions may have different needs).
+     *
+     * Note that most of the time, this key should be set by the framework, not
+     * by the code of the client action.
+     */
     _controlPanel: null,
 
     /**
-    * String containing the title of the client action (which may be needed to
-    * display in the breadcrumbs zone of the control panel).
-    *
-    * @see _setTitle
-    */
+     * String containing the title of the client action (which may be needed to
+     * display in the breadcrumbs zone of the control panel).
+     *
+     * @see _setTitle
+     */
     _title: '',
 
     /**
