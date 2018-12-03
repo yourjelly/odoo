@@ -16,8 +16,9 @@ var FavoriteMenu = DropdownMenu.extend({
      * @param {Widget} parent
      * @param {Object[]} favorites
      */
-    init: function (parent, favorites) {
+    init: function (parent, favorites, action) {
         this._super(parent, favorites);
+        this.action = action;
         this.isMobile = config.device.isMobile;
         this.dropdownCategory = 'favorite';
         this.dropdownTitle = _t('Favorites');
@@ -42,7 +43,7 @@ var FavoriteMenu = DropdownMenu.extend({
         this.$menu.addClass('o_favorites_menu');
         this.subMenus = [];
         favorites_submenus_registry.values().forEach(function (SubMenu) {
-            var subMenu = new SubMenu(self, params);
+            var subMenu = new SubMenu(self, params, self.action);
             subMenu.appendTo(self.$menu);
             self.subMenus.push(subMenu);
         });

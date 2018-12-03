@@ -21,18 +21,13 @@ var AddToBoardMenu = Widget.extend({
         'keyup .o_add_to_board_input': '_onKeyUp',
     }),
 
-    init: function (parent) {
-        var self = this;
+    init: function (parent, favorites, action) {
         this._super(parent);
+        this.action = action;
         this.isOpen = false;
-        this.trigger_up('get_action_info', {
-            callback: function (info) {
-                self.actionInfo = info;
-            }
-        });
     },
     start: function () {
-        if (this.actionInfo.actionId && this.actionInfo.actionType === 'ir.actions.act_window') {
+        if (this.action.id && this.action.type === 'ir.actions.act_window') {
             this._render();
         }
         return this._super.apply(this, arguments);
@@ -81,7 +76,7 @@ var AddToBoardMenu = Widget.extend({
         });
         var controller = actionManager.getCurrentController();
 
-        var context = new Context(this.actionInfo.actionContext);
+        var context = new Context(this.action.context);
         context.add(searchQuery.context);
         context.add({
             group_by: pyUtils.eval('groupbys', searchQuery.groupBys || [])
@@ -93,7 +88,7 @@ var AddToBoardMenu = Widget.extend({
             }
         });
 
-        var domain = new Domain(this.actionInfo.actionDomain || []);
+        var domain = new Domain(this.action.domain || []);
         domain = Domain.prototype.normalizeArray(domain.toArray().concat(searchQuery.domain));
 
         var evalutatedContext = pyUtils.eval('context', context);
@@ -111,7 +106,7 @@ var AddToBoardMenu = Widget.extend({
         return self._rpc({
                 route: '/board/add_to_dashboard',
                 params: {
-                    action_id: self.actionInfo.actionId || false,
+                    action_id: self.action.id || false,
                     context_to_save: evalutatedContext,
                     domain: domain,
                     view_mode: controller.viewType,
@@ -139,7 +134,7 @@ var AddToBoardMenu = Widget.extend({
         this._replaceElement($el);
         if (this.isOpen) {
             this.$input = this.$('.o_add_to_board_input');
-            this.$input.val(this.actionInfo.actionName);
+            this.$input.val(this.action.name);
             this.$input.focus();
         }
     },

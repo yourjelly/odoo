@@ -48,9 +48,9 @@ var ControlPanelRenderer = Renderer.extend({
         }
         this.context = params.context;
 
-        // TODO
+        // TODO ?
         this.$subMenus = null;
-        this.actionInfo = params.actionInfo;
+        this.action = params.action;
         this.displaySearchMenu = true;
         this.menusSetup = false;
         this.searchMenuTypes = params.searchMenuTypes;
@@ -300,6 +300,7 @@ var ControlPanelRenderer = Renderer.extend({
     },
     _setupMenu: function (menuType) {
         var Menu;
+        var menu;
         if (menuType === 'filter') {
             Menu = FilterMenu;
         }
@@ -312,7 +313,12 @@ var ControlPanelRenderer = Renderer.extend({
         if (menuType === 'favorite') {
             Menu = FavoriteMenu;
         }
-        var menu = new Menu(this, this._getMenuItems(menuType), this.state.fields);
+        if (_.contains(['filter', 'groupBy', 'timeRange'], menuType)) {
+            menu = new Menu(this, this._getMenuItems(menuType), this.state.fields);
+        }
+        if (menuType === 'favorite') {
+            menu = new Menu(this, this._getMenuItems(menuType), this.action);
+        }
         this.subMenus[menuType] = menu;
         return menu.appendTo(this.$subMenus);
     },
@@ -352,10 +358,6 @@ var ControlPanelRenderer = Renderer.extend({
      */
     _onDropdownClicked: function (ev) {
         ev.stopPropagation();
-    },
-    _onGetActionInfo: function (ev) {
-        ev.stopPropagation();
-        ev.data.callback(this.actionInfo);
     },
     _onMore: function () {
         this.displaySearchMenu = !this.displaySearchMenu;

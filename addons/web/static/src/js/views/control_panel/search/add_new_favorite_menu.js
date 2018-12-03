@@ -16,9 +16,11 @@ var AddNewFavoriteMenu = Widget.extend({
         'keyup .o_save_name input': '_onKeyUp',
     }),
 
-    init: function (parent, params) {
+    init: function (parent, params, action) {
         this._super(parent);
         this.favorites = params.favorites;
+        // action should be used to display its name in input
+        this.action = action;
         this.isOpen = false;
     },
     start: function () {
@@ -45,7 +47,9 @@ var AddNewFavoriteMenu = Widget.extend({
     _render: function () {
         this.renderElement();
         if (this.isOpen) {
-            this.$('.o_favorite_name').focus();
+            var $input = this.$('.o_favorite_name input.o_input');
+            $input.val(this.action.name);
+            $input.focus();
         }
     },
     /**

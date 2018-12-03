@@ -163,10 +163,9 @@ var AbstractView = Factory.extend({
             this.searchMenuTypes = [];
         }
         this.controlPanelParams = {
-            // rename
+            // action put somewhere else after some proccessing?
+            action: action,
             actionId: action.id || false,
-            actionName: action.name,
-            actionType: action.type,
             breadcrumbs: params.breadcrumbs,
             context: params.context,
             currentConfiguration: params.currentControlPanelConfiguration,

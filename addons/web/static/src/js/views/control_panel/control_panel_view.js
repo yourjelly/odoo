@@ -26,25 +26,37 @@ var ControlPanelView = Factory.extend({
 
     /**
      * @override
-     * @param {Object} [params]
-     * @param {Object} [params.viewInfo] a controlpanel (or search) fieldsview
+     * @param {Object} [params={}]
+     * @param {Object} [params.action={}]
+     * @param {Object} [params.context={}]
+     * @param {string} [params.currentConfiguration] used to determine
+     *   the control panel model essential content at load. For instance,
+     *   currentConfiguration can be the configuration of an other control panel
+     *   model that we want to use.
+     * @param {string} [params.domain=[]]
+     * @param {string} [params.modelName]
+     * @param {string[]} [params.searchMenuTypes = ['filter', 'groupBy', 'favorite']]
+     *   determines search menus displayed.
+     * @param {string} [params.template] the QWeb template to render
+     * @param {Object} [params.viewInfo={arch: '<controlpanel/>', fields: {}}]
+         a controlpanel (or search) fieldsview
      * @param {string} [params.viewInfo.arch]
-     * @param {string} [params.context={}]
      * @param {boolean} [params.context.no_breadcrumbs=false] if set to true,
      *   breadcrumbs won't be rendered
-     * @param {string} [params.domain=[]]
-     * @param {string} [params.template] the QWeb template to render
-     * @param {string} [params.withBreadcrumbs=true] if set to false,
+     * @param {boolean} [params.withBreadcrumbs=true] if set to false,
      *   breadcrumbs won't be rendered
-     * @param {string} [params.withSearchBar=true] if set to false, no default
+     * @param {boolean} [params.withSearchBar=true] if set to false, no default
      *   search bar will be rendered
+     *
      */
     init: function (params) {
         var self = this;
         this._super();
         params = params || {};
+        var action = params.action || {};
         var viewInfo = params.viewInfo || {arch: '<controlpanel/>', fields: {}};
         var context = _.extend({}, params.context);
+        var domain = params.domain || [];
 
         this.searchDefaults = {};
         Object.keys(context).forEach(function (key) {
@@ -63,17 +75,10 @@ var ControlPanelView = Factory.extend({
         this.rendererParams.context = context;
 
         this.modelParams.context = context;
-        this.modelParams.domain = params.domain || [];
+        this.modelParams.domain = domain;
 
         this.rendererParams.template = params.template;
-        this.rendererParams.actionInfo = {
-            actionId: params.actionId,
-            actionDomain: params.domain,
-            actionContext: params.context,
-            actionType: params.actionType,
-            actionName: params.actionName,
-            modelName: params.modelName
-        };
+        this.rendererParams.action = action;
         this.rendererParams.withBreadcrumbs = !context.no_breadcrumbs && // could we get rid of this ?
                                               params.withBreadcrumbs !== false;
         this.rendererParams.breadcrumbs = params.breadcrumbs;

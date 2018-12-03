@@ -16,17 +16,12 @@ var AddToGoogleSpreadsheetMenu = Widget.extend({
         'click .add_to_spreadsheet': '_onAddToSpreadsheetClick',
     }),
 
-    init: function (parent) {
-        var self = this;
+    init: function (parent, favorites, action) {
         this._super(parent);
-        this.trigger_up('get_action_info', {
-            callback: function (info) {
-                self.actionInfo = info;
-            }
-        });
+        this.action = action;
     },
     start: function () {
-        if (this.actionInfo.actionType === 'ir.actions.act_window') {
+        if (this.action.type === 'ir.actions.act_window') {
             this._render();
         }
         return this._super.apply(this, arguments);
@@ -67,7 +62,7 @@ var AddToGoogleSpreadsheetMenu = Widget.extend({
                 searchQuery = query;
             }
         });
-        var modelName = this.actionInfo.modelName;
+        var modelName = this.action.res_model;
         var list_view = _.findWhere(controller.widget.actionViews, {type: 'list'});
         var list_view_id = list_view ? list_view.viewID : false;
         var domain = searchQuery.domain;
