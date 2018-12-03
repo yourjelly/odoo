@@ -9,7 +9,7 @@ var Widget = require('web.Widget');
 var _t = core._t;
 var _lt = core._lt;
 
-var ExtendedSearchProposition = Widget.extend(/** @lends instance.web.search.ExtendedSearchProposition# */{
+var ExtendedSearchProposition = Widget.extend({
     template: 'SearchView.extended_search.proposition',
     events: {
         'change .o_searchview_extended_prop_field': 'changed',
@@ -25,10 +25,7 @@ var ExtendedSearchProposition = Widget.extend(/** @lends instance.web.search.Ext
         },
     },
     /**
-     * @constructs instance.web.search.ExtendedSearchProposition
-     * @extends instance.web.Widget
-     *
-     * @param parent
+     * @override
      * @param fields
      */
     init: function (parent, fields) {
@@ -46,8 +43,8 @@ var ExtendedSearchProposition = Widget.extend(/** @lends instance.web.search.Ext
     },
     changed: function () {
         var nval = this.$(".o_searchview_extended_prop_field").val();
-        if(this.attrs.selected === null || this.attrs.selected === undefined || nval != this.attrs.selected.name) {
-            this.select_field(_.detect(this.fields, function (x) {return x.name == nval;}));
+        if(this.attrs.selected === null || this.attrs.selected === undefined || nval !== this.attrs.selected.name) {
+            this.select_field(_.detect(this.fields, function (x) {return x.name === nval;}));
         }
     },
     operator_changed: function (e) {
@@ -84,8 +81,9 @@ var ExtendedSearchProposition = Widget.extend(/** @lends instance.web.search.Ext
 
     },
     get_filter: function () {
-        if (this.attrs.selected === null || this.attrs.selected === undefined)
+        if (this.attrs.selected === null || this.attrs.selected === undefined) {
             return null;
+        }
         var field = this.attrs.selected,
             op_select = this.$('.o_searchview_extended_prop_op')[0],
             operator = op_select.options[op_select.selectedIndex];

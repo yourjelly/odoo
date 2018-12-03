@@ -1224,7 +1224,6 @@
 
 <input t-name="SearchView.SearchBarInput" type="text" class="o_searchview_input" accesskey="Q" placeholder="Search..." role="searchbox" aria-haspopup="true"/>
 
-<!-- TODO -->
 <div t-name="SearchView.SearchFacet" tabindex="0" class="o_searchview_facet" role="img" aria-label="search">
 
     <span t-if="widget.facet.type === 'field'" class="o_searchview_facet_label">
@@ -1238,11 +1237,6 @@
     </div>
     <div class="fa fa-sm fa-remove o_facet_remove" role="img" aria-label="Remove" title="Remove"/>
 </div>
-
-<!-- TODO -->
-<!-- <span t-name="SearchView.FacetView.Value">
-    <t t-esc="widget.model.get('label') + (widget.optionLabel ? (': ' + widget.optionLabel) : '')"/>
-</span> -->
 
 <t t-name="SearchView.autocomplete">
     <div class="dropdown-menu o_searchview_autocomplete" role="menu"/>
@@ -1259,65 +1253,6 @@
             <t t-esc="filter.attrs.string or filter.attrs.help or filter.attrs.name or 'Ω'"/>
         </a>
     </t>
-</t>
-<t t-name="SearchView.field">
-    <label t-att-class="'oe_label' + (attrs.help ? '_help' : '')"
-           t-att-title="attrs.help"
-           t-att-for="element_id"
-           t-att-style="style">
-        <t t-esc="attrs.string || attrs.name"/>
-        <span t-if="attrs.help">?</span>
-    </label>
-    <div t-att-style="style">
-        <input type="text" size="15" class="o_input"
-               t-att-name="attrs.name"
-               t-att-autofocus="attrs.default_focus === '1' ? 'autofocus' : undefined"
-               t-att-id="element_id"
-               t-att-value="defaults[attrs.name] || ''"/>
-        <t t-if="filters.length" t-raw="filters.render(defaults)"/>
-    </div>
-</t>
-<t t-name="SearchView.date">
-    <label t-att-class="'oe_label' + (attrs.help ? '_help' : '')"
-           t-att-title="attrs.help"
-           t-att-for="element_id"
-           t-att-style="style">
-        <t t-esc="attrs.string || attrs.name"/>
-        <span t-if="attrs.help">?</span>
-    </label>
-    <div t-att-style="style">
-        <span t-att-id="element_id"/>
-        <t t-if="filters.length" t-raw="filters.render(defaults)"/>
-    </div>
-</t>
-<t t-name="SearchView.field.selection">
-    <label t-att-title="attrs.help"
-           t-att-class="'oe_label' + (attrs.help ? '_help' : '')"
-           t-att-for="element_id"
-           t-att-style="style">
-        <t t-esc="attrs.string || attrs.name"/>
-        <span t-if="attrs.help">?</span>
-    </label>
-    <div t-att-style="style">
-        <select class="o_input"
-                t-att-name="attrs.name"
-                t-att-id="element_id"
-                t-att-autofocus="attrs.default_focus === '1' || undefined">
-            <option t-if="prepend_empty"/>
-            <t t-foreach="attrs.selection" t-as="option">
-                <t t-set="selected" t-value="defaults[attrs.name] === option[0]"/>
-                <option t-if="selected"
-                        t-attf-selected="selected"
-                        t-att-value="option_index">
-                    <t t-esc="option[1]"/>
-                </option>
-                <option t-if="!selected" t-att-value="option_index">
-                    <t t-esc="option[1]"/>
-                </option>
-            </t>
-        </select>
-        <t t-if="filters.length" t-raw="filters.render(defaults)"/>
-    </div>
 </t>
 <t t-name="SearchView.extended_search.proposition">
     <div role="menuitem" class="dropdown-item-text o_filter_condition">

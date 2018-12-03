@@ -1,27 +1,43 @@
-odoo.define('web.SearchBarAutoCompleteWidgets', function (require) {
+odoo.define('web.SearchBarAutoCompleteSources', function (require) {
 "use strict";
 
+var Class = require('web.Class');
 var core = require('web.core');
 var Domain = require('web.Domain');
 var field_utils = require('web.field_utils');
+var mixins = require('web.mixins');
 var pyUtils = require('web.py_utils');
+var ServicesMixin = require('web.ServicesMixin');
 var time = require('web.time');
-var Widget = require('web.Widget');
 
 var _t = core._t;
 var _lt = core._lt;
 
-// TODO: no need to be a widget ; a Class with parented mixin(?) is enough
-var FilterInterface = Widget.extend({
+var FilterInterface = Class.extend(mixins.EventDispatcherMixin, {
     completion_label: _lt("%s"),
+    /**
+     * @override
+     * @param {Object} filter
+     */
     init: function (parent, filter) {
-        this._super.apply(this, arguments);
+        mixins.EventDispatcherMixin.init.call(this);
+        this.setParent(parent);
+
         this.filter = filter;
     },
-    getAutocompletionValues: function (item) {
+    /**
+     * Fetch auto-completion values for the widget.
+     *
+     * The completion values should be an array of objects with keys facet and
+     * label. They will be used by search_bar in @_onAutoCompleteSelected.
+     *
+     * @param {string} value value to getAutocompletionValues
+     * @returns {Deferred<null|Array>}
+     */
+    getAutocompletionValues: function (value) {
         var result;
-        item = item.toLowerCase();
-        if (fuzzy.test(item, this.filter.description)) {
+        value = value.toLowerCase();
+        if (fuzzy.test(value, this.filter.description)) {
             result = [{
                 label: _.str.sprintf(this.completion_label.toString(),
                                          _.escape(this.filter.description)),
@@ -42,7 +58,7 @@ var GroupBy = FilterInterface.extend({
     completion_label: _lt("Group by: %s"),
 });
 
-var Field = FilterInterface.extend({
+var Field = FilterInterface.extend(ServicesMixin, {
     default_operator: '=',
     /**
      * @override
@@ -52,9 +68,9 @@ var Field = FilterInterface.extend({
      */
     init: function (parent, filter, field, context) {
         this._super.apply(this, arguments);
+
         this.field = field;
         this.filter = filter;
-        // TODO: this is a bit four-tout
         this.attrs = _.extend({}, field, filter.attrs);
         this.context = context;
     },
@@ -64,41 +80,44 @@ var Field = FilterInterface.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * Fetch auto-completion values for the widget.
-     *
-     * The completion values should be an array of objects with keys category,
-     * label, value prefixed with an object with keys type=section and label
-     *
-     * @param {String} value value to getAutocompletionValues
-     * @returns {jQuery.Deferred<null|Array>}
+     * @override
      */
     getAutocompletionValues: function (value) {
-        // the returned value will be used by search_bar in @_onAutoCompleteSelected
         return $.when([{
             label: this._getAutocompletionLabel(value),
             facet: this._getFacetValue(value),
         }]);
     },
     /**
-     * @TODO
+     * TODO: the domain logic (getDomain, operator, etc.) should not be put here
+     * (this has nothing to do with the autocomplete sources).
+     *
+     * This method is used by the ControlPanelModel when setting the
+     * `filter_domain`.
+     *
      * @param {Object[]} values
      * @returns {string}
      */
     getDomain: function (values) {
         if (!values.length) { return; }
 
-        var value_to_domain;
+        var valueToDomain;
         var self = this;
         var domain = this.attrs.filter_domain;
         if (domain) {
-            value_to_domain = function (facetValue) {
+            valueToDomain = function (facetValue) {
                 return Domain.prototype.stringToArray(
                     domain,
-                    {self: self._valueFrom(facetValue), raw_value: facetValue.value}  // TODO: what is that?
+                    {
+                        // these are the values that can be used in search view
+                        // fields `filter_domain` attribute
+                        self: self._valueFrom(facetValue),
+                        raw_value: facetValue.value,
+                    }
                 );
             };
         } else {
-            value_to_domain = function (facetValue) {
+            valueToDomain = function (facetValue) {
                 return self._makeDomain(
                     self.attrs.name,
                     self.attrs.operator || self.default_operator,
@@ -106,7 +125,7 @@ var Field = FilterInterface.extend({
                 );
             };
         }
-        var domains = values.map(value_to_domain);
+        var domains = values.map(valueToDomain);
 
         domains = domains.map(Domain.prototype.arrayToString);
         return pyUtils.assembleDomains(domains, 'OR');
@@ -177,7 +196,7 @@ var CharField = Field.extend({
     getAutocompletionValues: function (value) {
         if (_.isEmpty(value)) { return $.when(null); }
         return this._super.apply(this, arguments);
-    }
+    },
 });
 
 var NumberField = Field.extend({
@@ -204,7 +223,7 @@ var IntegerField = NumberField.extend({
         } catch (e) {
             return NaN;
         }
-    }
+    },
 });
 
 var FloatField = NumberField.extend({
@@ -215,32 +234,10 @@ var FloatField = NumberField.extend({
         } catch (e) {
             return NaN;
         }
-    }
+    },
 });
 
-/**
- * @class
- * @extends instance.web.search.Field
- */
 var SelectionField = Field.extend({
-    // TODO
-    // This implementation is a basic <select> field, but it may have to be
-    // altered to be more in line with the GTK client, which uses a combo box
-    // (~ jquery.autocomplete):
-    // * If an option was selected in the list, behave as currently
-    // * If something which is not in the list was entered (via the text input),
-    //   the default domain should become (`ilike` string_value) but **any
-    //   ``context`` or ``filter_domain`` becomes falsy, idem if ``@operator``
-    //   is specified. So at least getDomain needs to be quite a bit
-    //   overridden (if there's no @value and there is no filter_domain and
-    //   there is no @operator, return [[name, 'ilike', str_val]]
-    init: function () {
-        this._super.apply(this, arguments);
-        // prepend empty option if there is no empty option in the selection list
-        this.prepend_empty = !_(this.attrs.selection).detect(function (item) {
-            return !item[1];
-        });
-    },
 
     //--------------------------------------------------------------------------
     // Public
@@ -249,13 +246,13 @@ var SelectionField = Field.extend({
     /**
      * @override
      */
-    getAutocompletionValues: function (needle) {
+    getAutocompletionValues: function (value) {
         var self = this;
         var results = _(this.attrs.selection).chain()
             .filter(function (sel) {
-                var value = sel[0], label = sel[1];
-                if (value === undefined || !label) { return false; }
-                return label.toLowerCase().indexOf(needle.toLowerCase()) !== -1;
+                var selValue = sel[0], label = sel[1];
+                if (selValue === undefined || !label) { return false; }
+                return label.toLowerCase().indexOf(value.toLowerCase()) !== -1;
             })
             .map(function (sel) {
                 return {
@@ -293,11 +290,12 @@ var BooleanField = SelectionField.extend({
      */
     init: function () {
         this._super.apply(this, arguments);
+
         this.attrs.selection = [
             [true, _t("Yes")],
             [false, _t("No")]
         ];
-    }
+    },
 });
 
 var DateField = Field.extend({
@@ -333,12 +331,6 @@ var DateField = Field.extend({
     /**
      * @override
      */
-    _valueFrom: function (facetValue) {
-        return time.date_to_str(facetValue.value);
-    },
-    /**
-     * @override
-     */
     _getAutocompletionLabel: function (value) {
         return _.str.sprintf(_.str.escapeHTML(
             _t("Search %(field)s at: %(value)s")), {
@@ -354,27 +346,35 @@ var DateField = Field.extend({
         facet.values[0].value = rawValue;
         return facet;
     },
+    /**
+     * @override
+     */
+    _valueFrom: function (facetValue) {
+        return time.date_to_str(facetValue.value);
+    },
 });
 
-/**
- * Implementation of the ``datetime`` openerp field type:
- *
- * * Uses the same widget as the ``date`` field type (a simple date)
- *
- * * Builds a slighly more complex, it's a datetime range (includes time)
- *   spanning the whole day selected by the date widget
- *
- * @class
- * @extends instance.web.DateField
- */
 var DateTimeField = DateField.extend({
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
     _valueFrom: function (facetValue) {
         return time.datetime_to_str(facetValue.value);
-    }
+    },
 });
 
 var ManyToOneField = CharField.extend({
     default_operator: {},
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
     /**
      * @override
      */
@@ -395,19 +395,25 @@ var ManyToOneField = CharField.extend({
     /**
      * @override
      */
-    _getFacetValue: function (value) {
-        return {
-            filter: this.filter,
-            values: [{label: value, value: value, operator: 'ilike'}],
-        };
-    },
     _getExpandedFacetValue: function (value) {
         return {
             filter: this.filter,
             values: [{label: value[1], value: value[0]}],
         };
     },
-    _expand: function (needle) {
+    /**
+     * @override
+     */
+    _getFacetValue: function (value) {
+        return {
+            filter: this.filter,
+            values: [{label: value, value: value, operator: 'ilike'}],
+        };
+    },
+    /**
+     * @override
+     */
+    _expand: function (value) {
         var self = this;
         var args = this.attrs.domain;
         if (typeof args === 'string') {
@@ -421,7 +427,7 @@ var ManyToOneField = CharField.extend({
                 model: this.attrs.relation,
                 method: 'name_search',
                 kwargs: {
-                    name: needle,
+                    name: value,
                     args: args,
                     limit: 8,
                     context: this.context,
@@ -437,9 +443,9 @@ var ManyToOneField = CharField.extend({
                 });
             });
     },
-    _valueFrom: function (facetValue) {
-        return facetValue.label;
-    },
+    /**
+     * @override
+     */
     _makeDomain: function (name, operator, facetValue) {
         operator = facetValue.operator || operator;
 
@@ -452,6 +458,12 @@ var ManyToOneField = CharField.extend({
             return [[name, 'child_of', facetValue.value]];
         }
         return this._super(name, operator, facetValue);
+    },
+    /**
+     * @override
+     */
+    _valueFrom: function (facetValue) {
+        return facetValue.label;
     },
 });
 

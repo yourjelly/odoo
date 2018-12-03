@@ -43,6 +43,9 @@ var DropdownMenu = Widget.extend({
     // Public
     //--------------------------------------------------------------------------
 
+    /**
+     * @param {Object} items
+     */
     update: function (items) {
         this.items = items;
         this._renderMenuItems();

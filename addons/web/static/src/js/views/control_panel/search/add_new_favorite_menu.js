@@ -15,7 +15,11 @@ var AddNewFavoriteMenu = Widget.extend({
         'click .o_add_favorite.o_menu_header': '_onMenuHeaderClick',
         'keyup .o_save_name input': '_onKeyUp',
     }),
-
+    /**
+     * @override
+     * @param {Object} params
+     * @param {Object} params.favorites
+     */
     init: function (parent, params) {
         this._super(parent);
         this.favorites = params.favorites;
@@ -31,6 +35,9 @@ var AddNewFavoriteMenu = Widget.extend({
     // Public
     //--------------------------------------------------------------------------
 
+    /**
+     * Closes the menu and re-render the widget.
+     */
     closeMenu: function () {
         this.isOpen = false;
         this._render();
@@ -84,7 +91,7 @@ var AddNewFavoriteMenu = Widget.extend({
         this.closeMenu();
     },
     /**
-     * Hide and display the submenu which allows adding custom filters
+     * Hide and display the submenu which allows adding custom filters.
      *
      * @private
      */

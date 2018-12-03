@@ -2,7 +2,7 @@ odoo.define('web.SearchBar', function (require) {
 "use strict";
 
 var AutoComplete = require('web.AutoComplete');
-var AutoCompleteWidgets = require('web.SearchBarAutoCompleteWidgets');
+var AutoCompleteSources = require('web.SearchBarAutoCompleteSources');
 var core = require('web.core');
 var SearchBarInput = require('web.SearchBarInput');
 var SearchFacet = require('web.SearchFacet');
@@ -10,19 +10,15 @@ var Widget = require('web.Widget');
 
 var SearchBar = Widget.extend({
     template: 'SearchView.SearchBar',
-    custom_events: _.extend({}, Widget.prototype.custom_events, {
-    }),
-    events: _.extend({}, Widget.prototype.events, {
-    }),
     /**
      * @override
      * @param {Object} [params]
      * @param {Object} [params.context]
-     * @param {Object} [params.facets]
+     * @param {Object[]} [params.facets]
      * @param {Object} [params.fields]
-     * @param {Object} [params.filters]
-     * @param {Object} [params.filterFields]
-     * @param {Object} [params.groupBys]
+     * @param {Object[]} [params.filterFields]
+     * @param {Object[]} [params.filters]
+     * @param {Object[]} [params.groupBys]
      */
     init: function (parent, params) {
         this._super.apply(this, arguments);
@@ -35,7 +31,7 @@ var SearchBar = Widget.extend({
         this.filterFields = params.filterFields;
         this.groupBys = params.groupBys;
 
-        this.autoCompleteWidgets = [];
+        this.autoCompleteSources = [];
     },
     /**
      * @override
@@ -56,7 +52,7 @@ var SearchBar = Widget.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * Provide auto-completion result for req.term
+     * Provide auto-completion result for req.term.
      *
      * @private
      * @param {Object} req request to complete
@@ -64,7 +60,7 @@ var SearchBar = Widget.extend({
      * @param {Function} callback
      */
     _getAutoCompleteSources: function (req, callback) {
-        var defs = _.invoke(this.autoCompleteWidgets, 'getAutocompletionValues', req.term);
+        var defs = _.invoke(this.autoCompleteSources, 'getAutocompletionValues', req.term);
         $.when.apply($, defs).then(function () {
             callback(_(arguments).chain()
                 .compact()
@@ -111,14 +107,14 @@ var SearchBar = Widget.extend({
             var field = self.fields[filter.attrs.name];
             var Obj = core.search_widgets_registry.getAny([filter.attrs.widget, field.type]);
             if (Obj) {
-                self.autoCompleteWidgets.push(new (Obj) (self, filter, field, self.context));
+                self.autoCompleteSources.push(new (Obj) (self, filter, field, self.context));
             }
         });
         _.each(this.filters, function (filter) {
-            self.autoCompleteWidgets.push(new AutoCompleteWidgets.Filter(self, filter));
+            self.autoCompleteSources.push(new AutoCompleteSources.Filter(self, filter));
         });
         _.each(this.groupBys, function (filter) {
-            self.autoCompleteWidgets.push(new AutoCompleteWidgets.GroupBy(self, filter));
+            self.autoCompleteSources.push(new AutoCompleteSources.GroupBy(self, filter));
         });
     },
 
@@ -128,7 +124,7 @@ var SearchBar = Widget.extend({
 
     /**
      * @private
-     * @param {Object} e
+     * @param {Event} e
      * @param {Object} ui
      * @param {Object} ui.item selected completion item
      */

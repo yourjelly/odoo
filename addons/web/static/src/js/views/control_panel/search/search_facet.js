@@ -14,6 +14,10 @@ var SearchFacet = Widget.extend({
         'click .o_facet_remove': '_onFacetRemove',
         'keydown': '_onKeydown',
     }),
+    /**
+     * @override
+     * @param {Object} facet
+     */
     init: function (parent, facet) {
         this._super.apply(this, arguments);
 
@@ -30,6 +34,12 @@ var SearchFacet = Widget.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * Get the correct icon according to facet type.
+     *
+     * @private
+     * @returns {string}
+     */
     _getIcon: function () {
         var icon;
         if (this.facet.type === 'filter') {
@@ -43,6 +53,12 @@ var SearchFacet = Widget.extend({
         }
         return icon;
     },
+    /**
+     * Get the correct separator according to facet type.
+     *
+     * @private
+     * @returns {string}
+     */
     _getSeparator: function () {
         var separator;
         if (this.facet.type === 'filter') {
@@ -54,6 +70,12 @@ var SearchFacet = Widget.extend({
         }
         return separator;
     },
+    /**
+     * Get the correct description according to filter.
+     *
+     * @private
+     * @returns {string}
+     */
     _getFilterDescription: function (filter) {
         if (filter.type === 'field') {
             var values = _.pluck(filter.autoCompleteValues, 'label');
@@ -85,15 +107,23 @@ var SearchFacet = Widget.extend({
     // Handlers
     //--------------------------------------------------------------------------
 
+    /**
+     * @private
+     * @param {Event} e
+     */
+    _onFacetRemove: function () {
+        this.trigger_up('facet_removed', {group: this.facet});
+    },
+    /**
+     * @private
+     * @param {Event} e
+     */
     _onKeydown: function (e) {
         switch (e.which) {
             case $.ui.keyCode.BACKSPACE:
                 this.trigger_up('facet_removed', {group: this.facet});
                 break;
         }
-    },
-    _onFacetRemove: function () {
-        this.trigger_up('facet_removed', {group: this.facet});
     },
 });
 

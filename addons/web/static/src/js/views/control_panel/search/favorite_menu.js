@@ -12,9 +12,7 @@ var _t = core._t;
 var FavoriteMenu = DropdownMenu.extend({
     /*
      * override
-     *
-     * @param {Widget} parent
-     * @param {Object[]} favorites
+     * @param {Object} action
      */
     init: function (parent, favorites, action) {
         this._super(parent, favorites);
@@ -29,10 +27,10 @@ var FavoriteMenu = DropdownMenu.extend({
 
     },
     /**
-     * render the template used to register a new favorite and append it
-     * to the basic dropdown menu
+     * Render the template used to register a new favorite and append it
+     * to the basic dropdown menu.
      *
-     * @private
+     * @override
      */
     start: function () {
         var self = this;
@@ -71,7 +69,6 @@ var FavoriteMenu = DropdownMenu.extend({
      * override
      *
      * @private
-     * @param {jQueryEvent} event
      */
     _onBootstrapClose: function () {
         this._super.apply(this, arguments);

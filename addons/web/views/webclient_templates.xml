@@ -267,7 +267,7 @@
         <script type="text/javascript" src="/web/static/src/js/views/control_panel/control_panel_view.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/control_panel/mobile_control_panel_controller.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/control_panel/mobile_control_panel_renderer.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/search_bar_autocomplete_widgets.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/search_bar_autocomplete_sources.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/search_bar_input.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/search_facet.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/search_bar.js"></script>

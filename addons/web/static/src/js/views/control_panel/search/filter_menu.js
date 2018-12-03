@@ -21,7 +21,10 @@ var FilterMenu = DropdownMenu.extend({
         'click .o_add_condition': '_onAddCondition',
         'click .o_apply_filter': '_onApplyClick',
     }),
-
+    /**
+     * @override
+     * @param {Object} fields
+     */
     init: function (parent, filters, fields) {
         this._super(parent, filters);
 
@@ -43,17 +46,17 @@ var FilterMenu = DropdownMenu.extend({
         this.dropdownStyle.mainButton.class = 'o_filters_menu_button ' +
                                                 this.dropdownStyle.mainButton.class;
     },
-
     /**
-     * render the template used to add a new custom filter and append it
-     * to the basic dropdown menu
+     * Render the template used to add a new custom filter and append it
+     * to the basic dropdown menu.
      *
-     * @private
+     * @override
      */
     start: function () {
         this.$menu = this.$('.o_dropdown_menu');
         this.$menu.addClass('o_filters_menu');
         this._renderGeneratorMenu();
+        return this._super.apply(this, arguments);
     },
 
     //--------------------------------------------------------------------------
@@ -154,11 +157,13 @@ var FilterMenu = DropdownMenu.extend({
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
+
     /**
      * @private
      * @param {MouseEvent} event
      */
     _onAddCondition: function (event) {
+        event.stopPropagation();
         this._appendProposition();
     },
     /**

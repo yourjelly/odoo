@@ -79,22 +79,27 @@ var GroupByMenu = DropdownMenu.extend({
         });
     },
 
-    // /**
-    //  * render the template used to add a new custom groupby and append it
-    //  * to the basic dropdown menu
-    //  *
-    //  * @private
-    //  */
+    /**
+     * Render the template used to add a new custom groupby and append it
+     * to the basic dropdown menu.
+     *
+     * @override
+     */
     start: function () {
         this.$menu = this.$('.o_dropdown_menu');
         this.$menu.addClass('o_group_by_menu');
         this._renderGeneratorMenu();
+        return this._super.apply(this, arguments);
     },
 
     //--------------------------------------------------------------------------
-    // Private
+    // Public
     //--------------------------------------------------------------------------
 
+    /**
+     * @override
+     * @param {Object[]} groupBys
+     */
     update: function (groupBys) {
         this._super.apply(this, arguments);
         this.presentedFields = this._setPresentedFields(groupBys);
@@ -105,10 +110,10 @@ var GroupByMenu = DropdownMenu.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * method called via the 'Add Custom Groupby' menu to create
-     * a new groupby and add it (activated) to the menu
+     * Method called via the 'Add Custom Groupby' menu to create
+     * a new groupby and add it (activated) to the menu.
      * In case the field is of type date, it is activated using
-     * the option determined by the parameter 'DEFAULT_INTERVAL'
+     * the option determined by the parameter 'DEFAULT_INTERVAL'.
      *
      * @private
      * @param {string} fieldName
@@ -166,7 +171,7 @@ var GroupByMenu = DropdownMenu.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * toggle the 'Add Custom Group'
+     * Toggles the 'Add Custom Group'.
      *
      * @private
      * @param {MouseEvent} event
