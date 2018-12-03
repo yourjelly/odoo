@@ -362,6 +362,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
 
         var template = config.device.isMobile ? 'ControlPanel.SwitchButtons.Mobile' : 'ControlPanel.SwitchButtons';
         var $switchButtons = $(QWeb.render(template, {
+            viewType: this.viewType,
             views: views,
         }));
         // create bootstrap tooltips
@@ -375,13 +376,10 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
             self.trigger_up('switch_view', {view_type: viewType});
         }, 200, true));
 
-        // highlight active view
+        // set active view's icon as view switcher button's icon in mobile
         if (config.device.isMobile) {
-            // set active view's icon as view switcher button's icon
             var activeView = _.findWhere(views, {type: this.viewType});
             $switchButtons.find('.o_switch_view_button_icon').addClass('fa fa-lg ' + activeView.icon);
-        } else {
-            $switchButtons.filter('.o_cp_switch_' + this.viewType).addClass('active');
         }
 
         return $switchButtons;
