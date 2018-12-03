@@ -6,21 +6,6 @@
          template
     -->
     <rng:include href="common.rng"/>
-    <rng:define name="search">
-        <rng:element name="search">
-            <rng:ref name="overload"/>
-            <rng:optional><rng:attribute name="string"/></rng:optional>
-            <rng:zeroOrMore>
-                <rng:choice>
-                    <rng:ref name="field"/>
-                    <rng:ref name="group"/>
-                    <rng:ref name="separator"/>
-                    <rng:ref name="filter"/>
-                    <rng:element name="newline"><rng:empty/></rng:element>
-                </rng:choice>
-            </rng:zeroOrMore>
-        </rng:element>
-    </rng:define>
     <rng:start>
         <rng:choice>
             <rng:ref name="search" />

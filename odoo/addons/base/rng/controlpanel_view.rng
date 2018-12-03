@@ -2,11 +2,8 @@
 <rng:grammar xmlns:rng="http://relaxng.org/ns/structure/1.0"
              xmlns:a="http://relaxng.org/ns/annotation/1.0"
              datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
-    <!-- Handling of element overloading when inheriting from a base
-         template
-    -->
     <rng:include href="common.rng"/>
-    <rng:include href="search_view.rng"/>
+
     <rng:define name="controlpanel">
         <rng:element name="controlpanel">
             <rng:ref name="overload"/>
@@ -25,7 +22,9 @@
             </rng:zeroOrMore>
         </rng:element>
     </rng:define>
+
     <rng:start>
         <rng:ref name="controlpanel"/>
     </rng:start>
+
 </rng:grammar>

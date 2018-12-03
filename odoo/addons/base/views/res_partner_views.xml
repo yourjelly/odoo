@@ -444,45 +444,37 @@
             </field>
         </record>
 
-       <record id="res_partner_controlpanel_view" model="ir.ui.view">
-            <field name="name">res.partner.controlpanel</field>
+        <record id="view_res_partner_filter" model="ir.ui.view">
+            <field name="name">res.partner.select</field>
             <field name="model">res.partner</field>
             <field name="arch" type="xml">
                 <controlpanel>
                     <controls>
                         <button name="crm.crm_lead_opportunities_tree_view" type="action" class="btn-primary" string="Open Pipeline"/>
                     </controls>
-               </controlpanel>
-            </field>
-        </record>
-
-       <record id="view_res_partner_filter" model="ir.ui.view">
-            <field name="name">res.partner.select</field>
-            <field name="model">res.partner</field>
-            <field name="arch" type="xml">
-                <search string="Search Partner">
-                   <field name="name"
-                       filter_domain="['|','|',('display_name','ilike',self),('ref','=',self),('email','ilike',self)]"/>
-                   <field name="parent_id" domain="[('is_company','=',True)]" operator="child_of"/>
-                   <filter name="filter_my_partners" help="My Contacts"
-                           domain="[('user_id','=',uid)]"/>
-                   <separator/>
-                   <filter string="Individuals" name="type_person" domain="[('is_company','=',False)]"/>
-                   <filter string="Companies" name="type_company" domain="[('is_company','=',True)]"/>
-                   <separator/>
-                   <filter string="Customers" name="customer" domain="[('customer','=',True), ('parent_id', '=', False)]"/>
-                   <filter string="Vendors" name="supplier" domain="[('supplier','=',True), ('parent_id', '=', False)]"/>
-                   <filter string="Archived" name="inactive" domain="[('active','=',False)]"/>
-                   <separator/>
-                   <field name="category_id" string="Tag" filter_domain="[('category_id','ilike', self)]"/>
-                   <field name="user_id"/>
-                   <field name="phone" filter_domain="['|',('phone','ilike',self),('mobile','=',self)]"/>
-                   <group expand="0" name="group_by" string="Group By">
-                       <filter name="salesperson" string="Salesperson" domain="[]" context="{'group_by' : 'user_id'}" />
-                       <filter name="group_company" string="Company" context="{'group_by': 'parent_id'}"/>
-                       <filter name="group_country" string="Country" context="{'group_by': 'country_id'}"/>
-                   </group>
-               </search>
+                    <search string="Search Partner">
+                        <field name="name"
+                            filter_domain="['|','|',('display_name','ilike',self),('ref','=',self),('email','ilike',self)]"/>
+                        <field name="parent_id" domain="[('is_company','=',True)]" operator="child_of"/>
+                        <filter name="filter_my_partners" help="My Contacts" domain="[('user_id','=',uid)]"/>
+                        <separator/>
+                        <filter string="Individuals" name="type_person" domain="[('is_company','=',False)]"/>
+                        <filter string="Companies" name="type_company" domain="[('is_company','=',True)]"/>
+                        <separator/>
+                        <filter string="Customers" name="customer" domain="[('customer','=',True), ('parent_id', '=', False)]"/>
+                        <filter string="Vendors" name="supplier" domain="[('supplier','=',True), ('parent_id', '=', False)]"/>
+                        <filter string="Archived" name="inactive" domain="[('active','=',False)]"/>
+                        <separator/>
+                        <field name="category_id" string="Tag" filter_domain="[('category_id','ilike', self)]"/>
+                        <field name="user_id"/>
+                        <field name="phone" filter_domain="['|',('phone','ilike',self),('mobile','=',self)]"/>
+                        <group expand="0" name="group_by" string="Group By">
+                            <filter name="salesperson" string="Salesperson" domain="[]" context="{'group_by' : 'user_id'}" />
+                            <filter name="group_company" string="Company" context="{'group_by': 'parent_id'}"/>
+                            <filter name="group_country" string="Country" context="{'group_by': 'country_id'}"/>
+                        </group>
+                    </search>
+                </controlpanel>
             </field>
         </record>
 
