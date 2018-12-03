@@ -21,9 +21,9 @@ var AddToBoardMenu = Widget.extend({
         'keyup .o_add_to_board_input': '_onKeyUp',
     }),
 
-    init: function (parent, favorites, action) {
+    init: function (parent, params) {
         this._super(parent);
-        this.action = action;
+        this.action = params.action;
         this.isOpen = false;
     },
     start: function () {

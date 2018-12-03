@@ -16,11 +16,10 @@ var AddNewFavoriteMenu = Widget.extend({
         'keyup .o_save_name input': '_onKeyUp',
     }),
 
-    init: function (parent, params, action) {
+    init: function (parent, params) {
         this._super(parent);
         this.favorites = params.favorites;
-        // action should be used to display its name in input
-        this.action = action;
+        this.action = params.action;
         this.isOpen = false;
     },
     start: function () {

@@ -16,9 +16,9 @@ var AddToGoogleSpreadsheetMenu = Widget.extend({
         'click .add_to_spreadsheet': '_onAddToSpreadsheetClick',
     }),
 
-    init: function (parent, favorites, action) {
+    init: function (parent, params) {
         this._super(parent);
-        this.action = action;
+        this.action = params.action;
     },
     start: function () {
         if (this.action.type === 'ir.actions.act_window') {

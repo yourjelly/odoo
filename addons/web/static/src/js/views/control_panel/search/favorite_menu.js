@@ -38,12 +38,13 @@ var FavoriteMenu = DropdownMenu.extend({
         var self = this;
         var params = {
             favorites: this.items,
+            action: this.action,
         };
         this.$menu = this.$('.o_dropdown_menu');
         this.$menu.addClass('o_favorites_menu');
         this.subMenus = [];
         favorites_submenus_registry.values().forEach(function (SubMenu) {
-            var subMenu = new SubMenu(self, params, self.action);
+            var subMenu = new SubMenu(self, params);
             subMenu.appendTo(self.$menu);
             self.subMenus.push(subMenu);
         });
