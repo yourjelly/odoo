@@ -1025,7 +1025,7 @@ QUnit.module('Search View', {
     });
 
     QUnit.test('Customizing filter does not close the filter dropdown', function (assert) {
-        assert.expect(4);
+        assert.expect(3);
         var self = this;
 
         _.each(this.data.partner.records.slice(), function (rec) {
@@ -1051,36 +1051,28 @@ QUnit.module('Search View', {
             res_id: 1,
         });
 
-        form.$('.o_input').click();
-        $('.ui-autocomplete .ui-menu-item:contains(Search More)').mouseenter().click();
+        testUtils.fields.many2one.clickOpenDropdown('bar');
+        testUtils.fields.many2one.clickItem('bar', 'Search More');
 
-        var $modal = $('.modal-dialog.modal-lg');
-        assert.strictEqual($modal.length, 1, 'Modal Opened');
+        assert.containsOnce(document.body, '.modal');
 
-        $modal.find('.o_search_options button:contains(Filters)').click();
+        testUtils.dom.click($('.modal .o_filters_menu_button'));
 
-        var $filterDropDown = $modal.find('.o_dropdown_menu.show');
+        var $filterDropdown = $('.modal .o_filters_menu');
+        testUtils.dom.click($filterDropdown.find('.o_add_custom_filter'));
 
-        $filterDropDown.find('button:contains(Add Custom Filter)').click();
-
-        assert.ok($filterDropDown.find('button:contains(Add Custom Filter)').hasClass('o_open_menu'),
-            'The right dropdown is open');
-
-        var $filterInputs = $filterDropDown.find('.o_input');
-
-        assert.strictEqual($filterInputs.length, 3,
-            'The custom filter builder has 3 elements');
+        assert.containsN($filterDropdown, '.o_input', 3);
 
         // We really are interested in the click event
         // We do it twice on each input to make sure
         // the parent dropdown doesn't react to any of it
-        _.each($filterInputs, function (input) {
+        _.each($filterDropdown.find('input'), function (input) {
             var $input = $(input);
             $input.click();
             $input.click();
         });
 
-        assert.ok($filterDropDown.is(':visible'));
+        assert.isVisible($filterDropdown);
 
         form.destroy();
     });

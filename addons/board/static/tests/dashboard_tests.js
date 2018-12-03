@@ -766,23 +766,26 @@ QUnit.test('save two searches to dashboard', function (assert) {
 
     var filter_count = 0;
     // Add a first filter
-    $('span.fa-filter').click();
-    $('.o_add_custom_filter:visible').click();
-    $('.o_searchview_extended_prop_value .o_input').val('a')
-    $('.o_apply_filter').click();
+    testUtils.dom.click(actionManager.$('.o_filters_menu_button'));
+    testUtils.dom.click(actionManager.$('.o_add_custom_filter'));
+    actionManager.$('.o_searchview_extended_prop_value .o_input').val('a');
+    testUtils.dom.click(actionManager.$('.o_apply_filter'));
     // Add it to dashboard
-    $('.o_add_to_dashboard_button').click();
+    testUtils.dom.click(actionManager.$('.o_favorites_menu_button'));
+    testUtils.dom.click(actionManager.$('.o_add_to_board'));
+    testUtils.dom.click(actionManager.$('.o_add_to_board_confirm_button'));
     // Remove it
-    $('.o_facet_remove').click();
+    testUtils.dom.click(actionManager.$('.o_facet_remove'));
 
     // Add the second filter
-    $('span.fa-filter').click();
-    $('span.fa-filter').click();
-    $('.o_add_custom_filter:visible').click();
-    $('.o_searchview_extended_prop_value .o_input').val('b')
-    $('.o_apply_filter').click();
+    testUtils.dom.click(actionManager.$('.o_filters_menu_button'));
+    testUtils.dom.click(actionManager.$('.o_add_custom_filter'));
+    actionManager.$('.o_searchview_extended_prop_value .o_input').val('b');
+    testUtils.dom.click(actionManager.$('.o_apply_filter'));
     // Add it to dashboard
-    $('.o_add_to_dashboard_button').click();
+    testUtils.dom.click(actionManager.$('.o_favorites_menu_button'));
+    testUtils.dom.click(actionManager.$('.o_add_to_board'));
+    testUtils.dom.click(actionManager.$('.o_add_to_board_confirm_button'));
 
     actionManager.destroy();
 });
