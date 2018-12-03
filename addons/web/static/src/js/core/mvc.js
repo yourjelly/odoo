@@ -2,7 +2,31 @@ odoo.define('web.mvc', function (require) {
 "use strict";
 
 /**
- * TODO: doc (explain why mrc)
+ * This file contains a 'formalization' of a MVC pattern, applied to Odoo
+ * idioms.
+ *
+ * For a simple widget/component, this is definitely overkill.  However, when
+ * working on complex systems, such as Odoo views (or the control panel, or some
+ * client actions), it is useful to clearly separate the code in concerns.
+ *
+ * We define here 4 classes: Factory, Model, Renderer, Controller.  Note that
+ * for various historical reasons, we use the term Renderer instead of View. The
+ * main issue is that the term 'View' is used way too much in Odoo land, and
+ * adding it would increase the confusion.
+ *
+ * In short, here are the responsabilities of the four classes:
+ * - Model: this is where the main state of the system lives.  This is the part
+ *     that will talk to the server, process the results and is the owner of the
+ *     state
+ * - Renderer: this is the UI code: it should only be concerned with the look
+ *     and feel of the system: rendering, binding handlers, ...
+ * - Controller: coordinates the model with the renderer and the parents widgets.
+ *     This is more a 'plumbing' widget.
+ * - Factory: setting up the MRC components is a complex task, because each of
+ *     them needs the proper arguments/options, it needs to be extensible, they
+ *     needs to be created in the proper order, ...  The job of the factory is
+ *     to process all the various arguments, and make sure each component is as
+ *     simple as possible.
  */
 
 var ajax = require('web.ajax');
@@ -11,6 +35,15 @@ var mixins = require('web.mixins');
 var ServicesMixin = require('web.ServicesMixin');
 var Widget = require('web.Widget');
 
+
+/**
+ * Owner of the state, this component is tasked with fetching data, processing
+ * it, updating it, ...
+ *
+ * Note that this is not a widget: it is a class which has not UI representation.
+ *
+ * @class Model
+ */
 var Model = Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
     /**
      * @param {Widget} parent
@@ -46,6 +79,12 @@ var Model = Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
     },
 });
 
+/**
+ * Only responsability of this component is to display the user interface, and
+ * react to user changes.
+ *
+ * @class Renderer
+ */
 var Renderer = Widget.extend({
     /**
      * @override
@@ -58,6 +97,11 @@ var Renderer = Widget.extend({
     },
 });
 
+/**
+ * The controller has to coordinate between parent, renderer and model.
+ *
+ * @class Controller
+ */
 var Controller = Widget.extend({
     /**
      * @override
@@ -100,6 +144,9 @@ var Factory = Class.extend({
         Renderer: Renderer,
         Controller: Controller,
     },
+    /**
+     * @override
+     */
     init: function () {
         this.rendererParams = {};
         this.controllerParams = {};
