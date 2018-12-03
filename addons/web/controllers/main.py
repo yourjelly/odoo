@@ -1046,10 +1046,11 @@ class Binary(http.Controller):
     def content_common(self, xmlid=None, model='ir.attachment', id=None, field='datas',
                        filename=None, filename_field='datas_fname', unique=None, mimetype=None,
                        download=None, data=None, token=None, access_token=None, **kw):
-        status, headers, content = binary_content(
+
+        status, headers, content = request.registry['ir.http'].binary_content(
             xmlid=xmlid, model=model, id=id, field=field, unique=unique, filename=filename,
-            filename_field=filename_field, download=download, mimetype=mimetype,
-            access_token=access_token)
+            filename_field=filename_field, download=download, mimetype=mimetype, access_token=access_token)
+
         if status == 304:
             response = werkzeug.wrappers.Response(status=status, headers=headers)
         elif status == 301:
@@ -1089,7 +1090,7 @@ class Binary(http.Controller):
         :param signature: used to give a unique value based on the file content (like the checksum) to
         prevent cache mismatch.
         """
-        status, headers, content = binary_content(
+        status, headers, content = request.registry['ir.http'].binary_content(
             xmlid=xmlid, model=model, id=id, field=field, unique=unique, filename=filename,
             filename_field=filename_field, download=download, mimetype=mimetype,
             default_mimetype='image/png', access_token=access_token)

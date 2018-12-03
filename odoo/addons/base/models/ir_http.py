@@ -74,6 +74,10 @@ class IrHttp(models.AbstractModel):
     _name = 'ir.http'
     _description = "HTTP Routing"
 
+    #------------------------------------------------------
+    # Routing map
+    #------------------------------------------------------
+
     @classmethod
     def _get_converters(cls):
         return {'model': ModelConverter, 'models': ModelsConverter, 'int': SignedIntConverter}
@@ -236,13 +240,121 @@ class IrHttp(models.AbstractModel):
         if hasattr(cls, '_routing_map'):
             del cls._routing_map
 
-    @classmethod
-    def content_disposition(cls, filename):
-        return content_disposition(filename)
+    #------------------------------------------------------
+    # Binary server
+    #------------------------------------------------------
 
     @classmethod
     def _xmlid_to_obj(cls, env, xmlid):
         return env.ref(xmlid, False)
+
+    @classmethod
+    def _binary_security_check(cls, xmlid=None, model=None, id=None, field='datas', access_token=None, env=None):
+        # get object and content
+        env = env or request.env
+        record = None
+        if xmlid:
+            record = cls._xmlid_to_obj(env, xmlid)
+        elif id and model in env.registry:
+            record = env[model].browse(int(id))
+
+        # obj exists
+        if not record or not record.exists() or field not in record:
+            return None, 404
+
+        # access token grant access
+        if model == 'ir.attachment' and access_token:
+            record = record.sudo()
+            if not consteq(record.access_token or u'', access_token):
+                return None, 403
+
+        # check read access
+        try:
+            last_update = record['__last_update']
+        except AccessError:
+            return None, 403
+        # TODO: check group of filename_field fields
+        #if hasgroup() not needed for field because only for ir attachment
+
+        return record, 202
+
+    @classmethod
+    def _binary_ir_attachment_redirect_content(cls, record, default_mimetype='application/octet-stream'):
+        # mainly used for theme images attachemnts
+        # sdlfjsdqmlfjsqmldf
+        status = content = filename = mimetype = None
+        if record.type == 'url' and record.url:
+            # if url in in the form /somehint server locally
+            url_match = re.match("^/(\w+)/(.+)$", record.url)
+            if url_match:
+                module = url_match.group(1)
+                module_path = get_module_path(module)
+                module_resource_path = get_resource_path(module, url_match.group(2))
+
+                if module_path and module_resource_path:
+                    module_path = os.path.join(os.path.normpath(module_path), '')  # join ensures the path ends with '/'
+                    module_resource_path = os.path.normpath(module_resource_path)
+                    if module_resource_path.startswith(module_path):
+                        with open(module_resource_path, 'rb') as f:
+                            content = base64.b64encode(f.read())
+#                        last_update = pycompat.text_type(os.path.getmtime(module_resource_path))
+                        status = 200
+                        filename = os.path.basename(module_resource_path)
+                        mimetype = guess_mimetype(base64.b64decode(content), default=default_mimetype)
+            else:
+                status = 301
+                content = record.url
+
+        filehash = '"%s"' % hashlib.md5(pycompat.to_text(content).encode('utf-8')).hexdigest()
+
+        return status, content, filename, mimetype, filehash
+
+    @classmethod
+    def _binary_record_content(
+            cls, record, model='ir.attachment', field='datas', filename=None,
+            filename_field='datas_fname', default_mimetype='application/octet-stream', env=None):
+        env = env or request.env
+
+        mimetype, content, filehash = 'mimetype' in record and record.mimetype or False, None, 'checksum' in record and record['checksum']
+
+        if getattr(env[model]._fields[field], 'attachment', False):
+            res_record = env['ir.attachment'].search_read(domain=[('res_model', '=', model), ('res_id', '=', record.id), ('res_field', '=', field)], fields=['datas', 'mimetype', 'checksum'], limit=1)
+            if res_record:
+                mimetype = res_record[0]['mimetype']
+                content = res_record[0]['datas']
+                filehash = res_record[0]['checksum']
+
+        if not content:
+            content = record[field] or ''
+
+        # filename
+        if not filename:
+            if filename_field in record:
+                filename = record[filename_field]
+            else:
+                filename = "%s-%s-%s" % (record._name, record.id, field)
+
+        if not mimetype:
+            mimetype = guess_mimetype(base64.b64decode(content), default=default_mimetype)
+
+        if not filehash:
+            filehash = '"%s"' % hashlib.md5(pycompat.to_text(content).encode('utf-8')).hexdigest()
+
+        return 200, content, filename, mimetype, filehash
+
+    @classmethod
+    def _binary_http_response(cls, status, content, filename, mimetype, unique, filehash=None, download=False):
+        headers = [('Content-Type', mimetype), ('X-Content-Type-Options', 'nosniff')]
+        # cache
+        etag = bool(request) and request.httprequest.headers.get('If-None-Match')
+        status = status or (304 if etag == filehash else 200)
+        headers.append(('ETag', filehash))
+        headers.append(('Cache-Control', 'max-age=%s' % (STATIC_CACHE if unique else 0)))
+        # content-disposition default name
+        if download:
+            headers.append(('Content-Disposition', content_disposition(filename)))
+
+        return (status, headers, content)
 
     @classmethod
     def binary_content(cls, xmlid=None, model='ir.attachment', id=None, field='datas',
@@ -270,135 +382,25 @@ class IrHttp(models.AbstractModel):
         :param Environment env: by default use request.env
         :returns: (status, headers, content)
         """
-        env = env or request.env
+        record, status = cls._binary_security_check(xmlid=xmlid, model=model, id=id, field=field, access_token=access_token, env=env)
 
-        # get object and content
-        obj = None
-        if xmlid:
-            obj = cls._xmlid_to_obj(env, xmlid)
-        elif id and model in env.registry:
-            obj = env[model].browse(int(id))
-        # obj exists
-        if not obj or not obj.exists() or field not in obj:
-            return (404, [], None)
+        if not record:
+            return (status or 404, [], None)
 
-        # access token grant access
-        if model == 'ir.attachment' and access_token:
-            obj = obj.sudo()
-            if not consteq(obj.access_token or u'', access_token):
-                return (403, [], None)
+        # special cas for ir attachement redirections
 
-        # check read access
-        try:
-            last_update = obj['__last_update']
-        except AccessError:
-            return (403, [], None)
+        content, headers, status = None, [], None
 
-        return cls._serve_data(obj, model=model, id=id, field=field,
-                               unique=unique, filename=filename, filename_field=filename_field, download=download,
-                               default_mimetype=default_mimetype, env=env)
-
-    @classmethod
-    def _serve_data(cls, obj, model='ir.attachment', id=None, field='datas',
-                    unique=False, filename=None, filename_field='datas_fname', download=False,
-                    default_mimetype='application/octet-stream', env=None):
-
-        status, headers, content = None, [], None
-
-        content, status, filename = cls._get_url(obj=obj, model=model, filename=filename,
-                                                 status=status, content=content)
-
+        if record._name == 'ir.attachment':
+            status, content, filename, mimetype, filehash = cls._binary_ir_attachment_redirect_content(record, default_mimetype=default_mimetype)
         if not content:
-            content = obj[field] or ''
+            status, content, filename, mimetype, filehash = cls._binary_record_content(
+                record, model=model, field=field, filename=None, filename_field=filename_field,
+                default_mimetype='application/octet-stream', env=env)
 
-        # filename
-        if not filename:
-            if filename_field in obj:
-                filename = obj[filename_field]
-            else:
-                filename = "%s-%s-%s" % (obj._name, obj.id, field)
+        status, headers, content = cls._binary_http_response(
+            status, content, filename, mimetype, unique, filehash=False, download=download)
 
-        # mimetype
-        mimetype = 'mimetype' in obj and obj.mimetype or False
-        if not mimetype:
-            if filename:
-                mimetype = mimetypes.guess_type(filename)[0]
-            if not mimetype and getattr(env[model]._fields[field], 'attachment', False):
-                # for binary fields, fetch the ir_attachement for mimetype check
-                attach_mimetype = env['ir.attachment'].search_read(
-                    domain=[('res_model', '=', model), ('res_id', '=', id), ('res_field', '=', field)],
-                    fields=['mimetype'], limit=1)
-                mimetype = attach_mimetype and attach_mimetype[0]['mimetype']
-            if not mimetype:
-                mimetype = guess_mimetype(base64.b64decode(content), default=default_mimetype)
+        return status, headers, content
 
-        headers += [('Content-Type', mimetype), ('X-Content-Type-Options', 'nosniff')]
-
-        # cache
-        etag = bool(request) and request.httprequest.headers.get('If-None-Match')
-        retag = '"%s"' % hashlib.md5(pycompat.to_text(content).encode('utf-8')).hexdigest()
-        status = status or (304 if etag == retag else 200)
-        headers.append(('ETag', retag))
-        headers.append(('Cache-Control', 'max-age=%s' % (STATIC_CACHE if unique else 0)))
-
-        # content-disposition default name
-        if download:
-            headers.append(('Content-Disposition', cls.content_disposition(filename)))
-
-        return (status, headers, content)
-
-    @classmethod
-    def _get_url(cls, obj, model='ir.attachment', filename=None, status=None, content=None):
-
-        if model == 'ir.attachment' and obj.type == 'url' and obj.url:
-
-            module_resource_path = None
-            url_match = re.match("^/(\w+)/(.+)$", obj.url)
-            if url_match:
-                module = url_match.group(1)
-                module_path = get_module_path(module)
-                module_resource_path = get_resource_path(module, url_match.group(2))
-                if module_path and module_resource_path:
-                    module_path = os.path.join(os.path.normpath(module_path), '')  # join ensures the path ends with '/'
-                    module_resource_path = os.path.normpath(module_resource_path)
-                    if module_resource_path.startswith(module_path):
-                        with open(module_resource_path, 'rb') as f:
-                            content = base64.b64encode(f.read())
-                        last_update = pycompat.text_type(os.path.getmtime(module_resource_path))
-
-            if not module_resource_path:
-                module_resource_path = obj.url
-
-            filename = os.path.basename(module_resource_path)
-
-            if not content:
-                status = 301
-                content = module_resource_path
-
-        return content, status, filename
-
-
-def convert_exception_to(to_type, with_message=False):
-    """ Should only be called from an exception handler. Fetches the current
-    exception data from sys.exc_info() and creates a new exception of type
-    ``to_type`` with the original traceback.
-
-    If ``with_message`` is ``True``, sets the new exception's message to be
-    the stringification of the original exception. If ``False``, does not
-    set the new exception's message. Otherwise, uses ``with_message`` as the
-    new exception's message.
-
-    :type with_message: str|bool
-    """
-    etype, original, tb = sys.exc_info()
-    try:
-        if with_message is False:
-            message = None
-        elif with_message is True:
-            message = str(original)
-        else:
-            message = str(with_message)
-
-        raise pycompat.reraise(to_type, to_type(message), tb)
-    except to_type as e:
-        return e
+#
