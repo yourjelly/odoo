@@ -90,6 +90,7 @@ var ControlPanelView = Factory.extend({
         this.loadParams.actionId = params.actionId;
         this.loadParams.fields = this.fields;
         this.loadParams.modelName = params.modelName;
+        this.loadParams.activateDefaultFavorite = !context.search_disable_custom_filters;
         if (this.loadParams.withSearchBar) {
             if (params.currentConfiguration) {
                 this.loadParams.initialConfiguration = params.currentConfiguration;
@@ -111,9 +112,6 @@ var ControlPanelView = Factory.extend({
         INTERVAL_OPTIONS = INTERVAL_OPTIONS.map(function (option) {
             return _.extend(option, {description: option.description.toString()});
         });
-
-        // TODO: use this where necessary
-        // var disableCustomFilters = context.search_disable_custom_filters;
     },
 
     //--------------------------------------------------------------------------

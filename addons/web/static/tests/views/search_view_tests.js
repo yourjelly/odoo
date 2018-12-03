@@ -1,13 +1,13 @@
 odoo.define('web.search_view_tests', function (require) {
 "use strict";
 
-// var ControlPanelView =require('web.ControlPanelView');
 var FormView = require('web.FormView');
 var testUtils = require('web.test_utils');
 
 var createActionManager = testUtils.createActionManager;
-var patchDate = testUtils.mock.patchDate;
+var createControlPanel = testUtils.createControlPanel;
 var createView = testUtils.createView;
+var patchDate = testUtils.mock.patchDate;
 
 var controlPanelViewParameters = require('web.controlPanelViewParameters');
 var PERIOD_OPTIONS_IDS = controlPanelViewParameters.PERIOD_OPTIONS.map(function (option) {return option.optionId;});
@@ -822,6 +822,35 @@ QUnit.module('Search View', {
         testUtils.modal.clickButton('Ok');
         assert.containsNone(actionManager, '.o_control_panel .o_searchview_input_container .o_facet_values');
         actionManager.destroy();
+    });
+
+    QUnit.test('default favorite is not activated if key search_disable_custom_filters is set to true', async function (assert) {
+        assert.expect(1);
+
+        var controlPanel = await createControlPanel({
+            model: 'partner',
+            arch: '<controlpanel/>',
+            data: this.data,
+            intercepts: {
+                load_filters: function (event) {
+                    return $.when([{
+                        context: "{}",
+                        domain: "[]",
+                        id: 7,
+                        is_default: true,
+                        name: "My favorite",
+                        sort: "[]",
+                        user_id: [2, "Mitchell Admin"],
+                    }]).then(event.data.on_success);
+                },
+            },
+            context: {
+                search_disable_custom_filters: true,
+            },
+        });
+
+        assert.containsNone(controlPanel, '.o_facet_values');
+        controlPanel.destroy();
     });
 
     QUnit.module('Search Arch');

@@ -298,6 +298,7 @@ var ControlPanelModel = mvc.Model.extend({
         this.fields = params.fields;
         this.modelName = params.modelName;
         this.actionId = params.actionId;
+        this.activateDefaultFavorite = params.activateDefaultFavorite;
 
         if (!params.withSearchBar) {
             return $.when();
@@ -411,18 +412,16 @@ var ControlPanelModel = mvc.Model.extend({
 
     _activateDefaultFilters: function () {
         var self = this;
-        Object.keys(this.filters).forEach(
-            function (filterId) {
-                var filter = self.filters[filterId];
-                // if we are here, this means there is no favorite with isDefault set to true
-                if (filter.isDefault) {
-                    if (filter.hasOptions) {
-                        self.toggleFilterWithOptions(filter.id);
-                    } else {
-                        self.toggleFilter(filter.id);
-                    }
+        Object.keys(this.filters).forEach(function (filterId) {
+            var filter = self.filters[filterId];
+            // if we are here, this means there is no favorite with isDefault set to true
+            if (filter.isDefault && filter.type !== 'favorite') {
+                if (filter.hasOptions) {
+                    self.toggleFilterWithOptions(filter.id);
+                } else {
+                    self.toggleFilter(filter.id);
                 }
-        });
+        }});
     },
     _activateDefaultTimeRanges: function (defaultTimeRanges) {
         var self = this;
@@ -718,12 +717,14 @@ var ControlPanelModel = mvc.Model.extend({
                     };
                 });
                 self._createGroupOfFilters(favorites);
-                var defaultFavoriteId = Object.keys(self.filters).find(function (filterId) {
-                    var filter = self.filters[filterId];
-                    return filter.type === 'favorite' && filter.isDefault;
-                });
-                if (defaultFavoriteId) {
-                    self.toggleFilter(defaultFavoriteId);
+                if (self.activateDefaultFavorite) {
+                    var defaultFavoriteId = Object.keys(self.filters).find(function (filterId) {
+                        var filter = self.filters[filterId];
+                        return filter.type === 'favorite' && filter.isDefault;
+                    });
+                    if (defaultFavoriteId) {
+                        self.toggleFilter(defaultFavoriteId);
+                    }
                 }
             } else {
                 self._createEmptyGroup('favorite');
