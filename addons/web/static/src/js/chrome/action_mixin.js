@@ -24,19 +24,38 @@ var core = require('web.core');
 
 var ActionMixin = {
     template: 'Action',
+
+    /**
+    * The action mixin assumes that it is rendered with the 'Action' template.
+    * This template has a special zone ('.o_content') where the content should
+    * be added.  Actions that want to automatically render a template there
+    * should define the contentTemplate key.  In short, client actions should
+    * probably define a contentTemplate key, and not a template key.
+    */
+    contentTemplate: null,
+
+    /**
+    * If an action want to use a control panel, it will be created and
+    * registered in this _controlPanel key (the widget).  The way this control
+    * panel is created is up to the implementation (so, view controllers or
+    * client actions may have different needs).
+    *
+    * Note that most of the time, this key should be set by the framework, not
+    * by the code of the client action.
+    */
     _controlPanel: null,
+
+    /**
+    * String containing the title of the client action (which may be needed to
+    * display in the breadcrumbs zone of the control panel).
+    *
+    * @see _setTitle
+    */
     _title: '',
 
-    // init: function () {
-        // AAB: change this logic to stop using the properties mixin
-        // this.on("change:title", this, function () {
-        //     if (self._controlPanel) {
-        //         var breadcrumbs = self._getBreadcrumbs();
-        //         // TODO: handle breadcrumbs
-        //         // self._controlPanel.updateContents({breadcrumbs: breadcrumbs}, {clear: false});
-        //     }
-        // });
-    // },
+    /**
+     * @override
+     */
     renderElement: function () {
         this._super.apply(this, arguments);
         if (this.contentTemplate) {
@@ -81,6 +100,8 @@ var ActionMixin = {
      * This function is called when the current context (~state) of the action
      * should be known. For instance, if the action is a view controller,
      * this may be useful to reinstantiate the view in the same state.
+     *
+     * @returns {*}
      */
     getContext: function () {
     },
@@ -109,7 +130,16 @@ var ActionMixin = {
      */
     renderButtons: function ($node) {
     },
-    // TMP
+    /**
+     * This is the main method to customize the controlpanel content.
+     *
+     * @see updateContents method in ControlPanelRenderer for more info
+     *
+     * @param {Object} [status]
+     * @param {string} [status.title]
+     * @param {Object} [options]
+     * @param {boolean} [options.clear]
+     */
     updateControlPanel: function (status, options) {
         if (this._controlPanel) {
             status = status || {};
