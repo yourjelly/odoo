@@ -268,6 +268,17 @@ class Manager(threading.Thread):
             printer_devices[serial] = iot_device
         return printer_devices
 
+    def display_loop(self):
+        display_devices = {}
+        hdmi = subprocess.check_output('tvservice -n', shell=True).decode('utf-8')
+        if hdmi.find('=') != -1:
+            hdmi_serial = re.sub('[^a-zA-Z0-9 ]+', '', hdmi.split('=')[1]).replace(' ','_')
+            iot_device = IoTDevice()
+            iot_device.dev = hdmi_serial
+            iot_device.connection_type = 'display'
+            display_devices[hdmi_serial] = iot_device
+        return display_devices
+
     def run(self):
         devices = {}
         updated_devices = {}
@@ -276,6 +287,7 @@ class Manager(threading.Thread):
             updated_devices = self.usb_loop()
             updated_devices.update(self.video_loop())
             updated_devices.update(self.printer_loop())
+            updated_devices.update(self.display_loop())
             updated_devices.update(bt_devices)
             added = updated_devices.keys() - devices.keys()
             removed = devices.keys() - updated_devices.keys()
