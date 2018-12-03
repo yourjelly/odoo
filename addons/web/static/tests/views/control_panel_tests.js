@@ -76,6 +76,26 @@ QUnit.module('Views', {
         controlPanel.destroy();
     });
 
+    QUnit.test('view with nested search arch', function (assert) {
+        assert.expect(1);
+
+        var controlPanel = createView({
+            View: ControlPanelView,
+            model: 'partner',
+            data: this.data,
+            arch: '<controlpanel>' +
+                    '<search>' +
+                        '<filter name="filter" string="Hello" domain="[\'float_field\', \'>\', 0]"/>' +
+                    '</search>' +
+                '</controlpanel>',
+        });
+
+        testUtils.dom.click(controlPanel.$('.o_filters_menu_button'));
+        assert.containsOnce(controlPanel, '.o_filters_menu .o_menu_item:contains(Hello)');
+
+        controlPanel.destroy();
+    });
+
     QUnit.module('Control Panel Arch Parsing');
 
     QUnit.test('empty arch', function (assert) {

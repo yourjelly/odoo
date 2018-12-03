@@ -93,9 +93,9 @@ var ControlPanelView = Factory.extend({
                 this.loadParams.groups = [];
                 this.loadParams.timeRanges = context.time_ranges;
                 if (this.arch.tag === 'controlpanel') {
-                    this._parseControlPanelArch();
+                    this._parseControlPanelArch(this.arch);
                 } else {
-                    this._parseSearchArch();
+                    this._parseSearchArch(this.arch);
                 }
             }
         }
@@ -187,14 +187,19 @@ var ControlPanelView = Factory.extend({
      * Executed when the given arch has root node <controlpanel>.
      *
      * @private
+     * @param {Object} arch arch with root node <controlpanel>
      */
-    _parseControlPanelArch: function () {
+    _parseControlPanelArch: function (arch) {
+        var self = this;
         var controls = [];
-        this.arch.children.forEach(function (node) {
+        arch.children.forEach(function (node) {
             if (node.tag === 'controls') {
                 node.children.forEach(function (control) {
                     controls.push(control);
                 });
+            }
+            if (node.tag === 'search') {
+                self._parseSearchArch(node);
             }
         });
         this.rendererParams.controls = controls;
@@ -204,10 +209,11 @@ var ControlPanelView = Factory.extend({
      * compatibility with former 'search' view.
      *
      * @private
+     * @param {Object} arch arch with root node <search>
      */
-    _parseSearchArch: function () {
+    _parseSearchArch: function (arch) {
         var self = this;
-        var preFilters = _.flatten(this.arch.children.map(function (child) {
+        var preFilters = _.flatten(arch.children.map(function (child) {
             return child.tag !== 'group' ?
                     self._evalArchChild(child) :
                     child.children.map(self._evalArchChild);
