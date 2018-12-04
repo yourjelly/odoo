@@ -3,6 +3,7 @@ odoo.define('web.search_view_tests', function (require) {
 
 var FormView = require('web.FormView');
 var testUtils = require('web.test_utils');
+var testUtilsDom = require('web.test_utils_dom');
 var createActionManager = testUtils.createActionManager;
 var patchDate = testUtils.patchDate;
 var createView = testUtils.createView;
@@ -565,6 +566,39 @@ QUnit.module('Search View', {
         $('.o_apply_filter').click();
         assert.strictEqual($('.o_searchview .o_searchview_facet .o_facet_values span').text().trim(), 'ID is \"0\"',
             'should have a facet with candle name');
+        actionManager.destroy();
+    });
+
+    QUnit.test('Custom filter supports quotes in string', function (assert) {
+        assert.expect(3);
+
+        this.data.partner.fields.foo.searchable = true;
+
+        var actionManager = createActionManager({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            mockRPC: function (route, args) {
+                if (route === '/web/dataset/search_read' && searchReadCount === 1) {
+                    assert.deepEqual(args.domain, [["foo", "ilike", "input with 2' single quotes'"]],
+                        'The string in domain should contain the quotes');
+                }
+                return this._super.apply(this, arguments);
+            }
+        });
+
+        var searchReadCount = 0;
+        actionManager.doAction(1);
+        testUtilsDom.click($('.o_search_options button:contains(Filters)'));
+        testUtilsDom.click($('.o_search_options .o_filters_menu button'));
+
+        assert.strictEqual($('.o_filter_condition select').eq(0).val(), 'foo');
+        assert.strictEqual($('.o_filter_condition select').eq(1).val(), 'ilike');
+
+        searchReadCount = 1;
+        $('.o_filter_condition input').val("input with 2' single quotes'").trigger('input');
+        testUtilsDom.click($('.o_filters_menu button.o_apply_filter'));
+
         actionManager.destroy();
     });
 
