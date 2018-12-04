@@ -312,13 +312,12 @@ class IrHttp(models.AbstractModel):
     @classmethod
     def _binary_record_content(
             cls, record, model='ir.attachment', field='datas', filename=None,
-            filename_field='datas_fname', default_mimetype='application/octet-stream', env=None):
-        env = env or request.env
+            filename_field='datas_fname', default_mimetype='application/octet-stream'):
 
         mimetype, content, filehash = 'mimetype' in record and record.mimetype or False, None, 'checksum' in record and record['checksum']
 
-        if getattr(env[model]._fields[field], 'attachment', False):
-            res_record = env['ir.attachment'].search_read(domain=[('res_model', '=', model), ('res_id', '=', record.id), ('res_field', '=', field)], fields=['datas', 'mimetype', 'checksum'], limit=1)
+        if getattr(cls.env[model]._fields[field], 'attachment', False):
+            res_record = cls.env['ir.attachment'].search_read(domain=[('res_model', '=', model), ('res_id', '=', record.id), ('res_field', '=', field)], fields=['datas', 'mimetype', 'checksum'], limit=1)
             if res_record:
                 mimetype = res_record[0]['mimetype']
                 content = res_record[0]['datas']
@@ -360,7 +359,7 @@ class IrHttp(models.AbstractModel):
     def binary_content(cls, xmlid=None, model='ir.attachment', id=None, field='datas',
                        unique=False, filename=None, filename_field='datas_fname', download=False,
                        mimetype=None, default_mimetype='application/octet-stream',
-                       access_token=None, env=None):
+                       access_token=None):
         """ Get file, attachment or downloadable content
 
         If the ``xmlid`` and ``id`` parameter is omitted, fetches the default value for the
@@ -379,7 +378,6 @@ class IrHttp(models.AbstractModel):
         :param str default_mimetype: default mintype if no mintype found
         :param str access_token: optional token for unauthenticated access
                                  only available  for ir.attachment
-        :param Environment env: by default use request.env
         :returns: (status, headers, content)
         """
         record, status = cls._binary_security_check(xmlid=xmlid, model=model, id=id, field=field, access_token=access_token, env=env)
@@ -396,7 +394,7 @@ class IrHttp(models.AbstractModel):
         if not content:
             status, content, filename, mimetype, filehash = cls._binary_record_content(
                 record, model=model, field=field, filename=None, filename_field=filename_field,
-                default_mimetype='application/octet-stream', env=env)
+                default_mimetype='application/octet-stream')
 
         status, headers, content = cls._binary_http_response(
             status, content, filename, mimetype, unique, filehash=False, download=download)
