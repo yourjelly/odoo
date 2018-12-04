@@ -4,6 +4,7 @@ odoo.define('web.ControlPanelModel', function (require) {
 var controlPanelViewParameters = require('web.controlPanelViewParameters');
 var core = require('web.core');
 var Domain = require('web.Domain');
+var field_utils = require('web.field_utils');
 var mvc = require('web.mvc');
 var pyUtils = require('web.py_utils');
 var session = require('web.session');
@@ -331,7 +332,7 @@ var ControlPanelModel = mvc.Model.extend({
         if (filter.type === 'field') {
             filter.autoCompleteValues = params.autoCompleteValues;
             // the autocompletion filter is dynamic
-            filter.domain = this._setFilterDomain(filter);
+            filter.domain = this._getAutoCompleteDomain(filter);
             // active the filter
             var group = this.groups[filter.groupId];
             if (!group.activeFilterIds.includes(filter.id)) {
@@ -514,6 +515,23 @@ var ControlPanelModel = mvc.Model.extend({
             1
         );
         return groupNumber;
+    },
+    /**
+     * @private
+     * @param {Object} filter
+     */
+    _getAutoCompleteDomain: function (filter) {
+        var field = this.fields[filter.attrs.name];
+        var domainType = filter.attrs.widget in field_utils.format ?
+                            filter.attrs.widget :
+                            field.type;
+        var attrs = _.extend({}, field, filter.attrs);
+        var values = filter.autoCompleteValues.map(function (value) {
+            return value.value;
+        });
+        var domain = field_utils.domain[domainType](values, attrs);
+        debugger;
+        return domain;
     },
     // get context (without controller context (this is usefull only for favorite))
     _getQueryContext: function () {
@@ -767,7 +785,7 @@ var ControlPanelModel = mvc.Model.extend({
                             value: value,
                         };
                         filter.autoCompleteValues.push(autocompleteValue);
-                        filter.domain = self._setFilterDomain(filter);
+                        filter.domain = self._getAutoCompleteDomain(filter);
                     });
                 } else {
                     var autocompleteValue;
@@ -786,7 +804,7 @@ var ControlPanelModel = mvc.Model.extend({
                         };
                     }
                     filter.autoCompleteValues.push(autocompleteValue);
-                    filter.domain = self._setFilterDomain(filter);
+                    filter.domain = self._getAutoCompleteDomain(filter);
                 }
                 if (def) {
                     defs.push(def);
@@ -883,17 +901,6 @@ var ControlPanelModel = mvc.Model.extend({
             favorite.serverSideId = serverSideId;
             self._addNewFavorite(favorite);
         });
-    },
-    _setFilterDomain: function (filter) {
-        var domain = "";
-        var field = this.fields[filter.attrs.name];
-        // TODO: should not do that, the domain logic should be put somewhere else
-        var Obj = search_bar_autocomplete_sources_registry.getAny([filter.attrs.widget, field.type]);
-        if (Obj) {
-            var obj = new (Obj) (this, filter, field, this.actionContext);
-            domain = obj.getDomain(filter.autoCompleteValues);
-        }
-        return domain;
     },
 });
 

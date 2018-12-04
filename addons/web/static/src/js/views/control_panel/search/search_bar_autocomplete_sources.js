@@ -3,10 +3,8 @@ odoo.define('web.SearchBarAutoCompleteSources', function (require) {
 
 var Class = require('web.Class');
 var core = require('web.core');
-var Domain = require('web.Domain');
 var field_utils = require('web.field_utils');
 var mixins = require('web.mixins');
-var pyUtils = require('web.py_utils');
 var ServicesMixin = require('web.ServicesMixin');
 var time = require('web.time');
 
@@ -59,7 +57,6 @@ var GroupBy = FilterInterface.extend({
 });
 
 var Field = FilterInterface.extend(ServicesMixin, {
-    default_operator: '=',
     /**
      * @override
      * @param {Object} field
@@ -88,48 +85,6 @@ var Field = FilterInterface.extend(ServicesMixin, {
             facet: this._getFacetValue(value),
         }]);
     },
-    /**
-     * TODO: the domain logic (getDomain, operator, etc.) should not be put here
-     * (this has nothing to do with the autocomplete sources).
-     *
-     * This method is used by the ControlPanelModel when setting the
-     * `filter_domain`.
-     *
-     * @param {Object[]} values
-     * @returns {string}
-     */
-    getDomain: function (values) {
-        if (!values.length) { return; }
-
-        var valueToDomain;
-        var self = this;
-        var domain = this.attrs.filter_domain;
-        if (domain) {
-            valueToDomain = function (facetValue) {
-                return Domain.prototype.stringToArray(
-                    domain,
-                    {
-                        // these are the values that can be used in search view
-                        // fields `filter_domain` attribute
-                        self: self._valueFrom(facetValue),
-                        raw_value: facetValue.value,
-                    }
-                );
-            };
-        } else {
-            valueToDomain = function (facetValue) {
-                return self._makeDomain(
-                    self.attrs.name,
-                    self.attrs.operator || self.default_operator,
-                    facetValue
-                );
-            };
-        }
-        var domains = values.map(valueToDomain);
-
-        domains = domains.map(Domain.prototype.arrayToString);
-        return pyUtils.assembleDomains(domains, 'OR');
-    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -157,34 +112,9 @@ var Field = FilterInterface.extend(ServicesMixin, {
             values: [{label: value, value: value}],
         };
     },
-    /**
-     * Function creating the returned domain for the field, override this
-     * methods in children if you only need to customize the field's domain
-     * without more complex alterations or tests (and without the need to
-     * change override the handling of filter_domain)
-     *
-     * @private
-     * @param {String} name the field's name
-     * @param {String} operator the field's operator (either attribute-specified or default operator for the field
-     * @param {Number|String} facet parsed value for the field
-     * @returns {Array<Array>} domain to include in the resulting search
-     */
-    _makeDomain: function (name, operator, facet) {
-        return [[name, operator, this._valueFrom(facet)]];
-    },
-    /**
-     * @private
-     * @param {Object} facetValue
-     * @param {any} facetValue.value
-     * @returns {any}
-     */
-    _valueFrom: function (facetValue) {
-        return facetValue.value;
-    },
 });
 
 var CharField = Field.extend({
-    default_operator: 'ilike',
 
     //--------------------------------------------------------------------------
     // Public
@@ -216,7 +146,6 @@ var NumberField = Field.extend({
 });
 
 var IntegerField = NumberField.extend({
-    error_message: _t("not a valid integer"),
     parse: function (value) {
         try {
             return field_utils.parse.integer(value);
@@ -227,7 +156,6 @@ var IntegerField = NumberField.extend({
 });
 
 var FloatField = NumberField.extend({
-    error_message: _t("not a valid number"),
     parse: function (value) {
         try {
             return field_utils.parse.float(value);
@@ -265,22 +193,6 @@ var SelectionField = Field.extend({
         return $.when.call(null, [{
             label: _.escape(this.attrs.string)
         }].concat(results));
-    },
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     * @param {any} value
-     * @returns {Object}
-     */
-    _getFacetValue: function (value) {
-        return {
-            filter: this.filter,
-            values: [{label: value[1], value: value[0]}],
-        };
     },
 });
 
@@ -345,26 +257,6 @@ var DateField = Field.extend({
         var facet = this._super.apply(this, arguments);
         facet.values[0].value = rawValue;
         return facet;
-    },
-    /**
-     * @override
-     */
-    _valueFrom: function (facetValue) {
-        return time.date_to_str(facetValue.value);
-    },
-});
-
-var DateTimeField = DateField.extend({
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
-    _valueFrom: function (facetValue) {
-        return time.datetime_to_str(facetValue.value);
     },
 });
 
@@ -443,35 +335,13 @@ var ManyToOneField = CharField.extend({
                 });
             });
     },
-    /**
-     * @override
-     */
-    _makeDomain: function (name, operator, facetValue) {
-        operator = facetValue.operator || operator;
-
-        switch(operator){
-        case this.default_operator:
-            return [[name, '=', facetValue.value]];
-        case 'ilike':
-            return [[name, 'ilike', facetValue.value]];
-        case 'child_of':
-            return [[name, 'child_of', facetValue.value]];
-        }
-        return this._super(name, operator, facetValue);
-    },
-    /**
-     * @override
-     */
-    _valueFrom: function (facetValue) {
-        return facetValue.label;
-    },
 });
 
 return {
     BooleanField: BooleanField,
     CharField: CharField,
     DateField: DateField,
-    DateTimeField: DateTimeField,
+    DateTimeField: DateField,
     Field: Field,
     Filter: Filter,
     FloatField: FloatField,

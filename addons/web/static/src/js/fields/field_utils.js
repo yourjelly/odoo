@@ -17,12 +17,128 @@ odoo.define('web.field_utils', function (require) {
 
 var core = require('web.core');
 var dom = require('web.dom');
+var Domain = require('web.Domain');
+var pyUtils = require('web.py_utils');
 var session = require('web.session');
 var time = require('web.time');
 var utils = require('web.utils');
 
 var _t = core._t;
 
+//------------------------------------------------------------------------------
+// Domain
+//------------------------------------------------------------------------------
+
+function domainBoolean(values, attrs) {
+    return _getDomain(values, attrs, '=');
+}
+function domainChar(values, attrs) {
+    return _getDomain(values, attrs, 'ilike');
+}
+function domainDate(values, attrs) {
+    var formattedValues = values.map(function (value) {
+        return time.date_to_str(value);
+    });
+    return _getDomain(formattedValues, attrs, '=');
+}
+function domainDateTime(values, attrs) {
+    var formattedValues = values.map(function (value) {
+        return time.datetime_to_str(value);
+    });
+    return _getDomain(formattedValues, attrs, '=');
+}
+function domainFloat(values, attrs) {
+    return _getDomain(values, attrs, '=');
+}
+function domainInteger(values, attrs) {
+    return _getDomain(values, attrs, '=');
+}
+function domainManyToOne(values, attrs) {
+    debugger;
+    if (!values.length) { return; }
+
+    var valueToDomain;
+    var domain = attrs.filter_domain;
+    if (domain) {
+        valueToDomain = function (value) {
+            return Domain.prototype.stringToArray(
+                domain,
+                {
+                    // these are the values that can be used in search view
+                    // fields `filter_domain` attribute
+                    self: value,
+                    raw_value: value,
+                }
+            );
+        };
+    } else {
+        valueToDomain = function (value) {
+            var operator = attrs.operator || '=';
+            return [[attrs.name, operator, value]];
+        };
+    }
+    var domains = values.map(valueToDomain);
+
+    domains = domains.map(Domain.prototype.arrayToString);
+    return pyUtils.assembleDomains(domains, 'OR');
+
+    /**
+     * @override
+     */
+    // _makeDomain: function (name, operator, facetValue) {
+
+    //     return this._super(name, operator, facetValue);
+    // },
+    // /**
+    //  * @override
+    //  */
+    // _valueFrom: function (facetValue) {
+    //     return facetValue.label;
+    // },
+}
+function domainSelection(values, attrs) {
+    var formattedValues = values.map(function (value) {
+        return value[0];
+    });
+    return _getDomain(formattedValues, attrs, '=');
+}
+
+/**
+ * This method is used by the ControlPanelModel when setting the
+ * `filter_domain`.
+ *
+ * @param {Object[]} values
+ * @returns {string}
+ */
+function _getDomain (values, attrs, operator) {
+    debugger;
+    if (!values.length) { return; }
+
+    var valueToDomain;
+    var domain = attrs.filter_domain;
+    if (domain) {
+        valueToDomain = function (value) {
+            return Domain.prototype.stringToArray(
+                domain,
+                {
+                    // these are the values that can be used in search view
+                    // fields `filter_domain` attribute
+                    self: value,
+                    raw_value: value,
+                }
+            );
+        };
+    } else {
+        valueToDomain = function (value) {
+            operator = attrs.operator || operator;
+            return [[attrs.name, operator, value]];
+        };
+    }
+    var domains = values.map(valueToDomain);
+
+    domains = domains.map(Domain.prototype.arrayToString);
+    return pyUtils.assembleDomains(domains, 'OR');
+}
 //------------------------------------------------------------------------------
 // Formatting
 //------------------------------------------------------------------------------
@@ -649,6 +765,16 @@ function parseMany2one(value) {
 }
 
 return {
+    domain: {
+        boolean: domainBoolean,
+        char: domainChar,
+        date: domainDate,
+        datetime: domainDateTime,
+        float: domainFloat,
+        integer: domainInteger,
+        many2one: domainManyToOne,
+        selection: domainSelection,
+    },
     format: {
         binary: formatBinary,
         boolean: formatBoolean,
