@@ -91,7 +91,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
         if (this.controlPanelElements && this.controlPanelElements.$switch_buttons) {
             this.controlPanelElements.$switch_buttons.off();
         }
-        return this._super.apply(this, arguments);
+        this._super.apply(this, arguments);
     },
     /**
      * Called each time the controller is attached into the DOM.
