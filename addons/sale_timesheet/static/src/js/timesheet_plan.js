@@ -20,6 +20,7 @@ var ProjectPlan = AbstractAction.extend({
     },
     hasControlPanel: true,
     loadControlPanel: true,
+    searchMenuTypes: ['filter', 'favorite'],
     /**
      * @override
      */
@@ -32,7 +33,6 @@ var ProjectPlan = AbstractAction.extend({
         this.project_ids = [];
 
         this.controlPanelParams.modelName = 'project.project';
-        // TODO: disable_groupby: true,
     },
     /**
      * @override
