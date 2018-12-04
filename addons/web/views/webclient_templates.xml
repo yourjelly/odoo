@@ -267,6 +267,7 @@
         <script type="text/javascript" src="/web/static/src/js/views/control_panel/mobile_control_panel_controller.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/control_panel/mobile_control_panel_renderer.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/search_bar_autocomplete_sources.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/search_bar_autocomplete_sources_registry.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/search_bar_input.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/search_facet.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/search_bar.js"></script>
@@ -279,6 +280,7 @@
         <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/control_panel_view_parameters.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/favorites_submenus_registry.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/search_filters.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/control_panel/search/search_filters_registry.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/field_manager_mixin.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/standalone_field_manager_mixin.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/view_registry.js"></script>

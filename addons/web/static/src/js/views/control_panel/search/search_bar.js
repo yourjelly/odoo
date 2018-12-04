@@ -2,8 +2,7 @@ odoo.define('web.SearchBar', function (require) {
 "use strict";
 
 var AutoComplete = require('web.AutoComplete');
-var AutoCompleteSources = require('web.SearchBarAutoCompleteSources');
-var core = require('web.core');
+var search_bar_autocomplete_sources_registry = require('web.search_bar_autocomplete_sources_registry');
 var SearchBarInput = require('web.SearchBarInput');
 var SearchFacet = require('web.SearchFacet');
 var Widget = require('web.Widget');
@@ -147,18 +146,19 @@ var SearchBar = Widget.extend({
      */
     _setupAutoCompletionWidgets: function () {
         var self = this;
+        var registry = search_bar_autocomplete_sources_registry;
         _.each(this.filterFields, function (filter) {
             var field = self.fields[filter.attrs.name];
-            var Obj = core.search_widgets_registry.getAny([filter.attrs.widget, field.type]);
+            var Obj = registry.getAny([filter.attrs.widget, field.type]);
             if (Obj) {
                 self.autoCompleteSources.push(new (Obj) (self, filter, field, self.context));
             }
         });
         _.each(this.filters, function (filter) {
-            self.autoCompleteSources.push(new AutoCompleteSources.Filter(self, filter));
+            self.autoCompleteSources.push(new (registry.get('filter'))(self, filter));
         });
         _.each(this.groupBys, function (filter) {
-            self.autoCompleteSources.push(new AutoCompleteSources.GroupBy(self, filter));
+            self.autoCompleteSources.push(new (registry.get('groupby'))(self, filter));
         });
     },
 

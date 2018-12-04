@@ -7,6 +7,7 @@ var Domain = require('web.Domain');
 var mvc = require('web.mvc');
 var pyUtils = require('web.py_utils');
 var session = require('web.session');
+var search_bar_autocomplete_sources_registry = require('web.search_bar_autocomplete_sources_registry');
 
 var _t = core._t;
 
@@ -887,7 +888,7 @@ var ControlPanelModel = mvc.Model.extend({
         var domain = "";
         var field = this.fields[filter.attrs.name];
         // TODO: should not do that, the domain logic should be put somewhere else
-        var Obj = core.search_widgets_registry.getAny([filter.attrs.widget, field.type]);
+        var Obj = search_bar_autocomplete_sources_registry.getAny([filter.attrs.widget, field.type]);
         if (Obj) {
             var obj = new (Obj) (this, filter, field, this.actionContext);
             domain = obj.getDomain(filter.autoCompleteValues);
