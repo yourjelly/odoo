@@ -424,30 +424,20 @@ def xml2json_from_elementtree(el, preserve_whitespaces=False):
     res["children"] = kids
     return res
 
-def binary_content(xmlid=None, model='ir.attachment', id=None, field='datas', unique=False,
-                   filename=None, filename_field='datas_fname', download=False, mimetype=None,
-                   default_mimetype='application/octet-stream', access_token=None,
-                   env=None):
-    return request.registry['ir.http'].binary_content(
-        xmlid=xmlid, model=model, id=id, field=field, unique=unique, filename=filename,
-        filename_field=filename_field, download=download, mimetype=mimetype,
-        default_mimetype=default_mimetype, access_token=access_token,
-        env=env)
-
 def limited_image_resize(content, width=None, height=None, crop=False, upper_limit=False, avoid_if_small=False):
-    if crop and (width or height):
-        return crop_image(content, type='center', size=(width, height), ratio=(1, 1))
-
-    elif content and (width or height):
-        if not upper_limit:
-            # resize maximum 500*500
-            if width > 500:
-                width = 500
-            if height > 500:
-                height = 500
-        return image_resize_image(
-            base64_source=content, size=(width or None, height or None), encoding='base64', upper_limit=upper_limit,
-            avoid_if_small=avoid_if_small)
+    if content and (width or height):
+        if crop:
+            return crop_image(content, type='center', size=(width, height), ratio=(1, 1))
+        else:
+            if not upper_limit:
+                # resize maximum 500*500
+                if width > 500:
+                    width = 500
+                if height > 500:
+                    height = 500
+            return image_resize_image(
+                base64_source=content, size=(width or None, height or None), encoding='base64', upper_limit=upper_limit,
+                avoid_if_small=avoid_if_small)
     return content
 
 #----------------------------------------------------------
@@ -1047,7 +1037,7 @@ class Binary(http.Controller):
                        filename=None, filename_field='datas_fname', unique=None, mimetype=None,
                        download=None, data=None, token=None, access_token=None, **kw):
 
-        status, headers, content = request.registry['ir.http'].binary_content(
+        status, headers, content = request.env['ir.http'].binary_content(
             xmlid=xmlid, model=model, id=id, field=field, unique=unique, filename=filename,
             filename_field=filename_field, download=download, mimetype=mimetype, access_token=access_token)
 
@@ -1090,7 +1080,7 @@ class Binary(http.Controller):
         :param signature: used to give a unique value based on the file content (like the checksum) to
         prevent cache mismatch.
         """
-        status, headers, content = request.registry['ir.http'].binary_content(
+        status, headers, content = request.env['ir.http'].binary_content(
             xmlid=xmlid, model=model, id=id, field=field, unique=unique, filename=filename,
             filename_field=filename_field, download=download, mimetype=mimetype,
             default_mimetype='image/png', access_token=access_token)
@@ -1101,14 +1091,10 @@ class Binary(http.Controller):
         elif status != 200 and download:
             return request.not_found()
 
-        if headers and dict(headers).get('Content-Type', '') == 'image/svg+xml':  # we shan't resize svg images
-            height = 0
-            width = 0
-        else:
+        if not headers or not dict(headers).get('Content-Type', '') == 'image/svg+xml':  # we shan't resize svg images
             height = int(height or 0)
             width = int(width or 0)
-
-        content = limited_image_resize(content, width, height, crop, upper_limit, avoid_if_small)
+            content = limited_image_resize(content, width, height, crop, upper_limit, avoid_if_small)
 
         if content:
             image_base64 = base64.b64decode(content)
