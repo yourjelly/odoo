@@ -53,7 +53,7 @@
                     </group>
                     <field name="user_input_line_ids" mode="tree" attrs="{'readonly': False}">
                         <tree>
-                            <field name="page_id"/>
+                            <!-- <field name="page_id"/> -->
                             <field name="question_id"/>
                             <field name="answer_type"/>
                             <field name="skipped"/>
@@ -179,7 +179,7 @@
             <tree string="Survey Answer Line" create="false">
                 <field name="survey_id"/>
                 <field name="user_input_id"/>
-                <field name="page_id"/>
+                <!-- <field name="page_id"/> -->
                 <field name="question_id"/>
                 <field name="date_create"/>
                 <field name="answer_type"/>

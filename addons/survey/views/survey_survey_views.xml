@@ -34,12 +34,18 @@
                         <h1><field name="title" placeholder="Survey Title"/></h1>
                     </div>
                     <notebook>
-                        <page string="Edit Pages and Questions">
-                            <field name="page_ids" mode="tree" context="{'default_survey_id': active_id}" nolabel="1">
-                                <tree>
+                        <page string="Questions">
+                            <field name="question_ids" widget="question_one2many">
+                                <tree editable="bottom">
                                     <field name="sequence" widget="handle"/>
-                                    <field name="title"/>
-                                    <field name="question_ids"/>
+                                    <field name="line_type" invisible="1" />
+                                    <field name="question"/>
+                                    <field name="question_type"/>
+                                    <field name="constr_mandatory"/>
+                                    <control>
+                                        <create string="Add a Question" context="{'default_line_type': 'question'}"/>
+                                        <create string="Add a Page" context="{'default_line_type': 'page'}"/>
+                                    </control>
                                 </tree>
                             </field>
                         </page>
@@ -173,7 +179,7 @@
           </p>
         </field>
     </record>
-    <act_window context="{'search_default_survey_id': [active_id], 'default_survey_id': active_id}" id="act_survey_pages" name="Pages" res_model="survey.page" src_model="survey.survey"/>
+    <!-- <act_window context="{'search_default_survey_id': [active_id], 'default_survey_id': active_id}" id="act_survey_pages" name="Pages" res_model="survey.page" src_model="survey.survey"/> -->
     <act_window context="{'search_default_survey_id': [active_id], 'default_survey_id': active_id}" id="act_survey_question" name="Questions" res_model="survey.question" src_model="survey.survey"/>
 
     <menuitem name="Surveys" id="menu_survey_form" action="action_survey_form" parent="menu_surveys" sequence="1"/>

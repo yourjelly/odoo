@@ -29,7 +29,7 @@ sent mails with personal token for the invitation of the survey.
         'views/survey_survey_views.xml',
         'views/survey_user_views.xml',
         'views/survey_question_views.xml',
-        'views/survey_page_views.xml',
+        # 'views/survey_page_views.xml',
         'views/survey_templates.xml',
         'wizard/survey_mail_compose_message_views.xml',
     ],

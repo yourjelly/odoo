@@ -24,6 +24,8 @@
     <template id="assets_backend" name="survey assets" inherit_id="web.assets_backend">
         <xpath expr="." position="inside">
             <link rel="stylesheet" href="/survey/static/src/css/survey_result.css"/>
+            <link rel="stylesheet" href="/survey/static/src/css/question_backend.css"/>
+            <script type="text/javascript" src="/survey/static/src/js/survey_widget_question.js"></script>
         </xpath>
     </template>
 </data>

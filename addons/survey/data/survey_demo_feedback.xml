@@ -11,14 +11,14 @@
             <field name="thank_you_message">&lt;p&gt;&lt;/p&gt;</field>
         </record>
         <!-- Page 1 -->
-        <record model="survey.page" id="feedback_1">
+        <!-- <record model="survey.page" id="feedback_1">
             <field name="title">About your Odoo usage</field>
             <field name="survey_id" ref="feedback_form" />
             <field name="sequence">1</field>
             <field name="description">&lt;p&gt;&lt;/p&gt;</field>
-        </record>
+        </record> -->
         <record model="survey.question" id="feedback_1_1">
-            <field name="page_id" ref="feedback_1" />
+            <!-- <field name="page_id" ref="feedback_1" /> -->
             <field name="sequence">1</field>
             <field name="question">Are you using Odoo on a daily basis?</field>
             <field name="question_type">simple_choice</field>
@@ -46,7 +46,7 @@
                     <field name="value">No, I just tested it</field>
                 </record>
         <record model="survey.question" id="feedback_1_2">
-            <field name="page_id" ref="feedback_1" />
+            <!-- <field name="page_id" ref="feedback_1" /> -->
             <field name="sequence">2</field>
             <field name="question">Which modules are you using/testing?</field>
             <field name="question_type">multiple_choice</field>
@@ -84,15 +84,15 @@
                     <field name="value">Human Resources</field>
                 </record>
         <!-- Page 2 -->
-        <record model="survey.page" id="feedback_2">
+        <!-- <record model="survey.page" id="feedback_2">
             <field name="title">Ergonomy and ease of use</field>
             <field name="survey_id" ref="feedback_form" />
             <field name="sequence">2</field>
             <field name="description">&lt;p&gt;These questions relate to the ergonomy and ease of use of Odoo. Try to remind your firsts days on Odoo and
 what have been your difficulties.&lt;/p&gt;</field>
-        </record>
+        </record> -->
         <record model="survey.question" id="feedback_2_1">
-            <field name="page_id" ref="feedback_2" />
+            <!-- <field name="page_id" ref="feedback_2" /> -->
             <field name="sequence">1</field>
             <field name="question">What do you think about the documentation available on doc.odoo.com?</field>
             <field name="question_type">matrix</field>
@@ -145,7 +145,7 @@ what have been your difficulties.&lt;/p&gt;</field>
                     <field name="value">It is clear</field>
                 </record>
         <record model="survey.question" id="feedback_2_2">
-            <field name="page_id" ref="feedback_2" />
+            <!-- <field name="page_id" ref="feedback_2" /> -->
             <field name="sequence">2</field>
             <field name="question">What do you think about the process views of Odoo, available in the web client ?</field>
             <field name="question_type">matrix</field>
@@ -198,13 +198,13 @@ what have been your difficulties.&lt;/p&gt;</field>
                     <field name="value">It's easy to find the process you need</field>
                 </record>
         <record model="survey.question" id="feedback_2_3">
-            <field name="page_id" ref="feedback_2" />
+            <!-- <field name="page_id" ref="feedback_2" /> -->
             <field name="sequence">3</field>
             <field name="question">Do you have suggestions on how to improve the process view ?</field>
             <field name="question_type">free_text</field>
         </record>
         <record model="survey.question" id="feedback_2_4">
-            <field name="page_id" ref="feedback_2" />
+            <!-- <field name="page_id" ref="feedback_2" /> -->
             <field name="sequence">4</field>
             <field name="question">What do you think about the structure of the menus?</field>
             <field name="question_type">multiple_choice</field>
@@ -227,7 +227,7 @@ what have been your difficulties.&lt;/p&gt;</field>
                     <field name="value">There are too much menus, it's complex to understand</field>
                 </record>
         <record model="survey.question" id="feedback_2_5">
-            <field name="page_id" ref="feedback_2" />
+            <!-- <field name="page_id" ref="feedback_2" /> -->
             <field name="sequence">5</field>
             <field name="question">What do you think about the groups of users?</field>
             <field name="question_type">matrix</field>
@@ -280,7 +280,7 @@ what have been your difficulties.&lt;/p&gt;</field>
                     <field name="value">The groups set on menu items are relevant</field>
                 </record>
         <record model="survey.question" id="feedback_2_6">
-            <field name="page_id" ref="feedback_2" />
+            <!-- <field name="page_id" ref="feedback_2" /> -->
             <field name="sequence">6</field>
             <field name="question">What do you think about the structure of the menus?</field>
             <field name="question_type">simple_choice</field>
@@ -304,7 +304,7 @@ what have been your difficulties.&lt;/p&gt;</field>
                     <field name="value">The number of groups is good</field>
                 </record>
         <record model="survey.question" id="feedback_2_7">
-            <field name="page_id" ref="feedback_2" />
+            <!-- <field name="page_id" ref="feedback_2" /> -->
             <field name="sequence">7</field>
             <field name="question">What do you think about configuration wizards?</field>
             <field name="question_type">matrix</field>
@@ -352,14 +352,14 @@ what have been your difficulties.&lt;/p&gt;</field>
                     <field name="value">Running the configuration wizards is a good way to spare time</field>
                 </record>
         <!-- Page 3 -->
-        <record model="survey.page" id="feedback_3">
+        <!-- <record model="survey.page" id="feedback_3">
             <field name="title">Community and contributors</field>
             <field name="survey_id" ref="feedback_form" />
             <field name="sequence">3</field>
             <field name="description">&lt;p&gt;&lt;/p&gt;</field>
-        </record>
+        </record> -->
         <record model="survey.question" id="feedback_3_1">
-            <field name="page_id" ref="feedback_3" />
+            <!-- <field name="page_id" ref="feedback_3" /> -->
             <field name="sequence">1</field>
             <field name="question">How do you contribute or plan to contribute to Odoo?</field>
             <field name="question_type">multiple_choice</field>
@@ -392,26 +392,26 @@ what have been your difficulties.&lt;/p&gt;</field>
                     <field name="value">I write documentations</field>
                 </record>
         <record model="survey.question" id="feedback_3_2">
-            <field name="page_id" ref="feedback_3" />
+            <!-- <field name="page_id" ref="feedback_3" /> -->
             <field name="sequence">2</field>
             <field name="question">Do you have a proposition to help people to contribute?</field>
             <field name="question_type">free_text</field>
         </record>
         <record model="survey.question" id="feedback_3_3">
-            <field name="page_id" ref="feedback_3" />
+            <!-- <field name="page_id" ref="feedback_3" /> -->
             <field name="sequence">3</field>
             <field name="question">Do you have a proposition to attract new contributors?</field>
             <field name="question_type">free_text</field>
         </record>
         <!-- Page 4 -->
-        <record model="survey.page" id="feedback_4">
+        <!-- <record model="survey.page" id="feedback_4">
             <field name="title">Questions for developers</field>
             <field name="survey_id" ref="feedback_form" />
             <field name="sequence">4</field>
             <field name="description">&lt;p&gt;If you do not contribute or develop in Odoo, skip this page.&lt;/p&gt;</field>
-        </record>
+        </record> -->
         <record model="survey.question" id="feedback_4_1">
-            <field name="page_id" ref="feedback_4" />
+            <!-- <field name="page_id" ref="feedback_4" /> -->
             <field name="sequence">1</field>
             <field name="question">Where do you develop your new features?</field>
             <field name="question_type">multiple_choice</field>

@@ -2,7 +2,7 @@
 <odoo>
 <data>
     <!-- PAGES -->
-    <record model="ir.ui.view" id="survey_page_form">
+    <!-- <record model="ir.ui.view" id="survey_page_form">
         <field name="name">Form view for survey page</field>
         <field name="model">survey.page</field>
         <field name="arch" type="xml">
@@ -13,17 +13,12 @@
                         <h1><field name="title" placeholder="Page Title"/></h1>
                     </div>
                     <field name="question_ids" nolabel="1" mode="tree" context="{'default_page_id': active_id}">
-                        <tree>
-                            <field name="sequence" widget="handle"/>
-                            <field name="question"/>
-                            <field name="question_type"/>
-                            <field name="constr_mandatory"/>
-                        </tree>
+                        
                     </field>
                 </sheet>
             </form>
         </field>
-    </record>
+    </record> -->
     <record model="ir.ui.view" id="survey_page_tree">
         <field name="name">Tree view for survey page</field>
         <field name="model">survey.page</field>

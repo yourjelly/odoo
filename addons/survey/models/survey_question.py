@@ -34,13 +34,17 @@ class SurveyQuestion(models.Model):
     # Model fields #
 
     # Question metadata
-    page_id = fields.Many2one('survey.page', string='Survey page',
-            ondelete='cascade', required=True, default=lambda self: self.env.context.get('page_id'))
-    survey_id = fields.Many2one('survey.survey', related='page_id.survey_id', string='Survey', readonly=False)
+    # page_id = fields.Many2one('survey.page', string='Survey page',
+            # ondelete='cascade', required=True, default=lambda self: self.env.context.get('page_id'))
+    # survey_id = fields.Many2one('survey.survey', related='page_id.survey_id', string='Survey', readonly=False)
+    survey_id = fields.Many2one('survey.survey', string='Survey', ondelete='cascade', required=True)
     sequence = fields.Integer('Sequence', default=10)
 
+    # to determine that a line is a question or a page
+    line_type = fields.Selection([('page', 'Page'), ('question', 'Question')])
+
     # Question
-    question = fields.Char('Question Name', required=True, translate=True)
+    question = fields.Char('Question Name', translate=True)
     description = fields.Html('Description', help="Use this field to add \
         additional explanations about your question", translate=True,
         oldname='descriptive_text')
@@ -53,7 +57,7 @@ class SurveyQuestion(models.Model):
             ('date', 'Date'),
             ('simple_choice', 'Multiple choice: only one answer'),
             ('multiple_choice', 'Multiple choice: multiple answers allowed'),
-            ('matrix', 'Matrix')], string='Type of Question', default='free_text', required=True, oldname='type')
+            ('matrix', 'Matrix')], string='Type of Question', default='free_text', oldname='type')
     matrix_subtype = fields.Selection([('simple', 'One choice per row'),
         ('multiple', 'Multiple choices per row')], string='Matrix Type', default='simple')
     labels_ids = fields.One2many('survey.label', 'question_id', string='Types of answers', oldname='answer_choice_ids', copy=True)

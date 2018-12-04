@@ -44,7 +44,8 @@ class SurveyUserInput(models.Model):
     email = fields.Char('E-mail', readonly=True)
 
     # Displaying data
-    last_displayed_page_id = fields.Many2one('survey.page', string='Last displayed page')
+    # last_displayed_page_id = fields.Many2one('survey.page', string='Last displayed page')
+    last_displayed_page_id = fields.Many2one('survey.question', string='Last displayed page')
     # The answers !
     user_input_line_ids = fields.One2many('survey.user_input_line', 'user_input_id', string='Answers', copy=True)
 
@@ -114,7 +115,7 @@ class SurveyUserInputLine(models.Model):
 
     user_input_id = fields.Many2one('survey.user_input', string='User Input', ondelete='cascade', required=True)
     question_id = fields.Many2one('survey.question', string='Question', ondelete='restrict', required=True)
-    page_id = fields.Many2one(related='question_id.page_id', string="Page", readonly=False)
+    # page_id = fields.Many2one(related='question_id.page_id', string="Page", readonly=False)
     survey_id = fields.Many2one(related='user_input_id.survey_id', string='Survey', store=True, readonly=False)
     date_create = fields.Datetime('Create Date', default=fields.Datetime.now, required=True)
     skipped = fields.Boolean('Skipped')

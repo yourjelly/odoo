@@ -31,8 +31,25 @@ class Survey(http.Controller):
             return request.render("survey.notopen")
 
         # If there is no pages
-        if not survey.page_ids:
+        no_page = True
+        for row in survey.question_ids:
+            if row.line_type == 'page':
+                no_page = False
+                break
+        if no_page is True:
             return request.render("survey.nopages", {'survey': survey})
+
+        # If there is a page but it doesn't contain any question
+        question_available = check_if_question = False
+        for row in survey.question_ids:
+            if row.line_type == 'page':
+                check_if_question = True
+                continue
+            elif check_if_question and row.line_type == 'question':
+                question_available = True
+                break
+        if question_available is False:
+            return request.render("survey.nopages", {'survey': survey, 'no_question': True})
 
         # Everything seems to be ok
         return None
@@ -121,24 +138,32 @@ class Survey(http.Controller):
 
         # Select the right page
         if user_input.state == 'new':  # First page
-            page, page_nr, last = Survey.next_page(user_input, 0, go_back=False)
-            data = {'survey': survey, 'page': page, 'page_nr': page_nr, 'token': user_input.token}
-            if last:
-                data.update({'last': True})
+            # page, questions_ids, page_name, page_nr, last, pages_length = Survey.next_page(user_input, 0, go_back=False)
+            # data = {'survey': survey, 'page': page, 'page_name': page_name, 'page_nr': page_nr, 'pages_length': pages_length, 'questions_ids': questions_ids, 'token': user_input.token}
+            # if last:
+                # data.update({'last': True})
+            # print("---data= " + str(data))
+            # return request.render('survey.survey', data)
+            page, questions_ids, page_nr, pages_length, last = Survey.next_page_custom(user_input, 0, go_back=False)
+            data = {'survey': survey, 'questions_ids': questions_ids, 'page': page, 'page_nr': page_nr, 'pages_length': pages_length, 'token': user_input.token}
+            print("---data= " + str(data))
             return request.render('survey.survey', data)
         elif user_input.state == 'done':  # Display success message
+            print("\n\nuser_input.state == 'done'")
             return request.render('survey.sfinished', {'survey': survey,
                                                                'token': token,
                                                                'user_input': user_input})
         elif user_input.state == 'skip':
+            print("\n\n", prev, "   ", user_input.last_displayed_page_id.id)
             flag = (True if prev and prev == 'prev' else False)
-            page, page_nr, last = Survey.next_page(user_input, user_input.last_displayed_page_id.id, go_back=flag)
+            print("\n\n", user_input.last_displayed_page_id.id)
+            page, questions_ids, page_nr, pages_length, last = Survey.next_page_custom(user_input, user_input.last_displayed_page_id.id, go_back=flag)
 
             #special case if you click "previous" from the last page, then leave the survey, then reopen it from the URL, avoid crash
             if not page:
-                page, page_nr, last = Survey.next_page(user_input, user_input.last_displayed_page_id.id, go_back=True)
+                page, questions_ids, page_nr, pages_length, last = Survey.next_page_custom(user_input, user_input.last_displayed_page_id.id, go_back=True)
 
-            data = {'survey': survey, 'page': page, 'page_nr': page_nr, 'token': user_input.token}
+            data = {'survey': survey, 'questions_ids': questions_ids, 'page': page, 'page_nr': page_nr, 'pages_length': pages_length, 'token': user_input.token}
             if last:
                 data.update({'last': True})
             return request.render('survey.survey', data)
@@ -153,16 +178,21 @@ class Survey(http.Controller):
         UserInputLine = request.env['survey.user_input_line']
         ret = {}
 
+        print("\n\npage=", page)
         # Fetch previous answers
         if page:
-            previous_answers = UserInputLine.sudo().search([('user_input_id.token', '=', token), ('page_id', '=', page.id)])
+            previous_answers = UserInputLine.sudo().search([('user_input_id.token', '=', token), ('page_id', '=', page)])
         else:
+            print("\n\ntoken=", token)
             previous_answers = UserInputLine.sudo().search([('user_input_id.token', '=', token)])
 
+        # page_id = None
         # Return non empty answers in a JSON compatible format
         for answer in previous_answers:
             if not answer.skipped:
-                answer_tag = '%s_%s_%s' % (answer.survey_id.id, answer.page_id.id, answer.question_id.id)
+                # if not page_id:
+                # page_id = request.env['survey.survey'].get_page_id(answer.survey_id.id, answer.question_id.id)
+                answer_tag = '%s_%s' % (answer.survey_id.id, answer.question_id.id)
                 answer_value = None
                 if answer.answer_type == 'free_text':
                     answer_value = answer.value_free_text
@@ -183,6 +213,7 @@ class Survey(http.Controller):
                     answer_value = answer.value_suggested.id
                 if answer_value:
                     ret.setdefault(answer_tag, []).append(answer_value)
+                    print("-------ret.get(answer_tag)", ret.get(answer_tag))
                 else:
                     _logger.warning("[survey] No answer has been found for question %s marked as non skipped" % answer_tag)
         return json.dumps(ret)
@@ -206,14 +237,18 @@ class Survey(http.Controller):
     @http.route(['/survey/submit/<model("survey.survey"):survey>'], type='http', methods=['POST'], auth='public', website=True)
     def submit(self, survey, **post):
         _logger.debug('Incoming data: %s', post)
+        _logger.info('Incoming data: %s', post)
         page_id = int(post['page_id'])
-        questions = request.env['survey.question'].search([('page_id', '=', page_id)])
-
+        # questions = request.env['survey.question'].search([('page_id', '=', page_id)]) previous comment by:@kma
+        questions = request.env['survey.survey'].get_questions(survey, page_id)
+        print("-------------", questions, "------questions")
+        # questions = request.env['survey.question'].search([('survey_id', '=', survey.id)])
         # Answer validation
         errors = {}
         for question in questions:
-            answer_tag = "%s_%s_%s" % (survey.id, page_id, question.id)
-            errors.update(question.validate_question(post, answer_tag))
+            if question.line_type != 'page':
+                answer_tag = "%s_%s" % (survey.id, question.id)
+                errors.update(question.validate_question(post, answer_tag))
 
         ret = {}
         if len(errors):
@@ -228,11 +263,12 @@ class Survey(http.Controller):
             user_id = request.env.user.id if user_input.input_type != 'link' else SUPERUSER_ID
 
             for question in questions:
-                answer_tag = "%s_%s_%s" % (survey.id, page_id, question.id)
+                answer_tag = "%s_%s" % (survey.id, question.id)
+                print("\n\nuser_input.id: ", user_input.id, " question: ", question, " post: ", post, "answer_tag: ", answer_tag, "\n\n")
                 request.env['survey.user_input_line'].sudo(user=user_id).save_lines(user_input.id, question, post, answer_tag)
 
             go_back = post['button_submit'] == 'previous'
-            next_page, _, last = request.env['survey.survey'].next_page(user_input, page_id, go_back=go_back)
+            next_page, _, _, _, last = request.env['survey.survey'].next_page_custom(user_input, page_id, go_back=go_back)
             vals = {'last_displayed_page_id': page_id}
             if next_page is None and not go_back:
                 vals.update({'state': 'done'})
@@ -261,7 +297,7 @@ class Survey(http.Controller):
                 type='http', auth='user', website=True)
     def survey_reporting(self, survey, token=None, **post):
         '''Display survey Results & Statistics for given survey.'''
-        result_template = 'survey.result'
+        result_template = 'survey.result_custom'
         current_filters = []
         filter_display_data = []
         filter_finish = False
@@ -325,20 +361,42 @@ class Survey(http.Controller):
         """Returns dictionary having values for rendering template"""
         current_filters = current_filters if current_filters else []
         Survey = request.env['survey.survey']
-        result = {'page_ids': []}
-        for page in survey.page_ids:
-            page_dict = {'page': page, 'question_ids': []}
-            for question in page.question_ids:
+        result = {'question_ids': []}
+        question_ids = request.env['survey.question'].search([('survey_id', '=', survey.id)])
+        for question in question_ids:
+            if question.line_type != 'page':
                 question_dict = {
                     'question': question,
                     'input_summary': Survey.get_input_summary(question, current_filters),
                     'prepare_result': Survey.prepare_result(question, current_filters),
                     'graph_data': self.get_graph_data(question, current_filters),
                 }
-
-                page_dict['question_ids'].append(question_dict)
-            result['page_ids'].append(page_dict)
+            else:
+                question_dict = {'question': question}
+            result['question_ids'].append(question_dict)
+        print("\n@kma says: result['question_ids']: ", result['question_ids'], "\n")
         return result
+
+    # def prepare_result_dict(self, survey, current_filters=None):
+    #     """Returns dictionary having values for rendering template"""
+    #     current_filters = current_filters if current_filters else []
+    #     Survey = request.env['survey.survey']
+    #     result = {'page_ids': []}
+    #     page_ids = request.env['survey.survey'].get_page_ids(survey)
+    #     for page in page_ids:
+    #         page_dict = {'page': page, 'question_ids': []}
+    #         question_ids = request.env['survey.survey'].get_questions(survey, page.id)
+    #         for question in question_ids:
+    #             question_dict = {
+    #                 'question': question,
+    #                 'input_summary': Survey.get_input_summary(question, current_filters),
+    #                 'prepare_result': Survey.prepare_result(question, current_filters),
+    #                 'graph_data': self.get_graph_data(question, current_filters),
+    #             }
+    # 
+    #             page_dict['question_ids'].append(question_dict)
+    #         result['page_ids'].append(page_dict)
+    #     return result
 
     def get_filter_data(self, post):
         """Returns data used for filtering the result"""
