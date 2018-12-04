@@ -35,6 +35,20 @@ QUnit.module('core', {}, function () {
             "Registry getAny should find first defined key");
     });
 
+    QUnit.test('keys and values are properly ordered', function (assert) {
+        assert.expect(2);
+
+        var registry = new Registry();
+
+        registry
+            .add('fred', 'foo', 3)
+            .add('george', 'bar', 2)
+            .add('ronald', 'qux', 4);
+
+        assert.deepEqual(registry.keys(), ['george', 'fred', 'ronald']);
+        assert.deepEqual(registry.values(), ['bar', 'foo', 'qux']);
+    });
+
 });
 
 });

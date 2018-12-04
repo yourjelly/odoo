@@ -120,7 +120,6 @@
         <script type="text/javascript" src="/web/static/src/js/core/rpc.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/widget.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/registry.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/core/sorted_registry.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/session.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/dom.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/concurrency.js"></script>

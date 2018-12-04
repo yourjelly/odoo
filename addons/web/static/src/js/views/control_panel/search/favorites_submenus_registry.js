@@ -1,8 +1,8 @@
 odoo.define('web.favorites_submenus_registry', function (require) {
 "use strict";
 
-var SortedRegistry = require('web.SortedRegistry');
+var Registry = require('web.Registry');
 
-return new SortedRegistry();
+return new Registry();
 
 });
