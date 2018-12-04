@@ -51,7 +51,7 @@ var AbstractAction = Widget.extend(ActionMixin, {
 
     /**
      * This parameter can be set to customize the available sub menus in the
-     * controlpanel (Filters/Group By/Favorite).  This is basically a list of
+     * controlpanel (Filters/Group By/Favorites).  This is basically a list of
      * the sub menus that we want to use.
      *
      * Note that it only makes sense if hasControlPanel is set to true.
@@ -64,8 +64,8 @@ var AbstractAction = Widget.extend(ActionMixin, {
      * @override
      *
      * @param {Widget} parent
-     * @param {*} action
-     * @param {*} options
+     * @param {Object} action
+     * @param {Object} [options]
      */
     init: function (parent, action, options) {
         this._super(parent);

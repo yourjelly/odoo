@@ -35,7 +35,7 @@ var ActionMixin = {
     contentTemplate: null,
 
     /**
-     * If an action want to use a control panel, it will be created and
+     * If an action wants to use a control panel, it will be created and
      * registered in this _controlPanel key (the widget).  The way this control
      * panel is created is up to the implementation (so, view controllers or
      * client actions may have different needs).
