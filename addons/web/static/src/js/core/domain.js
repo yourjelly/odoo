@@ -224,6 +224,11 @@ var Domain = collections.Tree.extend({
      */
     arrayToString: function (domain) {
         if (_.isString(domain)) return domain;
+        _.each(domain, function (leaf) {
+            if (Array.isArray(leaf) && typeof leaf[2] === 'string') {
+                leaf[2] = leaf[2].replace(/'/g, '\\u0027');
+            }
+        });
         return JSON.stringify(domain || [])
             .replace(/null/g, "None")
             .replace(/false/g, "False")

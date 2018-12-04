@@ -580,11 +580,12 @@ QUnit.module('Search View', {
             data: this.data,
             mockRPC: function (route, args) {
                 if (route === '/web/dataset/search_read' && searchReadCount === 1) {
+                    debugger;
                     assert.deepEqual(args.domain, [["foo", "ilike", "input with 2' single quotes'"]],
                         'The string in domain should contain the quotes');
                 }
                 return this._super.apply(this, arguments);
-            }
+            },
         });
 
         var searchReadCount = 0;

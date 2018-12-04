@@ -310,8 +310,9 @@ var py = {};
                     }));
                 } else if (string_pattern.test(token)) {
                     var m = string_pattern.exec(token);
+                        debugger;
                     tokens.push(create(symbols['(string)'], {
-                        unicode: !!(m[2] || m[4]),
+                        unicode: !!(m[2] || m[4] || "").replace(/\u0027/g, "'"),
                         value: (m[3] !== undefined ? m[3] : m[5])
                     }));
                 } else if (token in symbols) {
