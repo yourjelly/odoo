@@ -90,34 +90,6 @@ class Survey(models.Model):
         default = dict(default or {}, title=title)
         return super(Survey, self).copy_data(default)
 
-    # Get page name by page_id
-    # def get_page_name(self, page_id):
-    #     page_name = self.env['survey.question'].browse(page_id)
-    #     return page_name.question
-
-    # Get id of page by question_id and survey_id
-    # def get_page_id(self, survey_id, question_id):
-    #     survey_data = self.env['survey.question'].search([('survey_id', '=', survey_id)])
-    #     page_id = None
-    #     for record in survey_data:
-    #         if record.line_type == 'page':
-    #             page_id = record.id
-    #         if record.id == question_id:
-    #             break
-    #     print("...page_id = ", page_id)
-    #     return page_id
-
-    # Get all the pages by survey
-    # def get_page_ids(self, survey):
-    #     page_ids = self.env['survey.question']
-    #     print("\nsurvey.id: ", survey.id, "\n")
-    #     survey_data = self.env['survey.question'].search([('survey_id', '=', survey.id)])
-    #     for record in survey_data:
-    #         if record.line_type == 'page':
-    #             page_ids |= record
-    #     print("\n", page_ids, "\n")
-    #     return page_ids
-
     # Get questions by page_id
     def get_questions(self, survey, page_id):
         questions_ids = self.env['survey.question']
@@ -127,15 +99,12 @@ class Survey(models.Model):
             if record.id == page_id:  # finding the correct page
                 start_appending_question = True
                 questions_ids |= record
-                print("id: ", record.id, " question name: ", record.question)
                 continue  # if correct page found, continue from next record
             if start_appending_question is True:  # don't append questions until correct page found
                 if record.line_type == 'page':
                     break
                 else:
                     questions_ids |= record
-                    print("id: ", record.id, " question name: ", record.question)
-        print("\n", questions_ids, "\n")
         return questions_ids
 
     def next_page_custom(self, user_input, page_id, go_back=False):
@@ -154,36 +123,24 @@ class Survey(models.Model):
             questions_ids = self.get_questions(survey, pages[0][1])
             return (pages[0][1], questions_ids, 0, len(pages), len(pages) == 1)
 
-        print("\n\n\n", next(p for p in pages if p[1] == page_id))
         current_page_index = pages.index(next(p for p in pages if p[1] == page_id))
-        print("\n\n\n", current_page_index, "\n")
 
         # All the pages have been displayed
         if current_page_index == len(pages) - 1 and not go_back:
-            print("# All the pages have been displayed")
             return (None, None, -1, None, False)
         # Let's get back, baby!
         elif go_back and survey.users_can_go_back:
-            print("# Let's get back, baby!")
             questions_ids = self.get_questions(survey, pages[current_page_index - 1][1])
             return (pages[current_page_index - 1][1], questions_ids, current_page_index - 1, len(pages), False)
         else:
             # This will show the last page
-            print("# This will show the last page")
             if current_page_index == len(pages) - 2:
-                print("\n\npages[current_page_index + 1][1]:")
-                print(pages[current_page_index + 1][1])
-                print(pages[current_page_index + 1][1], " ", current_page_index + 1)
                 questions_ids = self.get_questions(survey, pages[current_page_index + 1][1])
                 return (pages[current_page_index + 1][1], questions_ids, current_page_index + 1, len(pages), True)
             # This will show a regular page
             else:
-                print("# This will show a regular page")
                 questions_ids = self.get_questions(survey, pages[current_page_index + 1][1])
                 return (pages[current_page_index + 1][1], questions_ids, current_page_index + 1, len(pages), False)
-        # survey = user_input.survey_id
-        # questions_ids = self.env['survey.question'].search([('survey_id', '=', survey.id)])
-        # return questions_ids
 
     @api.model
     def next_page(self, user_input, page_id, go_back=False):
@@ -210,16 +167,6 @@ class Survey(models.Model):
             if row.line_type == 'page':
                 page_ids.append(row['id'])
         pages = list(enumerate(page_ids))
-        print("pages=")
-        print(pages)
-        print("\npage_ids=")
-        print(page_ids)
-        print("\npages[0][1]: ")
-        print(pages[0][1])
-        print("\npages[0]: ")
-        print(pages[0])
-        print("\nlen(pages) ")
-        print(len(pages))
         # return type agruments:
         # page id, questions of the page, page name, page_nr, is last page, length of pages
 
@@ -229,33 +176,24 @@ class Survey(models.Model):
             questions_ids = self.get_questions(survey, pages[0][1])
             return (pages[0][1], questions_ids, page_name, 0, len(pages) == 1, len(pages))
 
-        print("\n\n\n", next(p for p in pages if p[1] == page_id))
         current_page_index = pages.index(next(p for p in pages if p[1] == page_id))
-        print("\n\n\n", current_page_index, "\n")
 
         # All the pages have been displayed
         if current_page_index == len(pages) - 1 and not go_back:
-            print("all the pages have been displayed")
             return (None, None, None, -1, False, None)
         # Let's get back, baby!
         elif go_back and survey.users_can_go_back:
-            print("Let's get back, baby!")
             page_name = self.get_page_name(pages[current_page_index - 1][1])
             questions_ids = self.get_questions(survey, pages[current_page_index - 1][1])
             return (pages[current_page_index - 1][1], questions_ids, page_name, current_page_index - 1, False, len(pages))
         else:
             # This will show the last page
-            print("This will show the last page")
             if current_page_index == len(pages) - 2:
-                print("\n\npages[current_page_index + 1][1]:")
-                print(pages[current_page_index + 1][1])
-                print(pages[current_page_index + 1][1], " ", current_page_index + 1)
                 page_name = self.get_page_name(pages[current_page_index + 1][1])
                 questions_ids = self.get_questions(survey, pages[current_page_index + 1][1])
                 return (pages[current_page_index + 1][1], questions_ids, page_name, current_page_index + 1, True, len(pages))
             # This will show a regular page
             else:
-                print("\n\n\n This will show a regular page\n")
                 page_name = self.get_page_name(pages[current_page_index + 1][1])
                 questions_ids = self.get_questions(survey, pages[current_page_index + 1][1])
                 return (pages[current_page_index + 1][1], questions_ids, page_name, current_page_index + 1, False, len(pages))

@@ -162,7 +162,7 @@
             <input type="hidden" name="page_id" t-att-value="questions_ids[0].id" />
             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
             <input type="hidden" name="token" t-att-value="token" />
-            
+
             <p class="float-right">Page <span t-raw='page_nr + 1'/> of <span t-raw="pages_length"/></p>
 
             <t t-foreach='questions_ids' t-as='question'>
@@ -171,7 +171,7 @@
                         <h1 class="mt32" t-field='question.question' />
                     </div>
                 </t>
-                
+
                 <t t-if="question.line_type == 'question'">
                     <t t-set="prefix" t-value="'%s_%s' % (survey.id, question.id)" />
                     <div class="js_question-wrapper" t-att-id="prefix">
@@ -451,8 +451,6 @@
                     </div>
                 </div>
                 <div t-foreach="survey_dict['question_ids']" t-as='question_ids'>
-                    <div></div>
-                    
                     <t t-if="question_ids['question']['line_type'] == 'page'">
                         <h1 class="mt16" t-raw="question_ids['question']['question']" /> <hr/>
                     </t>
