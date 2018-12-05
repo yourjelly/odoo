@@ -1,4 +1,4 @@
-odoo.define('pos_employee.employees', function (require) {
+odoo.define('pos_hr.employees', function (require) {
     "use strict";
 
 var models = require('point_of_sale.models');
@@ -31,7 +31,7 @@ models.load_models([{
     fields: ['name', 'id', 'barcode', 'pin', 'user_id'],
     loaded: function(self, employees) {
         if (self.config.module_pos_hr) {
-            if (self.config.employees.length > 0) {
+            if (self.config.employee_ids.length > 0) {
                 self.employees = employees.filter(function(employee) {
                     return self.config.employees.includes(employee.id) || employee.user_id[0] === self.user.id;
                 });

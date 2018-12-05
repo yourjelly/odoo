@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from random import choice
 from string import digits
 import base64
 import logging
@@ -291,6 +292,10 @@ class Employee(models.Model):
         resources = self.mapped('resource_id')
         super(Employee, self).unlink()
         return resources.unlink()
+    
+    @api.multi
+    def generate_random_barcode(self):
+	    for i in self: i.barcode = "".join(choice(digits) for i in range(8))
 
     @api.depends('address_home_id.parent_id')
     def _compute_is_address_home_a_company(self):

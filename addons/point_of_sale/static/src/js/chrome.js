@@ -192,8 +192,8 @@ var HeaderCloseButtonWidget = HeaderButtonWidget.extend({
             } else {
                 self.hide();
             }
-        this.pos.bind('change:cashier', show_hide_close_button , this);
         };
+        this.pos.bind('change:cashier', show_hide_close_button , this);
     }
 });
 
