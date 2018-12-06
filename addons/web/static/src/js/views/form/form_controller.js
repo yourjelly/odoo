@@ -250,6 +250,9 @@ var FormController = BasicController.extend({
      * @override
      */
     update: function (params, options) {
+        if ('currentId' in params && !params.currentId) {
+            this.mode = 'edit'; // if there is no record, we are in 'edit' mode
+        }
         params = _.extend({viewType: 'form', mode: this.mode}, params);
         return this._super(params, options);
     },
