@@ -6,7 +6,6 @@ var mvc = require('web.mvc');
 var ControlPanelController = mvc.Controller.extend({
     className: 'o_cp_controller',
     custom_events: {
-        button_clicked: '_onButtonClicked',
         facet_removed: '_onFacetRemoved',
         get_search_query: '_onGetSearchQuery',
         item_option_clicked: '_onItemOptionClicked',
@@ -154,20 +153,6 @@ var ControlPanelController = mvc.Controller.extend({
         ev.stopPropagation();
         this.model.toggleAutoCompletionFilter(ev.data);
         this._reportNewQueryAndRender();
-    },
-    /**
-     * @private
-     * @param {OdooEvent} ev
-     */
-    _onButtonClicked: function (ev) {
-        ev.stopPropagation();
-        this.trigger_up('execute_action', {
-            action_data: ev.data.attrs,
-            env: {
-                context: {},
-                model: this.modelName,
-            },
-        });
     },
     /**
      * @private
