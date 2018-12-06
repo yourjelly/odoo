@@ -34,6 +34,69 @@ QUnit.module('Views', {
 }, function () {
     QUnit.module('ControlPanelView');
 
+    QUnit.test('basic rendering of controls', async function (assert) {
+        assert.expect(4);
+
+        var controlPanel = await createControlPanel({
+            View: ControlPanelView,
+            model: 'partner',
+            data: this.data,
+            arch: '<controlpanel>' +
+                    '<controls>' +
+                        '<button name="some_action_ref" type="action" string="Do it" class="b"/>' +
+                    '</controls>' +
+                '</controlpanel>',
+            intercepts: {
+                execute_action: function (ev) {
+                    assert.deepEqual(ev.data, {
+                        action_data: {
+                            class: 'b',
+                            name: 'some_action_ref',
+                            string: 'Do it',
+                            type: 'action',
+                        },
+                        env: {
+                            context: {},
+                            model: 'partner',
+                        },
+                    }, "should trigger execute_action with correct params");
+                },
+            },
+        });
+
+        assert.containsOnce(controlPanel, '.o_cp_custom_buttons',
+            "should have rendered a custom button area");
+        assert.containsOnce(controlPanel, '.o_cp_custom_buttons button',
+            "should have rendered one custom button");
+        assert.strictEqual(controlPanel.$('.o_cp_custom_buttons button.b').text(), 'Do it',
+            "should have correctly rendered the custom button");
+
+        testUtils.dom.click(controlPanel.$('.o_cp_custom_buttons button'));
+
+        controlPanel.destroy();
+    });
+
+    QUnit.test('view with nested search arch', async function (assert) {
+        assert.expect(1);
+
+        var controlPanel = await createControlPanel({
+            View: ControlPanelView,
+            model: 'partner',
+            data: this.data,
+            arch: '<controlpanel>' +
+                    '<search>' +
+                        '<filter name="filter" string="Hello" domain="[\'float_field\', \'>\', 0]"/>' +
+                    '</search>' +
+                '</controlpanel>',
+            searchMenuTypes: ['filter'],
+        });
+
+        testUtils.dom.click(controlPanel.$('.o_filters_menu_button'));
+        assert.containsOnce(controlPanel, '.o_filters_menu .o_menu_item:contains(Hello)');
+
+        controlPanel.destroy();
+    });
+
     QUnit.module('Control Panel Arch Parsing');
 
     QUnit.test('empty arch', function (assert) {

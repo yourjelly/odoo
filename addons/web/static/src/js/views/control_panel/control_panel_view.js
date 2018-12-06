@@ -36,8 +36,8 @@ var ControlPanelView = Factory.extend({
      *   essential content at load. For instance, state can be the state of an
      *   other control panel model that we want to use.
      * @param {string} [params.template] the QWeb template to render
-     * @param {Object} [params.viewInfo={arch: '<search/>', fields: {}}] a
-     *   search fieldsview
+     * @param {Object} [params.viewInfo={arch: '<controlpanel/>', fields: {}}]
+         a controlpanel (or search) fieldsview
      * @param {string} [params.viewInfo.arch]
      * @param {boolean} [params.withBreadcrumbs=true] if set to false,
      *   breadcrumbs won't be rendered
@@ -50,7 +50,7 @@ var ControlPanelView = Factory.extend({
         var self = this;
         this._super();
         params = params || {};
-        var viewInfo = params.viewInfo || {arch: '<search/>', fields: {}};
+        var viewInfo = params.viewInfo || {arch: '<controlpanel/>', fields: {}};
         var context = _.extend({}, params.context);
         var domain = params.domain || [];
         var action = params.action || {};
@@ -93,7 +93,11 @@ var ControlPanelView = Factory.extend({
                 // groups are determined in _parseSearchArch
                 this.loadParams.groups = [];
                 this.loadParams.timeRanges = context.time_ranges;
-                this._parseSearchArch(this.arch);
+                if (this.arch.tag === 'controlpanel') {
+                    this._parseControlPanelArch(this.arch);
+                } else {
+                    this._parseSearchArch(this.arch);
+                }
             }
         }
 
@@ -178,7 +182,29 @@ var ControlPanelView = Factory.extend({
         }
     },
     /**
-     * Parse the arch of a 'search' view.
+     * Executed when the given arch has root node <controlpanel>.
+     *
+     * @private
+     * @param {Object} arch arch with root node <controlpanel>
+     */
+    _parseControlPanelArch: function (arch) {
+        var self = this;
+        var controls = [];
+        arch.children.forEach(function (node) {
+            if (node.tag === 'controls') {
+                node.children.forEach(function (control) {
+                    controls.push(control);
+                });
+            }
+            if (node.tag === 'search') {
+                self._parseSearchArch(node);
+            }
+        });
+        this.rendererParams.controls = controls;
+    },
+    /**
+     * Executed when the given arch has root node <search>, for backward
+     * compatibility with former 'search' view.
      *
      * @private
      * @param {Object} arch arch with root node <search>

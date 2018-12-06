@@ -9,6 +9,7 @@ var GroupByMenu = require('web.GroupByMenu');
 var mvc = require('web.mvc');
 var SearchBar = require('web.SearchBar');
 var TimeRangeMenu = require('web.TimeRangeMenu');
+var viewUtils = require('web.viewUtils');
 
 var Renderer = mvc.Renderer;
 
@@ -26,6 +27,8 @@ var ControlPanelRenderer = Renderer.extend({
      * @override
      * @param {Object} [params.action] current action if any
      * @param {Object} [params.context]
+     * @param {Object[]} [params.controls=[]] list of nodes to render in the
+     *   buttons area.
      * @param {Object[]} [params.breadcrumbs=[]] list of breadcrumbs elements
      * @param {boolean} [params.withBreadcrumbs=false] if false, breadcrumbs
      *   won't be rendered
@@ -39,6 +42,7 @@ var ControlPanelRenderer = Renderer.extend({
      */
     init: function (parent, state, params) {
         this._super.apply(this, arguments);
+        this.controls = params.controls || [];
         this._breadcrumbs = params.breadcrumbs || [];
         this._title = params.title || '';
         this.withBreadcrumbs = params.withBreadcrumbs;
@@ -79,6 +83,21 @@ var ControlPanelRenderer = Renderer.extend({
         if (this.searchMenuTypes.length === 0) {
             this.nodes.$searchview_buttons = this.$('.o_search_options');
         }
+
+        // render and append custom controls
+        this.$controls = $('<div>', {class: 'o_cp_custom_buttons'});
+        var hasCustomButtons = false;
+        this.controls.forEach(function (node) {
+            if (node.tag === 'button') {
+                hasCustomButtons = true;
+                self.$controls.append(self._renderButton(node));
+            }
+        });
+        if (!hasCustomButtons) {
+            this.$controls = $(); // fixme: this is to prevent the controlpanel
+                                  // bottom row to take 5px height due to padding
+        }
+        this.$controls.prependTo(this.nodes.$buttons);
 
         if (this.withBreadcrumbs) {
             this._renderBreadcrumbs();
@@ -132,12 +151,16 @@ var ControlPanelRenderer = Renderer.extend({
             this._renderBreadcrumbs();
         }
 
+        // detach custom controls so that they can be re-appended afterwards
+        this.$controls.detach();
+        var toDetach = this.nodes;
         if (clear) {
-            this._detachContent(this.nodes);
+            this._detachContent(toDetach);
         } else {
-            this._detachContent(_.pick(this.nodes, _.keys(new_cp_content)));
+            this._detachContent(_.pick(toDetach, _.keys(new_cp_content)));
         }
         this._attachContent(new_cp_content);
+        this.$controls.prependTo(this.nodes.$buttons);
     },
     /**
      * Update the state of the renderer state. It retriggers a full rerendering.
@@ -253,6 +276,23 @@ var ControlPanelRenderer = Renderer.extend({
         return $bc;
     },
     /**
+     * Render a button to display in the buttons area, given an arch's node.
+     *
+     * @private
+     * @param {Object} node
+     * @returns {jQueryElement} $button
+     */
+    _renderButton: function (node) {
+        var self = this;
+        var $button = viewUtils.renderButtonFromNode(node);
+        $button.on('click', function () {
+            self.trigger_up('button_clicked', {
+                attrs: node.attrs,
+            });
+        });
+        return $button;
+    },
+    /**
      * Renderer the search bar and the search menus
      *
      * @private
@@ -362,6 +402,12 @@ var ControlPanelRenderer = Renderer.extend({
     // Handlers
     //--------------------------------------------------------------------------
 
+    /**
+     * @private
+     */
+    _onButtonClicked: function () {
+        this.trigger_up('button_clicked', {});
+    },
     /**
      * Prevent the search dropdowns from closing when clicking inside them.
      *
