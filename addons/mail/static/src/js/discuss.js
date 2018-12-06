@@ -7,13 +7,9 @@ var ThreadWidget = require('mail.widget.Thread');
 
 var AbstractAction = require('web.AbstractAction');
 var config = require('web.config');
-var ControlPanelMixin = require('web.ControlPanelMixin');
 var core = require('web.core');
-var data = require('web.data');
 var Dialog = require('web.Dialog');
 var dom = require('web.dom');
-var pyUtils = require('web.py_utils');
-var SearchView = require('web.SearchView');
 var session = require('web.session');
 
 var QWeb = core.qweb;
@@ -174,8 +170,8 @@ var ModeratorRejectMessageDialog = Dialog.extend({
     },
 });
 
-var Discuss = AbstractAction.extend(ControlPanelMixin, {
-    template: 'mail.discuss',
+var Discuss = AbstractAction.extend({
+    contentTemplate: 'mail.discuss',
     custom_events: {
         message_moderation: '_onMessageModeration',
         search: '_onSearch',
@@ -190,6 +186,10 @@ var Discuss = AbstractAction.extend(ControlPanelMixin, {
         'click .o_mail_open_channels': '_onPublicChannelsClick',
         'click .o_mail_partner_unpin': '_onUnpinChannel',
     },
+    hasControlPanel: true,
+    loadControlPanel: true,
+    withSearchBar: true,
+    searchMenuTypes: ['filter', 'favorite'],
 
     /**
      * @override
@@ -199,8 +199,8 @@ var Discuss = AbstractAction.extend(ControlPanelMixin, {
         this._super.apply(this, arguments);
 
         this.action = action;
+        this.context = action.context;
         this.action_manager = parent;
-        this.dataset = new data.DataSetSearch(this, 'mail.message');
         this.domain = [];
         this.options = options || {};
 
@@ -213,21 +213,14 @@ var Discuss = AbstractAction.extend(ControlPanelMixin, {
         this._selectedMessage = null;
         this._throttledUpdateThreads = _.throttle(
             this._updateThreads.bind(this), 100, { leading: false });
+
+        this.controlPanelParams.modelName = 'mail.message';
     },
     /**
      * @override
      */
     willStart: function () {
-        var self = this;
-        var viewID = this.action &&
-                        this.action.search_view_id &&
-                        this.action.search_view_id[0];
-        var def = this
-            .loadFieldView(this.dataset, viewID, 'search')
-            .then(function (fieldsView) {
-                self.fields_view = fieldsView;
-            });
-        return $.when(this._super(), this.call('mail_service', 'isReady'), def);
+        return $.when(this._super(), this.call('mail_service', 'isReady'));
     },
     /**
      * @override
@@ -257,11 +250,11 @@ var Discuss = AbstractAction.extend(ControlPanelMixin, {
             this._basicComposer.appendTo(this.$('.o_mail_discuss_content')));
         defs.push(
             this._extendedComposer.appendTo(this.$('.o_mail_discuss_content')));
-        defs.push(this._renderSearchView());
+        defs.push(this._super.apply(this, arguments));
 
-        return this.alive($.when.apply($, defs))
+        return $.when.apply($, defs)
             .then(function () {
-                return self.alive(self._setThread(self._defaultThreadID));
+                return self._setThread(self._defaultThreadID);
             })
             .then(function () {
                 self._updateThreads();
@@ -649,26 +642,6 @@ var Discuss = AbstractAction.extend(ControlPanelMixin, {
             .on('click', '.o_mail_discuss_button_unselect_all', this._onUnselectAllClicked.bind(this));
     },
     /**
-     * @private
-     * @returns {Deferred}
-     */
-    _renderSearchView: function () {
-        var self = this;
-        var options = {
-            $buttons: $('<div>'),
-            action: this.action,
-            disable_groupby: true,
-        };
-        this.searchview = new SearchView(this, this.dataset, this.fields_view, options);
-        return this.alive(this.searchview.appendTo($('<div>')))
-            .then(function () {
-                self.$searchview_buttons = self.searchview.$buttons;
-                // manually call do_search to generate the initial domain and filter
-                // the messages in the default thread
-                self.searchview.do_search();
-            });
-    },
-    /**
      * Render the sidebar of discuss app
      *
      * @private
@@ -852,7 +825,7 @@ var Discuss = AbstractAction.extend(ControlPanelMixin, {
 
             // Update control panel before focusing the composer, otherwise
             // focus is on the searchview
-            self.set("title", self._thread.getTitle());
+            self._setTitle('#' + self._thread.getName());
             self._updateControlPanel();
             self._updateControlPanelButtons(self._thread);
 
@@ -966,13 +939,10 @@ var Discuss = AbstractAction.extend(ControlPanelMixin, {
      * @private
      */
     _updateControlPanel: function () {
-        this.update_control_panel({
+        this.updateControlPanel({
             cp_content: {
                 $buttons: this.$buttons,
-                $searchview: this.searchview.$el,
-                $searchview_buttons: this.$searchview_buttons,
             },
-            searchview: this.searchview,
         });
     },
     /**
@@ -1365,12 +1335,7 @@ var Discuss = AbstractAction.extend(ControlPanelMixin, {
      */
     _onSearch: function (ev) {
         ev.stopPropagation();
-        var session = this.getSession();
-        var result = pyUtils.eval_domains_and_contexts({
-            domains: ev.data.domains,
-            contexts: [session.user_context],
-        });
-        this.domain = result.domain;
+        this.domain = ev.data.domain;
         if (this._thread) {
             // initially (when _onSearch is called manually), there is no
             // thread set yet, so don't try to fetch and render the thread as
