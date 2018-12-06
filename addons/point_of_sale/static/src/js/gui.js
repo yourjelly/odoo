@@ -28,18 +28,20 @@ var Gui = core.Class.extend({
 
         this.chrome.ready.then(function(){
             self.close_other_tabs();
-            var order = self.pos.get_order();
-            if (self.pos.config.module_pos_hr) {
-                self.show_screen('login');
-            } else if (order) {
-                self.show_saved_screen(order);
-            } else {
-                self.show_screen(self.startup_screen);
-            }
+            self._show_first_screen();
             self.pos.bind('change:selectedOrder', function(){
                 self.show_saved_screen(self.pos.get_order());
             });
         });
+    },
+
+    _show_first_screen: function() {
+        var order = this.pos.get_order();
+        if (order) {
+            this.show_saved_screen(order);
+        } else {
+            this.show_screen(this.startup_screen);
+        }
     },
 
     /* ---- Gui: SCREEN MANIPULATION ---- */

@@ -55,6 +55,7 @@ exports.PosModel = Backbone.Model.extend({
         this.company = null;
         this.user = null;
         this.users = [];
+        // employee = {name, id, barcode, user_id, pin}
         this.employee = null;
         this.employees = [];
         this.partners = [];

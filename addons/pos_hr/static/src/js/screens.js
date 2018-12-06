@@ -30,7 +30,6 @@ var LoginScreenWidget = ScreenWidget.extend({
                 'title':_t('Change Cashier'),})
             .then(function(employee){
                 self.pos.set_cashier(employee);
-                $('.username').text(employee.name);
                 self.unlock_screen();
             });
         });

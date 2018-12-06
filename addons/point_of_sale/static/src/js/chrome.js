@@ -80,34 +80,14 @@ var OrderSelectorWidget = PosBaseWidget.extend({
 
 /* ------- The User Name Widget ------- */
 
-// Displays the current cashier's name and allows
-// to switch between cashiers.
+// Displays the current cashier's name
 
 var UsernameWidget = PosBaseWidget.extend({
     template: 'UsernameWidget',
     init: function(parent, options){
         options = options || {};
         this._super(parent,options);
-    },
-    renderElement: function(){
-        var self = this;
-        this._super();
-
-        this.$el.click(function(){
-            self.click_username();
-        });
-    },
-    click_username: function(){
-        if(!this.pos.config.module_pos_hr) { return; }
-        var self = this;
-        this.gui.select_employee({
-            'security':     true,
-            'current_employee': this.pos.get_cashier(),
-            'title':      _t('Change Cashier'),
-        }).then(function(employee){
-            self.pos.set_cashier(employee);
-            self.renderElement();
-        });
+        this.pos.bind('change:cashier', function() { this.$el.text(this.pos.get('cashier') ? this.pos.get('cashier').name : this.pos.employee.name); }, this);
     },
     get_name: function(){
         var user = this.pos.get_cashier();
@@ -146,55 +126,6 @@ var HeaderButtonWidget = PosBaseWidget.extend({
     },
     show: function() { this.$el.removeClass('oe_hidden'); },
     hide: function() { this.$el.addClass('oe_hidden'); },
-});
-
-var HeaderLockButtonWidget = HeaderButtonWidget.extend({
-
-    init: function(parent, options) {
-        this._super(parent,options);
-        this.icon = options.icon[0];
-        this.color = options.icon[1];
-        this.icon_mouseover = options.icon_mouseover[0];
-        this.color_mouseover = options.icon_mouseover[1];
-    },
-
-    start: function(){
-        if (this.pos.config.module_pos_hr) {
-            this.show();
-        } else {
-            this.hide();
-        }
-    },
-
-    renderElement: function() {
-        var self = this;
-        this._super();
-        this.iconElement = this.$el.find("i");
-        this.$el.css('font-size','20px');
-        this.iconElement.addClass(this.icon);
-        this.$el.css('color',this.color);
-        this.$el.mouseover(function(){
-            self.iconElement.addClass(self.icon_mouseover).removeClass(self.icon);
-            $(this).css('color', self.color_mouseover);
-        }).mouseleave(function(){
-            self.iconElement.addClass(self.icon).removeClass(self.icon_mouseover);
-            $(this).css('color', self.color);
-        });
-    },
-});
-
-var HeaderCloseButtonWidget = HeaderButtonWidget.extend({
-    start: function(){
-        var self = this;
-        var show_hide_close_button = function() {
-            if ((self.pos.get('cashier') || self.pos.get_cashier()).role == 'manager') {
-                self.show();
-            } else {
-                self.hide();
-            }
-        };
-        this.pos.bind('change:cashier', show_hide_close_button , this);
-    }
 });
 
 /* --------- The Debug Widget --------- */
@@ -562,7 +493,6 @@ var ClientScreenWidget = PosBaseWidget.extend({
                 this.$el.click(function(){
                     self.pos.render_html_for_customer_facing_display().then(function(rendered_html) {
                         self.pos.proxy.take_ownership_over_client_screen(rendered_html).then(
-        
                         function(data) {
                             if (typeof data === 'string') {
                                 data = JSON.parse(data);
@@ -852,18 +782,6 @@ var Chrome = PosBaseWidget.extend(AbstractAction.prototype, {
             'widget': OrderSelectorWidget,
             'replace':  '.placeholder-OrderSelectorWidget',
         },{
-            'name':   'lock_button',
-            'widget': HeaderLockButtonWidget,
-            'append': '.pos-rightheader',
-            'args': {
-                label: _lt('Lock'),
-                icon: ['fa-unlock', 'green'],
-                icon_mouseover: ['fa-lock', 'red'],
-                action: function() {
-                    this.gui.show_screen('login');
-                }
-            }
-        },{
             'name':   'sale_details',
             'widget': SaleDetailsButton,
             'append':  '.pos-rightheader',
@@ -884,11 +802,12 @@ var Chrome = PosBaseWidget.extend(AbstractAction.prototype, {
             'append':  '.pos-rightheader',
         },{
             'name':   'close_button',
-            'widget': HeaderCloseButtonWidget,
+            'widget': HeaderButtonWidget,
             'append':  '.pos-rightheader',
             'args': {
-                label: _lt('Close'),
+                label: _t('Close'),
                 action: function(){ 
+                    this.$el.addClass('close_button');
                     var self = this;
                     if (!this.confirmed) {
                         this.$el.addClass('confirm');
@@ -919,30 +838,32 @@ var Chrome = PosBaseWidget.extend(AbstractAction.prototype, {
         },
     ],
 
-    // This method instantiates all the screens, widgets, etc. 
-    build_widgets: function() {
-        var classe;
-
-        for (var i = 0; i < this.widgets.length; i++) {
-            var def = this.widgets[i];
-            if ( !def.condition || def.condition.call(this) ) {
-                var args = typeof def.args === 'function' ? def.args(this) : def.args;
-                var w = new def.widget(this, args || {});
-                if (def.replace) {
-                    w.replace(this.$(def.replace));
-                } else if (def.append) {
-                    w.appendTo(this.$(def.append));
-                } else if (def.prepend) {
-                    w.prependTo(this.$(def.prepend));
+    load_widgets: function(widgets) {
+        for (var i = 0; i < widgets.length; i++) {
+            var widget = widgets[i];
+            if ( !widget.condition || widget.condition.call(this) ) {
+                var args = typeof widget.args === 'function' ? widget.args(this) : widget.args;
+                var w = new widget.widget(this, args || {});
+                if (widget.replace) {
+                    w.replace(this.$(widget.replace));
+                } else if (widget.append) {
+                    w.appendTo(this.$(widget.append));
+                } else if (widget.prepend) {
+                    w.prependTo(this.$(widget.prepend));
                 } else {
                     w.appendTo(this.$el);
                 }
-                this.widget[def.name] = w;
             }
         }
+    },
+
+    // This method instantiates all the screens, widgets, etc.
+    build_widgets: function() {
+        this.load_widgets(this.widgets);
 
         this.screens = {};
-        for (i = 0; i < this.gui.screen_classes.length; i++) {
+        var classe;
+        for (var i = 0; i < this.gui.screen_classes.length; i++) {
             classe = this.gui.screen_classes[i];
             if (!classe.condition || classe.condition.call(this)) {
                 var screen = new classe.widget(this,{});
@@ -978,8 +899,6 @@ return {
     Chrome: Chrome,
     DebugWidget: DebugWidget,
     HeaderButtonWidget: HeaderButtonWidget,
-    HeaderLockButtonWidget: HeaderLockButtonWidget,
-    HeaderCloseButtonWidget: HeaderCloseButtonWidget,
     OrderSelectorWidget: OrderSelectorWidget,
     ProxyStatusWidget: ProxyStatusWidget,
     SaleDetailsButton: SaleDetailsButton,

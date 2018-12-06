@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <xpath expr="//button[@id='btn_use_employees']" position='replace'>
                 <div attrs="{'invisible': [('module_pos_hr', '=', False)]}">
-                    <span class="o_form_label">Allowed Employees </span>
+                    <span class="o_form_label oe_edit_only">Allowed Employees </span>
                     <field name="employee_ids" widget="many2many_tags"/>
                 </div>
             </xpath>

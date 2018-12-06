@@ -60,7 +60,7 @@
                         </div>
                       </div>
                         <div class="col-12 col-lg-6 o_setting_box"
-                             title="Employees can scan their badge or enter a PIN to log in to a PoS session. Such credentials are settable in the *HR Settings* tab of the employee form.">
+                             title="Employees can scan their badge or enter a PIN to log in to a PoS session. These credentials are configurable in the *HR Settings* tab of the employee form.">
                             <div class="o_setting_left_pane">
                                 <field name="module_pos_hr"/>
                             </div>

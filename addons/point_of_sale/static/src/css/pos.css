@@ -2517,7 +2517,7 @@ td {
 }
 .pos .login-button{
     font-size: initial;
-    height: -webkit-fill-available;
+    height: 100%;
     color: #555555;
     border-radius: 5px;
 }

@@ -5,7 +5,7 @@ from string import digits
 import base64
 import logging
 
-from odoo import api, fields, models, SUPERUSER_ID
+from odoo import api, fields, models
 from odoo import tools, _
 from odoo.exceptions import ValidationError, AccessError
 from odoo.modules.module import get_module_resource
@@ -255,7 +255,6 @@ class Employee(models.Model):
         if user.tz:
             vals['tz'] = user.tz
         return vals
-
 
     @api.model
     def create(self, vals):

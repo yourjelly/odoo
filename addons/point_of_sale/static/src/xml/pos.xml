@@ -114,7 +114,7 @@
             <t t-if="!widget.icon">
                 <t t-esc="widget.label" />
             </t>
-            <t t-if="widget.icon">
+            <t t-else="">
                 <i class='fa fa-fw' role="img"/>
             </t>
         </div>
