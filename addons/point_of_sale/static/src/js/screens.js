@@ -68,32 +68,6 @@ var ScreenWidget = PosBaseWidget.extend({
             this.barcode_error_action(code);
         }
     },
-
-    // what happens when a cashier id barcode is scanned.
-    // the default behavior is the following : 
-    // - if there's an employee with a matching barcode, put it as the active 'cashier', go to cashier mode, and return true
-    // - else : do nothing and return false. You probably want to extend this to show and appropriate error popup... 
-    barcode_cashier_action: function(code){
-        var self = this;
-        var employees = this.pos.employees;
-        for(var i = 0, len = employees.length; i < len; i++){
-            if(employees[i].barcode === code.code){
-                if (employees[i].id !== this.pos.get_cashier().id && employees[i].pin) {
-                    return this.gui.ask_password(employees[i].pin).then(function(){
-                        self.pos.set_cashier(employees[i]);
-                        self.chrome.widget.username.renderElement();
-                        return true;
-                    });
-                } else {
-                    this.pos.set_cashier(employees[i]);
-                    this.chrome.widget.username.renderElement();
-                    return true;
-                }
-            }
-        }
-        this.barcode_error_action(code);
-        return false;
-    },
     
     // what happens when a client id barcode is scanned.
     // the default behavior is the following : 
@@ -139,7 +113,6 @@ var ScreenWidget = PosBaseWidget.extend({
         }
 
         this.pos.barcode_reader.set_action_callback({
-            'cashier': _.bind(self.barcode_cashier_action, self),
             'product': _.bind(self.barcode_product_action, self),
             'weight': _.bind(self.barcode_product_action, self),
             'price': _.bind(self.barcode_product_action, self),
