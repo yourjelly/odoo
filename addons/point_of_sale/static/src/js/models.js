@@ -55,8 +55,7 @@ exports.PosModel = Backbone.Model.extend({
         this.company = null;
         this.user = null;
         this.users = [];
-        // employee = {name, id, barcode, user_id, pin}
-        this.employee = null;
+        this.employee = {name: null, id: null, barcode: null, user_id:null, pin:null}
         this.employees = [];
         this.partners = [];
         this.cashregisters = [];
@@ -170,7 +169,7 @@ exports.PosModel = Backbone.Model.extend({
         loaded: function(self,users){
             self.user = users[0];
             self.user.role = 'manager';
-            self.employee = self.user;
+            self.employee.name = self.user.name;
             self.employee.user_id = [self.user.id, self.user.name];
             self.employees = [self.employee];
             self.set_cashier(self.employee);
@@ -2109,8 +2108,8 @@ exports.Order = Backbone.Model.extend({
             pos_session_id: this.pos_session_id,
             pricelist_id: this.pricelist ? this.pricelist.id : false,
             partner_id: this.get_client() ? this.get_client().id : false,
-            user_id: this.pos.user.id,
-            employee_id: this.pos.config.module_pos_hr ? this.pos.get_cashier().id : false,
+            user_id: this.pos.get_cashier().user_id,
+            employee_id: this.pos.get_cashier().id,
             uid: this.uid,
             sequence_number: this.sequence_number,
             creation_date: this.validation_date || this.creation_date, // todo: rename creation_date in master
