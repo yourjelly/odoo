@@ -169,6 +169,7 @@
                 <t t-if="question.line_type == 'page'">
                     <div class="o_page_header">
                         <h1 class="mt32" t-field='question.question' />
+                        <div t-field='question.description' class="oe_no_empty"/>
                     </div>
                 </t>
 
@@ -452,7 +453,9 @@
                 </div>
                 <div t-foreach="survey_dict['question_ids']" t-as='question_ids'>
                     <t t-if="question_ids['question']['line_type'] == 'page'">
-                        <h1 class="mt16" t-raw="question_ids['question']['question']" /> <hr/>
+                        <h1 class="mt16" t-raw="question_ids['question']['question']" />
+                        <div t-raw="question_ids['question']['description']" class="oe_no_empty" />
+                        <hr/>
                     </t>
                     <t t-if="question_ids['question']['line_type'] == 'question'">
                         <div class="mt16">
@@ -528,7 +531,7 @@
                 <div t-foreach="survey_dict['page_ids']" t-as='page_ids'>
                     <t t-set="page" t-value="page_ids['page']"/>
                     <!-- <h1 class="mt16" t-field='page.title'></h1> -->
-                    <h1 class="mt16" t-raw="page_name" />haa moj haa
+                    <h1 class="mt16" t-raw="page_name" />
                     <!-- <div t-field="page.description" class="oe_no_empty" /> -->
                     <hr/>
                     <div t-foreach="page_ids['question_ids']" t-as='question_ids' class="mt16">

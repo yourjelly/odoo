@@ -32,15 +32,17 @@ class TestSurvey(TransactionCase):
             'groups_id': [(6, 0, [self.ref('base.group_public')])]})
 
         self.survey1 = self.env['survey.survey'].sudo(self.survey_manager).create({'title': "S0"})
+        self.page1 = self.env['survey.question'].sudo(self.survey_manager).create({'survey_id': self.survey1.id, 'line_type': 'page', 'question': "P0"})
         # self.page1 = self.survey1.page_ids[0]
 
     def test_00_create_minimal_survey(self):
-        question = self.env['survey.question'].sudo(self.survey_manager).create({'question': 'Q0'})
+        question = self.env['survey.question'].sudo(self.survey_manager).create({'survey_id': self.survey1.id, 'line_type': 'question', 'question': 'Q0'})
         self.assertEqual(self.survey1.title, "S0", msg="Title of the survey is somehow modified.")
         # self.assertEqual(len(self.survey1.page_ids), 1, msg="Additional Pages are linked with the survey after creation.")
-        self.assertEqual(self.page1.title, "P0", msg="Title of the page is somehow modified.")
-        self.assertEqual(len(self.page1.question_ids), 1, msg="Additional questions are linked with the page after creation.")
+        self.assertEqual(self.page1.question, "P0", msg="Title of the page is somehow modified.")
+        # self.assertEqual(len(self.page1.question_ids), 1, msg="Additional questions are linked with the page after creation.")
         self.assertEqual(question.question, "Q0", msg="Title of the Question is somehow modified.")
+        self.assertEqual(question.line_type, "question", msg="Type of the Question is somehow modified.")
 
     def test_01_question_type_validation_save_line_function(self):
         for (question_type, text) in self.env['survey.question']._fields['question_type'].selection:
@@ -57,43 +59,43 @@ class TestSurvey(TransactionCase):
             # Blank value of field is not accepted for mandatory questions.
             if question_type == 'multiple_choice':
                 question = self.env['survey.question'].sudo(self.survey_manager).create({
-                    'question': 'Q0', 'question_type': 'multiple_choice',
+                    'survey_id': self.survey1.id, 'line_type': 'question', 'question': 'Q0', 'question_type': 'multiple_choice',
                     'constr_mandatory': True, 'constr_error_msg': 'Error',
                     'labels_ids': [(0, 0, {'value': "MChoice0", "quizz_mark": 0}), (0, 0, {'value': "MChoice1", "quizz_mark": 0})]})
 
             elif question_type == 'matrix':
                 question = self.env['survey.question'].sudo(self.survey_manager).create({
-                    'question': 'Q0', 'question_type': 'matrix', 'matrix_subtype': 'simple',
+                    'survey_id': self.survey1.id, 'line_type': 'question', 'question': 'Q0', 'question_type': 'matrix', 'matrix_subtype': 'simple',
                     'constr_mandatory': True, 'constr_error_msg': 'Error',
                     'labels_ids': [(0, 0, {'value': "Column0", "quizz_mark": 0}), (0, 0, {'value': "Column1", "quizz_mark": 0})],
                     'labels_ids_2': [(0, 0, {'value': "Row0", "quizz_mark": 0}), (0, 0, {'value': "Row1", "quizz_mark": 0})]})
 
             else:
                 question = self.env['survey.question'].sudo(self.survey_manager).create({
-                    'question': 'Q0', 'question_type': question_type, 'constr_mandatory': True, 'constr_error_msg': 'Error'})
-            answer_tag = '%s_%s_%s' % (self.survey1.id, self.page1.id, question.id)
+                    'survey_id': self.survey1.id, 'line_type': 'question', 'question': 'Q0', 'question_type': question_type, 'constr_mandatory': True, 'constr_error_msg': 'Error'})
+            answer_tag = '%s_%s' % (self.survey1.id, question.id)
             self.assertDictEqual({answer_tag: "Error"}, question.validate_question({answer_tag: ''}, answer_tag),
                 msg=("Validation function for type %s is unable to generate error if it is mandatory and answer is blank." % question_type))
 
     def test_03_question_textbox(self):
         questions = [
             self.env['survey.question'].sudo(self.survey_manager).create({
-                'question': 'Q0', 'question_type': 'textbox', 'validation_email': True}),
+                'survey_id': self.survey1.id, 'line_type': 'question', 'question': 'Q0', 'question_type': 'textbox', 'validation_email': True}),
             self.env['survey.question'].sudo(self.survey_manager).create({
-                'question': 'Q1', 'question_type': 'textbox', 'validation_required': True,
+                'survey_id': self.survey1.id, 'line_type': 'question', 'question': 'Q1', 'question_type': 'textbox', 'validation_required': True,
                 'validation_length_min': 2, 'validation_length_max': 8, 'validation_error_msg': "Error"})]
 
         results = [('test @ testcom', _('This answer must be an email address')), ('t', 'Error')]
         for i in range(len(questions)):
-            answer_tag = '%s_%s_%s' % (self.survey1.id, self.page1.id, questions[i].id)
+            answer_tag = '%s_%s' % (self.survey1.id, questions[i].id)
             self.assertEqual(questions[i].validate_question({answer_tag: results[i][0]}, answer_tag), {answer_tag: results[i][1]}, msg="\
                 Validation function for textbox is unable to notify if answer is violating the validation rules")
 
     def test_04_question_numerical_box(self):
         question = self.env['survey.question'].sudo(self.survey_manager).create({
-            'question': 'Q0', 'question_type': 'numerical_box', 'validation_required': True,
+            'survey_id': self.survey1.id, 'line_type': 'question', 'question': 'Q0', 'question_type': 'numerical_box', 'validation_required': True,
             'validation_min_float_value': 2.1, 'validation_max_float_value': 3.0, 'validation_error_msg': "Error"})
-        answer_tag = '%s_%s_%s' % (self.survey1.id, self.page1.id, question.id)
+        answer_tag = '%s_%s' % (self.survey1.id, question.id)
         results = [('aaa', _('This is not a number')), ('4.5', 'Error'), ('0.1', 'Error')]
         for i in range(len(results)):
             self.assertEqual(question.validate_question({answer_tag: results[i][0]}, answer_tag), {answer_tag: results[i][1]}, msg="\
@@ -101,9 +103,9 @@ class TestSurvey(TransactionCase):
 
     def test_05_question_date(self):
         question = self.env['survey.question'].sudo(self.survey_manager).create({
-            'question': 'Q0', 'question_type': 'date', 'validation_required': True,
+            'survey_id': self.survey1.id, 'line_type': 'question', 'question': 'Q0', 'question_type': 'date', 'validation_required': True,
             'validation_min_date': '2015-03-20', 'validation_max_date': '2015-03-25', 'validation_error_msg': "Error"})
-        answer_tag = '%s_%s_%s' % (self.survey1.id, self.page1.id, question.id)
+        answer_tag = '%s_%s' % (self.survey1.id, question.id)
         results = [('2015-55-10', _('This is not a date')), ('2015-03-19', 'Error'), ('2015-03-26', 'Error')]
         for i in range(len(results)):
             self.assertEqual(question.validate_question({answer_tag: results[i][0]}, answer_tag), {answer_tag: results[i][1]}, msg="\
@@ -114,6 +116,7 @@ class TestSurvey(TransactionCase):
         correct_survey = self.env['survey.survey'].sudo(self.survey_manager).create({
             'title': "S0", 'stage_id': self.env['survey.stage'].search([('sequence', '=', 1)]).id,
             # 'page_ids': [(0, 0, {'title': "P0", 'question_ids': [(0, 0, {'question': "Q0", 'question_type': 'free_text'})]})]
+            'question_ids': [(0, 0, {'line_type': 'page', 'question': "P0"}), (0, 0, {'line_type': 'question', 'question': "Q0", 'question_type': 'free_text'})]
             })
         action = correct_survey.action_send_survey()
         template = self.env.ref('survey.email_template_survey', raise_if_not_found=False)
@@ -139,15 +142,11 @@ class TestSurvey(TransactionCase):
         })
 
         # Case-2: Executing action with incorrect data.
-        surveys = [
-            self.env['survey.survey'].sudo(self.survey_manager).create({  # Survey without any page or question.
-                'title': "Test survey"}),
-            self.env['survey.survey'].sudo(self.survey_manager).create({  # Closed Survey.
+        incorrect_survey = self.env['survey.survey'].sudo(self.survey_manager).create({  # Closed Survey
                 'title': "S0", 'stage_id': self.env['survey.stage'].search([('closed', '=', True)]).id,  # Getting Closed stage id.
                 # 'page_ids': [(0, 0, {'title': "P0", 'question_ids': [(0, 0, {'question': "Q0", 'question_type': 'free_text'})]})]
-                })]
-        for survey in surveys:
-            self.assertRaises(UserError, survey.action_send_survey)
+                'question_ids': [(0, 0, {'line_type': 'page', 'question': "P0"}), (0, 0, {'line_type': 'question', 'question': "Q0", 'question_type': 'free_text'})]})
+        self.assertRaises(UserError, incorrect_survey.action_send_survey)
 
     def test_07_survey_email_message(self):
         # Case-1: Executing send_mail with correct data.
@@ -194,7 +193,7 @@ class TestSurvey(TransactionCase):
                 self.assertEqual(url_html % ('/' + url), getattr(self.survey1.with_context({'relative_url': True}), urltype + '_url_html'), msg="Public URL is incorrect.")
 
     def test_09_answer_survey(self):
-        question = self.env['survey.question'].sudo(self.survey_manager).create({'question': 'Q0'})
+        question = self.env['survey.question'].sudo(self.survey_manager).create({'survey_id': self.survey1.id, 'line_type': 'question', 'question': 'Q0'})
         input_portal = self.env['survey.user_input'].sudo(self.survey_user).create({
             'survey_id': self.survey1.id,
             'partner_id': self.survey_user.partner_id.id,
@@ -217,7 +216,7 @@ class TestSurvey(TransactionCase):
 
     def test_10_survey_result_simple_multiple_choice(self):
         question = self.env['survey.question'].sudo(self.survey_manager).create({
-            'question': 'Q0', 'question_type': 'simple_choice',
+            'survey_id': self.survey1.id, 'line_type': 'question', 'question': 'Q0', 'question_type': 'simple_choice',
             'labels_ids': [(0, 0, {'value': "Choice0", 'quizz_mark': 0}), (0, 0, {'value': "Choice1", 'quizz_mark': 0})]})
         for i in range(3):
             self.env['survey.user_input'].sudo(self.user_public).create({'survey_id': self.survey1.id, 'user_input_line_ids': [(0, 0, {
@@ -231,7 +230,7 @@ class TestSurvey(TransactionCase):
 
     def test_11_survey_result_matrix(self):
         question = self.env['survey.question'].sudo(self.survey_manager).create({
-            'question': 'Q0', 'question_type': 'matrix', 'matrix_subtype': 'simple',
+            'survey_id': self.survey1.id, 'line_type': 'question', 'question': 'Q0', 'question_type': 'matrix', 'matrix_subtype': 'simple',
             'labels_ids': [(0, 0, {'value': "Column0", "quizz_mark": 0}), (0, 0, {'value': "Column1", "quizz_mark": 0})],
             'labels_ids_2': [(0, 0, {'value': "Row0", "quizz_mark": 0}), (0, 0, {'value': "Row1", "quizz_mark": 0})]})
         for i in range(3):
@@ -245,7 +244,7 @@ class TestSurvey(TransactionCase):
         self.assertEqual(self.env['survey.survey'].prepare_result(question)['result'], res, msg="Statistics of matrix type questions are different from expectations")
 
     def test_12_survey_result_numeric_box(self):
-        question = self.env['survey.question'].sudo(self.survey_manager).create({'question': 'Q0', 'question_type': 'numerical_box'})
+        question = self.env['survey.question'].sudo(self.survey_manager).create({'survey_id': self.survey1.id, 'line_type': 'question', 'question': 'Q0', 'question_type': 'numerical_box'})
         num = [float(n) for n in random.sample(range(1, 100), 3)]
         nsum = sum(num)
         for i in range(3):
@@ -259,7 +258,7 @@ class TestSurvey(TransactionCase):
             self.assertEqual(result[key], exresult[key], msg="Statistics of numeric box type questions are different from expectations")
 
     def test_13_survey_actions(self):
-        self.env['survey.question'].sudo(self.survey_manager).create({'question': 'Q0', 'question_type': 'numerical_box'})
+        self.env['survey.question'].sudo(self.survey_manager).create({'survey_id': self.survey1.id, 'line_type': 'question', 'question': 'Q0', 'question_type': 'numerical_box'})
 
         actions = {
             'start': {'method': 'public', 'token': '/test', 'text': 'Start'},
