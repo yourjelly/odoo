@@ -224,31 +224,36 @@ var dom = {
      * @param {function} fct
      *      The function which is to be used as a handler. If a promise
      *      is returned, it is used to determine when the handler's action is
-     *      finished. Otherwise, the return is used as jQuery uses it.
-     * @param {function|boolean} preventDefault
-     * @param {function|boolean} stopPropagation
+     *      finished. Otherwise, the result is ignored and not transferred to
+     *      jquery.
+     * @param {Object} [options]
+     * @param {boolean} [options.debounce=false]
+     * @param {boolean} [options.immediate=true]
+     * @param {function|boolean} [options.preventDefault=false]
+     * @param {function|boolean} [options.stopPropagation=false]
      */
-    makeAsyncHandler: function (fct, preventDefault, stopPropagation) {
-        // Create a deferred indicating if a previous call to this handler is
-        // still pending.
-        var def = $.when();
+    makeAsyncHandler: function (fct, options) {
+        var preventDefault = false;
+        var stopPropagation = false;
+        if (options) {
+            preventDefault = options.preventDefault;
+            stopPropagation = options.stopPropagation;
+        }
+
+        var debounce = options && options.debounce ? dom.DEBOUNCE : 0;
+        var immediate = options && options.immediate !== undefined ? options.immediate : true;
+
+        var debouncedFct = concurrency.asyncDebounce(fct, debounce, immediate);
 
         return function (ev) {
-            if (preventDefault === true || preventDefault && preventDefault()) {
+            if (preventDefault === true || preventDefault && preventDefault(ev)) {
                 ev.preventDefault();
             }
-            if (stopPropagation === true || stopPropagation && stopPropagation()) {
+            if (stopPropagation === true || stopPropagation && stopPropagation(ev)) {
                 ev.stopPropagation();
             }
 
-            if (def.state() === 'pending') {
-                // If a previous call to this handler is still pending, ignore
-                // the new call.
-                return;
-            }
-            var result = fct.apply(this, arguments);
-            def = $.when(result);
-            return result;
+            debouncedFct.apply(this, arguments);
         };
     },
     /**
@@ -263,38 +268,52 @@ var dom = {
      * @param {function} fct
      *      The function which is to be used as a button click handler. If a
      *      promise is returned, it is used to determine when the button can be
-     *      re-enabled. Otherwise, the return is used as jQuery uses it.
+     *      re-enabled. Otherwise, the result is ignored and not transferred to
+     *      jquery.
+     * @param {Object} [options] @see makeAsyncHandler.options
      */
-    makeButtonHandler: function (fct) {
-        // Fallback: if the final handler is not binded to a button, at least
-        // make it an async handler (also handles the case where some events
-        // might ignore the disabled state of the button).
-        fct = dom.makeAsyncHandler(fct);
+    makeButtonHandler: function (fct, options) {
+        options = _.extend({
+            debounce: true,
+            immediate: true,
+        }, options || {});
 
-        return function (ev) {
+        return dom.makeAsyncHandler(function (ev) {
             var result = fct.apply(this, arguments);
-
-            var $button = $(ev.target).closest('.btn');
-            if (!$button.length) {
-                return result;
-            }
 
             // Disable the button for the duration of the handler's action
             // or at least for the duration of the click debounce. This makes
             // a 'real' debounce creation useless. Also, during the debouncing
             // part, the button is disabled without any visual effect.
+            var $button = $(ev.target).closest('.btn');
             $button.addClass('o_debounce_disabled');
-            $.when(dom.DEBOUNCE && concurrency.delay(dom.DEBOUNCE)).then(function () {
+            return $.when(dom.DEBOUNCE && concurrency.delay(dom.DEBOUNCE)).then(function () {
                 $button.addClass('disabled').prop('disabled', true);
                 $button.removeClass('o_debounce_disabled');
-
                 return $.when(result).always(function () {
                     $button.removeClass('disabled').prop('disabled', false);
                 });
             });
+        }, options);
+    },
+    /**
+     * Creates a debounced version of a function to be used as an input/textarea
+     * input/change handler.
+     *
+     * @param {function} fct
+     *      The function which is to be used as an input/textarea input/change
+     *      handler. If a promise is returned, it is used to virtually extend
+     *      the debounce duration for the resolve duration of that promise.
+     *      Otherwise, the result is ignored and not transferred to jquery.
+     * @param {Object} [options] @see makeAsyncHandler.options
+     */
+    makeInputHandler: function (fct, options) {
+        options = _.extend({
+            debounce: true,
+            immediate: false,
+        }, options || {});
 
-            return result;
-        };
+        return dom.makeAsyncHandler(fct, options);
     },
     /**
      * Prepends content in a jQuery object and optionnally triggers an event
