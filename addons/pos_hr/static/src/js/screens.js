@@ -62,6 +62,7 @@ var LoginScreenWidget = ScreenWidget.extend({
                 'title':_t('Change Cashier'),})
             .then(function(employee){
                 self.pos.set_cashier(employee);
+                self.chrome.widget.username.renderElement();
                 self.unlock_screen();
             });
         });
@@ -83,7 +84,6 @@ var LoginScreenWidget = ScreenWidget.extend({
 });
 
 gui.define_screen({name:'login', widget: LoginScreenWidget});
-
 
 return {
     LoginScreenWidget: LoginScreenWidget

@@ -30,6 +30,7 @@ odoo.define('pos_hr.chrome', function (require) {
                 'title':      _t('Change Cashier'),
             }).then(function(employee){
                 self.pos.set_cashier(employee);
+                self.chrome.widget.username.renderElement();
                 self.renderElement();
             });
         },
@@ -48,6 +49,7 @@ odoo.define('pos_hr.chrome', function (require) {
             } else {
                 this.hide();
             }
+            return this._super();
         }
     });
 
@@ -66,6 +68,7 @@ odoo.define('pos_hr.chrome', function (require) {
             } else {
                 this.hide();
             }
+            return this._super();
         },
 
         renderElement: function() {
@@ -97,11 +100,11 @@ odoo.define('pos_hr.chrome', function (require) {
             }
         },
         build_widgets: function() {
-            var self = this
+            var self = this;
                 this.widgets.some(function(widget, index){
                     if (widget.name === 'close_button'){
                         widget.widget = HeaderCloseButtonWidget;
-                        self.widgets.splice(index, 0, self.lock_button_widget)
+                        self.widgets.splice(index, 0, self.lock_button_widget);
                             return true;
                     }
                     return false;

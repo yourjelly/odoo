@@ -21,4 +21,5 @@
     ],
     'installable': True,
     'auto-install': True,
+    'qweb': ['static/src/xml/pos.xml'],
 }

@@ -87,7 +87,6 @@ var UsernameWidget = PosBaseWidget.extend({
     init: function(parent, options){
         options = options || {};
         this._super(parent,options);
-        this.pos.bind('change:cashier', function() { this.$el.text(this.pos.get('cashier') ? this.pos.get('cashier').name : this.pos.employee.name); }, this);
     },
     get_name: function(){
         var user = this.pos.get_cashier();
@@ -853,6 +852,7 @@ var Chrome = PosBaseWidget.extend(AbstractAction.prototype, {
                 } else {
                     w.appendTo(this.$el);
                 }
+                this.widget[widget.name] = w;
             }
         }
     },

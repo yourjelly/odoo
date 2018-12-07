@@ -55,7 +55,7 @@ exports.PosModel = Backbone.Model.extend({
         this.company = null;
         this.user = null;
         this.users = [];
-        this.employee = {name: null, id: null, barcode: null, user_id:null, pin:null}
+        this.employee = {name: null, id: null, barcode: null, user_id:null, pin:null};
         this.employees = [];
         this.partners = [];
         this.cashregisters = [];
@@ -1983,7 +1983,6 @@ exports.Order = Backbone.Model.extend({
         this.orderlines     = new OrderlineCollection();
         this.paymentlines   = new PaymentlineCollection();
         this.pos_session_id = this.pos.pos_session.id;
-        this.employee       = this.pos.employee;
         this.finalized      = false; // if true, cannot be modified.
         this.set_pricelist(this.pos.default_pricelist);
 
