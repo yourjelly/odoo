@@ -161,9 +161,7 @@ async function createAsyncView(params) {
         });
     }
 
-    /*var view =*/ /*await*/
-    return view.getController(widget).then(async function(view){
-
+    return view.getController(widget).then(function(view){
         // override the view's 'destroy' so that it calls 'destroy' on the widget
         // instead, as the widget is the parent of the view and the mockServer.
         view.__destroy = view.destroy;

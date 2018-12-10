@@ -170,7 +170,7 @@ var FormController = BasicController.extend({
         options = _.extend({}, options, {
             validate: this.canBeDiscarded.bind(this),
         });
-        this._super($node, options);
+        return this._super($node, options);
     },
     /**
      * Instantiate and render the sidebar if a sidebar is requested
@@ -399,11 +399,16 @@ var FormController = BasicController.extend({
      * @returns {Promise}
      */
     _update: function () {
-        var title = this.getTitle();
-        this._setTitle(title);
-        this._updateButtons();
-        this._updateSidebar();
-        return this._super.apply(this, arguments).then(this.autofocus.bind(this));
+        var self = this;
+
+        return this._super.apply(this, arguments).then(function() {
+            var title = self.getTitle();
+            self._setTitle(title);
+            self._updateButtons();
+            self._updateSidebar();
+
+            self.autofocus.bind(self);
+        });
     },
     /**
      * @private

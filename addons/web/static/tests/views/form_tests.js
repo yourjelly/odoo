@@ -1581,7 +1581,7 @@ QUnit.module('Views', {
             res_id: 1,
             mockRPC: function (route, args) {
                 if (args.method === 'search_read' && args.model === 'ir.attachment') {
-                    return $.when([]);
+                    return Promise.resolve([]);
                 }
                 return this._super.apply(this, arguments);
             },
@@ -1729,7 +1729,7 @@ QUnit.module('Views', {
             viewOptions: {hasSidebar: true},
             mockRPC: function (route, args) {
                 if (args.method === 'search_read' && args.model === 'ir.attachment') {
-                    return $.when([]);
+                    return Promise.resolve([]);
                 }
                 return this._super.apply(this, arguments);
             },
@@ -1794,7 +1794,7 @@ QUnit.module('Views', {
             viewOptions: {hasSidebar: true},
             mockRPC: function (route, args) {
                 if (args.method === 'search_read' && args.model === 'ir.attachment') {
-                    return $.when([]);
+                    return Promise.resolve([]);
                 }
                 return this._super.apply(this, arguments);
             },
@@ -2334,7 +2334,7 @@ QUnit.module('Views', {
             viewOptions: {hasSidebar: true},
             mockRPC: function (route, args) {
                 if (args.method === 'search_read' && args.model === 'ir.attachment') {
-                    return $.when([]);
+                    return Promise.resolve([]);
                 }
                 return this._super.apply(this, arguments);
             },
@@ -2674,7 +2674,7 @@ QUnit.module('Views', {
             res_id: 1,
             mockRPC: function (route, args) {
                 if (args.method === 'search_read' && args.model === 'ir.attachment') {
-                    return $.when([]);
+                    return Promise.resolve([]);
                 }
                 return this._super.apply(this, arguments);
             },
@@ -2718,7 +2718,7 @@ QUnit.module('Views', {
             res_id: 1,
             mockRPC: function (route, args) {
                 if (args.method === 'search_read' && args.model === 'ir.attachment') {
-                    return $.when([]);
+                    return Promise.resolve([]);
                 }
                 assert.step(args.method);
                 return this._super.apply(this, arguments);
@@ -4885,7 +4885,7 @@ QUnit.module('Views', {
                     return Promise.resolve({});
                 }
                 if (args.method === 'search_read' && args.model === 'ir.attachment') {
-                    return $.when([]);
+                    return Promise.resolve([]);
                 }
                 return this._super.apply(this, arguments);
             },
@@ -6169,7 +6169,7 @@ QUnit.module('Views', {
             viewOptions: {hasSidebar: true},
             mockRPC: function (route, args) {
                 if (args.method === 'search_read' && args.model === 'ir.attachment') {
-                    return $.when([]);
+                    return Promise.resolve([]);
                 }
                 var result = this._super.apply(this, arguments);
                 if (args.method === 'copy') {
@@ -6823,7 +6823,7 @@ QUnit.module('Views', {
                     assert.step('unlink');
                 }
                 if (args.method === 'search_read' && args.model === 'ir.attachment') {
-                    return $.when([]);
+                    return Promise.resolve([]);
                 }
                 return this._super.apply(this, arguments);
             },

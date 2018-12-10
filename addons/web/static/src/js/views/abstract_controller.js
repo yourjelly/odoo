@@ -317,7 +317,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
                     return Promise.all(defs).then(function () {
                         $banner.prependTo(self.$('> .o_content'));
                         self._$banner = $banner;
-                        return prom;
+                        // return prom;
                     });
                 });
         }
@@ -338,11 +338,14 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
         };
 
         this.renderButtons(elements.$buttons);
-        this.renderSidebar(elements.$sidebar);
-        this.renderPager(elements.$pager);
-        // remove the unnecessary outer div
-        elements = _.mapObject(elements, function($node) {
-            return $node && $node.contents();
+        var sidebarProm = this.renderSidebar(elements.$sidebar);
+        var pagerProm = this.renderPager(elements.$pager);
+
+        Promise.all([sidebarProm, pagerProm]).then(function() {
+            // remove the unnecessary outer div
+            elements = _.mapObject(elements, function($node) {
+                return $node && $node.contents();
+            });
         });
         elements.$switch_buttons = this._renderSwitchButtons();
 
