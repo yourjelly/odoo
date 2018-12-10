@@ -83,10 +83,10 @@ QUnit.module('gdrive_integration', {
                 if (route === '/web/dataset/call_kw/google.drive.config/get_google_drive_config') {
                     assert.deepEqual(args.args, ['partner', 1],
                         'The route to get google drive config should have been called');
-                    return $.when([{id: 27, name: 'Cyberdyne Systems'}]);
+                    return Promise.resolve([{id: 27, name: 'Cyberdyne Systems'}]);
                 }
                 if (route === '/web/dataset/call_kw/google.drive.config/search_read'){
-                    return $.when([{google_drive_resource_id: "T1000",
+                    return Promise.resolve([{google_drive_resource_id: "T1000",
                                     google_drive_client_id: "cyberdyne.org",
                                     id: 1}]);
                 }
@@ -134,10 +134,10 @@ QUnit.module('gdrive_integration', {
                 if (route === '/web/dataset/call_kw/google.drive.config/get_google_drive_config') {
                     assert.deepEqual(args.args, ['partner', 1],
                         'The route to get google drive config should have been called');
-                    return $.when([{id: 27, name: 'Cyberdyne Systems'}]);
+                    return Promise.resolve([{id: 27, name: 'Cyberdyne Systems'}]);
                 }
                 if (route === '/web/dataset/call_kw/google.drive.config/search_read'){
-                    return $.when([{google_drive_resource_id: "T1000",
+                    return Promise.resolve([{google_drive_resource_id: "T1000",
                                     google_drive_client_id: "cyberdyne.org",
                                     id: 1}]);
                 }

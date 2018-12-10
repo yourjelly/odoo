@@ -79,7 +79,7 @@ var LivechatButton = Widget.extend({
             ready = session.rpc('/im_livechat/init', {channel_id: this.options.channel_id})
                 .then(function (result) {
                     if (!result.available_for_me) {
-                        return $.Deferred().reject();
+                        return Promise.reject();
                     }
                     self._rule = result.rule;
                 });
@@ -198,7 +198,7 @@ var LivechatButton = Widget.extend({
                 QWeb.add_template(xml);
             });
         });
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
     /**
      * @private
@@ -213,7 +213,7 @@ var LivechatButton = Widget.extend({
         this._openingChat = true;
         clearTimeout(this._autoPopupTimeout);
         if (cookie) {
-            def = $.when(JSON.parse(cookie));
+            def = Promise.resolve(JSON.parse(cookie));
         } else {
             this._messages = []; // re-initialize messages cache
             def = session.rpc('/im_livechat/get_session', {
@@ -239,7 +239,9 @@ var LivechatButton = Widget.extend({
                 utils.set_cookie('im_livechat_session', JSON.stringify(self._livechat.toData()), 60*60);
                 utils.set_cookie('im_livechat_auto_popup', JSON.stringify(false), 60*60);
             }
-        }).always(function () {
+        }).then(function () {
+            self._openingChat = false;
+        }).catch(function() {
             self._openingChat = false;
         });
     }, 200, true),
@@ -341,7 +343,7 @@ var LivechatButton = Widget.extend({
         ev.stopPropagation();
         var self = this;
         var messageData = ev.data.messageData;
-        this._sendMessage(messageData).fail(function (error, e) {
+        this._sendMessage(messageData).catch(function (error, e) {
             e.preventDefault();
             return self._sendMessage(messageData); // try again just in case
         });

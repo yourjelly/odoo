@@ -152,7 +152,7 @@ var DataImport = AbstractAction.extend({
         }).then(function (result) {
             self.importTemplates = result;
         });
-        return $.when(this._super.apply(this, arguments), def);
+        return Promise.all([this._super.apply(this, arguments), def]);
     },
     start: function () {
         var self = this;
@@ -161,9 +161,9 @@ var DataImport = AbstractAction.extend({
         this.setup_float_format_picker();
         this.setup_date_format_picker();
 
-        return $.when(
+        return Promise.all([
             this._super(),
-            self.create_model().done(function (id) {
+            self.create_model().then(function (id) {
                 self.id = id;
                 self.$('input[name=import_id]').val(id);
 
@@ -172,7 +172,7 @@ var DataImport = AbstractAction.extend({
                     cp_content: {$buttons: self.$buttons},
                 };
                 self.updateControlPanel(status);
-            })
+            })]
         );
     },
     create_model: function() {
@@ -345,7 +345,7 @@ var DataImport = AbstractAction.extend({
                 method: 'parse_preview',
                 args: [this.id, this.import_options()],
                 kwargs: {context: session.user_context},
-            }).done(function (result) {
+            }).then(function (result) {
                 var signal = result.error ? 'preview_failed' : 'preview_succeeded';
                 self[signal](result);
             });
@@ -587,7 +587,7 @@ var DataImport = AbstractAction.extend({
                         || error.message;
                 }
 
-                return $.when({'messages': [{
+                return Promise.resolve({'messages': [{
                     type: 'error',
                     record: false,
                     message: msg,
@@ -595,12 +595,14 @@ var DataImport = AbstractAction.extend({
             }) ;
     },
     onvalidate: function () {
-        return this.call_import({ dryrun: true, tracking_disable: true })
-            .done(this.proxy('validated'));
+        var prom =  this.call_import({ dryrun: true, tracking_disable: true })
+        prom.then(this.proxy('validated'));
+        return prom;
     },
     onimport: function () {
         var self = this;
-        return this.call_import({ dryrun: false }).done(function (results) {
+        var prom = this.call_import({ dryrun: false });
+        prom.then(function (results) {
             var message = results.messages;
             if (!_.any(message, function (message) {
                     return message.type === 'error'; })) {
@@ -609,6 +611,7 @@ var DataImport = AbstractAction.extend({
             }
             self['import_failed'](results);
         });
+        return prom;
     },
     onimported: function (event, from, to, results) {
         this.do_notify(_t("Import completed"), _.str.sprintf(_t("%d records were successfully imported"), results.ids.length));

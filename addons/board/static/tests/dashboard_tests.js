@@ -121,7 +121,7 @@ QUnit.test('basic functionality, with one sub action', function (assert) {
         mockRPC: function (route, args) {
             if (route === '/web/action/load') {
                 assert.step('load action');
-                return $.when({
+                return Promise.resolve({
                     res_model: 'partner',
                     views: [[4, 'list']],
                 });
@@ -131,7 +131,7 @@ QUnit.test('basic functionality, with one sub action', function (assert) {
             }
             if (route === '/web/view/edit_custom') {
                 assert.step('edit custom');
-                return $.when(true);
+                return Promise.resolve(true);
             }
             return this._super.apply(this, arguments);
         },
@@ -209,7 +209,7 @@ QUnit.test('views in the dashboard do not have a control panel', function (asser
             '</form>',
         mockRPC: function (route) {
             if (route === '/web/action/load') {
-                return $.when({
+                return Promise.resolve({
                     res_model: 'partner',
                     views: [[4, 'list'], [5, 'form']],
                 });
@@ -258,7 +258,7 @@ QUnit.test('can render an action without view_mode attribute', function (assert)
                 return Promise.resolve();
             }
             if (route === '/web/action/load') {
-                return $.when({
+                return Promise.resolve({
                     context: '{"b": 2}',
                     domain: '[["foo", "=", "yop"]]',
                     res_model: 'partner',
@@ -301,7 +301,7 @@ QUnit.test('can sort a sub list', function (assert) {
             '</form>',
         mockRPC: function (route) {
             if (route === '/web/action/load') {
-                return $.when({
+                return Promise.resolve({
                     res_model: 'partner',
                     views: [[4, 'list']],
                 });
@@ -340,7 +340,7 @@ QUnit.test('can open a record', function (assert) {
             '</form>',
         mockRPC: function (route) {
             if (route === '/web/action/load') {
-                return $.when({
+                return Promise.resolve({
                     res_model: 'partner',
                     views: [[4, 'list']],
                 });
@@ -383,7 +383,7 @@ QUnit.test('can open record using action form view', function (assert) {
             '</form>',
         mockRPC: function (route) {
             if (route === '/web/action/load') {
-                return $.when({
+                return Promise.resolve({
                     res_model: 'partner',
                     views: [[4, 'list'], [5, 'form']],
                 });
@@ -428,14 +428,14 @@ QUnit.test('can drag and drop a view', function (assert) {
             '</form>',
         mockRPC: function (route) {
             if (route === '/web/action/load') {
-                return $.when({
+                return Promise.resolve({
                     res_model: 'partner',
                     views: [[4, 'list']],
                 });
             }
             if (route === '/web/view/edit_custom') {
                 assert.step('edit custom');
-                return $.when(true);
+                return Promise.resolve(true);
             }
             return this._super.apply(this, arguments);
         },
@@ -475,14 +475,14 @@ QUnit.test('twice the same action in a dashboard', function (assert) {
             '</form>',
         mockRPC: function (route) {
             if (route === '/web/action/load') {
-                return $.when({
+                return Promise.resolve({
                     res_model: 'partner',
                     views: [[4, 'list'],[5, 'kanban']],
                 });
             }
             if (route === '/web/view/edit_custom') {
                 assert.step('edit custom');
-                return $.when(true);
+                return Promise.resolve(true);
             }
             return this._super.apply(this, arguments);
         },
@@ -531,7 +531,7 @@ QUnit.test('non-existing action in a dashboard', function (assert) {
             }
             if (route === '/web/action/load') {
                 // server answer if the action doesn't exist anymore
-                return $.when(false);
+                return Promise.resolve(false);
             }
             return this._super.apply(this, arguments);
         },
@@ -581,10 +581,10 @@ QUnit.test('clicking on a kanban\'s button should trigger the action', function 
                 return Promise.resolve();
             }
             if (route === '/web/action/load') {
-                return $.when({res_model: 'partner', view_mode: 'kanban', views: [[false, 'kanban']]});
+                return Promise.resolve({res_model: 'partner', view_mode: 'kanban', views: [[false, 'kanban']]});
             }
             if (route === '/web/dataset/search_read') {
-                return $.when({records: [{foo: 'aqualung'}]});
+                return Promise.resolve({records: [{foo: 'aqualung'}]});
             }
             return this._super.apply(this, arguments);
         }
@@ -618,7 +618,7 @@ QUnit.test('subviews are aware of attach in or detach from the DOM', function (a
             '</form>',
         mockRPC: function (route) {
             if (route === '/web/action/load') {
-                return $.when({
+                return Promise.resolve({
                     res_model: 'partner',
                     views: [[4, 'list']],
                 });
@@ -663,7 +663,7 @@ QUnit.test('dashboard intercepts custom events triggered by sub controllers', fu
             '</form>',
         mockRPC: function (route) {
             if (route === '/web/action/load') {
-                return $.when({res_model: 'partner', views: [[false, 'list']]});
+                return Promise.resolve({res_model: 'partner', views: [[false, 'list']]});
             }
             return this._super.apply(this, arguments);
         },
@@ -696,7 +696,7 @@ QUnit.test('save actions to dashboard', function (assert) {
                     "should save the correct action");
                 assert.strictEqual(args.view_mode, 'list',
                     "should save the correct view type");
-                return $.when(true);
+                return Promise.resolve(true);
             }
             return this._super.apply(this, arguments);
         },
@@ -743,7 +743,7 @@ QUnit.test('save two searches to dashboard', function (assert) {
                 }
 
                 filter_count += 1;
-                return $.when(true);
+                return Promise.resolve(true);
             }
             return this._super.apply(this, arguments);
         },
@@ -806,7 +806,7 @@ QUnit.test("Views should be loaded in the user's language", function (assert) {
                     'The data should be loaded with the correct context');
             }
             if (route === '/web/action/load') {
-                return $.when({
+                return Promise.resolve({
                     res_model: 'partner',
                     views: [[4, 'list']],
                 });
@@ -841,7 +841,7 @@ QUnit.test("Dashboard should use correct groupby", function (assert) {
                     'user defined groupby should have precedence on action groupby');
             }
             if (route === '/web/action/load') {
-                return $.when({
+                return Promise.resolve({
                     res_model: 'partner',
                     context: {
                         group_by: 'some_field',

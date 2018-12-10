@@ -30,7 +30,7 @@ Sidebar.include({
      */
     start: function () {
         var _super = this._super.bind(this);
-        var def = this.hasAttachments ? this._updateAttachments() : $.when();
+        var def = this.hasAttachments ? this._updateAttachments() : Promise.resolve();
         return def.then(_super);
     },
     /**
@@ -52,7 +52,7 @@ Sidebar.include({
     updateEnv: function (env) {
         this.env = env;
         var _super = _.bind(this._super, this, env);
-        var def = this.hasAttachments ? this._updateAttachments() : $.when();
+        var def = this.hasAttachments ? this._updateAttachments() : Promise.resolve();
         def.then(_super);
     },
 

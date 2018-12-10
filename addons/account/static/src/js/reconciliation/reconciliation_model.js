@@ -357,7 +357,7 @@ var StatementModel = BasicModel.extend({
      * Load more bank statement line
      *
      * @param {integer} qty quantity to load
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     loadMore: function(qty) {
         if (qty === undefined) {
@@ -373,7 +373,7 @@ var StatementModel = BasicModel.extend({
      *
      * @param {Array} ids ids of bank statement line passed to rpc call
      * @param {Array} excluded_ids list of move_line ids that needs to be excluded from search
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     loadData: function(ids, excluded_ids) {
         var self = this;
@@ -1372,7 +1372,7 @@ var ManualModel = StatementModel.extend({
      * Load more partners/accounts
      *
      * @param {integer} qty quantity to load
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     loadMore: function(qty) {
         if (qty === undefined) {
@@ -1386,7 +1386,7 @@ var ManualModel = StatementModel.extend({
      * Method to load informations on lines
      *
      * @param {Array} lines manualLines to load
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     loadData: function(lines) {
         var self = this;
@@ -1394,7 +1394,7 @@ var ManualModel = StatementModel.extend({
         _.each(lines, function (l) {
             defs.push(self._formatLine(l.mode, l))
         });
-        return $.when.apply($, defs);
+        return Promise.all(defs);
 
     },
     /**

@@ -24,7 +24,7 @@ QUnit.module('Bus', {
     QUnit.test('notifications received from the longpolling channel', function (assert) {
         assert.expect(6);
 
-        var pollDeferred = $.Deferred();
+        var pollPromise = testUtils.makeTestPromise();
 
         var parent = new Widget();
         testUtils.mock.addMockEnvironment(parent, {
@@ -37,11 +37,11 @@ QUnit.module('Bus', {
                 if (route === '/longpolling/poll') {
                     assert.step([route, args.channels.join(',')]);
 
-                    pollDeferred = $.Deferred();
-                    pollDeferred.abort = (function () {
+                    pollPromise = testUtils.makeTestPromise();
+                    pollPromise.abort = (function () {
                         this.reject({message: "XmlHttpRequestError abort"}, $.Event());
-                    }).bind(pollDeferred);
-                    return pollDeferred;
+                    }).bind(pollPromise);
+                    return pollPromise;
                 }
                 return this._super.apply(this, arguments);
             }
@@ -55,12 +55,12 @@ QUnit.module('Bus', {
         });
         widget.call('bus_service', 'addChannel', 'lambda');
 
-        pollDeferred.resolve([{
+        pollPromise.resolve([{
             id: 1,
             channel: 'lambda',
             message: 'beta',
         }]);
-        pollDeferred.resolve([{
+        pollPromise.resolve([{
             id: 2,
             channel: 'lambda',
             message: 'epsilon',
@@ -96,7 +96,7 @@ QUnit.module('Bus', {
             },
         });
 
-        var pollDeferred = $.Deferred();
+        var pollPromise = testUtils.makeTestPromise();
         var parent = new Widget();
         testUtils.mock.addMockEnvironment(parent, {
             data: {},
@@ -110,11 +110,11 @@ QUnit.module('Bus', {
                     assert.strictEqual(args.last, 0,
                         "provided last notification ID should be 0");
 
-                    pollDeferred = $.Deferred();
-                    pollDeferred.abort = (function () {
+                    pollPromise = testUtils.makeTestPromise();
+                    pollPromise.abort = (function () {
                         this.reject({message: "XmlHttpRequestError abort"}, $.Event());
-                    }).bind(pollDeferred);
-                    return pollDeferred;
+                    }).bind(pollPromise);
+                    return pollPromise;
                 }
                 return this._super.apply(this, arguments);
             }
@@ -137,7 +137,7 @@ QUnit.module('Bus', {
 
         // master
 
-        var pollDeferredMaster = $.Deferred();
+        var pollPromiseMaster = testUtils.makeTestPromise();
 
         var parentMaster = new Widget();
         testUtils.mock.addMockEnvironment(parentMaster, {
@@ -150,11 +150,11 @@ QUnit.module('Bus', {
                 if (route === '/longpolling/poll') {
                     assert.step(['master', route, args.channels.join(',')]);
 
-                    pollDeferredMaster = $.Deferred();
-                    pollDeferredMaster.abort = (function () {
+                    pollPromiseMaster = testUtils.makeTestPromise();
+                    pollPromiseMaster.abort = (function () {
                         this.reject({message: "XmlHttpRequestError abort"}, $.Event());
-                    }).bind(pollDeferredMaster);
-                    return pollDeferredMaster;
+                    }).bind(pollPromiseMaster);
+                    return pollPromiseMaster;
                 }
                 return this._super.apply(this, arguments);
             }
@@ -194,7 +194,7 @@ QUnit.module('Bus', {
             });
             slave.call('bus_service', 'addChannel', 'lambda');
 
-            pollDeferredMaster.resolve([{
+            pollPromiseMaster.resolve([{
                 id: 1,
                 channel: 'lambda',
                 message: 'beta',
@@ -220,7 +220,7 @@ QUnit.module('Bus', {
         assert.expect(8);
 
         // master
-        var pollDeferredMaster = $.Deferred();
+        var pollPromiseMaster = testUtils.makeTestPromise();
 
         var parentMaster = new Widget();
         testUtils.mock.addMockEnvironment(parentMaster, {
@@ -233,11 +233,11 @@ QUnit.module('Bus', {
                 if (route === '/longpolling/poll') {
                     assert.step(['master', route, args.channels.join(',')]);
 
-                    pollDeferredMaster = $.Deferred();
-                    pollDeferredMaster.abort = (function () {
+                    pollPromiseMaster = testUtils.makeTestPromise();
+                    pollPromiseMaster.abort = (function () {
                         this.reject({message: "XmlHttpRequestError abort"}, $.Event());
-                    }).bind(pollDeferredMaster);
-                    return pollDeferredMaster;
+                    }).bind(pollPromiseMaster);
+                    return pollPromiseMaster;
                 }
                 return this._super.apply(this, arguments);
             }
@@ -254,7 +254,7 @@ QUnit.module('Bus', {
         // slave
         setTimeout(function () {
             var parentSlave = new Widget();
-            var pollDeferredSlave = $.Deferred();
+            var pollPromiseSlave = testUtils.makeTestPromise();
             testUtils.mock.addMockEnvironment(parentSlave, {
                 data: {},
                 services: {
@@ -265,11 +265,11 @@ QUnit.module('Bus', {
                     if (route === '/longpolling/poll') {
                         assert.step(['slave', route, args.channels.join(',')]);
 
-                        pollDeferredSlave = $.Deferred();
-                        pollDeferredSlave.abort = (function () {
+                        pollPromiseSlave = testUtils.makeTestPromise();
+                        pollPromiseSlave.abort = (function () {
                             this.reject({message: "XmlHttpRequestError abort"}, $.Event());
-                        }).bind(pollDeferredSlave);
-                        return pollDeferredSlave;
+                        }).bind(pollPromiseSlave);
+                        return pollPromiseSlave;
                     }
                     return this._super.apply(this, arguments);
                 }
@@ -283,7 +283,7 @@ QUnit.module('Bus', {
             });
             slave.call('bus_service', 'addChannel', 'lambda');
 
-            pollDeferredMaster.resolve([{
+            pollPromiseMaster.resolve([{
                 id: 1,
                 channel: 'lambda',
                 message: 'beta',
@@ -292,7 +292,7 @@ QUnit.module('Bus', {
             // simulate unloading master
             master.call('bus_service', '_onUnload');
 
-            pollDeferredSlave.resolve([{
+            pollPromiseSlave.resolve([{
                 id: 2,
                 channel: 'lambda',
                 message: 'gamma',

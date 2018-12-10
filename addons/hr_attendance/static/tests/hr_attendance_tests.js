@@ -53,7 +53,7 @@ QUnit.module('HR Attendance', {
 }, function () {
     QUnit.module('My attendances (client action)');
 
-    QUnit.test('simple rendering', function (assert) {
+    QUnit.test('simple rendering', async function (assert) {
         assert.expect(1);
 
         var $target = $('#qunit-fixture');
@@ -64,7 +64,7 @@ QUnit.module('HR Attendance', {
                 uid: 1,
             },
         });
-        clientAction.appendTo($target);
+        await clientAction.appendTo($target);
 
         assert.strictEqual(clientAction.$('.o_hr_attendance_kiosk_mode h1').text(), 'Employee A',
             "should have rendered the client action without crashing");
@@ -72,7 +72,7 @@ QUnit.module('HR Attendance', {
         clientAction.destroy();
     });
 
-    QUnit.test('Attendance Kiosk Mode Test', function (assert) {
+    QUnit.test('Attendance Kiosk Mode Test', async function (assert) {
         assert.expect(2);
 
         var $target = $('#qunit-fixture');
@@ -89,12 +89,12 @@ QUnit.module('HR Attendance', {
                 if (args.method === 'attendance_scan' && args.model === 'hr.employee') {
 
                     rpcCount++;
-                    return $.when(self.data['hr.employee'].records[0]);
+                    return Promise.resolve(self.data['hr.employee'].records[0]);
                 }
                 return this._super(route, args);
             },
         });
-        clientAction.appendTo($target);
+        await clientAction.appendTo($target);
         core.bus.trigger('barcode_scanned', 1);
         core.bus.trigger('barcode_scanned', 1);
         assert.strictEqual(rpcCount, 1, 'RPC call should have been done only once.');
@@ -105,7 +105,7 @@ QUnit.module('HR Attendance', {
         clientAction.destroy();
     });
 
-    QUnit.test('Attendance Greeting Message Test', function (assert) {
+    QUnit.test('Attendance Greeting Message Test', async function (assert) {
         assert.expect(10);
 
         var $target = $('#qunit-fixture');
@@ -113,7 +113,7 @@ QUnit.module('HR Attendance', {
         var rpcCount = 0;
 
         var clientActions = [];
-        function createGreetingMessage (target, barcode){
+        async function createGreetingMessage (target, barcode){
             var action = {
                 attendance: {
                     check_in: "2018-09-20 13:41:13",
@@ -138,12 +138,12 @@ QUnit.module('HR Attendance', {
                             as functional flow.
                         */
                         createGreetingMessage (target, args.args[0]);
-                        return $.when({action: action});
+                        return Promise.resolve({action: action});
                     }
                     return this._super(route, args);
                 },
             });
-            clientAction.appendTo(target);
+            await clientAction.appendTo(target);
 
             clientActions.push(clientAction);
         }

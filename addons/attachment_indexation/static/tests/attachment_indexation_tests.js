@@ -63,7 +63,7 @@ odoo.define('attachment_indexation.tests', function (require) {
                 viewOptions: {hasSidebar: true},
                 mockRPC: function (route, args) {
                     if (args.method === 'search_read' && args.model === 'ir.attachment') {
-                        return $.when(this.data['ir.attachment'].records);
+                        return Promise.resolve(this.data['ir.attachment'].records);
                     }
                     if (route === '/web/dataset/call_kw/ir.attachment/unlink') {
                         assert.strictEqual(args.args[0], 1, "Should have correct id of the attachment to be deleted");

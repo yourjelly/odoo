@@ -36,7 +36,7 @@ QUnit.module('hr_org_chart', {
             mockRPC: function (route, args) {
                 if (route === '/hr/get_org_chart') {
                     assert.ok('employee_id' in args, "it should have 'employee_id' as argument");
-                    return $.when({
+                    return Promise.resolve({
                         children: [],
                         managers: [],
                         managers_more: false,
@@ -69,7 +69,7 @@ QUnit.module('hr_org_chart', {
             mockRPC: function (route, args) {
                 if (route === '/hr/get_org_chart') {
                     assert.ok('employee_id' in args, "it should have 'employee_id' as argument");
-                    return $.when({
+                    return Promise.resolve({
                         children: [{
                             direct_sub_count: 0,
                             indirect_sub_count: 0,
@@ -122,7 +122,7 @@ QUnit.module('hr_org_chart', {
             mockRPC: function (route, args) {
                 if (route === '/hr/get_org_chart') {
                     assert.ok('employee_id' in args, "should have 'employee_id' as argument");
-                    return $.when({
+                    return Promise.resolve({
                         children: [{
                             direct_sub_count: 0,
                             indirect_sub_count: 0,

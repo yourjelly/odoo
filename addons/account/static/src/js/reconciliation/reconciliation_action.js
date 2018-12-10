@@ -120,7 +120,7 @@ var StatementAction = AbstractAction.extend({
     start: function () {
         var self = this;
 
-        this.renderer.prependTo(self.$('.o_form_sheet')).then(function(){
+        return this.renderer.prependTo(self.$('.o_form_sheet')).then(function(){
             return self._renderLines().then(function() {
                 // No more lines to reconcile, trigger the rainbowman.
                 var initialState = self.renderer._initialState;

@@ -56,13 +56,13 @@ FormController.include({
      * @private
      * @param {string} barcode sent by the scanner (string generate from keypress series)
      * @param {Object} activeBarcode: options sent by the field who use barcode features
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _barcodeAddX2MQuantity: function (barcode, activeBarcode) {
         if (this.mode === 'readonly') {
             this.do_warn(_t('Error: Document not editable'),
                 _t('To modify this document, please first start edition.'));
-            return new $.Deferred().reject();
+            return new Promise.reject();
         }
 
         var record = this.model.get(this.handle);
@@ -166,7 +166,7 @@ FormController.include({
      * @param {Object} current record
      * @param {string} barcode sent by the scanner (string generate from keypress series)
      * @param {Object} activeBarcode: options sent by the field who use barcode features
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _barcodeSelectedCandidate: function (candidate, record, barcode, activeBarcode, quantity) {
         var changes = {};
@@ -198,7 +198,7 @@ FormController.include({
      * @param {Object} current record
      * @param {string} barcode sent by the scanner (string generate from keypress series)
      * @param {Object} activeBarcode: options sent by the field who use barcode features
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _barcodeWithoutCandidate: function (record, barcode, activeBarcode) {
         var changes = {};
@@ -267,26 +267,26 @@ FormController.include({
      * @param {string|function} method defined by the commands options
      * @param {string} barcode sent by the scanner (string generate from keypress series)
      * @param {Object} activeBarcode: options sent by the field who use barcode features
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _barcodeActiveScanned: function (method, barcode, activeBarcode) {
         var self = this;
         var methodDef;
-        var def = new $.Deferred();
+        var def = new Promise(function(resolve, reject) {
+
         if (typeof method === 'string') {
             methodDef = this[method](barcode, activeBarcode);
         } else {
             methodDef = method.call(this, barcode, activeBarcode);
         }
         methodDef
-            .done(function () {
+            .then(function () {
                 var record = self.model.get(self.handle);
                 var candidate = self._getBarCodeRecord(record, barcode, activeBarcode);
                 activeBarcode.candidate = candidate;
             })
-            .always(function () {
-                def.resolve();
-            });
+            .then(resolve, resolve);
+        });
         return def;
     },
     /**
@@ -296,7 +296,7 @@ FormController.include({
      * @private
      * @param {string} barcode sent by the scanner (string generate from keypress series)
      * @param {DOM Object} target
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _barcodeScanned: function (barcode, target) {
         var self = this;
@@ -325,7 +325,7 @@ FormController.include({
             if (prefixed && !hasCommand) {
                 self.do_warn(_t('Error: Barcode command is undefined'), barcode);
             }
-            return self.alive($.when.apply($, defs)).then(function () {
+            return self.alive(Promise.all(defs)).then(function () {
                 if (!prefixed) {
                     // remember the barcode scanned for the quantity listener
                     self.current_barcode = barcode;
