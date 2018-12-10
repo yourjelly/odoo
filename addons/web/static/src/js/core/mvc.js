@@ -177,7 +177,8 @@ var Factory = Class.extend({
     getController: function (parent) {
         var self = this;
         var model = this.getModel(parent);
-        return Promise.all([this._loadData(model), ajax.loadLibs(this)]).then(function (state) {
+        return Promise.all([this._loadData(model), ajax.loadLibs(this)]).then(function (result) {
+            var state = result[0];
             var renderer = self.getRenderer(parent, state);
             var Controller = self.Controller || self.config.Controller;
             var controllerParams = _.extend({

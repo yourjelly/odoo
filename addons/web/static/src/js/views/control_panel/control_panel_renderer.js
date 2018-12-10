@@ -86,7 +86,7 @@ var ControlPanelRenderer = Renderer.extend({
 
         var superDef = this._super.apply(this, arguments);
         var searchDef = this._renderSearch();
-        return Promise.all(superDef, searchDef).then(function () {
+        return Promise.all([superDef, searchDef]).then(function () {
             self._setSearchMenusVisibility();
         });
     },
