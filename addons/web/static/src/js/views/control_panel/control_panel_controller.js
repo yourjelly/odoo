@@ -120,7 +120,7 @@ var ControlPanelController = mvc.Controller.extend({
     },
     /**
      * @private
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _reportNewQueryAndRender: function () {
         this.trigger_up('search', this.model.getQuery());

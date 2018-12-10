@@ -22,7 +22,7 @@ var Apps = AbstractAction.extend({
     },
 
     get_client: function() {
-        // return the client via a deferred, resolved or rejected depending if
+        // return the client via a promise, resolved or rejected depending if
         // the remote host is available or not.
         var check_client_available = function(client) {
             var i = new Image();

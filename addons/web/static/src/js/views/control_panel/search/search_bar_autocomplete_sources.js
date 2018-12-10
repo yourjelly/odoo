@@ -379,9 +379,9 @@ var ManyToOneField = CharField.extend({
      * @override
      */
     getAutocompletionValues: function (value) {
-        if (_.isEmpty(value)) { return $.when(null); }
+        if (_.isEmpty(value)) { return Promise.resolve(null); }
         var label = this._getAutocompletionLabel(value);
-        return $.when([{
+        return Promise.resolve([{
             label: label,
             facet: this._getFacetValue(value),
             expand: this._expand.bind(this),

@@ -1283,7 +1283,7 @@ QUnit.module('ActionManager', {
         await testUtils.dom.click(actionManager.$('.o_kanban_record:first'));
         actionManager.doAction(8);
 
-        // now, the next read operations will be deferred (this is the read
+        // now, the next read operations will be promise (this is the read
         // operation for the form view reload)
         def = testUtils.makeTestPromise();
         await testUtils.nextTick();
