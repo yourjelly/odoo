@@ -138,24 +138,24 @@ var Apps = AbstractAction.extend({
                     this.$ifr.height(m.height);
                 });
 
-            self.on('message:blockUI', self, function() { framework.blockUI(); });
-            self.on('message:unblockUI', self, function() { framework.unblockUI(); });
-            self.on('message:warn', self, function(m) {self.do_warn(m.title, m.message, m.sticky); });
+                self.on('message:blockUI', self, function() { framework.blockUI(); });
+                self.on('message:unblockUI', self, function() { framework.unblockUI(); });
+                self.on('message:warn', self, function(m) {self.do_warn(m.title, m.message, m.sticky); });
 
-            self.$ifr.appendTo(self.$('.o_content')).css(css).addClass('apps-client');
+                self.$ifr.appendTo(self.$('.o_content')).css(css).addClass('apps-client');
 
-            resolve();
-        }, function() {
-            self.do_warn(_t('Odoo Apps will be available soon'), _t('Showing locally available modules'), true);
-            return self._rpc({
-                route: '/web/action/load',
-                params: {action_id: self.failback_action_id},
-            }).then(function(action) {
-                return self.do_action(action);
-            }).then(reject, reject);
+                resolve();
+            }, function() {
+                self.do_warn(_t('Odoo Apps will be available soon'), _t('Showing locally available modules'), true);
+                return self._rpc({
+                    route: '/web/action/load',
+                    params: {action_id: self.failback_action_id},
+                }).then(function(action) {
+                    return self.do_action(action);
+                }).then(reject, reject);
+            });
         });
-    },
-}
+    }
 });
 
 var AppsUpdates = Apps.extend({
