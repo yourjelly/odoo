@@ -13,7 +13,8 @@
             <t t-foreach="docs" t-as="o">
                 <div class="article o_report_stock_rule">
                     <div class="page">
-                        <h2 t-field="o.name"/>
+                        <span class="h2" t-field="o.name"/>
+                        (<span>Confirmation Date: <t t-esc="estimate_date"/></span>)
 
                         <table class="table table-condensed table-bordered">
                             <thead>
@@ -49,40 +50,43 @@
                                         <t t-set="acc" t-value="0"/>
                                         <t t-foreach="route_line" t-as="rule">
                                             <t t-if="rule">
-                                                <t t-if="rule[0]._name == 'stock.rule'">
-                                                    <t t-set="color" t-value="rule[2]"/>
+                                                <t t-if="rule['rule']._name == 'stock.rule'">
+                                                    <t t-set="color" t-value="rule['color']"/>
                                                     <t t-if="acc > 0">
                                                         <t t-set="acc" t-value="acc+1"/>
                                                         <td t-att-colspan="acc" class="o_report_stock_rule_rule_cell">
                                                             <t t-set="padding" t-value="50.0/acc"/>
-                                                            <div class="o_report_stock_rule_rule_main" t-att-res-id="rule[0].id" t-att-res-model="rule[0]._name" view-type="form" t-att-title="rule[0].route_id.display_name">
+                                                            <div class="o_report_stock_rule_rule_main" t-att-res-id="rule['rule'].id" t-att-res-model="rule['rule']._name" view-type="form" t-att-title="rule['rule'].route_id.display_name">
+                                                                <div t-att-style="'color: red' if rule['is_due'] else None" class="text-center mt4"><t t-esc="rule['delay_date']"/></div>
+                                                                <!-- <div class="text-center mt4"><t t-esc="rule['is_due']"/></div> -->
                                                                 <div class="o_report_stock_rule_rule"  t-attf-style="padding-left: #{padding}%; padding-right: #{padding}%;">
-                                                                    <t t-if="rule[1] == 'destination'">
-                                                                        <t t-if="rule[0].procure_method == 'make_to_order'">
+                                                                    <t t-if="rule['source'] == 'destination'">
+                                                                        <t t-if="rule['rule'].procure_method == 'make_to_order'">
                                                                             <t t-call="stock.report_stock_rule_suspension_points"/>
                                                                         </t>
-                                                                        <t t-if="rule[0].action in ('push', 'pull_push')">
+                                                                        <t t-if="rule['rule'].action in ('push', 'pull_push')">
                                                                             <t t-call="stock.report_stock_rule_right_arrow"/>
                                                                         </t>
                                                                     </t>
-                                                                    <t t-if="rule[1] == 'origin' and rule[0].action in ('pull', 'pull_push')">
+                                                                    <t t-if="rule['source'] == 'origin' and rule['rule'].action in ('pull', 'pull_push')">
                                                                         <t t-call="stock.report_stock_rule_left_arrow"/>
                                                                     </t>
                                                                     <t t-call="stock.report_stock_rule_line"/>
-                                                                    <t t-if="rule[1] == 'destination' and rule[0].action in ('pull', 'pull_push')">
+                                                                    <t t-if="rule['source'] == 'destination' and rule['rule'].action in ('pull', 'pull_push')">
                                                                         <t t-call="stock.report_stock_rule_right_arrow"/>
                                                                     </t>
-                                                                    <t t-if="rule[1] == 'origin'">
-                                                                        <t t-if="rule[0].action in ('push', 'pull_push')">
+                                                                    <t t-if="rule['source'] == 'origin'">
+                                                                        <t t-if="rule['rule'].action in ('push', 'pull_push')">
                                                                             <t t-call="stock.report_stock_rule_left_arrow"/>
                                                                         </t>
-                                                                        <t t-if="rule[0].procure_method == 'make_to_order'">
+                                                                        <t t-if="rule['rule'].procure_method == 'make_to_order'">
                                                                             <t t-call="stock.report_stock_rule_suspension_points"/>
                                                                         </t>
                                                                     </t>
                                                                 </div>
-                                                                <div class="o_report_stock_rule_rule_name">
-                                                                    <span t-attf-style="color: #{color};"><t t-esc="rule[0].picking_type_id.name"/></span>
+                                                                <div class="mt4 mb4 o_report_stock_rule_rule_name">
+                                                                    <span t-attf-style="color: #{color};"><t t-esc="rule['rule'].picking_type_id.name"/></span>
+                                                                    <span t-if="rule['show_delay']">(<t t-esc="rule['rule'].delay"/> Days delay)</span>
                                                                 </div>
                                                             </div>
                                                         </td>

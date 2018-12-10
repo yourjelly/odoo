@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from datetime import date, timedelta
 
 from odoo import api, fields, models
 
@@ -8,11 +9,18 @@ class StockRulesReport(models.TransientModel):
     _name = 'stock.rules.report'
     _description = 'Stock Rules report'
 
+    def _default_estimate_date(self):
+        today = date.today()
+        estimate_date = today + timedelta(days=10)
+        return estimate_date
+
+
     product_id = fields.Many2one('product.product', string='Product', required=True)
     product_tmpl_id = fields.Many2one('product.template', String='Product Template', required=True)
     warehouse_ids = fields.Many2many('stock.warehouse', string='Warehouses', required=True,
         help="Show the routes that apply on selected warehouses.")
     product_has_variants = fields.Boolean('Has variants', default=False, required=True)
+    estimate_date = fields.Date('Confirmation Date', default=_default_estimate_date, required=True)
 
     @api.model
     def default_get(self, fields):
@@ -39,6 +47,7 @@ class StockRulesReport(models.TransientModel):
         data = {
             'product_id': self.product_id.id,
             'warehouse_ids': self.warehouse_ids.ids,
+            'estimate_date': self.estimate_date
         }
         return data
 

@@ -14,6 +14,7 @@
                     <field name="warehouse_ids"
                         groups="stock.group_stock_multi_warehouses"
                         widget="many2many_tags" />
+                    <field name="estimate_date"/>
                 </group>
                 <footer>
                     <button name="print_report" 

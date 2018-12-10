@@ -1,18 +1,41 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from datetime import date, timedelta
 
-from odoo import api, models, _
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+from odoo.tools.misc import format_date
 
 
 class ReportStockRule(models.AbstractModel):
     _name = 'report.stock.report_stock_rule'
     _description = 'Stock rule report'
 
+    def _calculate_lead_date(self, route, product, lead_date, estimate_date):
+        if route['rule'].location_id.usage == 'customer':
+            lead_date =  estimate_date
+            if product.sale_delay:
+                lead_date = lead_date + timedelta(days=product.sale_delay)
+        elif route['source'] == 'destination':
+            lead_date = lead_date + timedelta(days=-route['rule'].delay)
+            route['show_delay'] = True
+        return lead_date
+
+    @api.model
+    def _add_lead_time(self, route_lines, estimate_date, product):
+        estimate_date = fields.Date.from_string(estimate_date)
+        lead_date = estimate_date
+        for route_line in reversed(route_lines):
+            for route in  filter(None, route_line):
+                lead_date = self._calculate_lead_date(route, product, lead_date, estimate_date)
+                route['delay_date'] = format_date(self.env, lead_date)
+                route['is_due'] = lead_date < estimate_date
+
     @api.model
     def _get_report_values(self, docids, data=None):
         product = self.env['product.product'].browse(data['product_id'])
         warehouses = self.env['stock.warehouse'].browse(data['warehouse_ids'])
+        estimate_date = data['estimate_date']
 
         routes = self._get_routes(data)
 
@@ -55,17 +78,25 @@ class ReportStockRule(models.AbstractModel):
                     for x in range(len(locations_names)):
                         res.append([])
                     idx = locations_names.index(rule_loc['destination'].display_name)
-                    tpl = (rule, 'destination', route_color, )
+                    tpl = {
+                        'rule': rule,
+                        'source': 'destination',
+                        'color': route_color,
+                        'delay_date': False,
+                        'show_delay': False,
+                    }
                     res[idx] = tpl
                     idx = locations_names.index(rule_loc['source'].display_name)
-                    tpl = (rule, 'origin', route_color, )
+                    tpl = dict(tpl, source='origin')
                     res[idx] = tpl
                     route_lines.append(res)
+        self._add_lead_time(route_lines, estimate_date, product)
         return {
             'docs': product,
             'locations': locations,
             'header_lines': header_lines,
             'route_lines': route_lines,
+            'estimate_date': format_date(self.env, estimate_date)
         }
 
     @api.model
