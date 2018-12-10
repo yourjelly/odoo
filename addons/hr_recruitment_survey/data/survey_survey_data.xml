@@ -10,21 +10,24 @@
         <field name="thank_you_message">&lt;p&gt;&lt;/p&gt;</field>
     </record>
     <!-- Page 1 -->
-    <record id="recruitment_1" model="survey.page">
-        <field name="title">Basic information</field>
+    <record id="recruitment_1" model="survey.question">
         <field name="survey_id" ref="recruitment_form" />
+        <field name="line_type">page</field>
         <field name="sequence">1</field>
+        <field name="question">Basic information</field>
         <field name="description">&lt;p&gt;&lt;/p&gt;</field>
     </record>
     <record id="recruitment_1_1" model="survey.question">
-        <field name="page_id" ref="recruitment_1" />
-        <field name="sequence">1</field>
+        <field name="survey_id" ref="recruitment_form" />
+        <field name="line_type">question</field>
+        <field name="sequence">2</field>
         <field name="question">From which university will you graduate?</field>
         <field name="question_type">textbox</field>
     </record>
     <record id="recruitment_1_2" model="survey.question">
-        <field name="page_id" ref="recruitment_1" />
-        <field name="sequence">2</field>
+        <field name="survey_id" ref="recruitment_form" />
+        <field name="line_type">question</field>
+        <field name="sequence">3</field>
         <field name="question">What is your gender?</field>
         <field name="question_type">simple_choice</field>
         <field name="display_mode">dropdown</field>
@@ -40,8 +43,9 @@
         <field name="value">Female</field>
     </record>
     <record id="recruitment_1_3" model="survey.question">
-        <field name="page_id" ref="recruitment_1" />
-        <field name="sequence">3</field>
+        <field name="survey_id" ref="recruitment_form" />
+        <field name="line_type">question</field>
+        <field name="sequence">4</field>
         <field name="question">What age group do you belong to?</field>
         <field name="question_type">simple_choice</field>
         <field name="display_mode">columns</field>
@@ -89,46 +93,53 @@
         <field name="value">71+</field>
     </record>
     <!-- Page 2 -->
-    <record id="recruitment_2" model="survey.page">
-        <field name="title">Education and Activities</field>
+    <record id="recruitment_2" model="survey.question">
         <field name="survey_id" ref="recruitment_form" />
-        <field name="sequence">2</field>
+        <field name="line_type">page</field>
+        <field name="sequence">5</field>
+        <field name="question">Education and Activities</field>
         <field name="description">&lt;p&gt;&lt;/p&gt;</field>
     </record>
     <record id="recruitment_2_1" model="survey.question">
-        <field name="page_id" ref="recruitment_2" />
-        <field name="sequence">1</field>
+        <field name="survey_id" ref="recruitment_form" />
+        <field name="line_type">question</field>
+        <field name="sequence">6</field>
         <field name="question">Knowledge</field>
         <field name="question_type">free_text</field>
     </record>
     <record id="recruitment_2_2" model="survey.question">
-        <field name="page_id" ref="recruitment_2" />
-        <field name="sequence">2</field>
+        <field name="survey_id" ref="recruitment_form" />
+        <field name="line_type">question</field>
+        <field name="sequence">7</field>
         <field name="question">Education</field>
         <field name="question_type">free_text</field>
     </record>
     <record id="recruitment_2_3" model="survey.question">
-        <field name="page_id" ref="recruitment_2" />
-        <field name="sequence">3</field>
+        <field name="survey_id" ref="recruitment_form" />
+        <field name="line_type">question</field>
+        <field name="sequence">8</field>
         <field name="question">Experience</field>
         <field name="question_type">free_text</field>
     </record>
     <record id="recruitment_2_4" model="survey.question">
-        <field name="page_id" ref="recruitment_2" />
-        <field name="sequence">4</field>
+        <field name="survey_id" ref="recruitment_form" />
+        <field name="line_type">question</field>
+        <field name="sequence">9</field>
         <field name="question">Activities</field>
         <field name="question_type">free_text</field>
     </record>
     <!-- Page 3 -->
-    <record id="recruitment_3" model="survey.page">
-        <field name="title">Importance</field>
+    <record id="recruitment_3" model="survey.question">
         <field name="survey_id" ref="recruitment_form" />
-        <field name="sequence">3</field>
+        <field name="line_type">page</field>
+        <field name="sequence">10</field>
+        <field name="question">Importance</field>
         <field name="description">&lt;p&gt;&lt;/p&gt;</field>
     </record>
     <record id="recruitment_3_1" model="survey.question">
-        <field name="page_id" ref="recruitment_3" />
-        <field name="sequence">1</field>
+        <field name="survey_id" ref="recruitment_form" />
+        <field name="line_type">question</field>
+        <field name="sequence">11</field>
         <field name="question">Rate the Importance</field>
         <field name="question_type">matrix</field>
         <field name="matrix_subtype">simple</field>
