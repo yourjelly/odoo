@@ -129,7 +129,8 @@ return Widget.extend({
         });
         this.show();
     },
-    make_list_item: function (result) {
+    make_list_item: function (results) {
+        var result = results[0];
         var self = this;
         var $li = $('<li>')
             .hover(function () {self.focus_element($li);})

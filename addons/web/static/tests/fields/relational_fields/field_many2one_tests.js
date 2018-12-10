@@ -1857,9 +1857,8 @@ QUnit.module('fields', {}, function () {
             assert.equal($handles.length, 2,
                 'There should be 2 sequence handlers');
 
-            // Saving the modal and then the original model
-            await testUtils.dom.click($modal.find('.modal-footer .btn-primary'));
-            await testUtils.form.clickSave(form);
+            await testUtils.dom.dragAndDrop($handles.eq(1),
+                $modal.find('tbody tr').first(), { position: 'top' });
 
             // Saving the modal and then the original model
             await testUtils.dom.click($modal.find('.modal-footer .btn-primary'));

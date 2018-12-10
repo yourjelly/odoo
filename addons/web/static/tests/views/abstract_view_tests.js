@@ -35,11 +35,11 @@ QUnit.module('Views', {
         var done = assert.async();
         assert.expect(6);
 
-        var def = testUtils.makeTestPromise();
+        var prom = testUtils.makeTestPromise();
         var loadJS = ajax.loadJS;
         ajax.loadJS = function (url) {
             assert.step(url);
-            return def.then(function () {
+            return prom.then(function () {
                 assert.step(url + ' loaded');
             });
         };
@@ -52,7 +52,7 @@ QUnit.module('Views', {
             arch: '<fake/>',
             data: this.data,
             model: 'fake_model',
-        }).then(function(view){
+        }).then(function (view) {
             assert.verifySteps(['a', 'b', 'a loaded', 'b loaded'],
                 "should wait for both libs to be loaded");
             ajax.loadJS = loadJS;
@@ -60,17 +60,17 @@ QUnit.module('Views', {
             done();
         });
 
-        await testUtils.nextMicrotaskTick();
+        await testUtils.nextTick();
         assert.verifySteps(['a', 'b'],
             "both libs should be loaded in parallel");
-        def.resolve();
+        prom.resolve();
     });
 
     QUnit.test('lazy loading of js libs (sequentially)', async function (assert) {
         var done = assert.async();
         assert.expect(10);
 
-        var defs = {
+        var proms = {
             a:  testUtils.makeTestPromise(),
             b:  testUtils.makeTestPromise(),
             c:  testUtils.makeTestPromise(),
@@ -78,7 +78,7 @@ QUnit.module('Views', {
         var loadJS = ajax.loadJS;
         ajax.loadJS = function (url) {
             assert.step(url);
-            return defs[url].then(function () {
+            return proms[url].then(function () {
                 assert.step(url + ' loaded');
             });
         };
@@ -101,17 +101,17 @@ QUnit.module('Views', {
             view.destroy();
             done();
         });
-        await testUtils.nextMicrotaskTick();
+        await testUtils.nextTick();
         assert.verifySteps(['a', 'b'],
         "libs 'a' and 'b' should be loaded in parallel");
-        await defs.b.resolve();
+        await proms.b.resolve();
         assert.verifySteps(['a', 'b', 'b loaded'],
         "should wait for 'a' and 'b' to be loaded before loading 'c'");
-        await defs.a.resolve();
+        await proms.a.resolve();
         await testUtils.nextMicrotaskTick();
         assert.verifySteps(['a', 'b', 'b loaded', 'a loaded', 'c'],
             "should load 'c' when 'a' and 'b' are loaded");
-        await defs.c.resolve();
+        await proms.c.resolve();
     });
 
     QUnit.test('group_by from context can be a string, instead of a list of strings', async function (assert) {

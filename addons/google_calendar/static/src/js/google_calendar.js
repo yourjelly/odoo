@@ -89,11 +89,7 @@ CalendarController.include({
                     title: _t('Accounts'),
                 });
             }
-        }).then(function () {
-            event.data.on_always();
-        }).catch(function() {
-            event.data.on_always();
-        });
+        }).then(event.data.on_always, event.data.on_always);
     }
 });
 

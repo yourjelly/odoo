@@ -62,7 +62,7 @@ FormController.include({
         if (this.mode === 'readonly') {
             this.do_warn(_t('Error: Document not editable'),
                 _t('To modify this document, please first start edition.'));
-            return new Promise.reject();
+            return Promise.reject();
         }
 
         var record = this.model.get(this.handle);
@@ -272,7 +272,7 @@ FormController.include({
     _barcodeActiveScanned: function (method, barcode, activeBarcode) {
         var self = this;
         var methodDef;
-        var def = new Promise(function(resolve, reject) {
+        var def = new Promise(function (resolve, reject) {
 
         if (typeof method === 'string') {
             methodDef = this[method](barcode, activeBarcode);

@@ -53,7 +53,7 @@ QUnit.module('calendar', {
                         "the partner ids should be passed as argument");
                     assert.strictEqual(args.args[1], 14,
                         "the event id should be passed as argument");
-                    return Promise.reso([
+                    return Promise.resolve([
                         [1, "Jesus", "accepted", 0],
                         [2, "Mahomet", "needsAction", 0],
                     ]);

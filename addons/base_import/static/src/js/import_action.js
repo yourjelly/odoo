@@ -172,8 +172,8 @@ var DataImport = AbstractAction.extend({
                     cp_content: {$buttons: self.$buttons},
                 };
                 self.updateControlPanel(status);
-            })]
-        );
+            }),
+        ]);
     },
     create_model: function() {
         return this._rpc({
