@@ -480,7 +480,7 @@ ActionManager.include({
         var view = _.findWhere(action.views, {type: viewType});
         if (!view) {
             // can't switch to an unknown view
-            return $.Deferred().reject();
+            return Promise.reject();
         }
         var currentController = this.getCurrentController();
         var index;

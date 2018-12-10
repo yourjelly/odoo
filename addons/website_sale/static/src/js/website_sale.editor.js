@@ -29,7 +29,8 @@ WebsiteNewMenu.include({
             id: "editor_new_product",
             window_title: _t("New Product"),
             input: _t("Name"),
-        }).then(function (name) {
+        }).then(function (result) {
+            var id = result.id
             if (!name) {
                 return;
             }

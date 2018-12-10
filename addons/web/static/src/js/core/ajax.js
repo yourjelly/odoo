@@ -472,7 +472,7 @@ var loadXML = (function () {
         newLoadingData.def = new Promise(function (resolve, reject) {
             newLoadingData.resolve = resolve;
             newLoadingData.reject = reject;
-        })
+        });
         loadingsData.push(newLoadingData);
 
         // If not already started, start the loading loop (reinitialize the

@@ -228,7 +228,7 @@ var dom = {
      * @param {function|boolean} stopPropagation
      */
     makeAsyncHandler: function (fct, preventDefault, stopPropagation) {
-        // Create a deferred indicating if a previous call to this handler is
+        // Create a promise indicating if a previous call to this handler is
         // still pending.
         var def = $.when();
 
@@ -283,11 +283,13 @@ var dom = {
             // a 'real' debounce creation useless. Also, during the debouncing
             // part, the button is disabled without any visual effect.
             $button.addClass('o_debounce_disabled');
-            $.when(dom.DEBOUNCE && concurrency.delay(dom.DEBOUNCE)).then(function () {
+            Promise.resolve(dom.DEBOUNCE && concurrency.delay(dom.DEBOUNCE)).then(function () {
                 $button.addClass('disabled').prop('disabled', true);
                 $button.removeClass('o_debounce_disabled');
 
-                return $.when(result).always(function () {
+                return Promise.resolve(result).then(function () {
+                    $button.removeClass('disabled').prop('disabled', false);
+                }).catch(function () {
                     $button.removeClass('disabled').prop('disabled', false);
                 });
             });

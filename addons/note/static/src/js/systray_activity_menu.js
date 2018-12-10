@@ -93,10 +93,11 @@ ActivityMenu.include({
         if (!this.noteDateTimeWidget){
             this.noteDateTimeWidget = new datepicker.DateWidget(this, {useCurrent: true});
         }
-        this.noteDateTimeWidget.appendTo(this.$('.o_note_datetime'));
-        this.noteDateTimeWidget.$input.attr('placeholder', _t("Today"));
-        this.$('.o_note_show, .o_note').toggleClass('d-none');
-        this.$('.o_note_input').val('').focus();
+        this.noteDateTimeWidget.appendTo(this.$('.o_note_datetime')).then(function() {
+            this.noteDateTimeWidget.$input.attr('placeholder', _t("Today"));
+            this.$('.o_note_show, .o_note').toggleClass('d-none');
+            this.$('.o_note_input').val('').focus();
+        });
     },
     /**
      * When focusing on input for new quick note systerm tray must be open.

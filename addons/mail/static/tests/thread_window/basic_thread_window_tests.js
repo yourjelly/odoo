@@ -578,7 +578,7 @@ QUnit.test('do not auto-focus chat window on receiving new message from new DM',
         session: { partner_id: 3 },
         mockRPC: function (route, args) {
             if (args.method === 'channel_join_and_get_info') {
-                return $.when(_.extend({}, self.data['mail.channel'].records[0], { info: 'join' }));
+                return Promise.resolve(_.extend({}, self.data['mail.channel'].records[0], { info: 'join' }));
             }
             if (args.method === 'channel_minimize') {
                 _.extend(self.data['mail.channel'].records[0], {

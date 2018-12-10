@@ -63,11 +63,14 @@ odoo.define('payment.processing', function (require) {
                     }
                 }
                 self.startPolling();
-            }).always(function(){
+            }).then(function() {
                 if ($.blockUI) {
                     $.unblockUI();
                 }
-            }).fail(function(e) {
+            }).catch(function() {
+                if ($.blockUI) {
+                    $.unblockUI();
+                }
                 self.displayContent("payment.rpc_error", {});
                 self.startPolling();
             });

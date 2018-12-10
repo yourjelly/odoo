@@ -8,7 +8,7 @@ odoo.define('web.concurrency', function (require) {
  * everything concurrency related in Odoo.
  *
  * The basic concurrency primitives in Odoo JS are the callback, and the
- * promises.  Promises (deferred) are more composable, so we usually use them
+ * promises.  Promises (promise) are more composable, so we usually use them
  * whenever possible.  We use the jQuery implementation.
  *
  * Those functions are really nothing special, but are simply the result of how
@@ -19,50 +19,10 @@ var Class = require('web.Class');
 
 return {
     /**
-     * The jquery implementation for $.when has a (most of the time) useful
-     * property: it is synchronous, if the deferred is resolved immediately.
-     *
-     * This means that when we execute $.when(def), then all registered
-     * callbacks will be executed before the next line is executed.  This is
-     * useful quite often, but in some rare cases, we might want to force an
-     * async behavior. This is the purpose of this function, which simply adds a
-     * setTimeout before resolving the deferred.
-     *
-     * @returns {Deferred}
-     */
-    asyncWhen: function () {
-        throw "only used in tests";
-        var async = false;
-        var def = $.Deferred();
-        $.when.apply($, arguments).done(function () {
-            var args = arguments;
-            var action = function () {
-                def.resolve.apply(def, args);
-            };
-            if (async) {
-                action();
-            } else {
-                setTimeout(action, 0);
-            }
-        }).fail(function () {
-            var args = arguments;
-            var action = function () {
-                def.reject.apply(def, args);
-            };
-            if (async) {
-                action();
-            } else {
-                setTimeout(action, 0);
-            }
-        });
-        async = true;
-        return def;
-    },
-    /**
-     * Returns a deferred resolved after 'wait' milliseconds
+     * Returns a promise resolved after 'wait' milliseconds
      *
      * @param {int} [wait=0] the delay in ms
-     * @return {Deferred}
+     * @return {Promise}
      */
     delay: function (wait) {
         return new Promise(function (resolve, reject) {
@@ -95,17 +55,17 @@ return {
             this.failMisordered = failMisordered || false;
         },
         /**
-         * Adds a deferred (usually an async request) to the sequencer
+         * Adds a promise (usually an async request) to the sequencer
          *
-         * @param {Deferred} deferred to ensure add
-         * @returns {Deferred}
+         * @param {Promise} Promise to ensure add
+         * @returns {Promise}
          */
-        add: function (deferred) {
+        add: function (promise) {
             console.log("add drop missordered")
             var self = this;
             var seq = this.lsn++;
             var res = new Promise(function(resolve, reject) {
-                deferred.then(function(result) {
+                promise.then(function(result) {
                     if (seq > self.rsn) {
                         self.rsn = seq;
                         resolve(result);
@@ -123,22 +83,6 @@ return {
                 });
             });
             return res;
-            /*var res = $.Deferred();
-
-            var self = this, seq = this.lsn++;
-            deferred.done(function () {
-                if (seq > self.rsn) {
-                    self.rsn = seq;
-                    res.resolve.apply(res, arguments);
-                } else if (self.failMisordered) {
-                    res.reject();
-                }
-            }).fail(function () {
-                res.reject.apply(res, arguments);
-            });
-
-            return res.promise();
-            */
         },
     }),
     /**
@@ -177,19 +121,19 @@ return {
      */
     DropPrevious: Class.extend({
         /**
-         * Registers a new deferred and rejects the previous one
+         * Registers a new promise and rejects the previous one
          *
-         * @param {Promise} promise the new deferred
+         * @param {Promise} promise the new promise
          * @returns {Promise}
          */
-        add: function (deferred) {
+        add: function (promise) {
             console.log("add drop previous");
 
             if (this.currentDef) { this.currentDef.reject(); }
             var rejection;
             var res = new Promise(function (resolve, reject) {
                 rejection = reject;
-                deferred.then(resolve).catch(reject);
+                promise.then(resolve).catch(reject);
             });
 
             this.currentDef = res;
@@ -205,7 +149,7 @@ return {
      * state and cause some corrupted state.
      *
      * Imagine that we have a function to fetch some data _load(), which returns
-     * a deferred which resolves to something useful. Now, we have some code
+     * a promise which resolves to something useful. Now, we have some code
      * looking like this::
      *
      *      return this._load().then(function (result) {
@@ -240,8 +184,8 @@ return {
          * Add a computation to the queue, it will be executed as soon as the
          * previous computations are completed.
          *
-         * @param {function} action a function which may return a deferred
-         * @returns {Deferred}
+         * @param {function} action a function which may return a Promise
+         * @returns {Promise}
          */
         exec: function (action) {
             var currentLock = this.lock;
@@ -258,63 +202,6 @@ return {
             return this.lock.then(function () {
                 return result;
             });
-
-            // var currentPromise = this.promise;
-
-            // return new Promise(function (resolve) {
-
-            //     return currentPromise.then(function () {
-            //         var result = action();
-            //         result
-            //             .then(resolve)
-            //             .catch(resolve);
-            //         return result;
-            //     });
-            // });
-
-
-
-
-            // PROPOSITION
-
-            // var currentPromise = this.promise;
-            // var nextResolver;
-
-            // this.promise = new Promise(function (resolve) {
-            //     nextResolver = resolve;
-            // });
-
-            // return currentPromise.then(function () {
-            //     var result = action();
-            //     result
-            //         .then(nextResolver)
-            //         .catch(nextResolver);
-            //     return result;
-            // });
-
-
-
-
-
-            // INITIAL
-            // this.current.then(function () {
-
-            // this.def = $.Deferred();
-            // var next = this.def;
-
-            // var self = this;
-            // var current = this.def;
-            // var next = this.def = $.Deferred();
-            // this.unlockedDef = this.unlockedDef || $.Deferred();
-            // return current.done(function() {
-            //     return $.when(action()).always(function () {
-            //         next.resolve();
-            //         if (self.def.state() === 'resolved' && self.unlockedDef) {
-            //             self.unlockedDef.resolve();
-            //             self.unlockedDef = undefined;
-            //         }
-            //     });
-            // });
         },
         /**
          * @returns {Promise} resolved as soon as the Mutex is unlocked
@@ -322,9 +209,7 @@ return {
          */
         getUnlockedDef: function () {
             console.error("getUnlockedDef Not really implemented yet, but kinda ok");
-            //throw new Error("Not implemented yet");
             return Promise.resolve(this.lock);
-            // return $.when(this.unlockedDef);
         },
     }),
     /**
@@ -347,9 +232,9 @@ return {
      *
      * A MutexedDropPrevious has to be a class, and not a function, because we
      * have to keep track of some internal state. The exec function takes as
-     * argument an action (and not a deferred as DropPrevious for example)
+     * argument an action (and not a promise as DropPrevious for example)
      * because it's the MutexedDropPrevious role to trigger the RPC call that
-     * returns a deferred when it's time.
+     * returns a promise when it's time.
      */
     MutexedDropPrevious: Class.extend({
         init: function () {
@@ -362,8 +247,8 @@ return {
             this.i = 0;
         },
         /**
-         * @param {function} action a function which may return a deferred
-         * @returns {Deferred}
+         * @param {function} action a function which may return a promise
+         * @returns {Promise}
          */
         exec: function (action) {
             var self = this;

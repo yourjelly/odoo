@@ -60,7 +60,7 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
      * translator is translation mode is already enabled).
      *
      * @private
-     * @returns {Deferred}
+     * @returns {Promise|Deferred}
      */
     _startTranslateMode: function () {
         if (!ctx.edit_translations) {

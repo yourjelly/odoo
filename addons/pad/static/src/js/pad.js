@@ -156,7 +156,7 @@ var FieldPad = AbstractField.extend({
                     .removeClass('oe_pad_loading')
                     .html('<div class="oe_pad_readonly"><div>');
                 self.$('.oe_pad_readonly').html(data);
-            }).fail(function () {
+            }).catch(function () {
                 self.$('.oe_pad_content').text(_t('Unable to load pad'));
             });
         } else {

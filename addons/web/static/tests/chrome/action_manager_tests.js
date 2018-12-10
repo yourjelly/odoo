@@ -606,7 +606,7 @@ QUnit.module('ActionManager', {
             mockRPC: function (route, args) {
                 if (args.method === 'read') {
                     // this is the rpc to load form view
-                    return $.Deferred().reject();
+                    return Promise.reject();
                 }
                 return this._super.apply(this, arguments);
             },
@@ -1235,7 +1235,7 @@ QUnit.module('ActionManager', {
     QUnit.test('when an server action takes too much time...', async function (assert) {
         assert.expect(1);
 
-        var def = $.Deferred();
+        var def = testUtils.makeTestPromise();
 
         var actionManager = await createActionManager({
             actions: this.actions,
@@ -1381,7 +1381,7 @@ QUnit.module('ActionManager', {
         assert.expect(16);
 
         var self = this;
-        var def = $.Deferred();
+        var def = testUtils.makeTestPromise();
         var actionManager = await createActionManager({
             actions: this.actions,
             archs: this.archs,

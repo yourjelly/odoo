@@ -199,7 +199,8 @@ var AbstractView = Factory.extend({
             // get the parent of the model if it already exists, as _super will
             // set the new controller as parent, which we don't want
             var modelParent = self.model && self.model.getParent();
-            return _super(parent).done(function (controller) {
+            var prom =  _super(parent);
+            prom.then(function (controller) {
                 if (controlPanel) {
                     controlPanel.setParent(controller);
                 }
@@ -208,7 +209,7 @@ var AbstractView = Factory.extend({
                     self.model.setParent(modelParent);
                 }
             });
-
+            return prom;
         });
     },
     /**

@@ -87,7 +87,9 @@ var NewContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                 $add.find('input').prop('checked', true);
                 $group.after($add);
             }
-        }).then(function (val, field, $dialog) {
+        }).then(function (result) {
+            var val = result.id;
+            var $dialog = result.Dialog;
             if (!val) {
                 return;
             }
@@ -138,7 +140,7 @@ var NewContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
      *
      * @private
      * @param {number} moduleId: the module to install
-     * @return {Deferred}
+     * @return {Promise}
      */
     _install: function (moduleId) {
         this.pendingInstall = true;
@@ -147,7 +149,7 @@ var NewContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             model: 'ir.module.module',
             method: 'button_immediate_install',
             args: [[moduleId]],
-        }).fail(function () {
+        }).catch(function () {
             $('body').css('pointer-events', '');
         });
     },

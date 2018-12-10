@@ -45,7 +45,9 @@ WebsiteNewMenu.include({
                 $add.find('label').append(_t("Add to menu"));
                 $group.after($add);
             }
-        }).then(function (forum_name, field, $dialog) {
+        }).then(function (result) {
+            var forum_name = result.id;
+            var $dialog = result.dialog;
             if (!forum_name) {
                 return;
             }

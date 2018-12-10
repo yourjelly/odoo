@@ -39,7 +39,8 @@ WebsiteNewMenu.include({
                     init: function (field) {
                         return blog_ids;
                     },
-                }).then(function (blog_id) {
+                }).then(function (result) {
+                    var blog_id = result.id;
                     if (!blog_id) {
                         return;
                     }

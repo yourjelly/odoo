@@ -131,7 +131,7 @@ odoo.define('payment.payment_form', function (require) {
                         $(button).attr('disabled', false);
                         $(button).children('.fa').addClass('fa-plus-circle')
                         $(button).find('span.o_loader').remove();
-                    }).fail(function (error, event) {
+                    }).catch(function (error, event) {
                         // if the rpc fails, pretty obvious
                         $(button).attr('disabled', false);
                         $(button).children('.fa').addClass('fa-plus-circle')
@@ -183,7 +183,7 @@ odoo.define('payment.payment_form', function (require) {
                                     _t("We are not able to redirect you to the payment form.")
                                 );
                             }
-                        }).fail(function (error, event) {
+                        }).catch(function (error, event) {
                             self.displayError(
                                 _t('Server Error'),
                                 _t("We are not able to redirect you to the payment form. ") +
@@ -300,7 +300,7 @@ odoo.define('payment.payment_form', function (require) {
                     $(button).attr('disabled', false);
                     $(button).children('.fa').addClass('fa-plus-circle')
                     $(button).find('span.o_loader').remove();
-                }).fail(function (error, event) {
+                }).catch(function (error, event) {
                     // if the rpc fails, pretty obvious
                     $(button).attr('disabled', false);
                     $(button).children('.fa').addClass('fa-plus-circle')

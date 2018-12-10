@@ -28,7 +28,8 @@ WebsiteNewMenu.include({
         return wUtils.prompt({
             window_title: _t("New Channel"),
             input: _t("Name"),
-        }).then(function (name) {
+        }).then(function (result) {
+            var name = result.id;
             if (!name) {
                 return;
             }

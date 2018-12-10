@@ -54,7 +54,7 @@ odoo.define('partner_autocomplete.tests', function (require) {
             _.each(fieldsToPatch, function (fieldToPatch) {
                 testUtils.mock.patch(fieldToPatch, {
                     _getBase64Image: function (url) {
-                        return $.when(url === "odoo.com/logo.png" ? "odoobase64" : "");
+                        return Promise.resolve(url === "odoo.com/logo.png" ? "odoobase64" : "");
                     },
                     _isOnline: function () {
                         return true;
@@ -67,7 +67,7 @@ odoo.define('partner_autocomplete.tests', function (require) {
                         return def;
                     },
                     _enrichCompany: function (company) {
-                        return $.when(enrichData);
+                        return Promise.resolve(enrichData);
                     },
                     _getOdooSuggestions: function (value, isVAT) {
                         var results = _.filter(suggestions, function (suggestion) {
@@ -75,7 +75,7 @@ odoo.define('partner_autocomplete.tests', function (require) {
                             if (isVAT) return (suggestion.vat.toLowerCase().indexOf(value) >= 0);
                             else return (suggestion.name.toLowerCase().indexOf(value) >= 0);
                         });
-                        return $.when(results);
+                        return Promise.resolve(results);
                     },
                     _getClearbitSuggestions: function (value) {
                         return this._getOdooSuggestions(value);
@@ -413,7 +413,7 @@ odoo.define('partner_autocomplete.tests', function (require) {
             },
             mockRPC: function (route, args) {
                 if (args.method === "get_credits_url"){
-                    return $.when('credits_url');
+                    return Promise.resolve('credits_url');
                 }
                 return this._super.apply(this, arguments);
             },

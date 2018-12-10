@@ -132,7 +132,7 @@ var WebsiteNavbar = rootWidget.RootWidget.extend({
             def.done(ev.data.onSuccess);
         }
         if (ev.data.onFailure) {
-            def.fail(ev.data.onFailure);
+            def.catch(ev.data.onFailure);
         }
     },
     /**

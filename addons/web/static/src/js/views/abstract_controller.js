@@ -183,7 +183,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
                 params = _.extend({}, params, searchQuery);
             });
         }
-        return $.when(def).then(this.update.bind(this, params, {}));
+        return Promise.resolve(def).then(this.update.bind(this, params, {}));
     },
     /**
      * For views that require a pager, this method will be called to allow the

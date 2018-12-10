@@ -29,7 +29,8 @@ WebsiteNewMenu.include({
             id: "editor_new_event",
             window_title: _t("New Event"),
             input: _t("Event Name"),
-        }).then(function (eventName) {
+        }).then(function (result) {
+            var eventName = result.id;
             if (!eventName) {
                 return;
             }

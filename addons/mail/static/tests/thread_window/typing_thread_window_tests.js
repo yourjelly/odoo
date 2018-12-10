@@ -82,7 +82,7 @@ QUnit.test('receive typing notification', function (assert) {
             // when receiving an 'is typing' notification, fetch the list of
             // members of this channel if we haven't done yet.
             if (args.method === 'channel_fetch_listeners') {
-                return $.when([
+                return Promise.resolve([
                     { id: 42, name: "Someone" },
                 ]);
             }

@@ -51,7 +51,7 @@ QUnit.module('pad widget', {
             res_id: 1,
             mockRPC: function (route, args) {
                 if (args.method === 'pad_is_configured') {
-                    return $.when(false);
+                    return Promise.resolve(false);
                 }
                 return this._super.apply(this, arguments);
             },
@@ -87,7 +87,7 @@ QUnit.module('pad widget', {
             mockRPC: function (route, args) {
                 if (route === 'https://pad.odoo.pad/p/test/1?showChat=false&userName=batman') {
                     assert.ok(true, "should have an iframe with correct src");
-                    return $.when(true);
+                    return Promise.resolve(true);
                 }
                 return this._super.apply(this, arguments);
             },
@@ -114,7 +114,7 @@ QUnit.module('pad widget', {
     QUnit.test('pad widget works, with existing data', function (assert) {
         assert.expect(3);
 
-        var contentDef = $.Deferred();
+        var contentDef = testUtils.createTestPromise();
 
         var form = createView({
             View: FormView,
@@ -130,7 +130,7 @@ QUnit.module('pad widget', {
             res_id: 2,
             mockRPC: function (route, args) {
                 if (_.str.startsWith(route, 'http')) {
-                    return $.when(true);
+                    return Promise.resolve(true);
                 }
                 var result = this._super.apply(this, arguments);
                 if (args.method === 'pad_get_content') {
@@ -174,7 +174,7 @@ QUnit.module('pad widget', {
                 '</form>',
             mockRPC: function (route, args) {
                 if (!args.method) {
-                    return $.when(true);
+                    return Promise.resolve(true);
                 }
                 return this._super.apply(this, arguments);
             },
@@ -210,7 +210,7 @@ QUnit.module('pad widget', {
             res_id: 2,
             mockRPC: function (route, args) {
                 if (!args.method) {
-                    return $.when(true);
+                    return Promise.resolve(true);
                 }
                 return this._super.apply(this, arguments);
             },
@@ -247,7 +247,7 @@ QUnit.module('pad widget', {
             res_id: 2,
             mockRPC: function (route, args) {
                 if (!args.method) {
-                    return $.when(true);
+                    return Promise.resolve(true);
                 }
                 return this._super.apply(this, arguments);
             },
