@@ -55,7 +55,7 @@ var Followers = AbstractField.extend({
         // note: the rendering of this widget is asynchronous as it needs to
         // fetch the details of the followers, but it performs a first rendering
         // synchronously (_displayGeneric), and updates its rendering once it
-        // has fetched the required data, so this function doesn't return a deferred
+        // has fetched the required data, so this function doesn't return a promise
         // as we don't want to wait to the data to be loaded to display the widget
         var self = this;
         var fetch_def = this.dp.add(this._readFollowers());

@@ -20,7 +20,7 @@ BasicModel.include({
      * @private
      * @param {Object} record - an element from the localData
      * @param {string} fieldName
-     * @return {Deferred<Object>} the deferred is resolved with the
+     * @return {Promise<Object>} the promise is resolved with the
      *                            invalidPartnerIds
      */
     _setInvalidMany2ManyTagsEmail: function (record, fieldName) {
@@ -65,7 +65,7 @@ var FieldMany2ManyTagsEmail = M2MTags.extend({
      * Open a popup for each invalid partners (without email) to fill the email.
      *
      * @private
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _checkEmailPopup: function () {
         var self = this;

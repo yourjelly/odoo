@@ -72,7 +72,7 @@ var Channel = SearchableThread.extend(ChannelSeenMixin, ThreadTypingMixin, {
         this._isMyselfModerator = data.is_moderator;
         this._lastMessageDate = undefined;
         this._members = data.members || [];
-        // Deferred that is resolved on fetched members of this channel.
+        // Promise that is resolved on fetched members of this channel.
         this._membersDef = undefined;
         // number of messages that are 'needaction', which is equivalent to the
         // number of messages in this channel that are in inbox.

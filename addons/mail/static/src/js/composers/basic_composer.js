@@ -398,7 +398,7 @@ var BasicComposer = Widget.extend({
      * @returns {Promise}
      */
     _preprocessMessage: function () {
-        // Return a deferred as this function is extended with asynchronous
+        // Return a promise as this function is extended with asynchronous
         // behavior for the chatter composer
 
         //Removing unwanted extra spaces from message

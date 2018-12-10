@@ -199,7 +199,7 @@ MockServer.include({
             return Promise.resolve();
         }
         if (args.method === 'channel_fetched') {
-            return $.when();
+            return Promise.resolve();
         }
         if (args.method === 'message_fetch') {
             return Promise.resolve(this._mockMessageFetch(args));

@@ -35,7 +35,7 @@ QUnit.module('Views', {
                 '</t></templates></kanban>',
             mockRPC: function(route, args) {
                 if (route === '/lunch/infos') {
-                    return $.when({
+                    return Promise.resolve({
                         order: 1,
                         wallet: 20,
                         username: 'Marc Demo',
@@ -53,7 +53,7 @@ QUnit.module('Views', {
                         alerts: [],
                     });
                 } else if (route.startsWith('data:image/png;base64,')) {
-                    return $.when();
+                    return Promise.resolve();
                 }
                 return this._super(route, args);
             },
@@ -98,7 +98,7 @@ QUnit.module('Views', {
                 '</t></templates></kanban>',
             mockRPC: function(route, args) {
                 if (route === '/lunch/infos') {
-                    return $.when({
+                    return Promise.resolve({
                         order: 1,
                         wallet: 20,
                         username: 'Marc Demo',
@@ -116,14 +116,14 @@ QUnit.module('Views', {
                         alerts: [],
                     });
                 } else if (route === '/lunch/payment_message') {
-                    return $.when({message: 'Hello'});
+                    return Promise.resolve({message: 'Hello'});
                 } else if (route === '/lunch/pay') {
-                    return $.when(true);
+                    return Promise.resolve(true);
                 } else if (args.method === 'update_quantity') {
                     assert.step(args.args);
-                    return $.when();
+                    return Promise.resolve();
                 } else if (route.startsWith('data:image/png;base64,')) {
-                    return $.when();
+                    return Promise.resolve();
                 }
                 return this._super(route, args);
             },
@@ -170,7 +170,7 @@ QUnit.module('Views', {
                 '</t></templates></kanban>',
             mockRPC: function(route, args) {
                 if (route === '/lunch/infos') {
-                    return $.when({
+                    return Promise.resolve({
                         order: 1,
                         wallet: 20,
                         username: 'Marc Demo',
@@ -188,7 +188,7 @@ QUnit.module('Views', {
                         alerts: [],
                     });
                 } else if (route.startsWith('data:image/png;base64,')) {
-                    return $.when();
+                    return Promise.resolve();
                 }
                 return this._super(route, args);
             },

@@ -600,7 +600,7 @@ QUnit.test('3 members: 1 myself message received by some initially', function (a
         session: { partner_id: 3 },
         mockRPC: function (route, args) {
             if (args.method === 'channel_fetch_listeners') {
-                return $.when(members);
+                return Promise.resolve(members);
             }
             return this._super.apply(this, arguments);
         },
@@ -700,7 +700,7 @@ QUnit.test('several members: 1 myself message seen by everyone (initially not re
         session: { partner_id: 3 },
         mockRPC: function (route, args) {
             if (args.method === 'channel_fetch_listeners') {
-                return $.when(members);
+                return Promise.resolve(members);
             }
             return this._super.apply(this, arguments);
         },
@@ -901,7 +901,7 @@ QUnit.test('several members: other message seen by everyone (initially not recei
         session: { partner_id: 3 },
         mockRPC: function (route, args) {
             if (args.method === 'channel_fetch_listeners') {
-                return $.when(members);
+                return Promise.resolve(members);
             }
             return this._super.apply(this, arguments);
         },
@@ -1077,7 +1077,7 @@ QUnit.test('several members: only show seen icons from last message seen by ever
         session: { partner_id: 3 },
         mockRPC: function (route, args) {
             if (args.method === 'channel_fetch_listeners') {
-                return $.when(members);
+                return Promise.resolve(members);
             }
             return this._super.apply(this, arguments);
         },

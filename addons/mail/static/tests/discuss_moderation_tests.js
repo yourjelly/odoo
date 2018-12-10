@@ -534,7 +534,7 @@ QUnit.test('author: send message in moderated channel', function (assert) {
     assert.expect(4);
     var done = assert.async();
 
-    var messagePostDef = $.Deferred();
+    var messagePostDef = testUtils.makeTestPromise();
 
     this.data.initMessaging = {
         channel_slots: {
@@ -812,10 +812,10 @@ QUnit.test('no crash when load-more fetching "accepted" message twice', function
                 count++;
                 if (count === 1) {
                     // inbox message_fetch
-                    return $.when([]);
+                    return Promise.resolve([]);
                 }
                 // general message_fetch
-                return $.when(messageData);
+                return Promise.resolve(messageData);
             }
             return this._super.apply(this, arguments);
         },

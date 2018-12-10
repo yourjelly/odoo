@@ -687,7 +687,7 @@ QUnit.test('receive is typing notification from unselected thread', function (as
             // when receiving an 'is typing' notification, fetch the list of
             // members of this channel if we haven't done yet.
             if (args.method === 'channel_fetch_listeners') {
-                return $.when([
+                return Promise.resolve([
                     { id: self.myPartnerID, name: self.myName },
                     { id: 42, name: "Someone" },
                 ]);

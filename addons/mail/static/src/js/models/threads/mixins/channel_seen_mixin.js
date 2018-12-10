@@ -237,7 +237,7 @@ var ChannelSeenMixin = {
      * @returns {$.Promise}
      */
     _notifyFetched: function () {
-        return $.when();
+        return Promise.resolve();
     },
     /**
      * @abstract
@@ -245,7 +245,7 @@ var ChannelSeenMixin = {
      * @returns {$.Promise<integer>} resolved with ID of last seen message
      */
     _notifySeen: function () {
-        return $.when();
+        return Promise.resolve();
     },
 
     //--------------------------------------------------------------------------

@@ -97,7 +97,7 @@ MailManager.include({
      *
      * @param {string} [channelState='open'] state of the Support
      *   channel (see CHANNEL_STATES for accepted values)
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     startSupportLivechat: function (channelState) {
         var self = this;
@@ -149,7 +149,7 @@ MailManager.include({
                     channel.fold(channelState === 'folded');
                 }
             }
-        }).fail(function () {
+        }).catch(function () {
             self.do_warn(_t("The Support server can't be reached."));
         });
     },

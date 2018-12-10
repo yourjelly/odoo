@@ -29,7 +29,7 @@ QUnit.module('systray', {
     },
 });
 
-QUnit.test('messaging menu displays the Support channel', function (assert) {
+QUnit.test('messaging menu displays the Support channel', async function (assert) {
     assert.expect(1);
 
     var messagingMenu = new MessagingMenu();
@@ -38,7 +38,7 @@ QUnit.test('messaging menu displays the Support channel', function (assert) {
         services: this.services,
         session: this.supportParams,
     });
-    messagingMenu.appendTo($('#qunit-fixture'));
+    await messagingMenu.appendTo($('#qunit-fixture'));
 
     testUtils.dom.click(messagingMenu.$('.dropdown-toggle'));
     assert.containsOnce(messagingMenu, '.o_mail_systray_dropdown_bottom .o_mail_preview[data-preview-id=SupportChannel]', "should display the Support channel");
@@ -46,7 +46,7 @@ QUnit.test('messaging menu displays the Support channel', function (assert) {
     messagingMenu.destroy();
 });
 
-QUnit.test('clicking on Support channel: channel not available', function (assert) {
+QUnit.test('clicking on Support channel: channel not available', async function (assert) {
     assert.expect(9);
 
     var messagingMenu = new MessagingMenu();
@@ -71,7 +71,7 @@ QUnit.test('clicking on Support channel: channel not available', function (asser
         services: this.services,
         session: this.supportParams,
     });
-    messagingMenu.appendTo($('#qunit-fixture'));
+    await messagingMenu.appendTo($('#qunit-fixture'));
 
     testUtils.dom.click(messagingMenu.$('.dropdown-toggle'));
     assert.containsOnce(messagingMenu, '.o_mail_systray_dropdown_bottom .o_mail_preview[data-preview-id=SupportChannel]');
@@ -94,7 +94,7 @@ QUnit.test('clicking on Support channel: channel not available', function (asser
     messagingMenu.destroy();
 });
 
-QUnit.test('clicking on Support channel: channel available', function (assert) {
+QUnit.test('clicking on Support channel: channel available', async function (assert) {
     assert.expect(9);
 
     var messagingMenu = new MessagingMenu();
@@ -115,7 +115,7 @@ QUnit.test('clicking on Support channel: channel available', function (assert) {
         services: this.services,
         session: this.supportParams,
     });
-    messagingMenu.appendTo($('#qunit-fixture'));
+    await messagingMenu.appendTo($('#qunit-fixture'));
 
     testUtils.dom.click(messagingMenu.$('.dropdown-toggle'));
     assert.containsOnce(messagingMenu, '.o_mail_systray_dropdown_bottom .o_mail_preview[data-preview-id=SupportChannel]');
@@ -138,7 +138,7 @@ QUnit.test('clicking on Support channel: channel available', function (assert) {
     messagingMenu.destroy();
 });
 
-QUnit.test('post messages in Support channel', function (assert) {
+QUnit.test('post messages in Support channel', async function (assert) {
     assert.expect(8);
 
     var messagingMenu = new MessagingMenu();
@@ -159,7 +159,7 @@ QUnit.test('post messages in Support channel', function (assert) {
         services: this.services,
         session: this.supportParams,
     });
-    messagingMenu.appendTo($('#qunit-fixture'));
+    await messagingMenu.appendTo($('#qunit-fixture'));
 
     testUtils.dom.click(messagingMenu.$('.dropdown-toggle'));
     assert.containsOnce(messagingMenu, '.o_mail_systray_dropdown_bottom .o_mail_preview[data-preview-id=SupportChannel]');
@@ -183,7 +183,7 @@ QUnit.test('post messages in Support channel', function (assert) {
     messagingMenu.destroy();
 });
 
-QUnit.test('fold Support channel', function (assert) {
+QUnit.test('fold Support channel', async function (assert) {
     assert.expect(11);
 
     var messagingMenu = new MessagingMenu();
@@ -209,7 +209,7 @@ QUnit.test('fold Support channel', function (assert) {
             assert.step('LocalStorage: ' + ev.data.method + ' ' + ev.data.args);
         }
     }, true);
-    messagingMenu.appendTo($('#qunit-fixture'));
+    await messagingMenu.appendTo($('#qunit-fixture'));
 
     testUtils.dom.click(messagingMenu.$('.dropdown-toggle'));
     assert.containsOnce(messagingMenu, '.o_mail_systray_dropdown_bottom .o_mail_preview[data-preview-id=SupportChannel]');
@@ -237,7 +237,7 @@ QUnit.test('fold Support channel', function (assert) {
     messagingMenu.destroy();
 });
 
-QUnit.test('restore Support channel if necessary', function (assert) {
+QUnit.test('restore Support channel if necessary', async function (assert) {
     assert.expect(5);
 
     var messagingMenu = new MessagingMenu();
@@ -259,7 +259,7 @@ QUnit.test('restore Support channel if necessary', function (assert) {
         services: this.services,
         session: this.supportParams,
     });
-    messagingMenu.appendTo($('#qunit-fixture'));
+    await messagingMenu.appendTo($('#qunit-fixture'));
 
     assert.strictEqual($('.o_thread_window').length, 1,
         "should have open a chat window");
@@ -273,7 +273,7 @@ QUnit.test('restore Support channel if necessary', function (assert) {
     messagingMenu.destroy();
 });
 
-QUnit.test('receive messages in the Support channel', function (assert) {
+QUnit.test('receive messages in the Support channel', async function (assert) {
     assert.expect(10);
 
     var supportChannelID;
@@ -297,7 +297,7 @@ QUnit.test('receive messages in the Support channel', function (assert) {
         services: this.services,
         session: this.supportParams,
     });
-    messagingMenu.appendTo($('#qunit-fixture'));
+    await messagingMenu.appendTo($('#qunit-fixture'));
 
     assert.strictEqual($('.o_thread_window').length, 1,
         "should have open a chat window");

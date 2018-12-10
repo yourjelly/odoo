@@ -178,7 +178,7 @@ var LunchKanbanController = KanbanController.extend({
             }
             data.wallet = parseFloat(data.wallet).toFixed(2);
             self.widget = new LunchKanbanWidget(self, _.extend(data, {edit: self.editMode}));
-            self.widget.insertBefore(self.$('.o_kanban_view'));
+            return self.widget.insertBefore(self.$('.o_kanban_view'));
         });
 
         return this._super.apply(this, arguments);

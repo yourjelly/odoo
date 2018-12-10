@@ -1186,7 +1186,7 @@ QUnit.test('discard replying to message from inbox', function (assert) {
                     model: 'some.document',
                     record_name: 'SomeDocument',
                 });
-                return $.when(2);
+                return Promise.resolve(2);
             }
             return this._super.apply(this, arguments);
         },
@@ -1417,7 +1417,7 @@ QUnit.test('rename DM conversation', function (assert) {
                 assert.step(args.method);
                 assert.strictEqual(args.args[0], 1);
                 assert.strictEqual(args.kwargs.name, "Demo");
-                return $.when("Demo");
+                return Promise.resolve("Demo");
             }
             return this._super.apply(this, arguments);
         },

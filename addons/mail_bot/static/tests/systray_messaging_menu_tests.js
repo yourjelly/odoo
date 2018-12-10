@@ -52,7 +52,7 @@ QUnit.module('MessagingMenu', {
     }
 });
 
-QUnit.test('messaging menu widget: rendering with OdooBot has a request', function (assert) {
+QUnit.test('messaging menu widget: rendering with OdooBot has a request', async function (assert) {
     assert.expect(5);
 
     var messagingMenu = new MessagingMenu();
@@ -60,7 +60,7 @@ QUnit.test('messaging menu widget: rendering with OdooBot has a request', functi
         data: this.data,
         services: this.services,
     });
-    messagingMenu.appendTo($('#qunit-fixture'));
+    await messagingMenu.appendTo($('#qunit-fixture'));
 
     assert.containsOnce(messagingMenu, '.o_notification_counter',
         "should display a notification counter next to the messaging menu");
@@ -79,7 +79,7 @@ QUnit.test('messaging menu widget: rendering with OdooBot has a request', functi
     messagingMenu.destroy();
 });
 
-QUnit.test('messaging menu widget: rendering without OdooBot has a request', function (assert) {
+QUnit.test('messaging menu widget: rendering without OdooBot has a request', async function (assert) {
     assert.expect(3);
 
     this.isMailbotRequesting = false;
@@ -89,7 +89,7 @@ QUnit.test('messaging menu widget: rendering without OdooBot has a request', fun
         data: this.data,
         services: this.services,
     });
-    messagingMenu.appendTo($('#qunit-fixture'));
+    await messagingMenu.appendTo($('#qunit-fixture'));
 
     assert.containsOnce(messagingMenu, '.o_notification_counter',
         "should display a notification counter next to the messaging menu");
