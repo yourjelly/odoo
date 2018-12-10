@@ -25,6 +25,8 @@ var testUtilsMock = require('web.test_utils_mock');
 var testUtilsModal = require('web.test_utils_modal');
 var testUtilsPivot = require('web.test_utils_pivot');
 var tools = require('web.tools');
+
+var relationalFields = require('web.relational_fields');
 function deprecated(fn, type) {
     var msg = `Helper 'testUtils.${fn.name}' is deprecated. ` +
         `Please use 'testUtils.${type}.${fn.name}' instead.`;

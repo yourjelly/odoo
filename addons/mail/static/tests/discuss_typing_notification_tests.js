@@ -433,7 +433,7 @@ QUnit.test('do not display myself as typing', function (assert) {
             return this._super.apply(this, arguments);
         },
         session: { partner_id: this.myPartnerID },
-    }).then(function (discuss) {
+    }).then(async function (discuss) {
         // click on general channel
         var $general = discuss.$('.o_mail_discuss_sidebar')
                         .find('.o_mail_discuss_item[data-thread-id=1]');

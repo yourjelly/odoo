@@ -252,7 +252,7 @@ QUnit.module('Bus', {
         master.call('bus_service', 'addChannel', 'lambda');
 
         // slave
-        setTimeout(function () {
+        setTimeout(async function () {
             var parentSlave = new Widget();
             var pollPromiseSlave = testUtils.makeTestPromise();
             testUtils.mock.addMockEnvironment(parentSlave, {
