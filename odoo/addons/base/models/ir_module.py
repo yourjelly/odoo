@@ -902,8 +902,8 @@ class ModuleDependency(models.Model):
 
     @api.depends('depend_id.state')
     def _compute_state(self):
-        self.ensure_one()
-        self.state = self.depend_id.state or 'unknown'
+        for rec in self:
+            rec.state = rec.depend_id.state or 'unknown'
 
 
 class ModuleExclusion(models.Model):
