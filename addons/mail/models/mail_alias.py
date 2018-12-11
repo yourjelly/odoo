@@ -79,9 +79,9 @@ class Alias(models.Model):
         for record in self:
             record.alias_domain = alias_domain
 
-    @api.one
     @api.constrains('alias_defaults')
     def _check_alias_defaults(self):
+    self.ensure_one()
         try:
             dict(safe_eval(self.alias_defaults))
         except Exception:

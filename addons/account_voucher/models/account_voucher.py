@@ -86,9 +86,9 @@ class AccountVoucher(models.Model):
         ], 'Payment', index=True, readonly=True, states={'draft': [('readonly', False)]}, default='pay_later')
     date_due = fields.Date('Due Date', readonly=True, index=True, states={'draft': [('readonly', False)]})
 
-    @api.one
     @api.depends('move_id.line_ids.reconciled', 'move_id.line_ids.account_id.internal_type')
     def _check_paid(self):
+        self.ensure_one()
         self.paid = any([((line.account_id.internal_type, 'in', ('receivable', 'payable')) and line.reconciled) for line in self.move_id.line_ids])
 
     @api.model
@@ -115,9 +115,9 @@ class AccountVoucher(models.Model):
     def name_get(self):
         return [(r.id, (r.number or _('Voucher'))) for r in self]
 
-    @api.one
     @api.depends('journal_id', 'company_id')
     def _get_journal_currency(self):
+        self.ensure_one()
         self.currency_id = self.journal_id.currency_id.id or self.company_id.currency_id.id
 
     @api.multi
@@ -418,9 +418,9 @@ class AccountVoucherLine(models.Model):
     tax_ids = fields.Many2many('account.tax', string='Tax', help="Only for tax excluded from price")
     currency_id = fields.Many2one('res.currency', related='voucher_id.currency_id', readonly=False)
 
-    @api.one
     @api.depends('price_unit', 'tax_ids', 'quantity', 'product_id', 'voucher_id.currency_id')
     def _compute_subtotal(self):
+        self.ensure_one()
         self.price_subtotal = self.quantity * self.price_unit
         if self.tax_ids:
             taxes = self.tax_ids.compute_all(self.price_unit, self.voucher_id.currency_id, self.quantity, product=self.product_id, partner=self.voucher_id.partner_id)

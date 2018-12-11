@@ -216,8 +216,8 @@ class ProductProduct(models.Model):
                 list_price = product.list_price
             product.lst_price = list_price + product.price_extra
 
-    @api.one
     def _compute_product_code(self):
+        self.ensure_one()
         for supplier_info in self.seller_ids:
             if supplier_info.name.id == self._context.get('partner_id'):
                 self.code = supplier_info.product_code or self.default_code
@@ -225,8 +225,8 @@ class ProductProduct(models.Model):
         else:
             self.code = self.default_code
 
-    @api.one
     def _compute_partner_ref(self):
+        self.ensure_one()
         for supplier_info in self.seller_ids:
             if supplier_info.name.id == self._context.get('partner_id'):
                 product_name = supplier_info.product_name or self.default_code or self.name
@@ -235,9 +235,9 @@ class ProductProduct(models.Model):
         else:
             self.partner_ref = self.display_name
 
-    @api.one
     @api.depends('image_variant', 'product_tmpl_id.image')
     def _compute_images(self):
+        self.ensure_one()
         if self._context.get('bin_size'):
             self.image_medium = self.image_variant
             self.image_small = self.image_variant
@@ -254,20 +254,20 @@ class ProductProduct(models.Model):
         if not self.image:
             self.image = self.product_tmpl_id.image
 
-    @api.one
     def _set_image(self):
+        self.ensure_one()
         self._set_image_value(self.image)
 
-    @api.one
     def _set_image_medium(self):
+        self.ensure_one()
         self._set_image_value(self.image_medium)
 
-    @api.one
     def _set_image_small(self):
+        self.ensure_one()
         self._set_image_value(self.image_small)
 
-    @api.one
     def _set_image_value(self, value):
+        self.ensure_one()
         if isinstance(value, str):
             value = value.encode('ascii')
         image = tools.image_resize_image_big(value)
@@ -282,8 +282,8 @@ class ProductProduct(models.Model):
                 ('product_tmpl_id', '=', product.product_tmpl_id.id),
                 ('product_attribute_value_id', 'in', product.attribute_value_ids.ids)])
 
-    @api.one
     def _get_pricelist_items(self):
+        self.ensure_one()
         self.pricelist_item_ids = self.env['product.pricelist.item'].search([
             '|',
             ('product_id', '=', self.id),

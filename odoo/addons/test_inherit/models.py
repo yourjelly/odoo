@@ -12,9 +12,9 @@ class mother(models.Model):
     state = fields.Selection([('a', 'A'), ('b', 'B')], default='a')
     surname = fields.Char(compute='_compute_surname')
 
-    @api.one
     @api.depends('name')
     def _compute_surname(self):
+        self.ensure_one()
         self.surname = self.name or ''
 
 
@@ -43,9 +43,9 @@ class mother(models.Model):
     state = fields.Selection(selection_add=[('c', 'C')], default=None)
 
     # override the computed field, and extend its dependencies
-    @api.one
     @api.depends('field_in_mother')
     def _compute_surname(self):
+        self.ensure_one()
         if self.field_in_mother:
             self.surname = self.field_in_mother
         else:

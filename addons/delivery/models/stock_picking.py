@@ -12,9 +12,9 @@ from odoo.addons import decimal_precision as dp
 class StockQuantPackage(models.Model):
     _inherit = "stock.quant.package"
 
-    @api.one
     @api.depends('quant_ids')
     def _compute_weight(self):
+        self.ensure_one()
         weight = 0.0
         for quant in self.quant_ids:
             weight += quant.quantity * quant.product_id.weight
@@ -58,9 +58,9 @@ class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
 
-    @api.one
     @api.depends('move_line_ids')
     def _compute_packages(self):
+        self.ensure_one()
         self.ensure_one()
         packs = set()
         for move_line in self.move_line_ids:
@@ -68,18 +68,18 @@ class StockPicking(models.Model):
                 packs.add(move_line.result_package_id.id)
         self.package_ids = list(packs)
 
-    @api.one
     @api.depends('move_line_ids')
     def _compute_bulk_weight(self):
+        self.ensure_one()
         weight = 0.0
         for move_line in self.move_line_ids:
             if move_line.product_id and not move_line.result_package_id:
                 weight += move_line.product_uom_id._compute_quantity(move_line.qty_done, move_line.product_id.uom_id) * move_line.product_id.weight
         self.weight_bulk = weight
 
-    @api.one
     @api.depends('package_ids', 'weight_bulk')
     def _compute_shipping_weight(self):
+        self.ensure_one()
         self.shipping_weight = self.weight_bulk + sum([pack.shipping_weight for pack in self.package_ids])
 
     def _get_default_weight_uom(self):
@@ -214,8 +214,8 @@ class StockPicking(models.Model):
         }
         return client_action
 
-    @api.one
     def cancel_shipment(self):
+        self.ensure_one()
         self.carrier_id.cancel_shipment(self)
         msg = "Shipment %s cancelled" % self.carrier_tracking_ref
         self.message_post(body=msg)

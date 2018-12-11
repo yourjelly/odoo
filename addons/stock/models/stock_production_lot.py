@@ -48,8 +48,8 @@ class ProductionLot(models.Model):
                 ))
         return super(ProductionLot, self).write(vals)
 
-    @api.one
     def _product_qty(self):
+        self.ensure_one()
         # We only care for the quants in internal or transit locations.
         quants = self.quant_ids.filtered(lambda q: q.location_id.usage in ['internal', 'transit'])
         self.product_qty = sum(quants.mapped('quantity'))

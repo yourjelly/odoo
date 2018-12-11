@@ -134,15 +134,15 @@ class MrpWorkorder(models.Model):
     def name_get(self):
         return [(wo.id, "%s - %s - %s" % (wo.production_id.name, wo.product_id.name, wo.name)) for wo in self]
 
-    @api.one
     @api.depends('production_id.product_qty', 'qty_produced')
     def _compute_is_produced(self):
+        self.ensure_one()
         rounding = self.production_id.product_uom_id.rounding
         self.is_produced = float_compare(self.qty_produced, self.production_id.product_qty, precision_rounding=rounding) >= 0
 
-    @api.one
     @api.depends('time_ids.duration', 'qty_produced')
     def _compute_duration(self):
+        self.ensure_one()
         self.duration = sum(self.time_ids.mapped('duration'))
         self.duration_unit = round(self.duration / max(self.qty_produced, 1), 2)  # rounding 2 because it is a time
         if self.duration_expected:

@@ -300,8 +300,8 @@ class Slide(models.Model):
             )
         return True
 
-    @api.one
     def send_share_email(self, email):
+        self.ensure_one()
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         return self.channel_id.share_template_id.with_context(email=email, base_url=base_url).send_mail(self.id, notif_layout='mail.mail_notification_light')
 

@@ -211,8 +211,8 @@ class ProductTemplate(models.Model):
         for template in (self - unique_variants):
             template.standard_price = 0.0
 
-    @api.one
     def _set_standard_price(self):
+        self.ensure_one()
         if len(self.product_variant_ids) == 1:
             self.product_variant_ids.standard_price = self.standard_price
 
@@ -228,8 +228,8 @@ class ProductTemplate(models.Model):
         for template in (self - unique_variants):
             template.volume = 0.0
 
-    @api.one
     def _set_volume(self):
+        self.ensure_one()
         if len(self.product_variant_ids) == 1:
             self.product_variant_ids.volume = self.volume
 
@@ -281,14 +281,14 @@ class ProductTemplate(models.Model):
         for template in self:
             template.volume_uom_name = self._get_volume_uom_name_from_ir_config_parameter()
 
-    @api.one
     def _set_weight(self):
+        self.ensure_one()
         if len(self.product_variant_ids) == 1:
             self.product_variant_ids.weight = self.weight
 
-    @api.one
     @api.depends('product_variant_ids.product_tmpl_id')
     def _compute_product_variant_count(self):
+        self.ensure_one()
         # do not pollute variants to be prefetched when counting variants
         self.product_variant_count = len(self.with_prefetch().product_variant_ids)
 
@@ -300,8 +300,8 @@ class ProductTemplate(models.Model):
         for template in (self - unique_variants):
             template.default_code = ''
 
-    @api.one
     def _set_default_code(self):
+        self.ensure_one()
         if len(self.product_variant_ids) == 1:
             self.product_variant_ids.default_code = self.default_code
 

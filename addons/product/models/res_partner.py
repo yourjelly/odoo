@@ -22,8 +22,8 @@ class Partner(models.Model):
         for p in self:
             p.property_product_pricelist = res.get(p.id)
 
-    @api.one
     def _inverse_product_pricelist(self):
+        self.ensure_one()
         pls = self.env['product.pricelist'].search(
             [('country_group_ids.country_ids.code', '=', self.country_id and self.country_id.code or False)],
             limit=1

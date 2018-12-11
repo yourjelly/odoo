@@ -76,17 +76,17 @@ class EventMailScheduler(models.Model):
     mail_sent = fields.Boolean('Mail Sent on Event')
     done = fields.Boolean('Sent', compute='_compute_done', store=True)
 
-    @api.one
     @api.depends('mail_sent', 'interval_type', 'event_id.registration_ids', 'mail_registration_ids')
     def _compute_done(self):
+        self.ensure_one()
         if self.interval_type in ['before_event', 'after_event']:
             self.done = self.mail_sent
         else:
             self.done = len(self.mail_registration_ids) == len(self.event_id.registration_ids) and all(mail.mail_sent for mail in self.mail_registration_ids)
 
-    @api.one
     @api.depends('event_id.state', 'event_id.date_begin', 'interval_type', 'interval_unit', 'interval_nbr')
     def _compute_scheduled_date(self):
+        self.ensure_one()
         if self.event_id.state not in ['confirm', 'done']:
             self.scheduled_date = False
         else:
@@ -99,8 +99,8 @@ class EventMailScheduler(models.Model):
 
             self.scheduled_date = date + _INTERVALS[self.interval_unit](sign * self.interval_nbr)
 
-    @api.one
     def execute(self):
+        self.ensure_one()
         now = fields.Datetime.now()
         if self.interval_type == 'after_sub':
             # update registration lines
@@ -179,15 +179,15 @@ class EventMailRegistration(models.Model):
     scheduled_date = fields.Datetime('Scheduled Time', compute='_compute_scheduled_date', store=True)
     mail_sent = fields.Boolean('Mail Sent')
 
-    @api.one
     def execute(self):
+        self.ensure_one()
         if self.registration_id.state in ['open', 'done'] and not self.mail_sent:
             self.scheduler_id.template_id.send_mail(self.registration_id.id)
             self.write({'mail_sent': True})
 
-    @api.one
     @api.depends('registration_id', 'scheduler_id.interval_unit', 'scheduler_id.interval_type')
     def _compute_scheduled_date(self):
+        self.ensure_one()
         if self.registration_id:
             date_open = self.registration_id.date_open
             date_open_datetime = date_open or fields.Datetime.now()

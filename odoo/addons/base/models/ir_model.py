@@ -429,9 +429,9 @@ class IrModelFields(models.Model):
             model = model[name]
         return field
 
-    @api.one
     @api.constrains('related')
     def _check_related(self):
+        self.ensure_one()
         if self.state == 'manual' and self.related:
             field = self._related_field()
             if field.type != self.ttype:
@@ -477,9 +477,9 @@ class IrModelFields(models.Model):
             self.readonly = True
             self.copied = False
 
-    @api.one
     @api.constrains('relation_table')
     def _check_relation_table(self):
+        self.ensure_one()
         if self.relation_table:
             models.check_pg_name(self.relation_table)
 

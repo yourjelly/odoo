@@ -24,9 +24,9 @@ class Category(models.Model):
     discussions = fields.Many2many('test_new_api.discussion', 'test_new_api_discussion_category',
                                    'category', 'discussion')
 
-    @api.one
     @api.depends('name', 'parent.display_name')     # this definition is recursive
     def _compute_display_name(self):
+        self.ensure_one()
         if self.parent:
             self.display_name = self.parent.display_name + ' / ' + self.name
         else:
@@ -40,8 +40,8 @@ class Category(models.Model):
                 current = current.parent
             cat.root_categ = current
 
-    @api.one
     def _inverse_display_name(self):
+        self.ensure_one()
         names = self.display_name.split('/')
         # determine sequence of categories
         categories = []
@@ -129,26 +129,26 @@ class Message(models.Model):
     important = fields.Boolean()
     label = fields.Char(translate=True)
 
-    @api.one
     @api.constrains('author', 'discussion')
     def _check_author(self):
+        self.ensure_one()
         if self.discussion and self.author not in self.discussion.participants:
             raise ValidationError(_("Author must be among the discussion participants."))
 
-    @api.one
     @api.depends('author.name', 'discussion.name')
     def _compute_name(self):
+        self.ensure_one()
         self.name = "[%s] %s" % (self.discussion.name or '', self.author.name or '')
 
-    @api.one
     @api.depends('author.name', 'discussion.name', 'body')
     def _compute_display_name(self):
+        self.ensure_one()
         stuff = "[%s] %s: %s" % (self.author.name, self.discussion.name or '', self.body or '')
         self.display_name = stuff[:80]
 
-    @api.one
     @api.depends('body')
     def _compute_size(self):
+        self.ensure_one()
         self.size = len(self.body or '')
 
     def _search_size(self, operator, value):
@@ -161,9 +161,9 @@ class Message(models.Model):
         ids = [t[0] for t in self.env.cr.fetchall()]
         return [('id', 'in', ids)]
 
-    @api.one
     @api.depends('size')
     def _compute_double_size(self):
+        self.ensure_one()
         # This illustrates a subtle situation: self.double_size depends on
         # self.size. When size is computed, self.size is assigned, which should
         # normally invalidate self.double_size. However, this may not happen
@@ -173,9 +173,9 @@ class Message(models.Model):
         size = self.size
         self.double_size = self.double_size + size
 
-    @api.one
     @api.depends('author', 'author.partner_id')
     def _compute_author_partner(self):
+        self.ensure_one()
         self.author_partner = self.author.partner_id
 
     @api.model
@@ -280,8 +280,8 @@ class MixedModel(models.Model):
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.ref('base.EUR'))
     amount = fields.Monetary()
 
-    @api.one
     def _compute_now(self):
+        self.ensure_one()
         # this is a non-stored computed field without dependencies
         self.now = fields.Datetime.now()
 

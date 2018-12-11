@@ -111,9 +111,9 @@ class account_abstract_payment(models.AbstractModel):
         })
         return rec
 
-    @api.one
     @api.constrains('amount')
     def _check_amount(self):
+        self.ensure_one()
         if self.amount < 0:
             raise ValidationError(_('The payment amount cannot be negative.'))
 
@@ -442,9 +442,9 @@ class account_payment(models.Model):
             'context': action_context,
         }
 
-    @api.one
     @api.depends('invoice_ids', 'payment_type', 'partner_type', 'partner_id')
     def _compute_destination_account_id(self):
+        self.ensure_one()
         if self.invoice_ids:
             self.destination_account_id = self.invoice_ids[0].account_id.id
         elif self.payment_type == 'transfer':

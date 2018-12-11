@@ -170,8 +170,8 @@ class Applicant(models.Model):
     
 
     @api.depends('date_open', 'date_closed')
-    @api.one
     def _compute_day(self):
+        self.ensure_one()
         if self.date_open:
             date_create = self.create_date
             date_open = self.date_open

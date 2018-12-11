@@ -63,9 +63,9 @@ class UoM(models.Model):
         ('factor_reference_is_one', "CHECK((uom_type = 'reference' AND factor = 1.0) OR (uom_type != 'reference'))", "The reference unit must have a conversion factor equal to 1.")
     ]
 
-    @api.one
     @api.depends('factor')
     def _compute_factor_inv(self):
+        self.ensure_one()
         self.factor_inv = self.factor and (1.0 / self.factor) or 0.0
 
     @api.onchange('uom_type')

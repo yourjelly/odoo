@@ -267,8 +267,8 @@ class Partner(models.Model):
         for partner in self:
             partner.contact_address = partner._display_address()
 
-    @api.one
     def _compute_get_ids(self):
+        self.ensure_one()
         self.self = self.id
 
     @api.depends('is_company', 'parent_id.commercial_partner_id')

@@ -238,8 +238,8 @@ class SaleOrder(models.Model):
         for trans in self:
             trans.authorized_transaction_ids = trans.transaction_ids.filtered(lambda t: t.state == 'authorized')
 
-    @api.one
     def _compute_amount_undiscounted(self):
+        self.ensure_one()
         total = 0.0
         for line in self.order_line:
             total += line.price_subtotal + line.price_unit * ((line.discount or 0.0) / 100.0) * line.product_uom_qty  # why is there a discount in a field named amount_undiscounted ??

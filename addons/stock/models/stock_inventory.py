@@ -89,9 +89,9 @@ class Inventory(models.Model):
         help="Specify Product Category to focus your inventory on a particular Category.")
     exhausted = fields.Boolean('Include Exhausted Products', readonly=True, states={'draft': [('readonly', False)]})
 
-    @api.one
     @api.depends('product_id', 'line_ids.product_qty')
     def _compute_total_qty(self):
+        self.ensure_one()
         """ For single product inventory, total quantity of the counted """
         if self.product_id:
             self.total_qty = sum(self.mapped('line_ids').mapped('product_qty'))
@@ -145,9 +145,9 @@ class Inventory(models.Model):
         if self.location_id.company_id:
             self.company_id = self.location_id.company_id
 
-    @api.one
     @api.constrains('filter', 'product_id', 'lot_id', 'partner_id', 'package_id')
     def _check_filter_product(self):
+        self.ensure_one()
         if self.filter == 'none' and self.product_id and self.location_id and self.lot_id:
             return
         if self.filter not in ('product', 'product_owner') and self.product_id:
@@ -358,9 +358,9 @@ class InventoryLine(models.Model):
         'stock.location', 'Inventory Location', related='inventory_id.location_id', related_sudo=False, readonly=False)
     product_tracking = fields.Selection('Tracking', related='product_id.tracking', readonly=True)
 
-    @api.one
     @api.depends('location_id', 'product_id', 'package_id', 'product_uom_id', 'company_id', 'prod_lot_id', 'partner_id')
     def _compute_theoretical_qty(self):
+        self.ensure_one()
         if not self.product_id:
             self.theoretical_qty = 0
             return

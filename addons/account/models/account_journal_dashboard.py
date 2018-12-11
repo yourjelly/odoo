@@ -11,12 +11,12 @@ from odoo.tools.misc import formatLang
 class account_journal(models.Model):
     _inherit = "account.journal"
 
-    @api.one
     def _kanban_dashboard(self):
+        self.ensure_one()
         self.kanban_dashboard = json.dumps(self.get_journal_dashboard_datas())
 
-    @api.one
     def _kanban_dashboard_graph(self):
+        self.ensure_one()
         if (self.type in ['sale', 'purchase']):
             self.kanban_dashboard_graph = json.dumps(self.get_bar_graph_datas())
         elif (self.type in ['cash', 'bank']):

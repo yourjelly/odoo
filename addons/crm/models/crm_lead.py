@@ -554,8 +554,8 @@ class Lead(models.Model):
         data['type'] = self._merge_get_result_type()
         return data
 
-    @api.one
     def _mail_body(self, fields):
+        self.ensure_one()
         """ generate the message body with the changed values
             :param fields : list of fields to track
             :returns the body of the message for the current crm.lead

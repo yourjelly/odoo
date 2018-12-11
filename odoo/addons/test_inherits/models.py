@@ -11,9 +11,9 @@ class Unit(models.Model):
     state = fields.Selection([('a', 'A'), ('b', 'B')], string='State')
     surname = fields.Char(compute='_compute_surname')
 
-    @api.one
     @api.depends('name')
     def _compute_surname(self):
+        self.ensure_one()
         self.surname = self.name or ''
 
 

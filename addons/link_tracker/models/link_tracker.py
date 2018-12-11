@@ -51,34 +51,34 @@ class LinkTracker(models.Model):
     link_click_ids = fields.One2many('link.tracker.click', 'link_id', string='Clicks')
     count = fields.Integer(string='Number of Clicks', compute='_compute_count', store=True)
 
-    @api.one
     @api.depends('link_click_ids.link_id')
     def _compute_count(self):
+        self.ensure_one()
         self.count = len(self.link_click_ids)
 
-    @api.one
     @api.depends('code')
     def _compute_short_url(self):
+        self.ensure_one()
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         self.short_url = urls.url_join(base_url, '/r/%(code)s' % {'code': self.code})
 
-    @api.one
     def _compute_short_url_host(self):
+        self.ensure_one()
         self.short_url_host = self.env['ir.config_parameter'].sudo().get_param('web.base.url') + '/r/'
 
-    @api.one
     def _compute_code(self):
+        self.ensure_one()
         record = self.env['link.tracker.code'].search([('link_id', '=', self.id)], limit=1, order='id DESC')
         self.code = record.code
 
-    @api.one
     @api.depends('favicon')
     def _compute_icon_src(self):
+        self.ensure_one()
         self.icon_src = 'data:image/png;base64,' + self.favicon
 
-    @api.one
     @api.depends('url')
     def _compute_redirected_url(self):
+        self.ensure_one()
         parsed = urls.url_parse(self.url)
 
         utms = {}
@@ -102,9 +102,9 @@ class LinkTracker(models.Model):
 
         return title
 
-    @api.one
     @api.depends('url')
     def _compute_favicon(self):
+        self.ensure_one()
         try:
             icon = requests.get('http://www.google.com/s2/favicons', params={'domain': self.url}, timeout=5).content
             icon_base64 = base64.b64encode(icon).replace(b"\n", b"").decode('ascii')

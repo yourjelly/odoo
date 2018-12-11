@@ -59,8 +59,8 @@ class ImLivechatChannel(models.Model):
     channel_ids = fields.One2many('mail.channel', 'livechat_channel_id', 'Sessions')
     rule_ids = fields.One2many('im_livechat.channel.rule', 'channel_id', 'Rules')
 
-    @api.one
     def _are_you_inside(self):
+        self.ensure_one()
         self.are_you_inside = bool(self.env.uid in [u.id for u in self.user_ids])
 
     @api.multi

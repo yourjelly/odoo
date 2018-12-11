@@ -11,8 +11,8 @@ class StockBackorderConfirmation(models.TransientModel):
 
     pick_ids = fields.Many2many('stock.picking', 'stock_picking_backorder_rel')
 
-    @api.one
     def _process(self, cancel_backorder=False):
+        self.ensure_one()
         if cancel_backorder:
             for pick_id in self.pick_ids:
                 moves_to_log = {}

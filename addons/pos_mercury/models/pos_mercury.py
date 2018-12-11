@@ -37,8 +37,8 @@ class AccountBankStatementLine(models.Model):
     mercury_record_no = fields.Char(string='Mercury record number', help='Payment record number from Mercury Pay')
     mercury_invoice_no = fields.Char(string='Mercury invoice number', help='Invoice number from Mercury Pay')
 
-    @api.one
     def _compute_prefixed_card_number(self):
+        self.ensure_one()
         if self.mercury_card_number:
             self.mercury_prefixed_card_number = "********" + self.mercury_card_number
         else:

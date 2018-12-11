@@ -116,24 +116,24 @@ class Repair(models.Model):
     amount_total = fields.Float('Total', compute='_amount_total', store=True)
     tracking = fields.Selection('Product Tracking', related="product_id.tracking", readonly=False)
 
-    @api.one
     @api.depends('partner_id')
     def _compute_default_address_id(self):
+        self.ensure_one()
         if self.partner_id:
             self.default_address_id = self.partner_id.address_get(['contact'])['contact']
 
-    @api.one
     @api.depends('operations.price_subtotal', 'invoice_method', 'fees_lines.price_subtotal', 'pricelist_id.currency_id')
     def _amount_untaxed(self):
+        self.ensure_one()
         total = sum(operation.price_subtotal for operation in self.operations)
         total += sum(fee.price_subtotal for fee in self.fees_lines)
         self.amount_untaxed = self.pricelist_id.currency_id.round(total)
 
-    @api.one
     @api.depends('operations.price_unit', 'operations.product_uom_qty', 'operations.product_id',
                  'fees_lines.price_unit', 'fees_lines.product_uom_qty', 'fees_lines.product_id',
                  'pricelist_id.currency_id', 'partner_id')
     def _amount_tax(self):
+        self.ensure_one()
         val = 0.0
         for operation in self.operations:
             if operation.tax_id:
@@ -147,9 +147,9 @@ class Repair(models.Model):
                     val += c['amount']
         self.amount_tax = val
 
-    @api.one
     @api.depends('amount_untaxed', 'amount_tax')
     def _amount_total(self):
+        self.ensure_one()
         self.amount_total = self.pricelist_id.currency_id.round(self.amount_untaxed + self.amount_tax)
 
     _sql_constraints = [
@@ -544,9 +544,9 @@ class RepairLine(models.Model):
         for line in self.filtered(lambda x: x.product_id.tracking != 'none' and not x.lot_id):
             raise ValidationError(_("Serial number is required for operation line with product '%s'") % (line.product_id.name))
 
-    @api.one
     @api.depends('price_unit', 'repair_id', 'product_uom_qty', 'product_id', 'repair_id.invoice_method')
     def _compute_price_subtotal(self):
+        self.ensure_one()
         taxes = self.tax_id.compute_all(self.price_unit, self.repair_id.pricelist_id.currency_id, self.product_uom_qty, self.product_id, self.repair_id.partner_id)
         self.price_subtotal = taxes['total_excluded']
 
@@ -628,9 +628,9 @@ class RepairFee(models.Model):
     invoice_line_id = fields.Many2one('account.invoice.line', 'Invoice Line', copy=False, readonly=True)
     invoiced = fields.Boolean('Invoiced', copy=False, readonly=True)
 
-    @api.one
     @api.depends('price_unit', 'repair_id', 'product_uom_qty', 'product_id')
     def _compute_price_subtotal(self):
+        self.ensure_one()
         taxes = self.tax_id.compute_all(self.price_unit, self.repair_id.pricelist_id.currency_id, self.product_uom_qty, self.product_id, self.repair_id.partner_id)
         self.price_subtotal = taxes['total_excluded']
 

@@ -21,8 +21,8 @@ class pos_cache(models.Model):
     def refresh_all_caches(self):
         self.env['pos.cache'].search([]).refresh_cache()
 
-    @api.one
     def refresh_cache(self):
+        self.ensure_one()
         Product = self.env['product.product'].sudo(self.compute_user_id.id)
         products = Product.search(self.get_product_domain())
         prod_ctx = products.with_context(pricelist=self.config_id.pricelist_id.id, display_default_code=False,
@@ -55,9 +55,9 @@ class pos_cache(models.Model):
 class pos_config(models.Model):
     _inherit = 'pos.config'
 
-    @api.one
     @api.depends('cache_ids')
     def _get_oldest_cache_time(self):
+        self.ensure_one()
         pos_cache = self.env['pos.cache']
         oldest_cache = pos_cache.search([('config_id', '=', self.id)], order='write_date', limit=1)
         if oldest_cache:
@@ -93,7 +93,7 @@ class pos_config(models.Model):
             new_cache = self._get_cache_for_user()
             return new_cache.get_cache(domain, fields)
 
-    @api.one
     def delete_cache(self):
+        self.ensure_one()
         # throw away the old caches
         self.cache_ids.unlink()

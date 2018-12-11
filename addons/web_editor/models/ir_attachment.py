@@ -10,8 +10,8 @@ class IrAttachment(models.Model):
 
     local_url = fields.Char("Attachment URL", compute='_compute_local_url')
 
-    @api.one
     def _compute_local_url(self):
+        self.ensure_one()
         if self.url:
             self.local_url = self.url
         else:

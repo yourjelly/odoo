@@ -85,8 +85,8 @@ class StockQuant(models.Model):
             if quant.location_id.usage == 'view':
                 raise ValidationError(_('You cannot take products from or deliver products to a location of type "view".'))
 
-    @api.one
     def _compute_name(self):
+        self.ensure_one()
         self.name = '%s: %s%s' % (self.lot_id.name or self.product_id.code or '', self.quantity, self.product_id.uom_id.name)
 
     @api.model

@@ -898,12 +898,12 @@ class Page(models.Model):
     # don't use mixin website_id but use website_id on ir.ui.view instead
     website_id = fields.Many2one(related='view_id.website_id', store=True, readonly=False)
 
-    @api.one
     def _compute_homepage(self):
+        self.ensure_one()
         self.is_homepage = self == self.env['website'].get_current_website().homepage_id
 
-    @api.one
     def _set_homepage(self):
+        self.ensure_one()
         website = self.env['website'].get_current_website()
         if self.is_homepage:
             if website.homepage_id != self:
@@ -912,8 +912,8 @@ class Page(models.Model):
             if website.homepage_id == self:
                 website.write({'homepage_id': None})
 
-    @api.one
     def _compute_visible(self):
+        self.ensure_one()
         self.is_visible = self.website_published and (not self.date_publish or self.date_publish < fields.Datetime.now())
 
     @api.multi
@@ -1125,8 +1125,8 @@ class Menu(models.Model):
             self.env['website.menu'].search([('url', '=', menu.url), ('id', '!=', menu.id)]).unlink()
         return super(Menu, self).unlink()
 
-    @api.one
     def _compute_visible(self):
+        self.ensure_one()
         visible = True
         if self.page_id and not self.page_id.sudo().is_visible and not self.user_has_groups('base.group_user'):
             visible = False

@@ -62,9 +62,9 @@ class AccountMove(models.Model):
             else:
                 move.matched_percentage = total_reconciled / total_amount
 
-    @api.one
     @api.depends('company_id')
     def _compute_currency(self):
+        self.ensure_one()
         self.currency_id = self.company_id.currency_id or self.env.user.company_id.currency_id
 
     @api.multi
@@ -564,9 +564,9 @@ class AccountMoveLine(models.Model):
         for record in self.filtered('move_id'):
             record.parent_state = record.move_id.state
 
-    @api.one
     @api.depends('move_id.line_ids')
     def _get_counterpart(self):
+        self.ensure_one()
         counterpart = set()
         for line in self.move_id.line_ids:
             if (line.account_id.code != self.account_id.code):
@@ -1228,8 +1228,8 @@ class AccountMoveLine(models.Model):
                 vals_line = obj_line._prepare_analytic_line()[0]
                 self.env['account.analytic.line'].create(vals_line)
 
-    @api.one
     def _prepare_analytic_line(self):
+        self.ensure_one()
         """ Prepare the values used to create() an account.analytic.line upon validation of an account.move.line having
             an analytic account. This method is intended to be extended in other modules.
         """

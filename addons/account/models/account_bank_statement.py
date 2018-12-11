@@ -17,9 +17,9 @@ class AccountCashboxLine(models.Model):
     _rec_name = 'coin_value'
     _order = 'coin_value'
 
-    @api.one
     @api.depends('coin_value', 'number')
     def _sub_total(self):
+        self.ensure_one()
         """ Calculates Sub total"""
         self.subtotal = self.coin_value * self.number
 
@@ -71,9 +71,9 @@ class AccountBankStmtCloseCheck(models.TransientModel):
 
 class AccountBankStatement(models.Model):
 
-    @api.one
     @api.depends('line_ids', 'balance_start', 'line_ids.amount', 'balance_end_real')
     def _end_balance(self):
+        self.ensure_one()
         self.total_entry_encoding = sum([line.amount for line in self.line_ids])
         self.balance_end = self.balance_start + self.total_entry_encoding
         self.difference = self.balance_end_real - self.balance_end
@@ -83,14 +83,14 @@ class AccountBankStatement(models.Model):
         for bank_stmt in self:
             bank_stmt.is_difference_zero = float_is_zero(bank_stmt.difference, precision_digits=bank_stmt.currency_id.decimal_places)
 
-    @api.one
     @api.depends('journal_id')
     def _compute_currency(self):
+        self.ensure_one()
         self.currency_id = self.journal_id.currency_id or self.company_id.currency_id
 
-    @api.one
     @api.depends('line_ids.journal_entry_ids')
     def _check_lines_reconciled(self):
+        self.ensure_one()
         self.all_lines_reconciled = all([line.journal_entry_ids.ids or line.account_id.id for line in self.line_ids if not self.currency_id.is_zero(line.amount)])
 
     @api.depends('move_line_ids')
@@ -310,17 +310,17 @@ class AccountBankStatementLine(models.Model):
         default=False, copy=False,
         help="Technical field holding the number given to the journal entry, automatically set when the statement line is reconciled then stored to set the same number again if the line is cancelled, set to draft and re-processed again.")
 
-    @api.one
     @api.constrains('amount')
     def _check_amount(self):
+        self.ensure_one()
         # Allow to enter bank statement line with an amount of 0,
         # so that user can enter/import the exact bank statement they have received from their bank in Odoo
         if self.journal_id.type != 'bank' and self.currency_id.is_zero(self.amount):
             raise ValidationError(_('The amount of a cash transaction cannot be 0.'))
 
-    @api.one
     @api.constrains('amount', 'amount_currency')
     def _check_amount_currency(self):
+        self.ensure_one()
         if self.amount_currency != 0 and self.amount == 0:
             raise ValidationError(_('If "Amount Currency" is specified, then "Amount" must be as well.'))
 

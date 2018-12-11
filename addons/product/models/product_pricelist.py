@@ -451,10 +451,10 @@ class PricelistItem(models.Model):
             raise ValidationError(_('The minimum margin should be lower than the maximum margin.'))
         return True
 
-    @api.one
     @api.depends('categ_id', 'product_tmpl_id', 'product_id', 'compute_price', 'fixed_price', \
         'pricelist_id', 'percent_price', 'price_discount', 'price_surcharge')
     def _get_pricelist_item_name_price(self):
+        self.ensure_one()
         if self.categ_id:
             self.name = _("Category: %s") % (self.categ_id.name)
         elif self.product_tmpl_id:

@@ -127,13 +127,13 @@ class Forum(models.Model):
     karma_post = fields.Integer(string='Ask questions without validation', default=100)
     karma_moderate = fields.Integer(string='Moderate posts', default=1000)
 
-    @api.one
     def _compute_count_posts_waiting_validation(self):
+        self.ensure_one()
         domain = [('forum_id', '=', self.id), ('state', '=', 'pending')]
         self.count_posts_waiting_validation = self.env['forum.post'].search_count(domain)
 
-    @api.one
     def _compute_count_flagged_posts(self):
+        self.ensure_one()
         domain = [('forum_id', '=', self.id), ('state', '=', 'flagged')]
         self.count_flagged_posts = self.env['forum.post'].search_count(domain)
 
@@ -288,14 +288,14 @@ class Post(models.Model):
         # don't use param named because orm will add other param (test_active, ...)
         return [('id', op, (req, (user.id, user.karma, user.id, user.karma, user.id)))]
 
-    @api.one
     @api.depends('content')
     def _get_plain_content(self):
+        self.ensure_one()
         self.plain_content = tools.html2plaintext(self.content)[0:500] if self.content else False
 
-    @api.one
     @api.depends('vote_count', 'forum_id.relevancy_post_vote', 'forum_id.relevancy_time_decay')
     def _compute_relevancy(self):
+        self.ensure_one()
         if self.create_date:
             days = (datetime.today() - self.create_date).days
             self.relevancy = math.copysign(1, self.vote_count) * (abs(self.vote_count - 1) ** self.forum_id.relevancy_post_vote / (days + 2) ** self.forum_id.relevancy_time_decay)
@@ -319,23 +319,23 @@ class Post(models.Model):
         for post in self:
             post.vote_count = result[post.id]
 
-    @api.one
     def _get_user_favourite(self):
+        self.ensure_one()
         self.user_favourite = self._uid in self.favourite_ids.ids
 
-    @api.one
     @api.depends('favourite_ids')
     def _get_favorite_count(self):
+        self.ensure_one()
         self.favourite_count = len(self.favourite_ids)
 
-    @api.one
     @api.depends('create_uid', 'parent_id')
     def _is_self_reply(self):
+        self.ensure_one()
         self.self_reply = self.parent_id.create_uid.id == self._uid
 
-    @api.one
     @api.depends('child_ids.create_uid', 'website_message_ids')
     def _get_child_count(self):
+        self.ensure_one()
         def process(node):
             total = len(node.website_message_ids) + len(node.child_ids)
             for child in node.child_ids:
@@ -343,13 +343,13 @@ class Post(models.Model):
             return total
         self.child_count = process(self)
 
-    @api.one
     def _get_uid_has_answered(self):
+        self.ensure_one()
         self.uid_has_answered = any(answer.create_uid.id == self._uid for answer in self.child_ids)
 
-    @api.one
     @api.depends('child_ids.is_correct')
     def _get_has_validated_answer(self):
+        self.ensure_one()
         self.has_validated_answer = any(answer.is_correct for answer in self.child_ids)
 
     @api.multi
@@ -575,8 +575,8 @@ class Post(models.Model):
         })
         return True
 
-    @api.one
     def validate(self):
+        self.ensure_one()
         if not self.can_moderate:
             raise KarmaError('Not enough karma to validate a post')
 
@@ -592,16 +592,16 @@ class Post(models.Model):
         self.post_notification()
         return True
 
-    @api.one
     def refuse(self):
+        self.ensure_one()
         if not self.can_moderate:
             raise KarmaError('Not enough karma to refuse a post')
 
         self.moderator_id = self.env.user
         return True
 
-    @api.one
     def flag(self):
+        self.ensure_one()
         if not self.can_flag:
             raise KarmaError('Not enough karma to flag a post')
 
@@ -616,8 +616,8 @@ class Post(models.Model):
         else:
             return {'error': 'post_non_flaggable'}
 
-    @api.one
     def mark_as_offensive(self, reason_id):
+        self.ensure_one()
         if not self.can_moderate:
             raise KarmaError('Not enough karma to mark a post as offensive')
 
@@ -754,8 +754,8 @@ class Post(models.Model):
 
         return new_post
 
-    @api.one
     def unlink_comment(self, message_id):
+        self.ensure_one()
         user = self.env.user
         comment = self.env['mail.message'].sudo().browse(message_id)
         if not comment.model == 'forum.post' or not comment.res_id == self.id:

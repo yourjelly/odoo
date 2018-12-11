@@ -22,9 +22,9 @@ class Rating(models.Model):
         ('rating_range', 'check(rating >= 0 and rating <= 10)', 'Rating should be between 0 to 10'),
     ]
 
-    @api.one
     @api.depends('res_model', 'res_id')
     def _compute_res_name(self):
+        self.ensure_one()
         name = self.env[self.res_model].sudo().browse(self.res_id).name_get()
         self.res_name = name and name[0][1] or ('%s/%s') % (self.res_model, self.res_id)
 

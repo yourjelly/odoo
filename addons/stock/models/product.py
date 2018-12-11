@@ -619,8 +619,8 @@ class ProductCategory(models.Model):
         'stock.location.route', string='Total routes', compute='_compute_total_route_ids',
         readonly=True)
 
-    @api.one
     def _compute_total_route_ids(self):
+        self.ensure_one()
         category = self
         routes = self.route_ids
         while category.parent_id:

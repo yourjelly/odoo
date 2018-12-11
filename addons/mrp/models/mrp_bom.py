@@ -247,9 +247,9 @@ class MrpBomLine(models.Model):
             'You should install the mrp_byproduct module if you want to manage extra products on BoMs !'),
     ]
 
-    @api.one
     @api.depends('product_id', 'bom_id')
     def _compute_child_bom_id(self):
+        self.ensure_one()
         if not self.product_id:
             self.child_bom_id = False
         else:
@@ -258,18 +258,18 @@ class MrpBomLine(models.Model):
                 product=self.product_id,
                 picking_type=self.bom_id.picking_type_id)
 
-    @api.one
     @api.depends('product_id')
     def _compute_attachments_count(self):
+        self.ensure_one()
         nbr_attach = self.env['mrp.document'].search_count([
             '|',
             '&', ('res_model', '=', 'product.product'), ('res_id', '=', self.product_id.id),
             '&', ('res_model', '=', 'product.template'), ('res_id', '=', self.product_id.product_tmpl_id.id)])
         self.attachments_count = nbr_attach
 
-    @api.one
     @api.depends('child_bom_id')
     def _compute_child_line_ids(self):
+        self.ensure_one()
         """ If the BOM line refers to a BOM, return the ids of the child BOM lines """
         self.child_line_ids = self.child_bom_id.bom_line_ids.ids
 

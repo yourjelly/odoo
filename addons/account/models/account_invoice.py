@@ -50,10 +50,10 @@ class AccountInvoice(models.Model):
     def _get_default_incoterm(self):
         return self.env.user.company_id.incoterm_id
 
-    @api.one
     @api.depends('invoice_line_ids.price_subtotal', 'tax_line_ids.amount', 'tax_line_ids.amount_rounding',
                  'currency_id', 'company_id', 'date_invoice', 'type')
     def _compute_amount(self):
+        self.ensure_one()
         round_curr = self.currency_id.round
         self.amount_untaxed = sum(line.price_subtotal for line in self.invoice_line_ids)
         self.amount_tax = sum(round_curr(line.amount_total) for line in self.tax_line_ids)
@@ -97,12 +97,12 @@ class AccountInvoice(models.Model):
         journal = self._default_journal()
         return journal.currency_id or journal.company_id.currency_id or self.env.user.company_id.currency_id
 
-    @api.one
     @api.depends(
         'state', 'currency_id', 'invoice_line_ids.price_subtotal',
         'move_id.line_ids.amount_residual',
         'move_id.line_ids.currency_id')
     def _compute_residual(self):
+        self.ensure_one()
         residual = 0.0
         residual_company_signed = 0.0
         sign = self.type in ['in_refund', 'out_refund'] and -1 or 1
@@ -123,8 +123,8 @@ class AccountInvoice(models.Model):
         else:
             self.reconciled = False
 
-    @api.one
     def _get_outstanding_info_JSON(self):
+        self.ensure_one()
         self.outstanding_credits_debits_widget = json.dumps(False)
         if self.state == 'open':
             domain = [('account_id', '=', self.account_id.id), ('partner_id', '=', self.env['res.partner']._find_accounting_partner(self.partner_id).id), ('reconciled', '=', False), '|', ('amount_residual', '!=', 0.0), ('amount_residual_currency', '!=', 0.0)]
@@ -211,17 +211,17 @@ class AccountInvoice(models.Model):
             })
         return payment_vals
 
-    @api.one
     @api.depends('payment_move_line_ids.amount_residual')
     def _get_payment_info_JSON(self):
+        self.ensure_one()
         self.payments_widget = json.dumps(False)
         if self.payment_move_line_ids:
             info = {'title': _('Less Payment'), 'outstanding': False, 'content': self._get_payments_vals()}
             self.payments_widget = json.dumps(info, default=date_utils.json_default)
 
-    @api.one
     @api.depends('move_id.line_ids.amount_residual')
     def _compute_payments(self):
+        self.ensure_one()
         payment_lines = set()
         for line in self.move_id.line_ids.filtered(lambda l: l.account_id.id == self.account_id.id):
             payment_lines.update(line.mapped('matched_credit_ids.credit_move_id.id'))
@@ -1572,11 +1572,11 @@ class AccountInvoiceLine(models.Model):
     _description = "Invoice Line"
     _order = "invoice_id,sequence,id"
 
-    @api.one
     @api.depends('price_unit', 'discount', 'invoice_line_tax_ids', 'quantity',
         'product_id', 'invoice_id.partner_id', 'invoice_id.currency_id', 'invoice_id.company_id',
         'invoice_id.date_invoice', 'invoice_id.date')
     def _compute_price(self):
+        self.ensure_one()
         currency = self.invoice_id and self.invoice_id.currency_id or None
         price = self.price_unit * (1 - (self.discount or 0.0) / 100.0)
         taxes = False
@@ -1925,8 +1925,8 @@ class AccountPaymentTerm(models.Model):
     sequence = fields.Integer(required=True, default=10)
 
     @api.constrains('line_ids')
-    @api.one
     def _check_lines(self):
+        self.ensure_one()
         payment_term_lines = self.line_ids.sorted()
         if payment_term_lines and payment_term_lines[-1].value != 'balance':
             raise ValidationError(_('The last line of a Payment Term should have the Balance type.'))
@@ -1934,8 +1934,8 @@ class AccountPaymentTerm(models.Model):
         if len(lines) > 1:
             raise ValidationError(_('A Payment Term should have only one line of type Balance.'))
 
-    @api.one
     def compute(self, value, date_ref=False):
+        self.ensure_one()
         date_ref = date_ref or fields.Date.today()
         amount = value
         sign = value < 0 and -1 or 1
@@ -2008,15 +2008,15 @@ class AccountPaymentTermLine(models.Model):
     payment_id = fields.Many2one('account.payment.term', string='Payment Terms', required=True, index=True, ondelete='cascade')
     sequence = fields.Integer(default=10, help="Gives the sequence order when displaying a list of payment terms lines.")
 
-    @api.one
     @api.constrains('value', 'value_amount')
     def _check_percent(self):
+        self.ensure_one()
         if self.value == 'percent' and (self.value_amount < 0.0 or self.value_amount > 100.0):
             raise ValidationError(_('Percentages on the Payment Terms lines must be between 0 and 100.'))
 
-    @api.one
     @api.constrains('days')
     def _check_days(self):
+        self.ensure_one()
         if self.option in ('day_following_month', 'day_current_month') and self.days <= 0:
             raise ValidationError(_("The day of the month used for this term must be stricly positive."))
         elif self.days < 0:

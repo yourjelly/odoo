@@ -34,13 +34,13 @@ class AccountFiscalPosition(models.Model):
     # To be used in hiding the 'Federal States' field('attrs' in view side) when selected 'Country' has 0 states.
     states_count = fields.Integer(compute='_compute_states_count')
 
-    @api.one
     def _compute_states_count(self):
+        self.ensure_one()
         self.states_count = len(self.country_id.state_ids)
 
-    @api.one
     @api.constrains('zip_from', 'zip_to')
     def _check_zip(self):
+        self.ensure_one()
         if self.zip_from > self.zip_to:
             raise ValidationError(_('Invalid "Zip Range", please configure it properly.'))
         return True
@@ -323,8 +323,8 @@ class ResPartner(models.Model):
             domain += overdue_domain
         return domain
 
-    @api.one
     def _compute_has_unreconciled_entries(self):
+        self.ensure_one()
         # Avoid useless work if has_unreconciled_entries is not relevant for this partner
         if not self.active or not self.is_company and self.parent_id:
             return
@@ -364,8 +364,8 @@ class ResPartner(models.Model):
         self.env['account.partial.reconcile'].check_access_rights('write')
         return self.sudo().with_context(company_id=self.env.user.company_id.id).write({'last_time_entries_checked': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)})
 
-    @api.one
     def _get_company_currency(self):
+        self.ensure_one()
         if self.company_id:
             self.currency_id = self.sudo().company_id.currency_id
         else:

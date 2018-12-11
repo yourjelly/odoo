@@ -61,8 +61,8 @@ class PickingType(models.Model):
     rate_picking_backorders = fields.Integer(compute='_compute_picking_count')
     barcode = fields.Char('Barcode', copy=False)
 
-    @api.one
     def _compute_last_done_picking(self):
+        self.ensure_one()
         # TDE TODO: true multi
         tristates = []
         for picking in self.env['stock.picking'].search([('picking_type_id', '=', self.id), ('state', '=', 'done')], order='date_done desc', limit=10):
@@ -338,8 +338,8 @@ class Picking(models.Model):
                 picking.show_lots_text = False
 
     @api.depends('move_type', 'move_lines.state', 'move_lines.picking_id')
-    @api.one
     def _compute_state(self):
+        self.ensure_one()
         ''' State of a picking depends on the state of its related stock.move
         - Draft: only used for "planned pickings"
         - Waiting: if the picking is not ready to be sent so if
@@ -367,42 +367,42 @@ class Picking(models.Model):
             else:
                 self.state = relevant_move_state
 
-    @api.one
     @api.depends('move_lines.priority')
     def _compute_priority(self):
+        self.ensure_one()
         if self.mapped('move_lines'):
             priorities = [priority for priority in self.mapped('move_lines.priority') if priority] or ['1']
             self.priority = max(priorities)
         else:
             self.priority = '1'
 
-    @api.one
     def _set_priority(self):
+        self.ensure_one()
         self.move_lines.write({'priority': self.priority})
 
-    @api.one
     @api.depends('move_lines.date_expected')
     def _compute_scheduled_date(self):
+        self.ensure_one()
         if self.move_type == 'direct':
             self.scheduled_date = min(self.move_lines.mapped('date_expected') or [fields.Datetime.now()])
         else:
             self.scheduled_date = max(self.move_lines.mapped('date_expected') or [fields.Datetime.now()])
 
-    @api.one
     def _set_scheduled_date(self):
+        self.ensure_one()
         self.move_lines.write({'date_expected': self.scheduled_date})
 
-    @api.one
     def _has_scrap_move(self):
+        self.ensure_one()
         # TDE FIXME: better implementation
         self.has_scrap_move = bool(self.env['stock.move'].search_count([('picking_id', '=', self.id), ('scrapped', '=', True)]))
 
-    @api.one
     def _compute_move_line_exist(self):
+        self.ensure_one()
         self.move_line_exist = bool(self.move_line_ids)
 
-    @api.one
     def _compute_has_packages(self):
+        self.ensure_one()
         self.has_packages = self.move_line_ids.filtered(lambda ml: ml.result_package_id)
 
     @api.multi
@@ -529,8 +529,8 @@ class Picking(models.Model):
     # Actions
     # ----------------------------------------
 
-    @api.one
     def action_assign_owner(self):
+        self.ensure_one()
         self.move_line_ids.write({'owner_id': self.owner_id.id})
 
     @api.multi

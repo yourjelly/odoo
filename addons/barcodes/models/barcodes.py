@@ -188,9 +188,9 @@ class BarcodeRule(models.Model):
     pattern = fields.Char(string='Barcode Pattern', size=32, help="The barcode matching pattern", required=True, default='.*')
     alias = fields.Char(string='Alias', size=32, default='0', help='The matched pattern will alias to this barcode', required=True)
 
-    @api.one
     @api.constrains('pattern')
     def _check_pattern(self):
+        self.ensure_one()
         p = self.pattern.replace("\\\\", "X").replace("\{", "X").replace("\}", "X")
         findall = re.findall("[{]|[}]", p) # p does not contain escaped { or }
         if len(findall) == 2: 

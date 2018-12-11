@@ -13,9 +13,9 @@ class StockWarnInsufficientQty(models.AbstractModel):
     location_id = fields.Many2one( 'stock.location', 'Location', domain="[('usage', '=', 'internal')]", required=True)
     quant_ids = fields.Many2many('stock.quant', compute='_compute_quant_ids')
 
-    @api.one
     @api.depends('product_id')
     def _compute_quant_ids(self):
+        self.ensure_one()
         self.quant_ids = self.env['stock.quant'].search([
             ('product_id', '=', self.product_id.id),
             ('location_id.usage', '=', 'internal')

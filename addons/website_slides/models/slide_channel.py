@@ -124,9 +124,9 @@ class Channel(models.Model):
         # don't use param named because orm will add other param (test_active, ...)
         return [('id', op, (req, (self._uid, )))]
 
-    @api.one
     @api.depends('visibility', 'group_ids', 'upload_group_ids')
     def _compute_access(self):
+        self.ensure_one()
         self.can_see = self.visibility in ['public', 'private'] or bool(self.group_ids & self.env.user.groups_id)
         self.can_see_full = self.visibility == 'public' or bool(self.group_ids & self.env.user.groups_id)
         self.can_upload = self.can_see and (not self.upload_group_ids or bool(self.upload_group_ids & self.env.user.groups_id))

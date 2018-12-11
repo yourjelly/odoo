@@ -54,9 +54,9 @@ class LandedCost(models.Model):
     company_id = fields.Many2one('res.company', string="Company",
         related='account_journal_id.company_id', readonly=False)
 
-    @api.one
     @api.depends('cost_lines.price_unit')
     def _compute_total_amount(self):
+        self.ensure_one()
         self.amount_total = sum(line.price_unit for line in self.cost_lines)
 
     @api.model
@@ -284,20 +284,20 @@ class AdjustmentLines(models.Model):
         'Final Cost', compute='_compute_final_cost',
         digits=0, store=True)
 
-    @api.one
     @api.depends('cost_line_id.name', 'product_id.code', 'product_id.name')
     def _compute_name(self):
+        self.ensure_one()
         name = '%s - ' % (self.cost_line_id.name if self.cost_line_id else '')
         self.name = name + (self.product_id.code or self.product_id.name or '')
 
-    @api.one
     @api.depends('former_cost', 'quantity')
     def _compute_former_cost_per_unit(self):
+        self.ensure_one()
         self.former_cost_per_unit = self.former_cost / (self.quantity or 1.0)
 
-    @api.one
     @api.depends('former_cost', 'additional_landed_cost')
     def _compute_final_cost(self):
+        self.ensure_one()
         self.final_cost = self.former_cost + self.additional_landed_cost
 
     def _create_accounting_entries(self, move, qty_out):

@@ -204,17 +204,17 @@ class EventEvent(models.Model):
     def _tz_get(self):
         return [(x, x) for x in pytz.all_timezones]
 
-    @api.one
     @api.depends('date_tz', 'date_begin')
     def _compute_date_begin_tz(self):
+        self.ensure_one()
         if self.date_begin:
             self.date_begin_located = format_tz(self.with_context(use_babel=True).env, self.date_begin, tz=self.date_tz)
         else:
             self.date_begin_located = False
 
-    @api.one
     @api.depends('date_tz', 'date_end')
     def _compute_date_end_tz(self):
+        self.ensure_one()
         if self.date_end:
             self.date_end_located = format_tz(self.with_context(use_babel=True).env, self.date_end, tz=self.date_tz)
         else:
@@ -262,9 +262,9 @@ class EventEvent(models.Model):
         if any(event.seats_availability == 'limited' and event.seats_max and event.seats_available < 0 for event in self):
             raise ValidationError(_('No more available seats.'))
 
-    @api.one
     @api.constrains('date_begin', 'date_end')
     def _check_closing_date(self):
+        self.ensure_one()
         if self.date_end < self.date_begin:
             raise ValidationError(_('The closing date cannot be earlier than the beginning date.'))
 
@@ -303,8 +303,8 @@ class EventEvent(models.Model):
         default = dict(default or {}, name=_("%s (copy)") % (self.name))
         return super(EventEvent, self).copy(default)
 
-    @api.one
     def button_draft(self):
+        self.ensure_one()
         self.state = 'draft'
 
     @api.multi
@@ -314,16 +314,16 @@ class EventEvent(models.Model):
         self.registration_ids.write({'state': 'cancel'})
         self.state = 'cancel'
 
-    @api.one
     def button_done(self):
+        self.ensure_one()
         self.state = 'done'
 
-    @api.one
     def button_confirm(self):
+        self.ensure_one()
         self.state = 'confirm'
 
-    @api.one
     def mail_attendees(self, template_id, force_send=False, filter_func=lambda self: self.state != 'cancel'):
+        self.ensure_one()
         for attendee in self.registration_ids.filtered(filter_func):
             self.env['mail.template'].browse(template_id).send_mail(attendee.id, force_send=force_send)
 
@@ -362,9 +362,9 @@ class EventRegistration(models.Model):
     phone = fields.Char(string='Phone')
     name = fields.Char(string='Attendee Name', index=True)
 
-    @api.one
     @api.constrains('event_id', 'state')
     def _check_seats_limit(self):
+        self.ensure_one()
         if self.event_id.seats_availability == 'limited' and self.event_id.seats_max and self.event_id.seats_available < (1 if self.state == 'draft' else 0):
             raise ValidationError(_('No more seats available for this event.'))
 
@@ -403,12 +403,12 @@ class EventRegistration(models.Model):
         data.update({key: value for key, value in registration.items() if key in self._fields})
         return data
 
-    @api.one
     def do_draft(self):
+        self.ensure_one()
         self.state = 'draft'
 
-    @api.one
     def confirm_registration(self):
+        self.ensure_one()
         self.state = 'open'
 
         # auto-trigger after_sub (on subscribe) mail schedulers, if needed
@@ -416,8 +416,8 @@ class EventRegistration(models.Model):
             lambda s: s.interval_type == 'after_sub')
         onsubscribe_schedulers.execute()
 
-    @api.one
     def button_reg_close(self):
+        self.ensure_one()
         """ Close Registration """
         today = fields.Datetime.now()
         if self.event_id.date_begin <= today and self.event_id.state == 'confirm':
@@ -427,8 +427,8 @@ class EventRegistration(models.Model):
         else:
             raise UserError(_("You must wait the event starting day before doing this action."))
 
-    @api.one
     def button_reg_cancel(self):
+        self.ensure_one()
         self.state = 'cancel'
 
     @api.onchange('partner_id')

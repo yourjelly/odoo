@@ -35,8 +35,8 @@ class ProductTemplate(models.Model):
         action['domain'] = [('bom_line_ids.product_id', 'in', self.product_variant_ids.ids)]
         return action
 
-    @api.one
     def _compute_mrp_product_qty(self):
+        self.ensure_one()
         self.mrp_product_qty = float_round(sum(self.mapped('product_variant_ids').mapped('mrp_product_qty')), precision_rounding=self.uom_id.rounding)
 
     @api.multi

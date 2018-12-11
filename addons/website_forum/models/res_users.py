@@ -73,8 +73,8 @@ class Users(models.Model):
             email
         )).encode('utf-8')).hexdigest()
 
-    @api.one
     def send_forum_validation_email(self, forum_id=None):
+        self.ensure_one()
         if not self.email:
             return False
         token = self._generate_forum_token(self.id, self.email)
@@ -93,8 +93,8 @@ class Users(models.Model):
                     self.id, force_send=True, raise_exception=True)
         return True
 
-    @api.one
     def process_forum_validation_token(self, token, email, forum_id=None, context=None):
+        self.ensure_one()
         validation_token = self._generate_forum_token(self.id, email)
         if token == validation_token and self.karma == 0:
             karma = 3

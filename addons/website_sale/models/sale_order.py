@@ -29,8 +29,8 @@ class SaleOrder(models.Model):
     website_id = fields.Many2one('website', string='Website', readonly=True,
                                  help='Website through which this order was placed.')
 
-    @api.one
     def _compute_website_order_line(self):
+        self.ensure_one()
         self.website_order_line = self.order_line
 
     @api.multi

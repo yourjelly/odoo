@@ -7,21 +7,21 @@ from odoo.exceptions import ValidationError
 class AccountJournal(models.Model):
     _inherit = "account.journal"
 
-    @api.one
     @api.depends('outbound_payment_method_ids')
     def _compute_check_printing_payment_method_selected(self):
+        self.ensure_one()
         self.check_printing_payment_method_selected = any(pm.code == 'check_printing' for pm in self.outbound_payment_method_ids)
 
-    @api.one
     @api.depends('check_manual_sequencing')
     def _get_check_next_number(self):
+        self.ensure_one()
         if self.check_sequence_id:
             self.check_next_number = self.check_sequence_id.number_next_actual
         else:
             self.check_next_number = 1
 
-    @api.one
     def _set_check_next_number(self):
+        self.ensure_one()
         if self.check_next_number < self.check_sequence_id.number_next_actual:
             raise ValidationError(_("The last check number was %s. In order to avoid a check being rejected "
                 "by the bank, you can only use a greater number.") % self.check_sequence_id.number_next_actual)
@@ -51,8 +51,8 @@ class AccountJournal(models.Model):
         rec._create_check_sequence()
         return rec
 
-    @api.one
     def _create_check_sequence(self):
+        self.ensure_one()
         """ Create a check sequence for the journal """
         self.check_sequence_id = self.env['ir.sequence'].sudo().create({
             'name': self.name + _(" : Check Number Sequence"),

@@ -15,9 +15,9 @@ class MaintenanceEquipment(models.Model):
         default='employee')
     owner_user_id = fields.Many2one(compute='_compute_owner', store=True)
 
-    @api.one
     @api.depends('employee_id', 'department_id', 'equipment_assign_to')
     def _compute_owner(self):
+        self.ensure_one()
         self.owner_user_id = self.env.user.id
         if self.equipment_assign_to == 'employee':
             self.owner_user_id = self.employee_id.user_id.id

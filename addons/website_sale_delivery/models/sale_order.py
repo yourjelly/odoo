@@ -18,8 +18,8 @@ class SaleOrder(models.Model):
         compute='_compute_has_delivery', string='Has delivery',
         help="Has an order line set for delivery", store=True)
 
-    @api.one
     def _compute_website_order_line(self):
+        self.ensure_one()
         super(SaleOrder, self)._compute_website_order_line()
         self.website_order_line = self.website_order_line.filtered(lambda l: not l.is_delivery)
 

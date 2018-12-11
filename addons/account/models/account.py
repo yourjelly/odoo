@@ -541,18 +541,18 @@ class AccountJournal(models.Model):
                 sequence = journal.refund_sequence_id._get_current_sequence()
                 sequence.number_next = journal.refund_sequence_number_next
 
-    @api.one
     @api.constrains('currency_id', 'default_credit_account_id', 'default_debit_account_id')
     def _check_currency(self):
+        self.ensure_one()
         if self.currency_id:
             if self.default_credit_account_id and not self.default_credit_account_id.currency_id.id == self.currency_id.id:
                 raise ValidationError(_('The currency of the journal should be the same than the default credit account.'))
             if self.default_debit_account_id and not self.default_debit_account_id.currency_id.id == self.currency_id.id:
                 raise ValidationError(_('The currency of the journal should be the same than the default debit account.'))
 
-    @api.one
     @api.constrains('type', 'bank_account_id')
     def _check_bank_account(self):
+        self.ensure_one()
         if self.type == 'bank' and self.bank_account_id:
             if self.bank_account_id.company_id != self.company_id:
                 raise ValidationError(_('The bank account of a bank journal must belong to the same company (%s).') % self.company_id.name)
@@ -854,9 +854,9 @@ class ResPartnerBank(models.Model):
     journal_id = fields.One2many('account.journal', 'bank_account_id', domain=[('type', '=', 'bank')], string='Account Journal', readonly=True,
         help="The accounting journal corresponding to this bank account.")
 
-    @api.one
     @api.constrains('journal_id')
     def _check_journal_id(self):
+        self.ensure_one()
         if len(self.journal_id) > 1:
             raise ValidationError(_('A bank account can belong to only one journal.'))
 
@@ -930,9 +930,9 @@ class AccountTax(models.Model):
         ('name_company_uniq', 'unique(name, company_id, type_tax_use)', 'Tax names must be unique !'),
     ]
 
-    @api.one
     @api.constrains('children_tax_ids', 'type_tax_use')
     def _check_children_scope(self):
+        self.ensure_one()
         if not self._check_m2m_recursion('children_tax_ids'):
             raise ValidationError(_("Recursion found for tax '%s'.") % (self.name,))
         if not all(child.type_tax_use in ('none', self.type_tax_use) for child in self.children_tax_ids):

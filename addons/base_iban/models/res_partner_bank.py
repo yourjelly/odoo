@@ -79,9 +79,9 @@ class ResPartnerBank(models.Model):
             vals['acc_number'] = pretty_iban(normalize_iban(vals['acc_number']))
         return super(ResPartnerBank, self).write(vals)
 
-    @api.one
     @api.constrains('acc_number')
     def _check_iban(self):
+        self.ensure_one()
         if self.acc_type == 'iban':
             validate_iban(self.acc_number)
 

@@ -41,9 +41,9 @@ class HrExpenseSheetRegisterPaymentWizard(models.TransientModel):
         else:
             self.partner_bank_account_id = False
 
-    @api.one
     @api.constrains('amount')
     def _check_amount(self):
+        self.ensure_one()
         if not self.amount > 0.0:
             raise ValidationError(_('The payment amount must be strictly positive.'))
 
@@ -54,9 +54,9 @@ class HrExpenseSheetRegisterPaymentWizard(models.TransientModel):
         for payment in self:
             payment.show_partner_bank_account = payment.payment_method_id.code in self.env['account.payment']._get_method_codes_using_bank_account()
 
-    @api.one
     @api.depends('journal_id')
     def _compute_hide_payment_method(self):
+        self.ensure_one()
         if not self.journal_id:
             self.hide_payment_method = True
             return

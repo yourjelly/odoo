@@ -291,9 +291,9 @@ class SurveyLabel(models.Model):
     value = fields.Char('Suggested value', translate=True, required=True)
     quizz_mark = fields.Float('Score for this choice', help="A positive score indicates a correct choice; a negative or null score indicates a wrong answer")
 
-    @api.one
     @api.constrains('question_id', 'question_id_2')
     def _check_question_not_empty(self):
+        self.ensure_one()
         """Ensure that field question_id XOR field question_id_2 is not null"""
         if not bool(self.question_id) != bool(self.question_id_2):
             raise ValidationError(_("A label must be attached to only one question."))

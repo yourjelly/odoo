@@ -8,9 +8,9 @@ class Rating(models.Model):
 
     _inherit = "rating.rating"
 
-    @api.one
     @api.depends('res_model', 'res_id')
     def _compute_res_name(self):
+        self.ensure_one()
         # cannot change the rec_name of session since it is use to create the bus channel
         # so, need to override this method to set the same alternative rec_name as in reporting
         if self.res_model == 'mail.channel':

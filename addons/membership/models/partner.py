@@ -153,9 +153,9 @@ class Partner(models.Model):
                 res[partner.id] = 'free'
         return res
 
-    @api.one
     @api.constrains('associate_member')
     def _check_recursion_associate_member(self):
+        self.ensure_one()
         level = 100
         while self:
             self = self.associate_member
