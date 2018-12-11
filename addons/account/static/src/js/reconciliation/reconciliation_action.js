@@ -102,7 +102,7 @@ var StatementAction = AbstractAction.extend({
         var self = this;
         _.each(this.widgets, function(widget) {
             widget.destroy();
-        })
+        });
         this.widgets = [];
         this.model.reload()
             .then(function() {
@@ -119,8 +119,10 @@ var StatementAction = AbstractAction.extend({
      */
     start: function () {
         var self = this;
+        var args = arguments;
+        var sup = this._super;
 
-        return this.renderer.prependTo(self.$('.o_form_sheet')).then(function(){
+        return this.renderer.prependTo(self.$('.o_form_sheet')).then(function() {
             return self._renderLines().then(function() {
                 // No more lines to reconcile, trigger the rainbowman.
                 var initialState = self.renderer._initialState;
@@ -134,7 +136,7 @@ var StatementAction = AbstractAction.extend({
                     self._openFirstLine();
                 }
 
-                return self._super.apply(self, arguments);
+                return sup.apply(self, args);
             });
         });
     },
