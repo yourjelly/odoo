@@ -1971,7 +1971,7 @@ QUnit.module('Views', {
         });
 
         await testUtils.fields.editInput(form.$('input[name=foo]'), 'tralala');
-        await testUtils.dom.click(form.$('button'));
+        await testUtils.dom.click(form.$('button[special="save"]'));
         assert.verifySteps(['read', 'write', 'read', 'execute_action']);
 
         form.destroy();
@@ -2231,6 +2231,7 @@ QUnit.module('Views', {
                     form.update({}, {reload: false});
                 }
             },
+            // debug:1
         });
 
         // edit the p field
@@ -7062,6 +7063,8 @@ QUnit.module('Views', {
         // manually save the record, to prevent the field widget to notify the model of its new
         // value before being requested to
         form.saveRecord();
+
+        await testUtils.nextTick();
 
         assert.containsOnce(form, '.o_form_readonly', "form view should be in readonly");
         assert.strictEqual(form.$('.o_form_view').text().trim(), 'some foo value',
