@@ -288,14 +288,16 @@ class Channel(models.Model):
 
     @api.multi
     def _action_unfollow(self, partner):
+        # TODO remove those this line
         channel_info = self.channel_info('unsubscribe')[0]  # must be computed before leaving the channel (access rights)
         result = self.write({'channel_partner_ids': [(3, partner.id)]})
+        # TODO remove those this line
         self.env['bus.bus'].sendone((self._cr.dbname, 'res.partner', partner.id), channel_info)
         if not self.email_send:
             notification = _('<div class="o_mail_notification">left <a href="#" class="o_channel_redirect" data-oe-id="%s">#%s</a></div>') % (self.id, self.name,)
             # post 'channel left' message as root since the partner just unsubscribed from the channel
             self.sudo().message_post(body=notification, message_type="notification", subtype="mail.mt_comment", author_id=partner.id)
-        return result
+        return result # TODO use this in js
 
     @api.multi
     def _notify_get_groups(self, message, groups):
@@ -335,7 +337,7 @@ class Channel(models.Model):
         """ Override bounce management to unsubscribe bouncing addresses """
         for p in partner:
             if p.message_bounce >= self.MAX_BOUNCE_LIMIT:
-                self._action_unfollow(p)
+                self._action_unfollow(p)  # TODO think about it
         return super(Channel, self).message_receive_bounce(email, partner, mail_id=mail_id)
 
     @api.multi
@@ -989,7 +991,7 @@ class Channel(models.Model):
 
     def _execute_command_leave(self, **kwargs):
         if self.channel_type == 'channel':
-            self.action_unfollow()
+            self.action_unfollow()  # TODO think about it: remove or manage js side ?
         else:
             self.channel_pin(self.uuid, False)
 

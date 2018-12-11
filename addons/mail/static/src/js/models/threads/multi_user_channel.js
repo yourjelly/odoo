@@ -63,7 +63,7 @@ var MultiUserChannel = Channel.extend({
             model: 'mail.channel',
             method: 'action_unfollow',
             args: [[this.getID()]],
-        });
+        }); //todo do something here
     },
 
 });
