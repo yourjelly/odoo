@@ -165,6 +165,7 @@ var FormController = BasicController.extend({
      * @override method from BasicController
      * @param {jQueryElement} $node
      * @param {Object} options
+     * @returns {Promise}
      */
     renderPager: function ($node, options) {
         options = _.extend({}, options, {
@@ -177,6 +178,7 @@ var FormController = BasicController.extend({
      * Sets this.sidebar
      * @param {jQuery} [$node] a jQuery node where the sidebar should be
      *   inserted
+     * @return {Promise}
      **/
     renderSidebar: function ($node) {
         var self = this;
@@ -407,7 +409,7 @@ var FormController = BasicController.extend({
             self._updateButtons();
             self._updateSidebar();
 
-            self.autofocus.bind(self);
+            self.autofocus();
         });
     },
     /**
