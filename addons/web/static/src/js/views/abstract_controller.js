@@ -75,7 +75,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
                 self.controlPanelElements = self._renderControlPanelElements();
                 self._controlPanel.$el.prependTo(self.$el);
             }
-
+        }).then(function () {
             return self._update(self.initialState);
         });
     },
