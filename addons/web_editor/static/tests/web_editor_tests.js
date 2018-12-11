@@ -7,6 +7,7 @@ var core = require('web.core');
 var web_editor = require('web_editor.editor');
 
 var _t = core._t;
+var createView = testUtils.createView;
 
 QUnit.module('web_editor', {
     beforeEach: function() {
@@ -31,7 +32,7 @@ QUnit.test('field html widget', async function (assert) {
     var done = assert.async();
     assert.expect(3);
 
-    var form = await createAsyncView({
+    var form = await createView({
         View: FormView,
         model: 'mass.mailing',
         data: this.data,
@@ -63,7 +64,7 @@ QUnit.test('field html widget (with options inline-style)', async function (asse
     var done = assert.async();
     assert.expect(3);
 
-    var form = await createAsyncView({
+    var form = await createView({
         View: FormView,
         model: 'mass.mailing',
         data: this.data,
@@ -99,7 +100,7 @@ QUnit.test('field html translatable', async function (assert) {
 
     this.data['mass.mailing'].fields.body.translate = true;
 
-    var form = await createAsyncView({
+    var form = await createView({
         View: FormView,
         model: 'mass.mailing',
         data: this.data,
@@ -131,7 +132,7 @@ QUnit.test('field html translatable', async function (assert) {
 QUnit.test('field html_frame widget', async function (assert) {
     assert.expect(6);
 
-    var form = await createAsyncView({
+    var form = await createView({
         View: FormView,
         model: 'mass.mailing',
         data: this.data,
@@ -162,10 +163,10 @@ QUnit.test('field html_frame widget', async function (assert) {
     form.destroy();
 });
 
-QUnit.test('field htmlsimple does not crash when commitChanges is called in mode=readonly', function (assert) {
+QUnit.test('field htmlsimple does not crash when commitChanges is called in mode=readonly', async function (assert) {
     assert.expect(1);
 
-    var form = testUtils.createView({
+    var form = await createView({
         View: FormView,
         model: 'mass.mailing',
         data: this.data,
@@ -185,16 +186,16 @@ QUnit.test('field htmlsimple does not crash when commitChanges is called in mode
         },
     });
 
-    testUtils.dom.click(form.$('button:contains(Do it)'));
+    await testUtils.dom.click(form.$('button:contains(Do it)'));
     form.destroy();
 });
 
-QUnit.test('html_frame does not crash when saving in readonly', function (assert) {
+QUnit.test('html_frame does not crash when saving in readonly', async function (assert) {
     // The 'Save' action may be triggered even in readonly (e.g. when clicking
     // on a button in the form view)
     assert.expect(2);
 
-    var form = testUtils.createView({
+    var form = await createView({
         View: FormView,
         model: 'mass.mailing',
         data: this.data,
@@ -230,7 +231,7 @@ QUnit.test('html_frame does not crash when saving in edit mode (editor not loade
     // so that the editor may be not loaded, even though the content is!
     assert.expect(2);
 
-    var form = await createAsyncView({
+    var form = await createView({
         View: FormView,
         model: 'mass.mailing',
         data: this.data,
@@ -269,10 +270,10 @@ QUnit.test('html_frame saving in edit mode (editor and content fully loaded)', a
     assert.expect(4);
 
     var editorBar = new web_editor.Class();
-    var loadDeferred = $.Deferred();
-    var writeDeferred = $.Deferred();
+    var loadPromise = testUtils.makeTestPromise();
+    var writePromise = testUtils.makeTestPromise();
 
-    var form = await createAsyncView({
+    var form = await createView({
         View: FormView,
         model: 'mass.mailing',
         data: this.data,
@@ -287,14 +288,14 @@ QUnit.test('html_frame saving in edit mode (editor and content fully loaded)', a
             if (args.method) {
                 assert.step(args.method);
                 if (args.method === 'write') {
-                    writeDeferred.resolve();
+                    writePromise.resolve();
                 }
             }
             if (_.str.startsWith(route, '/logo')) {
                 // manually call the callback to simulate that the iframe has
                 // been fully loaded (content + editor)
                 var callback = $.deparam(route).callback;
-                return loadDeferred.then(function () {
+                return loadPromise.then(function () {
                     var contentCallback = window.odoo[callback + '_content'];
                     var editorCallback = window.odoo[callback + '_editor'];
                     if (editorCallback && contentCallback) {
@@ -311,17 +312,16 @@ QUnit.test('html_frame saving in edit mode (editor and content fully loaded)', a
     testUtils.fields.editInput(form.$('input.o_input.o_field_char'), 'trululu');
     await testUtils.form.clickSave(form);
 
-    loadDeferred.resolve(); // simulate late loading of html frame
+    loadPromise.resolve(); // simulate late loading of html frame
 
     assert.strictEqual(form.$('.o_field_char').val(), 'trululu',
         "should have saved the char field text");
 
-    writeDeferred.then( function () { // html_frame is async with write
+    writePromise.then( function () { // html_frame is async with write
         assert.verifySteps(['read', 'write']);
         form.destroy();
         done();
     });
-
 });
 
 });
