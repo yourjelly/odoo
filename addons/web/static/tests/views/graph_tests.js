@@ -561,7 +561,7 @@ QUnit.module('Views', {
             },
         });
 
-        testUtils.graph.reload(graph, {groupBy: []});
+        await testUtils.graph.reload(graph, {groupBy: []});
 
         graph.destroy();
     });

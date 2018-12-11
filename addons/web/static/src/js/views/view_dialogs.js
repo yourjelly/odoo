@@ -318,7 +318,7 @@ var SelectCreateDialog = ViewDialog.extend({
         }
         var self = this;
         var _super = this._super.bind(this);
-        this.loadViews(this.res_model, this.context, [[false, 'list'], [false, 'search']], {})
+        return this.loadViews(this.res_model, this.context, [[false, 'list'], [false, 'search']], {})
             .then(this.setup.bind(this))
             .then(function (fragment) {
                 self.opened().then(function () {
@@ -330,7 +330,7 @@ var SelectCreateDialog = ViewDialog.extend({
                 });
                 return _super();
             });
-        return this;
+        // return this;
     },
 
     setup: function (fieldsViews) {

@@ -160,7 +160,7 @@ QUnit.module('Views', {
         assert.isNotVisible(list.sidebar.$el, 'sidebar should be invisible');
         assert.ok(list.$('tbody td.o_list_record_selector').length, 'should have at least one record');
 
-        testUtils.dom.click(list.$('tbody td.o_list_record_selector:first input'));
+        await testUtils.dom.click(list.$('tbody td.o_list_record_selector:first input'));
         assert.isVisible(list.sidebar.$el, 'sidebar should be visible');
         assert.notOk(list.sidebar.$('a:contains(Delete)').length, 'sidebar should not have Delete button');
 

@@ -385,8 +385,10 @@ var ListController = BasicController.extend({
      * @returns {Promise}
      */
     _update: function () {
-        this._toggleSidebar();
-        return this._super.apply(this, arguments);
+        var self = this;
+        return this._super.apply(this, arguments).then(function() {
+            self._toggleSidebar();
+        });
     },
     /**
      * This helper simply makes sure that the control panel buttons matches the

@@ -218,11 +218,11 @@ QUnit.module('Views', {
         assert.containsN($sidebar, '.o_calendar_filter:has(h3:contains(attendees)) .o_calendar_filter_item', 4, "should display 4 filter items for 'attendees'");
         await testUtils.dom.click($sidebar.find('input[type="text"]'));
         assert.strictEqual($('ul.ui-autocomplete li:not(.o_m2o_dropdown_option)').text(), "partner 4", "should display the last choice in one2many autocomplete"); // TODO: remove :not(.o_m2o_dropdown_option) because can't have "create & edit" choice
-        await testUtils.dom.click($sidebar.find('.o_calendar_filter_item .o_remove').first());
+        await testUtils.dom.click($sidebar.find('.o_calendar_filter_item .o_remove').first(), {allowInvisible: true});
         assert.ok($('.modal-footer button.btn:contains(Ok)').length, "should display the confirm message");
         await testUtils.dom.click($('.modal-footer button.btn:contains(Ok)'));
         assert.containsN($sidebar, '.o_calendar_filter:has(h3:contains(attendees)) .o_calendar_filter_item', 3, "click on remove then should display 3 filter items for 'attendees'");
-        // calendar.destroy();
+        calendar.destroy();
     });
 
     QUnit.test('breadcrumbs are updated with the displayed period', async function (assert) {
