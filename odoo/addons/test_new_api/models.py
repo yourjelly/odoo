@@ -148,8 +148,8 @@ class Message(models.Model):
 
     @api.depends('body')
     def _compute_size(self):
-        self.ensure_one()
-        self.size = len(self.body or '')
+        for rec in self:
+            rec.size = len(rec.body or '')
 
     def _search_size(self, operator, value):
         if operator not in ('=', '!=', '<', '<=', '>', '>=', 'in', 'not in'):
@@ -163,20 +163,20 @@ class Message(models.Model):
 
     @api.depends('size')
     def _compute_double_size(self):
-        self.ensure_one()
         # This illustrates a subtle situation: self.double_size depends on
         # self.size. When size is computed, self.size is assigned, which should
         # normally invalidate self.double_size. However, this may not happen
         # while self.double_size is being computed: the last statement below
         # would fail, because self.double_size would be undefined.
-        self.double_size = 0
-        size = self.size
-        self.double_size = self.double_size + size
+        for rec in self:
+            rec.double_size = 0
+            size = rec.size
+            rec.double_size = rec.double_size + size
 
     @api.depends('author', 'author.partner_id')
     def _compute_author_partner(self):
-        self.ensure_one()
-        self.author_partner = self.author.partner_id
+        for rec in self:
+            rec.author_partner = rec.author.partner_id
 
     @api.model
     def _search_author_partner(self, operator, value):
