@@ -1493,8 +1493,8 @@ QUnit.module('ActionManager', {
             'load_views', // action 3
             '/web/dataset/search_read', // search read of list view of action 3
             '/web/action/load', // action 4
-            'read', // read the opened record of action 3 (this request is blocked)
             'load_views', // action 4
+            'read', // read the opened record of action 3 (this request is blocked)
             '/web/dataset/search_read', // search read action 4
         ]);
 
@@ -1512,8 +1512,8 @@ QUnit.module('ActionManager', {
             'load_views', // action 3
             '/web/dataset/search_read', // search read of list view of action 3
             '/web/action/load', // action 4
-            'read', // read the opened record of action 3 (this request is blocked)
             'load_views', // action 4
+            'read', // read the opened record of action 3 (this request is blocked)
             '/web/dataset/search_read', // search read action 4
         ]);
 
@@ -1745,7 +1745,7 @@ QUnit.module('ActionManager', {
         assert.expect(2);
 
         var ClientAction = AbstractAction.extend({});
-        var actionManager = createActionManager({
+        var actionManager = await createActionManager({
             intercepts: {
                 push_state: function () {
                     assert.step('push state');
