@@ -881,8 +881,7 @@ class Channel(models.Model):
         })
         notification = _('<div class="o_mail_notification">created <a href="#" class="o_channel_redirect" data-oe-id="%s">#%s</a></div>') % (new_channel.id, new_channel.name,)
         new_channel.message_post(body=notification, message_type="notification", subtype="mail.mt_comment")
-        channel_info = new_channel.channel_info('creation')[0]
-        self.env['bus.bus'].sendone((self._cr.dbname, 'res.partner', self.env.user.partner_id.id), channel_info)
+        channel_info = new_channel.channel_info()[0]
         return channel_info
 
     @api.model
