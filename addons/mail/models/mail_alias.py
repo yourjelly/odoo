@@ -81,7 +81,7 @@ class Alias(models.Model):
 
     @api.constrains('alias_defaults')
     def _check_alias_defaults(self):
-    self.ensure_one()
+        self.ensure_one()
         try:
             dict(safe_eval(self.alias_defaults))
         except Exception:
