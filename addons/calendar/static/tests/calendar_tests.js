@@ -33,10 +33,10 @@ QUnit.module('calendar', {
         };
     },
 }, function () {
-    QUnit.test("many2manyattendee widget: basic rendering", function (assert) {
+    QUnit.test("many2manyattendee widget: basic rendering", async function (assert) {
         assert.expect(9);
 
-        var form = createView({
+        var form = await createView({
             View: FormView,
             model: 'event',
             data: this.data,

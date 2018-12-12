@@ -29,10 +29,10 @@ QUnit.module('mrp', {
     },
 }, function () {
 
-    QUnit.test("bullet_state: basic rendering", function (assert) {
+    QUnit.test("bullet_state: basic rendering", async function (assert) {
         assert.expect(2);
 
-        var form = createView({
+        var form = await createView({
             View: FormView,
             model: 'partner',
             data: this.data,
@@ -51,10 +51,10 @@ QUnit.module('mrp', {
         form.destroy();
     });
 
-    QUnit.test("mrp_time_counter: basic rendering", function (assert) {
+    QUnit.test("mrp_time_counter: basic rendering", async function (assert) {
         assert.expect(2);
 
-        var form = createView({
+        var form = await createView({
             View: FormView,
             model: 'partner',
             data: this.data,
