@@ -51,14 +51,15 @@ var createViewer = function (params) {
         $target = $('body');
         $target.addClass('debug');
     }
-    viewer.appendTo($target);
 
     // actually destroy the parent when the viewer is destroyed
     viewer.destroy = function () {
         delete viewer.destroy;
         parent.destroy();
     };
-    return viewer;
+    return viewer.appendTo($target).then(function() {
+        return viewer;
+    });
 };
 
 QUnit.module('DocumentViewer', {
@@ -74,10 +75,10 @@ QUnit.module('DocumentViewer', {
     },
 }, function () {
 
-    QUnit.test('basic rendering', function (assert) {
+    QUnit.test('basic rendering', async function (assert) {
         assert.expect(7);
 
-        var viewer = createViewer({
+        var viewer = await createViewer({
             attachmentID: 1,
             attachments: this.attachments,
         });
@@ -100,11 +101,11 @@ QUnit.module('DocumentViewer', {
         viewer.destroy();
     });
 
-    QUnit.test('Document Viewer Youtube', function (assert) {
+    QUnit.test('Document Viewer Youtube', async function (assert) {
         assert.expect(3);
 
         var youtubeURL = 'https://www.youtube.com/embed/FYqW0Gdwbzk';
-        var viewer = createViewer({
+        var viewer = await createViewer({
             attachmentID: 2,
             attachments: this.attachments,
             mockRPC: function (route) {
@@ -123,10 +124,10 @@ QUnit.module('DocumentViewer', {
         viewer.destroy();
     });
 
-    QUnit.test('Document Viewer html/(txt)', function (assert) {
+    QUnit.test('Document Viewer html/(txt)', async function (assert) {
         assert.expect(2);
 
-        var viewer = createViewer({
+        var viewer = await createViewer({
             attachmentID: 4,
             attachments: this.attachments,
         });
@@ -139,10 +140,10 @@ QUnit.module('DocumentViewer', {
         viewer.destroy();
     });
 
-    QUnit.test('Document Viewer mp4', function (assert) {
+    QUnit.test('Document Viewer mp4', async function (assert) {
         assert.expect(2);
 
-        var viewer = createViewer({
+        var viewer = await createViewer({
             attachmentID: 5,
             attachments: this.attachments,
         });
@@ -155,10 +156,10 @@ QUnit.module('DocumentViewer', {
         viewer.destroy();
     });
 
-    QUnit.test('Document Viewer jpg', function (assert) {
+    QUnit.test('Document Viewer jpg', async function (assert) {
         assert.expect(2);
 
-        var viewer = createViewer({
+        var viewer = await createViewer({
             attachmentID: 6,
             attachments: this.attachments,
         });
@@ -171,10 +172,10 @@ QUnit.module('DocumentViewer', {
         viewer.destroy();
     });
 
-    QUnit.test('is closable by button', function (assert) {
+    QUnit.test('is closable by button', async function (assert) {
         assert.expect(3);
 
-        var viewer = createViewer({
+        var viewer = await createViewer({
             attachmentID: 6,
             attachments: this.attachments,
         });
@@ -184,15 +185,15 @@ QUnit.module('DocumentViewer', {
         assert.containsOnce(viewer, '.o_close_btn',
             "should have a close button");
 
-        testUtils.dom.click(viewer.$('.o_close_btn'));
+        await testUtils.dom.click(viewer.$('.o_close_btn'));
 
         assert.ok(viewer.isDestroyed(), 'viewer should be destroyed');
     });
 
-    QUnit.test('is closable by clicking on the wrapper', function (assert) {
+    QUnit.test('is closable by clicking on the wrapper', async function (assert) {
         assert.expect(3);
 
-        var viewer = createViewer({
+        var viewer = await createViewer({
             attachmentID: 6,
             attachments: this.attachments,
         });
@@ -202,7 +203,7 @@ QUnit.module('DocumentViewer', {
         assert.containsOnce(viewer, '.o_viewer_img_wrapper',
             "should have a wrapper");
 
-        testUtils.dom.click(viewer.$('.o_viewer_img_wrapper'));
+        await testUtils.dom.click(viewer.$('.o_viewer_img_wrapper'));
 
         assert.ok(viewer.isDestroyed(), 'viewer should be destroyed');
     });
