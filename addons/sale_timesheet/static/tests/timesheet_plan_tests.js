@@ -5,7 +5,7 @@ var ProjectPlan = require('sale_timesheet.ProjectPlan');
 var testUtils = require('web.test_utils');
 var Widget = require('web.Widget');
 
-function createPlan(params) {
+async function createPlan(params) {
     var Parent = Widget.extend({
         do_push_state: function () {},
     });
@@ -13,7 +13,7 @@ function createPlan(params) {
     testUtils.mock.addMockEnvironment(parent, params);
     var plan = new ProjectPlan(parent, params.action);
     var selector = params.debug ? 'body' : '#qunit-fixture';
-    plan.appendTo($(selector));
+    await plan.appendTo($(selector));
 
     plan.destroy = function () {
         delete plan.destroy;
@@ -36,10 +36,10 @@ QUnit.module('Timesheet Plan', {
     }
 }, function () {
 
-    QUnit.test('basic timesheet plan rendering', function (assert) {
+    QUnit.test('basic timesheet plan rendering', async function (assert) {
         assert.expect(5);
 
-        var plan = createPlan({
+        var plan = await createPlan({
             archs: {
                 'project.project,false,search': '<search></search>',
             },
@@ -70,10 +70,10 @@ QUnit.module('Timesheet Plan', {
         plan.destroy();
     });
 
-    QUnit.test('timesheet action takes action name into account', function (assert) {
+    QUnit.test('timesheet action takes action name into account', async function (assert) {
         assert.expect(1);
 
-        var plan = createPlan({
+        var plan = await createPlan({
             archs: {
                 'project.project,false,search': '<search></search>',
             },

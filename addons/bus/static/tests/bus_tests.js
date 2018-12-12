@@ -55,12 +55,12 @@ QUnit.module('Bus', {
         });
         widget.call('bus_service', 'addChannel', 'lambda');
 
-        pollPromise.resolve([{
+        await pollPromise.resolve([{
             id: 1,
             channel: 'lambda',
             message: 'beta',
         }]);
-        pollPromise.resolve([{
+        await pollPromise.resolve([{
             id: 2,
             channel: 'lambda',
             message: 'epsilon',
@@ -132,7 +132,6 @@ QUnit.module('Bus', {
     });
 
     QUnit.test('cross tab bus share message from a channel', async function (assert) {
-        var done = assert.async();
         assert.expect(5);
 
         // master
@@ -169,54 +168,48 @@ QUnit.module('Bus', {
         master.call('bus_service', 'addChannel', 'lambda');
 
         // slave
-
-        setTimeout(async function () {
-            var parentSlave = new Widget();
-            testUtils.mock.addMockEnvironment(parentSlave, {
-                data: {},
-                services: {
-                    bus_service: BusService,
-                    local_storage: LocalStorageServiceMock,
-                },
-                mockRPC: function (route, args) {
-                    if (route === '/longpolling/poll') {
-                        throw new Error("Can not use the longpolling of the slave client");
-                    }
-                    return this._super.apply(this, arguments);
+        await testUtils.nextTick();
+        var parentSlave = new Widget();
+        testUtils.mock.addMockEnvironment(parentSlave, {
+            data: {},
+            services: {
+                bus_service: BusService,
+                local_storage: LocalStorageServiceMock,
+            },
+            mockRPC: function (route, args) {
+                if (route === '/longpolling/poll') {
+                    throw new Error("Can not use the longpolling of the slave client");
                 }
-            });
+                return this._super.apply(this, arguments);
+            }
+        });
 
-            var slave = new Widget(parentSlave);
-            await slave.appendTo($('#qunit-fixture'));
+        var slave = new Widget(parentSlave);
+        await slave.appendTo($('#qunit-fixture'));
 
-            slave.call('bus_service', 'onNotification', slave, function (notifications) {
-                assert.step(['slave', 'notification', notifications]);
-            });
-            slave.call('bus_service', 'addChannel', 'lambda');
+        slave.call('bus_service', 'onNotification', slave, function (notifications) {
+            assert.step(['slave', 'notification', notifications]);
+        });
+        slave.call('bus_service', 'addChannel', 'lambda');
 
-            pollPromiseMaster.resolve([{
-                id: 1,
-                channel: 'lambda',
-                message: 'beta',
-            }]);
+        await pollPromiseMaster.resolve([{
+            id: 1,
+            channel: 'lambda',
+            message: 'beta',
+        }]);
 
-            assert.verifySteps([
-                ["master", "/longpolling/poll", "lambda"],
-                ["master", "notification", [["lambda", "beta"]]],
-                ["slave", "notification", [["lambda", "beta"]]],
-                ["master", "/longpolling/poll", "lambda"],
-            ]);
+        assert.verifySteps([
+            ["master", "/longpolling/poll", "lambda"],
+            ["master", "notification", [["lambda", "beta"]]],
+            ["slave", "notification", [["lambda", "beta"]]],
+            ["master", "/longpolling/poll", "lambda"],
+        ]);
 
-            parentMaster.destroy();
-            parentSlave.destroy();
-
-            done();
-
-        }, 3);
+        parentMaster.destroy();
+        parentSlave.destroy();
     });
 
     QUnit.test('cross tab bus elect new master on master unload', async function (assert) {
-        var done = assert.async();
         assert.expect(8);
 
         // master
@@ -252,68 +245,64 @@ QUnit.module('Bus', {
         master.call('bus_service', 'addChannel', 'lambda');
 
         // slave
-        setTimeout(async function () {
-            var parentSlave = new Widget();
-            var pollPromiseSlave = testUtils.makeTestPromise();
-            testUtils.mock.addMockEnvironment(parentSlave, {
-                data: {},
-                services: {
-                    bus_service: BusService,
-                    local_storage: LocalStorageServiceMock,
-                },
-                mockRPC: function (route, args) {
-                    if (route === '/longpolling/poll') {
-                        assert.step(['slave', route, args.channels.join(',')]);
+        await testUtils.nextTick();
+        var parentSlave = new Widget();
+        var pollPromiseSlave = testUtils.makeTestPromise();
+        testUtils.mock.addMockEnvironment(parentSlave, {
+            data: {},
+            services: {
+                bus_service: BusService,
+                local_storage: LocalStorageServiceMock,
+            },
+            mockRPC: function (route, args) {
+                if (route === '/longpolling/poll') {
+                    assert.step(['slave', route, args.channels.join(',')]);
 
-                        pollPromiseSlave = testUtils.makeTestPromise();
-                        pollPromiseSlave.abort = (function () {
-                            this.reject({message: "XmlHttpRequestError abort"}, $.Event());
-                        }).bind(pollPromiseSlave);
-                        return pollPromiseSlave;
-                    }
-                    return this._super.apply(this, arguments);
+                    pollPromiseSlave = testUtils.makeTestPromise();
+                    pollPromiseSlave.abort = (function () {
+                        this.reject({message: "XmlHttpRequestError abort"}, $.Event());
+                    }).bind(pollPromiseSlave);
+                    return pollPromiseSlave;
                 }
-            });
+                return this._super.apply(this, arguments);
+            }
+        });
 
-            var slave = new Widget(parentSlave);
-            await slave.appendTo($('#qunit-fixture'));
+        var slave = new Widget(parentSlave);
+        await slave.appendTo($('#qunit-fixture'));
 
-            slave.call('bus_service', 'onNotification', slave, function (notifications) {
-                assert.step(['slave', 'notification', notifications]);
-            });
-            slave.call('bus_service', 'addChannel', 'lambda');
+        slave.call('bus_service', 'onNotification', slave, function (notifications) {
+            assert.step(['slave', 'notification', notifications]);
+        });
+        slave.call('bus_service', 'addChannel', 'lambda');
 
-            pollPromiseMaster.resolve([{
-                id: 1,
-                channel: 'lambda',
-                message: 'beta',
-            }]);
+        await pollPromiseMaster.resolve([{
+            id: 1,
+            channel: 'lambda',
+            message: 'beta',
+        }]);
 
-            // simulate unloading master
-            master.call('bus_service', '_onUnload');
+        // simulate unloading master
+        master.call('bus_service', '_onUnload');
 
-            pollPromiseSlave.resolve([{
-                id: 2,
-                channel: 'lambda',
-                message: 'gamma',
-            }]);
+        await pollPromiseSlave.resolve([{
+            id: 2,
+            channel: 'lambda',
+            message: 'gamma',
+        }]);
 
-            assert.verifySteps([
-                ["master", "/longpolling/poll", "lambda"],
-                ["master", "notification", [["lambda", "beta"]]],
-                ["slave", "notification", [["lambda", "beta"]]],
-                ["master", "/longpolling/poll", "lambda"],
-                ["slave", "/longpolling/poll", "lambda"],
-                ["slave", "notification", [["lambda", "gamma"]]],
-                ["slave", "/longpolling/poll", "lambda"],
-            ]);
+        assert.verifySteps([
+            ["master", "/longpolling/poll", "lambda"],
+            ["master", "notification", [["lambda", "beta"]]],
+            ["slave", "notification", [["lambda", "beta"]]],
+            ["master", "/longpolling/poll", "lambda"],
+            ["slave", "/longpolling/poll", "lambda"],
+            ["slave", "notification", [["lambda", "gamma"]]],
+            ["slave", "/longpolling/poll", "lambda"],
+        ]);
 
-            parentMaster.destroy();
-            parentSlave.destroy();
-
-            done();
-
-        }, 3);
+        parentMaster.destroy();
+        parentSlave.destroy();
     });
 
 });});
