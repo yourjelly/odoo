@@ -759,7 +759,7 @@ odoo.define('web.basic_model_tests', function (require) {
                 data: this.data,
                 mockRPC: function (route, args) {
                     if (args.method === 'onchange') {
-                        return $.when({ value: { product_id: false } });
+                        return Promise.resolve({ value: { product_id: false } });
                     }
                     return this._super(route, args);
                 },
@@ -1636,7 +1636,7 @@ odoo.define('web.basic_model_tests', function (require) {
                 data: this.data,
                 mockRPC: function (route, args) {
                     if (args.method === 'default_get') {
-                        return $.when({
+                        return Promise.resolve({
                             product_ids: [[0, 0, { "name": "xdroid" }]]
                         });
                     }
@@ -2092,7 +2092,7 @@ odoo.define('web.basic_model_tests', function (require) {
                 mockRPC: function (route) {
                     if (route === '/web/dataset/search_read') {
                         // simulate randomn sort form the server
-                        return $.when({
+                        return Promise.resolve({
                             length: 3,
                             records: [
                                 { id: 12, display_name: "gold", date: "2017-01-25" },

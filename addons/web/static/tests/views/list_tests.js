@@ -445,7 +445,7 @@ QUnit.module('Views', {
             },
             intercepts: {
                 load_filters: function (event) {
-                    return $.when([
+                    return Promise.resolve([
                         {
                             context: "{}",
                             domain: "[]",

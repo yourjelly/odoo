@@ -1803,7 +1803,7 @@ QUnit.module('Views', {
                         {__domain: [['product_id', '=', 3]], product_id_count: 0},
                         {__domain: [['product_id', '=', 5]], product_id_count: 0},
                     ];
-                    return $.when(result);
+                    return Promise.resolve(result);
                 }
                 return this._super.apply(this, arguments);
             },
@@ -3413,7 +3413,7 @@ QUnit.module('Views', {
                     var result = [
                         {__domain: [['product_id', '=', 3]], product_id_count: 0, product_id: [3, 'hello']},
                     ];
-                    return $.when(result);
+                    return Promise.resolve(result);
                 }
                 return this._super.apply(this, arguments);
             },
@@ -3455,7 +3455,7 @@ QUnit.module('Views', {
                     var result = [
                         {__domain: [['product_id', '=', 3]], product_id_count: 0, product_id: [3, 'hello']},
                     ];
-                    return $.when(result);
+                    return Promise.resolve(result);
                 }
                 return this._super.apply(this, arguments);
             },
@@ -3500,7 +3500,7 @@ QUnit.module('Views', {
                     var result = [
                         {__domain: [['product_id', '=', 3]], product_id_count: 0, product_id: [3, 'hello']},
                     ];
-                    return $.when(result);
+                    return Promise.resolve(result);
                 }
                 return this._super.apply(this, arguments);
             },
@@ -3544,7 +3544,7 @@ QUnit.module('Views', {
                     var result = [
                         {__domain: [['product_id', '=', 3]], product_id_count: 0, product_id: [3, 'hello']},
                     ];
-                    return $.when(result);
+                    return Promise.resolve(result);
                 }
                 return this._super.apply(this, arguments);
             },
@@ -4692,7 +4692,7 @@ QUnit.module('Views', {
             groupBy: ['foo'],
             mockRPC: function (route, args) {
                 if (route === '/web/dataset/resequence') {
-                    return $.when(true);
+                    return Promise.resolve(true);
                 }
                 return this._super(route, args);
             },
