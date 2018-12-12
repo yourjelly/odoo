@@ -6,7 +6,7 @@ var testUtils = require('web.test_utils');
 var Widget = require('web.Widget');
 
 QUnit.module('KeyboardNavigationMixin', function () {
-    QUnit.test('aria-keyshortcuts is added on elements with accesskey', function (assert) {
+    QUnit.test('aria-keyshortcuts is added on elements with accesskey', async function (assert) {
         assert.expect(1);
         var $target = $('#qunit-fixture');
         var KeyboardWidget = Widget.extend(KeyboardNavigationMixin, {
@@ -19,7 +19,7 @@ QUnit.module('KeyboardNavigationMixin', function () {
         });
         var parent = testUtils.createParent({});
         var w = new KeyboardWidget(parent);
-        w.appendTo($target);
+        await w.appendTo($target);
 
         // minimum set of attribute to generate a native event that works with the mixin
         var e = new Event("keydown");
@@ -32,7 +32,7 @@ QUnit.module('KeyboardNavigationMixin', function () {
         parent.destroy();
     });
 
-    QUnit.test('keep CSS position absolute for parent of overlay', function (assert) {
+    QUnit.test('keep CSS position absolute for parent of overlay', async function (assert) {
         // If we change the CSS position of an 'absolute' element to 'relative',
         // we may likely change its position on the document. Since the overlay
         // CSS position is 'absolute', it will match the size and cover the
@@ -51,7 +51,7 @@ QUnit.module('KeyboardNavigationMixin', function () {
         });
         var parent = testUtils.createParent({});
         var w = new KeyboardWidget(parent);
-        w.appendTo($target);
+        await w.appendTo($target);
 
         $button.css('position', 'absolute');
 
