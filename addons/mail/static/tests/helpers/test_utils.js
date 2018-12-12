@@ -48,7 +48,7 @@ async function createDiscuss(params) {
         parent.destroy();
     };
 
-    return  discuss.appendTo($(selector)).then(function () {
+    return discuss.appendTo($(selector)).then(function () {
         return discuss;
     });
 }

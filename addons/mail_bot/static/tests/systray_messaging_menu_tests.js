@@ -67,7 +67,7 @@ QUnit.test('messaging menu widget: rendering with OdooBot has a request', async 
     assert.strictEqual(messagingMenu.$('.o_notification_counter').text(), '1',
         "should display a counter of '1' next to the messaging menu");
 
-    testUtils.dom.click(messagingMenu.$('.dropdown-toggle'));
+    await testUtils.dom.click(messagingMenu.$('.dropdown-toggle'));
     assert.containsOnce(messagingMenu, '.o_preview_info',
         "should display a preview in the messaging menu");
     assert.strictEqual(messagingMenu.$('.o_preview_name').text().trim(),
@@ -95,13 +95,12 @@ QUnit.test('messaging menu widget: rendering without OdooBot has a request', asy
         "should display a notification counter next to the messaging menu");
     assert.strictEqual(messagingMenu.$('.o_notification_counter').text(), '0',
         "should display a counter of '0' next to the messaging menu");
-    testUtils.dom.click(messagingMenu.$('.dropdown-toggle'));
+    await testUtils.dom.click(messagingMenu.$('.dropdown-toggle'));
     assert.containsNone(messagingMenu, '.o_preview_info',
         "should display no preview in the messaging menu");
 
     messagingMenu.destroy();
 });
-
 
 });
 });
