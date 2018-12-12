@@ -91,7 +91,10 @@ odoo.define('sale.product.configurator.tests', function (require) {
                     }
                 }
             };
-        }
+        },
+        afterEach: function () {
+            testUtils.checkBody();
+        },
     }, function (){
         QUnit.test('click on "Configure a product" and check for form loading', async function (assert) {
             assert.expect(2);
@@ -122,7 +125,7 @@ odoo.define('sale.product.configurator.tests', function (require) {
                 View: FormView,
                 model: 'sale_order',
                 data: this.data,
-                arch: getArch()
+                arch: getArch(),
             });
 
             var list = form.renderer.allFieldWidgets[form.handle][1];
@@ -135,6 +138,7 @@ odoo.define('sale.product.configurator.tests', function (require) {
             await testUtils.nextTick();
 
             assert.strictEqual(list.$("tr.o_data_row").length, 2);
+            form.destroy();
         });
 
         QUnit.test('Select a product in the list and check for template loading', async function (assert){
@@ -164,6 +168,7 @@ odoo.define('sale.product.configurator.tests', function (require) {
             });
             await testUtils.dom.click(product_configurator_form.$('.o_input'));
             await testUtils.dom.click($("ul.ui-autocomplete li a:contains('Customizable Desk')").mouseenter());
+            product_configurator_form.destroy();
         });
     });
 });
