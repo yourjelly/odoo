@@ -273,19 +273,18 @@ FormController.include({
         var self = this;
         var methodDef;
         var def = new Promise(function (resolve, reject) {
-
-        if (typeof method === 'string') {
-            methodDef = this[method](barcode, activeBarcode);
-        } else {
-            methodDef = method.call(this, barcode, activeBarcode);
-        }
-        methodDef
-            .then(function () {
-                var record = self.model.get(self.handle);
-                var candidate = self._getBarCodeRecord(record, barcode, activeBarcode);
-                activeBarcode.candidate = candidate;
-            })
-            .then(resolve, resolve);
+            if (typeof method === 'string') {
+                methodDef = self[method](barcode, activeBarcode);
+            } else {
+                methodDef = method.call(self, barcode, activeBarcode);
+            }
+            methodDef
+                .then(function () {
+                    var record = self.model.get(self.handle);
+                    var candidate = self._getBarCodeRecord(record, barcode, activeBarcode);
+                    activeBarcode.candidate = candidate;
+                })
+                .then(resolve, resolve);
         });
         return def;
     },
