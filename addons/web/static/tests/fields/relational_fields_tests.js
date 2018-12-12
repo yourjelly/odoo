@@ -146,7 +146,10 @@ QUnit.module('relational_fields', {
                 }]
             },
         };
-    }
+    },
+    afterEach: function () {
+        testUtils.checkBody();
+    },
 }, function () {
 
     QUnit.test('x2many default_order multiple fields', async function (assert) {
@@ -2243,7 +2246,7 @@ QUnit.module('relational_fields', {
         assert.strictEqual(list.$('.o_data_row:eq(1) .o_field_widget[name="reference"] select')[0], document.activeElement,
             'select of second data row should be selected');
 
-        // list.destroy();
+        list.destroy();
     });
 
     QUnit.test('one2many with extra field from server not in form', async function (assert) {

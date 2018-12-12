@@ -58,7 +58,10 @@ odoo.define('web.basic_model_tests', function (require) {
                 modelName: 'partner',
                 fields: this.data.partner.fields,
             };
-        }
+        },
+        afterEach: function () {
+            testUtils.checkBody();
+        },
     }, function () {
         QUnit.module('BasicModel');
 

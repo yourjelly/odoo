@@ -105,10 +105,8 @@ QUnit.module('Views', {
         };
     },
     afterEach: function() {
-        var numberOfModalsOpened = $('.modal').length;
-        if ( numberOfModalsOpened > 0) {
-            throw new Error (`There are ${numberOfModalsOpened} modal(s) still open after the test`);
-        }
+        testUtils.checkBody();
+        testUtils.checkModals();
     }
 }, function () {
 
@@ -2231,7 +2229,6 @@ QUnit.module('Views', {
                     form.update({}, {reload: false});
                 }
             },
-            // debug:1
         });
 
         // edit the p field
@@ -7379,6 +7376,7 @@ QUnit.module('Views', {
         form.$buttons.find('.o_form_buttons_edit').tooltip('show',false);
         assert.strictEqual($('.tooltip .oe_tooltip_string').length, 1,
             "should have rendered a tooltip");
+            await testUtils.nextTick();
         form.destroy();
     });
     QUnit.test('if the focus is on the save button, hitting ENTER should save', async function (assert) {

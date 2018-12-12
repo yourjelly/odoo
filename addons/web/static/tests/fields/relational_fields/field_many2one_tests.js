@@ -152,10 +152,8 @@ QUnit.module('fields', {}, function () {
             };
         },
         afterEach: function() {
-            var numberOfModalsOpened = $('.modal').length;
-            if ( numberOfModalsOpened > 0) {
-                throw new Error (`There are ${numberOfModalsOpened} modal(s) still open after the test`);
-            }
+            testUtils.checkBody();
+            testUtils.checkModals();
         },
     }, function () {
         QUnit.module('FieldMany2One');

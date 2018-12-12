@@ -53,10 +53,8 @@ QUnit.module('Views', {
         };
     },
     afterEach: function() {
-        var numberOfModalsOpened = $('.modal').length;
-        if ( numberOfModalsOpened > 0) {
-            throw new Error (`There are ${numberOfModalsOpened} modal(s) still open after the test`);
-        }
+        testUtils.checkBody();
+        testUtils.checkModals();
     },
 
 }, function () {

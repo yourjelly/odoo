@@ -57,7 +57,10 @@ QUnit.module('Views', {
             openGroupByDefault: true,
             viewType: 'kanban',
         };
-    }
+    },
+    afterEach: function () {
+        testUtils.checkBody();
+    },
 }, function () {
 
     QUnit.module('KanbanModel');

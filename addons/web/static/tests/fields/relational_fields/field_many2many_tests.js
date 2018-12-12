@@ -111,7 +111,10 @@ QUnit.module('fields', {}, function () {
                     }]
                 },
             };
-        }
+        },
+        afterEach: function() {
+            testUtils.checkBody();
+        },
     }, function () {
         QUnit.module('FieldMany2Many');
 

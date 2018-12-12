@@ -114,7 +114,6 @@ QUnit.module('FilterMenu', {
 
         delete this.fields.date_field;
         var filterMenu = createFilterMenu([], this.fields, {
-            debug: true,
             intercepts: {
                 new_filters: function (ev) {
                     var filter = ev.data.filters[0];
