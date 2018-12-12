@@ -16,6 +16,10 @@
                         <label for="inventory_availability" string="Default Mode" class="col-lg-3 o_light_label" />
                         <field name="inventory_availability" string="Inventory"/>
                     </div><br/>
+                    <div class="row mt16" attrs="{'invisible': [('group_stock_multi_warehouses', '=', False)]}">
+                        <label for="warehouse_id" string="Warehouse" class="col-lg-3 o_light_label" />
+                        <field name="warehouse_id"/>
+                    </div><br/>
                     <div class="row" attrs="{'invisible': [('inventory_availability', '!=', 'threshold')]}">
                         <label for="available_threshold" string="Default threshold" class="col-lg-3 o_light_label" />
                         <field name="available_threshold" class="oe_inline" attrs="{'required': [('inventory_availability', '=', 'threshold')]}"/>

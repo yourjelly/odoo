@@ -14,6 +14,7 @@ class ResConfigSettings(models.TransientModel):
         ('custom', 'Show product-specific notifications'),
     ], string='Inventory Availability', default='never')
     available_threshold = fields.Float(string='Availability Threshold')
+    warehouse_id = fields.Many2one('stock.warehouse', related='website_id.warehouse_id', readonly=False)
 
     @api.multi
     def set_values(self):
