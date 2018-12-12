@@ -116,13 +116,16 @@ var SearchBar = Widget.extend({
      * @param {Function} callback
      */
     _getAutoCompleteSources: function (req, callback) {
-        var defs = _.invoke(this.autoCompleteSources, 'getAutocompletionValues', req.term);
-        Promise.all(defs).then(function () {
-            callback(_(arguments).chain()
+        var defs = this.autoCompleteSources.map(function (source) {
+            return source.getAutocompletionValues(req.term);
+        });
+        Promise.all(defs).then(function (result) {
+            var resultCleaned = _(result).chain()
                 .compact()
                 .flatten(true)
-                .value());
-            });
+                .value();
+            callback(resultCleaned);
+        });
     },
     /**
      * @private

@@ -10,8 +10,9 @@ function createFilterMenu(filters, fields, params) {
     var target = params.debug ? document.body :  $('#qunit-fixture');
     var menu = new FilterMenu(null, filters, fields);
     testUtils.mock.addMockEnvironment(menu, params);
-    menu.appendTo(target);
-    return menu;
+    return menu.appendTo(target).then(function() {
+        return menu;
+    });
 }
 
 QUnit.module('FilterMenu', {
@@ -134,12 +135,12 @@ QUnit.module('FilterMenu', {
         filterMenu.destroy();
     });
 
-    QUnit.skip('commit search with an extended proposition with field char does not cause a crash', function (assert) {
+    QUnit.skip('commit search with an extended proposition with field char does not cause a crash', async function (assert) {
         assert.expect(0);
 
         this.fields = {many2one_field: {string: "Trululu", type: "many2one", relation: 'partner', selectable: true, searchable: true}};
 
-        var filterMenu = createFilterMenu([], this.fields, {
+        var filterMenu = await createFilterMenu([], this.fields, {
             intercepts: {
                 new_filters: function (ev) {
                     var filter = ev.data.filters[0];
@@ -149,18 +150,18 @@ QUnit.module('FilterMenu', {
         });
 
         // open menu dropdown and custom filter submenu, select trululu field and enter string "a", then click apply
-        testUtils.dom.click(filterMenu.$('span.fa-filter'));
-        testUtils.dom.click(filterMenu.$('.o_add_custom_filter'));
-        testUtils.fields.editSelect(filterMenu.$('.o_filter_condition select.o_input.o_searchview_extended_prop_field'), 'many2one_field');
-        testUtils.fields.editInput(filterMenu.$('.o_filter_condition .o_searchview_extended_prop_value input'), "a");
-        testUtils.dom.click(filterMenu.$('.o_apply_filter'));
+        await testUtils.dom.click(filterMenu.$('span.fa-filter'));
+        await testUtils.dom.click(filterMenu.$('.o_add_custom_filter'));
+        await testUtils.fields.editSelect(filterMenu.$('.o_filter_condition select.o_input.o_searchview_extended_prop_field'), 'many2one_field');
+        await testUtils.fields.editInput(filterMenu.$('.o_filter_condition .o_searchview_extended_prop_value input'), "a");
+        await testUtils.dom.click(filterMenu.$('.o_apply_filter'));
 
 
         // open custom filter submenu, select trululu field and enter string "'a'", then click apply
-        testUtils.dom.click(filterMenu.$('.o_add_custom_filter'));
-        testUtils.fields.editSelect(filterMenu.$('.o_filter_condition select.o_input.o_searchview_extended_prop_field'), 'many2one_field');
-        testUtils.fields.editInput(filterMenu.$('.o_filter_condition .o_searchview_extended_prop_value input'), '"a"');
-        testUtils.dom.click(filterMenu.$('.o_apply_filter'));
+        await testUtils.dom.click(filterMenu.$('.o_add_custom_filter'));
+        await testUtils.fields.editSelect(filterMenu.$('.o_filter_condition select.o_input.o_searchview_extended_prop_field'), 'many2one_field');
+        await testUtils.fields.editInput(filterMenu.$('.o_filter_condition .o_searchview_extended_prop_value input'), '"a"');
+        await testUtils.dom.click(filterMenu.$('.o_apply_filter'));
         filterMenu.destroy();
     });
 });

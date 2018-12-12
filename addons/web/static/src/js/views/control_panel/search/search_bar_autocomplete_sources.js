@@ -310,7 +310,7 @@ var DateField = Field.extend({
             t = (this.attrs && this.attrs.type === 'datetime') ? 'datetime' : 'date';
             v = field_utils.parse[t](value, {type: t}, {timezone: true});
         } catch (e) {
-            return $.when(null);
+            return Promise.resolve(null);
         }
 
         var m = moment(v, t === 'datetime' ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD');
