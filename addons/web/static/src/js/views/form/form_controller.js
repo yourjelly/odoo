@@ -324,6 +324,14 @@ var FormController = BasicController.extend({
             return this.renderer.confirmChange(record, record.id, [changedFields]);
         }
     },
+    _applyChanges: function (dataPointID, changes, event) {
+        var self = this;
+        return this._super.apply(this, arguments).fail(function () {
+            if (self.mode === 'readonly') {
+                return self.reload();
+            }
+        });
+    },
     /**
      * Override to disable buttons in the renderer.
      *
