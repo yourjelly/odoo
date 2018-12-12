@@ -35,9 +35,11 @@ var LinkDialog = Dialog.extend({
         this.data = linkInfo || {};
         this.needLabel = linkInfo.needLabel;
         this.data.iniClassName = linkInfo.className;
+        var allBtnClassSuffixes = /(^|\s+)btn(-[a-z0-9_-]*)?/gi;
+        var allBtnShapes = /\s*(rounded-circle|flat)\s*/gi;
         this.data.className = linkInfo.className
-            .replace(/(^|\s+)btn(-[a-z0-9_-]*)?/gi, ' ')
-            .replace(/\s*(rounded-circle|flat)\s*/gi, ' ');
+            .replace(allBtnClassSuffixes, ' ')
+            .replace(allBtnShapes, ' ');
     },
     /**
      * @override
@@ -104,8 +106,11 @@ var LinkDialog = Dialog.extend({
         }
         this.data.text = data.label;
         this.data.url = data.url;
-        this.data.className = data.classes.replace(/\s+/gi, ' ').replace(/^\s+|\s+$/gi, '');
-        if (data.classes.replace(/(^|[ ])(btn-secondary|btn-success|btn-primary|btn-info|btn-warning|btn-danger)([ ]|$)/gi, ' ')) {
+        var allWhitespace = /\s+/gi;
+        var allStartAndEndSpace = /^\s+|\s+$/gi;
+        var allBtnTypes = /(^|[ ])(btn-secondary|btn-success|btn-primary|btn-info|btn-warning|btn-danger)([ ]|$)/gi;
+        this.data.className = data.classes.replace(allWhitespace, ' ').replace(allStartAndEndSpace, '');
+        if (data.classes.replace(allBtnTypes, ' ')) {
             this.data.style = {'background-color': '', 'color': ''};
         }
         this.data.isNewWindow = data.isNewWindow;
@@ -128,10 +133,11 @@ var LinkDialog = Dialog.extend({
         if (data === null) {
             return;
         }
+        var floatClass = /float-\w+/;
         $preview.attr({
             target: data.isNewWindow ? '_blank' : '',
             href: data.url && data.url.length ? data.url : '#',
-            class: data.classes.replace(/float-\w+/, '') + ' o_btn_preview',
+            class: data.classes.replace(floatClass, '') + ' o_btn_preview',
         }).html((data.label && data.label.length) ? data.label : data.url);
     },
     /**
@@ -147,7 +153,7 @@ var LinkDialog = Dialog.extend({
 
         if (label && this.data.images) {
             for (var i = 0 ; i < this.data.images.length ; i++) {
-                label = label.replace(/</, "&lt;").replace(/>/, "&gt;").replace(/\[IMG\]/, this.data.images[i].outerHTML);
+                label = label.replace('<', "&lt;").replace('>', "&gt;").replace(/\[IMG\]/, this.data.images[i].outerHTML);
             }
         }
 
@@ -170,10 +176,12 @@ var LinkDialog = Dialog.extend({
         if (url.indexOf('@') >= 0 && url.indexOf('mailto:') < 0 && !url.match(/^http[s]?/i)) {
             url = ('mailto:' + url);
         }
+        var allWhitespace = /\s+/gi;
+        var allStartAndEndSpace = /^\s+|\s+$/gi;
         return {
             label: label,
             url: url,
-            classes: classes.replace(/\s+/gi, ' ').replace(/^\s+|\s+$/gi, ''),
+            classes: classes.replace(allWhitespace, ' ').replace(allStartAndEndSpace, ''),
             isNewWindow: isNewWindow,
         };
     },

@@ -111,7 +111,8 @@ Wysiwyg.include({
                 return true;
             }
             if (!_.find(node.childNodes, function (node) {
-                return node.tagName !== 'DIV' && (node.tagName || node.textContent.match(/\S|\u200B|\u00A0/));
+                var char = this.context.invoke('HelperPlugin.getRegex', 'char');
+                return node.tagName !== 'DIV' && (node.tagName || node.textContent.match(char));
             })) {
                 return false;
             }

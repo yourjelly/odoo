@@ -153,6 +153,9 @@ QUnit.test('clean the dom before save', function (assert) {
             // add dirty flag to remove warning because the cleaned dom is different of the initial value and no dirty flag
             $editable.find('.s_hr').keydown();
 
+            // trigger change to avoid warning because the DOM change on clean without trigger onchange by snippet or edition
+            $editable.trigger('content_changed');
+
             wysiwyg.save().then(function (isDirty, html) {
                 assert.strictEqual(html.replace(/\s+/g, ' '),
                     '<div class=\"s_hr pt32 pb32 cleanForSave\"> <hr class=\"s_hr_1px s_hr_solid w-100 mx-auto\"> </div>',

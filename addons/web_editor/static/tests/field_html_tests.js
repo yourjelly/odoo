@@ -335,6 +335,95 @@ QUnit.test('save', function (assert) {
     });
 });
 
+var keyboardTestsTab = [
+    { name: "TAB at start of list element (must leave field)",
+        content: "<ul><li>dom to edit</li></ul>",
+        steps: [{start: "li:contents()[0]->0", key: 'TAB'}],
+        test: {
+            check: function ($editable, assert) {
+                assert.strictEqual($editable.data('wysiwyg').getValue(), "<ul><li>dom to edit</li></ul>", "The DOM don't change");
+                $editable.mousedown().focus().mouseup();
+            },
+        }
+    },
+    { name: "TAB within list element (must leave field)",
+        content: "<ul><li>dom to edit</li></ul>",
+        steps: [{start: "li:contents()[0]->5", key: 'TAB'}],
+        test: {
+            check: function ($editable, assert) {
+                assert.strictEqual($editable.data('wysiwyg').getValue(), "<ul><li>dom to edit</li></ul>", "The DOM don't change");
+                $editable.mousedown().focus().mouseup();
+            },
+        }
+    },
+    { name: "TAB within table element (must leave field)",
+        content: "<table><tbody><tr><td>dom to edit</td><td>node</td></tr></tbody></table>",
+        steps: [{start: "td:contents()[0]->5", key: 'TAB'}],
+        test: {
+            check: function ($editable, assert) {
+                assert.strictEqual($editable.data('wysiwyg').getValue(), "<table><tbody><tr><td>dom to edit</td><td>node</td></tr></tbody></table>", "The DOM don't change");
+                $editable.mousedown().focus().mouseup();
+            },
+        }
+    },
+    { name: "SHIFT+TAB at start of indented list element (must leave field)",
+        content: "<ul><li>dom to edit</li></ul>",
+        steps: [{start: "li:contents()[0]->0", key: 'TAB', shiftKey: true}],
+        test: {
+            check: function ($editable, assert) {
+                assert.strictEqual($editable.data('wysiwyg').getValue(), "<ul><li>dom to edit</li></ul>", "The DOM don't change");
+                $editable.mousedown().focus().mouseup();
+            },
+        }
+    },
+];
+
+QUnit.test('Tab must switch to another field', function (assert) {
+    var done = assert.async();
+    testUtils.createAsyncView({
+        View: FormView,
+        model: 'note.note',
+        data: this.data,
+        arch: '<form>' +
+                '<sheet>' +
+                    '<group>' +
+                        '<field name="body" widget="html" style="height: 300px"/>' +
+                    '</group>' +
+                    '<group>' +
+                        '<field name="display_name"/>' +
+                    '</group>' +
+                '</sheet>' +
+            '</form>',
+        res_id: 1,
+    }).then(function (form) {
+        form.$buttons.find('.o_form_button_edit').click();
+        var $field = form.$('.oe_form_field[name="body"]');
+        var $editable = $field.find('.note-editable');
+
+        testUtils.mock.intercept(form.renderer, "wysiwyg_focus", function (ev) {
+            assert.step("wysiwyg_focus");
+        });
+        testUtils.mock.intercept(form.renderer, "navigation_move", function (ev) {
+            assert.step("navigation_move: " + ev.data.direction);
+        });
+
+        weTestUtils.testKeyboard($editable, assert, keyboardTestsTab, 9).then(function () {
+            assert.verifySteps([
+                "wysiwyg_focus",
+                "navigation_move: right",
+                "wysiwyg_focus",
+                "navigation_move: right",
+                "wysiwyg_focus",
+                "navigation_move: right",
+                "wysiwyg_focus",
+                "navigation_move: left",
+            ]);
+            form.destroy();
+            done();
+        });
+    });
+});
+
 QUnit.module('inline-style');
 
 QUnit.test('convert style to class on edit', function (assert) {
@@ -386,7 +475,7 @@ QUnit.test('convert style to class on edit', function (assert) {
 
         $field = form.$('.oe_form_field[name="body"]');
         assert.strictEqual($field.find('.note-editable').html(), '<p class="pull-right">toto '+
-            '<span class="fa fa-star o_fake_not_editable" style="color: red;" contenteditable=\"false\"></span>'+
+            '<span class="fa fa-star o_fake_not_editable" style="color: red;" contenteditable="false"></span>'+
             'toto toto</p><p>tata</p>',
             "should have rendered the field correctly in edit (remove inline style that used class)");
 

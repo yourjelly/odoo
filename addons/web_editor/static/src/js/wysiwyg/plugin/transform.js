@@ -39,7 +39,8 @@ var TransformPlugin = AbstractPlugin.extend({
                 $(document).off('mousedown', mousedown).off('mouseup', mouseup);
             }
             if ($(event.target).closest('.note-popover').length) {
-                $image.data('transfo-destroy', true).attr('style', ($image.attr('style') || '').replace(/[^;]*transform[\w:]*;?/g, ''));
+                var transformStyles = self.context.invoke('HelperPlugin.getRegex', '', 'g', '[^;]*transform[\\w:]*;?');
+                $image.data('transfo-destroy', true).attr('style', ($image.attr('style') || '').replace(transformStyles, ''));
             }
         });
         $(document).on('mousedown', mousedown);

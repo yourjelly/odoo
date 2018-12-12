@@ -11,15 +11,18 @@ var TablePlugin = Plugins.table.extend({
 
     initialize: function () {
         this._super.apply(this, arguments);
+        var self = this;
         setTimeout(function () {
             // contentEditable fail for image and font in table
             // user must use right arrow the number of space but without feedback
             this.$editable.find('td:has(img, span.fa)').each(function () {
                 if (this.firstChild && !this.firstChild.tagName) {
-                    this.firstChild.textContent = this.firstChild.textContent.replace(/^\s+/, ' ');
+                    var startSpace = self.context.invoke('HelperPlugin.getRegex', 'startSpace');
+                    this.firstChild.textContent = this.firstChild.textContent.replace(startSpace, ' ');
                 }
                 if (this.lastChild && !this.lastChild.tagName) {
-                    this.lastChild.textContent = this.lastChild.textContent.replace(/\s+$/, ' ');
+                    var endSpace = self.context.invoke('HelperPlugin.getRegex', 'endSpace');
+                    this.lastChild.textContent = this.lastChild.textContent.replace(endSpace, ' ');
                 }
             });
             this.context.invoke('HistoryPlugin.clear');
@@ -31,7 +34,116 @@ var TablePlugin = Plugins.table.extend({
     //--------------------------------------------------------------------------
 
     /**
+     * Add a new col and
+     * wrap contents of the new cells in p elements.
+     *
+     * @override
+     * @param {WrappedRange} rng
+     * @param {String('left'|'right')} position
+     */
+    addCol: function (rng, position) {
+        this._super.apply(this, arguments);
+        var cell = dom.ancestor(rng.commonAncestor(), dom.isCell);
+        var table = dom.ancestor(cell, function (n) {
+            return n.tagName === 'TABLE';
+        });
+        var newColIndex = $(cell)[position === 'right' ? 'next' : 'prev']('td').index() + 1;
+        $(table).find('td:nth-child(' + newColIndex + ')').contents().wrap('<p></p>');
+    },
+    /**
+     * Add a new row and
+     * wrap contents of the new cells in p elements.
+     *
+     * @override
+     * @param {WrappedRange} rng
+     * @param {String('top'|'bottom')} position
+     */
+    addRow: function (rng, position) {
+        this._super.apply(this, arguments);
+        var row = dom.ancestor(rng.commonAncestor(), dom.isCell).parentElement;
+        $(row)[position === 'bottom' ? 'next' : 'prev']('tr').find('td').contents().wrap('<p></p>');
+    },
+    /**
+     * Create empty table element and
+     * wrap the contents of all cells in p elements.
+     *
+     * @override
+     * @param {Number} rowCount
+     * @param {Number} colCount
+     * @returns {Node} table
+     */
+    createTable: function (colCount, rowCount, options) {
+        var table = this._super.apply(this, arguments);
+        $(table).find('td').contents().wrap('<p></p>');
+        return table;
+    },
+    /**
+     * @override
+     */
+    deleteCol: function () {
+        var range = this.context.invoke('editor.createRange');
+        
+        // Delete the last remaining column === delete the table
+        var cell = dom.ancestor(range.commonAncestor(), dom.isCell);
+        if (cell && !cell.previousElementSibling && !cell.nextElementSibling) {
+            return this.deleteTable();
+        }
+        var neighbor = cell.previousElementSibling || cell.nextElementSibling;
+
+        this._super.apply(this, arguments);
+
+        // Put the range back on the previous or next cell after deleting
+        // to allow chain-removing
+        range = this.context.invoke('editor.createRange');
+        if (range.sc.tagName !== 'TD' && neighbor) {
+            range.sc = range.ec = neighbor;
+            range.so = range.eo = 0;
+            range.normalize().select();
+        }
+    },
+    /**
+     * @override
+     */
+    deleteRow: function () {
+        var range = this.context.invoke('editor.createRange');
+        
+        // Delete the last remaining row === delete the table
+        var row = dom.ancestor(range.commonAncestor(), function (n) {
+            return n.tagName === 'TR';
+        });
+        if (row && !row.previousElementSibling && !row.nextElementSibling) {
+            return this.deleteTable();
+        }
+        var neighbor = row.previousElementSibling || row.nextElementSibling;
+
+        this._super.apply(this, arguments);
+
+        // Put the range back on the previous or next row after deleting
+        // to allow chain-removing
+        range = this.context.invoke('editor.createRange');
+        if (range.sc.tagName !== 'TR' && neighbor) {
+            range.sc = range.ec = neighbor;
+            range.so = range.eo = 0;
+            range.normalize().select();
+        }
+    },
+    /**
+     * Delete the table in range.
+     */
+    deleteTable: function () {
+        var range = this.context.invoke('editor.createRange');
+        var cell = dom.ancestor(range.commonAncestor(), dom.isCell);
+        var table = $(cell).closest('table')[0];
+
+        var point = this.context.invoke('HelperPlugin.removeBlockNode', table);
+        range.sc = range.ec = point.node;
+        range.so = range.eo = point.offset;
+        range.normalize().select();
+    },
+    /**
      * Insert a table.
+     * Note: adds <p><br></p> before/after the table if the table
+     * has nothing brefore/after it, so as to allow the carret to move there.
      *
      * @param {String} dim dimension of table (ex : "5x5")
      */
@@ -39,13 +151,14 @@ var TablePlugin = Plugins.table.extend({
         var dimension = dim.split('x');
         var table = this.createTable(dimension[0], dimension[1], this.options);
         this.context.invoke('HelperPlugin.insertBlockNode', table);
+        var p;
         if (!table.previousElementSibling) {
-            var p = this.document.createElement('p');
+            p = this.document.createElement('p');
             $(p).append(this.document.createElement('br'));
             $(table).before(p);
         }
         if (!table.nextElementSibling) {
-            var p = this.document.createElement('p');
+            p = this.document.createElement('p');
             $(p).append(this.document.createElement('br'));
             $(table).after(p);
         }
@@ -55,19 +168,8 @@ var TablePlugin = Plugins.table.extend({
         range.normalize().select();
         this.context.invoke('editor.saveRange');
     },
-    /**
-     * Delete the table in range.
-     */
-    deleteTable: function () {
-        var range = this.context.invoke('editor.createRange');
-        var cell = dom.ancestor(range.commonAncestor(), dom.isCell);
-        var table = $(cell).closest('table');
-        var point = this.context.invoke('HelperPlugin.removeBlockNode', table);
-        range.sc = range.ec = point.node;
-        range.so = range.eo = point.offset;
-        range.normalize().select();
-    },
 });
+
 
 var TablePopover = Plugins.tablePopover.extend({
     events: _.defaults({
@@ -78,8 +180,8 @@ var TablePopover = Plugins.tablePopover.extend({
      * Update the table's popover and its position.
      *
      * @override
-     * @param {DOM} target
-     * @returns {false|DOM} the selected cell (on which to display the popover)
+     * @param {Node} target
+     * @returns {false|Node} the selected cell (on which to display the popover)
      */
     update: function (target) {
         if (!target || this.context.isDisabled()) {

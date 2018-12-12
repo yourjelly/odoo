@@ -473,6 +473,9 @@ var MediaPlugin = AbstractPlugin.extend({
     _onChange: function (se, e) {
         var target = this._selectTarget();
         this._moveTargetSelection(target);
+        if (!this.$editable.has(target).length) {
+            return;
+        }
         return this.update(target);
     },
     /**
@@ -706,7 +709,10 @@ var ImagePlugin = AbstractMediaPlugin.extend({
         this.context.invoke('HandlePlugin.update', target);
 
         _.each(this.options.icons.imageShape, function (icon, className) {
-            ui.toggleBtnActive(this.$popover.find('.note-imageShape button:has(.' + icon.replace(/\s+/g, '.') + ')'), $target.hasClass(className));
+            var thisIconSel = '.note-imageShape button:has(.' +
+                                icon.replace(this.context.invoke('HelperPlugin.getRegex', 'space', 'g'), '.') +
+                                ')';
+            ui.toggleBtnActive(this.$popover.find(thisIconSel), $target.hasClass(className));
         }.bind(this));
 
         var size = (($target.attr('style') || '').match(/width:\s*([0-9]+)%/i) || [])[1];

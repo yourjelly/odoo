@@ -72,7 +72,7 @@ var FontPlugin = AbstractPlugin.extend({
         return $button;
     },
     /**
-     * Creates a (fore- or back-) color palette
+     * Creates a (fore- or back-) color palette.
      *
      * @param {string('foreColor'|'backColor')} eventName
      * @returns {jQuery}
@@ -135,6 +135,7 @@ var FontPlugin = AbstractPlugin.extend({
             var $target = $(e.target);
             this.context.invoke('FontPlugin.' + method, $target.closest('[data-value]').data('value'), $target);
             this.context.invoke('buttons.updateCurrentStyle');
+            this.editable.normalize();
             this.context.invoke('editor.saveRange');
             this.context.invoke('editor.afterCommand');
         }.bind(this));
@@ -183,7 +184,7 @@ var FontPlugin = AbstractPlugin.extend({
      * @returns {Node} the <font> node
      */
     _applyStylesToFontNode: function (node, color, bgcolor, size) {
-        var className = node.className.split(/\s+/);
+        var className = node.className.split(this.context.invoke('HelperPlugin.getRegex', 'space'));
         var k;
         if (color) {
             for (k=0; k<className.length; k++) {
@@ -332,8 +333,8 @@ var FontPlugin = AbstractPlugin.extend({
                 node = nodes[i];
                 font = dom.lastAncestor(node, dom.isFont);
                 if (!font) {
-                    if (node.textContent.match(/^[ ]|[ ]$/)) {
-                        node.textContent = node.textContent.replace(/^[ ]|[ ]$/g, '\u00A0');
+                    if (node.textContent.match(this.context.invoke('HelperPlugin.getRegex', 'startAndEndSpace'))) {
+                        node.textContent = node.textContent.replace(this.context.invoke('HelperPlugin.getRegex', 'startAndEndSpace', 'g'), '\u00A0');
                     }
                     font = dom.create("font");
                     node.parentNode.insertBefore(font, node);

@@ -39,7 +39,7 @@ var LinkPlugin = Plugins.linkDialog.extend({
         if (linkInfo.range) {
             var r = linkInfo.range.getPoints();
 
-            // move caret in icon, video...
+            // move carret in icon, video...
             if (!media && (dom.ancestor(r.sc, dom.isImg) || dom.ancestor(r.sc, dom.isIcon))) {
                 media = dom.ancestor(r.sc, dom.isImg) || dom.ancestor(r.sc, dom.isIcon);
             }
@@ -145,7 +145,7 @@ var LinkPlugin = Plugins.linkDialog.extend({
                         text += nodes[i].textContent;
                     }
                 }
-                linkInfo.text = text.replace(/[ \t\r\n]+/g, ' ');
+                linkInfo.text = text.replace(this.context.invoke('HelperPlugin.getRegex', 'space', 'g'), ' ');
             }
 
             linkInfo.needLabel = !linkInfo.text.length;
@@ -224,7 +224,8 @@ var LinkPlugin = Plugins.linkDialog.extend({
             this.context.invoke('editor.hidePopover');
             return;
         }
-        anchor.innerHTML = anchor.innerHTML.replace(/^\u200B|\u200B$/g, '');
+        var startAndEndInvisible = this.context.invoke('HelperPlugin.getRegex', 'startAndEndInvisible', 'g');
+        anchor.innerHTML = anchor.innerHTML.replace(startAndEndInvisible, '');
         var $contents = $(anchor).contents();
         $(anchor).before($contents).remove();
 
@@ -279,13 +280,13 @@ var LinkPopover = Plugins.linkPopover.extend({
     /**
      * Prevent links without text: replace empty text with the word "Label".
      *
-     * @param {Node} anchor
-     * @param {Boolean} select
+     * @param {DOM} anchor
+     * @param {bool} select
      */
     fillEmptyLink: function (anchor, select) {
         if (dom.isAnchor(anchor)) {
             var text = _t('Label');
-            if(/^[\s\u00A0\u200B]*(<br>)?[\s\u00A0\u200B]*$/.test(anchor.innerHTML)) {
+            if (this.context.invoke('HelperPlugin.getRegex', 'onlyEmptySpace').test(anchor.innerHTML)) {
                 $(anchor).contents().remove();
                 $(anchor).append(this.document.createTextNode(text));
             }
@@ -415,7 +416,10 @@ var LinkPopover = Plugins.linkPopover.extend({
             var rangeChange;
             var innerHTML = this.lastAnchor.innerHTML.replace('&nbsp;', '\u00A0').replace('&#8203;', '\u200B');
             // prevent links without text
-            if (this.$editable.has(this.lastAnchor).length && /^[\s\u00A0\u200B]*$/.test(innerHTML)) {
+            if (
+                this.$editable.has(this.lastAnchor).length &&
+                this.context.invoke('HelperPlugin.getRegexBlank', {space: true, invisible: true, nbsp: true}).test(innerHTML)
+               ) {
                 $(this.lastAnchor).contents().remove();
                 $(this.lastAnchor).append(this.document.createTextNode(_t('Label')));
                 range.sc = range.ec = this.lastAnchor.firstChild;
@@ -424,8 +428,11 @@ var LinkPopover = Plugins.linkPopover.extend({
                 rangeChange = true;
             }
             var firstChild = this.context.invoke('HelperPlugin.firstLeaf', this.lastAnchor);
-            if (!firstChild.tagName && /^\u200B/.test(firstChild.textContent)) {
-                firstChild.textContent = firstChild.textContent.replace(/^\u200B/, '');
+            if (
+                !firstChild.tagName &&
+                this.context.invoke('HelperPlugin.getRegex', 'startInvisible').test(firstChild.textContent)
+               ) {
+                firstChild.textContent = firstChild.textContent.replace(this.context.invoke('HelperPlugin.getRegex', 'startInvisible'), '');
                 if (range.sc === firstChild && range.so) {
                     range.so -= 1;
                     rangeChange = true;
@@ -436,8 +443,12 @@ var LinkPopover = Plugins.linkPopover.extend({
                 }
             }
             var lastChild = this.context.invoke('HelperPlugin.lastLeaf', this.lastAnchor);
-            if (lastChild.textContent.length > 1 && !lastChild.tagName && /\u200B$/.test(lastChild.textContent)) {
-                lastChild.textContent = lastChild.textContent.replace(/\u200B$/, '');
+            if (
+                lastChild.textContent.length > 1 &&
+                !lastChild.tagName &&
+                this.context.invoke('HelperPlugin.getRegex', 'endInvisible').test(lastChild.textContent)
+               ) {
+                lastChild.textContent = lastChild.textContent.replace(this.context.invoke('HelperPlugin.getRegex', 'endInvisible'), '');
                 if (range.sc === lastChild && range.so > dom.nodeLength(lastChild)) {
                     range.so = dom.nodeLength(lastChild);
                     rangeChange = true;

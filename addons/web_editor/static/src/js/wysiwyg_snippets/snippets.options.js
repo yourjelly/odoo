@@ -665,7 +665,7 @@ registry.colorpicker = SnippetOption.extend({
             var $clpicker = fontPlugin.createPalette('backColor').find('.note-color-palette'); // don't use custom color
             $clpicker.find('.note-color-reset').remove();
             $clpicker.find('h6').each(function () {
-                $(this).replaceWith($('<div class="text-muted mt8"/>').text($(this).text()));
+                $(this).replaceWith($('<div class="mt8"/>').text($(this).text()));
             });
 
             // Retrieve excluded palettes list
@@ -901,7 +901,8 @@ registry.background = SnippetOption.extend({
         if (value === undefined) {
             value = this.$target.css('background-image');
         }
-        return value && value.replace(/url\(['"]*|['"]*\)|^none$/g, '') || '';
+        var srcValueWrapper = /url\(['"]*|['"]*\)|^none$/g;
+        return value && value.replace(srcValueWrapper, '') || '';
     },
     /**
      * @override

@@ -22,6 +22,9 @@ HistoryPlugin.include({
         this.trigger_up('content_was_recreated', {
             $target: this.$editable,
         });
+        $('.oe_overlay').remove();
+        $('.note-control-selection').hide();
+        this.$editable.trigger('content_changed');
     },
 });
 

@@ -12,6 +12,7 @@ var HistoryPlugin = Plugins.history.extend({
      * @override
      */
     applySnapshot: function () {
+        this.context.invoke('MediaPlugin.hidePopovers');
         try {
             this._super.apply(this, arguments);
         } catch (e) {
@@ -35,7 +36,6 @@ var HistoryPlugin = Plugins.history.extend({
      * @override
      */
     makeSnapshot: function () {
-        this.editable.normalize();
         var rng = $.summernote.range.create(this.editable);
         var snapshot = this._super();
         if (rng.sc === this.editable || $(rng.sc).has(this.editable).length) {
@@ -56,10 +56,6 @@ var HistoryPlugin = Plugins.history.extend({
      * @override
      */
     undo: function () {
-        // Create snapshot if not yet recorded
-        if (this.stackOffset === this.stack.length -1) {
-            this.recordUndo();
-        }
         if (this.stackOffset > 0) {
             this.stackOffset--;
         }

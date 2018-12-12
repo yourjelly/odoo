@@ -18,6 +18,10 @@ var ToolbarPlugin = Plugins.toolbar.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    initialize: function () {
+        this._super();
+        this.update();
+    },
     /**
      * Update the toolbar (enabled/disabled).
      */
@@ -25,7 +29,7 @@ var ToolbarPlugin = Plugins.toolbar.extend({
         var $btn = this.$toolbar.children().not('.note-history, .note-view').find('button');
         var target = this.context.invoke('editor.restoreTarget') || this.context.invoke('editor.createRange').sc;
 
-        if (!target || !this.options.isEditableNode(target)) {
+        if (!target || !$.contains(this.editable, target) || !this.options.isEditableNode(target)) {
             $btn.addClass('o_disabled');
             return;
         }

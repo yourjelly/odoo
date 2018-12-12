@@ -27,8 +27,10 @@ var AltDialog = Dialog.extend({
         this.trigger_up('getRecordInfo', {recordInfo: options});
 
         this.media = media;
-        this.alt = ($(this.media).attr('alt') || "").replace(/&quot;/g, '"');
-        this.tag_title = ($(this.media).attr('title') || "").replace(/&quot;/g, '"');
+        var allEscQuots = /&quot;/g;
+        this.alt = ($(this.media).attr('alt') || "").replace(allEscQuots, '"');
+        var title = $(this.media).attr('title') || $(this.media).data('original-title') || "";
+        this.tag_title = (title).replace(allEscQuots, '"');
     },
 
     //--------------------------------------------------------------------------
@@ -41,7 +43,9 @@ var AltDialog = Dialog.extend({
     save: function () {
         var alt = this.$('#alt').val();
         var title = this.$('#title').val();
-        $(this.media).attr('alt', alt ? alt.replace(/"/g, "&quot;") : null).attr('title', title ? title.replace(/"/g, "&quot;") : null);
+        var allNonEscQuots = /"/g;
+        $(this.media).attr('alt', alt ? alt.replace(allNonEscQuots, "&quot;") : null)
+                     .attr('title', title ? title.replace(allNonEscQuots, "&quot;") : null);
 
         this.trigger('saved', {
             media: this.media,

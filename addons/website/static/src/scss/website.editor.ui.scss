@@ -130,10 +130,10 @@ html[lang] > body.editor_enable [data-oe-translation-state] {
 
 // SNIPPET OPTIONS
 .colorpicker {
-    background-color: $o-we-color-dark!important;
-
     .o_colorpicker_sections {
-        border: 1px solid darken($o-we-color-dark, 12%);
+        .note-color-palette > div {
+            color: $o-we-color-text-light;
+        }
     }
     .o_colorpicker_section {
         &:after {

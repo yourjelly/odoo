@@ -233,10 +233,12 @@ var ImageWidget = MediaWidget.extend({
         if (!this.$media.is('img')) {
             return;
         }
+        var allImgClasses = /(^|\s+)((img(\s|$)|img-(?!circle|rounded|thumbnail))[^\s]*)/g;
+        var allImgClassModifiers = /(^|\s+)(rounded-circle|shadow|rounded|img-thumbnail|mx-auto)([^\s]*)/g;
         this.media.className = this.media.className && this.media.className
             .replace('o_we_custom_image', '')
-            .replace(/(^|\s+)((img(\s|$)|img-(?!circle|rounded|thumbnail))[^\s]*)/g, ' ')
-            .replace(/(^|\s+)(rounded-circle|shadow|rounded|img-thumbnail|mx-auto)([^\s]*)/g, ' ');
+            .replace(allImgClasses, ' ')
+            .replace(allImgClassModifiers, ' ');
     },
     /**
      * Returns the domain for attachments used in media dialog.
@@ -742,7 +744,8 @@ var IconWidget = MediaWidget.extend({
      * @override
      */
     _clear: function () {
-        this.media.className = this.media.className && this.media.className.replace(/(^|\s)(fa(\s|$)|fa-[^\s]*)/g, ' ');
+        var allFaClasses = /(^|\s)(fa(\s|$)|fa-[^\s]*)/g;
+        this.media.className = this.media.className && this.media.className.replace(allFaClasses, ' ');
     },
     /**
      * @private
@@ -880,7 +883,8 @@ var VideoWidget = MediaWidget.extend({
                 this.media.dataset.src = undefined;
             }
         }
-        this.media.className = this.media.className && this.media.className.replace(/(^|\s)media_iframe_video(\s|$)/g, ' ');
+        var allVideoClasses = /(^|\s)media_iframe_video(\s|$)/g;
+        this.media.className = this.media.className && this.media.className.replace(allVideoClasses, ' ');
         this.media.innerHTML = '';
     },
     /**

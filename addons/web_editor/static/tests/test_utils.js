@@ -462,8 +462,9 @@ var testKeyboard = function ($editable, assert, keyboardTests, addTests) {
             // test content
             if (test.test.content) {
                 var value = $editable.data('wysiwyg').getValue({keepPopover: true});
-                value = value.replace(/\u200B/g, '&#8203;');
-                var result = test.test.content.replace(/\u200B/g, '&#8203;');
+                var allInvisible = /\u200B/g;
+                value = value.replace(allInvisible, '&#8203;');
+                var result = test.test.content.replace(allInvisible, '&#8203;');
                 assert.strictEqual(value, result, test.name);
 
                 if (test.test.start && value !== result) {

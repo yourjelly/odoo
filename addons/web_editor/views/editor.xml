@@ -45,19 +45,23 @@
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/helper.js"/>
 
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/toolbar.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/dropzone.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/history.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/table.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/text.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/editor.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/media.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/buttons.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/link.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/font.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/font_buttons.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/keyboard.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/unbreakable.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/transform.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/hint.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/bullet.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/codeview.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/help_dialog.js"/>
 </template>
 
 <template id="wysiwyg_snippets" inherit_id="web_editor.wysiwyg" name="Wysiwyg Editor additional snippets">
@@ -129,6 +133,8 @@
     <xpath expr="." position="inside">
         <script type="text/javascript" src="/web_editor/static/tests/test_utils.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/field_html_tests.js"/>
+        <script type="text/javascript" src="/web_editor/static/tests/wysiwyg_tests.js"/>
+        <script type="text/javascript" src="/web_editor/static/tests/wysiwyg_keyboard_tests.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/wysiwyg_snippets_tests.js"/>
     </xpath>
 </template>

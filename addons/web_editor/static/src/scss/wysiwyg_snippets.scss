@@ -188,10 +188,7 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
 
 // SNIPPET OPTIONS
 .colorpicker {
-    background-color: $o-wysiwyg-bg-color!important;
-
     .o_colorpicker_sections {
-        border: 1px solid darken($o-wysiwyg-bg-color, 12%);
         font-size: 14px;
 
         .o_colorpicker_section_tabs {

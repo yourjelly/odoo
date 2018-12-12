@@ -59,7 +59,7 @@ var BulletPlugin = AbstractPlugin.extend({
         // create list
 
         nodes = this.context.invoke('HelperPlugin.getSelectedNodes');
-        var formatNodes = this.context.invoke('HelperPlugin.filterFormatNodes', nodes);
+        var formatNodes = this.context.invoke('HelperPlugin.filterFormatAncestors', nodes);
 
         formatNodes = _.compact(_.map(formatNodes, function (node) {
             var ancestor = (!node.tagName || node.tagName === 'BR') && dom.ancestor(node, dom.isCell);
@@ -313,14 +313,15 @@ var BulletPlugin = AbstractPlugin.extend({
                 $ul = $(dom.ancestor(range.sc, dom.isList));
             }
             $ul.each(function () {
+                var notWhitespace = /\S/;
                 if (this.previousSibling &&
                     this.previousSibling !== this.previousElementSibling &&
-                    !this.previousSibling.textContent.match(/\S/)) {
+                    !this.previousSibling.textContent.match(notWhitespace)) {
                     this.parentNode.removeChild(this.previousSibling);
                 }
                 if (this.nextSibling &&
                     this.nextSibling !== this.nextElementSibling &&
-                    !this.nextSibling.textContent.match(/\S/)) {
+                    !this.nextSibling.textContent.match(notWhitespace)) {
                     this.parentNode.removeChild(this.nextSibling);
                 }
             });
