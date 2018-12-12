@@ -36,7 +36,7 @@
                     <notebook>
                         <page string="Questions">
                             <field name="question_ids" widget="question_one2many">
-                                <tree editable="bottom">
+                                <tree>
                                     <field name="sequence" widget="handle"/>
                                     <field name="line_type" invisible="1" />
                                     <field name="question"/>

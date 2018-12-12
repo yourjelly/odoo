@@ -139,7 +139,7 @@ class Survey(http.Controller):
         # Select the right page
         if user_input.state == 'new':  # First page
             page, questions_ids, page_nr, pages_length, last = Survey.next_page_custom(user_input, 0, go_back=False)
-            data = {'survey': survey, 'questions_ids': questions_ids, 'page': page, 'page_nr': page_nr, 'pages_length': pages_length, 'token': user_input.token}
+            data = {'survey': survey, 'questions_ids': questions_ids, 'page': page, 'page_nr': page_nr, 'pages_length': pages_length, 'last': last, 'token': user_input.token}
             return request.render('survey.survey', data)
         elif user_input.state == 'done':  # Display success message
             return request.render('survey.sfinished', {'survey': survey,
