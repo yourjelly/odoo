@@ -48,7 +48,7 @@ QUnit.module('section_and_note', {
 }, function () {
     QUnit.test('correct display of section and note fields', async function (assert) {
         assert.expect(4);
-        var form = createView({
+        var form = await createView({
             View: FormView,
             model: 'invoice',
             data: this.data,
@@ -80,14 +80,14 @@ QUnit.module('section_and_note', {
 
         // editing line should be textarea
         $tr0 = form.$('tr.o_data_row:eq(0)');
-        testUtils.dom.click($tr0.find('td.o_data_cell'));
-        assert.strictEqual($tr0.find('td.o_data_cell textarea[name="name"]').length, 1,
+        await testUtils.dom.click($tr0.find('td.o_data_cell'));
+        assert.containsOnce($tr0, 'td.o_data_cell textarea[name="name"]',
             "editing line should be textarea");
 
         // editing section should be input
         $tr1 = form.$('tr.o_data_row:eq(1)');
-        testUtils.dom.click($tr1.find('td.o_data_cell'));
-        assert.strictEqual($tr1.find('td.o_data_cell input[name="name"]').length, 1,
+        await testUtils.dom.click($tr1.find('td.o_data_cell'));
+        assert.containsOnce($tr1, 'td.o_data_cell input[name="name"]',
             "editing section should be input");
 
         form.destroy();
