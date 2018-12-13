@@ -39,11 +39,9 @@ KanbanRecord.include({
      * Mostly a handler for what happens to the input "this.$target_input"
      *
      * @private
-     * @param {JqueryEvent} ev
      *
      */
     _onSalesTeamTargetSet: function () {
-        var self = this;
         var value = Number(this.$target_input.val());
         if (isNaN(value)) {
             this.do_warn(_t("Wrong value entered!"), _t("Only Integer Value should be valid."));

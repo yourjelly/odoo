@@ -32,7 +32,7 @@ var _t = core._t;
  * that on_attach_callback() will be called on each w with arguments args
  */
 function _notify(content, callbacks) {
-    _.each(callbacks, function (c) {
+    callbacks.forEach(function (c) {
         if (c.widget && c.widget.on_attach_callback) {
             c.widget.on_attach_callback(c.callback_args);
         }
@@ -169,14 +169,14 @@ var dom = {
      * @return {jQuery} the detached elements
      */
     detach: function (to_detach, options) {
-        _.each(to_detach, function (d) {
+        to_detach.forEach( function (d) {
             if (d.widget.on_detach_callback) {
                 d.widget.on_detach_callback(d.callback_args);
             }
         });
         var $to_detach = options && options.$to_detach;
         if (!$to_detach) {
-            $to_detach = $(_.map(to_detach, function (d) {
+            $to_detach = $(to_detach.map(function (d) {
                 return d.widget.el;
             }));
         }
