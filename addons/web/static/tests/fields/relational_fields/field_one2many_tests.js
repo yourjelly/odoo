@@ -7761,8 +7761,8 @@ QUnit.module('fields', {}, function () {
                 },
             });
 
-            testUtils.dom.click($('button[name="action_invoice_open"]'));
             testUtils.dom.click(form.$('.o_field_x2many_list_row_add a'));
+            testUtils.dom.click($('button[name="action_invoice_open"]'));
             form.destroy();
         });
 

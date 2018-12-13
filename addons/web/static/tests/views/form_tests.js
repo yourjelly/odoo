@@ -1826,14 +1826,14 @@ QUnit.module('Views', {
             event.stopPropagation();
             count++;
         });
+        testUtils.fields.editInput(form.$('input[name=foo]'), 'tralala');
         testUtils.dom.click('.oe_stat_button');
         assert.strictEqual(count, 1, "should have triggered a execute action");
-        assert.strictEqual(form.mode, "edit", "form view should be in edit mode");
+        assert.strictEqual(form.mode, "readonly", "form view should be in edit mode");
 
-        testUtils.fields.editInput(form.$('input[name=foo]'), 'tralala');
         testUtils.dom.click('.oe_stat_button:first');
 
-        assert.strictEqual(form.mode, "edit", "form view should be in edit mode");
+        assert.strictEqual(form.mode, "readonly", "form view should be in edit mode");
         assert.strictEqual(count, 2, "should have triggered a execute action");
         assert.verifySteps(['read', 'write', 'read']);
         form.destroy();
@@ -1916,7 +1916,8 @@ QUnit.module('Views', {
         testUtils.dom.click(form.$('button:contains(Do something)'));
         assert.strictEqual(writeCount, 1, "should have triggered a write");
         assert.strictEqual(executeActionCount, 1, "should have triggered a execute action");
-
+        form.$('.o_form_button_edit').removeAttr('disabled')
+        testUtils.form.clickEdit(form)
         testUtils.fields.editInput(form.$('input[name=foo]'), 'abcdef');
 
         testUtils.dom.click(form.$('button:contains(Or discard)'));
