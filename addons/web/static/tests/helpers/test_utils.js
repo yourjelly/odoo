@@ -215,6 +215,8 @@ return Promise.all([
             dropFile: testUtilsFile.dropFile,
         },
 
+        checkBody: checkBody,
+        checkModals: checkModals,
         createActionManager: testUtilsCreate.createActionManager,
         createDebugManager: testUtilsCreate.createDebugManager,
         createAsyncView: testUtilsCreate.createAsyncView,
@@ -226,8 +228,6 @@ return Promise.all([
         makeTestPromiseWithAssert: makeTestPromiseWithAssert,
         nextMicrotaskTick: nextMicrotaskTick,
         nextTick: nextTick,
-        checkBody: checkBody,
-        checkModals: checkModals,
 
         // backward-compatibility
         addMockEnvironment: deprecated(testUtilsMock.addMockEnvironment, 'mock'),

@@ -22,10 +22,10 @@ QUnit.module('Views', {
 }, function () {
     QUnit.module('LunchKanbanView');
 
-    QUnit.test('Simple rendering of LunchKanbanView', function (assert) {
+    QUnit.test('Simple rendering of LunchKanbanView', async function (assert) {
         assert.expect(8);
 
-        var lunchKanban = createView({
+        var lunchKanban = await createView({
             View: LunchKanbanView,
             model: 'product',
             data: this.data,
@@ -61,34 +61,38 @@ QUnit.module('Views', {
 
         var $section = $(lunchKanban.$('.o_lunch_widget_info')[0]);
         // username
-        assert.strictEqual($section.find('div:eq(1) div:eq(0)').text().trim(), 'Marc Demo', 'Username should have been Marc Demo');
+        assert.strictEqual($section.find('div:eq(1) div:eq(0)').text().trim(),
+            'Marc Demo', 'Username should have been Marc Demo');
         // wallet_balance
-        assert.strictEqual($section.find('div:eq(1) div:eq(1) span:eq(0)').text().trim(), '20.00', 'Wallet balance should have been 20');
+        assert.strictEqual($section.find('div:eq(1) div:eq(1) span:eq(0)').text().trim(),
+            '20.00', 'Wallet balance should have been 20');
         // your order section
         $section = $(lunchKanban.$('.o_lunch_widget_info')[1]);
         // only one line
-        assert.strictEqual($section.find('div:eq(2) div.d-flex').length, 1, 'There should be only one line');
+        assert.containsOnce($section, 'div:eq(2) div.d-flex', 'There should be only one line');
         // quantity = 1
-        assert.strictEqual($section.find('div:eq(2) div:eq(0) span:eq(0)').text().trim(), '1', 'The line should contain only one product');
+        assert.strictEqual($section.find('div:eq(2) div:eq(0) span:eq(0)').text().trim(),
+            '1', 'The line should contain only one product');
         // buttons to remove and to add product
-        assert.strictEqual($section.find('.o_remove_product').length, 1, 'There should be a remove product button');
-        assert.strictEqual($section.find('.o_add_product').length, 1, 'There should be a add product button');
+        assert.containsOnce($section, '.o_remove_product', 'There should be a remove product button');
+        assert.containsOnce($section, '.o_add_product', 'There should be a add product button');
 
         $section = $(lunchKanban.$('.o_lunch_widget_info')[2]);
         // total
-        assert.strictEqual($section.find('div:eq(0) div:eq(1)').text().trim(), '7.4', 'total should be of 7.4');
+        assert.strictEqual($section.find('div:eq(0) div:eq(1)').text().trim(),
+            '7.4', 'total should be of 7.4');
         // order now button
-        assert.strictEqual($section.find('button').length, 1, 'order now button should be available');
+        assert.containsOnce($section, 'button', 'order now button should be available');
 
         lunchKanban.destroy();
     });
 
-    QUnit.test('User interactions', function (assert) {
+    QUnit.test('User interactions', async function (assert) {
         assert.expect(8);
 
         var state = 'new';
 
-        var lunchKanban = createView({
+        var lunchKanban = await createView({
             View: LunchKanbanView,
             model: 'product',
             data: this.data,
@@ -129,25 +133,28 @@ QUnit.module('Views', {
             },
         });
 
-        lunchKanban.$('.o_add_money').click();
+        await testUtils.dom.click(lunchKanban.$('.o_add_money'));
         var modal = $('.modal-dialog');
-        assert.strictEqual(modal.find('.modal-body').text().trim(), 'Hello', 'Message should have been Hello');
-        modal.find('.btn.btn-primary').click();
+        assert.strictEqual(modal.find('.modal-body').text().trim(), 'Hello',
+            'Message should have been Hello');
+        await testUtils.dom.click(modal.find('.btn.btn-primary'));
 
-        lunchKanban.$('.o_add_product').click();
-        lunchKanban.$('.o_remove_product').click();
+        await testUtils.dom.click(lunchKanban.$('.o_add_product'));
+        await testUtils.dom.click(lunchKanban.$('.o_remove_product'));
 
         state = 'ordered';
-        lunchKanban.$('.o_lunch_widget_order_button').click();
+        await testUtils.dom.click(lunchKanban.$('.o_lunch_widget_order_button'));
         // state is shown
-        assert.strictEqual(lunchKanban.$('.o_lunch_ordered').length, 1, 'state should be shown as ordered');
+        assert.containsOnce(lunchKanban, '.o_lunch_ordered', 'state should be shown as ordered');
         // no more buttons
-        assert.strictEqual(lunchKanban.$('.o_remove_product').length, 0, 'button to remove product should not be shown anymore');
-        assert.strictEqual(lunchKanban.$('.o_add_product').length, 0, 'button to add product should not be shown anymore');
+        assert.containsNone(lunchKanban, '.o_remove_product',
+            'button to remove product should not be shown anymore');
+        assert.containsNone(lunchKanban, '.o_add_product',
+            'button to add product should not be shown anymore');
         state = 'confirmed';
-        lunchKanban.reload();
+        await lunchKanban.reload();
         // state is updated
-        assert.strictEqual(lunchKanban.$('.o_lunch_confirmed').length, 1, 'state should be shown as confirmed');
+        assert.containsOnce(lunchKanban, '.o_lunch_confirmed', 'state should be shown as confirmed');
 
         assert.verifySteps([
             [[1], 1],
@@ -157,10 +164,10 @@ QUnit.module('Views', {
         lunchKanban.destroy();
     });
 
-    QUnit.test('Manager interactions', function (assert) {
+    QUnit.test('Manager interactions', async function (assert) {
         assert.expect(5);
 
-        var lunchKanban = createView({
+        var lunchKanban = await createView({
             View: LunchKanbanView,
             model: 'product',
             data: this.data,
