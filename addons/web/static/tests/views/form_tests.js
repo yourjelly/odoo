@@ -2353,7 +2353,7 @@ QUnit.module('Views', {
         form.destroy();
     });
 
-    QUnit.skip("switching to another record from a dirty one  [!!! ATTENTION, ATTENTION !!! DON'T SKIP ME !!! DON'T FORGET TO FIX ME BEFORE MERGING !!!]", async function (assert) {
+    QUnit.test("switching to another record from a dirty one", async function (assert) {
         assert.expect(11);
 
         var nbWrite = 0;
