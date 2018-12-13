@@ -90,7 +90,8 @@ QUnit.test('activity menu widget: menu with no records', async function (assert)
             },
         });
     await activityMenu.appendTo($('#qunit-fixture'));
-    assert.hasClass(activityMenu.$('.o_no_activity'),'o_no_activity', "should not have instance of widget");
+    await testUtils.nextTick();
+    assert.containsOnce(activityMenu, '.o_no_activity');
     activityMenu.destroy();
 });
 
@@ -108,6 +109,7 @@ QUnit.test('activity menu widget: activity menu with 3 records', async function 
         },
     });
     await activityMenu.appendTo($('#qunit-fixture'));
+    await testUtils.nextTick();
     assert.hasClass(activityMenu.$el, 'o_mail_systray_item', 'should be the instance of widget');
     // the assertion below has not been replace because there are includes of ActivityMenu that modify the length.
     assert.ok(activityMenu.$('.o_mail_preview').length);
@@ -164,6 +166,7 @@ QUnit.test('activity menu widget: activity view icon', async function (assert) {
         },
     });
     await activityMenu.appendTo($('#qunit-fixture'));
+    await testUtils.nextTick();
     assert.containsN(activityMenu, '.o_mail_activity_action', 2,
                        "widget should have 2 activity view icons");
 

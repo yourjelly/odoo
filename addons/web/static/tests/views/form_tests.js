@@ -2344,7 +2344,7 @@ QUnit.module('Views', {
         await testUtils.dom.click(form.sidebar.$('.o_dropdown_toggler_btn:contains(Action)'));
         await testUtils.dom.click(form.sidebar.$('a:contains(Duplicate)'));
 
-        assert.strictEqual(form.$('input').val(), 'tralala', 'input should contain ABC');
+        assert.strictEqual(form.$('input[name=foo]').val(), 'tralala', 'input should contain ABC');
 
         await testUtils.form.clickDiscard(form);
 
