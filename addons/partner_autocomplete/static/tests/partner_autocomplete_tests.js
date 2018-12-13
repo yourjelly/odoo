@@ -220,7 +220,6 @@ odoo.define('partner_autocomplete.tests', function (require) {
                 }
                 return this._super.apply(this, arguments);
             },
-            debug:1
         }).then(async function (form){
             // Set company type to Company
             var $company_type = form.$("select[name='company_type']");

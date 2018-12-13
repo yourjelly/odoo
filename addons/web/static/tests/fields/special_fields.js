@@ -276,7 +276,6 @@ QUnit.module('special_fields', {
                 image: "/web/static/tata.png",
                 pdf: "/web/static/tata.pdf",
             }],
-            debug: 1
         };
         this.data.partner.records[1].product_id = false;
 

@@ -89,7 +89,6 @@ QUnit.test('receive typing notification', async function (assert) {
             }
             return this._super.apply(this, arguments);
         },
-        debug:1
     });
     await testUtils.nextTick();
 

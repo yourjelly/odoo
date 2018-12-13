@@ -35,7 +35,6 @@ QUnit.test('mobile basic rendering', function (assert) {
         params: {},
         data: this.data,
         services: this.services,
-        debug: true,
     }).then(function (discuss) {
         // test basic rendering in mobile
         assert.containsOnce(discuss, '.o_mail_discuss_content .o_mail_no_content',
