@@ -67,10 +67,10 @@ QUnit.module('gdrive_integration', {
 }, function () {
     QUnit.module('Google Drive Sidebar');
 
-    QUnit.test('rendering of the google drive attachments in Sidebar', function (assert) {
+    QUnit.test('rendering of the google drive attachments in Sidebar', async function (assert) {
         assert.expect(3);
 
-        var form = createView({
+        var form = await createView({
             View: FormView,
             model: 'partner',
             data: this.data,
@@ -106,18 +106,17 @@ QUnit.module('gdrive_integration', {
             'The button to the google action should be present');
 
         // click on gdrive sidebar item
-        testUtils.dom.click(form.sidebar.$('.o_dropdown_toggler_btn:contains(Action)'));
-        testUtils.dom.click($googleAction);
+        await testUtils.dom.click(form.sidebar.$('.o_dropdown_toggler_btn:contains(Action)'));
+        await testUtils.dom.click($googleAction);
 
         form.destroy();
     });
 
-    QUnit.test('click on the google drive attachments after switching records', function (assert) {
+    QUnit.test('click on the google drive attachments after switching records', async function (assert) {
         assert.expect(3);
-        var self = this;
 
         var currentID;
-        var form = createView({
+        var form = await createView({
             View: FormView,
             model: 'partner',
             data: this.data,
@@ -152,13 +151,13 @@ QUnit.module('gdrive_integration', {
         });
 
         currentID = 1;
-        testUtils.dom.click(form.sidebar.$('.o_dropdown_toggler_btn:contains(Action)'));
-        testUtils.dom.click(form.sidebar.$('.oe_share_gdoc'));
+        await testUtils.dom.click(form.sidebar.$('.o_dropdown_toggler_btn:contains(Action)'));
+        await testUtils.dom.click(form.sidebar.$('.oe_share_gdoc'));
 
-        testUtils.dom.click(form.pager.$('.o_pager_next'));
+        await testUtils.dom.click(form.pager.$('.o_pager_next'));
         currentID = 2;
-        testUtils.dom.click(form.sidebar.$('.o_dropdown_toggler_btn:contains(Action)'));
-        testUtils.dom.click(form.sidebar.$('.oe_share_gdoc'));
+        await testUtils.dom.click(form.sidebar.$('.o_dropdown_toggler_btn:contains(Action)'));
+        await testUtils.dom.click(form.sidebar.$('.oe_share_gdoc'));
 
         form.destroy();
     });

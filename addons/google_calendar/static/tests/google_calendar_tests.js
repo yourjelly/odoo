@@ -69,11 +69,10 @@ QUnit.module('Google Calendar', {
     }
 }, function () {
 
-    QUnit.test('sync google calendar', function (assert) {
+    QUnit.test('sync google calendar', async function (assert) {
         assert.expect(6);
-        var done = assert.async();
 
-        createAsyncView({
+        var calendar = await createAsyncView({
             View: CalendarView,
             model: 'calendar.event',
             data: this.data,
@@ -99,24 +98,21 @@ QUnit.module('Google Calendar', {
                 }
                 return this._super.apply(this, arguments);
             },
-        }).then(function (calendar) {
-            assert.containsN(calendar, '.fc-event', 2, "should display 2 events on the month");
-
-            var $sidebar = calendar.$('.o_calendar_sidebar');
-
-            testUtils.dom.click(calendar.$('.o_google_sync_button'));
-
-            assert.verifySteps([
-                '/web/dataset/call_kw/calendar.event/search_read',
-                '/google_calendar/sync_data',
-                '/web/dataset/call_kw/calendar.event/search_read',
-            ], 'should do a search_read before and after the call to sync_data');
-
-            assert.containsN(calendar, '.fc-event', 3, "should now display 3 events on the month");
-
-            calendar.destroy();
-            done();
         });
+
+        assert.containsN(calendar, '.fc-event', 2, "should display 2 events on the month");
+
+        await testUtils.dom.click(calendar.$('.o_google_sync_button'));
+
+        assert.verifySteps([
+            '/web/dataset/call_kw/calendar.event/search_read',
+            '/google_calendar/sync_data',
+            '/web/dataset/call_kw/calendar.event/search_read',
+        ], 'should do a search_read before and after the call to sync_data');
+
+        assert.containsN(calendar, '.fc-event', 3, "should now display 3 events on the month");
+
+        calendar.destroy();
     });
 });
 });
