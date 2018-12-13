@@ -118,9 +118,9 @@ var PartnerField = FieldMany2One.extend(AutocompleteMixin, {
      * @private
      */
     _searchSuggestions: function (search_val) {
+        var self = this;
         return new Promise(function(resolve, reject) {
-            if (this._isOnline()) {
-                var self = this;
+            if (self._isOnline()) {
 
                 self._autocomplete(search_val).then(function (suggestions) {
                     var choices = [];

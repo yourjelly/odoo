@@ -307,7 +307,7 @@ var KanbanRecord = Widget.extend({
         });
         var options = _.extend({}, this.options, { attrs: attrs });
         var widget = new Widget(this, field_name, this.state, options);
-        var def = widget.replace($field)
+        var def = widget.replace($field);
         this.defs.push(def);
         def.then(function () {
             self._setFieldDisplay(widget.$el, field_name);
