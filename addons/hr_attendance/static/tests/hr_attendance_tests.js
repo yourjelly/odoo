@@ -149,7 +149,8 @@ QUnit.module('HR Attendance', {
         }
 
         // init - mock coming from kiosk
-        createGreetingMessage ($target, 1);
+        await createGreetingMessage ($target, 1);
+        await testUtils.nextMicrotaskTick();
         assert.strictEqual(clientActions.length, 1, 'Number of clientAction must = 1.');
 
         core.bus.trigger('barcode_scanned', 1);
@@ -161,15 +162,19 @@ QUnit.module('HR Attendance', {
         assert.strictEqual(rpcCount, 0, 'RPC call should not have been done.');
 
         core.bus.trigger('barcode_scanned', 2);
+        await testUtils.nextTick();
         assert.strictEqual(clientActions.length, 2, 'Number of clientActions must = 2.');
         assert.strictEqual(rpcCount, 1, 'RPC call should have been done only once.');
         core.bus.trigger('barcode_scanned', 2);
+        await testUtils.nextMicrotaskTick();
         assert.strictEqual(clientActions.length, 2, 'Number of clientActions must = 2.');
         assert.strictEqual(rpcCount, 1, 'RPC call should have been done only once.');
 
         core.bus.trigger('barcode_scanned', 1);
+        await testUtils.nextTick();
         assert.strictEqual(clientActions.length, 3, 'Number of clientActions must = 3.');
         core.bus.trigger('barcode_scanned', 1);
+        await testUtils.nextMicrotaskTick();
         assert.strictEqual(clientActions.length, 3, 'Number of clientActions must = 3.');
         assert.strictEqual(rpcCount, 2, 'RPC call should have been done only twice.');
 

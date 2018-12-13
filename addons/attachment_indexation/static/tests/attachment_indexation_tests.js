@@ -47,10 +47,10 @@ odoo.define('attachment_indexation.tests', function (require) {
         }
     }, function () {
         QUnit.module('DocView');
-        QUnit.test('AttachmentIndexationAttachmentTest', function (assert) {
+        QUnit.test('AttachmentIndexationAttachmentTest', async function (assert) {
             assert.expect(3);
 
-            var form = createView({
+            var form = await createView({
                 View: FormView,
                 model: 'partner',
                 data: this.data,
@@ -73,17 +73,17 @@ odoo.define('attachment_indexation.tests', function (require) {
             });
 
             assert.containsN(form.sidebar, '.o_sidebar_delete_attachment', 2, "there should be two attachments");
-            testUtils.dom.click(form.sidebar.$('.o_dropdown_toggler_btn:contains("Attachment")'));
-            testUtils.dom.click(form.sidebar.$('.o_sidebar_delete_attachment:eq(0)'));
-            testUtils.dom.click($('.modal-footer .btn-primary'));
+            await testUtils.dom.click(form.sidebar.$('.o_dropdown_toggler_btn:contains("Attachment")'));
+            await testUtils.dom.click(form.sidebar.$('.o_sidebar_delete_attachment:eq(0)'));
+            await testUtils.dom.click($('.modal-footer .btn-primary'));
             assert.containsOnce(form.sidebar, '.o_sidebar_delete_attachment', "there should be only one attachment");
             form.destroy();
         });
 
-        QUnit.test('no attachment on list view', function (assert) {
+        QUnit.test('no attachment on list view', async function (assert) {
             assert.expect(4);
 
-            var list = createView({
+            var list = await createView({
                 View: ListView,
                 model: 'partner',
                 data: this.data,
@@ -99,9 +99,9 @@ odoo.define('attachment_indexation.tests', function (require) {
             });
 
             // select record then trigger render
-            testUtils.dom.click(list.$('.o_group_header:last'));
-            testUtils.dom.click(list.$('.o_data_row input'));
-            testUtils.dom.click(list.$('.o_group_header:first'));
+            await testUtils.dom.click(list.$('.o_group_header:last'));
+            await testUtils.dom.click(list.$('.o_data_row input'));
+            await testUtils.dom.click(list.$('.o_group_header:first'));
 
             assert.verifySteps(['partner', 'partner', 'partner'],
                 "ir.attachment not called when selecting record in list view");
