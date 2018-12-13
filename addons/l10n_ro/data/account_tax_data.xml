@@ -272,7 +272,7 @@
 
     <record id="tvac_00" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">13</field>
+        <field name="sequence">10</field>
         <field name="description">TVA colectat 0%</field>
         <field name="name">TVA colectat 0%</field>
         <field name="amount">0</field>
@@ -286,7 +286,7 @@
 
     <record id="tvac_05" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">12</field>
+        <field name="sequence">11</field>
         <field name="name">TVA colectat 5%</field>
         <field name="description">TVA colectat 5%</field>
         <field name="amount">5</field>
@@ -300,7 +300,7 @@
 
     <record id="tvac_09" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">14</field>
+        <field name="sequence">12</field>
         <field name="name">TVA colectat 9%</field>
         <field name="description">TVA colectat 9%</field>
         <field name="amount">9</field>
@@ -314,7 +314,7 @@
 
     <record id="tvac_19" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">9</field>
+        <field name="sequence">1</field>
         <field name="name">TVA colectat 19%</field>
         <field name="description">TVA colectat 19%</field>
         <field name="amount">19</field>
@@ -328,7 +328,7 @@
 
     <record id="tvac_20" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">10</field>
+        <field name="sequence">14</field>
         <field name="name">TVA colectat 20%</field>
         <field name="description">TVA colectat 20%</field>
         <field name="amount">20</field>
@@ -342,7 +342,7 @@
 
     <record id="tvac_24" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">11</field>
+        <field name="sequence">15</field>
         <field name="name">TVA colectat 24%</field>
         <field name="description">TVA colectat 24%</field>
         <field name="amount">24</field>
@@ -356,7 +356,7 @@
 
     <record id="tvad_00" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">23</field>
+        <field name="sequence">30</field>
         <field name="name">TVA deductibil 0%</field>
         <field name="description">TVA deductibil 0%</field>
         <field name="amount">0</field>
@@ -370,7 +370,7 @@
 
     <record id="tvad_05" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">22</field>
+        <field name="sequence">31</field>
         <field name="name">TVA deductibil 5%</field>
         <field name="description">TVA deductibil 5%</field>
         <field name="amount">5</field>
@@ -384,7 +384,7 @@
 
     <record id="tvad_09" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">21</field>
+        <field name="sequence">32</field>
         <field name="name">TVA deductibil 9%</field>
         <field name="description">TVA deductibil 9%</field>
         <field name="amount">9</field>
@@ -398,7 +398,7 @@
 
     <record id="tvad_19" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">19</field>
+        <field name="sequence">2</field>
         <field name="name">TVA deductibil 19%</field>
         <field name="description">TVA deductibil 19%</field>
         <field name="amount">19</field>
@@ -412,7 +412,7 @@
 
     <record id="tvad_20" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">20</field>
+        <field name="sequence">34</field>
         <field name="name">TVA deductibil 20%</field>
         <field name="description">TVA deductibil 20%</field>
         <field name="amount">20</field>
@@ -426,7 +426,7 @@
 
     <record id="tvad_24" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">23</field>
+        <field name="sequence">35</field>
         <field name="name">TVA deductibil 24%</field>
         <field name="description">TVA deductibil 24%</field>
         <field name="amount">24</field>
@@ -438,9 +438,204 @@
         <field name="tax_group_id" ref="tax_group_tva_0"/>
     </record>
 
+    <!-- TVA la Incasare-->
+    <!-- RGO TODO: check/reset tag_ids -->
+    <record id="tvaic_00" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">20</field>
+        <field name="description">TVA colectat 0%</field>
+        <field name="name">TVA la Incasare - colectat 0%</field>
+        <field name="amount">0</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="tax_exigibility">on_payment</field>
+        <field name="account_id" ref="pcg_44281"/>
+        <field name="refund_account_id" ref="pcg_4427"/>
+        <field name="cash_basis_account_id" ref="pcg_4427"/>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_140'), ref('tax_tag_ro_170')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_0"/>
+    </record>
+
+    <record id="tvaic_05" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">21</field>
+        <field name="name">TVA la Incasare - colectat 5%</field>
+        <field name="description">TVA colectat 5%</field>
+        <field name="amount">5</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="tax_exigibility">on_payment</field>
+        <field name="account_id" ref="pcg_44281"/>
+        <field name="refund_account_id" ref="pcg_4427"/>
+        <field name="cash_basis_account_id" ref="pcg_4427"/>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_110'), ref('tax_tag_ro_170')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_5"/>
+    </record>
+
+    <record id="tvaic_09" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">22</field>
+        <field name="name">TVA la Incasare - colectat 9%</field>
+        <field name="description">TVA colectat 9%</field>
+        <field name="amount">9</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="tax_exigibility">on_payment</field>
+        <field name="account_id" ref="pcg_44281"/>
+        <field name="refund_account_id" ref="pcg_4427"/>
+        <field name="cash_basis_account_id" ref="pcg_4427"/>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_100'), ref('tax_tag_ro_170')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_9"/>
+    </record>
+
+    <record id="tvaic_19" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">23</field>
+        <field name="name">TVA la Incasare - colectat 19%</field>
+        <field name="description">TVA colectat 19%</field>
+        <field name="amount">19</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="tax_exigibility">on_payment</field>
+        <field name="account_id" ref="pcg_44281"/>
+        <field name="refund_account_id" ref="pcg_4427"/>
+        <field name="cash_basis_account_id" ref="pcg_4427"/>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_090'), ref('tax_tag_ro_170')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_19"/>
+    </record>
+
+    <record id="tvaic_20" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">24</field>
+        <field name="name">TVA la Incasare - colectat 20%</field>
+        <field name="description">TVA colectat 20%</field>
+        <field name="amount">20</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="tax_exigibility">on_payment</field>
+        <field name="account_id" ref="pcg_44281"/>
+        <field name="refund_account_id" ref="pcg_4427"/>
+        <field name="cash_basis_account_id" ref="pcg_4427"/>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_160'), ref('tax_tag_ro_170')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_20"/>
+    </record>
+
+    <record id="tvaic_24" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">25</field>
+        <field name="name">TVA la Incasare - colectat 24%</field>
+        <field name="description">TVA colectat 24%</field>
+        <field name="amount">24</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="tax_exigibility">on_payment</field>
+        <field name="account_id" ref="pcg_44281"/>
+        <field name="refund_account_id" ref="pcg_4427"/>
+        <field name="cash_basis_account_id" ref="pcg_4427"/>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_160'), ref('tax_tag_ro_170')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_24"/>
+    </record>
+
+    <record id="tvaid_00" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">40</field>
+        <field name="name">TVA la Incasare - deductibil 0%</field>
+        <field name="description">TVA deductibil 0%</field>
+        <field name="amount">0</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_exigibility">on_payment</field>
+        <field name="account_id" ref="pcg_44282"/>
+        <field name="refund_account_id" ref="pcg_4426"/>
+        <field name="cash_basis_account_id" ref="pcg_4426"/>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_280'), ref('tax_tag_ro_290'), ref('tax_tag_ro_300'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_0"/>
+    </record>
+
+    <record id="tvaid_05" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">41</field>
+        <field name="name">TVA la Incasare - deductibil 5%</field>
+        <field name="description">TVA deductibil 5%</field>
+        <field name="amount">5</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_exigibility">on_payment</field>
+        <field name="account_id" ref="pcg_44282"/>
+        <field name="refund_account_id" ref="pcg_4426"/>
+        <field name="cash_basis_account_id" ref="pcg_4426"/>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_240'), ref('tax_tag_ro_290'), ref('tax_tag_ro_300'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_5"/>
+    </record>
+
+    <record id="tvaid_09" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">42</field>
+        <field name="name">TVA la Incasare - deductibil 9%</field>
+        <field name="description">TVA deductibil 9%</field>
+        <field name="amount">9</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_exigibility">on_payment</field>
+        <field name="account_id" ref="pcg_44282"/>
+        <field name="refund_account_id" ref="pcg_4426"/>
+        <field name="cash_basis_account_id" ref="pcg_4426"/>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_230'), ref('tax_tag_ro_290'), ref('tax_tag_ro_300'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_9"/>
+    </record>
+
+    <record id="tvaid_19" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">43</field>
+        <field name="name">TVA la Incasare - deductibil 19%</field>
+        <field name="description">TVA deductibil 19%</field>
+        <field name="amount">19</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_exigibility">on_payment</field>
+        <field name="account_id" ref="pcg_44282"/>
+        <field name="refund_account_id" ref="pcg_4426"/>
+        <field name="cash_basis_account_id" ref="pcg_4426"/>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_220'), ref('tax_tag_ro_290'), ref('tax_tag_ro_300'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_19"/>
+    </record>
+
+    <record id="tvaid_20" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">44</field>
+        <field name="name">TVA la Incasare - deductibil 20%</field>
+        <field name="description">TVA deductibil 20%</field>
+        <field name="amount">20</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_exigibility">on_payment</field>
+        <field name="account_id" ref="pcg_44282"/>
+        <field name="refund_account_id" ref="pcg_4426"/>
+        <field name="cash_basis_account_id" ref="pcg_4426"/>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_320'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_20"/>
+    </record>
+
+    <record id="tvaid_24" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">45</field>
+        <field name="name">TVA la Incasare - deductibil 24%</field>
+        <field name="description">TVA deductibil 24%</field>
+        <field name="amount">24</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_exigibility">on_payment</field>
+        <field name="account_id" ref="pcg_44282"/>
+        <field name="refund_account_id" ref="pcg_4426"/>
+        <field name="cash_basis_account_id" ref="pcg_4426"/>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_320'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_24"/>
+    </record>
+
+    <!-- Taxare inversa-->
     <record id="tvati" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">30</field>
+        <field name="sequence">50</field>
         <field name="name">TVA Taxare Inversa</field>
         <field name="description">TVA Taxare Inversa</field>
         <field name="amount">0</field>
@@ -454,7 +649,7 @@
 
     <record id="tvatip00-c" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="name">TVA Taxare Inversa Colectat 0%</field>
+        <field name="name">TVA Achizitii Taxare Inversa Colectat 0%</field>
         <field name="amount">0</field>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">none</field>
@@ -465,7 +660,7 @@
     </record>
     <record id="tvatip00-d" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="name">TVA Taxare Inversa Deductibil 0%</field>
+        <field name="name">TVA Achizitii Taxare Inversa Deductibil 0%</field>
         <field name="price_include" eval="0"/>
         <field name="amount">0</field>
         <field name="amount_type">percent</field>
@@ -477,7 +672,7 @@
     </record>
     <record id="tvatip00" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">34</field>
+        <field name="sequence">60</field>
         <field name="name">TVA Taxare Inversa 0%</field>
         <field name="description">TVA Taxare Inversa 0%</field>
         <field name="amount">1</field>
@@ -490,7 +685,7 @@
 
     <record id="tvatip05-c" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="name">TVA Taxare Inversa Colectat 5%</field>
+        <field name="name">TVA Achizitii Taxare Inversa Colectat 5%</field>
         <field name="amount">-5</field>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">none</field>
@@ -501,7 +696,7 @@
     </record>
     <record id="tvatip05-d" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="name">TVA Taxare Inversa Deductibil 5%</field>
+        <field name="name">TVA Achizitii Taxare Inversa Deductibil 5%</field>
         <field name="amount">5</field>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">none</field>
@@ -512,7 +707,7 @@
     </record>
     <record id="tvatip05" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">33</field>
+        <field name="sequence">61</field>
         <field name="name">TVA Taxare Inversa 5%</field>
         <field name="description">TVA Taxare Inversa 5%</field>
         <field name="amount">1</field>
@@ -525,7 +720,7 @@
 
     <record id="tvatip09-c" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="name">TVA Taxare Inversa Colectat 9%</field>
+        <field name="name">TVA Achizitii Taxare Inversa Colectat 9%</field>
         <field name="amount">-9</field>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">none</field>
@@ -536,7 +731,7 @@
     </record>
     <record id="tvatip09-d" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="name">TVA Taxare Inversa Deductibil 9%</field>
+        <field name="name">TVA Achizitii Taxare Inversa Deductibil 9%</field>
         <field name="amount">9</field>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">none</field>
@@ -547,7 +742,7 @@
     </record>
     <record id="tvatip09" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">32</field>
+        <field name="sequence">62</field>
         <field name="name">TVA Taxare Inversa 9%</field>
         <field name="description">TVA Taxare Inversa 9%</field>
         <field name="amount">1</field>
@@ -560,7 +755,7 @@
 
     <record id="tvatip19-c" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="name">TVA Taxare Inversa Colectat 19%</field>
+        <field name="name">TVA Achizitii Taxare Inversa Colectat 19%</field>
         <field name="amount">-19</field>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">none</field>
@@ -571,7 +766,7 @@
     </record>
     <record id="tvatip19-d" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="name">TVA Taxare Inversa Deductibil 19%</field>
+        <field name="name">TVA Achizitii Taxare Inversa Deductibil 19%</field>
         <field name="amount">19</field>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">none</field>
@@ -582,7 +777,7 @@
     </record>
     <record id="tvatip19" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">32</field>
+        <field name="sequence">63</field>
         <field name="name">TVA Taxare Inversa 19%</field>
         <field name="description">TVA Taxare Inversa 19%</field>
         <field name="amount">1</field>
@@ -595,7 +790,7 @@
 
     <record id="tvatip20-c" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="name">TVA Taxare Inversa Colectat 20%</field>
+        <field name="name">TVA Achizitii Taxare Inversa Colectat 20%</field>
         <field name="amount">-20</field>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">none</field>
@@ -606,7 +801,7 @@
     </record>
     <record id="tvatip20-d" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="name">TVA Taxare Inversa Deductibil 20%</field>
+        <field name="name">TVA Achizitii Taxare Inversa Deductibil 20%</field>
         <field name="amount">20</field>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">none</field>
@@ -617,7 +812,7 @@
     </record>
     <record id="tvatip20" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">31</field>
+        <field name="sequence">64</field>
         <field name="name">TVA Taxare Inversa 20%</field>
         <field name="description">TVA Taxare Inversa 20%</field>
         <field name="amount">1</field>
@@ -630,7 +825,7 @@
 
     <record id="tvatip24-c" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="name">TVA Taxare Inversa Colectat 24%</field>
+        <field name="name">TVA Achizitii Taxare Inversa Colectat 24%</field>
         <field name="amount">-24</field>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">none</field>
@@ -641,7 +836,7 @@
     </record>
     <record id="tvatip24-d" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="name">TVA Taxare Inversa Deductibil 24%</field>
+        <field name="name">TVA Achizitii Taxare Inversa Deductibil 24%</field>
         <field name="amount">24</field>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">none</field>
@@ -652,7 +847,7 @@
     </record>
     <record id="tvatip24" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">30</field>
+        <field name="sequence">65</field>
         <field name="name">TVA Taxare Inversa 24%</field>
         <field name="description">TVA Taxare Inversa 24%</field>
         <field name="amount">1</field>
@@ -665,7 +860,7 @@
 
     <record id="tvatisc" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">40</field>
+        <field name="sequence">70</field>
         <field name="name">TVA Taxare Scutita Livrari</field>
         <field name="description">Scutit-L</field>
         <field name="amount">0</field>
@@ -679,7 +874,7 @@
 
     <record id="tvatisca" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">41</field>
+        <field name="sequence">72</field>
         <field name="name">TVA Taxare Scutita Achizitii</field>
         <field name="description">Scutit-A</field>
         <field name="amount">0</field>
@@ -693,7 +888,7 @@
 
     <record id="tvatine" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">50</field>
+        <field name="sequence">80</field>
         <field name="name">TVA Taxare Neimpozabila Livrari</field>
         <field name="description">Neimpozabil-L</field>
         <field name="amount">0</field>
@@ -707,7 +902,7 @@
 
     <record id="tvatinea" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">51</field>
+        <field name="sequence">81</field>
         <field name="name">TVA Taxare Neimpozabila Achizitii</field>
         <field name="description">Neimpozabil-A</field>
         <field name="amount">0</field>
@@ -721,7 +916,7 @@
 
     <record id="tvati_intras" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">60</field>
+        <field name="sequence">90</field>
         <field name="name">TVA Intracomunitara Livrari</field>
         <field name="amount">0</field>
         <field name="amount_type">percent</field>
@@ -757,7 +952,7 @@
     </record>
     <record id="tvati_intrap0" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">64</field>
+        <field name="sequence">100</field>
         <field name="name">TVA Intracomunitara Achizitii 0%</field>
         <field name="amount">1</field>
         <field name="amount_type">group</field>
@@ -792,7 +987,7 @@
     </record>
     <record id="tvati_intrap5" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">63</field>
+        <field name="sequence">101</field>
         <field name="name">TVA Intracomunitara Achizitii 5%</field>
         <field name="amount">1</field>
         <field name="amount_type">group</field>
@@ -827,7 +1022,7 @@
     </record>
     <record id="tvati_intrap9" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">62</field>
+        <field name="sequence">102</field>
         <field name="name">TVA Intracomunitara Achizitii 9%</field>
         <field name="amount">1</field>
         <field name="amount_type">group</field>
@@ -862,7 +1057,7 @@
     </record>
     <record id="tvati_intrap19" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">62</field>
+        <field name="sequence">103</field>
         <field name="name">TVA Intracomunitara Achizitii 19%</field>
         <field name="amount">1</field>
         <field name="amount_type">group</field>
@@ -897,7 +1092,7 @@
     </record>
     <record id="tvati_intrap20" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">61</field>
+        <field name="sequence">104</field>
         <field name="name">TVA Intracomunitara Achizitii 20%</field>
         <field name="amount">1</field>
         <field name="amount_type">group</field>
@@ -932,7 +1127,7 @@
     </record>
     <record id="tvati_intrap24" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="sequence">60</field>
+        <field name="sequence">105</field>
         <field name="name">TVA Intracomunitara Achizitii 24%</field>
         <field name="amount">1</field>
         <field name="amount_type">group</field>
@@ -940,5 +1135,244 @@
         <field name="children_tax_ids" eval="[(6, 0, [ref('tvati_intrap24d'), ref('tvati_intrap24c')])]"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_intracomunitara_achizitii_24')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_0"/>
+    </record>
+
+    <record id="tva_ned_1950c" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="name">TVA colectat 19% Nedeductibil 50%</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">-9.5</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="refund_account_id" ref="pcg_4427"/>
+        <field name="account_id" ref="pcg_4427"/>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_160'), ref('tax_tag_ro_170')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_19_ded"/>
+    </record>
+    <record id="tva_ned_1950d" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="name">TVA deductibil 19% Nedeductibil 50%</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">19</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="refund_account_id" ref="pcg_4426"/>
+        <field name="account_id" ref="pcg_4426"/>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_220'), ref('tax_tag_ro_290'), ref('tax_tag_ro_300'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_19_ded"/>
+    </record>
+    <record id="tva_ned_1950dexp" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="name">Cheltuiala TVA 19% Nedeductibil 50%</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">9.5</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="refund_account_id" ref="pcg_6352"/>
+        <field name="account_id" ref="pcg_6352"/>
+    </record>
+    <record id="tva_ned_1950" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">110</field>
+        <field name="name">TVA 19% Nedeductibil 50%</field>
+        <field name="amount">1</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('tva_ned_1950c'), ref('tva_ned_1950d'), ref('tva_ned_1950dexp')])]"/>
+    </record>
+     <record id="tva_ned_19c" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="name">TVA colectat 19% Nedeductibil 100%</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">-19</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="refund_account_id" ref="pcg_4427"/>
+        <field name="account_id" ref="pcg_4427"/>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_160'), ref('tax_tag_ro_170')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_19_ded"/>
+    </record>
+    <record id="tva_ned_19d" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="name">TVA deductibil 19% Nedeductibil 100%</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">19</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="refund_account_id" ref="pcg_4426"/>
+        <field name="account_id" ref="pcg_4426"/>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_220'), ref('tax_tag_ro_290'), ref('tax_tag_ro_300'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_19_ded"/>
+    </record>
+    <record id="tva_ned_19dexp" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="name">Cheltuiala TVA 19% Nedeductibil 100%</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">19</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="refund_account_id" ref="pcg_6352"/>
+        <field name="account_id" ref="pcg_6352"/>
+    </record>
+    <record id="tva_ned_19" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">111</field>
+        <field name="name">TVA 19% Nedeductibil 100%</field>
+        <field name="amount">1</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('tva_ned_19c'), ref('tva_ned_19d'), ref('tva_ned_19dexp')])]"/>
+    </record>
+     <record id="tva_reg_intr_scut" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">9000</field>
+        <field name="description">Regularizări livrări intracomunitare scutite</field>
+        <field name="name">Regularizări livrări intracomunitare scutite</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">0.0</field>
+        <field name="amount_type">fixed</field>
+        <field name="type_tax_use">none</field>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_020'), ref('tax_tag_ro_170')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_regularizari"/>
+    </record>
+     <record id="tva_reg_intr_serv_scut" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">9001</field>
+        <field name="description">Regularizări privind prestările de servicii intracomunitare fără scutire</field>
+        <field name="name">Regularizări privind prestările de servicii intracomunitare fără scutire</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">0.0</field>
+        <field name="amount_type">fixed</field>
+        <field name="type_tax_use">none</field>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_040'), ref('tax_tag_ro_170')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_regularizari"/>
+    </record>
+     <record id="tva_reg_intr_bunc" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="name">Regularizări privind achiziţiile intracomunitare de bunuri Colectat</field>
+        <field name="amount">-100</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="refund_account_id" ref="pcg_4427"/>
+        <field name="account_id" ref="pcg_4427"/>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_060'), ref('tax_tag_ro_170')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_regularizari"/>
+    </record>
+    <record id="tva_reg_intr_bund" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="name">Regularizări privind achiziţiile intracomunitare de bunuri Deductibil</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">100</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="refund_account_id" ref="pcg_4426"/>
+        <field name="account_id" ref="pcg_4426"/>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_190'), ref('tax_tag_ro_290'), ref('tax_tag_ro_300'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_regularizari"/>
+    </record>
+    <record id="tva_reg_intr_bun" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">9002</field>
+        <field name="description">Regularizări privind achiziţiile intracomunitare de bunuri</field>
+        <field name="name">Regularizări privind achiziţiile intracomunitare de bunuri</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">0.0</field>
+        <field name="amount_type">fixed</field>
+        <field name="type_tax_use">none</field>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('tva_reg_intr_bunc'), ref('tva_reg_intr_bund')])]"/>
+    </record>
+     <record id="tva_reg_intr_servc" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="name">Regularizări privind achiziţiile intracomunitare de servicii Colectat</field>
+        <field name="amount">-100</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="refund_account_id" ref="pcg_4427"/>
+        <field name="account_id" ref="pcg_4427"/>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_080'), ref('tax_tag_ro_170')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_regularizari"/>
+    </record>
+    <record id="tva_reg_intr_servd" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="name">Regularizări privind achiziţiile intracomunitare de servicii Deductibil</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">100</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="refund_account_id" ref="pcg_4426"/>
+        <field name="account_id" ref="pcg_4426"/>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_210'), ref('tax_tag_ro_290'), ref('tax_tag_ro_300'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_regularizari"/>
+    </record>
+    <record id="tva_reg_intr_serv" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">9003</field>
+        <field name="description">Regularizări privind achiziţiile intracomunitare de servicii</field>
+        <field name="name">Regularizări privind achiziţiile intracomunitare de servicii</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">0.0</field>
+        <field name="amount_type">fixed</field>
+        <field name="type_tax_use">none</field>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('tva_reg_intr_servc'), ref('tva_reg_intr_servd')])]"/>
+    </record>
+     <record id="tva_comp_forf_agri" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">9004</field>
+        <field name="description">Compensația în cotă forfetară pentru achiziții de produse și servicii agricole</field>
+        <field name="name">Compensația în cotă forfetară pentru achiziții de produse și servicii agricole</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">0.0</field>
+        <field name="amount_type">fixed</field>
+        <field name="type_tax_use">none</field>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_260'), ref('tax_tag_ro_290'), ref('tax_tag_ro_300'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_regularizari"/>
+    </record>
+     <record id="tva_reg_comp_forf_agri" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">9005</field>
+        <field name="description">Regularizări privind compensația în cotă forfetară</field>
+        <field name="name">Regularizări privind compensația în cotă forfetară</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">0.0</field>
+        <field name="amount_type">fixed</field>
+        <field name="type_tax_use">none</field>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_270'), ref('tax_tag_ro_290'), ref('tax_tag_ro_300'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_regularizari"/>
+    </record>
+     <record id="tva_rest_straini" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">9006</field>
+        <field name="description">TVA efectiv restituită cumpărătorilor straini, inclusiv comisionul unităţilor autorizate</field>
+        <field name="name">TVA efectiv restituită cumpărătorilor straini, inclusiv comisionul unităţilor autorizate</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">0.0</field>
+        <field name="amount_type">fixed</field>
+        <field name="type_tax_use">none</field>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_310'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_regularizari"/>
+    </record>
+     <record id="tva_reg_dedus" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">9007</field>
+        <field name="description">Regularizări taxă dedusă</field>
+        <field name="name">Regularizări taxă dedusă</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">0.0</field>
+        <field name="amount_type">fixed</field>
+        <field name="type_tax_use">none</field>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_320'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_regularizari"/>
+    </record>
+     <record id="tva_reg_prorata" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">9008</field>
+        <field name="description">Ajustări conform pro-rata / ajustări pentru bunurile de capital</field>
+        <field name="name">Ajustări conform pro-rata / ajustări pentru bunurile de capital</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">0.0</field>
+        <field name="amount_type">fixed</field>
+        <field name="type_tax_use">none</field>
+        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_330'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tax_group_id" ref="tax_group_tva_regularizari"/>
     </record>
 </odoo>
