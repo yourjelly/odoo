@@ -270,6 +270,106 @@
         <field name="applicability">taxes</field>
     </record>
 
+    <record id="tax_tag_sale_tvaic_00" model="account.account.tag">
+        <field name="name">TVA la Incasare - colectat 0%</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_sale_tvaic_05" model="account.account.tag">
+        <field name="name">TVA la Incasare - colectat 5%</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_sale_tvaic_09" model="account.account.tag">
+        <field name="name">TVA la Incasare - colectat 9%</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_sale_tvaic_19" model="account.account.tag">
+        <field name="name">TVA la Incasare - colectat 19%</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_sale_tvaic_20" model="account.account.tag">
+        <field name="name">TVA la Incasare - colectat 20%</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_sale_tvaic_24" model="account.account.tag">
+        <field name="name">TVA la Incasare - colectat 24%</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_purchase_tvaid_00" model="account.account.tag">
+        <field name="name">TVA la Incasare - deductibil 0%</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_purchase_tvaid_05" model="account.account.tag">
+        <field name="name">TVA la Incasare - deductibil 5%</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_purchase_tvaid_09" model="account.account.tag">
+        <field name="name">TVA la Incasare - deductibil 9%</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_purchase_tvaid_19" model="account.account.tag">
+        <field name="name">TVA la Incasare - deductibil 19%</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_purchase_tvaid_20" model="account.account.tag">
+        <field name="name">TVA la Incasare - deductibil 20%</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_purchase_tvaid_24" model="account.account.tag">
+        <field name="name">TVA la Incasare - deductibil 24%</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_purchase_tva_ned_1950c" model="account.account.tag">
+        <field name="name">TVA colectat 19% Nedeductibil 50%</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_purchase_tva_ned_1950d" model="account.account.tag">
+        <field name="name">TVA deductibil 19% Nedeductibil 50%</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_purchase_tva_ned_1950dexp" model="account.account.tag">
+        <field name="name">Cheltuiala TVA 19% Nedeductibil 50%</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_purchase_tva_ned_1950" model="account.account.tag">
+        <field name="name">TVA 19% Nedeductibil 50%</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_purchase_tva_ned_19c" model="account.account.tag">
+        <field name="name">TVA colectat 19% Nedeductibil 100%</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_purchase_tva_ned_19d" model="account.account.tag">
+        <field name="name">TVA deductibil 19% Nedeductibil 100%</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_purchase_tva_ned_19dexp" model="account.account.tag">
+        <field name="name">Cheltuiala TVA 19% Nedeductibil 100%</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_purchase_tva_ned_19" model="account.account.tag">
+        <field name="name">TVA 19% Nedeductibil 100%</field>
+        <field name="applicability">taxes</field>
+    </record>
+
     <record id="tvac_00" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="sequence">10</field>
@@ -379,7 +479,7 @@
         <field name="account_id" ref="pcg_4426"/>
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_purchase_tvad_05')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_5"/>
     </record>
 
     <record id="tvad_09" model="account.tax.template">
@@ -393,7 +493,7 @@
         <field name="account_id" ref="pcg_4426"/>
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_purchase_tvad_09')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_9"/>
     </record>
 
     <record id="tvad_19" model="account.tax.template">
@@ -407,7 +507,7 @@
         <field name="account_id" ref="pcg_4426"/>
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_purchase_tvad_19')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_19"/>
     </record>
 
     <record id="tvad_20" model="account.tax.template">
@@ -421,7 +521,7 @@
         <field name="account_id" ref="pcg_4426"/>
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_purchase_tvad_20')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_20"/>
     </record>
 
     <record id="tvad_24" model="account.tax.template">
@@ -435,11 +535,10 @@
         <field name="account_id" ref="pcg_4426"/>
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_purchase_tvad_24')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_24"/>
     </record>
 
     <!-- TVA la Incasare-->
-    <!-- RGO TODO: check/reset tag_ids -->
     <record id="tvaic_00" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="sequence">20</field>
@@ -452,7 +551,7 @@
         <field name="account_id" ref="pcg_44281"/>
         <field name="refund_account_id" ref="pcg_4427"/>
         <field name="cash_basis_account_id" ref="pcg_4427"/>
-        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_140'), ref('tax_tag_ro_170')])]"/> -->
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_sale_tvaic_00')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_0"/>
     </record>
 
@@ -468,7 +567,7 @@
         <field name="account_id" ref="pcg_44281"/>
         <field name="refund_account_id" ref="pcg_4427"/>
         <field name="cash_basis_account_id" ref="pcg_4427"/>
-        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_110'), ref('tax_tag_ro_170')])]"/> -->
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_sale_tvaic_05')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_5"/>
     </record>
 
@@ -484,7 +583,7 @@
         <field name="account_id" ref="pcg_44281"/>
         <field name="refund_account_id" ref="pcg_4427"/>
         <field name="cash_basis_account_id" ref="pcg_4427"/>
-        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_100'), ref('tax_tag_ro_170')])]"/> -->
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_sale_tvaic_09')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_9"/>
     </record>
 
@@ -500,7 +599,7 @@
         <field name="account_id" ref="pcg_44281"/>
         <field name="refund_account_id" ref="pcg_4427"/>
         <field name="cash_basis_account_id" ref="pcg_4427"/>
-        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_090'), ref('tax_tag_ro_170')])]"/> -->
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_sale_tvaic_19')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_19"/>
     </record>
 
@@ -516,7 +615,7 @@
         <field name="account_id" ref="pcg_44281"/>
         <field name="refund_account_id" ref="pcg_4427"/>
         <field name="cash_basis_account_id" ref="pcg_4427"/>
-        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_160'), ref('tax_tag_ro_170')])]"/> -->
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_sale_tvaic_20')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_20"/>
     </record>
 
@@ -532,7 +631,7 @@
         <field name="account_id" ref="pcg_44281"/>
         <field name="refund_account_id" ref="pcg_4427"/>
         <field name="cash_basis_account_id" ref="pcg_4427"/>
-        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_160'), ref('tax_tag_ro_170')])]"/> -->
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_sale_tvaic_24')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_24"/>
     </record>
 
@@ -548,7 +647,7 @@
         <field name="account_id" ref="pcg_44282"/>
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="cash_basis_account_id" ref="pcg_4426"/>
-        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_280'), ref('tax_tag_ro_290'), ref('tax_tag_ro_300'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_purchase_tvaid_00')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_0"/>
     </record>
 
@@ -564,7 +663,7 @@
         <field name="account_id" ref="pcg_44282"/>
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="cash_basis_account_id" ref="pcg_4426"/>
-        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_240'), ref('tax_tag_ro_290'), ref('tax_tag_ro_300'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_purchase_tvaid_05')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_5"/>
     </record>
 
@@ -580,7 +679,7 @@
         <field name="account_id" ref="pcg_44282"/>
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="cash_basis_account_id" ref="pcg_4426"/>
-        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_230'), ref('tax_tag_ro_290'), ref('tax_tag_ro_300'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_purchase_tvaid_09')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_9"/>
     </record>
 
@@ -596,7 +695,7 @@
         <field name="account_id" ref="pcg_44282"/>
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="cash_basis_account_id" ref="pcg_4426"/>
-        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_220'), ref('tax_tag_ro_290'), ref('tax_tag_ro_300'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_purchase_tvaid_19')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_19"/>
     </record>
 
@@ -612,7 +711,7 @@
         <field name="account_id" ref="pcg_44282"/>
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="cash_basis_account_id" ref="pcg_4426"/>
-        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_320'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_purchase_tvaid_20')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_20"/>
     </record>
 
@@ -628,7 +727,7 @@
         <field name="account_id" ref="pcg_44282"/>
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="cash_basis_account_id" ref="pcg_4426"/>
-        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_320'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_purchase_tvaid_24')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_24"/>
     </record>
 
@@ -692,7 +791,7 @@
         <field name="refund_account_id" ref="pcg_4427"/>
         <field name="account_id" ref="pcg_4427"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_taxare_inversa_colectat_5')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_5"/>
     </record>
     <record id="tvatip05-d" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -703,7 +802,7 @@
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="account_id" ref="pcg_4426"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_taxare_inversa_deductibil_5')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_5"/>
     </record>
     <record id="tvatip05" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -715,7 +814,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tvatip05-d'), ref('tvatip05-c')])]"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_taxare_inversa_5')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_5"/>
     </record>
 
     <record id="tvatip09-c" model="account.tax.template">
@@ -727,7 +826,7 @@
         <field name="refund_account_id" ref="pcg_4427"/>
         <field name="account_id" ref="pcg_4427"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_taxare_inversa_colectat_9')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_9"/>
     </record>
     <record id="tvatip09-d" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -738,7 +837,7 @@
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="account_id" ref="pcg_4426"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_taxare_inversa_deductibil_9')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_9"/>
     </record>
     <record id="tvatip09" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -750,7 +849,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tvatip09-d'), ref('tvatip09-c')])]"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_taxare_inversa_9')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_9"/>
     </record>
 
     <record id="tvatip19-c" model="account.tax.template">
@@ -762,7 +861,7 @@
         <field name="refund_account_id" ref="pcg_4427"/>
         <field name="account_id" ref="pcg_4427"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_taxare_inversa_colectat_19')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_19"/>
     </record>
     <record id="tvatip19-d" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -773,7 +872,7 @@
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="account_id" ref="pcg_4426"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_taxare_inversa_deductibil_19')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_19"/>
     </record>
     <record id="tvatip19" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -785,7 +884,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tvatip19-d'), ref('tvatip19-c')])]"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_taxare_inversa_19')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_19"/>
     </record>
 
     <record id="tvatip20-c" model="account.tax.template">
@@ -797,7 +896,7 @@
         <field name="refund_account_id" ref="pcg_4427"/>
         <field name="account_id" ref="pcg_4427"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_taxare_inversa_colectat_20')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_20"/>
     </record>
     <record id="tvatip20-d" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -808,7 +907,7 @@
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="account_id" ref="pcg_4426"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_taxare_inversa_deductibil_20')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_20"/>
     </record>
     <record id="tvatip20" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -820,7 +919,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tvatip20-d'), ref('tvatip20-c')])]"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_taxare_inversa_20')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_20"/>
     </record>
 
     <record id="tvatip24-c" model="account.tax.template">
@@ -832,7 +931,7 @@
         <field name="refund_account_id" ref="pcg_4427"/>
         <field name="account_id" ref="pcg_4427"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_taxare_inversa_colectat_24')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_24"/>
     </record>
     <record id="tvatip24-d" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -843,7 +942,7 @@
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="account_id" ref="pcg_4426"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_taxare_inversa_deductibil_24')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_24"/>
     </record>
     <record id="tvatip24" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -855,7 +954,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tvatip24-d'), ref('tvatip24-c')])]"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_taxare_inversa_24')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_24"/>
     </record>
 
     <record id="tvatisc" model="account.tax.template">
@@ -869,7 +968,7 @@
         <field name="account_id" ref="pcg_4427"/>
         <field name="refund_account_id" ref="pcg_4427"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tvatisc_sale')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_scutit"/>
     </record>
 
     <record id="tvatisca" model="account.tax.template">
@@ -883,7 +982,7 @@
         <field name="account_id" ref="pcg_4426"/>
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tvatisc_purchase')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_scutit"/>
     </record>
 
     <record id="tvatine" model="account.tax.template">
@@ -897,7 +996,7 @@
         <field name="account_id" ref="pcg_4427"/>
         <field name="refund_account_id" ref="pcg_4427"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tvatine_sale')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_neimp"/>
     </record>
 
     <record id="tvatinea" model="account.tax.template">
@@ -911,7 +1010,7 @@
         <field name="account_id" ref="pcg_4426"/>
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tvatine_purchase')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_neimp"/>
     </record>
 
     <record id="tvati_intras" model="account.tax.template">
@@ -924,7 +1023,7 @@
         <field name="refund_account_id" ref="pcg_4427"/>
         <field name="account_id" ref="pcg_4427"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_purchase_tvaiv')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_vanz_eu"/>
     </record>
 
     <record id="tvati_intrap0c" model="account.tax.template">
@@ -971,7 +1070,7 @@
         <field name="refund_account_id" ref="pcg_4427"/>
         <field name="account_id" ref="pcg_4427"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_intracomunitara_achizitii_colectat_5')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_5"/>
     </record>
     <record id="tvati_intrap5d" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -983,7 +1082,7 @@
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="account_id" ref="pcg_4426"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_intracomunitara_achizitii_deductibil_5')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_5"/>
     </record>
     <record id="tvati_intrap5" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -994,7 +1093,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tvati_intrap5d'), ref('tvati_intrap5c')])]"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_intracomunitara_achizitii_5')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_5"/>
     </record>
 
     <record id="tvati_intrap9c" model="account.tax.template">
@@ -1006,7 +1105,7 @@
         <field name="refund_account_id" ref="pcg_4427"/>
         <field name="account_id" ref="pcg_4427"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_intracomunitara_achizitii_colectat_9')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_9"/>
     </record>
     <record id="tvati_intrap9d" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -1018,7 +1117,7 @@
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="account_id" ref="pcg_4426"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_intracomunitara_achizitii_deductibil_9')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_9"/>
     </record>
     <record id="tvati_intrap9" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -1029,7 +1128,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tvati_intrap9d'), ref('tvati_intrap9c')])]"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_intracomunitara_achizitii_9')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_9"/>
     </record>
 
     <record id="tvati_intrap19c" model="account.tax.template">
@@ -1041,7 +1140,7 @@
         <field name="refund_account_id" ref="pcg_4427"/>
         <field name="account_id" ref="pcg_4427"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_intracomunitara_achizitii_colectat_19')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_19"/>
     </record>
     <record id="tvati_intrap19d" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -1053,7 +1152,7 @@
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="account_id" ref="pcg_4426"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_intracomunitara_achizitii_deductibil_19')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_19"/>
     </record>
     <record id="tvati_intrap19" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -1064,7 +1163,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tvati_intrap19d'), ref('tvati_intrap19c')])]"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_intracomunitara_achizitii_19')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_19"/>
     </record>
 
     <record id="tvati_intrap20c" model="account.tax.template">
@@ -1076,7 +1175,7 @@
         <field name="refund_account_id" ref="pcg_4427"/>
         <field name="account_id" ref="pcg_4427"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_intracomunitara_achizitii_colectat_20')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_20"/>
     </record>
     <record id="tvati_intrap20d" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -1088,7 +1187,7 @@
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="account_id" ref="pcg_4426"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_intracomunitara_achizitii_deductibil_20')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_20"/>
     </record>
     <record id="tvati_intrap20" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -1099,7 +1198,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tvati_intrap20d'), ref('tvati_intrap20c')])]"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_intracomunitara_achizitii_20')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_20"/>
     </record>
 
     <record id="tvati_intrap24c" model="account.tax.template">
@@ -1111,7 +1210,7 @@
         <field name="refund_account_id" ref="pcg_4427"/>
         <field name="account_id" ref="pcg_4427"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_intracomunitara_achizitii_colectat_24')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_24"/>
     </record>
     <record id="tvati_intrap24d" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -1123,7 +1222,7 @@
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="account_id" ref="pcg_4426"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_intracomunitara_achizitii_deductibil_24')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_24"/>
     </record>
     <record id="tvati_intrap24" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -1134,7 +1233,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tvati_intrap24d'), ref('tvati_intrap24c')])]"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_intracomunitara_achizitii_24')])]"/>
-        <field name="tax_group_id" ref="tax_group_tva_0"/>
+        <field name="tax_group_id" ref="tax_group_tva_24"/>
     </record>
 
     <record id="tva_ned_1950c" model="account.tax.template">
@@ -1146,7 +1245,7 @@
         <field name="type_tax_use">none</field>
         <field name="refund_account_id" ref="pcg_4427"/>
         <field name="account_id" ref="pcg_4427"/>
-        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_160'), ref('tax_tag_ro_170')])]"/> -->
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_purchase_tva_ned_1950c')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_19_ded"/>
     </record>
     <record id="tva_ned_1950d" model="account.tax.template">
@@ -1158,7 +1257,7 @@
         <field name="type_tax_use">none</field>
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="account_id" ref="pcg_4426"/>
-        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_220'), ref('tax_tag_ro_290'), ref('tax_tag_ro_300'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_purchase_tva_ned_1950d')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_19_ded"/>
     </record>
     <record id="tva_ned_1950dexp" model="account.tax.template">
@@ -1170,6 +1269,8 @@
         <field name="type_tax_use">none</field>
         <field name="refund_account_id" ref="pcg_6352"/>
         <field name="account_id" ref="pcg_6352"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_purchase_tva_ned_1950dexp')])]"/>
+        <field name="tax_group_id" ref="tax_group_tva_19_ded"/>
     </record>
     <record id="tva_ned_1950" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -1179,6 +1280,8 @@
         <field name="amount_type">group</field>
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tva_ned_1950c'), ref('tva_ned_1950d'), ref('tva_ned_1950dexp')])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_purchase_tva_ned_1950')])]"/>
+        <field name="tax_group_id" ref="tax_group_tva_19_ded"/>
     </record>
      <record id="tva_ned_19c" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -1189,7 +1292,7 @@
         <field name="type_tax_use">none</field>
         <field name="refund_account_id" ref="pcg_4427"/>
         <field name="account_id" ref="pcg_4427"/>
-        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_160'), ref('tax_tag_ro_170')])]"/> -->
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_purchase_tva_ned_19c')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_19_ded"/>
     </record>
     <record id="tva_ned_19d" model="account.tax.template">
@@ -1201,7 +1304,7 @@
         <field name="type_tax_use">none</field>
         <field name="refund_account_id" ref="pcg_4426"/>
         <field name="account_id" ref="pcg_4426"/>
-        <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_220'), ref('tax_tag_ro_290'), ref('tax_tag_ro_300'), ref('tax_tag_ro_340')])]"/> -->
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_purchase_tva_ned_19d')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_19_ded"/>
     </record>
     <record id="tva_ned_19dexp" model="account.tax.template">
@@ -1213,6 +1316,8 @@
         <field name="type_tax_use">none</field>
         <field name="refund_account_id" ref="pcg_6352"/>
         <field name="account_id" ref="pcg_6352"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_purchase_tva_ned_19dexp')])]"/>
+        <field name="tax_group_id" ref="tax_group_tva_19_ded"/>
     </record>
     <record id="tva_ned_19" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -1222,7 +1327,10 @@
         <field name="amount_type">group</field>
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tva_ned_19c'), ref('tva_ned_19d'), ref('tva_ned_19dexp')])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_purchase_tva_ned_19')])]"/>
+        <field name="tax_group_id" ref="tax_group_tva_19_ded"/>
     </record>
+    <!-- TODO: check with partner: are below two orphan taxes ? -->
      <record id="tva_reg_intr_scut" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="sequence">9000</field>
@@ -1270,6 +1378,7 @@
         <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_190'), ref('tax_tag_ro_290'), ref('tax_tag_ro_300'), ref('tax_tag_ro_340')])]"/> -->
         <field name="tax_group_id" ref="tax_group_tva_regularizari"/>
     </record>
+    <!-- TODO: Check with partner: shouldn't `type_tax_use` be sale/purchase ? -->
     <record id="tva_reg_intr_bun" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="sequence">9002</field>
@@ -1304,6 +1413,7 @@
         <!-- <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_210'), ref('tax_tag_ro_290'), ref('tax_tag_ro_300'), ref('tax_tag_ro_340')])]"/> -->
         <field name="tax_group_id" ref="tax_group_tva_regularizari"/>
     </record>
+    <!-- TODO: Check with partner: shouldn't `type_tax_use` be sale/purchase ? -->
     <record id="tva_reg_intr_serv" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="sequence">9003</field>
@@ -1315,6 +1425,7 @@
         <field name="type_tax_use">none</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tva_reg_intr_servc'), ref('tva_reg_intr_servd')])]"/>
     </record>
+    <!-- TODO: check with partner: are below five orphan taxes ? -->
      <record id="tva_comp_forf_agri" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="sequence">9004</field>
