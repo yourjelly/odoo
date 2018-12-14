@@ -78,8 +78,10 @@ var FontPlugin = AbstractPlugin.extend({
      * @returns {jQuery}
      */
     createPalette: function (eventName) {
+        var colors = _.clone(this.options.colors)
+        colors.splice(0, 1); // Ignore the summernote gray palette and use ours
         var $palette = $(QWeb.render('wysiwyg.plugin.font.colorPalette', {
-            colors: this.options.colors,
+            colors: colors,
             eventName: eventName,
             lang: this.lang,
         }));
@@ -93,24 +95,13 @@ var FontPlugin = AbstractPlugin.extend({
 
         // custom structure for the color picker and custom colorsin XML template
         var $clpicker = $(QWeb.render('web_editor.colorpicker'));
-        var groups;
-        var groupsType = [];
 
-        if ($clpicker.is("colorpicker")) {
-            groups = _.map($clpicker.find('[data-name="theme"], [data-name="transparent_grayscale"]'), function (el) {
-                groupsType.push($(el).data('name'));
-                return $(el).find("button").empty();
-            });
-        } else {
-            groups = [$clpicker.find("button").empty()];
-        }
-
-        var $buttons = $(_.map(groups, function ($group, index) {
-            if (!$group.length) {
+        var $buttons = $(_.map($clpicker.children(), function (group, index) {
+            var $contents = $(group).contents();
+            if (!$contents.length) {
                 return '';
             }
-            var className = "note-color-row mb8";
-            var $row = $("<div/>", {"class": "note-color-row mb8", 'data-group': groupsType[index]}).append($group);
+            var $row = $("<div/>", {"class": "note-color-row mb8 clearfix", 'data-group': $(group).data('name')}).append($contents);
             var $after_breaks = $row.find(".o_small + :not(.o_small)");
             if ($after_breaks.length === 0) {
                 $after_breaks = $row.find(":nth-child(8n+9)");
@@ -124,8 +115,9 @@ var FontPlugin = AbstractPlugin.extend({
             $(this).addClass('note-color-btn bg-' + color).attr('data-value', (eventName === 'backColor' ? 'bg-' : 'text-') + color);
         });
 
-        $palette.find('.o_theme_color_placeholder').prepend($buttons.not('[data-group="transparent_grayscale"]'));
+        $palette.find('.o_theme_color_placeholder').prepend($buttons.filter('[data-group="theme"]'));
         $palette.find('.o_transparent_color_placeholder').prepend($buttons.filter('[data-group="transparent_grayscale"]'));
+        $palette.find('.o_common_color_placeholder').prepend($buttons.filter('[data-group="common"]'));
 
         $palette.off('click').on('mousedown', '.note-color-btn', function (e) {
             e.preventDefault();
