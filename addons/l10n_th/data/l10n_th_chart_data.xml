@@ -321,6 +321,22 @@
         <field name="name">Input VAT</field>
         <field name="applicability">taxes</field>
     </record>
+    <record id="tag_th_23" model="account.account.tag">
+        <field name="name">Input VAT 0%</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tag_th_24" model="account.account.tag">
+        <field name="name">Output VAT 0%</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tag_th_25" model="account.account.tag">
+        <field name="name">Input VAT Exempted</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tag_th_26" model="account.account.tag">
+        <field name="name">Output VAT Exempted</field>
+        <field name="applicability">taxes</field>
+    </record>
 
 <!-- TAXES -->
 
@@ -346,6 +362,51 @@
     <field name="type_tax_use">sale</field>
     <field name="tag_ids" eval="[(6,0,[ref('tag_th_21'), ref('tag_th_10')])]"/>
     <field name="tax_group_id" ref="tax_group_vat_7"/>
+</record>
+
+
+<record id="tax_input_vat_0" model="account.tax.template">
+    <field name="chart_template_id" ref="chart"/>
+    <field name="name">Input VAT 0%</field>
+    <field name="amount_type">percent</field>
+    <field name="amount" eval="0"/>
+    <field name="account_id" ref="a_input_vat"/>
+    <field name="refund_account_id" ref="a_input_vat"/>
+    <field name="type_tax_use">purchase</field>
+    <field name="tag_ids" eval="[(6,0,[ref('tag_th_23')])]"/>
+</record>
+
+<record id="tax_output_vat_0" model="account.tax.template">
+    <field name="chart_template_id" ref="chart"/>
+    <field name="name">Output VAT 0%</field>
+    <field name="amount_type">percent</field>
+    <field name="amount" eval="0"/>
+    <field name="account_id" ref="a_output_vat"/>
+    <field name="refund_account_id" ref="a_output_vat"/>
+    <field name="type_tax_use">sale</field>
+    <field name="tag_ids" eval="[(6,0,[ref('tag_th_24')])]"/>
+</record>
+
+<record id="tax_input_vat_exempted" model="account.tax.template">
+    <field name="chart_template_id" ref="chart"/>
+    <field name="name">Input VAT Exempted</field>
+    <field name="amount_type">percent</field>
+    <field name="amount" eval="0"/>
+    <field name="account_id" ref="a_input_vat"/>
+    <field name="refund_account_id" ref="a_input_vat"/>
+    <field name="type_tax_use">purchase</field>
+    <field name="tag_ids" eval="[(6,0,[ref('tag_th_25')])]"/>
+</record>
+
+<record id="tax_output_vat_exempted" model="account.tax.template">
+    <field name="chart_template_id" ref="chart"/>
+    <field name="name">Output VAT Exempted</field>
+    <field name="amount_type">percent</field>
+    <field name="amount" eval="0"/>
+    <field name="account_id" ref="a_output_vat"/>
+    <field name="refund_account_id" ref="a_output_vat"/>
+    <field name="type_tax_use">sale</field>
+    <field name="tag_ids" eval="[(6,0,[ref('tag_th_26')])]"/>
 </record>
 
 <record id="tax_wht_co_1" model="account.tax.template">
