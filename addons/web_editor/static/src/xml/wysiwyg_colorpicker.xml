@@ -14,11 +14,13 @@
                 <h6 class="mt-2">Transparent colors</h6>
                 <div class="o_transparent_color_placeholder"/>
                 <h6 class="mt-2">Common colors</h6>
-                <div class="note-color-row" t-foreach="colors" t-as="rowColors">
-                    <button t-foreach="rowColors" t-as="color" type="button" class="note-color-btn" data-toggle="button" tabindex="-1"
-                        t-attf-style="background-color:{{color}}" 
-                        t-att-data-value="color" 
-                        t-att-title="color"/>
+                <div class="o_common_color_placeholder">
+                    <div class="note-color-row" t-foreach="colors" t-as="rowColors">
+                        <button t-foreach="rowColors" t-as="color" type="button" class="note-color-btn" data-toggle="button" tabindex="-1"
+                            t-attf-style="background-color:{{color}}"
+                            t-att-data-value="color"
+                            t-att-title="color"/>
+                    </div>
                 </div>
             </div>
             <h6 class="note-custom-color mt8"><t t-esc="lang.color.customColor"/></h6>
