@@ -430,7 +430,7 @@ var DataSet =  Class.extend(mixins.PropertiesMixin, {
     read_index: function (fields, options) {
         options = options || {};
         return this.read_ids([this.ids[this.index]], fields, options).then(function (records) {
-            if (_.isEmpty(records)) { return Promise.reject().promise(); }
+            if (_.isEmpty(records)) { return Promise.reject(); }
             return records[0];
         });
     },

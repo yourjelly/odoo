@@ -42,7 +42,8 @@ var PasswordField = fields.InputField.extend({
     _renderEdit: function () {
         var _this = this;
         var meter = this._meter;
-        return Promise.resolve(this._super.apply(this, arguments)).then(function () {
+        var prom = Promise.resolve(this._super.apply(this, arguments));
+        prom.then(function () {
             return meter._widgetRenderAndInsert(function (t) {
                 // insertAfter doesn't work and appendTo means the meter is
                 // ignored (as this.$el is an input[type=password])
@@ -52,6 +53,7 @@ var PasswordField = fields.InputField.extend({
             // initial meter update when re-editing
             meter.update(_this._getValue());
         });
+        return prom;
     },
     /**
      * disable formatting for this widget, or the value gets replaced by

@@ -54,18 +54,20 @@ var PortalChatter = Widget.extend({
     willStart: function(){
         var self = this;
         // load qweb template and init data
-        return Promise.all([
+        var prom = Promise.all([
             rpc.query({
                 route: '/mail/chatter_init',
                 params: this._messageFetchPrepareParams()
             }), this._loadTemplates()
-        ]).then(function (result) {
+        ]);
+        prom.then(function (result) {
             debugger; // SVS: Need to look what result look like (I think we need to use result[0] instead of result)
             console.warn(result); // TODO: when we are sure its result/result[0] we need to use, delete those 2 lines
             self.result = result[0];
             self.options = _.extend(self.options, self.result['options'] || {});
             return result;
         });
+        return prom;
     },
     /**
      * @override
@@ -98,13 +100,15 @@ var PortalChatter = Widget.extend({
      */
     messageFetch: function (domain) {
         var self = this;
-        return rpc.query({
+        var prom = rpc.query({
             route: '/mail/chatter_fetch',
             params: self._messageFetchPrepareParams()
-        }).then(function (result) {
-            self.set('messages', self.preprocessMessages(result['messages']));
-            self.set('message_count', result['message_count']);
         });
+        prom.then(function (result) {
+            self.set('messages', self.preprocessMessages(result.messages));
+            self.set('message_count', result.message_count);
+        });
+        return prom;
     },
     /**
      * Update the messages format
