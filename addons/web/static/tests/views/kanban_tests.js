@@ -4244,7 +4244,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.skip('basic support for widgets', async function (assert) {
+    QUnit.test('basic support for widgets', async function (assert) {
         assert.expect(1);
 
         var MyWidget = Widget.extend({
@@ -4514,7 +4514,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.skip('RPCs when (re)loading kanban view progressbars', async function (assert) {
+    QUnit.test('RPCs when (re)loading kanban view progressbars', async function (assert) {
         assert.expect(9);
 
         var kanban = await createAsyncView({
@@ -4544,14 +4544,14 @@ QUnit.module('Views', {
         assert.verifySteps([
             // initial load
             'read_group',
-            '/web/dataset/search_read',
-            '/web/dataset/search_read',
             'read_progress_bar',
+            '/web/dataset/search_read',
+            '/web/dataset/search_read',
             // reload
             'read_group',
-            '/web/dataset/search_read',
-            '/web/dataset/search_read',
             'read_progress_bar',
+            '/web/dataset/search_read',
+            '/web/dataset/search_read',
         ]);
 
         kanban.destroy();

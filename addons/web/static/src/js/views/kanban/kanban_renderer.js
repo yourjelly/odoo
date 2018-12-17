@@ -378,7 +378,7 @@ var KanbanRenderer = BasicRenderer.extend({
             Promise.all(self.defs).then(function () {
                 self._renderGhostDivs(fragment, 6).then(resolve).catch(reject);
             });
-        })
+        });
         this.defs.push(prom);
     },
     /**

@@ -321,12 +321,12 @@ var KanbanRecord = Widget.extend({
             var Widget = widgetRegistry.get($field.attr('name'));
             var widget = new Widget(self, self.state);
 
-            var def = widget._widgetRenderAndInsert(function () { })
+            var def = widget._widgetRenderAndInsert(function () { });
             self.defs.push(def);
             def.then(function () {
+                $field.replaceWith(widget.$el);
                 widget.$el.addClass('o_widget');
             });
-            $field.replaceWith(widget.$el);
         });
     },
     /**
