@@ -127,7 +127,7 @@ var FormViewDialog = ViewDialog.extend({
                     text: (multi_select ? _t("Save & Close") : _t("Save")),
                     classes: "btn-primary",
                     click: function () {
-                        this._save().then(self.close.bind(self));
+                        self._save().then(self.close.bind(self));
                     }
                 });
 
@@ -136,7 +136,7 @@ var FormViewDialog = ViewDialog.extend({
                         text: _t("Save & New"),
                         classes: "btn-primary",
                         click: function () {
-                            this._save().then(self.form_view.createRecord.bind(self.form_view, self.parentID));
+                            self._save().then(self.form_view.createRecord.bind(self.form_view, self.parentID));
                         },
                     });
                 }
