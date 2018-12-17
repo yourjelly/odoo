@@ -4,8 +4,9 @@ odoo.define('web_editor.base', function (require) {
 var ajax = require('web.ajax');
 var session = require('web.session');
 
-var domReady = $.Deferred();
-$(domReady.resolve.bind(domReady));
+var domReady = new Promise(function (resolve, reject) {
+    $(resolve);
+});
 
 return {
     /**

@@ -25,7 +25,11 @@ var WebsiteNavbar = rootWidget.RootWidget.extend({
      */
     init: function () {
         this._super.apply(this, arguments);
-        this._widgetDefs = [$.Deferred()];
+        var self = this;
+        var initPromise = new Promise(function (resolve, reject) {
+            self.resolveInit = resolve;
+        });
+        this._widgetDefs = [initPromise];
     },
     /**
      * @override
@@ -33,7 +37,7 @@ var WebsiteNavbar = rootWidget.RootWidget.extend({
     start: function () {
         var self = this;
         return this._super.apply(this, arguments).then(function () {
-            self._widgetDefs[0].resolve();
+            self.resolveInit();
         });
     },
 
@@ -66,7 +70,7 @@ var WebsiteNavbar = rootWidget.RootWidget.extend({
      * @private
      * @param {string} actionName
      * @param {Array} params
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _handleAction: function (actionName, params, _i) {
         var self = this;
@@ -100,7 +104,7 @@ var WebsiteNavbar = rootWidget.RootWidget.extend({
      * @private
      */
     _whenReadyForActions: function () {
-        return $.when.apply($, this._widgetDefs);
+        return Promise.all(this._widgetDefs);
     },
 
     //--------------------------------------------------------------------------
@@ -117,9 +121,10 @@ var WebsiteNavbar = rootWidget.RootWidget.extend({
     _onActionMenuClick: function (ev) {
         var $button = $(ev.currentTarget);
         $button.prop('disabled', true);
-        this._handleAction($button.data('action')).always(function () {
+        var always = function () {
             $button.prop('disabled', false);
-        });
+        };
+        this._handleAction($button.data('action')).then(always).catch(always);
     },
     /**
      * Called when an action is asked to be executed from a child widget ->
@@ -129,7 +134,7 @@ var WebsiteNavbar = rootWidget.RootWidget.extend({
     _onActionDemand: function (ev) {
         var def = this._handleAction(ev.data.actionName, ev.data.params);
         if (ev.data.onSuccess) {
-            def.done(ev.data.onSuccess);
+            def.then(ev.data.onSuccess);
         }
         if (ev.data.onFailure) {
             def.catch(ev.data.onFailure);
@@ -203,12 +208,12 @@ var WebsiteNavbarActionWidget = Widget.extend({
      *
      * @param {string} actionName
      * @param {Array} params
-     * @returns {Deferred|null} action's deferred or null if no action was found
+     * @returns {Promise|null} action's promise or null if no action was found
      */
     handleAction: function (actionName, params) {
         var action = this[this.actions[actionName]];
         if (action) {
-            return $.when(action.apply(this, params || []));
+            return Promise.resolve(action.apply(this, params || []));
         }
         return null;
     },

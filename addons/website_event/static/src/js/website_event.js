@@ -54,7 +54,7 @@ var EventRegistrationForm = Widget.extend({
             $('<div class="alert alert-info"/>')
                 .text(_t('Please select at least one ticket.'))
                 .insertAfter('#registration_form table');
-            return $.Deferred();
+            return new Promise(function(){});
         } else {
             $button.attr('disabled', true);
             return ajax.jsonRpc($form.attr('action'), 'call', post).then(function (modal) {

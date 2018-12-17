@@ -112,7 +112,7 @@ odoo.define('payment.payment_form', function (require) {
                             else {
                                 checked_radio.value = data.id; // set the radio value to the new card id
                                 form.submit();
-                                return $.Deferred();
+                                return new Promise(function(){});
                             }
                         }
                         // if the server has returned false, we display an error
@@ -174,7 +174,7 @@ odoo.define('payment.payment_form', function (require) {
                                 $(newForm).find('input[data-remove-me]').remove(); // remove all the input that should be removed
                                 if(action_url) {
                                     newForm.submit(); // and finally submit the form
-                                    return $.Deferred();
+                                    return new Promise(function(){});
                                 }
                             }
                             else {
@@ -201,7 +201,7 @@ odoo.define('payment.payment_form', function (require) {
                 }
                 else {  // if the user is using an old payment then we just submit the form
                     form.submit();
-                    return $.Deferred();
+                    return new Promise(function(){});
                 }
             }
             else {

@@ -25,7 +25,7 @@ WebsiteNewMenu.include({
      * and redirects the user to this channel with the "new slide" popup open.
      *
      * @private
-     * @returns {Deferred} Unresolved if there is a redirection
+     * @returns {Promise} Unresolved if there is a redirection
      */
     _createNewSlide: function () {
         var self = this;
@@ -34,30 +34,31 @@ WebsiteNewMenu.include({
             method: 'list_all',
             args: [[]],
         }).then(function (data) {
-            var def = $.Deferred();
-            new Dialog(self, {
-                title: _t("New slide"),
-                subtitle: _t("On which channel do you want to add a slide?"),
-                size: 'medium',
-                $content: QWeb.render('website.slide.create', data),
-                buttons: [{
-                    text: _t("Select"),
-                    classes: 'btn-primary',
-                    click: function () {
-                        var channel_url = this.$("option:selected").val();
-                        if (channel_url) {
-                            window.location.href = channel_url + '?enable_slide_upload';
-                        } else {
-                            def.reject();
+            var prom = new Promise(function (resolve, reject) {
+                new Dialog(self, {
+                    title: _t("New slide"),
+                    subtitle: _t("On which channel do you want to add a slide?"),
+                    size: 'medium',
+                    $content: QWeb.render('website.slide.create', data),
+                    buttons: [{
+                        text: _t("Select"),
+                        classes: 'btn-primary',
+                        click: function () {
+                            var channel_url = this.$("option:selected").val();
+                            if (channel_url) {
+                                window.location.href = channel_url + '?enable_slide_upload';
+                            } else {
+                                reject();
+                            }
                         }
-                    }
-                }, {
-                    text: _t("Cancel"), close: true
-                },]
-            }).open()
-                .on('closed', def.resolve.bind(def));
+                    }, {
+                        text: _t("Cancel"), close: true
+                    },]
+                }).open()
+                .on('closed', resolve);
+            });
 
-            return def;
+            return prom;
         });
     },
 });

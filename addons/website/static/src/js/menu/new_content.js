@@ -70,7 +70,7 @@ var NewContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
      * redirects the user to this new page.
      *
      * @private
-     * @returns {Deferred} Unresolved if there is a redirection
+     * @returns {Promise} Unresolved if there is a redirection
      */
     _createNewPage: function () {
         return wUtils.prompt({
@@ -96,7 +96,7 @@ var NewContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             var url = '/website/add/' + encodeURIComponent(val);
             if ($dialog.find('input[type="checkbox"]').is(':checked')) url +='?add_menu=1';
             document.location = url;
-            return $.Deferred();
+            return new Promise(function(){});
         });
     },
     /**

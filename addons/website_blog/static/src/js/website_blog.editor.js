@@ -21,7 +21,7 @@ WebsiteNewMenu.include({
      * it and redirects the user to this new post.
      *
      * @private
-     * @returns {Deferred} Unresolved if there is a redirection
+     * @returns {Promise} Unresolved if there is a redirection
      */
     _createNewBlogPost: function () {
         return this._rpc({
@@ -30,7 +30,7 @@ WebsiteNewMenu.include({
         }).then(function (blog_ids) {
             if (blog_ids.length === 1) {
                 document.location = '/blog/' + blog_ids[0][0] + '/post/new';
-                return $.Deferred();
+                return new Promise(function(){});
             } else if (blog_ids.length > 1) {
                 return wUtils.prompt({
                     id: 'editor_new_blog',
@@ -45,7 +45,7 @@ WebsiteNewMenu.include({
                         return;
                     }
                     document.location = '/blog/' + blog_id + '/post/new';
-                    return $.Deferred();
+                    return new Promise(function(){});
                 });
             }
         });

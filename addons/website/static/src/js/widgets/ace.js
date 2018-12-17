@@ -39,7 +39,7 @@ var WebsiteAceEditor = AceEditor.extend({
         return this._super.apply(this, arguments).then((function () {
             this._updateHash();
             window.location.reload();
-            return $.Deferred();
+            return new Promise(function(){});
         }).bind(this));
     },
     /**
@@ -48,7 +48,7 @@ var WebsiteAceEditor = AceEditor.extend({
     _resetResource: function () {
         return this._super.apply(this, arguments).then((function () {
             window.location.reload();
-            return $.Deferred();
+            return new Promise(function(){});
         }).bind(this));
     },
     /**
