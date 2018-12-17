@@ -42,14 +42,17 @@ KanbanRecord.include({
      *
      */
     _onSalesTeamTargetSet: function () {
+        var self = this;
         var value = Number(this.$target_input.val());
         if (isNaN(value)) {
             this.do_warn(_t("Wrong value entered!"), _t("Only Integer Value should be valid."));
         } else {
-            this.trigger_up('kanban_record_update', {invoiced_target: value});
-            this.trigger_up('reload');
-                // TODO: previous lines can be refactored as follows (in master)
-                // self.trigger_up('kanban_record_update', {invoiced_target: value});
+            this.trigger_up('kanban_record_update', {
+                invoiced_target: value,
+                onSuccess: function () {
+                    self.trigger_up('reload');
+                },
+            });
         }
     },
 });

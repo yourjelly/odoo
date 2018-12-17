@@ -456,11 +456,14 @@ var KanbanController = BasicController.extend({
      *
      * @private
      * @param {OdooEvent} ev
+     * @param {Function} [ev.data.onSuccess] callback to execute after applying changes
      */
     _onUpdateRecord: function (ev) {
+        var onSuccess = ev.data.onSuccess;
+        delete ev.data.onSuccess;
         var changes = _.clone(ev.data);
         ev.data.force_save = true;
-        this._applyChanges(ev.target.db_id, changes, ev);
+        this._applyChanges(ev.target.db_id, changes, ev).then(onSuccess);
     },
     /**
      * Allow the user to archive/restore all the records of a column.
