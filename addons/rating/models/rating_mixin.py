@@ -67,7 +67,7 @@ class RatingMixin(models.AbstractModel):
         """ Compute avg and count in one query, as thoses fields will be used together most of the time. """
         domain = self._rating_domain()
         read_group_res = self.env['rating.rating'].read_group(domain, ['rating:avg'], groupby=['res_id'], lazy=False)  # force average on rating column
-        mapping = {item['res_id']: {'rating_count': item['__count'], 'rating_avg': item['rating']} for item in read_group_res}
+        mapping = {item['res_id']: {'rating_count': item['__count'], 'rating_avg': item['rating:avg']} for item in read_group_res}
         for record in self:
             record.rating_count = mapping.get(record.id, {}).get('rating_count', 0)
             record.rating_avg = mapping.get(record.id, {}).get('rating_avg', 0)
