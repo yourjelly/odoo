@@ -31,7 +31,7 @@ options.registry.subscribe = options.Class.extend({
     onBuilt: function () {
         var self = this;
         this._super();
-        this.select_mailing_list("click").fail(function () {
+        this.select_mailing_list("click").catch(function () {
             self.getParent().removeSnippet();
         });
     },

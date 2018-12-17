@@ -6,7 +6,7 @@ var ajax = require('web.ajax');
 var Widget = require('web.Widget');
 
 if (!$('.o_portal_sale_sidebar').length) {
-    return $.Deferred().reject("DOM doesn't contain '.o_portal_sale_sidebar'");
+    return Promise.reject("DOM doesn't contain '.o_portal_sale_sidebar'");
 }
 
     // Add to SO button

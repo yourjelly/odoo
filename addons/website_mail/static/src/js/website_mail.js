@@ -13,7 +13,11 @@ var PortalChatter = require('portal.chatter').PortalChatter;
  */
 PortalChatter.include({
     _loadTemplates: function(){
-        return $.when(this._super(), ajax.loadXML('/website_mail/static/src/xml/website_mail.xml', qweb));
+        return Promise.all([
+            this._super(),
+            ajax.loadXML('/website_mail/static/src/xml/website_mail.xml',
+            qweb)
+        ]);
     },
 });
 

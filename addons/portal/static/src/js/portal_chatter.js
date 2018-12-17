@@ -54,13 +54,15 @@ var PortalChatter = Widget.extend({
     willStart: function(){
         var self = this;
         // load qweb template and init data
-        return $.when(
+        return Promise.all([
             rpc.query({
                 route: '/mail/chatter_init',
                 params: this._messageFetchPrepareParams()
             }), this._loadTemplates()
-        ).then(function(result){
-            self.result = result;
+        ]).then(function (result) {
+            debugger; // SVS: Need to look what result look like (I think we need to use result[0] instead of result)
+            console.warn(result); // TODO: when we are sure its result/result[0] we need to use, delete those 2 lines
+            self.result = result[0];
             self.options = _.extend(self.options, self.result['options'] || {});
             return result;
         });
@@ -92,14 +94,14 @@ var PortalChatter = Widget.extend({
      * current page and current domain.
      *
      * @param {Array} domain
-     * @returns {Deferred}
+     * @returns {Promise}
      */
-    messageFetch: function(domain){
+    messageFetch: function (domain) {
         var self = this;
         return rpc.query({
             route: '/mail/chatter_fetch',
             params: self._messageFetchPrepareParams()
-        }).then(function(result){
+        }).then(function (result) {
             self.set('messages', self.preprocessMessages(result['messages']));
             self.set('message_count', result['message_count']);
         });
@@ -136,7 +138,7 @@ var PortalChatter = Widget.extend({
     },
     /**
      * @private
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _loadTemplates: function(){
         return ajax.loadXML('/portal/static/src/xml/portal_chatter.xml', qweb);
@@ -238,7 +240,7 @@ var PortalChatter = Widget.extend({
      * @private
      */
     _onSubmitButtonClick: function () {
-        return $.Deferred();
+        return Promise.resolve();
     },
 });
 

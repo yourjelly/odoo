@@ -92,11 +92,13 @@ sAnimation.registry.autohideMenu = sAnimation.Class.extend({
                 if (img.complete) {
                     return; // Already loaded
                 }
-                var def = $.Deferred();
-                defs.push(def);
-                $(img).one('load', function () {
-                    def.resolve();
+
+                var prom = new Promise(function (resolve, reject) {
+                    $(img).one('load', function () {
+                        resolve();
+                    });
                 });
+                defs.push(prom);
             });
 
             // The previous code will make sure we wait for images to be fully
@@ -110,7 +112,7 @@ sAnimation.registry.autohideMenu = sAnimation.Class.extend({
                 $window.trigger('resize');
             });
         }
-        return $.when.apply($, defs).then(function () {
+        return Promise.all(defs).then(function () {
             if (!self.noAutohide) {
                 dom.initAutoMoreMenu(self.$el, {unfoldable: '.divider, .divider ~ li'});
             }

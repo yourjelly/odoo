@@ -42,7 +42,7 @@ var Dashboard = AbstractAction.extend({
 
     willStart: function() {
         var self = this;
-        return $.when(ajax.loadLibs(this), this._super()).then(function() {
+        return Promise.all([ajax.loadLibs(this), this._super()]).then(function() {
             return self.fetch_data();
         }).then(function(){
             var website = _.findWhere(self.websites, {selected: true});
@@ -70,7 +70,7 @@ var Dashboard = AbstractAction.extend({
                 date_from: this.date_from.year()+'-'+(this.date_from.month()+1)+'-'+this.date_from.date(),
                 date_to: this.date_to.year()+'-'+(this.date_to.month()+1)+'-'+this.date_to.date(),
             },
-        }).done(function(result) {
+        }).then(function (result) {
             self.data = result;
             self.dashboards_data = result.dashboards;
             self.currency_id = result.currency_id;
@@ -242,7 +242,7 @@ var Dashboard = AbstractAction.extend({
         }
 
         var self = this;
-        $.when(this.fetch_data()).then(function() {
+        Promise.resolve(this.fetch_data()).then(function () {
             self.$('.o_website_dashboard').empty();
             self.render_dashboards();
             self.render_graphs();
@@ -253,7 +253,7 @@ var Dashboard = AbstractAction.extend({
     on_website_button: function(website_id) {
         var self = this;
         this.website_id = website_id;
-        $.when(this.fetch_data()).then(function() {
+        Promise.resolve(this.fetch_data()).then(function () {
             self.$('.o_website_dashboard').empty();
             self.render_dashboards();
             self.render_graphs();

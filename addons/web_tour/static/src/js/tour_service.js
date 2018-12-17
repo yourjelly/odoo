@@ -12,7 +12,7 @@ var TourManager = require('web_tour.TourManager');
 var QWeb = core.qweb;
 
 if (config.device.isMobile) {
-    return $.Deferred().reject();
+    return Promise.reject();
 }
 
 /**
@@ -37,8 +37,9 @@ return session.is_bound.then(function () {
             });
         defs.push(def);
     }
-    return $.when.apply($, defs).then(function (consumed_tours) {
-        consumed_tours = session.is_frontend ? consumed_tours : session.web_tours;
+    return Promise.all(defs).then(function (results) {
+        debugger; // SVS : check if results is really what we expect
+        var consumed_tours = session.is_frontend ? results[0] : session.web_tours;
         var tour_manager = new TourManager(rootWidget, consumed_tours);
 
         // Use a MutationObserver to detect DOM changes
@@ -68,27 +69,28 @@ return session.is_bound.then(function () {
                     load_def = ajax.loadXML('/web_tour/static/src/xml/tip.xml', QWeb);
                 }
 
-                var def = $.Deferred();
-                $(function () {
-                    /**
-                     * Once the DOM is ready, we still have to wait all the modules are loaded before completing the tours
-                     * registration and starting listening for DOM mutations.
-                     */
-                    $.when(load_def).then(function () {
-                        _.defer(function () {
-                            tour_manager._register_all(observe);
-                            if (observe) {
-                                observer.observe(document.body, {
-                                    attributes: true,
-                                    childList: true,
-                                    subtree: true,
-                                });
-                            }
-                            def.resolve();
+                var prom = new Promise(function (resolve, reject) {
+                    $(function () {
+                        /**
+                         * Once the DOM is ready, we still have to wait all the modules are loaded before completing the tours
+                         * registration and starting listening for DOM mutations.
+                         */
+                        Promise.resolve(load_def).then(function () {
+                            _.defer(function () {
+                                tour_manager._register_all(observe);
+                                if (observe) {
+                                    observer.observe(document.body, {
+                                        attributes: true,
+                                        childList: true,
+                                        subtree: true,
+                                    });
+                                }
+                                resolve();
+                            });
                         });
                     });
                 });
-                return def;
+                return prom;
             };
         })();
 

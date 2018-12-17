@@ -256,7 +256,7 @@ QUnit.module('special_fields', {
 
     QUnit.module('FieldReportLayout');
 
-    QUnit.skip('report_layout widget in form view [!!! ATTENTION, ATTENTION !!! DON\'T SKIP ME !!! DON\'T FORGET TO FIX ME BEFORE MERGING !!!]', async function (assert) {
+    QUnit.test('report_layout widget in form view [!!! ATTENTION, ATTENTION !!! DON\'T SKIP ME !!! DON\'T FORGET TO FIX ME BEFORE MERGING !!!]', async function (assert) {
         assert.expect(3);
 
         this.data['report.layout'] = {
@@ -295,8 +295,7 @@ QUnit.module('special_fields', {
             "No image should be selected");
 
         // select first image
-        form.$(".img.img-fluid:first").click();
-        await testUtils.nextTick();
+        await testUtils.dom.click(form.$(".img.img-fluid:first"));
         // await testUtils.dom.click(form.$(".img.img-fluid:first"), {
         //     allowInvisible: true
         // });

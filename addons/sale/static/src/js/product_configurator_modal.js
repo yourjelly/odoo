@@ -104,7 +104,7 @@ var OptionalProductsModal = Dialog.extend(ServicesMixin, ProductConfiguratorMixi
         });
 
         var parentInit = self._super.apply(self, arguments);
-        return $.when(getModalContent, parentInit);
+        return Promise.all([getModalContent, parentInit]);
     },
 
     /**
@@ -345,14 +345,12 @@ var OptionalProductsModal = Dialog.extend(ServicesMixin, ProductConfiguratorMixi
             $main_product.after($parent);
         }
 
-        var productReady = this.selectOrCreateProduct(
+        this.selectOrCreateProduct(
             $parent,
             $parent.find('.product_id').val(),
             productTemplateId,
             true
-        );
-
-        productReady.done(function (productId){
+        ).then(function (productId) {
             $parent.find('.product_id').val(productId);
 
             ajax.jsonRpc(self._getUri("/product_configurator/optional_product_items"), 'call', {

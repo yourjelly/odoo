@@ -230,10 +230,10 @@ var ImageWidget = MediaWidget.extend({
      * @override
      */
     willStart: function () {
-        return $.when(
+        return Promise.all([
             this._super.apply(this, arguments),
             this.search('', true)
-        );
+        ]);
     },
     /**
      * @override
@@ -279,9 +279,9 @@ var ImageWidget = MediaWidget.extend({
             return this.media;
         }
 
-        var def = $.when();
+        var prom = Promise.resolve();
         if (!img.access_token) {
-            def = this._rpc({
+            prom = this._rpc({
                 model: 'ir.attachment',
                 method: 'generate_access_token',
                 args: [[img.id]]
@@ -290,7 +290,7 @@ var ImageWidget = MediaWidget.extend({
             });
         }
 
-        return def.then(function () {
+        return prom.then(function () {
             if (!img.isDocument) {
                 if (img.access_token && self.options.res_model !== 'ir.ui.view') {
                     img.src += _.str.sprintf('?access_token=%s', img.access_token);
@@ -475,14 +475,15 @@ var ImageWidget = MediaWidget.extend({
                     class: 'img-fluid',
                     src: $div.data('url') || $div.data('src'),
                 });
-                var def = $.Deferred();
-                $img[0].onload = def.resolve.bind(def);
-                $div.addClass('o_webimage').append($img);
-                return def;
+                var prom = new Promise(function (resolve, reject) {
+                    $img[0].onload = resolve();
+                    $div.addClass('o_webimage').append($img);
+                });
+                return prom;
             }
         });
         if (withEffect) {
-            $.when.apply($, imageDefs).then(function () {
+            Promise.all(imageDefs).then(function () {
                 _.delay(function () {
                     $divs.removeClass('o_image_loading');
                 }, 400);
@@ -1217,7 +1218,7 @@ var MediaDialog = Dialog.extend({
             defs.push(this.videoDialog.appendTo(this.$("#editor-media-video")));
         }
 
-        return $.when.apply($, defs).then(function () {
+        return Promise.all(defs).then(function () {
             self._setActive(self.imageDialog);
         });
     },
@@ -1236,7 +1237,7 @@ var MediaDialog = Dialog.extend({
         if (this.multiImages) {
             // In the case of multi images selection we suppose this was not to
             // replace an old media, so we only retrieve the images and save.
-            return $.when(this.active.save()).then(function (data) {
+            return Promise.resolve(this.active.save()).then(function (data) {
                 self.final_data = data;
                 return _super.apply(self, args);
             });
@@ -1257,7 +1258,7 @@ var MediaDialog = Dialog.extend({
             });
         }
 
-        return $.when(this.active.save()).then(function (media) {
+        return Promise.resolve(this.active.save()).then(function (media) {
             if (!self.media && media) {
                 self.range.insertNode(media, true);
             }
@@ -1488,7 +1489,7 @@ var LinkDialog = Dialog.extend({
             var $url = this.$('input[name="url"]');
             $url.closest('.form-group').addClass('o_has_error').find('.form-control, .custom-select').addClass('is-invalid');
             $url.focus();
-            return $.Deferred().reject();
+            return Promise.reject();
         }
         this.data.text = data.label;
         this.data.url = data.url;
@@ -1668,7 +1669,7 @@ var CropImageDialog = Dialog.extend({
                 _.extend(self.imageData, res);
             }));
         }
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
     /**
      * @override

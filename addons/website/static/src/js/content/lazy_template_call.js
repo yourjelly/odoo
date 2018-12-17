@@ -17,7 +17,7 @@ var LazyTemplateRenderer = Widget.extend({
             return $(this).data('oe-call');
         }).get());
         if (!oeCalls.length) {
-            return $.when(this._super.apply(this, arguments));
+            return Promise.resolve(this._super.apply(this, arguments));
         }
 
         var def = this._rpc({
@@ -34,7 +34,7 @@ var LazyTemplateRenderer = Widget.extend({
             });
         });
 
-        return $.when(this._super.apply(this, arguments), def);
+        return Promise.all([this._super.apply(this, arguments), def]);
     },
 });
 

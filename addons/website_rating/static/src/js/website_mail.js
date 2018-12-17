@@ -130,7 +130,11 @@ odoo.define('website_rating.thread', function(require) {
         //--------------------------------------------------------------------------
 
         _loadTemplates: function(){
-            return $.when(this._super(), ajax.loadXML('/website_rating/static/src/xml/website_mail.xml', qweb));
+            return Promise.all([
+                this._super(),
+                ajax.loadXML('/website_rating/static/src/xml/website_mail.xml',
+                qweb)
+            ]);
         },
         _messageFetchPrepareParams: function(){
             var params = this._super.apply(this, arguments);

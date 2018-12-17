@@ -81,7 +81,7 @@ translate.Class.include({
                     }).then(function () {
                         ajax.jsonRpc('/website/post_gengo_jobs', 'call', {});
                         self._save();
-                    }).fail(function () {
+                    }).catch(function () {
                         Dialog.alert(null, _t("Could not Post translation"));
                     });
                 });
@@ -102,7 +102,7 @@ translate.Class.include({
         ajax.jsonRpc('/website/get_translated_length', 'call', {
             'translated_ids': translated_ids,
             'lang': weContext.get().lang,
-        }).done(function (res){
+        }).then(function (res){
             var dialog = new GengoTranslatorStatisticDialog(res);
             dialog.appendTo($(document.body));
         });
@@ -188,7 +188,7 @@ var GengoApiConfigDialog = Widget.extend({
                'config': {'gengo_public_key':public_key,'gengo_private_key':private_key,'gengo_auto_approve':auto_approve,'gengo_sandbox':sandbox},
            }).then(function () {
                self.trigger('set_config');
-           }).fail(function () {
+           }).catch(function () {
                Dialog.alert(null, _t("Could not submit ! Try Again"));
            });
        }

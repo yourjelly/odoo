@@ -497,7 +497,7 @@ var FieldTextHtml = AbstractField.extend({
         if (this.mode === 'readonly') {
             return;
         }
-        return $.when(this.contentLoadedDeferred, this.editorLoadedDeferred, result).then(function () {
+        return Promise.all([this.contentLoadedDeferred, this.editorLoadedDeferred, result]).then(function () {
             // switch to WYSIWYG mode if currently in code mode to get all changes
             if (config.debug && self.editor.rte) {
                 var layoutInfo = self.editor.rte.editable().data('layoutInfo');

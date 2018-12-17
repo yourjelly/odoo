@@ -68,7 +68,7 @@ sAnimations.registry.WebsiteSaleOptions = sAnimations.Class.extend(ProductConfig
             false
         );
 
-        return productReady.done(function (productId){
+        return productReady.then(function (productId){
             $form.find(productSelector.join(', ')).val(productId);
 
             self.rootProduct = {

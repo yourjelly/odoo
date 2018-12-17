@@ -103,7 +103,7 @@ var ProductComparison = Widget.extend(ProductConfiguratorMixin, {
                 false
             );
 
-            productReady.done(function (productId) {
+            productReady.then(function (productId) {
                 productId = parseInt(productId, 10);
 
                 if (!productId) {
@@ -252,7 +252,7 @@ sAnimations.registry.ProductComparison = sAnimations.Class.extend({
         }
 
         this.productComparison = new ProductComparison(this);
-        return $.when(def, this.productComparison.appendTo(this.$el));
+        return Promise.all([def, this.productComparison.appendTo(this.$el)]);
     },
 
     //--------------------------------------------------------------------------

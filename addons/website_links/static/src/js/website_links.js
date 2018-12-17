@@ -38,7 +38,7 @@ var SelectBox = Widget.extend({
                 return {id: val.id, text: val.name};
             });
         }));
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
     /**
      * @override
@@ -377,7 +377,7 @@ sAnimations.registry.websiteLinks = sAnimations.Class.extend({
 
         $('[data-toggle="tooltip"]').tooltip();
 
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
 
     //--------------------------------------------------------------------------

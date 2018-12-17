@@ -87,13 +87,13 @@ var WebsiteNavbar = rootWidget.RootWidget.extend({
                 // instantiated yet (rare) -> retry some times to eventually abort
                 if (_i > 50) {
                     console.warn(_.str.sprintf("Action '%s' was not able to be handled.", actionName));
-                    return $.Deferred().reject();
+                    return Promise.reject();
                 }
                 return concurrency.delay(100).then(function () {
                     return self._handleAction(actionName, params, (_i || 0) + 1);
                 });
             }
-            return $.when.apply($, defs);
+            return Promise.all(defs);
         });
     },
     /**

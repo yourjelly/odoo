@@ -5,7 +5,7 @@ require('web.dom_ready');
 var SalePortalSidebar = require('sale.SalePortalSidebar');
 
 if (!$('.o_portal_sale_sidebar').length) {
-    return $.Deferred().reject("DOM doesn't contain '.o_portal_sale_sidebar'");
+    return Promise.reject("DOM doesn't contain '.o_portal_sale_sidebar'");
 }
 
 var $spyWatch = $('body[data-target=".navspy"]'),

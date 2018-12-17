@@ -5,7 +5,7 @@ odoo.define('portal.portal', function (require) {
 
 
     if (!$('.o_portal').length) {
-        return $.Deferred().reject("DOM doesn't contain '.o_portal'");
+        return Promise.reject("DOM doesn't contain '.o_portal'");
     }
 
     if ($('.o_portal_details').length) {

@@ -5,7 +5,7 @@ odoo.define('website_rating_project.rating', function (require) {
   require('web.dom_ready');
 
   if(!$('.o_portal_project_rating').length) {
-      return $.Deferred().reject("DOM doesn't contain '.o_portal_project_rating'");
+      return Promise.reject("DOM doesn't contain '.o_portal_project_rating'");
   }
 
   /**

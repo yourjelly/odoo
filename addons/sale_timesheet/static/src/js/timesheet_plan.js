@@ -81,7 +81,7 @@ var ProjectPlan = AbstractAction.extend({
      *
      * @private
      * @param {string[]}
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _fetchPlan: function (domain) {
         var self = this;

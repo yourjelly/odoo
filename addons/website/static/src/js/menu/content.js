@@ -93,7 +93,7 @@ var PagePropertiesDialog = weWidgets.Dialog.extend({
             self.fields = fields;
         }));
 
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
     /**
      * @override
@@ -176,7 +176,7 @@ var PagePropertiesDialog = weWidgets.Dialog.extend({
         }
         this.$('#date_publish_container').datetimepicker(datepickersOptions);
 
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
     /**
      * @override
@@ -251,7 +251,7 @@ var PagePropertiesDialog = weWidgets.Dialog.extend({
      *
      * @private
      * @param {integer} moID
-     * @returns {Deferred<Array>}
+     * @returns {Promise<Array>}
      */
     _getPageDependencies: function (moID) {
         return this._rpc({
@@ -265,7 +265,7 @@ var PagePropertiesDialog = weWidgets.Dialog.extend({
      *
      * @private
      * @param {integer} moID
-     * @returns {Deferred<Array>}
+     * @returns {Promise<Array>}
      */
     _getPageKeyDependencies: function (moID) {
         return this._rpc({
@@ -278,7 +278,7 @@ var PagePropertiesDialog = weWidgets.Dialog.extend({
      * Retrieves supported mimtype
      *
      * @private
-     * @returns {Deferred<Array>}
+     * @returns {Promise<Array>}
      */
     _getSupportedMimetype: function () {
         return this._rpc({
@@ -478,7 +478,7 @@ var EditMenuDialog = weWidgets.Dialog.extend({
             self.flat = self._flatenize(menu);
             self.to_delete = [];
         }));
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
     /**
      * @override
@@ -768,7 +768,7 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     _getPageOption: function (name) {
         var option = this.pageOptions[name];
         if (!option) {
-            return $.Deferred().reject();
+            return Promise.reject();
         }
         return $.when(option.value);
     },
@@ -788,7 +788,7 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                 }, true, true);
             }
         });
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
     /**
      * Opens the page properties dialog.
@@ -826,13 +826,13 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             },
         });
         if (mo.model !== 'website.page') {
-            return $.Deferred().reject();
+            return Promise.reject();
         }
 
         // Check if this is a valid option
         var option = this.pageOptions[params.name];
         if (!option) {
-            return $.Deferred().reject();
+            return Promise.reject();
         }
 
         // Toggle the value

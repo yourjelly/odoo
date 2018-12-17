@@ -17,7 +17,7 @@ sAnimation.registry.visitor = sAnimation.Class.extend({
                 self.$('.country_events_list').replaceWith(data);
             }
         }));
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
 });
 });

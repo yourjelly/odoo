@@ -62,7 +62,7 @@ var WebsiteRoot = BodyManager.extend({
      */
     willStart: function () {
         // TODO would be even greater to wait for localeDef only when necessary
-        return $.when(this._super.apply(this, arguments), localeDef);
+        return Promise.all([this._super.apply(this, arguments), localeDef]);
     },
     /**
      * @override
@@ -108,7 +108,7 @@ var WebsiteRoot = BodyManager.extend({
             $('input, textarea').placeholder();
         }
 
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
 
     //--------------------------------------------------------------------------
@@ -136,7 +136,7 @@ var WebsiteRoot = BodyManager.extend({
      * @param {jQuery} [$from]
      *        only initialize the animations whose `selector` matches the
      *        element or one of its descendant (default to the wrapwrap element)
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _startAnimations: function (editableMode, $from) {
         var self = this;
@@ -157,9 +157,9 @@ var WebsiteRoot = BodyManager.extend({
                 self.animations.push(animation);
                 return animation.attachTo($(el));
             });
-            return $.when.apply($, defs);
+            return Promise.all(defs);
         });
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
     /**
      * Destroys all animation instances. Especially needed before saving while
@@ -196,8 +196,8 @@ var WebsiteRoot = BodyManager.extend({
      */
     _onAnimationStartDemand: function (ev) {
         this._startAnimations(ev.data.editableMode, ev.data.$target)
-            .done(ev.data.onSuccess)
-            .fail(ev.data.onFailure);
+            .then(ev.data.onSuccess)
+            .catch(ev.data.onFailure);
     },
     /**
      * Called when the root is notified that the animations have to be
@@ -255,12 +255,12 @@ var WebsiteRoot = BodyManager.extend({
                 object: $data.data('object'),
             },
         })
-        .done(function (result) {
+        .then(function (result) {
             $data.toggleClass("css_unpublished css_published");
             $data.find('input').prop("checked", result);
             $data.parents("[data-publish]").attr("data-publish", +result ? 'on' : 'off');
         })
-        .fail(function (err, data) {
+        .catch(function (err, data) {
             return new Dialog(self, {
                 title: data.data ? data.data.arguments[0] : "",
                 $content: $('<div/>', {

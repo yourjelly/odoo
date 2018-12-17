@@ -107,7 +107,7 @@ odoo.define('portal.signature_form', function (require){
 
         /**
          * @private
-         * @returns {Deferred}
+         * @returns {Promise}
          */
         _loadTemplates: function () {
             return ajax.loadXML('/portal/static/src/xml/portal_signature.xml', qweb);

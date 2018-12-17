@@ -57,7 +57,7 @@ require('web.dom_ready');
 var options = require('web_editor.snippets.options');
 
 if (!$('.js_sale').length) {
-    return $.Deferred().reject("DOM doesn't contain '.js_sale'");
+    return Promise.reject("DOM doesn't contain '.js_sale'");
 }
 
 $('.oe_website_sale').on('click', '.oe_currency_value:o_editable', function (ev) {

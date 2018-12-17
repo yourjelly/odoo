@@ -31,7 +31,7 @@ sAnimations.registry.websiteSlides = sAnimations.Class.extend({
             $(el).text(displayStr);
         });
 
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
 
     //--------------------------------------------------------------------------
@@ -118,7 +118,7 @@ sAnimations.registry.websiteSlidesEmbed = sAnimations.Class.extend({
     start: function (parent) {
         var defs = [this._super.apply(this, arguments)];
         $('iframe.o_wslides_iframe_viewer').on('ready', this._onIframeViewerReady.bind(this));
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
 
     //--------------------------------------------------------------------------

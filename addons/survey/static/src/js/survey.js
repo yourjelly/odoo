@@ -17,7 +17,7 @@ var _t = core._t;
 var the_form = $('.js_surveyform');
 
 if(!the_form.length) {
-    return $.Deferred().reject("DOM doesn't contain '.js_surveyform'");
+    return Promise.reject("DOM doesn't contain '.js_surveyform'");
 }
 
     var prefill_controller = the_form.attr("data-prefill");
@@ -170,7 +170,7 @@ if(!the_form.length) {
         return ajax.loadJS(url);
     }
 
-    var ready_with_locale = $.when(base.ready(), load_locale());
+    var ready_with_locale = Promise.all([base.ready(), load_locale()]);
     // datetimepicker use moment locale to display date format according to language
     // frontend does not load moment locale at all.
     // so wait until DOM ready with locale then init datetimepicker

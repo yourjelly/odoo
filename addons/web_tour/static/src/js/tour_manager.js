@@ -49,7 +49,7 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
      *        the url to load when manually running the tour
      * @param {boolean} [options.rainbowMan=true]
      *        whether or not the rainbowman must be shown at the end of the tour
-     * @param {Deferred} [options.wait_for]
+     * @param {Promise} [options.wait_for]
      *        indicates when the tour can be started
      * @param {Object[]} steps - steps' descriptions, each step being an object
      *                     containing a tip description
@@ -70,7 +70,7 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
             url: options.url,
             rainbowMan: options.rainbowMan === undefined ? true : !!options.rainbowMan,
             test: options.test,
-            wait_for: options.wait_for || $.when(),
+            wait_for: options.wait_for || Promise.resolve(),
         };
         if (options.skip_enabled) {
             tour.skip_link = '<p><span class="o_skip_tour">' + _t('Skip tour') + '</span></p>';

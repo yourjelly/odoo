@@ -43,7 +43,7 @@ sAnimations.registry.websiteLinksCodeEditor = sAnimations.Class.extend({
     },
     /**
      * @private
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _submitCode: function () {
         var initCode = $('#edit-code-form #init_code').val();
@@ -75,7 +75,7 @@ sAnimations.registry.websiteLinksCodeEditor = sAnimations.Class.extend({
             });
         }
 
-        return $.when();
+        return Promise.resolve();
     },
 
     //--------------------------------------------------------------------------

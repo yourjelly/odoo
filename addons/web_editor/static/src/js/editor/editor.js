@@ -91,7 +91,7 @@ var EditorMenuBar = Widget.extend({
         defs.push(this.snippetsMenu.insertAfter(this.$el));
         this.rte.editable().find('*').off('mousedown mouseup click');
 
-        return $.when.apply($, defs).then(function () {
+        return Promise.all(defs).then(function () {
             self.trigger_up('edit_mode');
         });
     },
@@ -115,25 +115,27 @@ var EditorMenuBar = Widget.extend({
      * @param {boolean} [reload=true]
      *        true if the page has to be reloaded when the user answers yes
      *        (do nothing otherwise but add this to allow class extension)
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     cancel: function (reload) {
         var self = this;
-        var def = $.Deferred();
-        if (!rte.history.getEditableHasUndo().length) {
-            def.resolve();
-        } else {
-            var confirm = Dialog.confirm(this, _t("If you discard the current edition, all unsaved changes will be lost. You can cancel to return to the edition mode."), {
-                confirm_callback: def.resolve.bind(def),
-            });
-            confirm.on('closed', def, def.reject);
-        }
-        return def.then(function () {
+        var prom = new Promise(function (resolve, reject) {
+            if (!rte.history.getEditableHasUndo().length) {
+                resolve();
+            } else {
+                var confirm = Dialog.confirm(self, _t("If you discard the current edition, all unsaved changes will be lost. You can cancel to return to the edition mode."), {
+                    confirm_callback: resolve.bind(prom),
+                });
+                confirm.on('closed', prom, reject);
+            }
+        });
+        prom.then(function () {
             if (reload !== false) {
                 window.onbeforeunload = null;
                 return self._reload();
             }
         });
+        return prom;
     },
     /**
      * Asks the snippets to clean themself, then saves the page, then reloads it
@@ -141,13 +143,13 @@ var EditorMenuBar = Widget.extend({
      *
      * @param {boolean} [reload=true]
      *        true if the page has to be reloaded after the save
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     save: function (reload) {
         var self = this;
         var defs = [];
         this.trigger_up('ready_to_save', {defs: defs});
-        return $.when.apply($, defs).then(function () {
+        return Promise.all(defs).then(function () {
             self.snippetsMenu.cleanForSave();
             return self._saveCroppedImages();
         }).then(function () {
@@ -167,7 +169,7 @@ var EditorMenuBar = Widget.extend({
      * Reloads the page in non-editable mode, with the right scrolling.
      *
      * @private
-     * @returns {Deferred} (never resolved, the page is reloading anyway)
+     * @returns {Promise} (never resolved, the page is reloading anyway)
      */
     _reload: function () {
         window.location.hash = 'scrollTop=' + window.document.body.scrollTop;
@@ -176,7 +178,7 @@ var EditorMenuBar = Widget.extend({
         } else {
             window.location.reload(true);
         }
-        return $.Deferred();
+        return new Promise(function(){});
     },
     /**
      * @private
@@ -226,7 +228,7 @@ var EditorMenuBar = Widget.extend({
                 });
             }
         });
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
 
     //--------------------------------------------------------------------------

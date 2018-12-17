@@ -9,14 +9,7 @@ sAnimation.registry.subscribe = sAnimation.Class.extend({
     start: function () {
         var self = this;
 
-        // set value and display button
-        self.$target.find("input").removeClass('d-none');
-        this._rpc({
-            route: '/website_mass_mailing/is_subscriber',
-            params: {
-                list_id: this.$target.data('list-id'),
-            },
-        }).always(function (data) {
+        var always = function (data) {
             self.$target.find('input.js_subscribe_email')
                 .val(data.email ? data.email : "")
                 .attr("disabled", data.is_subscriber && data.email.length ? "disabled" : false);
@@ -26,6 +19,19 @@ sAnimation.registry.subscribe = sAnimation.Class.extend({
             self.$target.removeClass('d-none');
             self.$target.find('.js_subscribe_btn').toggleClass('d-none', !!data.is_subscriber);
             self.$target.find('.js_subscribed_btn').toggleClass('d-none', !data.is_subscriber);
+        };
+
+        // set value and display button
+        self.$target.find("input").removeClass('d-none');
+        this._rpc({
+            route: '/website_mass_mailing/is_subscriber',
+            params: {
+                list_id: this.$target.data('list-id'),
+            },
+        }).then(function (data) {
+            always(data);
+        }).catch(function (data) {
+            always(data);
         });
 
         // not if editable mode to allow designer to edit alert field

@@ -733,7 +733,7 @@ var SeoConfigurator = Dialog.extend({
         var obj = this.getMainObject();
         return new Promise(function(resolve, reject) {
             if (!obj) {
-                // return $.Deferred().reject(new Error("No main_object was found."));
+                // return Promise.reject(new Error("No main_object was found."));
                 resolve(null);
             } else {
                 var fields = ['website_meta_title', 'website_meta_description', 'website_meta_keywords'

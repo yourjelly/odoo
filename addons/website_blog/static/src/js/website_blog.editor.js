@@ -64,7 +64,7 @@ var options = require('web_editor.snippets.options');
 var rte = require('web_editor.rte');
 
 if (!$('.website_blog').length) {
-    return $.Deferred().reject("DOM doesn't contain '.website_blog'");
+    return Promise.reject("DOM doesn't contain '.website_blog'");
 }
 
 rte.Class.include({
@@ -105,7 +105,7 @@ rte.Class.include({
                 },
             }));
         }
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
 });
 

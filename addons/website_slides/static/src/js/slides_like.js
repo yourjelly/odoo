@@ -87,7 +87,7 @@ sAnimations.registry.websiteSlidesLike = sAnimations.Class.extend({
         var defs = [this._super.apply(this, arguments)];
         defs.push(new LikeButton(this).attachTo($('.oe_slide_js_like')));
         defs.push(new LikeButton(this).attachTo($('.oe_slide_js_unlike')));
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
 });
 });

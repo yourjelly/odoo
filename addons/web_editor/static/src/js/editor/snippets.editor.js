@@ -84,7 +84,7 @@ var SnippetEditor = Widget.extend({
             });
         }
 
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
     /**
      * @override
@@ -309,7 +309,7 @@ var SnippetEditor = Widget.extend({
 
         this.$el.find('[data-toggle="dropdown"]').dropdown();
 
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
 
     //--------------------------------------------------------------------------
@@ -603,7 +603,7 @@ var SnippetsMenu = Widget.extend({
             $(r && r.sc).closest('.o_default_snippet_text').removeClass('o_default_snippet_text');
         });
 
-        return $.when.apply($, defs).then(function () {
+        return Promise.all(defs).then(function () {
             // Trigger a resize event once entering edit mode as the snippets
             // menu will take part of the screen width (delayed because of
             // animation). (TODO wait for real animation end)
@@ -783,7 +783,7 @@ var SnippetsMenu = Widget.extend({
      * @param {jQuery|false} $snippet
      *        The DOM element whose editor need to be enabled. Only disable the
      *        current one if false is given.
-     * @returns {Deferred<SnippetEditor>}
+     * @returns {Promise<SnippetEditor>}
      *          (might be async when an editor must be created)
      */
     _activateSnippet: function ($snippet) {
@@ -792,7 +792,7 @@ var SnippetsMenu = Widget.extend({
                 $snippet = globalSelector.closest($snippet);
             }
             if (this.$activeSnippet && this.$activeSnippet[0] === $snippet[0]) {
-                return $.when($snippet.data('snippet-editor'));
+                return Promise.resolve($snippet.data('snippet-editor'));
             }
         }
         var editor = null;
@@ -811,7 +811,7 @@ var SnippetsMenu = Widget.extend({
                 return editor;
             });
         }
-        return $.when(editor);
+        return Promise.resolve(editor);
     },
     /**
      * @private
@@ -842,7 +842,7 @@ var SnippetsMenu = Widget.extend({
      * @param {function} callback
      *        Given two arguments: the snippet editor associated to the snippet
      *        being managed and the DOM element of this snippet.
-     * @returns {Deferred} (might be async if snippet editors need to be created
+     * @returns {Promise} (might be async if snippet editors need to be created
      *                     and/or the callback is async)
      */
     _callForEachChildSnippet: function ($snippet, callback) {
@@ -855,7 +855,7 @@ var SnippetsMenu = Widget.extend({
                 }
             });
         });
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
     /**
      * Creates and returns a set of helper functions which can help finding
@@ -1107,13 +1107,13 @@ var SnippetsMenu = Widget.extend({
      *
      * @private
      * @param {jQuery} $snippet
-     * @returns {Deferred<SnippetEditor>}
+     * @returns {Promise<SnippetEditor>}
      */
     _createSnippetEditor: function ($snippet) {
         var self = this;
         var snippetEditor = $snippet.data('snippet-editor');
         if (snippetEditor) {
-            return $.when(snippetEditor);
+            return Promise.resolve(snippetEditor);
         }
 
         var def;
@@ -1122,7 +1122,7 @@ var SnippetsMenu = Widget.extend({
             def = this._createSnippetEditor($parent);
         }
 
-        return $.when(def).then(function (parentEditor) {
+        return Promise.resolve(def).then(function (parentEditor) {
             snippetEditor = new SnippetEditor(parentEditor || self, $snippet, self.templateOptions);
             self.snippetEditors.push(snippetEditor);
             return snippetEditor.appendTo(self.$snippetEditorArea);

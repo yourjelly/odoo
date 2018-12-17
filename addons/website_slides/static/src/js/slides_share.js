@@ -67,7 +67,7 @@ sAnimations.registry.websiteSlidesShare = sAnimations.Class.extend({
             this._updateStatistics(key, slideURL);
         });
 
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
 
     //--------------------------------------------------------------------------

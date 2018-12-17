@@ -9,17 +9,24 @@ sAnimation.registry.follow = sAnimation.Class.extend({
     start: function () {
         var self = this;
         this.is_user = false;
+
+        var always = function (data) {
+            self.is_user = data.is_user;
+            self.email = data.email;
+            self.toggle_subscription(data.is_follower, data.email);
+            self.$target.removeClass('d-none');
+        };
+
         this._rpc({
             route: '/website_mail/is_follower',
             params: {
                 model: this.$target.data('object'),
                 res_id: this.$target.data('id'),
             },
-        }).always(function (data) {
-            self.is_user = data.is_user;
-            self.email = data.email;
-            self.toggle_subscription(data.is_follower, data.email);
-            self.$target.removeClass('d-none');
+        }).then(function (data) {
+            always(data);
+        }).catch(function (data) {
+            always(data);
         });
 
         // not if editable mode to allow designer to edit
