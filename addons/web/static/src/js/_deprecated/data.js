@@ -457,11 +457,13 @@ var DataSet =  Class.extend(mixins.PropertiesMixin, {
      */
     create: function (data, options) {
         var self = this;
-        return this._model.call('create', [data], {
+        var prom = this._model.call('create', [data], {
             context: this.get_context()
-        }).then(function () {
+        });
+        prom.then(function () {
             self.trigger('dataset_changed', data, options);
         });
+        return prom;
     },
     /**
      * Saves the provided data in an existing db record
@@ -477,11 +479,13 @@ var DataSet =  Class.extend(mixins.PropertiesMixin, {
     write: function (id, data, options) {
         options = options || {};
         var self = this;
-        return this._model.call('write', [[id], data], {
+        var prom = this._model.call('write', [[id], data], {
             context: this.get_context(options.context)
-        }).then(function () {
+        });
+        prom.then(function () {
             self.trigger('dataset_changed', id, data, options);
         });
+        return prom;
     },
     /**
      * Deletes an existing record from the database
@@ -490,11 +494,13 @@ var DataSet =  Class.extend(mixins.PropertiesMixin, {
      */
     unlink: function (ids) {
         var self = this;
-        return this._model.call('unlink', [ids], {
+        var prom = this._model.call('unlink', [ids], {
             context: this.get_context()
-        }).then(function () {
+        });
+        prom.then(function () {
             self.trigger('dataset_changed', ids);
         });
+        return prom;
     },
     /**
      * Calls an arbitrary RPC method
@@ -719,10 +725,12 @@ var DataSetSearch = DataSet.extend({
     },
     unlink: function (ids, callback, error_callback) {
         var self = this;
-        return this._super(ids).then(function () {
-            self.remove_ids( ids);
+        var prom = this._super(ids);
+        prom.then(function () {
+            self.remove_ids(ids);
             self.trigger("dataset_changed", ids, callback, error_callback);
         });
+        return prom;
     },
     size: function () {
         if (this._length !== null) {

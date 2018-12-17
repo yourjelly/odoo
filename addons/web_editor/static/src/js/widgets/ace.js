@@ -566,7 +566,8 @@ var ViewEditor = Widget.extend({
         }).bind(this));
 
         var self = this;
-        return Promise.all(defs).catch(function (results) {
+        var prom = Promise.all(defs);
+        prom.catch(function (results) {
             var session = results[0];
             var error = results[1];
             debugger; // SVS : check if results is what we expect
@@ -579,6 +580,7 @@ var ViewEditor = Widget.extend({
                 )
             });
         });
+        return prom;
     },
     /**
      * Saves an unique XML view.
