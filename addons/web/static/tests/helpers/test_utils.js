@@ -38,6 +38,7 @@ function checkBody () {
         // Stay in debug:
         {tagName: 'DIV', attrToCompare: 'className', value: 'o_web_client'},
         // Don't must be in the body after a test but tolerate:
+        {tagName: 'DIV', attrToCompare: 'className', value: 'o_notification_manager'},
         {tagName: 'DIV', attrToCompare: 'className', value: 'tooltip fade bs-tooltip-auto'},
         {tagName: 'DIV', attrToCompare: 'className', value: 'tooltip fade bs-tooltip-auto show'},
         {tagName: 'I', attrToCompare: 'title', value: 'Raphaël Colour Picker'},

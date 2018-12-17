@@ -52,6 +52,7 @@ QUnit.module('Basic', {
     afterEach: function () {
         // reset thread window append to body
         this.services.mail_service.prototype.THREAD_WINDOW_APPENDTO = 'body';
+        testUtils.checkBody();
     },
 });
 
