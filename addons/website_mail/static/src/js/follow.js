@@ -23,11 +23,7 @@ sAnimation.registry.follow = sAnimation.Class.extend({
                 model: this.$target.data('object'),
                 res_id: this.$target.data('id'),
             },
-        }).then(function (data) {
-            always(data);
-        }).catch(function (data) {
-            always(data);
-        });
+        }).then(always).catch(always);
 
         // not if editable mode to allow designer to edit
         if (!this.editableMode) {

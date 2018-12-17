@@ -521,7 +521,7 @@ var ViewEditor = Widget.extend({
                 self._toggleDirtyInfo(session.id, 'scss', false);
                 resolve();
             }, function (source, error) {
-                reject(session, error);
+                reject([session, error]);
             });
         });
     },
@@ -566,7 +566,10 @@ var ViewEditor = Widget.extend({
         }).bind(this));
 
         var self = this;
-        return Promise.all(defs).catch((function (session, error) {
+        return Promise.all(defs).catch(function (results) {
+            var session = results[0];
+            var error = results[1];
+            debugger; // SVS : check if results is what we expect
             Dialog.alert(self, '', {
                 title: _t("Server error"),
                 $content: $('<div/>').html(
@@ -575,7 +578,7 @@ var ViewEditor = Widget.extend({
                     + error
                 )
             });
-        }).bind(self));
+        });
     },
     /**
      * Saves an unique XML view.

@@ -74,7 +74,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
      * welcome message if necessary.
      *
      * @private
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _startEditMode: function () {
         var self = this;
@@ -85,13 +85,14 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             var $wrapwrap = $('#wrapwrap'); // TODO find this element another way
             var $htmlEditable = $wrapwrap.find('.oe_structure.oe_empty, [data-oe-type="html"]').not('[data-editor-message]');
             $htmlEditable.attr('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
-            var def = $.Deferred();
-            self.trigger_up('animation_start_demand', {
-                editableMode: true,
-                onSuccess: def.resolve.bind(def),
-                onFailure: def.reject.bind(def),
+            var prom = new Promise(function (resolve, reject) {
+                self.trigger_up('animation_start_demand', {
+                    editableMode: true,
+                    onSuccess: resolve,
+                    onFailure: reject,
+                });
             });
-            return def;
+            return prom;
         });
     },
     /**

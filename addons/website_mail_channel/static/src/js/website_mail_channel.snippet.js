@@ -28,11 +28,7 @@ sAnimation.registry.follow_alias = sAnimation.Class.extend({
                 channel_id: this.$target.data('id'),
                 get_alias_info: true,
             },
-        }).then(function (data) {
-            always(data);
-        }).catch(function (data) {
-            always(data);
-        });
+        }).then(always).catch(always);
 
         // not if editable mode to allow designer to edit alert field
         if (!this.editableMode) {

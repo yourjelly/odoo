@@ -41,7 +41,7 @@ sAnimations.registry.ProductWishlist = sAnimations.Class.extend(ProductConfigura
             }
         });
 
-        return $.when(def, wishDef);
+        return Promise.all([def, wishDef]);
     },
 
     //--------------------------------------------------------------------------
@@ -70,7 +70,7 @@ sAnimations.registry.ProductWishlist = sAnimations.Class.extend(ProductConfigura
             false
         );
 
-        productReady.done(function (productId) {
+        productReady.then(function (productId) {
             productId = parseInt(productId, 10);
 
             if (productId && !_.contains(self.wishlistProductIDs, productId)) {
@@ -83,11 +83,11 @@ sAnimations.registry.ProductWishlist = sAnimations.Class.extend(ProductConfigura
                     self.wishlistProductIDs.push(productId);
                     self._updateWishlistView();
                     wSaleUtils.animateClone($('#my_wish'), $el.closest('form'), 25, 40);
-                }).fail(function () {
+                }).catch(function () {
                     $el.prop("disabled", false).removeClass('disabled');
                 });
             }
-        }).fail(function () {
+        }).catch(function () {
             $el.prop("disabled", false).removeClass('disabled');
         });
     },
@@ -113,7 +113,7 @@ sAnimations.registry.ProductWishlist = sAnimations.Class.extend(ProductConfigura
 
         this._rpc({
             route: '/shop/wishlist/remove/' + wish,
-        }).done(function () {
+        }).then(function () {
             $(tr).hide();
         });
 

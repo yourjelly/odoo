@@ -124,7 +124,7 @@ var EditorMenuBar = Widget.extend({
                 resolve();
             } else {
                 var confirm = Dialog.confirm(self, _t("If you discard the current edition, all unsaved changes will be lost. You can cancel to return to the edition mode."), {
-                    confirm_callback: resolve.bind(prom),
+                    confirm_callback: resolve,
                 });
                 confirm.on('closed', prom, reject);
             }

@@ -28,11 +28,7 @@ sAnimation.registry.subscribe = sAnimation.Class.extend({
             params: {
                 list_id: this.$target.data('list-id'),
             },
-        }).then(function (data) {
-            always(data);
-        }).catch(function (data) {
-            always(data);
-        });
+        }).then(always).catch(always);
 
         // not if editable mode to allow designer to edit alert field
         if (!this.editableMode) {

@@ -344,7 +344,7 @@ var ThemeCustomizeDialog = Dialog.extend({
                 disable: (disable || []).join(','),
                 tab: this.$('.nav-link.active').parent().index(),
             });
-            return $.Deferred();
+            return Promise.resolve();
         }
 
         var self = this;

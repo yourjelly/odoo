@@ -63,20 +63,22 @@ var Dashboard = AbstractAction.extend({
      */
     fetch_data: function() {
         var self = this;
-        return this._rpc({
+        var prom = this._rpc({
             route: '/website/fetch_dashboard_data',
             params: {
                 website_id: this.website_id || false,
                 date_from: this.date_from.year()+'-'+(this.date_from.month()+1)+'-'+this.date_from.date(),
                 date_to: this.date_to.year()+'-'+(this.date_to.month()+1)+'-'+this.date_to.date(),
             },
-        }).then(function (result) {
+        });
+        prom.then(function (result) {
             self.data = result;
             self.dashboards_data = result.dashboards;
             self.currency_id = result.currency_id;
             self.groups = result.groups;
             self.websites = result.websites;
         });
+        return prom;
     },
 
     on_link_analytics_settings: function(ev) {
