@@ -126,7 +126,6 @@ class MailActivity(models.Model):
     icon = fields.Char('Icon', related='activity_type_id.icon', readonly=False)
     summary = fields.Char('Summary')
     note = fields.Html('Note')
-    feedback = fields.Html('Feedback')
     date_deadline = fields.Date('Due Date', index=True, required=True, default=fields.Date.context_today)
     automated = fields.Boolean(
         'Automated activity', readonly=True,
@@ -355,13 +354,17 @@ class MailActivity(models.Model):
 
     def action_feedback(self, feedback=False):
         message = self.env['mail.message']
-        if feedback:
-            self.write(dict(feedback=feedback))
+
+        activities = self.read()
         for activity in self:
             record = self.env[activity.res_model].browse(activity.res_id)
             record.message_post_with_view(
                 'mail.message_activity_done',
-                values={'activity': activity},
+                values={
+                    'activity': activity,
+                    'feedback': feedback,
+                    'display_assignee': activity.user_id != self.env.user
+                },
                 subtype_id=self.env['ir.model.data'].xmlid_to_res_id('mail.mt_activities'),
                 mail_activity_type_id=activity.activity_type_id.id,
             )
@@ -412,6 +415,8 @@ class MailActivity(models.Model):
     @api.multi
     def activity_format(self):
         activities = self.read()
+        for activity in activities:
+            print(activity['note'])
         mail_template_ids = set([template_id for activity in activities for template_id in activity["mail_template_ids"]])
         mail_template_info = self.env["mail.template"].browse(mail_template_ids).read(['id', 'name'])
         mail_template_dict = dict([(mail_template['id'], mail_template) for mail_template in mail_template_info])
