@@ -55,10 +55,10 @@ QUnit.module('Views', {
 
     QUnit.module('KanbanView Mobile');
 
-    QUnit.test('mobile grouped rendering', function (assert) {
+    QUnit.test('mobile grouped rendering', async function (assert) {
         assert.expect(9);
 
-        var kanban = createView({
+        var kanban = await createView({
             View: KanbanView,
             model: 'partner',
             data: this.data,
@@ -81,19 +81,19 @@ QUnit.module('Views', {
             "there is no records in next tab. Records will be loaded when it will be opened");
 
         // quick create in first column
-        testUtils.dom.click(kanban.$buttons.find('.o-kanban-button-new'));
+        await testUtils.dom.click(kanban.$buttons.find('.o-kanban-button-new'));
         assert.hasClass(kanban.$('.o_kanban_group:nth(0) > div:nth(1)'),'o_kanban_quick_create',
             "clicking on create should open the quick_create in the first column");
 
         // move to second column
-        kanban.$('.o_kanban_mobile_tab:nth(1)').trigger('click');
+        await testUtils.dom.click(kanban.$('.o_kanban_mobile_tab:nth(1)'));
         assert.hasClass(kanban.$('.o_kanban_mobile_tab:nth(1)'),'o_current',
             "second tab is now active with class 'o_current'");
         assert.strictEqual(kanban.$('.o_kanban_group:nth(1) > div.o_kanban_record').length, 2,
             "the 2 records of the second group have now been loaded");
 
         // quick create in second column
-        testUtils.dom.click(kanban.$buttons.find('.o-kanban-button-new'));
+        await testUtils.dom.click(kanban.$buttons.find('.o-kanban-button-new'));
         assert.hasClass(kanban.$('.o_kanban_group:nth(1) >  div:nth(1)'),'o_kanban_quick_create',
             "clicking on create should open the quick_create in the second column");
 
@@ -104,10 +104,10 @@ QUnit.module('Views', {
 
         kanban.destroy();
     });
-    QUnit.test('mobile grouped with undefined column', function (assert) {
+    QUnit.test('mobile grouped with undefined column', async function (assert) {
         assert.expect(3);
 
-        var kanban = createView({
+        var kanban = await createView({
             View: KanbanView,
             model: 'partner',
             data: this.data,
@@ -131,10 +131,10 @@ QUnit.module('Views', {
 
         kanban.destroy();
     });
-    QUnit.test('mobile grouped on many2one rendering', function (assert) {
+    QUnit.test('mobile grouped on many2one rendering', async function (assert) {
         assert.expect(3);
 
-        var kanban = createView({
+        var kanban = await createView({
             View: KanbanView,
             model: 'partner',
             data: this.data,
