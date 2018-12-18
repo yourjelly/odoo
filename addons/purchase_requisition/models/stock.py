@@ -21,8 +21,7 @@ class StockRule(models.Model):
             return super(StockRule, self)._run_buy(product_id, product_qty, product_uom, location_id, name, origin, values)
         values = self.env['purchase.requisition']._prepare_tender_values(product_id, product_qty, product_uom, location_id, name, origin, values)
         values['picking_type_id'] = self.picking_type_id.id
-        self.env['purchase.requisition'].create(values)
-        return True
+        return self.env['purchase.requisition'], values
 
     def _prepare_purchase_order(self, product_id, product_qty, product_uom, origin, values, partner):
         res = super(StockRule, self)._prepare_purchase_order(product_id, product_qty, product_uom, origin, values, partner)

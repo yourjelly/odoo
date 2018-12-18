@@ -31,27 +31,30 @@ class StockRule(models.Model):
 
     @api.multi
     def _run_manufacture(self, product_id, product_qty, product_uom, location_id, name, origin, values):
-        Production = self.env['mrp.production']
-        ProductionSudo = Production.sudo().with_context(force_company=values['company_id'].id)
         bom = self._get_matching_bom(product_id, values)
         if not bom:
             msg = _('There is no Bill of Material found for the product %s. Please define a Bill of Material for this product.') % (product_id.display_name,)
             raise UserError(msg)
 
         # create the MO as SUPERUSER because the current user may not have the rights to do it (mto product launched by a sale for example)
-        production = ProductionSudo.create(self._prepare_mo_vals(product_id, product_qty, product_uom, location_id, name, origin, values, bom))
-        production.move_raw_ids = self.env['stock.move'].create(production._get_moves_raw_values())
-        production.action_confirm()
-        origin_production = values.get('move_dest_ids') and values['move_dest_ids'][0].raw_material_production_id or False
-        orderpoint = values.get('orderpoint_id')
-        if orderpoint:
-            production.message_post_with_view('mail.message_origin_link',
-                                              values={'self': production, 'origin': orderpoint},
-                                              subtype_id=self.env.ref('mail.mt_note').id)
-        if origin_production:
-            production.message_post_with_view('mail.message_origin_link',
-                                              values={'self': production, 'origin': origin_production},
-                                              subtype_id=self.env.ref('mail.mt_note').id)
+        values = self._prepare_mo_vals(product_id, product_qty, product_uom, location_id, name, origin, values, bom)
+        return self.env['mrp.production'], values
+
+    @api.multi
+    def _run_post_manufacture(self, records_values):
+        for production, values in records_values:
+            production.move_raw_ids = self.env['stock.move'].create(production._get_moves_raw_values())
+            production.action_confirm()
+            origin_production = values.get('move_dest_ids') and values['move_dest_ids'][0].raw_material_production_id or False
+            orderpoint = values.get('orderpoint_id')
+            if orderpoint:
+                production.message_post_with_view('mail.message_origin_link',
+                                                  values={'self': production, 'origin': orderpoint},
+                                                  subtype_id=self.env.ref('mail.mt_note').id)
+            if origin_production:
+                production.message_post_with_view('mail.message_origin_link',
+                                                  values={'self': production, 'origin': origin_production},
+                                                  subtype_id=self.env.ref('mail.mt_note').id)
         return True
 
     def _get_custom_move_fields(self):
@@ -100,21 +103,25 @@ class ProcurementGroup(models.Model):
     _inherit = 'procurement.group'
 
     @api.model
-    def run(self, product_id, product_qty, product_uom, location_id, name, origin, values):
+    def run(self, procurements_list):
         """ If 'run' is called on a kit, this override is made in order to call
         the original 'run' method with the values of the components of that kit.
         """
-        bom_kit = self.env['mrp.bom']._bom_find(product=product_id, bom_type='phantom')
-        if bom_kit:
-            order_qty = product_uom._compute_quantity(product_qty, bom_kit.product_uom_id, round=False)
-            qty_to_produce = ( order_qty / bom_kit.product_qty)
-            boms, bom_sub_lines = bom_kit.explode(product_id, qty_to_produce)
-            for bom_line, bom_line_data in bom_sub_lines:
-                bom_line_uom = bom_line.product_uom_id
-                quant_uom =  bom_line.product_id.uom_id
-                component_qty, procurement_uom = bom_line_uom._adjust_uom_quantities(bom_line_data['qty'], quant_uom)
-                values['bom_line_id'] = bom_line.id
-                super(ProcurementGroup, self).run(bom_line.product_id, component_qty, procurement_uom, location_id, name, origin, values)
-            return True
-        else:
-            return super(ProcurementGroup, self).run(product_id, product_qty, product_uom, location_id, name, origin, values)
+        procurements_list_without_kit = []
+        while procurements_list:
+            procurements_request = procurements_list.pop()
+            (product_id, product_qty, product_uom, location_id, name, origin, values) = procurements_request
+            bom_kit = self.env['mrp.bom']._bom_find(product=product_id, bom_type='phantom')
+            if bom_kit:
+                order_qty = product_uom._compute_quantity(product_qty, bom_kit.product_uom_id, round=False)
+                qty_to_produce = (order_qty / bom_kit.product_qty)
+                boms, bom_sub_lines = bom_kit.explode(product_id, qty_to_produce)
+                for bom_line, bom_line_data in bom_sub_lines:
+                    bom_line_uom = bom_line.product_uom_id
+                    quant_uom = bom_line.product_id.uom_id
+                    component_qty, procurement_uom = bom_line_uom._adjust_uom_quantities(bom_line_data['qty'], quant_uom)
+                    values['bom_line_id'] = bom_line.id
+                    procurements_list_without_kit.append((bom_line.product_id, component_qty, procurement_uom, location_id, name, origin, values))
+            else:
+                procurements_list_without_kit.append(procurements_request)
+        return super(ProcurementGroup, self).run(procurements_list_without_kit)
