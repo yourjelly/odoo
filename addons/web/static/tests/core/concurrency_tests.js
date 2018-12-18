@@ -91,33 +91,43 @@ QUnit.module('core', {}, function () {
         done();
     });
 
-    QUnit.skip('mutex: getUnlockedDef checks', function (assert) {
-        assert.expect(5);
+    QUnit.test('mutex: getUnlockedDef checks', async function (assert) {
+        assert.expect(9);
 
-        var m = new concurrency.Mutex();
+        var mutex = new concurrency.Mutex();
 
-        var def1 = $.Deferred();
-        var def2 = $.Deferred();
+        var prom1 = makeTestPromiseWithAssert(assert, 'prom1');
+        var prom2 = makeTestPromiseWithAssert(assert, 'prom2');
 
-        assert.strictEqual(m.getUnlockedDef().state(), "resolved");
+        mutex.getUnlockedDef().then(function () {
+            assert.step('mutex unlocked (1)');
+        });
 
-        m.exec(function() { return def1; });
+        await testUtils.nextMicrotaskTick();
 
-        var unlockedDef = m.getUnlockedDef();
+        assert.verifySteps(['mutex unlocked (1)']);
 
-        assert.strictEqual(unlockedDef.state(), "pending");
+        mutex.exec(function () { return prom1; });
+        await testUtils.nextMicrotaskTick();
 
-        m.exec(function() { return def2; });
+        mutex.getUnlockedDef().then(function () {
+            assert.step('mutex unlocked (2)');
+        });
 
-        assert.strictEqual(unlockedDef.state(), "pending");
+        assert.verifySteps(['mutex unlocked (1)']);
 
-        def1.resolve();
+        mutex.exec(function () { return prom2; });
+        await testUtils.nextMicrotaskTick();
 
-        assert.strictEqual(unlockedDef.state(), "pending");
+        assert.verifySteps(['mutex unlocked (1)']);
 
-        def2.resolve();
+        await prom1.resolve();
 
-        assert.strictEqual(unlockedDef.state(), "resolved");
+        assert.verifySteps(['mutex unlocked (1)', 'ok prom1']);
+
+        await prom2.resolve();
+
+        assert.verifySteps(['mutex unlocked (1)', 'ok prom1', 'ok prom2', 'mutex unlocked (2)']);
     });
 
     QUnit.test('DropPrevious: basic usecase', async function (assert) {

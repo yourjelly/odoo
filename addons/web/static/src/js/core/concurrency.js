@@ -179,6 +179,9 @@ return {
     Mutex: Class.extend({
         init: function () {
             this.lock = Promise.resolve();
+            this.queueSize = 0;
+            this.unlockedProm = undefined;
+            this._unlock = undefined;
         },
         /**
          * Add a computation to the queue, it will be executed as soon as the
@@ -188,14 +191,25 @@ return {
          * @returns {Promise}
          */
         exec: function (action) {
+            var self = this;
             var currentLock = this.lock;
             var result;
+            this.queueSize++;
+            this.unlockedProm = this.unlockedProm || new Promise(function (resolve) {
+                self._unlock = resolve;
+            });
             this.lock = new Promise(function (unlockCurrent) {
                 currentLock.then(function () {
                     result = action();
-                    Promise.resolve(result)
-                        .then(unlockCurrent)
-                        .catch(unlockCurrent);
+                    var always = function () {
+                        unlockCurrent();
+                        self.queueSize--;
+                        if (self.queueSize === 0) {
+                            self.unlockedProm = undefined;
+                            self._unlock();
+                        }
+                    };
+                    Promise.resolve(result).then(always).catch(always);
                 });
             });
 
@@ -208,8 +222,7 @@ return {
          *   (directly if it is currently idle)
          */
         getUnlockedDef: function () {
-            console.error("getUnlockedDef Not really implemented yet, but kinda ok");
-            return Promise.resolve(this.lock);
+            return this.unlockedProm || Promise.resolve();
         },
     }),
     /**
