@@ -494,13 +494,15 @@ var RTEWidget = Widget.extend({
             });
         });
 
-        return Promise.all(defs).then(function () {
+        var prom = Promise.all(defs);
+        prom.then(function () {
             window.onbeforeunload = null;
         }, function (failed) {
             // If there were errors, re-enable edition
             self.cancel();
             self.start();
         });
+        return prom;
     },
 
     //--------------------------------------------------------------------------

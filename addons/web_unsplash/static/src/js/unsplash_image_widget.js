@@ -119,13 +119,15 @@ weWidgets.ImageWidget.include({
                 self._adaptLoadMore();
             }
         };
-        return this.unsplashAPI.getImages(needle, this.IMAGES_DISPLAYED_TOTAL).then(function (res) {
+        var prom = this.unsplashAPI.getImages(needle, this.IMAGES_DISPLAYED_TOTAL);
+        prom.then(function (res) {
             self._unsplash.isMaxed = res.isMaxed;
             self._unsplash.records = res.images;
             self._unsplash.error = false;
         }, function (err) {
             self._unsplash.error = err;
         }).then(always).catch(always);
+        return prom;
     },
 
     //--------------------------------------------------------------------------

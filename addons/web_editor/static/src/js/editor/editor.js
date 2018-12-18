@@ -91,9 +91,11 @@ var EditorMenuBar = Widget.extend({
         defs.push(this.snippetsMenu.insertAfter(this.$el));
         this.rte.editable().find('*').off('mousedown mouseup click');
 
-        return Promise.all(defs).then(function () {
+        var prom = Promise.all(defs);
+        prom.then(function () {
             self.trigger_up('edit_mode');
         });
+        return prom;
     },
     /**
      * @override
@@ -149,7 +151,8 @@ var EditorMenuBar = Widget.extend({
         var self = this;
         var defs = [];
         this.trigger_up('ready_to_save', {defs: defs});
-        return Promise.all(defs).then(function () {
+        var prom = Promise.all(defs);
+        prom.then(function () {
             self.snippetsMenu.cleanForSave();
             return self._saveCroppedImages();
         }).then(function () {
@@ -159,6 +162,7 @@ var EditorMenuBar = Widget.extend({
                 return self._reload();
             }
         });
+        return prom;
     },
 
     //--------------------------------------------------------------------------

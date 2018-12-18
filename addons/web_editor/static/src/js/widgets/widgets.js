@@ -290,7 +290,7 @@ var ImageWidget = MediaWidget.extend({
             });
         }
 
-        return prom.then(function () {
+        prom.then(function () {
             if (!img.isDocument) {
                 if (img.access_token && self.options.res_model !== 'ir.ui.view') {
                     img.src += _.str.sprintf('?access_token=%s', img.access_token);
@@ -338,6 +338,8 @@ var ImageWidget = MediaWidget.extend({
             }
             return self.media;
         });
+
+        return prom;
     },
     /**
      * @override
@@ -1258,7 +1260,8 @@ var MediaDialog = Dialog.extend({
             });
         }
 
-        return Promise.resolve(this.active.save()).then(function (media) {
+        var prom = Promise.resolve(this.active.save());
+        prom.then(function (media) {
             if (!self.media && media) {
                 self.range.insertNode(media, true);
             }
@@ -1280,6 +1283,7 @@ var MediaDialog = Dialog.extend({
             });
             return _super.apply(self, args);
         });
+        return prom;
     },
 
     //--------------------------------------------------------------------------

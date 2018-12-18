@@ -30,9 +30,11 @@ sAnimations.registry.crmPartnerAssign = sAnimations.Class.extend({
     _buttonExec: function ($btn, callback) {
         // TODO remove once the automatic system which does this lands in master
         $btn.prop('disabled', true);
-        return callback.call(this).catch(function () {
+        var prom = callback.call(this);
+        prom.catch(function () {
             $btn.prop('disabled', false);
         });
+        return prom;
     },
     /**
      * @private

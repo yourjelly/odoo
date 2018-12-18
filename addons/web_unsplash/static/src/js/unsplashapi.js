@@ -37,9 +37,11 @@ var UnsplashCore = Class.extend(Mixins.EventDispatcherMixin, ServicesMixin, {
         if (cachedData && (cachedData.images.length >= to || (cachedData.totalImages !== 0 && cachedData.totalImages < to))) {
             return Promise.resolve({ images: cachedData.images.slice(from, to), isMaxed: to > cachedData.totalImages });
         }
-        return this._fetchImages(query).then(function (cachedData) {
+        var prom = this._fetchImages(query);
+        prom.then(function (cachedData) {
             return { images: cachedData.images.slice(from, to), isMaxed: to > cachedData.totalImages };
         });
+        return prom;
     },
 
     //--------------------------------------------------------------------------
