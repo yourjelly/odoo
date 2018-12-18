@@ -107,13 +107,13 @@ odoo.define('sale.product.configurator.tests', function (require) {
                     mockRPC: function (route) {
                         if (route === '/web/dataset/call_kw/ir.model.data/xmlid_to_res_id') {
                             assert.ok(true);
-                            return $.Deferred().then(_.constant(1));
+                            return Promise.resolve(1);
                         }
                         return this._super.apply(this, arguments);
                     },
             });
 
-            assert.strictEqual(form.$("a:contains('Configure a product')").length, 1);
+            assert.containsOnce(form, "a:contains('Configure a product')");
 
             await testUtils.dom.click(form.$("a:contains('Configure a product')"));
         });
@@ -137,7 +137,7 @@ odoo.define('sale.product.configurator.tests', function (require) {
             });
             await testUtils.nextTick();
 
-            assert.strictEqual(list.$("tr.o_data_row").length, 2);
+            assert.containsN(list, "tr.o_data_row", 2);
             form.destroy();
         });
 
@@ -161,7 +161,7 @@ odoo.define('sale.product.configurator.tests', function (require) {
                     mockRPC: function (route) {
                         if (route === '/product_configurator/configure') {
                             assert.ok(true);
-                            return $.Deferred().then(_.constant(1));
+                            return Promise.resolve(1);
                         }
                         return this._super.apply(this, arguments);
                     }

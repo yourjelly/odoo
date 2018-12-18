@@ -3611,7 +3611,7 @@ QUnit.module('ActionManager', {
          * because of how native events are handled in tests
          */
 
-        var searchDeferred = testUtils.makeTestPromise();
+        var searchPromise = testUtils.makeTestPromise();
 
         var actionManager = await createActionManager({
             actions: this.actions,
@@ -3621,7 +3621,7 @@ QUnit.module('ActionManager', {
                 if (route === '/web/dataset/search_read') {
                     assert.step('search_read ' + args.domain);
                     if ( _.isEqual(args.domain, [['foo', 'ilike', 'm']])) {
-                        return searchDeferred.then(this._super.bind(this, route, args));
+                        return searchPromise.then(this._super.bind(this, route, args));
                     }
                 }
                 return this._super.apply(this, arguments);
@@ -3631,26 +3631,21 @@ QUnit.module('ActionManager', {
         await actionManager.doAction(3);
 
         var $searchInput = $('.o_searchview input');
-        $searchInput.trigger($.Event('keypress', {key: 'm', which: 109, keyCode: 109}));
-        await testUtils.nextTick();
-        $searchInput.trigger($.Event('keydown', {key: 'Enter', which: 13, keyCode: 13}));
+        await testUtils.fields.triggerKey('press', $searchInput, 'm');
+        await testUtils.fields.triggerKeydown($searchInput, 'enter');
 
-        await testUtils.nextTick();
         assert.verifySteps(["search_read ",
                             "search_read foo,ilike,m"]);
 
         // Triggering the do_search above will kill the current searchview Input
         $searchInput = $('.o_searchview input');
-        $searchInput.trigger($.Event('keypress', {key: 'o', which: 111, keyCode: 111}));
-        await testUtils.nextTick();
+        await testUtils.fields.triggerKey('press', $searchInput, 'o')
 
         // We have something in the input of the search view. Making the search_read
         // return at this point will trigger the redraw of the view.
         // However we want to hold on to what we just typed
-        searchDeferred.resolve();
-        await testUtils.nextTick();
-        $searchInput.trigger($.Event('keydown', {key: 'Enter', which: 13, keyCode: 13}));
-        await testUtils.nextTick();
+        await searchPromise.resolve();
+        await testUtils.fields.triggerKeydown($searchInput, 'enter');
 
         assert.verifySteps(["search_read ",
                             "search_read foo,ilike,m",

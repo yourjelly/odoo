@@ -260,7 +260,7 @@ QUnit.module('core', {}, function () {
     });
 
 
-    QUnit.test('delegate', function (assert) {
+    QUnit.test('delegate', async function (assert) {
         assert.expect(5);
 
         var a = [];
@@ -278,16 +278,16 @@ QUnit.module('core', {}, function () {
         }))();
         widget.renderElement();
 
-        widget.$el.click();
-        widget.$('li:eq(3)').click();
-        widget.$('input:last').val('foo').change();
+        await testUtils.dom.click(widget.$el, {allowInvisible: true});
+        await testUtils.dom.click(widget.$('li:eq(3)'), {allowInvisible: true});
+        await testUtils.fields.editAndTrigger(widget.$('input:last'), 'foo', 'change');
 
         for(var i=0; i<3; ++i) {
             assert.ok(a[i], "should pass test " + i);
         }
     });
 
-    QUnit.test('undelegate', function (assert) {
+    QUnit.test('undelegate', async function (assert) {
         assert.expect(4);
 
         var clicked = false;
@@ -301,13 +301,13 @@ QUnit.module('core', {}, function () {
         widget.renderElement();
         widget.$el.on('click', 'li', function () { newclicked = true; });
 
-        widget.$('li').click();
+        await testUtils.dom.clickFirst(widget.$('li'), {allowInvisible: true});
         assert.ok(clicked, "should trigger bound events");
         assert.ok(newclicked, "should trigger bound events");
 
         clicked = newclicked = false;
         widget._undelegateEvents();
-        widget.$('li').click();
+        await testUtils.dom.clickFirst(widget.$('li'), {allowInvisible: true});
         assert.ok(!clicked, "undelegate should unbind events delegated");
         assert.ok(newclicked, "undelegate should only unbind events it created");
     });
@@ -328,7 +328,7 @@ QUnit.module('core', {}, function () {
         assert.expect(1);
         var widget = new (Widget.extend({}));
 
-        return $.Deferred(function (d) {
+        return new Promise(function (resolve, reject) {
             widget.start()
             .then(function () {
                 // destroy widget
@@ -339,15 +339,15 @@ QUnit.module('core', {}, function () {
                     return Promise.resolve();
                 }).then(function () {
                     assert.ok(true);
-                    d.resolve();
+                    resolve();
                 });
                 // ensure that widget.alive() refuses to resolve or reject
                 return widget.alive(promise);
             }).then(function () {
-                d.reject();
+                reject();
                 assert.ok(false, "alive() should not terminate by default");
             }).catch(function() {
-                d.reject();
+                reject();
                 assert.ok(false, "alive() should not terminate by default");
             });
         });
@@ -437,12 +437,12 @@ QUnit.module('core', {}, function () {
 
     QUnit.test('start is not called when widget is destroyed', function (assert) {
         assert.expect(0);
-        var slowWillStartDef = $.Deferred();
+        var slowWillStartPromise = testUtils.makeTestPromise();
         var $fix = $( "#qunit-fixture");
 
         var widget = new (Widget.extend({
             willStart: function () {
-                return slowWillStartDef;
+                return slowWillStartPromise;
             },
             start: function () {
                 throw new Error('Should not call start method');
@@ -451,7 +451,7 @@ QUnit.module('core', {}, function () {
 
         widget.appendTo($fix);
         widget.destroy();
-        slowWillStartDef.resolve();
+        slowWillStartPromise.resolve();
     });
 
 });

@@ -222,7 +222,7 @@ async function createAsyncView(params) {
  * @param {boolean} [params.withSearchBar=true] if set to false, no default
  *   search bar will be rendered
  *
- * @returns {Deferred<ControlPanel>} resolves with an instance of the ControlPanelController
+ * @returns {Promise<ControlPanel>} resolves with an instance of the ControlPanelController
  */
 function createControlPanel(params) {
     params = params || {};
