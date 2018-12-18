@@ -314,8 +314,8 @@ class TxAuthorize(models.Model):
                 self._set_transaction_done()
             if tree.get('x_type').lower() == 'auth_only':
                 self.write({'acquirer_reference': tree.get('x_trans_id')})
-                self._set_transaction_authorized()
                 self.execute_callback()
+                self._set_transaction_authorized()
             if tree.get('x_type').lower() == 'void':
                 self._set_transaction_cancel()
             return True

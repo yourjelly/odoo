@@ -306,8 +306,8 @@ class PaymentTxOgone(models.Model):
             self.write(vals)
             if self.payment_token_id:
                 self.payment_token_id.verified = True
-            self._set_transaction_done()
             self.execute_callback()
+            self._set_transaction_done()
             # if this transaction is a validation one, then we refund the money we just withdrawn
             if self.type == 'validation':
                 self.s2s_do_refund()
@@ -453,8 +453,8 @@ class PaymentTxOgone(models.Model):
                 self.write({'payment_token_id': pm.id})
             if self.payment_token_id:
                 self.payment_token_id.verified = True
-            self._set_transaction_done()
             self.execute_callback()
+            self._set_transaction_done()
             # if this transaction is a validation one, then we refund the money we just withdrawn
             if self.type == 'validation':
                 self.s2s_do_refund()
