@@ -829,7 +829,7 @@ QUnit.module('Search View', {
             data: this.data,
             intercepts: {
                 load_filters: function (event) {
-                    return $.when([{
+                    return Promise.resolve([{
                         context: "{}",
                         domain: "[]",
                         id: 7,
@@ -863,7 +863,7 @@ QUnit.module('Search View', {
             data: this.data,
             intercepts: {
                 load_filters: function (event) {
-                    return $.when([{
+                    return Promise.resolve([{
                         context: "{}",
                         domain: "[]",
                         id: 7,
