@@ -497,8 +497,7 @@ var FieldTextHtml = AbstractField.extend({
         if (this.mode === 'readonly') {
             return;
         }
-        var prom = Promise.all([this.contentLoadedDeferred, this.editorLoadedDeferred, result]);
-        prom.then(function () {
+        return Promise.all([this.contentLoadedDeferred, this.editorLoadedDeferred, result]).then(function () {
             // switch to WYSIWYG mode if currently in code mode to get all changes
             if (config.debug && self.editor.rte) {
                 var layoutInfo = self.editor.rte.editable().data('layoutInfo');
@@ -519,7 +518,6 @@ var FieldTextHtml = AbstractField.extend({
             });
             self._setValue(self.$content.html());
         });
-        return prom;
     },
 });
 

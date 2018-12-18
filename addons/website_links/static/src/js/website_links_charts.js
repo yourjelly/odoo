@@ -178,8 +178,7 @@ sAnimations.registry.websiteLinksCharts = sAnimations.Class.extend({
 
         this.animating_copy = false;
 
-        var prom = Promise.all(defs);
-        prom.then(function (results) {
+        return Promise.all(defs).then(function (results) {
             debugger; // SVS: check if results is what we expect
             var _totalClicks = results[0];
             var _clicksByDay = results[1];
@@ -236,7 +235,6 @@ sAnimations.registry.websiteLinksCharts = sAnimations.Class.extend({
                 _.chain(self.charts).pluck('chart').invoke('update');
             });
         });
-        return prom;
     },
 
     //--------------------------------------------------------------------------

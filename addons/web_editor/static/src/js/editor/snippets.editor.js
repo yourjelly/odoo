@@ -603,8 +603,7 @@ var SnippetsMenu = Widget.extend({
             $(r && r.sc).closest('.o_default_snippet_text').removeClass('o_default_snippet_text');
         });
 
-        var prom = Promise.all(defs);
-        prom.then(function () {
+        return Promise.all(defs).then(function () {
             // Trigger a resize event once entering edit mode as the snippets
             // menu will take part of the screen width (delayed because of
             // animation). (TODO wait for real animation end)
@@ -612,7 +611,6 @@ var SnippetsMenu = Widget.extend({
                 $window.trigger('resize');
             }, 1000);
         });
-        return prom;
     },
     /**
      * @override
@@ -1118,19 +1116,19 @@ var SnippetsMenu = Widget.extend({
             return Promise.resolve(snippetEditor);
         }
 
-        var prom = Promise.resolve();
+        var def;
         var $parent = globalSelector.closest($snippet.parent());
         if ($parent.length) {
-            prom = this._createSnippetEditor($parent);
+            def = this._createSnippetEditor($parent);
         }
-        prom.then(function (parentEditor) {
+
+        return Promise.resolve(def).then(function (parentEditor) {
             snippetEditor = new SnippetEditor(parentEditor || self, $snippet, self.templateOptions);
             self.snippetEditors.push(snippetEditor);
             return snippetEditor.appendTo(self.$snippetEditorArea);
         }).then(function () {
             return snippetEditor;
         });
-        return prom;
     },
     /**
      * There may be no location where some snippets might be dropped. This mades

@@ -42,14 +42,12 @@ var Dashboard = AbstractAction.extend({
 
     willStart: function() {
         var self = this;
-        var prom = Promise.all([ajax.loadLibs(this), this._super()]);
-        prom.then(function() {
+        return Promise.all([ajax.loadLibs(this), this._super()]).then(function() {
             return self.fetch_data();
         }).then(function(){
             var website = _.findWhere(self.websites, {selected: true});
             self.website_id = website ? website.id : false;
         });
-        return prom;
     },
 
     start: function() {

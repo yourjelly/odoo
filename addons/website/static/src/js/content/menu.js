@@ -112,14 +112,12 @@ sAnimation.registry.autohideMenu = sAnimation.Class.extend({
                 $window.trigger('resize');
             });
         }
-        var prom = Promise.all(defs);
-        prom.then(function () {
+        return Promise.all(defs).then(function () {
             if (!self.noAutohide) {
                 dom.initAutoMoreMenu(self.$el, {unfoldable: '.divider, .divider ~ li'});
             }
             self.$el.removeClass('o_menu_loading');
         });
-        return prom;
     },
     /**
      * @override
