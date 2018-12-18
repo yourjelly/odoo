@@ -256,7 +256,7 @@ QUnit.module('special_fields', {
 
     QUnit.module('FieldReportLayout');
 
-    QUnit.skip('report_layout widget in form view [!!! ATTENTION, ATTENTION !!! DON\'T SKIP ME !!! DON\'T FORGET TO FIX ME BEFORE MERGING !!!]', async function (assert) {
+    QUnit.test('report_layout widget in form view', async function (assert) {
         assert.expect(3);
 
         this.data['report.layout'] = {
@@ -287,6 +287,9 @@ QUnit.module('special_fields', {
                     '<field name="product_id" widget="report_layout"/> '+
                   '</form>',
             res_id: 2,
+            viewOptions: {
+                mode: 'edit',
+            },
         });
 
         assert.strictEqual(form.$('.img.img-fluid').length, 2,
@@ -296,9 +299,6 @@ QUnit.module('special_fields', {
 
         // select first image
         await testUtils.dom.click(form.$(".img.img-fluid:first"));
-        // await testUtils.dom.click(form.$(".img.img-fluid:first"), {
-        //     allowInvisible: true
-        // });
         assert.ok(form.$(".img.img-fluid:first").hasClass('btn-info'),
             "First image should be selected");
 
