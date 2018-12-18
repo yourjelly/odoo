@@ -96,14 +96,12 @@ var ProductComparison = Widget.extend(ProductConfiguratorMixin, {
                 }
             }
 
-            var productReady = this.selectOrCreateProduct(
+            this.selectOrCreateProduct(
                 $elem.closest('form'),
                 productId,
                 $elem.closest('form').find('.product_template_id').val(),
                 false
-            );
-
-            productReady.then(function (productId) {
+            ).then(function (productId) {
                 productId = parseInt(productId, 10);
 
                 if (!productId) {

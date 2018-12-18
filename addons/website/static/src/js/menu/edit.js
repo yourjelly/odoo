@@ -85,14 +85,13 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             var $wrapwrap = $('#wrapwrap'); // TODO find this element another way
             var $htmlEditable = $wrapwrap.find('.oe_structure.oe_empty, [data-oe-type="html"]').not('[data-editor-message]');
             $htmlEditable.attr('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
-            var prom = new Promise(function (resolve, reject) {
+            return new Promise(function (resolve, reject) {
                 self.trigger_up('animation_start_demand', {
                     editableMode: true,
                     onSuccess: resolve,
                     onFailure: reject,
                 });
             });
-            return prom;
         });
     },
     /**

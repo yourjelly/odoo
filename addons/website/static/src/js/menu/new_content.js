@@ -161,19 +161,17 @@ var NewContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
      */
     _showMenu: function () {
         var self = this;
-        var prom = new Promise(function (resolve, reject) {
+        return new Promise(function (resolve, reject) {
             self.trigger_up('action_demand', {
                 actionName: 'close_all_widgets',
                 onSuccess: resolve,
             });
-        });
-        prom.then(function () {
+        }).then(function () {
             self.firstTab = true;
             self.$newContentMenuChoices.removeClass('o_hidden');
             $('body').addClass('o_new_content_open');
             self.$('> a').focus();
         });
-        return prom;
     },
 
     //--------------------------------------------------------------------------
