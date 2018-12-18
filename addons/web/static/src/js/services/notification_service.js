@@ -79,6 +79,7 @@ var NotificationService = AbstractService.extend({
         if (!this.$el) {
             this.$el = $('<div class="o_notification_manager"/>');
             this.$el.prependTo('body');
+            debugger
         }
         var NotificationWidget = params.Notification || Notification;
         var notification = this.notifications[++id] = new NotificationWidget(this, params);
