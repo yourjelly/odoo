@@ -96,6 +96,20 @@ var FavoriteMenu = DropdownMenu.extend({
         });
 
     },
+    /**
+     * @override
+     * @private
+     * @param {MouseEvent} event
+     */
+    _onSearchButtonClick: function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        var id = $(event.currentTarget).data('id');
+        var get_domain = this.items.find(function (favorite) {
+            return favorite.id === id;
+        });
+        this.trigger_up('decompose_filter', {domain: get_domain.domain});
+    },
 });
 
 return FavoriteMenu;

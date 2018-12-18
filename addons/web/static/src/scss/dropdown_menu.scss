@@ -46,4 +46,8 @@
         padding-left: 8px;
         @include o-position-absolute($right: $dropdown-item-padding-x * 0.5);
     }
+    .o_search_button {
+        padding-left: 8px;
+        @include o-position-absolute($right: $dropdown-item-padding-x * 1.6);
+    }
 }

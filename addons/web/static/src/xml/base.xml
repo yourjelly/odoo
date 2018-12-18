@@ -1085,6 +1085,7 @@
                 t-att-data-id="item.id">
                 <a href="#" t-attf-class="dropdown-item#{item.isActive ? ' selected ' : ''}">
                     <t t-esc="item.description"/>
+                    <span t-if="item.isRemovable" t-att-data-id="item.id" class="o_search_button" > <span class="fa fa-search"></span> </span>
                     <span t-if="item.isRemovable" t-att-data-id="item.id" class="o_trash_button" > <span class="fa fa-trash-o"></span> </span>
                     <span t-if="item.hasOptions" t-att-data-id="item.id" class="o_submenu_switcher">
                         <span t-att-class="widget.openItems[item.id] ? 'fa fa-caret-down' : 'fa fa-caret-right'"></span>

@@ -858,6 +858,34 @@ QUnit.module('Search View', {
         actionManager.destroy();
     });
 
+    QUnit.test('search an active favorite filter decompose in search bar', function (assert) {
+        assert.expect(2);
+
+        var actionManager = createActionManager({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            intercepts: {
+                load_filters: function (event) {
+                    return $.when([{
+                        context: "{}",
+                        domain: "[]",
+                        id: 7,
+                        is_default: true,
+                        name: "My favorite",
+                        sort: "[]",
+                        user_id: [2, "Mitchell Admin"],
+                    }]).then(event.data.on_success);
+                },
+            },
+        });
+        actionManager.doAction(6);
+        testUtils.dom.click(actionManager.$('.o_control_panel .o_search_options button.o_favorites_menu_button'));
+        assert.containsOnce(actionManager, '.o_control_panel .o_searchview_input_container .o_facet_values');
+        testUtils.dom.click(actionManager.$('.o_control_panel .o_search_options .o_favorites_menu span.o_search_button'));
+        actionManager.destroy();
+    });
+
     QUnit.test('default favorite is not activated if key search_disable_custom_filters is set to true', async function (assert) {
         assert.expect(1);
 

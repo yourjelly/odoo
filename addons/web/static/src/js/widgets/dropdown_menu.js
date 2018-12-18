@@ -13,6 +13,7 @@ var DropdownMenu = Widget.extend({
         'click .o_menu_item': '_onItemClick',
         'click .o_item_option': '_onOptionClick',
         'click span.o_trash_button': '_onTrashButtonClick',
+        'click span.o_search_button': '_onSearchButtonClick',
         'hidden.bs.dropdown': '_onBootstrapClose',
         'click .dropdown-item-text': '_onDropDownItemTextClick',
     },
@@ -125,6 +126,14 @@ var DropdownMenu = Widget.extend({
      */
      _onTrashButtonClick: function (event) {
      },
+     /**
+     * @private
+     * @param {MouseEvent} event
+     *
+     * To implement in child
+     */
+    _onSearchButtonClick: function (event) {
+    },
 });
 
 return DropdownMenu;

@@ -2,6 +2,8 @@ odoo.define('web.ControlPanelController', function (require) {
 "use strict";
 
 var mvc = require('web.mvc');
+var Domain = require('web.Domain');
+var search_filters_registry = require('web.search_filters_registry');
 
 var ControlPanelController = mvc.Controller.extend({
     className: 'o_cp_controller',
@@ -16,6 +18,7 @@ var ControlPanelController = mvc.Controller.extend({
         new_groupBy: '_onNewGroupBy',
         activate_time_range: '_onActivateTimeRange',
         autocompletion_filter: '_onAutoCompletionFilter',
+        decompose_filter: '_onClickDecomposeFilter'
     },
 
     /**
@@ -153,6 +156,93 @@ var ControlPanelController = mvc.Controller.extend({
         ev.stopPropagation();
         this.model.toggleAutoCompletionFilter(ev.data);
         this._reportNewQueryAndRender();
+    },
+    /**
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _onClickDecomposeFilter: function (ev) {
+        ev.stopPropagation();
+        var stringToArray = Domain.prototype.stringToArray(ev.data.domain);
+        var domain = this._filterDomain(stringToArray);
+        var clonedStringToArray = $.extend(true, [], stringToArray);
+        var description = this._filterDescription(clonedStringToArray);
+        var filters = [];
+        var check = false;
+        for (var i=0; i<domain.length; i++) {
+            if (check) {
+                this.model.createNewFilters([{
+                type: 'filter',
+                domain: Domain.prototype.arrayToString([domain[i]]),
+                description: description[i].toString(),
+            }]);
+                check = false
+                continue
+            }
+            if (domain[i] == '|' || domain[i] == '&') {
+                if (domain[i] == '&') {check=true}
+                continue;
+            }
+            filters.push({
+                type: 'filter',
+                domain: Domain.prototype.arrayToString([domain[i]]),
+                description: description[i].toString(),
+            });
+        }
+        this.model.createNewFilters(filters);
+        this._reportNewQueryAndRender();
+    },
+
+    _filterDomain: function (domainFilter) {
+        var operator = [];
+        var domain = [];
+        for (var i=0; i<domainFilter.length; i++) {
+            if (domainFilter[i] == '&' || domainFilter[i] == '|') {
+                operator.push(domainFilter[i]);
+            }
+            else {
+                domain.push(domainFilter[i]);
+                if (operator.length > 0) {
+                    var pop_operator = operator.pop();
+                    domain.push(pop_operator);
+                }
+            }
+        }
+        return domain;
+    },
+
+    _filterDescription: function (descroptionFilter) {
+        var operator = [];
+        var description = [];
+        var fields = this.__parentedParent.initialState.fields;
+        for (var i=0; i<descroptionFilter.length; i++) {
+            if (descroptionFilter[i] == '&' || descroptionFilter[i] == '|') {
+                operator.push(descroptionFilter[i]);
+            }
+            else {
+                var field_type = fields[descroptionFilter[i][0]].type;
+                for (var j=0; j<descroptionFilter[i].length; j++) {
+                    if (j == 0) {
+                        descroptionFilter[i][j] = fields[descroptionFilter[i][j]].string;
+                    }
+                    if (j == 1) {
+                        var operator_field = search_filters_registry.getAny([field_type, "char"]).prototype.operators;
+                        for (var k=0; k<operator_field.length; k++) {
+                            if (descroptionFilter[i][j] == operator_field[k].value) {
+                                descroptionFilter[i][j] = operator_field[k].text.toString();
+                                break;
+                            }
+                        }
+                    }
+                }
+                description.push(descroptionFilter[i]);
+                if (operator.length > 0) {
+                    var pop_operator = operator.pop();
+                    description.push(pop_operator);
+                }
+            }
+        }
+        return description;
     },
     /**
      * @private
