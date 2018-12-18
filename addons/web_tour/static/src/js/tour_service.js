@@ -37,8 +37,7 @@ return session.is_bound.then(function () {
             });
         defs.push(def);
     }
-    var prom = Promise.all(defs);
-    prom.then(function (results) {
+    return Promise.all(defs).then(function (results) {
         debugger; // SVS : check if results is really what we expect
         var consumed_tours = session.is_frontend ? results[0] : session.web_tours;
         var tour_manager = new TourManager(rootWidget, consumed_tours);
@@ -121,7 +120,6 @@ return session.is_bound.then(function () {
 
         return tour_manager;
     });
-    return prom;
 });
 
 });

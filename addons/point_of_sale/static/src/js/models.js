@@ -158,11 +158,9 @@ exports.PosModel = Backbone.Model.extend({
     {
         label:  'version',
         loaded: function (self) {
-            var prom = session.rpc('/web/webclient/version_info',{});
-            prom.then(function (version) {
+            return session.rpc('/web/webclient/version_info',{}).then(function (version) {
                 self.version = version;
             });
-            return prom;
         },
 
     },{
@@ -772,8 +770,7 @@ exports.PosModel = Backbone.Model.extend({
         }
 
         // when all images are loaded in product.image_base64
-        var prom = Promise.all(get_image_promises);
-        prom.then(function () {
+        return Promise.all(get_image_promises).then(function () {
             var rendered_order_lines = "";
             var rendered_payment_lines = "";
             var order_total_with_tax = self.chrome.format_currency(0);
@@ -810,7 +807,6 @@ exports.PosModel = Backbone.Model.extend({
             }) + rendered_html;
             return rendered_html;
         });
-        return prom;
     },
 
     // saves the order locally and try to send it to the backend.
