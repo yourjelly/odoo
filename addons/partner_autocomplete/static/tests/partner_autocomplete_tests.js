@@ -188,7 +188,7 @@ odoo.define('partner_autocomplete.tests', function (require) {
     });
 
 
-    QUnit.skip("Partner autocomplete : Company type = Company / Name search[FIX ME BEFORE MERGING!!!!!!!!!!!!!!!]", async function (assert) {
+    QUnit.test("Partner autocomplete : Company type = Company / Name search", async function (assert) {
         assert.expect(21);
         var fields = this.data['res.partner'].fields;
         var form = await createView({
@@ -265,7 +265,7 @@ odoo.define('partner_autocomplete.tests', function (require) {
             form.destroy();
     });
 
-    QUnit.skip("Partner autocomplete : Company type = Company / VAT search[FIX ME BEFORE MERGING!!!!!!!!!!!!!!!]", async function (assert) {
+    QUnit.test("Partner autocomplete : Company type = Company / VAT search", async function (assert) {
         assert.expect(32);
         var fields = this.data['res.partner'].fields;
         var form = await createView({
@@ -299,7 +299,7 @@ odoo.define('partner_autocomplete.tests', function (require) {
                 }
                 return this._super.apply(this, arguments);
             },
-        });//.then(async function (form){
+        });
             // Set company type to Company
             var $company_type = form.$("select[name='company_type']");
             await testUtils.fields.editSelect($company_type, '"company"');
