@@ -118,7 +118,9 @@ class LandedCost(models.Model):
                     qty_out = line.move_id.product_qty - line.move_id.remaining_qty
                 elif line.move_id._is_out():
                     qty_out = line.move_id.product_qty
-                move_vals['line_ids'] += line._create_accounting_entries(move, qty_out)
+                #TODO OCO qty_invoiced => récupérer sur la PO line (pas le choix)
+                #qty_invoiced = line.move_id.purchase_line_id.qty_invoiced #NON il faut celle de la SO ... :/
+                move_vals['line_ids'] += line._create_accounting_entries(move, qty_out, qty_invoiced)
 
             move = move.create(move_vals)
             cost.write({'state': 'done', 'account_move_id': move.id})
@@ -300,7 +302,7 @@ class AdjustmentLines(models.Model):
     def _compute_final_cost(self):
         self.final_cost = self.former_cost + self.additional_landed_cost
 
-    def _create_accounting_entries(self, move, qty_out):
+    def _create_accounting_entries(self, move, qty_out, qty_invoiced):
         # TDE CLEANME: product chosen for computation ?
         cost_product = self.cost_line_id.product_id
         if not cost_product:
@@ -309,13 +311,14 @@ class AdjustmentLines(models.Model):
         debit_account_id = accounts.get('stock_valuation') and accounts['stock_valuation'].id or False
         already_out_account_id = accounts['stock_output'].id
         credit_account_id = self.cost_line_id.account_id.id or cost_product.property_account_expense_id.id or cost_product.categ_id.property_account_expense_categ_id.id
+        product_expense_account_id = accounts.get('expense').id or False
 
         if not credit_account_id:
             raise UserError(_('Please configure Stock Expense Account for product: %s.') % (cost_product.name))
 
-        return self._create_account_move_line(move, credit_account_id, debit_account_id, qty_out, already_out_account_id)
+        return self._create_account_move_line(move, credit_account_id, debit_account_id, qty_out, qty_invoiced, already_out_account_id, product_expense_account_id)
 
-    def _create_account_move_line(self, move, credit_account_id, debit_account_id, qty_out, already_out_account_id):
+    def _create_account_move_line(self, move, credit_account_id, debit_account_id, qty_out, qty_invoiced, already_out_account_id, product_expense_account_id):
         """
         Generate the account.move.line values to track the landed cost.
         Afterwards, for the goods that are already out of stock, we should create the out moves
@@ -361,14 +364,14 @@ class AdjustmentLines(models.Model):
             AccountMoveLine.append([0, 0, debit_line])
             AccountMoveLine.append([0, 0, credit_line])
 
-            # TDE FIXME: oh dear
-            if self.env.user.company_id.anglo_saxon_accounting:
+            # TDE FIXME: oh dear => TODO OCO indeed
+            if self.env.user.company_id.anglo_saxon_accounting and qty_invoiced: #TODO OCO je dirais que c'est ici
                 debit_line = dict(base_line,
-                                  name=(self.name + ": " + str(qty_out) + _(' already out')),
+                                  name=(self.name + ": " + str(qty_invoiced) + _(' already out and invoiced')),
                                   quantity=0,
-                                  account_id=credit_account_id)
+                                  account_id=product_expense_account_id)
                 credit_line = dict(base_line,
-                                   name=(self.name + ": " + str(qty_out) + _(' already out')),
+                                   name=(self.name + ": " + str(qty_invoiced) + _(' already out and invoiced')),
                                    quantity=0,
                                    account_id=already_out_account_id)
 
