@@ -510,15 +510,22 @@ var ProxyDevice  = core.Class.extend(mixins.PropertiesMixin,{
         }
     },
 
+    /**
+     * @param {string} html
+     * @returns {Promise}
+     */
     take_ownership_over_client_screen: function(html) {
         return this.message("take_control", { html: html });
     },
 
+    /**
+     * @returns {Promise}
+     */
     test_ownership_of_client_screen: function() {
         if (this.connection) {
             return this.message("test_ownership", {});
         }
-        return null;
+        return Promise.reject({abort: true});
     },
 
     // asks the proxy to log some information, as with the debug.log you can provide several arguments.

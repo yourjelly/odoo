@@ -453,34 +453,33 @@ var ClientScreenWidget = PosBaseWidget.extend({
         var self = this;
         function loop() {
             if (self.pos.proxy.posbox_supports_display) {
-                var deffered = self.pos.proxy.test_ownership_of_client_screen();
-                if (deffered) {
-                    deffered.then(
-                        function(data) {
-                            if (typeof data === 'string') {
-                                data = JSON.parse(data);
-                            }
-                            if (data.status === 'OWNER') {
-                                self.change_status_display('success');
-                            } else {
-                                self.change_status_display('warning');
-                              }
-                        },
-                        
-                        function(err) {
-                            if (typeof err == "undefined") {
-                                self.change_status_display('failure');
-                            } else {
-                                self.change_status_display('not_found');
-                                self.pos.proxy.posbox_supports_display = false;
-                            }
-                        })
-    
-                    .always(function () {
-                        setTimeout(loop,3000);
-                    });
-                }
-            }   
+                self.pos.proxy.test_ownership_of_client_screen().then(
+                    function (data) {
+                        if (typeof data === 'string') {
+                            data = JSON.parse(data);
+                        }
+                        if (data.status === 'OWNER') {
+                            self.change_status_display('success');
+                        } else {
+                            self.change_status_display('warning');
+                        }
+                        setTimeout(loop, 3000);
+                    },
+                    function (err) {
+                        if (err.abort) {
+                            // Stop the loop
+                            return;
+                        }
+                        if (typeof err == "undefined") {
+                            self.change_status_display('failure');
+                        } else {
+                            self.change_status_display('not_found');
+                            self.pos.proxy.posbox_supports_display = false;
+                        }
+                        setTimeout(loop, 3000);
+                    }
+                );
+            }
         }
         loop();
     },
@@ -552,9 +551,6 @@ var Chrome = PosBaseWidget.extend(AbstractAction.prototype, {
         var self = this;
         this._super(arguments[0],{});
 
-        this.started  = new $.Deferred(); // resolves when DOM is online
-        this.ready    = new $.Deferred(); // resolves when the whole GUI has been loaded
-
         this.pos = new models.PosModel(this.getSession(), {chrome:this});
         this.gui = new gui.Gui({pos: this.pos, chrome: this});
         this.chrome = this; // So that chrome's childs have chrome set automatically
@@ -563,22 +559,25 @@ var Chrome = PosBaseWidget.extend(AbstractAction.prototype, {
         this.logo_click_time  = 0;
         this.logo_click_count = 0;
 
-            this.previous_touch_y_coordinate = -1;
+        this.previous_touch_y_coordinate = -1;
 
         this.widget = {};   // contains references to subwidgets instances
 
-        this.cleanup_dom();
-        this.pos.ready.done(function(){
-            self.build_chrome();
-            self.build_widgets();
-            self.disable_rubberbanding();
-            self.disable_backpace_back();
-            self.ready.resolve();
-            self.loading_hide();
-            self.replace_crashmanager();
-            self.pos.push_order();
-        }).fail(function(err){   // error when loading models data from the backend
-            self.loading_error(err);
+        // ready resolves when the whole GUI has been loaded
+        this.ready = new Promise(function (resolve, reject) {
+            self.cleanup_dom();
+            self.pos.ready.then(function () {
+                self.build_chrome();
+                self.build_widgets();
+                self.disable_rubberbanding();
+                self.disable_backpace_back();
+                resolve();
+                self.loading_hide();
+                self.replace_crashmanager();
+                self.pos.push_order();
+            }).catch(function (err) {   // error when loading models data from the backend
+                self.loading_error(err);
+            });
         });
     },
 

@@ -745,6 +745,9 @@ exports.PosModel = Backbone.Model.extend({
         });
     },
 
+    /**
+     * @returns {Promise<string>}
+     */
     render_html_for_customer_facing_display: function () {
         var self = this;
         var order = this.get_order();
