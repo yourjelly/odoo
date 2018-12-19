@@ -225,6 +225,7 @@ var ActivityRenderer = AbstractRenderer.extend({
             res_model: this.state.model,
             domain: this.state.domain,
             title: _.str.sprintf(_t("Search: %s"), this.arch.attrs.string),
+            no_create: this.arch.attrs.create ? !JSON.parse(this.arch.attrs.create) : false,
             disable_multiple_selection: true,
             on_selected: function (record) {
                 var widget = new KanbanActivity(self, "activity_ids", self._getKanbanActivityData({}, record[0]), {});
