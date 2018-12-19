@@ -38,7 +38,6 @@ return session.is_bound.then(function () {
         defs.push(def);
     }
     return Promise.all(defs).then(function (results) {
-        debugger; // SVS : check if results is really what we expect
         var consumed_tours = session.is_frontend ? results[0] : session.web_tours;
         var tour_manager = new TourManager(rootWidget, consumed_tours);
 
