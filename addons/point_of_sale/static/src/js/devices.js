@@ -212,7 +212,7 @@ var ProxyDevice  = core.Class.extend(mixins.PropertiesMixin,{
         } else if (localStorage.hw_proxy_url) {
             // try harder when we remember a good proxy url
             found_url = this.try_hard_to_connect(localStorage.hw_proxy_url, options)
-                .then(null, function () {
+                .catch(function () {
                     if (window.location.protocol != 'https:') {
                         return self.find_proxy(options);
                     }

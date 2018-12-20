@@ -551,6 +551,9 @@ var Chrome = PosBaseWidget.extend(AbstractAction.prototype, {
         var self = this;
         this._super(arguments[0],{});
 
+        this.started  = new $.Deferred(); // resolves when DOM is online
+        this.ready    = new $.Deferred(); // resolves when the whole GUI has been loaded
+
         this.pos = new models.PosModel(this.getSession(), {chrome:this});
         this.gui = new gui.Gui({pos: this.pos, chrome: this});
         this.chrome = this; // So that chrome's childs have chrome set automatically
@@ -563,21 +566,18 @@ var Chrome = PosBaseWidget.extend(AbstractAction.prototype, {
 
         this.widget = {};   // contains references to subwidgets instances
 
-        // ready resolves when the whole GUI has been loaded
-        this.ready = new Promise(function (resolve, reject) {
-            self.cleanup_dom();
-            self.pos.ready.then(function () {
-                self.build_chrome();
-                self.build_widgets();
-                self.disable_rubberbanding();
-                self.disable_backpace_back();
-                resolve();
-                self.loading_hide();
-                self.replace_crashmanager();
-                self.pos.push_order();
-            }).catch(function (err) {   // error when loading models data from the backend
-                self.loading_error(err);
-            });
+        this.cleanup_dom();
+        this.pos.ready.then(function(){
+            self.build_chrome();
+            self.build_widgets();
+            self.disable_rubberbanding();
+            self.disable_backpace_back();
+            self.ready.resolve();
+            self.loading_hide();
+            self.replace_crashmanager();
+            self.pos.push_order();
+        }).catch(function(err){   // error when loading models data from the backend
+            self.loading_error(err);
         });
     },
 
@@ -858,6 +858,7 @@ var Chrome = PosBaseWidget.extend(AbstractAction.prototype, {
 
     // This method instantiates all the screens, widgets, etc.
     build_widgets: function() {
+        var self = this;
         this.load_widgets(this.widgets);
 
         this.screens = {};
@@ -873,15 +874,15 @@ var Chrome = PosBaseWidget.extend(AbstractAction.prototype, {
         }
 
         this.popups = {};
-        for (i = 0; i < this.gui.popup_classes.length; i++) {
-            classe = this.gui.popup_classes[i];
-            if (!classe.condition || classe.condition.call(this)) {
-                var popup = new classe.widget(this,{});
-                    popup.appendTo(this.$('.popups'));
-                this.popups[classe.name] = popup;
-                this.gui.add_popup(classe.name, popup);
+        _.forEach(this.gui.popup_classes, function (classe) {
+            if (!classe.condition || classe.condition.call(self)) {
+                var popup = new classe.widget(self,{});
+                popup.appendTo(self.$('.popups')).then(function () {
+                    self.popups[classe.name] = popup;
+                    self.gui.add_popup(classe.name, popup);
+                });
             }
-        }
+        });
 
         this.gui.set_startup_screen('products');
         this.gui.set_default_screen('products');

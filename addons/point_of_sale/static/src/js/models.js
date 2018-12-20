@@ -589,8 +589,8 @@ exports.PosModel = Backbone.Model.extend({
     load_new_partners: function(){
         var self = this;
         return new Promise(function (resolve, reject) {
-            var fields = _.find(this.models, function(model){ return model.model === 'res.partner'; }).fields;
-            var domain = [['customer','=',true],['write_date','>',this.db.get_partner_write_date()]];
+            var fields = _.find(self.models, function(model){ return model.model === 'res.partner'; }).fields;
+            var domain = [['customer','=',true],['write_date','>',self.db.get_partner_write_date()]];
             rpc.query({
                 model: 'res.partner',
                 method: 'search_read',
@@ -823,7 +823,7 @@ exports.PosModel = Backbone.Model.extend({
         }
 
         return new Promise(function (resolve, reject) {
-            this.flush_mutex.exec(function () {
+            self.flush_mutex.exec(function () {
                 var flushed = self._flush_orders(self.db.get_orders(), opts);
 
                 flushed.then(resolve, resolve);
