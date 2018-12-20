@@ -83,8 +83,8 @@ var SlideDialog = Widget.extend({
      * @private
      * @param {String} Placeholder for element.
      * @param {bool}  true for multiple selection box, false for single selection
-     * @param {Function} Function to fetch data from remote location should return $.deferred object
-     * resolved data should be array of object with id and name. eg. [{'id': id, 'name': 'text'}, ...]
+     * @param {Function} Function to fetch data from remote location should return a resolved
+     * promise data should be array of object with id and name. eg. [{'id': id, 'name': 'text'}, ...]
      * @returns {Object} select2 wrapper object
     */
     _select2Wrapper: function (tag, multi, fetchFNC) {

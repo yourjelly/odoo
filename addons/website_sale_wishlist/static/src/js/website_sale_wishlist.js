@@ -119,10 +119,11 @@ sAnimations.registry.ProductWishlist = sAnimations.Class.extend(ProductConfigura
 
         this.wishlistProductIDs = _.without(this.wishlistProductIDs, product);
         if (this.wishlistProductIDs.length === 0) {
-            deferred_redirect = deferred_redirect ? deferred_redirect : $.Deferred();
-            deferred_redirect.then(function () {
-                self._redirectNoWish();
-            });
+            if (deferred_redirect) {
+                deferred_redirect.then(function () {
+                    self._redirectNoWish();
+                });
+            }
         }
         this._updateWishlistView();
     },

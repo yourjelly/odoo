@@ -487,7 +487,7 @@ var ViewEditor = Widget.extend({
         type = type || this.currentType;
 
         if (this.currentType === 'xml') {
-            return $.Defered().reject(_t("Reseting views is not supported yet"));
+            return Promise.reject(_t("Reseting views is not supported yet"));
         } else {
             return this._rpc({
                 route: '/web_editor/reset_scss',

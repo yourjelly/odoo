@@ -763,20 +763,20 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
      *
      * @private
      * @param {string} name
-     * @returns {Deferred<*>}
+     * @returns {Promise<*>}
      */
     _getPageOption: function (name) {
         var option = this.pageOptions[name];
         if (!option) {
             return Promise.reject();
         }
-        return $.when(option.value);
+        return Promise.resolve(option.value);
     },
     /**
      * On save, simulated page options have to be server-saved.
      *
      * @private
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _onSave: function () {
         var self = this;
@@ -794,7 +794,7 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
      * Opens the page properties dialog.
      *
      * @private
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _pageProperties: function () {
         var mo;
@@ -815,7 +815,7 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
      * @param {*} [params.value] (change value by default true -> false -> true)
      * @param {boolean} [forceSave=false]
      * @param {boolean} [noReload=false]
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _togglePageOption: function (params, forceSave, noReload) {
         // First check it is a website page
@@ -847,17 +847,17 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         // If not, write on the server page and reload the current location
         var vals = {};
         vals[params.name] = option.value;
-        var def = this._rpc({
+        var prom = this._rpc({
             model: 'website.page',
             method: 'write',
             args: [[mo.id], vals],
         });
         if (noReload) {
-            return def;
+            return prom;
         }
-        return def.then(function () {
+        return prom.then(function () {
             window.location.reload();
-            return $.Deferred();
+            return new Promise(function(){});
         });
     },
 });
@@ -879,7 +879,7 @@ var PageManagement = Widget.extend({
      *
      * @private
      * @param {integer} moID
-     * @returns {Deferred<Array>}
+     * @returns {Promise<Array>}
      */
     _getPageDependencies: function (moID) {
         return this._rpc({
@@ -926,35 +926,35 @@ var PageManagement = Widget.extend({
 // TODO: This function should be integrated in a widget in the future
 function _deletePage(pageId, fromPageManagement) {
     var self = this;
-    var def = $.Deferred();
-
-    // Search the page dependencies
-    this._getPageDependencies(pageId)
-    .then(function (dependencies) {
-    // Inform the user about those dependencies and ask him confirmation
-        var confirmDef = $.Deferred();
-        Dialog.safeConfirm(self, "", {
-            title: _t("Delete Page"),
-            $content: $(qweb.render('website.delete_page', {dependencies: dependencies})),
-            confirm_callback: confirmDef.resolve.bind(confirmDef),
-            cancel_callback: def.resolve.bind(self),
-        });
-        return confirmDef;
-    }).then(function () {
-    // Delete the page if the user confirmed
-        return self._rpc({
-            model: 'website.page',
-            method: 'unlink',
-            args: [pageId],
-        });
-    }).then(function () {
-        if (fromPageManagement) {
-            window.location.reload(true);
-        }
-        else {
-            window.location.href = '/';
-        }
-    }, def.reject.bind(def));
+    var prom = new Promise(function (resolve, reject) {
+        // Search the page dependencies
+        this._getPageDependencies(pageId)
+        .then(function (dependencies) {
+            // Inform the user about those dependencies and ask him confirmation
+            return new Promise(function (confirmResolve, confirmReject) {
+                Dialog.safeConfirm(self, "", {
+                    title: _t("Delete Page"),
+                    $content: $(qweb.render('website.delete_page', {dependencies: dependencies})),
+                    confirm_callback: confirmResolve,
+                    cancel_callback: resolve,
+                });
+            });
+        }).then(function () {
+            // Delete the page if the user confirmed
+            return self._rpc({
+                model: 'website.page',
+                method: 'unlink',
+                args: [pageId],
+            });
+        }).then(function () {
+            if (fromPageManagement) {
+                window.location.reload(true);
+            }
+            else {
+                window.location.href = '/';
+            }
+        }, reject);
+    });
 }
 
 websiteNavbarData.websiteNavbarRegistry.add(ContentMenu, '#content-menu');
