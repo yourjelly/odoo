@@ -973,14 +973,17 @@ var FieldX2Many = AbstractField.extend({
      * @returns {Promise|undefined}
      */
     _render: function () {
+        var self = this;
         if (!this.view) {
             return this._super();
         }
         if (this.renderer) {
             this.currentColInvisibleFields = this._evalColumnInvisibleFields();
-            this.renderer.updateState(this.value, {'columnInvisibleFields': this.currentColInvisibleFields});
-            this.pager.updateState({ size: this.value.count });
-            return Promise.resolve();
+            return this.renderer.updateState(this.value, {
+                columnInvisibleFields: this.currentColInvisibleFields,
+            }).then(function () {
+                self.pager.updateState({ size: self.value.count });
+            });
         }
         var arch = this.view.arch;
         var viewType;
@@ -1209,8 +1212,8 @@ var FieldX2Many = AbstractField.extend({
         this.trigger_up('edited_list', { id: this.value.id });
         var editedRecord = this.value.data[ev.data.index];
         this.renderer.setRowMode(editedRecord.id, 'edit')
-                .then(ev.data.onSuccess)
-                .catch(ev.data.onSuccess);
+            .then(ev.data.onSuccess)
+            .catch(ev.data.onSuccess);
     },
     /**
      * Updates the given record with the changes.

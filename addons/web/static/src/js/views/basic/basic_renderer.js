@@ -711,7 +711,7 @@ var BasicRenderer = AbstractRenderer.extend({
             modifiersData.evaluatedModifiers[record.id] = record.evalModifiers(modifiersData.modifiers);
             self._applyModifiers(modifiersData, record);
         });
-        // delete this.defs;
+        delete this.defs;
 
         return Promise.all(defs);
     },

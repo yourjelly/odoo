@@ -68,7 +68,6 @@ var ListRenderer = BasicRenderer.extend({
         this.pagers = []; // instantiated pagers (only for grouped lists)
         this.editable = params.editable;
         this.isGrouped = this.state.groupedBy.length > 0;
-        this.defs = []; // TODO maybe wait for those somewhere ?
     },
 
     //--------------------------------------------------------------------------
@@ -396,7 +395,7 @@ var ListRenderer = BasicRenderer.extend({
      *
      * @private
      * @param {Object} group
-     * @returns {Promise<jQueryElement>} a promise that will resolve with the pager's $el
+     * @returns {jQueryElement} the pager's $el
      */
     _renderGroupPager: function (group) {
         var pager = new Pager(this, group.count, group.offset + 1, group.limit);
@@ -417,11 +416,14 @@ var ListRenderer = BasicRenderer.extend({
         // register the pager so that it can be destroyed on next rendering
         this.pagers.push(pager);
 
-        var fragment = document.createDocumentFragment();
-
-        return pager.appendTo(fragment).then(function() {
-            return pager.$el;
+        var pagerProm = pager._widgetRenderAndInsert(function () {}); // start the pager
+        this.defs.push(pagerProm);
+        var $el =  $('<div>');
+        pagerProm.then(function () {
+            $el.replaceWith(pager.$el);
         });
+
+        return $el;
     },
     /**
      * Render the row that represent a group
@@ -429,10 +431,9 @@ var ListRenderer = BasicRenderer.extend({
      * @private
      * @param {Object} group
      * @param {integer} groupLevel the nesting level (0 for root groups)
-     * @returns {Promise<jQueryElement>} a promise that will resolve with the <tr> element
+     * @returns {jQueryElement} a <tr> element
      */
     _renderGroupRow: function (group, groupLevel) {
-        var pagerPromise = Promise.resolve();
         var aggregateValues = _.mapObject(group.aggregateValues, function (value) {
             return { value: value };
         });
@@ -458,21 +459,17 @@ var ListRenderer = BasicRenderer.extend({
         }
         $th.prepend($arrow);
         if (group.isOpen && !group.groupedBy.length && (group.count > group.data.length)) {
-            pagerPromise = this._renderGroupPager(group).then(function($pager) {
-                var $lastCell = $cells[$cells.length - 1] || $th;
-                $lastCell.addClass('o_group_pager').append($pager);
-            });
+            var $pager = this._renderGroupPager(group);
+            var $lastCell = $cells[$cells.length - 1] || $th;
+            $lastCell.addClass('o_group_pager').append($pager);
         }
-
-        return Promise.resolve(pagerPromise).then(function () {
-            return $('<tr>')
-                .addClass('o_group_header')
-                .toggleClass('o_group_open', group.isOpen)
-                .toggleClass('o_group_has_content', group.count > 0)
-                .data('group', group)
-                .append($th)
-                .append($cells);
-        });
+        return $('<tr>')
+            .addClass('o_group_header')
+            .toggleClass('o_group_open', group.isOpen)
+            .toggleClass('o_group_has_content', group.count > 0)
+            .data('group', group)
+            .append($th)
+            .append($cells);
     },
     /**
      * Render all groups in the view.  We assume that the view is in grouped
@@ -484,70 +481,38 @@ var ListRenderer = BasicRenderer.extend({
      * @private
      * @param {Object} data the dataPoint containing the groups
      * @param {integer} [groupLevel=0] the nesting level. 0 is for the root group
-     * @returns {Promise<jQueryElement[]>} a list of <tbody>
+     * @returns {jQueryElement[]} a list of <tbody>
      */
     _renderGroups: function (data, groupLevel) {
-        groupLevel = groupLevel || 0;
-        var groupsPromises = this._renderGroupsOneByOne(data, groupLevel);
-        return Promise.resolve(groupsPromises).then(function (result) {
-            return result;
-        });
-    },
-    /**
-     * Render groups one by one to keep them in the right order.
-     * It waits the first one finished its rendering before go to the second one.
-     *
-     * @private
-     * @param {Object} data the dataPoint containing the groups
-     * @param {number} groupLevel
-     * @param {number} index of the group
-     * @param {Object} previous keep results of last calls
-     * @returns {Promise<jQueryElement[]>} a list of <tbody>
-     */
-    _renderGroupsOneByOne: function (data, groupLevel, index, previous) {
-        index = index || 0;
-        previous = previous || {};
-        var result = previous.result || [];
-        var $tbody = previous.tbody;
-
-        if (index >= data.length) {
-            if ($tbody) {
-                result.push($tbody);
-            }
-            return result;
-        }
-
-        var group = data[index];
         var self = this;
-        return this._renderGroupRow(group, groupLevel).then(function ($groupRow) {
-            var prom = Promise.resolve();
+        groupLevel = groupLevel || 0;
+        var result = [];
+        var $tbody = $('<tbody>');
+        _.each(data, function (group) {
             if (!$tbody) {
                 $tbody = $('<tbody>');
             }
-            $tbody.append($groupRow);
+            $tbody.append(self._renderGroupRow(group, groupLevel));
             if (group.data.length) {
-                // render an opened group
                 result.push($tbody);
-
+                // render an opened group
                 if (group.groupedBy.length) {
                     // the opened group contains subgroups
-                    prom = self._renderGroups(group.data, groupLevel + 1)
-                    .then(function($subGroupRow) {
-                        result = result.concat($subGroupRow);
-                    });
+                    result = result.concat(self._renderGroups(group.data, groupLevel + 1));
                 } else {
                     // the opened group contains records
-                    var $records = group.data.map(self._renderRow.bind(self));
+                    var $records = _.map(group.data, function (record) {
+                        return self._renderRow(record);
+                    });
                     result.push($('<tbody>').append($records));
                 }
                 $tbody = null;
             }
-            return prom;
-        }).then(function () {
-            previous.result = result;
-            previous.tbody = $tbody;
-            return self._renderGroupsOneByOne(data, groupLevel, index + 1, previous);
         });
+        if ($tbody) {
+            result.push($tbody);
+        }
+        return result;
     },
     /**
      * Render the main header for the list view.  It is basically just a <thead>
@@ -629,16 +594,14 @@ var ListRenderer = BasicRenderer.extend({
             return self._renderBodyCell(record, node, index, { mode: 'readonly' });
         });
 
-        // return Promise.all(cellsPromises).then(function($cells) {
         var $tr = $('<tr/>', { class: 'o_data_row' })
             .data('id', record.id)
             .append($cells);
-        if (self.hasSelectors) {
-            $tr.prepend(self._renderSelector('td', !record.res_id));
+        if (this.hasSelectors) {
+            $tr.prepend(this._renderSelector('td', !record.res_id));
         }
-        self._setDecorationClasses(record, $tr);
+        this._setDecorationClasses(record, $tr);
         return $tr;
-        // });
     },
     /**
      * Render all rows. This method should only called when the view is not
@@ -678,47 +641,52 @@ var ListRenderer = BasicRenderer.extend({
      *
      * @override
      * @private
-     * @returns {Promise} this promise is resolved immediately
+     * @returns {Promise} resolved when the view has been rendered
      */
     _renderView: function () {
         var self = this;
 
-        this.$el
-            .removeClass('table-responsive')
-            .empty();
-
-        // destroy the previously instantiated pagers, if any
-        _.invoke(this.pagers, 'destroy');
+        var oldPagers = this.pagers;
         this.pagers = [];
 
-        var displayNoContentHelper = !this._hasContent() && !!this.noContentHelp;
         // display the no content helper if there is no data to display
+        var displayNoContentHelper = !this._hasContent() && !!this.noContentHelp;
         if (displayNoContentHelper) {
+            // destroy the previously instantiated pagers, if any
+            _.invoke(oldPagers, 'destroy');
+
+            this.$el.removeClass('table-responsive');
             this.$el.html(this._renderNoContentHelper());
-            return this._super();
+            return this._super.apply(this, arguments);
         }
 
-        var $table = $('<table>').addClass('o_list_view table table-sm table-hover table-striped');
-        this.$el.addClass('table-responsive')
-            .append($table);
+        var orderedBy = this.state.orderedBy;
+        this.hasHandle = orderedBy.length === 0 || orderedBy[0].name === this.handleField;
         this._computeAggregates();
+
+        var $table = $('<table>').addClass('o_list_view table table-sm table-hover table-striped');
         $table.toggleClass('o_list_view_grouped', this.isGrouped);
         $table.toggleClass('o_list_view_ungrouped', !this.isGrouped);
-        this.hasHandle = this.state.orderedBy.length === 0 ||
-            this.state.orderedBy[0].name === this.handleField;
+        var defs = [];
+        this.defs = defs;
         if (this.isGrouped) {
             $table.append(this._renderHeader(true));
-            self.defs.push(this._renderGroups(this.state.data).then(function(groupsRows) {
-                $table.append(groupsRows);
-                $table.append(self._renderFooter());
-            }));
+            $table.append(this._renderGroups(this.state.data));
+            $table.append(this._renderFooter());
 
         } else {
             $table.append(this._renderHeader());
             $table.append(this._renderBody());
             $table.append(this._renderFooter());
         }
-        var prom = Promise.all(self.defs).then(function () {
+        delete this.defs;
+
+        var prom = Promise.all(defs).then(function () {
+            // destroy the previously instantiated pagers, if any
+            _.invoke(oldPagers, 'destroy');
+
+            self.$el.addClass('table-responsive').html($table);
+
             if (self.selection.length) {
                 var $checked_rows = self.$('tr').filter(function (index, el) {
                     return _.contains(self.selection, $(el).data('id'));
@@ -726,7 +694,7 @@ var ListRenderer = BasicRenderer.extend({
                 $checked_rows.find('.o_list_record_selector input').prop('checked', true);
             }
         });
-        return Promise.all([this._super(), prom]);
+        return Promise.all([this._super.apply(this, arguments), prom]);
     },
     /**
      * Each line can be decorated according to a few simple rules. The arch

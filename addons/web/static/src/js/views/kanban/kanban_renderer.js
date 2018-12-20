@@ -389,21 +389,24 @@ var KanbanRenderer = BasicRenderer.extend({
         var self = this;
         var oldWidgets = this.widgets;
         this.widgets = [];
-        this.$el.empty();
 
-        var isGrouped = !!this.state.groupedBy.length;
-        this.$el.toggleClass('o_kanban_grouped', isGrouped);
-        this.$el.toggleClass('o_kanban_ungrouped', !isGrouped);
-        var fragment = document.createDocumentFragment();
         // render the kanban view
-        this.defs = [];
+        var isGrouped = !!this.state.groupedBy.length;
+        var fragment = document.createDocumentFragment();
+        var defs = [];
+        this.defs = defs;
         if (isGrouped) {
             this._renderGrouped(fragment);
         } else {
             this._renderUngrouped(fragment);
         }
+        delete this.defs;
+
         return this._super.apply(this, arguments).then(function () {
-            return Promise.all(self.defs).then(function() {
+            return Promise.all(defs).then(function () {
+                self.$el.empty();
+                self.$el.toggleClass('o_kanban_grouped', isGrouped);
+                self.$el.toggleClass('o_kanban_ungrouped', !isGrouped);
                 self.$el.append(fragment);
                 self._toggleNoContentHelper();
                 _.invoke(oldWidgets, 'destroy');

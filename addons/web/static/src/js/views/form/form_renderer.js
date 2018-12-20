@@ -912,7 +912,7 @@ var FormRenderer = BasicRenderer.extend({
         var defs = [];
         this.defs = defs;
         var $form = this._renderNode(this.arch).addClass(this.className);
-        //delete this.defs;
+        delete this.defs;
 
         return Promise.all(defs).then(function () {
             self._updateView($form.contents());

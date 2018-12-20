@@ -5036,7 +5036,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('asynchronous rendering of a field widget (ungrouped)', async function (assert) {
-        assert.expect(2);
+        assert.expect(4);
 
         var fooFieldProm = makeTestPromise();
         var FieldChar = fieldRegistry.get('char');
@@ -5067,12 +5067,23 @@ QUnit.module('Views', {
         await nextTick();
         assert.strictEqual($('.o_kanban_record').text(), "LOADEDLOADEDLOADEDLOADED");
 
+        // reload with a domain
+        fooFieldProm = makeTestPromise();
+        kanbanController.reload({domain: [['id', '=', 1]]});
+        await nextTick();
+
+        assert.strictEqual($('.o_kanban_record').text(), "LOADEDLOADEDLOADEDLOADED");
+
+        fooFieldProm.resolve();
+        await nextTick();
+        assert.strictEqual($('.o_kanban_record').text(), "LOADED");
+
         kanbanController.destroy();
         delete fieldRegistry.map.asyncWidget;
     });
 
     QUnit.test('asynchronous rendering of a field widget (grouped)', async function (assert) {
-        assert.expect(2);
+        assert.expect(4);
 
         var fooFieldProm = makeTestPromise();
         var FieldChar = fieldRegistry.get('char');
@@ -5104,10 +5115,20 @@ QUnit.module('Views', {
         await nextTick();
         assert.strictEqual($('.o_kanban_record').text(), "LOADEDLOADEDLOADEDLOADED");
 
+        // reload with a domain
+        fooFieldProm = makeTestPromise();
+        kanbanController.reload({domain: [['id', '=', 1]]});
+        await nextTick();
+
+        assert.strictEqual($('.o_kanban_record').text(), "LOADEDLOADEDLOADEDLOADED");
+
+        fooFieldProm.resolve();
+        await nextTick();
+        assert.strictEqual($('.o_kanban_record').text(), "LOADED");
+
         kanbanController.destroy();
         delete fieldRegistry.map.asyncWidget;
     });
-
 });
 
 });

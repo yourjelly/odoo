@@ -2697,7 +2697,6 @@ QUnit.module('Views', {
         list.destroy();
     });
 
-
     QUnit.test('navigation with tab and readonly field (with modification)', async function (assert) {
         // This test makes sure that if we have 2 cells in a row, the first in
         // edit mode, and the second one readonly, then if we press TAB when the
@@ -4070,6 +4069,46 @@ QUnit.module('Views', {
         assert.strictEqual($('.o_data_cell').text(), "blipblipyopgnap" + inputText);
 
         list.destroy();
+    });
+
+    QUnit.test('grouped list with async widget', async function (assert) {
+        assert.expect(4);
+
+        var prom = testUtils.makeTestPromise();
+        var AsyncWidget = Widget.extend({
+            willStart: function () {
+                return prom;
+            },
+            start: function () {
+                this.$el.text('ready');
+            },
+        });
+        widgetRegistry.add('asyncWidget', AsyncWidget);
+
+        var list = await createAsyncView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree><widget name="asyncWidget"/></tree>',
+            groupBy: ['int_field'],
+        });
+
+        assert.containsNone(list, '.o_data_row', "no group should be open");
+
+        await testUtils.dom.click(list.$('.o_group_header:first'));
+
+        assert.containsNone(list, '.o_data_row',
+            "should wait for async widgets before opening the group");
+
+        prom.resolve();
+        await testUtils.nextTick();
+
+        assert.containsN(list, '.o_data_row', 1, "group should be open");
+        assert.strictEqual(list.$('.o_data_row .o_data_cell').text(), 'ready',
+            "async widget should be correctly displayed");
+
+        list.destroy();
+        delete widgetRegistry.map.asyncWidget;
     });
 });
 

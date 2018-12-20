@@ -180,7 +180,7 @@ ListRenderer.include({
         // store the cursor position to restore it once potential onchanges have
         // been applied
         var currentRowID, currentWidget, focusedElement, selectionRange;
-        if (self.currentRow !== null) {
+        if (this.currentRow !== null) {
             currentRowID = this.state.data[this.currentRow].id;
             currentWidget = this.allFieldWidgets[currentRowID][this.currentFieldIndex];
             if (currentWidget) {
@@ -212,36 +212,39 @@ ListRenderer.include({
             });
             var newRowIndex = _.findIndex(state.data, {id: id});
             var $lastRow = $row;
+            var defs = [];
+            self.defs = defs;
             state.data.forEach(function (record, index) {
                 if (index === newRowIndex) {
                     return;
                 }
+                // FIXME: as we are manipulating the DOM directly, it will
+                // flicker if there is an async widget in the row
                 var $newRow = self._renderRow(record);
-                // return .then(function($newRow) {
-                    if (index < newRowIndex) {
-                        $newRow.insertBefore($row);
-                    } else {
-                        $newRow.insertAfter($lastRow);
-                        $lastRow = $newRow;
-                    }
-                // });
+                if (index < newRowIndex) {
+                    $newRow.insertBefore($row);
+                } else {
+                    $newRow.insertAfter($lastRow);
+                    $lastRow = $newRow;
+                }
             });
-            // return Promise.all(proms).then(function() {
-            if (self.currentRow !== null) {
-                self.currentRow = newRowIndex;
-                return self._selectCell(newRowIndex, self.currentFieldIndex, {force: true}).then(function () {
-                    // restore the cursor position
-                    currentRowID = self.state.data[newRowIndex].id;
-                    currentWidget = self.allFieldWidgets[currentRowID][self.currentFieldIndex];
-                    if (currentWidget) {
-                        focusedElement = currentWidget.getFocusableElement().get(0);
-                        if (selectionRange) {
-                            dom.setSelectionRange(focusedElement, selectionRange);
-                        }
+            delete self.defs;
+            return Promise.all(defs).then(function () {
+                if (self.currentRow !== null) {
+                    self.currentRow = newRowIndex;
+                    return self._selectCell(newRowIndex, self.currentFieldIndex, {force: true});
+                }
+            }).then(function () {
+                // restore the cursor position
+                currentRowID = self.state.data[newRowIndex].id;
+                currentWidget = self.allFieldWidgets[currentRowID][self.currentFieldIndex];
+                if (currentWidget) {
+                    focusedElement = currentWidget.getFocusableElement().get(0);
+                    if (selectionRange) {
+                        dom.setSelectionRange(focusedElement, selectionRange);
                     }
-                });
-            }
-            // });
+                }
+            });
         });
     },
     /**
@@ -356,31 +359,31 @@ ListRenderer.include({
         // Switch each cell to the new mode; note: the '_renderBodyCell'
         // function might fill the 'this.defs' variables with multiple promise
         // so we create the array and delete it after the rendering.
+        var defs = [];
+        this.defs = defs;
         _.each(this.columns, function (node, colIndex) {
             var $td = $tds.eq(colIndex);
-            // var renderBodyCellResult =
             var $newTd = self._renderBodyCell(record, node, colIndex, options);
-            // self.defs.push(renderBodyCellResult);
-            // renderBodyCellResult.then(function($newTd){
-                // Widgets are unregistered of modifiers data when they are
-                // destroyed. This is not the case for simple buttons so we have to
-                // do it here.
-                if ($td.hasClass('o_list_button')) {
-                    self._unregisterModifiersElement(node, recordID, $td.children());
-                }
 
-                // For edit mode we only replace the content of the cell with its
-                // new content (invisible fields, editable fields, ...).
-                // For readonly mode, we replace the whole cell so that the
-                // dimensions of the cell are not forced anymore.
-                if (editMode) {
-                    $td.empty().append($newTd.contents());
-                } else {
-                    self._unregisterModifiersElement(node, recordID, $td);
-                    $td.replaceWith($newTd);
-                }
-            // });
+            // Widgets are unregistered of modifiers data when they are
+            // destroyed. This is not the case for simple buttons so we have to
+            // do it here.
+            if ($td.hasClass('o_list_button')) {
+                self._unregisterModifiersElement(node, recordID, $td.children());
+            }
+
+            // For edit mode we only replace the content of the cell with its
+            // new content (invisible fields, editable fields, ...).
+            // For readonly mode, we replace the whole cell so that the
+            // dimensions of the cell are not forced anymore.
+            if (editMode) {
+                $td.empty().append($newTd.contents());
+            } else {
+                self._unregisterModifiersElement(node, recordID, $td);
+                $td.replaceWith($newTd);
+            }
         });
+        delete this.defs;
 
         // Destroy old field widgets
         _.each(oldWidgets, this._destroyFieldWidget.bind(this, recordID));
@@ -389,7 +392,7 @@ ListRenderer.include({
         $row.toggleClass('o_selected_row', editMode);
         $row.find('.o_list_record_selector input').prop('disabled', !record.res_id);
 
-        return Promise.all(this.defs || []).then(function () {
+        return Promise.all(defs).then(function () {
             // necessary to trigger resize on fieldtexts
             core.bus.trigger('DOM_updated');
         });
@@ -533,23 +536,19 @@ ListRenderer.include({
      * widget.
      *
      * @override
-     * @returns {Promise<jQueryElement>}
      */
     _renderBody: function () {
-        var self = this;
-        var $body = this._super();
-//         return .then(function($body) {
-            if (self.hasHandle) {
-                $body.sortable({
-                    axis: 'y',
-                    items: '> tr.o_data_row',
-                    helper: 'clone',
-                    handle: '.o_row_handle',
-                    stop: self._resequence.bind(self),
-                });
-            }
-            return $body;
-//         });
+        var $body = this._super.apply(this, arguments);
+        if (this.hasHandle) {
+            $body.sortable({
+                axis: 'y',
+                items: '> tr.o_data_row',
+                helper: 'clone',
+                handle: '.o_row_handle',
+                stop: this._resequence.bind(this),
+            });
+        }
+        return $body;
     },
     /**
      * Editable rows are possibly extended with a trash icon on their right, to
@@ -562,18 +561,15 @@ ListRenderer.include({
      * @returns {jQueryElement}
      */
     _renderRow: function (record, index) {
-        var self = this;
-        var $row = this._super.apply(this, arguments)
-        // return .then(function($row) {
-            if (self.addTrashIcon) {
-                var $icon = self.isMany2Many ?
-                                $('<button>', {class: 'fa fa-times', name: 'unlink', 'aria-label': _t('Unlink row ') + (index+1)}) :
-                                $('<button>', {class: 'fa fa-trash-o', name: 'delete', 'aria-label': _t('Delete row ') + (index+1)});
-                var $td = $('<td>', {class: 'o_list_record_remove'}).append($icon);
-                $row.append($td);
-            }
-            return $row;
-        // });
+        var $row = this._super.apply(this, arguments);
+        if (this.addTrashIcon) {
+            var $icon = this.isMany2Many ?
+                            $('<button>', {class: 'fa fa-times', name: 'unlink', 'aria-label': _t('Unlink row ') + (index+1)}) :
+                            $('<button>', {class: 'fa fa-trash-o', name: 'delete', 'aria-label': _t('Delete row ') + (index+1)});
+            var $td = $('<td>', {class: 'o_list_record_remove'}).append($icon);
+            $row.append($td);
+        }
+        return $row;
     },
     /**
      * If the editable list view has the parameter addCreateLine, we need to
@@ -586,13 +582,12 @@ ListRenderer.include({
      * @returns {jQueryElement[]}
      */
     _renderRows: function () {
-        var self = this;
         var $rows = this._super();
-        if (self.addCreateLine) {
+        if (this.addCreateLine) {
             var $tr = $('<tr>');
-            var colspan = self._getNumberOfCols();
+            var colspan = this._getNumberOfCols();
 
-            if (self.handleField) {
+            if (this.handleField) {
                 colspan = colspan - 1;
                 $tr.append('<td>');
             }
@@ -603,7 +598,7 @@ ListRenderer.include({
             $tr.append($td);
             $rows.push($tr);
 
-            _.each(self.creates, function (create, index) {
+            _.each(this.creates, function (create, index) {
                 var $a = $('<a href="#" role="button">')
                     .attr('data-context', create.context)
                     .text(create.string);
@@ -762,7 +757,7 @@ ListRenderer.include({
                 return Promise.reject();
             }
             // Notify the controller we want to make a record editable
-            return new Promise(function (resolve, reject) {
+            return new Promise(function (resolve) {
                 self.trigger_up('edit_line', {
                     index: rowIndex,
                     onSuccess: resolve,
