@@ -519,10 +519,9 @@ var ListRenderer = BasicRenderer.extend({
      * with the name of each fields
      *
      * @private
-     * @param {boolean} isGrouped
      * @returns {jQueryElement} a <thead> element
      */
-    _renderHeader: function (isGrouped) {
+    _renderHeader: function () {
         var $tr = $('<tr>')
             .append(_.map(this.columns, this._renderHeaderCell.bind(this)));
         if (this.hasSelectors) {
@@ -670,7 +669,7 @@ var ListRenderer = BasicRenderer.extend({
         var defs = [];
         this.defs = defs;
         if (this.isGrouped) {
-            $table.append(this._renderHeader(true));
+            $table.append(this._renderHeader());
             $table.append(this._renderGroups(this.state.data));
             $table.append(this._renderFooter());
 
