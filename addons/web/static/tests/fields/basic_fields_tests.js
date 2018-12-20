@@ -1505,7 +1505,7 @@ QUnit.module('basic_fields', {
 
         var $field = form.$('.o_field_text');
 
-        assert.strictEqual($field.outerHeight(), $field[0].scrollHeight,
+        assert.strictEqual($field[0].offsetHeight, $field[0].scrollHeight,
             "text field should not have a scroll bar");
 
         await testUtils.form.clickEdit(form);
@@ -1513,7 +1513,7 @@ QUnit.module('basic_fields', {
         var $textarea = form.$('textarea:first');
 
         // the difference is to take small calculation errors into account
-        assert.strictEqual($textarea.innerHeight(), $textarea[0].scrollHeight,
+        assert.strictEqual($textarea[0].clientHeight, $textarea[0].scrollHeight,
             "textarea should not have a scroll bar");
         form.destroy();
     });
