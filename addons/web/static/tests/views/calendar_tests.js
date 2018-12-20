@@ -1620,8 +1620,9 @@ QUnit.module('Views', {
         assert.containsN(calendar, '.fc-event', 3, "should display 3 events");
 
         // quick create a record
-        var left = calendar.$('.fc-bg td:eq(4)').offset().left+15;
-        var top = calendar.$('.fc-slats tr:eq(4) td:first').offset().top+15;
+        var left = calendar.$('.fc-bg td:eq(6)').offset().left+15;
+        var top = calendar.$('.fc-slats tr:eq(6) td:first').offset().top+15;
+        document.debugMe = true;
         try {
             testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
         } catch (e) {
@@ -1645,8 +1646,8 @@ QUnit.module('Views', {
         this.data.event.fields.partner_id.default = 4;
 
         // quick create and other record
-        left = calendar.$('.fc-bg td:eq(3)').offset().left+15;
-        top = calendar.$('.fc-slats tr:eq(4) td:first').offset().top+15;
+        left = calendar.$('.fc-bg td:eq(5)').offset().left+15;
+        top = calendar.$('.fc-slats tr:eq(6) td:first').offset().top+15;
         testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
         testUtils.dom.triggerPositionalMouseEvent(left, top + 200, "mousemove");
         testUtils.dom.triggerPositionalMouseEvent(left, top + 200, "mouseup");
