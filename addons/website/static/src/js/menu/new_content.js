@@ -89,7 +89,7 @@ var NewContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             }
         }).then(function (result) {
             var val = result.id;
-            var $dialog = result.Dialog;
+            var $dialog = result.dialog;
             if (!val) {
                 return;
             }
