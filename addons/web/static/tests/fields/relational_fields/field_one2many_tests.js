@@ -8117,6 +8117,86 @@ QUnit.module('fields', {}, function () {
                 "should be 1 column after the value change");
             form.destroy();
         });
+
+        QUnit.skip('datepickers inside one2many are closed when value is selected', async function (assert) {
+            // This test encodes a behavior that was partially wrong/annoying before the update of
+            // jquery, and which is now always wrong/annoying: when the value of a date(time) field
+            // embedded in an x2many list is selected in its datepicker, the datepicker doesn't
+            // close itself as it should.
+            // Before the update of jquery, it worked fine when there were no onchange, but with an
+            // onchange, the datepicker re-opened itself as soon as the onchange returned (when the
+            // field was reset and thus re-activated).
+            // After the update, this bug is still present, but in addition, it is kept open even
+            // when there is no onchange. Here is what happens in that case:
+            //  1) select day -> trigger change (async)
+            //  2) select day -> hide datepicker (tempusdominus)
+            //  1') (next tick) trigger change -> reset -> activate widget -> show datepicker
+            // Before the update, 1) and 1') was executed synchronously before 2), so the datepicker
+            // was correctly hidden.
+            assert.expect(3);
+
+            this.data.partner.fields.date2 = { string: "Another Date", type: 'date' };
+            this.data.partner.onchanges = {
+                date2: function () {},
+            };
+            this.data.partner.records[0].p = [2];
+
+            var prom = testUtils.makeTestPromise();
+            var form = await createView({
+                View: FormView,
+                model: 'partner',
+                data: this.data,
+                arch: '<form string="Partners">' +
+                        '<field name="p">' +
+                            '<tree editable="bottom">' +
+                                '<field name="date"/>' +
+                                '<field name="date2"/>' +
+                            '</tree>' +
+                        '</field>' +
+                    '</form>',
+                mockRPC: function (route, args) {
+                    var result = this._super.apply(this, arguments);
+                    if (args.method === 'onchange') {
+                        return prom.then(_.constant(result));
+                    }
+                    return result;
+                },
+                res_id: 1,
+                viewOptions: {
+                    mode: 'edit',
+                },
+            });
+
+            await testUtils.dom.click(form.$('.o_data_cell:first'));
+
+            // edit date field, no onchange
+            await testUtils.dom.click(form.$('.o_field_widget[name=date] .o_datepicker_input'));
+            await testUtils.nextTick();
+            await testUtils.dom.click($('.bootstrap-datetimepicker-widget .picker-switch').first());
+            await testUtils.dom.click($('.bootstrap-datetimepicker-widget .picker-switch:eq(1)'));
+            await testUtils.dom.click($('.bootstrap-datetimepicker-widget .year:contains(2017)'));
+            await testUtils.dom.click($('.bootstrap-datetimepicker-widget .month').eq(1));
+            await testUtils.dom.click($('.day:contains(22)'));
+
+            assert.containsNone(document.body, '.bootstrap-datetimepicker-widget');
+
+            // edit date2 field, with onchange
+            await testUtils.dom.click(form.$('.o_field_widget[name=date2] .o_datepicker_input'));
+            await testUtils.nextTick();
+            await testUtils.dom.click($('.bootstrap-datetimepicker-widget .picker-switch').first());
+            await testUtils.dom.click($('.bootstrap-datetimepicker-widget .picker-switch:eq(1)'));
+            await testUtils.dom.click($('.bootstrap-datetimepicker-widget .year:contains(2017)'));
+            await testUtils.dom.click($('.bootstrap-datetimepicker-widget .month').eq(1));
+            await testUtils.dom.click($('.day:contains(22)'));
+
+            assert.containsNone(document.body, '.bootstrap-datetimepicker-widget');
+
+            prom.resolve();
+
+            assert.containsNone(document.body, '.bootstrap-datetimepicker-widget');
+
+            form.destroy();
+        });
     });
 });
 });
