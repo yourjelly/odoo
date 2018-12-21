@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-07-27 11:56+0000\n"
-"PO-Revision-Date: 2018-07-27 11:56+0000\n"
+"POT-Creation-Date: 2018-12-21 09:56+0000\n"
+"PO-Revision-Date: 2018-12-21 09:56+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -771,7 +771,7 @@ msgid "Delivered"
 msgstr ""
 
 #. module: sale
-#: code:addons/sale/models/sale.py:844
+#: code:addons/sale/models/sale.py:873
 #: model:ir.ui.view,arch_db:sale.view_order_form
 #, python-format
 msgid "Delivered Quantity"
@@ -941,7 +941,7 @@ msgid "Extended Filters"
 msgstr ""
 
 #. module: sale
-#: code:addons/sale/models/sale.py:827
+#: code:addons/sale/models/sale.py:856
 #, python-format
 msgid "Extra line with %s "
 msgstr ""
@@ -1120,7 +1120,7 @@ msgid "Invoiced"
 msgstr ""
 
 #. module: sale
-#: code:addons/sale/models/sale.py:845
+#: code:addons/sale/models/sale.py:874
 #: model:ir.ui.view,arch_db:sale.view_order_form
 #, python-format
 msgid "Invoiced Quantity"
@@ -1203,14 +1203,14 @@ msgid "Is expired"
 msgstr ""
 
 #. module: sale
-#: code:addons/sale/models/sale.py:864
+#: code:addons/sale/models/sale.py:893
 #, python-format
 msgid "It is forbidden to modify the following fields in a locked order:\n"
 "%s"
 msgstr ""
 
 #. module: sale
-#: code:addons/sale/models/sale.py:551
+#: code:addons/sale/models/sale.py:552
 #, python-format
 msgid "It is not allowed to confirm an order in the following states: %s"
 msgstr ""
@@ -1361,10 +1361,10 @@ msgid "Name"
 msgstr ""
 
 #. module: sale
-#: code:addons/sale/models/sale.py:115
-#: code:addons/sale/models/sale.py:275
-#: code:addons/sale/models/sale.py:277
-#: code:addons/sale/models/sale.py:279
+#: code:addons/sale/models/sale.py:120
+#: code:addons/sale/models/sale.py:280
+#: code:addons/sale/models/sale.py:282
+#: code:addons/sale/models/sale.py:284
 #, python-format
 msgid "New"
 msgstr ""
@@ -1432,7 +1432,7 @@ msgstr ""
 
 #. module: sale
 #. openerp-web
-#: code:addons/sale/static/src/js/sale.js:32
+#: code:addons/sale/static/src/js/sale.js:49
 #, python-format
 msgid "Only Integer Value should be valid."
 msgstr ""
@@ -1524,7 +1524,7 @@ msgid "Ordered Qty"
 msgstr ""
 
 #. module: sale
-#: code:addons/sale/models/sale.py:841
+#: code:addons/sale/models/sale.py:870
 #: model:ir.ui.view,arch_db:sale.view_order_form
 #, python-format
 msgid "Ordered Quantity"
@@ -1616,13 +1616,13 @@ msgid "Personalize sales order and invoice report"
 msgstr ""
 
 #. module: sale
-#: code:addons/sale/models/sale.py:353
+#: code:addons/sale/models/sale.py:358
 #, python-format
 msgid "Please define an accounting sales journal for this company."
 msgstr ""
 
 #. module: sale
-#: code:addons/sale/models/sale.py:949
+#: code:addons/sale/models/sale.py:978
 #, python-format
 msgid "Please define income account for this product: \"%s\" (id:%d) - or for its category: \"%s\"."
 msgstr ""
@@ -1711,6 +1711,11 @@ msgstr ""
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Product Catalog"
+msgstr ""
+
+#. module: sale
+#: model:ir.ui.menu,name:sale.menu_product_category_config_sale
+msgid "Product Categories"
 msgstr ""
 
 #. module: sale
@@ -2159,7 +2164,7 @@ msgstr ""
 
 #. module: sale
 #. openerp-web
-#: code:addons/sale/static/src/js/sale.js:25
+#: code:addons/sale/static/src/js/sale.js:26
 #, python-format
 msgid "Set an invoicing target: "
 msgstr ""
@@ -2351,10 +2356,21 @@ msgid "Terms and conditions"
 msgstr ""
 
 #. module: sale
-#: code:addons/sale/models/analytic.py:129
-#: code:addons/sale/models/analytic.py:143
+#: code:addons/sale/models/analytic.py:134
 #, python-format
-msgid "The Sales Order %s linked to the Analytic Account must be validated before registering expenses."
+msgid "The Sales Order %s linked to the Analytic Account %s is cancelled. You cannot register an expense on a cancelled Sales Order."
+msgstr ""
+
+#. module: sale
+#: code:addons/sale/models/analytic.py:133
+#, python-format
+msgid "The Sales Order %s linked to the Analytic Account %s is currently locked. You cannot register an expense on a locked Sales Order. Please create a new SO linked to this Analytic Account."
+msgstr ""
+
+#. module: sale
+#: code:addons/sale/models/analytic.py:129
+#, python-format
+msgid "The Sales Order %s linked to the Analytic Account %s must be validated before registering expenses."
 msgstr ""
 
 #. module: sale
@@ -2412,8 +2428,8 @@ msgid "There is no income account defined for this product: \"%s\". You may have
 msgstr ""
 
 #. module: sale
-#: code:addons/sale/models/sale.py:438
-#: code:addons/sale/models/sale.py:442
+#: code:addons/sale/models/sale.py:443
+#: code:addons/sale/models/sale.py:448
 #, python-format
 msgid "There is no invoiceable line."
 msgstr ""
@@ -2499,7 +2515,7 @@ msgid "Track Service"
 msgstr ""
 
 #. module: sale
-#: code:addons/sale/models/sale.py:578
+#: code:addons/sale/models/sale.py:591
 #, python-format
 msgid "Uncategorized"
 msgstr ""
@@ -2583,7 +2599,7 @@ msgid "Warning"
 msgstr ""
 
 #. module: sale
-#: code:addons/sale/models/sale.py:1037
+#: code:addons/sale/models/sale.py:1066
 #, python-format
 msgid "Warning for %s"
 msgstr ""
@@ -2611,19 +2627,19 @@ msgstr ""
 
 #. module: sale
 #. openerp-web
-#: code:addons/sale/static/src/js/sale.js:32
+#: code:addons/sale/static/src/js/sale.js:49
 #, python-format
 msgid "Wrong value entered!"
 msgstr ""
 
 #. module: sale
-#: code:addons/sale/models/sale.py:188
+#: code:addons/sale/models/sale.py:193
 #, python-format
 msgid "You can not delete a sent quotation or a sales order! Try to cancel it before."
 msgstr ""
 
 #. module: sale
-#: code:addons/sale/models/sale.py:1098
+#: code:addons/sale/models/sale.py:1127
 #, python-format
 msgid "You can not remove a sales order line.\n"
 "Discard changes and try setting the quantity to 0."

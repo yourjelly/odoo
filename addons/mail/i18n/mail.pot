@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-07-27 11:55+0000\n"
-"PO-Revision-Date: 2018-07-27 11:55+0000\n"
+"POT-Creation-Date: 2018-12-21 09:55+0000\n"
+"PO-Revision-Date: 2018-12-21 09:55+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -122,6 +122,18 @@ msgid "${object.subject or (object.record_name and 'Re: %s' % object.record_name
 msgstr ""
 
 #. module: mail
+#: code:addons/mail/wizard/invite.py:29
+#, python-format
+msgid "%(user_name)s invited you to follow %(document)s document: %(title)s"
+msgstr ""
+
+#. module: mail
+#: code:addons/mail/wizard/invite.py:31
+#, python-format
+msgid "%(user_name)s invited you to follow a new document."
+msgstr ""
+
+#. module: mail
 #. openerp-web
 #: code:addons/mail/static/src/js/chat_manager.js:63
 #, python-format
@@ -142,7 +154,7 @@ msgid "%s (copy)"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:241
+#: code:addons/mail/models/mail_thread.py:243
 #, python-format
 msgid "%s created"
 msgstr ""
@@ -181,7 +193,7 @@ msgstr ""
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/static/src/xml/thread.xml:336
+#: code:addons/mail/static/src/xml/thread.xml:334
 #, python-format
 msgid "-------- Show older messages --------"
 msgstr ""
@@ -240,18 +252,6 @@ msgstr ""
 #: code:addons/mail/models/mail_channel.py:182
 #, python-format
 msgid "<div class=\"o_mail_notification\">left <a href=\"#\" class=\"o_channel_redirect\" data-oe-id=\"%s\">#%s</a></div>"
-msgstr ""
-
-#. module: mail
-#: code:addons/mail/wizard/invite.py:23
-#, python-format
-msgid "<div><p>Hello,</p><p>%s invited you to follow %s document: %s.</p></div>"
-msgstr ""
-
-#. module: mail
-#: code:addons/mail/wizard/invite.py:26
-#, python-format
-msgid "<div><p>Hello,</p><p>%s invited you to follow a new document.</p></div>"
 msgstr ""
 
 #. module: mail
@@ -667,7 +667,7 @@ msgstr ""
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/static/src/js/followers.js:333
+#: code:addons/mail/static/src/js/followers.js:335
 #, python-format
 msgid "Apply"
 msgstr ""
@@ -802,7 +802,7 @@ msgstr ""
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/static/src/js/followers.js:341
+#: code:addons/mail/static/src/js/followers.js:343
 #: code:addons/mail/static/src/xml/activity.xml:65
 #: model:ir.ui.view,arch_db:mail.email_compose_message_wizard_form
 #: model:ir.ui.view,arch_db:mail.mail_wizard_invite_form
@@ -947,13 +947,13 @@ msgid "Choose an example"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:347
+#: code:addons/mail/models/mail_thread.py:349
 #, python-format
 msgid "Click here to add new %(document)s or send an email to: %(email_link)s"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:363
+#: code:addons/mail/models/mail_thread.py:367
 #, python-format
 msgid "Click here to add new %s"
 msgstr ""
@@ -1285,7 +1285,7 @@ msgstr ""
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/static/src/xml/thread.xml:325
+#: code:addons/mail/static/src/xml/thread.xml:323
 #, python-format
 msgid "Delete this attachment"
 msgstr ""
@@ -1410,16 +1410,16 @@ msgstr ""
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/static/src/xml/thread.xml:301
+#: code:addons/mail/static/src/xml/thread.xml:299
 #, python-format
 msgid "Download this PDF"
 msgstr ""
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/static/src/xml/thread.xml:277
-#: code:addons/mail/static/src/xml/thread.xml:290
-#: code:addons/mail/static/src/xml/thread.xml:313
+#: code:addons/mail/static/src/xml/thread.xml:275
+#: code:addons/mail/static/src/xml/thread.xml:288
+#: code:addons/mail/static/src/xml/thread.xml:311
 #, python-format
 msgid "Download this attachment"
 msgstr ""
@@ -1450,7 +1450,7 @@ msgstr ""
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/static/src/js/followers.js:330
+#: code:addons/mail/static/src/js/followers.js:332
 #, python-format
 msgid "Edit Subscription of "
 msgstr ""
@@ -1570,7 +1570,7 @@ msgid "Error during communication with the publisher warranty server."
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_mail.py:305
+#: code:addons/mail/models/mail_mail.py:318
 #, python-format
 msgid "Error without exception. Probably due do sending an email without computed recipients."
 msgstr ""
@@ -1643,7 +1643,7 @@ msgstr ""
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/static/src/js/activity.js:235
+#: code:addons/mail/static/src/js/activity.js:260
 #: model:ir.model.fields,field_description:mail.field_mail_activity_feedback
 #, python-format
 msgid "Feedback"
@@ -1694,7 +1694,7 @@ msgstr ""
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/models/mail_thread.py:701
+#: code:addons/mail/models/mail_thread.py:705
 #: code:addons/mail/static/src/xml/followers.xml:20
 #, python-format
 msgid "Follow"
@@ -2003,6 +2003,12 @@ msgid "Headers"
 msgstr ""
 
 #. module: mail
+#: code:addons/mail/wizard/invite.py:35
+#, python-format
+msgid "Hello,"
+msgstr ""
+
+#. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_message_subtype_hidden
 msgid "Hidden"
 msgstr ""
@@ -2269,7 +2275,7 @@ msgid "Invalid expression, it must be a literal python dictionary definition e.g
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:1807
+#: code:addons/mail/models/mail_thread.py:1813
 #, python-format
 msgid "Invalid record set: should be called as model (without records) or on single-record recordset"
 msgstr ""
@@ -2288,7 +2294,7 @@ msgid "Invitation"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/wizard/invite.py:53
+#: code:addons/mail/wizard/invite.py:65
 #, python-format
 msgid "Invitation to follow %s: %s"
 msgstr ""
@@ -2303,7 +2309,7 @@ msgstr ""
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/static/src/js/followers.js:170
+#: code:addons/mail/static/src/js/followers.js:172
 #, python-format
 msgid "Invite Follower"
 msgstr ""
@@ -2697,7 +2703,7 @@ msgid "Mail Channel Form"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_mail.py:372
+#: code:addons/mail/models/mail_mail.py:385
 #, python-format
 msgid "Mail Delivery Failed"
 msgstr ""
@@ -2726,7 +2732,7 @@ msgid "Mail: Email Queue Manager"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:837
+#: code:addons/mail/models/mail_thread.py:841
 #, python-format
 msgid "Mailbox unavailable - %s"
 msgstr ""
@@ -3121,7 +3127,7 @@ msgstr ""
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/static/src/xml/thread.xml:238
+#: code:addons/mail/static/src/xml/thread.xml:236
 #, python-format
 msgid "New messages"
 msgstr ""
@@ -3239,7 +3245,7 @@ msgstr ""
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/static/src/js/followers.js:185
+#: code:addons/mail/static/src/js/followers.js:187
 #, python-format
 msgid "No follower"
 msgstr ""
@@ -3590,7 +3596,7 @@ msgstr ""
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/static/src/js/followers.js:187
+#: code:addons/mail/static/src/js/followers.js:189
 #, python-format
 msgid "One follower"
 msgstr ""
@@ -3881,7 +3887,7 @@ msgstr ""
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/static/src/xml/thread.xml:287
+#: code:addons/mail/static/src/xml/thread.xml:285
 #, python-format
 msgid "Play this video"
 msgstr ""
@@ -4306,7 +4312,7 @@ msgstr ""
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/static/src/js/thread_field.js:83
+#: code:addons/mail/static/src/js/thread_field.js:85
 #, python-format
 msgid "Sending Error"
 msgstr ""
@@ -4522,7 +4528,7 @@ msgstr ""
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/static/src/xml/thread.xml:221
+#: code:addons/mail/static/src/xml/thread.xml:222
 #, python-format
 msgid "Subject:"
 msgstr ""
@@ -4620,7 +4626,7 @@ msgid "The owner of records created upon receiving emails on this alias. If this
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_activity.py:175
+#: code:addons/mail/models/mail_activity.py:181
 #: code:addons/mail/models/mail_message.py:598
 #: code:addons/mail/models/mail_message.py:698
 #, python-format
@@ -4791,7 +4797,7 @@ msgid "UUID"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_mail.py:238
+#: code:addons/mail/models/mail_mail.py:251
 #, python-format
 msgid "Unable to connect to SMTP Server"
 msgstr ""
@@ -4804,7 +4810,7 @@ msgstr ""
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/models/mail_thread.py:705
+#: code:addons/mail/models/mail_thread.py:709
 #: code:addons/mail/static/src/xml/followers.xml:22
 #, python-format
 msgid "Unfollow"
@@ -4996,7 +5002,7 @@ msgstr ""
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/static/src/xml/thread.xml:327
+#: code:addons/mail/static/src/xml/thread.xml:325
 #, python-format
 msgid "Uploading"
 msgstr ""
@@ -5062,21 +5068,21 @@ msgid "Using your own email server is required to send/receive emails in Communi
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:675
+#: code:addons/mail/models/mail_thread.py:679
 #: model:ir.ui.view,arch_db:mail.message_user_assigned
 #, python-format
 msgid "View"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:673
+#: code:addons/mail/models/mail_thread.py:677
 #, python-format
 msgid "View %s"
 msgstr ""
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/static/src/js/followers.js:240
+#: code:addons/mail/static/src/js/followers.js:242
 #, python-format
 msgid "Warning! \n"
 " If you remove a follower, he won't be notified of any email or discussion on this document.\n"
@@ -5184,7 +5190,7 @@ msgid "You cannot delete those groups, as the Whole Company group is required by
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:354
+#: code:addons/mail/models/mail_thread.py:358
 #, python-format
 msgid "You could also add a new %(document)s by sending an email to: %(email_link)s."
 msgstr ""
@@ -5230,7 +5236,7 @@ msgstr ""
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/static/src/js/thread_field.js:83
+#: code:addons/mail/static/src/js/thread_field.js:85
 #, python-format
 msgid "Your message has not been sent."
 msgstr ""
@@ -5242,7 +5248,7 @@ msgid "Your template should define email_from"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:971
+#: code:addons/mail/models/mail_thread.py:975
 #, python-format
 msgid "alias %s: %s"
 msgstr ""
@@ -5263,7 +5269,7 @@ msgid "created"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:320
+#: code:addons/mail/models/mail_thread.py:322
 #, python-format
 msgid "document"
 msgstr ""
@@ -5288,7 +5294,7 @@ msgstr ""
 
 #. module: mail
 #. openerp-web
-#: code:addons/mail/static/src/js/followers.js:189
+#: code:addons/mail/static/src/js/followers.js:191
 #, python-format
 msgid "followers"
 msgstr ""
@@ -5343,19 +5349,19 @@ msgid "mail.alias.mixin"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:948
+#: code:addons/mail/models/mail_thread.py:952
 #, python-format
 msgid "model %s does not accept document creation"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:943
+#: code:addons/mail/models/mail_thread.py:947
 #, python-format
 msgid "model %s does not accept document update"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:936
+#: code:addons/mail/models/mail_thread.py:940
 #, python-format
 msgid "model %s does not accept document update, fall back on document creation"
 msgstr ""
@@ -5386,13 +5392,13 @@ msgid "on"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:918
+#: code:addons/mail/models/mail_thread.py:922
 #, python-format
 msgid "posting a message without model should be with a null res_id (private message), received %s"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:922
+#: code:addons/mail/models/mail_thread.py:926
 #, python-format
 msgid "posting a message without model should be with a parent_id (private message)"
 msgstr ""
@@ -5427,13 +5433,13 @@ msgid "record:"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:940
+#: code:addons/mail/models/mail_thread.py:944
 #, python-format
 msgid "reply to missing document (%s,%s)"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:933
+#: code:addons/mail/models/mail_thread.py:937
 #, python-format
 msgid "reply to missing document (%s,%s), fall back on new document creation"
 msgstr ""
@@ -5444,7 +5450,7 @@ msgid "res.config.settings"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:918
+#: code:addons/mail/models/mail_thread.py:922
 #, python-format
 msgid "resetting thread_id"
 msgstr ""
@@ -5473,11 +5479,11 @@ msgid "sales"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:922
-#: code:addons/mail/models/mail_thread.py:940
-#: code:addons/mail/models/mail_thread.py:943
-#: code:addons/mail/models/mail_thread.py:948
-#: code:addons/mail/models/mail_thread.py:971
+#: code:addons/mail/models/mail_thread.py:926
+#: code:addons/mail/models/mail_thread.py:944
+#: code:addons/mail/models/mail_thread.py:947
+#: code:addons/mail/models/mail_thread.py:952
+#: code:addons/mail/models/mail_thread.py:975
 #, python-format
 msgid "skipping"
 msgstr ""
@@ -5490,13 +5496,13 @@ msgid "this document"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:971
+#: code:addons/mail/models/mail_thread.py:975
 #, python-format
 msgid "unknown error"
 msgstr ""
 
 #. module: mail
-#: code:addons/mail/models/mail_thread.py:911
+#: code:addons/mail/models/mail_thread.py:915
 #, python-format
 msgid "unknown target model %s"
 msgstr ""
