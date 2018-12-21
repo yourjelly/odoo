@@ -32,7 +32,7 @@ QUnit.module('systray', {
 QUnit.test('messaging menu displays the Support channel', async function (assert) {
     assert.expect(1);
 
-    var messagingMenu = await new MessagingMenu();
+    var messagingMenu = new MessagingMenu();
     addMockSupportEnvironment(messagingMenu, {
         data: this.data,
         services: this.services,
@@ -50,7 +50,7 @@ QUnit.test('messaging menu displays the Support channel', async function (assert
 QUnit.test('clicking on Support channel: channel not available', async function (assert) {
     assert.expect(9);
 
-    var messagingMenu = await new MessagingMenu();
+    var messagingMenu = new MessagingMenu();
     addMockSupportEnvironment(messagingMenu, {
         data: this.data,
         mockRPC: function (route, args) {
@@ -99,7 +99,7 @@ QUnit.test('clicking on Support channel: channel not available', async function 
 QUnit.test('clicking on Support channel: channel available', async function (assert) {
     assert.expect(9);
 
-    var messagingMenu = await new MessagingMenu();
+    var messagingMenu = new MessagingMenu();
     addMockSupportEnvironment(messagingMenu, {
         data: this.data,
         mockRPC: function (route, args) {
@@ -144,7 +144,7 @@ QUnit.test('clicking on Support channel: channel available', async function (ass
 QUnit.test('post messages in Support channel', async function (assert) {
     assert.expect(8);
 
-    var messagingMenu = await new MessagingMenu();
+    var messagingMenu = new MessagingMenu();
     addMockSupportEnvironment(messagingMenu, {
         data: this.data,
         mockRPC: function (route, args) {
@@ -189,7 +189,7 @@ QUnit.test('post messages in Support channel', async function (assert) {
 QUnit.test('fold Support channel', async function (assert) {
     assert.expect(11);
 
-    var messagingMenu = await new MessagingMenu();
+    var messagingMenu = new MessagingMenu();
     addMockSupportEnvironment(messagingMenu, {
         data: this.data,
         mockRPC: function (route, args) {
@@ -244,7 +244,7 @@ QUnit.test('fold Support channel', async function (assert) {
 QUnit.test('restore Support channel if necessary', async function (assert) {
     assert.expect(5);
 
-    var messagingMenu = await new MessagingMenu();
+    var messagingMenu = new MessagingMenu();
     addMockSupportEnvironment(messagingMenu, {
         data: this.data,
         enableSupportPoll: true,
@@ -283,7 +283,7 @@ QUnit.test('receive messages in the Support channel', async function (assert) {
 
     var supportChannelID;
 
-    var messagingMenu = await new MessagingMenu();
+    var messagingMenu = new MessagingMenu();
     addMockSupportEnvironment(messagingMenu, {
         data: this.data,
         enableSupportPoll: true,
