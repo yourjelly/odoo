@@ -4021,7 +4021,7 @@ QUnit.module('Views', {
         // change the limit (should not ask to scroll)
         await testUtils.dom.click(list.pager.$('.o_pager_value'));
         await testUtils.fields.editAndTrigger(list.pager.$('.o_pager_value input'),
-            '1-2', ['change']);
+            '1-2', ['blur']);
         assert.strictEqual(list.pager.$('.o_pager_value').text(), '1-2',
             "should have changed the limit");
 
