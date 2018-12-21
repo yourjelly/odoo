@@ -22,7 +22,7 @@ CalendarRenderer.include({
 });
 
 
-var createAsyncView = testUtils.createAsyncView;
+var createCalendarView = testUtils.createCalendarView;
 
 var initialDate = new Date(2016, 11, 12, 8, 0, 0);
 initialDate = new Date(initialDate.getTime() - initialDate.getTimezoneOffset()*60*1000);
@@ -141,7 +141,7 @@ QUnit.module('Views', {
             type: 1
         });
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -276,7 +276,7 @@ QUnit.module('Views', {
     QUnit.test('create and change events', async function (assert) {
         assert.expect(26);
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -421,7 +421,7 @@ QUnit.module('Views', {
         assert.expect(4);
 
         var event = $.Event();
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -484,7 +484,7 @@ QUnit.module('Views', {
 
         this.data.event.records = [];
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -524,11 +524,7 @@ QUnit.module('Views', {
                 }
                 return this._super(route, args);
             },
-        });
-
-
-        var $view = $('#qunit-fixture').contents();
-        $view.prependTo('body'); // => select with click position
+        }, {positionalClicks: true});
 
         var top = calendar.$('.fc-axis:contains(8:00)').offset().top + 5;
         var left = calendar.$('.fc-day:eq(2)').offset().left + 5;
@@ -537,7 +533,6 @@ QUnit.module('Views', {
             testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
         } catch (e) {
             calendar.destroy();
-            $view.remove();
             throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
         }
 
@@ -574,7 +569,6 @@ QUnit.module('Views', {
         assert.containsNone(calendar, '.fc-content', "should delete the record");
 
         calendar.destroy();
-        $view.remove();
     });
 
     QUnit.test('create event with timezone in week mode with formViewDialog European locale', async function (assert) {
@@ -593,7 +587,7 @@ QUnit.module('Views', {
             }
         };
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -635,10 +629,7 @@ QUnit.module('Views', {
                 }
                 return this._super(route, args);
             },
-        });
-
-        var $view = $('#qunit-fixture').contents();
-        $view.prependTo('body'); // => select with click position
+        }, {positionalClicks: true});
 
         var top = calendar.$('.fc-axis:contains(8:00)').offset().top + 5;
         var left = calendar.$('.fc-day:eq(2)').offset().left + 5;
@@ -647,7 +638,6 @@ QUnit.module('Views', {
             testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
         } catch (e) {
             calendar.destroy();
-            $view.remove();
             throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
         }
         testUtils.dom.triggerPositionalMouseEvent(left, top + 60, "mousemove");
@@ -727,7 +717,6 @@ QUnit.module('Views', {
         testUtils.dom.triggerPositionalMouseEvent(left, top, "mouseup");
 
         calendar.destroy();
-        $view.remove();
     });
 
     QUnit.test('create event with timezone in week mode American locale', async function (assert) {
@@ -735,7 +724,7 @@ QUnit.module('Views', {
 
         this.data.event.records = [];
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -775,11 +764,7 @@ QUnit.module('Views', {
                 }
                 return this._super(route, args);
             },
-        });
-
-
-        var $view = $('#qunit-fixture').contents();
-        $view.prependTo('body'); // => select with click position
+        }, {positionalClicks: true});
 
         var top = calendar.$('.fc-axis:contains(8am)').offset().top + 5;
         var left = calendar.$('.fc-day:eq(2)').offset().left + 5;
@@ -788,7 +773,6 @@ QUnit.module('Views', {
             testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
         } catch (e) {
             calendar.destroy();
-            $view.remove();
             throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
         }
 
@@ -825,7 +809,6 @@ QUnit.module('Views', {
         assert.containsNone(calendar, '.fc-content', "should delete the record");
 
         calendar.destroy();
-        $view.remove();
     });
 
     QUnit.test('create event with timezone in week mode with formViewDialog American locale', async function (assert) {
@@ -844,7 +827,7 @@ QUnit.module('Views', {
             }
         };
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -886,10 +869,7 @@ QUnit.module('Views', {
                 }
                 return this._super(route, args);
             },
-        });
-
-        var $view = $('#qunit-fixture').contents();
-        $view.prependTo('body'); // => select with click position
+        }, {positionalClicks: true});
 
         var top = calendar.$('.fc-axis:contains(8am)').offset().top + 5;
         var left = calendar.$('.fc-day:eq(2)').offset().left + 5;
@@ -898,7 +878,6 @@ QUnit.module('Views', {
             testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
         } catch (e) {
             calendar.destroy();
-            $view.remove();
             throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
         }
         testUtils.dom.triggerPositionalMouseEvent(left, top + 60, "mousemove");
@@ -978,13 +957,12 @@ QUnit.module('Views', {
         testUtils.dom.triggerPositionalMouseEvent(left, top, "mouseup");
 
         calendar.destroy();
-        $view.remove();
     });
 
     QUnit.test('check calendar week column timeformat and event content timeformat', async function (assert) {
         assert.expect(2);
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -1013,7 +991,7 @@ QUnit.module('Views', {
 
         this.data.event.records = [];
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -1036,18 +1014,13 @@ QUnit.module('Views', {
                     return 120;
                 },
             },
-        });
-
-        var $view = $('#qunit-fixture').contents();
-        $view.prependTo('body'); // => select with click position
-
+        }, {positionalClicks: true});
 
         var pos = calendar.$('.fc-bg td:eq(4)').offset();
         try {
             testUtils.dom.triggerPositionalMouseEvent(pos.left+15, pos.top+15, "mousedown");
         } catch (e) {
             calendar.destroy();
-            $view.remove();
             throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
         }
         pos = calendar.$('.fc-bg td:eq(5)').offset();
@@ -1076,7 +1049,6 @@ QUnit.module('Views', {
             "the new record should have the utc datetime (quickCreate)");
 
         calendar.destroy();
-        $view.remove();
     });
 
     QUnit.test('create all day event in week mode (no quickCreate)', async function (assert) {
@@ -1084,7 +1056,7 @@ QUnit.module('Views', {
 
         this.data.event.records = [];
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -1116,18 +1088,13 @@ QUnit.module('Views', {
                     "should send the correct data to create events");
                 },
             },
-        });
-
-        var $view = $('#qunit-fixture').contents();
-        $view.prependTo('body'); // => select with click position
-
+        }, {positionalClicks: true});
 
         var pos = calendar.$('.fc-bg td:eq(4)').offset();
         try {
             testUtils.dom.triggerPositionalMouseEvent(pos.left+15, pos.top+15, "mousedown");
         } catch (e) {
             calendar.destroy();
-            $view.remove();
             throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
         }
         pos = calendar.$('.fc-bg td:eq(5)').offset();
@@ -1135,7 +1102,6 @@ QUnit.module('Views', {
         testUtils.dom.triggerPositionalMouseEvent(pos.left+15, pos.top+15, "mouseup");
 
         calendar.destroy();
-        $view.remove();
     });
 
     QUnit.test('create event in month mode', async function (assert) {
@@ -1143,7 +1109,7 @@ QUnit.module('Views', {
 
         this.data.event.records = [];
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -1176,17 +1142,13 @@ QUnit.module('Views', {
                 }
                 return this._super(route, args);
             },
-        });
-
-        var $view = $('#qunit-fixture').contents();
-        $view.prependTo('body'); // => select with click position
+        }, {positionalClicks: true});
 
         var pos = calendar.$('.fc-bg td:eq(20)').offset();
         try {
             testUtils.dom.triggerPositionalMouseEvent(pos.left+15, pos.top+15, "mousedown");
         } catch (e) {
             calendar.destroy();
-            $view.remove();
             throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
         }
         pos = calendar.$('.fc-bg td:eq(21)').offset();
@@ -1212,13 +1174,12 @@ QUnit.module('Views', {
         }, "the new record should have the utc datetime (quickCreate)");
 
         calendar.destroy();
-        $view.remove();
     });
 
     QUnit.test('use mini calendar', async function (assert) {
         assert.expect(12);
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -1274,7 +1235,7 @@ QUnit.module('Views', {
         this.data.event.records[0].partner_ids = [1,2,3,4,5];
         this.data.partner.records.push({id: 5, display_name: "partner 5", image: 'EEE'});
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -1310,7 +1271,7 @@ QUnit.module('Views', {
     QUnit.test('open form view', async function (assert) {
         assert.expect(3);
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -1387,7 +1348,7 @@ QUnit.module('Views', {
     QUnit.test('create and edit event in month mode (all_day: false)', async function (assert) {
         assert.expect(2);
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -1445,7 +1406,7 @@ QUnit.module('Views', {
 
         this.data.event.fields.start.readonly = true;
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -1537,7 +1498,7 @@ QUnit.module('Views', {
 
         var i = 0;
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -1589,7 +1550,7 @@ QUnit.module('Views', {
         this.data.event.fields.partner_id.default = 3;
         this.data.user.records.push({id: 5, display_name: "user 5", partner_id: 3});
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -1609,10 +1570,7 @@ QUnit.module('Views', {
             viewOptions: {
                 initialDate: initialDate,
             },
-        });
-
-        var $view = $('#qunit-fixture').contents();
-        $view.prependTo('body'); // => select with click position
+        }, {positionalClicks: true});
 
         await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=4] input'));
 
@@ -1620,14 +1578,13 @@ QUnit.module('Views', {
         assert.containsN(calendar, '.fc-event', 3, "should display 3 events");
 
         // quick create a record
-        var left = calendar.$('.fc-bg td:eq(6)').offset().left+15;
-        var top = calendar.$('.fc-slats tr:eq(6) td:first').offset().top+15;
+        var left = calendar.$('.fc-bg td:eq(4)').offset().left+15;
+        var top = calendar.$('.fc-slats tr:eq(12) td:first').offset().top+15;
         document.debugMe = true;
         try {
             testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
         } catch (e) {
             calendar.destroy();
-            $view.remove();
             throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
         }
         testUtils.dom.triggerPositionalMouseEvent(left, top + 200, "mousemove");
@@ -1646,8 +1603,8 @@ QUnit.module('Views', {
         this.data.event.fields.partner_id.default = 4;
 
         // quick create and other record
-        left = calendar.$('.fc-bg td:eq(5)').offset().left+15;
-        top = calendar.$('.fc-slats tr:eq(6) td:first').offset().top+15;
+        left = calendar.$('.fc-bg td:eq(3)').offset().left+15;
+        top = calendar.$('.fc-slats tr:eq(12) td:first').offset().top+15;
         testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
         testUtils.dom.triggerPositionalMouseEvent(left, top + 200, "mousemove");
         testUtils.dom.triggerPositionalMouseEvent(left, top + 200, "mouseup");
@@ -1664,7 +1621,6 @@ QUnit.module('Views', {
         assert.containsN(calendar, '.fc-event', 11, "should display all records");
 
         calendar.destroy();
-        $view.remove();
     });
 
     QUnit.test('create event with filters (no quickCreate)', async function (assert) {
@@ -1678,7 +1634,7 @@ QUnit.module('Views', {
             partner_id: 3
         });
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -1710,10 +1666,7 @@ QUnit.module('Views', {
             viewOptions: {
                 initialDate: initialDate,
             },
-        });
-
-        var $view = $('#qunit-fixture').contents();
-        $view.prependTo('body'); // => select with click position
+        }, {positionalClicks: true});
 
         await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=4] input'));
 
@@ -1723,12 +1676,11 @@ QUnit.module('Views', {
 
         // quick create a record
         var left = calendar.$('.fc-bg td:eq(4)').offset().left+15;
-        var top = calendar.$('.fc-slats tr:eq(4) td:first').offset().top+15;
+        var top = calendar.$('.fc-slats tr:eq(12) td:first').offset().top+15;
         try {
             testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
         } catch (e) {
             calendar.destroy();
-            $view.remove();
             throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
         }
         testUtils.dom.triggerPositionalMouseEvent(left, top + 200, "mousemove");
@@ -1744,7 +1696,6 @@ QUnit.module('Views', {
         assert.containsN(calendar, '.fc-event', 4, "should display the created item");
 
         calendar.destroy();
-        $view.remove();
     });
 
     QUnit.test('Update event with filters', async function (assert) {
@@ -1763,7 +1714,7 @@ QUnit.module('Views', {
             }
         };
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -1854,7 +1805,7 @@ QUnit.module('Views', {
             type: 1
         });
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -1890,7 +1841,7 @@ QUnit.module('Views', {
     QUnit.test('ensure events are still shown if filters give an empty domain', async function (assert) {
         assert.expect(2);
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -1911,9 +1862,9 @@ QUnit.module('Views', {
     });
 
     QUnit.test('events starting at midnight', async function (assert) {
-        assert.expect(2);
+        assert.expect(3);
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -1924,11 +1875,14 @@ QUnit.module('Views', {
             translateParameters: { // Avoid issues due to localization formats
                 time_format: "%H:%M:%S",
             },
-        });
+        }, {positionalClicks: true});
+
+        // Reset the scroll to 0 as we want to create an event from midnight
+        assert.ok(calendar.$('.fc-scroller')[0].scrollTop > 0,
+            "should scroll to 6:00 by default (this is true at least for resolutions up to 1900x1600)");
+        calendar.$('.fc-scroller')[0].scrollTop = 0;
 
         // Click on Tuesday 12am
-        var $view = $('#qunit-fixture').contents();
-        $view.prependTo('body');
         var top = calendar.$('.fc-axis:contains(0:00)').offset().top + 5;
         var left = calendar.$('.fc-day:eq(2)').offset().left + 5;
         try {
@@ -1937,7 +1891,6 @@ QUnit.module('Views', {
             await testUtils.nextTick();
         } catch (e) {
             calendar.destroy();
-            $view.remove();
             throw new Error('The test failed to simulate a click on the screen.' +
                 'Your screen is probably too small or your dev tools are open.');
         }
@@ -1951,7 +1904,6 @@ QUnit.module('Views', {
             "should display the new record after quick create dialog");
 
         calendar.destroy();
-        $view.remove();
     });
 
     QUnit.test('set event as all day when field is date', async function (assert) {
@@ -1959,7 +1911,7 @@ QUnit.module('Views', {
 
         this.data.event.records[0].start_date = "2016-12-14";
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -1996,7 +1948,7 @@ QUnit.module('Views', {
         assert.expect(1);
         var createCount = 0;
         var prom = testUtils.makeTestPromise();
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -2085,13 +2037,13 @@ QUnit.module('Views', {
             },
         };
 
-        var calendar = await createAsyncView(params);
+        var calendar = await createCalendarView(params);
         calendar.destroy();
 
         var initialInstanceNumber = instanceNumber;
         instanceNumber = 0;
 
-        calendar = await createAsyncView(params);
+        calendar = await createCalendarView(params);
 
         // call destroy function of controller to ensure that it correctly destroys everything
         calendar.__destroy();
@@ -2116,7 +2068,7 @@ QUnit.module('Views', {
                 return this;
             },
         });
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -2194,7 +2146,7 @@ QUnit.module('Views', {
     QUnit.test('timezone does not affect current day', async function (assert) {
         assert.expect(2);
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -2229,7 +2181,7 @@ QUnit.module('Views', {
     QUnit.test('form_view_id attribute works (for creating events)', async function (assert) {
         assert.expect(1);
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
@@ -2278,7 +2230,7 @@ QUnit.module('Views', {
     QUnit.test('calendar fallback to form view id in action if necessary', async function (assert) {
         assert.expect(1);
 
-        var calendar = await createAsyncView({
+        var calendar = await createCalendarView({
             View: CalendarView,
             model: 'event',
             data: this.data,
