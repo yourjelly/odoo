@@ -3393,8 +3393,7 @@ QUnit.module('fields', {}, function () {
             form.destroy();
         });
 
-        QUnit.skip('one2many and onchange (with date) [!!! ATTENTION, ATTENTION !!! DON\'T SKIP ME !!! DON\'T FORGET TO FIX ME BEFORE MERGING !!!]', async function (assert) {
-            // SVS: This test fails because an uncaught error occurs in tempusdominus lib
+        QUnit.test('one2many and onchange (with date)', async function (assert) {
             assert.expect(7);
 
             this.data.partner.onchanges = {
@@ -3429,6 +3428,11 @@ QUnit.module('fields', {}, function () {
             await testUtils.dom.click($('.bootstrap-datetimepicker-widget .year:contains(2017)'));
             await testUtils.dom.click($('.bootstrap-datetimepicker-widget .month').eq(1));
             await testUtils.dom.click($('.day:contains(22)'));
+            // trigger the blur of input before the click on Save, to closely mock what actually
+            // happens when we really click on Save
+            // this is required to close the datepicker before removing the input from the DOM
+            // (because of the re-rendering in readonly), otherwise tempusdominus crashes
+            await testUtils.dom.triggerEvents(form.$('.o_datepicker_input'), 'blur');
             await testUtils.form.clickSave(form);
 
             assert.verifySteps(['read', 'read', 'onchange', 'write', 'read', 'read']);
