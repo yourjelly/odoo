@@ -145,11 +145,13 @@ var AbstractWebClient = Widget.extend(ServiceProviderMixin, KeyboardNavigationMi
         this.$el.on('mouseenter', '.oe_systray > div:not([data-toggle=tooltip])', function () {
             $(this).attr('data-toggle', 'tooltip').tooltip().trigger('mouseenter');
         });
+        // TODO: this handler seems useless since 11.0, should be removed
         this.$el.on('click', '.oe_dropdown_toggle', function (ev) {
             ev.preventDefault();
             var $toggle = $(this);
             var doc_width = $(document).width();
             var $menu = $toggle.siblings('.oe_dropdown_menu');
+            // TODO: size has been deprecated in jq3
             $menu = $menu.size() >= 1 ? $menu : $toggle.find('.oe_dropdown_menu');
             var state = $menu.is('.oe_opened');
             setTimeout(function () {
