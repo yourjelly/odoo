@@ -24,8 +24,8 @@ options.registry.subscribe = options.Class.extend({
                         context: weContext.get(), // TODO use this._rpc
                     });
             },
-        }).then(function (mail_channel_id) {
-            self.$target.attr("data-id", mail_channel_id);
+        }).then(function (result) {
+            self.$target.attr("data-id", result.val);
         });
     },
     onBuilt: function () {

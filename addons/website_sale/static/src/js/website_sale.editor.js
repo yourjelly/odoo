@@ -30,14 +30,13 @@ WebsiteNewMenu.include({
             window_title: _t("New Product"),
             input: _t("Name"),
         }).then(function (result) {
-            var id = result.id
-            if (!name) {
+            if (!result.val) {
                 return;
             }
             return self._rpc({
                 route: '/shop/add_product',
                 params: {
-                    name: name,
+                    name: result.val,
                 },
             }).then(function (url) {
                 window.location.href = url;

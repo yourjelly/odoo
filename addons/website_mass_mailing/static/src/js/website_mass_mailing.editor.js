@@ -28,8 +28,8 @@ var mass_mailing_common = options.Class.extend({
                     });
             },
         });
-        def.then(function (mailing_list_id) {
-            self.$target.attr("data-list-id", mailing_list_id);
+        def.then(function (result) {
+            self.$target.attr("data-list-id", result.val);
         });
         return def;
     },

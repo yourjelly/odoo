@@ -29,7 +29,7 @@ WebsiteNewMenu.include({
             window_title: _t("New Channel"),
             input: _t("Name"),
         }).then(function (result) {
-            var name = result.id;
+            var name = result.val;
             if (!name) {
                 return;
             }

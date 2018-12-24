@@ -111,7 +111,7 @@ function prompt(options, _qweb) {
                 field.focus();
                 dialog.on('click', '.btn-primary', function () {
                     var backdrop = $('.modal-backdrop');
-                    resolve({ id:field.val(), field, dialog });
+                    resolve({ val: field.val(), field, dialog });
                     dialog.modal('hide').remove();
                         backdrop.remove();
                 });

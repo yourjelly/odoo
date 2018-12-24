@@ -30,7 +30,7 @@ WebsiteNewMenu.include({
             window_title: _t("New Event"),
             input: _t("Event Name"),
         }).then(function (result) {
-            var eventName = result.id;
+            var eventName = result.val;
             if (!eventName) {
                 return;
             }

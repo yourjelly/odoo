@@ -46,7 +46,7 @@ WebsiteNewMenu.include({
                 $group.after($add);
             }
         }).then(function (result) {
-            var forum_name = result.id;
+            var forum_name = result.val;
             var $dialog = result.dialog;
             if (!forum_name) {
                 return;

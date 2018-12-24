@@ -40,7 +40,7 @@ WebsiteNewMenu.include({
                         return blog_ids;
                     },
                 }).then(function (result) {
-                    var blog_id = result.id;
+                    var blog_id = result.val;
                     if (!blog_id) {
                         return;
                     }
