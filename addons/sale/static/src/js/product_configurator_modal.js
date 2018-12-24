@@ -124,7 +124,7 @@ var OptionalProductsModal = Dialog.extend(ServicesMixin, ProductConfiguratorMixi
                 self.$modal.attr('open', true);
                 self.$modal.removeAttr("aria-hidden");
                 self.$modal.modal().appendTo(self.container);
-                self._opened.resolve();
+                self._openedResolver();
             }
         });
         if (options && options.shouldFocusButtons) {
