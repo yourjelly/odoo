@@ -93,9 +93,13 @@ function _genericJsonRpc (fct_name, params, settings, fct) {
         }
     };
     promise.catch(function (reason) { // Allow promise user to disable rpc_error call in case of failure
-        if (!reason.event.isDefaultPrevented()) {
-            core.bus.trigger('rpc_error', reason.message, reason.event);
-        }
+        setTimeout(function () {
+            // we want to execute this handler after all others (hence
+            // setTimeout) to let the other handlers prevent the event
+            if (!reason.event.isDefaultPrevented()) {
+                core.bus.trigger('rpc_error', reason.message, reason.event);
+            }
+        }, 0);
     });
     return promise;
 };
