@@ -91,6 +91,7 @@ class ResConfigSettings(models.TransientModel):
     invoice_is_print = fields.Boolean(string='Print', related='company_id.invoice_is_print', readonly=False)
     invoice_is_email = fields.Boolean(string='Send Email', related='company_id.invoice_is_email', readonly=False)
     incoterm_id = fields.Many2one('account.incoterms', string='Default incoterm', related='company_id.incoterm_id', help='International Commercial Terms are a series of predefined commercial terms used in international transactions.', readonly=False)
+    group_multi_operating_unit = fields.Boolean(string="Multi Operating Unit", implied_group='account.group_multi_operating_unit')
 
     @api.multi
     def set_values(self):
@@ -149,6 +150,16 @@ class ResConfigSettings(models.TransientModel):
                              'Modify your taxes first before disabling this setting.')
             }
         return res
+
+    @api.multi
+    def action_open_company(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'res.company',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_id': self.company_id.id,
+        }
 
     @api.model
     def create(self, values):
