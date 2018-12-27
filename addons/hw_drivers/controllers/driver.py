@@ -329,6 +329,7 @@ class BtManager(threading.Thread):
 
 conn = cups.Connection()
 PPDs = conn.getPPDs()
+printers = conn.getPrinters()
 
 m = Manager()
 m.daemon = True
