@@ -103,7 +103,7 @@ var FieldManagerMixin = {
         // subrecord's form view), otherwise it bubbles up to the main form view
         // but its model doesn't have any data related to the given dataPointID
         event.stopPropagation();
-        this._applyChanges(event.data.dataPointID, event.data.changes, event)
+        return this._applyChanges(event.data.dataPointID, event.data.changes, event)
             .then(event.data.onSuccess || function () {})
             .catch(event.data.onFailure || function () {});
     },
