@@ -561,7 +561,8 @@ var BasicRenderer = AbstractRenderer.extend({
 
         // Prepare widget rendering and save the related promise
         var def = widget._widgetRenderAndInsert(function () {});
-        var $el =  $('<div>');
+        var $el = $('<div>');
+
         this.defs.push(def);
 
         // Update the modifiers registration by associating the widget and by

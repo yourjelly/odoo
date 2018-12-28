@@ -4172,6 +4172,37 @@ QUnit.module('Views', {
         form.destroy();
     });
 
+    QUnit.test('invisible fields are not considered as visible in a buttonbox', async function (assert) {
+        assert.expect(2);
+
+        var form = await createAsyncView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form>' +
+                '<div name="button_box" class="oe_button_box">' +
+                    '<field name="foo" invisible="1"/>' +
+                    '<field name="bar" invisible="1"/>' +
+                    '<field name="int_field" invisible="1"/>' +
+                    '<field name="qux" invisible="1"/>' +
+                    '<field name="display_name" invisible="1"/>' +
+                    '<field name="state" invisible="1"/>' +
+                    '<field name="date" invisible="1"/>' +
+                    '<field name="datetime" invisible="1"/>' +
+                    '<button type="object" class="oe_stat_button" icon="fa-check-square"/>' +
+                '</div>' +
+                '</form>',
+            res_id: 2,
+        });
+
+        assert.strictEqual(form.$('.oe_button_box').children().length, 9,
+            "button box should contain nine children");
+        assert.hasClass(form.$('.oe_button_box'), 'o_not_full',
+            "the buttonbox should not be full (only 1 visible child");
+
+        form.destroy();
+    });
+
     QUnit.test('display correctly buttonbox, in large size class', async function (assert) {
         assert.expect(1);
 
