@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<odoo>
+        <!-- Merge Pickings  -->
+        <record id="merge_pickings_form" model="ir.ui.view">
+            <field name="name">stock.merge.pickings.form</field>
+            <field name="model">stock.merge.pickings</field>
+            <field name="arch" type="xml">
+                <form string="Merge Pickings">
+                    <group string="Select Pickings">
+                        <field name="picking_ids" nolabel="1">
+                            <tree>
+                                <field name="name"/>
+                                <field name="partner_id"/>
+                                <field name="origin"/>
+                                <field name="backorder_id"/>
+                                <field name="state"/>
+                            </tree>
+                        </field>
+                    </group>
+                    <footer>
+                        <button name="action_merge" type="object" string="Merge" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!--  Merge pickings action -->
+        <record id="merge_pickings_act" model="ir.actions.act_window">
+            <field name="name">Merge Transfers</field>
+            <field name="res_model">stock.merge.pickings</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="merge_pickings_form"/>
+            <field name="target">new</field>
+        </record>
+
+        <act_window
+            id="action_merge_pickings"
+            name="Merge Transfers"
+            multi="True"
+            key2="client_action_multi"
+            res_model="stock.merge.pickings"
+            src_model="stock.picking"
+            view_mode="form"
+            target="new"
+            view_type="form"/>
+
+</odoo>

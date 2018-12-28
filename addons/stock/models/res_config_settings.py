@@ -33,6 +33,7 @@ class ResConfigSettings(models.TransientModel):
         config_parameter='stock.use_propagation_minimum_delta',
         help="Rescheduling applies to any chain of operations (e.g. Make To Order, Pick Pack Ship). In the case of MTO sales, a vendor delay (updated incoming date) impacts the expected delivery date to the customer. \n This option allows to not propagate the rescheduling if the change is not critical.")
     module_stock_picking_batch = fields.Boolean("Batch Pickings", oldname="module_stock_picking_wave")
+    module_stock_merge_transfers = fields.Boolean("Merge Transfers")
     module_stock_barcode = fields.Boolean("Barcode Scanner")
     module_delivery_dhl = fields.Boolean("DHL USA")
     module_delivery_fedex = fields.Boolean("FedEx")

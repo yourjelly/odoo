@@ -337,7 +337,7 @@ class Picking(models.Model):
             else:
                 picking.show_lots_text = False
 
-    @api.depends('move_type', 'move_lines.state', 'move_lines.picking_id')
+    @api.depends('move_type', 'move_lines.state', 'move_lines.picking_id', 'move_lines')
     @api.one
     def _compute_state(self):
         ''' State of a picking depends on the state of its related stock.move
