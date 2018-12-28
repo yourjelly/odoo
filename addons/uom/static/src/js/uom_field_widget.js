@@ -27,7 +27,8 @@ var FieldUom = FieldFloat.extend({
         if (!uomID) {
             return $.when().then(function () {
                 self.formatOptions.uom = {
-                    'rounding' : 0.01
+                    'rounding': 0.01,
+                    'decimal_places' : 2
                 };
             });
         } else {
@@ -43,17 +44,18 @@ var FieldUom = FieldFloat.extend({
 
     _onInput: function() {
         this._super.apply(this, arguments);
-        var rounding = this.formatOptions.uom.rounding;
-        var rounding_per = 0;
+        // var rounding = this.formatOptions.uom.rounding;
+        // var rounding_per = 0;
         var value = this.$input.val();
-        if (Math.floor(rounding) != rounding) {
-            rounding_per = rounding.toString().split('.')[1].length;
-        }
+        var uom_precision = this.formatOptions.uom.decimal_places;
+        // if (Math.floor(rounding) != rounding) {
+        //     rounding_per = rounding.toString().split('.')[1].length;
+        // }
         if (value.includes('.')) {
             // value = value.split(' ');
             var precision = value.split('.')[1].length;
-            if (rounding_per < precision) {
-                this.do_warn(_.str.sprintf(_t('Only %s decimal digits are allow.'), rounding_per));
+            if (uom_precision < precision) {
+                this.do_warn(_.str.sprintf(_t('Only %s decimal digits are allow.'), uom_precision));
                 this.$input.val(value.slice(0,-1))
             }
         }
@@ -69,13 +71,14 @@ fieldUtils.format.uom = function(value, field, options) {
     if (value === false) {
         return "";
     }
-    var rounding = options.uom.rounding || 0.01;
-    // var units = options.uom.name;
-    var precision = 0;
-    if (Math.floor(rounding) != rounding) {
-        precision = rounding.toString().split('.')[1].length;
-    }
-    return value.toFixed(precision);
+    // var rounding = options.uom.rounding || 0.01;
+    // // var units = options.uom.name;
+    // var precision = 0;
+    // if (Math.floor(rounding) != rounding) {
+    //     precision = rounding.toString().split('.')[1].length;
+    // }
+    var precision = options.uom && options.uom.decimal_places;
+    return parseFloat(value).toFixed(precision);
 };
 
 fieldUtils.parse.uom = function(value) {
