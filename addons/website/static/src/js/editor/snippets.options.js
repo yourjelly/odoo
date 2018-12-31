@@ -802,7 +802,7 @@ options.registry.ul = options.Class.extend({
      */
     start: function () {
         var self = this;
-        this.$target.on('mouseup', '.o_ul_toggle_self, .o_ul_toggle_next', function () {
+        this.$target.on('mouseup', '.o_ul_toggle', function () {
             self.trigger_up('cover_update');
         });
         return this._super.apply(this, arguments);
@@ -832,25 +832,21 @@ options.registry.ul = options.Class.extend({
             $target: this.$target,
         });
 
-        this.$target.find('.o_ul_toggle_self, .o_ul_toggle_next').remove();
-        this.$target.find('li:has(>ul,>ol)').map(function () {
-            // get if the li contain a text label
-            var texts = _.filter(_.toArray(this.childNodes), function (a) { return a.nodeType === 3;});
-            if (!texts.length || !texts.reduce(function (a,b) { return a.textContent + b.textContent;}).match(/\S/)) {
-                return;
-            }
-            $(this).children('ul,ol').addClass('o_close');
-            return $(this).children(':not(ul,ol)')[0] || this;
-        })
-        .prepend('<a href="#" class="o_ul_toggle_self fa" />');
-        var $li = this.$target.find('li:has(+li:not(>.o_ul_toggle_self)>ul, +li:not(>.o_ul_toggle_self)>ol)');
-        $li.map(function () { return $(this).children()[0] || this; })
-            .prepend('<a href="#" class="o_ul_toggle_next fa" />');
-        $li.removeClass('o_open').next().addClass('o_close');
-        this.$target.find('li').removeClass('o_open').css('list-style', '');
-        this.$target.find('li:has(.o_ul_toggle_self, .o_ul_toggle_next), li:has(>ul,>ol):not(:has(>li))').css('list-style', 'none');
+        this.$target.find('.o_ul_toggle').remove();
+        var parentOfIndentedSel = 'ul:has(ul,ol),ol:has(ul,ol)'; // every list that contains a list
+        this.$target.find(parentOfIndentedSel).addBack(parentOfIndentedSel) // include the root
+            .children('ul,ol').prev()
+            .prepend('<a href="#" class="o_ul_toggle fa" />')
+            .removeClass('o_open')
+            .next().addClass('o_close');
+        
+        var $toggleLIs = this.$target.find('li:has(.o_ul_toggle)');
+        if (this.$target.hasClass('o_ul_folded')) {
+            $toggleLIs.css('list-style', 'none');
+        } else {
+            $toggleLIs.css('list-style', '');
+        }
 
-        this.$target.find('li:not(:has(>ul))').css('list-style', '');
         this._refreshAnimations();
     },
 });
