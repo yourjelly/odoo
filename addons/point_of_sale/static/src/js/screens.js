@@ -1572,17 +1572,28 @@ var ReceiptScreenWidget = ScreenWidget.extend({
         if ($.browser.safari) {
             document.execCommand('print', false, null);
         } else {
-            try {
-                window.print();
-            } catch(err) {
+            var self = this;
+
+            var showPrintError = function(e) {
                 if (navigator.userAgent.toLowerCase().indexOf("android") > -1) {
-                    this.gui.show_popup('error',{
+                    self.gui.show_popup('error',{
                         'title':_t('Printing is not supported on some android browsers'),
                         'body': _t('Printing is not supported on some android browsers due to no default printing protocol is available. It is possible to print your tickets by making use of an IoT Box.'),
                     });
                 } else {
-                    throw err;
+                    if (e) {
+                        throw e;
+                    }
                 }
+            }
+            try {
+                window.print(); // not defined on firefox mobile
+                var showPrintErrorTimeout = setTimeout(showPrintError, 2000); // defined on some browser but do nothing.
+                window.onafterprint = function() {
+                    clearTimeout(showPrintErrorTimeout);
+                 }
+            } catch(e) {
+                showPrintError(e);
             }
         }
         this.pos.get_order()._printed = true;
