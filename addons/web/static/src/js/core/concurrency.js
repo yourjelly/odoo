@@ -47,7 +47,6 @@ return {
          *   should be failed or just ignored
          */
         init: function (failMisordered) {
-            console.log("start drop misordered");
             // local sequence number, for requests sent
             this.lsn = 0;
             // remote sequence number, seqnum of last received request
@@ -61,7 +60,6 @@ return {
          * @returns {Promise}
          */
         add: function (promise) {
-            console.log("add drop missordered")
             var self = this;
             var seq = this.lsn++;
             var res = new Promise(function(resolve, reject) {
@@ -70,14 +68,14 @@ return {
                         self.rsn = seq;
                         resolve(result);
                     } else if (self.failMisordered) {
-                        reject();
+                        reject("reject because of FailMisordered");
                     }
                 }).catch(function(result) {
                     if (seq > self.rsn) {
                         self.rsn = seq;
                         resolve(result);
                     } else if (self.failMisordered) {
-                        reject();
+                        reject("reject because of FailMisordered");
                     }
                     reject(result);
                 });
@@ -127,9 +125,7 @@ return {
          * @returns {Promise}
          */
         add: function (promise) {
-            console.log("add drop previous");
-
-            if (this.currentDef) { this.currentDef.reject(); }
+            if (this.currentDef) { this.currentDef.reject("Dropped by dropPrevious"); }
             var rejection;
             var res = new Promise(function (resolve, reject) {
                 rejection = reject;
@@ -251,8 +247,6 @@ return {
      */
     MutexedDropPrevious: Class.extend({
         init: function () {
-            console.log("start mutexed drop previous");
-
             this.currentDef = null;
             this.locked = false;
             this.pendingAction = null;
@@ -274,9 +268,9 @@ return {
                     resolution = resolve;
                     rejection = reject;
                     if (oldPendingDef) {
-                        oldPendingDef.reject();
+                        oldPendingDef.reject("Rejected by mutexedDropPrevious");
                     }
-                    self.currentDef.reject();
+                    self.currentDef.reject("Rejected by mutexedDropPrevious");
                 });
                 this.pendingDef.resolve = resolution;
                 this.pendingDef.reject = rejection;
@@ -328,7 +322,6 @@ return {
      * @returns {Promise}
      */
     rejectAfter: function (target_def, reference_def) {
-        console.log("rejectAfter");
         return new Promise(function(resolve, reject) {
             target_def.then(resolve, reject);
             reference_def.then(reject, reject);

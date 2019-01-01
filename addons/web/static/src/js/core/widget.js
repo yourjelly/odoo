@@ -116,7 +116,7 @@ var Widget = core.Class.extend(mixins.PropertiesMixin, ServicesMixin, {
      */
     willStart: function () {
         if (this.xmlDependencies) {
-            var defs = _.map(this.xmlDependencies, function (xmlPath) {
+            var defs = this.xmlDependencies.map(function (xmlPath) {
                 return ajax.loadXML(xmlPath, core.qweb);
             });
             return Promise.all(defs);
@@ -143,7 +143,10 @@ var Widget = core.Class.extend(mixins.PropertiesMixin, ServicesMixin, {
      * destroying itself.
      */
     destroy: function () {
-        _.invoke(this.getChildren(), 'destroy');
+        for(var property of this.getChildren()) {
+            property.destroy();
+        }
+        // _.invoke(this.getChildren(), 'destroy');
         if(this.$el) {
             this.$el.remove();
         }
