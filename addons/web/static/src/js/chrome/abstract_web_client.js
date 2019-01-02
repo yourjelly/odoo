@@ -151,8 +151,7 @@ var AbstractWebClient = Widget.extend(ServiceProviderMixin, KeyboardNavigationMi
             var $toggle = $(this);
             var doc_width = $(document).width();
             var $menu = $toggle.siblings('.oe_dropdown_menu');
-            // TODO: size has been deprecated in jq3
-            $menu = $menu.size() >= 1 ? $menu : $toggle.find('.oe_dropdown_menu');
+            $menu = $menu.length >= 1 ? $menu : $toggle.find('.oe_dropdown_menu');
             var state = $menu.is('.oe_opened');
             setTimeout(function () {
                 // Do not alter propagation
