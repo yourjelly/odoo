@@ -50,6 +50,7 @@ function _createFakeDataTransfer(file) {
  * @returns {Promise<Object>} resolved with file created
  */
 function createFile(data) {
+    // Note: this is only supported by Chrome, and does not work in Incognito mode
     return new Promise(function (resolve, reject) {
         var requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
         if (!requestFileSystem) {

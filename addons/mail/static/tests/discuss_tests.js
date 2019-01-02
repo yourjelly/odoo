@@ -940,7 +940,7 @@ QUnit.test('mark all messages as read from Inbox', async function (assert) {
     });
 });
 
-QUnit.test('drag and drop file in composer', async function (assert) {
+QUnit.test('drag and drop file in composer [REQUIRE NON-INCOGNITO WINDOW]', async function (assert) {
     assert.expect(8);
 
     this.data.initMessaging = {
