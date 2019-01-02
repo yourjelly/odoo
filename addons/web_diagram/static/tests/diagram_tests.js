@@ -139,23 +139,24 @@ QUnit.module('Views', {
             archs: this.archs,
             res_id: 1,
             mockRPC: this.mockRPC,
-        })
-            assert.containsN(diagram, '.o_diagram ellipse', 2,
-                "diagram should contain 2 'ellipse' nodes (nodes 2 and 3)");
-            assert.strictEqual(diagram.$('text:contains(a new node)').length, 0,
-                "diagram should only have the default nodes at start");
+        });
 
-            await testUtils.dom.click(diagram.$buttons.find('.o_diagram_new_button'));
-            await testUtils.fields.editInput($('.modal-body input:first'), 'a new node');
-            await testUtils.fields.editInput($('.modal-body input:last'), 1);
-            await testUtils.dom.click($('.modal-footer button.btn-primary'));
+        assert.containsN(diagram, '.o_diagram ellipse', 2,
+            "diagram should contain 2 'ellipse' nodes (nodes 2 and 3)");
+        assert.strictEqual(diagram.$('text:contains(a new node)').length, 0,
+            "diagram should only have the default nodes at start");
 
-            assert.containsN(diagram, '.o_diagram ellipse', 3,
-                "diagram should contain 3 'ellipse' nodes now (nodes 2, 3 and the new one)");
-            assert.strictEqual(diagram.$('text:contains(a new node)').length, 1,
-                "diagram should only have the default nodes at start");
+        await testUtils.dom.click(diagram.$buttons.find('.o_diagram_new_button'));
+        await testUtils.fields.editInput($('.modal-body input:first'), 'a new node');
+        await testUtils.fields.editInput($('.modal-body input:last'), 1);
+        await testUtils.dom.click($('.modal-footer button.btn-primary'));
 
-            diagram.destroy();
+        assert.containsN(diagram, '.o_diagram ellipse', 3,
+            "diagram should contain 3 'ellipse' nodes now (nodes 2, 3 and the new one)");
+        assert.strictEqual(diagram.$('text:contains(a new node)').length, 1,
+            "diagram should only have the default nodes at start");
+
+        diagram.destroy();
     });
 
     QUnit.test('node edition', async function (assert) {
@@ -170,18 +171,19 @@ QUnit.module('Views', {
             res_id: 1,
             mockRPC: this.mockRPC,
         });
-            assert.strictEqual(diagram.$('.o_diagram text').first().text(), 'A first node',
-                "diagram first node should have default name at first");
 
-            CuteNode.double_click_callback({id: 1});
-            await testUtils.nextTick();
-            await testUtils.fields.editInput($('.modal-body input:first'), 'An edited node');
-            await testUtils.dom.click($('.modal-footer button.btn-primary'));
+        assert.strictEqual(diagram.$('.o_diagram text').first().text(), 'A first node',
+            "diagram first node should have default name at first");
 
-            assert.strictEqual(diagram.$('text').first().text(), 'An edited node',
-                "diagram first node should now have new name");
+        CuteNode.double_click_callback({id: 1});
+        await testUtils.nextTick();
+        await testUtils.fields.editInput($('.modal-body input:first'), 'An edited node');
+        await testUtils.dom.click($('.modal-footer button.btn-primary'));
 
-            diagram.destroy();
+        assert.strictEqual(diagram.$('text').first().text(), 'An edited node',
+            "diagram first node should now have new name");
+
+        diagram.destroy();
     });
 
     QUnit.test('node deletion', async function (assert) {
@@ -195,17 +197,18 @@ QUnit.module('Views', {
             res_id: 1,
             mockRPC: this.mockRPC,
         });
-            assert.containsN(diagram, '.o_diagram ellipse', 2,
-                "diagram should contain 2 'ellipse' nodes (nodes 2 and 3)");
 
-            CuteNode.destruction_callback({id: 2});
-            await testUtils.nextTick();
-            await testUtils.dom.click($('.modal-footer button.btn-primary'));
+        assert.containsN(diagram, '.o_diagram ellipse', 2,
+            "diagram should contain 2 'ellipse' nodes (nodes 2 and 3)");
 
-            assert.containsOnce(diagram, '.o_diagram ellipse',
-                "diagram should contain 1 'ellipse' nodes (node 2)");
+        CuteNode.destruction_callback({id: 2});
+        await testUtils.nextTick();
+        await testUtils.dom.click($('.modal-footer button.btn-primary'));
 
-            diagram.destroy();
+        assert.containsOnce(diagram, '.o_diagram ellipse',
+            "diagram should contain 1 'ellipse' nodes (node 2)");
+
+        diagram.destroy();
     });
 
     QUnit.test('edge creation', async function (assert) {
@@ -220,25 +223,26 @@ QUnit.module('Views', {
             res_id: 1,
             mockRPC: this.mockRPC,
         });
-            assert.containsN(diagram, '.o_diagram path', 4,
-                "diagram should contain 4 'path' nodes (#raphael-marker-block, and transitions 1, 2 and 3)");
-            assert.strictEqual(diagram.$('text:contains(a transition from 1 to 3)').length, 0,
-                "diagram should not have a transition from 1 to 3 at start");
 
-            CuteEdge.new_edge_callback({
-                get_start: function () {return {id: 1};},
-                get_end: function () {return {id: 3};},
-            });
-            await testUtils.nextTick();
-            await testUtils.fields.editInput($('.modal-body input:first'), 'a transition from 1 to 3');
-            await testUtils.dom.click($('.modal-footer button.btn-primary'));
+        assert.containsN(diagram, '.o_diagram path', 4,
+            "diagram should contain 4 'path' nodes (#raphael-marker-block, and transitions 1, 2 and 3)");
+        assert.strictEqual(diagram.$('text:contains(a transition from 1 to 3)').length, 0,
+            "diagram should not have a transition from 1 to 3 at start");
 
-            assert.containsN(diagram, '.o_diagram path', 5,
-                "diagram should contain 4 'path' nodes (#raphael-marker-block, transitions 1, 2, 3, and the new one)");
-            assert.strictEqual(diagram.$('text:contains(a transition from 1 to 3)').length, 1,
-                "diagram should now have a transition from 1 to 3");
+        CuteEdge.new_edge_callback({
+            get_start: function () {return {id: 1};},
+            get_end: function () {return {id: 3};},
+        });
+        await testUtils.nextTick();
+        await testUtils.fields.editInput($('.modal-body input:first'), 'a transition from 1 to 3');
+        await testUtils.dom.click($('.modal-footer button.btn-primary'));
 
-            diagram.destroy();
+        assert.containsN(diagram, '.o_diagram path', 5,
+            "diagram should contain 4 'path' nodes (#raphael-marker-block, transitions 1, 2, 3, and the new one)");
+        assert.strictEqual(diagram.$('text:contains(a transition from 1 to 3)').length, 1,
+            "diagram should now have a transition from 1 to 3");
+
+        diagram.destroy();
     });
 
     QUnit.test('edge edition', async function (assert) {
@@ -253,22 +257,23 @@ QUnit.module('Views', {
             res_id: 1,
             mockRPC: this.mockRPC,
         });
-            assert.strictEqual(diagram.$('text:contains(a transition from 1 to 2)').length, 1,
-                "diagram edge should have default name at start");
-            assert.strictEqual(diagram.$('text:contains(An edited edge)').length, 0,
-                "diagram should only have the default edges at start");
 
-            CuteEdge.double_click_callback({id: 1});
-            await testUtils.nextTick();
-            await testUtils.fields.editInput($('.modal-body input:first'), 'An edited edge');
-            await testUtils.dom.click($('.modal-footer button.btn-primary'));
+        assert.strictEqual(diagram.$('text:contains(a transition from 1 to 2)').length, 1,
+            "diagram edge should have default name at start");
+        assert.strictEqual(diagram.$('text:contains(An edited edge)').length, 0,
+            "diagram should only have the default edges at start");
 
-            assert.strictEqual(diagram.$('text:contains(a transition from 1 to 2)').length, 0,
-                "diagram edge should not have default name anymore");
-            assert.strictEqual(diagram.$('text:contains(An edited edge)').length, 1,
-                "diagram should now have the new edge");
+        CuteEdge.double_click_callback({id: 1});
+        await testUtils.nextTick();
+        await testUtils.fields.editInput($('.modal-body input:first'), 'An edited edge');
+        await testUtils.dom.click($('.modal-footer button.btn-primary'));
 
-            diagram.destroy();
+        assert.strictEqual(diagram.$('text:contains(a transition from 1 to 2)').length, 0,
+            "diagram edge should not have default name anymore");
+        assert.strictEqual(diagram.$('text:contains(An edited edge)').length, 1,
+            "diagram should now have the new edge");
+
+        diagram.destroy();
     });
 
     QUnit.test('edge deletion', async function (assert) {
@@ -282,21 +287,22 @@ QUnit.module('Views', {
             res_id: 1,
             mockRPC: this.mockRPC,
         });
-            assert.containsN(diagram, '.o_diagram path', 4,
-                "diagram should contain 4 'path' nodes (#raphael-marker-block, and transitions 1, 2 and 3)");
-            assert.strictEqual(diagram.$('text:contains(a transition from 2 to 1)').length, 1,
-                "diagram edge should have default name at start");
 
-            CuteEdge.destruction_callback({id: 3});
-            await testUtils.nextTick();
-            await testUtils.dom.click($('.modal-footer button.btn-primary'));
+        assert.containsN(diagram, '.o_diagram path', 4,
+            "diagram should contain 4 'path' nodes (#raphael-marker-block, and transitions 1, 2 and 3)");
+        assert.strictEqual(diagram.$('text:contains(a transition from 2 to 1)').length, 1,
+            "diagram edge should have default name at start");
 
-            assert.containsN(diagram, '.o_diagram path', 3,
-                "diagram should contain 3 'path' nodes (#raphael-marker-block, and transitions 1 and 2)");
-            assert.strictEqual(diagram.$('text:contains(a transition from 2 to 1)').length, 0,
-                "diagram edge label should have been deleted");
+        CuteEdge.destruction_callback({id: 3});
+        await testUtils.nextTick();
+        await testUtils.dom.click($('.modal-footer button.btn-primary'));
 
-            diagram.destroy();
+        assert.containsN(diagram, '.o_diagram path', 3,
+            "diagram should contain 3 'path' nodes (#raphael-marker-block, and transitions 1 and 2)");
+        assert.strictEqual(diagram.$('text:contains(a transition from 2 to 1)').length, 0,
+            "diagram edge label should have been deleted");
+
+        diagram.destroy();
     });
 });
 });
