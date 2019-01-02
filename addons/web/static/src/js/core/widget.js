@@ -143,11 +143,10 @@ var Widget = core.Class.extend(mixins.PropertiesMixin, ServicesMixin, {
      * destroying itself.
      */
     destroy: function () {
-        for(var property of this.getChildren()) {
-            property.destroy();
-        }
-        // _.invoke(this.getChildren(), 'destroy');
-        if(this.$el) {
+        this.getChildren().forEach(function (child) {
+            child.destroy();
+        });
+        if (this.$el) {
             this.$el.remove();
         }
         mixins.PropertiesMixin.destroy.call(this);
