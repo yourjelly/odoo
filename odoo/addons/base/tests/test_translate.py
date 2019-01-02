@@ -117,6 +117,38 @@ class TranslationToolsTestCase(unittest.TestCase):
         self.assertItemsEqual(terms,
             ['Form stuff', 'Blah blah blah'])
 
+    def test_translate_xml_inline4(self):
+        """ Test xml_translate() with inline elements with translated attrs only. """
+        terms = []
+        source = """<form string="Form stuff">
+                        <div>
+                            <label for="stuff"/>
+                            <span class="fa fa-globe" title="Title stuff"/>
+                        </div>
+                    </form>"""
+        result = xml_translate(terms.append, source)
+        self.assertEquals(result, source)
+        self.assertItemsEqual(terms,
+            ['Form stuff', '<span class="fa fa-globe" title="Title stuff"/>'])
+
+    def test_translate_xml_inline5(self):
+        """ Test again xml_translate() with inline elements with translated attrs only. """
+        terms = []
+        source = """<form string="Form stuff">
+                        <div>
+                            <label for="website_name" string="Website Title"/>
+                            <span class="fa fa-lg fa-globe" title="Values set here are website-specific." groups="website.group_multi_website"/>
+                            <div class="text-muted">
+                                Name and favicon of your website
+                            </div>
+                        </div>
+                    </form>"""
+        result = xml_translate(terms.append, source)
+        self.assertEquals(result, source)
+        self.assertItemsEqual(terms,
+            ['Form stuff', "Website Title", '<span class="fa fa-lg fa-globe" title="Values set here are website-specific." groups="website.group_multi_website"/>', "Name and favicon of your website"])
+
+
     def test_translate_xml_t(self):
         """ Test xml_translate() with t-* attributes. """
         terms = []
