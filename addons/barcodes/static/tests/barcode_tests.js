@@ -131,7 +131,7 @@ QUnit.test('edit, save and cancel buttons', async function (assert) {
     await testUtils.nextTick();
     assert.containsOnce(form, ".o_form_readonly",
         "should have switched to 'readonly' mode");
-    assert.verifySteps(['save'], 'should not have saved');
+    assert.verifySteps([], 'should not have saved');
 
     form.destroy();
 });
@@ -212,13 +212,13 @@ QUnit.test('do no update form twice after a command barcode scanned', async func
     await testUtils.nextTick();
     // a first update is done to reload the data (thus followed by a read), but
     // update shouldn't be called afterwards
-    assert.verifySteps(['read', 'update', 'read']);
+    assert.verifySteps(['update', 'read']);
 
     _.each(['5','4','3','9','8','2','6','7','1','2','5','2','Enter'], triggerKeypressEvent);
     await testUtils.nextTick();
     // a real barcode has been scanned -> an update should be requested (with
     // option reload='false', so it isn't followed by a read)
-    assert.verifySteps(['read', 'update', 'read', 'update']);
+    assert.verifySteps(['read', 'update']);
 
     form.destroy();
     barcodeEvents.BarcodeEvents.max_time_between_keys_in_ms = delay;

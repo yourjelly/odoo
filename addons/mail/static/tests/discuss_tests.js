@@ -664,7 +664,7 @@ QUnit.test('older messages are loaded on scroll', async function (assert) {
     // switch to 'general'
     await testUtils.dom.click($general);
 
-    assert.verifySteps(['message_fetch', 'message_fetch'],
+    assert.verifySteps(['message_fetch'],
         "should fetch a second time for general channel messages (30 last messages)");
 
     assert.containsN(discuss, '.o_thread_message', 30,
@@ -675,7 +675,7 @@ QUnit.test('older messages are loaded on scroll', async function (assert) {
 
     await loadMoreDef;
     await testUtils.nextTick();
-    assert.verifySteps(['message_fetch', 'message_fetch', 'message_fetch'],
+    assert.verifySteps(['message_fetch'],
         "should fetch a third time for general channel messages (5 remaining messages)");
     assert.containsN(discuss, '.o_thread_message', 35,
         "all messages should now be loaded");

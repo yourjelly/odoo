@@ -1184,7 +1184,7 @@ QUnit.module('Views', {
         assert.strictEqual($('.modal').length, 1, 'a confirm modal should be displayed');
         await testUtils.dom.click($('.modal-footer .btn-primary'));
         assert.containsN(list, 'tbody td.o_list_record_selector', 3, "should have 3 records");
-        assert.verifySteps(['/web/dataset/search_read', '/web/dataset/call_kw/foo/write', '/web/dataset/search_read']);
+        assert.verifySteps(['/web/dataset/call_kw/foo/write', '/web/dataset/search_read']);
         list.destroy();
     });
 
@@ -3124,10 +3124,8 @@ QUnit.module('Views', {
         // row should switch it in edition
         await testUtils.dom.click(list.$('.o_data_cell:first'));
 
-        assert.verifySteps(['switch view form 1', 'switch view form false'],
-            "no more switch view should have been requested");
-        assert.containsOnce(list, '.o_selected_row',
-            "a row should be in edition");
+        assert.verifySteps([], "no more switch view should have been requested");
+        assert.containsOnce(list, '.o_selected_row', "a row should be in edition");
 
         // clicking on the body should leave the edition
         await testUtils.dom.click($('body'));
@@ -4025,14 +4023,12 @@ QUnit.module('Views', {
         assert.strictEqual(list.pager.$('.o_pager_value').text(), '1-2',
             "should have changed the limit");
 
-        assert.verifySteps(['scroll', 'scroll'],
-            "should not ask to scroll when changing the limit");
+        assert.verifySteps([], "should not ask to scroll when changing the limit");
 
         // switch pages again (should still ask to scroll)
         await testUtils.dom.click(list.pager.$('.o_pager_next'));
 
-        assert.verifySteps(['scroll', 'scroll', 'scroll'],
-            "this is still working after a limit change");
+        assert.verifySteps(['scroll'], "this is still working after a limit change");
 
         list.destroy();
     });

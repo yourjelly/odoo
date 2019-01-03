@@ -213,7 +213,7 @@ QUnit.test('notify is typing', async function (assert) {
     step = 2;
     testUtils.fields.editInput($input, '');
 
-    assert.verifySteps(['notify_typing', 'notify_typing']);
+    assert.verifySteps(['notify_typing']);
 
     discuss.destroy();
 });

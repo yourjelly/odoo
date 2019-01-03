@@ -562,7 +562,7 @@ QUnit.module('fields', {}, function () {
             // save the main record, and check that no extra rpcs are done (record
             // is not dirty, only a related record was modified)
             await testUtils.form.clickSave(form);
-            assert.verifySteps(['read', 'get_formview_id', 'load_views', 'read', 'write', 'onchange', 'read']);
+            assert.verifySteps([]);
             form.destroy();
         });
 
@@ -955,7 +955,7 @@ QUnit.module('fields', {}, function () {
             await prom.resolve();
             await testUtils.nextTick();
 
-            assert.verifySteps(['name_create', 'create']);
+            assert.verifySteps(['create']);
             form.destroy();
         });
 
@@ -1003,7 +1003,7 @@ QUnit.module('fields', {}, function () {
             await prom.resolve();
             await testUtils.nextTick();
 
-            assert.verifySteps(['name_create', 'create']);
+            assert.verifySteps(['create']);
             assert.strictEqual(list.$('.o_data_row:nth(1) .o_data_cell').text(), 'b',
                 "created row should have the correct m2o value");
             assert.containsN(list, '.o_data_row', 5, "should have added the fifth row");
@@ -1057,7 +1057,7 @@ QUnit.module('fields', {}, function () {
             await prom.resolve();
             await testUtils.nextTick();
 
-            assert.verifySteps(['name_create', 'create']);
+            assert.verifySteps(['create']);
             assert.strictEqual(form.$('.o_data_row:first .o_data_cell').text(), 'b',
                 "first row should have the correct m2o value");
             form.destroy();

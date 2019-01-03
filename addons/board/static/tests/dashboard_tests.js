@@ -189,7 +189,7 @@ QUnit.test('basic functionality, with one sub action', async function (assert) {
     assert.strictEqual($('.modal').length, 0, "should have no modal open");
     assert.containsNone(form, '.oe_action', "should have no displayed action");
 
-    assert.verifySteps(['load action', 'edit custom', 'edit custom', 'edit custom', 'edit custom']);
+    assert.verifySteps(['edit custom', 'edit custom']);
     form.destroy();
 });
 

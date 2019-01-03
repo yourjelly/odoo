@@ -552,8 +552,6 @@ QUnit.module('fields', {}, function () {
                 'new name', 'the updated row still has the correct values');
 
             assert.verifySteps([
-                'read', // main record
-                'read', // relational field
                 'search_read', // list view in dialog
                 'read', // relational field (updated)
                 'write', // save main record
@@ -927,14 +925,14 @@ QUnit.module('fields', {}, function () {
 
             await testUtils.fields.editInput(form.$('.o_field_widget[name=foo]'), 'trigger onchange');
 
-            assert.verifySteps(['read', 'onchange', 'read']);
+            assert.verifySteps(['onchange', 'read']);
             assert.strictEqual(form.$('.o_x2m_control_panel .o_pager_counter').text().trim(),
                 '1-40 / 45', "pager should be correct");
             assert.strictEqual(form.$('.o_kanban_record:not(".o_kanban_ghost")').length, 40,
                 'there should be 40 records displayed on page 1');
 
             await testUtils.dom.click(form.$('.o_field_widget[name=timmy] .o_pager_next'));
-            assert.verifySteps(['read', 'onchange', 'read', 'read']);
+            assert.verifySteps(['read']);
             assert.strictEqual(form.$('.o_x2m_control_panel .o_pager_counter').text().trim(),
                 '41-45 / 45', "pager should be correct");
             assert.strictEqual(form.$('.o_kanban_record:not(".o_kanban_ghost")').length, 5,

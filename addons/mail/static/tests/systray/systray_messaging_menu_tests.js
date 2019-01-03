@@ -510,9 +510,6 @@ QUnit.test('preview of inbox message not linked to document + mark as read', asy
     await testUtils.dom.click($preview2.find('.o_mail_preview_mark_as_read'));
     assert.verifySteps([{
         method: 'set_message_done',
-        messageIDs: [689],
-    }, {
-        method: 'set_message_done',
         messageIDs: [690],
     }], "should mark 2nd preview as read");
     assert.strictEqual(messagingMenu.$('.o_notification_counter').text(), '0',

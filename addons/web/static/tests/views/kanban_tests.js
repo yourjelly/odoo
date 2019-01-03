@@ -2198,8 +2198,6 @@ QUnit.module('Views', {
         // Write on the record using the priority widget to trigger a re-render in readonly
         await testUtils.dom.click(kanban.$('.o_field_widget.o_priority a.o_priority_star.fa-star-o').first());
         assert.verifySteps([
-            '/web/dataset/search_read',
-            '/web/dataset/call_kw/category/read',
             '/web/dataset/call_kw/partner/write',
             '/web/dataset/call_kw/partner/read',
             '/web/dataset/call_kw/category/read'
@@ -4031,7 +4029,7 @@ QUnit.module('Views', {
         assert.strictEqual(kanban.$('.o_kanban_group:eq(1) .o_kanban_record').length, 3,
             "there should now be 3 records in the column");
 
-        assert.verifySteps([[7], [6]], "the other categories should not be fetched");
+        assert.verifySteps([[6]], "the other categories should not be fetched");
 
         kanban.destroy();
     });

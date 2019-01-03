@@ -80,7 +80,7 @@ QUnit.test('cancel()', function (assert) {
         self.timeoutCDDef.resolve();
     });
     this.timeoutCDDef.then(function () {
-        assert.verifySteps(['__rpc__1'],
+        assert.verifySteps([],
             "function should still have been called once after 2nd function call cancelled");
         widget.destroy();
         done();
@@ -135,14 +135,14 @@ QUnit.test('clear()', function (assert) {
     }).then(function () {
         cctFunc(2);
     }).then(function () {
-        assert.verifySteps(['__rpc__1'],
+        assert.verifySteps([],
             "function should still have been called once (due to long throttle)");
         cctFunc.clear();
         self.timeoutCDDef.resolve();
         def2.resolve();
     });
     Promise.all([self.timeoutCDDef, def2]).then(function () {
-        assert.verifySteps(['__rpc__1', '__rpc__2'],
+        assert.verifySteps(['__rpc__2'],
             "function should have been called twice after 'clear' (buffered 2nd function call)");
         widget.destroy();
         done();

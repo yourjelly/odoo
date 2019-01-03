@@ -3237,7 +3237,7 @@ QUnit.module('fields', {}, function () {
             form.$('.o_field_widget[name="product_id"] input').val('').trigger('keyup');
             assert.verifySteps(['read', 'read'], 'no onchange should be done as line is invalid');
             await testUtils.dom.click(form.$('.o_list_record_remove'));
-            assert.verifySteps(['read', 'read', 'onchange'], 'onchange should have been done');
+            assert.verifySteps(['onchange'], 'onchange should have been done');
 
             form.destroy();
         });
@@ -5681,7 +5681,7 @@ QUnit.module('fields', {}, function () {
             await testUtils.fields.editInput(form.$('.o_field_widget[name="turtle_foo"]'), "some text");
             assert.strictEqual(form.$('.o_field_widget[name="int_field"]').val(), "0",
                 "int_field should still be 0 (no onchange should have been done yet)");
-            assert.verifySteps(['load_views', 'read', 'default_get'], "no onchange should have been applied");
+            assert.verifySteps([], "no onchange should have been applied");
 
             // fill partner_ids field with a tag (all required fields will then be set)
             await testUtils.fields.many2one.clickOpenDropdown('partner_ids');

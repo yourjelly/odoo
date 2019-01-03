@@ -175,12 +175,11 @@ QUnit.module('basic_fields', {
         await testUtils.nextMicrotaskTick();
 
         // wait for the debounced callback to be called
-        assert.verifySteps(['_setValue'],
+        assert.verifySteps([],
             "_setValue should not have been called after widget destruction");
 
         DebouncedField.prototype._doAction = _doAction;
         DebouncedField.prototype._setValue = _setValue;
-
     });
 
     QUnit.module('FieldBoolean');
@@ -1936,7 +1935,7 @@ QUnit.module('basic_fields', {
         assert.verifySteps(['_getURI']);
         // second upload call pdfjs method inside iframe
         form.$('input[type="file"]').trigger('change');
-        assert.verifySteps(['_getURI', 'open']);
+        assert.verifySteps(['open']);
 
         testUtils.mock.unpatch(field_registry.map.pdf_viewer);
         form.destroy();
@@ -2132,10 +2131,7 @@ QUnit.module('basic_fields', {
         await testUtils.dom.click(form.$('tbody td:contains(gold)'));
         assert.strictEqual($('.modal').length, 1,
             'The modal should have opened');
-        assert.verifySteps([
-            "The view's image should have been fetched",
-            "The dialog's image should have been fetched",
-        ]);
+        assert.verifySteps(["The dialog's image should have been fetched"]);
 
         form.destroy();
     });
@@ -2275,8 +2271,6 @@ QUnit.module('basic_fields', {
             kanban.on_detach_callback();
 
             assert.verifySteps([
-                'on_attach_callback',
-                'on_attach_callback',
                 'on_detach_callback',
                 'on_detach_callback'
             ]);

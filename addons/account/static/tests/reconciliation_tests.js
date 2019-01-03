@@ -1839,14 +1839,14 @@ QUnit.module('account', {
         await testUtils.dom.click($reconcileForm.find('.create_tax_id input'));
         $('.ui-autocomplete .ui-menu-item a:contains(Tax 20.00%)').trigger('mouseover').trigger('click');
         await testUtils.nextTick();
-        assert.verifySteps(["Account", "Tax"], "Tax rpc done");
+        assert.verifySteps(["Tax"], "Tax rpc done");
 
         await testUtils.dom.click($reconcileForm.find('.create_journal_id input'),{allowInvisible:true});
         $('.ui-autocomplete .ui-menu-item a:contains(company 1 journal)').trigger('mouseover').trigger('click');
         await testUtils.nextTick();
         await testUtils.fields.editAndTrigger($reconcileForm.find('.create_label input'),'dummy text','input');
         await testUtils.dom.click($reconcileForm.find('.create_label input'));
-        assert.verifySteps(["Account", "Tax", "Journal"], "Journal rpc done");
+        assert.verifySteps(["Journal"], "Journal rpc done");
 
         // Verify the two (gift + tax) lines were added to the list
         var $newLines = widget.$('tr.mv_line[data-line-id^=createLine]');

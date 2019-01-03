@@ -2130,7 +2130,7 @@ QUnit.module('relational_fields', {
         // trigger onchange
         await testUtils.fields.editInput(form.$('.o_field_widget[name=int_field]'), 12);
 
-        assert.verifySteps(['product', 'partner_type'], "the second name_get should have been done");
+        assert.verifySteps(['partner_type'], "the second name_get should have been done");
         assert.strictEqual(form.$('.o_field_widget[name="reference"] select').val(), "partner_type",
             "reference field model should be correctly set");
         assert.strictEqual(form.$('.o_field_widget[name="reference"] input').val(), "gold",

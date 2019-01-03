@@ -115,7 +115,7 @@ QUnit.module('settings_dashboard', function () {
             'should not have generated any badge');
         assert.strictEqual(dashboard.$('.o_user_emails').val(), 'xyz@odoo.com',
             'input should not have been cleared');
-        assert.verifySteps(['warning', 'warning']);
+        assert.verifySteps(['warning']);
 
         dashboard.destroy();
     });

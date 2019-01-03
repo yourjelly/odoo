@@ -53,7 +53,7 @@ QUnit.module('Views', {
             data: this.data,
             model: 'fake_model',
         }).then(function (view) {
-            assert.verifySteps(['a', 'b', 'a loaded', 'b loaded'],
+            assert.verifySteps(['a loaded', 'b loaded'],
                 "should wait for both libs to be loaded");
             ajax.loadJS = loadJS;
             view.destroy();
@@ -61,8 +61,7 @@ QUnit.module('Views', {
         });
 
         await testUtils.nextTick();
-        assert.verifySteps(['a', 'b'],
-            "both libs should be loaded in parallel");
+        assert.verifySteps(['a', 'b'], "both libs should be loaded in parallel");
         prom.resolve();
     });
 
@@ -95,22 +94,18 @@ QUnit.module('Views', {
             data: this.data,
             model: 'fake_model',
         }).then(function (view) {
-            assert.verifySteps(['a', 'b', 'b loaded', 'a loaded', 'c', 'c loaded'],
-                "should for all libs to be loaded");
+            assert.verifySteps(['c loaded'], "should wait for all libs to be loaded");
             ajax.loadJS = loadJS;
             view.destroy();
             done();
         });
         await testUtils.nextTick();
-        assert.verifySteps(['a', 'b'],
-        "libs 'a' and 'b' should be loaded in parallel");
+        assert.verifySteps(['a', 'b'], "libs 'a' and 'b' should be loaded in parallel");
         await proms.b.resolve();
-        assert.verifySteps(['a', 'b', 'b loaded'],
-        "should wait for 'a' and 'b' to be loaded before loading 'c'");
+        assert.verifySteps(['b loaded'], "should wait for 'a' and 'b' to be loaded before loading 'c'");
         await proms.a.resolve();
         await testUtils.nextMicrotaskTick();
-        assert.verifySteps(['a', 'b', 'b loaded', 'a loaded', 'c'],
-            "should load 'c' when 'a' and 'b' are loaded");
+        assert.verifySteps(['a loaded', 'c'], "should load 'c' when 'a' and 'b' are loaded");
         await proms.c.resolve();
     });
 

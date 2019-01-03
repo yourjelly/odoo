@@ -30,7 +30,7 @@ QUnit.module('core', {}, function () {
 
         await prom2.resolve();
 
-        assert.verifySteps(['ok prom1', 'ok prom2']);
+        assert.verifySteps(['ok prom2']);
 
         done();
     });
@@ -54,7 +54,7 @@ QUnit.module('core', {}, function () {
 
         await prom1.resolve();
 
-        assert.verifySteps(['ok prom2', 'ok prom1']);
+        assert.verifySteps(['ok prom1']);
 
         done();
     });
@@ -82,12 +82,12 @@ QUnit.module('core', {}, function () {
         try {
             await prom2.reject();
         } catch {
-            assert.verifySteps(['ok prom1', 'ko prom2']);
+            assert.verifySteps(['ko prom2']);
         }
 
         await prom3.resolve();
 
-        assert.verifySteps(['ok prom1', 'ko prom2', 'ok prom3']);
+        assert.verifySteps(['ok prom3']);
         done();
     });
 
@@ -114,20 +114,20 @@ QUnit.module('core', {}, function () {
             assert.step('mutex unlocked (2)');
         });
 
-        assert.verifySteps(['mutex unlocked (1)']);
+        assert.verifySteps([]);
 
         mutex.exec(function () { return prom2; });
         await testUtils.nextMicrotaskTick();
 
-        assert.verifySteps(['mutex unlocked (1)']);
+        assert.verifySteps([]);
 
         await prom1.resolve();
 
-        assert.verifySteps(['mutex unlocked (1)', 'ok prom1']);
+        assert.verifySteps(['ok prom1']);
 
         await prom2.resolve();
 
-        assert.verifySteps(['mutex unlocked (1)', 'ok prom1', 'ok prom2', 'mutex unlocked (2)']);
+        assert.verifySteps(['ok prom2', 'mutex unlocked (2)']);
     });
 
     QUnit.test('DropPrevious: basic usecase', async function (assert) {
@@ -148,7 +148,7 @@ QUnit.module('core', {}, function () {
 
         await prom2.resolve();
 
-        assert.verifySteps(['rejected dp1','ok dp2']);
+        assert.verifySteps(['ok dp2']);
         done();
     });
 
@@ -172,7 +172,7 @@ QUnit.module('core', {}, function () {
         await prom1.resolve();
         await prom2.resolve();
 
-        assert.verifySteps(['rejected dp1','ok dp2']);
+        assert.verifySteps(['ok dp2']);
         done();
     });
 
@@ -386,9 +386,9 @@ QUnit.module('core', {}, function () {
             assert.step("p2 resolved");
         });
 
-        assert.verifySteps(['ok d1','p1 resolved'])
+        assert.verifySteps([])
         await d2.resolve('d2');
-        assert.verifySteps(['ok d1','p1 resolved','ok d2','p2 resolved'])
+        assert.verifySteps(['ok d2','p2 resolved'])
         done();
     });
 
@@ -411,9 +411,9 @@ QUnit.module('core', {}, function () {
             assert.step("p2 resolved");
         });
 
-        assert.verifySteps(['p1 resolved'])
+        assert.verifySteps([])
         await d2.resolve('d2');
-        assert.verifySteps(['p1 resolved','ok d2','p2 resolved'])
+        assert.verifySteps(['ok d2','p2 resolved'])
         done();
     });
 
@@ -439,7 +439,7 @@ QUnit.module('core', {}, function () {
         assert.verifySteps(['p1 rejected','ok d1'])
 
         await d2.resolve('d2');
-        assert.verifySteps(['p1 rejected','ok d1','ok d2','p2 resolved'])
+        assert.verifySteps(['ok d2','p2 resolved'])
         done();
     });
 
@@ -475,10 +475,10 @@ QUnit.module('core', {}, function () {
 
         await d1.resolve('d1');
 
-        assert.verifySteps(['p1 rejected', 'p2 rejected', 'ok d1']);
+        assert.verifySteps(['ok d1']);
 
         await d3.resolve('d3');
-        assert.verifySteps(['p1 rejected', 'p2 rejected', 'ok d1', 'ok d3','p3 resolved']);
+        assert.verifySteps(['ok d3','p3 resolved']);
 
         done();
     });
@@ -513,7 +513,7 @@ QUnit.module('core', {}, function () {
         assert.verifySteps(['p1 rejected']);
 
         await d1.resolve('d1');
-        assert.verifySteps(['p1 rejected', 'ok d1', 'execute d2']);
+        assert.verifySteps(['ok d1', 'execute d2']);
 
         var p3 = m.exec(function () {
             assert.step('execute d3');
@@ -522,13 +522,13 @@ QUnit.module('core', {}, function () {
             assert.step('p3 resolved');
         });
         await Promise.resolve()
-        assert.verifySteps(['p1 rejected', 'ok d1', 'execute d2', 'p2 rejected']);
+        assert.verifySteps(['p2 rejected']);
 
         await d2.resolve();
-        assert.verifySteps(['p1 rejected', 'ok d1', 'execute d2', 'p2 rejected','ok d2', 'execute d3']);
+        assert.verifySteps(['ok d2', 'execute d3']);
 
         await d3.resolve();
-        assert.verifySteps(['p1 rejected', 'ok d1', 'execute d2', 'p2 rejected','ok d2','execute d3', 'ok d3', 'p3 resolved']);
+        assert.verifySteps(['ok d3', 'p3 resolved']);
 
         done();
      });
@@ -569,10 +569,10 @@ QUnit.module('core', {}, function () {
         assert.verifySteps(['p1 rejected', 'p2 rejected']);
 
         await d1.resolve('d1');
-        assert.verifySteps(['p1 rejected', 'p2 rejected', 'ok d1']);
+        assert.verifySteps(['ok d1']);
 
         await d3.resolve('d3');
-        assert.verifySteps(['p1 rejected', 'p2 rejected', 'ok d1', 'ok d3', 'p3 resolved']);
+        assert.verifySteps(['ok d3', 'p3 resolved']);
 
         done();
     });

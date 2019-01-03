@@ -5791,9 +5791,9 @@ QUnit.module('Views', {
 
         // click on button, and click on ok in confirm dialog
         await testUtils.dom.click(form.$('.o_statusbar_buttons button'));
-        assert.verifySteps(['default_get']);
+        assert.verifySteps([]);
         await testUtils.dom.click($('.modal-footer button.btn-primary'));
-        assert.verifySteps(['default_get', 'create', 'read', 'execute_action']);
+        assert.verifySteps(['create', 'read', 'execute_action']);
 
         form.destroy();
     });
@@ -6562,7 +6562,7 @@ QUnit.module('Views', {
         // in edit
         await testUtils.form.clickEdit(form);
         await testUtils.dom.click(form.$('[name="display_name"]'));
-        assert.verifySteps(['bounce']);
+        assert.verifySteps([]);
 
         form.destroy();
     });

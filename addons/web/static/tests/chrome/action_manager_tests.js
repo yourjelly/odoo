@@ -586,7 +586,7 @@ QUnit.module('ActionManager', {
         await actionManager.doAction(4);
         assert.verifySteps(['push_state']);
         await actionManager.doAction(5);
-        assert.verifySteps(['push_state']);
+        assert.verifySteps([]);
 
         actionManager.destroy();
     });
@@ -614,7 +614,7 @@ QUnit.module('ActionManager', {
         await actionManager.doAction(8);
         assert.verifySteps(['push_state']);
         await testUtils.dom.click(actionManager.$('tr.o_data_row:first'));
-        assert.verifySteps(['push_state']);
+        assert.verifySteps([]);
         // we make sure here that the list view is still in the dom
         assert.containsOnce(actionManager, '.o_list_view',
             "there should still be a list view in dom");
@@ -1364,15 +1364,7 @@ QUnit.module('ActionManager', {
         assert.containsNone(actionManager, '.o_kanban_view',
             "should not display the kanban view of action 4");
 
-        assert.verifySteps([
-            '/web/action/load', // load state action 4
-            'load_views', // load state action 4
-            'read', // read the opened record (action 4)
-            '/web/dataset/search_read', // blocked search read when coming back to Kanban (action 4)
-            '/web/action/load', // action 8
-            'load_views', // action 8
-            '/web/dataset/search_read', // search read action 8
-        ]);
+        assert.verifySteps([]);
 
         actionManager.destroy();
     });
@@ -1435,16 +1427,7 @@ QUnit.module('ActionManager', {
         assert.containsNone(actionManager, '.o_kanban_view',
             "should not display action 1");
 
-        assert.verifySteps([
-            '/web/action/load', // action 3
-            'load_views', // action 3
-            '/web/dataset/search_read', // list for action 3
-            'read', // form for action 3
-            'object', // click on 'Call method' button (this request is blocked)
-            '/web/action/load', // action 8
-            'load_views', // action 8
-            '/web/dataset/search_read', // list for action 8
-        ]);
+        assert.verifySteps([]);
 
         actionManager.destroy();
     });
@@ -1507,15 +1490,7 @@ QUnit.module('ActionManager', {
         assert.containsNone(actionManager, '.o_form_view',
             "should not display the form view of action 3");
 
-        assert.verifySteps([
-            '/web/action/load', // action 3
-            'load_views', // action 3
-            '/web/dataset/search_read', // search read of list view of action 3
-            '/web/action/load', // action 4
-            'load_views', // action 4
-            'read', // read the opened record of action 3 (this request is blocked)
-            '/web/dataset/search_read', // search read action 4
-        ]);
+        assert.verifySteps([]);
 
         actionManager.destroy();
     });
@@ -3647,9 +3622,7 @@ QUnit.module('ActionManager', {
         await searchPromise.resolve();
         await testUtils.fields.triggerKeydown($searchInput, 'enter');
 
-        assert.verifySteps(["search_read ",
-                            "search_read foo,ilike,m",
-                            "search_read |,foo,ilike,m,foo,ilike,o"]);
+        assert.verifySteps(["search_read |,foo,ilike,m,foo,ilike,o"]);
 
         actionManager.destroy();
     });

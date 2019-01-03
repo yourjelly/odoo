@@ -71,7 +71,7 @@ QUnit.test('reset()', async function (assert) {
     }, 0);
 
     await prom.then(function () {
-        assert.verifySteps(['function_called', 'function_called'],
+        assert.verifySteps(['function_called'],
             "should have called the function twice (2nd time from reset)");
     });
 });

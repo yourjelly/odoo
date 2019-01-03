@@ -2716,7 +2716,7 @@ QUnit.test('fieldmany2many tags email (edition)', async function (assert) {
         "should contain the second tag");
     // should have read [14] three times: when opening the dropdown, when opening the modal, and
     // after the save
-    assert.verifySteps([[12], [14], [14], [14]]);
+    assert.verifySteps([[14], [14], [14]]);
 
     form.destroy();
 });
