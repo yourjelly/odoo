@@ -5575,7 +5575,7 @@ QUnit.module('fields', {}, function () {
         });
 
         QUnit.test('one2many list editable, no onchange when required field is not set', async function (assert) {
-            assert.expect(7);
+            assert.expect(8);
 
             this.data.turtle.fields.turtle_foo.required = true;
             this.data.partner.onchanges = {
@@ -5616,6 +5616,7 @@ QUnit.module('fields', {}, function () {
             assert.verifySteps(['read', 'default_get'], "no onchange should have been applied");
 
             await testUtils.fields.editInput(form.$('.o_field_widget[name="turtle_foo"]'), "some text");
+            assert.verifySteps(['onchange']);
             assert.strictEqual(form.$('.o_field_widget[name="int_field"]').val(), "1",
                 "int_field should now be 1 (the onchange should have been done");
 
@@ -5626,7 +5627,7 @@ QUnit.module('fields', {}, function () {
             // should omit require fields that aren't in the view as they (obviously)
             // have no value, when checking the validity of required fields
             // shouldn't consider numerical fields with value 0 as unset
-            assert.expect(12);
+            assert.expect(13);
 
             this.data.turtle.fields.turtle_foo.required = true;
             this.data.turtle.fields.turtle_qux.required = true; // required field not in the view
@@ -5688,6 +5689,7 @@ QUnit.module('fields', {}, function () {
             await testUtils.fields.many2one.clickHighlightedItem('partner_ids');
             assert.strictEqual(form.$('.o_field_widget[name="int_field"]').val(), "1",
                 "int_field should now be 1 (the onchange should have been done");
+            assert.verifySteps(['name_search', 'read', 'onchange']);
 
             form.destroy();
         });

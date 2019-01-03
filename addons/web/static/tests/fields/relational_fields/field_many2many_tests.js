@@ -873,7 +873,7 @@ QUnit.module('fields', {}, function () {
         QUnit.test('onchange with 40+ commands for a many2many', async function (assert) {
             // this test ensures that the basic_model correctly handles more LINK_TO
             // commands than the limit of the dataPoint (40 for x2many kanban)
-            assert.expect(23);
+            assert.expect(24);
 
             // create a lot of partner_types that will be linked by the onchange
             var commands = [[5]];
@@ -957,6 +957,7 @@ QUnit.module('fields', {}, function () {
             assert.strictEqual(form.$('.o_kanban_record:not(".o_kanban_ghost")').length, 40,
                 'there should be 40 records displayed on page 1');
 
+            assert.verifySteps(['write', 'read', 'read', 'read']);
             form.destroy();
         });
 

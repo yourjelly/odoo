@@ -2847,7 +2847,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('delete a column in grouped on m2o', async function (assert) {
-        assert.expect(36);
+        assert.expect(37);
 
         testUtils.mock.patch(KanbanRenderer, {
             _renderGrouped: function () {
@@ -2960,6 +2960,7 @@ QUnit.module('Views', {
         await nextTick(); // wait for resequence after drag and drop
         assert.deepEqual([newColumnID, 3], resequencedIDs,
             "moved column should be resequenced accordingly")
+        assert.verifySteps(['name_create', 'read', 'read', 'read']);
 
         kanban.destroy();
         testUtils.mock.unpatch(KanbanRenderer);
@@ -3927,7 +3928,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('load more records in column', async function (assert) {
-        assert.expect(12);
+        assert.expect(13);
 
         var envIDs = [1, 2, 4]; // the ids that should be in the environment during this test
         var kanban = await createAsyncView({
@@ -3970,6 +3971,7 @@ QUnit.module('Views', {
         assert.strictEqual(kanban.$('.o_kanban_group:eq(1) .o_kanban_record').length, 3,
             "there should still be 3 records in the column after reload");
         assert.deepEqual(kanban.exportState().resIds, envIDs);
+        assert.verifySteps([[4, undefined], [2, undefined]]);
 
         kanban.destroy();
     });

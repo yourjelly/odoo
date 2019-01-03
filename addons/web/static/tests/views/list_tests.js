@@ -3937,7 +3937,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('list view on a "noCache" model', async function (assert) {
-        assert.expect(8);
+        assert.expect(9);
 
         testUtils.mock.patch(BasicModel, {
             noCacheModels: BasicModel.prototype.noCacheModels.concat(['foo']),
@@ -3989,6 +3989,8 @@ QUnit.module('Views', {
 
         list.destroy();
         testUtils.mock.unpatch(BasicModel);
+
+        assert.verifySteps(['clear_cache']); // triggered by the test environment on destroy
     });
 
     QUnit.test('list should ask to scroll to top on page changes', async function (assert) {

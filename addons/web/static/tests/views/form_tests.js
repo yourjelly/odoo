@@ -2900,7 +2900,7 @@ QUnit.module('Views', {
             },
             intercepts: {
                 warning: function (event) {
-                    assert.step('warning');
+                    assert.ok(true, 'should trigger a warning');
                 },
             },
         });
@@ -2911,7 +2911,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('do nothing if add a line in one2many result in a onchange with a warning', async function (assert) {
-        assert.expect(2);
+        assert.expect(3);
 
         this.data.partner.onchanges = { foo: true };
 
@@ -2951,6 +2951,7 @@ QUnit.module('Views', {
         await testUtils.dom.click(form.$('.o_field_x2many_list_row_add a'));
         assert.containsNone(form, 'tr.o_data_row',
             "should not have added a line");
+        assert.verifySteps(["should have triggered a warning"]);
         form.destroy();
     });
 
@@ -3516,7 +3517,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('onchanges that complete after discarding', async function (assert) {
-        assert.expect(4);
+        assert.expect(5);
 
         var def1 = testUtils.makeTestPromise();
 
@@ -3564,6 +3565,7 @@ QUnit.module('Views', {
         await testUtils.nextTick();
         assert.strictEqual(form.$('span[name="foo"]').text(), "blip",
             "field foo should still be displayed to initial value");
+        assert.verifySteps(['onchange is done']);
 
         form.destroy();
     });
@@ -6756,7 +6758,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('edition in form view on a "noCache" model', async function (assert) {
-        assert.expect(4);
+        assert.expect(5);
 
         await testUtils.mock.patch(BasicModel, {
             noCacheModels: BasicModel.prototype.noCacheModels.concat(['partner']),
@@ -6791,10 +6793,12 @@ QUnit.module('Views', {
 
         form.destroy();
         await testUtils.mock.unpatch(BasicModel);
+
+        assert.verifySteps(['clear_cache']); // triggered by the test environment on destroy
     });
 
     QUnit.test('creation in form view on a "noCache" model', async function (assert) {
-        assert.expect(4);
+        assert.expect(5);
 
         await testUtils.mock.patch(BasicModel, {
             noCacheModels: BasicModel.prototype.noCacheModels.concat(['partner']),
@@ -6825,10 +6829,12 @@ QUnit.module('Views', {
 
         form.destroy();
         await testUtils.mock.unpatch(BasicModel);
+
+        assert.verifySteps(['clear_cache']); // triggered by the test environment on destroy
     });
 
     QUnit.test('deletion in form view on a "noCache" model', async function (assert) {
-        assert.expect(4);
+        assert.expect(5);
 
         await testUtils.mock.patch(BasicModel, {
             noCacheModels: BasicModel.prototype.noCacheModels.concat(['partner']),
@@ -6867,6 +6873,8 @@ QUnit.module('Views', {
 
         form.destroy();
         await testUtils.mock.unpatch(BasicModel);
+
+        assert.verifySteps(['clear_cache']); // triggered by the test environment on destroy
     });
 
     QUnit.test('a popup window should automatically close after a do_action event', async function (assert) {

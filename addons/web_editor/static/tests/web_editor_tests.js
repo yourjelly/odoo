@@ -181,7 +181,7 @@ QUnit.test('field htmlsimple does not crash when commitChanges is called in mode
         res_id: 1,
         intercepts: {
             execute_action: function () {
-                assert.step('execute_action');
+                assert.ok(true, 'should trigger execute_action');
             }
         },
     });

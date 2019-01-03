@@ -617,7 +617,7 @@ QUnit.module('relational_fields', {
     });
 
     QUnit.test('widget selection, edition and on many2one field', async function (assert) {
-        assert.expect(18);
+        assert.expect(19);
 
         this.data.partner.onchanges = {product_id: function () {}};
         this.data.partner.records[0].product_id = 37;
@@ -672,6 +672,8 @@ QUnit.module('relational_fields', {
         count = 0;
         await form.reload();
         assert.strictEqual(count, 1, "should not reload product_id relation");
+        assert.verifySteps(['read']);
+
         form.destroy();
     });
 
@@ -1785,7 +1787,7 @@ QUnit.module('relational_fields', {
     QUnit.module('FieldMany2ManyBinaryMultiFiles');
 
     QUnit.test('widget many2many_binary', async function (assert) {
-        assert.expect(14);
+        assert.expect(15);
         this.data['ir.attachment'] = {
             fields: {
                 name: {string:"Name", type: "char"},
@@ -1858,6 +1860,11 @@ QUnit.module('relational_fields', {
 
         assert.strictEqual(form.$('div.o_field_widget.oe_fileupload .oe_attachments').children().length, 0,
             "there should be no attachment");
+
+        assert.verifySteps([
+            '/web/dataset/call_kw/turtle/write',
+            '/web/dataset/call_kw/turtle/read',
+        ]);
 
         form.destroy();
     });

@@ -23,7 +23,7 @@ QUnit.module('core', {}, function () {
         });
 
         widget.do_action('test.some_action_id', {clear_breadcrumbs: true}).then(function () {
-            assert.step('deferred should have been resolved');
+            assert.ok(true, 'deferred should have been resolved');
             widget.destroy();
             done();
         });
