@@ -73,9 +73,6 @@ QUnit.module('DocumentViewer', {
             {id: 6, name: 'image.jpg', datas_fname: 'image.jpg', type: 'binary', mimetype: 'image/jpeg', checksum: 999, datas:'R0lVOP////ywAADs='},
         ];
     },
-    afterEach: function () {
-        testUtils.checkBody();
-    },
 }, function () {
 
     QUnit.test('basic rendering', async function (assert) {

@@ -97,9 +97,6 @@ QUnit.module('Views', {
             },
         };
     },
-    afterEach: function () {
-        testUtils.checkBody();
-    },
 }, function () {
 
     QUnit.module('CalendarView');

@@ -92,9 +92,6 @@ odoo.define('sale.product.configurator.tests', function (require) {
                 }
             };
         },
-        afterEach: function () {
-            testUtils.checkBody();
-        },
     }, function (){
         QUnit.test('click on "Configure a product" and check for form loading', async function (assert) {
             assert.expect(2);

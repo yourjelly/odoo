@@ -42,9 +42,6 @@ QUnit.module('Dashboard', {
             },
         };
     },
-    afterEach: function () {
-        testUtils.checkModals();
-    },
 });
 
 QUnit.test('dashboard basic rendering', async function (assert) {

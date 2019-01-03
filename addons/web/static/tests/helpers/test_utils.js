@@ -28,52 +28,6 @@ var testUtilsPivot = require('web.test_utils_pivot');
 var tools = require('web.tools');
 
 
-function checkBody () {
-    var $bodyChilds = $('body > *');
-    var validElements = [
-        // Always in the body:
-        {tagName: 'DIV', attrToCompare: 'id', value: 'qunit'},
-        {tagName: 'DIV', attrToCompare: 'id', value: 'qunit-fixture'},
-        {tagName: 'SCRIPT', attrToCompare: 'id', value: ''},
-        // Stay in debug:
-        {tagName: 'DIV', attrToCompare: 'className', value: 'o_web_client'},
-        // Don't must be in the body after a test but tolerate:
-        {tagName: 'DIV', attrToCompare: 'className', value: 'o_notification_manager'},
-        {tagName: 'DIV', attrToCompare: 'className', value: 'tooltip fade bs-tooltip-auto'},
-        {tagName: 'DIV', attrToCompare: 'className', value: 'tooltip fade bs-tooltip-auto show'},
-        {tagName: 'I', attrToCompare: 'title', value: 'Raphaël Colour Picker'},
-    ];
-    if ($bodyChilds.length > 3) {
-        console.warn(`There are something abnormal in the body`);
-        for (var i = 0; i < $bodyChilds.length; i++) {
-            var bodyChild = $bodyChilds[i];
-            var validate = false;
-
-            for (var j = 0; j < validElements.length; j++) {
-                var toleratedElement = validElements[j];
-                if (toleratedElement.tagName === bodyChild.tagName) {
-                    var attr = toleratedElement.attrToCompare;
-                    if (toleratedElement.value === bodyChild[attr]) {
-                        validate = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!validate) {
-                throw new Error (`Body still contains undesirable element (${bodyChild})`);
-            }
-        }
-    }
-}
-
-function checkModals () {
-    var numberOfModalsOpened = $('.modal').length;
-    if ( numberOfModalsOpened > 0) {
-        throw new Error (`There are ${numberOfModalsOpened} modal(s) still open after the test`);
-    }
-}
-
 function deprecated(fn, type) {
     var msg = `Helper 'testUtils.${fn.name}' is deprecated. ` +
         `Please use 'testUtils.${type}.${fn.name}' instead.`;
@@ -216,8 +170,6 @@ return Promise.all([
             dropFile: testUtilsFile.dropFile,
         },
 
-        checkBody: checkBody,
-        checkModals: checkModals,
         createActionManager: testUtilsCreate.createActionManager,
         createDebugManager: testUtilsCreate.createDebugManager,
         createAsyncView: testUtilsCreate.createAsyncView,

@@ -32,9 +32,6 @@ QUnit.module('pad widget', {
             },
         };
     },
-    afterEach: function () {
-        testUtils.checkBody();
-    },
 });
 
     QUnit.test('pad widget display help if server not configured', async function (assert) {

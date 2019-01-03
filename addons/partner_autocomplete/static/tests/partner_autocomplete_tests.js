@@ -148,9 +148,6 @@ odoo.define('partner_autocomplete.tests', function (require) {
             testUtils.mock.unpatch(AutocompleteField);
             testUtils.mock.unpatch(PartnerField);
         },
-        afterEach: function () {
-            testUtils.checkBody();
-        },
     });
 
     QUnit.test("Partner autocomplete : Company type = Individual", function (assert) {

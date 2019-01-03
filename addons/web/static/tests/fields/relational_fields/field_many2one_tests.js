@@ -151,10 +151,6 @@ QUnit.module('fields', {}, function () {
                 },
             };
         },
-        afterEach: function() {
-            testUtils.checkBody();
-            testUtils.checkModals();
-        },
     }, function () {
         QUnit.module('FieldMany2One');
 

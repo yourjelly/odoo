@@ -52,11 +52,6 @@ QUnit.module('Views', {
             },
         };
     },
-    afterEach: function() {
-        testUtils.checkBody();
-        testUtils.checkModals();
-    },
-
 }, function () {
 
     QUnit.module('view_dialogs');

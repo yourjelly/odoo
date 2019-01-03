@@ -147,9 +147,6 @@ QUnit.module('relational_fields', {
             },
         };
     },
-    afterEach: function () {
-        testUtils.checkBody();
-    },
 }, function () {
 
     QUnit.test('x2many default_order multiple fields', async function (assert) {
