@@ -52,10 +52,10 @@ function _genericJsonRpc (fct_name, params, settings, fct) {
             }
             resolve(result);
         }, function (reason) {
-            var type = reason.type;
-            var error = reason.error;
-            var textStatus = reason.textStatus;
-            var errorThrown = reason.errorThrown;
+            var type = reason[0];
+            var error = reason[1];
+            var textStatus = reason[2];
+            var errorThrown = reason[3];
             if (type === "server") {
                 if (!shadow) {
                     core.bus.trigger('rpc_response');

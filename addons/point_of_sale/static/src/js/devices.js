@@ -389,12 +389,12 @@ var ProxyDevice  = core.Class.extend(mixins.PropertiesMixin,{
 
         return new Promise(function (resolve, reject) {
             Promise.all(threads).then(function(results){
-                var urls = results[0];
-                // SVS: need to check if results/urls are what we expect
-                console.log('- device.js > find_proxy');
-                console.log('-- Promise.all results :', results);
-                console.log('-- urls :', urls);
-                // ^^^ TODO: Delete these console.log before merge ^^^
+                var urls = [];
+                for(var i = 0; i < results.length; i++){
+                    if(results[i]){
+                        urls.push(results[i]);
+                    }
+                }
                 resolve(urls[0]);
             });
         });
