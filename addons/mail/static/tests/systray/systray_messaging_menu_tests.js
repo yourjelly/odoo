@@ -459,10 +459,7 @@ QUnit.test('preview of inbox message not linked to document + mark as read', asy
         },
         mockRPC: function (route, args) {
             if (args.method === 'set_message_done') {
-                assert.step({
-                    method: 'set_message_done',
-                    messageIDs: args.args[0],
-                });
+                assert.step('method: set_message_done, messageIDs: ' + JSON.stringify(args.args[0]));
             }
             return this._super.apply(this, arguments);
         },
@@ -495,10 +492,8 @@ QUnit.test('preview of inbox message not linked to document + mark as read', asy
         "Demo:*Message2*", "should correctly display the 2nd preview");
 
     await testUtils.dom.click($preview1.find('.o_mail_preview_mark_as_read'));
-    assert.verifySteps([{
-            method: 'set_message_done',
-            messageIDs: [689],
-        }], "should mark 1st preview as read");
+    assert.verifySteps(['method: set_message_done, messageIDs: [689]'],
+        "should mark 1st preview as read");
     assert.strictEqual(messagingMenu.$('.o_notification_counter').text(), '1',
         "should display a counter of 1 on the messaging menu icon after marking one preview as read");
     assert.strictEqual(messagingMenu.$('.o_mail_preview').length, 1,
@@ -508,10 +503,8 @@ QUnit.test('preview of inbox message not linked to document + mark as read', asy
 
     $preview2 = messagingMenu.$('.o_mail_preview');
     await testUtils.dom.click($preview2.find('.o_mail_preview_mark_as_read'));
-    assert.verifySteps([{
-        method: 'set_message_done',
-        messageIDs: [690],
-    }], "should mark 2nd preview as read");
+    assert.verifySteps(['method: set_message_done, messageIDs: [690]'],
+        "should mark 2nd preview as read");
     assert.strictEqual(messagingMenu.$('.o_notification_counter').text(), '0',
         "should display a counter of 0 on the messaging menu icon after marking both previews as read");
     assert.strictEqual(messagingMenu.$('.o_mail_preview').length, 0,

@@ -227,7 +227,7 @@ QUnit.test('activity view: batch send mail on activity', async function (assert)
         arch: '<activity string="Task"/>',
         mockRPC: function(route, args) {
             if (args.method === 'activity_send_mail'){
-                assert.step(args.args);
+                assert.step(JSON.stringify(args.args));
                 return Promise.resolve();
             }
             if (args.method === 'get_activity_data') {
@@ -250,8 +250,8 @@ QUnit.test('activity view: batch send mail on activity', async function (assert)
     testUtils.dom.click(activity.$('table thead tr:first th:nth-child(2) span:nth-child(2) i.fa-ellipsis-v'));
     testUtils.dom.click(activity.$('table thead tr:first th:nth-child(2) span:nth-child(2) .dropdown-menu.show .o_send_mail_template:nth-child(2):contains(Task: Reception Acknowledgment)'));
     assert.verifySteps([
-        [[13, 30], 9], //send mail template 9 on tasl 13 and 30
-        [[13, 30], 8]  //send mail template 8 on tasl 13 and 30
+        '[[13,30],9]', // send mail template 9 on tasks 13 and 30
+        '[[13,30],8]',  // send mail template 8 on tasks 13 and 30
     ]);
 
     activity.destroy();

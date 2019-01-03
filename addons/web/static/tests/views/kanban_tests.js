@@ -3946,7 +3946,7 @@ QUnit.module('Views', {
             },
             mockRPC: function (route, args) {
                 if (route === '/web/dataset/search_read') {
-                    assert.step([args.limit, args.offset]);
+                    assert.step(args.limit + ' - ' +  args.offset);
                 }
                 return this._super.apply(this, arguments);
             },
@@ -3962,7 +3962,7 @@ QUnit.module('Views', {
 
         assert.strictEqual(kanban.$('.o_kanban_group:eq(1) .o_kanban_record').length, 3,
             "there should now be 3 records in the column");
-        assert.verifySteps([[2, undefined], [2, undefined], [2, 2]],
+        assert.verifySteps(['2 - undefined', '2 - undefined', '2 - 2'],
             "the records should be correctly fetched");
         assert.deepEqual(kanban.exportState().resIds, envIDs);
 
@@ -3971,7 +3971,7 @@ QUnit.module('Views', {
         assert.strictEqual(kanban.$('.o_kanban_group:eq(1) .o_kanban_record').length, 3,
             "there should still be 3 records in the column after reload");
         assert.deepEqual(kanban.exportState().resIds, envIDs);
-        assert.verifySteps([[4, undefined], [2, undefined]]);
+        assert.verifySteps(['4 - undefined', '2 - undefined']);
 
         kanban.destroy();
     });
@@ -4004,7 +4004,7 @@ QUnit.module('Views', {
             },
             mockRPC: function (route, args) {
                 if (args.model === 'category' && args.method === 'read') {
-                    assert.step(args.args[0]);
+                    assert.step(String(args.args[0]));
                 }
                 if (route === '/web/dataset/search_read') {
                     if (args.limit) {
@@ -4023,7 +4023,7 @@ QUnit.module('Views', {
         assert.strictEqual(kanban.$('.o_kanban_group:eq(1) .o_kanban_record').length, 2,
             "there should be 2 records in the column");
 
-        assert.verifySteps([[7]], "only the appearing category should be fetched");
+        assert.verifySteps(['7'], "only the appearing category should be fetched");
 
         // load more
         await testUtils.dom.click(kanban.$('.o_kanban_group:eq(1)').find('.o_kanban_load_more'));
@@ -4031,7 +4031,7 @@ QUnit.module('Views', {
         assert.strictEqual(kanban.$('.o_kanban_group:eq(1) .o_kanban_record').length, 3,
             "there should now be 3 records in the column");
 
-        assert.verifySteps([[6]], "the other categories should not be fetched");
+        assert.verifySteps(['6'], "the other categories should not be fetched");
 
         kanban.destroy();
     });

@@ -107,7 +107,7 @@ QUnit.module('project', {
                     }]);
                 }
                 if (args.model === 'project.task' && args.method === 'write') {
-                    assert.step(args.args[0][0]);
+                    assert.step(String(args.args[0][0]));
                     return this._super(route, args);
                 }
                 return this._super(route, args);
@@ -130,7 +130,7 @@ QUnit.module('project', {
         assert.containsOnce(kanban, 'img[data-src*="/web/image/2"]');
 
         // verify writes on both kanban records
-        assert.verifySteps([1, 2]);
+        assert.verifySteps(['1', '2']);
 
         kanban.destroy();
     });

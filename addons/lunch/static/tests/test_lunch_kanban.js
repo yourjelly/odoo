@@ -124,7 +124,7 @@ QUnit.module('Views', {
                 } else if (route === '/lunch/pay') {
                     return Promise.resolve(true);
                 } else if (args.method === 'update_quantity') {
-                    assert.step(args.args);
+                    assert.step(JSON.stringify(args.args));
                     return Promise.resolve();
                 } else if (route.startsWith('data:image/png;base64,')) {
                     return Promise.resolve();
@@ -156,10 +156,7 @@ QUnit.module('Views', {
         // state is updated
         assert.containsOnce(lunchKanban, '.o_lunch_confirmed', 'state should be shown as confirmed');
 
-        assert.verifySteps([
-            [[1], 1],
-            [[1], -1],
-        ]);
+        assert.verifySteps(['[[1],1]', '[[1],-1]']);
 
         lunchKanban.destroy();
     });

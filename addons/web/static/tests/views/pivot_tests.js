@@ -1439,11 +1439,14 @@ QUnit.module('Views', {
                 get_file: function (args) {
                     var data = JSON.parse(args.data.data);
                     _.each(data.headers, function (l) {
-                        assert.step(l.map(function (o) {return o.title;}));
+                        var titles = l.map(function (o) {return o.title;});
+                        assert.step(JSON.stringify(titles));
                     });
-                    assert.step(data.measure_row.map(function (o) {return o.measure;}));
-                    assert.step(data.nbr_measures);
-                    assert.step(data.rows.map(function (o) {return o.values.length;}));
+                    var measures = data.measure_row.map(function (o) {return o.measure;});
+                    assert.step(JSON.stringify(measures));
+                    assert.step(String(data.nbr_measures));
+                    var valuesLength = data.rows.map(function (o) {return o.values.length;});
+                    assert.step(JSON.stringify(valuesLength));
                     assert.strictEqual(args.url, '/web/pivot/export_xls',
                         "should call get_file with correct parameters");
                     args.complete();
@@ -1487,18 +1490,15 @@ QUnit.module('Views', {
 
         assert.verifySteps([
             // Headers
-            ["Total", ""],
-            ["December 2016" , "November 2016"],
-            ["Foo", "Foo", "Foo"],
-            [
-                "This Month", "Previous Period", "Variation",
-                "This Month", "Previous Period", "Variation",
-                "This Month", "Previous Period", "Variation"
-            ],
+            '["Total",""]',
+            '["December 2016","November 2016"]',
+            '["Foo","Foo","Foo"]',
+            '["This Month","Previous Period","Variation","This Month","Previous Period"' +
+                ',"Variation","This Month","Previous Period","Variation"]',
             // number of 'measures'
-            3,
+            '3',
             // rows values length
-            [9]
+            '[9]',
         ]);
 
         unpatchDate();

@@ -740,7 +740,7 @@ QUnit.module('fields', {}, function () {
                         assert.step(_.last(route.split('/')) + ' on ' + args.model);
                     }
                     if (args.model === 'turtle') {
-                        assert.step(args.args[0]); // the read ids
+                        assert.step(JSON.stringify(args.args[0])); // the read ids
                     }
                     return this._super.apply(this, arguments);
                 },
@@ -769,16 +769,16 @@ QUnit.module('fields', {}, function () {
                 'read on partner',
                 'search_read on partner_type',
                 'read on turtle',
-                [1, 2, 3],
+                '[1,2,3]',
                 'read on partner_type',
                 'read on turtle',
-                [1, 2],
+                '[1,2]',
                 'search_read on partner_type',
                 'read on turtle',
-                [2, 3],
+                '[2,3]',
                 'read on partner_type',
                 'read on turtle',
-                [2, 3],
+                '[2,3]',
             ]);
 
             form.destroy();

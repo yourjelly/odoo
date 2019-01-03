@@ -35,7 +35,7 @@ QUnit.module('Bus', {
             },
             mockRPC: function (route, args) {
                 if (route === '/longpolling/poll') {
-                    assert.step([route, args.channels.join(',')]);
+                    assert.step(route + ' - ' + args.channels.join(','));
 
                     pollPromise = testUtils.makeTestPromise();
                     pollPromise.abort = (function () {
@@ -51,7 +51,7 @@ QUnit.module('Bus', {
         await widget.appendTo($('#qunit-fixture'));
 
         widget.call('bus_service', 'onNotification', this, function (notifications) {
-            assert.step(['notification', notifications]);
+            assert.step('notification - ' + notifications.toString());
         });
         widget.call('bus_service', 'addChannel', 'lambda');
 
@@ -67,11 +67,11 @@ QUnit.module('Bus', {
         }]);
 
         assert.verifySteps([
-            ["/longpolling/poll", "lambda"],
-            ["notification", [["lambda","beta"]]],
-            ["/longpolling/poll", "lambda"],
-            ["notification", [["lambda","epsilon"]]],
-            ["/longpolling/poll", "lambda"]
+            '/longpolling/poll - lambda',
+            'notification - lambda,beta',
+            '/longpolling/poll - lambda',
+            'notification - lambda,epsilon',
+            '/longpolling/poll - lambda',
         ]);
 
         parent.destroy();
@@ -147,7 +147,7 @@ QUnit.module('Bus', {
             },
             mockRPC: function (route, args) {
                 if (route === '/longpolling/poll') {
-                    assert.step(['master', route, args.channels.join(',')]);
+                    assert.step('master' + ' - ' + route + ' - ' + args.channels.join(','));
 
                     pollPromiseMaster = testUtils.makeTestPromise();
                     pollPromiseMaster.abort = (function () {
@@ -163,7 +163,7 @@ QUnit.module('Bus', {
         await master.appendTo($('#qunit-fixture'));
 
         master.call('bus_service', 'onNotification', master, function (notifications) {
-            assert.step(['master', 'notification', notifications]);
+            assert.step('master - notification - ' + notifications.toString());
         });
         master.call('bus_service', 'addChannel', 'lambda');
 
@@ -188,7 +188,7 @@ QUnit.module('Bus', {
         await slave.appendTo($('#qunit-fixture'));
 
         slave.call('bus_service', 'onNotification', slave, function (notifications) {
-            assert.step(['slave', 'notification', notifications]);
+            assert.step('slave - notification - ' + notifications.toString());
         });
         slave.call('bus_service', 'addChannel', 'lambda');
 
@@ -199,10 +199,10 @@ QUnit.module('Bus', {
         }]);
 
         assert.verifySteps([
-            ["master", "/longpolling/poll", "lambda"],
-            ["master", "notification", [["lambda", "beta"]]],
-            ["slave", "notification", [["lambda", "beta"]]],
-            ["master", "/longpolling/poll", "lambda"],
+            'master - /longpolling/poll - lambda',
+            'master - notification - lambda,beta',
+            'slave - notification - lambda,beta',
+            'master - /longpolling/poll - lambda',
         ]);
 
         parentMaster.destroy();
@@ -224,7 +224,7 @@ QUnit.module('Bus', {
             },
             mockRPC: function (route, args) {
                 if (route === '/longpolling/poll') {
-                    assert.step(['master', route, args.channels.join(',')]);
+                    assert.step('master - ' + route + ' - ' + args.channels.join(','));
 
                     pollPromiseMaster = testUtils.makeTestPromise();
                     pollPromiseMaster.abort = (function () {
@@ -240,7 +240,7 @@ QUnit.module('Bus', {
         await master.appendTo($('#qunit-fixture'));
 
         master.call('bus_service', 'onNotification', master, function (notifications) {
-            assert.step(['master', 'notification', notifications]);
+            assert.step('master - notification - ' + notifications.toString());
         });
         master.call('bus_service', 'addChannel', 'lambda');
 
@@ -256,7 +256,7 @@ QUnit.module('Bus', {
             },
             mockRPC: function (route, args) {
                 if (route === '/longpolling/poll') {
-                    assert.step(['slave', route, args.channels.join(',')]);
+                    assert.step('slave - ' + route + ' - ' + args.channels.join(','));
 
                     pollPromiseSlave = testUtils.makeTestPromise();
                     pollPromiseSlave.abort = (function () {
@@ -272,7 +272,7 @@ QUnit.module('Bus', {
         await slave.appendTo($('#qunit-fixture'));
 
         slave.call('bus_service', 'onNotification', slave, function (notifications) {
-            assert.step(['slave', 'notification', notifications]);
+            assert.step('slave - notification - ' + notifications.toString());
         });
         slave.call('bus_service', 'addChannel', 'lambda');
 
@@ -292,17 +292,17 @@ QUnit.module('Bus', {
         }]);
 
         assert.verifySteps([
-            ["master", "/longpolling/poll", "lambda"],
-            ["master", "notification", [["lambda", "beta"]]],
-            ["slave", "notification", [["lambda", "beta"]]],
-            ["master", "/longpolling/poll", "lambda"],
-            ["slave", "/longpolling/poll", "lambda"],
-            ["slave", "notification", [["lambda", "gamma"]]],
-            ["slave", "/longpolling/poll", "lambda"],
+            'master - /longpolling/poll - lambda',
+            'master - notification - lambda,beta',
+            'slave - notification - lambda,beta',
+            'master - /longpolling/poll - lambda',
+            'slave - /longpolling/poll - lambda',
+            'slave - notification - lambda,gamma',
+            'slave - /longpolling/poll - lambda',
         ]);
 
         parentMaster.destroy();
         parentSlave.destroy();
     });
-
-});});
+});
+});

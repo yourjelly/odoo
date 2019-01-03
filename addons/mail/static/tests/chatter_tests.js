@@ -2625,7 +2625,7 @@ QUnit.test('fieldmany2many tags email', function (assert) {
         },
         mockRPC: function (route, args) {
             if (args.method ==='read' && args.model === 'partner_type') {
-                assert.step(args.args[0]);
+                assert.step(JSON.stringify(args.args[0]));
                 assert.deepEqual(args.args[1] , ['display_name', 'email'], "should read the email");
             }
             return this._super.apply(this, arguments);
@@ -2635,7 +2635,7 @@ QUnit.test('fieldmany2many tags email', function (assert) {
         },
     }).then(async function (form) {
         // should read it 3 times (1 with the form view, one with the form dialog and one after save)
-        assert.verifySteps([[12, 14], [14], [14]]);
+        assert.verifySteps(['[12,14]', '[14]', '[14]']);
         await testUtils.nextTick();
         assert.containsN(form, '.o_field_many2manytags[name="timmy"] .badge.o_tag_color_0', 2,
             "two tags should be present");
@@ -2683,7 +2683,7 @@ QUnit.test('fieldmany2many tags email (edition)', async function (assert) {
         },
         mockRPC: function (route, args) {
             if (args.method ==='read' && args.model === 'partner_type') {
-                assert.step(args.args[0]);
+                assert.step(JSON.stringify(args.args[0]));
                 assert.deepEqual(args.args[1] , ['display_name', 'email'], "should read the email");
             }
             return this._super.apply(this, arguments);
@@ -2693,7 +2693,7 @@ QUnit.test('fieldmany2many tags email (edition)', async function (assert) {
         },
     });
 
-    assert.verifySteps([[12]]);
+    assert.verifySteps(['[12]']);
     assert.containsOnce(form, '.o_field_many2manytags[name="timmy"] .badge.o_tag_color_0',
         "should contain one tag");
 
@@ -2716,7 +2716,7 @@ QUnit.test('fieldmany2many tags email (edition)', async function (assert) {
         "should contain the second tag");
     // should have read [14] three times: when opening the dropdown, when opening the modal, and
     // after the save
-    assert.verifySteps([[14], [14], [14]]);
+    assert.verifySteps(['[14]', '[14]', '[14]']);
 
     form.destroy();
 });

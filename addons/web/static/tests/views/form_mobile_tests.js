@@ -70,7 +70,7 @@ QUnit.module('Views', {
             res_id: 1,
             mockRPC: function (route, args) {
                 if (route === '/web/dataset/call_kw/partner/read') {
-                    assert.step(args.args[0][0]);
+                    assert.step(String(args.args[0][0]));
                 }
                 return this._super(route, args);
             },
@@ -84,7 +84,7 @@ QUnit.module('Views', {
         await testUtils.nextTick();
         assert.strictEqual(form.pager.$('.o_pager_value').text(), '1', 'pager value should be 1');
 
-        assert.verifySteps([1, 2, 1]);
+        assert.verifySteps(['1', '2', '1']);
 
         $.fn.swipe = oldSwipe;
         form.destroy();

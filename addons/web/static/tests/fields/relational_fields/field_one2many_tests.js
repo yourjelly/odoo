@@ -1591,16 +1591,15 @@ QUnit.module('fields', {}, function () {
             });
 
             testUtils.mock.intercept(form, "field_changed", function (event) {
-                assert.step(form.model.get(event.data.changes.turtles.id).res_id);
+                assert.step(String(form.model.get(event.data.changes.turtles.id).res_id));
             }, true);
 
             await testUtils.form.clickEdit(form);
 
-            var steps = [];
             var positions = [
-                [6, 0, 'top', [3, 6, 1, 2, 5, 7, 4]], // move the last to the first line
-                [5, 1, 'top', [7, 6, 1, 2, 5]], // move the penultimate to the second line
-                [2, 5, 'center', [1, 2, 5, 6]], // move the third to the penultimate line
+                [6, 0, 'top', ['3', '6', '1', '2', '5', '7', '4']], // move the last to the first line
+                [5, 1, 'top', ['7', '6', '1', '2', '5']], // move the penultimate to the second line
+                [2, 5, 'center', ['1', '2', '5', '6']], // move the third to the penultimate line
             ];
             async function dragAndDrop() {
                 var pos = positions.shift();
@@ -1611,8 +1610,7 @@ QUnit.module('fields', {}, function () {
                     { position: pos[2] }
                 );
 
-                steps = steps.concat(pos[3]);
-                assert.verifySteps(steps,
+                assert.verifySteps(pos[3],
                     "sequences values should be apply from the begin index to the drop index");
 
                 if (positions.length) {

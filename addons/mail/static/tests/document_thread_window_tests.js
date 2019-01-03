@@ -237,7 +237,7 @@ QUnit.test('open, fold, unfold and close a document thread window', async functi
     await testUtils.nextTick();
     testUtils.mock.intercept(messagingMenu, 'call_service', function (ev) {
         if (ev.data.service === 'local_storage' && ev.data.method === 'setItem') {
-            assert.step(ev.data.args);
+            assert.step(JSON.stringify(ev.data.args));
         }
     }, true);
     await messagingMenu.appendTo($('#qunit-fixture'));
@@ -263,10 +263,10 @@ QUnit.test('open, fold, unfold and close a document thread window', async functi
     await testUtils.nextTick();
 
     assert.verifySteps([
-        ['mail.document_threads_state', {"some.res.model_1": {"name": "Some Record", "windowState": "open"}}],
-        ['mail.document_threads_state', {"some.res.model_1": {"name": "Some Record", "windowState": "folded"}}],
-        ['mail.document_threads_state', {"some.res.model_1": {"name": "Some Record", "windowState": "open"}}],
-        ['mail.document_threads_state', {"some.res.model_1": {"name": "Some Record", "windowState": "closed"}}],
+        '["mail.document_threads_state",{"some.res.model_1":{"name":"Some Record","windowState":"open"}}]',
+        '["mail.document_threads_state",{"some.res.model_1":{"name":"Some Record","windowState":"folded"}}]',
+        '["mail.document_threads_state",{"some.res.model_1":{"name":"Some Record","windowState":"open"}}]',
+        '["mail.document_threads_state",{"some.res.model_1":{"name":"Some Record","windowState":"closed"}}]',
     ]);
 
     messagingMenu.destroy();
