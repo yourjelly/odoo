@@ -171,6 +171,7 @@ async function createAsyncView(params) {
             // when it will be called the second time (by its parent)
             delete view.destroy;
             widget.destroy();
+            $webClient.remove();
 
             testUtilsMock.unpatch(View);
         };
@@ -297,6 +298,7 @@ function createControlPanel(params) {
             // children when it will be called the second time (by its parent)
             delete controlPanel.destroy;
             widget.destroy();
+            $webClient.remove();
         };
 
         // render the controlPanel in a fragment as it must be able to render

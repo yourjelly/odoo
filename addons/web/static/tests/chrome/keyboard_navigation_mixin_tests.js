@@ -10,6 +10,10 @@ QUnit.module('KeyboardNavigationMixin', function () {
         assert.expect(1);
         var $target = $('#qunit-fixture');
         var KeyboardWidget = Widget.extend(KeyboardNavigationMixin, {
+            init: function () {
+                this._super.apply(this, arguments);
+                KeyboardNavigationMixin.init.call(this);
+            },
             start: function () {
                 var $button = $('<button>').text('Click Me!').attr('accesskey', 'o');
                 // we need to define the accesskey because it will not be assigned on invisible buttons
@@ -42,6 +46,10 @@ QUnit.module('KeyboardNavigationMixin', function () {
         var $target = $('#qunit-fixture');
         var $button;
         var KeyboardWidget = Widget.extend(KeyboardNavigationMixin, {
+            init: function () {
+                this._super.apply(this, arguments);
+                KeyboardNavigationMixin.init.call(this);
+            },
             start: function () {
                 $button = $('<button>').text('Click Me!').attr('accesskey', 'o');
                 // we need to define the accesskey because it will not be assigned on invisible buttons

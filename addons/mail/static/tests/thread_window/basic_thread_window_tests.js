@@ -176,6 +176,7 @@ QUnit.test('thread window\'s input can still be focused when the UI is blocked',
 
     framework.unblockUI();
     parent.destroy();
+    $input.remove();
 });
 
 QUnit.test('emoji popover should open correctly in thread windows', async function (assert) {

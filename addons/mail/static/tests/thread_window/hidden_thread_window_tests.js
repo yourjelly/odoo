@@ -48,6 +48,9 @@ QUnit.module('Hidden', {
         };
     },
     afterEach: function () {
+        // remove thread window dropup appended by mail service
+        var $target = $(this.services.mail_service.prototype.THREAD_WINDOW_APPENDTO);
+        $target.find('.o_thread_window_dropdown').remove();
         // reset thread window append to body
         this.services.mail_service.prototype.THREAD_WINDOW_APPENDTO = 'body';
     },

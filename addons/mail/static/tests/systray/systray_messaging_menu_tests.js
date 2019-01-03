@@ -117,7 +117,7 @@ QUnit.test('messaging menu widget: menu with no records', async function (assert
     await messagingMenu.appendTo($('#qunit-fixture'));
     await testUtils.dom.click(messagingMenu.$('.dropdown-toggle'));
     assert.hasClass(messagingMenu.$('.o_no_activity'),'o_no_activity', "should not have instance of widget");
-    // messagingMenu.destroy();
+    messagingMenu.destroy();
 });
 
 QUnit.test('messaging menu widget: messaging menu with 1 record', async function (assert) {
