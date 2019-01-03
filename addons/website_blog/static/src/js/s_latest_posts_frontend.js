@@ -126,7 +126,7 @@ sAnimation.registry.js_get_posts = sAnimation.Class.extend({
                 $progress.hide();
             }, 5000);
 
-            $dummyImg.load(function () {
+            $dummyImg.on('load', function () {
                 $bar.css('width', '100%').attr('aria-valuenow', '100');
                 setTimeout(function () {
                     $post.removeClass('js-loading');
