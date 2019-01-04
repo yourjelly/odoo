@@ -3896,7 +3896,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('concurrent reloads finishing in inverse order', async function (assert) {
-        assert.expect(3);
+        assert.expect(4);
 
         var blockSearchRead = false;
         var prom = testUtils.makeTestPromise();
@@ -3920,6 +3920,7 @@ QUnit.module('Views', {
         // reload with a domain (this request is blocked)
         blockSearchRead = true;
         list.reload({domain: [['foo', '=', 'yop']]});
+        await testUtils.nextTick();
 
         assert.containsN(list, '.o_list_view .o_data_row', 4,
             "list view should still contain 4 records (search_read being blocked)");
@@ -3927,9 +3928,15 @@ QUnit.module('Views', {
         // reload without the domain
         blockSearchRead = false;
         list.reload({domain: []});
+        await testUtils.nextTick();
+
+        assert.containsN(list, '.o_list_view .o_data_row', 4,
+            "list view should still contain 4 records");
 
         // unblock the RPC
         prom.resolve();
+        await testUtils.nextTick();
+
         assert.containsN(list, '.o_list_view .o_data_row', 4,
             "list view should still contain 4 records");
 

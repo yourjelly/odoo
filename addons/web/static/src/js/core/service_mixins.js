@@ -124,27 +124,6 @@ var ServicesMixin = {
         return result;
     },
     /**
-     * @param  {string} service
-     * @param  {string} method
-     * @return {Promise<any>} result of the service called wrapped in a promise
-     */
-    callAsync: function (service, method) {
-        var self = this;
-        var args = Array.prototype.slice.call(arguments, 2);
-        var prom = new Promise(function (resolve, reject) {
-            self.trigger_up('call_service', {
-                service: service,
-                method: method,
-                args: args,
-                callback: function (result) {
-                    resolve(result);
-                },
-            });
-        });
-        prom.abort = function () {};
-        return prom;
-    },
-    /**
      * Builds and executes RPC query. Returns a promise resolved with
      * the RPC result.
      *
@@ -154,7 +133,7 @@ var ServicesMixin = {
      */
     _rpc: function (params, options) {
         var query = rpc.buildQuery(params);
-        var prom = this.callAsync('ajax', 'rpc', query.route, query.params, options, this);
+        var prom = this.call('ajax', 'rpc', query.route, query.params, options, this);
         if (!prom) {
             var dummy = Promise.resolve();
             dummy.abort = function () {};
