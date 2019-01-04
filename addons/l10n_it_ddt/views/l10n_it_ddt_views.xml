@@ -1,48 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <data>
-        <record model="ir.ui.view" id="l10n_it_ddt_tree">
-            <field name="name">DDT tree</field>
-            <field name="model">l10n.it.ddt</field>
-            <field name="arch" type="xml">
-                <tree>
-                    <field name="name"/>
-                </tree>
-            </field>
-        </record>
-        <record model="ir.ui.view" id="l10n_it_ddt_form">
-            <field name="name">DDT form</field>
-            <field name="model">l10n.it.ddt</field>
-            <field name="arch" type="xml">
-                <form>
-                    <sheet>
-                        <h1><field name="name" readonly="1"/></h1> 
-                    </sheet>
-                    <groups>
-                        <groups>
-                            <field name="picking_ids"/>
-                        </groups>
-                        <groups>
-                        </groups>
-                    </groups>
-                    <notebook>
-                        <page>
-                            <field name="stock_move_ids"/>
-                        </page>
-                    </notebook>
-                </form>
-            </field>
-        </record>
-        
-        <!-- actions opening views on models -->
-        <record model="ir.actions.act_window" id="ddt_action">
-            <field name="name">DDT</field>
-            <field name="res_model">l10n.it.ddt</field>
-            <field name="view_type">form</field>
-             <field name="view_mode">tree,form</field>
-        </record>
+<odoo noupdate="0">
+  <record id="l10n_it_ddt_tree" model="ir.ui.view">
+    <field name="name">l10n.it.ddt</field>
+    <field name="model">l10n.it.ddt</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name"/>
+        <field name="date"/>
+        <field name="date_done"/>
+        <field name="package_id"/>
+       <!--  <field name="state"/> -->
+        <field name="package_id"/>
+        <field name="company_id"/>
+        <field name="orgin"/>
+        <field name="package_no"/>
+        <field name="weight"/>
+        <field name="volume"/>
+      </tree>
+    </field>
+  </record>
 
-        <menuitem id="ddt_menu" name="DDT"/>
-        <menuitem name="DDT_one" id="menu_l10n_it_ddt_main" parent="ddt_menu" groups="group_l10n_it_ddt_manager" action="ddt_action"/>
-        </data>
+  <record id="l10n_it_ddt_form" model="ir.ui.view">
+    <field name="name">l10n.it.ddt</field>
+    <field name="model">l10n.it.ddt</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <group>
+            <group>
+              <field name="name"/>
+              <field name="date"/>
+              <field name="date_done"/>
+              <field name="package_id"/>
+              <field name="transfers_reason"/>
+              <field name="quantity"/>
+            </group>
+            <group>
+              <field name="package_id"/>
+              <field name="company_id"/>
+              <field name="orgin"/>
+              <field name="package_no"/>
+              <field name="weight"/>
+              <field name="volume"/>
+            </group>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record model="ir.actions.act_window" id="l10n_it_ddt_action">
+    <field name="name">l10n.it.ddt</field>
+    <field name="res_model">l10n.it.ddt</field>
+    <field name="view_type">form</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+
+  <menuitem action="l10n_it_ddt_action" id="l10n_it_ddt_menu"/>
+
 </odoo>

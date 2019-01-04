@@ -1,2 +1,2 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_l10n_it_ddt,l10n_it_ddt.ddt,model_l10n_it_ddt,l10n_it_ddt.group_l10n_it_ddt_manager,1,1,1,1
+access_l10n_it_ddt,l10n_it_ddt,model_l10n_it_ddt,l10n_it_ddt.group_l10n_it_ddt_manager,1,1,1,1
