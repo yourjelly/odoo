@@ -1,0 +1,17 @@
+<template>
+
+<t t-name="Translate.Popover">
+    <table class="table table-bordered o_translate_table">
+        <t t-set="data" t-value="result.data"/>
+            <t t-foreach="data" t-as="res">
+                <tr>
+                    <td><t t-set="lang_name" t-value="res.lang"/><t t-esc="lang_name.name"/></td>
+                    <td>
+                        <input type="text" class="o_translate_input o_input" t-if="res.value" t-att-value="res.value" t-att-data-id="res.id"/>
+                        <input type="text" class="o_translate_input o_input text-muted" t-if="!res.value" placeholder="No Translation" t-att-data-id="res.id"/>
+                    </td>
+                </tr>
+            </t>
+    </table>
+</t>
+</template>

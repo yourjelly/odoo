@@ -20,6 +20,7 @@ var session = require('web.session');
 var utils = require('web.utils');
 var view_dialogs = require('web.view_dialogs');
 var field_utils = require('web.field_utils');
+var PopupTranslate = require('web.PopupTranslate');
 
 var qweb = core.qweb;
 var _t = core._t;
@@ -28,7 +29,10 @@ var TranslatableFieldMixin = {
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
-
+    init: function () {
+        this._super.apply(this, arguments);
+        this.popover = false;
+     },
     /**
      * @private
      * @returns {jQuery}
@@ -53,8 +57,18 @@ var TranslatableFieldMixin = {
      *
      * @private
      */
-    _onTranslate: function () {
-        this.trigger_up('translate', {fieldName: this.name, id: this.dataPointID});
+    _onTranslate: function (ev) {
+        if (ev.target === ev.currentTarget) {
+            var def = $.Deferred().resolve();
+            var self = this;
+            if (!this.popover){
+                this.popover = new PopupTranslate(this, this.res_id, this.model, this.name);
+                def = this.popover.appendTo($(ev.currentTarget));
+            }
+            def.then(function () {
+                self.popover.showPopover();
+            });
+        }
     },
 };
 

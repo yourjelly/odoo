@@ -217,6 +217,12 @@ var FormController = BasicController.extend({
      */
     saveRecord: function () {
         var self = this;
+        if (_t.database.multi_lang && this.el.translate) {
+        _.each(this.renderer.allFieldWidgets[this.handle], function (widget) {
+            if (widget.popover) {
+                widget.popover.saveTranslation();
+            }});
+        }
         return this._super.apply(this, arguments).then(function (changedFields) {
             // the title could have been changed
             self._setTitle(self.getTitle());

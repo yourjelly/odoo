@@ -113,6 +113,7 @@
         <script type="text/javascript" src="/web/static/src/js/core/class.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/collections.js"/>
         <script type="text/javascript" src="/web/static/src/js/core/translation.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/widgets/edit_translation.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/ajax.js"></script>
         <script type="text/javascript" src="/web/static/src/js/services/ajax_service.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/time.js"></script>
@@ -179,6 +180,7 @@
         <link rel="stylesheet" type="text/scss" href="/web/static/src/scss/dropdown_menu.scss"/>
         <link rel="stylesheet" type="text/scss" href="/web/static/src/scss/search_view_extra.scss"/>
         <link rel="stylesheet" type="text/scss" href="/web/static/src/scss/data_export.scss"/>
+        <link rel="stylesheet" type="text/scss" href="/web/static/src/scss/translate_popover.scss"/>
         <link rel="stylesheet" type="text/scss" href="/base/static/src/scss/onboarding.scss"/>
 
         <link rel="stylesheet" type="text/scss" href="/web/static/src/scss/base_settings.scss"/>

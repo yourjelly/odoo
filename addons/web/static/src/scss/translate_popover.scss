@@ -1,0 +1,15 @@
+/* Translate popover (form view) */
+.o_translate_field_popover {
+    max-width: 600px;
+    width: 600px;
+    font-size: 1.08333333rem;
+    .popover-body{
+        color: initial;
+        .o_input{
+            border: none;
+        }
+        .text-muted{
+            font-style: italic;
+        }
+    }
+}

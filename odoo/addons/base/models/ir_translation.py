@@ -726,6 +726,44 @@ class IrTranslation(models.Model):
         return action
 
     @api.model
+    def edit_translate_fields(self, model, id, field):
+        """ Open a view for translating the field(s) of the record (model, id). """
+        main_lang = 'en_US'
+        if not self.env['res.lang'].search_count([('code', '!=', main_lang)]):
+            raise UserError(_("Translation features are unavailable until you install an extra translation."))
+
+        lang = self.env['res.lang'].search([('code', '!=', self.env.user.lang)])
+        record = self.env[model].with_context(lang=main_lang).browse(id)
+        domain = ['&', '&', ('res_id', '=', id), ('name', '=like', model + ',' + field), ('lang', 'in', [langs.code for langs in lang])]
+        for name, fld in record._fields.items():
+            if not fld.translate:
+                continue
+
+            rec = record
+            if fld.related:
+                try:
+                    # traverse related fields up to their data source
+                    while fld.related:
+                        rec, fld = fld.traverse_related(rec)
+            #         if rec:
+            #             domain = ['|'] + domain + make_domain(fld, rec)
+                except AccessError:
+                    continue
+
+            assert fld.translate and rec._name == fld.model_name
+            self.insert_missing(fld, rec)
+        result = {
+            'name': 'Translate',
+            'res_model': 'ir.translation',
+            'data': self.search_read(domain=domain, fields=['lang', 'value', 'name'])
+        }
+        for i in result.get('data'):
+            i['lang'] = {'name': self.env['res.lang'].search([('code', '=', i['lang'])]).name,
+                        'code': i['lang']}
+
+        return result
+
+    @api.model
     def _get_import_cursor(self):
         """ Return a cursor-like object for fast inserting translations """
         return IrTranslationImport(self)
