@@ -5,7 +5,6 @@ var ajax = require('web.ajax');
 var Dialog = require('web.Dialog');
 var ServicesMixin = require('web.ServicesMixin');
 var ProductConfiguratorMixin = require('sale.ProductConfiguratorMixin');
-var weContext = require('web_editor.context');
 
 var productNameMap = {};
 var optionalProductsMap = {};
@@ -60,6 +59,7 @@ var OptionalProductsModal = Dialog.extend(ServicesMixin, ProductConfiguratorMixi
             title: params.title
         });
 
+        this.context = params.context;
         this.rootProduct = params.rootProduct;
         this.container = parent;
         this.pricelistId = params.pricelistId;
@@ -89,7 +89,7 @@ var OptionalProductsModal = Dialog.extend(ServicesMixin, ProductConfiguratorMixi
             kwargs: {
                 context: _.extend({
                     'quantity': self.rootProduct.quantity
-                }, weContext.get()),
+                }, this.context),
             }
         })
         .then(function (modalContent) {

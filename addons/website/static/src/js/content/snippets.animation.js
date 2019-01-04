@@ -494,7 +494,9 @@ var Animation = Widget.extend({
 /**
  * The registry object contains the list of available animations.
  */
-var registry = {};
+var Registry = require('web.Registry');
+var registryObject = new Registry();
+var registry = registryObject.map;
 
 registry.slider = Animation.extend({
     selector: '.carousel',
@@ -753,8 +755,7 @@ registry.mediaVideo = Animation.extend({
 registry.ul = Animation.extend({
     selector: 'ul.o_ul_folded, ol.o_ul_folded',
     events: {
-        'click .o_ul_toggle_next': '_onToggleNextClick',
-        'click .o_ul_toggle_self': '_onToggleSelfClick',
+        'click .o_ul_toggle': '_onToggleClick',
     },
 
     //--------------------------------------------------------------------------
@@ -762,26 +763,16 @@ registry.ul = Animation.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * Called when a "toggle next" ul is clicked.
+     * Called when a toggle ul is clicked.
      *
      * @private
      */
-    _onToggleNextClick: function (ev) {
+    _onToggleClick: function (ev) {
         ev.preventDefault();
         var $target = $(ev.currentTarget);
         $target.toggleClass('o_open');
-        $target.closest('li').next().toggleClass('o_close');
-    },
-    /**
-     * Called when a "toggle self" ul is clicked.
-     *
-     * @private
-     */
-    _onToggleSelfClick: function (ev) {
-        ev.preventDefault();
-        var $target = $(ev.currentTarget);
-        $target.toggleClass('o_open');
-        $target.closest('li').find('ul,ol').toggleClass('o_close');
+        // the button is in the li before the ul to open/close:
+        $target.parent().next().toggleClass('o_close');
     },
 });
 
@@ -1083,5 +1074,6 @@ registry._fixAppleCollapse = Animation.extend({
 return {
     Class: Animation,
     registry: registry,
+    registryObject: registryObject,
 };
 });
