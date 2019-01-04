@@ -1372,7 +1372,6 @@ var FieldOne2Many = FieldX2Many.extend({
     init: function () {
         this._super.apply(this, arguments);
 
-        this.isone2Many = this.field.type === 'one2many' || this.attrs.widget === 'one2many';
         // boolean used to prevent concurrent record creation
         this.creatingRecord = false;
     },

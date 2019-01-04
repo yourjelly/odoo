@@ -313,7 +313,7 @@ var Discuss = AbstractAction.extend(ControlPanelMixin, {
         }
         this._loadEnoughMessages();
         if(this.searchview){
-            this.searchview.$('input').focus();
+            this.searchview.on_attach_callback();
         }
     },
     /**
