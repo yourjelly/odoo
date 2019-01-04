@@ -395,11 +395,11 @@ QUnit.module('Views', {
         });
 
         // Descending order on Foo
-        list.$('th.o_column_sortable:contains("Foo")').click();
-        list.$('th.o_column_sortable:contains("Foo")').click();
+        await testUtils.dom.click(list.$('th.o_column_sortable:contains("Foo")'));
+        await testUtils.dom.click(list.$('th.o_column_sortable:contains("Foo")'));
 
         // Ascending order on Date
-        list.$('th.o_column_sortable:contains("Date")').click();
+        await testUtils.dom.click(list.$('th.o_column_sortable:contains("Date")'));
 
         var listContext = list.getOwnedQueryParams();
         assert.deepEqual(listContext,
@@ -2341,7 +2341,7 @@ QUnit.module('Views', {
             "the foo field widget parent cell should not be readonly again");
 
         // Click outside to leave edition mode
-        testUtils.dom.click(list.$el);
+        await testUtils.dom.click(list.$el);
 
         assert.containsN(list, 'tbody td.o_readonly_modifier', 2,
             "there should be 2 readonly foo cells in readonly mode");
