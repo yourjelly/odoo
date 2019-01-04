@@ -4776,7 +4776,7 @@ QUnit.module('Views', {
         assert.notStrictEqual(document.activeElement, form.$('input[name="int_field"]')[0],
             "int_field field should not have focus");
 
-        form.update({});
+        await form.update({});
 
         assert.notStrictEqual(document.activeElement, form.$('input[name="int_field"]')[0],
             "int_field field should not have focus");

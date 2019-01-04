@@ -2391,7 +2391,7 @@ var BasicModel = AbstractModel.extend({
             defs.push(self._fetchReferenceData(datapoints, model, fieldName));
         });
 
-        return Promise.all($, defs);
+        return Promise.all(defs);
     },
     /**
      * Batch requests for all reference field in list's children.

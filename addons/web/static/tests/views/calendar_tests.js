@@ -701,6 +701,7 @@ QUnit.module('Views', {
         left = calendar.$('.fc-day:eq(1)').offset().left + 5;
         testUtils.dom.triggerPositionalMouseEvent(left, top, "mousemove");
         testUtils.dom.triggerPositionalMouseEvent(left, top, "mouseup");
+        await testUtils.nextTick();
 
         // Move to "All day"
         expectedEvent = {
@@ -712,6 +713,7 @@ QUnit.module('Views', {
         top = calendar.$('.fc-day:eq(1)').offset().top + 5;
         testUtils.dom.triggerPositionalMouseEvent(left, top, "mousemove");
         testUtils.dom.triggerPositionalMouseEvent(left, top, "mouseup");
+        await testUtils.nextTick();
 
         calendar.destroy();
     });
@@ -941,6 +943,7 @@ QUnit.module('Views', {
         left = calendar.$('.fc-day:eq(1)').offset().left + 5;
         testUtils.dom.triggerPositionalMouseEvent(left, top, "mousemove");
         testUtils.dom.triggerPositionalMouseEvent(left, top, "mouseup");
+        await testUtils.nextTick();
 
         // Move to "All day"
         expectedEvent = {
@@ -952,6 +955,7 @@ QUnit.module('Views', {
         top = calendar.$('.fc-day:eq(1)').offset().top + 5;
         testUtils.dom.triggerPositionalMouseEvent(left, top, "mousemove");
         testUtils.dom.triggerPositionalMouseEvent(left, top, "mouseup");
+        await testUtils.nextTick();
 
         calendar.destroy();
     });
@@ -1989,6 +1993,7 @@ QUnit.module('Views', {
         await testUtils.nextTick();
         await testUtils.dom.click($('.modal-footer button:first'));
         prom.resolve();
+        await testUtils.nextTick();
         assert.strictEqual(createCount, 1,
             "should create only one event");
 
