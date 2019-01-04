@@ -2,7 +2,6 @@ odoo.define('web.ajax', function (require) {
 "use strict";
 
 var core = require('web.core');
-var utils = require('web.utils');
 var time = require('web.time');
 var download = require('web.download');
 var contentdisposition = require('web.contentdisposition');
