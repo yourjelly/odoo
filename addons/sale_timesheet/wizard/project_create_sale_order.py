@@ -143,10 +143,8 @@ class ProjectCreateSalesOrder(models.TransientModel):
 
         non_billable_tasks = self.project_id.tasks.filtered(lambda task: task.billable_type == 'no')
 
-        map_entries = self.env['project.sale.line.employee.map']
-        EmployeeMap = self.env['project.sale.line.employee.map'].sudo()
-
         # create SO lines: create on SOL per product/price. So many employee can be linked to the same SOL
+        values_map_to_create = []
         map_product_price_sol = {}  # (product_id, price) --> SOL
         for wizard_line in self.line_ids:
             map_key = (wizard_line.product_id.id, wizard_line.price_unit)
@@ -165,11 +163,13 @@ class ProjectCreateSalesOrder(models.TransientModel):
                 sale_order_line = self.env['sale.order.line'].create(values)
                 map_product_price_sol[map_key] = sale_order_line
 
-            map_entries |= EmployeeMap.create({
+            values_map_to_create.append({
                 'project_id': self.project_id.id,
                 'sale_line_id': map_product_price_sol[map_key].id,
                 'employee_id': wizard_line.employee_id.id,
             })
+
+        map_entries = self.env['project.sale.line.employee.map'].sudo().create(values_map_to_create)
 
         # link the project to the SO
         self.project_id.write({

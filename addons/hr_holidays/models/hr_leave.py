@@ -540,11 +540,12 @@ class HolidaysRequest(models.Model):
     @api.multi
     def _create_resource_leave(self):
         """ This method will create entry in resource calendar leave object at the time of holidays validated """
+        values_to_create = []
         for leave in self:
             date_from = fields.Datetime.from_string(leave.date_from)
             date_to = fields.Datetime.from_string(leave.date_to)
 
-            self.env['resource.calendar.leaves'].create({
+            values_to_create.append({
                 'name': leave.name,
                 'date_from': fields.Datetime.to_string(date_from),
                 'holiday_id': leave.id,
@@ -553,7 +554,7 @@ class HolidaysRequest(models.Model):
                 'calendar_id': leave.employee_id.resource_calendar_id.id,
                 'time_type': leave.holiday_status_id.time_type,
             })
-        return True
+        return self.env['resource.calendar.leaves'].create(values_to_create)
 
     @api.multi
     def _remove_resource_leave(self):
@@ -563,11 +564,12 @@ class HolidaysRequest(models.Model):
     def _validate_leave_request(self):
         """ Validate leave requests (holiday_type='employee')
         by creating a calendar event and a resource leaves. """
-        for holiday in self.filtered(lambda request: request.holiday_type == 'employee'):
+        employee_requests = self.filtered(lambda request: request.holiday_type == 'employee')
+        for holiday in employee_requests:
             meeting_values = holiday._prepare_holidays_meeting_values()
             meeting = self.env['calendar.event'].with_context(no_mail_to_attendees=True).create(meeting_values)
             holiday.write({'meeting_id': meeting.id})
-            holiday._create_resource_leave()
+        employee_requests._create_resource_leave()
 
     @api.multi
     def _prepare_holidays_meeting_values(self):
