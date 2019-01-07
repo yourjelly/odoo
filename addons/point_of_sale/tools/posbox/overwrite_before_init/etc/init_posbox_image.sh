@@ -11,6 +11,7 @@ __base="$(basename ${__file} .sh)"
 # Since we are emulating, the real /boot is not mounted, 
 # leading to mismatch between kernel image and modules.
 mount /dev/sda1 /boot
+umount /var/log
 
 # Recommends: antiword, graphviz, ghostscript, postgresql, python-gevent, poppler-utils
 export DEBIAN_FRONTEND=noninteractive
@@ -109,10 +110,6 @@ create_ramdisk_dir () {
     mkdir "${1}_ram"
 }
 
-create_ramdisk_dir "/var"
-create_ramdisk_dir "/etc"
-create_ramdisk_dir "/tmp"
-mkdir /root_bypass_ramdisks
 umount /dev/sda1
 
 reboot

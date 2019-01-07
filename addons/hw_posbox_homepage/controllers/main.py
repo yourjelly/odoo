@@ -185,9 +185,6 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
     @http.route('/load_drivers', type='http', auth='none', website=True)
     def load_drivers(self):
-        subprocess.call("sudo mount -o remount,rw /", shell=True)
-        subprocess.call("sudo mount -o remount,rw /root_bypass_ramdisks", shell=True)
-
         mac = subprocess.check_output("/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5}", shell=True).decode('utf-8').split('\n')[0]
 
         #response = requests.get(url, auth=(username, db_uuid.split('\n')[0]), stream=True)
@@ -206,8 +203,6 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
                 zip_file = zipfile.ZipFile(io.BytesIO(resp.data))
                 zip_file.extractall("/home/pi/odoo/addons/hw_drivers/drivers")
         subprocess.call("sudo service odoo restart", shell=True)
-        subprocess.call("sudo mount -o remount,ro /", shell=True)
-        subprocess.call("sudo mount -o remount,ro /root_bypass_ramdisks", shell=True)
 
         return "<meta http-equiv='refresh' content='20; url=http://" + self.get_ip_iotbox() + ":8069/list_drivers'>"
 

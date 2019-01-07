@@ -1,4 +1,10 @@
-proc            /proc           proc    defaults             0       0
-/dev/mmcblk0p1  /boot           vfat    defaults             0       2
-/dev/mmcblk0p2  /               ext4    defaults,noatime,ro  0       1
+proc            /proc               proc    defaults                                            0   0
+/dev/mmcblk0p1  /boot               vfat    defaults                                            0   2
+/dev/mmcblk0p2  /                   ext4    defaults                                            0   1
+
+# For debugging the IoT Box, unmount /var/log or comment next line
+tmpfs           /var                tmpfs       defaults,noatime,nosuid,size=195m               0   0
+
+tmpfs           /tmp                tmpfs    defaults,noatime,nosuid,size=100m                  0   0
+
 # a swapfile is not a swap partition, so no using swapon|off from here on, use  dphys-swapfile swap[on|off]  for that

@@ -22,10 +22,8 @@ function connect () {
 	if [ -n "${ESSID}" ] ; then
 		if [ -n "${PERSIST}" ] ; then
 			logger -t posbox_connect_to_wifi "Making network selection permanent"
-			sudo mount -o remount,rw /
 			echo "${ESSID}" > ${PERSISTENT_WIFI_NETWORK_FILE}
 			echo "${PASSWORD}" >> ${PERSISTENT_WIFI_NETWORK_FILE}
-			sudo mount -o remount,ro /
 		fi
 	else
 		logger -t posbox_connect_to_wifi "Reading configuration from ${PERSISTENT_WIFI_NETWORK_FILE}"
