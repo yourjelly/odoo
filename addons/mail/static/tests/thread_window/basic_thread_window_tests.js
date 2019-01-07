@@ -646,7 +646,7 @@ QUnit.test('out-of-office status in thread window', function (assert) {
                     name: "DM",
                     channel_type: "chat",
                     message_unread_counter: 0,
-                    direct_partner: [{ id: 666, name: 'DemoUser1', im_status: 'online', out_of_office_message: 'Please don\'t diturb'}],
+                    direct_partner: [{ id: 666, name: 'DemoUser1', im_status: 'online', out_of_office_message: 'Please don\'t disturb'}],
                 }],
             },
         },
