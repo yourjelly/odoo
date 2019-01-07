@@ -334,8 +334,7 @@ class InventoryLine(models.Model):
         required=True)
     product_uom_category_id = fields.Many2one(string='Uom category', related='product_uom_id.category_id', readonly=True)
     product_qty = fields.Float(
-        'Checked Quantity',
-        digits=dp.get_precision('Product Unit of Measure'), default=0)
+        'Checked Quantity', default=0)
     location_id = fields.Many2one(
         'stock.location', 'Location',
         index=True, required=True)
@@ -351,8 +350,7 @@ class InventoryLine(models.Model):
     state = fields.Selection(
         'Status',  related='inventory_id.state', readonly=True)
     theoretical_qty = fields.Float(
-        'Theoretical Quantity', compute='_compute_theoretical_qty',
-        digits=dp.get_precision('Product Unit of Measure'), readonly=True, store=True)
+        'Theoretical Quantity', compute='_compute_theoretical_qty', readonly=True, store=True)
     inventory_location_id = fields.Many2one(
         'stock.location', 'Inventory Location', related='inventory_id.location_id', related_sudo=False, readonly=False)
     product_tracking = fields.Selection('Tracking', related='product_id.tracking', readonly=True)

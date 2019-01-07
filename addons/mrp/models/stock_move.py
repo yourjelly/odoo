@@ -14,7 +14,7 @@ class StockMoveLine(models.Model):
     production_id = fields.Many2one('mrp.production', 'Production Order')
     lot_produced_id = fields.Many2one('stock.production.lot', 'Finished Lot/Serial Number')
     lot_produced_qty = fields.Float(
-        'Quantity Finished Product', digits=dp.get_precision('Product Unit of Measure'),
+        'Quantity Finished Product',
         help="Informative, not used in matching")
     done_wo = fields.Boolean('Done for Work Order', default=True, help="Technical Field which is False when temporarily filled in in work order")  # TDE FIXME: naming
     done_move = fields.Boolean('Move Done', related='move_id.is_done', readonly=False, store=True)  # TDE FIXME: naming

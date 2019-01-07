@@ -29,7 +29,7 @@
                             <field name="product_id" groups="product.group_product_variant" context="{'default_type': 'product'}"/>
                             <label for="product_qty" string="Quantity"/>
                             <div class="o_row">
-                                <field name="product_qty"/>
+                                <field name="product_qty" widget="uom" options="{'uom_field': 'product_uom_id'}"/>
                                 <field name="product_uom_id" options="{'no_open':True,'no_create':True}" groups="uom.group_uom"/>
                             </div>
                             <field name="routing_id" attrs="{'invisible': [('type','=','phantom')]}" groups="mrp.group_mrp_routings"/>
@@ -65,7 +65,7 @@
                                     class="float-right"/>
                                     <field name="attachments_count" class="text-left"
                                     string=" "/>
-                                    <field name="product_qty"/>
+                                    <field name="product_qty" widget="uom" options="{'uom_field': 'product_uom_id'}"/>
                                     <field name="parent_product_tmpl_id" invisible="1" />
                                     <field name="product_uom_id" options="{'no_open':True,'no_create':True}" groups="uom.group_uom"/>
                                     <field name="attribute_value_ids" widget="many2many_tags" options="{'no_create': True}" attrs="{'column_invisible': [('parent.product_id', '!=', False)]}" groups="product.group_product_variant"/>
@@ -103,7 +103,7 @@
                     <field name="product_tmpl_id"/>
                     <field name="code"/>
                     <field name="product_id" groups="product.group_product_variant"/>
-                    <field name="product_qty"/>
+                    <field name="product_qty" widget="uom" options="{'uom_field': 'product_uom_id'}"/>
                     <field name="product_uom_id" groups="uom.group_uom"/>
                     <field name="routing_id" groups="mrp.group_mrp_routings"/>
                 </tree>
@@ -116,7 +116,7 @@
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
                     <field name="product_tmpl_id"/>
-                    <field name="product_qty"/>
+                    <field name="product_qty" widget="uom" options="{'uom_field': 'product_uom_id'}"/>
                     <field name="product_uom_id"/>
                     <templates>
                         <t t-name="kanban-box">
@@ -189,7 +189,7 @@
                             <field name="product_id"/>
                             <label for="product_qty" string="Quantity"/>
                             <div class="o_row">
-                                <field name="product_qty"/>
+                                <field name="product_qty" widget="uom" options="{'uom_field': 'product_uom_id'}"/>
                                 <field name="product_uom_id" options="{'no_open':True,'no_create':True}" groups="uom.group_uom"/>
                             </div>
                         </group>

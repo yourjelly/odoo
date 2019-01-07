@@ -7,7 +7,7 @@
             <field name="arch" type="xml">
                 <tree decoration-muted="state == 'cancel'" string="Moves" create="false">
                     <field name="product_id"/>
-                    <field name="product_uom_qty"/>
+                    <field name="product_uom_qty" widget="uom" options="{'uom_field': 'product_uom'}"/>
                     <field name="product_uom" options="{'no_open': True, 'no_create': True}" string="Unit of Measure" groups="uom.group_uom"/>
                     <field name="product_packaging" domain="[('product_id','=',product_id)]" groups="product.group_stock_packaging"/>
                     <field name="picking_id"/>
@@ -59,7 +59,7 @@
                     <field name="product_id"/>
                     <field name="location_id" groups="stock.group_stock_multi_locations" string="From"/>
                     <field name="location_dest_id" groups="stock.group_stock_multi_locations" string="To"/>
-                    <field name="product_uom_qty"/>
+                    <field name="product_uom_qty" widget="uom" options="{'uom_field': 'product_uom'}"/>
                     <field name="product_uom" options="{'no_open': True, 'no_create': True}" string="Unit of Measure" groups="uom.group_uom"/>
                     <field name="state"/>
                 </tree>
@@ -74,9 +74,10 @@
                 <kanban class="o_kanban_mobile" create="0">
                     <field name="product_id"/>
                     <field name="show_details_visible"/>
-                    <field name="product_uom_qty"/>
-                    <field name="quantity_done"/>
-                    <field name="reserved_availability"/>
+                    <field name="product_uom_qty" widget="uom" options="{'uom_field': 'product_uom'}"/>
+                    <field name="product_uom" options="{'no_open': True, 'no_create': True}" string="Unit of Measure" groups="uom.group_uom"/>
+                    <field name="quantity_done" widget="uom" options="{'uom_field': 'product_uom'}"/>
+                    <field name="reserved_availability" widget="uom" options="{'uom_field': 'product_uom'}"/>
                     <field name="inventory_id"/>
                     <templates>
                         <t t-name="kanban-box">
@@ -113,7 +114,7 @@
                 <tree decoration-muted="scrapped == True" string="Stock Moves" editable="bottom">
                     <field name="product_id"/>
                     <field name="name" invisible="1"/>
-                    <field name="product_uom_qty"/>
+                    <field name="product_uom_qty"  widget="uom" options="{'uom_field': 'product_uom'}"/>
                     <field name="product_uom" options="{'no_open': True, 'no_create': True}" string="Unit of Measure" groups="uom.group_uom"/>
                     <field name="location_id" invisible="1"/>
                     <field name="create_date" invisible="1" />
@@ -145,14 +146,14 @@
                             <field name="product_id" readonly="1"/>
                             <label for="product_uom_qty"/>
                             <div class="o_row">
-                                <span><field name="product_uom_qty" readonly="1" nolabel="1"/></span>
+                                <span><field name="product_uom_qty" readonly="1" nolabel="1" widget="uom" options="{'uom_field': 'product_uom'}"/></span>
                                 <span><field name="product_uom" readonly="1" nolabel="1"/></span>
                             </div>
                             <label for="quantity_done"/>
                             <div class="o_row">
-                                <span><field name="quantity_done" readonly="1" nolabel="1"/></span>
+                                <span><field name="quantity_done" readonly="1" nolabel="1" widget="uom" options="{'uom_field': 'product_uom'}"/></span>
                                 <span attrs="{'invisible': [('state', '=', 'done')]}"> / </span>
-                                <span><field name="reserved_availability" nolabel="1" attrs="{'invisible': [('state', '=', 'done')]}" /></span>
+                                <span><field name="reserved_availability" nolabel="1" attrs="{'invisible': [('state', '=', 'done')]}" widget="uom" options="{'uom_field': 'product_uom'}"/></span>
                                 <span><field name="product_uom" readonly="1" nolabel="1"/></span>
                             </div>
 
@@ -197,10 +198,10 @@
                     <field name="result_package_id" attrs="{'readonly': ['&amp;', ('package_level_id', '!=', False), ('parent.picking_type_entire_packs', '=', True)]}" groups="stock.group_tracking_lot" domain="['|', '|', ('location_id', '=', False), ('location_id', '=', location_dest_id), ('id', '=', package_id)]"/>
                     <field name="owner_id" attrs="{'readonly': ['&amp;', ('package_level_id', '!=', False), ('parent.picking_type_entire_packs', '=', True)]}" groups="stock.group_tracking_owner"/>
                     <field name="is_initial_demand_editable" invisible="1"/>
-                    <field name="product_uom_qty" invisible="not context.get('show_reserved_quantity')" readonly="1"/>
+                    <field name="product_uom_qty" invisible="not context.get('show_reserved_quantity')" readonly="1" widget="uom" options="{'uom_field': 'product_uom_id'}"/>
                     <field name="state" invisible="1"/>
                     <field name="is_locked" invisible="1"/>
-                    <field name="qty_done" attrs="{'readonly': ['|', '|', ('is_initial_demand_editable', '=', True), '&amp;', ('state', '=', 'done'), ('is_locked', '=', True), '&amp;', ('package_level_id', '!=', False), ('parent.picking_type_entire_packs', '=', True)]}"/>
+                    <field name="qty_done" attrs="{'readonly': ['|', '|', ('is_initial_demand_editable', '=', True), '&amp;', ('state', '=', 'done'), ('is_locked', '=', True), '&amp;', ('package_level_id', '!=', False), ('parent.picking_type_entire_packs', '=', True)]}" widget="uom" options="{'uom_field': 'product_uom_id'}"/>
                     <field name="product_uom_id" options="{'no_open': True, 'no_create': True}" attrs="{'readonly': ['|', ('product_uom_qty', '!=', 0.0), '&amp;', ('package_level_id', '!=', False), ('parent.picking_type_entire_packs', '=', True)]}" string="Unit of Measure" groups="uom.group_uom"/>
                 </tree>
             </field>
@@ -229,7 +230,7 @@
                                 <field name="product_id"/>
                                 <label for="product_uom_qty"/>
                                 <div class="o_row">
-                                    <field name="product_uom_qty"/>
+                                    <field name="product_uom_qty" widget="uom" options="{'uom_field': 'product_uom'}"/>
                                     <field name="product_uom" options="{'no_open': True, 'no_create': True}" groups="uom.group_uom"/>
                                 </div>
                                 <field name="name" invisible="1"/>
@@ -247,7 +248,7 @@
                                 <tree>
                                     <field name="location_id"/>
                                     <field name="location_dest_id"/>
-                                    <field name="product_uom_qty"/>
+                                    <field name="product_uom_qty" widget="uom" options="{'uom_field': 'product_uom'}"/>
                                     <field name="product_uom"/>
                                     <field name="state"/>
                                 </tree>
@@ -256,7 +257,7 @@
                                 <tree>
                                     <field name="location_id"/>
                                     <field name="location_dest_id"/>
-                                    <field name="product_uom_qty"/>
+                                    <field name="product_uom_qty" widget="uom" options="{'uom_field': 'product_uom'}"/>
                                     <field name="product_uom"/>
                                     <field name="state"/>
                                 </tree>
@@ -285,7 +286,7 @@
                         <field name="group_id" invisible="1"/>
                         <label for="product_uom_qty"/>
                         <div>
-                            <field name="product_uom_qty"/>
+                            <field name="product_uom_qty" widget="uom" options="{'uom_field': 'product_uom'}"/>
                             <field name="product_uom" options="{'no_open': True, 'no_create': True}" string="Unit Of Measure" groups="uom.group_uom" class="oe_inline"/>
                         </div>
                         <field name="product_tmpl_id" invisible="1"/>
@@ -423,7 +424,7 @@
                     <field name="sequence" invisible="1"/>
                     <field name="origin"/>
                     <field name="product_id"/>
-                    <field name="product_uom_qty"/>
+                    <field name="product_uom_qty" widget="uom" options="{'uom_field': 'product_uom'}"/>
                     <field name="product_uom" options="{'no_open': True, 'no_create': True}" string="Unit of Measure" groups="uom.group_uom"/>
                     <field name="location_id" invisible="1"/>
                     <field name="location_dest_id" invisible="1"/>
@@ -478,7 +479,7 @@
                 <tree string="Moves">
                     <field name="picking_id" string="Reference"/>
                     <field name="product_id"/>
-                    <field name="product_uom_qty"/>
+                    <field name="product_uom_qty" widget="uom" options="{'uom_field': 'product_uom'}"/>
                     <field name="product_uom" options="{'no_open': True, 'no_create': True}" string="Unit of Measure" groups="uom.group_uom"/>
                     <field name="date" groups="base.group_no_one"/>
                 </tree>
@@ -492,7 +493,7 @@
                 <kanban class="o_kanban_mobile">
                     <field name="product_id"/>
                     <field name="state"/>
-                    <field name="product_uom_qty"/>
+                    <field name="product_uom_qty" widget="uom" options="{'uom_field': 'product_uom'}"/>
                     <field name="priority"/>
                     <templates>
                         <t t-name="kanban-box">

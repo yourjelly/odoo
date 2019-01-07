@@ -1608,6 +1608,10 @@ class AccountInvoiceLine(models.Model):
         for l in self:
             l.price_tax = l.price_total - l.price_subtotal
 
+    @api.model
+    def _default_product_uom_id(self):
+        return self.env['uom.uom'].search([], limit=1, order='id')
+
     name = fields.Text(string='Description', required=True)
     origin = fields.Char(string='Source Document',
         help="Reference of the document that produced this invoice.")
@@ -1617,7 +1621,7 @@ class AccountInvoiceLine(models.Model):
         ondelete='cascade', index=True)
     invoice_type = fields.Selection(related='invoice_id.type', readonly=True)
     uom_id = fields.Many2one('uom.uom', string='Unit of Measure',
-        ondelete='set null', index=True, oldname='uos_id')
+        ondelete='set null', index=True, oldname='uos_id', default=_default_product_uom_id)
     product_id = fields.Many2one('product.product', string='Product',
         ondelete='restrict', index=True)
     product_image = fields.Binary('Product Image', related="product_id.image", store=False, readonly=True)
@@ -1633,7 +1637,7 @@ class AccountInvoiceLine(models.Model):
         store=True, readonly=True, compute='_compute_price',
         help="Total amount in the currency of the company, negative for credit note.")
     price_tax = fields.Monetary(string='Tax Amount', compute='_get_price_tax', store=False)
-    quantity = fields.Float(string='Quantity', digits=dp.get_precision('Product Unit of Measure'),
+    quantity = fields.Float(string='Quantity',
         required=True, default=1)
     discount = fields.Float(string='Discount (%)', digits=dp.get_precision('Discount'),
         default=0.0)

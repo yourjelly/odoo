@@ -55,7 +55,7 @@ class MrpProduction(models.Model):
     product_tmpl_id = fields.Many2one('product.template', 'Product Template', related='product_id.product_tmpl_id')
     product_qty = fields.Float(
         'Quantity To Produce',
-        default=1.0, digits=dp.get_precision('Product Unit of Measure'),
+        default=1.0,
         readonly=True, required=True, tracking=True,
         states={'draft': [('readonly', False)]})
     product_uom_id = fields.Many2one(

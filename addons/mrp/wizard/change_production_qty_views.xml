@@ -9,8 +9,9 @@
             <field name="arch" type="xml">
                 <form string="Change Product Qty">
                     <group>
-                        <field name="product_qty"/>
+                        <field name="product_qty" widget="uom" options="{'uom_field': 'uom_id'}"/>
                         <field name="mo_id" invisible="1"/>
+                        <field name="uom_id" invisible="1"/>
                     </group>
                     <footer>
                         <button name="change_prod_qty" string="Approve"

@@ -52,7 +52,6 @@ class StockMove(models.Model):
         help='Quantity in the default UoM of the product')
     product_uom_qty = fields.Float(
         'Initial Demand',
-        digits=dp.get_precision('Product Unit of Measure'),
         default=0.0, required=True, states={'done': [('readonly', True)]},
         help="This is the quantity of products from an inventory "
              "point of view. For moves in the state 'done', this is the "
@@ -134,7 +133,6 @@ class StockMove(models.Model):
     returned_move_ids = fields.One2many('stock.move', 'origin_returned_move_id', 'All returned moves', help='Optional: all returned moves created from this move')
     reserved_availability = fields.Float(
         'Quantity Reserved', compute='_compute_reserved_availability',
-        digits=dp.get_precision('Product Unit of Measure'),
         readonly=True, help='Quantity that has already been reserved for this move')
     availability = fields.Float(
         'Forecasted Quantity', compute='_compute_product_availability',
@@ -146,7 +144,7 @@ class StockMove(models.Model):
     route_ids = fields.Many2many('stock.location.route', 'stock_location_route_move', 'move_id', 'route_id', 'Destination route', help="Preferred route")
     warehouse_id = fields.Many2one('stock.warehouse', 'Warehouse', help="Technical field depicting the warehouse to consider for the route selection on the next procurement (if any).")
     has_tracking = fields.Selection(related='product_id.tracking', string='Product with Tracking')
-    quantity_done = fields.Float('Quantity Done', compute='_quantity_done_compute', digits=dp.get_precision('Product Unit of Measure'), inverse='_quantity_done_set')
+    quantity_done = fields.Float('Quantity Done', compute='_quantity_done_compute', inverse='_quantity_done_set')
     show_operations = fields.Boolean(related='picking_id.picking_type_id.show_operations', readonly=False)
     show_details_visible = fields.Boolean('Details Visible', compute='_compute_show_details_visible')
     show_reserved_availability = fields.Boolean('From Supplier', compute='_compute_show_reserved_availability')
@@ -305,7 +303,6 @@ class StockMove(models.Model):
             self.availability = min(self.product_qty, total_availability)
 
     def _compute_string_qty_information(self):
-        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
         void_moves = self.filtered(lambda move: move.state in ('draft', 'done', 'cancel') or move.location_id.usage != 'internal')
         other_moves = self - void_moves
         for move in void_moves:
@@ -313,7 +310,7 @@ class StockMove(models.Model):
         for move in other_moves:
             total_available = min(move.product_qty, move.reserved_availability + move.availability)
             total_available = move.product_id.uom_id._compute_quantity(total_available, move.product_uom, round=False)
-            total_available = float_round(total_available, precision_digits=precision)
+            total_available = float_round(total_available, precision_digits=move.product_id.uom_id.decimal_places)
             info = str(total_available)
             if self.user_has_groups('uom.group_uom'):
                 info += ' ' + move.product_uom.name
@@ -321,7 +318,7 @@ class StockMove(models.Model):
                 if move.reserved_availability != total_available:
                     # some of the available quantity is assigned and some are available but not reserved
                     reserved_available = move.product_id.uom_id._compute_quantity(move.reserved_availability, move.product_uom, round=False)
-                    reserved_available = float_round(reserved_available, precision_digits=precision)
+                    reserved_available = float_round(reserved_available, precision_digits=move.product_id.uom_id.decimal_places)
                     info += _(' (%s reserved)') % str(reserved_available)
                 else:
                     # all available quantity is assigned
@@ -812,8 +809,7 @@ class StockMove(models.Model):
         if quantity:
             uom_quantity = self.product_id.uom_id._compute_quantity(quantity, self.product_uom, rounding_method='HALF-UP')
             uom_quantity_back_to_product_uom = self.product_uom._compute_quantity(uom_quantity, self.product_id.uom_id, rounding_method='HALF-UP')
-            rounding = self.env['decimal.precision'].precision_get('Product Unit of Measure')
-            if float_compare(quantity, uom_quantity_back_to_product_uom, precision_digits=rounding) == 0:
+            if float_compare(quantity, uom_quantity_back_to_product_uom, precision_digits=self.product_id.uom_id.decimal_places) == 0:
                 vals = dict(vals, product_uom_qty=uom_quantity)
             else:
                 vals = dict(vals, product_uom_qty=quantity, product_uom_id=self.product_id.uom_id.id)
@@ -856,8 +852,7 @@ class StockMove(models.Model):
         quants = []
 
         if self.product_id.tracking == 'serial':
-            rounding = self.env['decimal.precision'].precision_get('Product Unit of Measure')
-            if float_compare(taken_quantity, int(taken_quantity), precision_digits=rounding) != 0:
+            if float_compare(taken_quantity, int(taken_quantity), precision_digits=self.product_uom.decimal_places) != 0:
                 taken_quantity = 0
 
         try:
@@ -1090,7 +1085,7 @@ class StockMove(models.Model):
         # this operation could trigger a merge of moves.
         for move in moves:
             if move.quantity_done <= 0:
-                if float_compare(move.product_uom_qty, 0.0, precision_rounding=move.product_uom.rounding) == 0:
+                if float_compare(move.product_uom_qty, 0.0, precision_rounding=move.product_id.uom_id.rounding) == 0:
                     move._action_cancel()
 
         # Create extra moves where necessary
@@ -1106,8 +1101,8 @@ class StockMove(models.Model):
         for move in moves_todo:
             # To know whether we need to create a backorder or not, round to the general product's
             # decimal precision and not the product's UOM.
-            rounding = self.env['decimal.precision'].precision_get('Product Unit of Measure')
-            if float_compare(move.quantity_done, move.product_uom_qty, precision_digits=rounding) < 0:
+            # rounding = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+            if float_compare(move.quantity_done, move.product_uom_qty, precision_digits=move.product_id.uom_id.decimal_places) < 0:
                 # Need to do some kind of conversion here
                 qty_split = move.product_uom._compute_quantity(move.product_uom_qty - move.quantity_done, move.product_id.uom_id, rounding_method='HALF-UP')
                 new_move = move._split(qty_split)
@@ -1180,14 +1175,12 @@ class StockMove(models.Model):
         if float_is_zero(qty, precision_rounding=self.product_id.uom_id.rounding) or self.product_qty <= qty:
             return self.id
 
-        decimal_precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
-
         # `qty` passed as argument is the quantity to backorder and is always expressed in the
         # quants UOM. If we're able to convert back and forth this quantity in the move's and the
         # quants UOM, the backordered move can keep the UOM of the move. Else, we'll create is in
         # the UOM of the quants.
         uom_qty = self.product_id.uom_id._compute_quantity(qty, self.product_uom, rounding_method='HALF-UP')
-        if float_compare(qty, self.product_uom._compute_quantity(uom_qty, self.product_id.uom_id, rounding_method='HALF-UP'), precision_digits=decimal_precision) == 0:
+        if float_compare(qty, self.product_uom._compute_quantity(uom_qty, self.product_id.uom_id, rounding_method='HALF-UP'), precision_digits=self.product_id.uom_id.decimal_places) == 0:
             defaults = self._prepare_move_split_vals(uom_qty)
         else:
             defaults = self.with_context(force_split_uom_id=self.product_id.uom_id.id)._prepare_move_split_vals(qty)
@@ -1205,7 +1198,7 @@ class StockMove(models.Model):
         # precision and not the move's UOM to handle case where the `quantity_done` is not
         # compatible with the move's UOM.
         new_product_qty = self.product_id.uom_id._compute_quantity(self.product_qty - qty, self.product_uom, round=False)
-        new_product_qty = float_round(new_product_qty, precision_digits=self.env['decimal.precision'].precision_get('Product Unit of Measure'))
+        new_product_qty = float_round(new_product_qty, precision_digits=self.product_id.uom_id.decimal_places)
         self.with_context(do_not_propagate=True, do_not_unreserve=True, rounding_method='HALF-UP').write({'product_uom_qty': new_product_qty})
         new_move = new_move._action_confirm(merge=False)
         return new_move.id

@@ -47,7 +47,7 @@
                 <tree string="Invoice Line">
                     <field name="name"/>
                     <field name="account_id" groups="account.group_account_user"/>
-                    <field name="quantity"/>
+                    <field name="quantity" widget="uom" options="{'uom_field': 'uom_id'}"/>
                     <field name="uom_id" groups="uom.group_uom"/>
                     <field name="price_unit"/>
                     <field name="discount" groups="base.group_no_one"/>
@@ -88,7 +88,7 @@
                                  context="{'partner_id': partner_id}"/>
                             <label for="quantity"/>
                             <div>
-                                <field name="quantity" class="oe_inline"/>
+                                <field name="quantity" class="oe_inline" widget="uom" options="{'uom_field': 'uom_id'}"/>
                                 <field name="uom_id" class="oe_inline" groups="uom.group_uom"/>
                             </div>
                             <field name="price_unit"/>
@@ -498,7 +498,7 @@
                                         domain="[('company_id', '=', parent.company_id)]"
                                         context="{'default_partner_id': parent.partner_id}"/>
                                     <field name="analytic_tag_ids" groups="analytic.group_analytic_tags" widget="many2many_tags" options="{'color_field': 'color'}"/>
-                                    <field name="quantity"/>
+                                    <field name="quantity" widget="uom" options="{'uom_field': 'uom_id'}"/>
                                     <field name="uom_id" groups="uom.group_uom"/>
                                     <field name="price_unit" string="Price"/>
                                     <field name="discount" groups="base.group_no_one" string="Disc (%)"/>
@@ -513,7 +513,7 @@
                                     <field name="product_id"/>
                                     <field name="price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
                                     <field name="price_total" groups="account.group_show_line_subtotals_tax_included"/>
-                                    <field name="quantity"/>
+                                    <field name="quantity" widget="uom" options="{'uom_field': 'uom_id'}"/>
                                     <field name="uom_id" groups="uom.group_uom"/>
                                     <field name="price_unit"/>
                                     <field name="display_type"/>

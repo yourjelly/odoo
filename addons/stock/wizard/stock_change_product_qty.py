@@ -14,9 +14,9 @@ class ProductChangeQuantity(models.TransientModel):
     product_id = fields.Many2one('product.product', 'Product', required=True)
     product_tmpl_id = fields.Many2one('product.template', 'Template', required=True)
     product_variant_count = fields.Integer('Variant Count', related='product_tmpl_id.product_variant_count', readonly=False)
+    uom_id = fields.Many2one('uom.uom', string='Unit of Measure', related='product_id.uom_id', readonly=False)
     new_quantity = fields.Float(
-        'New Quantity on Hand', default=1,
-        digits=dp.get_precision('Product Unit of Measure'), required=True,
+        'New Quantity on Hand', default=1, required=True,
         help='This quantity is expressed in the Default Unit of Measure of the product.')
     location_id = fields.Many2one('stock.location', 'Location', required=True, domain="[('usage', '=', 'internal')]")
 

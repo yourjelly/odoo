@@ -12,7 +12,7 @@
                     <field name="date_planned_start"/>
                     <field name="product_id"/>
                     <field name="origin"/>
-                    <field name="product_qty" sum="Total Qty" string="Quantity"/>
+                    <field name="product_qty" sum="Total Qty" string="Quantity" widget="uom" options="{'uom_field': 'product_uom_id'}"/>
                     <field name="product_uom_id" string="Unit of Measure" options="{'no_open':True,'no_create':True}" groups="uom.group_uom"/>
                     <field name="routing_id" groups="mrp.group_mrp_routings"/>
                     <field name="state"/>
@@ -85,7 +85,7 @@
                             <field name="product_tmpl_id" invisible="1"/>
                             <label for="product_qty"/>
                             <div class="o_row">
-                                <field name="product_qty" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                                <field name="product_qty" attrs="{'readonly': [('state', '!=', 'draft')]}" widget="uom" options="{'uom_field': 'product_uom_id'}"/>
                                 <field name="product_uom_id" options="{'no_open':True,'no_create':True}" force_save="1" groups="uom.group_uom" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
                                 <button type="action"
                                     name="%(mrp.action_change_production_qty)d"
@@ -184,7 +184,7 @@
                 <kanban class="o_kanban_mobile">
                     <field name="name"/>
                     <field name="product_id"/>
-                    <field name="product_qty"/>
+                    <field name="product_qty" widget="uom" options="{'uom_field': 'product_uom_id'}"/>
                      <field name="product_uom_id" options="{'no_open':True,'no_create':True}"/>
                     <field name="date_planned_start"/>
                     <field name="state"/>

@@ -318,7 +318,7 @@
                                             <div>
                                                 <field
                                                     context="{'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'uom':product_uom, 'uom_qty_change':True, 'company_id': parent.company_id}"
-                                                    name="product_uom_qty" class="oe_inline"/>
+                                                    name="product_uom_qty" class="oe_inline" widget="uom" options="{'uom_field': 'product_uom'}"/>
                                                 <field
                                                     name="product_uom"
                                                     groups="uom.group_uom"
@@ -331,11 +331,11 @@
                                             </div>
                                             <label for="qty_delivered" string="Delivered Quantity" attrs="{'invisible': [('parent.state', 'not in', ['sale', 'done'])]}"/>
                                             <div attrs="{'invisible': [('parent.state', 'not in', ['sale', 'done'])]}">
-                                                <field name="qty_delivered" attrs="{'readonly': [('qty_delivered_method', '!=', 'manual')]}"/>
+                                                <field name="qty_delivered" attrs="{'readonly': [('qty_delivered_method', '!=', 'manual')]}" widget="uom" options="{'uom_field': 'product_uom'}"/>
                                             </div>
                                             <label for="qty_invoiced" string="Invoiced Quantity" attrs="{'invisible': [('parent.state', 'not in', ['sale', 'done'])]}"/>
                                             <div attrs="{'invisible': [('parent.state', 'not in', ['sale', 'done'])]}">
-                                                <field name="qty_invoiced" attrs="{'invisible': [('parent.state', 'not in', ['sale', 'done'])]}"/>
+                                                <field name="qty_invoiced" attrs="{'invisible': [('parent.state', 'not in', ['sale', 'done'])]}" widget="uom" options="{'uom_field': 'product_uom'}"/>
                                             </div>
                                             <field name="price_unit"/>
                                             <label for="discount" groups="sale.group_discount_per_so_line"/>
@@ -423,20 +423,20 @@
                                             'pricelist': parent.pricelist_id,
                                             'uom': product_uom,
                                             'company_id': parent.company_id
-                                        }"
+                                        }" widget="uom" options="{'uom_field': 'product_uom'}"
                                     />
                                     <field
                                         name="qty_delivered"
                                         attrs="{
                                             'column_invisible': [('parent.state', 'not in', ['sale', 'done'])],
                                             'readonly': [('qty_delivered_method', '!=', 'manual')]
-                                        }"
+                                        }" widget="uom" options="{'uom_field': 'product_uom'}"
                                     />
                                     <field name="qty_delivered_manual" invisible="1"/>
                                     <field name="qty_delivered_method" invisible="1"/>
                                     <field
                                         name="qty_invoiced"
-                                        attrs="{'column_invisible': [('parent.state', 'not in', ['sale', 'done'])]}"
+                                        attrs="{'column_invisible': [('parent.state', 'not in', ['sale', 'done'])]}" widget="uom" options="{'uom_field': 'product_uom'}"
                                     />
                                     <field name="qty_to_invoice" invisible="1"/>
                                     <field
@@ -476,7 +476,7 @@
                                 <kanban class="o_kanban_mobile">
                                     <field name="name"/>
                                     <field name="product_id"/>
-                                    <field name="product_uom_qty"/>
+                                    <field name="product_uom_qty" widget="uom" options="{'uom_field': 'product_uom'}"/>
                                     <field name="product_uom" groups="uom.group_uom"/>
                                     <field name="price_subtotal"/>
                                     <field name="price_unit"/>
@@ -880,10 +880,10 @@
                     <field name="order_partner_id"/>
                     <field name="name"/>
                     <field name="salesman_id"/>
-                    <field name="product_uom_qty" string="Qty"/>
-                    <field name="qty_delivered"/>
-                    <field name="qty_invoiced"/>
-                    <field name="qty_to_invoice"/>
+                    <field name="product_uom_qty" string="Qty" widget="uom" options="{'uom_field': 'product_uom'}"/>
+                    <field name="qty_delivered" widget="uom" options="{'uom_field': 'product_uom'}"/>
+                    <field name="qty_invoiced" widget="uom" options="{'uom_field': 'product_uom'}"/>
+                    <field name="qty_to_invoice" widget="uom" options="{'uom_field': 'product_uom'}"/>
                     <field name="product_uom" string="Unit of Measure" groups="uom.group_uom"/>
                     <field name="price_subtotal" sum="Total" widget="monetary"/>
                 </tree>
@@ -906,9 +906,9 @@
                                 <field name="order_id"/>
                                 <field name="product_id" readonly="1"/>
                                 <field name="name" readonly="1"/>
-                                <field name="product_uom_qty" readonly="1"/>
-                                <field name="qty_delivered" readonly="1"/>
-                                <field name="qty_invoiced"/>
+                                <field name="product_uom_qty" readonly="1" widget="uom" options="{'uom_field': 'product_uom'}"/>
+                                <field name="qty_delivered" readonly="1" widget="uom" options="{'uom_field': 'product_uom'}"/>
+                                <field name="qty_invoiced" widget="uom" options="{'uom_field': 'product_uom'}"/>
                                 <field name="product_uom" readonly="1"/>
                                 <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
                                 <field name="order_partner_id" invisible="1"/>

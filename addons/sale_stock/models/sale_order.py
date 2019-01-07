@@ -203,9 +203,8 @@ class SaleOrderLine(models.Model):
     def write(self, values):
         lines = self.env['sale.order.line']
         if 'product_uom_qty' in values:
-            precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
             lines = self.filtered(
-                lambda r: r.state == 'sale' and not r.is_expense and float_compare(r.product_uom_qty, values['product_uom_qty'], precision_digits=precision) == -1)
+                lambda r: r.state == 'sale' and not r.is_expense and float_compare(r.product_uom_qty, values['product_uom_qty'], precision_digits=r.product_uom.decimal_places) == -1)
         previous_product_uom_qty = {line.id: line.product_uom_qty for line in lines}
         res = super(SaleOrderLine, self).write(values)
         if lines:
@@ -267,12 +266,11 @@ class SaleOrderLine(models.Model):
 
     def _check_availability_warning(self, product_id, product_qty, ignore_warehouse=False):
         if product_id.type == 'product':
-            precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
             product_by_wh = product_id.with_context(
                 warehouse=self.order_id.warehouse_id.id,
                 lang=self.order_id.partner_id.lang or self.env.user.lang or 'en_US'
             )
-            if float_compare(product_by_wh.virtual_available, product_qty, precision_digits=precision) == -1:
+            if float_compare(product_by_wh.virtual_available, product_qty, precision_digits=product_id.uom_id.decimal_places) == -1:
                 is_available = self._check_routing(product_id)
                 if not is_available:
                     message = _('You plan to sell %s %s of %s but you only have %s %s available in %s warehouse.') % \
@@ -281,7 +279,7 @@ class SaleOrderLine(models.Model):
                                product_by_wh.uom_id.name, self.order_id.warehouse_id.name)
                     # We check if some products are available in other warehouses.
                     if not ignore_warehouse and float_compare(product_by_wh.virtual_available, product_id.virtual_available,
-                                     precision_digits=precision) == -1:
+                                     precision_digits=product_id.uom_id.decimal_places) == -1:
                         message += _('\nThere are %s %s available across all warehouses.\n\n') % \
                                    (product_id.virtual_available, product_by_wh.uom_id.name)
                         for warehouse in self.env['stock.warehouse'].search([]):
@@ -359,13 +357,12 @@ class SaleOrderLine(models.Model):
         sale order line. procurement group will launch '_run_pull', '_run_buy' or '_run_manufacture'
         depending on the sale order line product rule.
         """
-        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
         errors = []
         for line in self:
             if line.state != 'sale' or not line.product_id.type in ('consu','product'):
                 continue
             qty = line._get_qty_procurement()
-            if float_compare(qty, line.product_uom_qty, precision_digits=precision) >= 0:
+            if float_compare(qty, line.product_uom_qty, precision_digits=line.product_uom.decimal_places) >= 0:
                 continue
 
             group_id = line.order_id.procurement_group_id
@@ -451,8 +448,7 @@ class SaleOrderLine(models.Model):
         return is_available
 
     def _update_line_quantity(self, values):
-        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
-        if self.mapped('qty_delivered') and float_compare(values['product_uom_qty'], max(self.mapped('qty_delivered')), precision_digits=precision) == -1:
+        if self.mapped('qty_delivered') and float_compare(values['product_uom_qty'], max(self.mapped('qty_delivered')), precision_digits=self.product_uom.decimal_places) == -1:
             raise UserError(_('You cannot decrease the ordered quantity below the delivered quantity.\n'
                               'Create a return first.'))
         super(SaleOrderLine, self)._update_line_quantity(values)

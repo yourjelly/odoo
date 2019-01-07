@@ -575,10 +575,13 @@ class AccountMoveLine(models.Model):
             counterpart = list(counterpart)[0:2] + ["..."]
         self.counterpart = ",".join(counterpart)
 
+    @api.model
+    def _default_product_uom_id(self):
+        return self.env['uom.uom'].search([], limit=1, order='id')
+
     name = fields.Char(string="Label")
-    quantity = fields.Float(digits=dp.get_precision('Product Unit of Measure'),
-        help="The optional quantity expressed by this line, eg: number of product sold. The quantity is not a legal requirement but is very useful for some reports.")
-    product_uom_id = fields.Many2one('uom.uom', string='Unit of Measure')
+    quantity = fields.Float(help="The optional quantity expressed by this line, eg: number of product sold. The quantity is not a legal requirement but is very useful for some reports.")
+    product_uom_id = fields.Many2one('uom.uom', string='Unit of Measure', default=_default_product_uom_id)
     product_id = fields.Many2one('product.product', string='Product')
     debit = fields.Monetary(default=0.0, currency_field='company_currency_id')
     credit = fields.Monetary(default=0.0, currency_field='company_currency_id')

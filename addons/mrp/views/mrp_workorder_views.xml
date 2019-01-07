@@ -132,7 +132,7 @@
                         <field name="product_id" string="To Produce"/>
                         <label for="qty_produced" string="Quantity Produced"/>
                         <div class="o_row">
-                            <field name="qty_produced"/> /
+                            <field name="qty_produced" widget="uom" options="{'uom_field': 'product_uom_id'}"/>
                             <field name="qty_production"/>
                             <field name="product_uom_id"/>
                             <field name="production_availability" nolabel="1" widget="bullet_state" options="{'classes': {'assigned': 'success', 'waiting': 'danger'}}" attrs="{'invisible': [('state', '=', 'done')]}"/>
@@ -147,7 +147,7 @@
                 <page string="Current Production">
                     <group>
                         <group>
-                            <field name="qty_producing" string="Current Qty" attrs="{'readonly': ['|', ('product_tracking', '=', 'serial'), ('state', 'in', ('done', 'cancel'))]}"/>
+                            <field name="qty_producing" string="Current Qty" attrs="{'readonly': ['|', ('product_tracking', '=', 'serial'), ('state', 'in', ('done', 'cancel'))]}" options="{'uom_field': 'product_uom_id'}"/>
                             <field name="final_lot_id" context="{'default_product_id': product_id}" domain="['|', '&amp;', ('product_id', '=', product_id), ('product_id.tracking', '!=', 'serial'), ('use_next_on_work_order_id', '=', id)]" attrs="{'invisible': [('product_tracking', '=', 'none')]}" groups="stock.group_production_lot"/>
                             <field name="product_tracking" invisible="1"/>
                         </group>
