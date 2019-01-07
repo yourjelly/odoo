@@ -18,8 +18,8 @@ class ResUsers(models.Model):
             SELECT
                 user_id as id,
                 CASE WHEN age(now() AT TIME ZONE 'UTC', last_poll) > interval %s THEN 'offline'
-                     WHEN age(now() AT TIME ZONE 'UTC', last_presence) > interval %s THEN 'away'
-                     ELSE 'online'
+                        WHEN age(now() AT TIME ZONE 'UTC', last_presence) > interval %s THEN 'away'
+                        ELSE 'online'
                 END as status
             FROM bus_presence
             WHERE user_id IN %s
