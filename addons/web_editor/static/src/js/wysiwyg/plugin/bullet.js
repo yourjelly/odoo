@@ -28,86 +28,36 @@ var BulletPlugin = AbstractPlugin.extend({
 
     /**
      * Insert an ordered list, an unordered list or a checklist.
+     * If already in list, remove the list or convert it to the given type.
      *
      * @param {string('ol'|'ul'|'checklist')} type the type of list to insert
-     * @returns {false|Node[]} contents of the ul/ol or content of the removed list
+     * @returns {false|Node[]} contents of the ul/ol or content of the converted/removed list
      */
     insertList: function (type) {
-        var self = this;
         var range = this.context.invoke('editor.createRange');
-        var nodes;
         if (!range) {
             return;
         }
+        var res;
+        var start = range.getStartPoint();
+        var end = range.getEndPoint();
 
-        // existing list
-
-        var ol = dom.ancestor(range.sc, dom.isList);
-        if (ol) {
-            var start = range.getStartPoint();
-            var end = range.getEndPoint();
-            nodes = [];
-            this._convertList(false, nodes, start, end, type);
-            range.sc = start.node;
-            range.so = start.offset;
-            range.ec = end.node;
-            range.eo = end.offset;
-            range.select();
-            this.context.invoke('editor.saveRange');
-            return nodes;
+        var isInList = dom.ancestor(range.sc, dom.isList);
+        if (isInList) {
+            res = this._convertList(false, [], start, end, type);
+        } else {
+            var ul = this._createList(type);
+            res = [].slice.call(ul.children);
         }
 
-        // create list
-
-        nodes = this.context.invoke('HelperPlugin.getSelectedNodes');
-        var formatNodes = this.context.invoke('HelperPlugin.filterFormatAncestors', nodes);
-
-        formatNodes = _.compact(_.map(formatNodes, function (node) {
-            var ancestor = (!node.tagName || node.tagName === 'BR') && dom.ancestor(node, dom.isCell);
-            if (ancestor && self.options.isEditableNode(ancestor)) {
-                if (!ancestor.childNodes.length) {
-                    var br = self.document.createElement('br');
-                    ancestor.appendChild(br);
-                }
-                var p = self.document.createElement('p');
-                $(p).append(ancestor.childNodes);
-                ancestor.appendChild(p);
-                return p;
-            }
-            return self.options.isEditableNode(node) && node || null;
-        }));
-
-        if (!formatNodes.length) {
-            return;
-        }
-
-        var ul = this.document.createElement(type === "ol" ? "ol" : "ul");
-        if (type === 'checklist') {
-            ul.className = 'o_checklist';
-        }
-        $(formatNodes[0][0] || formatNodes[0]).before(ul);
-
-        _.each(formatNodes, function (node) {
-            var li = self.document.createElement('li');
-            $(li).append(node);
-            ul.appendChild(li);
-        });
-
-        this.context.invoke('HelperPlugin.deleteEdge', ul, 'next');
-        this.context.invoke('HelperPlugin.deleteEdge', ul, 'prev');
-        this.document.normalize();
-
-        if (range.sc.firstChild) {
-            range.sc = this.context.invoke('HelperPlugin.firstLeaf', range.sc);
-            range.so = 0;
-        }
-        if (range.ec.firstChild) {
-            range.ec = this.context.invoke('HelperPlugin.lastLeaf', range.ec);
-            range.eo = dom.nodeLength(range.ec);
-        }
+        range.sc = this.context.invoke('HelperPlugin.firstLeaf', start.node);
+        range.so = start.offset;
+        range.ec = this.context.invoke('HelperPlugin.firstLeaf', end.node);
+        range.eo = end.offset;
         range.select();
         this.context.invoke('editor.saveRange');
-        return [].slice.call(ul.children);
+
+        return res;
     },
     /**
      * Indent a node (list or format node).
@@ -268,6 +218,89 @@ var BulletPlugin = AbstractPlugin.extend({
         nodes.push.apply(nodes, res);
 
         return isWithinElem;
+    },
+    /**
+     * Create a list if allowed.
+     *
+     * @param {string('ol'|'ul'|'checklist')} type the type of list to insert
+     * @returns {false|Node} the list, if any
+     */
+    _createList: function (type) {
+        var nodes = this.context.invoke('HelperPlugin.getSelectedNodes');
+        var formatNodes = this._filterEditableFormatNodes(nodes);
+        if (!formatNodes.length) {
+            return;
+        }
+
+        var ul = this._createListElement(type);
+        $(formatNodes[0][0] || formatNodes[0]).before(ul);
+        this._fillListElementWith(ul, formatNodes);
+        this._deleteListElementEdges(ul);
+
+        return ul;
+    },
+    /**
+     * Create a list element of the given type and return it.
+     *
+     * @param {string('ol'|'ul'|'checklist')} type the type of list to insert
+     * @returns {Node}
+     */
+    _createListElement: function (type) {
+        var ul = this.document.createElement(type === "ol" ? "ol" : "ul");
+        if (type === 'checklist') {
+            ul.className = 'o_checklist';
+        }
+        return ul;
+    },
+    /**
+     * Delete a list element's edges if necessary.
+     *
+     * @param {Node} ul
+     */
+    _deleteListElementEdges: function (ul) {
+        this.context.invoke('HelperPlugin.deleteEdge', ul, 'next');
+        this.context.invoke('HelperPlugin.deleteEdge', ul, 'prev');
+        this.editable.normalize();
+    },
+    /**
+     * Fill a list element with the nodes passed, wrapped in LIs.
+     *
+     * @param {Node} ul
+     * @param {Node[]} nodes
+     */
+    _fillListElementWith: function (ul, nodes) {
+        var self = this;
+        _.each(nodes, function (node) {
+            var li = self.document.createElement('li');
+            $(li).append(node);
+            ul.appendChild(li);
+        });
+    },
+    /**
+     * Filter the editable format ancestors of the given nodes
+     * and fill or wrap them if needed for range selection.
+     *
+     * @param {Node[]} nodes
+     * @returns {Node[]}
+     */
+    _filterEditableFormatNodes: function (nodes) {
+        var self = this;
+        var formatNodes = this.context.invoke('HelperPlugin.filterFormatAncestors', nodes);
+        formatNodes = _.compact(_.map(formatNodes, function (node) {
+            var ancestor = (!node.tagName || node.tagName === 'BR') && dom.ancestor(node, dom.isCell);
+            if (ancestor && self.options.isEditableNode(ancestor)) {
+                if (!ancestor.childNodes.length) {
+                    var br = self.document.createElement('br');
+                    ancestor.appendChild(br);
+                }
+                var p = self.document.createElement('p');
+                $(p).append(ancestor.childNodes);
+                ancestor.appendChild(p);
+                return p;
+            }
+            return self.options.isEditableNode(node) && node || null;
+        }));
+        return formatNodes;
     },
     /**
      * Indent or outdent a format node.
