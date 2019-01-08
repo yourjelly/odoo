@@ -107,3 +107,11 @@ class DeferredException(Exception):
 
 class QWebException(Exception):
     pass
+
+
+class ProgrammingError(Exception):
+    """ For code that could potentially lead to unexpected bugs.
+    e.g. A required m2o without the ondelete option explicitly specified, which could lead to
+         record deletion errors
+    """
+    pass
