@@ -7,11 +7,11 @@ from odoo.http import request
 class WebsiteSale(WebsiteSale):
     def _get_combination_info(self, product_template_id, product_id, combination, add_qty, pricelist, **kw):
         res = super(WebsiteSale, self)._get_combination_info(product_template_id, product_id, combination, add_qty, pricelist, **kw)
-
         if res['product_id']:
             product = request.env['product.product'].sudo().browse(res['product_id'])
+
             res.update({
-                'virtual_available': product.virtual_available,
+                'virtual_available': product.with_context(warehouse=request.website.warehouse_id.id).virtual_available,
                 'product_type': product.type,
                 'inventory_availability': product.inventory_availability,
                 'available_threshold': product.available_threshold,
