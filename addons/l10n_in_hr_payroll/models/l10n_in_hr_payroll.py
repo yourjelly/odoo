@@ -49,8 +49,10 @@ class HrPayrollAdvice(models.Model):
         states={'draft': [('readonly', False)]}, readonly=True, copy=True)
     chaque_nos = fields.Char(string='Cheque Numbers')
     neft = fields.Boolean(string='NEFT Transaction', help='Check this box if your company use online transfer for salary')
-    company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True,
-        states={'draft': [('readonly', False)]}, default=lambda self: self.env.user.company_id)
+    company_id = fields.Many2one(
+        'res.company', string='Company', required=True, readonly=True, ondelete='set null',
+        states={'draft': [('readonly', False)]}, default=lambda self: self.env.user.company_id,
+    )
     bank_id = fields.Many2one('res.bank', string='Bank', readonly=True, states={'draft': [('readonly', False)]},
         help='Select the Bank from which the salary is going to be paid')
     batch_id = fields.Many2one('hr.payslip.run', string='Batch', readonly=True)
@@ -166,7 +168,8 @@ class HrPayrollAdviceLine(models.Model):
     advice_id = fields.Many2one('hr.payroll.advice', string='Bank Advice')
     name = fields.Char('Bank Account No.', required=True)
     ifsc_code = fields.Char(string='IFSC Code')
-    employee_id = fields.Many2one('hr.employee', string='Employee', required=True)
+    employee_id = fields.Many2one('hr.employee', string='Employee', required=True,
+                                  ondelete='set null')
     bysal = fields.Float(string='By Salary', digits=dp.get_precision('Payroll'))
     debit_credit = fields.Char(string='C/D', default='C')
     company_id = fields.Many2one('res.company', related='advice_id.company_id', string='Company', store=True, readonly=False)

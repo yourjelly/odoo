@@ -26,7 +26,8 @@ class PurchaseReport(models.Model):
     product_id = fields.Many2one('product.product', 'Product', readonly=True)
     partner_id = fields.Many2one('res.partner', 'Vendor', readonly=True)
     date_approve = fields.Date('Date Approved', readonly=True)
-    product_uom = fields.Many2one('uom.uom', 'Reference Unit of Measure', required=True)
+    product_uom = fields.Many2one('uom.uom', 'Reference Unit of Measure', required=True,
+                                  ondelete='set null')
     company_id = fields.Many2one('res.company', 'Company', readonly=True)
     currency_id = fields.Many2one('res.currency', 'Currency', readonly=True)
     user_id = fields.Many2one('res.users', 'Purchase Representative', readonly=True)

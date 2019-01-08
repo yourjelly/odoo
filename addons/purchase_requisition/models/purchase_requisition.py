@@ -60,13 +60,19 @@ class PurchaseRequisition(models.Model):
     origin = fields.Char(string='Source Document')
     order_count = fields.Integer(compute='_compute_orders_number', string='Number of Orders')
     vendor_id = fields.Many2one('res.partner', string="Vendor")
-    type_id = fields.Many2one('purchase.requisition.type', string="Agreement Type", required=True, default=_get_type_id)
+    type_id = fields.Many2one(
+        'purchase.requisition.type', string="Agreement Type", required=True, default=_get_type_id,
+        ondelete='set null',
+    )
     ordering_date = fields.Date(string="Ordering Date", tracking=True)
     date_end = fields.Datetime(string='Agreement Deadline', tracking=True)
     schedule_date = fields.Date(string='Delivery Date', index=True, help="The expected and scheduled delivery date where all the products are received", tracking=True)
     user_id = fields.Many2one('res.users', string='Purchase Representative', default= lambda self: self.env.user)
     description = fields.Text()
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env['res.company']._company_default_get('purchase.requisition'))
+    company_id = fields.Many2one(
+        'res.company', string='Company', required=True, ondelete='set null',
+        default=lambda self: self.env['res.company']._company_default_get('purchase.requisition'),
+    )
     purchase_ids = fields.One2many('purchase.order', 'requisition_id', string='Purchase Orders', states={'done': [('readonly', True)]})
     line_ids = fields.One2many('purchase.requisition.line', 'requisition_id', string='Products to Purchase', states={'done': [('readonly', True)]}, copy=True)
     warehouse_id = fields.Many2one('stock.warehouse', string='Warehouse')
@@ -74,10 +80,13 @@ class PurchaseRequisition(models.Model):
                               'Status', tracking=True, required=True,
                               copy=False, default='draft')
     state_blanket_order = fields.Selection(PURCHASE_REQUISITION_STATES, compute='_set_state')
-    picking_type_id = fields.Many2one('stock.picking.type', 'Operation Type', required=True, default=_get_picking_in)
+    picking_type_id = fields.Many2one(
+        'stock.picking.type', 'Operation Type', required=True, default=_get_picking_in,
+        ondelete='set null',
+    )
     is_quantity_copy = fields.Selection(related='type_id.quantity_copy', readonly=True)
     currency_id = fields.Many2one('res.currency', 'Currency', required=True,
-        default=lambda self: self.env.user.company_id.currency_id.id)
+        default=lambda self: self.env.user.company_id.currency_id.id, ondelete='set null')
 
     @api.depends('state')
     def _set_state(self):
@@ -186,7 +195,10 @@ class PurchaseRequisitionLine(models.Model):
     _description = "Purchase Requisition Line"
     _rec_name = 'product_id'
 
-    product_id = fields.Many2one('product.product', string='Product', domain=[('purchase_ok', '=', True)], required=True)
+    product_id = fields.Many2one(
+        'product.product', string='Product', domain=[('purchase_ok', '=', True)], required=True,
+        ondelete='set null',
+    )
     product_uom_id = fields.Many2one('uom.uom', string='Product Unit of Measure')
     product_qty = fields.Float(string='Quantity', digits=dp.get_precision('Product Unit of Measure'))
     price_unit = fields.Float(string='Unit Price', digits=dp.get_precision('Product Price'))

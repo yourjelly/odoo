@@ -40,7 +40,7 @@ class BaseGengoTranslations(models.TransientModel):
         ('receive', 'Receive Translation'),
         ('both', 'Both')
         ], "Sync Type", default='both', required=True)
-    lang_id = fields.Many2one('res.lang', 'Language', required=True)
+    lang_id = fields.Many2one('res.lang', 'Language', required=True, ondelete='set null')
     sync_limit = fields.Integer("No. of terms to sync", default=20)
     authorized_credentials = fields.Boolean('The private and public keys are valid')
 

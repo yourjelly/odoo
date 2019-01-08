@@ -52,9 +52,15 @@ class Website(models.Model):
     domain = fields.Char('Website Domain')
     country_group_ids = fields.Many2many('res.country.group', 'website_country_group_rel', 'website_id', 'country_group_id',
                                          string='Country Groups', help='Used when multiple websites have the same domain.')
-    company_id = fields.Many2one('res.company', string="Company", default=lambda self: self.env.ref('base.main_company').id, required=True)
+    company_id = fields.Many2one(
+        'res.company', string="Company", default=lambda self: self.env.ref('base.main_company').id,
+        required=True, ondelete='set null',
+    )
     language_ids = fields.Many2many('res.lang', 'website_lang_rel', 'website_id', 'lang_id', 'Languages', default=_active_languages)
-    default_lang_id = fields.Many2one('res.lang', string="Default Language", default=_default_language, required=True)
+    default_lang_id = fields.Many2one(
+        'res.lang', string="Default Language", default=_default_language, required=True,
+        ondelete='set null',
+    )
     default_lang_code = fields.Char("Default language code", related='default_lang_id.code', store=True, readonly=False)
     auto_redirect_lang = fields.Boolean('Autoredirect Language', default=True, help="Should users be redirected to their browser's language")
 
@@ -94,7 +100,7 @@ class Website(models.Model):
 
     google_maps_api_key = fields.Char('Google Maps API Key')
 
-    user_id = fields.Many2one('res.users', string='Public User', required=True)
+    user_id = fields.Many2one('res.users', string='Public User', required=True, ondelete='set null')
     cdn_activated = fields.Boolean('Content Delivery Network (CDN)')
     cdn_url = fields.Char('CDN Base URL', default='')
     cdn_filters = fields.Text('CDN Filters', default=lambda s: '\n'.join(DEFAULT_CDN_FILTERS), help="URL matching those filters will be rewritten using the CDN Base URL")

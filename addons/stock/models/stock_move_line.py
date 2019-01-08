@@ -23,7 +23,7 @@ class StockMoveLine(models.Model):
         help="Change to a better name", index=True)
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env['res.users']._get_company(), readonly=True)
     product_id = fields.Many2one('product.product', 'Product', ondelete="cascade")
-    product_uom_id = fields.Many2one('uom.uom', 'Unit of Measure', required=True)
+    product_uom_id = fields.Many2one('uom.uom', 'Unit of Measure', required=True, ondelete='set null')
     product_qty = fields.Float(
         'Real Reserved Quantity', digits=0,
         compute='_compute_product_qty', inverse='_set_product_qty', store=True)
@@ -39,8 +39,8 @@ class StockMoveLine(models.Model):
         help="If set, the operations are packed into this package")
     date = fields.Datetime('Date', default=fields.Datetime.now, required=True)
     owner_id = fields.Many2one('res.partner', 'Owner', help="Owner of the quants")
-    location_id = fields.Many2one('stock.location', 'From', required=True)
-    location_dest_id = fields.Many2one('stock.location', 'To', required=True)
+    location_id = fields.Many2one('stock.location', 'From', required=True, ondelete='set null')
+    location_dest_id = fields.Many2one('stock.location', 'To', required=True, ondelete='set null')
     lots_visible = fields.Boolean(compute='_compute_lots_visible')
     picking_type_use_create_lots = fields.Boolean(related='picking_id.picking_type_id.use_create_lots', readonly=True)
     picking_type_use_existing_lots = fields.Boolean(related='picking_id.picking_type_id.use_existing_lots', readonly=True)

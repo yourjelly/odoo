@@ -53,10 +53,11 @@ class LunchProduct(models.Model):
     _description = 'Lunch Product'
 
     name = fields.Char('Name', required=True)
-    category_id = fields.Many2one('lunch.product.category', 'Product Category', required=True)
+    category_id = fields.Many2one('lunch.product.category', 'Product Category', required=True,
+                                  ondelete='set null')
     description = fields.Text('Description')
     price = fields.Float('Price', digits=dp.get_precision('Account'), required=True)
-    supplier_id = fields.Many2one('lunch.supplier', 'Vendor', required=True)
+    supplier_id = fields.Many2one('lunch.supplier', 'Vendor', required=True, ondelete='set null')
     active = fields.Boolean(default=True)
 
     # image: all image fields are base64 encoded and PIL-supported

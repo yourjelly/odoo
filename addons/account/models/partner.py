@@ -169,7 +169,8 @@ class AccountFiscalPositionTax(models.Model):
 
     position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position',
         required=True, ondelete='cascade')
-    tax_src_id = fields.Many2one('account.tax', string='Tax on Product', required=True)
+    tax_src_id = fields.Many2one('account.tax', string='Tax on Product', required=True,
+                                 ondelete='set null')
     tax_dest_id = fields.Many2one('account.tax', string='Tax to Apply')
 
     _sql_constraints = [

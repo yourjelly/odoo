@@ -124,7 +124,8 @@ class LunchOrderLine(models.Model):
     name = fields.Char(related='product_id.name', string="Product Name", readonly=True)
     order_id = fields.Many2one('lunch.order', 'Order', ondelete='cascade', required=True)
     topping_ids = fields.Many2many('lunch.topping', string='Toppings')
-    product_id = fields.Many2one('lunch.product', string="Product", required=True)
+    product_id = fields.Many2one('lunch.product', string="Product", required=True,
+                                 ondelete='set null')
     category_id = fields.Many2one('lunch.product.category', string='Product Category',
                                   related='product_id.category_id', readonly=True, store=True)
     date = fields.Date(string='Date', related='order_id.date', readonly=True, store=True)

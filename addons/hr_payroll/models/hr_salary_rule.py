@@ -27,8 +27,10 @@ class HrPayrollStructure(models.Model):
 
     name = fields.Char(required=True)
     code = fields.Char(string='Reference', required=True)
-    company_id = fields.Many2one('res.company', string='Company', required=True,
-        copy=False, default=lambda self: self.env['res.company']._company_default_get())
+    company_id = fields.Many2one(
+        'res.company', string='Company', required=True, ondelete='set null'
+        copy=False, default=lambda self: self.env['res.company']._company_default_get(),
+    )
     note = fields.Text(string='Description')
     parent_id = fields.Many2one('hr.payroll.structure', string='Parent', default=_get_parent)
     children_ids = fields.One2many('hr.payroll.structure', 'parent_id', string='Children', copy=True)
@@ -114,7 +116,8 @@ class HrSalaryRule(models.Model):
              "For e.g. A rule for Meal Voucher having fixed amount of "
              u"1€ per worked day can have its quantity defined in expression "
              "like worked_days.WORK100.number_of_days.")
-    category_id = fields.Many2one('hr.salary.rule.category', string='Category', required=True)
+    category_id = fields.Many2one('hr.salary.rule.category', string='Category', required=True,
+                                  ondelete='set null')
     active = fields.Boolean(default=True,
         help="If the active field is set to false, it will allow you to hide the salary rule without removing it.")
     appears_on_payslip = fields.Boolean(string='Appears on Payslip', default=True,

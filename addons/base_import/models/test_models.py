@@ -58,7 +58,7 @@ class M2oRequired(models.Model):
     _name = name('m2o.required')
     _description = 'Tests : Base Import Model, Many to One required'
 
-    value = fields.Many2one(name('m2o.required.related'), required=True)
+    value = fields.Many2one(name('m2o.required.related'), required=True, ondelete='set null')
 
 class M2oRequiredRelated(models.Model):
     _name = name('m2o.required.related')

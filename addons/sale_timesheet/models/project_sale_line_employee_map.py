@@ -14,9 +14,15 @@ class ProjectProductEmployeeMap(models.Model):
             return self._context['active_id']
         return False
 
-    project_id = fields.Many2one('project.project', "Project", domain=[('billable_type', '!=', 'no')], required=True, default=_default_project_id)
-    employee_id = fields.Many2one('hr.employee', "Employee", required=True)
-    sale_line_id = fields.Many2one('sale.order.line', "Sale Order Item", domain=[('is_service', '=', True)], required=True)
+    project_id = fields.Many2one(
+        'project.project', "Project", domain=[('billable_type', '!=', 'no')], required=True,
+        default=_default_project_id, ondelete='set null',
+    )
+    employee_id = fields.Many2one('hr.employee', "Employee", required=True, ondelete='set null')
+    sale_line_id = fields.Many2one(
+        'sale.order.line', "Sale Order Item", domain=[('is_service', '=', True)], required=True,
+        ondelete='set null',
+    )
     price_unit = fields.Float(related='sale_line_id.price_unit', readonly=True)
 
     _sql_constraints = [

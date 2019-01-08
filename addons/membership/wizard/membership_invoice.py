@@ -9,7 +9,8 @@ class MembershipInvoice(models.TransientModel):
     _name = "membership.invoice"
     _description = "Membership Invoice"
 
-    product_id = fields.Many2one('product.product', string='Membership', required=True)
+    product_id = fields.Many2one('product.product', string='Membership', required=True,
+                                 ondelete='set null')
     member_price = fields.Float(string='Member Price', digits= dp.get_precision('Product Price'), required=True)
 
     @api.onchange('product_id')

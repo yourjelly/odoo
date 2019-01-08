@@ -62,9 +62,11 @@ class AccountAccountTemplate(models.Model):
     name = fields.Char(required=True, index=True)
     currency_id = fields.Many2one('res.currency', string='Account Currency', help="Forces all moves for this account to have this secondary currency.")
     code = fields.Char(size=64, required=True, index=True)
-    user_type_id = fields.Many2one('account.account.type', string='Type', required=True, oldname='user_type',
+    user_type_id = fields.Many2one(
+        'account.account.type', string='Type', required=True, oldname='user_type',
         help="These types are defined according to your country. The type contains more information "\
-        "about the account and its specificities.")
+        "about the account and its specificities.", ondelete='set null',
+    )
     reconcile = fields.Boolean(string='Allow Invoices & payments Matching', default=False,
         help="Check this option if you want the user to reconcile entries in this account.")
     note = fields.Text()
@@ -99,7 +101,8 @@ class AccountChartTemplate(models.Model):
     visible = fields.Boolean(string='Can be Visible?', default=True,
         help="Set this to False if you don't want this template to be used actively in the wizard that generate Chart of Accounts from "
             "templates, this is useful when you want to generate accounts of this template only when loading its child template.")
-    currency_id = fields.Many2one('res.currency', string='Currency', required=True)
+    currency_id = fields.Many2one('res.currency', string='Currency', required=True,
+                                  ondelete='set null')
     use_anglo_saxon = fields.Boolean(string="Use Anglo-Saxon accounting", default=False)
     complete_tax_set = fields.Boolean(string='Complete Set of Taxes', default=True,
         help="This boolean helps you to choose if you want to propose to the user to encode the sale and purchase rates or choose from list "
@@ -775,7 +778,9 @@ class AccountTaxTemplate(models.Model):
     _description = 'Templates for Taxes'
     _order = 'id'
 
-    chart_template_id = fields.Many2one('account.chart.template', string='Chart Template', required=True)
+    chart_template_id = fields.Many2one(
+        'account.chart.template', string='Chart Template', required=True, ondelete='set null',
+    )
 
     name = fields.Char(string='Tax Name', required=True)
     type_tax_use = fields.Selection([('sale', 'Sales'), ('purchase', 'Purchases'), ('none', 'None'), ('adjustment', 'Adjustment')], string='Tax Scope', required=True, default="sale",
@@ -920,7 +925,9 @@ class AccountFiscalPositionTemplate(models.Model):
 
     sequence = fields.Integer()
     name = fields.Char(string='Fiscal Position Template', required=True)
-    chart_template_id = fields.Many2one('account.chart.template', string='Chart Template', required=True)
+    chart_template_id = fields.Many2one(
+        'account.chart.template', string='Chart Template', required=True, ondelete='set null'
+    )
     account_ids = fields.One2many('account.fiscal.position.account.template', 'position_id', string='Account Mapping')
     tax_ids = fields.One2many('account.fiscal.position.tax.template', 'position_id', string='Tax Mapping')
     note = fields.Text(string='Notes')
@@ -941,7 +948,8 @@ class AccountFiscalPositionTaxTemplate(models.Model):
     _rec_name = 'position_id'
 
     position_id = fields.Many2one('account.fiscal.position.template', string='Fiscal Position', required=True, ondelete='cascade')
-    tax_src_id = fields.Many2one('account.tax.template', string='Tax Source', required=True)
+    tax_src_id = fields.Many2one('account.tax.template', string='Tax Source', required=True,
+                                 ondelete='set null')
     tax_dest_id = fields.Many2one('account.tax.template', string='Replacement Tax')
 
 
@@ -951,8 +959,13 @@ class AccountFiscalPositionAccountTemplate(models.Model):
     _rec_name = 'position_id'
 
     position_id = fields.Many2one('account.fiscal.position.template', string='Fiscal Mapping', required=True, ondelete='cascade')
-    account_src_id = fields.Many2one('account.account.template', string='Account Source', required=True)
-    account_dest_id = fields.Many2one('account.account.template', string='Account Destination', required=True)
+    account_src_id = fields.Many2one(
+        'account.account.template', string='Account Source', required=True, ondelete='set null',
+    )
+    account_dest_id = fields.Many2one(
+        'account.account.template', string='Account Destination', required=True,
+        ondelete='set null',
+    )
 
 
 class AccountReconcileModelTemplate(models.Model):
@@ -960,7 +973,9 @@ class AccountReconcileModelTemplate(models.Model):
     _description = 'Reconcile Model Template'
 
     # Base fields.
-    chart_template_id = fields.Many2one('account.chart.template', string='Chart Template', required=True)
+    chart_template_id = fields.Many2one(
+        'account.chart.template', string='Chart Template', required=True, ondelete='set null',
+    )
     name = fields.Char(string='Button Label', required=True)
     sequence = fields.Integer(required=True, default=10)
 

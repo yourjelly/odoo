@@ -19,7 +19,8 @@ class HrContract(models.Model):
         ('bi-monthly', 'Bi-monthly'),
     ], string='Scheduled Pay', index=True, default='monthly',
     help="Defines the frequency of the wage payment.")
-    resource_calendar_id = fields.Many2one(required=True, help="Employee's working schedule.")
+    resource_calendar_id = fields.Many2one(required=True, help="Employee's working schedule.",
+                                           ondelete='set null')
 
     @api.multi
     def get_all_structures(self):

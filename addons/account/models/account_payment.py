@@ -39,7 +39,9 @@ class account_abstract_payment(models.AbstractModel):
                            help='Technical field indicating if the user selected invoices from multiple partners or from different types.')
 
     payment_type = fields.Selection([('outbound', 'Send Money'), ('inbound', 'Receive Money')], string='Payment Type', required=True)
-    payment_method_id = fields.Many2one('account.payment.method', string='Payment Method Type', required=True, oldname="payment_method",
+    payment_method_id = fields.Many2one(
+        'account.payment.method', string='Payment Method Type', required=True,
+        oldname="payment_method", ondelete='set null',
         help="Manual: Get paid by cash, check or any other method outside of Odoo.\n"\
         "Electronic: Get paid automatically through a payment acquirer by requesting a transaction on a card saved by the customer when buying or subscribing online (payment token).\n"\
         "Check: Pay bill by check and print it from Odoo.\n"\
@@ -52,10 +54,16 @@ class account_abstract_payment(models.AbstractModel):
     partner_id = fields.Many2one('res.partner', string='Partner')
 
     amount = fields.Monetary(string='Payment Amount', required=True)
-    currency_id = fields.Many2one('res.currency', string='Currency', required=True, default=lambda self: self.env.user.company_id.currency_id)
+    currency_id = fields.Many2one(
+        'res.currency', string='Currency', required=True, ondelete='set null',
+        default=lambda self: self.env.user.company_id.currency_id,
+    )
     payment_date = fields.Date(string='Payment Date', default=fields.Date.context_today, required=True, copy=False)
     communication = fields.Char(string='Memo')
-    journal_id = fields.Many2one('account.journal', string='Payment Journal', required=True, domain=[('type', 'in', ('bank', 'cash'))])
+    journal_id = fields.Many2one(
+        'account.journal', string='Payment Journal', required=True, ondelete='set null',
+        domain=[('type', 'in', ('bank', 'cash'))]
+    )
 
     hide_payment_method = fields.Boolean(compute='_compute_hide_payment_method',
         help="Technical field used to hide the payment method if the selected journal has only one available which is 'manual'")

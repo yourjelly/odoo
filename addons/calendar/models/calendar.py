@@ -94,8 +94,9 @@ class Contacts(models.Model):
     _name = 'calendar.contacts'
     _description = 'Calendar Contacts'
 
-    user_id = fields.Many2one('res.users', 'Me', required=True, default=lambda self: self.env.user)
-    partner_id = fields.Many2one('res.partner', 'Employee', required=True)
+    user_id = fields.Many2one('res.users', 'Me', required=True, default=lambda self: self.env.user,
+                              ondelete='set null')
+    partner_id = fields.Many2one('res.partner', 'Employee', required=True, ondelete='set null')
     active = fields.Boolean('Active', default=True)
 
     _sql_constraints = [

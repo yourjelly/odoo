@@ -13,10 +13,19 @@ class TaxAdjustments(models.TransientModel):
         return self.env['account.journal'].search([('type', '=', 'general')], limit=1).id
 
     reason = fields.Char(string='Justification', required=True)
-    journal_id = fields.Many2one('account.journal', string='Journal', required=True, default=_get_default_journal, domain=[('type', '=', 'general')])
+    journal_id = fields.Many2one(
+        'account.journal', string='Journal', required=True, default=_get_default_journal,
+        domain=[('type', '=', 'general')], ondelete='set null',
+    )
     date = fields.Date(required=True, default=fields.Date.context_today)
-    debit_account_id = fields.Many2one('account.account', string='Debit account', required=True, domain=[('deprecated', '=', False)])
-    credit_account_id = fields.Many2one('account.account', string='Credit account', required=True, domain=[('deprecated', '=', False)])
+    debit_account_id = fields.Many2one(
+        'account.account', string='Debit account', required=True, ondelete='set null',
+        domain=[('deprecated', '=', False)],
+    )
+    credit_account_id = fields.Many2one(
+        'account.account', string='Credit account', required=True, ondelete='set null',
+        domain=[('deprecated', '=', False)],
+    )
     amount = fields.Monetary(currency_field='company_currency_id', required=True)
     adjustment_type = fields.Selection([('debit', 'Applied on debit journal item'), ('credit', 'Applied on credit journal item')], string="Adjustment Type", store=False, required=True)
     company_currency_id = fields.Many2one('res.currency', readonly=True, default=lambda self: self.env.user.company_id.currency_id)

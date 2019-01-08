@@ -46,9 +46,29 @@ class HrExpense(models.Model):
 
     name = fields.Char('Description', readonly=True, required=True, states={'draft': [('readonly', False)], 'reported': [('readonly', False)], 'refused': [('readonly', False)]})
     date = fields.Date(readonly=True, states={'draft': [('readonly', False)], 'reported': [('readonly', False)], 'refused': [('readonly', False)]}, default=fields.Date.context_today, string="Date")
-    employee_id = fields.Many2one('hr.employee', string="Employee", required=True, readonly=True, states={'draft': [('readonly', False)], 'reported': [('readonly', False)], 'refused': [('readonly', False)]}, default=_default_employee_id, domain=lambda self: self._get_employee_id_domain())
-    product_id = fields.Many2one('product.product', string='Product', readonly=True, states={'draft': [('readonly', False)], 'reported': [('readonly', False)], 'refused': [('readonly', False)]}, domain=[('can_be_expensed', '=', True)], required=True)
-    product_uom_id = fields.Many2one('uom.uom', string='Unit of Measure', required=True, readonly=True, states={'draft': [('readonly', False)], 'refused': [('readonly', False)]}, default=_default_product_uom_id)
+    employee_id = fields.Many2one(
+        'hr.employee', string="Employee", required=True, readonly=True, ondelete='set null',
+        states={
+            'draft': [('readonly', False)],
+            'reported': [('readonly', False)],
+            'refused': [('readonly', False)],
+        }, default=_default_employee_id, domain=lambda self: self._get_employee_id_domain(),
+    )
+    product_id = fields.Many2one(
+        'product.product', string='Product', readonly=True, ondelete='set null',
+        states={
+            'draft': [('readonly', False)],
+            'reported': [('readonly', False)],
+            'refused': [('readonly', False)]
+        }, domain=[('can_be_expensed', '=', True)], required=True,
+    )
+    product_uom_id = fields.Many2one(
+        'uom.uom', string='Unit of Measure', required=True, readonly=True, ondelete='set null',
+        states={
+            'draft': [('readonly', False)],
+            'refused': [('readonly', False)]
+        }, default=_default_product_uom_id,
+    )
     unit_amount = fields.Float("Unit Price", readonly=True, required=True, states={'draft': [('readonly', False)], 'reported': [('readonly', False)], 'refused': [('readonly', False)]}, digits=dp.get_precision('Product Price'))
     quantity = fields.Float(required=True, readonly=True, states={'draft': [('readonly', False)], 'reported': [('readonly', False)], 'refused': [('readonly', False)]}, digits=dp.get_precision('Product Unit of Measure'), default=1)
     tax_ids = fields.Many2many('account.tax', 'expense_tax', 'expense_id', 'tax_id', string='Taxes', states={'done': [('readonly', True)], 'post': [('readonly', True)]})
@@ -517,7 +537,13 @@ class HrExpenseSheet(models.Model):
         ('done', 'Paid'),
         ('cancel', 'Refused')
     ], string='Status', index=True, readonly=True, tracking=True, copy=False, default='draft', required=True, help='Expense Report State')
-    employee_id = fields.Many2one('hr.employee', string="Employee", required=True, readonly=True, states={'draft': [('readonly', False)]}, default=lambda self: self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1))
+    employee_id = fields.Many2one(
+        'hr.employee', string="Employee", required=True, readonly=True, ondelete='set null',
+        states={'draft': [('readonly', False)]},
+        default=lambda self: self.env['hr.employee'].search(
+            [('user_id', '=', self.env.uid)], limit=1
+        ),
+    )
     address_id = fields.Many2one('res.partner', string="Employee Home Address")
     payment_mode = fields.Selection([("own_account", "Employee (to reimburse)"), ("company_account", "Company")], related='expense_line_ids.payment_mode', default='own_account', readonly=True, string="Paid By")
     user_id = fields.Many2one('res.users', 'Manager', readonly=True, copy=False, states={'draft': [('readonly', False)]}, tracking=True, oldname='responsible_id')

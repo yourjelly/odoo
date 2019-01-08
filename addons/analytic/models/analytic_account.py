@@ -12,10 +12,14 @@ class AccountAnalyticDistribution(models.Model):
     _description = 'Analytic Account Distribution'
     _rec_name = 'account_id'
 
-    account_id = fields.Many2one('account.analytic.account', string='Analytic Account', required=True)
+    account_id = fields.Many2one(
+        'account.analytic.account', string='Analytic Account', required=True, ondelete='set null'
+    )
     percentage = fields.Float(string='Percentage', required=True, default=100.0)
     name = fields.Char(string='Name', related='account_id.name', readonly=False)
-    tag_id = fields.Many2one('account.analytic.tag', string="Parent tag", required=True)
+    tag_id = fields.Many2one(
+        'account.analytic.tag', string="Parent tag", required=True, ondelete='set null'
+    )
 
     _sql_constraints = [
         ('check_percentage', 'CHECK(percentage >= 0 AND percentage <= 100)',
@@ -183,7 +187,10 @@ class AccountAnalyticLine(models.Model):
     partner_id = fields.Many2one('res.partner', string='Partner')
     user_id = fields.Many2one('res.users', string='User', default=_default_user)
     tag_ids = fields.Many2many('account.analytic.tag', 'account_analytic_line_tag_rel', 'line_id', 'tag_id', string='Tags', copy=True)
-    company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True, default=lambda self: self.env.user.company_id)
+    company_id = fields.Many2one(
+        'res.company', string='Company', required=True, readonly=True, ondelete='set null',
+        default=lambda self: self.env.user.company_id,
+    )
     currency_id = fields.Many2one(related="company_id.currency_id", string="Currency", readonly=True, store=True, compute_sudo=True)
     group_id = fields.Many2one('account.analytic.group', related='account_id.group_id', store=True, readonly=True, compute_sudo=True)
 

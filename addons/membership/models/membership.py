@@ -22,7 +22,8 @@ class MembershipLine(models.Model):
     _description = 'Membership Line'
 
     partner = fields.Many2one('res.partner', string='Partner', ondelete='cascade', index=True)
-    membership_id = fields.Many2one('product.product', string="Membership", required=True)
+    membership_id = fields.Many2one('product.product', string="Membership", required=True,
+                                    ondelete='set null')
     date_from = fields.Date(string='From', readonly=True)
     date_to = fields.Date(string='To', readonly=True)
     date_cancel = fields.Date(string='Cancel date')

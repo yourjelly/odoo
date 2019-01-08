@@ -10,7 +10,8 @@ class StockPackageLevel(models.Model):
     _name = 'stock.package_level'
     _description = 'Stock Package Level'
 
-    package_id = fields.Many2one('stock.quant.package', 'Package', required=True)
+    package_id = fields.Many2one('stock.quant.package', 'Package', required=True,
+                                 ondelete='set null')
     picking_id = fields.Many2one('stock.picking', 'Picking')
     move_ids = fields.One2many('stock.move', 'package_level_id')
     move_line_ids = fields.One2many('stock.move.line', 'package_level_id')

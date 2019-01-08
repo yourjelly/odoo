@@ -90,7 +90,10 @@ class AccountMove(models.Model):
     name = fields.Char(string='Number', required=True, copy=False, default='/')
     ref = fields.Char(string='Reference', copy=False)
     date = fields.Date(required=True, states={'posted': [('readonly', True)]}, index=True, default=fields.Date.context_today)
-    journal_id = fields.Many2one('account.journal', string='Journal', required=True, states={'posted': [('readonly', True)]}, default=_get_default_journal)
+    journal_id = fields.Many2one(
+        'account.journal', string='Journal', required=True, ondelete='set null',
+        states={'posted': [('readonly', True)]}, default=_get_default_journal,
+    )
     currency_id = fields.Many2one('res.currency', compute='_compute_currency', store=True, string="Currency")
     state = fields.Selection([('draft', 'Unposted'), ('posted', 'Posted')], string='Status',
       required=True, readonly=True, copy=False, default='draft',
@@ -1360,8 +1363,8 @@ class AccountPartialReconcile(models.Model):
     _name = "account.partial.reconcile"
     _description = "Partial Reconcile"
 
-    debit_move_id = fields.Many2one('account.move.line', index=True, required=True)
-    credit_move_id = fields.Many2one('account.move.line', index=True, required=True)
+    debit_move_id = fields.Many2one('account.move.line', index=True, required=True, ondelete='set null')
+    credit_move_id = fields.Many2one('account.move.line', index=True, required=True, ondelete='set null')
     amount = fields.Monetary(currency_field='company_currency_id', help="Amount concerned by this matching. Assumed to be always positive")
     amount_currency = fields.Monetary(string="Amount in Currency")
     currency_id = fields.Many2one('res.currency', string='Currency')

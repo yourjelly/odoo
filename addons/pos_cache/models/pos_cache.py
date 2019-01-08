@@ -14,8 +14,10 @@ class pos_cache(models.Model):
     product_domain = fields.Text(required=True)
     product_fields = fields.Text(required=True)
 
-    config_id = fields.Many2one('pos.config', ondelete='cascade', required=True)
-    compute_user_id = fields.Many2one('res.users', 'Cache compute user', required=True)
+    config_id = fields.Many2one('pos.config', ondelete='cascade', required=True,
+                                ondelete='set null')
+    compute_user_id = fields.Many2one('res.users', 'Cache compute user', required=True,
+                                      ondelete='set null')
 
     @api.model
     def refresh_all_caches(self):

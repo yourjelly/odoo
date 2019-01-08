@@ -108,7 +108,7 @@ class CountryState(models.Model):
     _name = 'res.country.state'
     _order = 'code'
 
-    country_id = fields.Many2one('res.country', string='Country', required=True)
+    country_id = fields.Many2one('res.country', string='Country', required=True, ondelete='set null')
     name = fields.Char(string='State Name', required=True,
                help='Administrative divisions of a country. E.g. Fed. State, Departement, Canton')
     code = fields.Char(string='State Code', help='The state code.', required=True)

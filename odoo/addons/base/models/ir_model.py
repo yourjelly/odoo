@@ -943,7 +943,7 @@ class IrModelConstraint(models.Model):
                        help="PostgreSQL constraint or foreign key name.")
     definition = fields.Char(help="PostgreSQL constraint definition")
     model = fields.Many2one('ir.model', required=True, ondelete="cascade", index=True)
-    module = fields.Many2one('ir.module.module', required=True, index=True)
+    module = fields.Many2one('ir.module.module', required=True, index=True, ondelete='set null')
     type = fields.Char(string='Constraint Type', required=True, size=1, index=True,
                        help="Type of the constraint: `f` for a foreign key, "
                             "`u` for other constraints.")
@@ -1063,8 +1063,8 @@ class IrModelRelation(models.Model):
 
     name = fields.Char(string='Relation Name', required=True, index=True,
                        help="PostgreSQL table name implementing a many2many relation.")
-    model = fields.Many2one('ir.model', required=True, index=True)
-    module = fields.Many2one('ir.module.module', required=True, index=True)
+    model = fields.Many2one('ir.model', required=True, index=True, ondelete='set null')
+    module = fields.Many2one('ir.module.module', required=True, index=True, ondelete='set null')
     date_update = fields.Datetime(string='Update Date')
     date_init = fields.Datetime(string='Initialization Date')
 

@@ -32,7 +32,8 @@ class LunchSupplier(models.Model):
     _name = 'lunch.supplier'
     _description = 'Lunch Supplier'
 
-    partner_id = fields.Many2one('res.partner', string='Linked partner', required=True)
+    partner_id = fields.Many2one('res.partner', string='Linked partner', required=True,
+                                 ondelete='set null')
 
     name = fields.Char('Name', related='partner_id.name')
     description = fields.Text('Description')

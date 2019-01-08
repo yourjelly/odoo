@@ -290,7 +290,7 @@ class FleetVehicleOdometer(models.Model):
     name = fields.Char(compute='_compute_vehicle_log_name', store=True)
     date = fields.Date(default=fields.Date.context_today)
     value = fields.Float('Odometer Value', group_operator="max")
-    vehicle_id = fields.Many2one('fleet.vehicle', 'Vehicle', required=True)
+    vehicle_id = fields.Many2one('fleet.vehicle', 'Vehicle', required=True, ondelete='set null')
     unit = fields.Selection(related='vehicle_id.odometer_unit', string="Unit", readonly=True)
     driver_id = fields.Many2one(related="vehicle_id.driver_id", string="Driver", readonly=False)
 
@@ -347,7 +347,8 @@ class FleetVehicleAssignationLog(models.Model):
     _description = "Drivers history on a vehicle"
     _order = "date_start"
 
-    vehicle_id = fields.Many2one('fleet.vehicle', string="Vehicle", required=True)
-    driver_id = fields.Many2one('res.partner', string="Driver", required=True)
+    vehicle_id = fields.Many2one('fleet.vehicle', string="Vehicle", required=True,
+                                 ondelete='set null')
+    driver_id = fields.Many2one('res.partner', string="Driver", required=True, ondelete='set null')
     date_start = fields.Date(string="Start Date")
     date_end = fields.Date(string="End Date")

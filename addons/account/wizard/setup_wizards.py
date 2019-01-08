@@ -11,7 +11,7 @@ class FinancialYearOpeningWizard(models.TransientModel):
     _name = 'account.financial.year.op'
     _description = 'Opening Balance of Financial Year'
 
-    company_id = fields.Many2one(comodel_name='res.company', required=True)
+    company_id = fields.Many2one(comodel_name='res.company', required=True, ondelete='set null')
     opening_move_posted = fields.Boolean(string='Opening Move Posted', compute='_compute_opening_move_posted')
     opening_date = fields.Date(string='Opening Date', required=True, related='company_id.account_opening_date', help="Date from which the accounting is managed in Odoo. It is the date of the opening entry.", readonly=False)
     fiscalyear_last_day = fields.Integer(related="company_id.fiscalyear_last_day", required=True, readonly=False,

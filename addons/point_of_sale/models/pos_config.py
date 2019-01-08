@@ -142,11 +142,17 @@ class PosConfig(models.Model):
     pos_session_duration = fields.Char(compute='_compute_current_session_user')
     group_by = fields.Boolean(string='Group Journal Items', default=True,
         help="Check this if you want to group the Journal Items by Product while closing a Session.")
-    pricelist_id = fields.Many2one('product.pricelist', string='Default Pricelist', required=True, default=_default_pricelist,
-        help="The pricelist used if no customer is selected or if the customer has no Sale Pricelist configured.")
+    pricelist_id = fields.Many2one(
+        'product.pricelist', string='Default Pricelist', required=True, default=_default_pricelist,
+        help=("The pricelist used if no customer is selected or if the customer "
+              "has no Sale Pricelist configured."), ondelete='set null',
+    )
     available_pricelist_ids = fields.Many2many('product.pricelist', string='Available Pricelists', default=_default_pricelist,
         help="Make several pricelists available in the Point of Sale. You can also apply a pricelist to specific customers from their contact form (in Sales tab). To be valid, this pricelist must be listed here as an available pricelist. Otherwise the default pricelist will apply.")
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.user.company_id)
+    company_id = fields.Many2one(
+        'res.company', string='Company', required=True, ondelete='set null',
+        default=lambda self: self.env.user.company_id,
+    )
     barcode_nomenclature_id = fields.Many2one('barcode.nomenclature', string='Barcode Nomenclature',
         help='Defines what kind of barcodes are available and how they are assigned to products, customers and cashiers.',
         default=lambda self: self.env.user.company_id.nomenclature_id, required=True)

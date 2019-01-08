@@ -8,9 +8,10 @@ class ChooseDestinationLocation(models.TransientModel):
     _name = 'stock.package.destination'
     _description = 'Stock Package Destination'
 
-    picking_id = fields.Many2one('stock.picking', required=True)
+    picking_id = fields.Many2one('stock.picking', required=True, ondelete='set null')
     move_line_ids = fields.Many2many('stock.move.line', 'Products', compute='_compute_move_line_ids', required=True)
-    location_dest_id = fields.Many2one('stock.location', 'Destination location', required=True)
+    location_dest_id = fields.Many2one('stock.location', 'Destination location', required=True,
+                                       ondelete='set null')
     filtered_location = fields.One2many(comodel_name='stock.location', compute='_filter_location')
 
     @api.one

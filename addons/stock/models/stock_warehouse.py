@@ -28,8 +28,14 @@ class Warehouse(models.Model):
         index=True, readonly=True, required=True,
         help='The company is automatically set from your user preferences.')
     partner_id = fields.Many2one('res.partner', 'Address')
-    view_location_id = fields.Many2one('stock.location', 'View Location', domain=[('usage', '=', 'view')], required=True)
-    lot_stock_id = fields.Many2one('stock.location', 'Location Stock', domain=[('usage', '=', 'internal')], required=True)
+    view_location_id = fields.Many2one(
+        'stock.location', 'View Location', domain=[('usage', '=', 'view')], required=True,
+        ondelete='set null',
+    )
+    lot_stock_id = fields.Many2one(
+        'stock.location', 'Location Stock', domain=[('usage', '=', 'internal')], required=True,
+        ondelete='set null',
+    )
     code = fields.Char('Short Name', required=True, size=5, help="Short name used to identify your warehouse")
     route_ids = fields.Many2many(
         'stock.location.route', 'stock_route_warehouse', 'warehouse_id', 'route_id',

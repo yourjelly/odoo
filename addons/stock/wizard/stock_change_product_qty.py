@@ -11,14 +11,18 @@ class ProductChangeQuantity(models.TransientModel):
     _description = "Change Product Quantity"
 
     # TDE FIXME: strange dfeault method, was present before migration ? to check
-    product_id = fields.Many2one('product.product', 'Product', required=True)
-    product_tmpl_id = fields.Many2one('product.template', 'Template', required=True)
+    product_id = fields.Many2one('product.product', 'Product', required=True, ondelete='set null')
+    product_tmpl_id = fields.Many2one('product.template', 'Template', required=True,
+                                      ondelete='set null')
     product_variant_count = fields.Integer('Variant Count', related='product_tmpl_id.product_variant_count', readonly=False)
     new_quantity = fields.Float(
         'New Quantity on Hand', default=1,
         digits=dp.get_precision('Product Unit of Measure'), required=True,
         help='This quantity is expressed in the Default Unit of Measure of the product.')
-    location_id = fields.Many2one('stock.location', 'Location', required=True, domain="[('usage', '=', 'internal')]")
+    location_id = fields.Many2one(
+        'stock.location', 'Location', required=True, domain="[('usage', '=', 'internal')]",
+        ondelete='set null',
+    )
 
     @api.model
     def default_get(self, fields):

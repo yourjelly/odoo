@@ -27,8 +27,10 @@ class HrPayslip(models.Model):
         states={'draft': [('readonly', False)]})
     number = fields.Char(string='Reference', readonly=True, copy=False,
         states={'draft': [('readonly', False)]})
-    employee_id = fields.Many2one('hr.employee', string='Employee', required=True, readonly=True,
-        states={'draft': [('readonly', False)]})
+    employee_id = fields.Many2one(
+        'hr.employee', string='Employee', required=True, readonly=True, ondelete='set null',
+        states={'draft': [('readonly', False)]},
+    )
     date_from = fields.Date(string='Date From', readonly=True, required=True,
         default=lambda self: fields.Date.to_string(date.today().replace(day=1)), states={'draft': [('readonly', False)]})
     date_to = fields.Date(string='Date To', readonly=True, required=True,
@@ -333,9 +335,12 @@ class HrPayslipLine(models.Model):
                        help="The code of salary rules can be used as reference in computation of other rules. "
                        "In that case, it is case sensitive.")
     slip_id = fields.Many2one('hr.payslip', string='Pay Slip', required=True, ondelete='cascade')
-    salary_rule_id = fields.Many2one('hr.salary.rule', string='Rule', required=True)
-    contract_id = fields.Many2one('hr.contract', string='Contract', required=True, index=True)
-    employee_id = fields.Many2one('hr.employee', string='Employee', required=True)
+    salary_rule_id = fields.Many2one('hr.salary.rule', string='Rule', required=True,
+                                     ondelete='set null')
+    contract_id = fields.Many2one('hr.contract', string='Contract', required=True, index=True,
+                                  ondelete='set null')
+    employee_id = fields.Many2one('hr.employee', string='Employee', required=True,
+                                  ondelete='set null')
     rate = fields.Float(string='Rate (%)', digits=dp.get_precision('Payroll Rate'), default=100.0)
     amount = fields.Float(digits=dp.get_precision('Payroll'))
     quantity = fields.Float(digits=dp.get_precision('Payroll'), default=1.0)
@@ -376,8 +381,10 @@ class HrPayslipWorkedDays(models.Model):
     code = fields.Char(required=True, help="The code that can be used in the salary rules")
     number_of_days = fields.Float(string='Number of Days')
     number_of_hours = fields.Float(string='Number of Hours')
-    contract_id = fields.Many2one(related='payslip_id.contract_id', string='Contract', required=True,
-        help="The contract for which applied this worked days")
+    contract_id = fields.Many2one(
+        related='payslip_id.contract_id', string='Contract', required=True, ondelete='set null',
+        help="The contract for which applied this worked days",
+    )
 
 
 class HrPayslipInput(models.Model):
@@ -392,8 +399,10 @@ class HrPayslipInput(models.Model):
     amount = fields.Float(help="It is used in computation. For e.g. A rule for sales having "
                                "1% commission of basic salary for per product can defined in expression "
                                "like result = inputs.SALEURO.amount * contract.wage*0.01.")
-    contract_id = fields.Many2one(related='payslip_id.contract_id', string='Contract', required=True,
-        help="The contract for which applied this input")
+    contract_id = fields.Many2one(
+        related='payslip_id.contract_id', string='Contract', required=True, ondelete='set null',
+        help="The contract for which applied this input",
+    )
 
 
 class HrPayslipRun(models.Model):

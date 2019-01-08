@@ -7,9 +7,11 @@ class DemoFailure(models.TransientModel):
     _name = 'ir.demo_failure'
     _description = 'Demo failure'
 
-    module_id = fields.Many2one('ir.module.module', required=True, string="Module")
+    module_id = fields.Many2one('ir.module.module', required=True, ondelete='set null',
+                                string="Module")
     error = fields.Char(string="Error")
     wizard_id = fields.Many2one('ir.demo_failure.wizard')
+
 
 class DemoFailureWizard(models.TransientModel):
     _name = 'ir.demo_failure.wizard'

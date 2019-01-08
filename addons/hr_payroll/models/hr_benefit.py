@@ -16,8 +16,13 @@ class HrBenefit(models.Model):
 
     name = fields.Char(required=True)
     active = fields.Boolean(default=True)
-    employee_id = fields.Many2one('hr.employee', required=True,
-        domain=lambda self: [('contract_ids.state', 'in', ('open', 'pending')), ('company_id', '=', self.env.user.company_id.id)])
+    employee_id = fields.Many2one(
+        'hr.employee', required=True, ondelete='set null',
+        domain=lambda self: [
+            ('contract_ids.state', 'in', ('open', 'pending')),
+            ('company_id', '=', self.env.user.company_id.id),
+        ],
+    )
     date_start = fields.Datetime(required=True, string='Start')
     date_stop = fields.Datetime(string='End')
     duration = fields.Float(compute='_compute_duration', inverse='_inverse_duration', store=True, string="Hours")

@@ -9,7 +9,7 @@ class product_price_list(models.TransientModel):
     _name = 'product.price_list'
     _description = 'Product Price per Unit Based on Pricelist Version'
 
-    price_list = fields.Many2one('product.pricelist', 'PriceList', required=True)
+    price_list = fields.Many2one('product.pricelist', 'PriceList', required=True, ondelete='set null')
     qty1 = fields.Integer('Quantity-1', default=1)
     qty2 = fields.Integer('Quantity-2', default=5)
     qty3 = fields.Integer('Quantity-3', default=10)

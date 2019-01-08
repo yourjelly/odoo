@@ -215,7 +215,8 @@ class MrpWorkcenterProductivity(models.Model):
     _rec_name = "loss_id"
 
     production_id = fields.Many2one('mrp.production', string='Manufacturing Order', related='workorder_id.production_id', readonly='True')
-    workcenter_id = fields.Many2one('mrp.workcenter', "Work Center", required=True)
+    workcenter_id = fields.Many2one('mrp.workcenter', "Work Center", required=True,
+                                    ondelete='set null')
     workorder_id = fields.Many2one('mrp.workorder', 'Work Order')
     user_id = fields.Many2one(
         'res.users', "User",

@@ -11,6 +11,6 @@ class City(models.Model):
 
     name = fields.Char("Name", required=True, translate=True)
     zipcode = fields.Char("Zip")
-    country_id = fields.Many2one('res.country', string='Country', required=True)
+    country_id = fields.Many2one('res.country', string='Country', required=True, ondelete='set null')
     state_id = fields.Many2one(
         'res.country.state', 'State', domain="[('country_id', '=', country_id)]")

@@ -27,8 +27,14 @@ class ProjectCreateSalesOrder(models.TransientModel):
             result['partner_id'] = project.partner_id.id
         return result
 
-    project_id = fields.Many2one('project.project', "Project", domain=[('sale_line_id', '=', False)], help="Project for which we are creating a sales order", required=True)
-    partner_id = fields.Many2one('res.partner', string="Customer", domain=[('customer', '=', True)], required=True, help="Customer of the sales order")
+    project_id = fields.Many2one(
+        'project.project', "Project", domain=[('sale_line_id', '=', False)],
+        help="Project for which we are creating a sales order", required=True, ondelete='set null',
+    )
+    partner_id = fields.Many2one(
+        'res.partner', string="Customer", domain=[('customer', '=', True)], required=True,
+        help="Customer of the sales order", ondelete='set null',
+    )
     product_id = fields.Many2one('product.product', domain=[('type', '=', 'service'), ('invoice_policy', '=', 'delivery'), ('service_type', '=', 'timesheet')], string="Service", help="Product of the sales order item. Must be a service invoiced based on timesheets on tasks.")
     price_unit = fields.Float("Unit Price", help="Unit price of the sales order item.")
     currency_id = fields.Many2one('res.currency', string="Currency", related='product_id.currency_id', readonly=False)
@@ -197,12 +203,22 @@ class ProjectCreateSalesOrderLine(models.TransientModel):
     _description = 'Create SO Line from project'
     _order = 'id,create_date'
 
-    wizard_id = fields.Many2one('project.create.sale.order', required=True)
-    product_id = fields.Many2one('product.product', domain=[('type', '=', 'service'), ('invoice_policy', '=', 'delivery'), ('service_type', '=', 'timesheet')], string="Service", required=True,
-        help="Product of the sales order item. Must be a service invoiced based on timesheets on tasks.")
+    wizard_id = fields.Many2one('project.create.sale.order', required=True, ondelete='set null')
+    product_id = fields.Many2one(
+        'product.product', domain=[
+            ('type', '=', 'service'),
+            ('invoice_policy', '=', 'delivery'),
+            ('service_type', '=', 'timesheet')
+        ], string="Service", required=True, ondelete='set null',
+        help=("Product of the sales order item. "
+              "Must be a service invoiced based on timesheets on tasks."),
+    )
     price_unit = fields.Float("Unit Price", default=1.0, help="Unit price of the sales order item.")
     currency_id = fields.Many2one('res.currency', string="Currency", related='product_id.currency_id', readonly=False)
-    employee_id = fields.Many2one('hr.employee', string="Employee", required=True, help="Employee that has timesheets on the project.")
+    employee_id = fields.Many2one(
+        'hr.employee', string="Employee", required=True,
+        help="Employee that has timesheets on the project.", ondelete='set null',
+    )
 
     _sql_constraints = [
         ('unique_employee_per_wizard', 'UNIQUE(wizard_id, employee_id)', "An employee cannot be selected more than once in the mapping. Please remove duplicate(s) and try again."),

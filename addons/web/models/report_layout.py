@@ -13,6 +13,6 @@ class View(models.Model):
     _name = "report.layout"
     _description = 'Report Layout'
 
-    view_id = fields.Many2one('ir.ui.view', 'Document Template', required=True)
+    view_id = fields.Many2one('ir.ui.view', 'Document Template', required=True, ondelete='set null')
     image = fields.Char(string="Preview image src")
     pdf = fields.Char(string="Preview pdf src")

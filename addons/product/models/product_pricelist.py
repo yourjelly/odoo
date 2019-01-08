@@ -28,7 +28,10 @@ class Pricelist(models.Model):
     item_ids = fields.One2many(
         'product.pricelist.item', 'pricelist_id', 'Pricelist Items',
         copy=True, default=_get_default_item_ids)
-    currency_id = fields.Many2one('res.currency', 'Currency', default=_get_default_currency_id, required=True)
+    currency_id = fields.Many2one(
+        'res.currency', 'Currency', default=_get_default_currency_id, required=True,
+        ondelete='set null',
+    )
     company_id = fields.Many2one('res.company', 'Company')
 
     sequence = fields.Integer(default=16)

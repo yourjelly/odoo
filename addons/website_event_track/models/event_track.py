@@ -82,7 +82,7 @@ class Track(models.Model):
     date = fields.Datetime('Track Date')
     duration = fields.Float('Duration', default=1.5)
     location_id = fields.Many2one('event.track.location', 'Room')
-    event_id = fields.Many2one('event.event', 'Event', required=True)
+    event_id = fields.Many2one('event.event', 'Event', required=True, ondelete='set null')
     color = fields.Integer('Color Index')
     priority = fields.Selection([
         ('0', 'Low'), ('1', 'Medium'),
@@ -205,9 +205,11 @@ class Sponsor(models.Model):
     _description = 'Event Sponsor'
     _order = "sequence"
 
-    event_id = fields.Many2one('event.event', 'Event', required=True)
-    sponsor_type_id = fields.Many2one('event.sponsor.type', 'Sponsoring Type', required=True)
-    partner_id = fields.Many2one('res.partner', 'Sponsor/Customer', required=True)
+    event_id = fields.Many2one('event.event', 'Event', required=True, ondelete='set null')
+    sponsor_type_id = fields.Many2one('event.sponsor.type', 'Sponsoring Type', required=True,
+                                      ondelete='set null')
+    partner_id = fields.Many2one('res.partner', 'Sponsor/Customer', required=True,
+                                 ondelete='set null')
     url = fields.Char('Sponsor Website')
     sequence = fields.Integer('Sequence', store=True, related='sponsor_type_id.sequence', readonly=False)
     image_medium = fields.Binary(string='Logo', related='partner_id.image_medium', store=True, readonly=False)

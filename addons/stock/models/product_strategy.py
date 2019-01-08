@@ -52,7 +52,9 @@ class FixedPutAwayStrategy(models.Model):
     _description = 'Fixed Putaway Strategy on Location'
 
     product_id = fields.Many2one('product.product', 'Product')
-    putaway_id = fields.Many2one('product.putaway', 'Put Away Method', required=True)
+    putaway_id = fields.Many2one('product.putaway', 'Put Away Method', required=True,
+                                 ondelete='set null')
     category_id = fields.Many2one('product.category', 'Product Category')
-    fixed_location_id = fields.Many2one('stock.location', 'Location', required=True)
+    fixed_location_id = fields.Many2one('stock.location', 'Location', required=True,
+                                        ondelete='set null')
     sequence = fields.Integer('Priority', help="Give to the more specialized category, a higher priority to have them in top of the list.")

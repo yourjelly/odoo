@@ -184,7 +184,7 @@ class Post(models.Model):
     _order = "is_correct DESC, vote_count DESC, write_date DESC"
 
     name = fields.Char('Title')
-    forum_id = fields.Many2one('forum.forum', string='Forum', required=True)
+    forum_id = fields.Many2one('forum.forum', string='Forum', required=True, ondelete='set null')
     content = fields.Html('Content', strip_style=True)
     plain_content = fields.Text('Plain Content', compute='_get_plain_content', store=True)
     tag_ids = fields.Many2many('forum.tag', 'forum_tag_rel', 'forum_id', 'forum_tag_id', string='Tags')
@@ -844,7 +844,10 @@ class Vote(models.Model):
     _description = 'Post Vote'
 
     post_id = fields.Many2one('forum.post', string='Post', ondelete='cascade', required=True)
-    user_id = fields.Many2one('res.users', string='User', required=True, default=lambda self: self._uid)
+    user_id = fields.Many2one(
+        'res.users', string='User', required=True, default=lambda self: self._uid,
+        ondelete='set null',
+    )
     vote = fields.Selection([('1', '1'), ('-1', '-1'), ('0', '0')], string='Vote', required=True, default='1')
     create_date = fields.Datetime('Create Date', index=True, readonly=True)
     forum_id = fields.Many2one('forum.forum', string='Forum', related="post_id.forum_id", store=True, readonly=False)
@@ -907,7 +910,7 @@ class Tags(models.Model):
     _inherit = ['mail.thread', 'website.seo.metadata']
 
     name = fields.Char('Name', required=True)
-    forum_id = fields.Many2one('forum.forum', string='Forum', required=True)
+    forum_id = fields.Many2one('forum.forum', string='Forum', required=True, ondelete='set null')
     post_ids = fields.Many2many(
         'forum.post', 'forum_tag_rel', 'forum_tag_id', 'forum_id',
         string='Posts', domain=[('state', '=', 'active')])

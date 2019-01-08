@@ -13,7 +13,10 @@ class FleetVehicleCost(models.Model):
     _order = 'date desc, vehicle_id asc'
 
     name = fields.Char(related='vehicle_id.name', string='Name', store=True, readonly=False)
-    vehicle_id = fields.Many2one('fleet.vehicle', 'Vehicle', required=True, help='Vehicle concerned by this log')
+    vehicle_id = fields.Many2one(
+        'fleet.vehicle', 'Vehicle', required=True, help='Vehicle concerned by this log',
+        ondelete='set null',
+    )
     cost_subtype_id = fields.Many2one('fleet.service.type', 'Type', help='Cost type purchased with this cost')
     amount = fields.Float('Total Price')
     cost_type = fields.Selection([

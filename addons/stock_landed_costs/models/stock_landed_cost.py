@@ -236,7 +236,7 @@ class LandedCostLine(models.Model):
     cost_id = fields.Many2one(
         'stock.landed.cost', 'Landed Cost',
         required=True, ondelete='cascade')
-    product_id = fields.Many2one('product.product', 'Product', required=True)
+    product_id = fields.Many2one('product.product', 'Product', required=True, ondelete='set null')
     price_unit = fields.Float('Cost', digits=dp.get_precision('Product Price'), required=True)
     split_method = fields.Selection(product.SPLIT_METHOD, string='Split Method', required=True)
     account_id = fields.Many2one('account.account', 'Account', domain=[('deprecated', '=', False)])
@@ -263,7 +263,7 @@ class AdjustmentLines(models.Model):
     cost_line_id = fields.Many2one(
         'stock.landed.cost.lines', 'Cost Line', readonly=True)
     move_id = fields.Many2one('stock.move', 'Stock Move', readonly=True)
-    product_id = fields.Many2one('product.product', 'Product', required=True)
+    product_id = fields.Many2one('product.product', 'Product', required=True, ondelete='set null')
     quantity = fields.Float(
         'Quantity', default=1.0,
         digits=0, required=True)

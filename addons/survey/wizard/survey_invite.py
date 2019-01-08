@@ -58,7 +58,10 @@ class SurveyInvite(models.TransientModel):
     # technical info
     mail_server_id = fields.Many2one('ir.mail_server', 'Outgoing mail server')
     # survey
-    survey_id = fields.Many2one('survey.survey', string='Survey', default=default_survey_id, required=True)
+    survey_id = fields.Many2one(
+        'survey.survey', string='Survey', default=default_survey_id, required=True,
+        ondelete='set null',
+    )
     public = fields.Selection([('public_link', 'Share the public web link to your audience.'),
                                 ('email_public_link', 'Send by email the public web link to your audience.'),
                                 ('email_private', 'Send private invitation to your audience (only one response per recipient and per invitation).')],

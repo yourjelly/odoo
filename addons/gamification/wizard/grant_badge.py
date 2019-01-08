@@ -9,8 +9,9 @@ class grant_badge_wizard(models.TransientModel):
     _name = 'gamification.badge.user.wizard'
     _description = 'Gamification User Badge Wizard'
 
-    user_id = fields.Many2one("res.users", string='User', required=True)
-    badge_id = fields.Many2one("gamification.badge", string='Badge', required=True)
+    user_id = fields.Many2one("res.users", string='User', required=True, ondelete='set null')
+    badge_id = fields.Many2one("gamification.badge", string='Badge', required=True,
+                               ondelete='set null')
     comment = fields.Text('Comment')
 
     @api.multi

@@ -9,11 +9,11 @@ class MrpSubProduct(models.Model):
     _name = 'mrp.subproduct'
     _description = 'Byproduct'
 
-    product_id = fields.Many2one('product.product', 'Product', required=True)
+    product_id = fields.Many2one('product.product', 'Product', required=True, ondelete='set null')
     product_qty = fields.Float(
         'Product Qty',
         default=1.0, digits=dp.get_precision('Product Unit of Measure'), required=True)
-    product_uom_id = fields.Many2one('uom.uom', 'Unit of Measure', required=True)
+    product_uom_id = fields.Many2one('uom.uom', 'Unit of Measure', required=True, ondelete='set null')
     bom_id = fields.Many2one('mrp.bom', 'BoM', ondelete='cascade')
     operation_id = fields.Many2one('mrp.routing.workcenter', 'Produced at Operation')
 

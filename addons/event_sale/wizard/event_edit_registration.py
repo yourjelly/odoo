@@ -7,7 +7,7 @@ class RegistrationEditor(models.TransientModel):
     _name = "registration.editor"
     _description = 'Edit Attendee Details on Sales Confirmation'
 
-    sale_order_id = fields.Many2one('sale.order', 'Sales Order', required=True)
+    sale_order_id = fields.Many2one('sale.order', 'Sales Order', required=True, ondelete='set null')
     event_registration_ids = fields.One2many('registration.editor.line', 'editor_id', string='Registrations to Edit')
 
     @api.model
@@ -67,7 +67,7 @@ class RegistrationEditorLine(models.TransientModel):
 
     editor_id = fields.Many2one('registration.editor')
     sale_order_line_id = fields.Many2one('sale.order.line', string='Sales Order Line')
-    event_id = fields.Many2one('event.event', string='Event', required=True)
+    event_id = fields.Many2one('event.event', string='Event', required=True, ondelete='set null')
     registration_id = fields.Many2one('event.registration', 'Original Registration')
     event_ticket_id = fields.Many2one('event.event.ticket', string='Event Ticket')
     email = fields.Char(string='Email')

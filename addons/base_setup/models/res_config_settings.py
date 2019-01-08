@@ -9,8 +9,10 @@ class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
     group_multi_company = fields.Boolean("Manage multiple companies", implied_group='base.group_multi_company')
-    company_id = fields.Many2one('res.company', string='Company', required=True,
-        default=lambda self: self.env.user.company_id)
+    company_id = fields.Many2one(
+        'res.company', string='Company', required=True, ondelete='set null',
+        default=lambda self: self.env.user.company_id,
+    )
     user_default_rights = fields.Boolean(
         "Default Access Rights",
         config_parameter='base_setup.default_user_rights',

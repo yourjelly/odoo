@@ -10,7 +10,10 @@ class FleetVehicleModel(models.Model):
     _order = 'name asc'
 
     name = fields.Char('Model name', required=True)
-    brand_id = fields.Many2one('fleet.vehicle.model.brand', 'Make', required=True, help='Make of the vehicle')
+    brand_id = fields.Many2one(
+        'fleet.vehicle.model.brand', 'Make', required=True, help='Make of the vehicle',
+        ondelete='set null',
+    )
     vendors = fields.Many2many('res.partner', 'fleet_vehicle_model_vendors', 'model_id', 'partner_id', string='Vendors')
     image = fields.Binary(related='brand_id.image', string="Logo", readonly=False)
     image_medium = fields.Binary(related='brand_id.image_medium', string="Logo (medium)", readonly=False)

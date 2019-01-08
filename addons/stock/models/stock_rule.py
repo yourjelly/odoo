@@ -40,7 +40,8 @@ class StockRule(models.Model):
     sequence = fields.Integer('Sequence', default=20)
     company_id = fields.Many2one('res.company', 'Company',
         default=lambda self: self.env.user.company_id)
-    location_id = fields.Many2one('stock.location', 'Destination Location', required=True)
+    location_id = fields.Many2one('stock.location', 'Destination Location', required=True,
+                                  ondelete='set null')
     location_src_id = fields.Many2one('stock.location', 'Source Location')
     route_id = fields.Many2one('stock.location.route', 'Route', required=True, ondelete='cascade')
     procure_method = fields.Selection([

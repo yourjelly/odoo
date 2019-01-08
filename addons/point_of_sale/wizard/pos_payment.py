@@ -29,8 +29,12 @@ class PosMakePayment(models.TransientModel):
             return (order.amount_total - order.amount_paid)
         return False
 
-    session_id = fields.Many2one('pos.session', required=True, default=_default_session)
-    journal_id = fields.Many2one('account.journal', string='Payment Mode', required=True, default=_default_journal)
+    session_id = fields.Many2one('pos.session', required=True, default=_default_session,
+                                 ondelete='set null')
+    journal_id = fields.Many2one(
+        'account.journal', string='Payment Mode', required=True, default=_default_journal,
+        ondelete='set null',
+    )
     amount = fields.Float(digits=0, required=True, default=_default_amount)
     payment_name = fields.Char(string='Payment Reference')
     payment_date = fields.Date(string='Payment Date', required=True, default=lambda *a: fields.Date.today())

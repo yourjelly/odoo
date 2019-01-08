@@ -8,7 +8,7 @@ class goal_manual_wizard(models.TransientModel):
     _name = 'gamification.goal.wizard'
     _description = 'Gamification Goal Wizard'
 
-    goal_id = fields.Many2one("gamification.goal", string='Goal', required=True)
+    goal_id = fields.Many2one("gamification.goal", string='Goal', required=True, ondelete='set null')
     current = fields.Float('Current')
 
     @api.multi

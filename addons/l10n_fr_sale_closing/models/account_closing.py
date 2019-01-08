@@ -20,7 +20,9 @@ class AccountClosing(models.Model):
     _description = "Sale Closing"
 
     name = fields.Char(help="Frequency and unique sequence number", required=True)
-    company_id = fields.Many2one('res.company', string='Company', readonly=True, required=True)
+    company_id = fields.Many2one(
+        'res.company', string='Company', readonly=True, required=True, ondelete='set null',
+    )
     date_closing_stop = fields.Datetime(string="Closing Date", help='Date to which the values are computed', readonly=True, required=True)
     date_closing_start = fields.Datetime(string="Starting Date", help='Date from which the total interval is computed', readonly=True, required=True)
     frequency = fields.Selection(string='Closing Type', selection=[('daily', 'Daily'), ('monthly', 'Monthly'), ('annually', 'Annual')], readonly=True, required=True)

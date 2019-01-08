@@ -553,7 +553,9 @@ class PaymentTransaction(models.Model):
         return self.env['res.company']._company_default_get('payment.transaction').country_id.id
 
     date = fields.Datetime('Validation Date', readonly=True)
-    acquirer_id = fields.Many2one('payment.acquirer', string='Acquirer', readonly=True, required=True)
+    acquirer_id = fields.Many2one(
+        'payment.acquirer', string='Acquirer', readonly=True, required=True, ondelete='set null',
+    )
     provider = fields.Selection(string='Provider', related='acquirer_id.provider', readonly=True)
     type = fields.Selection([
         ('validation', 'Validation of the bank card'),
@@ -574,7 +576,8 @@ class PaymentTransaction(models.Model):
     amount = fields.Monetary(string='Amount', currency_field='currency_id', required=True, readonly=True)
     fees = fields.Monetary(string='Fees', currency_field='currency_id', readonly=True,
                            help='Fees amount; set by the system because depends on the acquirer')
-    currency_id = fields.Many2one('res.currency', 'Currency', required=True, readonly=True)
+    currency_id = fields.Many2one('res.currency', 'Currency', required=True, readonly=True,
+                                  ondelete='set null')
     reference = fields.Char(string='Reference', required=True, readonly=True, index=True,
                             help='Internal reference of the TX')
     acquirer_reference = fields.Char(string='Acquirer Reference', readonly=True, help='Reference of the TX as stored in the acquirer database')
@@ -586,7 +589,10 @@ class PaymentTransaction(models.Model):
     partner_zip = fields.Char('Zip')
     partner_address = fields.Char('Address')
     partner_city = fields.Char('City')
-    partner_country_id = fields.Many2one('res.country', 'Country', default=_get_default_partner_country_id, required=True)
+    partner_country_id = fields.Many2one(
+        'res.country', 'Country', default=_get_default_partner_country_id, required=True,
+        ondelete='set null',
+    )
     partner_phone = fields.Char('Phone')
     html_3ds = fields.Char('3D Secure HTML')
 
@@ -1026,8 +1032,9 @@ class PaymentToken(models.Model):
 
     name = fields.Char('Name', help='Name of the payment token')
     short_name = fields.Char('Short name', compute='_compute_short_name')
-    partner_id = fields.Many2one('res.partner', 'Partner', required=True)
-    acquirer_id = fields.Many2one('payment.acquirer', 'Acquirer Account', required=True)
+    partner_id = fields.Many2one('res.partner', 'Partner', required=True, ondelete='set null')
+    acquirer_id = fields.Many2one('payment.acquirer', 'Acquirer Account', required=True,
+                                  ondelete='set null')
     acquirer_ref = fields.Char('Acquirer Ref.', required=True)
     active = fields.Boolean('Active', default=True)
     payment_ids = fields.One2many('payment.transaction', 'payment_token_id', 'Payment Transactions')

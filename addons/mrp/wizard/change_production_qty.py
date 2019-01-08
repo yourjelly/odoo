@@ -12,7 +12,8 @@ class ChangeProductionQty(models.TransientModel):
     _description = 'Change Production Qty'
 
     # TDE FIXME: add production_id field
-    mo_id = fields.Many2one('mrp.production', 'Manufacturing Order', required=True)
+    mo_id = fields.Many2one('mrp.production', 'Manufacturing Order', required=True,
+                            ondelete='set null')
     product_qty = fields.Float(
         'Quantity To Produce',
         digits=dp.get_precision('Product Unit of Measure'), required=True)

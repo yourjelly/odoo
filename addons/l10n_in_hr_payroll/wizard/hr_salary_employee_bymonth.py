@@ -23,7 +23,10 @@ class HrSalaryEmployeeBymonth(models.TransientModel):
     start_date = fields.Date(string='Start Date', required=True, default=_get_default_start_date)
     end_date = fields.Date(string='End Date', required=True, default=_get_default_end_date)
     employee_ids = fields.Many2many('hr.employee', 'payroll_year_rel', 'payroll_year_id', 'employee_id', string='Employees', required=True)
-    category_id = fields.Many2one('hr.salary.rule.category', string='Category', required=True, default=_get_default_category)
+    category_id = fields.Many2one(
+        'hr.salary.rule.category', string='Category', required=True, default=_get_default_category,
+        ondelete='set null',
+    )
 
     @api.multi
     def print_report(self):

@@ -17,13 +17,27 @@ class HrExpenseSheetRegisterPaymentWizard(models.TransientModel):
         expense_sheet = self.env['hr.expense.sheet'].browse(active_ids)
         return expense_sheet.address_id.id or expense_sheet.employee_id.id and expense_sheet.employee_id.address_home_id.id
 
-    partner_id = fields.Many2one('res.partner', string='Partner', required=True, default=_default_partner_id)
+    partner_id = fields.Many2one(
+        'res.partner', string='Partner', required=True, default=_default_partner_id,
+        ondelete='set null',
+    )
     partner_bank_account_id = fields.Many2one('res.partner.bank', string="Recipient Bank Account")
-    journal_id = fields.Many2one('account.journal', string='Payment Method', required=True, domain=[('type', 'in', ('bank', 'cash'))])
-    company_id = fields.Many2one('res.company', related='journal_id.company_id', string='Company', readonly=True, required=True)
-    payment_method_id = fields.Many2one('account.payment.method', string='Payment Type', required=True)
+    journal_id = fields.Many2one(
+        'account.journal', string='Payment Method', required=True, ondelete='set null',
+        domain=[('type', 'in', ('bank', 'cash'))],
+    )
+    company_id = fields.Many2one(
+        'res.company', related='journal_id.company_id', string='Company', readonly=True,
+        required=True, ondelete='set null',
+    )
+    payment_method_id = fields.Many2one(
+        'account.payment.method', string='Payment Type', required=True, ondelete='set null',
+    )
     amount = fields.Monetary(string='Payment Amount', required=True)
-    currency_id = fields.Many2one('res.currency', string='Currency', required=True, default=lambda self: self.env.user.company_id.currency_id)
+    currency_id = fields.Many2one(
+        'res.currency', string='Currency', required=True, ondelete='set null',
+        default=lambda self: self.env.user.company_id.currency_id,
+    )
     payment_date = fields.Date(string='Payment Date', default=fields.Date.context_today, required=True)
     communication = fields.Char(string='Memo')
     hide_payment_method = fields.Boolean(compute='_compute_hide_payment_method',

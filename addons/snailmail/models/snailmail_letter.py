@@ -21,9 +21,11 @@ class SnailmailLetter(models.Model):
     user_id = fields.Many2one('res.users', 'Sent by')
     model = fields.Char('Model', required=True)
     res_id = fields.Integer('Document ID', required=True)
-    partner_id = fields.Many2one('res.partner', string='Recipient', required=True)
-    company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True,
-        default=lambda self: self.env.user.company_id.id)
+    partner_id = fields.Many2one('res.partner', string='Recipient', required=True, ondelete='set null')
+    company_id = fields.Many2one(
+        'res.company', string='Company', required=True, readonly=True, ondelete='set null',
+        default=lambda self: self.env.user.company_id.id
+    )
     report_template = fields.Many2one('ir.actions.report', 'Optional report to print and attach')
 
     attachment_id = fields.Many2one('ir.attachment', string='Attachment', ondelete='cascade')
