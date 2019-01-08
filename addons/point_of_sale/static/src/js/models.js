@@ -53,6 +53,7 @@ exports.PosModel = Backbone.Model.extend({
         this.currency = null;
         this.shop = null;
         this.company = null;
+        this.lang = this.attributes.user_context.lang;
         this.user = null;
         this.users = [];
         this.employee = {name: null, id: null, barcode: null, user_id:null, pin:null};
@@ -201,7 +202,7 @@ exports.PosModel = Backbone.Model.extend({
         }
     },{
         model:  'res.partner',
-        fields: ['name','street','city','state_id','country_id','vat',
+        fields: ['name','street','city','state_id','country_id','vat', 'lang',
                  'phone','zip','mobile','email','barcode','write_date',
                  'property_account_position_id','property_product_pricelist'],
         domain: [['customer','=',true]],
@@ -220,6 +221,17 @@ exports.PosModel = Backbone.Model.extend({
                     self.company.country = countries[i];
                 }
             }
+        },
+    },{
+        model:  'res.lang',
+        fields: ['name', 'code'],
+        loaded: function (self, langs){
+            self.langs = langs;
+            // for (var i = 0; i < langs.length; i++) {
+            //     if (langs[i].code === self.attributes.user_context.lang){
+            //         self.default_lang = langs[i];
+            //     }
+            // }
         },
     },{
         model:  'account.tax',

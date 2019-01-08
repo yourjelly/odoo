@@ -1087,20 +1087,22 @@ var ClientListScreenWidget = ScreenWidget.extend({
             self.gui.back();
         });
 
-        this.$('.next').click(function(){   
+        this.$('.next').click(function(){
             self.save_changes();
             self.gui.back();    // FIXME HUH ?
         });
 
         this.$('.new-customer').click(function(){
+            debugger;
             self.display_client_details('edit',{
                 'country_id': self.pos.company.country_id,
+                'lang': self.pos.lang,
             });
         });
 
         var partners = this.pos.db.get_partners_sorted(1000);
         this.render_list(partners);
-        
+
         this.reload_partners();
 
         if( this.old_client ){
@@ -1562,9 +1564,11 @@ var ReceiptScreenWidget = ScreenWidget.extend({
     },
     get_receipt_render_env: function() {
         var order = this.pos.get_order();
+        debugger;
         return {
             widget: this,
             pos: this.pos,
+            // lang: order.attributes.client.lang,
             order: order,
             receipt: order.export_for_printing(),
             orderlines: order.get_orderlines(),
@@ -1659,7 +1663,14 @@ var ReceiptScreenWidget = ScreenWidget.extend({
         this.$('.change-value').html(this.format_currency(this.pos.get_order().get_change()));
     },
     render_receipt: function() {
-        this.$('.pos-receipt-container').html(QWeb.render('PosTicket', this.get_receipt_render_env()));
+        var self = this;
+        var data = this.get_receipt_render_env();
+        var partner_lang = data.order.attributes.client.lang;
+        _t.database.load_translations(data.pos.attributes, data.pos.attributes.module_list, partner_lang).then(function (temp){
+            self.$('.pos-receipt-container').html(QWeb.render('PosTicket', data));
+
+        });
+
     },
 });
 gui.define_screen({name:'receipt', widget: ReceiptScreenWidget});
