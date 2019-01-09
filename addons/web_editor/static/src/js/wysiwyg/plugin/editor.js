@@ -76,6 +76,25 @@ var NewSummernoteEditor = Plugins.editor.extend({
         this._super();
     },
     /**
+     * Set the range at the given nodes and offsets.
+     * If no `ec` is specified, the range is collapsed on start.
+     * Note: Does NOT select the range.
+     *
+     * @param {Node} sc
+     * @param {Number} so
+     * @param {Node} [ec]
+     * @param {Number} [eo]
+     * @returns {Object} range
+     */
+    setRange: function (sc, so, ec, eo) {
+        var range = this.createRange();
+        range.sc = sc;
+        range.so = so;
+        range.ec = ec || sc;
+        range.eo = eo || so;
+        return range;
+    },
+    /**
      * Remove a link and preserve its text contents.
      */
     unlink: function () {

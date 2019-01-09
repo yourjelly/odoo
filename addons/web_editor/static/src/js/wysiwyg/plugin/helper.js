@@ -661,6 +661,19 @@ var HelperPlugin = AbstractPlugin.extend({
         return node;
     },
     /**
+     * Get the first leaf of a node, that is an element and not a BR.
+     * In this context, a leaf node is understood as a childless node.
+     *
+     * @param {Node} node
+     * @returns {Node} node
+     */
+    firstNonBRElementLeaf: function (node) {
+        while (node.firstElementChild && node.firstElementChild.tagName !== 'BR') {
+            node = node.firstElementChild;
+        }
+        return node;
+    },
+    /**
      * Returns the node targeted by a path
      *
      * @param {Object[]} list of object (tagName, offset)
@@ -1192,6 +1205,18 @@ var HelperPlugin = AbstractPlugin.extend({
         return node;
     },
     /**
+     * Returns a Point object from a node and an offset.
+     *
+     * @param {Node} node
+     * @param {Number} offset
+     */
+    makePoint: function (node, offset) {
+        return {
+            node: node,
+            offset: offset,
+        };
+    },
+    /**
      * Merges mergeFromBlock into mergeIntoBlock, respecting the rules of unbreakable.
      *
      * @param {Node} mergeFromBlock block to merge from
@@ -1586,37 +1611,6 @@ var HelperPlugin = AbstractPlugin.extend({
     // Private
     //--------------------------------------------------------------------------
 
-    /**
-     * Perform operations that are necessary after the insertion of a visible character:
-     * adapt range for the presence of zero-width characters, move out of media, rerange.
-     *
-     * @private
-     */
-    _removeInvisibleChar: function (range) {
-        if (range.sc.tagName || dom.ancestor(range.sc, dom.isAnchor)) {
-            return true;
-        }
-        var needReselect = false;
-        var fake = range.sc.parentNode;
-        if ((fake.className || '').indexOf('o_fake_editable') !== -1 && dom.isMedia(fake)) {
-            var $media = $(fake.parentNode);
-            $media[fake.previousElementSibling ? 'after' : 'before'](fake.firstChild);
-            needReselect = true;
-        }
-        if (range.sc.textContent.slice(range.so - 2, range.so - 1) === '\u200B') {
-            range.sc.textContent = range.sc.textContent.slice(0, range.so - 2) + range.sc.textContent.slice(range.so - 1);
-            range.so = range.eo = range.so - 1;
-            needReselect = true;
-        }
-        if (range.sc.textContent.slice(range.so, range.so + 1) === '\u200B') {
-            range.sc.textContent = range.sc.textContent.slice(0, range.so) + range.sc.textContent.slice(range.so + 1);
-            needReselect = true;
-        }
-        if (needReselect) {
-            range = range.normalize();
-        }
-        return range;
-    },
     _insertTextNodeInEditableArea: function (range, text) {
         // try to insert the text node in editable area
         var textNode = this.document.createTextNode(text);
@@ -1652,6 +1646,37 @@ var HelperPlugin = AbstractPlugin.extend({
         }
 
         return textNode.parentNode && textNode;
+    },
+    /**
+     * Perform operations that are necessary after the insertion of a visible character:
+     * adapt range for the presence of zero-width characters, move out of media, rerange.
+     *
+     * @private
+     */
+    _removeInvisibleChar: function (range) {
+        if (range.sc.tagName || dom.ancestor(range.sc, dom.isAnchor)) {
+            return true;
+        }
+        var needReselect = false;
+        var fake = range.sc.parentNode;
+        if ((fake.className || '').indexOf('o_fake_editable') !== -1 && dom.isMedia(fake)) {
+            var $media = $(fake.parentNode);
+            $media[fake.previousElementSibling ? 'after' : 'before'](fake.firstChild);
+            needReselect = true;
+        }
+        if (range.sc.textContent.slice(range.so - 2, range.so - 1) === '\u200B') {
+            range.sc.textContent = range.sc.textContent.slice(0, range.so - 2) + range.sc.textContent.slice(range.so - 1);
+            range.so = range.eo = range.so - 1;
+            needReselect = true;
+        }
+        if (range.sc.textContent.slice(range.so, range.so + 1) === '\u200B') {
+            range.sc.textContent = range.sc.textContent.slice(0, range.so) + range.sc.textContent.slice(range.so + 1);
+            needReselect = true;
+        }
+        if (needReselect) {
+            range = range.normalize();
+        }
+        return range;
     },
     _standardizeRangeOnEdge: function (range) {
         var self = this;

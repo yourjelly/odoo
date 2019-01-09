@@ -27,6 +27,190 @@ var KeyboardPlugin = AbstractPlugin.extend({
     //--------------------------------------------------------------------------
 
     /**
+     * Perform various DOM and range manipulations after a deletion:
+     * - Rerange out of BR elements
+     * - Clean the DOM at current range position
+     *
+     * @see _handleDeletion
+     *
+     * @private
+     * @param {Object} range
+     * @param {String('prev'|'next')} direction 'prev' to delete BEFORE the carret
+     * @returns {Object} range
+     */
+    _afterDeletion: function (range, direction) {
+        range = direction === 'prev' ? this._insertInvisibleCharAfterSingleBR(range) : range;
+        range = this._rerangeOutOfBR(range, direction);
+        range = this._cleanRangeAfterDeletion(range);
+        return range;
+    },
+    /**
+     * Perform operations that are necessary after the insertion of a visible character:
+     * - Adapt range for the presence of zero-width characters
+     * - Move out of media
+     * - Rerange
+     *
+     * @private
+     */
+    _afterVisibleChar: function () {
+        var range = this.context.invoke('editor.createRange');
+        if (range.sc.tagName || dom.ancestor(range.sc, dom.isAnchor)) {
+            return true;
+        }
+        var needReselect = false;
+        var fake = range.sc.parentNode;
+        if ((fake.className || '').indexOf('o_fake_editable') !== -1 && dom.isMedia(fake)) {
+            var $media = $(fake.parentNode);
+            $media[fake.previousElementSibling ? 'after' : 'before'](fake.firstChild);
+            needReselect = true;
+        }
+        if (range.sc.textContent.slice(range.so - 2, range.so - 1) === '\u200B') {
+            range.sc.textContent = range.sc.textContent.slice(0, range.so - 2) + range.sc.textContent.slice(range.so - 1);
+            range.so = range.eo = range.so - 1;
+            needReselect = true;
+        }
+        if (range.sc.textContent.slice(range.so, range.so + 1) === '\u200B') {
+            range.sc.textContent = range.sc.textContent.slice(0, range.so) + range.sc.textContent.slice(range.so + 1);
+            needReselect = true;
+        }
+        if (needReselect) {
+            range.normalize().select();
+        }
+    },
+    /**
+     * Perform various DOM and range manipulations to prepare a deletion:
+     * - Rerange within the element targeted by the range
+     * - Slice the text content if necessary
+     * - Move before an invisible BR if necessary
+     * - Replace a media with an empty SPAN if necessary
+     * - Change the direction of deletion if necessary
+     * - Clean the DOM at range position if necessary
+     *
+     * @see _handleDeletion
+     *
+     * @private
+     * @param {Object} range
+     * @param {String('prev'|'next')} direction
+     * @param {Boolean} didDeleteNodes true if nodes were already deleted prior to this call
+     * @returns {Object} {didDeleteNodes: Boolean, range: Object, direction: String('prev'|next')}
+     */
+    _beforeDeletion: function (range, direction, didDeleteNodes) {
+        var res = {
+            range: range,
+            direction: direction,
+            didDeleteNodes: didDeleteNodes,
+        };
+
+        res.range = this._rerangeToOffsetChild(res.range, direction);
+        res.range = this._sliceAndRerangeBeforeDeletion(res.range);
+        res.range = direction === 'prev' ? this._moveBeforeInvisibleBR(res.range) : res.range;
+
+        if (dom.isMedia(res.range.sc)) {
+            var span = this._replaceMediaWithEmptySpan(res.range.sc);
+            res.range = this.context.invoke('editor.setRange', span, 0);
+            res.didDeleteNodes = true;
+            return res;
+        }
+
+        if (res.didDeleteNodes) {
+            res.direction = 'next';
+            return res;
+        }
+        
+        res.range = this._cleanRangeBeforeDeletion(res.range, direction);
+
+        return res;
+    },
+    /**
+     * Clean the DOM at range position after a deletion:
+     * - Remove empty inline nodes
+     * - Fill the current node if it's empty
+     *
+     * @private
+     * @param {Object} range
+     * @returns {Object} range
+     */
+    _cleanRangeAfterDeletion: function (range) {
+        var point = range.getStartPoint();
+
+        point = this.context.invoke('HelperPlugin.removeEmptyInlineNodes', point);
+        point = this.context.invoke('HelperPlugin.fillEmptyNode', point);
+        range = this.context.invoke('editor.setRange', point.node, point.offset);
+        return range;
+    },
+    /**
+     * Clean the DOM at range position:
+     * - Remove all previous zero-width characters
+     * - Remove leading/trailing breakable space
+     *
+     * @private
+     * @param {Object} range
+     * @param {String('prev'|'next')} direction
+     * @returns {Object} range
+     */
+    _cleanRangeBeforeDeletion: function (range, direction) {
+        if (direction === 'prev') {
+            this._removeAllPreviousInvisibleChars(range);
+        }
+        range = this._removeExtremeBreakableSpaceAndRerange(range);
+        return range;
+    },
+    /**
+     * Get information on the range in order to perform a deletion:
+     * - The point at which to delete, if any
+     * - Whether the node contains a block
+     * - The block to remove, if any
+     *
+     * @private
+     * @param {Object} range
+     * @param {String('prev'|'next')} direction
+     * @param {Boolean} wasOnStartOfBR true if the requested deletion started at
+     *                                 the beginning of a BR element
+     * @returns {Object} {
+     *      point: {false|Object},
+     *      hasBlock: {Boolean},
+     *      blockToRemove: {false|Node},
+     * }
+     */
+    _getDeleteInfo: function (range, direction, wasOnStartOfBR) {
+        var self = this;
+        var hasBlock = false;
+        var blockToRemove = false;
+        var method = direction === 'prev' ? 'prevPointUntil' : 'nextPointUntil';
+
+        var pt = range.getStartPoint();
+        pt = dom[method](pt, function (point) {
+            var isAtStartOfMedia = !point.offset && dom.isMedia(point.node);
+            var isBRorHR = point.node.tagName === 'BR' || point.node.tagName === 'HR';
+            var isRootBR = wasOnStartOfBR && point.node === range.sc;
+            var isOnRange = range.ec === point.node && range.eo === point.offset;
+
+            if (!point.offset && self.context.invoke('HelperPlugin.isNodeBlockType', point.node)) {
+                hasBlock = true;
+                if (blockToRemove) {
+                    return true;
+                }
+            }
+
+            if (!blockToRemove && (isAtStartOfMedia || isBRorHR && !isRootBR)) {
+                blockToRemove = point.node;
+                return false;
+            }
+
+            if (isOnRange) {
+                return false;
+            }
+
+            return self._isDeletableNode(point.node);
+        });
+
+        return {
+            point: pt || false,
+            hasBlock: hasBlock,
+            blockToRemove: blockToRemove,
+        };
+    },
+    /**
      * Handle deletion (BACKSPACE / DELETE).
      *
      * @private
@@ -34,169 +218,26 @@ var KeyboardPlugin = AbstractPlugin.extend({
      * @returns {Boolean} true if case handled
      */
     _handleDeletion: function (direction) {
-        var deleteNodes = this.context.invoke('HelperPlugin.deleteSelection');
+        var didDeleteNodes = this.context.invoke('HelperPlugin.deleteSelection')
         var range = this.context.invoke('editor.createRange');
-        var prevBR = direction === 'prev' && !range.so && range.sc.tagName === 'BR';
+        var wasOnStartOfBR = direction === 'prev' && !range.so && range.sc.tagName === 'BR';
 
-        if (range.sc.childNodes[range.so]) {
-            if (direction === 'prev' && range.so > 0) {
-                range.sc = range.ec = range.sc.childNodes[range.so - 1];
-                range.so = range.eo = dom.nodeLength(range.sc);
-            } else {
-                range.sc = range.ec = range.sc.childNodes[range.so];
-                range.so = range.eo = 0;
-            }
+        var temp = this._beforeDeletion(range, direction, didDeleteNodes);
+        didDeleteNodes = temp.didDeleteNodes;
+        range = temp.range;
+        direction = temp.direction;
+
+        if (!didDeleteNodes) {
+            var newRange = this._performDeletion(range, direction, wasOnStartOfBR);
+            didDeleteNodes = newRange.so !== range.so || newRange.sc !== range.sc;
+            range = newRange;
         }
 
-        if (!range.sc.tagName && range.so === 1 && range.sc.textContent[0] === '\u200B' &&
-                !(range.sc.previousSibling && range.sc.previousSibling.previousSibling &&
-                    range.sc.previousSibling.tagName === 'BR' && range.sc.previousSibling.previousSibling.tagName === 'BR')) {
-            range.sc.textContent = range.sc.textContent.slice(1);
-            range.so = 0;
-        }
-        if (!range.sc.tagName && range.so === dom.nodeLength(range.sc) - 1 && range.sc.textContent.slice(range.so) === '\u200B' &&
-                !(range.sc.previousSibling && range.sc.previousSibling.tagName === 'BR')) {
-            range.sc.textContent = range.sc.textContent.slice(0, range.so);
-        }
-        if (direction === 'prev' && (range.so === 1 && range.sc.childElementCount === 1 && range.sc.firstChild.tagName === 'BR' ||
-                range.sc.childElementCount && range.so === dom.nodeLength(range.sc) && range.sc.lastChild.tagName === 'BR' &&
-                    _.all(range.sc.childNodes, function (n) {
-                        return dom.isText(n) || n === range.sc.lastChild;
-                    })
-                )) {
-            // If we're after a BR in an element that has only a BR (or text and a BR), and moving in direction prev: move before the BR
-            range.so -= 1;
-        }
-
-        if (dom.isMedia(range.sc)) {
-            range.so = range.eo = 0;
-            var span = this.document.createElement('span');
-            var media = dom.ancestor(range.sc, function (n) {
-                return !n.parentNode || !dom.isMedia(n.parentNode);
-            });
-            $(media).replaceWith(span);
-            range.sc = range.ec = span;
-            deleteNodes = true;
-        } else if (deleteNodes) {
-            direction = 'next';
-        } else {
-            while (!range.sc.tagName && direction === 'prev' && range.so && range.sc.textContent[range.so - 1] === '\u200B') {
-                var text = range.sc.textContent;
-                range.sc.textContent = text.slice(0, range.so - 1) + text.slice(range.so, text.length);
-                range.so -= 1;
-            }
-            // If everything is just space before/after the range, skip it all
-            if (!range.sc.tagName && !dom.ancestor(range.sc, dom.isPre)) {
-                var changed = this.context.invoke('HelperPlugin.removeExtremeBreakableSpace', range.sc);
-                range.so = range.eo = range.so > changed.start ? range.so - changed.start : 0;
-                range.so = range.eo = range.so > dom.nodeLength(range.sc) ? dom.nodeLength(range.sc) : range.so;
-                range.select();
-                this.context.invoke('editor.saveRange');
-            }
-            if ((range.sc.tagName !== 'BR' || range.sc.parentNode.innerHTML.trim() === "<br>") &&
-                   (direction === 'next' && range.so === dom.nodeLength(range.sc) ||
-                    direction === 'prev' && range.so === 0)) {
-                var rest = this.context.invoke('HelperPlugin.deleteEdge', range.sc, direction);
-                deleteNodes = !!rest;
-                if (deleteNodes) {
-                    range.sc = range.ec = rest.node;
-                    range.so = range.eo = rest.offset;
-                }
-            }
-        }
-
-        if (!deleteNodes) {
-            // delete next char
-
-            var method = direction === 'prev' ? 'prevPointUntil' : 'nextPointUntil';
-            var hasBlock = false;
-            var blockToRemove = false;
-
-            var pt = dom[method]({node: range.sc, offset: range.so}, function (point) {
-                if (!point.offset && this.context.invoke('HelperPlugin.isNodeBlockType', point.node)) {
-                    hasBlock = true;
-                    if (blockToRemove) {
-                        return true;
-                    }
-                }
-                if (!blockToRemove &&
-                        (!point.offset && dom.isMedia(point.node) ||
-                        ((point.node.tagName === 'BR' || point.node.tagName === 'HR') && (!prevBR || point.node !== range.sc)))) {
-                    blockToRemove = point.node;
-                    return false;
-                }
-                if (range.ec === point.node && range.eo === point.offset) {
-                    return false;
-                }
-
-                return (
-                        this.context.invoke('HelperPlugin.isVisibleText', point.node) ||
-                        dom.isMedia(point.node) ||
-                        point.node.tagName === 'BR'
-                    ) && this.options.isEditableNode(point.node);
-            }.bind(this));
-
-            if (pt) {
-                var hasChanged;
-                if (blockToRemove) {
-                    if (blockToRemove.tagName !== "BR" || blockToRemove.parentNode.childNodes.length !== 1) { // keep the last br
-                        $(blockToRemove).remove();
-                        if (blockToRemove.tagName === "HR") {
-                            pt = this.context.invoke('HelperPlugin.deleteEdge', range.sc, direction);
-                        }
-                        hasChanged = true;
-                    }
-                } else if (!hasBlock) {
-                    if (pt.offset && direction === 'next' || !pt.node.tagName && pt.offset === dom.nodeLength(pt.node)) {
-                        pt.offset -= 1;
-                    }
-
-                    pt.node.textContent = pt.node.textContent.slice(0, pt.offset) + pt.node.textContent.slice(pt.offset + 1);
-                    if (!dom.ancestor(range.sc, dom.isPre)) {
-                        this.context.invoke('HelperPlugin.secureExtremeSingleSpace', pt.node);
-                    }
-                    if (!pt.offset && direction === 'prev' && (!pt.node.previousSibling || pt.node.previousSibling.tagName === "BR")) {
-                        var startSpace = this.context.invoke('HelperPlugin.getRegex', 'startSpace');
-                        pt.node.textContent = pt.node.textContent.replace(startSpace, '\u00A0');
-                    }
-                    hasChanged = true;
-                }
-
-                if (hasChanged) {
-                    range.sc = range.ec = pt.node;
-                    range.so = range.eo = pt.offset;
-                }
-            }
-        }
-
-        // Carret after \w<br> with no text after br should insert a zero-width character after br, to make the br visible on screen
-        if (direction === 'prev' && !range.so && dom.isText(range.sc) && !this.context.invoke('HelperPlugin.isVisibleText', range.sc) &&
-                range.sc.previousSibling && range.sc.previousSibling.tagName === 'BR' &&
-                range.sc.previousSibling.previousSibling && range.sc.previousSibling.previousSibling.tagName !== 'BR') {
-            var invisibleChar = this.document.createTextNode('\u200B');
-            $(range.sc.previousSibling).after(invisibleChar);
-            range.sc = range.ec = invisibleChar;
-            range.so = range.eo = 1;
-        }
-
-        while (range.sc.firstElementChild && range.sc.firstElementChild.tagName !== 'BR') {
-            range.sc = range.sc.firstElementChild;
-            range.so = 0;
-        }
-
-        var point = {node: range.sc, offset: range.so};
-        point = dom[direction === 'prev' ? 'nextPointUntil' : 'prevPointUntil'](point, function (pt) {
-            return pt.node.tagName !== 'BR';
-        });
-        point = this.context.invoke('HelperPlugin.removeEmptyInlineNodes', point);
-        point = this.context.invoke('HelperPlugin.fillEmptyNode', point);
-        range.ec = range.sc = point.node;
-        range.eo = range.so = point.offset;
+        range = this._afterDeletion(range, direction);
 
         range = range.collapse(direction === 'prev').select();
-
         this.editable.normalize();
-        return _.isArray(deleteNodes) ? !!deleteNodes.length : deleteNodes;
+        return didDeleteNodes;
     },
     /**
      * Handle ENTER.
@@ -205,17 +246,23 @@ var KeyboardPlugin = AbstractPlugin.extend({
      * @returns {Boolean} true if case handled
      */
     _handleEnter: function () {
+        var self = this;
         var range = this.context.invoke('editor.createRange');
 
         var ancestor = dom.ancestor(range.sc, function (node) {
-            return dom.isLi(node) || this.options.isUnbreakableNode(node.parentNode) && node.parentNode !== this.editable ||
-                this.context.invoke('HelperPlugin.isNodeBlockType', node) && !dom.ancestor(node, dom.isLi);
-        }.bind(this));
+            return dom.isLi(node) || self.options.isUnbreakableNode(node.parentNode) && node.parentNode !== self.editable ||
+                self.context.invoke('HelperPlugin.isNodeBlockType', node) && !dom.ancestor(node, dom.isLi);
+        });
 
-        if (dom.isLi(ancestor) && !$(ancestor.parentNode).hasClass('list-group') &&
-                this.context.invoke('HelperPlugin.getRegexBlank', {space: true, newline: true}).test(ancestor.textContent) &&
-                $(ancestor).find('br').length <= 1 &&
-                !$(ancestor).find('.fa, img').length) {
+        if (
+            dom.isLi(ancestor) && !$(ancestor.parentNode).hasClass('list-group') &&
+            this.context.invoke('HelperPlugin.getRegexBlank', {
+                space: true,
+                newline: true,
+            }).test(ancestor.textContent) &&
+            $(ancestor).find('br').length <= 1 &&
+            !$(ancestor).find('.fa, img').length
+        ) {
             // double enter in a list make oudent
             this.context.invoke('BulletPlugin.outdent');
             return true;
@@ -225,7 +272,10 @@ var KeyboardPlugin = AbstractPlugin.extend({
             return $(n).hasClass('btn');
         });
 
-        var point = {node: range.sc, offset: range.so};
+        var point = {
+            node: range.sc,
+            offset: range.so,
+        };
 
         if (!point.node.tagName && this.options.isUnbreakableNode(point.node.parentNode)) {
             return this._handleShiftEnter();
@@ -281,14 +331,28 @@ var KeyboardPlugin = AbstractPlugin.extend({
         }
 
         // move to next editable area
-        point = {node: next, offset: 0};
-        if ((point.node.tagName && point.node.tagName !== 'BR') || !this.context.invoke('HelperPlugin.isVisibleText', point.node.textContent)) {
+        point = {
+            node: next,
+            offset: 0,
+        };
+        if (
+            (point.node.tagName && point.node.tagName !== 'BR') ||
+            !this.context.invoke('HelperPlugin.isVisibleText', point.node.textContent)
+        ) {
             point = dom.nextPointUntil(point, function (pt) {
                 if (pt.node === point.node) {
                     return;
                 }
-                return (pt.node.tagName === "BR" || this.context.invoke('HelperPlugin.isVisibleText', pt.node)) && this.options.isEditableNode(pt.node);
-            }.bind(this)) || {node: next, offset: 0};
+                return (
+                        pt.node.tagName === "BR" ||
+                        self.context.invoke('HelperPlugin.isVisibleText', pt.node)
+                    ) &&
+                    self.options.isEditableNode(pt.node);
+            });
+            point = point || {
+                node: next,
+                offset: 0,
+            };
             if (point.node.tagName === "BR") {
                 point = dom.nextPoint(point);
             }
@@ -304,7 +368,7 @@ var KeyboardPlugin = AbstractPlugin.extend({
             var endSpace = this.context.invoke('HelperPlugin.getRegex', 'endSpace');
             range.sc.textContent = range.sc.textContent.replace(endSpace,
                 function (trailingSpaces) {
-                    return Array(trailingSpaces.length+1).join('\u00A0');
+                    return Array(trailingSpaces.length + 1).join('\u00A0');
                 }
             );
         }
@@ -347,7 +411,7 @@ var KeyboardPlugin = AbstractPlugin.extend({
                 before = target;
             } else if (target === range.sc) {
                 if (range.so) {
-                    before = range.sc.childNodes[range.so-1];
+                    before = range.sc.childNodes[range.so - 1];
                 } else {
                     before = this.document.createTextNode('');
                     $(range.sc).append(before);
@@ -356,7 +420,10 @@ var KeyboardPlugin = AbstractPlugin.extend({
         } else {
             before = target;
             var after = target.splitText(target === range.sc ? range.so : 0);
-            if (!after.nextSibling && after.textContent === '' && this.context.invoke('HelperPlugin.isNodeBlockType', after.parentNode)) {
+            if (
+                !after.nextSibling && after.textContent === '' &&
+                this.context.invoke('HelperPlugin.isNodeBlockType', after.parentNode)
+            ) {
                 after.textContent = '\u200B';
             }
             if (!after.tagName && (!after.previousSibling || after.previousSibling.tagName === "BR")) {
@@ -370,7 +437,10 @@ var KeyboardPlugin = AbstractPlugin.extend({
 
         var br = this.document.createElement('br');
         $(before).after(br);
-        var next = {node: br, offset: 0};
+        var next = {
+            node: br,
+            offset: 0,
+        };
         var startSpace = this.context.invoke('HelperPlugin.getRegex', 'startSpace');
 
         if (!before.tagName) {
@@ -382,10 +452,17 @@ var KeyboardPlugin = AbstractPlugin.extend({
             }
         }
 
-        if (next.node.tagName === "BR" && next.node.nextSibling && !next.node.nextSibling.tagName && !dom.ancestor(next.node, dom.isPre)) {
+        if (
+            next.node.tagName === "BR" && next.node.nextSibling &&
+            !next.node.nextSibling.tagName && !dom.ancestor(next.node, dom.isPre)
+        ) {
             next.node.nextSibling.textContent = next.node.nextSibling.textContent.replace(startSpace, '\u00A0');
         }
-        if (!next.node.tagName && (!next.node.previousSibling || next.node.previousSibling.tagName === "BR") && !dom.ancestor(next.node, dom.isPre)) {
+        if (
+            !next.node.tagName &&
+            (!next.node.previousSibling || next.node.previousSibling.tagName === "BR") &&
+            !dom.ancestor(next.node, dom.isPre)
+        ) {
             next.node.textContent = next.node.textContent.replace(startSpace, '\u00A0');
         }
 
@@ -396,6 +473,264 @@ var KeyboardPlugin = AbstractPlugin.extend({
         return true;
     },
     /**
+     * Insert a zero-width character after a BR if the range is
+     * at the beginning of an invisible text node
+     * and after said single BR element.
+     *
+     * @private
+     * @param {Object} range
+     * @returns {Object} range
+     */
+    _insertInvisibleCharAfterSingleBR: function (range) {
+        if (this._isAtStartOfInvisibleText(range) && this._isAfterSingleBR(range.sc)) {
+            var invisibleChar = this.document.createTextNode('\u200B');
+            $(range.sc.previousSibling).after(invisibleChar);
+            range = this.context.invoke('editor.setRange', invisibleChar, 1);
+        }
+        return range;
+    },
+    /**
+     * Return true if the node comes after a BR element.
+     *
+     * @private
+     * @param {Node} node
+     * @returns {Boolean}
+     */
+    _isAfterBR: function (node) {
+        return node.previousSibling && node.previousSibling.tagName === 'BR';
+    },
+    /**
+     * Return true if the range if positioned after a BR element that doesn't visually
+     * show a new line in the DOM: a BR in an element that has only a BR, or text then a BR.
+     * eg: <p><br></p> or <p>text<br></p>
+     *
+     * @private
+     * @param {Object} range
+     * @returns {Boolean}
+     */
+    _isAfterInvisibleBR: function (range) {
+        return this._isAfterOnlyBR(range) || this._isAfterOnlyTextThenBR(range);
+    },
+    /**
+     * Return true if the range is positioned on a text node, after an zero-width character.
+     *
+     * @private
+     * @param {Object} range
+     * @returns {Boolean}
+     */
+    _isAfterInvisibleChar: function (range) {
+        return !range.sc.tagName && range.so && range.sc.textContent[range.so - 1] === '\u200B';
+    },
+    /**
+     * Return true if the range is positioned on a text node, after an leading zero-width character.
+     *
+     * @private
+     * @param {Object} range
+     * @returns {Boolean}
+     */
+    _isAfterLeadingInvisibleChar: function (range) {
+        return !range.sc.tagName && range.so === 1 && range.sc.textContent[0] === '\u200B';
+    },
+    /**
+     * Return true if the range if positioned after a BR element in a node that has only a BR.
+     * eg: <p><br></p>
+     *
+     * @private
+     * @param {Object} range
+     * @returns {Boolean}
+     */
+    _isAfterOnlyBR: function (range) {
+        return this._hasOnlyBR(range.sc) && range.so === 1;
+    },
+    /**
+     * Return true if the node has for only element child a BR element.
+     *
+     * @private
+     * @param {Node} node
+     * @returns {Boolean}
+     */
+    _hasOnlyBR: function (node) {
+        return node.childElementCount === 1 && node.firstChild.tagName === 'BR';
+    },
+    /**
+     * Return true if the range if positioned after a BR element in a node that has only text
+     * and ends with a BR.
+     * eg: <p>text<br></p>
+     *
+     * @private
+     * @param {Object} range
+     * @returns {Boolean}
+     */
+    _isAfterOnlyTextThenBR: function (range) {
+        var hasTrailingBR = range.sc.lastChild && range.sc.lastChild.tagName === 'BR';
+        if (!hasTrailingBR) {
+            return false;
+        }
+        var hasOnlyTextThenBR = _.all(range.sc.childNodes, function (n) {
+            return dom.isText(n) || n === range.sc.lastChild;
+        });
+        var isAfterTrailingBR = range.so === dom.nodeLength(range.sc);
+        return hasOnlyTextThenBR && isAfterTrailingBR;
+    },
+    /**
+     * Return true if the node is after a single BR.
+     *
+     * @private
+     * @param {Node} node
+     * @returns {Boolean}
+     */
+    _isAfterSingleBR: function (node) {
+        var isPreviousAfterBR = node.previousSibling && this._isAfterBR(node.previousSibling);
+        return this._isAfterBR(node) && !isPreviousAfterBR;
+    },
+    /**
+     * Return true if the node comes after two BR elements.
+     *
+     * @private
+     * @param {Node} node
+     * @returns {Boolean}
+     */
+    _isAfterTwoBRs: function (node) {
+        var isAfterBR = this._isAfterBR(node);
+        var isPreviousSiblingAfterBR = node.previousSibling && this._isAfterBR(node.previousSibling);
+        return isAfterBR && isPreviousSiblingAfterBR;
+    },
+    /**
+     * Return true if the range is positioned at the start of an invisible text node.
+     *
+     * @private
+     * @param {Object} range
+     * @returns {Boolean}
+     */
+    _isAtStartOfInvisibleText: function (range) {
+        return !range.so && dom.isText(range.sc) && !this.context.invoke('HelperPlugin.isVisibleText', range.sc);
+    },
+    /**
+     * Return true if the range is positioned on a text node, before a trailing zero-width character.
+     *
+     * @private
+     * @param {Object} range
+     * @returns {Boolean}
+     */
+    _isBeforeTrailingInvisibleChar: function (range) {
+        var isBeforeLastCharOfText = !range.sc.tagName && range.so === dom.nodeLength(range.sc) - 1;
+        var isLastCharInvisible = range.sc.textContent.slice(range.so) === '\u200B';
+        return isBeforeLastCharOfText && isLastCharInvisible;
+    },
+    /**
+     * Return true if the node is deletable.
+     *
+     * @private
+     * @param {Node} node
+     * @return {Boolean}
+     */
+    _isDeletableNode: function (node) {
+        var isVisibleText = this.context.invoke('HelperPlugin.isVisibleText', node);
+        var isMedia = dom.isMedia(node);
+        var isBR = node.tagName === 'BR';
+        var isEditable = this.options.isEditableNode(node);
+        return isEditable && (isVisibleText || isMedia || isBR);
+    },
+    /**
+     * Return true if the range is positioned on an edge to delete, depending on the given direction.
+     *
+     * @private
+     * @param {Object} range
+     * @param {String('prev'|'next')} direction
+     */
+    _isOnEdgeToDelete: function (range, direction) {
+        var isOnBR = range.sc.tagName === 'BR';
+        var parentHasOnlyBR = range.sc.parentNode && range.sc.parentNode.innerHTML.trim() === "<br>";
+        var isOnDirEdge;
+        if (direction === 'next') {
+            isOnDirEdge = range.so === dom.nodeLength(range.sc);
+        } else {
+            isOnDirEdge = range.so === 0;
+        }
+        return (!isOnBR || parentHasOnlyBR) && isOnDirEdge;
+    },
+    /**
+     * Move the range before a BR if that BR doesn't visually show a new line in the DOM.
+     * Return the new range.
+     *
+     * @private
+     * @param {Object} range
+     * @returns {Object} range
+     */
+    _moveBeforeInvisibleBR: function (range) {
+        // If we're after an invisible BR, and moving in direction prev: move before the BR
+        if (this._isAfterInvisibleBR(range)) {
+            range.so -= 1;
+        }
+        return range;
+    },
+    /**
+     * Perform a deletion in the given direction.
+     * Note: This is where the actual deletion takes place.
+     *       It should be preceded by _beforeDeletion and
+     *       followed by _afterDeletion.
+     *
+     * @see _handleDeletion
+     *
+     * @private
+     * @param {Object} range
+     * @param {String('prev'|'next')} direction 'prev' to delete BEFORE the carret
+     * @param {Boolean} wasOnStartOfBR true if the requested deletion started at
+     *                                 the beginning of a BR element
+     * @returns {Object} range
+     */
+    _performDeletion: function (range, direction, wasOnStartOfBR) {
+        var didDeleteNodes = false;
+        if (this._isOnEdgeToDelete(range, direction)) {
+            var rest = this.context.invoke('HelperPlugin.deleteEdge', range.sc, direction);
+            didDeleteNodes = !!rest;
+            if (didDeleteNodes) {
+                range = this.context.invoke('editor.setRange', rest.node, rest.offset);
+                return range;
+            }
+        }
+
+        var deleteInfo = this._getDeleteInfo(range, direction, wasOnStartOfBR);
+
+        if (!deleteInfo.point) {
+            return range;
+        }
+
+        var point = deleteInfo.point;
+        var blockToRemove = deleteInfo.blockToRemove;
+        var hasBlock = deleteInfo.hasBlock;
+
+        var isLonelyBR = blockToRemove && blockToRemove.tagName === 'BR' && this._hasOnlyBR(blockToRemove.parentNode);
+        var isHR = blockToRemove && blockToRemove.tagName === "HR";
+
+        if (blockToRemove && !isLonelyBR) {
+            $(blockToRemove).remove();
+            point = isHR ? this.context.invoke('HelperPlugin.deleteEdge', range.sc, direction) : point;
+            didDeleteNodes = true;
+        } else if (!hasBlock) {
+            var isAtEndOfNode = point.offset === dom.nodeLength(point.node);
+            var shouldMove = isAtEndOfNode || direction === 'next' && point.offset;
+
+            point.offset = shouldMove ? point.offset - 1 : point.offset;
+            point.node = this._removeCharAtOffset(point);
+            didDeleteNodes = true;
+
+            var isInPre = !!dom.ancestor(range.sc, dom.isPre);
+            if (!isInPre) {
+                this.context.invoke('HelperPlugin.secureExtremeSingleSpace', point.node);
+            }
+
+            if (direction === 'prev' && !point.offset && !this._isAfterBR(point.node)) {
+                point.node = this._replaceLeadingSpaceWithSingleNBSP(point.node);
+            }
+        }
+
+        if (didDeleteNodes) {
+            range = this.context.invoke('editor.setRange', point.node, point.offset);
+        }
+        return range;
+    },
+    /**
      * Prevent the appearance of a text node with the editable DIV as direct parent:
      * wrap it in a p element.
      *
@@ -403,7 +738,10 @@ var KeyboardPlugin = AbstractPlugin.extend({
      */
     _preventTextInEditableDiv: function () {
         var range = this.context.invoke('editor.createRange');
-        while (dom.isText(this.editable.firstChild) && !this.context.invoke('HelperPlugin.isVisibleText', this.editable.firstChild)) {
+        while (
+            dom.isText(this.editable.firstChild) &&
+            !this.context.invoke('HelperPlugin.isVisibleText', this.editable.firstChild)
+        ) {
             var node = this.editable.firstChild;
             if (node && node.parentNode) {
                 node.parentNode.removeChild(node);
@@ -425,6 +763,55 @@ var KeyboardPlugin = AbstractPlugin.extend({
         range.select();
     },
     /**
+     * Remove all invisible chars before the current range, that are adjacent to it,
+     * then rerange.
+     *
+     * @private
+     * @param {Object} range
+     * @returns {Object} range
+     */
+    _removeAllPreviousInvisibleChars: function (range) {
+        while (this._isAfterInvisibleChar(range)) {
+            var text = range.sc.textContent;
+            range.sc.textContent = text.slice(0, range.so - 1) + text.slice(range.so, text.length);
+            range.so -= 1;
+        }
+        return range;
+    },
+    /**
+     * Remove a char from a point's text node, at the point's offset.
+     *
+     * @private
+     * @param {Object} point
+     * @returns {Node}
+     */
+    _removeCharAtOffset: function (point) {
+        var text = point.node.textContent;
+        var startToOffset = text.slice(0, point.offset);
+        var offsetToEnd = text.slice(point.offset + 1);
+        point.node.textContent = startToOffset + offsetToEnd;
+        return point.node;
+    },
+    /**
+     * Remove any amount of leading/trailing breakable space at range position.
+     * Then move the range and return it.
+     *
+     * @private
+     * @param {Object} range
+     * @returns {Object} range
+     */
+    _removeExtremeBreakableSpaceAndRerange: function (range) {
+        var isInPre = !!dom.ancestor(range.sc, dom.isPre);
+        if (!range.sc.tagName && !isInPre) {
+            var changed = this.context.invoke('HelperPlugin.removeExtremeBreakableSpace', range.sc);
+            range.so = range.eo = range.so > changed.start ? range.so - changed.start : 0;
+            range.so = range.eo = range.so > dom.nodeLength(range.sc) ? dom.nodeLength(range.sc) : range.so;
+            range.select();
+            this.context.invoke('editor.saveRange');
+        }
+        return range;
+    },
+    /**
      * Patch for Google Chrome's contenteditable SPAN bug.
      *
      * @private
@@ -439,7 +826,111 @@ var KeyboardPlugin = AbstractPlugin.extend({
             $span.after($span.contents()).remove();
         }
     },
-    
+    /**
+     * Replace all leading space from a text node with one non-breakable space.
+     *
+     * @param {Node} node
+     * @returns {Node} node
+     */
+    _replaceLeadingSpaceWithSingleNBSP: function (node) {
+        var startSpace = this.context.invoke('HelperPlugin.getRegex', 'startSpace');
+        node.textContent = node.textContent.replace(startSpace, '\u00A0');
+        return node;
+    },
+    /**
+     * Replace a media node with an empty SPAN and return that SPAN.
+     *
+     * @param {Node} media
+     * @returns {Node} span
+     */
+    _replaceMediaWithEmptySpan: function (media) {
+        var span = this.document.createElement('span');
+        media = dom.ancestor(media, function (n) {
+            return !n.parentNode || !dom.isMedia(n.parentNode);
+        });
+        $(media).replaceWith(span);
+        return span;
+    },
+    /**
+     * Move the (collapsed) range to get out of BR elements.
+     *
+     * @private
+     * @param {Object} range
+     * @returns {Object} range
+     */
+    _rerangeOutOfBR: function (range, direction) {
+        range = this._rerangeToFirstNonBRElementLeaf(range);
+        range = this._rerangeToNextNonBR(range, direction === 'next');
+        return range;
+    },
+    /**
+     * Move the (collapsed) range to the first leaf that is not a BR element.
+     *
+     * @private
+     * @param {Object} range
+     * @returns {Object} range
+     */
+    _rerangeToFirstNonBRElementLeaf: function (range) {
+        var leaf = this.context.invoke('HelperPlugin.firstNonBRElementLeaf', range.sc);
+        if (leaf !== range.sc) {
+            range = this.context.invoke('editor.setRange', leaf, 0);
+        }
+        return range;            
+    },
+    /**
+     * Move the (collapsed) range to the next (or previous) node that is not a BR element.
+     *
+     * @private
+     * @param {Object} range
+     * @param {Boolean} previous true to move to the previous node
+     * @returns {Object} range
+     */
+    _rerangeToNextNonBR: function (range, previous) {
+        var point = range.getStartPoint();
+        var method = previous ? 'prevPointUntil' : 'nextPointUntil';
+        point = dom[method](point, function (pt) {
+            return pt.node.tagName !== 'BR';
+        });
+        range = this.context.invoke('editor.setRange', point.node, point.offset);
+        return range;
+    },
+    /**
+     * Move the (collapsed) range to the child of the node at the current offset if possible.
+     *
+     * @private
+     * @param {Object} range
+     * @param {String('prev'|'next')} direction
+     * @returns {Object} range
+     */
+    _rerangeToOffsetChild: function (range, direction) {
+        if (range.sc.childNodes[range.so]) {
+            if (direction === 'prev' && range.so > 0) {
+                range.sc = range.ec = range.sc.childNodes[range.so - 1];
+                range.so = range.eo = dom.nodeLength(range.sc);
+            } else {
+                range.sc = range.ec = range.sc.childNodes[range.so];
+                range.so = range.eo = 0;
+            }
+        }
+        return range;
+    },
+    /**
+     * Before a deletion, if necessary, slice the text content at range, then rerange.
+     *
+     * @param {Object} range
+     * @returns {Object} range
+     */
+    _sliceAndRerangeBeforeDeletion: function (range) {
+        if (this._isAfterLeadingInvisibleChar(range) && !this._isAfterTwoBRs(range.sc)) {
+            range.sc.textContent = range.sc.textContent.slice(1);
+            range.so = 0;
+        }
+        if (this._isBeforeTrailingInvisibleChar(range) && !this._isAfterBR(range.sc)) {
+            range.sc.textContent = range.sc.textContent.slice(0, range.so);
+        }
+        return range;
+    },
+
 
     //--------------------------------------------------------------------------
     // Handle
@@ -454,6 +945,7 @@ var KeyboardPlugin = AbstractPlugin.extend({
      * @returns {Boolean} true if case handled
      */
     _onKeydown: function (se, e) {
+        var self = this;
         var handled = false;
 
         if (e.key &&
@@ -478,8 +970,8 @@ var KeyboardPlugin = AbstractPlugin.extend({
             }
             // or no new char for 500ms
             this.lastCharIsVisibleTime = setTimeout(function () {
-                this.lastCharIsVisible = false;
-            }.bind(this), 500);
+                self.lastCharIsVisible = false;
+            }, 500);
             if (!this.lastCharIsVisible) {
                 this.lastCharIsVisible = true;
                 this.context.invoke('HistoryPlugin.recordUndo');
@@ -494,16 +986,16 @@ var KeyboardPlugin = AbstractPlugin.extend({
             this.context.invoke('MediaPlugin.hidePopovers');
             this.context.invoke('editor.beforeCommand');
             switch (e.keyCode) {
-                case 8:  // BACKSPACE
+                case 8: // BACKSPACE
                     handled = this._onBackspace(e);
                     break;
-                case 9:  // TAB
+                case 9: // TAB
                     handled = this._onTab(e);
                     break;
-                case 13:  // ENTER
+                case 13: // ENTER
                     handled = this._onEnter(e);
                     break;
-                case 46:  // DELETE
+                case 46: // DELETE
                     handled = this._onDelete(e);
                     break;
             }
@@ -543,7 +1035,10 @@ var KeyboardPlugin = AbstractPlugin.extend({
             }
 
             // Outdent if on left edge of an indented block
-            point = {node: range.sc, offset: range.so};
+            point = {
+                node: range.sc,
+                offset: range.so,
+            };
             var isIndented = !!dom.ancestor(point.node, function (n) {
                 var style = dom.isCell(n) ? 'paddingLeft' : 'marginLeft';
                 return n.tagName && !!parseFloat(n.style[style] || 0);
@@ -581,7 +1076,10 @@ var KeyboardPlugin = AbstractPlugin.extend({
         // Special case
         if (range.isCollapsed()) {
             // Do nothing if on left edge of a table cell
-            if (this.context.invoke('HelperPlugin.isRightEdgeOfTag', {node: range.sc, offset: range.so}, 'TD')) {
+            if (this.context.invoke('HelperPlugin.isRightEdgeOfTag', {
+                    node: range.sc,
+                    offset: range.so,
+                }, 'TD')) {
                 return true;
             }
         }
@@ -617,11 +1115,18 @@ var KeyboardPlugin = AbstractPlugin.extend({
     _onTab: function (e) {
         // If TAB not handled, prevent default and do nothing
         if (!this.options.keyMap.pc.TAB) {
-            this.trigger_up('wysiwyg_blur', {key: 'TAB', keyCode: 9, shiftKey: e.shiftKey});
+            this.trigger_up('wysiwyg_blur', {
+                key: 'TAB',
+                keyCode: 9,
+                shiftKey: e.shiftKey,
+            });
             return true;
         }
         var range = this.context.invoke('editor.createRange');
-        var point = {node: range.sc, offset: range.so};
+        var point = {
+            node: range.sc,
+            offset: range.so,
+        };
         var startSpace = this.context.invoke('HelperPlugin.getRegex', 'startSpace');
 
         if (!range.isOnCell()) {
@@ -659,6 +1164,7 @@ var KeyboardPlugin = AbstractPlugin.extend({
      * @returns {Boolean} true if case is handled and event default must be prevented
      */
     _onVisibleChar: function (e, accented) {
+        var self = this;
         e.preventDefault();
         if (accented) {
             this.editable.normalize();
