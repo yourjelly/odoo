@@ -45,11 +45,11 @@ class AccountVoucher(models.Model):
         readonly=True, index=True, states={'draft': [('readonly', False)]},
         help="Effective date for accounting entries", copy=False, default=fields.Date.context_today)
     journal_id = fields.Many2one('account.journal', 'Journal',
-        required=True, readonly=True, states={'draft': [('readonly', False)]}, default=_default_journal)
+        required=True, ondelete="set null", readonly=True, states={'draft': [('readonly', False)]}, default=_default_journal)
     payment_journal_id = fields.Many2one('account.journal', string='Payment Method', readonly=True,
         states={'draft': [('readonly', False)]}, domain="[('type', 'in', ['cash', 'bank'])]", default=_default_payment_journal)
     account_id = fields.Many2one('account.account', 'Account',
-        required=True, readonly=True, states={'draft': [('readonly', False)]},
+        required=True, ondelete="set null", readonly=True, states={'draft': [('readonly', False)]},
         domain="[('deprecated', '=', False), ('internal_type','=', (voucher_type == 'purchase' and 'payable' or 'receivable'))]")
     line_ids = fields.One2many('account.voucher.line', 'voucher_id', 'Voucher Lines',
         readonly=True, copy=True,
@@ -405,7 +405,7 @@ class AccountVoucherLine(models.Model):
     product_id = fields.Many2one('product.product', string='Product',
         ondelete='set null', index=True)
     account_id = fields.Many2one('account.account', string='Account',
-        required=True, domain=[('deprecated', '=', False)],
+        required=True, ondelete="set null", domain=[('deprecated', '=', False)],
         help="The income or expense account related to the selected product.")
     price_unit = fields.Float(string='Unit Price', required=True, digits=dp.get_precision('Product Price'), oldname='amount')
     price_subtotal = fields.Monetary(string='Amount',

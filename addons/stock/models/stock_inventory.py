@@ -47,12 +47,12 @@ class Inventory(models.Model):
         default='draft')
     company_id = fields.Many2one(
         'res.company', 'Company',
-        readonly=True, index=True, required=True,
+        readonly=True, index=True, required=True, ondelete="set null",
         states={'draft': [('readonly', False)]},
         default=lambda self: self.env['res.company']._company_default_get('stock.inventory'))
     location_id = fields.Many2one(
         'stock.location', 'Inventoried Location',
-        readonly=True, required=True,
+        readonly=True, required=True, ondelete="set null",
         states={'draft': [('readonly', False)]},
         default=_default_location_id)
     product_id = fields.Many2one(
@@ -328,10 +328,10 @@ class InventoryLine(models.Model):
     product_id = fields.Many2one(
         'product.product', 'Product',
         domain=[('type', '=', 'product')],
-        index=True, required=True)
+        index=True, required=True, ondelete="set null")
     product_uom_id = fields.Many2one(
         'uom.uom', 'Product Unit of Measure',
-        required=True,
+        required=True, ondelete="set null",
         default=lambda self: self.env.ref('uom.product_uom_unit', raise_if_not_found=True))
     product_uom_category_id = fields.Many2one(string='Uom category', related='product_uom_id.category_id', readonly=True)
     product_qty = fields.Float(
@@ -339,7 +339,7 @@ class InventoryLine(models.Model):
         digits=dp.get_precision('Product Unit of Measure'), default=0)
     location_id = fields.Many2one(
         'stock.location', 'Location',
-        index=True, required=True)
+        index=True, required=True, ondelete="set null")
     package_id = fields.Many2one(
         'stock.quant.package', 'Pack', index=True)
     prod_lot_id = fields.Many2one(

@@ -53,7 +53,7 @@ class HolidaysAllocation(models.Model):
         'End Date', readonly=True, copy=False,
         states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]}, tracking=True)
     holiday_status_id = fields.Many2one(
-        "hr.leave.type", string="Leave Type", required=True, readonly=True,
+        "hr.leave.type", string="Leave Type", required=True, ondelete="set null", readonly=True,
         states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]},
         domain=[('valid', '=', True)], default=_default_holiday_status_id)
     employee_id = fields.Many2one(

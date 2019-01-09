@@ -439,7 +439,7 @@ class AccountJournal(models.Model):
     group_invoice_lines = fields.Boolean(string='Group Invoice Lines',
         help="If this box is checked, the system will try to group the accounting lines when generating them from invoices.")
     sequence_id = fields.Many2one('ir.sequence', string='Entry Sequence',
-        help="This field contains the information related to the numbering of the journal entries of this journal.", required=True, copy=False)
+        help="This field contains the information related to the numbering of the journal entries of this journal.", required=True, ondelete="set null", copy=False)
     refund_sequence_id = fields.Many2one('ir.sequence', string='Credit Note Entry Sequence',
         help="This field contains the information related to the numbering of the credit note entries of this journal.", copy=False)
     sequence = fields.Integer(help='Used to order Journals in the dashboard view', default=10)

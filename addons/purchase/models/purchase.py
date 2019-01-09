@@ -93,7 +93,7 @@ class PurchaseOrder(models.Model):
     dest_address_id = fields.Many2one('res.partner', string='Drop Ship Address', states=READONLY_STATES,
         help="Put an address if you want to deliver directly from the vendor to the customer. "
              "Otherwise, keep empty to deliver to your own company.")
-    currency_id = fields.Many2one('res.currency', 'Currency', required=True, states=READONLY_STATES,
+    currency_id = fields.Many2one('res.currency', 'Currency', required=True, ondelete="set null", states=READONLY_STATES,
         default=lambda self: self.env.user.company_id.currency_id.id)
     state = fields.Selection([
         ('draft', 'RFQ'),
@@ -127,7 +127,7 @@ class PurchaseOrder(models.Model):
 
     product_id = fields.Many2one('product.product', related='order_line.product_id', string='Product', readonly=False)
     user_id = fields.Many2one('res.users', string='Purchase Representative', index=True, tracking=True, default=lambda self: self.env.user)
-    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, states=READONLY_STATES, default=lambda self: self.env.user.company_id.id)
+    company_id = fields.Many2one('res.company', 'Company', required=True, ondelete="set null", index=True, states=READONLY_STATES, default=lambda self: self.env.user.company_id.id)
 
     def _compute_access_url(self):
         super(PurchaseOrder, self)._compute_access_url()
@@ -409,8 +409,8 @@ class PurchaseOrderLine(models.Model):
     product_uom_qty = fields.Float(string='Total Quantity', compute='_compute_product_uom_qty', store=True)
     date_planned = fields.Datetime(string='Scheduled Date', required=True, index=True)
     taxes_id = fields.Many2many('account.tax', string='Taxes', domain=['|', ('active', '=', False), ('active', '=', True)])
-    product_uom = fields.Many2one('uom.uom', string='Product Unit of Measure', required=True)
-    product_id = fields.Many2one('product.product', string='Product', domain=[('purchase_ok', '=', True)], change_default=True, required=True)
+    product_uom = fields.Many2one('uom.uom', string='Product Unit of Measure', required=True, ondelete="set null")
+    product_id = fields.Many2one('product.product', string='Product', domain=[('purchase_ok', '=', True)], change_default=True, required=True, ondelete="set null")
     product_image = fields.Binary(
         'Product Image', related="product_id.image", readonly=False,
         help="Non-stored related field to allow portal user to see the image of the product he has ordered")

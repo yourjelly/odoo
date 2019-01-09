@@ -308,7 +308,7 @@ class MassMailingCampaign(models.Model):
         group_expand='_group_expand_stage_ids')
     user_id = fields.Many2one(
         'res.users', string='Responsible',
-        required=True, default=lambda self: self.env.uid)
+        required=True, ondelete="set null", default=lambda self: self.env.uid)
     campaign_id = fields.Many2one('utm.campaign', 'campaign_id',
         required=True, ondelete='cascade',  help="This name helps you tracking your different campaign efforts, e.g. Fall_Drive, Christmas_Special")
     source_id = fields.Many2one('utm.source', string='Source',

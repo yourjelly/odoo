@@ -48,14 +48,14 @@ class l10n_eu_service(models.TransientModel):
         return eu_country_group.country_ids - eu_fiscal.mapped('country_id') - user.company_id.country_id
 
     company_id = fields.Many2one(
-        'res.company', string='Company', required=True, default=_get_default_company_id)
+        'res.company', string='Company', required=True, ondelete="set null", default=_get_default_company_id)
     fiscal_position_id = fields.Many2one(
         'account.fiscal.position', string='Fiscal Position', default=_default_fiscal_position_id,
         help="Optional fiscal position to use as template for general account mapping. "
              "Should usually be your current Intra-EU B2B fiscal position. "
              "If not set, no general account mapping will be configured for EU fiscal positions.")
     tax_id = fields.Many2one(
-        'account.tax', string='Service VAT', required=True, default=_default_tax_id,
+        'account.tax', string='Service VAT', required=True, ondelete="set null", default=_default_tax_id,
         help="Select your current VAT tax for services. This is the tax that will be mapped "
              "to the corresponding VAT tax in each EU country selected below.")
     account_collected_id = fields.Many2one(

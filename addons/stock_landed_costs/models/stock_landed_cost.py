@@ -50,7 +50,7 @@ class LandedCost(models.Model):
         copy=False, readonly=True)
     account_journal_id = fields.Many2one(
         'account.journal', 'Account Journal',
-        required=True, states={'done': [('readonly', True)]})
+        required=True, ondelete="set null", states={'done': [('readonly', True)]})
     company_id = fields.Many2one('res.company', string="Company",
         related='account_journal_id.company_id', readonly=False)
 

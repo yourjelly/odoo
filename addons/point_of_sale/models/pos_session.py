@@ -45,12 +45,12 @@ class PosSession(models.Model):
     config_id = fields.Many2one(
         'pos.config', string='Point of Sale',
         help="The physical point of sale you will use.",
-        required=True,
+        required=True, ondelete="set null",
         index=True)
     name = fields.Char(string='Session ID', required=True, readonly=True, default='/')
     user_id = fields.Many2one(
         'res.users', string='Responsible',
-        required=True,
+        required=True, ondelete="set null",
         index=True,
         readonly=True,
         states={'opening_control': [('readonly', False)]},

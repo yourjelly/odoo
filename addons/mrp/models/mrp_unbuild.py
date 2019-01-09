@@ -21,17 +21,17 @@ class MrpUnbuild(models.Model):
     name = fields.Char('Reference', copy=False, readonly=True, default=lambda x: _('New'))
     product_id = fields.Many2one(
         'product.product', 'Product',
-        required=True, states={'done': [('readonly', True)]})
+        required=True, ondelete="set null", states={'done': [('readonly', True)]})
     product_qty = fields.Float(
         'Quantity', default=1.0,
         required=True, states={'done': [('readonly', True)]})
     product_uom_id = fields.Many2one(
         'uom.uom', 'Unit of Measure',
-        required=True, states={'done': [('readonly', True)]})
+        required=True, ondelete="set null", states={'done': [('readonly', True)]})
     bom_id = fields.Many2one(
         'mrp.bom', 'Bill of Material',
         domain=[('product_tmpl_id', '=', 'product_id.product_tmpl_id')], #should be more specific
-        required=True, states={'done': [('readonly', True)]})  # Add domain
+        required=True, ondelete="set null", states={'done': [('readonly', True)]})  # Add domain
     mo_id = fields.Many2one(
         'mrp.production', 'Manufacturing Order',
         domain="[('product_id', '=', product_id), ('state', 'in', ['done', 'cancel'])]",
@@ -44,11 +44,11 @@ class MrpUnbuild(models.Model):
     location_id = fields.Many2one(
         'stock.location', 'Source Location',
         default=_get_default_location_id,
-        required=True, states={'done': [('readonly', True)]}, help="Location where the product you want to unbuild is.")
+        required=True, ondelete="set null", states={'done': [('readonly', True)]}, help="Location where the product you want to unbuild is.")
     location_dest_id = fields.Many2one(
         'stock.location', 'Destination Location',
         default=_get_default_location_dest_id,
-        required=True, states={'done': [('readonly', True)]}, help="Location where you want to send the components resulting from the unbuild order.")
+        required=True, ondelete="set null", states={'done': [('readonly', True)]}, help="Location where you want to send the components resulting from the unbuild order.")
     consume_line_ids = fields.One2many(
         'stock.move', 'consume_unbuild_id', readonly=True,
         string='Consumed Disassembly Lines')

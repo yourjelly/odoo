@@ -20,7 +20,7 @@ class MrpWorkorder(models.Model):
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
 
     workcenter_id = fields.Many2one(
-        'mrp.workcenter', 'Work Center', required=True,
+        'mrp.workcenter', 'Work Center', required=True, ondelete="set null",
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
     working_state = fields.Selection(
         'Workcenter Status', related='workcenter_id.working_state', readonly=False,

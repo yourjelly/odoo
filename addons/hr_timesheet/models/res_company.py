@@ -31,6 +31,6 @@ class ResCompany(models.Model):
              "If you use the timesheet linked to projects, don't "
              "forget to setup the right unit of measure in your employees.")
     timesheet_encode_uom_id = fields.Many2one('uom.uom', string="Timesheet Encoding Unit",
-        default=_default_timesheet_encode_uom_id, domain=[('measure_type', '=', 'time')], required=True,
+        default=_default_timesheet_encode_uom_id, domain=[('measure_type', '=', 'time')], required=True, ondelete="set null",
         help="""This will set the unit of measure used to encode timesheet. This will simply provide tools
         and widgets to help the encoding. All reporting will still be expressed in hours (default value).""")

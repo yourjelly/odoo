@@ -547,7 +547,7 @@ class PosOrder(models.Model):
     sequence_number = fields.Integer(string='Sequence Number', help='A session-unique sequence number for the order', default=1)
 
     session_id = fields.Many2one(
-        'pos.session', string='Session', required=True, index=True,
+        'pos.session', string='Session', required=True, ondelete="set null", index=True,
         domain="[('state', '=', 'opened')]", states={'draft': [('readonly', False)]},
         readonly=True, default=_default_session)
     config_id = fields.Many2one('pos.config', related='session_id.config_id', string="Point of Sale", readonly=False)

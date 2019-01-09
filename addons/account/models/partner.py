@@ -392,7 +392,7 @@ class ResPartner(models.Model):
         string="Account Receivable", oldname="property_account_receivable",
         domain="[('internal_type', '=', 'receivable'), ('deprecated', '=', False)]",
         help="This account will be used instead of the default one as the receivable account for the current partner",
-        required=True)
+        required=True, ondelete="set null")
     property_account_position_id = fields.Many2one('account.fiscal.position', company_dependent=True,
         string="Fiscal Position",
         help="The fiscal position determines the taxes/accounts used for this contact.", oldname="property_account_position")

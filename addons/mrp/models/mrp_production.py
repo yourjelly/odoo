@@ -50,7 +50,7 @@ class MrpProduction(models.Model):
     product_id = fields.Many2one(
         'product.product', 'Product',
         domain=[('type', 'in', ['product', 'consu'])],
-        readonly=True, required=True,
+        readonly=True, required=True, ondelete="set null",
         states={'draft': [('readonly', False)]})
     product_tmpl_id = fields.Many2one('product.template', 'Product Template', related='product_id.product_tmpl_id')
     product_qty = fields.Float(
@@ -60,22 +60,22 @@ class MrpProduction(models.Model):
         states={'draft': [('readonly', False)]})
     product_uom_id = fields.Many2one(
         'uom.uom', 'Product Unit of Measure',
-        oldname='product_uom', readonly=True, required=True,
+        oldname='product_uom', readonly=True, required=True, ondelete="set null",
         states={'draft': [('readonly', False)]})
     product_uom_qty = fields.Float(string='Total Quantity', compute='_compute_product_uom_qty', store=True)
     picking_type_id = fields.Many2one(
         'stock.picking.type', 'Operation Type',
-        default=_get_default_picking_type, required=True)
+        default=_get_default_picking_type, required=True, ondelete="set null")
     location_src_id = fields.Many2one(
         'stock.location', 'Raw Materials Location',
         default=_get_default_location_src_id,
-        readonly=True,  required=True,
+        readonly=True,  required=True, ondelete="set null",
         states={'draft': [('readonly', False)]},
         help="Location where the system will look for components.")
     location_dest_id = fields.Many2one(
         'stock.location', 'Finished Products Location',
         default=_get_default_location_dest_id,
-        readonly=True,  required=True,
+        readonly=True,  required=True, ondelete="set null",
         states={'draft': [('readonly', False)]},
         help="Location where the system will stock the finished products.")
     date_planned_start = fields.Datetime(
@@ -161,7 +161,7 @@ class MrpProduction(models.Model):
     company_id = fields.Many2one(
         'res.company', 'Company',
         default=lambda self: self.env['res.company']._company_default_get('mrp.production'),
-        required=True)
+        required=True, ondelete="set null")
 
     qty_produced = fields.Float(compute="_get_produced_qty", string="Quantity Produced")
     procurement_group_id = fields.Many2one(

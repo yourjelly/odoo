@@ -168,7 +168,7 @@ class SaleOrder(models.Model):
         }, help="Delivery address for current sales order.", ondelete='set null',
     )
     pricelist_id = fields.Many2one(
-        'product.pricelist', string='Pricelist', required=True, readonly=True,
+        'product.pricelist', string='Pricelist', required=True, ondelete="set null", readonly=True,
         states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
         help="Pricelist for current sales order."
     )

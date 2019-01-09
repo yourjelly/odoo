@@ -374,7 +374,7 @@ class EventRegistration(models.Model):
         string='Source Document', readonly=True,
         help="Reference of the document that created the registration, for example a sales order")
     event_id = fields.Many2one(
-        'event.event', string='Event', required=True,
+        'event.event', string='Event', required=True, ondelete="set null",
         readonly=True, states={'draft': [('readonly', False)]})
     partner_id = fields.Many2one(
         'res.partner', string='Contact',

@@ -30,7 +30,7 @@ class MrpBom(models.Model):
         default='normal', required=True)
     product_tmpl_id = fields.Many2one(
         'product.template', 'Product',
-        domain="[('type', 'in', ['product', 'consu'])]", required=True)
+        domain="[('type', 'in', ['product', 'consu'])]", required=True, ondelete="set null")
     product_id = fields.Many2one(
         'product.product', 'Product Variant',
         domain="['&', ('product_tmpl_id', '=', product_tmpl_id), ('type', 'in', ['product', 'consu'])]",
@@ -41,7 +41,7 @@ class MrpBom(models.Model):
         digits=dp.get_precision('Unit of Measure'), required=True)
     product_uom_id = fields.Many2one(
         'uom.uom', 'Product Unit of Measure',
-        default=_get_default_product_uom_id, oldname='product_uom', required=True,
+        default=_get_default_product_uom_id, oldname='product_uom', required=True, ondelete="set null",
         help="Unit of Measure (Unit of Measure) is the unit of measurement for the inventory control")
     sequence = fields.Integer('Sequence', help="Gives the sequence order when displaying a list of bills of material.")
     routing_id = fields.Many2one(
@@ -60,7 +60,7 @@ class MrpBom(models.Model):
     company_id = fields.Many2one(
         'res.company', 'Company',
         default=lambda self: self.env['res.company']._company_default_get('mrp.bom'),
-        required=True)
+        required=True, ondelete="set null")
 
     @api.onchange('product_id')
     def onchange_product_id(self):
@@ -207,7 +207,7 @@ class MrpBomLine(models.Model):
         return self.env['uom.uom'].search([], limit=1, order='id').id
 
     product_id = fields.Many2one(
-        'product.product', 'Component', required=True)
+        'product.product', 'Component', required=True, ondelete="set null")
     product_tmpl_id = fields.Many2one('product.template', 'Product Template', related='product_id.product_tmpl_id', readonly=False)
     product_qty = fields.Float(
         'Quantity', default=1.0,
@@ -215,7 +215,7 @@ class MrpBomLine(models.Model):
     product_uom_id = fields.Many2one(
         'uom.uom', 'Product Unit of Measure',
         default=_get_default_product_uom_id,
-        oldname='product_uom', required=True,
+        oldname='product_uom', required=True, ondelete="set null",
         help="Unit of Measure (Unit of Measure) is the unit of measurement for the inventory control")
     sequence = fields.Integer(
         'Sequence', default=1,

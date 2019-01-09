@@ -28,10 +28,10 @@ class StockScrap(models.Model):
     origin = fields.Char(string='Source Document')
     product_id = fields.Many2one(
         'product.product', 'Product', domain=[('type', 'in', ['product', 'consu'])],
-        required=True, states={'done': [('readonly', True)]})
+        required=True, ondelete="set null", states={'done': [('readonly', True)]})
     product_uom_id = fields.Many2one(
         'uom.uom', 'Unit of Measure',
-        required=True, states={'done': [('readonly', True)]})
+        required=True, ondelete="set null", states={'done': [('readonly', True)]})
     tracking = fields.Selection('Product Tracking', readonly=True, related="product_id.tracking")
     lot_id = fields.Many2one(
         'stock.production.lot', 'Lot',
@@ -44,10 +44,10 @@ class StockScrap(models.Model):
     picking_id = fields.Many2one('stock.picking', 'Picking', states={'done': [('readonly', True)]})
     location_id = fields.Many2one(
         'stock.location', 'Location', domain="[('usage', '=', 'internal')]",
-        required=True, states={'done': [('readonly', True)]}, default=_get_default_location_id)
+        required=True, ondelete="set null", states={'done': [('readonly', True)]}, default=_get_default_location_id)
     scrap_location_id = fields.Many2one(
         'stock.location', 'Scrap Location', default=_get_default_scrap_location_id,
-        domain="[('scrap_location', '=', True)]", required=True, states={'done': [('readonly', True)]})
+        domain="[('scrap_location', '=', True)]", required=True, ondelete="set null", states={'done': [('readonly', True)]})
     scrap_qty = fields.Float('Quantity', default=1.0, required=True, states={'done': [('readonly', True)]})
     state = fields.Selection([
         ('draft', 'Draft'),

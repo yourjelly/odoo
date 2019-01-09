@@ -37,14 +37,14 @@ class StockMove(models.Model):
     company_id = fields.Many2one(
         'res.company', 'Company',
         default=lambda self: self.env['res.company']._company_default_get('stock.move'),
-        index=True, required=True)
+        index=True, required=True, ondelete="set null")
     date_expected = fields.Datetime(
         'Expected Date', default=fields.Datetime.now, index=True, required=True,
         states={'done': [('readonly', True)]},
         help="Scheduled date for the processing of this move")
     product_id = fields.Many2one(
         'product.product', 'Product',
-        domain=[('type', 'in', ['product', 'consu'])], index=True, required=True,
+        domain=[('type', 'in', ['product', 'consu'])], index=True, required=True, ondelete="set null",
         states={'done': [('readonly', True)]})
     product_qty = fields.Float(
         'Real Quantity', compute='_compute_product_qty', inverse='_set_product_qty',
@@ -72,11 +72,11 @@ class StockMove(models.Model):
         help="It specifies attributes of packaging like type, quantity of packaging,etc.")
     location_id = fields.Many2one(
         'stock.location', 'Source Location',
-        auto_join=True, index=True, required=True,
+        auto_join=True, index=True, required=True, ondelete="set null",
         help="Sets a location if you produce at a fixed location. This can be a partner location if you subcontract the manufacturing operations.")
     location_dest_id = fields.Many2one(
         'stock.location', 'Destination Location',
-        auto_join=True, index=True, required=True,
+        auto_join=True, index=True, required=True, ondelete="set null",
         help="Location where the system will stock the finished products.")
     partner_id = fields.Many2one(
         'res.partner', 'Destination Address ',

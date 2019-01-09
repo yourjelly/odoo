@@ -35,14 +35,14 @@ class Repair(models.Model):
         states={'confirmed': [('readonly', True)]})
     product_id = fields.Many2one(
         'product.product', string='Product to Repair',
-        readonly=True, required=True, states={'draft': [('readonly', False)]})
+        readonly=True, required=True, ondelete="set null", states={'draft': [('readonly', False)]})
     product_qty = fields.Float(
         'Product Quantity',
         default=1.0, digits=dp.get_precision('Product Unit of Measure'),
         readonly=True, required=True, states={'draft': [('readonly', False)]})
     product_uom = fields.Many2one(
         'uom.uom', 'Product Unit of Measure',
-        readonly=True, required=True, states={'draft': [('readonly', False)]})
+        readonly=True, required=True, ondelete="set null", states={'draft': [('readonly', False)]})
     partner_id = fields.Many2one(
         'res.partner', 'Customer',
         index=True, states={'confirmed': [('readonly', True)]},
@@ -71,7 +71,7 @@ class Repair(models.Model):
     location_id = fields.Many2one(
         'stock.location', 'Location',
         default=_default_stock_location,
-        index=True, readonly=True, required=True,
+        index=True, readonly=True, required=True, ondelete="set null",
         help="This is the location where the product to repair is located.",
         states={'draft': [('readonly', False)], 'confirmed': [('readonly', True)]})
     lot_id = fields.Many2one(
@@ -517,16 +517,16 @@ class RepairLine(models.Model):
         digits=dp.get_precision('Product Unit of Measure'), required=True)
     product_uom = fields.Many2one(
         'uom.uom', 'Product Unit of Measure',
-        required=True)
+        required=True, ondelete="set null")
     invoice_line_id = fields.Many2one(
         'account.invoice.line', 'Invoice Line',
         copy=False, readonly=True)
     location_id = fields.Many2one(
         'stock.location', 'Source Location',
-        index=True, required=True)
+        index=True, required=True, ondelete="set null")
     location_dest_id = fields.Many2one(
         'stock.location', 'Dest. Location',
-        index=True, required=True)
+        index=True, required=True, ondelete="set null")
     move_id = fields.Many2one(
         'stock.move', 'Inventory Move',
         copy=False, readonly=True)

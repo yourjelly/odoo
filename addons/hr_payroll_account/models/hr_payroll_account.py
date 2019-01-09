@@ -161,4 +161,4 @@ class HrPayslipRun(models.Model):
     _inherit = 'hr.payslip.run'
 
     journal_id = fields.Many2one('account.journal', 'Salary Journal', states={'draft': [('readonly', False)]}, readonly=True,
-        required=True, default=lambda self: self.env['account.journal'].search([('type', '=', 'general')], limit=1))
+        required=True, ondelete="set null", default=lambda self: self.env['account.journal'].search([('type', '=', 'general')], limit=1))

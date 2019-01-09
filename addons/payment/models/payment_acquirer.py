@@ -72,9 +72,9 @@ class PaymentAcquirer(models.Model):
         default='manual', required=True)
     company_id = fields.Many2one(
         'res.company', 'Company',
-        default=lambda self: self.env.user.company_id.id, required=True)
+        default=lambda self: self.env.user.company_id.id, required=True, ondelete="set null")
     view_template_id = fields.Many2one(
-        'ir.ui.view', 'Form Button Template', required=True,
+        'ir.ui.view', 'Form Button Template', required=True, ondelete="set null",
         default=_get_default_view_template_id)
     registration_view_template_id = fields.Many2one(
         'ir.ui.view', 'S2S Form Template', domain=[('type', '=', 'qweb')],

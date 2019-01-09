@@ -81,7 +81,7 @@ class PosConfig(models.Model):
     use_existing_lots = fields.Boolean(related='picking_type_id.use_existing_lots', readonly=False)
     stock_location_id = fields.Many2one(
         'stock.location', string='Stock Location',
-        domain=[('usage', '=', 'internal')], required=True, default=_get_default_location)
+        domain=[('usage', '=', 'internal')], required=True, ondelete="set null", default=_get_default_location)
     journal_id = fields.Many2one(
         'account.journal', string='Sales Journal',
         domain=[('type', '=', 'sale')],
@@ -155,7 +155,7 @@ class PosConfig(models.Model):
     )
     barcode_nomenclature_id = fields.Many2one('barcode.nomenclature', string='Barcode Nomenclature',
         help='Defines what kind of barcodes are available and how they are assigned to products, customers and cashiers.',
-        default=lambda self: self.env.user.company_id.nomenclature_id, required=True)
+        default=lambda self: self.env.user.company_id.nomenclature_id, required=True, ondelete="set null")
     group_pos_manager_id = fields.Many2one('res.groups', string='Point of Sale Manager Group', default=_get_group_pos_manager,
         help='This field is there to pass the id of the pos manager group to the point of sale client.')
     group_pos_user_id = fields.Many2one('res.groups', string='Point of Sale User Group', default=_get_group_pos_user,

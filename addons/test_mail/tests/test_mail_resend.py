@@ -128,3 +128,5 @@ class TestMailResend(common.BaseFunctionalTest, common.MockEmails):
         wizard.cancel_mail_action()
         self.assertNotifStates(('canceled', 'sent', 'canceled', 'sent'), message)
         self.assertBusMessage([self.partner_admin])  # one update for cancell
+'canceled', 'sent', 'canceled', 'sent'), message)
+        self.assertBusMessage([self.partner_admin])  # one update for cancell

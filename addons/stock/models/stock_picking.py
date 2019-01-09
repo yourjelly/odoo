@@ -233,12 +233,12 @@ class Picking(models.Model):
     location_id = fields.Many2one(
         'stock.location', "Source Location",
         default=lambda self: self.env['stock.picking.type'].browse(self._context.get('default_picking_type_id')).default_location_src_id,
-        readonly=True, required=True,
+        readonly=True, required=True, ondelete="set null",
         states={'draft': [('readonly', False)]})
     location_dest_id = fields.Many2one(
         'stock.location', "Destination Location",
         default=lambda self: self.env['stock.picking.type'].browse(self._context.get('default_picking_type_id')).default_location_dest_id,
-        readonly=True, required=True,
+        readonly=True, required=True, ondelete="set null",
         states={'draft': [('readonly', False)]})
     move_lines = fields.One2many('stock.move', 'picking_id', string="Stock Moves", copy=True)
     move_ids_without_package = fields.One2many('stock.move', 'picking_id', string="Stock moves not in package", compute='_compute_move_without_package', inverse='_set_move_without_package')
@@ -246,7 +246,7 @@ class Picking(models.Model):
         'Has Scrap Moves', compute='_has_scrap_move')
     picking_type_id = fields.Many2one(
         'stock.picking.type', 'Operation Type',
-        required=True,
+        required=True, ondelete="set null",
         readonly=True,
         states={'draft': [('readonly', False)]})
     picking_type_code = fields.Selection([
@@ -263,7 +263,7 @@ class Picking(models.Model):
     company_id = fields.Many2one(
         'res.company', 'Company',
         default=lambda self: self.env['res.company']._company_default_get('stock.picking'),
-        index=True, required=True,
+        index=True, required=True, ondelete="set null",
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
 
     move_line_ids = fields.One2many('stock.move.line', 'picking_id', 'Operations')
