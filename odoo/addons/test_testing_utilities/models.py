@@ -57,6 +57,7 @@ class M2Onchange(models.Model):
     f = fields.Many2one(
         'test_testing_utilities.m2o',
         required=True,
+        ondelete='set null',
         default=lambda self: self.env['test_testing_utilities.m2o'].search(
             [], limit=1
         )
