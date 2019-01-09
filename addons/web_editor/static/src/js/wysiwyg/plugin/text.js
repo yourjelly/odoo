@@ -26,12 +26,13 @@ var TextPlugin = AbstractPlugin.extend({
      * Insert a Horizontal Rule element (hr).
      */
     insertHR: function () {
+        var self = this;
         var hr = this.document.createElement('hr');
         this.context.invoke('HelperPlugin.insertBlockNode', hr);
-        var point = {node: hr, offset: 0};
+        var point = this.context.invoke('HelperPlugin.makePoint', hr, 0);
         point = dom.nextPointUntil(point, function (pt) {
-            return pt.node !== hr && !this.options.isUnbreakableNode(pt.node);
-        }.bind(this)) || point;
+            return pt.node !== hr && !self.options.isUnbreakableNode(pt.node);
+        }) || point;
         var range = $.summernote.range.create(point.node, point.offset);
         range.select();
     },
@@ -48,6 +49,7 @@ var TextPlugin = AbstractPlugin.extend({
      * @param {Boolean} textOnly true to allow only dropping plain text
      */
     pasteNodes: function (nodes, textOnly) {
+        var self = this;
         if (!nodes.length) {
             return;
         }
@@ -59,34 +61,34 @@ var TextPlugin = AbstractPlugin.extend({
         // Respect the rules of unbreakable nodes
         var point;
         if (range.sc.childNodes[range.so]) {
-            point = {node: range.sc.childNodes[range.so], offset: 0};
+            point = this.context.invoke('HelperPlugin.makePoint', range.sc.childNodes[range.so], 0);
         } else {
-            point = {node: range.sc, offset: range.so};
+            point = range.getStartPoint();
         }
 
         point = dom.nextPointUntil(point, function (pt) {
             var isTextWithParent = !pt.node.tagName && pt.parentNode;
-            return !(this.options.isUnbreakableNode(pt.node) ||
-                        isTextWithParent && (
-                            pt.node.parentNode.tagName === 'BR' ||
-                            $(pt.node.parentNode).filter('.fa').length));
-        }.bind(this));
+            return !(self.options.isUnbreakableNode(pt.node) ||
+                isTextWithParent && (
+                    pt.node.parentNode.tagName === 'BR' ||
+                    $(pt.node.parentNode).filter('.fa').length));
+        });
 
         // Prevent pasting HTML within a link
         if (!textOnly) {
             point = dom.nextPointUntil(point, function (pt) {
                 var ancestor = dom.ancestor(pt.node, dom.isAnchor);
-                return !ancestor || ancestor === this.editable;
-            }.bind(this));
+                return !ancestor || ancestor === self.editable;
+            });
         }
 
         nodes = this._mergeAdjacentULs(nodes);
 
         // Insert the nodes
         var isInsertInline = dom.isInline(nodes[0]) &&
-                             ( !point.node.tagName ||
-                               point.node.tagName === 'BR' ||
-                               dom.isMedia(point.node) );
+            (!point.node.tagName ||
+                point.node.tagName === 'BR' ||
+                dom.isMedia(point.node));
         var fakeParent = this.document.createElement('div');
         $(fakeParent).append(nodes);
         if (isInsertInline) {
@@ -98,8 +100,8 @@ var TextPlugin = AbstractPlugin.extend({
         $(fakeParent).contents().unwrap();
 
         // Move the carret
-        range.sc = range.ec = nodes[nodes.length-1];
-        range.so = range.eo = dom.nodeLength(range.sc);
+        var start = nodes[nodes.length - 1];
+        range = this.context.invoke('editor.setRange', start, dom.nodeLength(start));
         range.normalize().select();
     },
     /**
@@ -109,6 +111,7 @@ var TextPlugin = AbstractPlugin.extend({
      * @returns {Node[]}
      */
     prepareClipboardData: function (clipboardData) {
+        var self = this;
         var whiteList = this._clipboardWhitelist();
         var blackList = this._clipboardBlacklist();
 
@@ -123,8 +126,10 @@ var TextPlugin = AbstractPlugin.extend({
                 $fakeParent = $(this.document.createElement('div'));
                 for (var i = 0; i < $clipboardData.length; i++) {
                     var node = $clipboardData[i];
-                    if (node.tagName && !$(node).filter(whiteList.join(',')).length ||
-                        $(node).filter(blackList.join(',')).length) {
+                    if (
+                        node.tagName && !$(node).filter(whiteList.join(',')).length ||
+                        $(node).filter(blackList.join(',')).length
+                    ) {
                         $fakeParent.append(node.childNodes);
                         root = true;
                     } else {
@@ -132,7 +137,7 @@ var TextPlugin = AbstractPlugin.extend({
                     }
                 }
                 $clipboardData = $fakeParent.contents();
-            // Clean the rest of the tree
+                // Clean the rest of the tree
             } else {
                 var $contents = $badNodes.contents();
                 if ($contents.length) {
@@ -143,11 +148,11 @@ var TextPlugin = AbstractPlugin.extend({
             }
 
             $badNodes = $clipboardData.find('*').addBack()
-                                      .not(whiteList.join(','))
-                                      .addBack(blackList.join(','))
-                                      .filter(function () {
-                return !!this.tagName;
-            });
+                .not(whiteList.join(','))
+                .addBack(blackList.join(','))
+                .filter(function () {
+                    return !!this.tagName;
+                });
         } while ($badNodes.length);
 
         var $all = $clipboardData.find('*').addBack();
@@ -160,31 +165,31 @@ var TextPlugin = AbstractPlugin.extend({
 
         // 4. Prevent inlines directly within TD's
         var $inlinesInTD = $all.filter('td').contents().filter(function (i, n) {
-            return !this.context.invoke('HelperPlugin.isNodeBlockType', n);
-        }.bind(this));
+            return !self.context.invoke('HelperPlugin.isNodeBlockType', n);
+        });
         var parentsOfInlinesInTD = [];
         _.each($inlinesInTD, function (n) {
-            parentsOfInlinesInTD.push(this.context.invoke('HelperPlugin.firstBlockAncestor', n));
-        }.bind(this));
+            parentsOfInlinesInTD.push(self.context.invoke('HelperPlugin.firstBlockAncestor', n));
+        });
         $($.unique(parentsOfInlinesInTD)).wrapInner(this.document.createElement('p'));
-        
+
         // 5. Fill up empty blocks
         var emptyP = this.document.createElement('p');
         $(emptyP).append(this.document.createElement('br'));
 
         $all.filter(function (i, n) {
-            return this.context.invoke('HelperPlugin.isNodeBlockType', n) && !n.childNodes;
-        }.bind(this)).append(this.document.createElement('br'));
+            return self.context.invoke('HelperPlugin.isNodeBlockType', n) && !n.childNodes;
+        }).append(this.document.createElement('br'));
 
         // 6. remove non-whitelisted attributes
         $all.each(function () {
             var $node = $(this);
             _.each(_.pluck(this.attributes, 'name'), function (attribute) {
-                if (attribute.indexOf(this._clipboardWhitelistAttr()) !== -1) {
+                if (self._clipboardWhitelistAttr().indexOf(attribute) === -1) {
                     $node.removeAttr(attribute);
                 }
-            }.bind(this));
-        }.bind(this)).removeClass('o_editable o_not_editable');
+            });
+        }).removeClass('o_editable o_not_editable');
 
         // 7. remove all classes on 'a' tags
         $all.filter('a').removeClass();
@@ -201,8 +206,14 @@ var TextPlugin = AbstractPlugin.extend({
      *       P, H1, H2, H3, H4, H5, H6, BLOCKQUOTE, PRE
      */
     formatBlock: function (tagName) {
+        var self = this;
         var r = this.context.invoke('editor.createRange');
-        if (!r || !this.$editable.has(r.sc).length ||! this.$editable.has(r.ec).length || this.options.isUnbreakableNode(r.sc)) {
+        if (
+            !r ||
+            !this.$editable.has(r.sc).length ||
+            !this.$editable.has(r.ec).length ||
+            this.options.isUnbreakableNode(r.sc)
+        ) {
             return;
         }
         var nodes = this.context.invoke('HelperPlugin.getSelectedNodes');
@@ -216,7 +227,7 @@ var TextPlugin = AbstractPlugin.extend({
         }
         var changedNodes = [];
         _.each(nodes, function (node) {
-            var newNode = this.document.createElement(tagName);
+            var newNode = self.document.createElement(tagName);
             $(newNode).append($(node).contents());
             var attributes = $(node).prop("attributes");
             _.each(attributes, function (attr) {
@@ -224,16 +235,14 @@ var TextPlugin = AbstractPlugin.extend({
             });
             $(node).replaceWith(newNode);
             changedNodes.push(newNode);
-        }.bind(this));
+        });
 
         // Select all formatted nodes
         if (changedNodes.length) {
-            var lastNode = changedNodes[changedNodes.length-1];
-            var range = this.context.invoke('editor.createRange');
-            range.sc = changedNodes[0].firstChild || changedNodes[0];
-            range.so = 0;
-            range.ec = lastNode.lastChild || lastNode;
-            range.eo = dom.nodeLength(lastNode.lastChild || lastNode);
+            var lastNode = changedNodes[changedNodes.length - 1];
+            var startNode = changedNodes[0].firstChild || changedNodes[0];
+            var endNode = lastNode.lastChild || lastNode;
+            var range = this.context.invoke('editor.setRange', startNode, 0, endNode, dom.nodeLength(endNode));
             range.select();
         }
     },
@@ -248,8 +257,8 @@ var TextPlugin = AbstractPlugin.extend({
         var nodes = this.context.invoke('HelperPlugin.getSelectedNodes');
         nodes = this.context.invoke('HelperPlugin.filterFormatAncestors', nodes);
         var align = style === 'justifyLeft' ? 'left' :
-                    style === 'justifyCenter' ? 'center' :
-                    style === 'justifyRight' ? 'right' : 'justify';
+            style === 'justifyCenter' ? 'center' :
+            style === 'justifyRight' ? 'right' : 'justify';
         _.each(nodes, function (node) {
             if (dom.isText(node)) {
                 return;
@@ -280,13 +289,13 @@ var TextPlugin = AbstractPlugin.extend({
             strikethrough: 'S',
             superscript: 'SUP',
             subscript: 'SUB',
-        }[tagName];
+        } [tagName];
         if (!tag) {
             throw new Error(tagName);
         }
 
         var range = this.context.invoke('editor.createRange');
-        if (!range || !this.$editable.has(range.sc).length ||! this.$editable.has(range.ec).length) {
+        if (!range || !this.$editable.has(range.sc).length || !this.$editable.has(range.ec).length) {
             return;
         }
         if (range.isCollapsed()) {
@@ -299,9 +308,7 @@ var TextPlugin = AbstractPlugin.extend({
             if (br) {
                 var emptyText = this.document.createTextNode('\u200B');
                 $(br).before(emptyText).remove();
-                range.sc = range.ec = emptyText;
-                range.so = 0;
-                range.eo = 1;
+                range = this.context.invoke('editor.setRange', emptyText, 0, emptyText, 1);
             } else {
                 this.document.execCommand('insertText', 0, '\u200B');
                 range.eo += 1;
@@ -316,17 +323,18 @@ var TextPlugin = AbstractPlugin.extend({
         var start = this.context.invoke('HelperPlugin.firstLeaf', nodes[0]);
         var end = this.context.invoke('HelperPlugin.lastLeaf', nodes[nodes.length - 1]);
 
-        function containsOnlySelectedText (node) {
+        function containsOnlySelectedText(node) {
             return _.all(node.childNodes, function (n) {
                 return _.any(texts, function (t) {
-                    return n === t && ! (dom.isText(n) && n.textContent === '');
+                    return n === t && !(dom.isText(n) && n.textContent === '');
                 }) && containsOnlySelectedText(n);
             });
         }
-        function containsAllSelectedText (node) {
+
+        function containsAllSelectedText(node) {
             return _.all(texts, function (t) {
                 return _.any(node.childNodes, function (n) {
-                    return n === t  && ! (dom.isText(n) && n.textContent === '')|| containsAllSelectedText(n);
+                    return n === t && !(dom.isText(n) && n.textContent === '') || containsAllSelectedText(n);
                 });
             });
         }
@@ -345,7 +353,11 @@ var TextPlugin = AbstractPlugin.extend({
                 return node.tagName === tag;
             });
             if (styled) {
-                if (!/^\u200B$/.test(text.textContent) && containsAllSelectedText(styled) && containsOnlySelectedText(styled)) {
+                if (
+                    !/^\u200B$/.test(text.textContent) &&
+                    containsAllSelectedText(styled) &&
+                    containsOnlySelectedText(styled)
+                ) {
                     // Unwrap all contents
                     nodes = $(styled).contents();
                     $(styled).before(nodes).remove();
@@ -357,18 +369,25 @@ var TextPlugin = AbstractPlugin.extend({
                         isNotSplitEdgePoint: true,
                     };
 
-                    if (nodeAlreadyStyled.indexOf(text.nextSibling) === -1 && !dom.isRightEdgeOf(text, styled)) {
+                    if (
+                        nodeAlreadyStyled.indexOf(text.nextSibling) === -1 &&
+                        !dom.isRightEdgeOf(text, styled)
+                    ) {
                         options.nextText = false;
-                        var point = {node: text, offset: dom.nodeLength(text)};
+                        var point = self.context.invoke('HelperPlugin.makePoint', text, dom.nodeLength(text));
                         if (dom.isMedia(text)) {
                             point = dom.nextPoint(point);
                         }
                         var next = self.context.invoke('HelperPlugin.splitTree', styled, point, options);
                         nodeAlreadyStyled.push(next);
                     }
-                    if (nodeAlreadyStyled.indexOf(text.previousSibling) === -1 && !dom.isLeftEdgeOf(text, styled)) {
+                    if (
+                        nodeAlreadyStyled.indexOf(text.previousSibling) === -1 &&
+                        !dom.isLeftEdgeOf(text, styled)
+                    ) {
                         options.nextText = true;
-                        text = self.context.invoke('HelperPlugin.splitTree', styled, {node: text, offset: 0}, options);
+                        var textPoint = self.context.invoke('HelperPlugin.makePoint', text, 0);
+                        text = self.context.invoke('HelperPlugin.splitTree', styled, textPoint, options);
                         nodeAlreadyStyled.push(text);
                         if (index === 0) {
                             start = text;
@@ -381,10 +400,16 @@ var TextPlugin = AbstractPlugin.extend({
                     });
                     if (toRemove) {
                         // Remove generated empty elements
-                        if (toRemove.nextSibling && self.context.invoke('HelperPlugin.isBlankNode', toRemove.nextSibling)) {
+                        if (
+                            toRemove.nextSibling &&
+                            self.context.invoke('HelperPlugin.isBlankNode', toRemove.nextSibling)
+                        ) {
                             $(toRemove.nextSibling).remove();
                         }
-                        if (toRemove.previousSibling && self.context.invoke('HelperPlugin.isBlankNode', toRemove.previousSibling)) {
+                        if (
+                            toRemove.previousSibling &&
+                            self.context.invoke('HelperPlugin.isBlankNode', toRemove.previousSibling)
+                        ) {
                             $(toRemove.previousSibling).remove();
                         }
 
@@ -404,7 +429,11 @@ var TextPlugin = AbstractPlugin.extend({
             }
 
             var node = text;
-            while (node && node.parentNode && formatted.indexOf(node) === -1 && formatted.indexOf(node.parentNode) === -1) {
+            while (
+                node && node.parentNode &&
+                formatted.indexOf(node) === -1 &&
+                formatted.indexOf(node.parentNode) === -1
+            ) {
                 node = node.parentNode;
             }
             if (node !== text) {
@@ -448,8 +477,10 @@ var TextPlugin = AbstractPlugin.extend({
                     }
                 }
                 // Add adjacent nodes with same tagName to list of nodes to merge
-                if (node.parentNode && node.parentNode[next ? 'nextSibling' : 'previousSibling'] &&
-                    node.parentNode.tagName === node.parentNode[next ? 'nextSibling' : 'previousSibling'].tagName) {
+                if (
+                    node.parentNode && node.parentNode[next ? 'nextSibling' : 'previousSibling'] &&
+                    node.parentNode.tagName === node.parentNode[next ? 'nextSibling' : 'previousSibling'].tagName
+                ) {
                     toMerge.push(next ? node.parentNode : node.parentNode.previousSibling);
                 }
             });
@@ -459,10 +490,7 @@ var TextPlugin = AbstractPlugin.extend({
             }
         }
 
-        range.sc = start;
-        range.so = 0;
-        range.ec = end;
-        range.eo = dom.nodeLength(range.ec);
+        range = this.context.invoke('editor.setRange', start, 0, end, dom.nodeLength(end));
 
         if (range.sc === range.ec && range.sc.textContent === '\u200B') {
             range.so = range.eo = 1;
@@ -500,7 +528,7 @@ var TextPlugin = AbstractPlugin.extend({
      * @returns {String[]}
      */
     _clipboardWhitelist: function () {
-        var listSels = [ 'ul', 'ol', 'li'];
+        var listSels = ['ul', 'ol', 'li'];
         var styleSels = ['i', 'b', 'u', 'em', 'strong'];
         var tableSels = ['table', 'th', 'tbody', 'tr', 'td'];
         var miscSels = ['img', 'br', 'a', '.fa'];
@@ -528,7 +556,7 @@ var TextPlugin = AbstractPlugin.extend({
         var res = [];
         var prevNode;
         _.each(nodes, function (node) {
-            prevNode = res[res.length-1];
+            prevNode = res[res.length - 1];
             if (prevNode && node.tagName === 'UL' && prevNode.tagName === 'UL') {
                 $(prevNode).append(node.childNodes);
             } else {

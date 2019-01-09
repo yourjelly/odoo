@@ -50,10 +50,9 @@ var BulletPlugin = AbstractPlugin.extend({
             res = [].slice.call(ul.children);
         }
 
-        range.sc = this.context.invoke('HelperPlugin.firstLeaf', start.node);
-        range.so = start.offset;
-        range.ec = this.context.invoke('HelperPlugin.firstLeaf', end.node);
-        range.eo = end.offset;
+        var startLeaf = this.context.invoke('HelperPlugin.firstLeaf', start.node);
+        var endLeaf = this.context.invoke('HelperPlugin.firstLeaf', end.node);
+        range = this.context.invoke('editor.setRange', startLeaf, start.offset, endLeaf, end.offset);
         range.select();
         this.context.invoke('editor.saveRange');
 

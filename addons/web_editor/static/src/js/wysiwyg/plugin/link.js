@@ -108,14 +108,8 @@ var LinkPlugin = Plugins.linkDialog.extend({
 
                     // search nodes to insert in the anchor
 
-                    var startPoint = {
-                        node: r.sc,
-                        offset: r.so
-                    };
-                    var endPoint = {
-                        node: r.ec,
-                        offset: r.eo
-                    };
+                    var startPoint = this.context.invoke('HelperPlugin.makePoint', r.sc, r.so);
+                    var endPoint = this.context.invoke('HelperPlugin.makePoint', r.ec, r.eo);
                     dom.walkPoint(startPoint, endPoint, function (point) {
                         var node = point.node.childNodes && point.node.childNodes[point.offset] || point.node;
                         nodes.push(node);
@@ -181,13 +175,12 @@ var LinkPlugin = Plugins.linkDialog.extend({
                 var anchor = dom.ancestor(range.sc.childNodes[range.so] || range.sc, dom.isAnchor);
                 $anchor = $(anchor);
                 if (isCollapsed) {
-                    // move the range juste after the link
+                    // move the range just after the link
                     var point = dom.nextPoint({
                         node: anchor,
                         offset: dom.nodeLength(anchor),
                     });
-                    range.sc = range.ec = point.node;
-                    range.so = range.eo = point.offset;
+                    range = self.context.invoke('editor.setRange', point.node, point.offset);
                     range.select();
                 } else {
                     $anchor.selectContent();
@@ -233,10 +226,9 @@ var LinkPlugin = Plugins.linkDialog.extend({
 
         this.context.invoke('editor.hidePopover');
 
-        rng.sc = $contents[0];
-        rng.so = 0;
-        rng.ec = $contents.last()[0];
-        rng.eo = dom.nodeLength(rng.ec);
+        var start = $contents[0];
+        var end = $contents.last()[0];
+        rng = this.context.invoke('editor.setRange', start, 0, end, dom.nodeLength(end));
         rng.select();
         this.editable.normalize();
         this.context.invoke('editor.saveRange');

@@ -107,10 +107,7 @@ var Unbreakable = AbstractPlugin.extend({
             });
             if (!startPoint || !startPoint.node) { // no allowed node, search the other way
                 afterEnd = false;
-                startPoint = dom.prevPointUntil({
-                    node: range.sc,
-                    offset: range.so,
-                }, function (point) {
+                startPoint = dom.prevPointUntil(range.getStartPoint(), function (point) {
                     return self.options.isEditableNode(point.node) && dom.isVisiblePoint(point) || !point.node;
                 });
             }
@@ -203,10 +200,7 @@ var Unbreakable = AbstractPlugin.extend({
             }
 
             if (!endPoint) {
-                endPoint = {
-                    node: range.sc,
-                    offset: range.so,
-                };
+                endPoint = range.getStartPoint();
             }
 
             if (endPoint.node !== range.ec || endPoint.offset !== range.eo) {
@@ -309,8 +303,7 @@ var Unbreakable = AbstractPlugin.extend({
         ) {
             range = this.context.invoke('editor.createRange');
             if (!$.contains(e.target, range.sc) && !$.contains(e.target, range.ec)) {
-                range.sc = range.ec = e.target;
-                range.so = range.eo = 0;
+                range = this.context.invoke('editor.setRange', e.target, 0);
                 range = range.normalize().select();
                 this.context.invoke('editor.saveRange');
                 this._focusNode(range.ec);

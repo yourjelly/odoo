@@ -272,10 +272,7 @@ var KeyboardPlugin = AbstractPlugin.extend({
             return $(n).hasClass('btn');
         });
 
-        var point = {
-            node: range.sc,
-            offset: range.so,
-        };
+        var point = range.getStartPoint();
 
         if (!point.node.tagName && this.options.isUnbreakableNode(point.node.parentNode)) {
             return this._handleShiftEnter();
@@ -331,10 +328,7 @@ var KeyboardPlugin = AbstractPlugin.extend({
         }
 
         // move to next editable area
-        point = {
-            node: next,
-            offset: 0,
-        };
+        point = this.context.invoke('HelperPlugin.makePoint', next, 0);
         if (
             (point.node.tagName && point.node.tagName !== 'BR') ||
             !this.context.invoke('HelperPlugin.isVisibleText', point.node.textContent)
@@ -349,10 +343,7 @@ var KeyboardPlugin = AbstractPlugin.extend({
                     ) &&
                     self.options.isEditableNode(pt.node);
             });
-            point = point || {
-                node: next,
-                offset: 0,
-            };
+            point = point || this.context.invoke('HelperPlugin.makePoint', next, 0);
             if (point.node.tagName === "BR") {
                 point = dom.nextPoint(point);
             }
@@ -380,8 +371,7 @@ var KeyboardPlugin = AbstractPlugin.extend({
             });
 
             // Move carret to the new button
-            range.sc = range.ec = next.firstChild;
-            range.so = range.eo = 0;
+            range = this.context.invoke('editor.setRange', next.firstChild, 0);
             range.select();
 
             // Force content in empty buttons, the carret can be moved there
@@ -389,8 +379,7 @@ var KeyboardPlugin = AbstractPlugin.extend({
             this.context.invoke('LinkPopover.fillEmptyLink', next, true);
             this.context.invoke('LinkPopover.fillEmptyLink', btn, true);
         } else {
-            range.sc = range.ec = point.node;
-            range.so = range.eo = point.offset;
+            range = this.context.invoke('editor.setRange', point.node, point.offset);
             range.normalize().select();
         }
 
@@ -437,10 +426,7 @@ var KeyboardPlugin = AbstractPlugin.extend({
 
         var br = this.document.createElement('br');
         $(before).after(br);
-        var next = {
-            node: br,
-            offset: 0,
-        };
+        var next = this.context.invoke('HelperPlugin.makePoint', br, 0);
         var startSpace = this.context.invoke('HelperPlugin.getRegex', 'startSpace');
 
         if (!before.tagName) {
@@ -466,8 +452,7 @@ var KeyboardPlugin = AbstractPlugin.extend({
             next.node.textContent = next.node.textContent.replace(startSpace, '\u00A0');
         }
 
-        range.sc = range.ec = next.node;
-        range.so = range.eo = next.offset;
+        range = this.context.invoke('editor.setRange', next.node, next.offset);
         range.select();
 
         return true;
@@ -752,12 +737,10 @@ var KeyboardPlugin = AbstractPlugin.extend({
             var p = this.document.createElement('p');
             p.innerHTML = '<br>';
             this.editable.appendChild(p);
-            range.sc = range.ec = p;
-            range.so = range.eo = 0;
+            range = this.context.invoke('editor.setRange', p, 0);
         } else if (this.context.invoke('HelperPlugin.isBlankNode', this.editable.firstChild) && !range.sc.parentNode) {
             this.editable.firstChild.innerHTML = '<br/>';
-            range.sc = range.ec = this.editable.firstChild;
-            range.so = range.eo = 0;
+            range = this.context.invoke('editor.setRange', this.editable.firstChild, 0);
         }
 
         range.select();
@@ -904,12 +887,16 @@ var KeyboardPlugin = AbstractPlugin.extend({
      */
     _rerangeToOffsetChild: function (range, direction) {
         if (range.sc.childNodes[range.so]) {
+            var node;
+            var offset;
             if (direction === 'prev' && range.so > 0) {
-                range.sc = range.ec = range.sc.childNodes[range.so - 1];
-                range.so = range.eo = dom.nodeLength(range.sc);
+                node = range.sc.childNodes[range.so - 1];
+                offset = dom.nodeLength(node);
+                range = this.context.invoke('editor.setRange', node, offset);
             } else {
-                range.sc = range.ec = range.sc.childNodes[range.so];
-                range.so = range.eo = 0;
+                node = range.sc.childNodes[range.so];
+                offset = 0;
+                range = this.context.invoke('editor.setRange', node, offset);
             }
         }
         return range;
@@ -1035,10 +1022,7 @@ var KeyboardPlugin = AbstractPlugin.extend({
             }
 
             // Outdent if on left edge of an indented block
-            point = {
-                node: range.sc,
-                offset: range.so,
-            };
+            point = range.getStartPoint();
             var isIndented = !!dom.ancestor(point.node, function (n) {
                 var style = dom.isCell(n) ? 'paddingLeft' : 'marginLeft';
                 return n.tagName && !!parseFloat(n.style[style] || 0);
@@ -1076,10 +1060,7 @@ var KeyboardPlugin = AbstractPlugin.extend({
         // Special case
         if (range.isCollapsed()) {
             // Do nothing if on left edge of a table cell
-            if (this.context.invoke('HelperPlugin.isRightEdgeOfTag', {
-                    node: range.sc,
-                    offset: range.so,
-                }, 'TD')) {
+            if (this.context.invoke('HelperPlugin.isRightEdgeOfTag', range.getStartPoint(), 'TD')) {
                 return true;
             }
         }
@@ -1123,10 +1104,7 @@ var KeyboardPlugin = AbstractPlugin.extend({
             return true;
         }
         var range = this.context.invoke('editor.createRange');
-        var point = {
-            node: range.sc,
-            offset: range.so,
-        };
+        var point = range.getStartPoint();
         var startSpace = this.context.invoke('HelperPlugin.getRegex', 'startSpace');
 
         if (!range.isOnCell()) {
@@ -1178,9 +1156,7 @@ var KeyboardPlugin = AbstractPlugin.extend({
             $(baseRange.sc).after(accentPlaceholder);
             $(accentPlaceholder).attr('contenteditable', true);
 
-            var range = this.context.invoke('editor.createRange');
-            range.sc = range.ec = accentPlaceholder;
-            range.so = range.eo = 0;
+            var range = this.context.invoke('editor.setRange', accentPlaceholder, 0);
             range.select();
 
             setTimeout(function () {

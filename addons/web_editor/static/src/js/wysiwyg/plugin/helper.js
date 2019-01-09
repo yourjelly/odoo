@@ -22,6 +22,9 @@ var HelperPlugin = AbstractPlugin.extend({
         char: {
             noflag: /\S|\u00A0|\u200B/,
         },
+        emptyElemWithBR: {
+            noflag: /^\s*<br\/?>\s*$/,
+        },
         endInvisible: {
             noflag: /\u200B$/,
         },
@@ -164,11 +167,10 @@ var HelperPlugin = AbstractPlugin.extend({
      * @returns {Object} {node, offset, changed}
      */
     deleteBetween: function (pointA, pointB) {
+        var self = this;
         if (pointB.node.childNodes[pointB.offset]) {
-            pointB = {
-                node: this.firstLeaf(pointB.node.childNodes[pointB.offset]),
-                offset: 0,
-            };
+            var firstLeaf = this.firstLeaf(pointB.node.childNodes[pointB.offset]);
+            pointB = this.makeRange(firstLeaf, 0);
         }
         if (pointB.node.tagName && pointB.node.tagName !== 'BR' && pointB.offset >= dom.nodeLength(pointB.node)) {
             pointB = dom.nextPoint(pointB);
@@ -177,17 +179,21 @@ var HelperPlugin = AbstractPlugin.extend({
         var commonAncestor = dom.commonAncestor(pointA.node, pointB.node);
 
         var ecAncestor = dom.ancestor(pointB.node, function (node) {
-            return node === commonAncestor || this.options.isUnbreakableNode(node.parentNode);
-        }.bind(this));
-        var next = this.splitTree(ecAncestor, pointB, {nextText: true});
+            return node === commonAncestor || self.options.isUnbreakableNode(node.parentNode);
+        });
+        var next = this.splitTree(ecAncestor, pointB, {
+            nextText: true,
+        });
 
         var scAncestor = dom.ancestor(pointA.node, function (node) {
-            return node === commonAncestor || this.options.isUnbreakableNode(node.parentNode);
-        }.bind(this));
+            return node === commonAncestor || self.options.isUnbreakableNode(node.parentNode);
+        });
         if (dom.isIcon(pointA.node)) {
             pointA = dom.prevPoint(pointA);
         }
-        this.splitTree(scAncestor, pointA, {nextText: true});
+        this.splitTree(scAncestor, pointA, {
+            nextText: true,
+        });
         pointA.offset = dom.nodeLength(pointA.node);
 
         var nodes = [];
@@ -202,19 +208,23 @@ var HelperPlugin = AbstractPlugin.extend({
             if (target === pointA.node || $.contains(target, pointA.node) || target === next || $.contains(target, next)) {
                 return;
             }
-            if (nodes.indexOf(target) === -1 && !dom.ancestor(target, function (target) { return nodes.indexOf(target) !== -1; })) {
+            if (
+                nodes.indexOf(target) === -1 && !dom.ancestor(target, function (target) {
+                    return nodes.indexOf(target) !== -1;
+                })
+            ) {
                 nodes.push(target);
             }
-        }.bind(this));
+        });
         $(nodes).remove();
 
         changed = !!nodes.length;
         var toMerge = changed && pointA.node.parentNode !== next.parentNode;
 
 
-        var point = {node: this.firstLeaf(next), offset: 0};
+        var point = this.makePoint(this.firstLeaf(next), 0);
         if (nodes.length > 1 || nodes.length && !dom.isText(nodes[0])) {
-            point = this.removeEmptyInlineNodes({node: this.firstLeaf(next), offset: 0});
+            point = this.removeEmptyInlineNodes(point);
         }
 
         // Remove whole li/ul/ol if deleted all contents of li/ul/ol
@@ -223,7 +233,11 @@ var HelperPlugin = AbstractPlugin.extend({
         });
         if (ul && next[dom.isText(next) ? 'textContent' : 'innerHTML'] === '' && pointA.node !== next.previousSibling) {
             var toRemove = next;
-            while (toRemove !== ul && toRemove.parentNode && !this.options.isUnbreakableNode(toRemove.parentNode) && this.isBlankNode(toRemove.parentNode)) {
+            while (
+                toRemove !== ul && toRemove.parentNode &&
+                !this.options.isUnbreakableNode(toRemove.parentNode) &&
+                this.isBlankNode(toRemove.parentNode)
+            ) {
                 toRemove = toRemove.parentNode;
             }
             $(toRemove).remove();
@@ -263,11 +277,11 @@ var HelperPlugin = AbstractPlugin.extend({
 
         var nodes = [];
         var next;
-        while(node && node !== this.editable && !this.options.isUnbreakableNode(node)) {
+        while (node && node !== this.editable && !this.options.isUnbreakableNode(node)) {
             nodes.push(node);
 
             next = node[prevOrNext];
-            while(next && !next.tagName) {
+            while (next && !next.tagName) {
                 if (!this.getRegex('char').test(next.textContent)) {
                     next = next[prevOrNext];
                     continue;
@@ -276,13 +290,13 @@ var HelperPlugin = AbstractPlugin.extend({
             }
 
             if (next) {
-              break;
+                break;
             }
             node = node.parentNode;
         }
 
         if (next && next.tagName === 'TABLE') {
-            return {node: node, offset: 0};
+            return this.makePoint(node, 0);
         }
 
         var ifBrRemovedAndMerge = !_.filter(nodes, this.isNodeBlockType.bind(this)).length;
@@ -293,7 +307,7 @@ var HelperPlugin = AbstractPlugin.extend({
         var spaceToRemove = [];
         while (node = nodes.pop()) {
             next = node[prevOrNext];
-            while(next && !next.tagName) {
+            while (next && !next.tagName) {
                 if (!this.getRegex('char').test(next.textContent)) {
                     spaceToRemove.push(next);
                     next = next[prevOrNext];
@@ -301,9 +315,11 @@ var HelperPlugin = AbstractPlugin.extend({
                 }
                 break;
             }
-            if (!next ||
+            if (
+                !next ||
                 !(node.tagName || next.tagName === 'BR') ||
-                !next.tagName) {
+                !next.tagName
+            ) {
                 continue;
             }
 
@@ -311,10 +327,8 @@ var HelperPlugin = AbstractPlugin.extend({
                 var newNext = next[prevOrNext];
                 $(next).remove();
                 next = newNext;
-                result = {
-                    node: next || node,
-                    offset: (next ? direction === 'prev' : direction === 'next') ? dom.nodeLength(next) : 0,
-                };
+                var offset = (next ? direction === 'prev' : direction === 'next') ? dom.nodeLength(next) : 0;
+                result = this.makePoint(next || node, offset);
                 if (!ifBrRemovedAndMerge) {
                     continue;
                 }
@@ -346,12 +360,11 @@ var HelperPlugin = AbstractPlugin.extend({
                         }
                     }
                     deep = this.lastLeaf(next);
-                    result = {
-                        node: deep,
-                        offset: dom.nodeLength(deep),
-                    };
-                    if (this.getRegex('char').test(node.textContent) || node.childElementCount > 1 ||
-                        node.firstElementChild && node.firstElementChild.tagName !== "BR") {
+                    result = this.makePoint(deep, dom.nodeLength(deep));
+                    if (
+                        this.getRegex('char').test(node.textContent) || node.childElementCount > 1 ||
+                        node.firstElementChild && node.firstElementChild.tagName !== "BR"
+                    ) {
                         $next.append($(node).contents());
                     }
                     $(node).remove();
@@ -369,19 +382,13 @@ var HelperPlugin = AbstractPlugin.extend({
                         $(node).contents().remove();
                     }
                     deep = this.lastLeaf(node);
-                    result = {
-                        node: deep,
-                        offset: dom.nodeLength(deep),
-                    };
+                    result = this.makePoint(deep, dom.nodeLength(deep));
                     $(node).append($next.contents());
                     $next.remove();
                 }
                 continue;
             } else if (!this.getRegex('char').test(next.textContent)) {
-                result = {
-                    node: node,
-                    offset: direction === 'prev' ? 0 : dom.nodeLength(node),
-                };
+                result = this.makePoint(node, direction === 'prev' ? 0 : dom.nodeLength(node));
                 $next.remove();
                 continue;
             }
@@ -405,10 +412,16 @@ var HelperPlugin = AbstractPlugin.extend({
      */
     deleteNonSimilarEdge: function (node, direction) {
         var next = node[direction === 'next' ? 'nextSibling' : 'previousSibling'];
-        while (next && dom.isText(next) && this.getRegexBlank({space: true, invisible: true}).test(next.textContent)) {
+        while (
+            next && dom.isText(next) &&
+            this.getRegexBlank({
+                space: true,
+                invisible: true,
+            }).test(next.textContent)
+        ) {
             next = next[direction === 'next' ? 'nextSibling' : 'previousSibling'];
         }
-        
+
         if (next) {
             return;
         }
@@ -419,7 +432,7 @@ var HelperPlugin = AbstractPlugin.extend({
             return;
         }
 
-        var point = {node: node, offset: direction === 'prev' ? 0 : dom.nodeLength(node)};
+        var point = this.makePoint(node, direction === 'prev' ? 0 : dom.nodeLength(node));
         var otherBlock = this.findNextBlockToMerge(point.node, direction);
 
         if (!otherBlock) {
@@ -431,14 +444,14 @@ var HelperPlugin = AbstractPlugin.extend({
 
         // empty tag are removed
         if (
-            this.getRegexBlank({space: true, newline: true}).test(blockToMergeInto.textContent) &&
+            this.getRegexBlank({
+                space: true,
+                newline: true,
+            }).test(blockToMergeInto.textContent) &&
             !$(blockToMergeInto).find('.fa').length && $(blockToMergeInto).find('br').length <= 1
-           ) {
+        ) {
             $(blockToMergeInto).remove();
-            return {
-                node: this.firstLeaf(blockToMergeFrom),
-                offset: 0,
-            };
+            return this.makePoint(this.firstLeaf(blockToMergeFrom), 0);
         }
 
         return this.mergeNonSimilarBlocks(blockToMergeFrom, blockToMergeInto);
@@ -456,8 +469,7 @@ var HelperPlugin = AbstractPlugin.extend({
         var point = this.deleteBetween(range.getStartPoint(), range.getEndPoint());
         point = this.fillEmptyNode(point);
 
-        range.ec = range.sc = point.node;
-        range.eo = range.so = point.offset;
+        range = this.context.invoke('editor.setRange', point.node, point.offset);
         range = range.select();
 
         this.editable.normalize();
@@ -478,14 +490,24 @@ var HelperPlugin = AbstractPlugin.extend({
      * @returns {Object} {node, offset}
      */
     fillEmptyNode: function (point) {
-        if (!point.node.tagName && this.getRegexBlank({space: true, invisible: true, nbsp: true}).test(point.node.parentNode.innerHTML)) {
+        if (
+            !point.node.tagName && this.getRegexBlank({
+                space: true,
+                invisible: true,
+                nbsp: true,
+            }).test(point.node.parentNode.innerHTML)
+        ) {
             point.node = point.node.parentNode;
             point.offset = 0;
         }
         if (
             point.node.tagName && point.node.tagName !== 'BR' &&
-            this.getRegexBlank({space: true, invisible: true, nbsp: true}).test(point.node.innerHTML)
-           ) {
+            this.getRegexBlank({
+                space: true,
+                invisible: true,
+                nbsp: true,
+            }).test(point.node.innerHTML)
+        ) {
             var text = this.document.createTextNode('');
             point.node.innerHTML = '';
             point.node.appendChild(text);
@@ -515,24 +537,25 @@ var HelperPlugin = AbstractPlugin.extend({
      * @returns {Node[]}
      */
     filterFormatAncestors: function (nodes) {
+        var self = this;
         var selectedNodes = [];
         _.each(this.filterLeafChildren(nodes), function (node) {
             var ancestor = dom.ancestor(node, function (node) {
                 return dom.isCell(node) || (
-                        !this.options.isUnbreakableNode(node) &&
-                        (this.isFormatNode(node) || this.isNodeBlockType(node))
-                    ) && this.editable !== node;
-            }.bind(this));
+                    !self.options.isUnbreakableNode(node) &&
+                    (self.isFormatNode(node) || self.isNodeBlockType(node))
+                ) && self.editable !== node;
+            });
             if (!ancestor) {
                 ancestor = node;
             }
             if (dom.isCell(ancestor)) {
                 ancestor = node;
             }
-            if (ancestor && selectedNodes.indexOf(ancestor) === - 1) {
+            if (ancestor && selectedNodes.indexOf(ancestor) === -1) {
                 selectedNodes.push(ancestor);
             }
-        }.bind(this));
+        });
         return selectedNodes;
     },
     /**
@@ -544,20 +567,21 @@ var HelperPlugin = AbstractPlugin.extend({
      * @returns {Node[]}
      */
     filterLeafChildren: function (nodes) {
+        var self = this;
         return _.compact(_.map(nodes, function (node) {
             if (node.firstChild) {
                 node = node.firstChild;
             }
             if (
                 node.tagName === "BR" ||
-                this.isVisibleText(node) ||
+                self.isVisibleText(node) ||
                 dom.isFont(node) ||
                 dom.isImg(node) ||
                 dom.isDocument(node)
-               ) {
+            ) {
                 return node;
             }
-        }.bind(this)));
+        }));
     },
     /**
      * Find the previous/next non-similar block to merge with.
@@ -568,13 +592,14 @@ var HelperPlugin = AbstractPlugin.extend({
      * @returns {false|Node}
      */
     findNextBlockToMerge: function (node, direction) {
+        var self = this;
         var startNode = node;
         var mergeableTags = this.options.styleTags.join(', ') + ', li';
         var blockToMerge = false;
 
         var li = dom.ancestor(node, function (n) {
-            return n !== node && this.isNodeBlockType(n) || dom.isLi(n);
-        }.bind(this));
+            return n !== node && self.isNodeBlockType(n) || dom.isLi(n);
+        });
         li = li && dom.isLi(li) ? li : undefined;
         if (li && direction === 'next') {
             if (li.nextElementSibling) {
@@ -598,16 +623,18 @@ var HelperPlugin = AbstractPlugin.extend({
         var ulFoldedSnippetStartNode = dom.ancestor(startNode, function (n) {
             return $(n).hasClass('o_ul_folded');
         });
-        if ((this.options.isUnbreakableNode(node) && (!ulFoldedSnippetNode || ulFoldedSnippetNode === this.editable)) &&
-                this.options.isUnbreakableNode(startNode) && (!ulFoldedSnippetStartNode || ulFoldedSnippetStartNode === this.editable)) {
+        if (
+            (this.options.isUnbreakableNode(node) && (!ulFoldedSnippetNode || ulFoldedSnippetNode === this.editable)) &&
+            this.options.isUnbreakableNode(startNode) && (!ulFoldedSnippetStartNode || ulFoldedSnippetStartNode === this.editable)
+        ) {
             return false;
         }
 
         node = this.firstBlockAncestor(node);
 
         li = dom.ancestor(node, function (n) {
-            return n !== node && this.isNodeBlockType(n) || dom.isLi(n);
-        }.bind(this));
+            return n !== node && self.isNodeBlockType(n) || dom.isLi(n);
+        });
         li = li && dom.isLi(li) ? li : undefined;
         node = li || node;
 
@@ -643,9 +670,10 @@ var HelperPlugin = AbstractPlugin.extend({
      * @returns {Node}
      */
     firstBlockAncestor: function (node) {
+        var self = this;
         return dom.ancestor(node, function (n) {
-            return this.isNodeBlockType(n);
-        }.bind(this));
+            return self.isNodeBlockType(n);
+        });
     },
     /**
      * Get the first leaf of a node, that is editable and not a media.
@@ -712,10 +740,10 @@ var HelperPlugin = AbstractPlugin.extend({
             }
             var firstVal = this.regex[name][Object.keys(this.regex[name])[0]];
             this.regex[name][flagName] = new RegExp(firstVal, flag);
-        // If the regular expression does not exist:
-        // save it into the `regex` object, with the name, expression
-        // and flag passed as arguments (if any).
         } else if (!this.regex[name]) {
+            // If the regular expression does not exist:
+            // save it into the `regex` object, with the name, expression
+            // and flag passed as arguments (if any).
             if (!exp) {
                 throw new Error("Cannot find a regular expression with the name " + name + ". Pass an expression to create it.");
             }
@@ -810,7 +838,7 @@ var HelperPlugin = AbstractPlugin.extend({
             range.select();
         }
         var res = [range.sc];
-        var point = {node: range.sc, offset: range.so};
+        var point = range.getStartPoint();
         var prevNode = range.sc;
         dom.nextPointUntil(point, function (pt) {
             if (pt.node !== prevNode) {
@@ -821,8 +849,8 @@ var HelperPlugin = AbstractPlugin.extend({
                     if (dom.listAncestor(pt.node).indexOf(n) !== -1) {
                         res[i] = pt.node;
                         ok = false;
-                    // Inversely, skip parents of res[i]
                     } else if (dom.listAncestor(n).indexOf(pt.node) !== -1) {
+                        // Inversely, skip parents of res[i]
                         ok = false;
                     }
                 });
@@ -851,14 +879,15 @@ var HelperPlugin = AbstractPlugin.extend({
      * @param {Node} node
      */
     insertBlockNode: function (node) {
+        var self = this;
         var range = this.context.invoke('editor.createRange');
         range = range.deleteContents();
-        var point = {node: range.sc, offset: range.so};
+        var point = range.getStartPoint();
         var unbreakable = point.node;
         if (!this.options.isUnbreakableNode(point.node)) {
             unbreakable = dom.ancestor(point.node, function (node) {
-                return this.options.isUnbreakableNode(node.parentNode) || node === this.editable;
-            }.bind(this)) || point.node;
+                return self.options.isUnbreakableNode(node.parentNode) || node === self.editable;
+            }) || point.node;
         }
 
         if (unbreakable === point.node && !point.offset && point.node.tagName !== 'P') {
@@ -879,8 +908,8 @@ var HelperPlugin = AbstractPlugin.extend({
             });
             if ((!tree || $.contains(tree, range.sc)) && (point.offset || point.node.tagName)) {
                 tree = tree || dom.ancestor(point.node, function (node) {
-                    return this.options.isUnbreakableNode(node.parentNode);
-                }.bind(this));
+                    return self.options.isUnbreakableNode(node.parentNode);
+                });
                 $(tree).after(node);
             } else {
                 $(tree).before(node);
@@ -913,6 +942,7 @@ var HelperPlugin = AbstractPlugin.extend({
      * @param {String} text
      */
     insertTextInline: function (text) {
+        var self = this;
         if (text === " ") {
             text = "\u00A0";
         }
@@ -957,8 +987,7 @@ var HelperPlugin = AbstractPlugin.extend({
 
         this._wrapTextWithP(textNode);
 
-        range.sc = range.ec = textNode;
-        range.so = range.eo = text.length;
+        range = this.context.invoke('editor.setRange', textNode, text.length);
         range.select();
         this.context.invoke('editor.saveRange');
 
@@ -994,8 +1023,13 @@ var HelperPlugin = AbstractPlugin.extend({
      */
     isBlankText: function (node) {
         return dom.isText(node) &&
-            this.getRegexBlank({not: true, notspace: true, nbsp: true, invisible: true})
-                .test(node.textContent);
+            this.getRegexBlank({
+                not: true,
+                notspace: true,
+                nbsp: true,
+                invisible: true,
+            })
+            .test(node.textContent);
     },
     /**
      * Returns true if the node is blank.
@@ -1010,7 +1044,9 @@ var HelperPlugin = AbstractPlugin.extend({
         if (dom.isVoid(node) || dom.isIcon(node)) {
             return false;
         }
-        if (this.getRegexBlank({space: true}).test(node[dom.isText(node) ? 'textContent' : 'innerHTML'])) {
+        if (this.getRegexBlank({
+                space: true,
+            }).test(node[dom.isText(node) ? 'textContent' : 'innerHTML'])) {
             return true;
         }
         if (node.childNodes.length && _.all(node.childNodes, this.isBlankNode.bind(this))) {
@@ -1035,7 +1071,7 @@ var HelperPlugin = AbstractPlugin.extend({
         while (point && point.node.tagName !== tagName) {
             newPt = this.skipNodes(point, prevOrNext, function (pt) {
                 return pt.node.tagName === tagName && dom[method](pt);
-            }.bind(this));
+            });
             if (newPt.node.tagName === tagName || newPt.node.tagName === 'BR') {
                 point = newPt;
                 break;
@@ -1143,41 +1179,49 @@ var HelperPlugin = AbstractPlugin.extend({
         var isEdge = direction === 'prev' ? dom.isLeftEdgePoint(point) : dom.isRightEdgePoint(point);
 
         // skip blank text nodes
-        if (!options.noSkipBlankText &&
-            this.isBlankText(point.node)) {
-
+        if (
+            !options.noSkipBlankText &&
+            this.isBlankText(point.node)
+        ) {
             return true;
         }
         // skip single BRs
-        if (!options.noSkipSingleBRs &&
+        if (
+            !options.noSkipSingleBRs &&
             point.node.tagName === 'BR' &&
             (!point.node.previousSibling || this.isBlankText(point.node.previousSibling)) &&
-            (!point.node.nextSibling || this.isBlankText(point.node.nextSibling))) {
-
+            (!point.node.nextSibling || this.isBlankText(point.node.nextSibling))
+        ) {
             return true;
         }
         // skip leading/trailing breakable space
-        if (!options.noSkipExtremeBreakableSpace &&
+        if (
+            !options.noSkipExtremeBreakableSpace &&
             (direction === 'prev' && !isEdge && point.offset <= this.countLeadingBreakableSpace(point.node) ||
-             direction === 'next' && point.offset > dom.nodeLength(point.node) - this.countTrailingBreakableSpace(point.node))) {
-
+                direction === 'next' && point.offset > dom.nodeLength(point.node) - this.countTrailingBreakableSpace(point.node))
+        ) {
             return true;
         }
         // skip to leaf node or edge
-        var node = direction === 'prev' ? point.node.childNodes[0] : point.node.childNodes[point.node.childNodes.length-1];
+        var node = direction === 'prev' ? point.node.childNodes[0] : point.node.childNodes[point.node.childNodes.length - 1];
         var offset = direction === 'prev' ? 0 : dom.nodeLength(node);
-        if (!options.noSkipParent &&
-            !isEdge && point.node.childNodes.length && this.isSkippable({node: node, offset: offset}, direction, options)) {
-
+        if (
+            !options.noSkipParent &&
+            !isEdge && point.node.childNodes.length &&
+            this.isSkippable(this.makePoint(node, offset), direction, options)
+        ) {
             return true;
         }
         // skip if on edge and sibling is skippable
         var sibling = direction === 'prev' ? point.node.previousSibling : point.node.nextSibling;
         offset = direction === 'prev' ? 0 : dom.nodeLength(sibling);
-        if (!options.noSkipSibling &&
+        if (
+            !options.noSkipSibling &&
             isEdge && sibling &&
-            this.isSkippable({node: sibling, offset: offset}, direction, _.defaults({noSkipSibling: true}, options))) {
-
+            this.isSkippable(this.makePoint(sibling, offset), direction, _.defaults({
+                noSkipSibling: true,
+            }, options))
+        ) {
             return true;
         }
         return false;
@@ -1227,12 +1271,12 @@ var HelperPlugin = AbstractPlugin.extend({
         var point;
         var mergeableTags = this.options.styleTags.join(', ') + ', li';
         var $contents = $(mergeFromBlock).find('*').addBack()
-                        .filter(mergeableTags)
-                        .filter(function (i, n) {
-                            if (!(n.tagName === 'LI' && $(n).find(mergeableTags).length)) {
-                                return n;
-                            }
-                        }).contents();
+            .filter(mergeableTags)
+            .filter(function (i, n) {
+                if (!(n.tagName === 'LI' && $(n).find(mergeableTags).length)) {
+                    return n;
+                }
+            }).contents();
         var containsUnbreakables = !!$contents.filter(this.options.isUnbreakable).length;
 
         if ($contents.length && !containsUnbreakables) {
@@ -1256,11 +1300,9 @@ var HelperPlugin = AbstractPlugin.extend({
 
             point = {};
             if ($lastContents && $lastContents.length) {
-                point.node = $lastContents[0];
-                point.offset = dom.nodeLength(point.node);
+                point = this.makePoint($lastContents[0], dom.nodeLength($lastContents[0]));
             } else {
-                point.node = $contents[0];
-                point.offset = 0;
+                point = this.makePoint($contents[0], 0);
             }
 
             point = this.context.invoke('HelperPlugin.deleteEdge', point.node, 'next', true) || point;
@@ -1288,8 +1330,7 @@ var HelperPlugin = AbstractPlugin.extend({
             point = dom.nextPoint(point);
         }
         if (point.node !== range.sc || point.offset !== range.so) {
-            range.sc = range.ec = point.node;
-            range.so = range.eo = point.offset;
+            range = this.context.invoke('editor.setRange', point.node, point.offset);
             range.select();
         }
     },
@@ -1315,12 +1356,14 @@ var HelperPlugin = AbstractPlugin.extend({
      */
     orderClass: function (node) {
         var className = node.getAttribute && node.getAttribute('class');
-        if (!className) return null;
+        if (!className) {
+            return null;
+        }
         className = className.replace(this.getRegex('spaceOrNewline', 'g'), ' ')
-                             .replace(this.getRegex('startAndEndSpace', 'g'), '')
-                             .replace(this.getRegex('space', 'g'), ' ');
+            .replace(this.getRegex('startAndEndSpace', 'g'), '')
+            .replace(this.getRegex('space', 'g'), ' ');
         className = className.replace('o_default_snippet_text', '')
-                             .replace('o_checked', '');
+            .replace('o_checked', '');
         if (!className.length) {
             node.removeAttribute("class");
             return null;
@@ -1339,17 +1382,19 @@ var HelperPlugin = AbstractPlugin.extend({
      */
     orderStyle: function (node) {
         var style = node.getAttribute('style');
-        if (!style) return null;
+        if (!style) {
+            return null;
+        }
         style = style.replace(this.getRegex('spaceOrNewline'), ' ')
-                     .replace(this.getRegex('startAndEndSemicolon', 'g'), '')
-                     .replace(this.getRegex('semicolon', 'g'), ';');
+            .replace(this.getRegex('startAndEndSemicolon', 'g'), '')
+            .replace(this.getRegex('semicolon', 'g'), ';');
         if (!style.length) {
-          node.removeAttribute("style");
-          return null;
+            node.removeAttribute("style");
+            return null;
         }
         style = style.split(";");
         style.sort();
-        style = style.join("; ")+";";
+        style = style.join("; ") + ";";
         node.setAttribute('style', style);
         return style;
     },
@@ -1400,39 +1445,45 @@ var HelperPlugin = AbstractPlugin.extend({
             if (point.node === target) {
                 return false;
             }
-            return !point.node || this.options.isEditableNode(point.node) &&
-                (point.node.tagName === "BR" || this.isVisibleText(point.node));
-        }.bind(this);
+            return !point.node || self.options.isEditableNode(point.node) &&
+                (point.node.tagName === "BR" || self.isVisibleText(point.node));
+        };
         var parent = target.parentNode;
         var offset = [].indexOf.call(parent.childNodes, target);
         var deleteEdge = 'next';
-        var point = dom.prevPointUntil({node: target, offset: 0}, check);
+        var point = dom.prevPointUntil(this.makePoint(target, 0), check);
         if (!point || !point.node) {
             deleteEdge = 'prev';
-            point = dom.nextPointUntil({node: target, offset: 0}, check);
+            point = dom.nextPointUntil(this.makePoint(target, 0), check);
         }
 
         $(target).remove();
 
-        if (point && (deleteEdge === 'prev' && point.offset) || (deleteEdge === 'next' && point.offset === dom.nodeLength(point.node))) {
+        if (
+            point && (deleteEdge === 'prev' && point.offset) ||
+            deleteEdge === 'next' && point.offset === dom.nodeLength(point.node)
+        ) {
             point = this.deleteEdge(point.node, deleteEdge) || point;
         }
 
         $(parent).contents().filter(function () {
-            return dom.isText(this) && self.getRegexBlank({atLeastOne: true, invisible: true}).test(this.textContent);
+            return dom.isText(this) && self.getRegexBlank({
+                atLeastOne: true,
+                invisible: true,
+            }).test(this.textContent);
         }).remove();
 
         var br;
         if (parent.innerHTML === '') {
             br = this.document.createElement('br');
             $(parent).append(br);
-            point = {
-                node: parent,
-                offset: 0,
-            };
+            point = this.makePoint(parent, 0);
         }
 
-        if (!doNotInsertP && this.getRegexBlank({space: true, invisible: true}).test(parent.innerHTML)) {
+        if (!doNotInsertP && this.getRegexBlank({
+                space: true,
+                invisible: true,
+            }).test(parent.innerHTML)) {
             br = this.document.createElement('br');
             if (this.options.isUnbreakableNode(parent) && parent.tagName !== "TD") {
                 var p = this.document.createElement('p');
@@ -1441,10 +1492,7 @@ var HelperPlugin = AbstractPlugin.extend({
             } else {
                 $(parent).append(br);
             }
-            point = {
-                node: br.parentNode,
-                offset: 0,
-            };
+            point = this.makePoint(br.parentNode, 0);
         }
 
         if (point && point.node.tagName === "BR" && point.node.parentNode) {
@@ -1454,10 +1502,7 @@ var HelperPlugin = AbstractPlugin.extend({
             };
         }
 
-        return point || {
-            node: parent,
-            offset: offset,
-        };
+        return point || this.makePoint(parent, offset);
     },
     /**
      * Removes the empty inline nodes around the point, and joins its siblings.
@@ -1477,16 +1522,19 @@ var HelperPlugin = AbstractPlugin.extend({
         var prev;
         var next;
         while (
-                node.tagName !== 'BR' &&
-                (node.tagName ? node.innerHTML : node.textContent) === '' &&
-                !this.isNodeBlockType(node) &&
-                this.options.isEditableNode(node.parentNode) &&
-                (!node.attributes || !node.attributes.contenteditable) &&
-                !dom.isMedia(node)
-              ) {
+            node.tagName !== 'BR' &&
+            (node.tagName ? node.innerHTML : node.textContent) === '' &&
+            !this.isNodeBlockType(node) &&
+            this.options.isEditableNode(node.parentNode) &&
+            (!node.attributes || !node.attributes.contenteditable) &&
+            !dom.isMedia(node)
+        ) {
             prev = node.previousSibling;
             next = node.nextSibling;
-            point = {node: node.parentNode, offset: [].indexOf.call(node.parentNode.childNodes, node)};
+            point = {
+                node: node.parentNode,
+                offset: [].indexOf.call(node.parentNode.childNodes, node)
+            };
             $(node).remove();
             node = point.node;
         }
@@ -1496,12 +1544,12 @@ var HelperPlugin = AbstractPlugin.extend({
             }
         }
         if (prev) {
-            if(!prev.tagName) {
+            if (!prev.tagName) {
                 if (/[^\s>]\s+$/.test(prev.textContent)) {
                     prev.textContent = prev.textContent.replace(this.getRegex('endSpace'), ' ');
                 }
             }
-            point = {node: prev, offset: dom.nodeLength(prev)};
+            point = this.makePoint(prev, dom.nodeLength(prev));
         }
         return point;
     },
@@ -1521,7 +1569,10 @@ var HelperPlugin = AbstractPlugin.extend({
         if (secureExtremeties) {
             this.secureExtremeSingleSpace(textNode);
         }
-        var removed = {start: 0, end: 0};
+        var removed = {
+            start: 0,
+            end: 0,
+        };
         textNode.textContent = textNode.textContent.replace(this.getRegex('startNotChar'), function (toRemove) {
             removed.start = toRemove.length;
             return '';
@@ -1540,7 +1591,7 @@ var HelperPlugin = AbstractPlugin.extend({
     secureExtremeSingleSpace: function (node) {
         if (this.getRegex('endSingleSpace').test(node.textContent)) {
             // if the text ends with a single space, make it insecable
-            node.textContent = node.textContent.substr(0, node.textContent.length-1) + '\u00A0';
+            node.textContent = node.textContent.substr(0, node.textContent.length - 1) + '\u00A0';
         }
         if (this.getRegex('startSingleSpace').test(node.textContent)) {
             // if the text starts with a single space, make it insecable
@@ -1563,6 +1614,7 @@ var HelperPlugin = AbstractPlugin.extend({
      * @returns {Object} {node, offset}
      */
     skipNodes: function (point, direction, pred, options) {
+        var self = this;
         if (arguments.length === 3 && !_.isFunction(arguments[2])) {
             // allow for passing options and no pred function
             options = _.clone(pred);
@@ -1570,8 +1622,8 @@ var HelperPlugin = AbstractPlugin.extend({
         }
         options = options || {};
         return dom[direction + 'PointUntil'](point, function (pt) {
-            return !this.isSkippable(pt, direction, options) || pred && pred(pt);
-        }.bind(this));
+            return !self.isSkippable(pt, direction, options) || pred && pred(pt);
+        });
     },
     /**
      * Split the DOM tree at the point
@@ -1684,35 +1736,32 @@ var HelperPlugin = AbstractPlugin.extend({
         var invisible = this.document.createTextNode('\u200B');
 
         if (dom.isText(range.sc) && !this.isVisibleText(range.sc) && range.sc.nextSibling) {
-            range.sc = range.ec = this.firstLeaf(range.sc.nextSibling);
-            range.so = range.eo = 0;
+            var firstLeafOfNext = this.firstLeaf(range.sc.nextSibling);
+            range = this.context.invoke('editor.setRange', firstLeafOfNext, 0);
         }
 
         // Create empty text node to have a range into the node
         if (range.sc.tagName && !dom.isVoid(range.sc) && !range.sc.childNodes[range.so]) {
             $(range.sc).append(invisible);
-            range.sc = range.ec = invisible;
-            range.so = range.eo = 0;
+            range = this.context.invoke('editor.setRange', invisible, 0);
         }
 
         // On left edge of non-empty element: move before
         var siblings = range.sc.parentNode && range.sc.parentNode.childNodes;
         var isInEmptyElem = !siblings || !siblings.length || _.all(siblings, this.isBlankNode.bind(this));
-        if (!range.so && !isInEmptyElem && !(range.sc.previousSibling && range.sc.previousSibling.tagName === "BR")
-            && !this.options.isEditableNode(range.sc)) {
-            var point = {
-                node: range.sc,
-                offset: range.so,
-            };
+        if (
+            !range.so && !isInEmptyElem &&
+            !(range.sc.previousSibling && range.sc.previousSibling.tagName === "BR") &&
+            !this.options.isEditableNode(range.sc)
+        ) {
+            var point = range.getStartPoint();
             var newPoint = dom.prevPointUntil(point, function (pt) {
                 return pt.node !== range.sc && !pt.node.tagName && !self.isBlankText(pt.node);
             });
             if (!newPoint || this.firstBlockAncestor(newPoint.node) !== this.firstBlockAncestor(point.node)) {
-                range.sc = range.ec = point.node;
-                range.so = range.eo = point.offset;
+                range = this.context.invoke('editor.setRange', point.node, point.offset);
             } else {
-                range.sc = range.ec = newPoint.node;
-                range.so = range.eo = newPoint.offset;
+                range = this.context.invoke('editor.setRange', newPoint.node, newPoint.offset);
             }
         }
 

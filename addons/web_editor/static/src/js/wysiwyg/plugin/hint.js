@@ -21,6 +21,7 @@ var HintPlugin = Plugins.hintPopover.extend({
      * Replace the current hint.
      */
     replace: function () {
+        var self = this;
         var $item = this.$content.find('.note-hint-item.active');
         if ($item.length) {
             this.lastWordRange.select();
@@ -29,8 +30,7 @@ var HintPlugin = Plugins.hintPopover.extend({
 
             this.nodeFromItem($item).each(function () {
                 $(range.sc).after(this);
-                range.sc = range.ec = this;
-                range.so = range.eo = dom.nodeLength(this);
+                range = self.context.invoke('editor.setRange', this, dom.nodeLength(this));
             });
             range.select();
             this.context.invoke('editor.saveRange');

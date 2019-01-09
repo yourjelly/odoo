@@ -73,9 +73,7 @@ var MediaPlugin = AbstractPlugin.extend({
         this.context.invoke('editor.beforeCommand');
         var target = this.context.invoke('editor.restoreTarget');
         var point = this.context.invoke('HelperPlugin.removeBlockNode', target);
-        var rng = this.context.invoke('editor.createRange');
-        rng.sc = rng.ec = point.node;
-        rng.so = rng.eo = point.offset;
+        var rng = this.context.invoke('editor.setRange', point.node, point.offset);
         rng.normalize().select();
         this.context.invoke('editor.saveRange');
         this.context.invoke('editor.clearTarget');
@@ -95,10 +93,7 @@ var MediaPlugin = AbstractPlugin.extend({
             return;
         }
 
-        this.lastPos = {
-            target: target,
-            offset: $(target).offset(),
-        };
+        this.lastPos = this.context.invoke('HelperPlugin.makePoint', target, $(target).offset());
 
         this.context.triggerEvent('focusnode', target);
 
@@ -165,8 +160,8 @@ var MediaPlugin = AbstractPlugin.extend({
 
             if (previous) {
                 this.context.invoke('editor.clearTarget');
-                rng.sc = rng.ec = previous.parentNode;
-                rng.so = rng.eo = _.indexOf(rng.sc.childNodes, previous);
+                var start = previous.parentNode;
+                rng = this.context.invoke('editor.setRange', start, _.indexOf(start.childNodes, previous));
                 if (previous.tagName === "IMG" && $(previous).hasClass('img-fluid')) {
                     $(newMedia).addClass('img img-fluid mx-auto');
                 }
@@ -175,8 +170,7 @@ var MediaPlugin = AbstractPlugin.extend({
                     var doNotInsertP = previous.tagName === newMedia.tagName;
                     point = this.context.invoke('HelperPlugin.removeBlockNode', previous, doNotInsertP);
                     if (!rng.sc.parentNode || !rng.sc.childNodes[rng.so]) {
-                        rng.sc = rng.ec = point.node;
-                        rng.so = rng.eo = point.offset;
+                        rng = this.context.invoke('editor.setRange', point.node, point.offset);
                     }
                     previous = null;
                 }
@@ -226,9 +220,8 @@ var MediaPlugin = AbstractPlugin.extend({
                     if (!newMedia.nextSibling) {
                         $(newMedia).after(this.document.createTextNode('\u200B'), newMedia);
                     }
-                    rng.sc = rng.ec = newMedia.nextSibling || newMedia;
-                    rng.so = rng.eo = 0;
-                    rng = rng.normalize().select();
+                    rng = this.context.invoke('editor.setRange', newMedia.nextSibling || newMedia, 0);
+                    rng.normalize().select();
                 }
             }
             this.context.invoke('editor.saveRange');
@@ -384,35 +377,20 @@ var MediaPlugin = AbstractPlugin.extend({
             return;
         }
 
-        var next = {
-            node: target,
-            offset: 0,
-        };
+        var next = this.context.invoke('HelperPlugin.makePoint', target, 0);
         if (left) {
             if (dom.isVideo(target)) {
-                next = {
-                    node: target.firstElementChild,
-                    offset: 0,
-                };
+                next = this.context.invoke('HelperPlugin.makePoint', target.firstElementChild, 0);
             } else {
-                next = dom.prevPointUntil({
-                    node: target,
-                    offset: 0,
-                }, function (point) {
+                next = dom.prevPointUntil(next, function (point) {
                     return point.node !== target && !$.contains(target, point.node);
                 }) || next;
             }
         } else {
             if (dom.isVideo(target)) {
-                next = {
-                    node: target.lastElementChild,
-                    offset: 0,
-                };
+                next = this.context.invoke('HelperPlugin.makePoint', target.lastElementChild, 0);
             } else {
-                next = dom.nextPointUntil({
-                    node: target,
-                    offset: 0,
-                }, function (point) {
+                next = dom.nextPointUntil(next, function (point) {
                     return point.node !== target && !$.contains(target, point.node);
                 }) || next;
             }
@@ -425,8 +403,7 @@ var MediaPlugin = AbstractPlugin.extend({
             $contentEditable.focus();
         }
 
-        range.sc = range.ec = next.node;
-        range.so = range.eo = next.offset;
+        range = this.context.invoke('editor.setRange', next.node, next.offset);
         range.select();
 
         this.context.invoke('editor.saveRange');

@@ -96,8 +96,7 @@ var TablePlugin = Plugins.table.extend({
         // to allow chain-removing
         range = this.context.invoke('editor.createRange');
         if (range.sc.tagName !== 'TD' && neighbor) {
-            range.sc = range.ec = neighbor;
-            range.so = range.eo = 0;
+            range = this.context.invoke('editor.setRange', neighbor, 0);
             range.normalize().select();
         }
     },
@@ -122,8 +121,7 @@ var TablePlugin = Plugins.table.extend({
         // to allow chain-removing
         range = this.context.invoke('editor.createRange');
         if (range.sc.tagName !== 'TR' && neighbor) {
-            range.sc = range.ec = neighbor;
-            range.so = range.eo = 0;
+            range = this.context.invoke('editor.setRange', neighbor, 0);
             range.normalize().select();
         }
     },
@@ -136,8 +134,7 @@ var TablePlugin = Plugins.table.extend({
         var table = $(cell).closest('table')[0];
 
         var point = this.context.invoke('HelperPlugin.removeBlockNode', table);
-        range.sc = range.ec = point.node;
-        range.so = range.eo = point.offset;
+        range = this.context.invoke('editor.setRange', point.node, point.offset);
         range.normalize().select();
     },
     /**
@@ -162,9 +159,7 @@ var TablePlugin = Plugins.table.extend({
             $(p).append(this.document.createElement('br'));
             $(table).after(p);
         }
-        var range = this.context.invoke('editor.createRange');
-        range.sc = range.ec = $(table).find('td')[0];
-        range.so = range.eo = 0;
+        var range = this.context.invoke('editor.setRange', $(table).find('td')[0], 0);
         range.normalize().select();
         this.context.invoke('editor.saveRange');
     },
@@ -194,10 +189,7 @@ var TablePopover = Plugins.tablePopover.extend({
             pos.left = pos.left - posContainer.left + 10;
             pos.top = pos.top - posContainer.top + $(cell).outerHeight() - 4;
 
-            this.lastPos = {
-                target: target,
-                offset: $(target).offset(),
-            };
+            this.lastPos = this.context.invoke('HelperPlugin.makePoint', target, $(target).offset());
 
             this.$popover.css({
                 display: 'block',

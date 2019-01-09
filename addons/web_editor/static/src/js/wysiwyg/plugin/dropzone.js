@@ -116,8 +116,7 @@ var DropzonePlugin = Plugins.dropzone.extend({
             });
             $.when.apply($, defs).then(function () {
                 if (images.length === 1) {
-                    range.sc = range.ec = _.last(images);
-                    range.so = range.eo = 0;
+                    range = self.context.invoke('editor.setRange', _.last(images), 0);
                     range.select();
                     self.context.invoke('editor.saveRange');
                     self.context.invoke('editor.afterCommand');

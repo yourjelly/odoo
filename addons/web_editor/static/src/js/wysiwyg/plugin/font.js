@@ -251,8 +251,7 @@ var FontPlugin = AbstractPlugin.extend({
             } else {
                 target = this.context.invoke('editor.restoreTarget');
                 if (target && dom.isIcon(target)) {
-                    r.sc = r.ec = target;
-                    r.so = r.eo = 0;
+                    r = this.context.invoke('editor.setRange', target, 0);
                 } else if (dom.isText(r.sc)) {
                     font = dom.create("font");
                     font.appendChild(this.document.createTextNode('\u200B'));
@@ -262,17 +261,13 @@ var FontPlugin = AbstractPlugin.extend({
                     });
                     var right;
                     if (fontParent) {
-                        right = this.context.invoke('HelperPlugin.splitTree', fontParent, {
-                            node: r.sc,
-                            offset: r.so,
-                        });
+                        right = this.context.invoke('HelperPlugin.splitTree', fontParent, r.getStartPoint());
                     } else {
                         right = r.sc.splitText(r.so);
                     }
                     $(right).before(font);
                     font = this._applyStylesToFontNode(font, color, bgcolor, size);
-                    r.sc = r.ec = font;
-                    r.so = r.eo = 1;
+                    r = this.context.invoke('editor.setRange', font, 1);
                     r.select();
                     return;
                 }
@@ -433,10 +428,7 @@ var FontPlugin = AbstractPlugin.extend({
         }
 
         // restore selection
-        r.sc = startPoint.node;
-        r.so = startPoint.offset;
-        r.ec = endPoint.node;
-        r.eo = endPoint.offset;
+        r = this.context.invoke('editor.setRange', startPoint.node, startPoint.offset, endPoint.node, endPoint.offset);
         r.normalize().select();
 
         if (target) {
