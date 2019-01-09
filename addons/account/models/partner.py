@@ -188,9 +188,9 @@ class AccountFiscalPositionAccount(models.Model):
     position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position',
         required=True, ondelete='cascade')
     account_src_id = fields.Many2one('account.account', string='Account on Product',
-        domain=[('deprecated', '=', False)], required=True)
+        domain=[('deprecated', '=', False)], required=True, ondelete='set null')
     account_dest_id = fields.Many2one('account.account', string='Account to Use Instead',
-        domain=[('deprecated', '=', False)], required=True)
+        domain=[('deprecated', '=', False)], required=True, ondelete='set null')
 
     _sql_constraints = [
         ('account_src_dest_uniq',
@@ -387,7 +387,7 @@ class ResPartner(models.Model):
         string="Account Payable", oldname="property_account_payable",
         domain="[('internal_type', '=', 'payable'), ('deprecated', '=', False)]",
         help="This account will be used instead of the default one as the payable account for the current partner",
-        required=True)
+        required=True, ondelete='set null')
     property_account_receivable_id = fields.Many2one('account.account', company_dependent=True,
         string="Account Receivable", oldname="property_account_receivable",
         domain="[('internal_type', '=', 'receivable'), ('deprecated', '=', False)]",

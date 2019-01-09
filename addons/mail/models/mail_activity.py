@@ -134,7 +134,8 @@ class MailActivity(models.Model):
     user_id = fields.Many2one(
         'res.users', 'Assigned to',
         default=lambda self: self.env.user,
-        index=True, required=True)
+        index=True, required=True, ondelete='set null',
+    )
     state = fields.Selection([
         ('overdue', 'Overdue'),
         ('today', 'Today'),

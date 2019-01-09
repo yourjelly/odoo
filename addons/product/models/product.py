@@ -70,7 +70,7 @@ class ProductPriceHistory(models.Model):
         return self._context.get('force_company', self.env.user.company_id.id)
 
     company_id = fields.Many2one('res.company', string='Company',
-        default=_get_default_company_id, required=True)
+        default=_get_default_company_id, required=True, ondelete='set null')
     product_id = fields.Many2one('product.product', 'Product', ondelete='cascade', required=True)
     datetime = fields.Datetime('Date', default=fields.Datetime.now)
     cost = fields.Float('Cost', digits=dp.get_precision('Product Price'))
@@ -673,7 +673,7 @@ class SupplierInfo(models.Model):
     currency_id = fields.Many2one(
         'res.currency', 'Currency',
         default=lambda self: self.env.user.company_id.currency_id.id,
-        required=True)
+        required=True, ondelete='set null')
     date_start = fields.Date('Start Date', help="Start date for this vendor price")
     date_end = fields.Date('End Date', help="End date for this vendor price")
     product_id = fields.Many2one(

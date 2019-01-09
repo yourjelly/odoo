@@ -58,7 +58,7 @@ class ProductTemplate(models.Model):
              'A service is a non-material product you provide.')
     rental = fields.Boolean('Can be Rent')
     categ_id = fields.Many2one(
-        'product.category', 'Product Category',
+        'product.category', 'Product Category', ondelete='set null',
         change_default=True, default=_get_default_category_id,
         required=True, help="Select category for the current product")
 
@@ -97,12 +97,12 @@ class ProductTemplate(models.Model):
         help='Technical field. Used for searching on pricelists, not stored in database.')
     uom_id = fields.Many2one(
         'uom.uom', 'Unit of Measure',
-        default=_get_default_uom_id, required=True,
+        default=_get_default_uom_id, required=True, ondelete='set null',
         help="Default unit of measure used for all stock operations.")
     uom_name = fields.Char(string='Unit of Measure Name', related='uom_id.name', readonly=True)
     uom_po_id = fields.Many2one(
         'uom.uom', 'Purchase Unit of Measure',
-        default=_get_default_uom_id, required=True,
+        default=_get_default_uom_id, required=True, ondelete='set null',
         help="Default unit of measure used for purchase orders. It must be in the same category as the default unit of measure.")
     company_id = fields.Many2one(
         'res.company', 'Company',

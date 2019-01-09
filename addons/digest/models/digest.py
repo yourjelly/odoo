@@ -31,7 +31,7 @@ class Digest(models.Model):
     template_id = fields.Many2one('mail.template', string='Email Template',
                                   domain="[('model','=','digest.digest')]",
                                   default=lambda self: self.env.ref('digest.digest_mail_template'),
-                                  required=True)
+                                  required=True, ondelete='set null')
     currency_id = fields.Many2one(related="company_id.currency_id", string='Currency', readonly=False)
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.user.company_id.id)
     available_fields = fields.Char(compute='_compute_available_fields')

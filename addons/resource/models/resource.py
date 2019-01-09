@@ -453,7 +453,7 @@ class ResourceResource(models.Model):
     calendar_id = fields.Many2one(
         "resource.calendar", string='Working Time',
         default=lambda self: self.env['res.company']._company_default_get().resource_calendar_id,
-        required=True,
+        required=True, ondelete='set null',
         help="Define the schedule of resource")
     tz = fields.Selection(
         _tz_get, string='Timezone', required=True,

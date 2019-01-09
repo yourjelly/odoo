@@ -2083,7 +2083,8 @@ class Many2one(_Relational):
         if not self.ondelete:
             if self.required:
                 raise ProgrammingError(
-                    'Required Many2one fields must explicitly define the ondelete option'
+                    'The required many2one field %s of model %s must explicitly declare its '
+                    'ondelete policy' % (self.name, model._name)
                 )
             self.ondelete = 'set null'
 
