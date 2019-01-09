@@ -1505,11 +1505,6 @@
     </t>
 
     <t t-name="PosTicket">
-        <!-- <t t-debug="pdb"/> -->
-        <!-- <t t-set="context" t-value="{lang:'en_us'}"/> -->
-        <!-- <t t-set="lang" t-value="lang"/> -->
-        <!-- <t t-set="_t.database.parameters.name" t-value=""/> -->
-        <!-- <t t-set="widget" t-value="widget.with_context({'lang': lang})" /> -->
         <div class="pos-sale-ticket">
 
             <div class="pos-center-align"><t t-esc="order.formatted_validation_date"/> <t t-esc="order.name"/></div>

@@ -1568,7 +1568,6 @@ var ReceiptScreenWidget = ScreenWidget.extend({
         return {
             widget: this,
             pos: this.pos,
-            // lang: order.attributes.client.lang,
             order: order,
             receipt: order.export_for_printing(),
             orderlines: order.get_orderlines(),
@@ -1663,14 +1662,7 @@ var ReceiptScreenWidget = ScreenWidget.extend({
         this.$('.change-value').html(this.format_currency(this.pos.get_order().get_change()));
     },
     render_receipt: function() {
-        var self = this;
-        var data = this.get_receipt_render_env();
-        var partner_lang = data.order.attributes.client.lang;
-        _t.database.load_translations(data.pos.attributes, data.pos.attributes.module_list, partner_lang).then(function (temp){
-            self.$('.pos-receipt-container').html(QWeb.render('PosTicket', data));
-
-        });
-
+        this.$('.pos-receipt-container').html(QWeb.render('PosTicket', this.get_receipt_render_env()));
     },
 });
 gui.define_screen({name:'receipt', widget: ReceiptScreenWidget});

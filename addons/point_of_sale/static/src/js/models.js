@@ -2195,6 +2195,7 @@ exports.Order = Backbone.Model.extend({
             change: this.get_change(),
             name : this.get_name(),
             client: client ? client.name : null ,
+            lang: client ? client.lang : this.pos.lang ,
             invoice_id: null,   //TODO
             cashier: cashier ? cashier.name : null,
             precision: {
