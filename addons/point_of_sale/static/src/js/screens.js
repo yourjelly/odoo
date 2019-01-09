@@ -1093,7 +1093,6 @@ var ClientListScreenWidget = ScreenWidget.extend({
         });
 
         this.$('.new-customer').click(function(){
-            debugger;
             self.display_client_details('edit',{
                 'country_id': self.pos.company.country_id,
                 'lang': self.pos.lang,
@@ -1271,7 +1270,7 @@ var ClientListScreenWidget = ScreenWidget.extend({
     // save was successfull.
     save_client_details: function(partner) {
         var self = this;
-        
+
         var fields = {};
         this.$('.client-details-contents .detail').each(function(idx,el){
             fields[el.name] = el.value || false;
@@ -1564,7 +1563,6 @@ var ReceiptScreenWidget = ScreenWidget.extend({
     },
     get_receipt_render_env: function() {
         var order = this.pos.get_order();
-        debugger;
         return {
             widget: this,
             pos: this.pos,
