@@ -1087,7 +1087,7 @@ var ClientListScreenWidget = ScreenWidget.extend({
             self.gui.back();
         });
 
-        this.$('.next').click(function(){
+        this.$('.next').click(function(){ 
             self.save_changes();
             self.gui.back();    // FIXME HUH ?
         });
@@ -1101,7 +1101,7 @@ var ClientListScreenWidget = ScreenWidget.extend({
 
         var partners = this.pos.db.get_partners_sorted(1000);
         this.render_list(partners);
-
+        
         this.reload_partners();
 
         if( this.old_client ){
@@ -1270,7 +1270,7 @@ var ClientListScreenWidget = ScreenWidget.extend({
     // save was successfull.
     save_client_details: function(partner) {
         var self = this;
-
+        
         var fields = {};
         this.$('.client-details-contents .detail').each(function(idx,el){
             fields[el.name] = el.value || false;
