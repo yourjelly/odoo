@@ -1,61 +1,130 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo noupdate="0">
-  <record id="l10n_it_ddt_tree" model="ir.ui.view">
-    <field name="name">l10n.it.ddt</field>
+<odoo>
+    <record id="l10n_it_ddt_tree" model="ir.ui.view">
+    <field name="name">l10n.it.ddt.tree</field>
     <field name="model">l10n.it.ddt</field>
     <field name="arch" type="xml">
-      <tree>
-        <field name="name"/>
-        <field name="date"/>
-        <field name="date_done"/>
-        <field name="package_id"/>
-       <!--  <field name="state"/> -->
-        <field name="package_id"/>
-        <field name="company_id"/>
-        <field name="orgin"/>
-        <field name="package_no"/>
-        <field name="weight"/>
-        <field name="volume"/>
-      </tree>
+        <tree>
+            <field name="name"/>
+            <field name="partner_id"/>
+            <field name="partner_shipping_id"/>
+            <field name="ddt_type_id"/>
+            <field name="company_id"/>
+            <field name="stock_picking_ids"/>
+        </tree>
     </field>
-  </record>
+    </record>
 
-  <record id="l10n_it_ddt_form" model="ir.ui.view">
-    <field name="name">l10n.it.ddt</field>
+    <record id="l10n_it_ddt_form" model="ir.ui.view">
+    <field name="name">l10n.it.ddt.form</field>
     <field name="model">l10n.it.ddt</field>
     <field name="arch" type="xml">
-      <form>
-        <sheet>
-          <group>
-            <group>
-              <field name="name"/>
-              <field name="date"/>
-              <field name="date_done"/>
-              <field name="package_id"/>
-              <field name="transfers_reason"/>
-              <field name="quantity"/>
-            </group>
-            <group>
-              <field name="package_id"/>
-              <field name="company_id"/>
-              <field name="orgin"/>
-              <field name="package_no"/>
-              <field name="weight"/>
-              <field name="volume"/>
-            </group>
-          </group>
-        </sheet>
-      </form>
+        <form>
+            <header>
+                <button name="action_confirm" id="action_confirm"
+                        string="Done" class="btn-primary" type="object"/>
+                <button name="do_print_ddt" id="action_print"
+                        string="Print" class="btn-primary" type="object" attrs="{'invisible': ('state', '!=', 'done')}"/>
+                <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+            </header>
+            <sheet>
+                <group>
+                    <group>
+                        <field name="partner_id"/>
+                        <field name="ddt_type_id"/>
+                    </group>
+                    <group>
+                        <field name="company_id"/>
+                    </group>
+                </group>
+                <notebook>
+                    <page string="Product Information">
+                        <field name="ddt_line_id">
+                            <tree>
+                                <field name="product_id"/>
+                                <field name="name"/>
+                                <field name="quantity"/>
+                                <field name="product_uom_id" groups="uom.group_uom"/>
+                                <field name="unit_price"/>
+                                <field name="discount"/>
+                                <field name="tax_ids"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="product_id"/>
+                                    <field name="quantity"/>
+                                    <field name="product_uom_id" groups="uom.group_uom"/>
+                                    <field name="unit_price"/>
+                                </group>
+                                <group>
+                                    <field name="discount"/>
+                                    <field name="tax_ids"/>
+                                </group>
+                                <field name="name"/>
+                            </form>
+                        </field>
+                    </page>
+                    <page string="shipping Information">
+                      <sheet>
+                        <group>
+                            <field name="partner_shipping_id"/>
+                        </group>
+                      </sheet>
+                    </page>
+                    <page string="Transfer">
+                      <sheet>
+                        <group>
+                            <field name="stock_picking_ids"/>
+                        </group>
+                      </sheet>
+                    </page>
+                </notebook>
+            </sheet>
+        </form>
     </field>
-  </record>
+    </record>
 
-  <record model="ir.actions.act_window" id="l10n_it_ddt_action">
-    <field name="name">l10n.it.ddt</field>
-    <field name="res_model">l10n.it.ddt</field>
-    <field name="view_type">form</field>
-    <field name="view_mode">tree,form</field>
-  </record>
+    <record id="l10n_it_ddt_type_tree" model="ir.ui.view">
+        <field name="name">l10n.it.ddt.type.tree</field>
+        <field name="model">l10n.it.ddt.type</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
 
-  <menuitem action="l10n_it_ddt_action" id="l10n_it_ddt_menu"/>
+    <record id="l10n_it_ddt_type_form" model="ir.ui.view">
+        <field name="name">l10n.it.ddt.type.form</field>
+        <field name="model">l10n.it.ddt.type</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
 
+    <record model="ir.actions.act_window" id="l10n_it_ddt_action">
+        <field name="name">DDT</field>
+        <field name="res_model">l10n.it.ddt</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field eval="False" name="view_id"/>
+    </record>
+
+    <record model="ir.actions.act_window" id="l10n_it_ddt_type_action">
+        <field name="name">DDT Type</field>
+        <field name="res_model">l10n.it.ddt.type</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+    <menuitem name="ddt" id="l10n_it_ddt_menu"/>
+    <menuitem name="DDT" parent="l10n_it_ddt_menu" action="l10n_it_ddt_action" id="menu_action_ddt" groups="l10n_it_ddt.group_l10n_it_ddt_manager"/>
+    <menuitem  name="DDT Type" parent="l10n_it_ddt_menu" action="l10n_it_ddt_type_action" id="ddt_type_menu" groups="l10n_it_ddt.group_l10n_it_ddt_manager"/>
 </odoo>

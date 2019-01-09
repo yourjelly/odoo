@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+   <record id="view_sale_order_form_inherit_ddt_type" model="ir.ui.view">
+        <field name="name">sale.order.form.ddt.type</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='analytic_account_id']" position="after">
+                <field name="ddt_ids" string="DDt No" widget="many2many_tags"/>
+            </xpath>
+            <xpath expr="//field[@name='require_signature']" position="after">
+                <field name="auto_ddt" string="Create DDT Automatically"/>
+            </xpath>
+            <xpath expr="//button[@name='action_view_invoice']" position="before">
+                    <button name="action_view_ddt"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-pencil-square-o"
+                        attrs="{'invisible': [('ddt_count', '=', 0)]}">
+                        <field name="ddt_count" widget="statinfo" string="DDT"/>
+                    </button>
+               </xpath>
+        </field>
+    </record>
+</odoo>

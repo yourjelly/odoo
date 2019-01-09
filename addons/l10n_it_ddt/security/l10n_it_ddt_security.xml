@@ -4,11 +4,6 @@
         <field name="name">l10n_it_ddt</field>
         <field name="sequence">3</field>
 	</record>
-	<!-- <record id="group_openinstitute_user" model="res.groups">
-        <field name="name">User</field>
-        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
-        <field name="category_id" ref="module_category_openinstitute"/>
-	</record> -->
 	<record id="group_l10n_it_ddt_manager" model="res.groups">
         <field name="name">Manager</field>
         <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>

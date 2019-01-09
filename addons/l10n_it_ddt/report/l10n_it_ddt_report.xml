@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_ddt_view">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="mt16"/>
+                        <div class="row">
+                            <div class="col-6">
+                               <span><strong>Warehouse Address:</strong></span>
+                                <div t-field="o.stock_picking_ids.picking_type_id.warehouse_id.partner_id"
+                                    t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}'/>
+                            </div>
+                            <div class="col-5 offset-1">
+                                <div>
+                                    <span><strong>Customer Address:</strong></span>
+                                    <div t-field="o.partner_id"
+                                           t-options='{"widget": "contact", "fields": ["name", "phone"], "no_marker": True, "phone_icons": True}'/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt16"/>
+                        <div>
+                            <div class="row justify-content-end mb16">
+                                <div class="col-4" name="right_box">
+                                    <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.name, 600, 100)" style="width:300px;height:50px;" alt="Barcode"/>
+                                </div>
+                            </div>
+
+                            <h1 t-field="o.name" class="mt0 float-left"/>
+                        </div>
+                         <div class="clearfix"/>
+                        <div class="mt32"/>
+                        <div class="mt32"/>
+                        <div class="mt32"/>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th><strong>Type Of Document</strong></th>
+                                    <th><strong>DDT Type</strong></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <span>DDT</span><div class="mt16"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="o.ddt_type_id"/><div class="mt16"/>
+                                    </td>
+                                    
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="clearfix"/>
+                        <div class="mt32"/>
+                        <div class="mt32"/>
+                        <div class="mt32"/>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th><strong>Order</strong></th>
+                                    <th><strong>State</strong></th>
+                                    <th><strong>Commitment Date</strong></th>
+                                    <th><strong>Scheduled Date</strong></th>
+                                    <th><strong>source</strong></th>
+                                    <th><strong>Destination</strong></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="o.stock_picking_ids" t-as="s">
+                               <tr>
+                                    <td>
+                                        <span t-field="s.origin"/><div class="mt16"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="s.state"/><div class="mt16"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="s.date"/><div class="mt16"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="s.scheduled_date"/><div class="mt16"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="s.location_id"/><div class="mt16"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="s.location_dest_id"/><div class="mt16"/>
+                                    </td>
+                                </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                        <div class="mt32"/>
+                        <div class="mt32"/>
+                        <div class="mt32"/>
+                        <table class="table table-sm" name="document_details">
+                            <thead>
+                                <tr>
+                                    <th><strong>Product</strong></th>
+                                    <th><strong>Quantity</strong></th>
+                                    <th><strong>Price</strong></th>
+                                    <th groups="uom.group_uom"><strong>Unit of Measure</strong></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="o.ddt_line_id" t-as="l">
+                                   <tr>
+                                        <td>
+                                            <span t-field="l.product_id"/><div class="mt16"/>
+                                        </td>
+                                        <td>
+                                            <span t-field="l.quantity"/><div class="mt16"/>
+                                        </td>
+                                        <td>
+                                            <span t-field="l.unit_price"/><div class="mt16"/>
+                                        </td>
+                                        <td groups="uom.group_uom">
+                                            <span t-field="l.product_uom_id"/><div class="mt16"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+    <report
+        string="DDT report"
+        id="action_report_ddt"
+        model="l10n.it.ddt"
+        report_type="qweb-html"
+        name="l10n_it_ddt.report_ddt_view"
+        file="report_ddt_report"
+        print_report_name="'DDT'"
+    />
+</odoo>

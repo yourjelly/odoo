@@ -12,6 +12,9 @@
         'security/l10n_it_ddt_security.xml',
         'security/ir.model.access.csv',
         'data/l10n_it_ddt_sequence_data.xml',
+        'report/l10n_it_ddt_report.xml',
         'views/l10n_it_ddt_views.xml',
+        'views/sale_views.xml',
+        'views/stock_picking_views.xml',
     ]
 }
