@@ -16,15 +16,26 @@ class StockRule(models.Model):
     _inherit = 'stock.rule'
 
     @api.multi
-    def _run_buy(self, product_id, product_qty, product_uom, location_id, name, origin, values):
-        if product_id.purchase_requisition != 'tenders':
-            return super(StockRule, self)._run_buy(product_id, product_qty, product_uom, location_id, name, origin, values)
-        values = self.env['purchase.requisition']._prepare_tender_values(product_id, product_qty, product_uom, location_id, name, origin, values)
-        values['picking_type_id'] = self.picking_type_id.id
-        return self.env['purchase.requisition'], values
+    def _run_buy(self, procurements_list):
+        requisitions_values = []
+        other_procurements = []
+        for procurement, rule in procurements_list:
+            if procurement.product_id.purchase_requisition == 'tenders':
+                values = self.env['purchase.requisition']._prepare_tender_values(
+                    procurement.product_id, procurement.product_qty,
+                    procurement.product_uom, procurement.location_id,
+                    procurement.name, procurement.origin, procurement.values)
+                values['picking_type_id'] = rule.picking_type_id.id
+                requisitions_values.append(values)
+            else:
+                other_procurements.append((procurement, rule))
+        if requisitions_values:
+            self.env['purchase.requisition'].create(requisitions_values)
+        return super(StockRule, self)._run_buy(other_procurements)
 
-    def _prepare_purchase_order(self, product_id, product_qty, product_uom, origin, values, partner):
-        res = super(StockRule, self)._prepare_purchase_order(product_id, product_qty, product_uom, origin, values, partner)
+    def _prepare_purchase_order(self, origins, values):
+        res = super(StockRule, self)._prepare_purchase_order(origins, values)
+        values = values[0]
         res['partner_ref'] = values['supplier'].purchase_requisition_id.name
         res['requisition_id'] = values['supplier'].purchase_requisition_id.id
         if values['supplier'].purchase_requisition_id.currency_id:

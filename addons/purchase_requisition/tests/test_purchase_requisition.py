@@ -50,10 +50,13 @@ class TestPurchaseRequisition(common.TransactionCase):
         warehouse = self.env['stock.warehouse'].browse(self.ref('stock.warehouse0'))
         product = self.env['product.product'].browse(self.product_13_id)
         product.write({'route_ids': [(4, self.ref('purchase_stock.route_warehouse0_buy'))]})
-        self.env['procurement.group'].run([(product, 14, self.env['uom.uom'].browse(self.ref('uom.product_uom_unit')), warehouse.lot_stock_id, '/', '/', {
-            'warehouse_id': warehouse,
-            'date_planned': date_planned,
-        })])
+        self.env['procurement.group'].run([self.env['procurement.group'].procurement_args(
+            product, 14, self.env['uom.uom'].browse(self.ref('uom.product_uom_unit')),
+            warehouse.lot_stock_id, '/', '/',
+            {
+                'warehouse_id': warehouse,
+                'date_planned': date_planned,
+            })])
 
         # Check requisition details which created after run procurement.
         line = self.env['purchase.requisition.line'].search([('product_id', '=', self.product_13_id), ('product_qty', '=', 14.0)])

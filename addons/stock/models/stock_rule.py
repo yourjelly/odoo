@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from collections import OrderedDict
+from collections import namedtuple, OrderedDict
 from dateutil.relativedelta import relativedelta
 from odoo.tools.misc import split_every
 from psycopg2 import OperationalError
@@ -167,25 +167,16 @@ class StockRule(models.Model):
         }
         return new_move_vals
 
-    def _run_pull(self, product_id, product_qty, product_uom, location_id, name, origin, values):
-        if not self.location_src_id:
-            msg = _('No source location defined on stock rule: %s!') % (self.name, )
-            raise UserError(msg)
-
+    @api.model
+    def _run_pull(self, procurements_list):
+        move_values = []
+        for procurement, rule in procurements_list:
+            move_values.append(rule._get_stock_move_values(procurement.product_id,
+                procurement.product_qty, procurement.product_uom, procurement.location_id,
+                procurement.name, procurement.origin, procurement.values))
         # create the move as SUPERUSER because the current user may not have the rights to do it (mto product launched by a sale for example)
-        # Search if picking with move for it exists already:
-        group_id = False
-        if self.group_propagation_option == 'propagate':
-            group_id = values.get('group_id', False) and values['group_id'].id
-        elif self.group_propagation_option == 'fixed':
-            group_id = self.group_id.id
-
-        data = self._get_stock_move_values(product_id, product_qty, product_uom, location_id, name, origin, values, group_id)
+        moves = self.env['stock.move'].sudo().with_context(force_company=procurement.values['company_id'].id).create(move_values)
         # Since action_confirm launch following procurement_group we should activate it.
-        return self.env['stock.move'], data
-
-    def _run_post_pull(self, records_values):
-        moves = self.env['stock.move'].concat(*[record[0] for record in records_values])
         moves._action_confirm()
         return True
 
@@ -195,13 +186,23 @@ class StockRule(models.Model):
         """
         return []
 
-    def _get_stock_move_values(self, product_id, product_qty, product_uom, location_id, name, origin, values, group_id):
+    def _get_stock_move_values(self, product_id, product_qty, product_uom, location_id, name, origin, values):
         ''' Returns a dictionary of values that will be used to create a stock move from a procurement.
         This function assumes that the given procurement has a rule (action == 'pull' or 'pull_push') set on it.
 
         :param procurement: browse record
         :rtype: dictionary
         '''
+        if not self.location_src_id:
+            msg = _('No source location defined on stock rule: %s!') % (self.name, )
+            raise UserError(msg)
+
+        group_id = False
+        if self.group_propagation_option == 'propagate':
+            group_id = values.get('group_id', False) and values['group_id'].id
+        elif self.group_propagation_option == 'fixed':
+            group_id = self.group_id.id
+
         date_expected = fields.Datetime.to_string(
             fields.Datetime.from_string(values['date_planned']) - relativedelta(days=self.delay or 0)
         )
@@ -283,6 +284,8 @@ class ProcurementGroup(models.Model):
     _description = 'Procurement Group'
     _order = "id desc"
 
+    procurement_args = namedtuple('Procurement', ['product_id', 'product_qty',
+        'product_uom', 'location_id', 'name', 'origin', 'values'])
     partner_id = fields.Many2one('res.partner', 'Partner')
     name = fields.Char(
         'Reference',
@@ -300,43 +303,36 @@ class ProcurementGroup(models.Model):
         In order to be able to find a suitable location that provide the product
         it will search among stock.rule.
         """
-        records = {}
-        post_process = {}
+        actions_to_run = {}
         errors = []
-        for product_id, product_qty, product_uom, location_id, name, origin, values in procurements_list:
-            values.setdefault('company_id', self.env['res.company']._company_default_get('procurement.group'))
-            values.setdefault('priority', '1')
-            values.setdefault('date_planned', fields.Datetime.now())
-            rule = self._get_rule(product_id, location_id, values)
+        for procurement in procurements_list:
+            procurement.values.setdefault('company_id', self.env['res.company']._company_default_get('procurement.group'))
+            procurement.values.setdefault('priority', '1')
+            procurement.values.setdefault('date_planned', fields.Datetime.now())
+            rule = self._get_rule(procurement.product_id, procurement.location_id, procurement.values)
             if not rule:
-                errors.append(_('No procurement rule found in location "%s" for product "%s".\n Check routes configuration.') % (location_id.display_name, product_id.display_name))
+                errors.append(_('No procurement rule found in location "%s" for product "%s".\n Check routes configuration.') %
+                    (procurement.location_id.display_name, procurement.product_id.display_name))
             else:
                 action = 'pull' if rule.action == 'pull_push' else rule.action
-                if hasattr(rule, '_run_%s' % action):
-                    create_record = getattr(rule, '_run_%s' % action)(product_id, product_qty, product_uom, location_id, name, origin, values)
-                    if not create_record:
-                        continue
-                    model, vals = create_record
-                    if model in records:
-                        records[model][0].append(vals)
-                        records[model][1].append(action)
-                        records[model][2].append(values)
-                    else:
-                        records[model] = [vals], [action], [values]
+                if action in actions_to_run:
+                    actions_to_run[action].append((procurement, rule))
                 else:
-                    _logger.error("The method _run_%s doesn't exist on the procument rules" % action)
+                    actions_to_run[action] = [(procurement, rule)]
         if errors:
             raise UserError('\n'.join(errors))
-        for model, (list_vals, actions, post_process_values) in records.items():
-            record_ids = model.sudo().with_context(force_company=values['company_id'].id).create(list_vals)
-            for record_id, action, values in zip(record_ids, actions, post_process_values):
-                if action in post_process:
-                    post_process[action].append((record_id, values))
-                else:
-                    post_process[action] = [(record_id, values)]
-        for action, records_values in post_process.items():
-            if hasattr(self.env['stock.rule'], '_run_post_%s' % action):
-                getattr(self.env['stock.rule'], '_run_post_%s' % action)(records_values)
+
+        for action, procurements_list in actions_to_run.items():
+            if hasattr(self.env['stock.rule'], '_run_%s' % action):
+                try:
+                    getattr(self.env['stock.rule'], '_run_%s' % action)(procurements_list)
+                except UserError as e:
+                    errors.append(e.name)
+            else:
+                _logger.error("The method _run_%s doesn't exist on the procurement rules" % action)
+
+        if errors:
+            raise UserError('\n'.join(errors))
         return True
 
     @api.model
@@ -523,8 +519,9 @@ class ProcurementGroup(models.Model):
                                     values = orderpoint._prepare_procurement_values(qty_rounded, **group['procurement_values'])
                                     try:
                                         with self._cr.savepoint():
-                                            self.env['procurement.group'].run([(orderpoint.product_id, qty_rounded, orderpoint.product_uom, orderpoint.location_id,
-                                                                              orderpoint.name, orderpoint.name, values)])
+                                            self.env['procurement.group'].run([self.env['procurement.group'].procurement_args(
+                                                orderpoint.product_id, qty_rounded, orderpoint.product_uom,
+                                                orderpoint.location_id, orderpoint.name, orderpoint.name, values)])
                                     except UserError as error:
                                         self.env['stock.rule']._log_next_activity(orderpoint.product_id, error.name)
                                     self._procurement_from_orderpoint_post_process([orderpoint.id])

@@ -30,19 +30,21 @@ class StockRule(models.Model):
         return {'domain': domain}
 
     @api.multi
-    def _run_manufacture(self, product_id, product_qty, product_uom, location_id, name, origin, values):
-        bom = self._get_matching_bom(product_id, values)
-        if not bom:
-            msg = _('There is no Bill of Material found for the product %s. Please define a Bill of Material for this product.') % (product_id.display_name,)
-            raise UserError(msg)
+    def _run_manufacture(self, procurements_list):
+        productions_values = []
+        procurement_values = []
+        for procurement, rule in procurements_list:
+            bom = self._get_matching_bom(procurement.product_id, procurement.values)
+            if not bom:
+                msg = _('There is no Bill of Material found for the product %s. Please define a Bill of Material for this product.') % (procurement.product_id.display_name,)
+                raise UserError(msg)
 
-        # create the MO as SUPERUSER because the current user may not have the rights to do it (mto product launched by a sale for example)
-        values = self._prepare_mo_vals(product_id, product_qty, product_uom, location_id, name, origin, values, bom)
-        return self.env['mrp.production'], values
+            # create the MO as SUPERUSER because the current user may not have the rights to do it (mto product launched by a sale for example)
+            productions_values.append(rule._prepare_mo_vals(*procurement, bom))
+            procurement_values.append(procurement.values)
+        production_ids = self.env['mrp.production'].create(productions_values)
 
-    @api.multi
-    def _run_post_manufacture(self, records_values):
-        for production, values in records_values:
+        for production, values in zip(production_ids, procurement_values):
             production.move_raw_ids = self.env['stock.move'].create(production._get_moves_raw_values())
             production.action_confirm()
             origin_production = values.get('move_dest_ids') and values['move_dest_ids'][0].raw_material_production_id or False
@@ -109,19 +111,19 @@ class ProcurementGroup(models.Model):
         """
         procurements_list_without_kit = []
         while procurements_list:
-            procurements_request = procurements_list.pop()
-            (product_id, product_qty, product_uom, location_id, name, origin, values) = procurements_request
-            bom_kit = self.env['mrp.bom']._bom_find(product=product_id, bom_type='phantom')
+            procurement = procurements_list.pop()
+            bom_kit = self.env['mrp.bom']._bom_find(product=procurement.product_id, bom_type='phantom')
             if bom_kit:
-                order_qty = product_uom._compute_quantity(product_qty, bom_kit.product_uom_id, round=False)
+                order_qty = procurement.product_uom._compute_quantity(procurement.product_qty, bom_kit.product_uom_id, round=False)
                 qty_to_produce = (order_qty / bom_kit.product_qty)
-                boms, bom_sub_lines = bom_kit.explode(product_id, qty_to_produce)
+                boms, bom_sub_lines = bom_kit.explode(procurement.product_id, qty_to_produce)
                 for bom_line, bom_line_data in bom_sub_lines:
                     bom_line_uom = bom_line.product_uom_id
                     quant_uom = bom_line.product_id.uom_id
+                    procurement.values['bom_line_id'] = bom_line.id
                     component_qty, procurement_uom = bom_line_uom._adjust_uom_quantities(bom_line_data['qty'], quant_uom)
-                    values['bom_line_id'] = bom_line.id
-                    procurements_list_without_kit.append((bom_line.product_id, component_qty, procurement_uom, location_id, name, origin, values))
+                    procurements_list_without_kit.append(self.env['procurement.group'].procurement_args(
+                        bom_line.product_id, component_qty, procurement_uom, *procurement[3:]))
             else:
-                procurements_list_without_kit.append(procurements_request)
+                procurements_list_without_kit.append(procurement)
         return super(ProcurementGroup, self).run(procurements_list_without_kit)

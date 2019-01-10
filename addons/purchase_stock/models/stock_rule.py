@@ -2,9 +2,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from dateutil.relativedelta import relativedelta
+from itertools import groupby
 
 from odoo import api, fields, models, _
-from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from odoo.exceptions import UserError
 
 
@@ -29,72 +29,125 @@ class StockRule(models.Model):
             domain = {'picking_type_id': [('code', '=', 'incoming')]}
         return {'domain': domain}
 
-    @api.multi
-    def _run_buy(self, product_id, product_qty, product_uom, location_id, name, origin, values):
-        cache = {}
-        suppliers = product_id.seller_ids\
-            .filtered(lambda r: (not r.company_id or r.company_id == values['company_id']) and (not r.product_id or r.product_id == product_id))
-        if not suppliers:
-            msg = _('There is no vendor associated to the product %s. Please define a vendor for this product.') % (product_id.display_name,)
-            raise UserError(msg)
-        supplier = self._make_po_select_supplier(values, suppliers)
-        partner = supplier.name
-        # we put `supplier_info` in values for extensibility purposes
-        values['supplier'] = supplier
+    @api.model
+    def _run_buy(self, procurements_list):
+        procurements_with_same_domain = {}
+        for procurement, rule in procurements_list:
 
-        domain = self._make_po_get_domain(values, partner)
-        if domain in cache:
-            po = cache[domain]
-        else:
-            po = self.env['purchase.order'].sudo().search([dom for dom in domain])
-            po = po[0] if po else False
-            cache[domain] = po
-        if not po:
-            vals = self._prepare_purchase_order(product_id, product_qty, product_uom, origin, values, partner)
-            company_id = values.get('company_id') and values['company_id'].id or self.env.user.company_id.id
-            po = self.env['purchase.order'].with_context(force_company=company_id).sudo().create(vals)
-            cache[domain] = po
-        elif not po.origin or origin not in po.origin.split(', '):
-            if po.origin:
-                if origin:
-                    po.write({'origin': po.origin + ', ' + origin})
-                else:
-                    po.write({'origin': po.origin})
+            # Get the schedule date in order to find a valid seller
+            procurement_date_planned = fields.Datetime.from_string(procurement.values['date_planned'])
+            schedule_date = (procurement_date_planned - relativedelta(days=procurement.values['company_id'].po_lead))
+
+            supplier = procurement.product_id._select_seller(
+                quantity=procurement.product_qty,
+                date=schedule_date.date(),
+                uom_id=procurement.product_uom)
+
+            if not supplier:
+                msg = _('There is no vendor associated to the product %s. Please define a vendor for this product.') % (procurement.product_id.display_name,)
+                raise UserError(msg)
+
+            partner = supplier.name
+            # we put `supplier_info` in values for extensibility purposes
+            procurement.values['supplier'] = supplier
+
+            domain = rule._make_po_get_domain(procurement.values, partner)
+            if domain in procurements_with_same_domain:
+                procurements_with_same_domain[domain].append(procurement)
             else:
-                po.write({'origin': origin})
+                procurements_with_same_domain[domain] = [procurement]
 
-        # Create Line
-        po_line = False
-        for line in po.order_line:
-            if line.product_id == product_id and line.product_uom == product_id.uom_po_id:
-                if line._merge_in_existing_line(product_id, product_qty, product_uom, location_id, name, origin, values):
-                    vals = self._update_purchase_order_line(product_id, product_qty, product_uom, values, line, partner)
-                    po_line = line
-                    po_line.write(vals)
-                    return False
-        if not po_line:
-            vals = self._prepare_purchase_order_line(product_id, product_qty, product_uom, values, po, partner)
-        return self.env['purchase.order.line'], vals
+        for domain, procurements_list in procurements_with_same_domain.items():
+            origins = set([p.origin for p in procurements_list])
+            po = self.env['purchase.order'].sudo().search([dom for dom in domain], limit=1)
+            if not po:
+                procurements_values = [p.values for p in procurements_list]
+                vals = rule._prepare_purchase_order(origins, procurements_values)
+                company_id = procurements_values[0].get('company_id') and procurements_values[0]['company_id'].id or self.env.user.company_id.id
+                po = self.env['purchase.order'].with_context(force_company=company_id).sudo().create(vals)
+            elif not po.origin or any(origin not in po.origin.split(', ') for origin in origins):
+                if po.origin:
+                    if origins:
+                        missing_origins = origins - set(po.origin.split(', '))
+                        if missing_origins:
+                            po.write({'origin': po.origin + ', ' + ', '.join(missing_origins)})
+                else:
+                    po.write({'origin': ', '.join(origins)})
 
-    def _get_purchase_schedule_date(self, values):
-        """Return the datetime value to use as Schedule Date (``date_planned``) for the
-           Purchase Order Lines created to satisfy the given procurement. """
-        procurement_date_planned = fields.Datetime.from_string(values['date_planned'])
-        schedule_date = (procurement_date_planned - relativedelta(days=values['company_id'].po_lead))
-        return schedule_date
+            similar_procurements = self._get_similar_procurements(procurements_list)
+            procurements = self._merge_similar_procurements(similar_procurements)
+            procurements = {p.product_id: p for p in procurements}
 
-    def _get_purchase_order_date(self, product_id, product_qty, product_uom, values, partner, schedule_date):
-        """Return the datetime value to use as Order Date (``date_order``) for the
-           Purchase Order created to satisfy the given procurement. """
-        seller = product_id._select_seller(
-            partner_id=partner,
-            quantity=product_qty,
-            date=schedule_date and schedule_date.date(),
-            uom_id=product_uom)
+            # Create Line
+            for line in po.order_line:
+                if line.product_id in list(procurements.keys()) and line.product_uom == line.product_id.uom_po_id:
+                    procurement = procurements.pop(line.product_id)
+                    if line._merge_in_existing_line(procurement.product_id,
+                            procurement.product_qty, procurement.product_uom,
+                            procurement.location_id, procurement.name,
+                            procurement.origin, procurement.values):
+                        vals = self._update_purchase_order_line(procurement.product_id,
+                            procurement.product_qty, procurement.product_uom,
+                            procurement.values, line)
+                        line.write(vals)
 
-        return schedule_date - relativedelta(days=int(seller.delay))
+            po_line_values_list = []
+            for procurement in procurements.values():
+                partner = procurement.values['supplier'].name
+                po_line_values_list.append(self._prepare_purchase_order_line(
+                    procurement.product_id, procurement.product_qty,
+                    procurement.product_uom, procurement.values, po))
+            self.env['purchase.order.line'].create(po_line_values_list)
 
-    def _update_purchase_order_line(self, product_id, product_qty, product_uom, values, line, partner):
+    @api.model
+    def _get_similar_procurements_groupby(self, procurement):
+        return procurement.product_id.id
+
+    @api.model
+    def _get_similar_procurements_sorted(self, procurement):
+        return procurement.product_id
+
+    @api.model
+    def _get_similar_procurements(self, procurements_list):
+        """ Get a list of procurements values and create groups of procuments
+        that would use the same purchase order line.
+        params procurements_list list: procurements requests (not ordered nor
+        sorted).
+        return list: procurements requests grouped by their product_id.
+        """
+        similar_procurements = []
+
+        for k, procurements in groupby(sorted(procurements_list, key=self._get_similar_procurements_sorted), key=self._get_similar_procurements_groupby):
+            similar_procurements.append(list(procurements))
+        return similar_procurements
+
+    @api.model
+    def _merge_similar_procurements(self, similar_procurements):
+        """ Merge the quantity for procurements requests that could use the same
+        order line.
+        params similar_procurements list: list of procurements that have been
+        marked as 'alike' from _get_similar_procurements method.
+        return a list of procurements values where values of similar_procurements
+        list have been merged.
+        """
+        combined_procurement_list = []
+        for procurements_list in similar_procurements:
+            quantity = 0
+            move_dest_ids = self.env['stock.move']
+            order_point_id = self.env['stock.warehouse.orderpoint']
+            for procurement in procurements_list:
+                if procurement.values.get('move_dest_ids'):
+                    move_dest_ids |= procurement.values['move_dest_ids']
+                if not order_point_id and procurement.values.get('order_point_id'):
+                    order_point_id = procurement.values['order_point_id']
+                quantity += procurement.product_qty
+            procurement.values['move_dest_ids'] = move_dest_ids
+            procurement.values['order_point_id'] = move_dest_ids
+            combined_procurement_list.append(procurement._replace(product_qty=quantity))
+        return combined_procurement_list
+
+    def _update_purchase_order_line(self, product_id, product_qty, product_uom, values, line):
+        partner = values['supplier'].name
         procurement_uom_po_qty = product_uom._compute_quantity(product_qty, product_id.uom_po_id)
         seller = product_id._select_seller(
             partner_id=partner,
@@ -114,8 +167,11 @@ class StockRule(models.Model):
         }
 
     @api.multi
-    def _prepare_purchase_order_line(self, product_id, product_qty, product_uom, values, po, partner):
+    def _prepare_purchase_order_line(self, product_id, product_qty, product_uom, values, po):
+        partner = values['supplier'].name
         procurement_uom_po_qty = product_uom._compute_quantity(product_qty, product_id.uom_po_id)
+        # _select_seller is used if the supplier have different price depending
+        # the quantities ordered.
         seller = product_id._select_seller(
             partner_id=partner,
             quantity=procurement_uom_po_qty,
@@ -141,7 +197,7 @@ class StockRule(models.Model):
         if product_lang.description_purchase:
             name += '\n' + product_lang.description_purchase
 
-        date_planned = self.env['purchase.order.line']._get_date_planned(seller, po=po).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        date_planned = self.env['purchase.order.line']._get_date_planned(seller, po=po)
 
         return {
             'name': name,
@@ -156,9 +212,16 @@ class StockRule(models.Model):
             'move_dest_ids': [(4, x.id) for x in values.get('move_dest_ids', [])],
         }
 
-    def _prepare_purchase_order(self, product_id, product_qty, product_uom, origin, values, partner):
-        schedule_date = self._get_purchase_schedule_date(values)
-        purchase_date = self._get_purchase_order_date(product_id, product_qty, product_uom, values, partner, schedule_date)
+    def _prepare_purchase_order(self, origins, values):
+        dates = [fields.Datetime.from_string(value['date_planned']) for value in values]
+
+        procurement_date_planned = min(dates)
+        schedule_date = (procurement_date_planned - relativedelta(days=values[0]['company_id'].po_lead))
+
+        values = values[0]
+        partner = values['supplier'].name
+        purchase_date = schedule_date - relativedelta(days=int(values['supplier'].delay))
+
         fpos = self.env['account.fiscal.position'].with_context(force_company=values['company_id'].id).get_fiscal_position(partner.id)
 
         gpo = self.group_propagation_option
@@ -171,18 +234,12 @@ class StockRule(models.Model):
             'company_id': values['company_id'].id,
             'currency_id': partner.with_context(force_company=values['company_id'].id).property_purchase_currency_id.id or self.env.user.company_id.currency_id.id,
             'dest_address_id': values.get('partner_id', False),
-            'origin': origin,
+            'origin': ', '.join(origins),
             'payment_term_id': partner.with_context(force_company=values['company_id'].id).property_supplier_payment_term_id.id,
-            'date_order': purchase_date.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+            'date_order': purchase_date,
             'fiscal_position_id': fpos,
             'group_id': group
         }
-
-    def _make_po_select_supplier(self, values, suppliers):
-        """ Method intended to be overridden by customized modules to implement any logic in the
-            selection of supplier.
-        """
-        return suppliers[0]
 
     def _make_po_get_domain(self, values, partner):
         domain = super(StockRule, self)._make_po_get_domain(values, partner)

@@ -393,8 +393,10 @@ class SaleOrderLine(models.Model):
             line_uom = line.product_uom
             quant_uom = line.product_id.uom_id
             product_qty, procurement_uom = line_uom._adjust_uom_quantities(product_qty, quant_uom)
-
-            procurements_list.append((line.product_id, product_qty, procurement_uom, line.order_id.partner_shipping_id.property_stock_customer, line.name, line.order_id.name, values))
+            procurements_list.append(self.env['procurement.group'].procurement_args(
+                line.product_id, product_qty, procurement_uom,
+                line.order_id.partner_shipping_id.property_stock_customer,
+                line.name, line.order_id.name, values))
         if procurements_list:
             self.env['procurement.group'].run(procurements_list)
         return True

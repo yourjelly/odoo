@@ -769,8 +769,10 @@ class StockMove(models.Model):
         for move in move_create_proc:
             values = move._prepare_procurement_values()
             origin = (move.group_id and move.group_id.name or (move.origin or move.picking_id.name or "/"))
-            procurement_requests.append((move.product_id, move.product_uom_qty, move.product_uom, move.location_id, move.rule_id and move.rule_id.name or "/", origin,
-                                              values))
+            procurement_requests.append(self.env['procurement.group'].procurement_args(
+                move.product_id, move.product_uom_qty, move.product_uom,
+                move.location_id, move.rule_id and move.rule_id.name or "/",
+                origin, values))
         self.env['procurement.group'].run(procurement_requests)
 
         move_to_confirm.write({'state': 'confirmed'})
