@@ -227,7 +227,8 @@ var Domain = collections.Tree.extend({
         return JSON.stringify(domain || [])
             .replace(/null/g, "None")
             .replace(/false/g, "False")
-            .replace(/true/g, "True");
+            .replace(/true/g, "True")
+            .replace(/\"/g, "'");
     },
     /*
      * @param {string} fieldName
