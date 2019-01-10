@@ -455,9 +455,7 @@ var ChatAction = Widget.extend(ControlPanelMixin, {
                 .addClass('o_active');
 
             var $new_messages_separator = self.$('.o_thread_new_messages_separator');
-            if ($new_messages_separator.length) {
-                self.thread.$el.scrollTo($new_messages_separator);
-            } else {
+            if (!$new_messages_separator.length) {
                 self.thread.scroll_to({offset: new_channel_scrolltop});
             }
 
