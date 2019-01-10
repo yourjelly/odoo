@@ -89,46 +89,48 @@ var SectionAndNoteListRenderer = ListRenderer.extend({
 
         // but we do want to unselect current row
         var self = this;
-        this.unselectRow().then(function () {
-            var context = ev.currentTarget.dataset.context;
-
-            var pricelistId = self._getPricelistId();
-            if (context && pyUtils.py_eval(context).open_product_configurator){
-                self._rpc({
-                    model: 'ir.model.data',
-                    method: 'xmlid_to_res_id',
-                    kwargs: {xmlid: 'sale.sale_product_configurator_view_form'},
-                }).then(function (res_id) {
-                    self.do_action({
-                        name: _t('Configure a product'),
-                        type: 'ir.actions.act_window',
-                        res_model: 'sale.product.configurator',
-                        views: [[res_id, 'form']],
-                        target: 'new',
-                        context: {
-                            'default_pricelist_id': pricelistId
-                        }
-                    }, {
-                        on_close: function (products) {
-                            if (products && products !== 'special'){
-                                self.trigger_up('add_record', {
-                                    context: self._productsToRecords(products),
-                                    forceEditable: "bottom" ,
-                                    allowWarning: true,
-                                    onSuccess: function (){
-                                        self.unselectRow();
-                                    }
-                                });
-                            }
-                        }
-                    });
-                });
-            } else {
-                self.trigger_up('add_record', {context: context && [context]}); // TODO write a test, the deferred was not considered
-            }
-        });
+        this.unselectRow().then(self._product_configurator(ev));
     },
 
+    _product_configurator: function(ev) {
+        var self = this
+        var context = ev.currentTarget.dataset.context;
+
+        var pricelistId = self._getPricelistId();
+        if (context && pyUtils.py_eval(context).open_product_configurator){
+            self._rpc({
+                model: 'ir.model.data',
+                method: 'xmlid_to_res_id',
+                kwargs: {xmlid: 'sale.sale_product_configurator_view_form'},
+            }).then(function (res_id) {
+                self.do_action({
+                    name: _t('Configure a product'),
+                    type: 'ir.actions.act_window',
+                    res_model: 'sale.product.configurator',
+                    views: [[res_id, 'form']],
+                    target: 'new',
+                    context: {
+                        'default_pricelist_id': pricelistId
+                    }
+                }, {
+                    on_close: function (products) {
+                        if (products && products !== 'special'){
+                            self.trigger_up('add_record', {
+                                context: self._productsToRecords(products),
+                                forceEditable: "bottom" ,
+                                allowWarning: true,
+                                onSuccess: function (){
+                                    self.unselectRow();
+                                }
+                            });
+                        }
+                    }
+                });
+            });
+        } else {
+            self.trigger_up('add_record', {context: context && [context]}); // TODO write a test, the deferred was not considered
+        }
+    },
     /**
      * Will try to get the pricelist_id value from the parent sale_order form
      *
@@ -219,4 +221,5 @@ var SectionAndNoteFieldText = function (parent, name, record, options) {
 fieldRegistry.add('section_and_note_one2many', SectionAndNoteFieldOne2Many);
 fieldRegistry.add('section_and_note_text', SectionAndNoteFieldText);
 
+return SectionAndNoteListRenderer;
 });
