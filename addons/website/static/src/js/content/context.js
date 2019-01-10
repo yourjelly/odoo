@@ -7,6 +7,7 @@ function getContext(context) {
         lang: (html.getAttribute('lang') || 'en_US').replace('-', '_'),
     }, context || {});
 }
+
 function getExtraContext(context) {
     var html = document.documentElement;
     return _.extend(getContext(), {

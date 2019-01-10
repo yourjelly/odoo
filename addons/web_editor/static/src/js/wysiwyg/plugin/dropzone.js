@@ -56,6 +56,7 @@ var DropzonePlugin = Plugins.dropzone.extend({
      * @param {File[]]} files (images only)
      */
     _dropImages: function (files) {
+        var self = this;
         this.context.invoke('editor.beforeCommand');
         var range = this.context.invoke('editor.createRange');
 
@@ -65,7 +66,7 @@ var DropzonePlugin = Plugins.dropzone.extend({
         _.each(files, function (file) {
             // Add spinner
             var spinner = $('<span class="fa fa-spinner fa-spin">').attr('data-filename', file.name)[0];
-            this.context.invoke('editor.hidePopover');
+            self.context.invoke('editor.hidePopover');
             if (range.sc.tagName) {
                 if (range.so >= dom.nodeLength(range.sc)) {
                     $(range.sc).append(spinner);
@@ -84,9 +85,9 @@ var DropzonePlugin = Plugins.dropzone.extend({
             // Get image's Base64 string
             var reader = new FileReader();
             reader.addEventListener('load', function (e) {
-                this._uploadImage(e.target.result, file.name).then(function (attachment) {
+                self._uploadImage(e.target.result, file.name).then(function (attachment) {
                     // Make the HTML
-                    var image = this.document.createElement('img');
+                    var image = self.document.createElement('img');
                     image.setAttribute('style', 'width: 100%;');
                     image.src = '/web/content/' + attachment.id + '/' + attachment.name;
                     image.alt = attachment.name;
@@ -94,16 +95,19 @@ var DropzonePlugin = Plugins.dropzone.extend({
                     images.push(image);
                     def.resolve(image);
                     $(image).trigger('dropped');
-                }.bind(this));
-            }.bind(this));
+                });
+            });
             reader.readAsDataURL(file);
-        }.bind(this));
+        });
 
-        this.trigger_up('drop_images', {spinners: spinners, promises: defs});
+        this.trigger_up('drop_images', {
+            spinners: spinners,
+            promises: defs,
+        });
 
         $.when.apply($, defs).then(function () {
             var defs = [];
-            $(images).each(function() {
+            $(images).each(function () {
                 if (!this.height) {
                     var def = $.Deferred();
                     defs.push(def);
@@ -115,14 +119,14 @@ var DropzonePlugin = Plugins.dropzone.extend({
                     range.sc = range.ec = _.last(images);
                     range.so = range.eo = 0;
                     range.select();
-                    this.context.invoke('editor.saveRange');
-                    this.context.invoke('editor.afterCommand');
-                    this.context.invoke('MediaPlugin.updatePopoverAfterEdit', images[0]);
+                    self.context.invoke('editor.saveRange');
+                    self.context.invoke('editor.afterCommand');
+                    self.context.invoke('MediaPlugin.updatePopoverAfterEdit', images[0]);
                 } else {
-                    this.context.invoke('editor.afterCommand');
+                    self.context.invoke('editor.afterCommand');
                 }
-            }.bind(this));
-        }.bind(this));
+            });
+        });
     },
     /**
      * Upload an image from its Base64 representation.
@@ -134,7 +138,10 @@ var DropzonePlugin = Plugins.dropzone.extend({
      */
     _uploadImage: function (imageBase64, fileName) {
         var options = {};
-        this.trigger_up('getRecordInfo', {recordInfo: options, type: 'media'});
+        this.trigger_up('getRecordInfo', {
+            recordInfo: options,
+            type: 'media',
+        });
 
         return this._rpc({
             route: '/web_editor/add_image_base64',

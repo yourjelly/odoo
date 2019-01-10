@@ -959,7 +959,7 @@ options.registry.gallery = options.Class.extend({
         });
 
         this.$target.on('dropped', 'img', function (ev) {
-                self.mode(null, self.getMode());
+            self.mode(null, self.getMode());
             if (!ev.target.height) {
                 $(ev.target).one('load', function () {
                     setTimeout(function () {

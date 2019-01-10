@@ -24,8 +24,10 @@ var CodeviewPlugin = Plugins.codeview.extend({
      * @override
      */
     deactivate: function () {
-        if (this.context.invoke('HelperPlugin.hasJinja', this.context.invoke('code')) &&
-            !this.isBeingDestroyed) {
+        if (
+            this.context.invoke('HelperPlugin.hasJinja', this.context.invoke('code')) &&
+            !this.isBeingDestroyed
+        ) {
             var message = _t("Your code contains JINJA conditions.\nRemove them to return to WYSIWYG HTML edition.");
             this.do_warn(_t("Cannot edit HTML"), message);
             this.$codable.focus();

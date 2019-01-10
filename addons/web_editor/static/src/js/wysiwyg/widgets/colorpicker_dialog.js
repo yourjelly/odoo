@@ -357,7 +357,7 @@ var ColorpickerDialog = Dialog.extend({
  * @static
  * @param {Object|string} color
  * @returns {string} rgba (red, green, blue, opacity)
-*/
+ */
 ColorpickerDialog.formatColor = function (color) {
     if (typeof color === 'string') {
         color = ColorpickerDialog.convertColorToRgba(color);
@@ -381,7 +381,7 @@ ColorpickerDialog.formatColor = function (color) {
  * @static
  * @param {string} color
  * @returns {Object|false} contains red, green, blue, opacity
-*/
+ */
 ColorpickerDialog.convertColorToRgba = function (color) {
     var rgba = color.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(?:\.\d+)?))?\)$/);
     if (rgba) {
@@ -404,7 +404,7 @@ ColorpickerDialog.convertColorToRgba = function (color) {
  * @static
  * @param {string} hex - hexadecimal code
  * @returns {Object|false} contains red, green and blue
-*/
+ */
 ColorpickerDialog.convertHexToRgba = function (hex) {
     if (!/^#([0-9A-F]{6}|[0-9A-F]{8})$/i.test(hex)) {
         return false;
@@ -427,9 +427,9 @@ ColorpickerDialog.convertHexToRgba = function (hex) {
  * @returns {Object|false} contains hue, saturation and lightness
  */
 ColorpickerDialog.convertRgbToHsl = function (r, g, b) {
-    if (typeof(r) !== 'number' || isNaN(r) || r < 0 || r > 255 ||
-        typeof(g) !== 'number' || isNaN(g) || g < 0 || g > 255 ||
-        typeof(b) !== 'number' || isNaN(b) || b < 0 || b > 255) {
+    if (typeof (r) !== 'number' || isNaN(r) || r < 0 || r > 255 ||
+        typeof (g) !== 'number' || isNaN(g) || g < 0 || g > 255 ||
+        typeof (b) !== 'number' || isNaN(b) || b < 0 || b > 255) {
         return false;
     }
 
@@ -473,9 +473,9 @@ ColorpickerDialog.convertRgbToHsl = function (r, g, b) {
  * @returns {Object|false} contains red, green and blue
  */
 ColorpickerDialog.convertHslToRgb = function (h, s, l) {
-    if (typeof(h) !== 'number' || isNaN(h) || h < 0 || h > 360 ||
-        typeof(s) !== 'number' || isNaN(s) || s < 0 || s > 100 ||
-        typeof(l) !== 'number' || isNaN(l) || l < 0 || l > 100) {
+    if (typeof (h) !== 'number' || isNaN(h) || h < 0 || h > 360 ||
+        typeof (s) !== 'number' || isNaN(s) || s < 0 || s > 100 ||
+        typeof (l) !== 'number' || isNaN(l) || l < 0 || l > 100) {
         return false;
     }
     var huePrime = h / 60;
@@ -483,28 +483,52 @@ ColorpickerDialog.convertHslToRgb = function (h, s, l) {
     var lightness = l / 100;
     var chroma = saturation * (1 - Math.abs(2 * lightness - 1));
     var secondComponent = chroma * (1 - Math.abs(huePrime % 2 - 1));
-    var lightnessAdjustment = lightness - chroma/2;
+    var lightnessAdjustment = lightness - chroma / 2;
     var precision = 255;
     chroma = (chroma + lightnessAdjustment) * precision | 0;
     secondComponent = (secondComponent + lightnessAdjustment) * precision | 0;
     lightnessAdjustment = lightnessAdjustment * precision | 0;
     if (huePrime >= 0 && huePrime < 1) {
-        return {red: chroma, green: secondComponent, blue: lightnessAdjustment};
+        return {
+            red: chroma,
+            green: secondComponent,
+            blue: lightnessAdjustment,
+        };
     }
     if (huePrime >= 1 && huePrime < 2) {
-        return {red: secondComponent, green: chroma, blue: lightnessAdjustment};
+        return {
+            red: secondComponent,
+            green: chroma,
+            blue: lightnessAdjustment,
+        };
     }
     if (huePrime >= 2 && huePrime < 3) {
-        return {red: lightnessAdjustment, green: chroma, blue: secondComponent};
+        return {
+            red: lightnessAdjustment,
+            green: chroma,
+            blue: secondComponent,
+        };
     }
     if (huePrime >= 3 && huePrime < 4) {
-        return {red: lightnessAdjustment, green: secondComponent, blue: chroma};
+        return {
+            red: lightnessAdjustment,
+            green: secondComponent,
+            blue: chroma,
+        };
     }
     if (huePrime >= 4 && huePrime < 5) {
-        return {red: secondComponent, green: lightnessAdjustment, blue: chroma};
+        return {
+            red: secondComponent,
+            green: lightnessAdjustment,
+            blue: chroma,
+        };
     }
     if (huePrime >= 5 && huePrime <= 6) {
-        return {red: chroma, green: lightnessAdjustment, blue: secondComponent};
+        return {
+            red: chroma,
+            green: lightnessAdjustment,
+            blue: secondComponent,
+        };
     }
 };
 /**
@@ -517,15 +541,17 @@ ColorpickerDialog.convertHslToRgb = function (h, s, l) {
  * @returns {Object|false} contains hexadecimal code
  */
 ColorpickerDialog.convertRgbToHex = function (r, g, b) {
-    if (typeof(r) !== 'number' || isNaN(r) || r < 0 || r > 255 ||
-        typeof(g) !== 'number' || isNaN(g) || g < 0 || g > 255 ||
-        typeof(b) !== 'number' || isNaN(b) || b < 0 || b > 255) {
+    if (typeof (r) !== 'number' || isNaN(r) || r < 0 || r > 255 ||
+        typeof (g) !== 'number' || isNaN(g) || g < 0 || g > 255 ||
+        typeof (b) !== 'number' || isNaN(b) || b < 0 || b > 255) {
         return false;
     }
     var red = r < 16 ? '0' + r.toString(16) : r.toString(16);
     var green = g < 16 ? '0' + g.toString(16) : g.toString(16);
     var blue = b < 16 ? '0' + b.toString(16) : b.toString(16);
-    return {hex: _.str.sprintf('#%s%s%s', red, green, blue)};
+    return {
+        hex: _.str.sprintf('#%s%s%s', red, green, blue)
+    };
 };
 
 return ColorpickerDialog;

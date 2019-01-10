@@ -20,7 +20,7 @@ var CropImageDialog = Dialog.extend({
     cssLibs: [
         '/web_editor/static/lib/cropper/css/cropper.css',
     ],
-    events : _.extend({}, Dialog.prototype.events, {
+    events: _.extend({}, Dialog.prototype.events, {
         'click .o_crop_options [data-event]': '_onCropOptionClick',
     }),
 
@@ -104,7 +104,7 @@ var CropImageDialog = Dialog.extend({
         if (this.$cropperImage.length) {
             var data = this.$media.data();
             var ratio = 0;
-            for (var i = 0 ; i < this.aspectRatioList.length ; i++) {
+            for (var i = 0; i < this.aspectRatioList.length; i++) {
                 if (this.aspectRatioList[i][1] === data.aspectRatio) {
                     ratio = this.aspectRatioList[i][2];
                     break;
@@ -118,7 +118,7 @@ var CropImageDialog = Dialog.extend({
             });
         }
         return this._super.apply(this, arguments);
-     },
+    },
     /**
      * @override
      */

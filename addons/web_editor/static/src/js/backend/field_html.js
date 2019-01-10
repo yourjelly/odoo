@@ -75,14 +75,15 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @override
      */
     commitChanges: function () {
+        var self = this;
         if (!this.wysiwyg) {
             return this._super();
         }
         var _super = this._super.bind(this);
         return this.wysiwyg.save().then(function (isDirty, html) {
-            this._isDirty = isDirty;
+            self._isDirty = isDirty;
             _super();
-        }.bind(this));
+        });
     },
     /**
      * @override
@@ -140,14 +141,15 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @returns {$.Promise}
      */
     _createWysiwygIntance: function () {
+        var self = this;
         this.wysiwyg = new Wysiwyg(this, this._getWysiwygOptions());
 
         // by default this is synchronous because the assets are already loaded in willStart
         // but it can be async in the case of options such as iframe, snippets...
         return this.wysiwyg.attachTo(this.$target).then(function () {
-            this.$content = this.wysiwyg.$el;
-            this._onLoadWysiwyg();
-        }.bind(this));
+            self.$content = self.wysiwyg.$el;
+            self._onLoadWysiwyg();
+        });
     },
     /**
      * Get wysiwyg options to create wysiwyg instance.
@@ -222,7 +224,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         this.$target = $('<textarea>').val(value).hide();
         this.$target.appendTo(this.$el);
 
-        var fieldNameAttachment =_.chain(this.recordData)
+        var fieldNameAttachment = _.chain(this.recordData)
             .pairs()
             .find(function (value) {
                 return _.isObject(value[1]) && value[1].model === "ir.attachment";
@@ -244,6 +246,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @override
      */
     _renderReadonly: function () {
+        var self = this;
         var value = this._textToHtml(this.value);
         if (this.nodeOptions.wrapper) {
             value = this._wrap(value);
@@ -266,18 +269,18 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
                     console.warn('Wysiwyg iframe double load detected');
                     return;
                 }
-                this.$content = $('#iframe_target', this.$iframe[0].contentWindow.document.body);
+                self.$content = $('#iframe_target', self.$iframe[0].contentWindow.document.body);
                 def.resolve();
-            }.bind(this);
+            };
 
-            this.$iframe.one('load', function onLoad () {
+            this.$iframe.one('load', function onLoad() {
                 var _avoidDoubleLoad = ++avoidDoubleLoad;
-                ajax.loadAsset(this.nodeOptions.cssReadonly).then(function (asset) {
+                ajax.loadAsset(self.nodeOptions.cssReadonly).then(function (asset) {
                     if (_avoidDoubleLoad !== avoidDoubleLoad) {
                         console.warn('Wysiwyg immediate iframe double load detected');
                         return;
                     }
-                    var cwindow = this.$iframe[0].contentWindow;
+                    var cwindow = self.$iframe[0].contentWindow;
                     cwindow.document
                         .open("text/html", "replace")
                         .write(
@@ -295,16 +298,16 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
                             '<body class="o_in_iframe o_readonly">\n' +
                                 '<div id="iframe_target">' + value + '</div>\n' +
                                 '<script type="text/javascript">' +
-                                    'if (window.top.' + this._onUpdateIframeId + ') {' +
-                                        'window.top.' + this._onUpdateIframeId + '(' + _avoidDoubleLoad + ')' +
+                                    'if (window.top.' + self._onUpdateIframeId + ') {' +
+                                        'window.top.' + self._onUpdateIframeId + '(' + _avoidDoubleLoad + ')' +
                                     '}' +
                                 '</script>\n' +
                             '</body>');
 
                     var height = cwindow.document.body.scrollHeight;
-                    this.$iframe.css('height', Math.max(30, Math.min(height, 500)) + 'px');
-                }.bind(this));
-            }.bind(this));
+                    self.$iframe.css('height', Math.max(30, Math.min(height, 500)) + 'px');
+                });
+            });
         } else {
             this.$content = $('<div class="o_readonly"/>').html(value);
             this.$content.appendTo(this.$el);
@@ -312,8 +315,8 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         }
 
         def.then(function () {
-            this.$content.on('click', 'ul.o_checklist > li', this._onReadonlyClickChecklist.bind(this));
-        }.bind(this));
+            self.$content.on('click', 'ul.o_checklist > li', self._onReadonlyClickChecklist.bind(self));
+        });
     },
     /**
      * @private
@@ -409,6 +412,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @param {OdooEvent} ev
      */
     _onReadonlyClickChecklist: function (ev) {
+        var self = this;
         if (ev.offsetX > 0) {
             return;
         }
@@ -425,8 +429,8 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
                 checked: !checked,
             },
         }).then(function (value) {
-            this._setValue(value);
-        }.bind(this));
+            self._setValue(value);
+        });
     },
     /**
      * Method called when the wysiwyg instance is loaded.
@@ -452,15 +456,16 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         ev.stopPropagation();
         this._doAction();
         if (ev.data.key === 'TAB') {
-            this.trigger_up('navigation_move', {direction: ev.data.shiftKey ? 'left' : 'right'});
+            this.trigger_up('navigation_move', {
+                direction: ev.data.shiftKey ? 'left' : 'right',
+            });
         }
     },
     /**
      * @private
      * @param {OdooEvent} ev
      */
-    _onWysiwygFocus: function (ev) {
-    },
+    _onWysiwygFocus: function (ev) {},
 });
 
 

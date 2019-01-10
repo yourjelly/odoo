@@ -26,25 +26,27 @@ var EditorMenu = Widget.extend({
      * @override
      */
     willStart: function () {
+        var self = this;
         this.$el = null; // temporary null to avoid hidden error (@see start)
         return this._super()
             .then(function () {
                 var $wrapwrap = $('#wrapwrap');
                 $wrapwrap.removeClass('o_editable'); // clean the dom before edition
-                this.editable($wrapwrap).addClass('o_editable');
-                this.wysiwyg = this._wysiwygInstance();
-                return this.wysiwyg.attachTo($wrapwrap);
-            }.bind(this));
+                self.editable($wrapwrap).addClass('o_editable');
+                self.wysiwyg = self._wysiwygInstance();
+                return self.wysiwyg.attachTo($wrapwrap);
+            });
     },
     /**
      * @override
      */
     start: function () {
+        var self = this;
         this.$el.css({width: '100%'});
         return this._super().then(function () {
-            this.trigger_up('edit_mode');
-            this.$el.css({width: ''});
-        }.bind(this));
+            self.trigger_up('edit_mode');
+            self.$el.css({width: ''});
+        });
     },
     /**
      * @override
@@ -68,6 +70,7 @@ var EditorMenu = Widget.extend({
      * @returns {Deferred}
      */
     cancel: function (reload) {
+        var self = this;
         var def = $.Deferred();
         if (!this.wysiwyg.isDirty()) {
             def.resolve();
@@ -78,19 +81,19 @@ var EditorMenu = Widget.extend({
             confirm.on('closed', def, def.reject);
         }
         return def.then(function () {
-            this.trigger_up('edition_will_stopped');
+            self.trigger_up('edition_will_stopped');
             var $wrapwrap = $('#wrapwrap');
-            this.editable($wrapwrap).removeClass('o_editable');
+            self.editable($wrapwrap).removeClass('o_editable');
             if (reload !== false) {
-                this.wysiwyg.destroy();
-                return this._reload();
+                self.wysiwyg.destroy();
+                return self._reload();
             } else {
-                this.wysiwyg.destroy();
-                this.trigger_up('readonly_mode');
-                this.trigger_up('edition_was_stopped');
-                this.destroy();
-            }            
-        }.bind(this));
+                self.wysiwyg.destroy();
+                self.trigger_up('readonly_mode');
+                self.trigger_up('edition_was_stopped');
+                self.destroy();
+            }
+        });
     },
     /**
      * Asks the snippets to clean themself, then saves the page, then reloads it
@@ -101,20 +104,21 @@ var EditorMenu = Widget.extend({
      * @returns {Deferred}
      */
     save: function (reload) {
+        var self = this;
         this.trigger_up('edition_will_stopped');
         return this.wysiwyg.save().then(function (dirty) {
             var $wrapwrap = $('#wrapwrap');
-            this.editable($wrapwrap).removeClass('o_editable');
+            self.editable($wrapwrap).removeClass('o_editable');
             if (dirty && reload !== false) {
                 // remove top padding because the connected bar is not visible
                 $('body').removeClass('o_connected_user');
-                return this._reload();
+                return self._reload();
             } else {
-                this.wysiwyg.destroy();
-                this.trigger_up('edition_was_stopped');
-                this.destroy();
+                self.wysiwyg.destroy();
+                self.trigger_up('edition_was_stopped');
+                self.destroy();
             }
-        }.bind(this));
+        });
     },
     /**
      * Returns the editable areas on the page.

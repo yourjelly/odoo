@@ -9,6 +9,7 @@
         @include o-position-absolute(0, 0, 0, 0);
         background-color: inherit;
     }
+
     &::after {
         content: "";
         @include o-position-absolute(0, 0, 0, 0);
@@ -22,7 +23,13 @@ $o-wysiwyg-zindex: 1000;
 
 $o-wysiwyg-md-ease: cubic-bezier(0.19, 1, 0.22, 1) !default;
 
-$o-wysiwyg-font-family: Roboto, "Montserrat", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+$o-wysiwyg-font-family: Roboto,
+"Montserrat",
+"Segoe UI",
+"Helvetica Neue",
+Helvetica,
+Arial,
+sans-serif;
 
 $o-wysiwyg-toolbar-height: 32px;
 

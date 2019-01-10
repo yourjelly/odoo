@@ -15,7 +15,7 @@ var TablePlugin = Plugins.table.extend({
         setTimeout(function () {
             // contentEditable fail for image and font in table
             // user must use right arrow the number of space but without feedback
-            this.$editable.find('td:has(img, span.fa)').each(function () {
+            self.$editable.find('td:has(img, span.fa)').each(function () {
                 if (this.firstChild && !this.firstChild.tagName) {
                     var startSpace = self.context.invoke('HelperPlugin.getRegex', 'startSpace');
                     this.firstChild.textContent = this.firstChild.textContent.replace(startSpace, ' ');
@@ -25,8 +25,8 @@ var TablePlugin = Plugins.table.extend({
                     this.lastChild.textContent = this.lastChild.textContent.replace(endSpace, ' ');
                 }
             });
-            this.context.invoke('HistoryPlugin.clear');
-        }.bind(this));
+            self.context.invoke('HistoryPlugin.clear');
+        });
     },
 
     //--------------------------------------------------------------------------
@@ -82,7 +82,7 @@ var TablePlugin = Plugins.table.extend({
      */
     deleteCol: function () {
         var range = this.context.invoke('editor.createRange');
-        
+
         // Delete the last remaining column === delete the table
         var cell = dom.ancestor(range.commonAncestor(), dom.isCell);
         if (cell && !cell.previousElementSibling && !cell.nextElementSibling) {
@@ -106,7 +106,7 @@ var TablePlugin = Plugins.table.extend({
      */
     deleteRow: function () {
         var range = this.context.invoke('editor.createRange');
-        
+
         // Delete the last remaining row === delete the table
         var row = dom.ancestor(range.commonAncestor(), function (n) {
             return n.tagName === 'TR';
@@ -194,15 +194,17 @@ var TablePopover = Plugins.tablePopover.extend({
             pos.left = pos.left - posContainer.left + 10;
             pos.top = pos.top - posContainer.top + $(cell).outerHeight() - 4;
 
-            this.lastPos = {target: target, offset: $(target).offset()};
+            this.lastPos = {
+                target: target,
+                offset: $(target).offset(),
+            };
 
             this.$popover.css({
                 display: 'block',
                 left: pos.left,
                 top: pos.top,
             });
-        }
-        else {
+        } else {
             this.hide();
         }
         return cell;

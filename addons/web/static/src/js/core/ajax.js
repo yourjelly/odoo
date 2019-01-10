@@ -522,7 +522,9 @@ var loadAsset = (function () {
             return $.when(cache[xmlId]);
         }
         var params = {
-            args: [xmlId, {debug: config.debug}],
+            args: [xmlId, {
+                debug: config.debug
+            }],
             kwargs: {
                 context: odoo.session_info.user_context,
             },
@@ -533,17 +535,17 @@ var loadAsset = (function () {
             var $xml = $(xml);
             cache[xmlId] = {
                 cssLibs: $xml.filter('link[href]:not([type="image/x-icon"])').map(function () {
-                        return $(this).attr('href');
-                    }).get(),
+                    return $(this).attr('href');
+                }).get(),
                 cssContents: $xml.filter('style').map(function () {
-                        return $(this).html();
-                    }).get(),
+                    return $(this).html();
+                }).get(),
                 jsLibs: $xml.filter('script[src]').map(function () {
-                        return $(this).attr('src');
-                    }).get(),
+                    return $(this).attr('src');
+                }).get(),
                 jsContents: $xml.filter('script:not([src])').map(function () {
-                        return $(this).html();
-                    }).get(),
+                    return $(this).html();
+                }).get(),
             };
             return cache[xmlId];
         });

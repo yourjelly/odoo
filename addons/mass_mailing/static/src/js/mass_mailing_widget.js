@@ -39,30 +39,31 @@ var MassMailingFieldHtml = FieldHtml.extend({
      * @override
      */
     commitChanges: function () {
+        var self = this;
         var fieldName = this.nodeOptions['inline-field'];
 
-        if(this.$content.find('.o_basic_theme').length) {
+        if (this.$content.find('.o_basic_theme').length) {
             this.$content.find('*').css('font-family', '');
         }
 
         var $editable = this.wysiwyg.getEditable();
 
         return this.wysiwyg.save().then(function (isDirty) {
-            this._isDirty = isDirty;
+            self._isDirty = isDirty;
 
             convertInline.attachmentThumbnailToLinkImg($editable);
             convertInline.fontToImg($editable);
             convertInline.classToStyle($editable);
 
-            this.trigger_up('field_changed', {
+            self.trigger_up('field_changed', {
                 dataPointID: this.dataPointID,
                 changes: _.object([fieldName], [this._unWrap($editable.html())])
             });
 
-            if (this._isDirty && this.mode === 'edit') {
-                return this._doAction();
+            if (self._isDirty && self.mode === 'edit') {
+                return self._doAction();
             }
-        }.bind(this));
+        });
     },
     /**
      * The html_frame widget is opened in an iFrame that has its URL encoded
@@ -250,20 +251,34 @@ var MassMailingFieldHtml = FieldHtml.extend({
         var $new_wrapper;
         var $newWrapperContent;
         if (themeParams.nowrap) {
-            $new_wrapper = $('<div/>', {class: 'oe_structure'});
+            $new_wrapper = $('<div/>', {
+                class: 'oe_structure'
+            });
             $newWrapperContent = $new_wrapper;
         } else {
             // This wrapper structure is the only way to have a responsive
             // and centered fixed-width content column on all mail clients
-            $new_wrapper = $('<table/>', {class: 'o_mailWrapper'});
-            $newWrapperContent = $('<td/>', {class: 'o_mail_no_options o_mailWrapper_td oe_structure'});
+            $new_wrapper = $('<table/>', {
+                class: 'o_mailWrapper'
+            });
+            $newWrapperContent = $('<td/>', {
+                class: 'o_mail_no_options o_mailWrapper_td oe_structure'
+            });
             $new_wrapper.append($('<tr/>').append(
-                $('<td/>', {class: 'o_mail_no_resize o_not_editable', contenteditable: 'false'}),
+                $('<td/>', {
+                    class: 'o_mail_no_resize o_not_editable',
+                    contenteditable: 'false'
+                }),
                 $newWrapperContent,
-                $('<td/>', {class: 'o_mail_no_resize o_not_editable', contenteditable: 'false'})
+                $('<td/>', {
+                    class: 'o_mail_no_resize o_not_editable',
+                    contenteditable: 'false'
+                })
             ));
         }
-        var $newLayout = $('<div/>', {class: 'o_layout ' + themeParams.className}).append($new_wrapper);
+        var $newLayout = $('<div/>', {
+            class: 'o_layout ' + themeParams.className
+        }).append($new_wrapper);
 
         var $contents;
         if (firstChoice) {
@@ -286,7 +301,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
                     return this.nodeType === 3 && this.textContent.match(/\S/);
                 }).parent().addClass('o_default_snippet_text');
 
-            if(themeParams.name == 'basic') {
+            if (themeParams.name == 'basic') {
                 this.$content.focusIn();
             }
         }
@@ -336,9 +351,14 @@ var MassMailingFieldHtml = FieldHtml.extend({
             var name = $theme.data("name");
             var classname = "o_" + name + "_theme";
             self._allClasses += " " + classname;
-            var imagesInfo = _.defaults($theme.data("imagesInfo") || {}, {all: {}});
+            var imagesInfo = _.defaults($theme.data("imagesInfo") || {}, {
+                all: {}
+            });
             _.each(imagesInfo, function (info) {
-                info = _.defaults(info, imagesInfo.all, {module: "mass_mailing", format: "jpg"});
+                info = _.defaults(info, imagesInfo.all, {
+                    module: "mass_mailing",
+                    format: "jpg"
+                });
             });
             return {
                 name: name,
@@ -382,7 +402,9 @@ var MassMailingFieldHtml = FieldHtml.extend({
          */
         var selectedTheme = false;
         $dropdown.on("mouseenter", ".dropdown-item", function (e) {
-            if (firstChoice) return;
+            if (firstChoice) {
+                return;
+            }
             e.preventDefault();
             var themeParams = themesParams[$(e.currentTarget).index()];
             self._switchThemes(firstChoice, themeParams);
@@ -435,7 +457,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
         $dropdown.on("shown.bs.dropdown", function () {
             selectedTheme = self._getSelectedTheme(themesParams);
             $dropdown.find(".dropdown-item").removeClass("selected").filter(function () {
-                return ($(this).has(".o_thumb[style=\""+ "background-image: url(" + (selectedTheme && selectedTheme.img) + "_small.png)"+ "\"]").length > 0);
+                return ($(this).has(".o_thumb[style=\"" + "background-image: url(" + (selectedTheme && selectedTheme.img) + "_small.png)" + "\"]").length > 0);
             }).addClass("selected");
         });
         $dropdown.on("hidden.bs.dropdown", function () {
@@ -469,7 +491,10 @@ var MassMailingFieldHtml = FieldHtml.extend({
      * @override
      */
     _onTranslate: function () {
-        this.trigger_up('translate', {fieldName: this.nodeOptions['inline-field'], id: this.dataPointID});
+        this.trigger_up('translate', {
+            fieldName: this.nodeOptions['inline-field'],
+            id: this.dataPointID
+        });
     },
 });
 

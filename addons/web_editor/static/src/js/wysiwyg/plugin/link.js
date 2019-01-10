@@ -80,7 +80,7 @@ var LinkPlugin = Plugins.linkDialog.extend({
                         r.so = 0;
                     }
                     if (r.ec.tagName) {
-                        r.ec = (r.eo ? r.ec.childNodes[r.eo-1] : r.ec).lastChild || r.ec;
+                        r.ec = (r.eo ? r.ec.childNodes[r.eo - 1] : r.ec).lastChild || r.ec;
                         r.eo = r.ec.textContent.length;
                     } else if (r.eo !== r.ec.textContent.length) {
                         r.ec.splitText(r.eo);
@@ -88,11 +88,11 @@ var LinkPlugin = Plugins.linkDialog.extend({
 
                     // browsers can't target a picture or void node
                     if (dom.isVoid(r.sc) || dom.isImg(r.sc)) {
-                        r.so = dom.listPrev(r.sc).length-1;
+                        r.so = dom.listPrev(r.sc).length - 1;
                         r.sc = r.sc.parentNode;
                     }
                     if (dom.isBR(r.ec)) {
-                        r.eo = dom.listPrev(r.ec).length-1;
+                        r.eo = dom.listPrev(r.ec).length - 1;
                         r.ec = r.ec.parentNode;
                     } else if (dom.isVoid(r.ec) || dom.isImg(r.sc)) {
                         r.eo = dom.listPrev(r.ec).length;
@@ -130,16 +130,16 @@ var LinkPlugin = Plugins.linkDialog.extend({
             if (nodes.length > 0) {
                 var text = "";
                 linkInfo.images = [];
-                for (var i=0; i<nodes.length; i++) {
+                for (var i = 0; i < nodes.length; i++) {
                     if (dom.ancestor(nodes[i], dom.isImg)) {
                         text += dom.ancestor(nodes[i], dom.isImg).outerHTML;
                     } else if (dom.ancestor(nodes[i], dom.isIcon)) {
                         text += dom.ancestor(nodes[i], dom.isIcon).outerHTML;
                     } else if (!linkInfo.isAnchor && nodes[i].nodeType === 1) {
                         // just use text nodes from listBetween
-                    } else if (!linkInfo.isAnchor && i===0) {
+                    } else if (!linkInfo.isAnchor && i === 0) {
                         text += nodes[i].textContent;
-                    } else if (!linkInfo.isAnchor && i===nodes.length-1) {
+                    } else if (!linkInfo.isAnchor && i === nodes.length - 1) {
                         text += nodes[i].textContent;
                     } else {
                         text += nodes[i].textContent;
@@ -152,8 +152,7 @@ var LinkPlugin = Plugins.linkDialog.extend({
         }
 
         var def = $.Deferred();
-        var linkDialog = new LinkDialog(this.options.parent,
-            {
+        var linkDialog = new LinkDialog(this.options.parent, {
                 onClose: function () {
                     setTimeout(function () {
                         self.context.invoke('editor.focus');
@@ -176,14 +175,17 @@ var LinkPlugin = Plugins.linkDialog.extend({
                     $anchor.removeAttr('target');
                 }
             } else {
-                this.context.invoke('editor.saveRange');
+                self.context.invoke('editor.saveRange');
                 def.resolve(_.clone(newLinkInfo));
-                var range = this.context.invoke('editor.createRange');
+                var range = self.context.invoke('editor.createRange');
                 var anchor = dom.ancestor(range.sc.childNodes[range.so] || range.sc, dom.isAnchor);
                 $anchor = $(anchor);
                 if (isCollapsed) {
                     // move the range juste after the link
-                    var point = dom.nextPoint({node: anchor, offset: dom.nodeLength(anchor)});
+                    var point = dom.nextPoint({
+                        node: anchor,
+                        offset: dom.nodeLength(anchor),
+                    });
                     range.sc = range.ec = point.node;
                     range.so = range.eo = point.offset;
                     range.select();
@@ -196,10 +198,10 @@ var LinkPlugin = Plugins.linkDialog.extend({
             }
             $anchor.attr('class', newLinkInfo.className);
             $anchor.attr('href', newLinkInfo.url);
-            this.context.invoke('editor.saveRange');
-            this.context.invoke('editor.saveTarget', $anchor[0]);
-            this.context.triggerEvent('focusnode', $anchor[0]);
-        }.bind(this)));
+            self.context.invoke('editor.saveRange');
+            self.context.invoke('editor.saveTarget', $anchor[0]);
+            self.context.triggerEvent('focusnode', $anchor[0]);
+        }));
         linkDialog.on('closed', this, function () {
             def.reject();
             this.context.invoke('editor.restoreRange');
@@ -317,7 +319,7 @@ var LinkPopover = Plugins.linkPopover.extend({
     update: function () {
         var rng = this.context.invoke('editor.createRange');
         var anchor = dom.ancestor(rng.sc, dom.isAnchor);
-        if (anchor && anchor === dom.ancestor(rng.ec, dom.isAnchor))  {
+        if (anchor && anchor === dom.ancestor(rng.ec, dom.isAnchor)) {
             anchor = dom.ancestor(rng.sc, dom.isAnchor);
             if (!$(anchor).is(':o_editable')) {
                 this.hide();
@@ -418,8 +420,12 @@ var LinkPopover = Plugins.linkPopover.extend({
             // prevent links without text
             if (
                 this.$editable.has(this.lastAnchor).length &&
-                this.context.invoke('HelperPlugin.getRegexBlank', {space: true, invisible: true, nbsp: true}).test(innerHTML)
-               ) {
+                this.context.invoke('HelperPlugin.getRegexBlank', {
+                    space: true,
+                    invisible: true,
+                    nbsp: true,
+                }).test(innerHTML)
+            ) {
                 $(this.lastAnchor).contents().remove();
                 $(this.lastAnchor).append(this.document.createTextNode(_t('Label')));
                 range.sc = range.ec = this.lastAnchor.firstChild;
@@ -431,7 +437,7 @@ var LinkPopover = Plugins.linkPopover.extend({
             if (
                 !firstChild.tagName &&
                 this.context.invoke('HelperPlugin.getRegex', 'startInvisible').test(firstChild.textContent)
-               ) {
+            ) {
                 firstChild.textContent = firstChild.textContent.replace(this.context.invoke('HelperPlugin.getRegex', 'startInvisible'), '');
                 if (range.sc === firstChild && range.so) {
                     range.so -= 1;
@@ -447,7 +453,7 @@ var LinkPopover = Plugins.linkPopover.extend({
                 lastChild.textContent.length > 1 &&
                 !lastChild.tagName &&
                 this.context.invoke('HelperPlugin.getRegex', 'endInvisible').test(lastChild.textContent)
-               ) {
+            ) {
                 lastChild.textContent = lastChild.textContent.replace(this.context.invoke('HelperPlugin.getRegex', 'endInvisible'), '');
                 if (range.sc === lastChild && range.so > dom.nodeLength(lastChild)) {
                     range.so = dom.nodeLength(lastChild);
@@ -468,10 +474,10 @@ var LinkPopover = Plugins.linkPopover.extend({
 });
 
 registry.add('LinkPlugin', LinkPlugin)
-        .add('LinkPopover', LinkPopover)
-        .add('linkDialog', null)
-        .add('linkPopover', null)
-        .add('autoLink', null);
+    .add('LinkPopover', LinkPopover)
+    .add('linkDialog', null)
+    .add('linkPopover', null)
+    .add('autoLink', null);
 
 return {
     LinkPlugin: LinkPlugin,

@@ -54,8 +54,7 @@ var MediaPlugin = AbstractPlugin.extend({
         this.context.invoke('editor.saveRange');
         var media = this.context.invoke('editor.restoreTarget');
 
-        var mediaDialog = new weWidgets.MediaDialog(this.options.parent,
-            {},
+        var mediaDialog = new weWidgets.MediaDialog(this.options.parent, {},
             $(media).clone()[0]
         );
 
@@ -96,7 +95,10 @@ var MediaPlugin = AbstractPlugin.extend({
             return;
         }
 
-        this.lastPos = {target: target, offset: $(target).offset()};
+        this.lastPos = {
+            target: target,
+            offset: $(target).offset(),
+        };
 
         this.context.triggerEvent('focusnode', target);
 
@@ -110,7 +112,11 @@ var MediaPlugin = AbstractPlugin.extend({
         if (!$target.data('show_tooltip')) {
             $target.data('show_tooltip', true);
             setTimeout(function () {
-                $target.tooltip({title: _t('Double-click to edit'), trigger: 'manuel', container: this.document.body}).tooltip('show');
+                $target.tooltip({
+                    title: _t('Double-click to edit'),
+                    trigger: 'manuel',
+                    container: this.document.body,
+                }).tooltip('show');
                 setTimeout(function () {
                     $target.tooltip('dispose');
                 }, 2000);
@@ -240,8 +246,8 @@ var MediaPlugin = AbstractPlugin.extend({
      */
     updatePopoverAfterEdit: function (media) {
         this.mousePosition = {
-            pageX: $(media).offset().left + $(media).width()/2,
-            pageY: $(media).offset().top + $(media).height()/2,
+            pageX: $(media).offset().left + $(media).width() / 2,
+            pageY: $(media).offset().top + $(media).height() / 2,
         };
         $(media).trigger('mousedown').trigger('mouseup');
     },
@@ -297,7 +303,10 @@ var MediaPlugin = AbstractPlugin.extend({
         var padding = [null, 'padding-small', 'padding-medium', 'padding-large', 'padding-xl'];
         var zipped = _.zip(padding, this.lang.image.paddingList);
         var values = _.map(zipped, function (z) {
-            return {value: z[0], string: z[1]};
+            return {
+                value: z[0],
+                string: z[1],
+            };
         });
         this._createDropdownButton('padding', this.options.icons.padding, this.lang.image.padding, values);
     },
@@ -329,7 +338,7 @@ var MediaPlugin = AbstractPlugin.extend({
             return target;
         }
 
-        while(target.parentNode && dom.isMedia(target.parentNode)) {
+        while (target.parentNode && dom.isMedia(target.parentNode)) {
             target = target.parentNode;
         }
 
@@ -362,8 +371,11 @@ var MediaPlugin = AbstractPlugin.extend({
         var range = this.context.invoke('editor.createRange');
         var $contentEditable;
 
-        if (range.sc.tagName && $.contains(target, range.sc) && $(range.sc).hasClass('o_fake_editable') &&
-            left === !range.sc.previousElementSibling) {
+        if (
+            range.sc.tagName && $.contains(target, range.sc) &&
+            $(range.sc).hasClass('o_fake_editable') &&
+            left === !range.sc.previousElementSibling
+        ) {
             $contentEditable = $(range.sc).closest('[contentEditable]');
             if ($(target).closest('[contentEditable]')[0] !== $contentEditable[0]) {
                 $contentEditable.focus();
@@ -372,20 +384,35 @@ var MediaPlugin = AbstractPlugin.extend({
             return;
         }
 
-        var next = {node: target, offset: 0};
+        var next = {
+            node: target,
+            offset: 0,
+        };
         if (left) {
             if (dom.isVideo(target)) {
-                next = {node: target.firstElementChild, offset: 0};
+                next = {
+                    node: target.firstElementChild,
+                    offset: 0,
+                };
             } else {
-                next = dom.prevPointUntil({node: target, offset: 0}, function (point) {
+                next = dom.prevPointUntil({
+                    node: target,
+                    offset: 0,
+                }, function (point) {
                     return point.node !== target && !$.contains(target, point.node);
                 }) || next;
             }
         } else {
             if (dom.isVideo(target)) {
-                next = {node: target.lastElementChild, offset: 0};
+                next = {
+                    node: target.lastElementChild,
+                    offset: 0,
+                };
             } else {
-                next = dom.nextPointUntil({node: target, offset: 0}, function (point) {
+                next = dom.nextPointUntil({
+                    node: target,
+                    offset: 0,
+                }, function (point) {
                     return point.node !== target && !$.contains(target, point.node);
                 }) || next;
             }
@@ -500,7 +527,7 @@ var MediaPlugin = AbstractPlugin.extend({
 
             var width = $(target).width();
             // we put the cursor to the left if we click in the first tier of the media
-            var left = this.mousePosition.pageX < (pos.left + width/3);
+            var left = this.mousePosition.pageX < (pos.left + width / 3);
             this._moveTargetSelection(target, left);
 
             this.update(target);
@@ -537,7 +564,9 @@ var AbstractMediaPlugin = AbstractPlugin.extend({
     targetType: null,
     initialize: function () {
         this._super.apply(this, arguments);
-        this.$popover = this.ui.popover({className: 'note-' + this.targetType + '-popover'})
+        this.$popover = this.ui.popover({
+                className: 'note-' + this.targetType + '-popover',
+            })
             .render().appendTo(this.options.container);
         var $content = this.$popover.find('.popover-content, .note-popover-content');
         this.context.invoke('buttons.build', $content, this.options.popover[this.targetType]);
@@ -656,8 +685,7 @@ var ImagePlugin = AbstractMediaPlugin.extend({
         this.context.invoke('editor.saveRange');
 
         var media = this.context.invoke('editor.restoreTarget');
-        var cropImageDialog = new weWidgets.CropImageDialog(this.options.parent,
-            {},
+        var cropImageDialog = new weWidgets.CropImageDialog(this.options.parent, {},
             $(media).clone()
         );
         cropImageDialog.on('saved', this, function (data) {
@@ -676,14 +704,13 @@ var ImagePlugin = AbstractMediaPlugin.extend({
         this.context.invoke('editor.saveRange');
 
         var media = this.context.invoke('editor.restoreTarget');
-        var altDialog = new weWidgets.AltDialog(this.options.parent,
-            {},
+        var altDialog = new weWidgets.AltDialog(this.options.parent, {},
             $(media).clone()
         );
         altDialog.on('saved', this, this._wrapCommand(function (data) {
             $(media).attr('alt', $(data.media).attr('alt'))
-                    .attr('title', $(data.media).attr('title'))
-                    .trigger('content_changed');
+                .attr('title', $(data.media).attr('title'))
+                .trigger('content_changed');
         }));
         altDialog.on('closed', this, function () {
             this.context.invoke('editor.restoreRange');
@@ -699,6 +726,7 @@ var ImagePlugin = AbstractMediaPlugin.extend({
      * @param {Object} mousePosition {pageX: Number, pageY: Number}
      */
     show: function (target, mousePosition) {
+        var self = this;
         this._super.apply(this, arguments);
         var $target = $(target);
 
@@ -706,10 +734,10 @@ var ImagePlugin = AbstractMediaPlugin.extend({
 
         _.each(this.options.icons.imageShape, function (icon, className) {
             var thisIconSel = '.note-imageShape button:has(.' +
-                                icon.replace(this.context.invoke('HelperPlugin.getRegex', 'space', 'g'), '.') +
-                                ')';
-            ui.toggleBtnActive(this.$popover.find(thisIconSel), $target.hasClass(className));
-        }.bind(this));
+                icon.replace(self.context.invoke('HelperPlugin.getRegex', 'space', 'g'), '.') +
+                ')';
+            ui.toggleBtnActive(self.$popover.find(thisIconSel), $target.hasClass(className));
+        });
 
         var size = (($target.attr('style') || '').match(/width:\s*([0-9]+)%/i) || [])[1];
         ui.toggleBtnActive(this.$popover.find('.note-imagesize button:contains(' + (size ? size + '%' : this.lang.image.imageSizeAuto) + ')'), true);
@@ -765,7 +793,9 @@ var ImagePlugin = AbstractMediaPlugin.extend({
                     return self._rpc({
                         model: 'ir.attachment',
                         method: 'generate_access_token',
-                        args: [[attachmentID]],
+                        args: [
+                            [attachmentID],
+                        ],
                     }).then(function (access_token) {
                         $croppedImg.attr('src', '/web/image/' + attachmentID + '?access_token=' + access_token[0]);
                     });
@@ -774,7 +804,11 @@ var ImagePlugin = AbstractMediaPlugin.extend({
                 return self._rpc({
                     model: 'ir.attachment',
                     method: 'write',
-                    args: [[cropID], {datas: datas}],
+                    args: [
+                        [cropID], {
+                            datas: datas,
+                        },
+                    ],
                 });
             }
         }).get();
@@ -1016,12 +1050,26 @@ var IconPlugin = AbstractMediaPlugin.extend({
      */
     _addButtons: function () {
         this._super();
-        var values = [
-            {value: '', string: '1x'},
-            {value: 'fa-2x', string: '2x'},
-            {value: 'fa-3x', string: '3x'},
-            {value: 'fa-4x', string: '4x'},
-            {value: 'fa-5x', string: '5x'},
+        var values = [{
+                value: '',
+                string: '1x',
+            },
+            {
+                value: 'fa-2x',
+                string: '2x',
+            },
+            {
+                value: 'fa-3x',
+                string: '3x',
+            },
+            {
+                value: 'fa-4x',
+                string: '4x',
+            },
+            {
+                value: 'fa-5x',
+                string: '5x',
+            },
         ];
         this._createDropdownButton('faSize', this.options.icons.faSize, this.lang.image.faSize, values);
         this._createToggleButton('faSpin', this.options.icons.faSpin, this.lang.image.faSpin, 'fa-spin');
@@ -1107,7 +1155,7 @@ var DocumentPlugin = AbstractMediaPlugin.extend({
         var posContainer = $(this.options.container).offset();
         pos.left = pos.left - posContainer.left + this.options.POPOVER_MARGIN;
         pos.top = pos.top - posContainer.top + this.options.POPOVER_MARGIN;
-        
+
         var popoverPos = this._popoverFitEditor(pos.left + 10, pos.top - 15);
         this.$popover.css({
             display: 'block',
@@ -1161,7 +1209,7 @@ var HandlePlugin = Plugins.handle.extend({
         if (src) {
             var origImageObj = new Image();
             origImageObj.src = src;
-            sizingText += ' (' + this.lang.image.original + ': ' + origImageObj.width + 'x' + origImageObj.height + ')';   
+            sizingText += ' (' + this.lang.image.original + ': ' + origImageObj.width + 'x' + origImageObj.height + ')';
         }
         $selection.find('.note-control-selection-info').text(sizingText);
         this.context.invoke('editor.saveTarget', target);

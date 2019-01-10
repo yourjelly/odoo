@@ -24,7 +24,9 @@ var AltDialog = Dialog.extend({
             title: _t("Change media description and tooltip")
         }, options));
 
-        this.trigger_up('getRecordInfo', {recordInfo: options});
+        this.trigger_up('getRecordInfo', {
+            recordInfo: options,
+        });
 
         this.media = media;
         var allEscQuots = /&quot;/g;
@@ -45,7 +47,7 @@ var AltDialog = Dialog.extend({
         var title = this.$('#title').val();
         var allNonEscQuots = /"/g;
         $(this.media).attr('alt', alt ? alt.replace(allNonEscQuots, "&quot;") : null)
-                     .attr('title', title ? title.replace(allNonEscQuots, "&quot;") : null);
+            .attr('title', title ? title.replace(allNonEscQuots, "&quot;") : null);
 
         this.trigger('saved', {
             media: this.media,

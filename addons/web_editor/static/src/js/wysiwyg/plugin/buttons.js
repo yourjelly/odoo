@@ -24,10 +24,11 @@ Plugins.buttons.include({
      * @param {JQuery Object} $container
      */
     updateActiveStyleDropdown: function ($container) {
+        var self = this;
         var range = this.context.invoke('editor.createRange');
         var el = dom.ancestor(range.sc, function (n) {
-            return n.tagName && this.options.styleTags.indexOf(n.tagName.toLowerCase()) !== -1;
-        }.bind(this));
+            return n.tagName && self.options.styleTags.indexOf(n.tagName.toLowerCase()) !== -1;
+        });
         if (el) {
             var tagName = el.tagName.toLowerCase();
             $container.find('.dropdown-style a').each(function (idx, item) {

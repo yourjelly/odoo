@@ -56,19 +56,20 @@ var FontPlugin = AbstractPlugin.extend({
      * @returns {jQuery} the overridden button
      */
     overrideFontSizeButton: function ($button) {
+        var self = this;
         $button.click(function (e) {
             e.preventDefault();
         });
         $button.find('.dropdown-menu').off('click').on('mousedown', function (e) {
             e.preventDefault();
-            this.context.invoke('editor.createRange');
-            this.context.invoke('editor.beforeCommand');
+            self.context.invoke('editor.createRange');
+            self.context.invoke('editor.beforeCommand');
             var $target = $(e.target);
-            this.context.invoke('FontPlugin.changeFontSize', $target.closest('[data-value]').data('value'), $target);
-            this.context.invoke('buttons.updateCurrentStyle');
-            this.context.invoke('editor.saveRange');
-            this.context.invoke('editor.afterCommand');
-        }.bind(this));
+            self.context.invoke('FontPlugin.changeFontSize', $target.closest('[data-value]').data('value'), $target);
+            self.context.invoke('buttons.updateCurrentStyle');
+            self.context.invoke('editor.saveRange');
+            self.context.invoke('editor.afterCommand');
+        });
         return $button;
     },
     /**
@@ -78,7 +79,8 @@ var FontPlugin = AbstractPlugin.extend({
      * @returns {jQuery}
      */
     createPalette: function (eventName) {
-        var colors = _.clone(this.options.colors)
+        var self = this;
+        var colors = _.clone(this.options.colors);
         colors.splice(0, 1); // Ignore the summernote gray palette and use ours
         var $palette = $(QWeb.render('wysiwyg.plugin.font.colorPalette', {
             colors: colors,
@@ -101,7 +103,10 @@ var FontPlugin = AbstractPlugin.extend({
             if (!$contents.length) {
                 return '';
             }
-            var $row = $("<div/>", {"class": "note-color-row mb8 clearfix", 'data-group': $(group).data('name')}).append($contents);
+            var $row = $("<div/>", {
+                "class": "note-color-row mb8 clearfix",
+                'data-group': $(group).data('name'),
+            }).append($contents);
             var $after_breaks = $row.find(".o_small + :not(.o_small)");
             if ($after_breaks.length === 0) {
                 $after_breaks = $row.find(":nth-child(8n+9)");
@@ -121,16 +126,16 @@ var FontPlugin = AbstractPlugin.extend({
 
         $palette.off('click').on('mousedown', '.note-color-btn', function (e) {
             e.preventDefault();
-            this.context.invoke('editor.createRange');
-            this.context.invoke('editor.beforeCommand');
+            self.context.invoke('editor.createRange');
+            self.context.invoke('editor.beforeCommand');
             var method = eventName === 'backColor' ? 'changeBgColor' : 'changeForeColor';
             var $target = $(e.target);
-            this.context.invoke('FontPlugin.' + method, $target.closest('[data-value]').data('value'), $target);
-            this.context.invoke('buttons.updateCurrentStyle');
-            this.editable.normalize();
-            this.context.invoke('editor.saveRange');
-            this.context.invoke('editor.afterCommand');
-        }.bind(this));
+            self.context.invoke('FontPlugin.' + method, $target.closest('[data-value]').data('value'), $target);
+            self.context.invoke('buttons.updateCurrentStyle');
+            self.editable.normalize();
+            self.context.invoke('editor.saveRange');
+            self.context.invoke('editor.afterCommand');
+        });
         $palette.on('mousedown', '.note-custom-color', this._onCustomColor.bind(this, eventName));
 
         return $palette;
@@ -179,9 +184,9 @@ var FontPlugin = AbstractPlugin.extend({
         var className = node.className.split(this.context.invoke('HelperPlugin.getRegex', 'space'));
         var k;
         if (color) {
-            for (k=0; k<className.length; k++) {
-                if (className[k].length && className[k].slice(0,5) === "text-") {
-                    className.splice(k,1);
+            for (k = 0; k < className.length; k++) {
+                if (className[k].length && className[k].slice(0, 5) === "text-") {
+                    className.splice(k, 1);
                     k--;
                 }
             }
@@ -197,9 +202,9 @@ var FontPlugin = AbstractPlugin.extend({
             }
         }
         if (bgcolor) {
-            for (k=0; k<className.length; k++) {
-                if (className[k].length && className[k].slice(0,3) === "bg-") {
-                    className.splice(k,1);
+            for (k = 0; k < className.length; k++) {
+                if (className[k].length && className[k].slice(0, 3) === "bg-") {
+                    className.splice(k, 1);
                     k--;
                 }
             }
@@ -217,7 +222,7 @@ var FontPlugin = AbstractPlugin.extend({
         }
         if (size) {
             node.style.fontSize = "inherit";
-            if (!isNaN(size) && Math.abs(parseInt(this.window.getComputedStyle(node).fontSize, 10)-size)/size > 0.05) {
+            if (!isNaN(size) && Math.abs(parseInt(this.window.getComputedStyle(node).fontSize, 10) - size) / size > 0.05) {
                 node.style.fontSize = size + "px";
             }
         }
@@ -233,8 +238,9 @@ var FontPlugin = AbstractPlugin.extend({
      * @param {integer} fontsize
      */
     _applyFont: function (color, bgcolor, size) {
+        var self = this;
         var r = this.context.invoke('editor.createRange');
-        if (!r || !this.$editable.has(r.sc).length ||! this.$editable.has(r.ec).length) {
+        if (!r || !this.$editable.has(r.sc).length || !this.$editable.has(r.ec).length) {
             return;
         }
         var target;
@@ -256,7 +262,10 @@ var FontPlugin = AbstractPlugin.extend({
                     });
                     var right;
                     if (fontParent) {
-                        right = this.context.invoke('HelperPlugin.splitTree', fontParent, {node: r.sc, offset: r.so});
+                        right = this.context.invoke('HelperPlugin.splitTree', fontParent, {
+                            node: r.sc,
+                            offset: r.so,
+                        });
                     } else {
                         right = r.sc.splitText(r.so);
                     }
@@ -303,11 +312,11 @@ var FontPlugin = AbstractPlugin.extend({
         var nodes = [];
         dom.walkPoint(startPoint, endPoint, function (point) {
             var node = point.node;
-            if (((dom.isText(node) && this.context.invoke('HelperPlugin.isVisibleText', node)) || dom.isIcon(node)) &&
-            (node !== endPoint.node || endPoint.offset)) {
+            if (((dom.isText(node) && self.context.invoke('HelperPlugin.isVisibleText', node)) || dom.isIcon(node)) &&
+                (node !== endPoint.node || endPoint.offset)) {
                 nodes.push(point.node);
             }
-        }.bind(this));
+        });
         nodes = _.unique(nodes);
         // if fontawesome
         if (r.isCollapsed()) {
@@ -321,7 +330,7 @@ var FontPlugin = AbstractPlugin.extend({
         var className;
         var i;
         if (color || bgcolor || size) {
-            for (i=0; i<nodes.length; i++) {
+            for (i = 0; i < nodes.length; i++) {
                 node = nodes[i];
                 font = dom.lastAncestor(node, dom.isFont);
                 if (!font) {
@@ -339,7 +348,7 @@ var FontPlugin = AbstractPlugin.extend({
         // remove empty values
         // we must remove the value in 2 steps (applay inherit then remove) because some
         // browser like chrome have some time an error for the rendering and/or keep inherit
-        for (i=0; i<fonts.length; i++) {
+        for (i = 0; i < fonts.length; i++) {
             font = fonts[i];
             if (font.style.color === "inherit") {
                 font.style.color = "";
@@ -376,7 +385,7 @@ var FontPlugin = AbstractPlugin.extend({
         });
         nodes = _.unique(nodes);
         // remove node without attributes (move content), and merge the same nodes
-        for (i=0; i<nodes.length; i++) {
+        for (i = 0; i < nodes.length; i++) {
             node = nodes[i];
             if (dom.isText(node) && !this.context.invoke('HelperPlugin.isVisibleText', node)) {
                 continue;
@@ -398,7 +407,7 @@ var FontPlugin = AbstractPlugin.extend({
                 }
                 $(node).remove();
 
-                nodes.splice(i,1);
+                nodes.splice(i, 1);
                 i--;
                 continue;
             }
@@ -417,7 +426,7 @@ var FontPlugin = AbstractPlugin.extend({
                 }
                 $(font).remove();
 
-                nodes.splice(i,1);
+                nodes.splice(i, 1);
                 i--;
                 continue;
             }
@@ -534,7 +543,9 @@ registry.addJob(function (wysiwyg) {
         return;
     }
     var options = {};
-    wysiwyg.trigger_up('getRecordInfo', {recordInfo: options});
+    wysiwyg.trigger_up('getRecordInfo', {
+        recordInfo: options,
+    });
     return wysiwyg._rpc({
         model: 'ir.ui.view',
         method: 'read_template',

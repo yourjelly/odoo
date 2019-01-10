@@ -19,7 +19,7 @@ var trusted_origin = utils.build_origin(trusted_protocol, trusted_host);
 // `do_action` command
 $('[res-id][res-model][view-type]')
     .wrap('<a/>')
-        .attr('href', '#')
+    .attr('href', '#')
     .on('click', function (ev) {
         ev.preventDefault();
         var action = {
@@ -28,7 +28,9 @@ $('[res-id][res-model][view-type]')
             'view_mode': $(this).attr('view-mode') || $(this).attr('view-type'),
             'res_id': Number($(this).attr('res-id')),
             'res_model': $(this).attr('res-model'),
-            'views': [[$(this).attr('view-id') || false, $(this).attr('view-type')]],
+            'views': [
+                [$(this).attr('view-id') || false, $(this).attr('view-type')],
+            ],
         };
         window.parent.postMessage({
             'message': 'report:do_action',

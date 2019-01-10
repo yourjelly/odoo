@@ -16,9 +16,15 @@ var SummernoteDialog = Dialog.extend({
     init: function (parent, options) {
         this.options = options || {};
         this._super(parent, _.extend({}, {
-            buttons: [
-                {text: this.options.save_text || _t("Save"), classes: 'btn-primary', click: this.save},
-                {text: _t("Discard"), close: true}
+            buttons: [{
+                    text: this.options.save_text || _t("Save"),
+                    classes: 'btn-primary',
+                    click: this.save,
+                },
+                {
+                    text: _t("Discard"),
+                    close: true,
+                }
             ]
         }, this.options));
 

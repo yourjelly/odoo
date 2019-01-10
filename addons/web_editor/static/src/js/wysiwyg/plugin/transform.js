@@ -63,7 +63,7 @@ var TransformPlugin = AbstractPlugin.extend({
             return self.context.invoke('buttons.button', {
                 contents: self.ui.icon(self.options.icons.transform),
                 tooltip: self.lang.image.transform,
-                click: self.context.createInvokeHandler('TransformPlugin.transform')
+                click: self.context.createInvokeHandler('TransformPlugin.transform'),
             }).render();
         });
     },

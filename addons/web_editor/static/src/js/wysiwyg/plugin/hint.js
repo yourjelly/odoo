@@ -78,7 +78,7 @@ var HintPlugin = Plugins.hintPopover.extend({
                 };
                 this.$popover.css({
                     left: bnd.left,
-                    top: bnd.top + (this.direction === 'top' ? - this.$popover.outerHeight() : (rect.bottom - rect.top)) - 5
+                    top: bnd.top + (this.direction === 'top' ? -this.$popover.outerHeight() : (rect.bottom - rect.top)) - 5,
                 });
             } else {
                 this.hide();
@@ -98,8 +98,7 @@ var HintPlugin = Plugins.hintPopover.extend({
      */
     _hints: function () {
         var self = this;
-        return [
-            {
+        return [{
                 className: 'o_hint_partner',
                 match: /\B@(\w+(\s\w*)?)$/,
                 search: function (keyword, callback) {
@@ -107,7 +106,9 @@ var HintPlugin = Plugins.hintPopover.extend({
                         model: 'res.partner',
                         method: "search_read",
                         fields: ['id', 'name', 'email'],
-                        domain: [['name', 'ilike', keyword]],
+                        domain: [
+                            ['name', 'ilike', keyword],
+                        ],
                         limit: 10,
                     }).then(callback);
                 },

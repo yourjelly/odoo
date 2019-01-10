@@ -15,7 +15,7 @@ var Wysiwyg = Widget.extend({
         '/web_editor/static/src/xml/wysiwyg.xml',
     ],
     custom_events: {
-        getRecordInfo:  '_onGetRecordInfo',
+        getRecordInfo: '_onGetRecordInfo',
         wysiwyg_blur: '_onWysiwygBlur',
     },
     defaultOptions: {
@@ -55,14 +55,15 @@ var Wysiwyg = Widget.extend({
      * @override
      **/
     willStart: function () {
+        var self = this;
         this.$target = this.$el;
         this.$el = null; // temporary null to avoid hidden error, setElement when start
         return this._super()
             .then(function () {
-                return modulesRegistry.start(this).then(function () {
-                    return this._loadInstance();
-                }.bind(this));
-            }.bind(this));
+                return modulesRegistry.start(self).then(function () {
+                    return self._loadInstance();
+                });
+            });
     },
     /**
      *
@@ -129,12 +130,12 @@ var Wysiwyg = Widget.extend({
      */
     history: function (step) {
         if (step < 0) {
-            while(step) {
+            while (step) {
                 this._summernote.modules.editor.history.rewind();
                 step++;
             }
         } else if (step > 0) {
-            while(step) {
+            while (step) {
                 this._summernote.modules.editor.history.redo();
                 step--;
             }
@@ -407,8 +408,8 @@ var Wysiwyg = Widget.extend({
         var allChildren = [];
         var child;
         while (child = children.pop()) {
-           allChildren.push(child);
-           children = children.concat(child.getChildren());
+            allChildren.push(child);
+            children = children.concat(child.getChildren());
         }
 
         var childrenDom = _.filter(_.unique(_.flatten(_.map(allChildren, function (obj) {
@@ -428,26 +429,30 @@ var Wysiwyg = Widget.extend({
      */
     _loadInstance: function () {
         var defaultOptions = this._editorOptions();
-        var summernoteOptions = _.extend({id: this.id}, defaultOptions, _.omit(this.options, 'isEditableNode', 'isUnbreakableNode'));
+        var summernoteOptions = _.extend({
+            id: this.id,
+        }, defaultOptions, _.omit(this.options, 'isEditableNode', 'isUnbreakableNode'));
 
         _.extend(summernoteOptions.callbacks, defaultOptions.callbacks, this.options.callbacks);
         if (this.options.keyMap) {
             _.defaults(summernoteOptions.keyMap.pc, defaultOptions.keyMap.pc);
-            _.each(summernoteOptions.keyMap.pc, function(v, k, o) {
-                if(!v) {
+            _.each(summernoteOptions.keyMap.pc, function (v, k, o) {
+                if (!v) {
                     delete o[k];
                 }
             });
             _.defaults(summernoteOptions.keyMap.mac, defaultOptions.keyMap.mac);
-            _.each(summernoteOptions.keyMap.mac, function(v, k, o) {
-                if(!v) {
+            _.each(summernoteOptions.keyMap.mac, function (v, k, o) {
+                if (!v) {
                     delete o[k];
                 }
             });
         }
 
         var plugins = _.extend(this._getPlugins(), this.options.plugins);
-        summernoteOptions.modules = _.omit(plugins, function (v) {return !v;});
+        summernoteOptions.modules = _.omit(plugins, function (v) {
+            return !v;
+        });
 
         if (this.$target.parent().length) {
             summernoteOptions.container = this.$target.parent().css('position', 'relative')[0];
@@ -536,16 +541,17 @@ var Wysiwyg = Widget.extend({
      * @param {jQueryEvent} ev
      */
     _onMouseDown: function (ev) {
+        var self = this;
         if (this._isEditorContent(ev.target)) {
             setTimeout(function () {
-                if (!this._editableHasFocus && !this._isEditorContent(document.activeElement)) {
-                    this._summernote.layoutInfo.editable.focus();
+                if (!self._editableHasFocus && !self._isEditorContent(document.activeElement)) {
+                    self._summernote.layoutInfo.editable.focus();
                 }
-                if (!this._isFocused) {
-                    this._isFocused = true;
-                    this._onFocus();
+                if (!self._isFocused) {
+                    self._isFocused = true;
+                    self._onFocus();
                 }
-            }.bind(this));
+            });
         } else if (this._isFocused) {
             this._isFocused = false;
             this._onBlur();
@@ -647,7 +653,9 @@ var Wysiwyg = Widget.extend({
     _onImageUpload: function (attachments) {
         var self = this;
         attachments = _.filter(attachments, function (attachment) {
-            return !_.findWhere(self.attachments, {id: attachment.id});
+            return !_.findWhere(self.attachments, {
+                id: attachment.id,
+            });
         });
         if (!attachments.length) {
             return;
@@ -693,11 +701,11 @@ var Wysiwyg = Widget.extend({
  * @see Wysiwyg.createReadyFunction
  * @param {Widget} parent
  * @returns {$.Promise}
-*/
+ */
 Wysiwyg.prepare = (function () {
     var assetsLoaded = false;
     var def;
-    return function prepare (parent) {
+    return function prepare(parent) {
         if (assetsLoaded) {
             return $.when();
         }
@@ -708,7 +716,11 @@ Wysiwyg.prepare = (function () {
         var timeout = setTimeout(function () {
             throw _t("Can't load assets of the wysiwyg editor");
         }, 10000);
-        var wysiwyg = new Wysiwyg(parent, {recordInfo: {context: {}}});
+        var wysiwyg = new Wysiwyg(parent, {
+            recordInfo: {
+                context: {},
+            }
+        });
         wysiwyg.attachTo($('<textarea>')).then(function () {
             assetsLoaded = true;
             clearTimeout(timeout);
@@ -725,7 +737,7 @@ Wysiwyg.prepare = (function () {
  * @returns {Number} so - start offset
  * @returns {Node} ec - end container
  * @returns {Number} eo - end offset
-*/
+ */
 Wysiwyg.getRange = function (node) {
     var range = $.summernote.range.create();
     return range && {
@@ -740,7 +752,7 @@ Wysiwyg.getRange = function (node) {
  * @param {Number} startOffset
  * @param {Node} endNode
  * @param {Number} endOffset
-*/
+ */
 Wysiwyg.setRange = function (startNode, startOffset, endNode, endOffset) {
     $(startNode).focus();
     if (endNode) {
@@ -756,12 +768,16 @@ Wysiwyg.setRange = function (startNode, startOffset, endNode, endOffset) {
  * @param {Object} [options]
  * @param {Boolean} options.begin move the range to the beginning of the first node.
  * @param {Boolean} options.end move the range to the end of the last node.
-*/
+ */
 Wysiwyg.setRangeFromNode = function (node, options) {
     var last = node;
-    while (last.lastChild) { last = last.lastChild; }
+    while (last.lastChild) {
+        last = last.lastChild;
+    }
     var first = node;
-    while (first.firstChild) { first = first.firstChild; }
+    while (first.firstChild) {
+        first = first.firstChild;
+    }
 
     if (options && options.begin && !options.end) {
         Wysiwyg.setRange(first, 0);
@@ -781,10 +797,20 @@ $.extend($.expr[':'], {
         while (node) {
             if (node.attributes) {
                 var className = _.isString(node.className) && node.className || '';
-                if (className.indexOf('o_not_editable') !== -1 || (node.attributes.contenteditable && node.attributes.contenteditable.value !== 'true' && className.indexOf('o_fake_not_editable') === -1)) {
+                if (
+                    className.indexOf('o_not_editable') !== -1 ||
+                    (node.attributes.contenteditable &&
+                        node.attributes.contenteditable.value !== 'true' &&
+                        className.indexOf('o_fake_not_editable') === -1)
+                ) {
                     return false;
                 }
-                if (className.indexOf('o_editable') !== -1 || (node.attributes.contenteditable && node.attributes.contenteditable.value === 'true' && className.indexOf('o_fake_editable') === -1)) {
+                if (
+                    className.indexOf('o_editable') !== -1 ||
+                    (node.attributes.contenteditable &&
+                        node.attributes.contenteditable.value === 'true' &&
+                        className.indexOf('o_fake_editable') === -1)
+                ) {
                     return true;
                 }
             }

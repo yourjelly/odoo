@@ -424,7 +424,9 @@ FieldHtml.include({
         attachmentThumbnailToLinkImg($editable);
         fontToImg($editable);
         classToStyle($editable);
-        this.wysiwyg.setValue($editable.html(), {notifyChange: false});
+        this.wysiwyg.setValue($editable.html(), {
+            notifyChange: false,
+        });
     },
     /**
      * Revert _toInline changes.
@@ -439,7 +441,9 @@ FieldHtml.include({
         styleToClass($editable);
         imgToFont($editable);
         linkImgToAttachmentThumbnail($editable);
-        this.wysiwyg.setValue($editable.html(), {notifyChange: false});
+        this.wysiwyg.setValue($editable.html(), {
+            notifyChange: false,
+        });
     },
 
     //--------------------------------------------------------------------------

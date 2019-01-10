@@ -30,7 +30,9 @@ var LinkDialog = Dialog.extend({
             title: _t("Link to"),
         }, this.options));
 
-        this.trigger_up('getRecordInfo', {recordInfo: this.options});
+        this.trigger_up('getRecordInfo', {
+            recordInfo: this.options,
+        });
 
         this.data = linkInfo || {};
         this.needLabel = linkInfo.needLabel;
@@ -111,7 +113,10 @@ var LinkDialog = Dialog.extend({
         var allBtnTypes = /(^|[ ])(btn-secondary|btn-success|btn-primary|btn-info|btn-warning|btn-danger)([ ]|$)/gi;
         this.data.className = data.classes.replace(allWhitespace, ' ').replace(allStartAndEndSpace, '');
         if (data.classes.replace(allBtnTypes, ' ')) {
-            this.data.style = {'background-color': '', 'color': ''};
+            this.data.style = {
+                'background-color': '',
+                'color': '',
+            };
         }
         this.data.isNewWindow = data.isNewWindow;
         this.final_data = this.data;
@@ -152,7 +157,7 @@ var LinkDialog = Dialog.extend({
         var label = this.$('input[name="label"]').val() || url;
 
         if (label && this.data.images) {
-            for (var i = 0 ; i < this.data.images.length ; i++) {
+            for (var i = 0; i < this.data.images.length; i++) {
                 label = label.replace('<', "&lt;").replace('>', "&gt;").replace(/\[IMG\]/, this.data.images[i].outerHTML);
             }
         }
@@ -167,10 +172,10 @@ var LinkDialog = Dialog.extend({
         var shapes = shape.split(',');
         var outline = shapes[0] === 'outline';
         shape = shapes.slice(outline ? 1 : 0).join(' ');
-        var classes = (this.data.className || '')
-            + (style ? (' btn btn-' + (outline ? 'outline-' : '') + style) : '')
-            + (shape ? (' ' + shape) : '')
-            + (size ? (' btn-' + size) : '');
+        var classes = (this.data.className || '') +
+            (style ? (' btn btn-' + (outline ? 'outline-' : '') + style) : '') +
+            (shape ? (' ' + shape) : '') +
+            (size ? (' btn-' + size) : '');
         var isNewWindow = this.$('input[name="is_new_window"]').prop('checked');
 
         if (url.indexOf('@') >= 0 && url.indexOf('mailto:') < 0 && !url.match(/^http[s]?/i)) {

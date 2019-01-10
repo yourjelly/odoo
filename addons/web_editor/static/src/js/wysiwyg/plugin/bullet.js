@@ -33,6 +33,7 @@ var BulletPlugin = AbstractPlugin.extend({
      * @returns {false|Node[]} contents of the ul/ol or content of the removed list
      */
     insertList: function (type) {
+        var self = this;
         var range = this.context.invoke('editor.createRange');
         var nodes;
         if (!range) {
@@ -63,18 +64,18 @@ var BulletPlugin = AbstractPlugin.extend({
 
         formatNodes = _.compact(_.map(formatNodes, function (node) {
             var ancestor = (!node.tagName || node.tagName === 'BR') && dom.ancestor(node, dom.isCell);
-            if (ancestor && this.options.isEditableNode(ancestor)) {
+            if (ancestor && self.options.isEditableNode(ancestor)) {
                 if (!ancestor.childNodes.length) {
-                    var br = this.document.createElement('br');
+                    var br = self.document.createElement('br');
                     ancestor.appendChild(br);
                 }
-                var p = this.document.createElement('p');
+                var p = self.document.createElement('p');
                 $(p).append(ancestor.childNodes);
                 ancestor.appendChild(p);
                 return p;
             }
-            return this.options.isEditableNode(node) && node || null;
-        }.bind(this)));
+            return self.options.isEditableNode(node) && node || null;
+        }));
 
         if (!formatNodes.length) {
             return;
@@ -87,10 +88,10 @@ var BulletPlugin = AbstractPlugin.extend({
         $(formatNodes[0][0] || formatNodes[0]).before(ul);
 
         _.each(formatNodes, function (node) {
-            var li = this.document.createElement('li');
+            var li = self.document.createElement('li');
             $(li).append(node);
             ul.appendChild(li);
-        }.bind(this));
+        });
 
         this.context.invoke('HelperPlugin.deleteEdge', ul, 'next');
         this.context.invoke('HelperPlugin.deleteEdge', ul, 'prev');
@@ -133,12 +134,13 @@ var BulletPlugin = AbstractPlugin.extend({
      * Add checklist buttons.
      */
     _addButtons: function () {
+        var self = this;
         this._super();
         this.context.memo('help.checklist', this.lang.help.checklist);
         this._createButton('checklist', this.options.icons.checklist, this.lang.lists.checklist, function (e) {
             e.preventDefault();
-            this.context.invoke('editor.insertCheckList');
-        }.bind(this));
+            self.context.invoke('editor.insertCheckList');
+        });
     },
     /**
      * Convert ul<->ol or remove ul/ol.
@@ -252,7 +254,7 @@ var BulletPlugin = AbstractPlugin.extend({
 
                 var hasNode = _.find(res, function (node) {
                     return node.tagName && node.tagName !== "BR" && !dom.isMedia(node);
-                }.bind(this));
+                });
                 if (!hasNode) {
                     var p = this.document.createElement('p');
                     $(p).insertBefore(ol).append(res);
@@ -305,12 +307,14 @@ var BulletPlugin = AbstractPlugin.extend({
             if (!$dom.length) {
                 // if the selection is contained in a single HTML node, we indent
                 // the first ancestor 'content block' (P, H1, PRE, ...) or TD
-                $dom = $(range.sc).closest(this.options.styleTags.join(',')+',td');
+                $dom = $(range.sc).closest(this.options.styleTags.join(',') + ',td');
             }
         }
 
         // if select tr, take the first td
-        $dom = $dom.map(function () { return this.tagName === "TR" ? this.firstElementChild : this; });
+        $dom = $dom.map(function () {
+            return this.tagName === "TR" ? this.firstElementChild : this;
+        });
 
         $dom.each(function () {
             if (isWithinElem || $.contains(this, range.sc)) {
@@ -337,14 +341,18 @@ var BulletPlugin = AbstractPlugin.extend({
             }
             $ul.each(function () {
                 var notWhitespace = /\S/;
-                if (this.previousSibling &&
+                if (
+                    this.previousSibling &&
                     this.previousSibling !== this.previousElementSibling &&
-                    !this.previousSibling.textContent.match(notWhitespace)) {
+                    !this.previousSibling.textContent.match(notWhitespace)
+                ) {
                     this.parentNode.removeChild(this.previousSibling);
                 }
-                if (this.nextSibling &&
+                if (
+                    this.nextSibling &&
                     this.nextSibling !== this.nextElementSibling &&
-                    !this.nextSibling.textContent.match(notWhitespace)) {
+                    !this.nextSibling.textContent.match(notWhitespace)
+                ) {
                     this.parentNode.removeChild(this.nextSibling);
                 }
             });
@@ -403,14 +411,22 @@ var BulletPlugin = AbstractPlugin.extend({
 
         var temp;
         var prev = ul.previousElementSibling;
-        if (prev && prev.tagName === "LI" && (temp = prev.firstElementChild) && temp.tagName === tagName && ((prev.firstElementChild || prev.firstChild) !== ul)) {
+        if (
+            prev && prev.tagName === "LI" &&
+            (temp = prev.firstElementChild) && temp.tagName === tagName &&
+            ((prev.firstElementChild || prev.firstChild) !== ul)
+        ) {
             $(prev.firstElementChild || prev.firstChild).append($(ul).contents());
             $(ul).remove();
             ul = prev;
             ul.parentNode.removeChild(ul.nextElementSibling);
         }
         next = ul.nextElementSibling;
-        if (next && next.tagName === "LI" && (temp = next.firstElementChild) && temp.tagName === tagName && (ul.firstElementChild !== next.firstElementChild)) {
+        if (
+            next && next.tagName === "LI" &&
+            (temp = next.firstElementChild) && temp.tagName === tagName &&
+            (ul.firstElementChild !== next.firstElementChild)
+        ) {
             $(ul.firstElementChild).append($(next.firstElementChild).contents());
             $(next.firstElementChild).remove();
             ul.parentNode.removeChild(ul.nextElementSibling);
@@ -432,7 +448,7 @@ var BulletPlugin = AbstractPlugin.extend({
      */
     _outdentContainer: function (node) {
         var style = dom.isCell(node) ? 'paddingLeft' : 'marginLeft';
-        var margin = parseFloat(node.style[style] || 0)-1.5;
+        var margin = parseFloat(node.style[style] || 0) - 1.5;
         node.style[style] = margin > 0 ? margin + "em" : "";
         return margin;
     },
@@ -444,7 +460,7 @@ var BulletPlugin = AbstractPlugin.extend({
      */
     _indentContainer: function (node) {
         var style = dom.isCell(node) ? 'paddingLeft' : 'marginLeft';
-        var margin = parseFloat(node.style[style] || 0)+1.5;
+        var margin = parseFloat(node.style[style] || 0) + 1.5;
         node.style[style] = margin + "em";
         return margin;
     },
@@ -459,7 +475,7 @@ var BulletPlugin = AbstractPlugin.extend({
      * @param {DOM} end
      * @returns {bool} isWithinElem
      */
-    _indentFormatNode: function(outdent, isWithinElem, nodes, p, start, end) {
+    _indentFormatNode: function (outdent, isWithinElem, nodes, p, start, end) {
         if (p === start || $.contains(p, start) || $.contains(start, p)) {
             isWithinElem = true;
         }

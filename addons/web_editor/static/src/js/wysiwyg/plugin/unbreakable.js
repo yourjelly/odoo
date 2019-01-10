@@ -20,11 +20,12 @@ var Unbreakable = AbstractPlugin.extend({
     },
 
     initialize: function () {
+        var self = this;
         this._super.apply(this, arguments);
         setTimeout(function () {
-            this.secureArea();
-            this.context.invoke('HistoryPlugin.clear');
-        }.bind(this));
+            self.secureArea();
+            self.context.invoke('HistoryPlugin.clear');
+        });
     },
 
     //--------------------------------------------------------------------------
@@ -69,9 +70,9 @@ var Unbreakable = AbstractPlugin.extend({
         content_6       content_8       -               content_6
         content_7       content_8       -               content_8
         content_9       content_12      content_10      -
-     *
-     * @returns {WrappedRange}
-     */
+        *
+        * @returns {WrappedRange}
+        */
     secureRange: function () {
         var self = this;
         var range = this.context.invoke('editor.createRange');
@@ -82,9 +83,11 @@ var Unbreakable = AbstractPlugin.extend({
 
         // don't change the selection if the carret is just after a media in editable area
         var prev;
-        if (isCollapsed && startPoint.node.tagName && startPoint.node.childNodes[startPoint.offset] &&
+        if (
+            isCollapsed && startPoint.node.tagName && startPoint.node.childNodes[startPoint.offset] &&
             (prev = dom.prevPoint(startPoint)) && dom.isMedia(prev.node) &&
-            this.options.isEditableNode(prev.node.parentNode)) {
+            this.options.isEditableNode(prev.node.parentNode)
+        ) {
             return range;
         }
 
@@ -104,7 +107,10 @@ var Unbreakable = AbstractPlugin.extend({
             });
             if (!startPoint || !startPoint.node) { // no allowed node, search the other way
                 afterEnd = false;
-                startPoint = dom.prevPointUntil({node: range.sc, offset: range.so}, function (point) {
+                startPoint = dom.prevPointUntil({
+                    node: range.sc,
+                    offset: range.so,
+                }, function (point) {
                     return self.options.isEditableNode(point.node) && dom.isVisiblePoint(point) || !point.node;
                 });
             }
@@ -159,7 +165,11 @@ var Unbreakable = AbstractPlugin.extend({
                     }
 
                     // select the entirety of the unbreakable node
-                    if (point.node.tagName && point.offset && $.contains(commonUnbreakableParent, point.node) && self.options.isUnbreakableNode(point.node)) {
+                    if (
+                        point.node.tagName && point.offset &&
+                        $.contains(commonUnbreakableParent, point.node) &&
+                        self.options.isUnbreakableNode(point.node)
+                    ) {
                         return true;
                     }
 
@@ -178,7 +188,11 @@ var Unbreakable = AbstractPlugin.extend({
                     if (!self.options.isEditableNode(point.node)) {
                         return false;
                     }
-                    if ((/\S|\u200B|\u00A0/.test(point.node.textContent) || dom.isMedia(point.node)) && dom.isVisiblePoint(point)) {
+                    if (
+                        (/\S|\u200B|\u00A0/.test(point.node.textContent) ||
+                            dom.isMedia(point.node)) &&
+                        dom.isVisiblePoint(point)
+                    ) {
                         return true;
                     }
                     if (dom.isText(point.node)) {
@@ -216,7 +230,7 @@ var Unbreakable = AbstractPlugin.extend({
     secureArea: function (node) {
         this.$editable.find('o_not_editable').attr('contentEditable', 'false');
 
-        var medias = (function findMedia (node) {
+        var medias = (function findMedia(node) {
             var medias = [];
             if (node.tagName !== 'IMG' && dom.isMedia(node)) {
                 medias.push(node);
@@ -289,7 +303,10 @@ var Unbreakable = AbstractPlugin.extend({
         }
         var range;
         // for test tour, to trigger Keydown on target (instead of use Wysiwyg.setRange)
-        if (e.target !== this._focusedNode && (this.editable === e.target || $.contains(this.editable, e.target))) {
+        if (
+            e.target !== this._focusedNode &&
+            (this.editable === e.target || $.contains(this.editable, e.target))
+        ) {
             range = this.context.invoke('editor.createRange');
             if (!$.contains(e.target, range.sc) && !$.contains(e.target, range.ec)) {
                 range.sc = range.ec = e.target;

@@ -36,7 +36,10 @@ var MediaDialog = Dialog.extend({
             save_text: _t("Add"),
         }, options));
 
-        this.trigger_up('getRecordInfo', {recordInfo: options, type: 'media'});
+        this.trigger_up('getRecordInfo', {
+            recordInfo: options,
+            type: 'media',
+        });
 
         this.media = media;
         this.$media = $(media);
@@ -49,7 +52,9 @@ var MediaDialog = Dialog.extend({
         this.noVideos = onlyImages || options.noVideos;
 
         if (!this.noDocuments) {
-            this.documentDialog = new MediaModules.ImageWidget(this, this.media, _.extend({}, options, {document: true}));
+            this.documentDialog = new MediaModules.ImageWidget(this, this.media, _.extend({}, options, {
+                document: true,
+            }));
             this.documentDialog.tabToShow = 'document';
         }
         if (!this.noIcons) {

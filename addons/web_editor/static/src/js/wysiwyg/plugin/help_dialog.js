@@ -12,13 +12,16 @@ var HelpDialog = Plugins.helpDialog.extend({
      * Restore the hidden close button.
      */
     showHelpDialog: function () {
+        var self = this;
         return this._super().then(function () {
-            this.$dialog.find('button.close span').attr('aria-hidden', 'false');
-        }.bind(this));
+            self.$dialog.find('button.close span').attr('aria-hidden', 'false');
+        });
     },
 });
 
 registry.add('helpDialog', HelpDialog);
 
-return {HelpDialog: HelpDialog};
+return {
+    HelpDialog: HelpDialog,
+};
 });

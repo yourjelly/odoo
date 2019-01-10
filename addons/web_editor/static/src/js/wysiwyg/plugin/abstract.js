@@ -62,7 +62,9 @@ var AbstractPlugin = Class.extend(mixins.EventDispatcherMixin, ServicesMixin).ex
     // Public summernote module API
     //--------------------------------------------------------------------------
 
-    shouldInitialize: function () { return true; },
+    shouldInitialize: function () {
+        return true;
+    },
     initialize: function () {},
 
     //--------------------------------------------------------------------------
@@ -72,8 +74,7 @@ var AbstractPlugin = Class.extend(mixins.EventDispatcherMixin, ServicesMixin).ex
     /**
      * Override to add buttons.
      */
-    _addButtons: function () {
-    },
+    _addButtons: function () {},
     /**
      * Creates a dropdown button with its contents and behavior.
      *
@@ -88,7 +89,9 @@ var AbstractPlugin = Class.extend(mixins.EventDispatcherMixin, ServicesMixin).ex
 
         if (!onclick) {
             onclick = function (e) {
-                var classNames = _.map(values, function (item) { return item.value; }).join(' ');
+                var classNames = _.map(values, function (item) {
+                    return item.value;
+                }).join(' ');
                 var $target = $(self.context.invoke('editor.restoreTarget'));
                 $target.removeClass(classNames);
                 if ($(e.target).data('value')) {
@@ -174,8 +177,7 @@ var AbstractPlugin = Class.extend(mixins.EventDispatcherMixin, ServicesMixin).ex
             this.context.invoke('buttons.button', {
                 className: 'dropdown-toggle',
                 contents: buttonIcon.indexOf('<') === -1 ?
-                    this.ui.dropdownButtonContents(this.ui.icon(buttonIcon), this.options) :
-                    buttonIcon,
+                    this.ui.dropdownButtonContents(this.ui.icon(buttonIcon), this.options) : buttonIcon,
                 tooltip: buttonTooltip,
                 data: {
                     toggle: 'dropdown'
@@ -201,15 +203,16 @@ var AbstractPlugin = Class.extend(mixins.EventDispatcherMixin, ServicesMixin).ex
      * @returns {any} the return of fn
      */
     _wrapCommand: function (fn) {
+        var self = this;
         return function () {
-            this.context.invoke('editor.restoreRange');
-            this.context.invoke('editor.beforeCommand');
-            var res = fn.apply(this, arguments);
-            this.editable.normalize();
-            this.context.invoke('editor.saveRange');
-            this.context.invoke('editor.afterCommand');
+            self.context.invoke('editor.restoreRange');
+            self.context.invoke('editor.beforeCommand');
+            var res = fn.apply(self, arguments);
+            self.editable.normalize();
+            self.context.invoke('editor.saveRange');
+            self.context.invoke('editor.afterCommand');
             return res;
-        }.bind(this);
+        };
     },
 
 });

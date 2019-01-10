@@ -19,12 +19,15 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
     transition: padding-left 400ms $o-wysiwyg-md-ease 0s;
     padding-left: 210px !important;
 }
+
 .note-editor.note-frame .note-editing-area .o_wrap_editable_snippets {
     overflow: auto;
+
     .note-editable {
         overflow: visible;
     }
 }
+
 .o_in_iframe .note-editor.o_snippets_loaded .note-editable {
     padding-top: 30px;
 }
@@ -77,6 +80,7 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
                 margin-right: 5px;
             }
         }
+
         .o_panel_body {
             &:after {
                 content: " ";
@@ -100,6 +104,7 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
                     .oe_snippet_thumbnail_img {
                         border: none;
                     }
+
                     .oe_snippet_thumbnail_title {
                         border: none;
                         padding: 5px 0;
@@ -115,6 +120,7 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
                     .oe_snippet_thumbnail {
                         background-color: rgba(255, 0, 0, 0.75);
                     }
+
                     .oe_snippet_thumbnail_img {
                         opacity: 0.8;
                     }
@@ -124,10 +130,12 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
                     .oe_snippet_thumbnail_img {
                         opacity: 0.5;
                     }
+
                     .btn.o_install_btn {
                         display: none;
                         @include o-position-absolute(16px, 4px, auto, 4px);
                     }
+
                     &:hover .btn.o_install_btn {
                         display: block;
                     }
@@ -144,14 +152,16 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
         left: 0 !important;
     }
 }
-.oe_snippet { // No root because can be drag and drop (and the helper is in the body)
+
+.oe_snippet {
+    // No root because can be drag and drop (and the helper is in the body)
     position: relative;
     width: 100px;
     background-color: $o-wysiwyg-bg-color;
     z-index: $o-wysiwyg-zindex;
 
     > :not(.oe_snippet_thumbnail) {
-        display: none!important;
+        display: none !important;
     }
 
     .oe_snippet_thumbnail {
@@ -167,10 +177,12 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
             text-align: center;
             overflow: hidden;
         }
+
         img.oe_snippet_thumbnail_img {
             height: auto;
             padding-bottom: 0;
         }
+
         .oe_snippet_thumbnail_title {
             display: block;
             border: 1px solid $o-wysiwyg-bg-color;
@@ -180,6 +192,7 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
             text-shadow: none;
             color: $o-wysiwyg-color;
         }
+
         &:hover .oe_snippet_thumbnail_title {
             color: $o-wysiwyg-color-light;
         }
@@ -203,6 +216,7 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
             margin: 1px 1px 0 2px;
             border: 1px solid black;
         }
+
         div[data-group="transparent_grayscale"] button {
             @include o-alpha-button-preview;
 
@@ -213,7 +227,8 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
                 border-radius: 50%;
             }
 
-            &:hover, &.selected {
+            &:hover,
+            &.selected {
                 box-shadow: 0px 0px 2px 2px $o-wysiwyg-color;
             }
 
@@ -226,6 +241,7 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
 
             &[data-event="foreColor"] {
                 background-color: $o-wysiwyg-bg-color;
+
                 &:before {
                     background-color: rgba(white, 0.3);
                 }
@@ -235,30 +251,36 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
                 background-color: transparent;
             }
         }
-        .note-color-palette > div {
+
+        .note-color-palette>div {
             clear: both;
         }
+
         .note-color-row {
             height: 28px;
         }
     }
+
     .note-palette-title {
         padding: 10px 0px 10px 10px;
         color: $o-wysiwyg-color-light;
         font-weight: bold;
     }
+
     .palette-reset {
         @include o-position-absolute(0, 0);
         margin: 0;
         padding: 5px 10px 0;
+
         .note-color-reset {
-            font-size: 20px!important;
+            font-size: 20px !important;
             color: desaturate(rgba($o-wysiwyg-color-danger, 0.6), 40%);
             margin: 1px 0 0;
             padding: 0;
             cursor: pointer;
+
             &:hover {
-                background: transparent!important;
+                background: transparent !important;
                 color: $o-wysiwyg-color-danger;
             }
         }
@@ -271,6 +293,7 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
         background-color: rgba($o-brand-odoo, 0.2);
     }
 }
+
 .note-editable .oe_drop_zone {
     background-color: rgba($o-brand-odoo, 0.05);
     animation: dropZoneInsert 1s linear 0s infinite alternate;
@@ -327,22 +350,24 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
         background: transparent;
         text-align: center;
         transition: opacity 400ms linear 0s;
+
         &.o_keypress {
             opacity: 0;
         }
+
         &.oe_active {
             display: block;
         }
 
         // OVERLAY OPTIONS
-        > .oe_overlay_options {
+        >.oe_overlay_options {
             font-family: $o-wysiwyg-font-family;
             @include o-position-absolute($bottom: 0, $left: 0);
             width: 250px; // the parent oe_overlay has a width equal to the snippet width, the 250px is there to force the options to stay on one line without overriding bootstrap .btn-group
             text-align: left;
             z-index: $o-wysiwyg-zindex + 1;
 
-            > .btn-group {
+            >.btn-group {
                 white-space: nowrap;
                 border: 0;
 
@@ -360,6 +385,7 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
                     transition: all 400ms ease 0s;
                     color: $o-wysiwyg-color;
                     background-color: $o-wysiwyg-bg-color;
+
                     &:hover {
                         color: $o-wysiwyg-color-light;
                         background-color: lighten($o-wysiwyg-bg-color, 10%);
@@ -370,7 +396,7 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
                         background-color: $o-wysiwyg-color-danger;
                         border-color: darken($o-wysiwyg-color-danger, 20%);
 
-                        > .fa {
+                        >.fa {
                             color: $o-wysiwyg-color;
                         }
 
@@ -378,12 +404,13 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
                             background-color: darken($o-wysiwyg-color-danger, 20%);
                         }
                     }
-                    &.oe_snippet_parent > i {
+
+                    &.oe_snippet_parent>i {
                         transform: scaleX(-1);
                         font-size: 12px;
                     }
 
-                    > .fa {
+                    >.fa {
                         color: $o-wysiwyg-color;
                         line-height: inherit;
                         vertical-align: top;
@@ -391,18 +418,22 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
                 }
 
                 // CUSTOMIZE MENU BUTTON
-                > .oe_options {
+                >.oe_options {
                     .btn {
                         width: auto;
                         padding: 0 25px 0 5px;
                         background-color: $o-wysiwyg-bg-color;
                         text-transform: uppercase;
-                        &:hover, &:active, &:focus {
+
+                        &:hover,
+                        &:active,
+                        &:focus {
                             background-color: lighten($o-wysiwyg-bg-color, 5%);
                             border-color: lighten($o-wysiwyg-bg-color, 10%);
                         }
 
-                        &:before, &:after {
+                        &:before,
+                        &:after {
                             content: "";
                             width: 7px;
                             height: 2px;
@@ -410,27 +441,37 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
                             @include o-position-absolute(46%);
                             transition: all 0.3s ease 0s;
                         }
+
                         &:before {
                             right: 9px;
                             transform: rotate(45deg);
                         }
+
                         &:after {
                             right: 5px;
                             transform: rotate(-45deg);
                         }
                     }
+
                     // Open menu
                     &.show .btn {
-                        &:active, &:focus, &:active:focus {
+
+                        &:active,
+                        &:focus,
+                        &:active:focus {
                             box-shadow: none;
                         }
-                        &:before, &:after {
+
+                        &:before,
+                        &:after {
                             width: 9px;
                         }
+
                         &:before {
                             right: 10px;
                             transform: translateX(5px) rotate(-45deg);
                         }
+
                         &:after {
                             transform: rotate(45deg);
                         }
@@ -455,6 +496,7 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
                                 background: transparent;
                                 cursor: pointer;
                             }
+
                             &.active {
                                 &:before {
                                     @include o-position-absolute($top: 5px, $right: 5px);
@@ -463,7 +505,8 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
                                     color: $o-brand-primary;
                                 }
                             }
-                            > i {
+
+                            >i {
                                 width: 15px;
                                 margin-right: 10px;
                                 text-align: center;
@@ -472,15 +515,18 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
 
                         .dropdown-submenu {
                             position: relative;
+
                             &::before {
                                 @include o-position-absolute($top: 12px, $right: 10px);
                                 @include o-caret-right(4px);
                                 border-left-color: $o-wysiwyg-color-light;
                             }
-                            &:hover > .dropdown-menu {
+
+                            &:hover>.dropdown-menu {
                                 display: block;
                                 left: 100%;
                                 top: 0;
+
                                 &.o_open_to_left {
                                     left: auto;
                                     right: 100%;
@@ -500,6 +546,7 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
                             font-size: 11px;
                             margin-top: 2px;
                             text-transform: uppercase;
+
                             &:hover {
                                 background-color: initial;
                             }
@@ -507,6 +554,7 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
                             &.o_main_header {
                                 padding-left: 10px;
                             }
+
                             &.o_parent_editor_header {
                                 position: relative;
                                 color: $o-wysiwyg-color-light;
@@ -515,21 +563,25 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
                                 margin: 10px 0 0 10px;
                                 text-transform: uppercase;
                                 padding-bottom: .25em;
+
                                 &::before {
                                     content: "\f148";
                                     @include o-position-absolute($top: 5px, $left: 4px);
                                     font-family: FontAwesome;
                                     transform: scaleX(-1);
                                 }
-                                ~ .dropdown-submenu .dropdown-item,
-                                ~ .dropdown-item {
+
+                                ~.dropdown-submenu .dropdown-item,
+                                ~.dropdown-item {
                                     font-size: 11px;
                                     opacity: 0.7;
+
                                     &:hover {
                                         opacity: 1;
                                     }
                                 }
-                                ~ .dropdown-submenu::before {
+
+                                ~.dropdown-submenu::before {
                                     @include o-position-absolute($top: 10px, $right: 10px);
                                 }
                             }
@@ -539,33 +591,34 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
             }
         }
 
-        &.o_top_cover > .oe_overlay_options {
+        &.o_top_cover>.oe_overlay_options {
             bottom: auto;
             top: 1px;
             right: 1px;
         }
 
         // HANDLES
-        > .o_handles {
+        >.o_handles {
             @include o-position-absolute(-$o-wysiwyg-handles-offset-to-hide, 0, auto, 0);
             z-index: $o-wysiwyg-zindex;
 
-            &:hover > .o_handle {
+            &:hover>.o_handle {
                 background-color: rgba($o-wysiwyg-handles-accent-color, 0.05);
             }
 
-            > .o_handle {
+            >.o_handle {
 
                 position: relative;
                 border: 0 solid $o-wysiwyg-handles-accent-color;
                 transition: background 300ms ease 0s;
 
-                &:hover, &.o_active {
+                &:hover,
+                &.o_active {
                     background-color: rgba($o-wysiwyg-handles-accent-color, 0.2);
 
                     &:before {
                         content: '';
-                        @include o-position-absolute(0, $left:50%);
+                        @include o-position-absolute(0, $left: 50%);
                         width: 1px;
                         height: 100%;
                         margin-left: -1px;
@@ -595,26 +648,39 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
                     background-color: darken($o-wysiwyg-handles-accent-color, 20%);
                     color: white;
                 }
-                &.w:after, &.e:after {
+
+                &.w:after,
+                &.e:after {
                     content: "\f07e";
                 }
-                &.s:after, &.n:after {
+
+                &.s:after,
+                &.n:after {
                     content: "\f07d";
                 }
 
                 &.o_handle_start {
-                    &.w:after, &.e:after {
+
+                    &.w:after,
+                    &.e:after {
                         content: '\f061';
                     }
-                    &.n:after, &.s:after {
+
+                    &.n:after,
+                    &.s:after {
                         content: '\f063';
                     }
                 }
+
                 &.o_handle_end {
-                    &.w:after, &.e:after {
+
+                    &.w:after,
+                    &.e:after {
                         content: '\f060';
                     }
-                    &.n:after, &.s:after {
+
+                    &.n:after,
+                    &.s:after {
                         content: '\f062';
                     }
                 }
@@ -631,6 +697,7 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
                         margin-top: -$o-wysiwyg-handles-btn-size/2;
                     }
                 }
+
                 &.e {
                     @include o-position-absolute($o-wysiwyg-handles-offset-to-hide, 0, -$o-wysiwyg-handles-offset-to-hide, auto);
                     width: $o-wysiwyg-handle-edge-size;
@@ -642,6 +709,7 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
                         margin-top: -$o-wysiwyg-handles-btn-size/2;
                     }
                 }
+
                 &.n {
                     @include o-position-absolute($o-wysiwyg-handles-offset-to-hide, 0, auto, 0);
                     border-top-width: $o-wysiwyg-handle-border-width;
@@ -652,6 +720,7 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
                         margin-left: -$o-wysiwyg-handles-btn-size/2;
                     }
                 }
+
                 &.s {
                     @include o-position-absolute(auto, 0, -$o-wysiwyg-handles-offset-to-hide, 0);
                     border-bottom-width: $o-wysiwyg-handle-border-width;
@@ -664,11 +733,12 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
                 }
 
                 &.readonly {
-                    cursor: auto!important;
+                    cursor: auto !important;
 
                     &:after {
-                        display: none!important;
+                        display: none !important;
                     }
+
                     &:hover {
                         opacity: 0.5;
                     }
@@ -691,15 +761,19 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
 .s-resize-important * {
     cursor: s-resize !important;
 }
+
 .n-resize-important * {
     cursor: n-resize !important;
 }
+
 .e-resize-important * {
     cursor: e-resize !important;
 }
+
 .w-resize-important * {
     cursor: w-resize !important;
 }
+
 .move-important * {
     cursor: move !important;
 }
@@ -721,7 +795,10 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
         border: none;
         border-bottom: 1px solid #757575;
     }
-    input:focus { outline: none; }
+
+    input:focus {
+        outline: none;
+    }
 
     /* LABEL ======================================= */
     label {
@@ -734,15 +811,22 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
     }
 
     /* active state */
-    input:focus ~ label, input:valid ~ label {
+    input:focus~label,
+    input:valid~label {
         top: -20px;
         font-size: 14px;
         color: #5264AE;
     }
 
     /* BOTTOM BARS ================================= */
-    .bar    { position: relative; display: block; width: 300px; }
-    .bar:before, .bar:after {
+    .bar {
+        position: relative;
+        display: block;
+        width: 300px;
+    }
+
+    .bar:before,
+    .bar:after {
         content: '';
         height: 2px;
         width: 0;
@@ -751,15 +835,18 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
         background: #5264AE;
         transition: 0.2s ease all;
     }
+
     .bar:before {
         left: 50%;
     }
+
     .bar:after {
         right: 50%;
     }
 
     /* active state */
-    input:focus ~ .bar:before, input:focus ~ .bar:after {
+    input:focus~.bar:before,
+    input:focus~.bar:after {
         width: 50%;
     }
 
@@ -773,7 +860,7 @@ $o-wysiwyg-handles-offset-to-hide: 10000px !default;
     }
 
     /* active state */
-    input:focus ~ .highlight {
+    input:focus~.highlight {
         animation: inputHighlighter 0.3s ease;
     }
 }
