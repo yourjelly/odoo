@@ -9,12 +9,16 @@ class L10nItDdt(models.Model):
 
     name = fields.Char(
         string='DDT Number', required=True,
-        copy=False, default='New',
+        copy=False, default='DDT',
         readonly=True)
     state = fields.Selection([
         ('draft', 'draft'),
         ('done', 'Done'),
         ], string='Status', default='draft')
+    transport_type = fields.Selection([
+        ('our_transport', 'Our Transport'),
+        ('your_transport', 'Your Transport'),
+        ], string='Transport Type', compute="_compute_transport_data")
     partner_id = fields.Many2one('res.partner', string='Partner')
     partner_invoice_id = fields.Many2one(
         'res.partner',
@@ -23,6 +27,7 @@ class L10nItDdt(models.Model):
         'res.partner',
         string='Shipping Information')
     ddt_type_id = fields.Many2one('l10n.it.ddt.type', string='DDT Type')
+    ddt_tag_id = fields.Many2one('l10n.it.ddt.tag', string='DDT Tag')
     company_id = fields.Many2one('res.company', string='Company')
     stock_picking_ids = fields.One2many(
         'stock.picking', 'l10n_it_ddt_id',
@@ -40,10 +45,23 @@ class L10nItDdt(models.Model):
                 'state': 'done'
                 })
 
+    @api.depends('partner_shipping_id', 'partner_id')
+    def _compute_transport_data(self):
+        for record in self:
+            if record.partner_shipping_id.commercial_partner_id == record.partner_id:
+                record.transport_type = 'our_transport'
+            else:
+                record.transport_type = 'your_transport'
+
     @api.multi
     def do_print_ddt(self):
         return self.env.ref('l10n_it_ddt.action_report_ddt').report_action(self)
 
+
+class L10nItDdtType(models.Model):
+    _name = 'l10n.it.ddt.tag'
+
+    name = fields.Char('Name')
 
 class L10nItDdtType(models.Model):
     _name = 'l10n.it.ddt.type'

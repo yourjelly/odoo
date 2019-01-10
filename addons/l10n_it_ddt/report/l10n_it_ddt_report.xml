@@ -8,29 +8,26 @@
                         <div class="mt16"/>
                         <div class="row">
                             <div class="col-6">
-                               <span><strong>Warehouse Address:</strong></span>
-                                <div t-field="o.stock_picking_ids.picking_type_id.warehouse_id.partner_id"
-                                    t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}'/>
+                                <t t-foreach="o.stock_picking_ids.mapped('picking_type_id')" t-as="picking_type">
+                                    <span><strong>Warehouse Address:</strong></span>
+                                    <div t-field="picking_type.warehouse_id.partner_id"
+                                        t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}'/>
+                                 </t>
                             </div>
                             <div class="col-5 offset-1">
                                 <div>
                                     <span><strong>Customer Address:</strong></span>
                                     <div t-field="o.partner_id"
                                            t-options='{"widget": "contact", "fields": ["name", "phone"], "no_marker": True, "phone_icons": True}'/>
+                                    <span t-if="o.partner_id.vat"><strong>VAT: </strong><span t-field="o.partner_id.vat"/></span>
                                 </div>
                             </div>
                         </div>
                         <div class="mt16"/>
                         <div>
-                            <div class="row justify-content-end mb16">
-                                <div class="col-4" name="right_box">
-                                    <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.name, 600, 100)" style="width:300px;height:50px;" alt="Barcode"/>
-                                </div>
-                            </div>
-
                             <h1 t-field="o.name" class="mt0 float-left"/>
                         </div>
-                         <div class="clearfix"/>
+                        <div class="clearfix"/>
                         <div class="mt32"/>
                         <div class="mt32"/>
                         <div class="mt32"/>
@@ -39,6 +36,7 @@
                                 <tr>
                                     <th><strong>Type Of Document</strong></th>
                                     <th><strong>DDT Type</strong></th>
+                                    <th><strong>DDT Tag</strong></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -49,7 +47,9 @@
                                     <td>
                                         <span t-field="o.ddt_type_id"/><div class="mt16"/>
                                     </td>
-                                    
+                                    <td>
+                                        <span t-field="o.ddt_tag_id"/><div class="mt16"/>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>

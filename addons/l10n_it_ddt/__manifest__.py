@@ -6,7 +6,7 @@
     'category': 'Uncategorized',
     'version': '0.1',
 
-    'depends': ['base', 'sale_stock'],
+    'depends': ['l10n_it', 'sale_stock'],
 
     'data': [
         'security/l10n_it_ddt_security.xml',

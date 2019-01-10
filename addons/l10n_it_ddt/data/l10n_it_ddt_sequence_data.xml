@@ -11,15 +11,26 @@
             <field name="company_id" eval="False"/>
         </record>
 
-        <!-- carriage conditions -->
-        <record id="carriage_condition_PF" model="l10n.it.ddt.type">
-            <field name="name">PORTO FRANCO</field>
+        <!-- DDT type -->
+        <record id="ddt_type_bilaterale" model="l10n.it.ddt.type">
+            <field name="name">DDT Bilaterale</field>
         </record>
-        <record id="carriage_condition_PA" model="l10n.it.ddt.type">
-            <field name="name">ASSIGNED PORT</field>
+        <record id="ddt_type_per_terzeparti" model="l10n.it.ddt.type">
+            <field name="name">DDT Per Terzeparti</field>
         </record>
-        <record id="carriage_condition_PAF" model="l10n.it.ddt.type">
-            <field name="name">WITH INVOICE INVOICE</field>
+
+        <!--- DDT Tag-->
+        <record id="ddt_tag_sale" model="l10n.it.ddt.tag">
+            <field name="name">Sale</field>
+        </record>
+         <record id="ddt_tag_account_vision" model="l10n.it.ddt.tag">
+            <field name="name">Account vision</field>
+        </record>
+         <record id="ddt_tag_deposit_account" model="l10n.it.ddt.tag">
+            <field name="name">Deposit account</field>
+        </record>
+         <record id="ddt_tag_account_sales" model="l10n.it.ddt.tag">
+            <field name="name">Account sales</field>
         </record>
     </data>
 </odoo>
