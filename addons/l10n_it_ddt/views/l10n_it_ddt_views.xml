@@ -36,13 +36,18 @@
                         <field name="partner_id"/>
                         <field name="ddt_type_id"/>
                         <field name="ddt_tag_id"/>
+                        <field name="packages"/>
                     </group>
                     <group>
                         <field name="company_id"/>
                         <field name="transport_type"/>
+                        <field name="weight"/>
                     </group>
                 </group>
                 <notebook>
+                    <page string="Transfer">
+                        <field name="stock_picking_ids"/>
+                    </page>
                     <page string="Product Information">
                         <field name="ddt_line_id">
                             <tree>
@@ -73,13 +78,6 @@
                       <sheet>
                         <group>
                             <field name="partner_shipping_id"/>
-                        </group>
-                      </sheet>
-                    </page>
-                    <page string="Transfer">
-                      <sheet>
-                        <group>
-                            <field name="stock_picking_ids"/>
                         </group>
                       </sheet>
                     </page>

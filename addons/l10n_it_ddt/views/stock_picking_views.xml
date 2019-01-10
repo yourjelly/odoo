@@ -11,6 +11,9 @@
             <xpath expr="//field[@name='company_id']" position="after">
                 <field name="l10n_it_ddt_id" string="DDt No"/>
             </xpath>
+            <xpath expr="//button[@name='button_validate']" position="after">
+                <button name="%(action_ddt_from_pickings)d" string="DDT From Packing" type="action"/>
+            </xpath>
         </field>
     </record>
 </odoo>

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import Warning as UserError
 
 
 class L10nItDdt(models.Model):
@@ -35,6 +36,8 @@ class L10nItDdt(models.Model):
     ddt_line_id = fields.One2many(
         'l10n.it.ddt.line', 'ddt_id',
         string='DDT id')
+    packages = fields.Integer(string="Packages")
+    weight = fields.Float(string="Weight")
 
     @api.multi
     def action_confirm(self):
@@ -56,6 +59,18 @@ class L10nItDdt(models.Model):
     @api.multi
     def do_print_ddt(self):
         return self.env.ref('l10n_it_ddt.action_report_ddt').report_action(self)
+
+    def _check_linked_picking(self, pickings):
+        if len(pickings.mapped('picking_type_id')) > 1:
+            raise UserError(
+                    _("Selected Picking have diffrent Operation Type"))
+        for picking in pickings:
+            if picking.l10n_it_ddt_id:
+                raise UserError(
+                    _("Picking %s already in ddt %s") % (picking.name, picking.l10n_it_ddt_id.name))
+            if picking.partner_id != self.partner_id:
+                raise UserError(
+                    _("Selected Picking %s have different Partner") % picking.name)
 
 
 class L10nItDdtType(models.Model):
