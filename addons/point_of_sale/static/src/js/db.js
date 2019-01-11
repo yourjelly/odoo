@@ -3,6 +3,7 @@ odoo.define('point_of_sale.DB', function (require) {
 
 var core = require('web.core');
 var utils = require('web.utils');
+var translation = require('web.translation');
 /* The PosDB holds reference to data that is either
  * - static: does not change between pos reloads
  * - persistent : must stay between reloads ( orders )
@@ -40,9 +41,10 @@ var PosDB = core.Class.extend({
         this.category_childs = {};
         this.category_parent    = {};
         this.category_search_string = {};
+        this.translation_term = {};
     },
 
-    /* 
+    /*
      * sets an uuid to prevent conflict in locally stored data between multiple databases running
      * in the same browser at the same origin (Doing this is not advised !)
      */
@@ -277,14 +279,22 @@ var PosDB = core.Class.extend({
                 if(partner.barcode){
                     this.partner_by_barcode[partner.barcode] = partner;
                 }
-                partner.address = (partner.street || '') +', '+ 
+                partner.address = (partner.street || '') +', '+
                                   (partner.zip || '')    +' '+
-                                  (partner.city || '')   +', '+ 
+                                  (partner.city || '')   +', '+
                                   (partner.country_id[1] || '');
                 this.partner_search_string += this._partner_search_string(partner);
             }
         }
         return updated_count;
+    },
+    add_translation_term: function (session, languages) {
+        var self = this;
+        _.each(languages, function (lang){
+            var trans = new translation.TranslationDataBase().build_translation_function();
+            trans.database.load_translations(session, ['point_of_sale'], lang.code);
+            self.translation_term[lang.code] = trans;
+        });
     },
     get_partner_write_date: function(){
         return this.partner_write_date || "1970-01-01 00:00:00";

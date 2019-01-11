@@ -43,7 +43,7 @@ function preprocess_node() {
             }
             var match = /^(\s*)([\s\S]+?)(\s*)$/.exec(this.node.data);
             if (match) {
-                this.node.data = match[1] + _t(match[2]) + match[3];
+                this.node.data = match[1] + this.engine.default_dict._t(match[2]) + match[3];
             }
             break;
         case Node.ELEMENT_NODE:

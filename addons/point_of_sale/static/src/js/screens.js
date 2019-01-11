@@ -1660,7 +1660,17 @@ var ReceiptScreenWidget = ScreenWidget.extend({
         this.$('.change-value').html(this.format_currency(this.pos.get_order().get_change()));
     },
     render_receipt: function() {
-        this.$('.pos-receipt-container').html(QWeb.render('PosTicket', this.get_receipt_render_env()));
+        var pos = this.pos;
+        var client_lang = pos.get_client().lang;
+        var QWEB = new WebQweb(this.getSession().debug);
+        QWEB.default_dict = _.extend({}, QWEB.default_dict || {}, {
+            '_t' : pos.db.translation_term[client_lang],
+        });
+        QWEB.add_template($.ajax({
+            url : "/point_of_sale/static/src/xml/pos.xml",
+            async: false,
+        }).responseXML);
+        this.$('.pos-receipt-container').html(QWEB.render('PosTicket', this.get_receipt_render_env()));
     },
 });
 gui.define_screen({name:'receipt', widget: ReceiptScreenWidget});

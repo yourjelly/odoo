@@ -227,11 +227,7 @@ exports.PosModel = Backbone.Model.extend({
         fields: ['name', 'code'],
         loaded: function (self, langs){
             self.langs = langs;
-            // for (var i = 0; i < langs.length; i++) {
-            //     if (langs[i].code === self.attributes.user_context.lang){
-            //         self.default_lang = langs[i];
-            //     }
-            // }
+            self.db.add_translation_term(self.attributes, langs);
         },
     },{
         model:  'account.tax',
