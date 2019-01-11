@@ -33,6 +33,7 @@ var models = require('point_of_sale.models');
 var core = require('web.core');
 var rpc = require('web.rpc');
 var utils = require('web.utils');
+var WebQweb = require('web.QWeb');
 var field_utils = require('web.field_utils');
 var BarcodeEvents = require('barcodes.BarcodeEvents').BarcodeEvents;
 
@@ -1087,7 +1088,7 @@ var ClientListScreenWidget = ScreenWidget.extend({
             self.gui.back();
         });
 
-        this.$('.next').click(function(){ 
+        this.$('.next').click(function(){  
             self.save_changes();
             self.gui.back();    // FIXME HUH ?
         });

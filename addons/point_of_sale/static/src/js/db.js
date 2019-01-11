@@ -44,7 +44,7 @@ var PosDB = core.Class.extend({
         this.translation_term = {};
     },
 
-    /*
+    /* 
      * sets an uuid to prevent conflict in locally stored data between multiple databases running
      * in the same browser at the same origin (Doing this is not advised !)
      */
@@ -279,9 +279,9 @@ var PosDB = core.Class.extend({
                 if(partner.barcode){
                     this.partner_by_barcode[partner.barcode] = partner;
                 }
-                partner.address = (partner.street || '') +', '+
+                partner.address = (partner.street || '') +', '+ 
                                   (partner.zip || '')    +' '+
-                                  (partner.city || '')   +', '+
+                                  (partner.city || '')   +', '+ 
                                   (partner.country_id[1] || '');
                 this.partner_search_string += this._partner_search_string(partner);
             }
