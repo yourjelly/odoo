@@ -150,6 +150,13 @@ return AbstractModel.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    _getMeasure: function () {
+        var measure = this.chart.measure;
+        if (measure !== '__count__' && this.fields[measure].type === 'many2one') {
+            return measure + ":count_distinct";
+        }
+        return measure;
+    },
     /**
      * @private
      * @returns {number}
@@ -192,12 +199,7 @@ return AbstractModel.extend({
         });
 
         if (this.chart.measure !== '__count__') {
-            if (this.fields[this.chart.measure].type === 'many2one') {
-                fields = fields.concat(this.chart.measure + ":count_distinct");
-            }
-            else {
-                fields = fields.concat(this.chart.measure);
-            }
+            fields = fields.concat(this._getMeasure());
         }
 
         var context = _.extend({fill_temporal: true}, this.chart.context);
@@ -232,6 +234,7 @@ return AbstractModel.extend({
     _processData: function (originIndex, rawData) {
         var self = this;
         var isCount = this.chart.measure === '__count__';
+        var measure = this._getMeasure();
         var labels;
 
         function getLabels (dataPt) {
@@ -242,7 +245,7 @@ return AbstractModel.extend({
         rawData.forEach(function (dataPt){
             labels = getLabels(dataPt);
             var count = dataPt.__count || dataPt[self.chart.groupBy[0]+'_count'] || 0;
-            var value = isCount ? count : dataPt[self.chart.measure];
+            var value = isCount ? count : (dataPt[measure] || 0);
             if (value instanceof Array) {
                 // when a many2one field is used as a measure AND as a grouped
                 // field, bad things happen.  The server will only return the
