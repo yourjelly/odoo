@@ -10,7 +10,7 @@ class L10nItDdt(models.Model):
 
     name = fields.Char(
         string='DDT Number', required=True,
-        copy=False, default='DDT',
+        copy=False, default='New',
         readonly=True)
     state = fields.Selection([
         ('draft', 'draft'),
@@ -61,16 +61,10 @@ class L10nItDdt(models.Model):
         return self.env.ref('l10n_it_ddt.action_report_ddt').report_action(self)
 
     def _check_linked_picking(self, pickings):
-        if len(pickings.mapped('picking_type_id')) > 1:
-            raise UserError(
-                    _("Selected Picking have diffrent Operation Type"))
         for picking in pickings:
-            if picking.l10n_it_ddt_id:
-                raise UserError(
-                    _("Picking %s already in ddt %s") % (picking.name, picking.l10n_it_ddt_id.name))
             if picking.partner_id != self.partner_id:
                 raise UserError(
-                    _("Selected Picking %s have different Partner") % picking.name)
+                    _("Selected Picking %s have different Partner from DDT %s") % picking.name, self.name)
 
 
 class L10nItDdtType(models.Model):
@@ -78,13 +72,14 @@ class L10nItDdtType(models.Model):
 
     name = fields.Char('Name')
 
+
 class L10nItDdtType(models.Model):
     _name = 'l10n.it.ddt.type'
 
     name = fields.Char('Name')
 
 
-class L10nItLine(models.Model):
+class L10nItDdtLine(models.Model):
     _name = 'l10n.it.ddt.line'
 
     name = fields.Text(string='Description', required=True)

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.ui.view" id="10n_it_to_picking_to_ddt_wizard">
+        <field name="name">l10n.it.ddt.to.pickings</field>
+        <field name="model">l10n.it.ddt.to.pickings</field>
+        <field name="arch" type="xml">
+            <form string="DDT From Picking">
+                <field name="ddt_id" invisible="context.get('create_ddt')"/>
+                <field name="picking_ids" invisible="not context.get('create_ddt', True)"/>
+                <footer>
+                    <button name="add_ddt" string="ADD DDT" type="object" class="oe_highlight" invisible="context.get('create_ddt')"/>
+                    <button name="create_ddt_ddt" string="Create DDT" type="object" class="oe_highlight" invisible="not context.get('create_ddt', True)"/>
+                    or
+                    <button string="Cancel" class="oe_link" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+  
+    <record id="action_ddt_link_with_pickings" model="ir.actions.act_window">
+        <field name="name">Link with existing DDT</field>
+        <field name="res_model">l10n.it.ddt.to.pickings</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="10n_it_to_picking_to_ddt_wizard"/>
+        <field name="target">new</field>
+    </record>
+
+    <record id="action_ddt_create_with_pickings" model="ir.actions.act_window">
+        <field name="name">Create DDT</field>
+        <field name="res_model">l10n.it.ddt.to.pickings</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="10n_it_to_picking_to_ddt_wizard"/>
+        <field name="target">new</field>
+        <field name="context">{'create_ddt': True}</field>
+    </record>
+</odoo>
+

@@ -12,7 +12,8 @@
                 <field name="l10n_it_ddt_id" string="DDt No"/>
             </xpath>
             <xpath expr="//button[@name='button_validate']" position="after">
-                <button name="%(action_ddt_from_pickings)d" string="DDT From Packing" type="action"/>
+                <button name="%(action_ddt_link_with_pickings)d" string="Add Picking to DDT" type="action"/>
+                <button name="%(action_ddt_create_with_pickings)d" string="Create Picking to DDT" type="action"/>
             </xpath>
         </field>
     </record>
