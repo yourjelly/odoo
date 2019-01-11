@@ -1,4 +1,58 @@
 .o_web_client {
+    .o_control_panel {
+        .o_cp_searchview {
+            &.o_searchview_quick {
+                display: flex;
+                width: 100%;
+                .o_searchview {
+                    flex: 1 1 auto;
+                    border-bottom: 1px solid $o-brand-secondary;
+
+                    > .o_searchview_input_container {
+                        flex: 1 1 auto;
+                    }
+                }
+            }
+
+            > button {
+                padding-right: 10px;
+                padding-left: 10px;
+                &:focus {
+                    box-shadow: none;
+                }
+                &.btn-secondary {
+                    color: $o-brand-primary !important;
+                }
+                &.o_enable_searchview {
+                    padding-right: 14px;
+                    margin-bottom: 1px; // compensate the 1px solid border
+                }
+            }
+
+            .o_searchview {
+                display: flex;
+                align-items: center;
+
+
+
+                .o_mobile_quick_search {
+                    display: flex;
+                    flex: 1 1 auto;
+                    flex-direction: row-reverse;
+                    align-items: baseline;
+                    border-bottom: 1px solid transparent;
+                    .o_searchview_input_container {
+                        .o_searchview_autocomplete li {
+                            padding: 10px 10px 10px 15px;
+                            .o-expand {
+                                padding: 0px;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     .o_mobile_search {
         position: fixed;
         top: 0;
@@ -21,20 +75,16 @@
         }
         .o_searchview_input_container {
             display: flex;
-            padding: 15px 20px 0 20px;
+            padding: 5px 20px 0 20px;
             position: relative;
             .o_searchview_input {
                 width: 100%;
                 margin-bottom: 15px;
                 border-bottom: 1px solid $o-brand-secondary;
             }
-           .o_searchview_facet {
-                border-radius: 10px;
+            .o_searchview_facet {
                 display: inline-flex;
-                order:1;
-                .o_searchview_facet_label {
-                    border-radius: 2em 0em 0em 2em;
-                }
+                order: 1;
             }
             .o_searchview_autocomplete {
                 top:100%;
@@ -49,7 +99,6 @@
                 width: 100%;
                 margin: 15px 5px 0px 5px;
                 border: solid 1px darken(gray('200'), 20%);
-
             }
             .o_dropdown_toggler_btn {
                 width: 100%;
@@ -59,7 +108,6 @@
                     display: none;
                 }
             }
-
             // We disable the backdrop in this case because it prevents any
             // interaction outside of a dropdown while it is open.
             .dropdown-backdrop {
