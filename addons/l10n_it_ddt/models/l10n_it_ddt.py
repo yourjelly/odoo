@@ -8,6 +8,14 @@ from odoo.exceptions import Warning as UserError
 class L10nItDdt(models.Model):
     _name = 'l10n.it.ddt'
 
+    @api.depends('partner_shipping_id', 'partner_id')
+    def _compute_transport_data(self):
+        for record in self:
+            if record.partner_shipping_id.commercial_partner_id == record.partner_id:
+                record.transport_type = 'our_transport'
+            else:
+                record.transport_type = 'your_transport'
+
     name = fields.Char(
         string='DDT Number', required=True,
         copy=False, default='New',
@@ -39,22 +47,18 @@ class L10nItDdt(models.Model):
     packages = fields.Integer(string="Packages")
     weight = fields.Float(string="Weight")
 
+    @api.model
+    def create(self, vals):
+        if vals.get('name', _('New')) == _('New'):
+            vals['name'] = self.env['ir.sequence'].next_by_code('l10n.it.ddt') or _('New')
+        return super(L10nItDdt, self).create(vals)
+
+
     @api.multi
     def action_confirm(self):
         self.ensure_one()
         if self.state == 'draft':
-            self.write({
-                'name': self.env['ir.sequence'].next_by_code('l10n.it.ddt'),
-                'state': 'done'
-                })
-
-    @api.depends('partner_shipping_id', 'partner_id')
-    def _compute_transport_data(self):
-        for record in self:
-            if record.partner_shipping_id.commercial_partner_id == record.partner_id:
-                record.transport_type = 'our_transport'
-            else:
-                record.transport_type = 'your_transport'
+            self.state ='done'
 
     @api.multi
     def do_print_ddt(self):

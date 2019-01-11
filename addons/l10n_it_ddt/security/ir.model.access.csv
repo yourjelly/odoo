@@ -1,5 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_ddt,ddt,model_l10n_it_ddt,l10n_it_ddt.group_l10n_it_ddt_manager,1,1,1,1
-access_ddt_tag,ddt.tag,model_l10n_it_ddt_tag,l10n_it_ddt.group_l10n_it_ddt_manager,1,1,1,1
-access_ddt_type,ddt.type,model_l10n_it_ddt_type,l10n_it_ddt.group_l10n_it_ddt_manager,1,1,1,1
-access_ddt_line,ddt.line,model_l10n_it_ddt_line,l10n_it_ddt.group_l10n_it_ddt_manager,1,1,1,1
+access_ddt,ddt,model_l10n_it_ddt,,1,1,1,1
+access_ddt_tag,ddt.tag,model_l10n_it_ddt_tag,,1,1,1,1
+access_ddt_type,ddt.type,model_l10n_it_ddt_type,,1,1,1,1
+access_ddt_line,ddt.line,model_l10n_it_ddt_line,,1,1,1,1

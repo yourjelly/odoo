@@ -127,7 +127,6 @@
     </record>
 
 
-    <menuitem name="ddt" id="l10n_it_ddt_menu"/>
-    <menuitem name="DDT" parent="l10n_it_ddt_menu" action="l10n_it_ddt_action" id="menu_action_ddt" groups="l10n_it_ddt.group_l10n_it_ddt_manager"/>
-    <menuitem  name="DDT Type" parent="l10n_it_ddt_menu" action="l10n_it_ddt_type_action" id="ddt_type_menu" groups="l10n_it_ddt.group_l10n_it_ddt_manager"/>
+    <menuitem name="DDT" parent="stock.menu_stock_warehouse_mgmt" action="l10n_it_ddt_action" id="menu_action_ddt"/>
+    <!-- <menuitem  name="DDT Type" parent="l10n_it_ddt_menu" action="l10n_it_ddt_type_action" id="ddt_type_menu"/> -->
 </odoo>

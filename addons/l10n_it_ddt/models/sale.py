@@ -17,37 +17,6 @@ class SaleOrder(models.Model):
         for order in self:
             order.ddt_count = len(self.mapped('ddt_ids'))
 
-    @api.multi
-    def _pripare_ddt(self):
-        self.ensure_one()
-        line_vals = []
-        for line in self.order_line:
-            line_vals.append([0, 0, {
-                'product_id': line.product_id.id,
-                'quantity': line.product_uom_qty,
-                'product_uom_id': line.product_uom.id,
-                'unit_price': line.price_unit,
-                'discount': line.discount,
-                'name': line.name
-                }])
-
-        res = {
-            'partner_id': self.partner_id.id,
-            'partner_shipping_id': self.partner_shipping_id.id,
-            'partner_invoice_id': self.partner_invoice_id.id,
-            'company_id': self.company_id.id,
-            'ddt_line_id': line_vals
-            }
-        print(res)
-        return res
-
-    @api.multi
-    def action_confirm(self):
-        res = super(SaleOrder, self).action_confirm()
-        for sale_order in self:
-            if sale_order.auto_ddt:
-                sale_order.ddt_ids = self.env['l10n.it.ddt'].create(sale_order._pripare_ddt())
-        return res
 
     @api.multi
     def action_view_ddt(self):

@@ -9,7 +9,6 @@
     'depends': ['l10n_it', 'sale_stock'],
 
     'data': [
-        'security/l10n_it_ddt_security.xml',
         'security/ir.model.access.csv',
         'data/l10n_it_ddt_sequence_data.xml',
         'report/l10n_it_ddt_report.xml',

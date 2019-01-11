@@ -11,7 +11,7 @@ class L10nItAddPickingsToDdt(models.TransientModel):
 
 
     ddt_id = fields.Many2one('l10n.it.ddt', string="DDT")
-    picking_ids = fields.Many2one('stock.picking', string="DDT", default=_get_picking_ids)
+    picking_ids = fields.Many2many('stock.picking', string="DDT", default=_get_picking_ids)
 
     @api.multi
     def add_ddt(self):
@@ -22,7 +22,7 @@ class L10nItAddPickingsToDdt(models.TransientModel):
         pickings._check_multi_picking()
         pickings.l10n_it_ddt_id = self.ddt_id.id
         return {
-            'name': 'DdT',
+            'name': 'DDT',
             'view_type': 'form',
             'view_mode': 'form',
             'res_model': 'l10n.it.ddt',
@@ -33,12 +33,13 @@ class L10nItAddPickingsToDdt(models.TransientModel):
     @api.multi
     def create_ddt(self):
         self.ensure_one()
+        print(self.picking_ids)
         ddt_id = self.picking_ids.create_ddt()
         return {
             'name': 'DdT',
             'view_type': 'form',
             'view_mode': 'form',
             'res_model': 'l10n.it.ddt',
-            'res_id': self.ddt_id.id,
+            'res_id': ddt_id.id,
             'type': 'ir.actions.act_window',
         }

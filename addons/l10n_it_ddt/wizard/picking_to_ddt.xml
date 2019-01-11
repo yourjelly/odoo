@@ -5,11 +5,11 @@
         <field name="model">l10n.it.ddt.to.pickings</field>
         <field name="arch" type="xml">
             <form string="DDT From Picking">
-                <field name="ddt_id" invisible="context.get('create_ddt')"/>
-                <field name="picking_ids" invisible="not context.get('create_ddt', True)"/>
+                <field name="ddt_id" options="{'no_create_edit': True}" invisible="context.get('create_ddt')"/>
+                <field name="picking_ids" options="{'no_create_edit': True}" invisible="not context.get('create_ddt')"/>
                 <footer>
                     <button name="add_ddt" string="ADD DDT" type="object" class="oe_highlight" invisible="context.get('create_ddt')"/>
-                    <button name="create_ddt_ddt" string="Create DDT" type="object" class="oe_highlight" invisible="not context.get('create_ddt', True)"/>
+                    <button name="create_ddt" string="Create DDT" type="object" class="oe_highlight" invisible="not context.get('create_ddt')"/>
                     or
                     <button string="Cancel" class="oe_link" special="cancel" />
                 </footer>
@@ -35,5 +35,12 @@
         <field name="target">new</field>
         <field name="context">{'create_ddt': True}</field>
     </record>
+
+
+     <act_window id="action_add_pickingd_to_ddt"
+            multi="True"
+            key2="client_action_multi" name="Add Pickings to DDT"
+            res_model="l10n.it.ddt.to.pickings" src_model="stock.picking"
+            view_mode="form" target="new" view_type="form" context="{'create_ddt': True}"/>
 </odoo>
 
