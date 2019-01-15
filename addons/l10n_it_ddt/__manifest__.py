@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 {
     'name': "l10n_it_ddt",
@@ -16,5 +17,6 @@
         'views/l10n_it_ddt_views.xml',
         'views/sale_views.xml',
         'views/stock_picking_views.xml',
+        # 'views/account_invoice_view.xml',
     ]
 }

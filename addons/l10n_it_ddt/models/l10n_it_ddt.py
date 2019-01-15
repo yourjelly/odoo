@@ -41,7 +41,7 @@ class L10nItDdt(models.Model):
     stock_picking_ids = fields.One2many(
         'stock.picking', 'l10n_it_ddt_id',
         string='Related Transfers')
-    ddt_line_id = fields.One2many(
+    ddt_line_ids = fields.One2many(
         'l10n.it.ddt.line', 'ddt_id',
         string='DDT id')
     packages = fields.Integer(string="Packages")
@@ -53,6 +53,12 @@ class L10nItDdt(models.Model):
             vals['name'] = self.env['ir.sequence'].next_by_code('l10n.it.ddt') or _('New')
         return super(L10nItDdt, self).create(vals)
 
+    @api.multi
+    def _update_lines(self):
+        self.ensure_one()
+        new_moves = self.stock_picking_ids.mapped('move_lines') - self.ddt_line_ids.mapped('move_line_id')
+        self.ddt_line_ids = [(0, 0, new_move._pripare_ddt_line()) for new_move in new_moves]
+
 
     @api.multi
     def action_confirm(self):
@@ -60,15 +66,11 @@ class L10nItDdt(models.Model):
         if self.state == 'draft':
             self.state ='done'
 
-    @api.multi
-    def do_print_ddt(self):
-        return self.env.ref('l10n_it_ddt.action_report_ddt').report_action(self)
-
     def _check_linked_picking(self, pickings):
         for picking in pickings:
             if picking.partner_id != self.partner_id:
                 raise UserError(
-                    _("Selected Picking %s have different Partner from DDT %s") % picking.name, self.name)
+                    _("Selected Picking have different Partner from DDT"))
 
 
 class L10nItDdtType(models.Model):
@@ -94,3 +96,4 @@ class L10nItDdtLine(models.Model):
     discount = fields.Float(string='Discount')
     tax_ids = fields.Many2many('account.tax', string='Taxes')
     ddt_id = fields.Many2one('l10n.it.ddt', string="DDT")
+    move_line_id = fields.Many2one('stock.move', string="Stock Move")

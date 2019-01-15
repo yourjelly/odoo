@@ -32,14 +32,14 @@ class StockPicking(models.Model):
             res = {
                 'partner_id': self[0].partner_id.id,
                 'company_id': self[0].company_id.id,
-                'ddt_line_id': line_vals
+                'ddt_line_ids': line_vals
                 }
             return res
 
     @api.multi
     def create_ddt(self):
         ddt_id = self.env['l10n.it.ddt'].create(self._pripare_ddt())
-        self.l10n_it_ddt_id = ddt_id.id
+        self.write({'l10n_it_ddt_id': ddt_id.id})
         return ddt_id
 
 
@@ -57,5 +57,7 @@ class StockMove(models.Model):
                 'product_uom_id': self.product_uom.id,
                 'unit_price': self.sale_line_id and self.sale_line_id.price_unit or 0,
                 'discount': self.sale_line_id and self.sale_line_id.discount or 0,
-                'name': self.name
+                'tax_ids': [(6, 0, self.sale_line_id.tax_id.ids)],
+                'name': self.name,
+                'move_line_id': self.id,
             }

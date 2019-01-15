@@ -21,6 +21,7 @@ class L10nItAddPickingsToDdt(models.TransientModel):
         self.ddt_id._check_linked_picking(pickings)
         pickings._check_multi_picking()
         pickings.l10n_it_ddt_id = self.ddt_id.id
+        self.ddt_id._update_lines()
         return {
             'name': 'DDT',
             'view_type': 'form',
@@ -33,7 +34,6 @@ class L10nItAddPickingsToDdt(models.TransientModel):
     @api.multi
     def create_ddt(self):
         self.ensure_one()
-        print(self.picking_ids)
         ddt_id = self.picking_ids.create_ddt()
         return {
             'name': 'DdT',

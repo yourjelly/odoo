@@ -24,8 +24,6 @@
             <header>
                 <button name="action_confirm" id="action_confirm"
                         string="Done" class="btn-primary" type="object" attrs='{"invisible": [("state", "=", "done")]}'/>
-                <button name="do_print_ddt" id="action_print"
-                        string="Print" class="btn-primary" type="object" attrs="{'invisible': [('state', '!=', 'done')]}"/>
                 <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
             </header>
             <sheet>
@@ -49,15 +47,15 @@
                         <field name="stock_picking_ids"/>
                     </page>
                     <page string="Product Information">
-                        <field name="ddt_line_id">
-                            <tree>
+                        <field name="ddt_line_ids">
+                            <tree editable="bottom">
                                 <field name="product_id"/>
                                 <field name="name"/>
                                 <field name="quantity"/>
                                 <field name="product_uom_id" groups="uom.group_uom"/>
                                 <field name="unit_price"/>
                                 <field name="discount"/>
-                                <field name="tax_ids"/>
+                                <field name="tax_ids"  widget="many2many_tags"/>
                             </tree>
                             <form>
                                 <group>
@@ -68,7 +66,7 @@
                                 </group>
                                 <group>
                                     <field name="discount"/>
-                                    <field name="tax_ids"/>
+                                    <field name="tax_ids"  widget="many2many_tags"/>
                                 </group>
                                 <field name="name"/>
                             </form>
