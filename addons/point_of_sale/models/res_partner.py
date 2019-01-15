@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import api, fields, models
+from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 
 
 class ResPartner(models.Model):
@@ -32,3 +33,9 @@ class ResPartner(models.Model):
             partner['lang'] = self.env.user.lang
             partner_id = self.create(partner).id
         return partner_id
+
+    @api.multi
+    def unlink(self):
+        if self.env['pos.session'].search_count([('state', '!=', 'closed')]):
+            raise UserError(_("You cannot delete Partners while there are active PoS sessions."))
+        return super(ResPartner, self).unlink()

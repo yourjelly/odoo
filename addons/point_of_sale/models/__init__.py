@@ -13,3 +13,5 @@ from . import pos_session
 from . import product
 from . import res_partner
 from . import res_config_settings
+from . import stock_picking_type
+from . import ir_sequence

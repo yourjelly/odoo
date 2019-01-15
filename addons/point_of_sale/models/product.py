@@ -26,6 +26,17 @@ class ProductTemplate(models.Model):
         if not self.sale_ok:
             self.available_in_pos = False
 
+    @api.multi
+    def write(self, vals):
+        if self.env['pos.session'].search_count([('state', '!=', 'closed')]):
+            forbidden_fields = []
+            for field in ['available_in_pos', 'pos_categ_id']:
+                if field in vals:
+                    forbidden_fields.append(field)
+            if forbidden_fields:
+                raise UserError(_("You cannot change folowing fields while there is an active PoS session:") + "\n" + ", ".join(forbidden_fields))
+        return super(ProductTemplate, self).write(vals)
+
 
 class ProductProduct(models.Model):
     _inherit = 'product.product'

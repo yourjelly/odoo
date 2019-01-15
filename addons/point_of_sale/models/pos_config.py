@@ -5,7 +5,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 
 
 class AccountCashboxLine(models.Model):
@@ -38,6 +38,16 @@ class AccountBankStmtCashWizard(models.Model):
 class PosConfig(models.Model):
     _name = 'pos.config'
     _description = 'Point of Sale Configuration'
+
+    def _get_fields_to_check(self):
+        return {
+            'active': _('archive'),
+            'module_pos_restaurant': _('Is a Bar/Restaurant'),
+            'journal_ids': _('Payment Methods'),
+            'sequence_id': _('Order Reference'),
+            'picking_type_id': _('Operation Type'),
+            'journal_id': _('Sales Journal')
+            }
 
     def _default_sale_journal(self):
         journal = self.env.ref('point_of_sale.pos_sale_journal', raise_if_not_found=False)
@@ -370,8 +380,16 @@ class PosConfig(models.Model):
 
     @api.multi
     def write(self, vals):
-        result = super(PosConfig, self).write(vals)
+        if self.env['pos.session'].search_count([('config_id', '=', self.id), ('state', '!=', 'closed')]):
+            forbidden_fields = []
+            fields_to_check = self._get_fields_to_check()
+            for check_field in fields_to_check.keys():
+                if check_field in vals:
+                    forbidden_fields.append(fields_to_check[check_field])
+            if forbidden_fields:
+                raise UserError(_("You cannot change following fields while there is an active PoS session:") + "\n" + ", ".join(forbidden_fields))
 
+        result = super(PosConfig, self).write(vals)
         config_display = self.filtered(lambda c: c.is_posbox and c.iface_customer_facing_display and not (c.customer_facing_display_html or '').strip())
         if config_display:
             super(PosConfig, config_display).write({'customer_facing_display_html': self._compute_default_customer_html()})

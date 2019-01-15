@@ -244,7 +244,7 @@ var DebugWidget = PosBaseWidget.extend({
         this.$('.button.delete_orders').click(function(){
             self.gui.show_popup('confirm',{
                 'title': _t('Delete Paid Orders ?'),
-                'body':  _t('This operation will permanently destroy all paid orders from the local storage. You will lose all the data. This operation cannot be undone.'),
+                'body':  _t('This operation will permanently destroy all paid orders from the browser cache. You will lose all the data. This operation cannot be undone.'),
                 confirm: function(){
                     self.pos.db.remove_all_orders();
                     self.pos.set({synch: { state:'connected', pending: 0 }});
@@ -711,7 +711,6 @@ var Chrome = PosBaseWidget.extend(AbstractAction.prototype, {
            }
        });
     },
-
     loading_error: function(err){
         var self = this;
 
@@ -737,12 +736,43 @@ var Chrome = PosBaseWidget.extend(AbstractAction.prototype, {
             widget: { options: {title: title , body: body }},
         }));
 
+        popup.find('.button.icon').hide();
         popup.find('.button').click(function(){
             self.gui.close();
         });
 
         popup.css({ zindex: 9001 });
 
+        popup.appendTo(this.$el);
+    },
+    json_error: function(err){
+        var self = this;
+        var body = "There are conflicts between the browser cache and the loaded data. " +
+            "Changes where made in the database after first initialisation of this PoS session.\n\n" +
+            "Some possible causes could be:\n" +
+            "- Products used in the session are not available anymore.\n" + 
+            "- Clients used in the session ar not available anymore.\n" +
+            "- Changes in the PoS configuration.\n\n" +
+            "Use the buttons to download or to clear the browser cache. Click Ok to leave the session.";
+//        }
+        var popup = $(QWeb.render('ErrorJsonPopupWidget',{
+            widget: { options: {title: err.title, body: body}},
+        }));
+        popup.find('.button.icon.clear').click(function(){
+            localStorage.clear();
+            self.gui.close();
+        });
+        popup.find('.button.icon.download').click(function(){
+            var toStore = Object.keys(localStorage)
+                .filter(key => key.includes("order"))
+                .reduce((obj, key) => {obj[key] = localStorage[key]; return obj;},{});
+            var file = new Blob([JSON.stringify(toStore, null, 2)], {type: 'text/plain'});
+            saveAs(file, 'local_storage.txt');
+        });
+        popup.find('.button.cancel').click(function(){
+            self.gui.close();
+        });
+        popup.css({ zindex: 9001 });
         popup.appendTo(this.$el);
     },
     loading_progress: function(fac){

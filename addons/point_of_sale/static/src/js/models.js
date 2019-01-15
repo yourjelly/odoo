@@ -1909,8 +1909,12 @@ exports.Paymentline = Backbone.Model.extend({
         this.amount = 0;
         this.selected = false;
         if (options.json) {
-            this.init_from_JSON(options.json);
-            return;
+            try {
+                this.init_from_JSON(options.json);
+                return;
+            } catch(error) {
+                this.pos.chrome.json_error({title: _t("Payment journal ID ") + json.statement_id +_t( " is not available in the point of sale.")});
+            }
         }
         this.cashregister = options.cashregister;
         if (this.cashregister === undefined) {
@@ -2046,14 +2050,13 @@ exports.Order = Backbone.Model.extend({
         this.validation_date = json.creation_date;
 
         if (json.fiscal_position_id) {
-            var fiscal_position = _.find(this.pos.fiscal_positions, function (fp) {
-                return fp.id === json.fiscal_position_id;
-            });
-
-            if (fiscal_position) {
+            try {
+                var fiscal_position = _.find(this.pos.fiscal_positions, function (fp) {
+                    return fp.id === json.fiscal_position_id;
+                });
                 this.fiscal_position = fiscal_position;
-            } else {
-                console.error('ERROR: trying to load a fiscal position not available in the pos');
+            } catch(error) {
+                this.pos.chrome.json_error({title: "Fiscal position ID " + json.fiscal_position_id + " is not available in the point of sale."});
             }
         }
 
@@ -2066,9 +2069,13 @@ exports.Order = Backbone.Model.extend({
         }
 
         if (json.partner_id) {
-            client = this.pos.db.get_partner_by_id(json.partner_id);
-            if (!client) {
-                console.error('ERROR: trying to load a partner not available in the pos');
+            try {
+                client = this.pos.db.get_partner_by_id(json.partner_id);
+                if (!client) {
+                    throw "Partner not available";
+                }
+            } catch(error) {
+                this.pos.chrome.json_error({title: "Partner ID " + json.partner_id + " is not available in the point of sale."});
             }
         } else {
             client = null;

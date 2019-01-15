@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 # Copyright (C) 2004-2008 PC Solutions (<http://pcsol.be>). All Rights Reserved
-from odoo import fields, models, api
+from odoo import fields, models, api, _
+from odoo.exceptions import UserError
 
 
 class AccountJournal(models.Model):
@@ -27,3 +28,23 @@ class AccountJournal(models.Model):
     def onchange_type(self):
         if self.type not in ['bank', 'cash']:
             self.journal_user = False
+
+    @api.multi
+    def write(self, vals):
+        for journal in self:
+            pos_session_ids = self.env['pos.session'].search([('state', '!=', 'closed'), '|', ('config_id.journal_id', '=', journal.id), ('config_id.journal_ids', 'in', journal.id)]).ids
+            if vals.get('active', False) and len(pos_session_ids):
+                raise UserError(_("You archive Journals that are used by active PoS sessions.\n")\
+                        + _("Journal: ") + str(journal.id) +"\n"\
+                        + _("PoS Sessions: ") + ', '.join(str(pos_session_id) for pos_session_id in pos_session_ids))
+        return super(AccountJournal, self).write(vals)
+
+    @api.multi
+    def unlink(self):
+        for journal in self:
+            pos_session_ids = self.env['pos.session'].search([('state', '!=', 'closed'), '|', ('config_id.journal_id', '=', journal.id), ('config_id.journal_ids', 'in', journal.id)]).ids
+            if len(pos_session_ids):
+                raise UserError(_("You cannot delete Journals that are used by active PoS sessions.\n")\
+                        + _("Journal: ") + str(journal.id) +"\n"\
+                        + _("PoS Sessions: ") + ', '.join(str(pos_session_id) for pos_session_id in pos_session_ids))
+        return super(AccountJournal, self).unlink()
