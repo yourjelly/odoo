@@ -1,11 +1,19 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 
 
 class PosConfig(models.Model):
     _inherit = 'pos.config'
+
+    def _get_fields_to_check(self):
+        res = super(PosConfig, self)._get_fields_to_check()
+        res.update({
+                'is_table_management': _('Table Management'),
+                'floor_ids': _('Floor ids'),
+                })
+        return res
 
     iface_splitbill = fields.Boolean(string='Bill Splitting', help='Enables Bill Splitting in the Point of Sale.')
     iface_printbill = fields.Boolean(string='Bill Printing', help='Allows to print the Bill before payment.')

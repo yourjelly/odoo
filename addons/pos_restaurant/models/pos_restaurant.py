@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 
 
 class RestaurantFloor(models.Model):
@@ -16,6 +17,25 @@ class RestaurantFloor(models.Model):
     table_ids = fields.One2many('restaurant.table', 'floor_id', string='Tables', help='The list of tables in this floor')
     sequence = fields.Integer('Sequence', help='Used to sort Floors', default=1)
 
+    @api.multi
+    def write(self, vals):
+        for floor in self:
+            pos_session_ids =self.env['pos.session'].search([('state', '!=', 'closed'), (floor.id, 'in', 'config_id.floor_ids')]).ids
+            if vals.get('active', False) and len(pos_session_ids):
+                raise UserError(_("You cannot delete Floors that are used by active PoS sessions.\n") \
+                        + _("Floor: ") + str(floor.id) + "\n"\
+                        + _("PoS Sessions: ") + ", ".join(str(pos_session_id) for pos_session_id in pos_session_ids))
+        return super(RestaurantFloor, self).write(vals)
+
+    @api.multi
+    def unlink(self):
+        for floor in self:
+            pos_session_ids = self.env['pos.session'].search([('state', '!=', 'closed'), (floor.id, 'in', 'config_id.floor_ids')]).ids
+            if len(pos_session_ids):
+                raise UserError(_("You cannot delete Floors that are used by active PoS sessions.\n") \
+                        + _("Floor: ") + str(floor.id) + "\n"\
+                        + _("PoS Sessions: ") + ", ".join(str(pos_session_id) for pos_session_id in pos_session_ids))
+        return super(RestaurantFloor, self).unlink()
 
 class RestaurantTable(models.Model):
 
