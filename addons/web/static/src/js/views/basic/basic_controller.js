@@ -21,7 +21,6 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
         reload: '_onReload',
         set_dirty: '_onSetDirty',
         sidebar_data_asked: '_onSidebarDataAsked',
-        translate: '_onTranslate',
     }),
     /**
      * @override
@@ -621,34 +620,6 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
     _onSidebarDataAsked: function (ev) {
         var sidebarEnv = this._getSidebarEnv();
         ev.data.callback(sidebarEnv);
-    },
-    /**
-     * open the translation view for the current field
-     *
-     * @private
-     * @param {OdooEvent} ev
-     */
-    _onTranslate: function (ev) {
-        ev.stopPropagation();
-        var self = this;
-        var record = this.model.get(ev.data.id, {raw: true});
-        this._rpc({
-            route: '/web/dataset/call_button',
-            params: {
-                model: 'ir.translation',
-                method: 'translate_fields',
-                args: [record.model, record.res_id, ev.data.fieldName, record.getContext()],
-            }
-        }).then(function (result) {
-            self.do_action(result, {
-                on_reverse_breadcrumb: function () {
-                    if (!_.isEmpty(self.renderer.alertFields)) {
-                        self.renderer.displayTranslationAlert();
-                    }
-                    return false;
-                },
-            });
-        });
     },
 });
 

@@ -6,6 +6,7 @@ var core = require('web.core');
 var Dialog = require('web.Dialog');
 var dialogs = require('web.view_dialogs');
 var Sidebar = require('web.Sidebar');
+var TranslationListView = require('web.TranslationListView');
 
 var _t = core._t;
 var qweb = core.qweb;
@@ -23,6 +24,7 @@ var FormController = BasicController.extend({
         form_dialog_discarded: '_onFormDialogDiscarded',
         swipe_left: '_onSwipeLeft',
         swipe_right: '_onSwipeRight',
+        translate: '_onTranslate',
     }),
     /**
      * @override
@@ -687,6 +689,68 @@ var FormController = BasicController.extend({
         if (this.pager) {
             this.pager.previous();
         }
+
+    },
+     /**
+     * setup the translation list view for the current field
+     *
+     * @private
+     * @param {OdooAction} odoo action
+     * @param {OdooEvent} ev
+     */
+    _setupTranslationView: function (action, ev) {
+        var viewType = action.views[0][1];
+        var context = action.context;
+        var self = this;
+        this.loadViews(action.res_model, context, action.views).then(function (viewsInfo) {
+            var viewInfo = viewsInfo[viewType];
+            var view = new TranslationListView(viewInfo, {
+                hasSelectors: false,
+                modelName: action.res_model,
+                searchQuery: {
+                    context: context,
+                    domain: action.domain,
+                    groupBy: [],
+                },
+            });
+            view.getController(self).then(function (controller) {
+                controller.appendTo(document.createDocumentFragment());
+                ev.data.field.displayTranslation(controller.$el);
+            });
+        });
+    },
+     /**
+     * open the translation view for the current field
+     *
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _onTranslate: function (ev) {
+        ev.stopPropagation();
+        var self = this;
+        var record = this.model.get(ev.data.id, {raw: true});
+        this._rpc({
+            route: '/web/dataset/call_button',
+            params: {
+                model: 'ir.translation',
+                method: 'translate_fields',
+                args: [record.model, record.res_id, ev.data.fieldName, ev.data.view, record.getContext()],
+            }
+        }).then(function (action) {
+            if (ev.data.view) {
+                self._setupTranslationView(action, ev);
+            }
+            else {
+                self.do_action(action, {
+                    on_reverse_breadcrumb: function () {
+                        if (!_.isEmpty(self.renderer.alertFields)) {
+                            self.renderer.displayTranslationAlert();
+                        }
+                        return false;
+                    },
+                });
+            }
+        });
     },
     /**
      * This method is called when someone tries to sort a column, most likely

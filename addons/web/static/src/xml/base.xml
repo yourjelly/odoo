@@ -1076,6 +1076,19 @@
     </t>
 </div>
 
+<t t-name="Translation.Button">
+    <span class="btn-group o_field_translate">
+        <button type="button" class="fa o_field_button fa-globe btn btn-link" data-toggle="dropdown" data-display="static">
+        </button>
+        <ul class="o_translate dropdown-menu dropdown-menu-right">
+            <div class="o_translate_content">
+                <div class="dropdown-item text-center o_no_activity">
+                    <span class="fa fa-spinner fa-spin fa-2x" role="img" aria-label="Loading..." title="Loading..."/>
+                </div>
+            </div>
+        </ul>
+    </span>
+</t>
 <t t-name="DropdownMenu.MenuItems">
     <t t-if="widget.items.length !== 0">
         <t t-set="group" t-value="0"/>

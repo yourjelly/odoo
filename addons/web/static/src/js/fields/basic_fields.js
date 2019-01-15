@@ -35,15 +35,19 @@ var TranslatableFieldMixin = {
      */
     _renderTranslateButton: function () {
         if (_t.database.multi_lang && this.field.translate && this.res_id) {
-            return $('<button>', {
-                    type: 'button',
-                    'class': 'o_field_translate fa fa-globe btn btn-link',
-                })
-                .on('click', this._onTranslate.bind(this));
+            this.$translate_el = $(qweb.render('Translation.Button'));
+            this.$translate_el.find('.o_field_button').on('click', this._onTranslate.bind(this));
+            this.$translate_el.find('.o_translate_content').on('click', function (ev) {
+                ev.stopPropagation();
+            });
+            return this.$translate_el;
         }
         return $();
     },
-
+    displayTranslation: function ($el) {
+        this.$translate_el.find('.o_translate_content').empty().append($el);
+        this.setupView = true;
+    },
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
@@ -54,7 +58,14 @@ var TranslatableFieldMixin = {
      * @private
      */
     _onTranslate: function () {
-        this.trigger_up('translate', {fieldName: this.name, id: this.dataPointID});
+        if (!this.setupView) {
+            this.trigger_up('translate', {
+                fieldName: this.name,
+                id: this.dataPointID,
+                view: true,
+                field: this
+            });
+        }
     },
 };
 
