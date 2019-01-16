@@ -8,37 +8,18 @@ from odoo.exceptions import Warning as UserError
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
-    l10n_it_ddt_id = fields.Many2one('l10n.it.ddt', String='DDT')
-
-    def _check_multi_picking(self):
-        if len(self.mapped('picking_type_id')) > 1:
-            raise UserError(
-                    _("Selected Pickings have diffrent Operation Type"))
-        if len(self.mapped('partner_id')) > 1:
-                raise UserError(
-                    _("Selected Pickings have different Partners"))
+    ddt_id = fields.Many2one('l10n.it.ddt', String='Transport Document')
+    @api.constrains('ddt_id')
+    def _check_ddt_id(self):
         for picking in self:
-            if picking.l10n_it_ddt_id:
-                raise UserError(
-                    _("Picking %s already in ddt %s") %
-                     (picking.name, picking.l10n_it_ddt_id.name))
+            if picking.partner_id != ddt.partner_id or picking.warehouse_id != ddt.warehouse_id or :
+                raise ValidationError(_('You can not link ddt with different partner, warehouse and picking type.'))
 
+class Stock_Move(models.Model):
+    _name = 'stock.move'
+    _inherit = 'stock.move'
 
-class StockMove(models.Model):
-    _inherit = "stock.move"
-
-    l10n_it_ddt_id = fields.Many2one('l10n.it.ddt', String='DDT')
-
-    @api.multi
-    def _pripare_ddt_line(self):
-        self.ensure_one()
-        return {
-                'product_id': self.product_id.id,
-                'quantity': self.product_uom_qty,
-                'product_uom_id': self.product_uom.id,
-                'unit_price': self.sale_line_id and self.sale_line_id.price_unit or 0,
-                'discount': self.sale_line_id and self.sale_line_id.discount or 0,
-                'tax_ids': [(6, 0, self.sale_line_id.tax_id.ids)],
-                'name': self.name,
-                'move_line_id': self.id,
-            }
+    unit_price = fields.Float(string='Unit Price', related='sale_line_id.price_unit')
+    discount = fields.Float(string='Discount', related='sale_line_id.discount')
+    tax_ids = fields.Many2many('account.tax', string='Taxes', related='sale_line_id.tax_id')
+    total_amount = fields.Float(computed='_compute_total_amount')

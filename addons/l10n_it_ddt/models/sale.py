@@ -7,8 +7,9 @@ from odoo import fields, models, api
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
-    # @api.depends('ddt_ids')
-    # def _compute_sale_order(self):
+    def _compute_ddt_ids(self):
+        for order in self:
+            order.ddt_ids = picking_ids.mapped('ddt_id').ids
 
-
-    ddt_ids = fields.Many2many('l10n.it.ddt', string="DDT")
+    ddt_ids = fields.Many2many(
+        'l10n.it.ddt', string="DDT", compute="_compute_ddt_ids")
