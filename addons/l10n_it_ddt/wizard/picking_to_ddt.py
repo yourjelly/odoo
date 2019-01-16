@@ -9,9 +9,9 @@ class L10nItAddPickingsToDdt(models.TransientModel):
     def _get_picking_ids(self):
         return self.env['stock.picking'].browse(self.env.context['active_ids'])
 
-
     ddt_id = fields.Many2one('l10n.it.ddt', string="DDT")
-    picking_ids = fields.Many2many('stock.picking', string="DDT", default=_get_picking_ids)
+    picking_ids = fields.Many2many(
+        'stock.picking', string="DDT", default=_get_picking_ids)
 
     @api.multi
     def add_ddt(self):

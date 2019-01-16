@@ -12,11 +12,9 @@
     'data': [
         'security/ir.model.access.csv',
         'data/l10n_it_ddt_sequence_data.xml',
-        'report/l10n_it_ddt_report.xml',
         'wizard/picking_to_ddt.xml',
         'views/l10n_it_ddt_views.xml',
-        'views/sale_views.xml',
         'views/stock_picking_views.xml',
-        # 'views/account_invoice_view.xml',
+        'views/account_invoice_view.xml',
     ]
 }

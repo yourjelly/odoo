@@ -24,7 +24,8 @@
   
     <act_window id="action_add_pickingd_to_ddt"
             multi="False"
-            key2="client_action_multi" name="Add Pickings to DDT"
+            key2="client_action_multi"
+            name="Add Pickings to DDT"
             res_model="l10n.it.ddt.to.pickings" src_model="stock.picking"
             view_mode="form" target="new" view_type="form"/>
 

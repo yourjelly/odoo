@@ -21,11 +21,6 @@
     <field name="model">l10n.it.ddt</field>
     <field name="arch" type="xml">
         <form>
-            <header>
-                <button name="action_confirm" id="action_confirm"
-                        string="Done" class="btn-primary" type="object" attrs='{"invisible": [("state", "=", "done")]}'/>
-                <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
-            </header>
             <sheet>
                 <h1>
                     <field name="name"/></h1>
@@ -34,48 +29,26 @@
                         <field name="partner_id"/>
                         <field name="ddt_type_id"/>
                         <field name="ddt_tag_id"/>
-                        <field name="packages"/>
                     </group>
                     <group>
-                        <field name="company_id"/>
                         <field name="transport_type"/>
-                        <field name="weight"/>
                     </group>
                 </group>
                 <notebook>
                     <page string="Transfer">
                         <field name="stock_picking_ids"/>
                     </page>
-                    <page string="Product Information">
-                        <field name="ddt_line_ids">
-                            <tree editable="bottom">
-                                <field name="product_id"/>
-                                <field name="name"/>
-                                <field name="quantity"/>
-                                <field name="product_uom_id" groups="uom.group_uom"/>
-                                <field name="unit_price"/>
-                                <field name="discount"/>
-                                <field name="tax_ids"  widget="many2many_tags"/>
-                            </tree>
-                            <form>
-                                <group>
-                                    <field name="product_id"/>
-                                    <field name="quantity"/>
-                                    <field name="product_uom_id" groups="uom.group_uom"/>
-                                    <field name="unit_price"/>
-                                </group>
-                                <group>
-                                    <field name="discount"/>
-                                    <field name="tax_ids"  widget="many2many_tags"/>
-                                </group>
-                                <field name="name"/>
-                            </form>
-                        </field>
-                    </page>
                     <page string="shipping Information">
                       <sheet>
                         <group>
-                            <field name="partner_shipping_id"/>
+                            <group>
+                                <field name="weight"/>
+                                <field name="company_id"/>
+                            </group>
+                            <group>
+                                <field name="partner_shipping_id"/>
+                                <field name="packages"/>
+                            </group>
                         </group>
                       </sheet>
                     </page>
@@ -126,5 +99,4 @@
 
 
     <menuitem name="DDT" parent="stock.menu_stock_warehouse_mgmt" action="l10n_it_ddt_action" id="menu_action_ddt"/>
-    <!-- <menuitem  name="DDT Type" parent="l10n_it_ddt_menu" action="l10n_it_ddt_type_action" id="ddt_type_menu"/> -->
 </odoo>
