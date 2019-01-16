@@ -1003,6 +1003,7 @@ class Field(MetaField('DummyField', (object,), {})):
     def compute_value(self, records):
         """ Invoke the compute method on ``records``; the results are in cache. """
         fields = records._field_computed[self]
+        print("compute fields: ",fields)
         with records.env.do_in_draft(), records.env.protecting(fields, records):
             try:
                 self._compute_value(records)
