@@ -5,6 +5,7 @@ import datetime
 import itertools
 import logging
 import hmac
+import time
 
 from collections import defaultdict
 from itertools import chain, repeat
@@ -658,6 +659,10 @@ class GroupsImplied(models.Model):
         # Compute the transitive closure recursively. Note that the performance
         # is good, because the record cache behaves as a memo (the field is
         # never computed twice on a given group.)
+        print("begin__compute_trans_implied")
+        print (time.strftime("%Y%m%d %H:%M:%S")) 
+        print(self)
+        print("end__compute_trans_implied")
         for g in self:
             g.trans_implied_ids = g.implied_ids | g.mapped('implied_ids.trans_implied_ids')
 
@@ -672,6 +677,10 @@ class GroupsImplied(models.Model):
 
     @api.multi
     def write(self, values):
+        print("begin_write")
+        print (time.strftime("%Y%m%d %H:%M:%S")) 
+        print(self)
+        print("end_write")
         res = super(GroupsImplied, self).write(values)
         if values.get('users') or values.get('implied_ids'):
             # add all implied groups (to all users of each group)
