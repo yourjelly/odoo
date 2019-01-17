@@ -24,7 +24,13 @@
                 </rng:attribute>
             </rng:optional>
             <rng:optional><rng:attribute name="periods"/></rng:optional>
-            <rng:optional><rng:attribute name="popover_template"/></rng:optional>
+            <rng:optional>
+                <rng:element name="templates">
+                    <rng:oneOrMore>
+                        <rng:ref name="any"/>
+                    </rng:oneOrMore>
+                </rng:element>
+            </rng:optional>
             <rng:optional><rng:attribute name="decoration-secondary"/></rng:optional>
             <rng:optional><rng:attribute name="decoration-success"/></rng:optional>
             <rng:optional><rng:attribute name="decoration-info"/></rng:optional>
