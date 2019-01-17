@@ -8,6 +8,6 @@ class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
     module_project_forecast = fields.Boolean(string="Forecasts")
-    module_hr_timesheet = fields.Boolean(string="Task Logs")
+    module_hr_timesheet = fields.Boolean(string="Timesheet")
     group_subtask_project = fields.Boolean("Sub-tasks", implied_group="project.group_subtask_project")
     group_project_rating = fields.Boolean("Use Rating on Project", implied_group='project.group_project_rating')
