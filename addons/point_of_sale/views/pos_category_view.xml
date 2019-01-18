@@ -25,7 +25,7 @@
         <field name="arch" type="xml">
             <tree string="Product Product Categories">
                 <field name="sequence" widget="handle"/>
-                <field name="display_name"/>
+                <field name="display_name" string="Pos Category"/>
             </tree>
         </field>
     </record>
