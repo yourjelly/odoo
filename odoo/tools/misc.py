@@ -914,13 +914,14 @@ def dumpstacks(sig=None, frame=None, out_channel=None):
                     for th in threading.enumerate()}
     for threadId, stack in sys._current_frames().items():
         thread_info = threads_info.get(threadId, {})
-        code.append("\n# Thread: %s (db:%s) (uid:%s) (url:%s)" %
-                    (thread_info.get('repr', threadId),
-                     thread_info.get('dbname', 'n/a'),
-                     thread_info.get('uid', 'n/a'),
-                     thread_info.get('url', 'n/a')))
-        for line in extract_stack(stack):
-            code.append(line)
+        if (str(thread_info['repr']).find("MainThread")>=1):
+            code.append("\n# Thread: %s (db:%s) (uid:%s) (url:%s)" %
+                        (thread_info.get('repr', threadId),
+                        thread_info.get('dbname', 'n/a'),
+                        thread_info.get('uid', 'n/a'),
+                        thread_info.get('url', 'n/a')))
+            for line in extract_stack(stack):
+                code.append(line)
 
     if odoo.evented:
         # code from http://stackoverflow.com/questions/12510648/in-gevent-how-can-i-dump-stack-traces-of-all-running-greenlets
@@ -937,7 +938,7 @@ def dumpstacks(sig=None, frame=None, out_channel=None):
         _logger.info("\n".join(code))
     else:
         try:
-            encoded_code = str.encode("\n".join([time.strftime('%Y%m%d%H%M%S')]+code))
+            encoded_code = str.encode("\n".join([time.strftime('\ntimestamp:%Y%m%d%H%M%S\n')]+code))
             os.write(out_channel,encoded_code) # print on out_channel
         except:
             pass

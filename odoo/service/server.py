@@ -86,9 +86,7 @@ class TraceLogger:
     def run(self):
         while True:
             dumpstacks(sig=3, out_channel=2)
-            time.sleep(1)
-
-
+            time.sleep(60)
 
 class BaseWSGIServerNoBind(LoggingBaseWSGIServerMixIn, werkzeug.serving.BaseWSGIServer):
     """ werkzeug Base WSGI Server patched to skip socket binding. PreforkServer
