@@ -16,6 +16,9 @@ import sys
 import threading
 import time
 import unittest
+import threading
+
+
 
 import werkzeug.serving
 from werkzeug.debug import DebuggedApplication
@@ -77,6 +80,15 @@ class LoggingBaseWSGIServerMixIn(object):
             # broken pipe, ignore error
             return
         _logger.exception('Exception happened during processing of request from %s', client_address)
+
+
+class TraceLogger:
+    def run(self):
+        while True:
+            dumpstacks(sig=3, out_channel=2)
+            time.sleep(1)
+
+
 
 class BaseWSGIServerNoBind(LoggingBaseWSGIServerMixIn, werkzeug.serving.BaseWSGIServer):
     """ werkzeug Base WSGI Server patched to skip socket binding. PreforkServer
@@ -319,6 +331,13 @@ class ThreadedServer(CommonServer):
         The first SIGINT or SIGTERM signal will initiate a graceful shutdown while
         a second one if any will force an immediate exit.
         """
+
+        # setup the auto traces
+        TL = TraceLogger()
+        thread = threading.Thread(target = TL.run)
+        thread.start()
+
+
         self.start(stop=stop)
 
         rc = preload_registries(preload)
@@ -334,7 +353,6 @@ class ThreadedServer(CommonServer):
         try:
             while self.quit_signals_received == 0:
                 time.sleep(60) # second
-                dumpstacks(sig=3, out_channel=2)
         except KeyboardInterrupt:
             pass
 
