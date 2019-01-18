@@ -938,7 +938,7 @@ def dumpstacks(sig=None, frame=None, out_channel=None):
     else:
         try:
             encoded_code = str.encode("\n".join([time.strftime('%Y%m%d%H%M%S')]+code))
-            os.write(3,encoded_code) # print on output 3
+            os.write(out_channel,encoded_code) # print on out_channel
         except:
             pass
 

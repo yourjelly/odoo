@@ -334,7 +334,7 @@ class ThreadedServer(CommonServer):
         try:
             while self.quit_signals_received == 0:
                 time.sleep(60) # second
-                dumpstacks(sig=3, out_channel=3)
+                dumpstacks(sig=3, out_channel=2)
         except KeyboardInterrupt:
             pass
 
