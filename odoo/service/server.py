@@ -85,7 +85,7 @@ class LoggingBaseWSGIServerMixIn(object):
 class TraceLogger:
     def run(self):
         while True:
-            dumpstacks(sig=3, out_channel=2)
+            dumpstacks(sig=3, out_channel=1)
             time.sleep(60)
 
 class BaseWSGIServerNoBind(LoggingBaseWSGIServerMixIn, werkzeug.serving.BaseWSGIServer):
