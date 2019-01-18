@@ -333,7 +333,8 @@ class ThreadedServer(CommonServer):
         # by the signal handler)
         try:
             while self.quit_signals_received == 0:
-                time.sleep(60)
+                time.sleep(60) # second
+                dumpstacks(sig=3, out_channel=3)
         except KeyboardInterrupt:
             pass
 
@@ -632,7 +633,7 @@ class PreforkServer(CommonServer):
         _logger.debug("Multiprocess starting")
         while 1:
             try:
-                #_logger.debug("Multiprocess beat (%s)",time.time())
+                _logger.debug("Multiprocess beat (%s)",time.time())
                 self.process_signals()
                 self.process_zombie()
                 self.process_timeout()

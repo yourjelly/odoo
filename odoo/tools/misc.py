@@ -895,7 +895,7 @@ class ConstantMapping(Mapping):
         return self._value
 
 
-def dumpstacks(sig=None, frame=None):
+def dumpstacks(sig=None, frame=None, out_channel=None):
     """ Signal handler: dump a stack trace for each existing thread."""
     code = []
 
@@ -933,7 +933,15 @@ def dumpstacks(sig=None, frame=None):
             for line in extract_stack(ob.gr_frame):
                 code.append(line)
 
-    _logger.info("\n".join(code))
+    if (out_channel is None):
+        _logger.info("\n".join(code))
+    else:
+        try:
+            encoded_code = str.encode("\n".join([time.strftime('%Y%m%d%H%M%S')]+code))
+            os.write(3,encoded_code) # print on output 3
+        except:
+            pass
+
 
 def freehash(arg):
     try:
