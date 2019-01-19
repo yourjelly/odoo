@@ -823,6 +823,7 @@ class AccountMoveLine(models.Model):
         to_create = []
         cash_basis = debit_moves and debit_moves[0].account_id.internal_type in ('receivable', 'payable') or False
         cash_basis_percentage_before_rec = {}
+        dc_vals ={}
         while (debit_moves and credit_moves):
             debit_move = debit_moves[0]
             credit_move = credit_moves[0]
@@ -830,6 +831,7 @@ class AccountMoveLine(models.Model):
             # We need those temporary value otherwise the computation might be wrong below
             temp_amount_residual = min(debit_move.amount_residual, -credit_move.amount_residual)
             temp_amount_residual_currency = min(debit_move.amount_residual_currency, -credit_move.amount_residual_currency)
+            dc_vals[(debit_move.id, credit_move.id)] = (debit_move, credit_move, temp_amount_residual_currency)
             amount_reconcile = min(debit_move[field], -credit_move[field])
 
             #Remove from recordset the one(s) that will be totally reconciled
@@ -867,11 +869,22 @@ class AccountMoveLine(models.Model):
                 'currency_id': currency,
             })
 
+        after_list = []
         part_rec = self.env['account.partial.reconcile']
         with self.env.norecompute():
             for partial_rec_dict in to_create:
-                new_rec = self.env['account.partial.reconcile'].create(partial_rec_dict)
-                part_rec += new_rec
+                dval, cval, tval = dc_vals[partial_rec_dict['debit_move_id'], partial_rec_dict['credit_move_id']]
+                # /!\ NOTE: Exchange rate differences shall not create cash tax
+                # basis entries and we will create first their apr records
+                # because the order of creation of apr records do matter for
+                # the `_get_matched_percentage` method in aml afterwards when
+                # it is used in the apr's where cash_basis applies.
+                if not (not tval and dval.currency_id and cval.currency_id):
+                    after_list.append(partial_rec_dict)
+                    continue
+                part_rec.create(partial_rec_dict)
+            for after_rec_dict in after_list:
+                new_rec = part_rec.create(after_rec_dict)
                 if cash_basis:
                     new_rec.create_tax_cash_basis_entry(cash_basis_percentage_before_rec)
         self.recompute()
