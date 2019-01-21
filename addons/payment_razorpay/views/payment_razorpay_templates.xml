@@ -10,7 +10,10 @@
             <input type="hidden" name="email" t-att-value='email'/>
             <input type="hidden" name="order_id" t-att-value='order_id'/>
             <input type="hidden" name="merchant_name" t-att-value='acquirer.company_id.name'/>
-            <script type="text/javascript" src="/payment_razorpay/static/src/js/razorpay.js"></script>
+            <input type="hidden" name="send_sms_email" t-att-value='send_sms_email'/>
+            <t t-if="not send_sms_email">
+                <script type="text/javascript" src="/payment_razorpay/static/src/js/razorpay.js"></script>
+            </t>
         </div>
     </template>
 </odoo>

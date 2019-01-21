@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import json
 import logging
 import requests
 
@@ -17,6 +18,9 @@ class PaymentAcquirer(models.Model):
     provider = fields.Selection(selection_add=[('razorpay', 'Razorpay')])
     razorpay_key_id = fields.Char(string='Key ID', required_if_provider='razorpay', groups='base.group_user')
     razorpay_key_secret = fields.Char(string='Key Secret', required_if_provider='razorpay', groups='base.group_user')
+    send_sms_email = fields.Boolean(string='Payment via send sms/email',
+                                    help='Payment using send link on registered contact number and on email address',
+                                    groups='base.group_user')
 
     @api.multi
     def razorpay_form_generate_values(self, values):
@@ -31,8 +35,34 @@ class PaymentAcquirer(models.Model):
             'contact': values.get('partner_phone'),
             'email': values.get('partner_email'),
             'order_id': values.get('reference'),
+            'send_sms_email': self.send_sms_email,
         })
         return values
+
+    def razorpay_get_form_action_url(self):
+        if self.send_sms_email:
+            return '/payment/razorpay/feedback'
+
+    def _format_razorpay_data(self):
+        pending_msg = _('''<div>
+<h3>Payment link is send to your registered contact number/email address.</h3>
+<h4>You can do directly payment from payment link.</h4>
+</div>''')
+        return pending_msg
+
+    @api.model
+    def create(self, values):
+        """ Hook in write to create a default pending_message, if send sms/email option set."""
+        if values.get('provider') == 'razorpay' and values.get('send_sms_email'):
+            values['pending_msg'] = self._format_razorpay_data()
+        return super(PaymentAcquirer, self).create(values)
+
+    @api.multi
+    def write(self, values):
+        """ Hook in write to create a default pending_message, if send sms/email option set. See create(). """
+        if all(not acquirer.send_sms_email and acquirer.provider == 'razorpay' for acquirer in self) and values.get('send_sms_email'):
+            values['pending_msg'] = self._format_razorpay_data()
+        return super(PaymentAcquirer, self).write(values)
 
 
 class PaymentTransaction(models.Model):
@@ -60,7 +90,33 @@ class PaymentTransaction(models.Model):
         return payment_response
 
     @api.model
+    def _create_razorpay_notify(self, data):
+        invoice_id = data.get('payload', {}).get('payment', {}).get('entity', {}).get('invoice_id', False)
+        status = data.get('payload', {}).get('payment', {}).get('entity', {}).get('status', False)
+        order_id = data.get('payload', {}).get('order', {}).get('entity', {}).get('id', False)
+        TX = self.env['payment.transaction']
+        if invoice_id and status in "captured":
+            TX = TX.sudo().search([('acquirer_reference', '=', invoice_id)])
+            if TX:
+                TX.sudo().write({'state': 'done'})
+        return TX
+
+    @api.model
     def _razorpay_form_get_tx_from_data(self, data):
+        payment_acquirer = self.env['payment.acquirer'].search([('provider', '=', 'razorpay')], limit=1)
+        if payment_acquirer.send_sms_email:
+            tx = self.env['payment.transaction'].search([('reference', '=', data.get('order_id'))])
+
+            if not tx or len(tx) > 1:
+                error_msg = _('received data for reference %s') % (pprint.pformat(reference))
+                if not tx:
+                    error_msg += _('; no order found')
+                else:
+                    error_msg += _('; multiple order found')
+                _logger.info(error_msg)
+                raise ValidationError(error_msg)
+
+            return tx
         reference, txn_id = data.get('notes', {}).get('order_id'), data.get('id')
         if not reference or not txn_id:
             error_msg = _('Razorpay: received data with missing reference (%s) or txn_id (%s)') % (reference, txn_id)
@@ -85,9 +141,52 @@ class PaymentTransaction(models.Model):
             invalid_parameters.append(('amount', data.get('amount'), '%.2f' % self.amount))
         return invalid_parameters
 
+    @api.model
+    def _razorpay_create_customer(self):
+        razorpay_key_id = self.acquirer_id.razorpay_key_id
+        razorpay_key_secret = self.acquirer_id.razorpay_key_secret
+        url = "https://%s:%s@api.razorpay.com/v1/customers" % (razorpay_key_id, razorpay_key_secret)
+        data = dict(
+                name=self.partner_id.name,
+                contact=self.partner_id.phone,
+                email=self.partner_id.email,
+                fail_existing=0
+            )
+        try:
+            response = requests.post(url, data=data).text
+        except Exception as e:
+            raise e
+        return json.loads(response)
+
+    @api.model
+    def _razorpay_send_payment_link(self, customer_details):
+        razorpay_key_id = self.acquirer_id.razorpay_key_id
+        razorpay_key_secret = self.acquirer_id.razorpay_key_secret
+        url = "https://%s:%s@api.razorpay.com/v1/invoices" % (razorpay_key_id, razorpay_key_secret)
+        data = dict(
+            type='link',
+            amount= float_repr(float_round(self.amount, 2) * 100, 0), # Razorpay always need amount in integer
+            currency="INR",  # orders.currency_id.name,
+            description="Payment", #improve desctiption -> sale order info + customer name + from odoo
+            customer_id=customer_details.get('id'),
+        )
+        data.update({"notes[order_id]": self.reference})
+        try:
+            response = requests.post(url, data=data).text
+        except Exception as e:
+            raise e
+        return json.loads(response)
+
     @api.multi
     def _razorpay_form_validate(self, data):
         status = data.get('status')
+        if data.get('send_sms_email') and not status:
+            res_customer = self._razorpay_create_customer()
+            res_payment = self._razorpay_send_payment_link(res_customer)
+            _logger.info('Validated Razorpay payment for tx %s: set as pending' % (self.reference))
+            self.write({'acquirer_reference': res_payment.get('id')})
+            self._set_transaction_pending()
+            return True
         if status == 'captured':
             _logger.info('Validated Razorpay payment for tx %s: set as done' % (self.reference))
             self.write({'acquirer_reference': data.get('id')})

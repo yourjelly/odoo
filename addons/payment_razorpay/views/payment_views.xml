@@ -11,6 +11,9 @@
                     <field name="razorpay_key_secret" password="True"/>
                 </group>
             </xpath>
+            <xpath expr='//field[@name="qr_code"]' position='after'>
+                <field name="send_sms_email" attrs="{'invisible': [('provider', '!=', 'razorpay')]}"/>
+            </xpath>
         </field>
     </record>
 </odoo>
