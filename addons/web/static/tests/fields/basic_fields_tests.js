@@ -122,6 +122,17 @@ QUnit.module('basic_fields', {
                     position: "after",
                 }]
             },
+            'ir.translation': {
+                fields: {
+                    lang: {string: "Lang", type: "char"},
+                    value: {string: "Value", type: "char"},
+                },
+                records: [{
+                    id: 1,
+                    lang: "French",
+                    value: "Yep_Fr"
+                }],
+            },
         };
     }
 }, function () {
@@ -1011,12 +1022,21 @@ QUnit.module('basic_fields', {
     });
 
     QUnit.test('char field translatable', function (assert) {
-        assert.expect(3);
+        assert.expect(5);
 
         this.data.partner.fields.foo.translate = true;
 
         var multiLang = _t.database.multi_lang;
         _t.database.multi_lang = true;
+        var action = {
+            id: 1,
+            name: "Translate",
+            context: {search_default_foo: "partner,foo"},
+            res_model: "ir.translation",
+            target: "current",
+            type: "ir.actions.act_window",
+            views: [[1, "list"]]
+        };
 
         var form = createView({
             View: FormView,
@@ -1029,19 +1049,31 @@ QUnit.module('basic_fields', {
                         '</group>' +
                     '</sheet>' +
                 '</form>',
+            archs: {
+                'ir.translation,1,list': '<tree editable="top" create="false">' +
+                    '<field name="lang"/><field name="value"/>'+
+                    '</tree>',
+            },
             res_id: 1,
             mockRPC: function (route, args) {
                 if (route === "/web/dataset/call_button" && args.method === 'translate_fields') {
-                    assert.deepEqual(args.args, ["partner",1,"foo",{}], 'should call "call_button" route');
-                    return $.when();
+                    assert.deepEqual(args.args, ["partner",1,"foo",true,{}], 'should call "call_button" route');
+                    return $.when(action);
                 }
                 return this._super.apply(this, arguments);
             },
         });
         testUtils.form.clickEdit(form);
-        var $button = form.$('input[type="text"].o_field_char + .o_field_translate');
+        var $button = form.$('input[type="text"].o_field_char + .o_field_translate .o_field_button');
         assert.strictEqual($button.length, 1, "should have a translate button");
         testUtils.dom.click($button);
+        var $td = form.$('.o_data_cell').eq(1);
+        testUtils.dom.click($td);
+        testUtils.fields.editInput($td.find('input'), 'yep_french');
+        assert.strictEqual($td.find('input').val(), 'yep_french', "translate field value has been edited correctly");
+        testUtils.dom.click($('.o_form_view'))
+        testUtils.dom.click($button);
+        assert.strictEqual(form.$('.o_data_cell').eq(1).text(), 'yep_french', "translated value saved correctly");
         form.destroy();
 
         form = createView({
@@ -1616,7 +1648,15 @@ QUnit.module('basic_fields', {
 
         var multiLang = _t.database.multi_lang;
         _t.database.multi_lang = true;
-
+        var action = {
+            id: 1,
+            context: {search_default_txt: "partner,txt"},
+            name: "Translate",
+            res_model: "ir.translation",
+            target: "current",
+            type: "ir.actions.act_window",
+            views: [[1, "list"]]
+        };
         var form = createView({
             View: FormView,
             model: 'partner',
@@ -1628,17 +1668,22 @@ QUnit.module('basic_fields', {
                         '</group>' +
                     '</sheet>' +
                 '</form>',
+            archs: {
+                'ir.translation,1,list': '<tree>' +
+                    '<field name="lang"/><field name="value"/>'+
+                    '</tree>',
+            },
             res_id: 1,
             mockRPC: function (route, args) {
                 if (route === "/web/dataset/call_button" && args.method === 'translate_fields') {
-                    assert.deepEqual(args.args, ["partner",1,"txt",{}], 'should call "call_button" route');
-                    return $.when();
+                    assert.deepEqual(args.args, ["partner",1,"txt",true,{}], 'should call "call_button" route');
+                    return $.when(action);
                 }
                 return this._super.apply(this, arguments);
             },
         });
         testUtils.form.clickEdit(form);
-        var $button = form.$('textarea + .o_field_translate');
+        var $button = form.$('textarea + .o_field_translate .o_field_button');
         assert.strictEqual($button.length, 1, "should have a translate button");
         testUtils.dom.click($button);
         form.destroy();

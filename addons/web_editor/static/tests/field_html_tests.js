@@ -55,6 +55,17 @@ QUnit.module('field html', {
                     body_arch: "<div class='field_body'>yep</div>",
                 }],
             },
+            'ir.translation': {
+                fields: {
+                    lang: {string: "Lang", type: "char"},
+                    value: {string: "Value", type: "char"},
+                },
+                records: [{
+                    id: 1,
+                    lang: "French",
+                    value: "Yep_Fr"
+                }],
+            },
         });
 
         testUtils.mock.patch(ajax, {
@@ -808,11 +819,21 @@ QUnit.test('drag&drop snippet options', function (assert) {
 QUnit.module('translation');
 
 QUnit.test('field html translatable', function (assert) {
+    var done = assert.async();
     assert.expect(3);
 
     var multiLang = _t.database.multi_lang;
     _t.database.multi_lang = true;
 
+    var action = {
+        id: 1,
+        name: "Translate",
+        context: {search_default_body: "note.note,body"},
+        res_model: "ir.translation",
+        target: "current",
+        type: "ir.actions.act_window",
+        views: [[1, "list"]]
+    };
     this.data['note.note'].fields.body.translate = true;
 
     testUtils.createAsyncView({
@@ -822,11 +843,17 @@ QUnit.test('field html translatable', function (assert) {
         arch: '<form string="Partners">' +
             '<field name="body" widget="html"/>' +
             '</form>',
+        archs: {
+            'ir.translation,1,list': '<tree editable="top" create="false">' +
+                '<field name="lang" readonly="1"/><field name="value"/>'+
+            '</tree>',
+        },
         res_id: 1,
+        debug: true,
         mockRPC: function (route, args) {
             if (route === '/web/dataset/call_button' && args.method === 'translate_fields') {
-                assert.deepEqual(args.args, ['note.note', 1, 'body', {}], "should call 'call_button' route");
-                return $.when();
+                assert.deepEqual(args.args, ['note.note', 1, 'body', true, {}], "should call 'call_button' route");
+                return $.when(action);
             }
             return this._super.apply(this, arguments);
         },
@@ -835,13 +862,13 @@ QUnit.test('field html translatable', function (assert) {
             "should not have a translate button in readonly mode");
 
         form.$buttons.find('.o_form_button_edit').click();
-        var $button = form.$('.oe_form_field_html .note-toolbar .o_field_translate');
+        var $button = form.$('.oe_form_field_html .note-toolbar .o_field_translate .o_field_button');
         assert.strictEqual($button.length, 1, "should have a translate button");
         $button.click();
 
         form.destroy();
         _t.database.multi_lang = multiLang;
-
+        done();
     });
 });
 
@@ -852,6 +879,15 @@ QUnit.test('field html translatable in iframe', function (assert) {
     var multiLang = _t.database.multi_lang;
     _t.database.multi_lang = true;
 
+    var action = {
+        id: 1,
+        name: "Translate",
+        context: {search_default_body: "note.note,body"},
+        res_model: "ir.translation",
+        target: "current",
+        type: "ir.actions.act_window",
+        views: [[1, "list"]]
+    };
     this.data['note.note'].fields.body.translate = true;
 
     testUtils.createAsyncView({
@@ -861,11 +897,16 @@ QUnit.test('field html translatable in iframe', function (assert) {
         arch: '<form>' +
             '<field name="body" widget="html" style="height: 100px" options="{\'cssEdit\': \'template.assets\'}"/>' +
             '</form>',
+        archs: {
+            'ir.translation,1,list': '<tree editable="top" create="false">' +
+                '<field name="lang" readonly="1"/><field name="value"/>'+
+            '</tree>',
+        },
         res_id: 1,
         mockRPC: function (route, args) {
             if (route === '/web/dataset/call_button' && args.method === 'translate_fields') {
-                assert.deepEqual(args.args, ['note.note', 1, 'body', {}], "should call 'call_button' route");
-                return $.when();
+                assert.deepEqual(args.args, ['note.note', 1, 'body', true, {}], "should call 'call_button' route");
+                return $.when(action);
             }
             return this._super.apply(this, arguments);
         },
@@ -879,7 +920,7 @@ QUnit.test('field html translatable in iframe', function (assert) {
             var doc = $iframe.contents()[0];
             var $content = $('#iframe_target', doc);
 
-            var $button = $content.find('.note-toolbar .o_field_translate');
+            var $button = $content.find('.note-toolbar .o_field_translate .o_field_button');
             assert.strictEqual($button.length, 1, "should have a translate button");
             $button.click();
 

@@ -44,6 +44,11 @@ var TranslatableFieldMixin = {
         }
         return $();
     },
+    /**
+     * open the translation view for crrent field
+     *
+     * @private
+     */
     displayTranslation: function ($el) {
         this.$translate_el.find('.o_translate_content').empty().append($el);
         this.setupView = true;
@@ -53,7 +58,7 @@ var TranslatableFieldMixin = {
     //--------------------------------------------------------------------------
 
     /**
-     * open the translation view for the current field
+     * this method calls when we click on translate button
      *
      * @private
      */

@@ -104,6 +104,17 @@ QUnit.module('Views', {
                     {id: 14, display_name: "silver", color: 5},
                 ]
             },
+            'ir.translation': {
+                fields: {
+                    lang: {string: "Lang", type: "char"},
+                    value: {string: "Value", type: "char"},
+                },
+                records: [{
+                    id: 1,
+                    lang: "French",
+                    value: "Yep_Fr"
+                }],
+            },
         };
     }
 }, function () {
@@ -5610,6 +5621,15 @@ QUnit.module('Views', {
 
         var multi_lang = _t.database.multi_lang;
         _t.database.multi_lang = true;
+        var action = {
+            id: 1,
+            context: {search_default_product_id: "partner,product_id"},
+            name: "Translate",
+            res_model: "ir.translation",
+            target: "current",
+            type: "ir.actions.act_window",
+            views: [[1, "list"]]
+        };
 
         var form = createView({
             View: FormView,
@@ -5631,15 +5651,19 @@ QUnit.module('Views', {
                             '</group>' +
                         '</sheet>' +
                     '</form>',
+
+                'ir.translation,1,list': '<tree>' +
+                    '<field name="lang"/><field name="value"/>'+
+                    '</tree>',
             },
             res_id: 1,
             mockRPC: function (route, args) {
                 if (route === '/web/dataset/call_kw/product/get_formview_id') {
                     return $.when(false);
                 } else if (route === "/web/dataset/call_button" && args.method === 'translate_fields') {
-                    assert.deepEqual(args.args, ["product",37,"name",{}], 'should call "call_button" route');
+                    assert.deepEqual(args.args, ["product",37,"name",true,{}], 'should call "call_button" route');
                     nbTranslateCalls++;
-                    return $.when();
+                    return $.when(action);
                 }
                 return this._super.apply(this, arguments);
             },
@@ -5648,10 +5672,10 @@ QUnit.module('Views', {
         testUtils.form.clickEdit(form);
         testUtils.dom.click(form.$('[name="product_id"] .o_external_button'));
 
-        assert.strictEqual($('.modal-body .o_field_translate').length, 1,
+        assert.strictEqual($('.modal-body .o_field_translate .o_field_button').length, 1,
             "there should be a translate button in the modal");
 
-        testUtils.dom.click($('.modal-body .o_field_translate'));
+        testUtils.dom.click($('.modal-body .o_field_translate .o_field_button'));
 
         assert.strictEqual(nbTranslateCalls, 1, "should call_button translate once");
 
