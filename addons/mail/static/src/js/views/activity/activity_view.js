@@ -2,6 +2,7 @@ odoo.define('mail.ActivityView', function (require) {
 "use strict";
 
 var ActivityController = require('mail.ActivityController');
+var BasicView = require('web.BasicView');
 var ActivityModel = require('mail.ActivityModel');
 var ActivityRenderer = require('mail.ActivityRenderer');
 var AbstractView = require('web.AbstractView');
@@ -10,7 +11,7 @@ var view_registry = require('web.view_registry');
 
 var _lt = core._lt;
 
-var ActivityView = AbstractView.extend({
+var ActivityView = BasicView.extend({
     accesskey: "a",
     display_name: _lt('Activity'),
     icon: 'fa-clock-o',
@@ -21,6 +22,13 @@ var ActivityView = AbstractView.extend({
     }),
     viewType: 'activity',
     searchMenuTypes: ['filter', 'favorite'],
+    /**
+     * @override
+     */
+    init: function (viewInfo, params) {
+        this._super.apply(this, arguments);
+        this.rendererParams.eventTemplate = _.findWhere(this.arch.children, { 'tag': 'templates' });
+    },
 });
 
 view_registry.add('activity', ActivityView);

@@ -1273,7 +1273,11 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         :returns: a activity view as an lxml document
         :rtype: etree._Element
         """
-        return E.activity(string=self._description)
+        field = E.field(name=self._rec_name_fallback())
+        card_div = E.div(field, {'class': "oe_kanban_global_click"})
+        kanban_box = E.t(card_div, {'t-name': "kanban-box"})
+        templates = E.templates(kanban_box)
+        return E.activity(templates, string=self._description)
 
     @api.model
     def _get_default_pivot_view(self):

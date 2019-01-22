@@ -520,9 +520,8 @@ class MailActivity(models.Model):
 
         return {
             'activity_types': activity_type_infos,
-            'res_ids': [(rid, res_id_to_name[rid]) for rid in res_ids_sorted],
+            'activity_res_ids': res_ids_sorted,
             'grouped_activities': activity_data,
-            'model': res_model,
         }
 
 

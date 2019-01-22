@@ -10,6 +10,42 @@
     <define name="activity">
         <element name="activity">
             <attribute name="string"/>
+            <interleave>
+                <oneOrMore><ref name="field"/></oneOrMore>
+                <optional>
+                    <element name="templates">
+                        <oneOrMore>
+                            <ref name="any"/>
+                        </oneOrMore>
+                    </element>
+                </optional>
+            </interleave>
         </element>
     </define>
+
+    <define name="field">
+        <element name="field">
+            <attribute name="name"/>
+            <!-- other garbage -->
+            <optional><attribute name="on_change"/></optional>
+            <optional><attribute name="modifiers"/></optional>
+            <optional><attribute name="can_create"/></optional>
+            <optional><attribute name="can_write"/></optional>
+        </element>
+    </define>
+
+    <define name="any">
+        <element>
+            <anyName/>
+            <zeroOrMore>
+                <choice>
+                    <attribute>
+                        <anyName/>
+                    </attribute>
+                    <text/>
+                    <ref name="any"/>
+                </choice>
+            </zeroOrMore>
+        </element>
+   </define>
 </grammar>

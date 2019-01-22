@@ -4,15 +4,24 @@ odoo.define('mail.ActivityRenderer', function (require) {
 var AbstractRenderer = require('web.AbstractRenderer');
 var core = require('web.core');
 var field_registry = require('web.field_registry');
+var KanbanRecord = require('web.KanbanRecord');
+var qweb = require('web.QWeb');
+var session = require('web.session');
+var utils = require('web.utils');
 
 var QWeb = core.qweb;
 var _t = core._t;
 
+
 var ActivityRenderer = AbstractRenderer.extend({
     className: 'o_activity_view',
     events: {
-        'click .o_res_name_cell': '_onResNameClicked',
         'click .o_send_mail_template': '_onSenMailTemplateClicked',
+    },
+    init: function (parent, state, params) {
+        this._super.apply(this, arguments);
+        this.qweb = new qweb(session.debug, {_s: session.origin});
+        this.qweb.add_template(utils.json_node_to_xml(params.eventTemplate));
     },
 
     //--------------------------------------------------------------------------
@@ -28,7 +37,7 @@ var ActivityRenderer = AbstractRenderer.extend({
             .removeClass('table-responsive')
             .empty();
 
-        if (this.state.data.activity_types.length === 0) {
+        if (this.state.activity_types.length === 0) {
             this.$el.append(QWeb.render('ActivityView.nodata'));
         } else {
             var $table = $('<table>')
@@ -46,7 +55,7 @@ var ActivityRenderer = AbstractRenderer.extend({
      * @returns {jQueryElement} a jquery element <tbody>
      */
     _renderBody: function () {
-        var $rows = _.map(this.state.data.res_ids, this._renderRow.bind(this));
+        var $rows = _.map(this.state.activity_res_ids, this._renderRow.bind(this));
         return $('<tbody>').append($rows);
     },
     /**
@@ -56,7 +65,7 @@ var ActivityRenderer = AbstractRenderer.extend({
     _renderHeader: function () {
         var $tr = $('<tr>')
                 .append($('<th>')) //empty cell for name
-                .append(_.map(this.state.data.activity_types, this._renderHeaderCell.bind(this)));
+                .append(_.map(this.state.activity_types, this._renderHeaderCell.bind(this)));
         return $('<thead>').append($tr);
     },
     /**
@@ -73,21 +82,22 @@ var ActivityRenderer = AbstractRenderer.extend({
     },
     /**
      * @private
-     * @param {Object} data
+     * @param {integer} id
      * @returns {jQueryElement} a <tr> element
      */
-    _renderRow: function (data) {
+    _renderRow: function (id) {
         var self = this;
-        var res_id = data[0];
-        var name = data[1];
-        var $nameTD = $('<td>')
-            .addClass("o_res_name_cell")
-            .html(name)
-            .data('res-id', res_id);
-        var $cells = _.map(this.state.data.activity_types, function (node) {
+        var data = _.findWhere(this.state.data, {res_id: id});
+        var res_id = data.res_id;
+        var $nameTD = $('<td>', { class: 'o_res_name_cell'});
+        var kanbanRecord = new KanbanRecord(this, data, {
+            'qweb': this.qweb,
+        });
+        kanbanRecord.appendTo($nameTD);
+        var $cells = _.map(this.state.activity_types, function (node) {
             var $td = $('<td>').addClass("o_activity_summary_cell");
             var activity_type_id = node[0];
-            var activity_group = self.state.data.grouped_activities[res_id][activity_type_id];
+            var activity_group = self.state.grouped_activities[res_id][activity_type_id];
             activity_group = activity_group || {count: 0, ids: [], state: false};
             if (activity_group.state) {
                 $td.addClass(activity_group.state);
@@ -114,7 +124,7 @@ var ActivityRenderer = AbstractRenderer.extend({
                     },
                 },
                 fieldsInfo: {},
-                model: self.state.data.model,
+                model: self.state.model,
                 ref: res_id, // not necessary, i think
                 type: 'record',
                 res_id: res_id,
@@ -164,15 +174,6 @@ var ActivityRenderer = AbstractRenderer.extend({
             activityTypeID: activityTypeID,
             templateID: templateID,
         });
-    },
-    /**
-     * @private
-     * @override
-     * @param {MouseEvent} ev
-     */
-    _onResNameClicked: function (ev) {
-        var resID = $(ev.currentTarget).data('res-id');
-        this.trigger_up('open_view_form', {resID: resID});
     },
 });
 
