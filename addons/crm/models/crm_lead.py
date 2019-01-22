@@ -779,12 +779,10 @@ class Lead(models.Model):
         if len(self.ids) <= 1:
             raise UserError(_('Please select more than one element (lead or opportunity) from the list view.'))
 
-        # Sorting the leads/opps according to the confidence level of its stage, which relates to the probability of winning it
+        # Sorting the leads/opps according to the confidence level of its stage, which relates to the progress rate (stage's sequence)
         # The confidence level increases with the stage sequence
         # An Opportunity always has higher confidence level than a lead
-        def opps_key(opportunity):
-            return opportunity.type == 'opportunity', opportunity.stage_id.sequence, -opportunity.id
-        opportunities = self.sorted(key=opps_key, reverse=True)
+        opportunities = self._sort_by_confidence_level(reverse=True)
 
         # get SORTED recordset of head and tail, and complete list
         opportunities_head = opportunities[0]
@@ -817,6 +815,13 @@ class Lead(models.Model):
         opportunities_tail.sudo().unlink()
 
         return opportunities_head
+
+    @api.multi
+    def _sort_by_confidence_level(self, reverse=False):
+        def opps_key(opportunity):
+            return opportunity.type == 'opportunity', opportunity.stage_id.sequence, -opportunity._origin.id
+
+        return self.sorted(key=opps_key, reverse=reverse)
 
     @api.multi
     def get_duplicated_leads(self, partner_id, include_lost=False):
