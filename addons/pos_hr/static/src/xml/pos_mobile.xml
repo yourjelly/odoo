@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-extend="MobileHeaderOptionWidget">
+        <t t-jquery="li[data-menu='switch_user']" t-operation="after">
+            <t t-if="widget.pos.config.module_pos_hr">
+                <li class="divider"/>
+                <li data-menu="lock_screen"><i class="fa fa-lock"/> Lock Screen</li>
+            </t>
+        </t>
+    </t>
+</templates>

@@ -6,6 +6,9 @@
             <script type="text/javascript" src="/pos_hr/static/src/js/screens.js"></script>
             <script type="text/javascript" src="/pos_hr/static/src/js/gui.js"></script>
             <script type="text/javascript" src="/pos_hr/static/src/js/chrome.js"></script>
+            <script type="text/javascript" src="/pos_hr/static/src/js/hr_mobile.js"></script>
+
+            <link rel="stylesheet" type="text/scss" href="/pos_hr/static/src/scss/mobile.scss"/>
         </xpath>
     </template>
 </odoo>
