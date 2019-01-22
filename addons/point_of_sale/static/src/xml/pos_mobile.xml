@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-extend="Chrome">
+        <t t-jquery=".pos-branding" t-operation="append">
+            <span class="placeholder-MobileOrderSelectorWidget"></span>
+            <span class="placeholder-MobileHeaderOptionWidget"></span>
+        </t>
+        <t t-jquery=".placeholder-UsernameWidget" t-operation="replace">
+        </t>
+        <t  t-jquery=".window > .subwindow" t-operation="after">
+            <span class="placeholder-MobileOrderBottomWidget"></span>
+        </t>
+    </t>
+
+    <t t-extend="ActionpadWidget">
+        <t t-jquery="button:first" t-operation="before">
+            <button class="button btn-product-view"><i class='fa fa-plus-circle' role="img" aria-label="Add Item" title="Add Item"/> Add Item</button>
+        </t>
+    </t>
+
+    <t t-name="MobileHeaderOptionWidget">
+        <div class="pos-mobile-header">
+            <div class="dropdown">
+                <button class="btn-action dropbtn"><i class="fa fa-ellipsis-v"/></button>
+                <ul class="dropdown-content">
+                    <li data-menu="switch_user"><div class="active_cashier"><t t-esc="widget.userName"></t></div><i t-if="widget.pos.config.module_pos_hr" class="muted">Tap to switch user</i></li>
+                    <li class="divider"/>
+                    <li data-menu="close_pos">Close</li>
+                </ul>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="MobileOrderSelectorWidget">
+        <div class="mobile-order-selector">
+            <t t-set="total_orders" t-value="widget.pos.get_order_list().length"/>
+            <t t-set="order" t-value="widget.pos.get_order()"/>
+            <span t-if="order" class="order-button switch_to_order">
+                <span class="order-sequence">
+                    <strong><t t-esc='order.sequence_number' /></strong> <small t-if="total_orders > 1" class="muted">/ <t t-esc="total_orders"/></small>
+                </span>
+            </span>
+            <span class="order-button square" data-menu="add_new_order">
+                <i aria-label="New order" class="fa fa-plus" role="img" title="New order"></i>
+            </span>
+            <span class="order-button square" data-menu="delete_order">
+                <i aria-label="Delete order" class="fa fa-minus" role="img" title="Delete order"></i>
+            </span>
+        </div>
+    </t>
+
+    <t t-name="MobileOrderBottomWidget">
+        <div class="mobile-quick-order-view">
+            <div class="order-info">
+                <small><span class="item_counter"/> item(s) in cart</small>
+                <h2><span class="total_price"/></h2>
+                <small>Taxes: <span class="total_taxes"/></small>
+            </div>
+            <button class="btn-view-order view_order">View Cart <span class="fa fa-arrow-circle-right"/></button>
+        </div>
+    </t>
+
+    <t t-extend="ClientListScreenWidget">
+        <t t-jquery=".button.next" t-operation="replace">
+        </t>
+        <t t-jquery=".screen-content" t-operation="after">
+            <div class="screen-content screen_client_detail oe_hidden">
+                <section class="top-content">
+                    <span class='button goback'>
+                        <i class='fa fa-angle-double-left'></i> Back
+                    </span>
+                    <span class='button next oe_hidden highlight'>
+                        Select Customer
+                        <i class='fa fa-angle-double-right'></i>
+                    </span>
+                </section>
+                <section class="full-content">
+                    <div class="client-details-contents"/>
+                </section>
+            </div>
+        </t>
+    </t>
+
+</templates>
