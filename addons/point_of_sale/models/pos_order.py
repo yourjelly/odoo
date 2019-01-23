@@ -363,23 +363,21 @@ class PosOrder(models.Model):
                             account_analytic=account_analytic)
                     if res:
                         line1, line2 = res
-                        line1 = Product._convert_prepared_anglosaxon_line(line1, order.partner_id)
                         insert_data('counter_part', {
                             'name': line1['name'],
                             'account_id': line1['account_id'],
-                            'credit': line1['credit'] or 0.0,
-                            'debit': line1['debit'] or 0.0,
-                            'partner_id': line1['partner_id']
+                            'credit': line1['price'] < 0 and -line1['price'],
+                            'debit': line1['price'] > 0 and line1['price'],
+                            'partner_id': order.partner_id
 
                         })
 
-                        line2 = Product._convert_prepared_anglosaxon_line(line2, order.partner_id)
                         insert_data('counter_part', {
                             'name': line2['name'],
                             'account_id': line2['account_id'],
-                            'credit': line2['credit'] or 0.0,
-                            'debit': line2['debit'] or 0.0,
-                            'partner_id': line2['partner_id']
+                            'credit': line2['price'] < 0 and -line2['price'],
+                            'debit': line2['price'] > 0 and line2['price'],
+                            'partner_id': order.partner_id
                         })
         move = False
         for order in self.filtered(lambda o: not o.account_move or o.state == 'paid'):
@@ -493,7 +491,7 @@ class PosOrder(models.Model):
         return True
 
     def _get_pos_anglo_saxon_price_unit(self, product, partner_id, quantity):
-        price_unit = product._get_anglo_saxon_price_unit()
+        price_unit = product._stock_account_get_anglo_saxon_price_unit()
         if product._get_invoice_policy() == "delivery":
             moves = self.filtered(lambda o: o.partner_id.id == partner_id)\
                 .mapped('picking_id.move_lines')\
@@ -665,8 +663,8 @@ class PosOrder(models.Model):
         return {
             'name': _('Customer Invoice'),
             'view_mode': 'form',
-            'view_id': self.env.ref('account.invoice_form').id,
-            'res_model': 'account.invoice',
+            'view_id': self.env.ref('account.view_move_form').id,
+            'res_model': 'account.move',
             'context': "{'type':'out_invoice'}",
             'type': 'ir.actions.act_window',
             'res_id': self.invoice_id.id,
@@ -717,8 +715,8 @@ class PosOrder(models.Model):
             'name': _('Customer Invoice'),
             'view_type': 'form',
             'view_mode': 'form',
-            'view_id': self.env.ref('account.invoice_form').id,
-            'res_model': 'account.invoice',
+            'view_id': self.env.ref('account.view_move_form').id,
+            'res_model': 'account.move',
             'context': "{'type':'out_invoice'}",
             'type': 'ir.actions.act_window',
             'nodestroy': True,
@@ -763,7 +761,7 @@ class PosOrder(models.Model):
 
             if to_invoice:
                 pos_order.action_pos_order_invoice()
-                pos_order.invoice_id.sudo().action_invoice_open()
+                pos_order.invoice_id.sudo().post()
                 pos_order.account_move = pos_order.invoice_id.move_id
         return order_ids
 

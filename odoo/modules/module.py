@@ -448,7 +448,7 @@ def get_test_modules(module):
             mod.__name__)
 
     result = [mod_obj for name, mod_obj in inspect.getmembers(mod, inspect.ismodule)
-              if name.startswith('test_')]
+              if name.startswith('test_') and name == 'test_account_move_invoice']
     return result
 
 # Use a custom stream object to log the test executions.

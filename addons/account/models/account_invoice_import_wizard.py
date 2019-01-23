@@ -15,10 +15,10 @@ class ImportInvoiceImportWizard(models.TransientModel):
 
     @api.multi
     def _create_invoice_from_file(self, attachment):
-        self = self.with_context(default_journal_id= self.journal_id.id)
-        invoice_form = Form(self.env['account.invoice'], view='account.invoice_supplier_form')
+        self = self.with_context(default_journal_id=self.journal_id.id, type='in_invoice')
+        invoice_form = Form(self.env['account.move'])
         invoice = invoice_form.save()
-        attachment.write({'res_model': 'account.invoice', 'res_id': invoice.id})
+        attachment.write({'res_model': 'account.move', 'res_id': invoice.id})
         invoice.message_post(attachment_ids=[attachment.id])
         return invoice
 
@@ -30,7 +30,7 @@ class ImportInvoiceImportWizard(models.TransientModel):
         if not self.attachment_ids:
             return
 
-        invoices = self.env['account.invoice']
+        invoices = self.env['account.move']
         for attachment in self.attachment_ids:
             invoices += self._create_invoice_from_file(attachment)
 
@@ -38,7 +38,7 @@ class ImportInvoiceImportWizard(models.TransientModel):
             'name': _('Invoices'),
             'domain': [('id', 'in', invoices.ids)],
             'view_type': 'form',
-            'res_model': 'account.invoice',
+            'res_model': 'account.move',
             'view_id': False,
             'type': 'ir.actions.act_window',
         }

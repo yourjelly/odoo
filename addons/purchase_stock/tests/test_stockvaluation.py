@@ -357,7 +357,7 @@ class TestStockValuationWithCOA(AccountingTestCase):
             'type': 'in_invoice',
         })
         invoice_po1.purchase_order_change()
-        invoice_po1.action_invoice_open()
+        invoice_po1.post()
 
         # Receive 10@20 ; create the vendor bill
         po2 = self.env['purchase.order'].create({
@@ -385,7 +385,7 @@ class TestStockValuationWithCOA(AccountingTestCase):
             'type': 'in_invoice',
         })
         invoice_po2.purchase_order_change()
-        invoice_po2.action_invoice_open()
+        invoice_po2.post()
 
         # valuation of product1 should be 300
         self.assertEqual(self.product1.stock_value, 300)
@@ -413,7 +413,7 @@ class TestStockValuationWithCOA(AccountingTestCase):
 
         creditnote_po2.purchase_order_change()
         creditnote_po2.invoice_line_ids[0].quantity = 10
-        creditnote_po2.action_invoice_open()
+        creditnote_po2.post()
 
         # check the anglo saxon entries
         price_diff_entry = self.env['account.move.line'].search([('account_id', '=', price_diff_account.id)])
@@ -455,7 +455,7 @@ class TestStockValuationWithCOA(AccountingTestCase):
         })
         invoice.purchase_order_change()
         invoice.invoice_line_ids[0].price_unit = 15.0
-        invoice.action_invoice_open()
+        invoice.post()
 
         # Check what was posted in the price difference account
         price_diff_aml = self.env['account.move.line'].search([('account_id','=',price_diff_account.id)])

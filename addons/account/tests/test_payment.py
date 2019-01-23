@@ -8,10 +8,8 @@ class TestPayment(AccountingTestCase):
 
     def setUp(self):
         super(TestPayment, self).setUp()
-        self.register_payments_model = self.env['account.register.payments'].with_context(active_model='account.invoice')
+        self.register_payments_model = self.env['account.register.payments'].with_context(active_model='account.move')
         self.payment_model = self.env['account.payment']
-        self.invoice_model = self.env['account.invoice']
-        self.invoice_line_model = self.env['account.invoice.line']
         self.acc_bank_stmt_model = self.env['account.bank.statement']
         self.acc_bank_stmt_line_model = self.env['account.bank.statement.line']
 
@@ -43,23 +41,16 @@ class TestPayment(AccountingTestCase):
 
     def create_invoice(self, amount=100, type='out_invoice', currency_id=None, partner=None, account_id=None):
         """ Returns an open invoice """
-        invoice = self.invoice_model.create({
+        invoice = self.env['account.move'].with_context(type=type, assist_move_creation=True).create({
             'partner_id': partner or self.partner_agrolait.id,
             'currency_id': currency_id or self.currency_eur_id,
-            'name': type,
-            'account_id': account_id or self.account_receivable.id,
-            'type': type,
-            'date_invoice': time.strftime('%Y') + '-06-26',
+            'invoice_date': time.strftime('%Y') + '-06-26',
+            'date': time.strftime('%Y') + '-06-26',
+            'line_ids': [
+                (0, 0, {'product_id': self.product.id, 'quantity': 1, 'price_unit': amount})
+            ],
         })
-        self.invoice_line_model.create({
-            'product_id': self.product.id,
-            'quantity': 1,
-            'price_unit': amount,
-            'invoice_id': invoice.id,
-            'name': 'something',
-            'account_id': self.account_revenue.id,
-        })
-        invoice.action_invoice_open()
+        invoice.post()
         return invoice
 
     def reconcile(self, liquidity_aml, amount=0.0, amount_currency=0.0, currency_id=None):
@@ -86,7 +77,7 @@ class TestPayment(AccountingTestCase):
         inv_1 = self.create_invoice(amount=100, currency_id=self.currency_eur_id, partner=self.partner_agrolait.id)
         inv_2 = self.create_invoice(amount=200, currency_id=self.currency_eur_id, partner=self.partner_agrolait.id)
 
-        ctx = {'active_model': 'account.invoice', 'active_ids': [inv_1.id, inv_2.id]}
+        ctx = {'active_model': 'account.move', 'active_ids': [inv_1.id, inv_2.id]}
         register_payments = self.register_payments_model.with_context(ctx).create({
             'payment_date': time.strftime('%Y') + '-07-15',
             'journal_id': self.bank_journal_euro.id,
@@ -98,8 +89,8 @@ class TestPayment(AccountingTestCase):
         self.assertAlmostEquals(payment.amount, 300)
         self.assertEqual(payment.state, 'posted')
         self.assertEqual(payment.state, 'posted')
-        self.assertEqual(inv_1.state, 'paid')
-        self.assertEqual(inv_2.state, 'paid')
+        self.assertEqual(inv_1.invoice_payment_state, 'paid')
+        self.assertEqual(inv_2.invoice_payment_state, 'paid')
 
         self.assertRecordValues(payment.move_line_ids, [
             {'account_id': self.account_eur.id, 'debit': 300.0, 'credit': 0.0, 'amount_currency': 0, 'currency_id': False},
@@ -149,8 +140,8 @@ class TestPayment(AccountingTestCase):
         payment.post()
 
         self.assertRecordValues(payment.move_line_ids, [
-            {'account_id': self.account_usd.id, 'debit': 0.0, 'credit': 38.21, 'amount_currency': -58.42, 'currency_id': self.currency_usd_id},
             {'account_id': self.partner_china_exp.property_account_payable_id.id, 'debit': 38.21, 'credit': 0.0, 'amount_currency': 50, 'currency_id': self.currency_chf_id},
+            {'account_id': self.account_usd.id, 'debit': 0.0, 'credit': 38.21, 'amount_currency': -58.42, 'currency_id': self.currency_usd_id},
         ])
 
     def test_multiple_payments_00(self):
@@ -200,20 +191,20 @@ class TestPayment(AccountingTestCase):
             {'account_id': self.account_eur.id, 'debit': 600.0, 'credit': 0.0, 'amount_currency': 0.0, 'currency_id': False},
             {'account_id': inv_1.account_id.id, 'debit': 0.0, 'credit': 600.0, 'amount_currency': 0.0, 'currency_id': False},
         ])
-        self.assertEqual(inv_1.state, 'paid')
-        self.assertEqual(inv_2.state, 'paid')
+        self.assertEqual(inv_1.invoice_payment_state, 'paid')
+        self.assertEqual(inv_2.invoice_payment_state, 'paid')
 
         self.assertRecordValues(inv_3_pay.move_line_ids, [
             {'account_id': self.account_eur.id, 'debit': 200.0, 'credit': 0.0, 'amount_currency': 0.0, 'currency_id': False},
             {'account_id': inv_1.account_id.id, 'debit': 0.0, 'credit': 200.0, 'amount_currency': 0.0, 'currency_id': False},
         ])
-        self.assertEqual(inv_3.state, 'paid')
+        self.assertEqual(inv_3.invoice_payment_state, 'paid')
 
         self.assertRecordValues(inv_4_pay.move_line_ids, [
             {'account_id': self.account_eur.id, 'debit': 0.0, 'credit': 50.0, 'amount_currency': 0.0, 'currency_id': False},
             {'account_id': inv_1.account_id.id, 'debit': 50.0, 'credit': 0.0, 'amount_currency': 0.0, 'currency_id': False},
         ])
-        self.assertEqual(inv_4.state, 'paid')
+        self.assertEqual(inv_4.invoice_payment_state, 'paid')
 
     def test_partial_payment(self):
         """ Create test to pay invoices (cust. inv + vendor bill) with partial payment """
@@ -317,6 +308,7 @@ class TestPayment(AccountingTestCase):
         account_receivable_id_2 = self.account_receivable.copy(default={
             'code': '%s (%s)' % (self.account_receivable.code, 'duplicate 1')
         }).id
+        self.partner_china_exp.property_account_receivable_id = account_receivable_id_2
 
         inv_1 = self.create_invoice(amount=100, account_id=account_receivable_id_1)
         inv_2 = self.create_invoice(amount=150, account_id=account_receivable_id_1)
@@ -373,12 +365,12 @@ class TestPayment(AccountingTestCase):
             })
         payment.post()
         self.assertRecordValues(payment.move_line_ids, [
+            {'account_id': self.account_receivable.id, 'debit': 0.0, 'credit': 25.0, 'amount_currency': -38.22, 'currency_id': self.currency_usd_id},
             {'account_id': self.account_eur.id, 'debit': 16.35, 'credit': 0.0, 'amount_currency': 25.0, 'currency_id': self.currency_usd_id},
             {'account_id': self.account_payable.id, 'debit': 8.65, 'credit': 0.0, 'amount_currency': 13.22, 'currency_id': self.currency_usd_id},
-            {'account_id': self.account_receivable.id, 'debit': 0.0, 'credit': 25.0, 'amount_currency': -38.22, 'currency_id': self.currency_usd_id},
         ])
-        self.assertTrue(payment.move_line_ids.filtered(lambda l: l.account_id == invoice.account_id)[0].full_reconcile_id)
-        self.assertEqual(invoice.state, 'paid')
+        self.assertTrue(payment.move_line_ids.filtered(lambda l: l._is_invoice_payment_term_line())[0].full_reconcile_id)
+        self.assertEqual(invoice.invoice_payment_state, 'paid')
 
         # Use case:
         # Company is in EUR, create a vendor bill for 25 EUR and register payment of 25 USD.
@@ -405,7 +397,7 @@ class TestPayment(AccountingTestCase):
             {'account_id': self.account_receivable.id, 'debit': 25.0, 'credit': 0.0, 'amount_currency': 38.22, 'currency_id': self.currency_usd_id},
         ])
         self.assertTrue(payment.move_line_ids.filtered(lambda l: l.account_id == invoice.account_id)[0].full_reconcile_id)
-        self.assertEqual(invoice.state, 'paid')
+        self.assertEqual(invoice.invoice_payment_state, 'paid')
 
     def test_payment_and_writeoff_out_refund(self):
         # Use case:
@@ -431,7 +423,7 @@ class TestPayment(AccountingTestCase):
             {'account_id': self.account_payable.id, 'debit': 0.0, 'credit': 10.0, 'amount_currency': 0.0, 'currency_id': False},
             {'account_id': self.account_receivable.id, 'debit': 100.0, 'credit': 0.0, 'amount_currency': 0.0, 'currency_id': False},
         ])
-        self.assertEqual(invoice.state, 'paid')
+        self.assertEqual(invoice.invoice_payment_state, 'paid')
 
     def test_payment_and_writeoff_in_other_currency_2(self):
         # Use case:
@@ -450,7 +442,7 @@ class TestPayment(AccountingTestCase):
             'name': time.strftime('%Y') + '-07-15'})
 
         invoice = self.create_invoice(amount=5325.6, type='in_invoice', currency_id=self.currency_usd_id, partner=self.partner_agrolait.id)
-        self.assertRecordValues(invoice.move_id.line_ids, [
+        self.assertRecordValues(invoice.line_ids, [
             {'account_id': self.account_receivable.id, 'debit': 0.0, 'credit': 5950.39, 'amount_currency': -5325.6, 'currency_id': self.currency_usd_id},
             {'account_id': self.account_revenue.id, 'debit': 5950.39, 'credit': 0.0, 'amount_currency': 5325.6, 'currency_id': self.currency_usd_id},
         ])
@@ -480,7 +472,7 @@ class TestPayment(AccountingTestCase):
         ])
 
         #check the invoice status
-        self.assertEqual(invoice.state, 'paid')
+        self.assertEqual(invoice.invoice_payment_state, 'paid')
 
 
     def test_payment_and_writeoff_in_other_currency_3(self):
@@ -502,9 +494,9 @@ class TestPayment(AccountingTestCase):
             'name': time.strftime('%Y') + '-06-26'})
 
         invoice = self.create_invoice(amount=247590.4, type='out_invoice', currency_id=self.currency_eur_id, partner=self.partner_agrolait.id)
-        self.assertRecordValues(invoice.move_id.line_ids, [
-            {'account_id': self.account_receivable.id, 'debit': 247590.4, 'credit': 0.0, 'amount_currency': 0.0, 'currency_id': False},
+        self.assertRecordValues(invoice.line_ids, [
             {'account_id': self.account_revenue.id, 'debit': 0.0, 'credit': 247590.4, 'amount_currency': 0.0, 'currency_id': False},
+            {'account_id': self.account_receivable.id, 'debit': 247590.4, 'credit': 0.0, 'amount_currency': 0.0, 'currency_id': False},
         ])
         # register payment on invoice
         payment = self.payment_model.create({'payment_type': 'inbound',
@@ -529,8 +521,8 @@ class TestPayment(AccountingTestCase):
 
         # Check the invoice status and the full reconciliation: the difference on the receivable account
         # should have been completed by an exchange rate difference entry
-        self.assertEqual(invoice.state, 'paid')
-        self.assertTrue(invoice.move_id.line_ids.filtered(lambda l: l.account_id == self.account_receivable)[0].full_reconcile_id)
+        self.assertEqual(invoice.invoice_payment_state, 'paid')
+        self.assertTrue(invoice.line_ids.filtered(lambda l: l.account_id == self.account_receivable)[0].full_reconcile_id)
 
     def test_post_at_bank_reconciliation_payment(self):
         # Create two new payments in a journal requiring the journal entries to be posted at bank reconciliation
@@ -571,10 +563,9 @@ class TestPayment(AccountingTestCase):
 
         # Reconcile the two payments with an invoice, whose full amount is equal to their sum
         invoice = self.create_invoice(amount=53, partner=self.partner_agrolait.id)
-        (payment_one.move_line_ids + payment_two.move_line_ids + invoice.move_id.line_ids).filtered(lambda x: x.account_id.user_type_id.type == 'receivable').reconcile()
+        (payment_one.move_line_ids + payment_two.move_line_ids + invoice.line_ids).filtered(lambda x: x.account_id.user_type_id.type == 'receivable').reconcile()
 
-        self.assertTrue(invoice.reconciled, "Invoice should have been reconciled with the payments")
-        self.assertEqual(invoice.state, 'in_payment', "Invoice should be in 'in payment' state")
+        self.assertEqual(invoice.invoice_payment_state, 'in_payment', "Invoice should be in 'in payment' state")
 
         # Match the first payment with a bank statement line
         bank_statement_one = self.reconcile(payment_one.move_line_ids.filtered(lambda x: x.account_id.user_type_id.type == 'liquidity'), 42)
@@ -583,7 +574,7 @@ class TestPayment(AccountingTestCase):
         self.assertEqual(payment_one.mapped('move_line_ids.move_id.state'), ['posted'], "After bank reconciliation, payment one's account.move should be posted.")
         self.assertEqual(payment_one.mapped('move_line_ids.move_id.date'), stmt_line_date_one, "After bank reconciliation, payment one's account.move should share the same date as the bank statement.")
         self.assertEqual([payment_one.payment_date], stmt_line_date_one, "After bank reconciliation, payment one should share the same date as the bank statement.")
-        self.assertEqual(invoice.state, 'in_payment', "The invoice should still be 'in payment', not all its payments are reconciled with a statement")
+        self.assertEqual(invoice.invoice_payment_state, 'in_payment', "The invoice should still be 'in payment', not all its payments are reconciled with a statement")
 
         # Match the second payment with a bank statement line
         bank_statement_two = self.reconcile(payment_two.move_line_ids.filtered(lambda x: x.account_id.user_type_id.type == 'liquidity'), 42)
@@ -594,12 +585,12 @@ class TestPayment(AccountingTestCase):
         self.assertEqual([payment_two.payment_date], stmt_line_date_two, "After bank reconciliation, payment two should share the same date as the bank statement.")
 
         # The invoice should now be paid
-        self.assertEqual(invoice.state, 'paid', "Invoice should be in 'paid' state after having reconciled the two payments with a bank statement")
+        self.assertEqual(invoice.invoice_payment_state, 'paid', "Invoice should be in 'paid' state after having reconciled the two payments with a bank statement")
 
     def test_register_payments_multi_invoices(self):
         inv1 = self.create_invoice(amount=40)
         inv2 = inv1.copy()
-        inv2.action_invoice_open()
+        inv2.post()
 
         batch_payment = self.env['account.register.payments'].with_context(active_ids=(inv1 + inv2).ids).create({
             'amount': 70,
@@ -616,11 +607,11 @@ class TestPayment(AccountingTestCase):
         payment_id = batch_payment.create_payments()['res_id']
         payment_id = self.env['account.payment'].browse(payment_id)
 
-        self.assertEqual(inv1.state, 'paid')
-        self.assertEqual(inv2.state, 'paid')
+        self.assertEqual(inv1.invoice_payment_state, 'paid')
+        self.assertEqual(inv2.invoice_payment_state, 'paid')
 
-        receivable_inv1 = inv1.move_id.line_ids.filtered(lambda l: l.account_id.internal_type == 'receivable')
-        receivable_inv2 = inv2.move_id.line_ids.filtered(lambda l: l.account_id.internal_type == 'receivable')
+        receivable_inv1 = inv1.line_ids.filtered(lambda l: l.account_id.internal_type == 'receivable')
+        receivable_inv2 = inv2.line_ids.filtered(lambda l: l.account_id.internal_type == 'receivable')
         receivable_payment = payment_id.move_line_ids.filtered(lambda l: l.account_id.internal_type == 'receivable')
 
         self.assertEqual(

@@ -58,11 +58,11 @@ class StockMoveInvoice(AccountingTestCase):
         # I confirm the invoice
 
         self.invoice = self.sale_prepaid.invoice_ids
-        self.invoice.action_invoice_open()
+        self.invoice.post()
 
         # I pay the invoice.
         self.invoice = self.sale_prepaid.invoice_ids
-        self.invoice.action_invoice_open()
+        self.invoice.post()
         self.journal = self.AccountJournal.search([('type', '=', 'cash'), ('company_id', '=', self.sale_prepaid.company_id.id)], limit=1)
         self.invoice.pay_and_reconcile(self.journal, self.invoice.amount_total)
 

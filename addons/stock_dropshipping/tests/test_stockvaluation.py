@@ -73,12 +73,12 @@ class TestStockValuation(AccountingTestCase):
             'type': 'in_invoice',
         })
         self.vendor_bill1.purchase_order_change()
-        self.vendor_bill1.action_invoice_open()
+        self.vendor_bill1.post()
 
         # create the customer invoice
         self.customer_invoice1_id = self.sale_order1._create_invoices()
         self.customer_invoice1 = self.env['account.invoice'].browse(self.customer_invoice1_id)
-        self.customer_invoice1.action_invoice_open()
+        self.customer_invoice1.post()
 
         all_amls = self.vendor_bill1.move_id.line_ids + self.customer_invoice1.move_id.line_ids
         if self.sale_order1.picking_ids.move_lines.account_move_ids:

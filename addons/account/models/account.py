@@ -607,7 +607,7 @@ class AccountJournal(models.Model):
         if self.alias_id:
             self.alias_id.write(alias_values)
         else:
-            self.alias_id = self.env['mail.alias'].with_context(alias_model_name='account.invoice',
+            self.alias_id = self.env['mail.alias'].with_context(alias_model_name='account.move',
                 alias_parent_model_name='account.journal').create(alias_values)
 
         if vals.get('alias_name'):
@@ -996,14 +996,6 @@ class AccountTax(models.Model):
     def onchange_price_include(self):
         if self.price_include:
             self.include_base_amount = True
-
-    def get_grouping_key(self, invoice_tax_val):
-        """ Returns a string that will be used to group account.invoice.tax sharing the same properties"""
-        self.ensure_one()
-        return str(invoice_tax_val['tax_id']) + '-' + \
-               str(invoice_tax_val['account_id']) + '-' + \
-               str(invoice_tax_val['account_analytic_id']) + '-' + \
-               str(invoice_tax_val.get('analytic_tag_ids', []))
 
     def _compute_amount(self, base_amount, price_unit, quantity=1.0, product=None, partner=None):
         """ Returns the amount of a single tax. base_amount is the actual amount on which the tax is applied, which is

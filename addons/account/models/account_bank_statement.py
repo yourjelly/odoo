@@ -694,7 +694,7 @@ class AccountBankStatementLine(models.Model):
 
                 (new_aml | counterpart_move_line).reconcile()
 
-                self._check_invoice_state(counterpart_move_line.invoice_id)
+                self._check_invoice_state(counterpart_move_line.move_id)
 
             # Balance the move
             st_line_amount = -sum([x.balance for x in move.line_ids])

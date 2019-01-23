@@ -42,7 +42,7 @@ QUnit.module('account', {
                     assert.deepEqual(args.args, [22,{"invoice_id":1}], "should call remove_move_reconcile {warning: required focus}");
                     return Promise.resolve();
                 }
-                if (args.method === 'assign_outstanding_credit') {
+                if (args.method === 'js_assign_outstanding_line') {
                     assert.deepEqual(args.args, [4, 20], "should call assign_outstanding_credit {warning: required focus}");
                     return Promise.resolve();
                 }

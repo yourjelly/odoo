@@ -156,7 +156,7 @@ class TestSaleStock(TestSale):
         self.assertEqual(len(inv_1_id), 1, 'Sale Stock: only one invoice instead of "%s" should be created' % len(inv_1_id))
         self.inv_1 = self.env['account.invoice'].browse(inv_1_id)
         self.assertEqual(self.inv_1.amount_untaxed, self.inv_1.amount_untaxed, 'Sale Stock: amount in SO and invoice should be the same')
-        self.inv_1.action_invoice_open()
+        self.inv_1.post()
 
         # Create return picking
         StockReturnPicking = self.env['stock.return.picking']

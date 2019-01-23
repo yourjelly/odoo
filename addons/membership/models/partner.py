@@ -37,11 +37,11 @@ class Partner(models.Model):
         string ='Cancel Membership Date', store=True,
         help="Date on which membership has been cancelled")
 
-    @api.depends('member_lines.account_invoice_line.invoice_id.state',
-                 'member_lines.account_invoice_line.invoice_id.invoice_line_ids',
-                 'member_lines.account_invoice_line.invoice_id.payment_ids',
-                 'member_lines.account_invoice_line.invoice_id.payment_move_line_ids',
-                 'member_lines.account_invoice_line.invoice_id.partner_id',
+    @api.depends('member_lines.account_invoice_line.move_id.state',
+                 'member_lines.account_invoice_line.move_id.line_ids',
+                 'member_lines.account_invoice_line.move_id.partner_id',
+                 'member_lines.account_invoice_line.move_id.line_ids.matched_debit_ids.credit_move_id',
+                 'member_lines.account_invoice_line.move_id.line_ids.matched_credit_ids.debit_move_id',
                  'free_member',
                  'member_lines.date_to', 'member_lines.date_from',
                  'associate_member.membership_state')
@@ -50,9 +50,8 @@ class Partner(models.Model):
         for partner in self:
             partner.membership_state = values[partner.id]
 
-    @api.depends('member_lines.account_invoice_line.invoice_id.state',
-                 'member_lines.account_invoice_line.invoice_id.invoice_line_ids',
-                 'member_lines.account_invoice_line.invoice_id.payment_ids',
+    @api.depends('member_lines.account_invoice_line.move_id.state',
+                 'member_lines.account_invoice_line.move_id.line_ids',
                  'free_member',
                  'member_lines.date_to', 'member_lines.date_from', 'member_lines.date_cancel',
                  'membership_state',
@@ -64,9 +63,8 @@ class Partner(models.Model):
                 ('partner', '=', partner.associate_member.id or partner.id), ('date_cancel','=',False)
             ], limit=1, order='date_from').date_from
 
-    @api.depends('member_lines.account_invoice_line.invoice_id.state',
-                 'member_lines.account_invoice_line.invoice_id.invoice_line_ids',
-                 'member_lines.account_invoice_line.invoice_id.payment_ids',
+    @api.depends('member_lines.account_invoice_line.move_id.state',
+                 'member_lines.account_invoice_line.move_id.invoice_line_ids',
                  'free_member',
                  'member_lines.date_to', 'member_lines.date_from', 'member_lines.date_cancel',
                  'membership_state',
@@ -78,9 +76,8 @@ class Partner(models.Model):
                 ('partner', '=', partner.associate_member.id or partner.id),('date_cancel','=',False)
             ], limit=1, order='date_to desc').date_to
 
-    @api.depends('member_lines.account_invoice_line.invoice_id.state',
-                 'member_lines.account_invoice_line.invoice_id.invoice_line_ids',
-                 'member_lines.account_invoice_line.invoice_id.payment_ids',
+    @api.depends('member_lines.account_invoice_line.move_id.state',
+                 'member_lines.account_invoice_line.move_id.invoice_line_ids',
                  'free_member',
                  'member_lines.date_to', 'member_lines.date_from', 'member_lines.date_cancel',
                  'membership_state',
@@ -99,7 +96,7 @@ class Partner(models.Model):
         res = {}
         today = fields.Date.today()
         for partner in self:
-            res[partner.id] = 'none'
+            state = 'none'
 
             if partner.membership_cancel and today > partner.membership_cancel:
                 res[partner.id] = 'free' if partner.free_member else 'canceled'
@@ -112,45 +109,33 @@ class Partner(models.Model):
                 res[partner.id] = res_state[partner.associate_member.id]
                 continue
 
-            s = 4
-            if partner.member_lines:
+            line_states = [mline.state for mline in partner.member_lines if\
+                                (mline.date_to or date.min) >= today and\
+                                (mline.date_from or date.min) <= today and\
+                                mline.account_invoice_line.move_id.partner_id == partner]
+
+            if 'paid' in line_states:
+                state = 'paid'
+            elif 'invoiced' in line_states:
+                state = 'invoiced'
+            elif 'waiting' in line_states:
+                state = 'waiting'
+            elif 'canceled' in line_states:
+                state = 'canceled'
+
+            if state == 'none':
                 for mline in partner.member_lines:
-                    if (mline.date_to or date.min) >= today and (mline.date_from or date.min) <= today:
-                        if mline.account_invoice_line.invoice_id.partner_id == partner:
-                            mstate = mline.account_invoice_line.invoice_id.state
-                            if mstate == 'paid':
-                                s = 0
-                                inv = mline.account_invoice_line.invoice_id
-                                for ml in inv.payment_move_line_ids:
-                                    if any(ml.invoice_id.filtered(lambda inv: inv.type == 'out_refund')):
-                                        s = 2
-                                break
-                            elif mstate == 'open' and s != 0:
-                                s = 1
-                            elif mstate == 'cancel' and s != 0 and s != 1:
-                                s = 2
-                            elif mstate == 'draft' and s != 0 and s != 1:
-                                s = 3
-                if s == 4:
-                    for mline in partner.member_lines:
-                        if (mline.date_from or date.min) < today and (mline.date_to or date.min) < today and (mline.date_from or date.min) <= (mline.date_to or date.min) and mline.account_invoice_line and mline.account_invoice_line.invoice_id.state == 'paid':
-                            s = 5
-                        else:
-                            s = 6
-                if s == 0:
-                    res[partner.id] = 'paid'
-                elif s == 1:
-                    res[partner.id] = 'invoiced'
-                elif s == 2:
-                    res[partner.id] = 'canceled'
-                elif s == 3:
-                    res[partner.id] = 'waiting'
-                elif s == 5:
-                    res[partner.id] = 'old'
-                elif s == 6:
-                    res[partner.id] = 'none'
-            if partner.free_member and s != 0:
-                res[partner.id] = 'free'
+                    # if there is an old invoice paid, set the state to 'old'
+                    if ((mline.date_from or date.min) < today and (mline.date_to or date.min) < today and\
+                        (mline.date_from or date.min) <= (mline.date_to or date.min) and\
+                        mline.account_invoice_id and mline.account_invoice_id.state == 'paid'):
+
+                        state = 'old'
+                        break
+
+            if partner.free_member and state is not 'paid':
+                state = 'free'
+            res[partner.id] = state
         return res
 
     @api.one
@@ -178,29 +163,19 @@ class Partner(models.Model):
         """
         product_id = product_id or datas.get('membership_product_id')
         amount = datas.get('amount', 0.0)
-        invoice_list = []
+        invoice_vals_list = []
         for partner in self:
             addr = partner.address_get(['invoice'])
             if partner.free_member:
                 raise UserError(_("Partner is a free Member."))
             if not addr.get('invoice', False):
                 raise UserError(_("Partner doesn't have an address to make the invoice."))
-            invoice = self.env['account.invoice'].create({
+            invoice_vals_list.append({
                 'partner_id': partner.id,
-                'account_id': partner.property_account_receivable_id.id,
-                'fiscal_position_id': partner.property_account_position_id.id
+                'line_ids': [
+                    (0, None, {'product_id': product_id, 'quantity': 1, 'price_unit': amount})
+                ]
             })
-            line_values = {
-                'product_id': product_id,
-                'price_unit': amount,
-                'invoice_id': invoice.id,
-            }
-            # create a record in cache, apply onchange then revert back to a dictionnary
-            invoice_line = self.env['account.invoice.line'].new(line_values)
-            invoice_line._onchange_product_id()
-            line_values = invoice_line._convert_to_write({name: invoice_line[name] for name in invoice_line._cache})
-            line_values['price_unit'] = amount
-            invoice.write({'invoice_line_ids': [(0, 0, line_values)]})
-            invoice_list.append(invoice.id)
-            invoice.compute_taxes()
-        return invoice_list
+
+        return self.env['account.move'].with_context(type='out_invoice', assist_move_creation=True)\
+            .create(invoice_vals_list)

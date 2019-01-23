@@ -640,7 +640,7 @@ class TestSaleMrpFlow(common.TransactionCase):
         self.invoice = self.so.invoice_ids
         # Changed the invoiced quantity of the finished product to 2
         self.invoice.invoice_line_ids.write({'quantity': 2.0})
-        self.invoice.action_invoice_open()
+        self.invoice.post()
         aml = self.invoice.move_id.line_ids
         aml_expense = aml.filtered(lambda l: l.account_id.id == account_expense.id)
         aml_output = aml.filtered(lambda l: l.account_id.id == account_output.id)

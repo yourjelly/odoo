@@ -122,7 +122,7 @@ class TestReInvoice(TestCommonSaleTimesheetNoChart):
             'account_id': self.account_income.id,
             'invoice_id': self.invoiceA.id,
         })
-        self.invoiceA.action_invoice_open()
+        self.invoiceA.post()
 
         sale_order_line3 = self.sale_order.order_line.filtered(lambda sol: sol != sale_order_line1 and sol.product_id == self.product_ordered_cost)
         sale_order_line4 = self.sale_order.order_line.filtered(lambda sol: sol != sale_order_line2 and sol.product_id == self.product_deliver_cost)
@@ -166,7 +166,7 @@ class TestReInvoice(TestCommonSaleTimesheetNoChart):
             'account_id': self.account_income.id,
             'invoice_id': self.invoiceB.id,
         })
-        self.invoiceB.action_invoice_open()
+        self.invoiceB.post()
 
         sale_order_line5 = self.sale_order.order_line.filtered(lambda sol: sol != sale_order_line1 and sol != sale_order_line3 and sol.product_id == self.product_ordered_cost)
         sale_order_line6 = self.sale_order.order_line.filtered(lambda sol: sol != sale_order_line2 and sol != sale_order_line4 and sol.product_id == self.product_deliver_cost)
@@ -239,7 +239,7 @@ class TestReInvoice(TestCommonSaleTimesheetNoChart):
             'account_id': self.account_income.id,
             'invoice_id': self.invoiceA.id,
         })
-        self.invoiceA.action_invoice_open()
+        self.invoiceA.post()
 
         sale_order_line3 = self.sale_order.order_line.filtered(lambda sol: sol != sale_order_line1 and sol.product_id == self.product_deliver_sales_price)
         sale_order_line4 = self.sale_order.order_line.filtered(lambda sol: sol != sale_order_line2 and sol.product_id == self.product_order_sales_price)
@@ -283,7 +283,7 @@ class TestReInvoice(TestCommonSaleTimesheetNoChart):
             'account_id': self.account_income.id,
             'invoice_id': self.invoiceB.id,
         })
-        self.invoiceB.action_invoice_open()
+        self.invoiceB.post()
 
         sale_order_line5 = self.sale_order.order_line.filtered(lambda sol: sol != sale_order_line1 and sol != sale_order_line3 and sol.product_id == self.product_deliver_sales_price)
         sale_order_line6 = self.sale_order.order_line.filtered(lambda sol: sol != sale_order_line2 and sol != sale_order_line4 and sol.product_id == self.product_order_sales_price)
@@ -322,7 +322,7 @@ class TestReInvoice(TestCommonSaleTimesheetNoChart):
             'account_id': self.account_income.id,
             'invoice_id': self.invoiceA.id,
         })
-        self.invoiceA.action_invoice_open()
+        self.invoiceA.post()
 
         # let's log some timesheets (on the project created by sale_order_line1)
         task_sol1 = sale_order_line.task_id

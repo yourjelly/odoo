@@ -35,7 +35,7 @@ class TestPrintCheck(AccountingTestCase):
             'name': is_refund and "Supplier Refund" or "Supplier Invoice",
             'type': is_refund and "in_refund" or "in_invoice",
             'account_id': self.account_payable.id,
-            'date_invoice': time.strftime('%Y') + '-06-26',
+            'invoice_date': time.strftime('%Y') + '-06-26',
         })
         self.invoice_line_model.create({
             'product_id': self.product.id,
@@ -45,7 +45,7 @@ class TestPrintCheck(AccountingTestCase):
             'name': 'something',
             'account_id': self.account_expenses.id,
         })
-        invoice.action_invoice_open()
+        invoice.post()
         return invoice
 
     def create_payment(self, invoices):

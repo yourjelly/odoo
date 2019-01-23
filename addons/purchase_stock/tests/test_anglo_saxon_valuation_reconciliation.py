@@ -51,7 +51,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCase):
             'currency_id': self.currency_two.id,
             'name': 'vendor bill',
             'type': 'in_invoice',
-            'date_invoice': date,
+            'invoice_date': date,
             'date': date,
             'account_id': account_receivable.id,
         })
@@ -72,7 +72,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCase):
             'rate': 7.76435463,
             'name': '2018-02-01',
         })
-        invoice.action_invoice_open()
+        invoice.post()
         picking = self.env['stock.picking'].search([('purchase_id','=',purchase_order.id)])
         self.check_reconciliation(invoice, picking)
         # cancel the invoice
@@ -99,7 +99,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCase):
         })
 
         # Validate the invoice and refund the goods
-        invoice.action_invoice_open()
+        invoice.post()
         self._process_pickings(purchase_order.picking_ids, date='2017-12-24')
         picking = self.env['stock.picking'].search([('purchase_id', '=', purchase_order.id)])
         self.check_reconciliation(invoice, picking)
@@ -136,7 +136,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCase):
             'description': 'test_invoice_shipment_refund',
             'filter_refund': 'cancel',
             'date': '2018-03-15',
-            'date_invoice': '2018-03-15',
+            'invoice_date': '2018-03-15',
         })
         refund_invoice_wiz.invoice_refund()
 
@@ -162,7 +162,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCase):
             'rate': 7.76435463,
             'name': '2017-02-01',
         })
-        invoice.action_invoice_open()
+        invoice.post()
         self.check_reconciliation(invoice, picking, full_reconcile=False)
 
         invoice2 = self._create_invoice_for_po(purchase_order, '2017-02-15')
@@ -174,7 +174,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCase):
             'rate': 13.834739702,
             'name': '2017-03-01',
         })
-        invoice2.action_invoice_open()
+        invoice2.post()
         self.check_reconciliation(invoice2, picking, full_reconcile=False)
 
         self.env['res.currency.rate'].create({

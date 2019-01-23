@@ -8,21 +8,17 @@ from odoo.tests import tagged
 class TestReconciliationMatchingRules(AccountingTestCase):
     def _create_invoice_line(self, amount, partner, type):
         ''' Create an invoice on the fly.'''
-        self_ctx = self.env['account.invoice'].with_context(type=type)
-        journal_id = self_ctx._default_journal().id
-        self_ctx = self_ctx.with_context(journal_id=journal_id)
-        view = type in ('in_invoice', 'in_refund') and 'account.invoice_supplier_form' or 'account.invoice_form'
-        with Form(self_ctx, view=view) as invoice_form:
-            invoice_form.partner_id = partner
-            with invoice_form.invoice_line_ids.new() as invoice_line_form:
-                invoice_line_form.name = 'xxxx'
-                invoice_line_form.quantity = 1
-                invoice_line_form.price_unit = amount
-                invoice_line_form.invoice_line_tax_ids.clear()
+        invoice_form = Form(self.env['account.move'].with_context(type=type, assist_move_creation=True))
+        invoice_form.partner_id = partner
+        with invoice_form.invoice_line_ids.new() as invoice_line_form:
+            invoice_line_form.name = 'xxxx'
+            invoice_line_form.quantity = 1
+            invoice_line_form.price_unit = amount
+            invoice_line_form.tax_ids.clear()
         invoice = invoice_form.save()
-        invoice.action_invoice_open()
-        lines = invoice.move_id.line_ids
-        return lines.filtered(lambda l: l.account_id == invoice.account_id)
+        invoice.post()
+        lines = invoice.line_ids
+        return lines.filtered(lambda l: l._is_invoice_payment_term_line())
 
     def _check_statement_matching(self, rules, expected_values):
         statement_lines = (self.bank_st + self.cash_st).mapped('line_ids')
@@ -286,13 +282,13 @@ class TestReconciliationMatchingRules(AccountingTestCase):
 
         # Check first line has been well reconciled.
         self.assertRecordValues(self.bank_line_1.journal_entry_ids, [
-            {'partner_id': self.partner_1.id, 'debit': 105.0, 'credit': 0.0},
-            {'partner_id': self.partner_1.id, 'debit': 0.0, 'credit': 100.0},
             {'partner_id': self.partner_1.id, 'debit': 0.0, 'credit': 5.0},
+            {'partner_id': self.partner_1.id, 'debit': 0.0, 'credit': 100.0},
+            {'partner_id': self.partner_1.id, 'debit': 105.0, 'credit': 0.0},
         ])
 
         # Check second line has been well reconciled.
         self.assertRecordValues(self.cash_line_1.journal_entry_ids, [
-            {'partner_id': self.partner_2.id, 'debit': 0.0, 'credit': 1000.0},
             {'partner_id': self.partner_2.id, 'debit': 1000.0, 'credit': 0.0},
+            {'partner_id': self.partner_2.id, 'debit': 0.0, 'credit': 1000.0},
         ])

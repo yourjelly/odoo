@@ -170,7 +170,7 @@ class TestSaleService(TestCommonSaleTimesheetNoChart):
         # invoice SO, and validate invoice
         invoice_id = self.sale_order._create_invoices()[0]
         invoice = self.env['account.invoice'].browse(invoice_id)
-        invoice.action_invoice_open()
+        invoice.post()
 
         # try to update timesheets, catch error 'You cannot modify invoiced timesheet'
         with self.assertRaises(UserError):

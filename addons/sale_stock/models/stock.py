@@ -33,7 +33,7 @@ class StockMove(models.Model):
         rslt = super(StockMove, self)._get_related_invoices()
         invoices = self.mapped('picking_id.sale_id.invoice_ids').filtered(lambda x: x.state not in ('draft', 'cancel'))
         rslt += invoices
-        #rslt += invoices.mapped('refund_invoice_ids')
+        #rslt += invoices.mapped('reverse_entry_ids')
         return rslt
 
     def _assign_picking_post_process(self, new=False):

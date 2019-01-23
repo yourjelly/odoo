@@ -55,7 +55,7 @@ class TestPingenSend(AccountingTestCase):
             'name': 'invoice to client',
             'account_id': account_receivable.id,
             'type': 'out_invoice',
-            'date_invoice': '2018-12-11',
+            'invoice_date': '2018-12-11',
         })
 
         self.env['account.invoice.line'].create({
@@ -67,7 +67,7 @@ class TestPingenSend(AccountingTestCase):
             'account_id': account_income.id,
         })
 
-        invoice.action_invoice_open()
+        invoice.post()
 
         return invoice
 

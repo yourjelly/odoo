@@ -1187,7 +1187,7 @@ class Form(object):
                 contexts[fname] = ctx
 
             descr = fvg['fields'].get(fname) or {'type': None}
-            if descr['type'] == 'one2many':
+            if descr['type'] == 'one2many' and not descr.get('relation_field') == 'reverse_entry_id':
                 self._o2m_set_edition_view(descr, f)
 
         fvg['modifiers']['id'] = {'required': False, 'readonly': True}
@@ -1538,7 +1538,8 @@ class O2MForm(Form):
             # skip unmodified fields
             if f not in self._changed:
                 continue
-            # if self._get_modifier(f, 'readonly'):
+            # if self._get_modifi
+            # er(f, 'readonly'):
             #     continue
             values[f] = v
         return values

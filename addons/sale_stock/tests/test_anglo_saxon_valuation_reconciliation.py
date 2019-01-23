@@ -53,7 +53,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCase):
             'currency_id': self.currency_two.id,
             'name': 'customer invoice',
             'type': 'out_invoice',
-            'date_invoice': date,
+            'invoice_date': date,
             'account_id': self.account_receivable.id,
             'invoice_line_ids': [(0, 0, {
                 'name': 'test line',
@@ -103,7 +103,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCase):
             'rate': 9.87366352,
             'name': '2018-02-01',
         })
-        invoice.action_invoice_open()
+        invoice.post()
         picking = self.env['stock.picking'].search([('sale_id', '=', sale_order.id)])
         self.check_reconciliation(invoice, picking, operation='sale')
 
@@ -125,7 +125,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCase):
             'rate': 0.974784,
             'name': '2018-02-01',
         })
-        invoice.action_invoice_open()
+        invoice.post()
 
         self._process_pickings(sale_order.picking_ids)
 
@@ -182,7 +182,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCase):
             'rate': 7.76435463,
             'name': '2018-02-01',
         })
-        invoice.action_invoice_open()
+        invoice.post()
         self.check_reconciliation(invoice, picking, full_reconcile=False, operation='sale')
 
         invoice2 = self._create_invoice_for_so(sale_order, test_product, '2018-03-12')
@@ -194,7 +194,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCase):
             'rate': 13.834739702,
             'name': '2018-03-01',
         })
-        invoice2.action_invoice_open()
+        invoice2.post()
         self.check_reconciliation(invoice2, picking, full_reconcile=False, operation='sale')
 
         self.env['res.currency.rate'].create({
