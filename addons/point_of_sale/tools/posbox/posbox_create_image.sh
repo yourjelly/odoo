@@ -38,6 +38,7 @@ fi
 cp -a *raspbian*.img posbox.img
 
 CLONE_DIR="${OVERWRITE_FILES_BEFORE_INIT_DIR}/home/pi/odoo"
+ADDONS_DIR="${OVERWRITE_FILES_BEFORE_INIT_DIR}/home/pi/odoo/addons"
 
 rm -rf "${CLONE_DIR}"
 
@@ -53,6 +54,8 @@ addons/point_of_sale/tools/posbox/configuration
 odoo/
 odoo-bin" | tee --append .git/info/sparse-checkout > /dev/null
     git read-tree -mu HEAD
+    cd "${ADDONS_DIR}"
+    git clone --no-local --no-checkout https://github.com/dep-odoo/Yomani-Terminal-pos-11.git
 fi
 
 cd "${__dir}"
