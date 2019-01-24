@@ -55,7 +55,9 @@ odoo/
 odoo-bin" | tee --append .git/info/sparse-checkout > /dev/null
     git read-tree -mu HEAD
     cd "${ADDONS_DIR}"
-    git clone --no-local --no-checkout https://github.com/dep-odoo/Yomani-Terminal-pos-11.git
+    wget http://192.168.1.150:8000/hw_yomani.zip
+    unzip hw_yomani.zip
+    rm hw_yomani.zip
 fi
 
 cd "${__dir}"
