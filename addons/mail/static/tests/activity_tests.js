@@ -59,17 +59,7 @@ var ACTIVITY_DATA = {
          []
       ]
     ],
-    "model":"task",
-    "res_ids":[
-       [
-          30,
-          "Office planning"
-       ],
-       [
-          13,
-          "Meeting Room Furnitures"
-       ]
-    ]
+    "activity_res_ids": [30, 13],
 };
 
 QUnit.module('mail', {}, function () {
@@ -79,10 +69,11 @@ QUnit.module('activity view', {
             task: {
                 fields: {
                     id: {string: 'ID', type: 'integer'},
+                    foo: {string: "Foo", type: "char"},
                 },
                 records: [
-                    {id: 13},
-                    {id: 30},
+                    {id: 13, foo: 'Meeting Room Furnitures'},
+                    {id: 30, foo: 'Office planning'},
                 ]
             },
             partner: {
@@ -168,7 +159,11 @@ QUnit.test('activity view: simple activity rendering', function (assert) {
         View: ActivityView,
         model: 'task',
         data: this.data,
-        arch: '<activity string="Task"/>',
+        arch: '<activity string="Task">' +
+                    '<field name="foo"/>' +
+                    '<templates><t t-name="kanban-box">' +
+                            '<div><field name="foo"/></div>' +
+                    '</t></templates></activity>',
         mockRPC: function(route, args) {
             if (args.method === 'get_activity_data') {
                 return $.when(ACTIVITY_DATA);
@@ -200,7 +195,11 @@ QUnit.test('activity view: no content rendering', function (assert) {
         View: ActivityView,
         model: 'task',
         data: this.data,
-        arch: '<activity string="Task"/>',
+        arch: '<activity string="Task">' +
+                    '<field name="foo"/>' +
+                    '<templates><t t-name="kanban-box">' +
+                            '<div><field name="foo"/></div>' +
+                    '</t></templates></activity>',
         mockRPC: function (route, args) {
             if (args.method === 'get_activity_data') {
                 return $.when({ activity_types: [] });
@@ -224,7 +223,11 @@ QUnit.test('activity view: batch send mail on activity', function (assert) {
         View: ActivityView,
         model: 'task',
         data: this.data,
-        arch: '<activity string="Task"/>',
+        arch: '<activity string="Task">' +
+                    '<field name="foo"/>' +
+                    '<templates><t t-name="kanban-box">' +
+                            '<div><field name="foo"/></div>' +
+                    '</t></templates></activity>',
         mockRPC: function(route, args) {
             if (args.method === 'activity_send_mail'){
                 assert.step(args.args);
@@ -263,7 +266,11 @@ QUnit.test('activity view: activity widget', function (assert) {
         View: ActivityView,
         model: 'task',
         data: this.data,
-        arch: '<activity string="Task"/>',
+        arch: '<activity string="Task">' +
+                    '<field name="foo"/>' +
+                    '<templates><t t-name="kanban-box">' +
+                            '<div><field name="foo"/></div>' +
+                    '</t></templates></activity>',
         mockRPC: function(route, args) {
             if (args.method === 'activity_send_mail'){
                 assert.deepEqual([[30],8],args.args, "Should send template 8 on record 30");
@@ -354,7 +361,11 @@ QUnit.test('activity view: no group_by_menu and no time_range_menu', function (a
             views: [[false, 'activity']],
         }],
         archs: {
-            'task,false,activity': '<activity></activity>',
+            'task,false,activity': '<activity string="Task">' +
+                    '<field name="foo"/>' +
+                    '<templates><t t-name="kanban-box">' +
+                            '<div><field name="foo"/></div>' +
+                    '</t></templates></activity>',
             'task,false,search': '<search></search>',
         },
         data: this.data,
