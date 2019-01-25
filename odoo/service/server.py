@@ -857,7 +857,7 @@ class TraceLogger(Worker):
             # close the cursor
             cr2.commit()
             cr2.close()
-            time.sleep(3)
+            time.sleep(30)
 
 
 class WorkerCron(Worker):
