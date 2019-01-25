@@ -1956,6 +1956,25 @@ class Selection(Field):
                 selection_add = field.args['selection_add']
                 self.selection = list(OrderedDict(self.selection + selection_add).items())
 
+    def _selection_modules(self, model):
+        """ Return a mapping from selection values to modules defining each value. """
+        if not isinstance(self.selection, list):
+            return {}
+        value_modules = defaultdict(set)
+        for field in reversed(resolve_mro(model, self.name, self._can_setup_from)):
+            module = field.args.get('_module')
+            if not module:
+                continue
+            if 'selection' in field.args:
+                value_modules.clear()
+                if isinstance(field.args['selection'], list):
+                    for value, label in field.args['selection']:
+                        value_modules[value].add(module)
+            if 'selection_add' in field.args:
+                for value, label in field.args['selection_add']:
+                    value_modules[value].add(module)
+        return value_modules
+
     def _description_selection(self, env):
         """ return the selection list (pairs (value, label)); labels are
             translated according to context language
@@ -1968,10 +1987,10 @@ class Selection(Field):
 
         # translate selection labels
         if env.lang:
-            name = "%s,%s" % (self.model_name, self.name)
-            translate = partial(
-                env['ir.translation']._get_source, name, 'selection', env.lang)
-            return [(value, translate(label) if label else label) for value, label in selection]
+            field = env['ir.model.fields']._get(self.model_name, self.name)
+            # use mapping in case selection values are not strings
+            value2label = {sel.value: sel.name for sel in field.selection_ids}
+            return [(value, value2label[value]) for value, _ in selection]
         else:
             return selection
 
