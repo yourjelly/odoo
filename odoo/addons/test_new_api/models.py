@@ -535,6 +535,9 @@ class Selection(models.Model):
     _name = 'test_new_api.selection'
     _description = "Selection"
 
+    state = fields.Selection([('foo', 'Foo'), ('bar', 'Bar')])
+    api_type = fields.Selection([('old', 'Old'), ('new', 'New')])
+
 
 class RequiredM2O(models.Model):
     _name = 'test_new_api.req_m2o'

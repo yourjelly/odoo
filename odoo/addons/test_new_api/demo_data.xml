@@ -51,5 +51,11 @@
             <field name="digits" eval="3"/>
         </record>
 
+        <record id="api_openerp" model="test_new_api.selection">
+            <field name="api_type">old</field>
+        </record>
+        <record id="api_odoo" model="test_new_api.selection">
+            <field name="api_type">new</field>
+        </record>
     </data>
 </odoo>
