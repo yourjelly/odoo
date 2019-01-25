@@ -10,7 +10,7 @@ import time
 from odoo import api
 from odoo.addons.base.models.assetsbundle import AssetsBundle
 from odoo.modules.module import get_resource_path
-from odoo.tests import HttpCase
+from odoo.tests import HttpCase, tagged
 from odoo.tests.common import TransactionCase
 
 
@@ -500,7 +500,7 @@ class TestJavascriptAssetsBundle(TransactionCase):
     </body>
 </html>""").encode('utf8'))
 
-
+@tagged("assets_bundle")
 class TestAssetsBundleInBrowser(HttpCase):
     def test_01_js_interpretation(self):
         """ Checks that the javascript of a bundle is correctly interpreted.

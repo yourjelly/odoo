@@ -760,6 +760,8 @@ class HttpRequest(WebRequest):
 
     def __init__(self, *args):
         super(HttpRequest, self).__init__(*args)
+        if 'test_assetsbundle.bundle1.js' in str(args):
+            _logger.info('accessing test_assetsbundle/js ')
         params = collections.OrderedDict(self.httprequest.args)
         params.update(self.httprequest.form)
         params.update(self.httprequest.files)
@@ -829,8 +831,19 @@ more details.
                     """, request.httprequest.path)
 
                 raise werkzeug.exceptions.BadRequest('Session expired (invalid CSRF token)')
-
+        
+        if 'test_assetsbundle.bundle1.js' in request.httprequest.url:
+            _logger.info('params')
+            _logger.info(json.dumps(self.params))
+            if self.endpoint_arguments:
+                print('endpoint_arguments')
+                print(self.endpoint_arguments)
+            else:
+                print('no endpoint_argument')
         r = self._call_function(**self.params)
+        if 'test_assetsbundle.bundle1.js' in request.httprequest.url:
+            _logger.info('response')
+            _logger.info(r.data)
         if not r:
             r = Response(status=204)  # no content
         return r
