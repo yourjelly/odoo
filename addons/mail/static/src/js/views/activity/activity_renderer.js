@@ -12,12 +12,15 @@ var utils = require('web.utils');
 var QWeb = core.qweb;
 var _t = core._t;
 
-
 var ActivityRenderer = AbstractRenderer.extend({
     className: 'o_activity_view',
     events: {
         'click .o_send_mail_template': '_onSenMailTemplateClicked',
     },
+
+    /**
+     * @override
+     */
     init: function (parent, state, params) {
         this._super.apply(this, arguments);
         this.qweb = new qweb(session.debug, {_s: session.origin});
@@ -82,22 +85,20 @@ var ActivityRenderer = AbstractRenderer.extend({
     },
     /**
      * @private
-     * @param {integer} id
+     * @param {integer} resId
      * @returns {jQueryElement} a <tr> element
      */
-    _renderRow: function (id) {
+    _renderRow: function (resId) {
         var self = this;
-        var data = _.findWhere(this.state.data, {res_id: id});
-        var res_id = data.res_id;
-        var $nameTD = $('<td>', { class: 'o_res_name_cell'});
-        var kanbanRecord = new KanbanRecord(this, data, {
-            'qweb': this.qweb,
-        });
+        var record = _.findWhere(this.state.data, { res_id: resId });
+        var $nameTD = $('<td>', { class: 'o_res_name_cell' });
+        var kanbanRecord = new KanbanRecord(this, record, { 'qweb': this.qweb });
         kanbanRecord.appendTo($nameTD);
+
         var $cells = _.map(this.state.activity_types, function (node) {
             var $td = $('<td>').addClass("o_activity_summary_cell");
             var activity_type_id = node[0];
-            var activity_group = self.state.grouped_activities[res_id][activity_type_id];
+            var activity_group = self.state.grouped_activities[resId][activity_type_id];
             activity_group = activity_group || {count: 0, ids: [], state: false};
             if (activity_group.state) {
                 $td.addClass(activity_group.state);
@@ -125,9 +126,9 @@ var ActivityRenderer = AbstractRenderer.extend({
                 },
                 fieldsInfo: {},
                 model: self.state.model,
-                ref: res_id, // not necessary, i think
+                ref: resId, // not necessary, i think
                 type: 'record',
-                res_id: res_id,
+                res_id: resId,
                 getContext: function () {
                     return {}; // session.user_context
                 },

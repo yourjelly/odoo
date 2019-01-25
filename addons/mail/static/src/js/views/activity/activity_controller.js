@@ -19,7 +19,6 @@ var ActivityController = BasicController.extend({
     _onSendMailTemplate: function (ev) {
         var templateID = ev.data.templateID;
         var activityTypeID = ev.data.activityTypeID;
-        var state = this.model.get();
         var groupedActivities = this.model.additionalData.grouped_activities;
         var resIDS = [];
         Object.keys(groupedActivities).forEach(function (resID) {

@@ -10,48 +10,51 @@ var ActivityModel = BasicModel.extend({
     //--------------------------------------------------------------------------
 
     /**
-    * @override
-    */
+     * Add the following (activity specific) keys when performing a `get`
+     *
+     * - activity_types
+     * - activity_res_ids
+     * - grouped_activities
+     *
+     * @override
+     * @returns {Object}
+     */
     get: function () {
         var list = this._super.apply(this, arguments);
-        if (list && list.model === this.modelName) {
-            if (list.type === 'record') {
-                if (list.data && _.contains(_.map(this.additionalData.grouped_activities, function (act, key) { return Number(key) }), list.data.id)) {
-                    list.data.activity_data = this.additionalData.grouped_activities[list.data.id];
-                }
-            } else {
-                return _.extend(list, this.additionalData);
-            }
+        if (list && list.model === this.modelName && list.type === 'list') {
+            return _.extend(list, this.additionalData);
         }
         return list;
     },
     /**
      * @override
      * @param {Object} params
-     * @param {Array[]} params.domain
-     * @returns {Deferred}
+     * @returns {Deferred<string>} resolves to a local id or handle
      */
     load: function (params) {
         var self = this;
         this.modelName = params.modelName;
         this.domain = params.domain;
-        return this._super.apply(this, arguments).then(function (id) {
-            return $.when(self._fetchData(id));
+        var def = this._super.apply(this, arguments);
+        return $.when(def, this._fetchData()).then(function (recordID) {
+            return recordID;
         });
     },
     /**
+     * @override
      * @param {any} handle
      * @param {Object} params
      * @param {Array[]} params.domain
-     * @returns {Deferred}
+     * @returns {Deferred<string>} resolves to a local id or handle
      */
     reload: function (handle, params) {
         var self = this;
         if (params && 'domain' in params) {
             this.domain = params.domain;
         }
-        return this._super.apply(this, arguments).then(function (id) {
-            return self._fetchData(id);
+        var def = this._super.apply(this, arguments);
+        return $.when(def, this._fetchData()).then(function (recordID) {
+            return recordID;
         });
     },
 
@@ -65,19 +68,17 @@ var ActivityModel = BasicModel.extend({
      * @private
      * @returns {Deferred}
      */
-    _fetchData: function (id) {
+    _fetchData: function () {
         var self = this;
-        var def = this._rpc({
+        return this._rpc({
             model: "mail.activity",
             method: 'get_activity_data',
             kwargs: {
                 res_model: this.modelName,
                 domain: this.domain,
             }
-        });
-        return $.when(def).then(function (result) {
+        }).then(function (result) {
             self.additionalData = result;
-            return id;
         });
     },
 });
