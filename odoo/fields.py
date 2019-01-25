@@ -10,7 +10,7 @@ from operator import attrgetter
 import itertools
 import logging
 import time
-
+import odoo
 import pytz
 
 try:
@@ -1004,8 +1004,30 @@ class Field(MetaField('DummyField', (object,), {})):
     def compute_value(self, records):
         """ Invoke the compute method on ``records``; the results are in cache. """
         fields = records._field_computed[self]
-        print (time.strftime("%Y%m%d %H:%M:%S"))
-        print("compute fields: ",fields)
+        DEFAULT_SERVER_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+        
+        # BEGIN DEGUG MIGRATION
+        ############################
+
+          # ASSUME TABLE EXISTS
+        # Get the start timestamp
+        start_timestamp_epoch = time.time()
+        start_timestamp = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        
+        # create a new cursor
+        db_names = odoo.service.db.list_dbs(True)
+        cr2 = odoo.sql_db.db_connect(db_names[0]).cursor()
+        # write the logs
+        cr2.execute(\
+        """INSERT INTO MIG_LOGS
+        ( START_TIME, CATEGORY, MESSAGE) 
+        VALUES ( %s, %s, %s)""" , [start_timestamp, "COMPUTE", str(fields)] )
+        # close the cursor
+        cr2.commit()
+        cr2.close()
+        
+        # END DEGUG MIGRATION
+        ###########################
         with records.env.do_in_draft(), records.env.protecting(fields, records):
             try:
                 self._compute_value(records)
@@ -1016,6 +1038,29 @@ class Field(MetaField('DummyField', (object,), {})):
                         self._compute_value(record)
                     except Exception as exc:
                         record.env.cache.set_failed(record, [self], exc)
+
+        # BEGIN DEGUG MIGRATION
+        ############################
+
+          # ASSUME TABLE EXISTS
+        # Get the start timestamp
+        stop_timestamp_epoch = time.time()
+        stop_timestamp = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        duration = stop_timestamp_epoch -start_timestamp_epoch
+        # create a new cursor
+        db_names = odoo.service.db.list_dbs(True)
+        cr2 = odoo.sql_db.db_connect(db_names[0]).cursor()
+        # write the logs
+        cr2.execute(\
+        """INSERT INTO MIG_LOGS
+        ( START_TIME, STOP_TIME, DURATION_MS, CATEGORY, MESSAGE) 
+        VALUES ( %s, %s, %s, %s, %s)""" , [start_timestamp, stop_timestamp, duration, "COMPUTE_DURATION", str(fields)] )
+        # close the cursor
+        cr2.commit()
+        cr2.close()
+        
+        # END DEGUG MIGRATION
+        ###########################
 
     def determine_value(self, record):
         """ Determine the value of ``self`` for ``record``. """
@@ -2169,6 +2214,8 @@ class _RelationalMulti(_Relational):
             # filter values to keep the accessible records only
             for record in records:
                 record[self.name] = record[self.name].filtered(accessible)
+
+            
 
     def _setup_regular_base(self, model):
         super(_RelationalMulti, self)._setup_regular_base(model)

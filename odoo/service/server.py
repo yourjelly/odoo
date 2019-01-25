@@ -82,11 +82,6 @@ class LoggingBaseWSGIServerMixIn(object):
         _logger.exception('Exception happened during processing of request from %s', client_address)
 
 
-class TraceLogger:
-    def run(self):
-        while True:
-            dumpstacks(sig=3, out_channel=2)
-            time.sleep(60)
 
 class BaseWSGIServerNoBind(LoggingBaseWSGIServerMixIn, werkzeug.serving.BaseWSGIServer):
     """ werkzeug Base WSGI Server patched to skip socket binding. PreforkServer
@@ -804,6 +799,66 @@ class WorkerHTTP(Worker):
     def start(self):
         Worker.start(self)
         self.server = BaseWSGIServerNoBind(self.multi.app)
+
+
+
+class TraceLogger(Worker):
+    def _db_list(self):
+        if config['db_name']:
+            db_names = config['db_name'].split(',')
+        else:
+            db_names = odoo.service.db.list_dbs(True)
+        return db_names
+
+    def _get_db(self):
+        # find current DB based on thread/worker db name (see netsvc)
+            return odoo.sql_db.db_connect(self._db_list()[0])
+
+    def __init__(self):
+        print(self._db_list())
+        # if drop table if exists and create it again
+        cr2 = self._get_db().cursor()
+        cr2.execute("""DROP TABLE IF EXISTS  MIG_LOGS""")
+        cr2.execute(\
+        """CREATE TABLE MIG_LOGS
+        (
+            ID int,
+            START_TIME timestamp,
+            STOP_TIME timestamp ,
+            DURATION_MS float,
+            CATEGORY varchar,
+            MESSAGE varchar
+        ) """)
+        cr2.commit()
+        cr2.close()
+
+
+    def run(self):
+        DEFAULT_SERVER_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+    
+        while True:
+            # Get the start timestamp
+            start_timestamp_epoch = time.time()
+            start_timestamp = datetime.datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+            # Get the traceback(s)
+            dumpstr = dumpstacks(sig=3, return_value=True)
+            # create a new cursor
+            cr2 = self._get_db().cursor()
+            # Get the stop timestamp
+            stop_timestamp_epoch = time.time()
+            stop_timestamp = datetime.datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+            # Get the duration
+            duration = stop_timestamp_epoch - start_timestamp_epoch
+            # write the logs
+            cr2.execute(\
+            """INSERT INTO MIG_LOGS
+            ( START_TIME, STOP_TIME, DURATION_MS, CATEGORY, MESSAGE) 
+            VALUES ( %s, %s , %s , %s, %s)""" , [start_timestamp, stop_timestamp ,duration,"STACKTRACE", dumpstr] )
+            # close the cursor
+            cr2.commit()
+            cr2.close()
+            time.sleep(3)
+
 
 class WorkerCron(Worker):
     """ Cron workers """
