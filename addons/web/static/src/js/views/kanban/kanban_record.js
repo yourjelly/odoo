@@ -44,7 +44,7 @@ var KanbanRecord = Widget.extend({
         this._super(parent);
 
         this.fields = state.fields;
-        this.fieldsInfo = state.fieldsInfo.kanban;
+        this.fieldsInfo = state.fieldsInfo[state.viewType];
         this.modelName = state.model;
 
         this.options = options;
