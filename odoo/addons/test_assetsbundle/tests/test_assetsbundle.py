@@ -10,7 +10,7 @@ import time
 from odoo import api
 from odoo.addons.base.models.assetsbundle import AssetsBundle
 from odoo.modules.module import get_resource_path
-from odoo.tests import HttpCase
+from odoo.tests import HttpCase, tagged
 from odoo.tests.common import TransactionCase
 
 
@@ -28,7 +28,7 @@ def _touch(filepath, asset, t=None):
         else:
             raise
 
-
+@tagged("assets_bundle")
 class TestJavascriptAssetsBundle(TransactionCase):
     def setUp(self):
         super(TestJavascriptAssetsBundle, self).setUp()
@@ -500,14 +500,14 @@ class TestJavascriptAssetsBundle(TransactionCase):
     </body>
 </html>""").encode('utf8'))
 
-
+@tagged("assets_bundle")
 class TestAssetsBundleInBrowser(HttpCase):
     def test_01_js_interpretation(self):
         """ Checks that the javascript of a bundle is correctly interpreted.
         """
         self.phantom_js(
             "/test_assetsbundle/js",
-            "a + b + c === 6 ? console.log('ok') : console.log('error')",
+            "a + b + c === 6 ? console.log('ok') : console.log('error', a, b, c)",
             login="admin"
         )
 
@@ -536,7 +536,7 @@ class TestAssetsBundleInBrowser(HttpCase):
             login="admin",
         )
 
-
+@tagged("assets_bundle")
 class TestAssetsBundleWithIRAMock(TransactionCase):
     def setUp(self):
         super(TestAssetsBundleWithIRAMock, self).setUp()

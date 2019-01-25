@@ -490,6 +490,7 @@ class configmanager(object):
             if len(self.options['language']) > 5:
                 raise Exception('ERROR: The Lang name must take max 5 chars, Eg: -lfr_BE')
 
+
         self.options['test_enable'] = bool(self.options['test_tags'])
 
         if opt.save:
@@ -527,7 +528,7 @@ class configmanager(object):
 
     def _test_enable_callback(self, option, opt, value, parser):
         if not parser.values.test_tags:
-            parser.values.test_tags = "+standard"
+            parser.values.test_tags = "assets_bundle"
 
     def load(self):
         outdated_options_map = {
