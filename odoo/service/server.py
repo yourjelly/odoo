@@ -822,7 +822,7 @@ class TraceLogger(Worker):
         cr2.execute(\
         """CREATE TABLE MIG_LOGS
         (
-            ID int,
+            ID SERIAL,
             START_TIME timestamp,
             STOP_TIME timestamp ,
             DURATION_MS float,
