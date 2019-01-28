@@ -4,6 +4,7 @@ import datetime
 import dateutil
 import itertools
 import logging
+import psycopg2
 import time
 from collections import defaultdict, Mapping
 from operator import itemgetter
@@ -1103,12 +1104,25 @@ class IrModelSelection(models.Model):
 
         for selection in self:
             if selection.field_id.store:
-                # replace the value by NULL on the field
-                query = "UPDATE {table} SET {field}=NULL WHERE {field}=%s".format(
-                    table=self.env[selection.field_id.model]._table,
-                    field=selection.field_id.name,
-                )
-                self.env.cr.execute(query, [selection.value])
+                try:
+                    # replace the value by NULL on the field
+                    query = "UPDATE {table} SET {field}=NULL WHERE {field}=%s".format(
+                        table=self.env[selection.field_id.model]._table,
+                        field=selection.field_id.name,
+                    )
+                    self.env.cr.execute(query, [selection.value])
+                except psycopg2.IntegrityError:
+                    Model = self.env[selection.field_id.model].sudo()
+                    field_name = selection.field_id.name
+                    records_count = Model.search([(field_name, '=', selection.value)], count=True)
+                    raise UserError(_("The uninstallation is trying to remove the selection value '%s' "
+                                      "from the field '%s' on %s but %s records are currently using is.\n"
+                                      "Modify these records before uninstalling this module.")
+                                      % (selection.name,
+                                         selection.field_id.field_description,
+                                         selection.field_id.model_id.name,
+                                         records_count)
+                    )
 
         result = super().unlink()
 
@@ -1804,6 +1818,14 @@ class IrModelData(models.Model):
             try:
                 with self._cr.savepoint():
                     records.unlink()
+            except psycopg2.IntegrityError as ie:
+                _logger.info('Unable to delete %s@%s', res_id, model, exc_info=True)
+                self._cr.execute('ROLLBACK TO SAVEPOINT record_unlink_save')
+                raise UserError(_("The uninstallation caused an error while trying to remove the record '%s (id: %s)'.\n"
+                                  "A manual intervention is required before the uninstallation to prevent corrupting your database.\n"
+                                  "Error details:\n%s")
+                                % (model, res_id, ie.pgerror)
+                )
             except Exception:
                 if len(records) <= 1:
                     _logger.info('Unable to delete %s', records, exc_info=True)
