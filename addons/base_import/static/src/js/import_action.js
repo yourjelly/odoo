@@ -6,6 +6,7 @@ var ControlPanelMixin = require('web.ControlPanelMixin');
 var core = require('web.core');
 var session = require('web.session');
 var time = require('web.time');
+var Widget = require('web.Widget');
 
 var QWeb = core.qweb;
 var _t = core._t;
@@ -72,6 +73,123 @@ function dataFilteredQuery(q) {
     q.callback({results: suggestions});
 }
 
+// Render Error
+// Render Table Preview
+// Edit Preview Table
+
+var PreviewTable = Widget.extend({
+    template: 'PreviewTable',
+    events: {
+        'change .oe_import_grid-input': 'onRowChange'
+    },
+    init: function (parent, options) {
+        this._super.apply(this, arguments);
+        this.table = {};
+        this.preview = [];
+        this.error_msg = false;
+        this.mode = options.mode || 'readonly';
+        this.state = [];
+        this.currentState = [];
+    },
+    parserPreview: function (messages) {
+        var preview = [];
+        _.each(messages, function (message) {
+            if (message.type === 'error' && message.rows) {
+                preview.push(message.rows.data);
+            }
+        });
+        return _.flatten(preview);
+    },
+    parserError: function (messages, offset) {
+        return QWeb.render('ImportView.error', {
+            errors: _(messages).groupBy('message'),
+            at: function (rows) {
+                var from = rows.from + offset;
+                var to = rows.to + offset;
+                if (from === to) {
+                    return _.str.sprintf(_t("at row %d"), from);
+                }
+                return _.str.sprintf(_t("between rows %d and %d"),
+                                     from, to);
+            },
+            more: function (n) {
+                return _.str.sprintf(_t("(%d more)"), n);
+            },
+            info: function (msg) {
+                if (typeof msg === 'string') {
+                    return _.str.sprintf(
+                        '<div class="oe_import_moreinfo oe_import_moreinfo_message">%s</div>',
+                        _.str.escapeHTML(msg));
+                }
+                if (msg instanceof Array) {
+                    return _.str.sprintf(
+                        '<div class="oe_import_moreinfo oe_import_moreinfo_choices">%s <ul>%s</ul></div>',
+                        _.str.escapeHTML(_t("Here are the possible values:")),
+                        _(msg).map(function (msg) {
+                            return '<li>'
+                                + _.str.escapeHTML(msg)
+                            + '</li>';
+                        }).join(''));
+                }
+                // Final should be object, action descriptor
+                return [
+                    '<div class="oe_import_moreinfo oe_import_moreinfo_action">',
+                        _.str.sprintf('<a href="#" data-action="%s">',
+                                _.str.escapeHTML(JSON.stringify(msg))),
+                            _.str.escapeHTML(
+                                _t("Get all possible values")),
+                        '</a>',
+                    '</div>'
+                ].join('');
+            },
+        });
+    },
+    renderPreview: function (messages, offset) {
+        var error_msg = this.parserError(messages, offset);
+        var preview = this.parserPreview(messages);
+        this.mode = preview.length ? 'edit': 'readonly';
+        this._setPreview(error_msg, preview);
+        this.renderElement();
+    },
+    _setPreview: function (message, preview) {
+        this.error_msg = message;
+        this.table.preview = preview.length ? preview : this.preview;
+        this.setValue();
+    },
+    getValue: function () {
+        var isModified = !_.isEqual(this.currentState, this.state);
+        return isModified ? _.difference(this.currentState, this.state) : [];
+    },
+    setValue: function () {
+        this.state = this.table.preview;
+        this.currentState = _.clone(this.state);
+    },
+    setTable: function (table, mode) {
+        this.table = table;
+        this.preview = table.preview;
+        this.mode = mode;
+        this.setValue();
+    },
+    notifyChange: function (){
+        var isModified = _.isEqual(this.currentState, this.state);
+        this.trigger_up('preview_change', {
+            'isModified': isModified
+        });
+    },
+    onRowChange: function (ev) {
+        var $row = $(ev.target).closest('tr');
+        var rowData = [];
+        var rowId = $row.data('row-id');
+        $row.find('.oe_import_grid-input').each(function () {
+            rowData.push($(this).val());
+        });
+        var index =  _.findIndex(this.state, {'row-id': rowId});
+        var row = {'row-id': rowId, 'row-data': rowData};
+        this.currentState.splice(index, index+1, row);
+        this.notifyChange();
+    }
+});
+
 var DataImport = AbstractAction.extend(ControlPanelMixin, {
     template: 'ImportView',
     opts: [
@@ -129,6 +247,9 @@ var DataImport = AbstractAction.extend(ControlPanelMixin, {
             }));
         },
     },
+    custom_events: {
+        'preview_change': '_onPreviewChange'
+    },
     init: function (parent, action) {
         this._super.apply(this, arguments);
         this.action_manager = parent;
@@ -139,6 +260,7 @@ var DataImport = AbstractAction.extend(ControlPanelMixin, {
         this.session = session;
         action.display_name = _t('Import a File'); // Displayed in the breadcrumbs
         this.do_not_change_match = false;
+        this.previewtable = new PreviewTable(this, {mode : 'readonly'});
     },
     /**
      * @override
@@ -187,6 +309,7 @@ var DataImport = AbstractAction.extend(ControlPanelMixin, {
         this.$buttons = $(QWeb.render("ImportView.buttons", this));
         this.$buttons.filter('.o_import_validate').on('click', this.validate.bind(this));
         this.$buttons.filter('.o_import_import').on('click', this.import.bind(this));
+        this.$buttons.filter('.o_import_save').on('click', this.save.bind(this));
         this.$buttons.filter('.o_import_file_reload').on('click', this.loaded_file.bind(this));
         this.$buttons.filter('.oe_import_file').on('click', function () {
             self.$('.oe_import_file').click();
@@ -355,8 +478,9 @@ var DataImport = AbstractAction.extend(ControlPanelMixin, {
         this.$el.addClass('oe_import_preview_error oe_import_error');
         this.$el.find('.oe_import_box, .oe_import_with_file').removeClass('d-none');
         this.$el.find('.o_view_nocontent').addClass('d-none');
-        this.$('.oe_import_error_report').html(
-                QWeb.render('ImportView.preview.error', result));
+        this.$('.preview-table').html(
+            QWeb.render('ImportView.preview.error', result)
+        );
     },
     onpreview_success: function (event, from, to, result) {
         var self = this;
@@ -369,7 +493,8 @@ var DataImport = AbstractAction.extend(ControlPanelMixin, {
         this.$el.find('.o_view_nocontent').addClass('d-none');
         this.$el.addClass('oe_import_preview');
         this.$('input.oe_import_advanced_mode').prop('checked', result.advanced_mode);
-        this.$('.oe_import_grid').html(QWeb.render('ImportView.preview', result));
+        this.previewtable.setTable(result, 'readonly');
+        this.previewtable.appendTo(this.$('.preview-table'));
 
         if (result.headers.length === 1) {
             this.$('.oe_import_options').show();
@@ -389,7 +514,10 @@ var DataImport = AbstractAction.extend(ControlPanelMixin, {
             this.$('.oe_import_tracking').hide();
             this.$('.oe_import_deferparentstore').hide();
         }
-
+        this.setup_import_fields(result);
+    },
+    setup_import_fields: function (result){
+        var self = this;
         var $fields = this.$('.oe_import_fields input');
         this.render_fields_matches(result, $fields);
         var data = this.generate_fields_completion(result);
@@ -424,9 +552,8 @@ var DataImport = AbstractAction.extend(ControlPanelMixin, {
                         $thing.find('input').attr('field', '').prop('checked', false);
                         $thing.hide();
                     }
-                }
+                };
             }
-
             $(v).select2({
                 allowClear: true,
                 minimumInputLength: 0,
@@ -632,50 +759,29 @@ var DataImport = AbstractAction.extend(ControlPanelMixin, {
         if (this.import_options().headers) { offset += 1; }
 
         this.$el.addClass('oe_import_error');
-        this.$('.oe_import_error_report').html(
-            QWeb.render('ImportView.error', {
-                errors: _(message).groupBy('message'),
-                at: function (rows) {
-                    var from = rows.from + offset;
-                    var to = rows.to + offset;
-                    if (from === to) {
-                        return _.str.sprintf(_t("at row %d"), from);
-                    }
-                    return _.str.sprintf(_t("between rows %d and %d"),
-                                         from, to);
-                },
-                more: function (n) {
-                    return _.str.sprintf(_t("(%d more)"), n);
-                },
-                info: function (msg) {
-                    if (typeof msg === 'string') {
-                        return _.str.sprintf(
-                            '<div class="oe_import_moreinfo oe_import_moreinfo_message">%s</div>',
-                            _.str.escapeHTML(msg));
-                    }
-                    if (msg instanceof Array) {
-                        return _.str.sprintf(
-                            '<div class="oe_import_moreinfo oe_import_moreinfo_choices">%s <ul>%s</ul></div>',
-                            _.str.escapeHTML(_t("Here are the possible values:")),
-                            _(msg).map(function (msg) {
-                                return '<li>'
-                                    + _.str.escapeHTML(msg)
-                                + '</li>';
-                            }).join(''));
-                    }
-                    // Final should be object, action descriptor
-                    return [
-                        '<div class="oe_import_moreinfo oe_import_moreinfo_action">',
-                            _.str.sprintf('<a href="#" data-action="%s">',
-                                    _.str.escapeHTML(JSON.stringify(msg))),
-                                _.str.escapeHTML(
-                                    _t("Get all possible values")),
-                            '</a>',
-                        '</div>'
-                    ].join('');
-                },
-            }));
+        this.previewtable.renderPreview(message, offset);
+        this.setup_import_fields(this.previewtable.table);
     },
+    onsave: function () {
+        var self = this;
+        var rows = this.previewtable.getValue();
+        if (rows.length) {
+            var def = this._rpc({
+                model: 'base_import.import',
+                method: 'save_rows',
+                args: [this.id, rows],
+                kwargs: {context: session.user_context},
+            });
+            return def.then(function () {
+                self.$buttons.filter('.o_import_save').addClass('d-none');
+                self['validate']();
+            });
+        }
+        return true;
+    },
+    _onPreviewChange: function (ev) {
+        this.$buttons.filter('.o_import_save').toggleClass('d-none', ev.data.isModified);
+    }
 });
 core.action_registry.add('import', DataImport);
 
@@ -693,7 +799,9 @@ StateMachine.create({
         { name: 'preview_succeeded', from: 'previewing', to: 'preview_success' },
         { name: 'validate', from: 'preview_success', to: 'validating' },
         { name: 'validate', from: 'results', to: 'validating' },
+        { name: 'validate', from: 'save_success', to: 'validating' },
         { name: 'validated', from: 'validating', to: 'results' },
+        { name: 'save', from: 'results', to: 'save_success' },
         { name: 'import', from: ['preview_success', 'results'], to: 'importing' },
         { name: 'import_succeeded', from: 'importing', to: 'imported'},
         { name: 'import_failed', from: 'importing', to: 'results' }

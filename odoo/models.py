@@ -1017,6 +1017,10 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             yield record, {'rows': {
                 'from': index,
                 'to': index + len(record_span) - 1,
+                'data': [{
+                    'row-id': index + counter + 1,
+                    'row-data': row,
+                } for counter, row in enumerate(record_span)]
             }}
             index += len(record_span)
 

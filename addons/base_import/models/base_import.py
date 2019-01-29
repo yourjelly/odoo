@@ -3,26 +3,27 @@
 
 import base64
 import collections
-import unicodedata
-
-import chardet
 import datetime
 import io
 import itertools
 import logging
-import psycopg2
 import operator
 import os
 import re
-import requests
+import unicodedata
 
+import chardet
+import psycopg2
+import requests
 from PIL import Image
 
-from odoo import api, fields, models
+from odoo import api, fields, models, tools
 from odoo.exceptions import AccessError
-from odoo.tools.translate import _
+from odoo.tools import (DEFAULT_SERVER_DATE_FORMAT,
+                        DEFAULT_SERVER_DATETIME_FORMAT, config, pycompat)
+from odoo.tools.func import lazy_property
 from odoo.tools.mimetypes import guess_mimetype
-from odoo.tools import config, DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, pycompat
+from odoo.tools.translate import _
 
 FIELDS_RECURSION_LIMIT = 2
 ERROR_PREVIEW_BYTES = 200
@@ -47,15 +48,257 @@ try:
 except ImportError:
     odf_ods_reader = None
 
-FILE_TYPE_DICT = {
-    'text/csv': ('csv', True, None),
-    'application/vnd.ms-excel': ('xls', xlrd, 'xlrd'),
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ('xlsx', xlsx, 'xlrd >= 1.0.0'),
-    'application/vnd.oasis.opendocument.spreadsheet': ('ods', odf_ods_reader, 'odfpy')
-}
-EXTENSIONS = {
-    '.' + ext: handler
-    for mime, (ext, handler, req) in FILE_TYPE_DICT.items()
+
+class File(object):
+    extension = None
+
+    def __new__(cls, *args, **kwargs):
+        satisfied, req = cls.check_dependency()
+        if satisfied:
+            return super(File, cls).__new__(cls)
+        raise ImportError(_("Unable to load \"{extension}\" file: requires Python module \"{modname}\"").format(extension=cls.extension, modname=req))
+
+    def __init__(self, id, file):
+        self.id = id
+        self.file = file or b''
+        self.table_name = 'temp_csv_%s' % self.id
+
+    @classmethod
+    def check_dependency(cls):
+        raise NotImplementedError()
+
+    def drop_db(self, cr):
+        if tools.table_exists(cr, self.table_name):
+            cr.execute("DROP TABLE %s" % self.table_name)
+
+    def reflect_db(self, cr):
+        pass
+
+class CSVFile(File):
+    extension = 'csv'
+
+    @classmethod
+    def check_dependency(cls):
+        return True, 'csv'
+
+    @lazy_property
+    def csv_data(self):
+        if self.encoding != 'utf-8':
+            return self.file.decode(self.encoding).encode('utf-8')
+        return self.file
+
+    @lazy_property
+    def encoding(self):
+        return chardet.detect(self.file)['encoding'].lower()
+
+    def get_separator(self, csv_data, quotechar):
+        separator = ','
+        for candidate in (',', ';', '\t', ' ', '|', unicodedata.lookup('unit separator')):
+            # pass through the CSV and check if all rows are the same
+            # length & at least 2-wide assume it's the correct one
+            it = pycompat.csv_reader(io.BytesIO(csv_data), quotechar=quotechar, delimiter=candidate)
+            w = None
+            for row in it:
+                width = len(row)
+                if w is None:
+                    w = width
+                if width == 1 or width != w:
+                    break  # next candidate
+            else:  # nobreak
+                separator = candidate
+                break
+        return separator
+
+    def get_options(self):
+        # TODO RGA: get quotechar from file
+        quotechar = '"'
+        separator = self.get_separator(self.csv_data, quotechar)
+        return {
+           'encoding': self.encoding,
+           'separator': separator,
+           'quotechar': quotechar,
+        }
+    def create_temp_table(self, cr, table_name, columns):
+        cols = ['{} TEXT,'.format(column) for column in columns]
+        query = """
+        CREATE TABLE {table} (
+            "uid" SERIAL NOT NULL PRIMARY KEY,
+            {columns}
+        )""".format(table=table_name, columns=" ".join(cols)[:-1])  # [:-1] remove trailing comma
+        cr.execute(query)
+
+    def reflect_db(self, cr):
+        if not tools.table_exists(cr, self.table_name):
+            columns = ['"%s"' % col for col in self.read_header()]
+            self.create_temp_table(cr, self.table_name, columns)
+            file_stream = io.BytesIO(self.csv_data)
+            next(file_stream)   # skip header line
+            options = self.get_options()
+            cr.copy_from(
+                file_stream,
+                self.table_name,
+                sep=options['separator'],
+                columns=columns
+            )
+
+    def read_header(self):
+        options = self.get_options()
+        csv_iterator = pycompat.csv_reader(
+            io.BytesIO(self.file),
+            quotechar=options['quotechar'],
+            delimiter=options['separator'])
+        return next(csv_iterator)
+
+    def read(self, cr, header=False):
+        assert tools.table_exists(cr, self.table_name), 'File not reflected on temp table'
+        cr.execute('SELECT * FROM %s ORDER BY uid ASC' % self.table_name)
+        while True:
+            # consume result over a series of iterations
+            # with each iteration fetching 2000 records
+            records = cr.fetchmany(size=2000)
+            if not records:
+                break
+            for row in records:
+                yield row[0], [r.strip('\"') for r in row[1:]]
+
+    def write(self, cr, data):
+        alias_table = 'csv'
+
+        columns = self.read_header()
+        set_query = ",".join(['"%s" = "%s"."%s"' % (col, alias_table, col)  for col in columns])
+        alias_query = 'AS "%s"("uid",%s)' % (alias_table, ",".join(['"%s"' % col for col in columns]))
+        where = '"%s"."%s" = "%s"."%s"' % (alias_table, 'uid', self.table_name, 'uid')
+
+        rows = [(r['row-id'], *r['row-data']) for r in data]
+        placehoder = ",".join(["%s" for r in rows])
+        query = """
+            UPDATE {table} SET
+            {query}
+            FROM (VALUES
+                {placehoder}
+            ) {alias_query}
+            WHERE {where}
+        """.format(
+            table=self.table_name,
+            query=set_query,
+            placehoder=placehoder,
+            alias_query=alias_query,
+            where=where
+        )
+        cr.execute(query, (*rows,))
+
+class XLSDFile(File):
+    extension = 'xls'
+
+    @classmethod
+    def check_dependency(cls):
+        req = 'xlrd'
+        try:
+            import xlrd
+        except ImportError:
+            return False, req
+        return True, req
+
+    def read_header(self):
+        rows = self.read(None, header=True)
+        index, header = next(rows)
+        return header
+
+    def read(self, cr, header=False):
+        book = xlrd.open_workbook(file_contents=self.file or b'')
+        rows = self._read_xls_book(book)
+        if not header:
+            next(rows)
+        return rows
+
+    def _read_xls_book(self, book):
+        sheet = book.sheet_by_index(0)
+        # emulate Sheet.get_rows for pre-0.9.4
+        for index, row in enumerate(pycompat.imap(sheet.row, range(sheet.nrows))):
+            values = []
+            for cell in row:
+                if cell.ctype is xlrd.XL_CELL_NUMBER:
+                    is_float = cell.value % 1 != 0.0
+                    values.append(
+                        pycompat.text_type(cell.value)
+                        if is_float
+                        else pycompat.text_type(int(cell.value))
+                    )
+                elif cell.ctype is xlrd.XL_CELL_DATE:
+                    is_datetime = cell.value % 1 != 0.0
+                    # emulate xldate_as_datetime for pre-0.9.3
+                    dt = datetime.datetime(*xlrd.xldate.xldate_as_tuple(cell.value, book.datemode))
+                    values.append(
+                        dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+                        if is_datetime
+                        else dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
+                    )
+                elif cell.ctype is xlrd.XL_CELL_BOOLEAN:
+                    values.append(u'True' if cell.value else u'False')
+                elif cell.ctype is xlrd.XL_CELL_ERROR:
+                    raise ValueError(
+                        _("Error cell found while reading XLS/XLSX file: %s") %
+                        xlrd.error_text_from_code.get(
+                            cell.value, "unknown error code %s" % cell.value)
+                    )
+                else:
+                    values.append(cell.value)
+            if any(x for x in values if x.strip()):
+                yield index, values
+
+    def write(self, cr, data):
+        raise NotImplementedError("TODO: edit XLS/XLSX file")
+
+class XLSXFile(XLSDFile):
+    extension = 'xlsx'
+
+    @classmethod
+    def check_dependency(cls):
+        req = 'xlsx'
+        try:
+            from xlrd import xlsx
+        except ImportError:
+            return False, req
+        return True, req
+
+class OSDFile(File):
+    extension = 'ods'
+
+    @classmethod
+    def check_dependency(cls):
+        req = 'odfpy'
+        try:
+            from . import odf_ods_reader
+        except ImportError:
+            return False, req
+        return True, req
+
+    def read_header(self):
+        rows = self.read(None, header=True)
+        index, header = next(rows)
+        return header
+
+    def read(self, cr, header=False):
+        rows = self._read_ods()
+        if not header:
+            next(rows)
+        return rows
+
+    def _read_ods(self):
+        doc = odf_ods_reader.ODSReader(file=io.BytesIO(self.file or b''))
+        for index, row in enumerate(doc.getFirstSheet()):
+            if any(x for x in row if x.strip()):
+                yield index, row
+
+    def write(self, cr, data):
+        raise NotImplementedError("TODO: edit OSD file")
+
+
+Import_File_Registry = {
+    'text/csv': CSVFile,
+    'application/vnd.ms-excel': XLSDFile,
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': XLSXFile,
+    'application/vnd.oasis.opendocument.spreadsheet': OSDFile
 }
 
 class Base(models.AbstractModel):
@@ -216,145 +459,6 @@ class Import(models.TransientModel):
         # TODO: cache on model?
         return importable_fields
 
-    @api.multi
-    def _read_file(self, options):
-        """ Dispatch to specific method to read file content, according to its mimetype or file type
-            :param options : dict of reading options (quoting, separator, ...)
-        """
-        self.ensure_one()
-        # guess mimetype from file content
-        mimetype = guess_mimetype(self.file or b'')
-        (file_extension, handler, req) = FILE_TYPE_DICT.get(mimetype, (None, None, None))
-        if handler:
-            try:
-                return getattr(self, '_read_' + file_extension)(options)
-            except Exception:
-                _logger.warn("Failed to read file '%s' (transient id %d) using guessed mimetype %s", self.file_name or '<unknown>', self.id, mimetype)
-
-        # try reading with user-provided mimetype
-        (file_extension, handler, req) = FILE_TYPE_DICT.get(self.file_type, (None, None, None))
-        if handler:
-            try:
-                return getattr(self, '_read_' + file_extension)(options)
-            except Exception:
-                _logger.warn("Failed to read file '%s' (transient id %d) using user-provided mimetype %s", self.file_name or '<unknown>', self.id, self.file_type)
-
-        # fallback on file extensions as mime types can be unreliable (e.g.
-        # software setting incorrect mime types, or non-installed software
-        # leading to browser not sending mime types)
-        if self.file_name:
-            p, ext = os.path.splitext(self.file_name)
-            if ext in EXTENSIONS:
-                try:
-                    return getattr(self, '_read_' + ext[1:])(options)
-                except Exception:
-                    _logger.warn("Failed to read file '%s' (transient id %s) using file extension", self.file_name, self.id)
-
-        if req:
-            raise ImportError(_("Unable to load \"{extension}\" file: requires Python module \"{modname}\"").format(extension=file_extension, modname=req))
-        raise ValueError(_("Unsupported file format \"{}\", import only supports CSV, ODS, XLS and XLSX").format(self.file_type))
-
-    @api.multi
-    def _read_xls(self, options):
-        """ Read file content, using xlrd lib """
-        book = xlrd.open_workbook(file_contents=self.file or b'')
-        return self._read_xls_book(book)
-
-    def _read_xls_book(self, book):
-        sheet = book.sheet_by_index(0)
-        # emulate Sheet.get_rows for pre-0.9.4
-        for row in pycompat.imap(sheet.row, range(sheet.nrows)):
-            values = []
-            for cell in row:
-                if cell.ctype is xlrd.XL_CELL_NUMBER:
-                    is_float = cell.value % 1 != 0.0
-                    values.append(
-                        pycompat.text_type(cell.value)
-                        if is_float
-                        else pycompat.text_type(int(cell.value))
-                    )
-                elif cell.ctype is xlrd.XL_CELL_DATE:
-                    is_datetime = cell.value % 1 != 0.0
-                    # emulate xldate_as_datetime for pre-0.9.3
-                    dt = datetime.datetime(*xlrd.xldate.xldate_as_tuple(cell.value, book.datemode))
-                    values.append(
-                        dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-                        if is_datetime
-                        else dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
-                    )
-                elif cell.ctype is xlrd.XL_CELL_BOOLEAN:
-                    values.append(u'True' if cell.value else u'False')
-                elif cell.ctype is xlrd.XL_CELL_ERROR:
-                    raise ValueError(
-                        _("Error cell found while reading XLS/XLSX file: %s") %
-                        xlrd.error_text_from_code.get(
-                            cell.value, "unknown error code %s" % cell.value)
-                    )
-                else:
-                    values.append(cell.value)
-            if any(x for x in values if x.strip()):
-                yield values
-
-    # use the same method for xlsx and xls files
-    _read_xlsx = _read_xls
-
-    @api.multi
-    def _read_ods(self, options):
-        """ Read file content using ODSReader custom lib """
-        doc = odf_ods_reader.ODSReader(file=io.BytesIO(self.file or b''))
-
-        return (
-            row
-            for row in doc.getFirstSheet()
-            if any(x for x in row if x.strip())
-        )
-
-    @api.multi
-    def _read_csv(self, options):
-        """ Returns a CSV-parsed iterator of all non-empty lines in the file
-            :throws csv.Error: if an error is detected during CSV parsing
-        """
-        csv_data = self.file or b''
-        if not csv_data:
-            return iter([])
-
-        encoding = options.get('encoding')
-        if not encoding:
-            encoding = options['encoding'] = chardet.detect(csv_data)['encoding'].lower()
-
-        if encoding != 'utf-8':
-            csv_data = csv_data.decode(encoding).encode('utf-8')
-
-        separator = options.get('separator')
-        if not separator:
-            # default for unspecified separator so user gets a message about
-            # having to specify it
-            separator = ','
-            for candidate in (',', ';', '\t', ' ', '|', unicodedata.lookup('unit separator')):
-                # pass through the CSV and check if all rows are the same
-                # length & at least 2-wide assume it's the correct one
-                it = pycompat.csv_reader(io.BytesIO(csv_data), quotechar=options['quoting'], delimiter=candidate)
-                w = None
-                for row in it:
-                    width = len(row)
-                    if w is None:
-                        w = width
-                    if width == 1 or width != w:
-                        break # next candidate
-                else: # nobreak
-                    separator = options['separator'] = candidate
-                    break
-
-        csv_iterator = pycompat.csv_reader(
-            io.BytesIO(csv_data),
-            quotechar=options['quoting'],
-            delimiter=separator)
-
-        return (
-            row for row in csv_iterator
-            if any(x for x in row if x.strip())
-        )
-
     @api.model
     def _try_match_column(self, preview_values, options):
         """ Returns the potential field types, based on the preview values, using heuristics
@@ -509,7 +613,7 @@ class Import(models.TransientModel):
             traversal.append(field)
         return traversal
 
-    def _match_headers(self, rows, fields, options):
+    def _match_headers(self, fields, headers, options):
         """ Attempts to match the imported model's fields to the
             titles of the parsed CSV file, if the file is supposed to have
             headers.
@@ -525,12 +629,12 @@ class Import(models.TransientModel):
             :param dict options:
             :rtype: (list(str), dict(int: list(str)))
         """
-        if not options.get('headers'):
-            return [], {}
+        # if not options.get('headers'):
+        #     return [], {}
 
-        headers = next(rows, None)
-        if not headers:
-            return [], {}
+        # headers = next(rows, None)
+        # if not headers:
+        #     return [], {}
 
         matches = {}
         mapping_records = self.env['base_import.mapping'].search_read([('res_model', '=', self.res_model)], ['column_name', 'field_name'])
@@ -564,13 +668,19 @@ class Import(models.TransientModel):
         self.ensure_one()
         fields = self.get_fields(self.res_model)
         try:
-            rows = self._read_file(options)
-            headers, matches = self._match_headers(rows, fields, options)
+            FileType = self.get_file_type()
+            file = FileType(self.id, self.file)
+            rows = file.read(self.env.cr)
+            headers = file.read_header()
+            headers, matches = self._match_headers(fields, headers, options)
             # Match should have consumed the first row (iif headers), get
             # the ``count`` next rows for preview
-            preview = list(itertools.islice(rows, count))
+            preview = [{
+                'row-id': uid,
+                'row-data': row
+            } for uid, row in itertools.islice(rows, count)]
             assert preview, "file seems to have no content"
-            header_types = self._find_type_from_preview(options, preview)
+            header_types = self._find_type_from_preview(options, list(map(lambda line: line['row-data'], preview)))
             if options.get('keep_matches') and len(options.get('fields', [])):
                 matches = {}
                 for index, match in enumerate(options.get('fields')):
@@ -613,6 +723,47 @@ class Import(models.TransientModel):
                 'preview': preview,
             }
 
+    @api.multi
+    def set_file(self, file):
+        self.ensure_one()
+        self.write({
+            'file': file.read(),
+            'file_name': file.filename,
+            'file_type': file.content_type,
+        })
+        FileType = self.get_file_type()
+        file = FileType(self.id, self.file)
+        file.reflect_db(self.env.cr)
+
+    def unlink(self):
+        for record in self:
+            FileType = record.get_file_type()
+            file = FileType(record.id, record.file)
+            file.drop_db(self.env.cr)
+
+    @api.multi
+    def get_file_type(self):
+        self.ensure_one()
+        mimetype = guess_mimetype(self.file or b'')
+        file = None
+        for mimetype in [mimetype, self.file_type]:
+            file = Import_File_Registry.get(mimetype)
+            if file:
+                break
+        if not file:
+            _logger.warn("Failed to load file '%s' (transient id %d) using mimetype", self.file_name or '<unknown>', self.id)
+
+        if self.file_name and not file:
+            p, ext = os.path.splitext(self.file_name)
+            for file_ext, klass in [(klass.extension, klass) for klass in Import_File_Registry.values()]:
+                if file_ext == ext[1:]:
+                    file = klass
+                    break
+        if not file:
+            _logger.warn("Failed to load file '%s' (transient id %s) using file extension", self.file_name, self.id)
+            raise ValueError(_("Unsupported file format \"{}\", import only supports CSV, ODS, XLS and XLSX").format(self.file_type))
+        return file
+
     @api.model
     def _convert_import_data(self, fields, options):
         """ Extracts the input BaseModel and fields list (with
@@ -637,12 +788,11 @@ class Import(models.TransientModel):
             mapper = operator.itemgetter(*indices)
         # Get only list of actually imported fields
         import_fields = [f for f in fields if f]
-
-        rows_to_import = self._read_file(options)
-        if options.get('headers'):
-            rows_to_import = itertools.islice(rows_to_import, 1, None)
+        FileType = self.get_file_type()
+        file = FileType(self.id, self.file)
+        rows_to_import = file.read(self.env.cr)
         data = [
-            list(row) for row in pycompat.imap(mapper, rows_to_import)
+            list(row) for row in pycompat.imap(mapper, [rows for uid, rows in rows_to_import])
             # don't try inserting completely empty rows (e.g. from
             # filtering out o2m fields)
             if any(row)
@@ -828,6 +978,12 @@ class Import(models.TransientModel):
                 'line_number': line_number + 1,
                 'error': e
             })
+
+    @api.multi
+    def save_rows(self, rows):
+        FileType = self.get_file_type()
+        file = FileType(self.id, self.file)
+        rows = file.write(self.env.cr, rows)
 
     @api.multi
     def do(self, fields, columns, options, dryrun=False):
