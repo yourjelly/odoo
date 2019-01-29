@@ -85,6 +85,9 @@ class SurveyQuestion(models.Model):
     user_input_line_ids = fields.One2many(
         'survey.user_input_line', 'question_id', string='Answers',
         domain=[('skipped', '=', False)], groups='survey.group_survey_user')
+    hidden = fields.Boolean(default=False)
+    depend_question = fields.Many2one('survey.question', string='Question')
+    depend_answer = fields.Many2one("survey.label", string="Answer")
 
     _sql_constraints = [
         ('positive_len_min', 'CHECK (validation_length_min >= 0)', 'A length must be positive!'),
@@ -93,6 +96,39 @@ class SurveyQuestion(models.Model):
         ('validation_float', 'CHECK (validation_min_float_value <= validation_max_float_value)', 'Max value cannot be smaller than min value!'),
         ('validation_date', 'CHECK (validation_min_date <= validation_max_date)', 'Max date cannot be smaller than min date!')
     ]
+
+    def find_depend_question(self, q_id):
+        ''' (hide) This method is used to add data-depend attribute in template    '''
+        questions = self.search([('depend_question', '=', q_id)])
+        que = []
+        for q in questions:
+            que.append(q.id)
+        return que
+
+    @api.onchange('constr_mandatory')
+    def change_hidden_status(self):
+        # if question is requied then it will not hidden
+        if self.constr_mandatory:
+            self.hidden = False
+        elif self.hidden and self.constr_mandatory:
+            self.hidden = False
+
+    @api.model
+    def get_hidden_question(self, s_id, p_id, q_id, ans_id):
+        ''' (show) This method is called by RPC for showing question '''
+        if type(ans_id) is str:
+            hidden_question = self.env['survey.question'].search([('depend_question', '=', q_id), ('page_id', '=', p_id)])
+            ans_id = self.env['survey.label'].search([('question_id', '=', hidden_question.depend_question.id), ('value', '=', ans_id)]).id
+        returnString = []
+        question = self.search([('id', '=', q_id), ('page_id', '=', p_id)])
+        child_question = self.search([('depend_question', '=', question.id)])
+        for cq in child_question:
+            ans = self.env["survey.label"].search([('id', '=', cq.depend_answer.id)])
+            if ans.id == ans_id:
+                returnString.append([cq.id, True, q_id])
+            else:
+                returnString.append([cq.id, False, q_id])
+        return returnString
 
     @api.onchange('validation_email')
     def onchange_validation_email(self):

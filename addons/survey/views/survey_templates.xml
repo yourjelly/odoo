@@ -192,7 +192,7 @@
             <input type="hidden" name="token" t-att-value="token" />
             <t t-foreach='page.question_ids' t-as='question'>
                 <t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
-                <div class="js_question-wrapper" t-att-id="prefix">
+                <div t-att-class="'js_question-wrapper' + (' d-none' if question.hidden else '')" t-att-id="prefix" t-att-data-depend="question.find_depend_question(question.id)">
                     <h2>
                         <span t-field='question.question' />
                         <span t-if="question.constr_mandatory" class="text-danger">*</span>

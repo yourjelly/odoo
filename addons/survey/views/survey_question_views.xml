@@ -134,6 +134,16 @@
                                 <field name='comment_count_as_answer' attrs="{'invisible': ['|', ('comments_allowed', '=', False), ('question_type', 'in', ['matrix'])]}" />
                             </group>
                         </page>
+                        <page string="Hide/Show">
+                            <group string="Hide Question">
+                                <field name="hidden"/>
+                            </group>
+                            <group string="Show Condition" attrs="{'invisible': [('hidden', '=', False)]}">
+                                <field name="page_id" required="False" invisible="1" />
+                                <field name="depend_question" domain="[('page_id', '=', context.get('page_id') ), ('id' ,'!=', active_id)]" options="{'no_create_edit': True}" />
+                                <field name="depend_answer" context="{'default_question_id': depend_question}" domain="[('question_id', '=', depend_question)]"/>
+                            </group>
+                        </page>
                     </notebook>
                 </sheet>
             </form>
