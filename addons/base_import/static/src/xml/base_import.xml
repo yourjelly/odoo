@@ -69,9 +69,8 @@
                 field corresponding to the column. This makes imports
                 simpler especially when the file has many columns.</p>
 
-                <div class="oe_import_error_report"></div>
-                <div class="table-responsive">
-                    <table class="table-striped table-bordered oe_import_grid bg-white" />
+                <div class="table-responsive preview-table">
+                    <!-- preview table placeholder -->
                 </div>
             </div>
             <div class="o_view_nocontent">
@@ -95,6 +94,7 @@
     </t>
 
     <t t-name="ImportView.buttons">
+        <button type="button" class="btn btn-primary o_import_save d-none">Save</button>
         <button type="button" class="btn btn-primary o_import_import d-none">Import</button>
         <button type="button" class="btn btn-secondary o_import_validate d-none">Test Import</button>
         <button type="button" class="btn btn-secondary o_import_file_reload d-none">Reload File</button>
@@ -110,27 +110,49 @@
             </label>
         </div>
     </t>
+    <t t-name="PreviewTable">
+        <div class="oe_import_error_report">
+            <t t-if="widget.error_msg">
+                <t t-raw="widget.error_msg"/>
+            </t>
+        </div>
+        <table class="table-striped table-bordered oe_import_grid bg-white">
+            <thead>
+                <tr t-if="widget.table.headers" class="oe_import_grid-header">
+                    <td>
+                        #Id
+                    </td>
+                    <td t-foreach="widget.table.headers" t-as="header" class="oe_import_grid-cell"
+                        ><span class="o_import_header_name"><t t-esc="header"/></span></td>
+                </tr>
+                <tr class="oe_import_fields">
+                    <!-- Iterate on first row to ensure we have all columns -->
+                    <td>
+                    </td>
+                    <td t-foreach="widget.table.preview[0]['row-data']" t-as="column">
+                        <input class="oe_import_match_field"/>
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                <t t-foreach="widget.table.preview" t-as="row" >
+                    <tr t-att-data-row-id="row['row-id']" class="oe_import_grid-row">
+                        <td>
+                            <t t-esc="row['row-id']"/>
+                        </td>
+                        <td t-foreach="row['row-data']" t-as="cell" class="oe_import_grid-cell">
+                            <t t-if="widget.mode == 'edit'">
+                                <input class="oe_import_grid-input" t-att-value="cell"></input>
+                            </t>
+                            <t t-else=""><t t-esc="cell"/></t>
 
-    <t t-name="ImportView.preview">
-        <thead>
-            <tr t-if="headers" class="oe_import_grid-header">
-                <td t-foreach="headers" t-as="header" class="oe_import_grid-cell"
-                    ><span class="o_import_header_name"><t t-esc="header"/></span></td>
-            </tr>
-            <tr class="oe_import_fields">
-                <!-- Iterate on first row to ensure we have all columns -->
-                <td t-foreach="preview[0]" t-as="column">
-                    <input class="oe_import_match_field"/>
-                </td>
-            </tr>
-        </thead>
-        <tbody>
-            <tr t-foreach="preview" t-as="row" class="oe_import_grid-row">
-                <td t-foreach="row" t-as="cell" class="oe_import_grid-cell"
-                    ><t t-esc="cell"/></td>
-            </tr>
-        </tbody>
+                        </td>
+                    </tr>
+                </t>
+            </tbody>
+        </table>
     </t>
+
     <t t-name="ImportView.preview.error">
         <div class="oe_import_report bg-danger">
             <p>Import preview failed due to: <t t-esc="error"/>.</p>
