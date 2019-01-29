@@ -639,14 +639,14 @@
         <div class="o_mail_snippet_general">
             <table align="center" cellpadding="0" cellspacing="0" class="o_mail_table_styles">
                 <tr>
-                    <td style="width:25%;min-height: 150px;vertical-align:middle;" class="bg-beta text-center o_mail_col_mv">
+                    <td style="width:22%;min-height: 150px;vertical-align:middle;" class="bg-beta text-center o_mail_col_mv">
                         <div class="o_mail_h_padding o_mail_v_padding">
                             <h3 class="o_mail_no_margin">21 Jul</h3>
                             <p class="o_mail_no_margin">ALL DAY</p>
                         </div>
                     </td>
-                    <td style="width:25%;min-height: 150px;" class="text-center bg-delta o_mail_col_mv">
-                        <img src="/mass_mailing/static/src/img/theme_basic/s_default_image_block_event.jpg" class="d-block mx-auto" alt="Your Picture" />
+                    <td style="width:26%;min-height: 150px; padding:0px" class="text-center bg-delta o_mail_col_mv">
+                        <img src="/mass_mailing/static/src/img/theme_basic/s_default_image_block_event.jpg" class="d-block" alt="Your Picture" />
                     </td>
                     <td class="o_mail_h_padding o_mail_v_padding o_mail_col_mv" style="min-height: 150px;">
                         <div style="min-height: 111px">
@@ -657,8 +657,16 @@
                             </p>
                         </div>
                         <div class="small mt16">
-                            <a role="button" href="#" class="btn btn-primary">Registration</a>
-                            <a role="button" href="#" class="btn btn-link" style="margin-left:10px">More Info</a>
+                            <table>
+                                <tr>
+                                    <td>
+                                        <a role="button" href="#" class="btn btn-primary ">Registration</a>
+                                    </td>
+                                    <td>
+                                        <a role="button" href="#" class="btn" style="border:none;">More Info</a>
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
                     </td>
                 </tr>
