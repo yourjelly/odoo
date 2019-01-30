@@ -115,3 +115,7 @@ class website_form_model_fields(models.Model):
         'Blacklisted in web forms', default=True, index=True, # required=True,
         help='Blacklist this field for web forms'
     )
+
+    def unlink(self):
+        self._cr.execute("DELETE FROM ir_model_fields WHERE name='website_form_blacklisted'")
+        super(website_form_model_fields, self).unlink()
