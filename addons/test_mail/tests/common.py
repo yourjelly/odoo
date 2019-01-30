@@ -312,9 +312,10 @@ class Moderation(MockEmails, BaseFunctionalTest):
             'body': body,
             'moderation_status': status,
             'author_id': author.id,
-            'email_from': self.formataddr_superuser(author),
             'subtype_id': self.env['mail.message.subtype'].search([('name', '=', 'Discussions')]).id
             })
+        if author.email:
+            message['email_from'] = formataddr((author.name, author.email))
         return message
 
     def _clear_bus(self):
