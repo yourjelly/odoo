@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from email.utils import formataddr
 from functools import partial
 
-from odoo import api
+from odoo import api, SUPERUSER_ID
 from odoo.addons.bus.models.bus import json_dump
 from odoo.tests import common, tagged, new_test_user
 
@@ -132,6 +132,16 @@ class BaseFunctionalTest(common.SavepointCase):
             self.env = self.env(user=self.uid)
             self.test_record = self.test_record_old
 
+    def formataddr_superuser(self, partner_from):
+        if partner_from._name == 'res.users':
+            partner_from = partner_from.partner_id
+        if partner_from == self.env['res.users'].browse(SUPERUSER_ID).partner_id:
+            company = self.env.user.company_id
+            format_name = '%s (%s)'
+            return formataddr((format_name % (partner_from.name, company.name), company.email)) if company.email else company.catchall
+        else:
+            return formataddr((partner_from.name, partner_from.email))
+
 
 class TestRecipients(common.SavepointCase):
 
@@ -182,7 +192,7 @@ class MockEmails(common.SingleTransactionCase):
         expected_email_values = []
         for partners in recipients:
             if partner_from:
-                email_from = formataddr((partner_from.name, partner_from.email))
+                email_from = self.formataddr_superuser(partner_from)
             else:
                 email_from = values['email_from']
             expected = {
