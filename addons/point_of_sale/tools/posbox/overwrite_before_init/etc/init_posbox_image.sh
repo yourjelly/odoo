@@ -168,6 +168,13 @@ mkdir /home/pi/odoo/addons/hw_drivers/drivers/
 chmod 777 /home/pi/odoo/addons/hw_drivers/drivers/
 echo "addons/hw_drivers/drivers/" > /home/pi/odoo/.git/info/exclude
 
+# MultiProtocolDriver for SIX payment terminals
+chmod --recursive 775 /opt/mpd
+chmod 755 /opt/mpd/mpd.go
+chmod --recursive 777 /etc/opt/mpd/*
+chmod 755 /etc/init.d/mpd
+systemctl enable mpd
+
 # create dirs for ramdisks
 create_ramdisk_dir () {
     mkdir "${1}_ram"
