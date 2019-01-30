@@ -1021,7 +1021,8 @@ class Field(MetaField('DummyField', (object,), {})):
         cr2.execute(\
         """INSERT INTO MIG_LOGS
         ( START_TIME, CATEGORY, MESSAGE) 
-        VALUES ( %s, %s, %s)""" , [start_timestamp, "COMPUTE", str(fields)] )
+        VALUES ( %s, %s, %s) RETURNING id""" , [start_timestamp, "COMPUTE", str(fields)] )
+        new_id = cr2.fetchall()[0]
         # close the cursor
         cr2.commit()
         cr2.close()
@@ -1052,9 +1053,8 @@ class Field(MetaField('DummyField', (object,), {})):
         cr2 = odoo.sql_db.db_connect(db_names[0]).cursor()
         # write the logs
         cr2.execute(\
-        """INSERT INTO MIG_LOGS
-        ( START_TIME, STOP_TIME, DURATION_MS, CATEGORY, MESSAGE) 
-        VALUES ( %s, %s, %s, %s, %s)""" , [start_timestamp, stop_timestamp, duration, "COMPUTE_DURATION", str(fields)] )
+        """UPDATE MIG_LOGS set DURATION_MS=%s where id in %s
+        """ , [ duration, new_id] )
         # close the cursor
         cr2.commit()
         cr2.close()
