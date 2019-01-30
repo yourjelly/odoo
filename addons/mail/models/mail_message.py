@@ -936,6 +936,17 @@ class Message(models.Model):
                     'message_needaction_counter',
                 ], ids=[record.res_id])
 
+    def _email_from_superuser(self, values):
+        super_user = self.env['res.users'].browse(SUPERUSER_ID)
+        partner_id = values.get('author_id')
+        if partner_id == super_user.partner_id.id:
+            company = self.env['res.company'].browse(self._context.get('force_company') or self._context.get('company_id')) or self.env.user.company_id
+            if values.get('model') and values.get('res_id'):
+                model = self.env[values['model']].browse(values['res_id'])
+                company = (model.company_id or company) if hasattr(self, 'company_id') else company
+            name_email = '%s (%s)'
+            return formataddr((name_email % (super_user.partner_id.name, company.name), company.email)) if company.email else company.catchall
+
     @api.model
     def create(self, values):
         # coming from mail.js that does not have pid in its values
@@ -943,7 +954,7 @@ class Message(models.Model):
             self = self.with_context({'default_starred_partner_ids': [(4, self.env.user.partner_id.id)]})
 
         if 'email_from' not in values:  # needed to compute reply_to
-            values['email_from'] = self._get_default_from()
+            values['email_from'] = self._email_from_superuser(values) or self._get_default_from()
         if not values.get('message_id'):
             values['message_id'] = self._get_message_id(values)
         if 'reply_to' not in values:
