@@ -302,7 +302,7 @@ class Moderation(MockEmails, BaseFunctionalTest):
             'body': body,
             'moderation_status': status,
             'author_id': author.id,
-            'email_from': formataddr((author.name, author.email)),
+            'email_from': self.formataddr_superuser(author),
             'subtype_id': self.env['mail.message.subtype'].search([('name', '=', 'Discussions')]).id
             })
         return message
