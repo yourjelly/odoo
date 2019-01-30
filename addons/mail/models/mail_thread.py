@@ -25,7 +25,7 @@ from lxml import etree
 from werkzeug import url_encode
 from werkzeug import urls
 
-from odoo import _, api, exceptions, fields, models, tools
+from odoo import _, api, exceptions, fields, models, tools, SUPERUSER_ID
 from odoo.tools import pycompat, ustr
 from odoo.tools.misc import clean_context
 from odoo.tools.safe_eval import safe_eval
@@ -1970,6 +1970,8 @@ class MailThread(models.AbstractModel):
         if author_id is None:  # keep False values
             author_id = self.env['mail.message']._get_default_author().id
 
+        email_from_force = self._email_from_superuser(kwargs, author_id)
+
         # 2: Private message: add recipients (recipients and author of parent message) - current author
         #   + legacy-code management (! we manage only 4 and 6 commands)
         partner_ids = set()
@@ -2039,6 +2041,8 @@ class MailThread(models.AbstractModel):
         })
         if notif_layout:
             values['layout'] = notif_layout
+        if email_from_force and 'email_from' not in values:
+            values['email_from'] = email_from_force
 
         # 3. Attachments
         #   - HACK TDE FIXME: Chatter: attachments linked to the document (not done JS-side), load the message
@@ -2153,9 +2157,13 @@ class MailThread(models.AbstractModel):
             author = self.env['res.partner'].sudo().browse(kw_author)
         else:
             author = self.env.user.partner_id
-        if not author.email:
+
+        email_from_force = self._email_from_superuser(kwargs, author.id)
+
+        if not author.email and not email_from_force:
             raise exceptions.UserError(_("Unable to notify message, please configure the sender's email address."))
-        email_from = formataddr((author.name, author.email))
+
+        email_from = formataddr((author.name, author.email)) if author.email else email_from_force
 
         msg_values = {
             'subject': subject,
@@ -2188,9 +2196,13 @@ class MailThread(models.AbstractModel):
             author = self.env['res.partner'].sudo().browse(kw_author)
         else:
             author = self.env.user.partner_id
-        if not author.email:
+
+        email_from_force = self._email_from_superuser(kwargs, author.id)
+        if not author.email and not email_from_force:
             raise exceptions.UserError(_("Unable to log message, please configure the sender's email address."))
-        email_from = formataddr((author.name, author.email))
+
+        # Because it is an mt.note, no email is sent to the company's email
+        email_from = formataddr((author.name, author.email)) if author.email else email_from_force
 
         message_values = {
             'subject': subject,
