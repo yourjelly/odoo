@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from email.utils import formataddr
 from functools import partial
 
-from odoo import api
+from odoo import api, SUPERUSER_ID
 from odoo.addons.bus.models.bus import json_dump
 from odoo.tests import common, tagged, new_test_user
 
@@ -183,6 +183,8 @@ class MockEmails(common.SingleTransactionCase):
         for partners in recipients:
             if partner_from:
                 email_from = formataddr((partner_from.name, partner_from.email))
+                if partner_from == self.env['res.users'].browse(SUPERUSER_ID).partner_id:
+                    email_from = '"OdooBot (YourCompany)" <info@yourcompany.example.com>'
             else:
                 email_from = values['email_from']
             expected = {
