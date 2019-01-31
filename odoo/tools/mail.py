@@ -541,8 +541,8 @@ def decode_message_header(message, header, separator=' '):
     return separator.join(decode_smtp_header(h) for h in message.get_all(header, []) if h)
 
 
-def name_email_superuser(partner_id, res_model=None, res_id=None):
-    env = partner_id.env
+def name_email_superuser(partner_id, env=None, res_model=None, res_id=None):
+    env = env or partner_id.env
     super_user = env['res.users'].browse(SUPERUSER_ID)
     if partner_id == super_user.partner_id:
         company = env['res.company'].browse(env.context.get('force_company') or env.context.get('company_id')) or env.user.company_id
@@ -558,5 +558,5 @@ def name_email_superuser(partner_id, res_model=None, res_id=None):
     return partner_id.name, partner_id.email
 
 
-def format_address_superuser(partner_id, res_model=None, res_id=None):
-    return formataddr(name_email_superuser(partner_id, res_model, res_id))
+def format_address_superuser(partner_id, env=None, res_model=None, res_id=None):
+    return formataddr(name_email_superuser(partner_id, env, res_model, res_id))
