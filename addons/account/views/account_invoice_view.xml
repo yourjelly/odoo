@@ -599,6 +599,7 @@
                                     <field name="origin" groups="base.group_user" attrs="{'invisible': [('origin', '=', False)]}"/>
                                     <field name="partner_bank_id" domain="[('partner_id.ref_company_ids', 'in', [company_id])]" context="{'default_partner_id':company_id}"/>
                                 </group>
+                                <group name="utm_link" groups="base.group_no_one"/>
                             </group>
                             <field name="tax_line_ids">
                                 <tree editable="bottom" string="Taxes" create="0">

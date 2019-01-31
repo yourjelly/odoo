@@ -5,7 +5,8 @@ from odoo import api, fields, models, _
 
 
 class AccountInvoice(models.Model):
-    _inherit = 'account.invoice'
+    _name = 'account.invoice'
+    _inherit = ['account.invoice', 'utm.mixin']
 
     @api.model
     def _get_default_team(self):
