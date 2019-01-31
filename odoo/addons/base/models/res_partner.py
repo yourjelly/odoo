@@ -19,7 +19,7 @@ from odoo import api, fields, models, tools, SUPERUSER_ID, _
 from odoo.modules import get_module_resource
 from odoo.osv.expression import get_unaccent_wrapper
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import pycompat
+from odoo.tools import pycompat, format_address_superuser, name_email_superuser
 
 # Global variables used for the warning fields declared on the res.partner
 # in the following modules : sale, purchase, account, stock
@@ -406,9 +406,13 @@ class Partner(models.Model):
     def _compute_email_formatted(self):
         for partner in self:
             if partner.email:
-                partner.email_formatted = formataddr((partner.name or u"False", partner.email or u"False"))
+                partner.email_formatted = format_address_superuser(partner)
             else:
                 partner.email_formatted = ''
+
+    def _compute_email_not_formatted(self):
+        self.ensure_one()
+        return name_email_superuser(self)[1]
 
     @api.depends('is_company')
     def _compute_company_type(self):

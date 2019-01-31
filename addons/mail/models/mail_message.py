@@ -11,7 +11,7 @@ from openerp.http import request
 from odoo import _, api, fields, models, modules, SUPERUSER_ID, tools
 from odoo.exceptions import UserError, AccessError
 from odoo.osv import expression
-from odoo.tools import groupby
+from odoo.tools import groupby, format_address_superuser
 
 _logger = logging.getLogger(__name__)
 _image_dataurl = re.compile(r'(data:image/[a-z]+?);base64,([a-z0-9+/\n]{3,}=*)\n*([\'"])(?: data-filename="([^"]*)")?', re.I)
@@ -28,16 +28,9 @@ class Message(models.Model):
     _message_read_limit = 30
 
     @api.model
-    def _get_default_from(self, values=None):
-        if values is None or values is False:
-            values = {}
+    def _get_default_from(self, res_model=None, res_id=None):
         if self.env.user.id == SUPERUSER_ID:
-            company = self.env['res.company'].browse(self._context.get('force_company') or self._context.get('company_id')) or self.env.user.company_id
-            if values.get('model') and values.get('res_id'):
-                model = self.env[values['model']].browse(values['res_id'])
-                company = (model.company_id or company) if hasattr(model, 'company_id') else company
-            format_name = '%s (%s)'
-            return formataddr((format_name % (self.env.user.partner_id.name, company.name), company.email)) if company.email else company.catchall
+            return format_address_superuser(self.env.user.partner_id, res_model=res_model, res_id=res_id)
 
         if self.env.user.email:
             return formataddr((self.env.user.name, self.env.user.email))
@@ -954,7 +947,7 @@ class Message(models.Model):
             self = self.with_context({'default_starred_partner_ids': [(4, self.env.user.partner_id.id)]})
 
         if 'email_from' not in values:  # needed to compute reply_to
-            values['email_from'] = self._get_default_from(values)
+            values['email_from'] = self._get_default_from(res_model=values.get('model'), res_id=values.get('res_id'))
         if not values.get('message_id'):
             values['message_id'] = self._get_message_id(values)
         if 'reply_to' not in values:
