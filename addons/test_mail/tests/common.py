@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from email.utils import formataddr
 from functools import partial
 
-from odoo import api, SUPERUSER_ID
+from odoo import api
 from odoo.tools import format_address_superuser
 from odoo.addons.bus.models.bus import json_dump
 from odoo.tests import common, tagged, new_test_user
@@ -133,7 +133,8 @@ class BaseFunctionalTest(common.SavepointCase):
             self.env = self.env(user=self.uid)
             self.test_record = self.test_record_old
 
-    def formataddr_superuser(self, partner_from):
+    @classmethod
+    def formataddr_superuser(cls, partner_from):
         if partner_from._name == 'res.users':
             partner_from = partner_from.partner_id
         return format_address_superuser(partner_from)
@@ -308,10 +309,9 @@ class Moderation(MockEmails, BaseFunctionalTest):
             'body': body,
             'moderation_status': status,
             'author_id': author.id,
+            'email_from': self.formataddr_superuser(author),
             'subtype_id': self.env['mail.message.subtype'].search([('name', '=', 'Discussions')]).id
             })
-        if author.email:
-            message['email_from'] = formataddr((author.name, author.email))
         return message
 
     def _clear_bus(self):

@@ -9,10 +9,15 @@ class TestSendMailSudo(common.BaseFunctionalTest):
 
     @classmethod
     def setUpClass(cls):
+        """
+        Since we want to test from whom an email is sent,
+        we won't assert with the helper self.formataddr_superuser
+        Otherwise, the snake bites its tail!
+        Hence, we'll hardcode the expected email address
+        """
         super(TestSendMailSudo, cls).setUpClass()
         cls.mail_thread_model = cls.env['res.partner']
-        # Avoid demo data overrides
-        # target superuser
+
         cls.super_user = cls.env['res.users'].browse(SUPERUSER_ID)
         cls.super_user.company_id.email = 'timmy.thomas@livetogether.com'
 
