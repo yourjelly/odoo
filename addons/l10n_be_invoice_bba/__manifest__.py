@@ -24,7 +24,7 @@ Three algorithms are suggested:
     3) Customer Reference +++RRR/RRRR/SSSDDD+++
         **R..R =** Customer Reference without non-numeric characters, **SSS =** Sequence Number, **DD =** Check Digits
     """,
-    'depends': ['account', 'l10n_be'],
+    'depends': ['account', 'l10n_be_account'],
     'data' : [
         'data/mail_template_data.xml',
         'views/res_config_settings_views.xml',

@@ -4,7 +4,7 @@
 {
     'name': 'Belgium - Payroll',
     'category': 'Payroll Localization',
-    'depends': ['hr_payroll', 'l10n_be'],
+    'depends': ['hr_payroll', 'l10n_be_account'],
     'description': """
 Belgian Payroll Rules.
 ======================
