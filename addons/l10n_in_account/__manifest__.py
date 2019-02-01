@@ -18,6 +18,7 @@ Sheet, now only Vertical format has been permitted Which is Supported By Odoo.
   """,
     'category': 'Localization',
     'depends': [
+        'l10n_in',
         'account_tax_python',
     ],
     'data': [
@@ -28,7 +29,6 @@ Sheet, now only Vertical format has been permitted Which is Supported By Odoo.
         'data/account_tax_template_data.xml',
         'data/account_fiscal_position_data.xml',
         'data/l10n_in.port.code.csv',
-        'data/res_country_state_data.xml',
         'data/uom_data.xml',
         'views/account_invoice_views.xml',
         'views/account_journal_views.xml',
@@ -37,7 +37,6 @@ Sheet, now only Vertical format has been permitted Which is Supported By Odoo.
         'views/port_code_views.xml',
         'views/report_invoice.xml',
         'views/res_company_view.xml',
-        'views/res_country_state_view.xml',
         'views/res_partner_views.xml',
         'views/account_tax_views.xml',
         'views/uom_uom_views.xml',

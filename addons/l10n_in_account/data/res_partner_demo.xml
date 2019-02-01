@@ -3,7 +3,7 @@
 	<!-- Update main company -->
     <record id="base.main_company" model="res.company">
         <field name="country_id" ref="base.in"/>
-        <field name="state_id" ref="base.state_in_gj"/>
+        <field name="state_id" ref="l10n_in.state_in_gj"/>
         <field name="vat">24BBBFF5679L8ZR</field>
     </record>
 
@@ -30,7 +30,7 @@
         <field name="street2">InfoCity Gate - 1, Infocity</field>
         <field name="city">Gandhinagar</field>
         <field name="zip">382007</field>
-        <field name="state_id" ref="base.state_in_gj"/>
+        <field name="state_id" ref="l10n_in.state_in_gj"/>
         <field name="country_id" ref="base.in"/>
         <field name="vat">12GEOPS0823BBZH</field>
     </record>
@@ -43,7 +43,7 @@
         <field name="street">B105, yogeshwar Tower</field>
         <field name="city">Veraval</field>
         <field name="zip">362266</field>
-        <field name="state_id" ref="base.state_in_gj"/>
+        <field name="state_id" ref="l10n_in.state_in_gj"/>
         <field name="country_id" ref="base.in"/>
     </record>
 
@@ -55,7 +55,7 @@
         <field name="street">Gulloy, Carmona Road</field>
         <field name="city">Orlim</field>
         <field name="zip">403724</field>
-        <field name="state_id" ref="base.state_in_ga"/>
+        <field name="state_id" ref="l10n_in.state_in_ga"/>
         <field name="country_id" ref="base.in"/>
     </record>
 
@@ -70,7 +70,7 @@
         <field name="street2">InfoCity Gate - 1, Infocity</field>
         <field name="city">Gandhinagar</field>
         <field name="zip">382007</field>
-        <field name="state_id" ref="base.state_in_gj"/>
+        <field name="state_id" ref="l10n_in.state_in_gj"/>
         <field name="country_id" ref="base.in"/>
         <field name="vat">12GEOPS0823BBZH</field>
     </record>
@@ -84,7 +84,7 @@
         <field name="street">B105, yogeshwar Tower</field>
         <field name="city">Veraval</field>
         <field name="zip">362266</field>
-        <field name="state_id" ref="base.state_in_gj"/>
+        <field name="state_id" ref="l10n_in.state_in_gj"/>
         <field name="country_id" ref="base.in"/>
     </record>
 
@@ -98,7 +98,7 @@
         <field name="street">4/001 Ground Floor, 16th Main Rd,</field>
         <field name="city">Bengaluru</field>
         <field name="zip">560001</field>
-        <field name="state_id" ref="base.state_in_ka"/>
+        <field name="state_id" ref="l10n_in.state_in_ka"/>
         <field name="country_id" ref="base.in"/>
         <field name="vat">12AJIPA1572E1C7</field>
     </record>
