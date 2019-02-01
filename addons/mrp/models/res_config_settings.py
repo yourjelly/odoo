@@ -16,6 +16,8 @@ class ResConfigSettings(models.TransientModel):
     module_quality_control = fields.Boolean("Quality")
     group_mrp_routings = fields.Boolean("MRP Work Orders",
         implied_group='mrp.group_mrp_routings')
+    group_mrp_subcontracting = fields.Boolean('Manage Subcontracting',
+        implied_group='mrp.group_mrp_subcontracting')
 
     @api.onchange('use_manufacturing_lead')
     def _onchange_use_manufacturing_lead(self):
