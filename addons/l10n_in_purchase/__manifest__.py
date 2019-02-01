@@ -7,7 +7,7 @@
     'description': """GST Purchase Report""",
     'category': 'Accounting',
     'depends': [
-        'l10n_in',
+        'l10n_in_account',
         'purchase',
     ],
     'data': [

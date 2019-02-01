@@ -7,7 +7,7 @@
     'description': """GST Point of Sale""",
     'category': 'Localization',
     'depends': [
-        'l10n_in',
+        'l10n_in_account',
         'point_of_sale'
     ],
     'data': [

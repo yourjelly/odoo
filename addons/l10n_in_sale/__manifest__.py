@@ -7,7 +7,7 @@
     'description': """GST Sale Report""",
     'category': 'Accounting',
     'depends': [
-        'l10n_in',
+        'l10n_in_account',
         'sale',
     ],
     'data': [
