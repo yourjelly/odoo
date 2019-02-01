@@ -3282,8 +3282,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 protected_fields.extend(self._field_computed.get(field, [field]))
 
         if unknown_names:
-            _logger.warning("%s.write() with unknown fields: %s",
-                            self._name, ', '.join(sorted(unknown_names)))
+            raise ValueError("%s.write() with unknown fields: %s",
+                             self._name, ', '.join(sorted(unknown_names)))
 
         with self.env.protecting(protected_fields, self):
             # write stored fields with (low-level) method _write
@@ -3513,8 +3513,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             data_list.append(data)
 
         if unknown_names:
-            _logger.warning("%s.create() with unknown fields: %s",
-                            self._name, ', '.join(sorted(unknown_names)))
+            raise ValueError("%s.create() with unknown fields: %s",
+                             self._name, ', '.join(sorted(unknown_names)))
 
         # create or update parent records
         for model_name, parent_name in self._inherits.items():
