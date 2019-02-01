@@ -501,6 +501,7 @@ class StockMoveLine(models.Model):
             # recompute the moves which we adapted their lines.
             move_to_recompute_state = self.env['stock.move']
 
+            to_unlink = []
             rounding = self.product_uom_id.rounding
             for candidate in oudated_candidates:
                 if float_compare(candidate.product_qty, quantity, precision_rounding=rounding) <= 0:
@@ -509,7 +510,7 @@ class StockMoveLine(models.Model):
                     if candidate.qty_done:
                         candidate.product_uom_qty = 0.0
                     else:
-                        candidate.unlink()
+                        to_unlink.append(candidate.id)
                     if float_is_zero(quantity, precision_rounding=rounding):
                         break
                 else:
@@ -521,4 +522,6 @@ class StockMoveLine(models.Model):
                     candidate.product_uom_qty = self.product_id.uom_id._compute_quantity(quantity_split, candidate.product_uom_id, rounding_method='HALF-UP')
                     move_to_recompute_state |= candidate.move_id
                     break
+            if to_unlink:
+                self.env['stock.move.line'].search([('id', 'in', to_unlink)]).unlink()
             move_to_recompute_state._recompute_state()
