@@ -3,6 +3,7 @@
 import base64
 import os
 import re
+from werkzeug.urls import url_encode
 
 from odoo import api, fields, models, tools, _
 from odoo.exceptions import ValidationError, UserError
@@ -55,8 +56,14 @@ class Company(models.Model):
     website = fields.Char(related='partner_id.website', readonly=False)
     vat = fields.Char(related='partner_id.vat', string="Tax ID", readonly=False)
     company_registry = fields.Char()
-    paperformat_id = fields.Many2one('report.paperformat', 'Paper format', default=lambda self: self.env.ref('base.paperformat_euro', raise_if_not_found=False))
-    external_report_layout_id = fields.Many2one('ir.ui.view', 'Document Template')
+    paperformat_id = fields.Many2one('report.paperformat', 'Paper Format', default=lambda self: self.env.ref('base.paperformat_euro', raise_if_not_found=False))
+    external_report_layout_id = fields.Many2one('ir.ui.view', 'Layout')
+    primary_color = fields.Char('Primary Color', default="#17a2b8")
+    secondary_color = fields.Char('Secondary Color', default="#790556")
+    layout_url = fields.Char(compute="_compute_preview_url")
+    layout_key = fields.Char(related='external_report_layout_id.key', readonly=False)
+    font = fields.Char('Font')
+
     _sql_constraints = [
         ('name_uniq', 'unique (name)', 'The company name must be unique !')
     ]
@@ -196,6 +203,52 @@ class Company(models.Model):
     # deprecated, use clear_caches() instead
     def cache_restart(self):
         self.clear_caches()
+
+    @api.onchange('logo')
+    def _onchange_logo(self):
+        if self.logo:
+            company_id = self._origin.id if hasattr(self,'_origin') else self.id
+            IrAttachment = self.env["ir.attachment"]
+            url = '/web/content/logo_%s.png' % company_id
+            attachment = IrAttachment.search([('url', '=' , url)])
+            logo = tools.image_resize_image(self.logo.encode('utf-8'), (180, None))
+            if attachment:
+                attachment.write({'datas': logo})
+            else:
+                new_attach = {
+                    'name': url,
+                    'datas': logo,
+                    'mimetype': 'image/png' ,
+                    'res_model': 'res.company',
+                    'url': url,
+                    'res_id': company_id,
+                }
+                attachment = IrAttachment.create(new_attach)
+            values = {
+                'font': self.font,
+                'primary_color': self.primary_color,
+                'secondary_color': self.secondary_color,
+                'report_layout': self.external_report_layout_id.key,
+                'report_header': self.report_header or '',
+                'report_footer': self.report_footer or '',
+                'company_id': company_id,
+                'logo_url': '/web/content/%s?unique=%s' % (attachment.id,self.id)
+            }
+            self.layout_url = "/report_layout_preview?%s" % url_encode(values)
+
+    @api.depends('external_report_layout_id', 'primary_color', 'secondary_color', 'font', 'report_header', 'report_footer')
+    def _compute_preview_url(self):
+        for company in self:
+            values = {
+                'font': company.font,
+                'primary_color': company.primary_color,
+                'secondary_color': company.secondary_color,
+                'report_layout': company.external_report_layout_id.key,
+                'report_header': company.report_header or '',
+                'report_footer': company.report_footer or '',
+                'company_id': self._origin.id if hasattr(self,'_origin') else company.id,
+            }
+            company.layout_url = "/report_layout_preview?%s" % url_encode(values)
 
     @api.model
     def create(self, vals):

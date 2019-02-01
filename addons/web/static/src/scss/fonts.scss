@@ -35,3 +35,51 @@ $lato-font-path: '../fonts/lato';
 @include lato-font-pair('Reg', 400);
 @include lato-font-pair('Bol', 700);
 @include lato-font-pair('Bla', 900);
+
+// ------------------------------------------------------------------
+// Arvos
+// ------------------------------------------------------------------
+$arvos-font-path: '../fonts/arvo';
+
+@mixin arvos-font($type, $weight, $style) {
+    @font-face {
+        font-family: 'Arvos';
+        src: url('#{$arvos-font-path}/Arvo-#{$type}--webfont.ttf') format('truetype');
+        font-weight: $weight;
+        font-style: $style;
+    }
+    @font-face {
+        font-family: 'Arvos-#{$type}';
+        src: url('#{$arvos-font-path}/Arvo-#{$type}--webfont.ttf') format('truetype');
+    }
+}
+
+@mixin arvos-font-pair($type, $weight) {
+    @include arvos-font('#{$type}', $weight, normal);
+}
+
+@include arvos-font-pair('Regular', 400);
+
+// ------------------------------------------------------------------
+// Source Sans Pro
+// ------------------------------------------------------------------
+$source-sans-pro-font-path: '../fonts/source_sans_pro';
+
+@mixin source-sans-pro-font($type, $weight, $style) {
+    @font-face {
+        font-family: 'Source Sans Pro';
+        src: url('#{$source-sans-pro-font-path}/SourceSansPro-#{$type}-webfont.ttf') format('truetype');
+        font-weight: $weight;
+        font-style: $style;
+    }
+    @font-face {
+        font-family: 'Source Sans Pro-#{$type}';
+        src: url('#{$source-sans-pro-font-path}/SourceSansPro-#{$type}-webfont.ttf') format('truetype');
+    }
+}
+
+@mixin source-sans-pro-font-pair($type, $weight) {
+    @include source-sans-pro-font('#{$type}', $weight, normal);
+}
+
+@include source-sans-pro-font-pair('Regular', 400);

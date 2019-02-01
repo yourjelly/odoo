@@ -20,6 +20,7 @@ var session = require('web.session');
 var utils = require('web.utils');
 var view_dialogs = require('web.view_dialogs');
 var field_utils = require('web.field_utils');
+var ColorpickerDialog = require('wysiwyg.widgets.ColorpickerDialog');
 
 var qweb = core.qweb;
 var _t = core._t;
@@ -1397,6 +1398,125 @@ var CharCopyClipboard = FieldChar.extend(CopyClipboard, {
         this.$el.append($(qweb.render('CopyClipboardChar')));
         this._initClipboard();
     }
+});
+
+var FieldColorPickerChar = FieldChar.extend({
+
+    template: 'FieldColorPickerChar',
+    widget_class: 'oe_form_field_color',
+    events: {
+        'click .input_colorpicker': '_onColorClick',
+    },
+
+    /**
+    * @constructor
+    */
+    init: function () {
+        this._super.apply(this, arguments);
+        this.defaultColor = this.value;
+    },
+
+    /**
+    *
+    * @private
+    */
+    _render: function () {
+        if (this.defaultColor) {
+            this.$('.input_colorpicker').css('background-color', this.defaultColor);
+        }
+    },
+    /**
+    * @private
+    * @param {Event} ev
+    */
+    _onColorClick: function (ev) {
+        var self = this;
+        var $color = $(ev.currentTarget);
+        var colorpicker = new ColorpickerDialog(this, {
+            defaultColor: $color.find('.o_color_preview').css('background-color'),
+        });
+        colorpicker.on('colorpicker:saved', this, function (ev) {
+            ev.stopPropagation();
+            self.$('.input_colorpicker').css('background-color', ev.data.cssColor);
+            this.$input = $('.input_colorpicker');
+            this._setValue(ev.data.cssColor);
+        });
+        colorpicker.open();
+    }
+});
+
+var FieldIframeChar = FieldChar.extend({
+    template: 'FieldIframeChar',
+    /**
+    * @constructor
+    */
+    init: function (parent, action) {
+        this._super.apply(this, arguments);
+    },
+    /**
+    * @override
+    * @private
+    */
+    _render: function () {
+        this.$el.find('iframe').attr({ 'src': this.value });
+    },
+    /**
+    * @override
+    * @private
+    * @param {Object} record
+    */
+    reset: function (record, event) {
+        this._reset(record, event);
+        if (!event || event.target !== this) {
+            this.$el.find('iframe').attr({ 'src': this.value });
+        }
+        return $.when();
+    },
+});
+
+var FieldFontChar = FieldChar.extend({
+    template: 'FieldFontChar',
+    events: _.extend({}, AbstractField.prototype.events, {
+        'change': '_onChange',
+    }),
+    /**
+    * @constructor
+    */
+    init: function () {
+        this._super.apply(this, arguments);
+        this.fonts = [
+            "Source Sans Pro",
+            "Arvos"
+        ];
+    },
+    /**
+    * @override _render from FieldChar
+    *
+    * @private
+    */
+    _render: function () {
+        var self = this;
+        this.fonts.forEach(function(font) {
+           self.$el.append($('<option/>', {
+                value: font,
+                text: font,
+            }));
+        });
+        this.$el.val(this.value);
+    },
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * The small slight difficulty is that we have to set the value differently
+     * depending on the field type.
+     *
+     * @private
+     */
+    _onChange: function () {
+        this._setValue(this.el.value);
+    },
 });
 
 var AbstractFieldBinary = AbstractField.extend({
@@ -3039,6 +3159,9 @@ return {
     UrlWidget: UrlWidget,
     TextCopyClipboard: TextCopyClipboard,
     CharCopyClipboard: CharCopyClipboard,
+    FieldColorPickerChar: FieldColorPickerChar,
+    FieldIframeChar: FieldIframeChar,
+    FieldFontChar: FieldFontChar,
     JournalDashboardGraph: JournalDashboardGraph,
     AceEditor: AceEditor,
 };

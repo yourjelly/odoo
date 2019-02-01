@@ -971,6 +971,25 @@
         <span class="fa fa-clipboard"></span><span> Copy Text</span>
     </button>
 </t>
+<t t-name="FieldColorPickerChar">
+    <div class="col-4 border-0 pl-0">
+        <input type="text" t-att-name="widget.name" class="input_colorpicker"/>
+    </div>
+</t>
+<t t-name="FieldIframeChar">
+    <div class="o_iframe_wrap">
+        <iframe class="o_frame_widget" allowfullscreen="true"/>
+    </div>
+</t>
+<t t-name="FieldFontChar">
+    <span t-if="widget.mode === 'readonly'"/>
+    <select t-if="widget.mode !== 'readonly'"
+        class="o_input"
+        t-att-name="widget.name"
+        t-att-tabindex="widget.attrs.tabindex"
+        t-att-autofocus="widget.attrs.autofocus"
+        t-att-id="widget.idForLabel"/>
+</t>
 <t t-name="FieldBinaryFile">
     <a t-if="widget.mode === 'readonly'" href="javascript:void(0)" class="o_form_uri"/>
 

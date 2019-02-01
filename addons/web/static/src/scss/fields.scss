@@ -443,7 +443,18 @@
             }
         }
     }
-
+    &.o_iframe_wrap {
+        width: 400px!important;
+        height: 400px;
+        padding: 0;
+        overflow: hidden;
+        .o_frame_widget {
+            width: 780px;
+            height: 800px;
+            transform: scale(0.5);
+            transform-origin: 0 0;
+        }
+    }
 }
 
 button.o_field_float_toggle {

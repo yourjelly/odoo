@@ -99,7 +99,7 @@ class ResConfigSettings(models.TransientModel):
         self.ensure_one()
         template = self.env.ref('base.view_company_document_template_form')
         return {
-            'name': _('Choose Your Document Layout'),
+            'name': _('Set up your Document Layout'),
             'type': 'ir.actions.act_window',
             'view_type': 'form',
             'view_mode': 'form',
