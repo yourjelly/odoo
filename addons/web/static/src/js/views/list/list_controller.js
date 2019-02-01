@@ -11,7 +11,7 @@ var core = require('web.core');
 var BasicController = require('web.BasicController');
 var DataExport = require('web.DataExport');
 var Dialog = require('web.Dialog');
-var pyUtils = require('web.py_utils');
+var Domain = require('web.Domain');
 var Sidebar = require('web.Sidebar');
 
 var _t = core._t;
@@ -50,6 +50,7 @@ var ListController = BasicController.extend({
         this.editable = params.editable;
         this.noLeaf = params.noLeaf;
         this.selectedRecords = params.selectedRecords || [];
+        this.selectedGroups = params.selectedGroups || [];
     },
 
     //--------------------------------------------------------------------------
@@ -74,6 +75,14 @@ var ListController = BasicController.extend({
             var searchQuery = this._controlPanel ? this._controlPanel.getSearchQuery() : {};
             var record = self.model.get(self.handle, {raw: true});
             return $.when(record.getDomain().concat(searchQuery.domain || []));
+        } else if (this.$('.o_list_group_selector input:checked').length) {
+            var groupSelectorInputs = this.$('.o_list_group_selector input:checked');
+            var domain = _.times(groupSelectorInputs.length - 1, _.constant('|'));
+            _.each(groupSelectorInputs, function (ele) {
+                var group = $(ele).closest('.o_group_has_content').data('group');
+                domain = domain.concat(Domain.prototype.normalizeArray(group.domain));
+            });
+            return $.when(domain);
         } else {
             return $.Deferred().resolve();
         }
@@ -535,6 +544,7 @@ var ListController = BasicController.extend({
      */
     _onSelectionChanged: function (ev) {
         this.selectedRecords = ev.data.selection;
+        this.selectedGroups = ev.data.selectedGroups;
         this._toggleSidebar();
     },
     /**

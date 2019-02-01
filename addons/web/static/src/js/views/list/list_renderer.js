@@ -40,6 +40,7 @@ var ListRenderer = BasicRenderer.extend({
         'click thead th.o_column_sortable': '_onSortColumn',
         'click .o_group_header': '_onToggleGroup',
         'click thead .o_list_record_selector input': '_onToggleSelection',
+        'click .o_list_group_selector input': '_onGroupToggleSelection',
         'keypress thead tr td': '_onKeyPress',
         'keydown tr': '_onKeyDown',
         'keydown thead tr': '_onKeyDown',
@@ -65,6 +66,7 @@ var ListRenderer = BasicRenderer.extend({
             }).value();
         this.hasSelectors = params.hasSelectors;
         this.selection = params.selectedRecords || [];
+        this.selectedGroups = params.selectedGroups || [];
         this.pagers = []; // instantiated pagers (only for grouped lists)
         this.editable = params.editable;
         this.isGrouped = this.state.groupedBy.length > 0;
@@ -453,6 +455,7 @@ var ListRenderer = BasicRenderer.extend({
                 .toggleClass('fa-caret-down', group.isOpen);
         }
         $th.prepend($arrow);
+        $th.prepend(this._renderSelector('span', false, 'o_list_group_selector'));
         if (group.isOpen && !group.groupedBy.length && (group.count > group.data.length)) {
             var $pager = this._renderGroupPager(group);
             var $lastCell = $cells[$cells.length - 1] || $th;
@@ -499,7 +502,7 @@ var ListRenderer = BasicRenderer.extend({
                     var $records = _.map(group.data, function (record) {
                         return self._renderRow(record);
                     });
-                    result.push($('<tbody>').append($records));
+                    result.push($('<tbody>').attr('data-group_id', group.id).append($records));
                 }
                 $tbody = null;
             }
@@ -621,15 +624,17 @@ var ListRenderer = BasicRenderer.extend({
      * @private
      * @param {string} tag either th or td
      * @param {boolean} disableInput if true, the input generated will be disabled
+     * @param {string} selectorClass class name for selector
      * @returns {jQueryElement}
      */
-    _renderSelector: function (tag, disableInput) {
+    _renderSelector: function (tag, disableInput, selectorClass) {
         var $content = dom.renderCheckbox();
         if (disableInput) {
             $content.find("input[type='checkbox']").prop('disabled', disableInput);
         }
+        var selectorClass = selectorClass || 'o_list_record_selector';
         return $('<' + tag + ' width="1">')
-            .addClass('o_list_record_selector')
+            .addClass(selectorClass)
             .append($content);
     },
     /**
@@ -683,6 +688,13 @@ var ListRenderer = BasicRenderer.extend({
             });
             $checked_rows.find('.o_list_record_selector input').prop('checked', true);
         }
+        if (this.selectedGroups.length) {
+            var $checkedGroups = this.$('tr').filter(function (index, el) {
+                var group = $(el).data('group');
+                return _.contains(self.selectedGroups, group && group.id);
+            });
+            $checkedGroups.find('.o_list_group_selector input').prop('checked', true);
+        }
         return this._super();
     },
     /**
@@ -722,12 +734,20 @@ var ListRenderer = BasicRenderer.extend({
      * @private
      */
     _updateSelection: function () {
-        var $selectedRows = this.$('tbody .o_list_record_selector input:checked')
+        var $selectedRows = this.$('tbody .o_list_record_selector:not(".o_list_group_selector") input:checked')
             .closest('tr');
+        var $selectedGruops = this.$('tbody .o_list_record_selector.o_list_group_selector input:checked')
+            .closest('tr')
         this.selection = _.map($selectedRows, function (row) {
             return $(row).data('id');
         });
-        this.trigger_up('selection_changed', { selection: this.selection });
+        this.selectedGroups = _.map($selectedGruops, function (group) {
+            return $(group).data('group').id;
+        });
+        this.trigger_up('selection_changed', {
+            selection: this.selection,
+            selectedGroups: this.selectedGroups,
+        });
         this._updateFooter();
     },
 
@@ -801,10 +821,25 @@ var ListRenderer = BasicRenderer.extend({
      * @param {MouseEvent} ev
      */
     _onToggleGroup: function (ev) {
+        if ($(ev.target).hasClass('o_list_group_selector')) {
+            return;
+        }
         var group = $(ev.currentTarget).data('group');
         if (group.count) {
             this.trigger_up('toggle_group', { group: group });
         }
+    },
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onGroupToggleSelection: function(ev) {
+        ev.stopPropagation();
+        var $checkeBox = $(ev.currentTarget);
+        var group = $checkeBox.closest('.o_group_has_content').data('group');
+        var checked = $checkeBox.prop('checked') || false;
+        this.$('tbody[data-group_id="'+ group.id +'"] .o_list_record_selector input:not(":disabled")').prop('checked', checked);
+        this._updateSelection();
     },
     /**
      * When the user clicks on the 'checkbox' on the left of a record, we need
