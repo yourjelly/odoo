@@ -740,6 +740,7 @@ class ChromeBrowser():
                 content = " ".join([str(log.get('value', '')) for log in logs])
                 if log_type == 'error':
                     self._logger.error(content)
+                    self._logger.error(str(res))
                     logged_error = True
                 else:
                     self._logger.info('console log: %s', content)
