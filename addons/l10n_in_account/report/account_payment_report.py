@@ -32,10 +32,10 @@ class L10nInPaymentReport(models.AbstractModel):
         """common method to compute gst tax amount base on tax group"""
         res = {'igst_amount': 0.0, 'sgst_amount': 0.0, 'cgst_amount': 0.0, 'cess_amount': 0.0}
         AccountTax = self.env['account.tax']
-        igst_group = self.env.ref('l10n_in.igst_group', False)
-        cgst_group = self.env.ref('l10n_in.cgst_group', False)
-        sgst_group = self.env.ref('l10n_in.sgst_group', False)
-        cess_group = self.env.ref('l10n_in.cess_group', False)
+        igst_group = self.env.ref('l10n_in_account.igst_group', False)
+        cgst_group = self.env.ref('l10n_in_account.cgst_group', False)
+        sgst_group = self.env.ref('l10n_in_account.sgst_group', False)
+        cess_group = self.env.ref('l10n_in_account.cess_group', False)
         filter_tax = taxes.filtered(lambda t: t.type_tax_use != 'none')
         tax_compute = filter_tax.compute_all(price_unit, currency=currency, quantity=quantity, product=product, partner=partner)
         for tax_data in tax_compute['taxes']:
@@ -101,7 +101,7 @@ class L10nInPaymentReport(models.AbstractModel):
 
     def _where(self):
         return """WHERE aml.payment_id IS NOT NULL
-            AND tax.tax_group_id in (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name in ('cgst_group','sgst_group','igst_group','gst_group'))
+            AND tax.tax_group_id in (SELECT res_id FROM ir_model_data WHERE module='l10n_in_account' AND name in ('cgst_group','sgst_group','igst_group','gst_group'))
             AND ac.internal_type IN ('receivable', 'payable') AND am.state = 'posted'"""
 
     @api.model_cr

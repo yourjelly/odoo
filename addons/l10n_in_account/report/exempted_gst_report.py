@@ -50,7 +50,7 @@ class L10nInExemptedReport(models.Model):
                 SELECT MAX(account_tax_id) FROM account_move_line_account_tax_rel
                     JOIN account_tax at ON at.id = account_tax_id
                     WHERE account_move_line_id = aml.id AND at.tax_group_id IN
-                     ((SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='nil_rated_group'))
+                     ((SELECT res_id FROM ir_model_data WHERE module='l10n_in_account' AND name='nil_rated_group'))
             ) IS NOT NULL
                 THEN aml.balance * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END)
                 ELSE 0
@@ -60,7 +60,7 @@ class L10nInExemptedReport(models.Model):
                 SELECT MAX(account_tax_id) FROM account_move_line_account_tax_rel
                     JOIN account_tax at ON at.id = account_tax_id
                     WHERE account_move_line_id = aml.id AND at.tax_group_id IN
-                     ((SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='exempt_group'))
+                     ((SELECT res_id FROM ir_model_data WHERE module='l10n_in_account' AND name='exempt_group'))
             ) IS NOT NULL
                 THEN aml.balance * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END)
                 ELSE 0

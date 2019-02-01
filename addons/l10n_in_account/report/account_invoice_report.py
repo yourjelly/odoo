@@ -205,25 +205,25 @@ class L10nInAccountInvoiceReport(models.Model):
                     ELSE ''
                     END) as gst_format_shipping_bill_date,
                 CASE WHEN at.tax_group_id IN
-                    (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='igst_group')
+                    (SELECT res_id FROM ir_model_data WHERE module='l10n_in_account' AND name='igst_group')
                     THEN aml.balance
                     ELSE 0
                     END AS igst_amount,
                 CASE WHEN at.tax_group_id IN
-                    (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='cgst_group')
+                    (SELECT res_id FROM ir_model_data WHERE module='l10n_in_account' AND name='cgst_group')
                     THEN aml.balance
                     ELSE 0
                     END AS cgst_amount,
                 CASE WHEN at.tax_group_id IN
-                    (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='sgst_group')
+                    (SELECT res_id FROM ir_model_data WHERE module='l10n_in_account' AND name='sgst_group')
                     THEN aml.balance
                     ELSE 0
                     END AS sgst_amount,
                 (SELECT sum(temp_aml.balance) from account_move_line temp_aml JOIN account_tax temp_at ON temp_at.id = temp_aml.tax_line_id where temp_aml.move_id = aml.move_id and temp_aml.product_id = aml.product_id
-                    and temp_at.tax_group_id IN (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='cess_group')
+                    and temp_at.tax_group_id IN (SELECT res_id FROM ir_model_data WHERE module='l10n_in_account' AND name='cess_group')
                     ) AS cess_amount,
                 CASE WHEN at.tax_group_id IN
-                    (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='sgst_group') OR at.l10n_in_reverse_charge = True
+                    (SELECT res_id FROM ir_model_data WHERE module='l10n_in_account' AND name='sgst_group') OR at.l10n_in_reverse_charge = True
                     THEN NULL
                     ELSE (CASE WHEN aml.tax_base_amount <> 0 THEN aml.tax_base_amount ELSE NULL END)
                     END AS price_total,
@@ -257,7 +257,7 @@ class L10nInAccountInvoiceReport(models.Model):
     def _where(self):
         return """
                 WHERE am.state = 'posted'
-                    AND at.tax_group_id in (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name in ('cgst_group','sgst_group','igst_group','gst_group'))
+                    AND at.tax_group_id in (SELECT res_id FROM ir_model_data WHERE module='l10n_in_account' AND name in ('cgst_group','sgst_group','igst_group','gst_group'))
         """
 
     def _group_by(self):

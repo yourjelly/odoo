@@ -23,7 +23,7 @@
     <!-- Registered Customer -->
     <record id="res_partner_registered_customer" model="res.partner">
         <field name="name">Registered Customer</field>
-        <field eval="[(6, 0, [ref('l10n_in.res_partner_category_registered')])]" name="category_id"/>
+        <field eval="[(6, 0, [ref('l10n_in_account.res_partner_category_registered')])]" name="category_id"/>
         <field name="customer">1</field>
         <field name="is_company">1</field>
         <field name="street">201, Second Floor, IT Tower 4</field>
@@ -38,7 +38,7 @@
     <!-- Unregistered Customer -->
     <record id="res_partner_unregistered_customer" model="res.partner">
         <field name="name">Unregistered Customer</field>
-        <field eval="[(6, 0, [ref('l10n_in.res_partner_category_unregistered')])]" name="category_id"/>
+        <field eval="[(6, 0, [ref('l10n_in_account.res_partner_category_unregistered')])]" name="category_id"/>
         <field name="is_company">1</field>
         <field name="street">B105, yogeshwar Tower</field>
         <field name="city">Veraval</field>
@@ -50,7 +50,7 @@
     <!-- Unregistered Customer out of state-->
     <record id="res_partner_unregistered_customer_out_state" model="res.partner">
         <field name="name">Unregistered Customer (out state)</field>
-        <field eval="[(6, 0, [ref('l10n_in.res_partner_category_unregistered')])]" name="category_id"/>
+        <field eval="[(6, 0, [ref('l10n_in_account.res_partner_category_unregistered')])]" name="category_id"/>
         <field name="is_company">1</field>
         <field name="street">Gulloy, Carmona Road</field>
         <field name="city">Orlim</field>
@@ -62,7 +62,7 @@
     <!-- Registered Customer -->
     <record id="res_partner_registered_supplier" model="res.partner">
         <field name="name">Registered Supplier</field>
-        <field eval="[(6, 0, [ref('l10n_in.res_partner_category_registered')])]" name="category_id"/>
+        <field eval="[(6, 0, [ref('l10n_in_account.res_partner_category_registered')])]" name="category_id"/>
         <field name="customer">0</field>
         <field name="supplier">1</field>
         <field name="is_company">1</field>
@@ -78,7 +78,7 @@
     <!-- Unregistered Customer -->
     <record id="res_partner_unregistered_supplier" model="res.partner">
         <field name="name">Unregistered Supplier</field>
-        <field eval="[(6, 0, [ref('l10n_in.res_partner_category_unregistered')])]" name="category_id"/>
+        <field eval="[(6, 0, [ref('l10n_in_account.res_partner_category_unregistered')])]" name="category_id"/>
         <field name="customer">0</field>
         <field name="supplier">1</field>
         <field name="street">B105, yogeshwar Tower</field>
@@ -91,8 +91,8 @@
     <!-- reseller partner -->
     <record id="res_partner_reseller" model="res.partner">
         <field name="name">Reseller(E-Commerce)</field>
-        <field eval="[(6, 0, [ref('l10n_in.res_partner_category_reseller'),
-            ref('l10n_in.res_partner_category_registered')])]" name="category_id"/>
+        <field eval="[(6, 0, [ref('l10n_in_account.res_partner_category_reseller'),
+            ref('l10n_in_account.res_partner_category_registered')])]" name="category_id"/>
         <field name="customer">0</field>
         <field name="supplier">0</field>
         <field name="street">4/001 Ground Floor, 16th Main Rd,</field>

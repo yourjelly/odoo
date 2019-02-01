@@ -2,7 +2,7 @@
 <odoo noupdate="1">
     <!-- Demo of at(Tax liability on advances). Advance payment need to consideration for which invoices have not been issued in the same month.-->
 	<record id="demo_payment_at" model="account.payment">
-        <field name="partner_id" ref="l10n_in.res_partner_registered_customer"/>
+        <field name="partner_id" ref="l10n_in_account.res_partner_registered_customer"/>
         
         <field name="partner_type">customer</field>
         <field name="amount">10000</field>

@@ -43,37 +43,37 @@ class L10nInProductHsnReport(models.Model):
             CASE WHEN pt.l10n_in_hsn_description IS NULL THEN '' ELSE pt.l10n_in_hsn_description END AS hsn_description,
             CASE WHEN uom.l10n_in_code IS NULL THEN '' ELSE uom.l10n_in_code END AS l10n_in_uom_code,
             CASE WHEN at.tax_group_id IN
-                (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='sgst_group') OR at.l10n_in_reverse_charge = True
+                (SELECT res_id FROM ir_model_data WHERE module='l10n_in_account' AND name='sgst_group') OR at.l10n_in_reverse_charge = True
                 THEN 0
                 ELSE aml.quantity
                 END AS quantity,
             CASE WHEN at.tax_group_id IN
-                (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='igst_group')
+                (SELECT res_id FROM ir_model_data WHERE module='l10n_in_account' AND name='igst_group')
                 THEN aml.balance * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END)
                 ELSE 0
                 END AS igst_amount,
             CASE WHEN at.tax_group_id IN
-                (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='cgst_group')
+                (SELECT res_id FROM ir_model_data WHERE module='l10n_in_account' AND name='cgst_group')
                 THEN aml.balance * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END)
                 ELSE 0
                 END AS cgst_amount,
             CASE WHEN at.tax_group_id IN
-                (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='sgst_group')
+                (SELECT res_id FROM ir_model_data WHERE module='l10n_in_account' AND name='sgst_group')
                 THEN aml.balance * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END)
                 ELSE 0
                 END AS sgst_amount,
             CASE WHEN at.tax_group_id IN
-                (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='cess_group')
+                (SELECT res_id FROM ir_model_data WHERE module='l10n_in_account' AND name='cess_group')
                 THEN aml.balance * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END)
                 ELSE 0
                 END AS cess_amount,
             CASE WHEN at.tax_group_id IN
-                (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='sgst_group')
+                (SELECT res_id FROM ir_model_data WHERE module='l10n_in_account' AND name='sgst_group')
                 THEN 0
                 ELSE (CASE WHEN aml.tax_line_id IS NOT NULL THEN aml.tax_base_amount ELSE aml.balance * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END) END)
                 END AS price_total,
             (CASE WHEN at.tax_group_id IN
-                (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='sgst_group')
+                (SELECT res_id FROM ir_model_data WHERE module='l10n_in_account' AND name='sgst_group')
                 THEN 0
                 ELSE (CASE WHEN aml.tax_line_id IS NOT NULL THEN aml.tax_base_amount ELSE 1 END)
                 END) + (aml.balance * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END))  AS total

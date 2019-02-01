@@ -3,8 +3,8 @@
 
     <!-- Demo of B2B (business-to-business) Taxable supplies made to other registered person.-->
     <record id="demo_invoice_b2b" model="account.invoice">
-        <field name="partner_id" ref="l10n_in.res_partner_registered_customer"/>
-        <field name="l10n_in_reseller_partner_id" ref="l10n_in.res_partner_reseller"/>
+        <field name="partner_id" ref="l10n_in_account.res_partner_registered_customer"/>
+        <field name="l10n_in_reseller_partner_id" ref="l10n_in_account.res_partner_reseller"/>
         <field name="user_id" ref="base.user_demo"/>
         <field name="payment_term_id" ref="account.account_payment_term"/>
         <field name="type">out_invoice</field>
@@ -54,7 +54,7 @@
                 '|',
                     ('children_tax_ids.amount', '=', 9),
                     '&amp;',
-                    ('tax_group_id', '=', obj().env.ref('l10n_in.cess_group').id),
+                    ('tax_group_id', '=', obj().env.ref('l10n_in_account.cess_group').id),
                     ('children_tax_ids.amount','=', 5)
                 ], limit=2).ids)]"/>
     </record>
@@ -70,7 +70,7 @@
 
     <!-- Demo of B2CS (business to consumer small) Taxable supplies made to other unregistered Person and below INR 2.5 lakhs invoice value.-->
     <record id="demo_invoice_b2cs" model="account.invoice">
-        <field name="partner_id" ref="l10n_in.res_partner_unregistered_customer"/>
+        <field name="partner_id" ref="l10n_in_account.res_partner_unregistered_customer"/>
         <field name="user_id" ref="base.user_demo"/>
         <field name="payment_term_id" ref="account.account_payment_term"/>
         <field name="type">out_invoice</field>
@@ -144,7 +144,7 @@
 
     <!-- Demo of B2CL (business to consumer small) Taxable supplies made to other unregistered Person and below INR 2.5 lakhs invoice value.-->
     <record id="demo_invoice_b2cl" model="account.invoice">
-        <field name="partner_id" ref="l10n_in.res_partner_unregistered_customer_out_state"/>
+        <field name="partner_id" ref="l10n_in_account.res_partner_unregistered_customer_out_state"/>
         <field name="user_id" ref="base.user_demo"/>
         <field name="payment_term_id" ref="account.account_payment_term"/>
         <field name="type">out_invoice</field>
@@ -162,7 +162,7 @@
         <field name="invoice_line_tax_ids" model="account.tax"
             eval="[(6, 0, obj().search([
                 ('type_tax_use', '=', 'sale'),
-                ('tax_group_id', '=', obj().env.ref('l10n_in.igst_group').id),
+                ('tax_group_id', '=', obj().env.ref('l10n_in_account.igst_group').id),
                 ('amount','=', 18),
                 ('company_id', '=', obj().env['res.company']._company_default_get('account.tax').id)], limit=1).ids)]"/>
     </record>
@@ -191,7 +191,7 @@
                 or obj().search([('type', '=', 'sale')], limit=1).id"/>
         <field name="l10n_in_shipping_bill_number">999704</field>
         <field name="l10n_in_shipping_bill_date" eval="time.strftime('%Y-%m')+'-02'"/>
-        <field name="l10n_in_shipping_port_code_id" ref="l10n_in.port_code_inixy1"/>
+        <field name="l10n_in_shipping_port_code_id" ref="l10n_in_account.port_code_inixy1"/>
     </record>
 
     <record id="demo_invoice_exp_line_1" model="account.invoice.line">
@@ -205,7 +205,7 @@
         <field name="invoice_line_tax_ids" model="account.tax"
             eval="[(6, 0, obj().search([
                 ('type_tax_use', '=', 'sale'),
-                ('tax_group_id', '=', obj().env.ref('l10n_in.igst_group').id),
+                ('tax_group_id', '=', obj().env.ref('l10n_in_account.igst_group').id),
                 ('amount','=', 18),
                 ('company_id', '=', obj().env['res.company']._company_default_get('account.tax').id)], limit=1).ids)]"/>
     </record>
@@ -220,7 +220,7 @@
 
     <!-- Demo of exemp(Nil Rated, Exempted and Non GST supplies). Set Nill rated and Exempted tax in line.-->
     <record id="demo_invoice_nill" model="account.invoice">
-        <field name="partner_id" ref="l10n_in.res_partner_registered_customer"/>
+        <field name="partner_id" ref="l10n_in_account.res_partner_registered_customer"/>
         <field name="user_id" ref="base.user_demo"/>
         <field name="payment_term_id" ref="account.account_payment_term"/>
         <field name="type">out_invoice</field>
@@ -238,7 +238,7 @@
         <field name="invoice_line_tax_ids" model="account.tax"
             eval="[(6, 0, obj().search([
                 ('type_tax_use', '=', 'sale'),
-                ('tax_group_id', '=', obj().env.ref('l10n_in.exempt_group').id),
+                ('tax_group_id', '=', obj().env.ref('l10n_in_account.exempt_group').id),
                 ('company_id', '=', obj().env['res.company']._company_default_get('account.tax').id)], limit=1).ids)]"/>
     </record>
     <record id="demo_invoice_nill_line_2" model="account.invoice.line">
@@ -252,7 +252,7 @@
         <field name="invoice_line_tax_ids" model="account.tax"
             eval="[(6, 0, obj().search([
                 ('type_tax_use', '=', 'sale'),
-                ('tax_group_id', '=', obj().env.ref('l10n_in.nil_rated_group').id),
+                ('tax_group_id', '=', obj().env.ref('l10n_in_account.nil_rated_group').id),
                 ('company_id', '=', obj().env['res.company']._company_default_get('account.tax').id)], limit=1).ids)]"/>
     </record>
     
@@ -268,13 +268,13 @@
 
     <!-- Demo of cdnr(Credit/ Debit Note for registered person). Create credit note for demo b2b invoice.-->
     <record id="demo_invoice_cdnr" model="account.invoice">
-        <field name="partner_id" ref="l10n_in.res_partner_registered_customer"/>
-        <field name="l10n_in_reseller_partner_id" ref="l10n_in.res_partner_reseller"/>
+        <field name="partner_id" ref="l10n_in_account.res_partner_registered_customer"/>
+        <field name="l10n_in_reseller_partner_id" ref="l10n_in_account.res_partner_reseller"/>
         <field name="user_id" ref="base.user_demo"/>
         <field name="payment_term_id" ref="account.account_payment_term"/>
         <field name="type">out_refund</field>
         <field name="date_invoice" eval="time.strftime('%Y-%m')+'-02'"/>
-        <field name="refund_invoice_id" ref="l10n_in.demo_invoice_b2b"/>
+        <field name="refund_invoice_id" ref="l10n_in_account.demo_invoice_b2b"/>
     </record>
 
     <record id="demo_invoice_cdnr_line_1" model="account.invoice.line">
@@ -320,7 +320,7 @@
                 '|',
                     ('children_tax_ids.amount', '=', 9),
                     '&amp;',
-                    ('tax_group_id', '=', obj().env.ref('l10n_in.cess_group').id),
+                    ('tax_group_id', '=', obj().env.ref('l10n_in_account.cess_group').id),
                     ('children_tax_ids.amount','=', 5)
                 ], limit=2).ids)]"/>
     </record>
@@ -336,12 +336,12 @@
 
     <!-- Demo of cdnr(Credit/ Debit Note for unregistered person). Create credit note for demo b2cl invoice.-->
     <record id="demo_invoice_cdnur" model="account.invoice">
-        <field name="partner_id" ref="l10n_in.res_partner_unregistered_customer"/>
+        <field name="partner_id" ref="l10n_in_account.res_partner_unregistered_customer"/>
         <field name="user_id" ref="base.user_demo"/>
         <field name="payment_term_id" ref="account.account_payment_term"/>
         <field name="type">out_refund</field>
         <field name="date_invoice" eval="time.strftime('%Y-%m')+'-02'"/>
-        <field name="refund_invoice_id" ref="l10n_in.demo_invoice_b2cl"/>
+        <field name="refund_invoice_id" ref="l10n_in_account.demo_invoice_b2cl"/>
     </record>
 
     <record id="demo_invoice_cdnur_line_1" model="account.invoice.line">
@@ -370,7 +370,7 @@
     <!-- Demo of atadj(Advance adjustments). When invoice is reconcile against Advance payment.
     Reconciled invoice consideration for which payment have been recived in the past months.-->
     <record id="demo_invoice_atadj" model="account.invoice">
-        <field name="partner_id" ref="l10n_in.res_partner_registered_customer"/>
+        <field name="partner_id" ref="l10n_in_account.res_partner_registered_customer"/>
         <field name="user_id" ref="base.user_demo"/>
         <field name="payment_term_id" ref="account.account_payment_term"/>
         <field name="type">out_invoice</field>
@@ -406,7 +406,7 @@
         <value model="account.move.line" eval="obj().search([
             ('credit', '>', 0),
             ('debit', '=', 0),
-            ('payment_id','=', obj().env.ref('l10n_in.demo_payment_at').id)
+            ('payment_id','=', obj().env.ref('l10n_in_account.demo_payment_at').id)
             ], limit=1).id"/>
     </function>
 

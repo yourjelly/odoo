@@ -10,7 +10,7 @@ class AccountChartTemplate(models.Model):
     @api.multi
     def _prepare_all_journals(self, acc_template_ref, company, journals_dict=None):
         res = super(AccountChartTemplate, self)._prepare_all_journals(acc_template_ref, company, journals_dict=journals_dict)
-        if self == self.env.ref('l10n_in.indian_chart_template_standard'):
+        if self == self.env.ref('l10n_in_account.indian_chart_template_standard'):
             for journal in res:
                 if journal['code'] == 'INV':
                     journal['name'] = _('Tax Invoices')
