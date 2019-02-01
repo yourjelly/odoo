@@ -55,7 +55,7 @@ Wizards provided by this module:
         'data/menuitem_data.xml',
     ],
     'demo': [
-        'demo/l10n_be_demo.xml',
+        'demo/l10n_be_account_demo.xml',
     ],
     'post_init_hook': 'load_translations',
 }

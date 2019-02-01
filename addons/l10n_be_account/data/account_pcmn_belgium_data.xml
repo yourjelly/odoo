@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-        <!-- Chart template of l10n_be -->
+        <!-- Chart template of l10n_be_account -->
             <!-- Account template definition -->
         <record id="a1000" model="account.account.template">
             <field name="name">Capital</field>
