@@ -1940,6 +1940,10 @@ class Selection(Field):
     :param selection_add: provides an extension of the selection in the case
         of an overridden field. It is a list of pairs (``value``, ``string``).
 
+    :param selection_fallback: provides a mapping from new ``selection_add``
+        values to overridden selection values. The mapping is used to remap
+        existing data when uninstalling the corresponding module.
+
     The attribute ``selection`` is mandatory except in the case of
     :ref:`related fields <field-related>` or :ref:`field extensions
     <field-incremental-definition>`.
@@ -1948,6 +1952,7 @@ class Selection(Field):
     column_type = ('varchar', pg_varchar())
     _slots = {
         'selection': None,              # [(value, string), ...], function or method name
+        'selection_fallback': None,     # {value: value}
         'validate': True,               # whether validating upon write
     }
 
@@ -1970,6 +1975,7 @@ class Selection(Field):
     def _setup_attrs(self, model, name):
         super(Selection, self)._setup_attrs(model, name)
         # determine selection (applying 'selection_add' extensions)
+        fallback = {}
         for field in reversed(resolve_mro(model, name, self._can_setup_from)):
             # We cannot use field.selection or field.selection_add here
             # because those attributes are overridden by ``_setup_attrs``.
@@ -1979,6 +1985,15 @@ class Selection(Field):
                 # use an OrderedDict to update existing values
                 selection_add = field.args['selection_add']
                 self.selection = list(OrderedDict(self.selection + selection_add).items())
+                if self.required and 'selection_fallback' not in field.args:
+                    _logger.error("%s: selection_add=%r requires selection_fallback", self, selection_add)
+                fallback.update(field.args.get('selection_fallback', ()))
+                for kv in selection_add:
+                    if len(kv) == 1 and kv[0] not in values:
+                        _logger.error("%s: value %r not in overridden selection", self, kv[0])
+                    if self.required and kv[0] not in fallback and kv[0] not in values:
+                        _logger.error("%s: value %r requires a selection fallback", self, kv[0])
+            self.selection_fallback = fallback
 
     def _selection_modules(self, model):
         """ Return a mapping from selection values to modules defining each value. """
