@@ -1072,6 +1072,23 @@
             </field>
         </record>
 
+        <record model="ir.ui.view" id="account_invoice_form_inherit_utm">
+            <field name="name">Account Invoice utm</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_form"/>
+            <field name="arch" type="xml">
+                <data>
+                    <xpath expr="//group[@name='utm_link']" position="replace">
+                        <group string="Marketing" name="utm_link" groups="base.group_no_one">
+                            <field name="campaign_id"/>
+                            <field name="medium_id"/>
+                            <field name="source_id"/>
+                        </group>
+                    </xpath>
+                </data>
+            </field>
+        </record> 
+
         <record model="ir.ui.view" id="account_invoice_line_tree">
             <field name="name">account.invoice.line.tree</field>
             <field name="model">account.invoice.line</field>
