@@ -130,13 +130,14 @@ QUnit.config.urlConfig.push({
 });
 
 QUnit.begin(function() {
-    if (QUnit.config.failfast) {
-        QUnit.testDone(function(details) {
-            if (details.failed > 0) {
-                QUnit.config.queue.length = 0;
-            }
-        });
-    }
+    //if (QUnit.config.failfast) {
+    //    QUnit.testDone(function(details) {
+    //        if (details.failed > 0) {
+    //            QUnit.config.queue.length = 0;
+    //        }
+    //    });
+    //}
 });
+
 
 })();

@@ -2019,7 +2019,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(nbNotifyChanges, 0,
             "no event should have been triggered");
 
-        return waitForChangeTriggered().then(function () {
+        waitForChangeTriggered().then(function () {
             assert.strictEqual(nbNotifyChanges, 1,
                 "one event should have been triggered");
 
@@ -2037,6 +2037,7 @@ QUnit.module('basic_fields', {
             form.destroy();
             done();
         });
+        window.setTime(3);
 
         function waitForChangeTriggered() {
             return def.then(function () {
@@ -2341,6 +2342,7 @@ QUnit.module('basic_fields', {
                 done();
             });
         });
+        window.setTime(0);
     });
 
     QUnit.test('graph dashboard widget does not need nv to be destroyed', function (assert) {
@@ -2458,6 +2460,7 @@ QUnit.module('basic_fields', {
                 done();
             });
         });
+        window.setTime(0);
     });
 
     QUnit.test('rendering of a field with dashboard_graph widget in an updated kanban view (grouped)', function (assert) {
@@ -2492,6 +2495,7 @@ QUnit.module('basic_fields', {
                 done();
             });
         });
+        window.setTime(0);
     });
 
     QUnit.module('AceEditor');

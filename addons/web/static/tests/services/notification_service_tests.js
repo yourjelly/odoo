@@ -61,6 +61,7 @@ QUnit.module('Services', {
             view.destroy();
             done();
         });
+        window.setTime(0);
     });
 
     QUnit.test('Display a warning', function (assert) {
@@ -103,6 +104,7 @@ QUnit.module('Services', {
                 done();
             });
         });
+        window.setTime(0);
     });
 
     QUnit.test('Display a simple notification with onClose callback when automatically close', function (assert) {
@@ -118,12 +120,13 @@ QUnit.module('Services', {
                 close++;
             }
         });
-        view.destroy();
         assert.strictEqual(close, 0, "should wait to call onClose method once");
         setTimeout(function () {
+            console.log('should be here after destroy');
             assert.strictEqual(close, 1, "should call onClose method once");
             done();
         });
+        view.destroy();
     });
 
     QUnit.test('Display a sticky notification with onClose callback', function (assert) {
@@ -148,11 +151,14 @@ QUnit.module('Services', {
         });
         assert.strictEqual(close, 0, "should wait to call onClose method once");
         testUtils.dom.click($('body .o_notification_manager .o_notification .o_close'));
+        
         setTimeout(function () {
             assert.strictEqual(close, 1, "should call onClose method once");
             view.destroy();
             done();
         });
+        
+        window.setTime(0);
     });
 
     QUnit.test('Display a question', function (assert) {
@@ -205,6 +211,7 @@ QUnit.module('Services', {
             view.destroy();
             done();
         });
+        window.setTime(0);
     });
 
     QUnit.test('call close notification service', function (assert) {
@@ -244,6 +251,7 @@ QUnit.module('Services', {
             view.destroy();
             done();
         });
+        window.setTime(0);
     });
 
     QUnit.test('Display a custom notification', function (assert) {

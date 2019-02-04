@@ -194,7 +194,64 @@ function addMockEnvironment(widget, params) {
     }
 
     var widgetDestroy = widget.destroy;
+    var savedSetTimeout = window.setTimeout;
+    var savedClearTimeout = window.clearTimeout;
+    var currentTime = 0;
+    var timeouts = {};
+    var countTimeout = 0;
+    window.setTimeout = function (func, duration) {
+        duration = duration || 0;
+        console.log('setting timeout '+duration);
+        var executeTime = currentTime + duration;
+        countTimeout ++;
+        timeouts[countTimeout] = {executeTime:executeTime, func:func};
+        
+        console.log('id' + countTimeout);
+        return countTimeout;
+    },
+    window.setTime = function (time) {
+        console.log('setting time to ' + time);
+        var minKey = false;
+        _.each(timeouts, function (value, key) {
+            if (minKey === false) {
+                minKey = Number(key);
+                return;
+            }
+            var minTime = timeouts[minKey].executeTime;
+            if (value.executeTime < minTime || (value.executeTime === minTime && key < minKey)) {
+                minKey = Number(key);
+            }
+        });
+        
+        if (minKey !== false && timeouts[minKey].executeTime <= time) {
+            console.log('exec' + minKey);
+            currentTime = timeouts[minKey].executeTime;
+            var func = timeouts[minKey].func;
+            delete timeouts[minKey];
+            func();
+            window.setTime(time);
+        }
+        else {
+            currentTime = time;
+        }
+
+    },
+    window.clearTimeout = function (id) {
+        delete timeouts[id];
+    },
+    //note, todo same with interval
     widget.destroy = function () {
+        console.log('destroy');
+        var maxTimeInQueue = 0;
+        _.each(timeouts, function (value, key) {
+            if (value.executeTime > maxTimeInQueue) {
+                maxTimeInQueue = value.executeTime;
+            }
+        });
+        window.setTime(maxTimeInQueue); // try to empty timeout stack, but avoid infinite loop
+        window.setTimeout = savedSetTimeout;
+        window.clearTimeout = savedClearTimeout;
+
         // clear the caches (e.g. data_manager, ModelFieldSelector) when the
         // widget is destroyed, at the end of each test to avoid collisions
         core.bus.trigger('clear_cache');
