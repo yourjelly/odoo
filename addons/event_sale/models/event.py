@@ -237,6 +237,9 @@ class EventRegistration(models.Model):
                 'origin': line_id.order_id.name,
                 'sale_order_id': line_id.order_id.id,
                 'sale_order_line_id': line_id.id,
+                'campaign_id': line_id.order_id.campaign_id.id,
+                'medium_id': line_id.order_id.medium_id.id,
+                'source_id': line_id.order_id.source_id.id,
             })
         return att_data
 

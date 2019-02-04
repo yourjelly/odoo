@@ -570,7 +570,11 @@
                                 <group string="Reporting" name="technical" groups="base.group_no_one">
                                     <field groups="base.group_no_one" name="origin"/>
                                 </group>
-                                <group name="utm_link" groups="base.group_no_one"/>
+                                <group string="Marketing" name="utm_link" groups="base.group_no_one">
+                                    <field name="campaign_id"/>
+                                    <field name="medium_id"/>
+                                    <field name="source_id"/>
+                                </group>
                             </group>
                         </page>
                         <page groups="base.group_no_one" string="Customer Signature" name="customer_signature" attrs="{'invisible': [('require_signature', '=', False), ('signed_by', '=', False), ('signature', '=', False), ('signed_on', '=', False)]}">
