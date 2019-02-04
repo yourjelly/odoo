@@ -8,6 +8,8 @@ like countries, country states or country-related information that are not relat
 """,
     'data': [
         'data/res.country.state.csv',
+        'data/l10n_in.port.code.csv',
         'views/res_country_state_view.xml',
+        'views/port_code_views.xml',
     ]
 }
