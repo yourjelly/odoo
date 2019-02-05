@@ -2381,7 +2381,8 @@ QUnit.module('basic_fields', {
         assert.verifySteps(['destroy']);
 
         // Wait nvd3 to fully render the graph. If ommited, may slow down following tests.
-        return concurrency.delay(0);
+        concurrency.delay(0);
+        window.setTime(0);
     });
 
     QUnit.test('graph dashboard widget can be destroyed when nv is partially loaded', function (assert) {
