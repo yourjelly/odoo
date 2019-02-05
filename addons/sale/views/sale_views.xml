@@ -407,6 +407,7 @@
                                             'required': [('display_type', '=', False)],
                                         }"
                                         force_save="1"
+                                        optional="True"
                                         context="{
                                             'partner_id': parent.partner_id,
                                             'quantity': product_uom_qty,
@@ -417,12 +418,13 @@
                                             'default_description_sale': name
                                         }"
                                     />
-                                    <field name="product_custom_attribute_value_ids" invisible="1" />
-                                    <field name="product_no_variant_attribute_value_ids" invisible="1" />
-                                    <field name="name" widget="section_and_note_text"/>
+                                    <!-- <field name="product_custom_attribute_value_ids" invisible="1" />
+                                    <field name="product_no_variant_attribute_value_ids" invisible="1" /> -->
+                                    <field name="name" string="Product" widget="section_and_note_text"/>
                                     <field
                                         name="product_uom_qty"
-                                        string="Ordered Qty"
+                                        string="Ordered"
+                                        optional="True"
                                         context="{
                                             'partner_id': parent.partner_id,
                                             'quantity': product_uom_qty,
@@ -433,7 +435,10 @@
                                     />
                                     <field
                                         name="qty_delivered"
+                                        string="Delivered"
+                                        optional="True"
                                         attrs="{
+                                            'invisible': [('qty_delivered', '=', 0)],
                                             'column_invisible': [('parent.state', 'not in', ['sale', 'done'])],
                                             'readonly': [('qty_delivered_method', '!=', 'manual')]
                                         }"
@@ -442,12 +447,17 @@
                                     <field name="qty_delivered_method" invisible="1"/>
                                     <field
                                         name="qty_invoiced"
-                                        attrs="{'column_invisible': [('parent.state', 'not in', ['sale', 'done'])]}"
+                                        string="Invoiced"
+                                        optional="True"
+                                        attrs="{'column_invisible': [('parent.state', 'not in', ['sale', 'done'])],
+                                        'invisible':[('qty_invoiced', '=', 0)]}"
                                     />
                                     <field name="qty_to_invoice" invisible="1"/>
                                     <field
                                         name="product_uom"
                                         force_save="1"
+                                        string="Unit"
+                                        optional="True"
                                         attrs="{
                                             'readonly': [('state', 'in', ('sale','done', 'cancel'))],
                                             'required': [('display_type', '=', False)],
@@ -458,27 +468,31 @@
                                     />
                                     <field
                                         name="analytic_tag_ids"
+                                        optional="True"
                                         groups="analytic.group_analytic_tags"
                                         widget="many2many_tags"
                                     />
                                     <field
                                         name="price_unit"
+                                        optional="True"
                                         attrs="{'readonly': [('qty_invoiced', '&gt;', 0)]}"
                                     />
                                     <field
                                         name="tax_id"
+                                        optional="True"
                                         widget="many2many_tags"
                                         options="{'no_create': True}"
                                         domain="[('type_tax_use','=','sale'),('company_id','=',parent.company_id)]"
                                         attrs="{'readonly': [('qty_invoiced', '&gt;', 0)]}"
                                     />
-                                    <field name="discount" groups="sale.group_discount_per_so_line"/>
+                                    <!-- <field name="discount" groups="sale.group_discount_per_so_line"/> -->
+                                    <field name="discount" string="Disc. %" groups="sale.group_discount_per_so_line" attrs="{'invisible':[('discount', '=', 0)]}"/>
                                     <field name="price_subtotal" widget="monetary" groups="account.group_show_line_subtotals_tax_excluded"/>
-                                    <field name="price_total" widget="monetary" groups="account.group_show_line_subtotals_tax_included"/>
-                                    <field name="state" invisible="1"/>
-                                    <field name="invoice_status" invisible="1"/>
-                                    <field name="customer_lead" invisible="1"/>
-                                    <field name="currency_id" invisible="1"/>
+                                    <field name="price_total" optional="True" widget="monetary" groups="account.group_show_line_subtotals_tax_included"/>
+                                    <field name="state" optional="True" invisible="1"/>
+                                    <field name="invoice_status" optional="True" invisible="1"/>
+                                    <field name="customer_lead" string="Lead Time" invisible="1"/>
+                                    <field name="currency_id" optional="True" invisible="1"/>
                                     <field name="price_tax" invisible="1"/>
                                 </tree>
                                 <kanban class="o_kanban_mobile">
@@ -686,6 +700,8 @@
                 </xpath>
             </field>
         </record>
+
+        
 
         <record id="action_orders" model="ir.actions.act_window">
             <field name="name">Sales Orders</field>
