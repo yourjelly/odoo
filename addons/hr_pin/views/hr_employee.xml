@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_employee_kanban_inherit_hr_attendance_presence" model="ir.ui.view">
+        <field name="name">hr.employee</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='active_group']" position="after">
+                <group string="Login Information" name="identification_group">
+                    <field name="pin"/>
+                    <field name="barcode"/>
+                    <button string="Generate Badge ID" class="btn btn-primary" type="object" name="generate_random_barcode" attrs="{'invisible': [('barcode', '!=', False)]}"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_user_preferences_form" model="ir.ui.view">
+        <field name="name">hr.user.preferences.form.inherit.hr.pin</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="hr.view_users_form_simple_modif" />
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='active_group']" position="after">
+                <group string="Login Information" name="identification_group">
+                    <field name="pin"/>
+                    <field name="barcode"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

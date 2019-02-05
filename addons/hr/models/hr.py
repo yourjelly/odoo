@@ -201,8 +201,6 @@ class Employee(models.Model):
     # misc
     notes = fields.Text('Notes')
     color = fields.Integer('Color Index', default=0)
-    barcode = fields.Char(string="Badge ID", help="ID used for employee identification.", copy=False)
-    pin = fields.Char(string="PIN", help="PIN used to Check In/Out in Kiosk Mode (if enabled in Configuration).", copy=False)
     departure_reason = fields.Selection([
         ('fired', 'Fired'),
         ('resigned', 'Resigned'),
@@ -210,13 +208,16 @@ class Employee(models.Model):
     ], string="Departure Reason")
     departure_description = fields.Text(string="Additional Information")
 
-    _sql_constraints = [('barcode_uniq', 'unique (barcode)', "The Badge ID must be unique, this one is already assigned to another employee.")]
+    _sql_constraints = [
+        ('user_uniq', 'unique (user_id, company_id)', "A user cannot be linked to multiple employees in the same company.")
+    ]
 
-    @api.constrains('pin')
-    def _verify_pin(self):
-        for employee in self:
-            if employee.pin and not employee.pin.isdigit():
-                raise ValidationError(_("The PIN must be a sequence of digits."))
+    @api.onchange('parent_id')
+    def _onchange_parent_id(self):
+        manager = self.parent_id
+        previous_manager = self._origin.parent_id
+        if manager and (self.coach_id == previous_manager or not self.coach_id):
+            self.coach_id = manager
 
     @api.onchange('job_id')
     def _onchange_job_id(self):
@@ -312,10 +313,6 @@ class Employee(models.Model):
                 'context': {'active_id': self.id},
             }
         return res
-
-    @api.multi
-    def generate_random_barcode(self):
-        for i in self: i.barcode = "".join(choice(digits) for i in range(8))
 
     @api.depends('address_home_id.parent_id')
     def _compute_is_address_home_a_company(self):
