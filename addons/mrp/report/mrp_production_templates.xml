@@ -84,12 +84,8 @@
                         <t t-set="has_location" t-value="any(o.move_raw_ids.filtered(lambda x: x.move_line_ids.filtered(lambda x: x.location_id.id)))" groups="stock.group_stock_multi_locations"/>
                         <t t-set="has_serial_number" t-value="any(o.move_raw_ids.filtered(lambda x: x.move_line_ids.filtered(lambda x: x.lot_id or x.lot_name)))" groups="stock.group_production_lot"/>
                         <t t-set="has_product_barcode" t-value="any(o.move_raw_ids.filtered(lambda x: x.product_id.barcode))"/>
-                        <t t-set="has_product_available" t-value="any(o.move_raw_ids.filtered(lambda x: x.move_line_ids.filtered(lambda x: x.product_qty)))"/>
-                        <t t-if="o.state=='done'">
-                            <t t-set="has_product_available" t-value="any(o.move_raw_ids.filtered(lambda x: x.move_line_ids.filtered(lambda x: x.qty_done)))"/>
-                        </t>
                         <thead>
-                            <tr t-if="has_product_available">
+                            <tr>
                                 <th>Product</th>
                                 <th>Quantity</th>
                                 <th><span t-if="has_location">From</span></th>
@@ -98,17 +94,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <t t-if="has_product_available and o.move_raw_ids" >
+                            <t t-if="o.move_raw_ids" >
                                 <t t-set="lines" t-value="o.move_raw_ids"/>
                                 <t t-foreach="lines" t-as="line">
-                                    <t t-set="move_lines" t-value="line.move_line_ids.filtered(lambda x: x.state != 'done' and x.product_qty)"/>
                                     <t t-if="o.state == 'done'">
-                                        <t t-set="move_lines" t-value="line.move_line_ids.filtered(lambda x: x.state == 'done' and x.qty_done)"/>
+                                        <t t-set="line" t-value="line.move_line_ids.filtered(lambda x: x.state == 'done' and x.qty_done)"/>
                                     </t>
-                                    <t t-foreach="move_lines" t-as="ml">
+                                    <t t-foreach="line" t-as="ml">
                                         <tr>
                                             <td>
-                                                <span t-field="line.product_id"/>
+                                                <span t-field="ml.product_id"/>
                                             </td>
                                             <td>
                                                 <span t-esc="ml.product_uom_qty" t-if="ml.state !='done'"/>
@@ -136,10 +131,6 @@
                             </t>
                         </tbody>
                     </table>
-                    <t t-set="has_product_reserved" t-value="o.move_raw_ids.filtered(lambda x: x.product_uom_qty != x.reserved_availability)"/>
-                    <p t-if="o.state !='done' and (not has_product_available or has_product_reserved)" class="fa fa-exclamation-triangle">
-                        All components could not be reserved. Click on the "Check Availability button" to try to reserve components.
-                    </p>
                     <div class="oe_structure"/>
                 </div>
             </t>
