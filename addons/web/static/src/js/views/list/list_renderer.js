@@ -44,6 +44,7 @@ var ListRenderer = BasicRenderer.extend({
         'keydown tr': '_onKeyDown',
         'keydown thead tr': '_onKeyDown',
         "click .o_add_column_dropdown .dropdown-item input": "_onAddColumn",
+        "click tr .o_list_record_open": "_onOpenAdvancedFieldClick",
     },
     /**
      * @constructor
@@ -184,6 +185,7 @@ var ListRenderer = BasicRenderer.extend({
         var n = this.columns.length;
         n = this.hiddenColumns ? n + 1 : n;
         n = !this.editable ? n + 1 : n;
+        n = n + 1; // column for open advanced field icon
         return this.hasSelectors ? n + 1 : n;
     },
     /**
@@ -656,6 +658,11 @@ var ListRenderer = BasicRenderer.extend({
                 class: 'o-data-cell',
             }))
         }
+        if (!this.editable && this.hiddenColumns) {
+            var $icon = $('<button>', {class: 'fa fa-external-link', name: 'open', 'aria-label': _t('Open ') + ($cells.length+1)});
+            var $td = $('<td>', {class: 'o_list_record_open'}).append($icon);
+            $cells.push($td);
+        }
         delete this.defs;
         var $tr = $('<tr/>', { class: 'o_data_row' })
             .data('id', record.id)
@@ -665,6 +672,25 @@ var ListRenderer = BasicRenderer.extend({
         }
         this._setDecorationClasses(record, $tr);
         return $tr;
+    },
+    _onOpenAdvancedFieldClick: function (event) {
+        event.stopPropagation();
+        debugger;
+        var $row = $(event.target).closest('tr');
+        var id = $row.data('id');
+        if (id) {
+            this.trigger_up('open_record', { id: id, target: event.target });
+            /*var action = {
+                type: 'ir.actions.act_window',
+                res_model: 'sale.order',
+                view_mode: 'form',
+                view_type: 'form',
+                views: [[false, 'form']],
+                target: 'current',
+                res_id: id,
+            };
+            this.do_action(action);*/
+        }
     },
     /**
      * Render all rows. This method should only called when the view is not
