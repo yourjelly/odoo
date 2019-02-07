@@ -972,13 +972,14 @@
     </button>
 </t>
 <t t-name="FieldColorPickerChar">
-    <div class="col-4 border-0 pl-0">
-        <input type="text" t-att-name="widget.name" class="input_colorpicker"/>
+    <div>
+        <span class="o_field_colorpicker">  </span>
     </div>
 </t>
 <t t-name="FieldIframeChar">
     <div class="o_iframe_wrap">
-        <iframe class="o_frame_widget" allowfullscreen="true"/>
+        <i class="fa fa-spinner fa-spin fa-5x o_iframe_loader"> </i>
+        <iframe class="o_frame_widget"/>
     </div>
 </t>
 <t t-name="FieldFontChar">

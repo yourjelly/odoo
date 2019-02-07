@@ -1400,20 +1400,10 @@ var CharCopyClipboard = FieldChar.extend(CopyClipboard, {
     }
 });
 
-var FieldColorPickerChar = FieldChar.extend({
-
+var FieldColorPickerChar = AbstractField.extend({
     template: 'FieldColorPickerChar',
-    widget_class: 'oe_form_field_color',
     events: {
-        'click .input_colorpicker': '_onColorClick',
-    },
-
-    /**
-    * @constructor
-    */
-    init: function () {
-        this._super.apply(this, arguments);
-        this.defaultColor = this.value;
+        'click .o_field_colorpicker': '_onColorClick',
     },
 
     /**
@@ -1421,57 +1411,55 @@ var FieldColorPickerChar = FieldChar.extend({
     * @private
     */
     _render: function () {
-        if (this.defaultColor) {
-            this.$('.input_colorpicker').css('background-color', this.defaultColor);
-        }
+        this.$('.o_field_colorpicker').css('background-color', this.value);
     },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
     /**
     * @private
     * @param {Event} ev
     */
     _onColorClick: function (ev) {
         var self = this;
-        var $color = $(ev.currentTarget);
         var colorpicker = new ColorpickerDialog(this, {
-            defaultColor: $color.find('.o_color_preview').css('background-color'),
+            defaultColor: this.value,
         });
         colorpicker.on('colorpicker:saved', this, function (ev) {
             ev.stopPropagation();
-            self.$('.input_colorpicker').css('background-color', ev.data.cssColor);
-            this.$input = $('.input_colorpicker');
             this._setValue(ev.data.cssColor);
         });
         colorpicker.open();
     }
 });
 
-var FieldIframeChar = FieldChar.extend({
+var FieldIframeChar = AbstractField.extend({
     template: 'FieldIframeChar',
+    events: {
+        'load iframe': '_onColorClick',
+        'onload iframe': '_onColorClick',
+    },
     /**
-    * @constructor
+    * @override
     */
-    init: function (parent, action) {
-        this._super.apply(this, arguments);
+    start: function () {
+        var self = this;
+        this.$('iframe').on('load', this.onIframeLoad.bind(this));
+        return this._super.apply(this, arguments);
     },
     /**
     * @override
     * @private
     */
     _render: function () {
-        this.$el.find('iframe').attr({ 'src': this.value });
+        this.$('iframe').addClass('d-none');
+        this.$('iframe').attr({ 'src': this.value });
     },
-    /**
-    * @override
-    * @private
-    * @param {Object} record
-    */
-    reset: function (record, event) {
-        this._reset(record, event);
-        if (!event || event.target !== this) {
-            this.$el.find('iframe').attr({ 'src': this.value });
-        }
-        return $.when();
-    },
+    onIframeLoad: function () {
+        this.$('iframe').removeClass('d-none');
+    }
 });
 
 var FieldFontChar = FieldChar.extend({
