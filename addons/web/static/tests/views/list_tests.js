@@ -4112,7 +4112,7 @@ QUnit.module('Views', {
         list.destroy();
     });
 
-    QUnit.test('Grouped Editable List:navigation with tab on a list with multiple groups', function (assert) {
+    QUnit.skip('Grouped Editable List:navigation with tab on a list with multiple groups', function (assert) {
         assert.expect(6);
 
         var list = createView({
@@ -4151,7 +4151,7 @@ QUnit.module('Views', {
         list.destroy();
     });
 
-    QUnit.test('Grouped Editable List: edition, then navigation with tab (with a readonly field)', function (assert) {
+    QUnit.skip('Grouped Editable List: edition, then navigation with tab (with a readonly field)', function (assert) {
         assert.expect(5);
 
         var list = createView({
@@ -4181,7 +4181,7 @@ QUnit.module('Views', {
         list.destroy();
     });
 
-    QUnit.test('Grouped Editable List: navigation with shft+tab key', function (assert) {
+    QUnit.skip('Grouped Editable List: navigation with shft+tab key', function (assert) {
         assert.expect(5);
 
         var list = createView({
@@ -4213,7 +4213,7 @@ QUnit.module('Views', {
         list.destroy();
     });
 
-    QUnit.test('Grouped Editable List:navigation: moving down/up with keydown and keyup', function (assert) {
+    QUnit.skip('Grouped Editable List:navigation: moving down/up with keydown and keyup', function (assert) {
         assert.expect(3);
 
         var list = createView({
@@ -4238,7 +4238,7 @@ QUnit.module('Views', {
         list.destroy();
     });
 
-    QUnit.test('navigation: moving right with keydown from text field', function (assert) {
+    QUnit.skip('navigation: moving right with keydown from text field', function (assert) {
         assert.expect(6);
 
         this.data.foo.fields.foo.type = 'text';

@@ -910,8 +910,9 @@ ListRenderer.include({
      * @returns {Class} Widget returns last widget
      */
     _getLastWidget: function () {
-        var record = this.state.data[this.currentRow];
-        var recordWidgets = this.allFieldWidgets[record.id];
+        var recordID = this.getRecordID(this.currentRow);
+        var recordWidgets = this.allFieldWidgets[recordID];
+
         var lastWidget = _.chain(recordWidgets).filter(function (widget) {
             var isLast =
                 widget.$el.is(':visible') &&
