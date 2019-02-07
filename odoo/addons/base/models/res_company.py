@@ -207,39 +207,40 @@ class Company(models.Model):
 
     @api.depends('external_report_layout_id', 'primary_color', 'secondary_color', 'font', 'report_header', 'report_footer', 'logo')
     def _compute_preview_url(self):
-        for company in self:
-            company_id = self._origin.id if hasattr(self, '_origin') else company.id
-            logo_url = '/logo.png'
-            if company.logo:
-                logo_url = '/web/report_preview_logo/logo_%s.png' % company_id
-                IrAttachment = self.env["ir.attachment"]
-                attachment = IrAttachment.search([('url', '=' , logo_url)])
-                logo = company.logo
-                if isinstance(logo, str):
-                    logo = logo.encode('utf-8')
-                logo = tools.image_resize_image(logo, (180, None))
-                if attachment:
-                    attachment.write({'datas': logo})
-                else:
-                    vals = {
-                        'name': logo_url,
-                        'datas': logo,
-                        'mimetype': 'image/png',
-                        'url': logo_url
-                    }
-                    attachment = IrAttachment.create(vals)
-            values = {
-                'font': company.font,
-                'primary_color': company.primary_color,
-                'secondary_color': company.secondary_color,
-                'external_report_layout_id': company.external_report_layout_id.id,
-                'report_header': company.report_header or '',
-                'report_footer': company.report_footer or '',
-                'company_id': company_id,
-                'logo_id': attachment.id,
-                'unique': random.randint(0,1000000)
-            }
-            company.layout_url = "/report_layout_preview?%s" % url_encode(values)
+        if not self.env.context.get('report_preview') or len(self) != 1:
+            return
+        company_id = self._origin.id if hasattr(self, '_origin') else self.id
+        values = {
+            'font': self.font,
+            'primary_color': self.primary_color,
+            'secondary_color': self.secondary_color,
+            'external_report_layout_id': self.external_report_layout_id.id,
+            'report_header': self.report_header or '',
+            'report_footer': self.report_footer or '',
+            'company_id': company_id,
+            'unique': random.randint(0, 1000000)
+        }
+        if self.logo:
+            IrAttachment = self.env["ir.attachment"]
+            logo_url = '/web/report_preview_logo/logo_%s.png' % company_id
+            logo_attachment = IrAttachment.search([('url', '=' , logo_url)])
+            logo = self.logo
+            if isinstance(logo, str):
+                logo = logo.encode('utf-8')
+            logo_base64 = tools.image_resize_image(logo, (1024, None), avoid_if_small=True)
+            if logo_attachment:
+                logo_attachment.write({'datas': logo_base64})
+            else:
+                vals = {
+                    'name': logo_url,
+                    'datas': logo_base64,
+                    'mimetype': 'image/png',
+                    'url': logo_url
+                }
+                logo_attachment = IrAttachment.create(vals)
+            values['logo_id'] = logo_attachment.id
+
+        self.layout_url = "/report_layout_preview?%s" % url_encode(values)
 
     @api.model
     def create(self, vals):
