@@ -11,11 +11,17 @@ class ReportPreview(http.Controller):
     @http.route('/report_layout_preview', auth="user")
     def report_layout_preview(self, **post):
         self.create_layout_scss(post)
-        return request.render('web.report_layout_preview_report', {
-            'report_preview_layout': post.get('report_layout'),
-            'report_header': post.get('report_header'),
-            'report_footer': post.get('report_footer'),
-            'company_logo': post.get('logo_url')})
+        company = request.env['res.company'].browse(int(post['company_id']))
+        company_data = company.copy_data()[0]
+        for field in ['report_preview_layout', 'report_header', 'report_footer']:
+            if post.get(field):
+                company_data[field] = post.get(field)
+        # set logo and report layout
+        logo = request.env['ir.attachment'].browse(int(post['logo_id']))
+        company_data['logo'] = logo.datas
+        company_data['external_report_layout_id'] = int(post['external_report_layout_id'])
+        dummy_company = company.new(company_data)
+        return request.render('web.report_layout_preview_report', {'company': dummy_company })
 
     def create_layout_scss(self, vals):
         IrAttachment = request.env["ir.attachment"]

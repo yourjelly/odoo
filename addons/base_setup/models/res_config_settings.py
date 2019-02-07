@@ -108,4 +108,8 @@ class ResConfigSettings(models.TransientModel):
             'views': [(template.id, 'form')],
             'view_id': template.id,
             'target': 'new',
+            'context': {
+                'report_preview': True,
+                'bin_size': False
+            }
         }

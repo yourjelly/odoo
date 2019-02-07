@@ -3,6 +3,7 @@
 import base64
 import os
 import re
+import random
 from werkzeug.urls import url_encode
 
 from odoo import api, fields, models, tools, _
@@ -204,49 +205,39 @@ class Company(models.Model):
     def cache_restart(self):
         self.clear_caches()
 
-    @api.onchange('logo')
-    def _onchange_logo(self):
-        if self.logo:
-            company_id = self._origin.id if hasattr(self,'_origin') else self.id
-            IrAttachment = self.env["ir.attachment"]
-            url = '/web/content/logo_%s.png' % company_id
-            attachment = IrAttachment.search([('url', '=' , url)])
-            logo = tools.image_resize_image(self.logo.encode('utf-8'), (180, None))
-            if attachment:
-                attachment.write({'datas': logo})
-            else:
-                new_attach = {
-                    'name': url,
-                    'datas': logo,
-                    'mimetype': 'image/png' ,
-                    'res_model': 'res.company',
-                    'url': url,
-                    'res_id': company_id,
-                }
-                attachment = IrAttachment.create(new_attach)
-            values = {
-                'font': self.font,
-                'primary_color': self.primary_color,
-                'secondary_color': self.secondary_color,
-                'report_layout': self.external_report_layout_id.key,
-                'report_header': self.report_header or '',
-                'report_footer': self.report_footer or '',
-                'company_id': company_id,
-                'logo_url': '/web/content/%s?unique=%s' % (attachment.id,self.id)
-            }
-            self.layout_url = "/report_layout_preview?%s" % url_encode(values)
-
-    @api.depends('external_report_layout_id', 'primary_color', 'secondary_color', 'font', 'report_header', 'report_footer')
+    @api.depends('external_report_layout_id', 'primary_color', 'secondary_color', 'font', 'report_header', 'report_footer', 'logo')
     def _compute_preview_url(self):
         for company in self:
+            company_id = self._origin.id if hasattr(self, '_origin') else company.id
+            logo_url = '/logo.png'
+            if company.logo:
+                logo_url = '/web/report_preview_logo/logo_%s.png' % company_id
+                IrAttachment = self.env["ir.attachment"]
+                attachment = IrAttachment.search([('url', '=' , logo_url)])
+                logo = company.logo
+                if isinstance(logo, str):
+                    logo = logo.encode('utf-8')
+                logo = tools.image_resize_image(logo, (180, None))
+                if attachment:
+                    attachment.write({'datas': logo})
+                else:
+                    vals = {
+                        'name': logo_url,
+                        'datas': logo,
+                        'mimetype': 'image/png',
+                        'url': logo_url
+                    }
+                    attachment = IrAttachment.create(vals)
             values = {
                 'font': company.font,
                 'primary_color': company.primary_color,
                 'secondary_color': company.secondary_color,
-                'report_layout': company.external_report_layout_id.key,
+                'external_report_layout_id': company.external_report_layout_id.id,
                 'report_header': company.report_header or '',
                 'report_footer': company.report_footer or '',
-                'company_id': self._origin.id if hasattr(self,'_origin') else company.id,
+                'company_id': company_id,
+                'logo_id': attachment.id,
+                'unique': random.randint(0,1000000)
             }
             company.layout_url = "/report_layout_preview?%s" % url_encode(values)
 
