@@ -158,5 +158,9 @@
         <function model="res.company" name="create_missing_scrap_location">
             <value model="res.company" eval="obj()"/>
         </function>
+        <!-- create the subcontracting locations for each company existing -->
+        <function model="res.company" name="create_missing_subcontracting_location">
+            <value model="res.company" eval="obj()"/>
+        </function>
     </data>
 </odoo>
