@@ -27,7 +27,6 @@ class MigTestCrm(TransactionCase):
             'groups_id': [(6, 0, [self.env.ref('base.group_partner_manager').id])]
         })
 
-
     def test_migration(self):
         # 1. Create a Lead
         lead_form = Form(self.env['crm.lead'], view='crm.crm_case_form_view_oppor')
@@ -38,32 +37,17 @@ class MigTestCrm(TransactionCase):
         lead_form.user_id = self.crm_salesman
         self.lead = lead_form.save()
 
-        # 2. Schedule a Call and Meeting
-        lead_model_id = self.env['ir.model']._get('crm.lead')
-
-        # 2.1 Call
-        call_form = Form(self.env['mail.activity'], view='calendar.mail_activity_view_form_popup')
-        call_form.activity_type_id=self.env['mail.activity.type'].search([('name', '=', 'Call')], limit=1)
-        call_form.note = 'This is a call activity'
-        call_form.res_model_id = lead_model_id
-        call_form.res_id = self.lead.id
-        call_form.date_deadline =  (datetime.now() + timedelta(days=1)).date()
-        call_form.user_id = self.crm_salesman
-        call = call_form.save()
-
-        # 2.2 Meeting
-        meeting_form = Form(self.env['mail.activity'], view='calendar.mail_activity_view_form_popup')
-        meeting_form.activity_type_id=self.env['mail.activity.type'].search([('name', '=', 'Meeting')], limit=1)
-        meeting_form.note = 'This is a meeting activity'
-        meeting_form.res_model_id = lead_model_id
-        meeting_form.res_id = self.lead.id
-        meeting_form.date_deadline = (datetime.now() + timedelta(days=1)).date()
-        meeting_form.user_id = self.crm_salesman
-        meeting = meeting_form.save()
+        # 2. Schedule an Activity
+        activity_form = Form(self.env['mail.activity'], view='calendar.mail_activity_view_form_popup')
+        activity_form.activity_type_id=self.env['mail.activity.type'].search([], limit=1)
+        activity_form.note = 'This is an activity'
+        activity_form.res_model_id = self.env['ir.model']._get('crm.lead')
+        activity_form.res_id = self.lead.id
+        activity_form.date_deadline =  (datetime.now() + timedelta(days=1)).date()
+        activity_form.user_id = self.crm_salesman
+        activity = activity_form.save()
 
         # 3. Mark Lead as won
         wonlead_form = Form(self.lead, view='crm.crm_case_form_view_oppor')
-        wonlead_form.stage_id = self.env['crm.stage'].search([('name', '=', 'Won')], limit=1)
+        wonlead_form.stage_id = self.env['crm.stage'].search([('probability', '=', '100')], limit=1)
         wonlead = wonlead_form.save()
-
-
