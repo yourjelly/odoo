@@ -869,21 +869,20 @@ class AccountMoveLine(models.Model):
                 'currency_id': currency,
             })
 
-        after_list = []
+        cash_basis_subjected = []
         part_rec = self.env['account.partial.reconcile']
         with self.env.norecompute():
             for partial_rec_dict in to_create:
-                dval, cval, tval = dc_vals[partial_rec_dict['debit_move_id'], partial_rec_dict['credit_move_id']]
-                # /!\ NOTE: Exchange rate differences shall not create cash tax
-                # basis entries and we will create first their apr records
-                # because the order of creation of apr records do matter for
-                # the `_get_matched_percentage` method in aml afterwards when
-                # it is used in the apr's where cash_basis applies.
-                if not (not tval and dval.currency_id and cval.currency_id):
-                    after_list.append(partial_rec_dict)
-                    continue
-                part_rec.create(partial_rec_dict)
-            for after_rec_dict in after_list:
+                debit_move, credit_move, amount_residual_currency = dc_vals[partial_rec_dict['debit_move_id'], partial_rec_dict['credit_move_id']]
+                # /!\ NOTE: Exchange rate differences shouldn't create cash basis entries
+                # i. e: we don't really receive/give money in a customer/provider fashion
+                # Since those are not subjected to cash basis computation we process them first
+                if not amount_residual_currency and debit_move.currency_id and credit_move.currency_id:
+                    part_rec.create(partial_rec_dict)
+                else:
+                    cash_basis_subjected.append(partial_rec_dict)
+
+            for after_rec_dict in cash_basis_subjected:
                 new_rec = part_rec.create(after_rec_dict)
                 if cash_basis:
                     new_rec.create_tax_cash_basis_entry(cash_basis_percentage_before_rec)
