@@ -311,7 +311,7 @@ function classToStyle($editable) {
             }
         }
         else if (node.nodeName === 'IMG' && $target.is('.mx-auto.d-block')) {
-            $target.wrap('<p class="o_outlook_hack" style="text-align:center;margin:0"/>');
+            $target.wrap('<p class="o_outlook_hack" style="text-align:center;margin:0px;"/>');
         }
         else if (node.nodeName === 'A' && $target.hasClass('btn') && $target.hasClass('btn-link')) {
             $target.css({'border': 'none'});
