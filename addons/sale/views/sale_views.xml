@@ -400,7 +400,7 @@
                                     <field name="display_type" invisible="1"/>
 
                                     <field name="product_updatable" invisible="1"/>
-                                    <field
+                                    <!-- <field
                                         name="product_id"
                                         attrs="{
                                             'readonly': [('product_updatable', '=', False)],
@@ -408,6 +408,7 @@
                                         }"
                                         force_save="1"
                                         optional="True"
+                                        advanced="True"
                                         context="{
                                             'partner_id': parent.partner_id,
                                             'quantity': product_uom_qty,
@@ -417,14 +418,15 @@
                                             'default_lst_price': price_unit,
                                             'default_description_sale': name
                                         }"
-                                    />
-                                    <!-- <field name="product_custom_attribute_value_ids" invisible="1" />
-                                    <field name="product_no_variant_attribute_value_ids" invisible="1" /> -->
+                                    /> -->
+                                    <field name="product_custom_attribute_value_ids" invisible="1" />
+                                    <field name="product_no_variant_attribute_value_ids" invisible="1" />
                                     <field name="name" string="Product" widget="section_and_note_text"/>
                                     <field
                                         name="product_uom_qty"
                                         string="Ordered"
                                         optional="True"
+                                        advanced="True"
                                         context="{
                                             'partner_id': parent.partner_id,
                                             'quantity': product_uom_qty,
@@ -437,6 +439,7 @@
                                         name="qty_delivered"
                                         string="Delivered"
                                         optional="True"
+                                        advanced="True"
                                         attrs="{
                                             'invisible': [('qty_delivered', '=', 0)],
                                             'column_invisible': [('parent.state', 'not in', ['sale', 'done'])],
@@ -449,6 +452,7 @@
                                         name="qty_invoiced"
                                         string="Invoiced"
                                         optional="True"
+                                        advanced="True"
                                         attrs="{'column_invisible': [('parent.state', 'not in', ['sale', 'done'])],
                                         'invisible':[('qty_invoiced', '=', 0)]}"
                                     />
@@ -458,6 +462,7 @@
                                         force_save="1"
                                         string="Unit"
                                         optional="True"
+                                        advanced="True"
                                         attrs="{
                                             'readonly': [('state', 'in', ('sale','done', 'cancel'))],
                                             'required': [('display_type', '=', False)],
@@ -466,33 +471,35 @@
                                         groups="uom.group_uom"
                                         options='{"no_open": True}'
                                     />
-                                    <field
+                                    <!-- <field
                                         name="analytic_tag_ids"
                                         optional="True"
+                                        advanced="True"
                                         groups="analytic.group_analytic_tags"
                                         widget="many2many_tags"
-                                    />
+                                    /> -->
                                     <field
                                         name="price_unit"
                                         optional="True"
+                                        advanced="True"
                                         attrs="{'readonly': [('qty_invoiced', '&gt;', 0)]}"
                                     />
                                     <field
                                         name="tax_id"
                                         optional="True"
+                                        advanced="True"
                                         widget="many2many_tags"
                                         options="{'no_create': True}"
                                         domain="[('type_tax_use','=','sale'),('company_id','=',parent.company_id)]"
                                         attrs="{'readonly': [('qty_invoiced', '&gt;', 0)]}"
                                     />
-                                    <!-- <field name="discount" groups="sale.group_discount_per_so_line"/> -->
                                     <field name="discount" string="Disc. %" groups="sale.group_discount_per_so_line" attrs="{'invisible':[('discount', '=', 0)]}"/>
                                     <field name="price_subtotal" widget="monetary" groups="account.group_show_line_subtotals_tax_excluded"/>
-                                    <field name="price_total" optional="True" widget="monetary" groups="account.group_show_line_subtotals_tax_included"/>
-                                    <field name="state" optional="True" invisible="1"/>
-                                    <field name="invoice_status" optional="True" invisible="1"/>
-                                    <field name="customer_lead" string="Lead Time" invisible="1"/>
-                                    <field name="currency_id" optional="True" invisible="1"/>
+                                    <field name="price_total" optional="True" advanced="True" widget="monetary" groups="account.group_show_line_subtotals_tax_included"/>
+                                    <field name="state" optional="True" advanced="True" invisible="1"/>
+                                    <field name="invoice_status" optional="True" advanced="True" invisible="1"/>
+                                    <!-- <field name="customer_lead" string="Lead Time" invisible="1"/> -->
+                                    <field name="currency_id" optional="True" advanced="True" invisible="1"/>
                                     <field name="price_tax" invisible="1"/>
                                 </tree>
                                 <kanban class="o_kanban_mobile">
@@ -615,6 +622,35 @@
             </field>
         </record>
 
+        <record id="sale_order_line_advanced_field_view_form" model="ir.ui.view">
+            <field name="name">sale.order.line.advanced.field.form</field>
+            <field name="model">sale.order.line</field>
+            <field name="arch" type="xml">
+                <form string="Order Line Advanced Field">
+                    <group>
+                        <group>
+                            <field name="product_id" invisible="1"/>
+                            <label for="customer_lead" string="Lead Time"/>
+                            <div>
+                                <field name="customer_lead" class="oe_inline"/> days
+                            </div>
+                        </group>
+                        <group>
+                            <field name="analytic_tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                        </group>
+                    </group>
+                    <field name="name"/>
+                    <footer>
+                        <div>
+                            <button name="button_save" string="Save" type="object" default_focus="1" class="oe_highlight"/>
+                            <button string="Discard" class="btn btn-secondary" special="cancel" />
+                            <button string="Remove" class="btn btn-secondary" special="cancel" />
+                        </div>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
         <!-- inherited view to make the order lines list in the form non-editable
              for the members of some usability groups -->
         <record id="view_order_form_editable_list" model="ir.ui.view">
@@ -700,8 +736,6 @@
                 </xpath>
             </field>
         </record>
-
-        
 
         <record id="action_orders" model="ir.actions.act_window">
             <field name="name">Sales Orders</field>

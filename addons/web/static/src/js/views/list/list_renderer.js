@@ -217,6 +217,10 @@ var ListRenderer = BasicRenderer.extend({
         this.columns = colGroup.columns;
         this.displayedColumns = _.map(this.columns, function (col) {return col.attrs.name});
         this.hiddenColumns = colGroup.hiddenColumns;
+        this.advancedColumns = _.filter(this.allColumns, function(col) {
+            return col.attrs.optional === "True" && !(col.attrs.modifiers && col.attrs.modifiers.required);
+        });
+        this.advancedColumnsList = [];
     },
     /**
      * Render a list of <td>, with aggregates if available.  It can be displayed
@@ -658,7 +662,7 @@ var ListRenderer = BasicRenderer.extend({
                 class: 'o-data-cell',
             }))
         }
-        if (!this.editable && this.hiddenColumns) {
+        if (this.advancedColumns.length) {
             var $icon = $('<button>', {class: 'fa fa-external-link', name: 'open', 'aria-label': _t('Open ') + ($cells.length+1)});
             var $td = $('<td>', {class: 'o_list_record_open'}).append($icon);
             $cells.push($td);
@@ -673,24 +677,24 @@ var ListRenderer = BasicRenderer.extend({
         this._setDecorationClasses(record, $tr);
         return $tr;
     },
-    _onOpenAdvancedFieldClick: function (event) {
-        event.stopPropagation();
-        debugger;
-        var $row = $(event.target).closest('tr');
-        var id = $row.data('id');
-        if (id) {
-            this.trigger_up('open_record', { id: id, target: event.target });
-            /*var action = {
+    _onOpenAdvancedFieldClick: function (ev) {
+        ev.stopPropagation();
+        var id = $(event.target).closest('tr').data('id');
+        // this.trigger_up('open_row', {id: id});
+        this.trigger_up('open_record', {id: id});
+        /*if (id) {
+            var action = {
+                name: 'Open: Order Lines',
                 type: 'ir.actions.act_window',
-                res_model: 'sale.order',
+                res_model: 'sale.order.line',
                 view_mode: 'form',
                 view_type: 'form',
                 views: [[false, 'form']],
-                target: 'current',
-                res_id: id,
+                target: 'new',
+                res_id: 21,
             };
-            this.do_action(action);*/
-        }
+            this.do_action(action);
+        }*/
     },
     /**
      * Render all rows. This method should only called when the view is not
@@ -926,6 +930,7 @@ var ListRenderer = BasicRenderer.extend({
             });
             var rmCol = this.columns[rmIndex];
             this.displayedColumns.splice(this.displayedColumns.indexOf(rmCol.attrs.name), 1);
+            this.advancedColumnsList.splice(this.advancedColumnsList.indexOf(rmCol.attrs.name), 1);
             this.columns.splice(rmIndex, 1);
         } else {
             var self = this;
@@ -933,6 +938,7 @@ var ListRenderer = BasicRenderer.extend({
             this.columns = _.filter(this.allColumns, function (col) {
                 return _.contains(self.displayedColumns, col.attrs.name);
             });
+            this.advancedColumnsList.push(ev.currentTarget.value);
         }
         this._renderView();
     },
