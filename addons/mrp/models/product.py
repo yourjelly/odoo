@@ -136,3 +136,15 @@ class ProductProduct(models.Model):
             'graph_measure': 'product_uom_qty',
         }
         return action
+
+
+class SupplierInfo(models.Model):
+    _inherit = 'product.supplierinfo'
+
+    is_subcontractor = fields.Boolean('Subcontracted', compute='_compute_is_subcontractor')
+    bom_subcontract = fields.Many2one('mrp.bom', 'Bill of Materials')
+
+    @api.depends('name')
+    def _compute_is_subcontractor(self):
+        for supplierinfo in self:
+            supplierinfo.is_subcontractor = True if supplierinfo.name.type == 'subcontractor' else False
