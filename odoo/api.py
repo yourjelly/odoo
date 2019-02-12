@@ -871,6 +871,19 @@ class Environment(Mapping):
         finally:
             self._protected.update(saved)
 
+    @contextmanager
+    def computing(self, fields, records):
+        with self.protecting(fields, records):
+            computed = self.all.computed
+            saved = {}
+            try:
+                for field in fields:
+                    ids = saved[field] = computed[field]
+                    computed[field] = ids.union(records._ids)
+                yield
+            finally:
+                computed.update(saved)
+
     def field_todo(self, field):
         """ Return a recordset with all records to recompute for ``field``. """
         ids = {rid for recs in self.all.todo.get(field, ()) for rid in recs.ids}
@@ -939,6 +952,7 @@ class Environments(object):
         self.cache = Cache()            # cache for all records
         self.todo = {}                  # recomputations {field: [records]}
         self.mode = False               # flag for draft/onchange
+        self.computed = defaultdict(frozenset)
         self.recompute = True
 
     def add(self, env):
@@ -1052,19 +1066,34 @@ class Cache(object):
 
     def invalidate(self, spec=None):
         """ Invalidate the cache, partially or totally depending on ``spec``. """
+        computed = Environment.envs.computed
+        badfields = set()
+
         if spec is None:
+            for field, ids in computed.items():
+                if ids:
+                    badfields.add(field)
             self._data.clear()
         elif spec:
             for field, ids in spec:
                 if ids is None:
+                    if computed.get(field):
+                        badfields.add(field)
                     for data in self._data.values():
                         data.pop(field, None)
                 else:
+                    if not computed.get(field, frozenset()).isdisjoint(ids):
+                        badfields.add(field)
                     for data in self._data.values():
                         field_cache = data.get(field)
                         if field_cache:
                             for id in ids:
                                 field_cache.pop(id, None)
+
+        if badfields:
+            _logger.warning("Invalidate computed fields %s",
+                            ", ".join(sorted(str(field) for field in badfields)),
+                            stack_info=True)
 
     def check(self, env):
         """ Check the consistency of the cache for the given environment. """
