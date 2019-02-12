@@ -1,9 +1,10 @@
 odoo.define('mail.chatter_tests', function (require) {
 "use strict";
 
-var mailTestUtils = require('mail.testUtils');
+var mailTestUtilsOwl = require('mail.owl.test_utils');
 
 var core = require('web.core');
+var FormRenderer = require('web.FormRenderer');
 var FormView = require('web.FormView');
 var KanbanView = require('web.KanbanView');
 var testUtils = require('web.test_utils');
@@ -23,7 +24,11 @@ QUnit.module('Chatter', {
         _.debounce = _.identity;
         _.throttle = _.identity;
 
-        this.services = mailTestUtils.getMailServices();
+        testUtils.mock.patch(FormRenderer, {
+            DISPLAY_OLD_CHATTER: false,
+        });
+
+        this.services = mailTestUtilsOwl.getMailServices();
         this.data = {
             'res.partner': {
                 fields: {
@@ -186,11 +191,13 @@ QUnit.module('Chatter', {
         // unpatch _.debounce and _.throttle
         _.debounce = this.underscoreDebounce;
         _.throttle = this.underscoreThrottle;
+
+        testUtils.mock.unpatch(FormRenderer);
     }
 });
 
 QUnit.test('basic rendering', async function (assert) {
-    assert.expect(9);
+    assert.expect(8);
 
     var count = 0;
     var unwanted_read_count = 0;
@@ -224,13 +231,14 @@ QUnit.test('basic rendering', async function (assert) {
         },
         res_id: 2,
     });
+
+    await testUtils.nextTick(); // chatter rendering
     assert.containsOnce(form, '.o_mail_activity', "there should be an activity widget");
     assert.containsOnce(form, '.o_chatter_topbar .o_chatter_button_schedule_activity',
     "there should be a 'Schedule an activity' button in the chatter's topbar");
     assert.containsOnce(form, '.o_chatter_topbar .o_followers',
     "there should be a followers widget, moved inside the chatter's topbar");
     assert.containsOnce(form, '.o_chatter', "there should be a chatter widget");
-    assert.containsOnce(form, '.o_mail_thread');
     assert.containsOnce(form, '.o_chatter_button_attachment', "should have one attachment button");
     assert.containsNone(form, '.o_chatter_topbar .o_chatter_button_log_note',
         "log note button should not be available");
@@ -324,6 +332,7 @@ QUnit.test('Activity Done keep feedback on blur', async function (assert) {
                 '</div>' +
             '</form>',
     });
+    await testUtils.nextTick(); // chatter rendering
     // sanity checks
     var $activityEl = form.$('.o_mail_activity[name=activity_ids]');
     assert.strictEqual($activityEl.find('.o_thread_message').length, 1,
@@ -416,6 +425,7 @@ QUnit.test('Activity Done by uploading a file', async function (assert) {
             return this._super.apply(this, arguments);
         },
     });
+    await testUtils.nextTick(); // chatter rendering
 
     var $activity = form.$('.o_mail_activity[name=activity_ids]');
     assert.containsOnce($activity, '.o_thread_message', 'There should be one activity');
@@ -468,6 +478,7 @@ QUnit.test('attachmentBox basic rendering', async function (assert) {
             return result;
         },
     });
+    await testUtils.nextTick(); // chatter rendering
     var $button = form.$('.o_chatter_button_attachment');
     assert.strictEqual($button.length, 1, "should have one attachment button");
     await testUtils.dom.click($button);
@@ -530,6 +541,7 @@ QUnit.test('chatter in create mode', async function (assert) {
             return this._super(route, args);
         },
     });
+    await testUtils.nextTick(); // chatter rendering
 
     assert.containsOnce(form, '.o_chatter',
         "chatter should be displayed");
@@ -597,6 +609,7 @@ QUnit.test('chatter rendering inside the sheet', async function (assert) {
             return this._super(route, args);
         },
     });
+    await testUtils.nextTick(); // chatter rendering
 
     assert.containsOnce(form, '.o_chatter',
         "chatter should be displayed");
@@ -642,6 +655,7 @@ QUnit.test('kanban activity widget with no activity', async function (assert) {
         },
         session: {uid: 2},
     });
+    await testUtils.nextTick(); // chatter rendering
 
     var $record = kanban.$('.o_kanban_record').first();
     assert.ok($record.find('.o_mail_activity .o_activity_color_default').length,
@@ -697,6 +711,7 @@ QUnit.test('kanban activity widget with an activity', async function (assert) {
         },
         session: {uid:2},
     });
+    await testUtils.nextTick(); // chatter rendering
 
     var $record = kanban.$('.o_kanban_record').first();
     assert.ok($record.find('.o_mail_activity .o_activity_color_today').length,
@@ -772,6 +787,7 @@ QUnit.test('kanban activity widget popover test', async function (assert) {
             return this._super(route, args);
         },
     });
+    await testUtils.nextTick(); // chatter rendering
 
     var $record = kanban.$('.o_kanban_record').first();
 
@@ -874,6 +890,7 @@ QUnit.test('chatter: post, receive and star messages', async function (assert) {
         },
         session: {},
     });
+    await testUtils.nextTick(); // chatter rendering
 
     assert.ok(form.$('.o_chatter_topbar .o_chatter_button_log_note').length,
         "log note button should be available");
@@ -984,6 +1001,7 @@ QUnit.test('chatter: post a message disable the send button', async function(ass
             return this._super(route, args);
         },
     });
+    await testUtils.nextTick(); // chatter rendering
 
     await testUtils.dom.click(form.$('.o_chatter_button_new_message'));
     assert.notOk(form.$('.o_composer_button_send').prop('disabled'),
@@ -1030,6 +1048,7 @@ QUnit.test('chatter: post message failure keep message', async function(assert) 
             return this._super(route, args);
         },
     });
+    await testUtils.nextTick(); // chatter rendering
 
     await testUtils.dom.click(form.$('.o_chatter_button_new_message'));
     assert.notOk(form.$('.o_composer_button_send').prop('disabled'),
@@ -1064,6 +1083,7 @@ QUnit.test('chatter: receive notif when document is open', async function (asser
             partner_id: 3,
         },
     });
+    await testUtils.nextTick(); // chatter rendering
 
     var thread = form.call('mail_service', 'getDocumentThread', 'partner', 2);
     assert.strictEqual(thread.getUnreadCounter(), 0,
@@ -1133,6 +1153,7 @@ QUnit.test('chatter: access document with some notifs', async function (assert) 
             return this._super.apply(this, arguments);
         },
     });
+    await testUtils.nextTick(); // chatter rendering
 
     assert.verifySteps(['set_message_done']);
 
@@ -1184,6 +1205,7 @@ QUnit.test('chatter: post a message and switch in edit mode', async function (as
             return this._super(route, args);
         },
     });
+    await testUtils.nextTick(); // chatter rendering
 
     assert.containsNone(form, '.o_thread_message', "thread should not contain messages");
 

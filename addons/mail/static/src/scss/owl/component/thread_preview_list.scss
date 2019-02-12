@@ -1,0 +1,23 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+ .o_ThreadPreviewList {
+    display: flex;
+    flex-flow: column;
+}
+
+.o_ThreadPreviewList_noConversation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 50px;
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o_ThreadPreviewList_preview:not(:last-of-type) {
+    border-bottom: 1px solid gray('400');
+}

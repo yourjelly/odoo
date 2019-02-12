@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <div
+        class="o_ThreadPreviewList"
+        owl="1"
+        t-name="mail.component.ThreadPreviewList">
+        <div
+            class="o_ThreadPreviewList_noConversation"
+            t-if="props.threadLocalIds.length === 0">
+            No conversation yet...
+        </div>
+        <t t-else="">
+            <ThreadPreview
+                class="o_ThreadPreviewList_preview"
+                threadLocalId="threadLocalId"
+                t-as="threadLocalId"
+                t-foreach="props.threadLocalIds"
+                t-key="threadLocalId"
+                t-on-clicked="_onClickedPreview"/>
+        </t>
+    </div>
+
+</templates>

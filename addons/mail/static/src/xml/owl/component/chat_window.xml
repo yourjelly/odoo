@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <div
+        class="o_ChatWindow"
+        owl="1"
+        t-att-data-id="id"
+        t-att-class="{
+            o_focused: state.focused,
+            o_folded: folded,
+            o_new_message: props.chatWindowId === 'new_message',
+        }"
+        t-attf-data-thread-local-id="{{ props.thread ? props.thread.localId : '' }}"
+        t-name="mail.component.ChatWindow"
+        t-on-click.stop="_onClick">
+        <Header
+            chatWindowId="props.chatWindowId"
+            class="o_ChatWindow_header"
+            expand="props.expand"
+            shiftLeft="props.shiftLeft"
+            shiftRight="props.shiftRight"
+            t-on-clicked.stop="_onClickedHeader"
+            t-on-close="_onCloseHeader"/>
+        <Thread
+            class="o_ChatWindow_thread"
+            composerAvatar="false"
+            composerAttachmentEditable="true"
+            composerAttachmentLayout="'card'"
+            composerAttachmentLayoutCardLabel="false"
+            composerSendButton="false"
+            domain="[]"
+            redirectAuthor="props.thread.channel_type !== 'chat'"
+            showComposer="props.thread._model !== 'mail.box'"
+            squashCloseMessages="props.thread._model !== 'mail.box'"
+            threadLocalId="props.chatWindowId"
+            t-if="props.thread"
+            t-on-focusin.stop="_onFocusinThread"
+            t-ref="thread"/>
+        <div
+            class="o_ChatWindow_newMessageForm"
+            t-else=""
+            t-key="'newMessageContainer'">
+            <span class="o_ChatWindow_newMessageFormLabel">
+                To:
+            </span>
+            <AutocompleteInput
+                class="o_ChatWindow_newMessageFormInput"
+                html="true"
+                select="_onAutocompleteSelect"
+                source="_onAutocompleteSource"
+                t-ref="input"/>
+        </div>
+    </div>
+
+</templates>

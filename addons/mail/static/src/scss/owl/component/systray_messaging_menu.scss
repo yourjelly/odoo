@@ -1,0 +1,67 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o_SystrayMessagingMenu_counter {
+    position: relative;
+    transform: translate(-5px, -5px);
+    margin-right: -10px; // "cancel" right padding of systray items
+}
+
+.o_SystrayMessagingMenu_dropdownMenu {
+    display: flex;
+    flex-flow: column;
+    flex: 0 1 auto;
+    max-height: 400px;
+    width: 350px;
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow-y: auto;
+}
+
+.o_SystrayMessagingMenu_dropdownMenuHeader {
+    display: flex;
+}
+
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o_SystrayMessagingMenu {
+
+    &.show {
+        background-color: rgba(black, 0.1);
+    }
+}
+
+.o_SystrayMessagingMenu_counter {
+    background-color: $o-brand-primary;
+}
+
+.o_SystrayMessagingMenu_dropdownMenuHeader {
+    border-bottom: 1px solid gray('400');
+    box-shadow: 0 0 2px gray('400');
+    z-index: 1;
+}
+
+.o_SystrayMessagingMenu_filter {
+
+    &.o_active {
+        font-weight: bold;
+    }
+
+    &:not(:hover) {
+
+        &:not(.o_active) {
+            color: gray('500');
+        }
+    }
+}
+
+.o_SystrayMessagingMenu_toggler {
+
+    > i {
+        font-size: larger
+    }
+}

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+   <div
+        class="o_ChatWindowManager"
+        owl="1"
+        t-name="mail.component.ChatWindowManager">
+        <!-- Note: DOM elements are ordered from left to right -->
+        <HiddenMenu
+            class="o_ChatWindowManager_hiddenMenu"
+            chatWindowIds="props.computed.hidden.chatWindowIds"
+            direction="direction"
+            offset="props.computed.hidden.offset"
+            t-if="props.computed.hidden.showMenu"
+            t-on-close-chat-window.stop="_onCloseChatWindow"
+            t-on-select-chat-window.stop="_onSelectChatWindow"
+            t-ref="hidden_menu"/>
+      <t t-set="visibleAmount" t-value="props.computed.visible.length"/>
+      <t t-foreach="reverseVisible" t-as="data">
+        <ChatWindow
+            chatWindowId="data.chatWindowId"
+            direction="direction"
+            expand="true"
+            offset="data.offset"
+            shiftLeft="data_index !== 0"
+            shiftRight="chatWindowShiftRight(data_index)"
+            t-key="data.chatWindowId"
+            t-on-close.stop="_onCloseChatWindow"
+            t-on-select-thread.stop="_onSelectThreadChatWindow"
+            t-on-shift-left.stop="_onShiftLeftChatWindow"
+            t-on-shift-right.stop="_onShiftRightChatWindow"
+            t-on-redirect="_onRedirect"
+            t-ref="{{ data.chatWindowId }}"/>
+      </t>
+   </div>
+
+</templates>

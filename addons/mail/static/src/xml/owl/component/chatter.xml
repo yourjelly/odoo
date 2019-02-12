@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <aside
+        class="
+            o_chatter
+            o_Chatter"
+        owl="1"
+        t-name="mail.component.Chatter">
+        <div
+            class="
+                o_chatter_topbar
+                o_Chatter_topbar"
+                t-ref="topbar">
+            <button
+                class="
+                    btn
+                    btn-link
+                    o_chatter_button_new_message
+                    o_Chatter_buttonNewMessage"
+                title="Send a message"
+                type="button"
+                t-att-class="{
+                    o_active: state.showComposer and !state.isComposerLog,
+                }"
+                t-att-disabled="props.record.res_id ? '' : 'disabled'"
+                t-on-click="_onClickSend">
+                Send message
+            </button>
+            <button
+                t-if="hasLogButton"
+                class="
+                    btn
+                    btn-link
+                    o_Chatter_buttonLogNote"
+                title="Log a note. Followers will not be notified."
+                t-att-class="{
+                    o_active: state.showComposer and state.isComposerLog,
+                }"
+                t-att-disabled="props.record.res_id ? '' : 'disabled'"
+                t-on-click="_onClickLog">
+                Log note
+            </button>
+            <button
+                class="
+                    btn
+                    btn-link
+                    o_chatter_button_schedule_activity
+                    o_Chatter_buttonScheduleActivity"
+                title="Log or schedule an activity"
+                t-att-disabled="props.record.res_id ? '' : 'disabled'"
+                t-if="props.mailFields.mail_activity"
+                t-on-click="_onClickScheduleActivity">
+                <i
+                    aria-label="Dates"
+                    class="
+                        fa
+                        fa-clock-o"
+                    role="img"
+                    title="Dates"/> Schedule activity
+            </button>
+            <div
+                class="
+                    o_topbar_right_area
+                    o_Chatter_topbarRightArea"
+                t-ref="topbarRight">
+                <button
+                    t-on-click="_onAttachmentClick"
+                    class="
+                        btn
+                        btn-link
+                        o_chatter_button_attachment"
+                    t-attf-class="{
+                        o_active_attach: state.isAttachmentBoxOpen,
+                    }"
+                    title="View all the attachments of the current record">
+                    <span>
+                        <i class="fa fa-paperclip"/>
+                        <span
+                            t-if="props.mailFields.mail_thread"
+                            class="o_chatter_attachment_button_count"> <t t-esc="props.record.data.message_attachment_count || 0"/>
+                        </span>
+                    </span>
+                </button>
+            </div>
+        </div>
+        <AttachmentBox
+            resId="props.record.res_id"
+            resModel="props.record.model"
+            t-if="state.isAttachmentBoxOpen"
+        />
+        <Composer
+            class="o_Chatter_composer"
+            chatter="true"
+            isLog="state.isComposerLog"
+            recordName="props.record.data.display_name"
+            suggestedRecipients="props.suggestedRecipients"
+            threadLocalId="props.threadLocalId"
+            t-if="state.showComposer"
+            t-on-full-composer-opened.stop="_onFullComposerOpened"
+            t-on-message-posted.stop="_onMessagePosted"/>
+        <div
+            t-if="props.mailFields.mail_activity"
+            t-ref="activity"/>
+        <Thread
+            class="o_Chatter_thread"
+            order="'desc'"
+            showComposer="false"
+            threadLocalId="props.threadLocalId"
+            t-if="props.thread"/>
+    </aside>
+
+</templates>

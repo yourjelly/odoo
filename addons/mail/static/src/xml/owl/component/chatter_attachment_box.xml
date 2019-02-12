@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <div
+        class="
+            o_mail_chatter_attachments
+            o_ChatterAttachmentBox"
+        owl="1"
+        t-name="mail.component.AttachmentBox">
+        <div
+            class="o_chatter_attachment">
+            <div class="o_border_dashed">
+                <span class="o_attach_title">Attachments</span>
+            </div>
+            <AttachmentList
+                attachmentLocalIds="props.imageAttachmentLocalIds"
+                class="
+                    o_attachments_previews
+                    o_ChatterAttachmentBox_imageAttachmentList"
+                downloadable="true"
+                editable="true"
+                layout="'card'"
+                layoutBasicImageSize="'medium'"
+                t-if="props.imageAttachmentLocalIds.length > 0"
+            />
+            <AttachmentList
+                attachmentLocalIds="props.nonImageAttachmentLocalIds"
+                class="
+                    o_attachments_list
+                    o_ChatterAttachmentBox_nonImageAttachmentList"
+                downloadable="true"
+                editable="true"
+                layout="'card'"
+                layoutBasicImageSize="'medium'"
+                t-if="props.nonImageAttachmentLocalIds.length > 0"
+            />
+            <div class="o_chatter_attachment_form">
+                <!-- TODO: use owl component for fileupload -->
+                <!-- <t t-call="HiddenInputFile">
+                    <t t-set="fileupload_id" t-value="widget.fileuploadId"/>
+                    <t t-set="fileupload_action" t-translation="off">/web/binary/upload_attachment</t>
+                    <t t-set="multi_upload" t-value="true"/>
+                    <input type="hidden" name="model" t-att-value="props.currentResModel"/>
+                    <input type="hidden" name="id" t-att-value="props.currentResId"/>
+                    <center><span class="btn btn-link o_upload_attachments_button"><span class="fa fa-plus-square"/> Add Attachments</span></center>
+                </t> -->
+                <center><span class="btn btn-link o_upload_attachments_button"><span class="fa fa-plus-square"/> Add Attachments</span></center>
+            </div>
+        </div>
+    </div>
+</templates>

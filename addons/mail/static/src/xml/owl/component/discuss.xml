@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <div
+        class="o_Discuss"
+        owl="1"
+        t-att-class="{
+            o_fullscreen: props.threadLocalId and props.isMobile and props.thread._model !== 'mail.box',
+            o_mobile: props.isMobile,
+        }"
+        t-name="mail.component.Discuss">
+        <t t-if="props.isMobile">
+            <!-- mobile layout -->
+            <t t-if="!props.threadLocalId or props.thread._model === 'mail.box'">
+                <!-- no thread or mailbox selection -->
+                <MobileMailboxSelection
+                    class="o_Discuss_mobileMailboxSelection"
+                    threadLocalId="props.threadLocalId"
+                    t-if="state.mobileNavbarTab === 'mailbox'"
+                    t-on-select-thread="_onSelectThread"/>
+                <t t-if="state.mobileNavbarTab === 'mailbox'">
+                    <Thread
+                        class="o_Discuss_thread"
+                        composerAttachmentEditable="true"
+                        composerAttachmentLayout="'card'"
+                        composerAttachmentLayoutCardLabel="true"
+                        composerAvatar="!props.isMobile"
+                        composerSendButton="!props.isMobile"
+                        domain="props.domain"
+                        redirectAuthor="props.thread.channel_type !== 'chat'"
+                        scrollTop="state.threadCachesInfo[props.threadCacheLocalId]
+                            ? state.threadCachesInfo[props.threadCacheLocalId].scrollTop
+                            : undefined"
+                        showComposer="props.thread._model !== 'mail.box'"
+                        squashCloseMessages="props.thread._model !== 'mail.box'"
+                        threadLocalId="props.threadLocalId"
+                        t-if="props.threadLocalId"
+                        t-key="props.threadLocalId"
+                        t-on-redirect="_onRedirect"
+                        t-ref="thread"/>
+                    <div
+                        class="o_Discuss_noThread"
+                        t-else="">No conversation.</div>
+                </t>
+                <t t-elif="!props.threadLocalId">
+                   <ThreadPreviewList
+                       class="o_Discuss_threadPreviewList"
+                       filter="state.mobileNavbarTab"
+                       t-on-select-thread="_onSelectThread"/>
+                </t>
+                <MobileNavbar
+                    active="state.mobileNavbarTab"
+                    class="o_Discuss_mobileNavbar"
+                    t-on-select.stop="_onSelectMobileNavbarTab"/>
+            </t>
+            <div
+                class="o_Discuss_content"
+                t-else="">
+                <!-- chat/channel selection (mobile) -->
+                <Thread
+                    class="o_Discuss_thread"
+                    composerAttachmentEditable="true"
+                    composerAttachmentLayout="'card'"
+                    composerAttachmentLayoutCardLabel="true"
+                    composerAvatar="!props.isMobile"
+                    composerSendButton="!props.isMobile"
+                    domain="props.domain"
+                    redirectAuthor="props.thread.channel_type !== 'chat'"
+                    scrollTop="state.threadCachesInfo[props.threadCacheLocalId]
+                        ? state.threadCachesInfo[props.threadCacheLocalId].scrollTop
+                        : undefined"
+                    showComposer="props.thread._model !== 'mail.box'"
+                    squashCloseMessages="props.thread._model !== 'mail.box'"
+                    threadLocalId="props.threadLocalId"
+                    t-key="props.threadLocalId"
+                    t-on-redirect="_onRedirect"
+                    t-on-rendered="_onThreadRendered"
+                    t-ref="thread"/>
+            </div>
+        </t>
+        <t t-else="">
+            <!-- desktop layout -->
+            <Sidebar
+                class="o_Discuss_sidebar"
+                threadLocalId="props.threadLocalId"
+                t-on-select-thread="_onSelectThread"/>
+            <div
+                class="o_Discuss_content">
+                <t t-if="props.threadLocalId">
+                    <Thread
+                        class="o_Discuss_thread"
+                        composerAttachmentEditable="true"
+                        composerAttachmentLayout="'card'"
+                        composerAttachmentLayoutCardLabel="true"
+                        composerAvatar="!props.isMobile"
+                        composerSendButton="!props.isMobile"
+                        domain="props.domain"
+                        redirectAuthor="props.thread.channel_type !== 'chat'"
+                        scrollTop="state.threadCachesInfo[props.threadCacheLocalId]
+                            ? state.threadCachesInfo[props.threadCacheLocalId].scrollTop
+                            : undefined"
+                        showComposer="props.thread._model !== 'mail.box'"
+                        squashCloseMessages="props.thread._model !== 'mail.box'"
+                        threadLocalId="props.threadLocalId"
+                        t-key="props.threadLocalId"
+                        t-on-redirect="_onRedirect"
+                        t-on-rendered="_onThreadRendered"
+                        t-ref="thread"/>
+                </t>
+            </div>
+        </t>
+    </div>
+
+</templates>

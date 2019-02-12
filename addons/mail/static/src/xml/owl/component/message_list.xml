@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <div
+        class="o_MessageList"
+        owl="1"
+        t-name="mail.component.MessageList"
+        t-on-scroll="_onScroll">
+        <div
+            class="o_MessageList_loadingMore"
+            t-if="loadingMore"
+            t-key="'loading'">
+            <i
+                class="
+                    fa
+                    fa-spin
+                    fa-spinner
+                    o_MessageList_loadingMoreIcon"/>Loading...
+        </div>
+        <a
+            class="o_MessageList_loadMore"
+            href="#"
+            t-elif="!props.threadCache.allHistoryLoaded"
+            t-key="'load_more'"
+            t-on-click="_onClickLoadMore"
+            t-ref="loadMore">
+            Load more
+        </a>
+        <t t-set="current_day" t-value="0"/>
+        <t t-set="prev_message" t-value="0"/>
+        <div
+            class="
+                o_MessageList_separator
+                o_MessageList_separatorNewMessages"
+            t-if="props.thread._model === 'mail.channel' and props.thread.message_unread_counter > 0 and !props.thread.seen_message_id"
+            t-key="'new_message_separator'">
+            <hr class="
+                o_MessageList_separatorLine
+                o_MessageList_separatorLineNewMessages"
+            /><span class="
+                o_MessageList_separatorLabel
+                o_MessageList_separatorLabelNewMessages">New messages</span>
+        </div>
+        <t t-foreach="messages" t-as="message">
+            <t t-set="message_day" t-value="getDateDay(message)"/>
+            <div
+                class="
+                    o_MessageList_separator
+                    o_MessageList_separatorDate"
+                t-if="current_day !== message_day"
+                t-key="'date_separator' + message_day">
+                <hr class="o_MessageList_separatorLine"
+                /><span class="
+                    o_MessageList_separatorLabel
+                    o_MessageList_separatorLabelDate"><t t-esc="message_day"/></span><hr class="o_MessageList_separatorLine"/>
+                <t t-set="current_day" t-value="message_day"/>
+                <t t-set="squashed" t-value="false"/>
+            </div>
+            <t t-else="">
+                <t t-set="squashed" t-value="shouldSquash(prev_message, message)"/>
+            </t>
+            <Message
+               class="o_MessageList_message"
+               messageLocalId="message.localId"
+               redirectAuthor="props.redirectAuthor"
+               squashed="squashed"
+               threadLocalId="props.threadLocalId"
+               t-key="message.localId"
+               t-ref="{{ message.localId }}"/>
+            <t t-set="prev_message" t-value="message"/>
+            <div
+                class="
+                    o_MessageList_separator
+                    o_MessageList_separatorNewMessages"
+                t-key="'new_message_separator'"
+                t-if="props.thread._model === 'mail.channel' and props.thread.message_unread_counter > 0 and props.thread.seen_message_id === message.id">
+                <hr class="
+                    o_MessageList_separatorLine
+                    o_MessageList_separatorLineNewMessages"
+                /><span class="
+                    o_MessageList_separatorLabel
+                    o_MessageList_separatorLabelNewMessages">New messages</span>
+            </div>
+        </t>
+    </div>
+
+</templates>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <li
+        class="o_SystrayMessagingMenu"
+        owl="1"
+        t-att-class="{
+            show: state.toggleShow,
+        }"
+        t-att-data-id="id"
+        t-name="mail.component.SystrayMessagingMenu">
+        <a
+            aria-expanded="false"
+            class="
+                o_SystrayMessagingMenu_toggler
+                o-no-caret"
+            data-toggle="dropdown"
+            data-display="static"
+            href="#"
+            role="button"
+            title="Conversations"
+            t-att-class="{
+                show: state.toggleShow,
+            }"
+            t-on-click.stop="_onClickToggleShow">
+            <i
+                aria-label="Messages"
+                class="
+                    fa
+                    fa-comments-o
+                    o_SystrayMessagingMenu_icon"
+                role="img"/>
+            <span
+                class="
+                    badge
+                    badge-pill
+                    o_SystrayMessagingMenu_counter"
+                t-if="props.counter > 0">
+                <t t-esc="props.counter"/>
+            </span>
+        </a>
+        <div
+            class="
+                dropdown-menu
+                dropdown-menu-right
+                o_SystrayMessagingMenu_dropdownMenu"
+            role="menu"
+            t-if="state.toggleShow">
+            <div class="o_SystrayMessagingMenu_dropdownMenuHeader">
+                <button
+                    class="
+                        btn
+                        btn-link
+                        o_SystrayMessagingMenu_filter"
+                    role="tab"
+                    type="button"
+                    t-as="filter"
+                    t-att-data-filter="filter"
+                    t-att-class="{
+                        o_active: state.filter === filter,
+                    }"
+                    t-foreach="['all', 'chat', 'channel']"
+                    t-key="filter"
+                    t-on-click.stop="_onClickFilter">
+                    <t t-if="filter === 'all'">All</t>
+                    <t t-elif="filter === 'chat'">Chat</t>
+                    <t t-elif="filter === 'channel'">Channels</t>
+                </button>
+                <div class="o_autogrow"/>
+                <button
+                    class="
+                        btn
+                        btn-link
+                        o_SystrayMessagingMenu_newMessage"
+                    type="button"
+                    t-if="!props.isDiscussOpen"
+                    t-on-click.stop="_onClickNewMessage">
+                    New message
+                </button>
+            </div>
+            <ThreadPreviewList
+               filter="state.filter"
+               t-on-select-thread.stop="_onSelectThread"/>
+        </div>
+    </li>
+
+</templates>

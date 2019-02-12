@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <div
+        class="o_Attachment"
+        owl="1"
+        t-att-class="{
+            o_basic_layout: props.layout === 'basic',
+            o_card_layout: props.layout === 'card',
+            o_editable: props.editable,
+            o_uploading: props.attachment.uploading,
+            o_viewable: props.attachment.isViewable,
+        }"
+        t-att-title="props.attachment.displayName"
+        t-name="mail.component.Attachment">
+        <t t-if="props.layout === 'basic'">
+            <!-- o_image from mimetype.scss -->
+            <div
+                class="
+                    o_Attachment_image
+                    o_image"
+                t-att-class="{
+                    o_viewable: props.attachment.isViewable,
+                }"
+                t-att-data-mimetype="props.attachment.mimetype"
+                t-att-href="attachmentUrl"
+                t-if="props.attachment.fileType !== 'image'"
+                t-on-click="_onClickImage"/>
+            <!-- o_image from mimetype.scss -->
+            <img
+                class="
+                    o_Attachment_image
+                    o_image"
+                t-att-class="{
+                    o_viewable: props.attachment.isViewable,
+                }"
+                t-att-data-mimetype="props.attachment.mimetype"
+                t-attf-src="web/image/{{ props.attachment.id }}/160x160"
+                t-else=""
+                t-on-click="_onClickImage"/>
+        </t>
+        <t t-elif="props.layout === 'card'">
+            <!-- o_image from mimetype.scss -->
+            <div
+                class="
+                    o_Attachment_image
+                    o_card_layout
+                    o_image"
+                t-att-class="{
+                    o_viewable: props.attachment.isViewable,
+                }"
+                t-att-data-mimetype="props.attachment.mimetype"
+                t-att-href="attachmentUrl"
+                t-att-style="props.attachment.fileType === 'image' ? 'background-image:url(/web/image/' + props.attachment.id + '/38x38/?crop=true' : ''"
+                t-on-click="_onClickImage"/>
+            <div
+                class="o_Attachment_main"
+                t-if="props.layoutCardLabel">
+                <div
+                    class="o_Attachment_filename">
+                    <t t-esc="props.attachment.displayFilename"/>
+                </div>
+                <div
+                    class="o_Attachment_extension">
+                    <t t-esc="props.attachment.extension"/>
+                </div>
+            </div>
+            <div
+                class="o_Attachment_aside">
+                <div
+                    aria-label="Uploading"
+                    class="
+                        o_Attachment_asideItem
+                        o_Attachment_asideItemUploading"
+                    title="Uploading"
+                    t-if="props.attachment.uploading"
+                    t-key="'uploading'">
+                    <i
+                        class="
+                            fa
+                            fa-spin
+                            fa-spinner"/>
+                </div>
+                <div
+                    aria-label="Uploaded"
+                    class="
+                        o_Attachment_asideItem
+                        o_Attachment_asideItemUploaded"
+                    title="Uploaded"
+                    t-if="props.attachment.uploaded"
+                    t-key="'uploaded'">
+                    <i class="
+                        fa
+                        fa-check"/>
+                </div>
+                <div
+                    aria-label="Remove"
+                    class="
+                        o_Attachment_asideItem
+                        o_Attachment_asideItemUnlink"
+                    title="Remove"
+                    t-if="props.attachment.uploaded or props.attachment.res_id"
+                    t-key="'unlink'"
+                    t-on-click="_onClickUnlink">
+                    <i class="fa fa-times"/>
+                </div>
+            </div>
+        </t>
+    </div>
+
+</templates>

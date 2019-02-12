@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <div
+        class="o_Composer"
+        owl="1"
+        t-att-data-id="id"
+        t-att-class="{
+            o_chatter_composer: props.chatter,
+            o_with_avatar: props.avatar,
+        }"
+        t-name="mail.component.Composer">
+        <div
+            class="o_Composer_sidebar"
+            t-if="props.avatar">
+            <img
+                alt=""
+                class="
+                    o_Composer_avatar
+                    rounded-circle"
+                t-att-src="userAvatar"/>
+        </div>
+        <div
+            class="o_Composer_core">
+            <!-- New message composer -->
+            <t t-if="props.chatter and !props.isLog">
+                <!-- Text for followers -->
+                <small
+                    class="o_Composer_followers">
+                    <b
+                        class="text-muted">To: </b>
+                    <em
+                        class="text-muted">Followers of </em>
+                    <b>
+                        <t t-if="props.recordName">
+                            &#32;&quot;<t t-esc="props.recordName"/>&quot;
+                        </t>
+                        <t t-if="!props.recordName">
+                            this document
+                        </t>
+                    </b>
+                </small>
+                <!-- List of followers -->
+                <div
+                    class="o_Composer_suggestedPartners"
+                    t-if="props.fullSuggestedRecipients.length">
+                    <div
+                        t-attf-title="Add as recipient and follower (reason: {{ recipient.reason }})"
+                        t-as="recipient"
+                        t-foreach="state.showAllSuggestedRecipients ? props.fullSuggestedRecipients : props.fullSuggestedRecipients.slice(0, 2)">
+                        <div
+                            class="custom-control custom-checkbox">
+                            <input
+                                class="custom-control-input"
+                                type="checkbox"
+                                t-att-checked="recipient.checked"
+                                t-attf-id="_suggested_partners_{{ recipient_index }}"/>
+                            <label
+                                class="custom-control-label"
+                                t-attf-for="_suggested_partners_{{ recipient_index }}">
+                                <t t-esc="recipient.partner.name"/><t t-if="recipient.partner.email"> (<t t-esc="recipient.partner.email"/>)</t>
+                            </label>
+                        </div>
+                    </div>
+                    <t t-if='props.fullSuggestedRecipients.length > 3'>
+                        <a
+                            href="#"
+                            t-if="state.showAllSuggestedRecipients"
+                            t-on-click="_onShowLessSuggestedRecipients">
+                            Show <t t-esc="props.fullSuggestedRecipients.length - 3"/> less
+                        </a>
+                        <a
+                            href="#"
+                            t-else=""
+                            t-on-click="_onShowMoreSuggestedRecipients">
+                            Show <t t-esc="props.fullSuggestedRecipients.length - 3"/> more
+                        </a>
+                    </t>
+                </div>
+            </t>
+            <div
+                class="o_Composer_main">
+                <Input
+                    class="o_Composer_textInput"
+                    t-on-post-message.stop="_onPostMessageTextInput"
+                    t-ref="textInput"/>
+                <div
+                    class="o_Composer_commands">
+                    <EmojisButton
+                        class="
+                            o_Composer_command
+                            o_Composer_commandEmojis"
+                        t-on-emoji-selection.stop="_onEmojiSelection"/>
+                    <button
+                        aria-label="Add attachment"
+                        class="
+                            btn
+                            btn-secondary
+                            fa
+                            fa-paperclip
+                            o_Composer_command
+                            o_Composer_commandAttachment"
+                        title="Add attachment"
+                        type="button"
+                        t-on-click="_onClickAddAttachment"/>
+                    <button
+                        aria-label="Full composer"
+                        class="
+                            btn
+                            btn-secondary
+                            fa
+                            fa-expand
+                            o_mail_component_Composer__command
+                            o_mail_component_Composer__commandAttachment"
+                        title="Full composer"
+                        type="button"
+                        t-if="props.chatter"
+                        t-on-click="_onClickFullComposer"/>
+                    <button
+                        class="
+                            btn
+                            btn-primary
+                            o_Composer_command
+                            o_Composer_commandSend"
+                        type="button"
+                        t-if="props.sendButton"
+                        t-on-click="_onClickSend">
+                        <t t-if="props.isLog">Log</t><t t-else="">Send</t>
+                    </button>
+                </div>
+            </div>
+            <div
+                class="o_Composer_footer"
+                t-if="showFooter">
+                <AttachmentList
+                    attachmentLocalIds="state.attachmentLocalIds"
+                    class="o_Composer_attachmentList"
+                    editable="props.attachmentEditable"
+                    layout="props.attachmentLayout"
+                    layoutCardLabel="props.attachmentLayoutCardLabel"
+                    t-if="state.attachmentLocalIds.length > 0"/>
+            </div>
+            <input
+                class="
+                    d-none
+                    o_Composer_fileInput"
+                multiple="true"
+                type="file"
+                t-key="'fileInput'"
+                t-on-change="_onChangeAttachment"
+                t-ref="fileInput"/>
+        </div>
+    </div>
+
+</templates>

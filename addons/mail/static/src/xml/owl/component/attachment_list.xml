@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <div
+        class="o_AttachmentList"
+        owl="1"
+        t-name="mail.component.AttachmentList">
+        <Attachment
+            attachmentLocalId="attachmentLocalId"
+            attachmentLocalIds="props.attachmentLocalIds"
+            class="o_AttachmentList_attachment"
+            downloadable="props.downloadable"
+            editable="props.editable"
+            layout="props.layout"
+            layoutBasicImageSize="props.layoutBasicImageSize"
+            layoutCardLabel="layoutCardLabel"
+            t-as="attachmentLocalId"
+            t-foreach="props.attachmentLocalIds"
+            t-key="attachmentLocalId"/>
+    </div>
+
+</templates>

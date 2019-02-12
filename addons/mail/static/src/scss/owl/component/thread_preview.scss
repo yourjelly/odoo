@@ -1,0 +1,119 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o_ThreadPreview {
+    display: flex;
+
+    &:hover .o_ThreadPreview_markAsRead {
+        display: flex;
+    }
+}
+
+.o_ThreadPreview_content {
+    display: flex;
+    flex-flow: column;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 3px;
+}
+
+.o_ThreadPreview_core {
+    display: flex;
+}
+
+.o_ThreadPreview_coreItem {
+    margin: 0 3px;
+
+    &:first-of-type {
+        margin-left: 0px;
+    }
+
+    &:last-of-type {
+        margin-right: 0px;
+    }
+}
+
+.o_ThreadPreview_counter {
+    margin: 0 3px;
+}
+
+.o_ThreadPreview_date {
+    flex: 0 0 auto;
+}
+
+.o_ThreadPreview_header {
+    display: flex;
+}
+
+.o_ThreadPreview_image {
+    width: 40px;
+    height: 40px;
+}
+
+.o_ThreadPreview_inlineText {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.o_ThreadPreview_inlineTextPrefix {
+    margin-right: 3px;
+}
+
+.o_ThreadPreview_markAsRead {
+    display: none;
+    flex: 0 0 auto;
+}
+
+.o_ThreadPreview_name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.o_ThreadPreview_sidebar {
+    margin: 3px;
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o_ThreadPreview {
+    background-color: white;
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+        background-color: gray('300');
+    }
+
+    &.o_unread {
+
+        .o_ThreadPreview_counter,
+        .o_ThreadPreview_name {
+            font-weight: bold;
+        }
+    }
+}
+
+.o_ThreadPreview_core {
+    color: gray('500');
+}
+
+.o_ThreadPreview_date {
+    font-size: x-small;
+    color: gray('500');
+}
+
+.o_ThreadPreview_markAsRead {
+
+    &:hover {
+        opacity: 1;
+        color: gray('600');
+    }
+
+    &:not(:hover) {
+        opacity: 0.8;
+    }
+}

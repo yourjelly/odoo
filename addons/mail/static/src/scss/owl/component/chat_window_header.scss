@@ -1,0 +1,79 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o_ChatWindowHeader {
+    display: flex;
+    align-items: center;
+    height: $o-mail-chat-window-header-height;
+}
+
+.o_ChatWindowHeader_command {
+    padding: 0 8px;
+    display: flex;
+    height: 100%;
+    align-items: center;
+
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+}
+
+.o_ChatWindowHeader_commands {
+    display: flex;
+    height: 100%;
+    align-items:center;
+}
+
+.o_ChatWindowHeader_item {
+    margin: 0 3px;
+
+    &:first-child {
+        margin-left: 10px;
+    }
+
+    &:last-child {
+        margin-right: 10px;
+
+        &.o_ChatWindowHeader_commands {
+            margin-right: 0px; // no margin for commands
+        }
+    }
+}
+
+.o_ChatWindowHeader_name {
+    max-height: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o_ChatWindowHeader {
+    background-color: $o-brand-odoo;
+    color: white;
+    cursor: pointer;
+}
+
+.o_ChatWindowHeader_command {
+    opacity: 0.5;
+
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.o_ChatWindowHeader_commands {
+    opacity: 0.8;
+
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.o_ChatWindowHeader_name {
+    user-select: none;
+}
