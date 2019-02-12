@@ -37,7 +37,7 @@
                         <group>
                             <field name="code"/>
                             <field name="type" widget="radio"/>
-                            <p colspan="2" class="oe_grey oe_edit_only" attrs="{'invisible': [('type','=','normal')]}">
+                            <p colspan="2" class="oe_grey oe_edit_only" attrs="{'invisible': [('type','!=','phantom')]}">
                             <ul>
                                 A BoM of type kit is used to split the product into its components.
                                 <li>
