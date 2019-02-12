@@ -684,6 +684,75 @@ class TestReconciliation(AccountingTestCase):
         full_rec_payable = full_rec_move.line_ids.filtered(lambda l: l.account_id == self.account_rsa)
         self.assertEqual(full_rec_payable.balance, 18.75)
 
+    def test_partial_reconcile_currencies02(self):
+        #                client Account (payable, rsa)
+        #        Debit                      Credit
+        # --------------------------------------------------------
+        # Pay a : 3400       |   Inv a : 1600/0.5 = 3200
+        #
+        dest_journal_id = self.env['account.journal'].search([('type', '=', 'purchase'), ('company_id', '=', self.env.ref('base.main_company').id)], limit=1)
+        account_expenses = self.env['account.account'].search([('user_type_id', '=', self.env.ref('account.data_account_type_expenses').id)], limit=1)
+
+        self.bank_journal_euro.write({'default_debit_account_id': self.account_rsa.id,
+                                      'default_credit_account_id': self.account_rsa.id})
+        dest_journal_id.write({'default_debit_account_id': self.account_rsa.id,
+                               'default_credit_account_id': self.account_rsa.id})
+        # Setting up rates for USD (main_company is in EUR)
+        self.env['res.currency.rate'].create({
+            'name': time.strftime('%Y') + '-' + '07' + '-01',
+            'rate': 0.5,
+            'currency_id': self.currency_usd_id,
+            'company_id': self.env.ref('base.main_company').id})
+
+        self.env['res.currency.rate'].create({
+            'name': time.strftime('%Y') + '-' + '08' + '-01',
+            'rate': 0.45,
+            'currency_id': self.currency_usd_id,
+            'company_id': self.env.ref('base.main_company').id})
+
+        # Preparing Invoices (from vendor)
+        invoice_a = self.account_invoice_model.create({
+            'partner_id': self.partner_agrolait_id,
+            'currency_id': self.currency_usd_id,
+            'name': 'invoice to vendor',
+            'account_id': self.account_rsa.id,
+            'type': 'in_invoice',
+            'date_invoice': time.strftime('%Y') + '-' + '07' + '-01',
+        })
+        self.account_invoice_line_model.create({'product_id': self.product.id,
+            'quantity': 1,
+            'price_unit': 1600,
+            'invoice_id': invoice_a.id,
+            'name': 'product that cost ' + str(1600),
+            'account_id': account_expenses.id,
+        })
+
+        invoice_a.action_invoice_open()
+
+        pay_a = self.env['account.payment'].create({
+            'invoice_ids': [(6, 0, [invoice_a.id])],
+            'currency_id': self.currency_euro_id,
+            'amount': 3400,
+            'payment_date': time.strftime('%Y') + '-' + '08' + '-01',
+            'payment_difference_handling': 'open',
+            'journal_id': self.bank_journal_euro.id,
+            'payment_type': 'outbound',
+            'partner_type': 'supplier',
+            'payment_method_id': self.env.ref('account.account_payment_method_manual_out').id,
+        })
+        pay_a.action_validate_invoice_payment()
+
+        self.assertEqual(invoice_a.residual, 70)
+        self.assertEqual(invoice_a.status, 'open')
+        self.assertEqual(len(pay_a.move_line_ids), 2)
+
+        payable_line = pay_a.move_line_ids.filtered(lambda l: l.debit)
+        
+        self.assertEqual(payable_line.debit, 3400)
+        self.assertEqual(payable_line.amount_residual, 200)
+        self.assertEqual(payable_line.amount_residual_currency, 0)
+        self.assertTrue(payable_line.reconciled)
+
     def test_unreconcile(self):
         # Use case:
         # 2 invoices paid with a single payment. Unreconcile the payment with one invoice, the
