@@ -113,6 +113,7 @@ lu_2011_account_21224,21224,Trademarks and franchises,account.data_account_type_
 lu_2011_account_212251,212251,Copyrights and reproduction rights,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_212258,212258,Other similar rights and values created by the undertaking itself,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_213,213,Goodwill acquired for consideration,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
+lu_2020_account_214,214,Down payments and intangible fixed assets under development,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2020_account_221111,221111,Developed land,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2020_account_221112,221112,Property rights and similar,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2020_account_221118,221118,Other land,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
@@ -149,6 +150,7 @@ lu_2020_account_235112,235112,Unlisted shares,account.data_account_type_current_
 lu_2011_account_23518,23518,Other securities held as fixed assets (equity right),account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_23521,23521,Debentures,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_23528,23528,Other securities held as fixed assets (creditor's right),account.data_account_type_current_assets,FALSE,lu_2011_chart_1
+lu_2020_account_2353,2353,Shares of collective investment funds,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_2358,2358,Other securities held as fixed assets,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2020_account_2361,2361,Loans,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2020_account_2362,2362,Deposits and guarantees paid,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
@@ -168,6 +170,7 @@ lu_2020_account_3621,3621,Inventories of land for resale in Luxembourg,account.d
 lu_2020_account_3622,3622,Inventories of land for resale in foreign countries,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2020_account_3631,3631,Inventories of buildings for resale in Luxembourg,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2020_account_3632,3632,Inventories of buildings for resale in foreign countries,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
+lu_2020_account_37,37,Payments on account,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_4011,4011,Customers,account.data_account_type_receivable,TRUE,lu_2011_chart_1
 lu_2011_account_4012,4012,Customers - Receivable bills of exchange,account.data_account_type_receivable,TRUE,lu_2011_chart_1
 lu_2011_account_4013,4013,Doubtful or disputed customers,account.data_account_type_receivable,TRUE,lu_2011_chart_1
@@ -195,6 +198,7 @@ lu_2011_account_41228,41228,Other receivables,account.data_account_type_current_
 lu_2011_account_41229,41229,Value adjustments,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_42111,42111,Advances and down payments ,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_42119,42119,Value adjustments,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
+lu_2020_account_4212,4212,Amounts owed by partners and shareholders (others than from affiliated undertakings),account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_42131,42131,Investment subsidies,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_42132,42132,Operating subsidies,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_42138,42138,Other subsidies,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
@@ -218,6 +222,7 @@ lu_2011_account_42172,42172,Foreign social security offices,account.data_account
 lu_2011_account_42178,42178,Other social bodies,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_421811,421811,Foreign VAT,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_421818,421818,Other foreign taxes,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
+lu_2020_account_42187,42187,Derivative financial instruments,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_42188,42188,Other miscellaneous receivables,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_42189,42189,Value adjustments,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2020_account_4221,4221,Staff - advances and down payments,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
@@ -289,6 +294,10 @@ lu_2020_account_4721,4721,Received deposits and guarantees,account.data_account_
 lu_2020_account_4722,4722,Amounts payable to partners and shareholders (others than from affiliated undertakings),account.data_account_type_current_liabilities,TRUE,lu_2011_chart_1
 lu_2011_account_4723,4723,"Amounts payable to directors, managers and statutory auditors and similar",account.data_account_type_current_liabilities,FALSE,lu_2011_chart_1
 lu_2020_account_4724,4724,Amounts payable to staff,account.data_account_type_current_liabilities,TRUE,lu_2011_chart_1
+lu_2020_account_47261,47261,Other loans,account.data_account_type_current_liabilities,TRUE,lu_2011_chart_1
+lu_2020_account_47262,47262,Lease debts,account.data_account_type_current_liabilities,TRUE,lu_2011_chart_1
+lu_2020_account_47263,47263,Life annuities,account.data_account_type_current_liabilities,TRUE,lu_2011_chart_1
+lu_2020_account_47264,47264,Other similar debts,account.data_account_type_current_liabilities,TRUE,lu_2011_chart_1
 lu_2020_account_4727,4727,Lease debts,account.data_account_type_current_liabilities,TRUE,lu_2011_chart_1
 lu_2011_account_4728,4728,Other miscellaneous debts,account.data_account_type_current_liabilities,FALSE,lu_2011_chart_1
 lu_2011_account_481,481,Deferred charges (on one or more financial years),account.data_account_type_current_assets,FALSE,lu_2011_chart_1
@@ -309,9 +318,11 @@ lu_2011_account_5085,5085,Unlisted debenture loans,account.data_account_type_cur
 lu_2011_account_5088,5088,Other miscellaneous transferable securities,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2020_account_5131,5131,Banks and CCP : available balance,account.data_account_type_liquidity,TRUE,lu_2011_chart_1
 lu_2020_account_5132,5132,Banks and CCP : overdraft,account.data_account_type_liquidity,TRUE,lu_2011_chart_1
+lu_2020_account_516,516,Cash in hand,account.data_account_type_liquidity,TRUE,lu_2011_chart_1
 lu_2020_account_5171,5171,Internal transfers : debit balance,account.data_account_type_liquidity,TRUE,lu_2011_chart_1
 lu_2020_account_5172,5172,Internal transfers : credit balance,account.data_account_type_liquidity,TRUE,lu_2011_chart_1
 lu_2011_account_518,518,Other cash amounts,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
+lu_2020_account_601,601,Purchases of raw materials,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2011_account_60311,60311,Solid fuels,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2011_account_60312,60312,Liquid fuels,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2011_account_60313,60313, Gas,account.data_account_type_expenses,FALSE,lu_2011_chart_1
@@ -324,6 +335,7 @@ lu_2011_account_6035,6035,Office and administrative supplies,account.data_accoun
 lu_2011_account_6036,6036,Motor fuels,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2011_account_6037,6037,Lubricants,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2011_account_6038,6038,Other consumable supplies,account.data_account_type_expenses,FALSE,lu_2011_chart_1
+lu_2020_account_604,604,Purchases of packaging,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2011_account_6061,6061,Purchases of merchandise,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2011_account_6062,6062,Purchases of land for resale,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2011_account_6063,6063,Purchases of buildings for resale,account.data_account_type_expenses,FALSE,lu_2011_chart_1
@@ -408,6 +420,7 @@ lu_2020_account_61842,61842,"Liquid fuels (oil, motor fuel, etc.)",account.data_
 lu_2020_account_61843,61843,Gas,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2020_account_61844,61844,Water and waste water,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2020_account_61845,61845,Electricity,account.data_account_type_expenses,FALSE,lu_2011_chart_1
+lu_2020_account_61851,61851,Office supplies,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2020_account_61852,61852,Small equipment,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2020_account_61853,61853,Work clothes,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2020_account_61854,61854,Maintenance supplies,account.data_account_type_expenses,FALSE,lu_2011_chart_1
