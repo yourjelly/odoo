@@ -1,9 +1,17 @@
 # -*- coding: utf-8 -*-
 
+import io
 import json
+
+try:
+    from odoo.tools.misc import xlsxwriter
+except ImportError:
+    # TODO saas-17: remove the try/except to directly import from misc
+    import xlsxwriter
 
 from odoo import api, models, _
 from odoo.tools import float_round
+from datetime import datetime
 
 class ReportBomStructure(models.AbstractModel):
     _name = 'report.mrp.report_bom_structure'
@@ -156,7 +164,6 @@ class ReportBomStructure(models.AbstractModel):
                 'phantom_bom': line.child_bom_id and line.child_bom_id.type == 'phantom' or False,
                 'attachments': self.env['mrp.document'].search(['|', '&',
                     ('res_model', '=', 'product.product'), ('res_id', '=', line.product_id.id), '&', ('res_model', '=', 'product.template'), ('res_id', '=', line.product_id.product_tmpl_id.id)]),
-
             })
             total += sub_total
         return components, total
@@ -207,7 +214,7 @@ class ReportBomStructure(models.AbstractModel):
 
         data = self._get_bom(bom_id=bom_id, product_id=product_id, line_qty=qty)
 
-        def get_sub_lines(bom, product_id, line_qty, line_id, level):
+        def get_sub_lines(bom, product_id, line_qty, line_id, level, report_type=False):
             data = self._get_bom(bom_id=bom.id, product_id=product_id, line_qty=line_qty, line_id=line_id, level=level)
             bom_lines = data['components']
             lines = []
@@ -252,3 +259,200 @@ class ReportBomStructure(models.AbstractModel):
         data['components'] = []
         data['lines'] = pdf_lines
         return data
+
+    #TO BE OVERWRITTEN
+    def _get_report_name(self):
+        return _('General Report')
+
+    def get_header(self, options):
+        if(options.get('report_type') == 'all'):
+            data = [{'name': 'Product'}, {'name': 'BoM'}, {'name': 'Quantity'}, {'name': 'Product Cost'}, {'name': 'BoM Cost'}]
+            return data
+        elif(options.get('report_type') == 'bom_structure'):
+            return [{'name': 'Product'}, {'name': 'BoM'}, {'name': 'Quantity'}, {'name': 'Product Cost'}]
+        elif(options.get('report_type') == 'bom_cost'):
+            return [{'name': 'Product'}, {'name': 'BoM'}, {'name': 'Quantity'}, {'name': 'BoM Cost'}]
+        else:
+            return {}
+
+    def _get_xlsx_line(self, bom_id, product_id=False, qty=1, child_bom_ids=[], unfolded=True):
+        data = self._get_bom(bom_id=bom_id, product_id=product_id, line_qty=qty)
+        def get_sub_lines(bom, product_id, line_qty, line_id, level, report_type=False):
+            data = self._get_bom(bom_id=bom, product_id=product_id, line_qty=line_qty, line_id=line_id, level=level)
+            bom_lines = data['components']
+            lines = []
+            bom_line = []
+
+            if(data.get('bom_prod_name')):
+                column = []
+                column += [
+                    {'name': data['code'], 'data': 'name'},
+                    {'name': data['bom_qty'], 'data': 'qty'},
+                    {'name': data['price'], 'data': 'prod_cost'},
+                    {'name': data['total'], 'data': 'bom_cost'},
+                ]
+                lines.append({
+                    'name': data['bom_prod_name'],
+                    'type': 'bom',
+                    'columns': column,
+                    'level': 0
+                })
+            for bom_line in bom_lines:
+                column = []
+                column += [
+                    {'name': data['code'], 'data': 'name'},
+                    {'name': data['bom_qty'], 'data': 'qty'},
+                    {'name': data['price'], 'data': 'prod_cost'},
+                    {'name': data['total'], 'data': 'bom_cost'},
+                ]
+                lines.append({
+                    'name': bom_line['prod_name'],
+                    'type': 'bom',
+                    'uom': bom_line['prod_uom'],
+                    'columns': column,
+                    'level': bom_line['level'],
+                })
+                if bom_line['child_bom'] and (unfolded or bom_line['child_bom'] in child_bom_ids):
+                    line = self.env['mrp.bom.line'].browse(bom_line['line_id'])
+                    lines += (get_sub_lines(line.child_bom_id.id, line.product_id, line.product_qty * data['bom_qty'], line, level))
+            if data['operations']:
+                column = []
+                column += [
+                    { 'name': '','data': 'name'},
+                    { 'name': data['operations_time'], 'data': 'time'}, # quantity
+                    { 'name': '', 'data': ''},
+                    { 'name': data['total'] ,'data': 'bom_cost'}, # bom_cost
+                ]
+                lines.append({
+                    'name': _('Operations'),
+                    'type': 'operation',
+                    'columns': column,
+                    'uom': _('minutes'),
+                    'level': level,
+                })
+                for operation in data['operations']:
+                    operation_sub_column = []
+                    operation_sub_column += [
+                        {'name': '', 'data': 'name'},
+                        {'name': operation['duration_expected'], 'data': 'duration'}, # operation_quantity
+                        {'name': '', 'data': ''},
+                        {'name': operation['total'], 'data': 'bom_cost'}, # bom_cost
+                    ]
+                    if unfolded or 'operation-' + str(bom.id) in child_bom_ids:
+                        lines.append({
+                            'name': operation['name'],
+                            'type': 'operation',
+                            'columns': operation_sub_column,
+                            'uom': _('minutes'),
+                            'level': level + 1,
+                        })
+            return lines
+
+        bom = self.env['mrp.bom'].browse(bom_id)
+        product = product_id or bom.product_id or bom.product_tmpl_id.product_variant_id
+        xlsx_lines = get_sub_lines(bom_id, product, qty, False, 2)
+        return xlsx_lines
+
+    def _set_context(self, options):
+        """This method will set information which will pass data to another method"""
+        bom_id = options.get('bom_id')
+        qty = options.get('bom_qty')
+        report_type = options.get('report_type')
+        doc = self._get_xlsx_line(bom_id=bom_id, product_id=False, qty=qty, child_bom_ids=[], unfolded=True)
+        return doc
+
+    def get_xlsx(self, options, response):
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+        sheet = workbook.add_worksheet(self._get_report_name()[:31])
+
+        date_default_col1_style = workbook.add_format({'font_name': 'Arial', 'font_size': 12, 'font_color': '#666666', 'indent': 2, 'num_format': 'yyyy-mm-dd'})
+        date_default_style = workbook.add_format({'font_name': 'Arial', 'font_size': 12, 'font_color': '#666666', 'num_format': 'yyyy-mm-dd'})
+        default_col1_style = workbook.add_format({'font_name': 'Arial', 'font_size': 12, 'font_color': '#666666', 'indent': 2})
+        default_style = workbook.add_format({'font_name': 'Arial', 'font_size': 12, 'font_color': '#666666'})
+        title_style = workbook.add_format({'font_name': 'Arial', 'bold': True, 'bottom': 2})
+        super_col_style = workbook.add_format({'font_name': 'Arial', 'bold': True, 'align': 'center'})
+        level_0_style = workbook.add_format({'font_name': 'Arial', 'bold': True, 'font_size': 13, 'bottom': 6, 'font_color': '#666666'})
+        level_1_style = workbook.add_format({'font_name': 'Arial', 'bold': True, 'font_size': 13, 'bottom': 1, 'font_color': '#666666'})
+        level_2_col1_style = workbook.add_format({'font_name': 'Arial', 'bold': True, 'font_size': 12, 'font_color': '#666666', 'indent': 1})
+        level_2_col1_total_style = workbook.add_format({'font_name': 'Arial', 'bold': True, 'font_size': 12, 'font_color': '#666666'})
+        level_2_style = workbook.add_format({'font_name': 'Arial', 'bold': True, 'font_size': 12, 'font_color': '#666666'})
+        level_3_col1_style = workbook.add_format({'font_name': 'Arial', 'font_size': 12, 'font_color': '#666666', 'indent': 2})
+        level_3_col1_total_style = workbook.add_format({'font_name': 'Arial', 'bold': True, 'font_size': 12, 'font_color': '#666666', 'indent': 1})
+        level_3_style = workbook.add_format({'font_name': 'Arial', 'font_size': 12, 'font_color': '#666666'})
+
+        #Set the first column width to 50
+        sheet.set_column(0, 0, 50)
+        y_offset = 1
+        x = 0
+        #header
+        for column in self.get_header(options):
+            colspan = column.get('colspan', 1)
+            header_label = column.get('name', '').replace('<br/>', ' ').replace('&nbsp;', ' ')
+            if colspan == 1:
+                sheet.write(y_offset, x, header_label, title_style)
+            else:
+                sheet.merge_range(y_offset, x, y_offset, x + colspan - 1, header_label, title_style)
+            x += colspan
+        y_offset += 1
+        line= self._set_context(options)
+        lines = line
+
+        #write all data rows
+        for y in range(0, len(lines)):
+            level = lines[y].get('level')
+            if lines[y].get('caret_options'):
+                style = level_3_style
+                col1_style = level_3_col1_style
+            elif level == 0:
+                y_offset += 1
+                style = level_0_style
+                col1_style = style
+            elif level == 1:
+                style = level_1_style
+                col1_style = style
+            elif level == 2:
+                style = level_2_style
+                col1_style = 'total' in lines[y].get('class', '').split(' ') and level_2_col1_total_style or level_2_col1_style
+            elif level == 3:
+                style = level_3_style
+                col1_style = 'total' in lines[y].get('class', '').split(' ') and level_3_col1_total_style or level_3_col1_style
+            else:
+                style = default_style
+                col1_style = default_col1_style
+
+
+            if 'date' in lines[y].get('class', ''):
+                #write the dates with a specific format to avoid them being casted as floats in the XLSX
+                if isinstance(lines[y]['name'], (datetime.date, datetime.datetime)):
+                    sheet.write_datetime(y + y_offset, 0, lines[y]['name'], date_default_col1_style)
+                else:
+                    sheet.write(y + y_offset, 0, lines[y]['name'], date_default_col1_style)
+            else:
+                #write the first column, with a specific style to manage the indentation
+                sheet.write(y + y_offset, 0, lines[y]['name'], col1_style)
+
+            #write all the remaining cells
+            for x in range(1, len(lines[y]['columns']) + 1):
+                this_cell_style = style
+                if 'date' in lines[y]['columns'][x - 1].get('class', ''):
+                    #write the dates with a specific format to avoid them being casted as floats in the XLSX
+                    this_cell_style = date_default_style
+                    if isinstance(lines[y]['columns'][x - 1].get('name', ''), (datetime.date, datetime.datetime)):
+                        sheet.write_datetime(y + y_offset, x + lines[y].get('colspan', 1) - 1, lines[y]['columns'][x - 1].get('name', ''), this_cell_style)
+                    else:
+                        sheet.write(y + y_offset, x + lines[y].get('colspan', 1) - 1, lines[y]['columns'][x - 1].get('name', ''), this_cell_style)
+                else:
+                    if(options.get('report_type') == 'all'):
+                        sheet.write(y + y_offset, x + lines[y].get('colspan', 1) - 1, lines[y]['columns'][x - 1].get('name', ''), this_cell_style)
+                    elif(options.get('report_type') == 'bom_structure'):
+                        if(lines[y]['columns'][x-1]['data'] != 'bom_cost'):
+                            sheet.write(y + y_offset, x + lines[y].get('colspan', 1) - 1, lines[y]['columns'][x - 1].get('name', ''), this_cell_style)
+                    else:
+                        if(lines[y]['columns'][x-1]['data'] != 'bom_cost'):
+                            sheet.write(y + y_offset, x + lines[y].get('colspan', 1) - 1, lines[y]['columns'][x - 1].get('name', ''), this_cell_style)
+
+        workbook.close()
+        output.seek(0)
+        response.stream.write(output.read())
+        output.close()

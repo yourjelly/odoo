@@ -4,6 +4,8 @@ odoo.define('mrp.mrp_bom_report', function (require) {
 var core = require('web.core');
 var framework = require('web.framework');
 var stock_report_generic = require('stock.stock_report_generic');
+var session = require('web.session');
+var crash_manager = require('web.crash_manager');
 
 var QWeb = core.qweb;
 var _t = core._t;
@@ -110,6 +112,7 @@ var MrpBomReport = stock_report_generic.extend({
         this.$buttonPrint = $(QWeb.render('mrp.button'));
         this.$buttonPrint.filter('.o_mrp_bom_print').on('click', this._onClickPrint.bind(this));
         this.$buttonPrint.filter('.o_mrp_bom_print_unfolded').on('click', this._onClickPrint.bind(this));
+        this.$buttonPrint.filter('.o_mrp_bom_print_xlsx').on('click', this._onClickXlsx.bind(this));
         this.$searchView = $(QWeb.render('mrp.report_bom_search', _.omit(this.data, 'lines')));
         this.$searchView.find('.o_mrp_bom_report_qty').on('change', this._onChangeQty.bind(this));
         this.$searchView.find('.o_mrp_bom_report_variants').on('change', this._onChangeVariants.bind(this));
@@ -131,11 +134,39 @@ var MrpBomReport = stock_report_generic.extend({
         var action = {
             'type': 'ir.actions.report',
             'report_type': 'qweb-pdf',
-            'report_name': reportname,                                
+            'report_name': reportname,
             'report_file': 'mrp.report_bom_structure',
         };
         return this.do_action(action).then(function (){
             framework.unblockUI();
+        });
+    },
+    _onClickXlsx: function (ev) {
+        var childBomIDs = _.map(this.$el.find('.o_mrp_bom_foldable').closest('tr'), function (el) {
+            return $(el).data('id');
+        });
+        framework.blockUI();
+        var bom_quantity = parseInt(this.$searchView.find('.o_mrp_bom_report_qty').val());;
+        var report_type = this.$searchView.find('.o_mrp_bom_report_type').children('option:selected').attr('data-type');
+        var options = JSON.stringify({
+            "bom_id": this.given_context.active_id,
+            "report_type": report_type,
+            "bom_qty": bom_quantity,
+        })
+        var def = $.Deferred();
+        session.get_file({
+            url: '/bom_report',
+            data: {
+                model: 'report.mrp.report_bom_structure',
+                options: options,
+                output_format: 'xlsx'
+            },
+            success: def.resolve.bind(def),
+            error: function () {
+                crash_manager.rpc_error.apply(crash_manager, arguments);
+                def.reject();
+            },
+            complete: framework.unblockUI,
         });
     },
     _onChangeQty: function (ev) {
