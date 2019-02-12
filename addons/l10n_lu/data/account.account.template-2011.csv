@@ -42,6 +42,7 @@ lu_2011_account_106198,106198,Other special private withdrawals,account.data_acc
 lu_2011_account_10621,10621,Inheritance or donation,account.data_account_type_equity,FALSE,lu_2011_chart_1
 lu_2011_account_10622,10622,Personal holdings,account.data_account_type_equity,FALSE,lu_2011_chart_1
 lu_2011_account_10623,10623,Private loans,account.data_account_type_equity,FALSE,lu_2011_chart_1
+lu_2011_account_10629,10629,Business share in private expenses,account.data_account_type_equity,FALSE,lu_2011_chart_1
 lu_2011_account_106241,106241,Private furniture,account.data_account_type_equity,FALSE,lu_2011_chart_1
 lu_2011_account_106242,106242,Private car,account.data_account_type_equity,FALSE,lu_2011_chart_1
 lu_2011_account_106243,106243,Private shares / bonds,account.data_account_type_equity,FALSE,lu_2011_chart_1
@@ -73,6 +74,7 @@ lu_2020_account_13828,13828,Reserves not available for distribution not mentione
 lu_2020_account_1411,1411,Results brought forward in the process of assignment,account.data_account_type_equity,FALSE,lu_2011_chart_1
 lu_2020_account_1412,1412,Results brought forward (assigned),account.data_account_type_equity,FALSE,lu_2011_chart_1
 lu_2011_account_142,142,Result for the financial year,account.data_account_type_equity,FALSE,lu_2011_chart_1
+lu_2011_account_15,15,Interim dividends,account.data_account_type_equity,FALSE,lu_2011_chart_1
 lu_2020_account_1611,1611,Development costs,account.data_account_type_other_income,FALSE,lu_2011_chart_1
 lu_2020_account_16121,16121,acquired against payment (except Goodwill),account.data_account_type_equity,FALSE,lu_2011_chart_1
 lu_2020_account_16122,16122,created by the undertaking itself,account.data_account_type_equity,FALSE,lu_2011_chart_1
@@ -110,6 +112,7 @@ lu_2011_account_21223,21223,Software licences,account.data_account_type_current_
 lu_2011_account_21224,21224,Trademarks and franchises,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_212251,212251,Copyrights and reproduction rights,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_212258,212258,Other similar rights and values created by the undertaking itself,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
+lu_2011_account_213,213,Goodwill acquired for consideration,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2020_account_221111,221111,Developed land,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2020_account_221112,221112,Property rights and similar,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2020_account_221118,221118,Other land,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
@@ -135,6 +138,8 @@ lu_2011_account_2237,2237,Returnable packaging,account.data_account_type_current
 lu_2011_account_2238,2238,Other fixtures,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_22411,22411,"Land, fitting-outs and buildings in Luxembourg",account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_22412,22412,"Land, fitting-outs and buildings in foreign countries",account.data_account_type_current_assets,FALSE,lu_2011_chart_1
+lu_2011_account_2242,2242,Plant and machinery,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
+lu_2011_account_2243,2243,"Other fixtures and fittings, tools and equipment (including rolling stock)",account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_231,231,Shares in affiliated undertakings,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_232,232,Amounts owed by affiliated undertakings,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_233,233,Participating interests,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
@@ -144,6 +149,7 @@ lu_2020_account_235112,235112,Unlisted shares,account.data_account_type_current_
 lu_2011_account_23518,23518,Other securities held as fixed assets (equity right),account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_23521,23521,Debentures,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_23528,23528,Other securities held as fixed assets (creditor's right),account.data_account_type_current_assets,FALSE,lu_2011_chart_1
+lu_2011_account_2358,2358,Other securities held as fixed assets,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2020_account_2361,2361,Loans,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2020_account_2362,2362,Deposits and guarantees paid,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_2363,2363,Long-term receivables,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
@@ -409,6 +415,7 @@ lu_2020_account_61858,61858,Other,account.data_account_type_expenses,FALSE,lu_20
 lu_2011_account_6186,6186,Surveillance and security charges,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2011_account_6187,6187,Contributions to professional associations,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2011_account_6188,6188,Other miscellaneous external charges,account.data_account_type_expenses,FALSE,lu_2011_chart_1
+lu_2011_account_619,619,"Rebates, discounts and refunds received on other external charges",account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2011_account_62111,62111,Base wages,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2011_account_621121,621121,Sunday,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2011_account_621122,621122,Public holidays,account.data_account_type_expenses,FALSE,lu_2011_chart_1
@@ -494,6 +501,7 @@ lu_2011_account_65113,65113,AVA on participating interests,account.data_account_
 lu_2011_account_65114,65114,AVA on amounts owed by undertakings with which the undertaking is linked by virtue of participating interests,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2011_account_65115,65115,AVA on securities held as fixed assets,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2011_account_65116,65116,"AVA on loans, deposits and claims held as fixed assets",account.data_account_type_expenses,FALSE,lu_2011_chart_1
+lu_2011_account_6512,6512,Fair value adjustments on financial fixed assets,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2020_account_65211,65211,Shares in affiliated undertakings,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2020_account_65212,65212,Amounts owed by affiliated undertakings,account.data_account_type_expenses,FALSE,lu_2011_chart_1
 lu_2020_account_65213,65213,Participating interests,account.data_account_type_expenses,FALSE,lu_2011_chart_1
