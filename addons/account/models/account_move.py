@@ -1313,7 +1313,7 @@ class AccountMoveLine(models.Model):
             else:
                 domain += [(date_field, '>=', context['date_from'])]
 
-        if context.get('journal_ids'):
+        if context.get('journal_ids') and not context.get('no_filter_journals'):
             domain += [('journal_id', 'in', context['journal_ids'])]
 
         state = context.get('state')
