@@ -4,7 +4,6 @@ lu_2011_account_102,102,Subscribed capital not called,account.data_account_type_
 lu_2011_account_103,103,Subscribed capital called but unpaid,account.data_account_type_equity,FALSE,lu_2011_chart_1
 lu_2020_account_104,104,"Capital of individual companies, corporate partnerships and similar",account.data_account_type_equity,FALSE,lu_2011_chart_1
 lu_2011_account_105,105,Endowment of branches,account.data_account_type_equity,FALSE,lu_2011_chart_1
-lu_2020_account_106,106,Account of the owner or the co-owners,account.data_account_type_equity,FALSE,lu_2011_chart_1
 lu_2011_account_10611,10611,Cash withdrawals (daily life),account.data_account_type_equity,FALSE,lu_2011_chart_1
 lu_2011_account_10612,10612,"Withdrawals of merchandise, finished products and services (at cost)",account.data_account_type_equity,FALSE,lu_2011_chart_1
 lu_2011_account_10613,10613,Private share of medical services expenses,account.data_account_type_equity,FALSE,lu_2011_chart_1
@@ -99,7 +98,6 @@ lu_2011_account_203,203,"Expenses for increases in capital and for various opera
 lu_2011_account_204,204,Loan issuances expenses,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_208,208,Other similar expenses,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_211,211,Development costs,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
-lu_2020_account_212,212,"Concessions, patents, licences, trademarks and similar rights and assets",account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_21211,21211,Concessions,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_21212,21212,Patents,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_21213,21213,Software licences,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
@@ -113,8 +111,6 @@ lu_2011_account_21223,21223,Software licences,account.data_account_type_current_
 lu_2011_account_21224,21224,Trademarks and franchises,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_212251,212251,Copyrights and reproduction rights,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_212258,212258,Other similar rights and values created by the undertaking itself,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
-lu_2020_account_221,221,"Land, fixtures and fitting-outs and buildings",account.data_account_type_current_assets,FALSE,lu_2011_chart_1
-lu_2020_account_2211,2211,Land,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2020_account_221111,221111,Developed land,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2020_account_221112,221112,Property rights and similar,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2020_account_221118,221118,Other land,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
@@ -288,11 +284,9 @@ lu_2020_account_4721,4721,Received deposits and guarantees,account.data_account_
 lu_2020_account_4722,4722,Amounts payable to partners and shareholders (others than from affiliated undertakings),account.data_account_type_current_liabilities,TRUE,lu_2011_chart_1
 lu_2011_account_4723,4723,"Amounts payable to directors, managers and statutory auditors and similar",account.data_account_type_current_liabilities,FALSE,lu_2011_chart_1
 lu_2020_account_4724,4724,Amounts payable to staff,account.data_account_type_current_liabilities,TRUE,lu_2011_chart_1
-lu_2020_account_4725,4725,Loans and similar debts,account.data_account_type_current_liabilities,TRUE,lu_2011_chart_1
 lu_2011_account_4726,4726,Loans and similar debts,account.data_account_type_current_liabilities,FALSE,lu_2011_chart_1
 lu_2020_account_4727,4727,Lease debts,account.data_account_type_current_liabilities,TRUE,lu_2011_chart_1
 lu_2011_account_4728,4728,Other miscellaneous debts,account.data_account_type_current_liabilities,FALSE,lu_2011_chart_1
-lu_2020_account_4729,4729,Other similar debts,account.data_account_type_current_liabilities,TRUE,lu_2011_chart_1
 lu_2011_account_481,481,Deferred charges (on one or more financial years),account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_482,482,Deferred income (on one or more financial years),account.data_account_type_current_liabilities,FALSE,lu_2011_chart_1
 lu_2011_account_483,483,State - Greenhous gas and similar emission quotas received,account.data_account_type_current_liabilities,FALSE,lu_2011_chart_1
