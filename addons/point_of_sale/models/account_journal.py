@@ -31,12 +31,26 @@ class AccountJournal(models.Model):
 
     @api.multi
     def write(self, vals):
-        for journal in self:
-            pos_session_ids = self.env['pos.session'].search([('state', '!=', 'closed'), '|', ('config_id.journal_id', '=', journal.id), ('config_id.journal_ids', 'in', journal.id)]).ids
-            if vals.get('active', False) and len(pos_session_ids):
-                raise UserError(_("You archive Journals that are used by active PoS sessions.\n")\
-                        + _("Journal: ") + str(journal.id) +"\n"\
-                        + _("PoS Sessions: ") + ', '.join(str(pos_session_id) for pos_session_id in pos_session_ids))
+        if vals.get('active', False):
+            config_ids = self.env['pos.config'].search([
+                '|',
+                    ('journal_id', 'in', self.ids),
+                    ('journal_ids', 'in', self.ids)
+            ]).ids
+            if config_ids:
+                running_sessions = self.env['pos.session'].search([
+                    ('state', '!=', 'closed'),
+                    ('config_id', 'in', config_ids)
+                ])
+                if running_sessions:
+                    journals = running_sessions.mapped('config_id.journal_id')
+                    journals |= running_sessions.mapped('config_id.journal_ids')
+                    journals = journals & self
+                    raise UserError(
+                        _("You can not archive the journal %s as it is still used in the PoS sessions %s.")
+                        % (', '.join(journal.name for journal in journals),
+                           ', '.join(session.name for session in open_sessions))
+                    )
         return super(AccountJournal, self).write(vals)
 
     @api.multi
