@@ -90,7 +90,7 @@
                                                         attrs="{'readonly': [('ttype','!=','many2one')],
                                                                 'invisible': [('ttype','!=','many2one')]}"/>
                                                     <field name="relation_field"
-                                                        attrs="{'required': [('ttype','=','one2many')],
+                                                        attrs="{'required': [('ttype','=','one2many'), ('store','=',True)],
                                                                 'readonly': [('ttype','!=','one2many')],
                                                                 'invisible': [('ttype','!=','one2many')]}"/>
                                                     <field name="relation_table" groups="base.group_no_one"
