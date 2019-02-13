@@ -22,6 +22,7 @@
             <form t-attf-action="/profile/user/save" method="post" role="form" class="js_website_submit_form row" enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                 <input type="file" class="d-none o_forum_file_upload" name="ufile" accept="image/*"/>
+                <input type="hidden" name="url_param" t-att-value="request.params.get('url_param')"/>
                 <div class="col-3">
                     <div class="card o_card_people">
                         <div class="card-body">
@@ -123,7 +124,7 @@
                     <div class="col-8 o_wprofile_id">
                         <a id="edit_profile_button" class="btn btn-primary o_wprofile_edit"
                             t-if="request.env.user == user"
-                           t-attf-href="/profile/edit"><b>EDIT PROFILE</b></a>
+                           t-attf-href="/profile/edit?url_param=#{edit_button_url_param}"><b>EDIT PROFILE</b></a>
                         <div class="row mb32">
                             <h3 class="o_card_people_name text-white"><b t-field="user.name"/></h3>
                         </div>
@@ -370,7 +371,9 @@
             <div class="container mb32 mt48">
                 <h1 class="mt32">This profile is private!</h1>
                 <p>
-                    <a t-attf-href="/">Return to the website.</a>
+                    <a id="private_profile_return_link" t-attf-href="/">
+                        <span t-if="not (request.params.get('forum_id') or request.params.get('channel_id'))">Return to the website.</span>
+                    </a>
                 </p>
             </div>
         </t>

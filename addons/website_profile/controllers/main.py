@@ -34,12 +34,16 @@ class WebsiteProfile(http.Controller):
         values.update(kwargs)
         return values
 
-    def _prepare_user_profile_values(self, user):
+    def _prepare_user_profile_parameters(self, **post):
+        return post
+
+    def _prepare_user_profile_values(self, user, **post):
         return {
             'uid': request.env.user.id,
             'user': user,
             'main_object': user,
             'is_profile_page': True,
+            'edit_button_url_param': '',
         }
 
     @http.route(['/profile/user/<int:user_id>'], type='http', auth="public", website=True)
@@ -47,7 +51,8 @@ class WebsiteProfile(http.Controller):
         user = self._check_user_profile_access(user_id)
         if not user:
             return request.render("website_profile.private_profile", {}, status=404)
-        values = self._prepare_user_profile_values(user)
+        params = self._prepare_user_profile_parameters(**post)
+        values = self._prepare_user_profile_values(user, **params)
         return request.render("website_profile.user_profile_main", values)
 
     # Edit Profile
@@ -60,6 +65,7 @@ class WebsiteProfile(http.Controller):
             'email_required': kwargs.get('email_required'),
             'countries': countries,
             'notifications': self._get_badge_granted_messages(),
+            'url_param': kwargs.get('url_param'),
         })
         return request.render("website_profile.user_profile_edit_main", values)
 
@@ -92,8 +98,10 @@ class WebsiteProfile(http.Controller):
     @http.route('/profile/user/save', type='http', auth="user", methods=['POST'], website=True)
     def save_edited_profile(self, **kwargs):
         user = self._save_edited_profile(**kwargs)
-        return werkzeug.utils.redirect("/profile/user/%d" % user.id)
-
+        if kwargs.get('url_param'):
+            return werkzeug.utils.redirect("/profile/user/%d?%s" % (user.id, kwargs.get('url_param')))
+        else:
+            return werkzeug.utils.redirect("/profile/user/%d" % user.id)
     # Ranks
     # ---------------------------------------------------
     @http.route('/profile/ranks', type='http', auth="public", website=True)
