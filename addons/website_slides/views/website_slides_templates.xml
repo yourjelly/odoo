@@ -138,7 +138,7 @@
                         </h3>
                         <ul class="navbar-nav ml-auto float-right pt-2">
                             <li class="nav-item">
-                                <a t-attf-href="/slides/#{ slug(channel) }/user/#{uid}" t-attf-class="text-dark font-weight-bold nav-link}">
+                                <a t-attf-href="/profile/user/#{uid}?channel_id=#{channel.id}" t-attf-class="text-dark font-weight-bold nav-link}">
                                     <i class="fa fa-diamond text-secondary" /> <t t-esc="user_id.karma"/>
                                 </a>
                             </li>

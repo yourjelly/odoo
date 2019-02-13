@@ -391,62 +391,20 @@ class WebsiteSlides(WebsiteProfile):
         }
         return values
 
-    def _prepare_user_profile_values(self, user):
-        values = super(WebsiteSlides, self)._prepare_user_profile_values(user)
-        values.update(self._prepare_user_slides_profile(user))
-        values.update({'channel': True})
-        return values
+    def _prepare_user_profile_parameters(self, **post):
+        post = super(WebsiteSlides, self)._prepare_user_profile_parameters(**post)
+        if post.get('channel_id'):
+            post.update({'no_forum': True})
+        return post
 
-    @http.route(['/slides/user/<int:user_id>'], type='http', auth="public", website=True)
-    def view_user_cross_slides_profile(self, user_id, **post):
+    def _prepare_user_profile_values(self, user, **post):
+        values = super(WebsiteSlides, self)._prepare_user_profile_values(user, **post)
+        if post.get('channel_id'):
+            values.update({'edit_button_url_param': 'channel_id=' + str(post.get('channel_id'))})
         channels = self._get_channels(**post)
         if not channels:
             channels = request.env['slide.channel'].search([])
-        values = self._prepare_user_values(channel=channels[0] if len(channels) == 1 else True, **post)
-
-        user = self._check_user_profile_access(user_id)
-        if not user:
-            if len(channels) != 1:
-                return request.render("website_slides.private_profile_cross_slides", values, status=404)
-            return request.render("website_slides.private_profile", values, status=404)
-
+        values.update(self._prepare_user_values(channel=channels[0] if len(channels) == 1 else True, **post))
         values.update(self._prepare_user_slides_profile(user))
         values.update({'badge_category': 'slides'})
-        return request.render("website_slides.cross_slides_user_profile_main", values)
-
-    @http.route(['/slides/<model("slide.channel"):channel>/user/<int:user_id>'], type='http', auth="public", website=True)
-    def view_user_slides_profile(self, channel, user_id, **post):
-        values = self._prepare_user_values(channel=channel, **post)
-
-        user = self._check_user_profile_access(user_id)
-        if not user:
-            return request.render("website_slides.private_profile", values, status=404)
-
-        values.update(self._prepare_user_slides_profile(user))
-        values.update({'badge_category': 'slides'})
-        return request.render("website_slides.slides_user_profile_main", values)
-
-    @http.route('/slides/user/edit', type='http', auth="user", website=True)
-    def edit_slide_profile(self, **kwargs):
-        countries = request.env['res.country'].search([])
-        if kwargs.get('channel_id'):
-            values = self._prepare_user_values(channel_id=int(kwargs.get('channel_id')), searches=kwargs)
-        else:
-            values = self._prepare_user_values(searches=kwargs)
-        values.update({
-            'email_required': kwargs.get('email_required'),
-            'countries': countries,
-            'notifications': self._get_badge_granted_messages(),
-        })
-        return request.render("website_slides.slides_user_profile_edit_main", values)
-
-    @http.route('/slides/user/save', type='http', auth="user", methods=['POST'], website=True)
-    def save_edited_profile_cross_slide(self, **kwargs):
-        user = self._save_edited_profile(**kwargs)
-        return werkzeug.utils.redirect("/slides/user/%d" % (user.id))
-
-    @http.route('/slides/<model("slide.channel"):channel>/user/save', type='http', auth="user", methods=['POST'], website=True)
-    def save_edited_profile_slide(self, channel, **kwargs):
-        user = self._save_edited_profile(**kwargs)
-        return werkzeug.utils.redirect("/slides/user/%d?channel_id=%d" % (user.id, channel.id))
-
+        return values
