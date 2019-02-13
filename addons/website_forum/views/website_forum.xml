@@ -186,7 +186,7 @@
                     </ul>
                     <ul class="navbar-nav ml-auto">
                         <li t-if="not is_public_user" class="nav-item">
-                            <a t-attf-href="/forum/#{ slug(forum) }/user/#{uid}" t-attf-class="text-dark font-weight-bold nav-link#{searches.get('my_profile') and ' active' or ''}">
+                            <a t-attf-href="/profile/user/#{uid}?forum_id=#{forum.id}" t-attf-class="text-dark font-weight-bold nav-link#{searches.get('my_profile') and ' active' or ''}">
                                 <i class="fa fa-diamond text-secondary" /> <t t-esc="user_id.karma"/>
                             </a>
                         </li>
@@ -1183,7 +1183,7 @@
                     <div class="card-body">
                         <img class="o_wforum_people_photo_container float-left mr-3" t-attf-src="/web/image/res.users/#{u.id}/image_medium"/>
                         <b><i class="text-secondary mr-1 fa fa-diamond"/><t t-esc="u.karma"/></b>
-                        <h4 class="font-weight-bold o_card_people_name"><a t-attf-href="/forum/#{slug(forum)}/user/#{u.id}" t-field="u.name"/></h4>
+                        <h4 class="font-weight-bold o_card_people_name"><a t-attf-href="/forum/user/#{u.id}?forum_id=#{forum.id}" t-field="u.name"/></h4>
                         <t t-if="u.country_id">
                             <span t-field="u.country_id.image" t-options='{"widget": "image", "class": "country_flag_people"}'/>
                         </t>

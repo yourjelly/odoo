@@ -29,13 +29,6 @@ class WebsiteForum(WebsiteProfile):
             values['forum'] = request.env['forum.forum'].browse(kwargs.pop('forum_id'))
         return values
 
-    def _prepare_user_profile_values(self, user):
-        values = super(WebsiteForum, self)._prepare_user_profile_values(user)
-        forums = request.env['forum.forum'].search([])
-        values.update(self._prepare_open_forum_user(user, request.env.user, forums, values))
-        values.update({'forum': True})
-        return values
-
     # User and validation
     # --------------------------------------------------
 
@@ -577,6 +570,25 @@ class WebsiteForum(WebsiteProfile):
 
     # Profile
     # -----------------------------------
+    @http.route(['/forum/<model("forum.forum"):forum>/user/<int:user_id>'], type='http', auth="public", website=True)
+    def view_user_forum_profile(self, forum, user_id, **post):
+        return werkzeug.utils.redirect('/profile/user/' + str(user_id) + '?forum_id=' + str(forum.id))
+
+    def _prepare_user_profile_values(self, user, **post):
+        values = super(WebsiteForum, self)._prepare_user_profile_values(user, **post)
+        if not post.get('no_forum'):
+            if post.get('forum'):
+                forums = post.get('forum')
+            elif post.get('forum_id'):
+                forums = request.env['forum.forum'].browse(int(post.get('forum_id')))
+                values.update({'edit_button_url_param': 'forum_id=' + str(post.get('forum_id'))})
+            else:
+                forums = request.env['forum.forum'].search([])
+            values.update(self._prepare_user_values(forum=forums[0] if len(forums) == 1 else True, **post))
+            values.update(self._prepare_open_forum_user(user, request.env.user, forums, values))
+            values.update({'badge_category': 'forum'})
+        return values
+
     def _prepare_open_forum_user(self, user, current_user, forums, values, **kwargs):
         if len(forums) > 0:
             Post = request.env['forum.post']
@@ -668,65 +680,6 @@ class WebsiteForum(WebsiteProfile):
             })
 
         return values
-
-    @http.route(['/forum/user/<int:user_id>'], type='http', auth="public", website=True)
-    def view_user_cross_forum_profile(self, user_id, **post):
-        if post.get('forum'):
-            forums = post.get('forum')
-        elif post.get('forum_id'):
-            forums = request.env['forum.forum'].browse(int(post.get('forum_id')))
-        else:
-            forums = request.env['forum.forum'].search([])
-
-        values = self._prepare_user_values(forum=forums[0] if len(forums) == 1 else True, **post)
-
-        user = self._check_user_profile_access(user_id)
-        if not user:
-            if len(forums) != 1:
-                return request.render("website_forum.private_profile_cross_forum", values, status=404)
-            return request.render("website_forum.private_profile", values, status=404)
-        current_user = request.env.user.sudo()
-
-        values.update(self._prepare_open_forum_user(user, current_user, forums, values, **post))
-        values.update({'badge_category': 'forum'})
-        return request.render("website_forum.cross_forum_user_profile_main", values)
-
-    @http.route(['/forum/<model("forum.forum"):forum>/user/<int:user_id>'], type='http', auth="public", website=True)
-    def view_user_forum_profile(self, forum, user_id, **post):
-        values = self._prepare_user_values(forum=forum, **post)
-
-        user = self._check_user_profile_access(user_id)
-        if not user:
-            return request.render("website_forum.private_profile", values, status=404)
-        current_user = request.env.user.sudo()
-
-        values.update(self._prepare_open_forum_user(user, current_user, forum, values, **post))
-        values.update({'badge_category': 'forum'})
-        return request.render("website_forum.forum_user_profile_main", values)
-
-    @http.route('/forum/user/edit', type='http', auth="user", website=True)
-    def edit_forum_profile(self, **kwargs):
-        countries = request.env['res.country'].search([])
-        if kwargs.get('forum_id'):
-            values = self._prepare_user_values(forum_id=int(kwargs.get('forum_id')), searches=kwargs)
-        else:
-            values = self._prepare_user_values(searches=kwargs)
-        values.update({
-            'email_required': kwargs.get('email_required'),
-            'countries': countries,
-            'notifications': self._get_badge_granted_messages(),
-        })
-        return request.render("website_forum.forum_user_profile_edit_main", values)
-
-    @http.route('/forum/user/save', type='http', auth="user", methods=['POST'], website=True)
-    def save_edited_profile_cross_forum(self, **kwargs):
-        user = self._save_edited_profile(**kwargs)
-        return werkzeug.utils.redirect("/forum/user/%d" % user.id)
-
-    @http.route('/forum/<model("forum.forum"):forum>/user/save', type='http', auth="user", methods=['POST'], website=True)
-    def save_edited_profile_forum(self, forum, **kwargs):
-        user = self._save_edited_profile(**kwargs)
-        return werkzeug.utils.redirect("/forum/user/%d?forum_id=%d" % (user.id, forum.id))
 
     # Messaging
     # --------------------------------------------------
