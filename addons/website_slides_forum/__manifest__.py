@@ -9,8 +9,7 @@
     'description': """A Slide channel can be linked to forum. Also, profiles from slide and forum are regrouped together""",
     'depends': ['website_slides', 'website_forum'],
     'data': [
-        'views/website_slides_views.xml',
-        'views/website_slides_forum_profile.xml'
+        'views/website_slides_views.xml'
     ],
     'auto_install': False,
 }
