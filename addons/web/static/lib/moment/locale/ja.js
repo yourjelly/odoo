@@ -2,27 +2,25 @@
 //! locale : Japanese [ja]
 //! author : LI Long : https://github.com/baryon
 
-;(function (global, factory) {
-   typeof exports === 'object' && typeof module !== 'undefined'
-       && typeof require === 'function' ? factory(require('../moment')) :
-   typeof define === 'function' && define.amd ? define(['../moment'], factory) :
-   factory(global.moment)
-}(this, (function (moment) { 'use strict';
+import moment from '../moment';
 
-
-var ja = moment.defineLocale('ja', {
+export default moment.defineLocale('ja', {
     months : '1月_2月_3月_4月_5月_6月_7月_8月_9月_10月_11月_12月'.split('_'),
     monthsShort : '1月_2月_3月_4月_5月_6月_7月_8月_9月_10月_11月_12月'.split('_'),
     weekdays : '日曜日_月曜日_火曜日_水曜日_木曜日_金曜日_土曜日'.split('_'),
     weekdaysShort : '日_月_火_水_木_金_土'.split('_'),
     weekdaysMin : '日_月_火_水_木_金_土'.split('_'),
     longDateFormat : {
-        LT : 'Ah時m分',
-        LTS : 'Ah時m分s秒',
+        LT : 'HH:mm',
+        LTS : 'HH:mm:ss',
         L : 'YYYY/MM/DD',
         LL : 'YYYY年M月D日',
-        LLL : 'YYYY年M月D日Ah時m分',
-        LLLL : 'YYYY年M月D日Ah時m分 dddd'
+        LLL : 'YYYY年M月D日 HH:mm',
+        LLLL : 'YYYY年M月D日 dddd HH:mm',
+        l : 'YYYY/MM/DD',
+        ll : 'YYYY年M月D日',
+        lll : 'YYYY年M月D日 HH:mm',
+        llll : 'YYYY年M月D日(ddd) HH:mm'
     },
     meridiemParse: /午前|午後/i,
     isPM : function (input) {
@@ -38,12 +36,24 @@ var ja = moment.defineLocale('ja', {
     calendar : {
         sameDay : '[今日] LT',
         nextDay : '[明日] LT',
-        nextWeek : '[来週]dddd LT',
+        nextWeek : function (now) {
+            if (now.week() < this.week()) {
+                return '[来週]dddd LT';
+            } else {
+                return 'dddd LT';
+            }
+        },
         lastDay : '[昨日] LT',
-        lastWeek : '[前週]dddd LT',
+        lastWeek : function (now) {
+            if (this.week() < now.week()) {
+                return '[先週]dddd LT';
+            } else {
+                return 'dddd LT';
+            }
+        },
         sameElse : 'L'
     },
-    ordinalParse : /\d{1,2}日/,
+    dayOfMonthOrdinalParse : /\d{1,2}日/,
     ordinal : function (number, period) {
         switch (period) {
             case 'd':
@@ -58,6 +68,7 @@ var ja = moment.defineLocale('ja', {
         future : '%s後',
         past : '%s前',
         s : '数秒',
+        ss : '%d秒',
         m : '1分',
         mm : '%d分',
         h : '1時間',
@@ -71,6 +82,3 @@ var ja = moment.defineLocale('ja', {
     }
 });
 
-return ja;
-
-})));
