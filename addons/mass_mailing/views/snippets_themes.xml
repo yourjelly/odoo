@@ -448,7 +448,7 @@
                 <tbody>
                     <tr>
                         <td style="width:270px;text-align:center;vertical-align:middle" class="o_mail_col_mv o_mail_img_container o_mail_h_padding o_mail_v_padding">
-                            <img src="/mass_mailing/static/src/img/theme_basic/s_default_image_block_image_text.jpg" class="d-block mx-auto" alt="Your Picture" />
+                            <img src="/mass_mailing/static/src/img/theme_basic/s_default_image_block_image_text.jpg" class="d-block mx-auto" alt="Your Picture" width="270"/>
                         </td>
                         <td style="width:270px;vertical-align:middle;text-align:center;" class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
                             <h3>Omnichannel sales</h3>
