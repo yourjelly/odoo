@@ -383,6 +383,10 @@ class Field(MetaField('DummyField', (object,), {})):
             if key in attrs:
                 _logger.warning("Field %s: parameter %r is not longer supported; %s",
                                 self, key, msg)
+        # validate extra arguments
+        for key in self._attrs:
+            if not model._valid_field_parameter(self, key):
+                _logger.warning("Field %s: invalid parameter %r", self, key)
 
         # prefetch only stored, column, non-manual and non-deprecated fields
         if not (self.store and self.column_type) or self.manual or self.deprecated:
@@ -2069,6 +2073,13 @@ class Selection(Field):
         # selection must be computed on related field
         field = self.related_field
         self.selection = lambda model: field._description_selection(model.env)
+
+    def _get_attrs(self, model, name):
+        attrs = super(Selection, self)._get_attrs(model, name)
+        # arguments 'selection' and 'selection_add' are processed below
+        attrs.pop('selection', None)
+        attrs.pop('selection_add', None)
+        return attrs
 
     def _setup_attrs(self, model, name):
         super(Selection, self)._setup_attrs(model, name)
