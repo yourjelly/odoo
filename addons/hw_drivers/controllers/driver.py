@@ -100,6 +100,7 @@ class StatusController(http.Controller):
 
 drivers = []
 bt_devices = {}
+socket_devices = {}
 iot_devices = {}
 
 class MetaClass(type):
@@ -278,6 +279,7 @@ class Manager(Thread):
             updated_devices.update(self.video_loop())
             updated_devices.update(self.printer_loop())
             updated_devices.update(bt_devices)
+            updated_devices.update(socket_devices)
             added = updated_devices.keys() - devices.keys()
             removed = devices.keys() - updated_devices.keys()
             devices = updated_devices
@@ -312,6 +314,18 @@ class BtManager(Thread):
         dm.start_discovery()
         dm.run()
 
+class SocketManager(Thread):
+
+    def run(self):
+        ser = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        ser.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        ser.bind(('', 9000))
+        ser.listen(1)
+        conn, addr = ser.accept()
+        if addr and addr[0] not in socket_devices:
+            iot_device = IoTDevice(conn, 'socket')
+            socket_devices[addr[0]] = iot_device
+
 conn = cups_connection()
 PPDs = conn.getPPDs()
 printers = conn.getPrinters()
@@ -323,3 +337,7 @@ m.start()
 bm = BtManager()
 bm.daemon = True
 bm.start()
+
+sm = SocketManager()
+sm.daemon = True
+sm.start()
