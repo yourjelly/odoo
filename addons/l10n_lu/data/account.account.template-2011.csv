@@ -92,7 +92,6 @@ lu_2020_account_1931,1931,due and payable within one year,account.data_account_t
 lu_2020_account_1932,1932,due and payable after more than one year,account.data_account_type_current_liabilities,FALSE,lu_2011_chart_1
 lu_2020_account_1941,1941,due and payable within one year,account.data_account_type_current_liabilities,FALSE,lu_2011_chart_1
 lu_2020_account_1942,1942,due and payable after more than one year,account.data_account_type_current_liabilities,FALSE,lu_2011_chart_1
-lu_2011_account_19822,19822,Capitalised life annuities,account.data_account_type_current_liabilities,FALSE,lu_2011_chart_1
 lu_2011_account_201,201,Set-up and start-up costs,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_203,203,"Expenses for increases in capital and for various operations (merger, demergers, change of legal form)",account.data_account_type_current_assets,FALSE,lu_2011_chart_1
 lu_2011_account_204,204,Loan issuances expenses,account.data_account_type_current_assets,FALSE,lu_2011_chart_1
@@ -284,7 +283,6 @@ lu_2020_account_4721,4721,Received deposits and guarantees,account.data_account_
 lu_2020_account_4722,4722,Amounts payable to partners and shareholders (others than from affiliated undertakings),account.data_account_type_current_liabilities,TRUE,lu_2011_chart_1
 lu_2011_account_4723,4723,"Amounts payable to directors, managers and statutory auditors and similar",account.data_account_type_current_liabilities,FALSE,lu_2011_chart_1
 lu_2020_account_4724,4724,Amounts payable to staff,account.data_account_type_current_liabilities,TRUE,lu_2011_chart_1
-lu_2011_account_4726,4726,Loans and similar debts,account.data_account_type_current_liabilities,FALSE,lu_2011_chart_1
 lu_2020_account_4727,4727,Lease debts,account.data_account_type_current_liabilities,TRUE,lu_2011_chart_1
 lu_2011_account_4728,4728,Other miscellaneous debts,account.data_account_type_current_liabilities,FALSE,lu_2011_chart_1
 lu_2011_account_481,481,Deferred charges (on one or more financial years),account.data_account_type_current_assets,FALSE,lu_2011_chart_1
