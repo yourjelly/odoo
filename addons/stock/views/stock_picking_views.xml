@@ -334,6 +334,7 @@
                                     <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
                                     <field name="group_id" groups="base.group_no_one"/>
                                     <field name="priority" attrs="{'invisible': [('picking_type_code', '=', 'incoming')]}"/>
+                                    <field name="user_id"/>
                                 </group>
                             </group>
                         </page>
