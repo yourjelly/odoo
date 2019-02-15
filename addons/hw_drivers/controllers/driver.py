@@ -276,7 +276,7 @@ class Manager(Thread):
                 }
             data = {
                 'params': {
-                    'data' : iot_box,
+                    'iot_box' : iot_box,
                     'devices' : devices_list,
                 }
             }
