@@ -225,6 +225,7 @@ class Field(MetaField('DummyField', (object,), {})):
 
         'string': None,                 # field label
         'help': None,                   # field tooltip
+        'invisible': False,             # whether the field is invisible
         'readonly': False,              # whether the field is readonly
         'required': False,              # whether the field is required
         'states': None,                 # set readonly and required depending on state
