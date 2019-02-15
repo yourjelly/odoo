@@ -77,7 +77,8 @@ class StatusController(http.Controller):
     def connect_box(self, token):
         server = get_odoo_server_url()
         if server:
-            return _('This IoTBox has already been connected')
+            f = open('/var/www/False.jpg','rb')
+            return f.read()
         else:
             iotname = ''
             token = b64decode(token).decode('utf-8')
@@ -87,7 +88,8 @@ class StatusController(http.Controller):
             path = os.getenv("HOME") + '/odoo/addons/point_of_sale/tools/posbox/configuration/connect_to_server.sh'
             subprocess.call([path, url, iotname, token, reboot])
             m.send_alldevices()
-            return _('IoTBox connected')
+            f = open('/var/www/True.jpg','rb')
+            return f.read()
 
 #----------------------------------------------------------
 # Drivers
