@@ -351,10 +351,12 @@
     <div class="o_wslides_home_aside">
         <div class="row o_wslides_home_aside_title align-items-center">
             <div class="col">
-                <t t-call="website_slides.slides_misc_user_image"/>
+                <t t-call="website_slides.slides_misc_user_image">
+                    <t t-set="img_style" t-value="'height: 26px'"/>
+                </t>
                 <a t-att-href="'/profile/user/%s' % user.id" class="float-right">Edit</a>
-                <h4 t-esc="user.name" class="font-weight-bold"/>
-                <hr/>
+                <h3 t-esc="user.name" class="font-weight-bold mb-0"/>
+                <hr class="mt-2"/>
             </div>
             <div class="col-12 mt8">
                 <span class="font-weight-bold text-muted">Current rank:</span>
