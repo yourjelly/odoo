@@ -4,14 +4,23 @@
 <!-- Channels home template -->
 <template id='courses_home' name="Odoo Courses Homepage">
     <t t-call="website.layout">
-        <t t-call="website_slides.courses_header">
-            <t t-set="header_title" t-value="'Reach new heights'"/>
-            <t t-set="header_subtitle" t-value="'Start your online course today !'"/>
-            <t t-set="header_text" t-value="'Skill up and have an impact! Your business career starts here. Time to start a course.'"/>
-            <t t-set="header_cta_url" t-value="'slides'"/>
-            <t t-set="header_cta_title" t-value="'Pick a course'"/>
-        </t>
         <div class="wrap">
+            <section class="s_banner overflow-hidden bg-900" style="background-image: url(&quot;/website_slides/static/src/img/banner_default.svg&quot;); background-size: cover; background-position: 55% 65%">
+                <div class="container align-items-center d-flex mb-5 mt-lg-5 pt-lg-4 pb-lg-1">
+                    <div>
+                        <h1 class="display-3 mb-0">Reach new heights</h1>
+                        <h2 class="mb-4">Start your online course today !</h2>
+                        <div class="row mt-1 mb-3">
+                            <div class="col-lg-4">
+                                <p>Skill up and have an impact! Your business career starts here. Time to start a course.</p>
+                            </div>
+                            <div class="col-lg-3">
+                                <a href="slides/all" class="btn btn-primary btn-lg">Pick a course</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
             <div class="container mt16 o_wslides_home_nav position-relative">
                 <nav class="navbar navbar-expand-md navbar-light shadow-sm" style="background: white!important">
                     <button class="navbar-toggler" type="button"
@@ -105,11 +114,13 @@
 <!-- Channel all/main template -->
 <template id='courses_all' name="Odoo All Courses">
     <t t-call="website.layout">
-        <t t-call="website_slides.courses_header">
-            <t t-set="header_title" t-value="'All Courses'"/>
-            <t t-set="header_subtitle" t-value="'Start your online course today !'"/>
-        </t>
         <div class="wrap">
+            <section class="s_banner bg-900" style="background-image: url(&quot;/website_slides/static/src/img/banner_default_all.svg&quot;); background-size: cover; background-position: 80% 20%">
+                <div class="container py-5">
+                    <h1 class="display-3 mb-0">All Courses</h1>
+                    <h3 class="mb-4">Start your online course today !</h3>
+                </div>
+            </section>
             <div class="container mt16 o_wslides_home_nav position-relative">
                 <!-- Navbar dynamically composed using displayed channel tag groups. -->
                 <nav class="navbar navbar-expand-md navbar-light shadow-sm" style="background: white!important">
@@ -199,28 +210,6 @@
     </t>
 </template>
 
-<template id="courses_header">
-    <section class="s_cover parallax bg-black-50 pt40 pb40 o_wslides_home_header" data-scroll-background-ratio="0" style="background-image: none;">
-        <span class="s_parallax_bg oe_img_bg oe_custom_bg" style="background-image: url(&quot;/website_slides/static/src/img/channel_banner_moutain.jpg&quot;); background-position: 52.1% 17.69%;"></span>
-        <div class="container">
-            <div class="row s_nb_column_fixed">
-                <div class="s_title pt0 col-lg-12" data-name="Title">
-                    <h1 class="s_title_small_caps" style="font-size: 62px; text-align: left;"><t t-esc="header_title"/></h1>
-                    <h4 t-if="header_subtitle" class="s_title_small_caps" style="font-size: 34px; text-align: left;"><t t-esc="header_subtitle"/></h4>
-                </div>
-            </div>
-            <div class="row s_nb_column_fixed">
-                <div t-if="header_text" class="col-lg-3 s_text pt16 pb16" data-name="Text">
-                    <p class="lead" style="text-align: left;"><t t-esc="header_text"/></p>
-                </div>
-                <div t-if="header_cta_title" class="col-lg-3 s_btn text-center pt16 pb16" data-name="Buttons">
-                    <a t-att-href="header_cta_url"
-                        class="btn btn-primary o_default_snippet_text text_small_caps"><t t-esc="header_cta_title"/></a>
-                </div>
-            </div>
-        </div>
-    </section>
-</template>
 
 <template id="courses_footer">
     <section class="s_cover parallax bg-black-50 pt40 pb40 o_wslides_home_footer mt16" data-scroll-background-ratio="0" style="background-image: none;">
