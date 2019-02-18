@@ -36,8 +36,17 @@ $MAX-Z-INDEX : 2147483647 !default;
 // **************************************************
 
 div .o_wslides_home_nav {
-    position: relative;
-    top: -50px;
+    top: -40px;
+
+    @include media-breakpoint-up(md) {
+        font-size: 1rem;
+
+        .o_wslides_nav_navbar_right {
+            margin-left: auto;
+            padding-left: $spacer;
+            border-left: 1px solid $border-color;
+        }
+    }
 }
 
 div .o_wslides_home_main {
