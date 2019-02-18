@@ -39,17 +39,17 @@
                     </div>
                 </nav>
             </div>
-            <div class="container mt16 o_wslides_home_main">
+            <div class="container o_wslides_home_main">
                 <div class="row">
-                    <div class="col-md-9">
+                    <div class="col-lg-9 pr-lg-5">
                         <t t-if="channels_my">
                             <t t-set="void_count" t-value="3 - len(channels_my[:3])"/>
-                            <div class="o_wslides_home_content_section">
-                                <div class="row mt16 o_wslides_home_content_section_title align-items-center">
+                            <div class="o_wslides_home_content_section mb-5">
+                                <div class="row o_wslides_home_content_section_title align-items-center">
                                     <div class="col">
                                         <a href="slides/all" class="float-right">View all</a>
-                                        <h3><i class="fa fa-certificate"/> Complete latest courses</h3>
-                                        <hr/>
+                                        <h5 class="m-0">Complete latest courses</h5>
+                                        <hr class="mt-2"/>
                                     </div>
                                 </div>
                                 <div class="row o_wslides_row mt8">
@@ -59,12 +59,12 @@
                                 </div>
                             </div>
                         </t>
-                        <div class="o_wslides_home_content_section">
-                            <div class="row mt16 o_wslides_home_content_section_title align-items-center">
+                        <div class="o_wslides_home_content_section mb-5">
+                            <div class="row o_wslides_home_content_section_title align-items-center">
                                 <div class="col">
                                     <a href="slides/all" class="float-right">View all</a>
-                                    <h3><i class="fa fa-fire"/> Most popular courses</h3>
-                                    <hr/>
+                                    <h5 class="m-0">Most popular courses</h5>
+                                    <hr class="mt-2"/>
                                 </div>
                             </div>
                             <div class="row o_wslides_row mt8">
@@ -73,12 +73,12 @@
                                 </t>
                             </div>
                         </div>
-                        <div class="o_wslides_home_content_section">
-                            <div class="row mt16 o_wslides_home_content_section_title align-items-center">
+                        <div class="o_wslides_home_content_section mb-5">
+                            <div class="row o_wslides_home_content_section_title align-items-center">
                                 <div class="col">
                                     <a href="slides/all" class="float-right">View all</a>
-                                    <h3><i class="fa fa-plus-square"/> Newest courses</h3>
-                                    <hr/>
+                                    <h5 class="m-0">Newest courses</h5>
+                                    <hr class="mt-2"/>
                                 </div>
                             </div>
                             <div class="row o_wslides_row mt8">
@@ -88,7 +88,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-lg-3">
                         <t t-if="is_public_user">
                             <t t-call="website_slides.slides_home_achievements_small"/>
                             <t t-call="website_slides.slides_home_users_small"/>
@@ -175,7 +175,7 @@
                     </div>
                 </nav>
             </div>
-            <div class="container mt16 o_wslides_home_main">
+            <div class="container o_wslides_home_main">
                 <t t-if="search_term and not channels_layouted">
                     <div class="row">
                         <div class="col">
@@ -281,7 +281,7 @@
 
 <template id='slides_home_achievements_small' name="Latest Achievements">
     <div class="o_wslides_home_aside">
-        <div class="row mt16 o_wslides_home_aside_title">
+        <div class="row o_wslides_home_aside_title">
             <div class="col">
                 <a href="slides" class="text-muted float-right">
                     <small class="float-right">View all</small>
@@ -318,7 +318,7 @@
 
 <template id='slides_home_users_small' name="Latest Users">
     <div class="o_wslides_home_aside">
-        <div class="row mt16 o_wslides_home_aside_title">
+        <div class="row o_wslides_home_aside_title">
             <div class="col">
                 <a href="slides" class="text-muted float-right">
                     <small class="float-right">View all</small>
@@ -361,8 +361,8 @@
 
 <template id='slides_home_user_profile_small' name="User Profile">
     <div class="o_wslides_home_aside">
-        <div class="row mt16 o_wslides_home_aside_title align-items-center">
-            <div class="col-12">
+        <div class="row o_wslides_home_aside_title align-items-center">
+            <div class="col">
                 <t t-call="website_slides.slides_misc_user_image"/>
                 <a t-att-href="'/profile/user/%s' % user.id" class="float-right">Edit</a>
                 <h4 t-esc="user.name" class="font-weight-bold"/>
