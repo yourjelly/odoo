@@ -52,9 +52,9 @@
                                         <hr class="mt-2"/>
                                     </div>
                                 </div>
-                                <div class="row o_wslides_row mt8">
+                                <div class="row o_wslides_row mx-n2 mt8">
                                     <t t-foreach="channels_my[:3]" t-as="channel">
-                                        <div class="col-md-4 col-sm-6 col-xs-12" t-call="website_slides.course_card"/>
+                                        <div class="col-md-4 col-sm-6 px-2 col-xs-12 d-flex flex-grow-1" t-call="website_slides.course_card"/>
                                     </t>
                                 </div>
                             </div>
@@ -67,9 +67,9 @@
                                     <hr class="mt-2"/>
                                 </div>
                             </div>
-                            <div class="row o_wslides_row mt8">
+                            <div class="row o_wslides_row mx-n2 mt8">
                                 <t t-foreach="channels_popular[:3]" t-as="channel">
-                                    <div class="col-md-4 col-sm-6 col-xs-12" t-call="website_slides.course_card"/>
+                                    <div class="col-md-4 col-sm-6 px-2 col-xs-12 d-flex flex-grow-1" t-call="website_slides.course_card"/>
                                 </t>
                             </div>
                         </div>
@@ -81,9 +81,9 @@
                                     <hr class="mt-2"/>
                                 </div>
                             </div>
-                            <div class="row o_wslides_row mt8">
+                            <div class="row o_wslides_row mx-n2 mt8">
                                 <t t-foreach="channels_newest[:3]" t-as="channel">
-                                    <div class="col-md-4 col-sm-6 col-xs-12" t-call="website_slides.course_card"/>
+                                    <div class="col-md-4 col-sm-6 px-2 col-xs-12 d-flex flex-grow-1" t-call="website_slides.course_card"/>
                                 </t>
                             </div>
                         </div>
@@ -235,45 +235,33 @@
 </template>
 
 <template id='course_card' name="Course Card">
-    <div class="card o_wslides_course_card">
-        <img class="card-img-top img-fuild"
-            style="max-height: 160px;"
-            t-att-src="'/web/image/slide.channel/%s/image_large' % channel.id if channel.image else '/website_slides/static/src/img/channel-default.jpg'"
-            t-att-alt="channel.name"/>
+    <div class="card w-100 o_wslides_course_card mb-4">
+        <t t-set="course_image" t-value="'/web/image/slide.channel/%s/image_large' % channel.id if channel.image else '/website_slides/static/src/img/channel-default.jpg'"/>
+        <a t-attf-href="/slides/#{slug(channel)}" t-title="channel.name">
+            <div class="card-img-top" t-attf-style="padding-top: 50%; background-image: url(#{course_image}); background-size: cover; background-position:center"/>
+        </a>
         <div class="card-body">
-            <h5 class="card-title" t-att-title="channel.name">
-                <a t-attf-href="/slides/#{slug(channel)}" t-esc="channel.name"/>
-            </h5>
-            <div class="card-text">
-                <div class="text-muted oe_no_empty" t-field="channel.description"/>
-                <div t-if="channel.tag_ids">
+            <a class="card-title h5" t-attf-href="/slides/#{slug(channel)}" t-esc="channel.name"/>
+            <div class="card-text mt-1">
+                <div class="font-weight-light oe_no_empty" t-field="channel.description"/>
+                <div t-if="channel.tag_ids" class="border-top mt-2 pt-1">
                     <t t-foreach="channel.tag_ids" t-as="tag">
-                        <a t-att-href="'/slides/all?channel_tag_id=%s' % tag.id" class="badge badge-secondary">
-                            <t t-esc="tag.name"/>
-                        </a>
+                        <a t-att-href="'/slides/all?channel_tag_id=%s' % tag.id" class="badge badge-light" t-esc="tag.name"/>
                     </t>
                 </div>
             </div>
         </div>
-        <div class="card-footer">
-            <div class="row justify-content-between align-items-center">
-                <small class="text-muted col-3">
+        <div class="card-footer border-top-0 text-600">
+            <div class="d-flex justify-content-between align-items-center small">
+                <b>
                     <t t-call="website_slides.slides_misc_float_time">
                         <t t-set="value" t-value="channel.total_time"/>
                     </t>
-                </small>
-                <t t-if="channel.is_member">
-                    <div class="col">
-                        <div class="progress">
-                            <div class="progress-bar" role="progressbar" t-att-aria-valuenow="channel.completion" aria-valuemin="0" aria-valuemax="100" t-attf-style="width:#{channel.completion}%;">
-                                <!-- <span><t t-esc="channel.completion"/>%</span> -->
-                            </div>
-                        </div>
-                    </div>
-                </t>
-                <t t-else="">
-                    <small class="text-muted col-5"><span t-esc="channel.total_slides"/> steps</small>
-                </t>
+                </b>
+                <div t-if="channel.is_member" class="progress w-50">
+                    <div class="progress-bar" role="progressbar" t-att-aria-valuenow="channel.completion" aria-valuemin="0" aria-valuemax="100" t-attf-style="width:#{channel.completion}%;"/>
+                </div>
+                <b t-else=""><span t-esc="channel.total_slides"/> steps</b>
             </div>
         </div>
     </div>
