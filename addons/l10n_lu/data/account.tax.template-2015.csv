@@ -1,249 +1,249 @@
 id,name,description,type_tax_use,amount_type,amount,account_id:id,refund_account_id:id,chart_template_id:id,sequence,children_tax_ids:id,tag_ids:id,tax_group_id:id
-lu_2011_tax_AB-EC-0,Purchase Goods Exempted - Extra-Community,AB-EC-0,purchase,percent,0,,,lu_2011_chart_1,101,,tag_lu_69,tax_group_0
-lu_2015_tax_AB-EC-14-n,Purchase Goods 14% - Extra-Community (-),AB-EC-14-n,none,percent,-14,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1106,,tag_lu_514,tax_group_14
-lu_2015_tax_AB-EC-14-p,Purchase Goods 14% - Extra-Community (+),AB-EC-14-p,none,percent,14,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1107,,tag_lu_362,tax_group_14
-lu_2015_tax_AB-EC-14,Purchase Goods 14% - Extra-Community,AB-EC-14,purchase,group,1,,,lu_2011_chart_1,105,"lu_2015_tax_AB-EC-14-n,lu_2015_tax_AB-EC-14-p",tag_lu_81,tax_group_14
-lu_2015_tax_AB-EC-17-n,Purchase Goods 17% - Extra-Community (-),AB-EC-17-n,none,percent,-17,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1112,,tag_lu_516,tax_group_17
-lu_2015_tax_AB-EC-17-p,Purchase Goods 17% - Extra-Community (+),AB-EC-17-p,none,percent,17,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1113,,tag_lu_358,tax_group_17
-lu_2015_tax_AB-EC-17,Purchase Goods 17% - Extra-Community,AB-EC-17,purchase,group,100,,,lu_2011_chart_1,111,"lu_2015_tax_AB-EC-17-n,lu_2015_tax_AB-EC-17-p",tag_lu_77,tax_group_17
-lu_2011_tax_AB-EC-3-n,Purchase Goods 3% - Extra-Community (-),AB-EC-3-n,none,percent,-3,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1115,,tag_lu_517,tax_group_3
-lu_2011_tax_AB-EC-3-p,Purchase Goods 3% - Extra-Community (+),AB-EC-3-p,none,percent,3,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1116,,tag_lu_334,tax_group_3
-lu_2011_tax_AB-EC-3,Purchase Goods 3% - Extra-Community,AB-EC-3,purchase,group,100,,,lu_2011_chart_1,114,"lu_2011_tax_AB-EC-3-n,lu_2011_tax_AB-EC-3-p",tag_lu_45,tax_group_3
-lu_2015_tax_AB-EC-8-n,Purchase Goods 8% - Extra-Community (-),AB-EC-8-n,none,percent,-8,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1121,,tag_lu_519,tax_group_8
-lu_2015_tax_AB-EC-8-p,Purchase Goods 8% - Extra-Community (+),AB-EC-8-p,none,percent,8,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1122,,tag_lu_366,tax_group_8
-lu_2015_tax_AB-EC-8,Purchase Goods 8% - Extra-Community,AB-EC-8,purchase,group,100,,,lu_2011_chart_1,120,"lu_2015_tax_AB-EC-8-n,lu_2015_tax_AB-EC-8-p",tag_lu_85,tax_group_8
-lu_2015_tax_AB-ECP-0,Purchase Goods Exempted - Extra-Community fin privées,AB-ECP-0,purchase,percent,0,,,lu_2011_chart_1,123,,tag_lu_73,tax_group_0
-lu_2015_tax_AB-ECP-14-n,Purchase Goods 14% - Extra-Community fin privées (-),AB-ECP-14-n,none,percent,-14,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1128,,tag_lu_521,tax_group_14
-lu_2015_tax_AB-ECP-14-p,Purchase Goods 14% - Extra-Community fin privées (+),AB-ECP-14-p,none,percent,14,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1129,,tag_lu_374,tax_group_14
-lu_2015_tax_AB-ECP-14,Purchase Goods 14% - Extra-Community fin privées,AB-ECP-14,purchase,group,100,,,lu_2011_chart_1,127,"lu_2015_tax_AB-ECP-14-n,lu_2015_tax_AB-ECP-14-p",tag_lu_93,tax_group_14
-lu_2015_tax_AB-ECP-17-n,Purchase Goods 17% - Extra-Community fin privées (-),AB-ECP-17-n,none,percent,-17,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1134,,tag_lu_523,tax_group_17
-lu_2015_tax_AB-ECP-17-p,Purchase Goods 17% - Extra-Community fin privées (+),AB-ECP-17-p,none,percent,17,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1135,,tag_lu_370,tax_group_17
-lu_2015_tax_AB-ECP-17,Purchase Goods 17% - Extra-Community fin privées,AB-ECP-17,purchase,group,100,,,lu_2011_chart_1,133,"lu_2015_tax_AB-ECP-17-n,lu_2015_tax_AB-ECP-17-p",tag_lu_89,tax_group_17
-lu_2015_tax_AB-ECP-3-n,Purchase Goods 3% - Extra-Community fin privées (-),AB-ECP-3-n,none,percent,-3,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1137,,tag_lu_524,tax_group_3
-lu_2015_tax_AB-ECP-3-p,Purchase Goods 3% - Extra-Community fin privées (+),AB-ECP-3-p,none,percent,3,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1138,,tag_lu_350,tax_group_3
-lu_2015_tax_AB-ECP-3,Purchase Goods 3% - Extra-Community fin privées,AB-ECP-3,purchase,group,100,,,lu_2011_chart_1,136,"lu_2015_tax_AB-ECP-3-n,lu_2015_tax_AB-ECP-3-p",tag_lu_61,tax_group_3
-lu_2015_tax_AB-ECP-8-n,Purchase Goods 8% - Extra-Community fin privées (-),AB-ECP-8-n,none,percent,-8,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1143,,tag_lu_526,tax_group_8
-lu_2015_tax_AB-ECP-8-p,Purchase Goods 8% - Extra-Community fin privées (+),AB-ECP-8-p,none,percent,8,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1144,,tag_lu_378,tax_group_8
-lu_2015_tax_AB-ECP-8,Purchase Goods 8% - Extra-Community fin privées,AB-ECP-8,purchase,group,100,,,lu_2011_chart_1,142,"lu_2015_tax_AB-ECP-8-n,lu_2015_tax_AB-ECP-8-p",tag_lu_97,tax_group_8
-lu_2011_tax_AB-IC-0,Purchase Goods Exempted - Intra-Community,AB-IC-0,purchase,percent,0,,,lu_2011_chart_1,145,,tag_lu_20,tax_group_0
-lu_2015_tax_AB-IC-14-n,Purchase Goods 14% - Intra-Community (-),AB-IC-14-n,none,percent,-14,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1150,,tag_lu_492,tax_group_14
-lu_2015_tax_AB-IC-14-p,Purchase Goods 14% - Intra-Community (+),AB-IC-14-p,none,percent,14,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1151,,tag_lu_317,tax_group_14
-lu_2015_tax_AB-IC-14,Purchase Goods 14% - Intra-Community,AB-IC-14,purchase,group,100,,,lu_2011_chart_1,149,"lu_2015_tax_AB-IC-14-n,lu_2015_tax_AB-IC-14-p",tag_lu_28,tax_group_14
-lu_2015_tax_AB-IC-17-n,Purchase Goods 17% - Intra-Community (-),AB-IC-17-n,none,percent,-17,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1156,,tag_lu_494,tax_group_17
-lu_2015_tax_AB-IC-17-p,Purchase Goods 17% - Intra-Community (+),AB-IC-17-p,none,percent,17,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1157,,tag_lu_313,tax_group_17
-lu_2015_tax_AB-IC-17,Purchase Goods 17% - Intra-Community,AB-IC-17,purchase,group,100,,,lu_2011_chart_1,155,"lu_2015_tax_AB-IC-17-n,lu_2015_tax_AB-IC-17-p",tag_lu_24,tax_group_17
-lu_2011_tax_AB-IC-3-n,Purchase Goods 3% - Intra-Community (-),AB-IC-3-n,none,percent,-3,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1159,,tag_lu_495,tax_group_3
-lu_2011_tax_AB-IC-3-p,Purchase Goods 3% - Intra-Community (+),AB-IC-3-p,none,percent,3,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1160,,tag_lu_305,tax_group_3
-lu_2011_tax_AB-IC-3,Purchase Goods 3% - Intra-Community,AB-IC-3,purchase,group,100,,,lu_2011_chart_1,158,"lu_2011_tax_AB-IC-3-n,lu_2011_tax_AB-IC-3-p",tag_lu_12,tax_group_3
-lu_2015_tax_AB-IC-8-n,Purchase Goods 8% - Intra-Community (-),AB-IC-8-n,none,percent,-8,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1165,,tag_lu_497,tax_group_8
-lu_2015_tax_AB-IC-8-p,Purchase Goods 8% - Intra-Community (+),AB-IC-8-p,none,percent,8,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1166,,tag_lu_321,tax_group_8
-lu_2015_tax_AB-IC-8,Purchase Goods 8% - Intra-Community,AB-IC-8,purchase,group,100,,,lu_2011_chart_1,164,"lu_2015_tax_AB-IC-8-n,lu_2015_tax_AB-IC-8-p",tag_lu_32,tax_group_8
+lu_2011_tax_AB-EC-0,Purchase Goods Exempted - Extra-Community,AB-EC-0,purchase,percent,0,,,lu_2011_chart_1,101,,tag_lu_195,tax_group_0
+lu_2015_tax_AB-EC-14-n,Purchase Goods 14% - Extra-Community (-),AB-EC-14-n,none,percent,-14,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1106,,tag_lu_460,tax_group_14
+lu_2015_tax_AB-EC-14-p,Purchase Goods 14% - Extra-Community (+),AB-EC-14-p,none,percent,14,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1107,,tag_lu_724,tax_group_14
+lu_2015_tax_AB-EC-14,Purchase Goods 14% - Extra-Community,AB-EC-14,purchase,group,1,,,lu_2011_chart_1,105,"lu_2015_tax_AB-EC-14-n,lu_2015_tax_AB-EC-14-p",tag_lu_723,tax_group_14
+lu_2015_tax_AB-EC-17-n,Purchase Goods 17% - Extra-Community (-),AB-EC-17-n,none,percent,-17,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1112,,tag_lu_460,tax_group_17
+lu_2015_tax_AB-EC-17-p,Purchase Goods 17% - Extra-Community (+),AB-EC-17-p,none,percent,17,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1113,,tag_lu_722,tax_group_17
+lu_2015_tax_AB-EC-17,Purchase Goods 17% - Extra-Community,AB-EC-17,purchase,group,100,,,lu_2011_chart_1,111,"lu_2015_tax_AB-EC-17-n,lu_2015_tax_AB-EC-17-p",tag_lu_721,tax_group_17
+lu_2011_tax_AB-EC-3-n,Purchase Goods 3% - Extra-Community (-),AB-EC-3-n,none,percent,-3,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1115,,tag_lu_460,tax_group_3
+lu_2011_tax_AB-EC-3-p,Purchase Goods 3% - Extra-Community (+),AB-EC-3-p,none,percent,3,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1116,,tag_lu_068,tax_group_3
+lu_2011_tax_AB-EC-3,Purchase Goods 3% - Extra-Community,AB-EC-3,purchase,group,100,,,lu_2011_chart_1,114,"lu_2011_tax_AB-EC-3-n,lu_2011_tax_AB-EC-3-p",tag_lu_059,tax_group_3
+lu_2015_tax_AB-EC-8-n,Purchase Goods 8% - Extra-Community (-),AB-EC-8-n,none,percent,-8,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1121,,tag_lu_460,tax_group_8
+lu_2015_tax_AB-EC-8-p,Purchase Goods 8% - Extra-Community (+),AB-EC-8-p,none,percent,8,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1122,,tag_lu_726,tax_group_8
+lu_2015_tax_AB-EC-8,Purchase Goods 8% - Extra-Community,AB-EC-8,purchase,group,100,,,lu_2011_chart_1,120,"lu_2015_tax_AB-EC-8-n,lu_2015_tax_AB-EC-8-p",tag_lu_725,tax_group_8
+lu_2015_tax_AB-ECP-0,Purchase Goods Exempted - Extra-Community fin privées,AB-ECP-0,purchase,percent,0,,,lu_2011_chart_1,123,,tag_lu_196,tax_group_0
+lu_2015_tax_AB-ECP-14-n,Purchase Goods 14% - Extra-Community fin privées (-),AB-ECP-14-n,none,percent,-14,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1128,,tag_lu_460,tax_group_14
+lu_2015_tax_AB-ECP-14-p,Purchase Goods 14% - Extra-Community fin privées (+),AB-ECP-14-p,none,percent,14,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1129,,tag_lu_734,tax_group_14
+lu_2015_tax_AB-ECP-14,Purchase Goods 14% - Extra-Community fin privées,AB-ECP-14,purchase,group,100,,,lu_2011_chart_1,127,"lu_2015_tax_AB-ECP-14-n,lu_2015_tax_AB-ECP-14-p",tag_lu_733,tax_group_14
+lu_2015_tax_AB-ECP-17-n,Purchase Goods 17% - Extra-Community fin privées (-),AB-ECP-17-n,none,percent,-17,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1134,,tag_lu_460,tax_group_17
+lu_2015_tax_AB-ECP-17-p,Purchase Goods 17% - Extra-Community fin privées (+),AB-ECP-17-p,none,percent,17,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1135,,tag_lu_732,tax_group_17
+lu_2015_tax_AB-ECP-17,Purchase Goods 17% - Extra-Community fin privées,AB-ECP-17,purchase,group,100,,,lu_2011_chart_1,133,"lu_2015_tax_AB-ECP-17-n,lu_2015_tax_AB-ECP-17-p",tag_lu_731,tax_group_17
+lu_2015_tax_AB-ECP-3-n,Purchase Goods 3% - Extra-Community fin privées (-),AB-ECP-3-n,none,percent,-3,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1137,,tag_lu_460,tax_group_3
+lu_2015_tax_AB-ECP-3-p,Purchase Goods 3% - Extra-Community fin privées (+),AB-ECP-3-p,none,percent,3,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1138,,tag_lu_073,tax_group_3
+lu_2015_tax_AB-ECP-3,Purchase Goods 3% - Extra-Community fin privées,AB-ECP-3,purchase,group,100,,,lu_2011_chart_1,136,"lu_2015_tax_AB-ECP-3-n,lu_2015_tax_AB-ECP-3-p",tag_lu_063,tax_group_3
+lu_2015_tax_AB-ECP-8-n,Purchase Goods 8% - Extra-Community fin privées (-),AB-ECP-8-n,none,percent,-8,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1143,,tag_lu_460,tax_group_8
+lu_2015_tax_AB-ECP-8-p,Purchase Goods 8% - Extra-Community fin privées (+),AB-ECP-8-p,none,percent,8,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1144,,tag_lu_736,tax_group_8
+lu_2015_tax_AB-ECP-8,Purchase Goods 8% - Extra-Community fin privées,AB-ECP-8,purchase,group,100,,,lu_2011_chart_1,142,"lu_2015_tax_AB-ECP-8-n,lu_2015_tax_AB-ECP-8-p",tag_lu_735,tax_group_8
+lu_2011_tax_AB-IC-0,Purchase Goods Exempted - Intra-Community,AB-IC-0,purchase,percent,0,,,lu_2011_chart_1,145,,tag_lu_194,tax_group_0
+lu_2015_tax_AB-IC-14-n,Purchase Goods 14% - Intra-Community (-),AB-IC-14-n,none,percent,-14,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1150,,tag_lu_459,tax_group_14
+lu_2015_tax_AB-IC-14-p,Purchase Goods 14% - Intra-Community (+),AB-IC-14-p,none,percent,14,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1151,,tag_lu_714,tax_group_14
+lu_2015_tax_AB-IC-14,Purchase Goods 14% - Intra-Community,AB-IC-14,purchase,group,100,,,lu_2011_chart_1,149,"lu_2015_tax_AB-IC-14-n,lu_2015_tax_AB-IC-14-p",tag_lu_713,tax_group_14
+lu_2015_tax_AB-IC-17-n,Purchase Goods 17% - Intra-Community (-),AB-IC-17-n,none,percent,-17,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1156,,tag_lu_459,tax_group_17
+lu_2015_tax_AB-IC-17-p,Purchase Goods 17% - Intra-Community (+),AB-IC-17-p,none,percent,17,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1157,,tag_lu_712,tax_group_17
+lu_2015_tax_AB-IC-17,Purchase Goods 17% - Intra-Community,AB-IC-17,purchase,group,100,,,lu_2011_chart_1,155,"lu_2015_tax_AB-IC-17-n,lu_2015_tax_AB-IC-17-p",tag_lu_711,tax_group_17
+lu_2011_tax_AB-IC-3-n,Purchase Goods 3% - Intra-Community (-),AB-IC-3-n,none,percent,-3,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1159,,tag_lu_459,tax_group_3
+lu_2011_tax_AB-IC-3-p,Purchase Goods 3% - Intra-Community (+),AB-IC-3-p,none,percent,3,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1160,,tag_lu_054,tax_group_3
+lu_2011_tax_AB-IC-3,Purchase Goods 3% - Intra-Community,AB-IC-3,purchase,group,100,,,lu_2011_chart_1,158,"lu_2011_tax_AB-IC-3-n,lu_2011_tax_AB-IC-3-p",tag_lu_049,tax_group_3
+lu_2015_tax_AB-IC-8-n,Purchase Goods 8% - Intra-Community (-),AB-IC-8-n,none,percent,-8,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1165,,tag_lu_459,tax_group_8
+lu_2015_tax_AB-IC-8-p,Purchase Goods 8% - Intra-Community (+),AB-IC-8-p,none,percent,8,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1166,,tag_lu_716,tax_group_8
+lu_2015_tax_AB-IC-8,Purchase Goods 8% - Intra-Community,AB-IC-8,purchase,group,100,,,lu_2011_chart_1,164,"lu_2015_tax_AB-IC-8-n,lu_2015_tax_AB-IC-8-p",tag_lu_715,tax_group_8
 lu_2011_tax_AB-PA-0,Purchase Goods 0% - Country,AB-PA-0,purchase,percent,0,,,lu_2011_chart_1,167,,tag_lu_220,tax_group_0
-lu_2015_tax_AB-PA-14,Purchase Goods 14% - Country,AB-PA-14,purchase,percent,14,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,169,,"tag_lu_222,tag_lu_448",tax_group_14
-lu_2015_tax_AB-PA-17,Purchase Goods 17% - Country,AB-PA-17,purchase,percent,17,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,171,,"tag_lu_224,tag_lu_450",tax_group_17
-lu_2011_tax_AB-PA-3,Purchase Goods 3% - Country,AB-PA-3,purchase,percent,3,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,172,,"tag_lu_225,tag_lu_451",tax_group_3
-lu_2015_tax_AB-PA-8,Purchase Goods 8% - Country,AB-PA-8,purchase,percent,8,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,174,,"tag_lu_453,tag_lu_227",tax_group_8
-lu_2011_tax_AP-EC-0,Purchase Services Exempted - Extra-Community,AP-EC-0,purchase,percent,0,,,lu_2011_chart_1,175,,tag_lu_153,tax_group_0
-lu_2015_tax_AP-EC-14-n,Purchase Services 14% - Extra-Community (-),AP-EC-14-n,none,percent,-14,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1180,,tag_lu_557,tax_group_14
-lu_2015_tax_AP-EC-14-p,Purchase Services 14% - Extra-Community (+),AP-EC-14-p,none,percent,14,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1181,,tag_lu_433,tax_group_14
-lu_2015_tax_AP-EC-14,Purchase Services 14% - Extra-Community,AP-EC-14,purchase,group,100,,,lu_2011_chart_1,179,"lu_2015_tax_AP-EC-14-n,lu_2015_tax_AP-EC-14-p",tag_lu_161,tax_group_14
-lu_2015_tax_AP-EC-17-n,Purchase Services 17% - Extra-Community (-),AP-EC-17-n,none,percent,-17,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1186,,tag_lu_559,tax_group_17
-lu_2015_tax_AP-EC-17-p,Purchase Services 17% - Extra-Community (+),AP-EC-17-p,none,percent,17,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1187,,tag_lu_429,tax_group_17
-lu_2015_tax_AP-EC-17,Purchase Services 17% - Extra-Community,AP-EC-17,purchase,group,100,,,lu_2011_chart_1,185,"lu_2015_tax_AP-EC-17-n,lu_2015_tax_AP-EC-17-p",tag_lu_157,tax_group_17
-lu_2011_tax_AP-EC-3-n,Purchase Services 3% - Extra-Community (-),AP-EC-3-n,none,percent,-3,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1189,,tag_lu_560,tax_group_3
-lu_2011_tax_AP-EC-3-p,Purchase Services 3% - Extra-Community (+),AP-EC-3-p,none,percent,3,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1190,,tag_lu_421,tax_group_3
-lu_2011_tax_AP-EC-3,Purchase Services 3% - Extra-Community,AP-EC-3,purchase,group,100,,,lu_2011_chart_1,188,"lu_2011_tax_AP-EC-3-n,lu_2011_tax_AP-EC-3-p",tag_lu_145,tax_group_3
-lu_2015_tax_AP-EC-8-n,Purchase Services 8% - Extra-Community (-),AP-EC-8-n,none,percent,-8,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1195,,tag_lu_562,tax_group_8
-lu_2015_tax_AP-EC-8-p,Purchase Services 8% - Extra-Community (+),AP-EC-8-p,none,percent,8,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1196,,tag_lu_437,tax_group_8
-lu_2015_tax_AP-EC-8,Purchase Services 8% - Extra-Community,AP-EC-8,purchase,group,100,,,lu_2011_chart_1,194,"lu_2015_tax_AP-EC-8-n,lu_2015_tax_AP-EC-8-p",tag_lu_165,tax_group_8
-lu_2011_tax_AP-IC-0,Purchase Services Exempted - Intra-Community,AP-IC-0,purchase,percent,0,,,lu_2011_chart_1,197,,tag_lu_120,tax_group_0
-lu_2015_tax_AP-IC-14-n,Purchase Services 14% - Intra-Community (-),AP-IC-14-n,none,percent,-14,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1202,,tag_lu_564,tax_group_14
-lu_2015_tax_AP-IC-14-p,Purchase Services 14% - Intra-Community (+),AP-IC-14-p,none,percent,14,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1203,,tag_lu_404,tax_group_14
-lu_2015_tax_AP-IC-14,Purchase Services 14% - Intra-Community,AP-IC-14,purchase,group,100,,,lu_2011_chart_1,201,"lu_2015_tax_AP-IC-14-n,lu_2015_tax_AP-IC-14-p",tag_lu_128,tax_group_14
-lu_2015_tax_AP-IC-17-n,Purchase Services 17% - Intra-Community (-),AP-IC-17-n,none,percent,-17,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1208,,tag_lu_566,tax_group_17
-lu_2015_tax_AP-IC-17-p,Purchase Services 17% - Intra-Community (+),AP-IC-17-p,none,percent,17,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1209,,tag_lu_400,tax_group_17
-lu_2015_tax_AP-IC-17,Purchase Services 17% - Intra-Community,AP-IC-17,purchase,group,100,,,lu_2011_chart_1,207,"lu_2015_tax_AP-IC-17-n,lu_2015_tax_AP-IC-17-p",tag_lu_124,tax_group_17
-lu_2011_tax_AP-IC-3-n,Purchase Services 3% - Intra-Community (-),AP-IC-3-n,none,percent,-3,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1211,,tag_lu_567,tax_group_3
-lu_2011_tax_AP-IC-3-p,Purchase Services 3% - Intra-Community (+),AP-IC-3-p,none,percent,3,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1212,,tag_lu_392,tax_group_3
-lu_2011_tax_AP-IC-3,Purchase Services 3% - Intra-Community,AP-IC-3,purchase,group,100,,,lu_2011_chart_1,210,"lu_2011_tax_AP-IC-3-n,lu_2011_tax_AP-IC-3-p",tag_lu_112,tax_group_3
-lu_2015_tax_AP-IC-8-n,Purchase Services 8% - Intra-Community (-),AP-IC-8-n,none,percent,-8,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1217,,tag_lu_569,tax_group_8
-lu_2015_tax_AP-IC-8-p,Purchase Services 8% - Intra-Community (+),AP-IC-8-p,none,percent,8,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1218,,tag_lu_408,tax_group_8
-lu_2015_tax_AP-IC-8,Purchase Services 8% - Intra-Community,AP-IC-8,purchase,group,100,,,lu_2011_chart_1,216,"lu_2015_tax_AP-IC-8-n,lu_2015_tax_AP-IC-8-p",tag_lu_132,tax_group_8
+lu_2015_tax_AB-PA-14,Purchase Goods 14% - Country,AB-PA-14,purchase,percent,14,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,169,,"tag_lu_222,tag_lu_458",tax_group_14
+lu_2015_tax_AB-PA-17,Purchase Goods 17% - Country,AB-PA-17,purchase,percent,17,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,171,,"tag_lu_224,tag_lu_458",tax_group_17
+lu_2011_tax_AB-PA-3,Purchase Goods 3% - Country,AB-PA-3,purchase,percent,3,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,172,,"tag_lu_225,tag_lu_458",tax_group_3
+lu_2015_tax_AB-PA-8,Purchase Goods 8% - Country,AB-PA-8,purchase,percent,8,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,174,,"tag_lu_458,tag_lu_227",tax_group_8
+lu_2011_tax_AP-EC-0,Purchase Services Exempted - Extra-Community,AP-EC-0,purchase,percent,0,,,lu_2011_chart_1,175,,tag_lu_445,tax_group_0
+lu_2015_tax_AP-EC-14-n,Purchase Services 14% - Extra-Community (-),AP-EC-14-n,none,percent,-14,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1180,,tag_lu_461,tax_group_14
+lu_2015_tax_AP-EC-14-p,Purchase Services 14% - Extra-Community (+),AP-EC-14-p,none,percent,14,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1181,,tag_lu_754,tax_group_14
+lu_2015_tax_AP-EC-14,Purchase Services 14% - Extra-Community,AP-EC-14,purchase,group,100,,,lu_2011_chart_1,179,"lu_2015_tax_AP-EC-14-n,lu_2015_tax_AP-EC-14-p",tag_lu_753,tax_group_14
+lu_2015_tax_AP-EC-17-n,Purchase Services 17% - Extra-Community (-),AP-EC-17-n,none,percent,-17,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1186,,tag_lu_461,tax_group_17
+lu_2015_tax_AP-EC-17-p,Purchase Services 17% - Extra-Community (+),AP-EC-17-p,none,percent,17,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1187,,tag_lu_752,tax_group_17
+lu_2015_tax_AP-EC-17,Purchase Services 17% - Extra-Community,AP-EC-17,purchase,group,100,,,lu_2011_chart_1,185,"lu_2015_tax_AP-EC-17-n,lu_2015_tax_AP-EC-17-p",tag_lu_751,tax_group_17
+lu_2011_tax_AP-EC-3-n,Purchase Services 3% - Extra-Community (-),AP-EC-3-n,none,percent,-3,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1189,,tag_lu_461,tax_group_3
+lu_2011_tax_AP-EC-3-p,Purchase Services 3% - Extra-Community (+),AP-EC-3-p,none,percent,3,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1190,,tag_lu_442,tax_group_3
+lu_2011_tax_AP-EC-3,Purchase Services 3% - Extra-Community,AP-EC-3,purchase,group,100,,,lu_2011_chart_1,188,"lu_2011_tax_AP-EC-3-n,lu_2011_tax_AP-EC-3-p",tag_lu_441,tax_group_3
+lu_2015_tax_AP-EC-8-n,Purchase Services 8% - Extra-Community (-),AP-EC-8-n,none,percent,-8,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1195,,tag_lu_461,tax_group_8
+lu_2015_tax_AP-EC-8-p,Purchase Services 8% - Extra-Community (+),AP-EC-8-p,none,percent,8,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1196,,tag_lu_756,tax_group_8
+lu_2015_tax_AP-EC-8,Purchase Services 8% - Extra-Community,AP-EC-8,purchase,group,100,,,lu_2011_chart_1,194,"lu_2015_tax_AP-EC-8-n,lu_2015_tax_AP-EC-8-p",tag_lu_755,tax_group_8
+lu_2011_tax_AP-IC-0,Purchase Services Exempted - Intra-Community,AP-IC-0,purchase,percent,0,,,lu_2011_chart_1,197,,tag_lu_435,tax_group_0
+lu_2015_tax_AP-IC-14-n,Purchase Services 14% - Intra-Community (-),AP-IC-14-n,none,percent,-14,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1202,,tag_lu_461,tax_group_14
+lu_2015_tax_AP-IC-14-p,Purchase Services 14% - Intra-Community (+),AP-IC-14-p,none,percent,14,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1203,,tag_lu_744,tax_group_14
+lu_2015_tax_AP-IC-14,Purchase Services 14% - Intra-Community,AP-IC-14,purchase,group,100,,,lu_2011_chart_1,201,"lu_2015_tax_AP-IC-14-n,lu_2015_tax_AP-IC-14-p",tag_lu_743,tax_group_14
+lu_2015_tax_AP-IC-17-n,Purchase Services 17% - Intra-Community (-),AP-IC-17-n,none,percent,-17,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1208,,tag_lu_461,tax_group_17
+lu_2015_tax_AP-IC-17-p,Purchase Services 17% - Intra-Community (+),AP-IC-17-p,none,percent,17,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1209,,tag_lu_742,tax_group_17
+lu_2015_tax_AP-IC-17,Purchase Services 17% - Intra-Community,AP-IC-17,purchase,group,100,,,lu_2011_chart_1,207,"lu_2015_tax_AP-IC-17-n,lu_2015_tax_AP-IC-17-p",tag_lu_741,tax_group_17
+lu_2011_tax_AP-IC-3-n,Purchase Services 3% - Intra-Community (-),AP-IC-3-n,none,percent,-3,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1211,,tag_lu_461,tax_group_3
+lu_2011_tax_AP-IC-3-p,Purchase Services 3% - Intra-Community (+),AP-IC-3-p,none,percent,3,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1212,,tag_lu_432,tax_group_3
+lu_2011_tax_AP-IC-3,Purchase Services 3% - Intra-Community,AP-IC-3,purchase,group,100,,,lu_2011_chart_1,210,"lu_2011_tax_AP-IC-3-n,lu_2011_tax_AP-IC-3-p",tag_lu_431,tax_group_3
+lu_2015_tax_AP-IC-8-n,Purchase Services 8% - Intra-Community (-),AP-IC-8-n,none,percent,-8,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1217,,tag_lu_461,tax_group_8
+lu_2015_tax_AP-IC-8-p,Purchase Services 8% - Intra-Community (+),AP-IC-8-p,none,percent,8,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1218,,tag_lu_746,tax_group_8
+lu_2015_tax_AP-IC-8,Purchase Services 8% - Intra-Community,AP-IC-8,purchase,group,100,,,lu_2011_chart_1,216,"lu_2015_tax_AP-IC-8-n,lu_2015_tax_AP-IC-8-p",tag_lu_745,tax_group_8
 lu_2011_tax_AP-PA-0,Purchase Services 0% - Country,AP-PA-0,purchase,percent,0,,,lu_2011_chart_1,219,,tag_lu_228,tax_group_0
-lu_2015_tax_AP-PA-14,Purchase Services 14% - Country,AP-PA-14,purchase,percent,14,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,221,,"tag_lu_456,tag_lu_230",tax_group_14
+lu_2015_tax_AP-PA-14,Purchase Services 14% - Country,AP-PA-14,purchase,percent,14,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,221,,"tag_lu_458,tag_lu_230",tax_group_14
 lu_2015_tax_AP-PA-17,Purchase Services 17% - Country,AP-PA-17,purchase,percent,17,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,223,,"tag_lu_458,tag_lu_232",tax_group_17
-lu_2011_tax_AP-PA-3,Purchase Services 3% - Country,AP-PA-3,purchase,percent,3,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,224,,"tag_lu_233,tag_lu_459",tax_group_3
-lu_2015_tax_AP-PA-8,Purchase Services 8% - Country,AP-PA-8,purchase,percent,8,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,226,,"tag_lu_235,tag_lu_461",tax_group_8
-lu_2011_tax_FB-EC-0,Expenses Goods Exempted - Extra-Community,FB-EC-0,purchase,percent,0,,,lu_2011_chart_1,227,,tag_lu_70,tax_group_0
-lu_2015_tax_FB-EC-14-n,Expenses Goods 14% - Extra-Community (-),FB-EC-14-n,none,percent,-14,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1232,,tag_lu_528,tax_group_14
-lu_2015_tax_FB-EC-14-p,Expenses Goods 14% - Extra-Community (+),FB-EC-14-p,none,percent,14,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1233,,tag_lu_363,tax_group_14
-lu_2015_tax_FB-EC-14,Expenses Goods 14% - Extra-Community,FB-EC-14,purchase,group,100,,,lu_2011_chart_1,231,"lu_2015_tax_FB-EC-14-n,lu_2015_tax_FB-EC-14-p",tag_lu_82,tax_group_14
-lu_2015_tax_FB-EC-17-n,Expenses Goods 17% - Extra-Community (-),FB-EC-17-n,none,percent,-17,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1238,,tag_lu_530,tax_group_17
-lu_2015_tax_FB-EC-17-p,Expenses Goods 17% - Extra-Community (+),FB-EC-17-p,none,percent,17,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1239,,tag_lu_359,tax_group_17
-lu_2015_tax_FB-EC-17,Expenses Goods 17% - Extra-Community,FB-EC-17,purchase,group,100,,,lu_2011_chart_1,237,"lu_2015_tax_FB-EC-17-n,lu_2015_tax_FB-EC-17-p",tag_lu_78,tax_group_17
-lu_2011_tax_FB-EC-3-n,Expenses Goods 3% - Extra-Community (-),FB-EC-3-n,none,percent,-3,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1241,,tag_lu_531,tax_group_3
-lu_2011_tax_FB-EC-3-p,Expenses Goods 3% - Extra-Community (+),FB-EC-3-p,none,percent,3,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1242,,tag_lu_335,tax_group_3
-lu_2011_tax_FB-EC-3,Expenses Goods 3% - Extra-Community,FB-EC-3,purchase,group,100,,,lu_2011_chart_1,240,"lu_2011_tax_FB-EC-3-n,lu_2011_tax_FB-EC-3-p",tag_lu_46,tax_group_3
-lu_2015_tax_FB-EC-8-n,Expenses Goods 8% - Extra-Community (-),FB-EC-8-n,none,percent,-8,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1247,,tag_lu_533,tax_group_8
-lu_2015_tax_FB-EC-8-p,Expenses Goods 8% - Extra-Community (+),FB-EC-8-p,none,percent,8,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1248,,tag_lu_367,tax_group_8
-lu_2015_tax_FB-EC-8,Expenses Goods 8% - Extra-Community,FB-EC-8,purchase,group,100,,,lu_2011_chart_1,246,"lu_2015_tax_FB-EC-8-n,lu_2015_tax_FB-EC-8-p",tag_lu_86,tax_group_8
-lu_2015_tax_FB-ECP-0,Expenses Goods Exempted - Extra-Community fin privées,FB-ECP-0,purchase,percent,0,,,lu_2011_chart_1,249,,tag_lu_74,tax_group_0
-lu_2015_tax_FB-ECP-14-n,Expenses Goods 14% - Extra-Community fin privées (-),FB-ECP-14-n,none,percent,-14,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1254,,tag_lu_535,tax_group_14
-lu_2015_tax_FB-ECP-14-p,Expenses Goods 14% - Extra-Community fin privées (+),FB-ECP-14-p,none,percent,14,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1255,,tag_lu_375,tax_group_14
-lu_2015_tax_FB-ECP-14,Expenses Goods 14% - Extra-Community fin privées,FB-ECP-14,purchase,group,100,,,lu_2011_chart_1,253,"lu_2015_tax_FB-ECP-14-n,lu_2015_tax_FB-ECP-14-p",tag_lu_94,tax_group_14
-lu_2015_tax_FB-ECP-17-n,Expenses Goods 17% - Extra-Community fin privées (-),FB-ECP-17-n,none,percent,-17,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1260,,tag_lu_537,tax_group_17
-lu_2015_tax_FB-ECP-17-p,Expenses Goods 17% - Extra-Community fin privées (+),FB-ECP-17-p,none,percent,17,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1261,,tag_lu_371,tax_group_17
-lu_2015_tax_FB-ECP-17,Expenses Goods 17% - Extra-Community fin privées,FB-ECP-17,purchase,group,100,,,lu_2011_chart_1,259,"lu_2015_tax_FB-ECP-17-n,lu_2015_tax_FB-ECP-17-p",tag_lu_90,tax_group_17
-lu_2015_tax_FB-ECP-3-n,Expenses Goods 3% - Extra-Community fin privées (-),FB-ECP-3-n,none,percent,-3,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1263,,tag_lu_538,tax_group_3
-lu_2015_tax_FB-ECP-3-p,Expenses Goods 3% - Extra-Community fin privées (+),FB-ECP-3-p,none,percent,3,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1264,,tag_lu_351,tax_group_3
-lu_2015_tax_FB-ECP-3,Expenses Goods 3% - Extra-Community fin privées,FB-ECP-3,purchase,group,100,,,lu_2011_chart_1,262,"lu_2015_tax_FB-ECP-3-n,lu_2015_tax_FB-ECP-3-p",tag_lu_62,tax_group_3
-lu_2015_tax_FB-ECP-8-n,Expenses Goods 8% - Extra-Community fin privées (-),FB-ECP-8-n,none,percent,-8,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1269,,tag_lu_540,tax_group_8
-lu_2015_tax_FB-ECP-8-p,Expenses Goods 8% - Extra-Community fin privées (+),FB-ECP-8-p,none,percent,8,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1270,,tag_lu_379,tax_group_8
-lu_2015_tax_FB-ECP-8,Expenses Goods 8% - Extra-Community fin privées,FB-ECP-8,purchase,group,100,,,lu_2011_chart_1,268,"lu_2015_tax_FB-ECP-8-n,lu_2015_tax_FB-ECP-8-p",tag_lu_98,tax_group_8
-lu_2011_tax_FB-IC-0,Expenses Goods Exempted - Intra-Community,FB-IC-0,purchase,percent,0,,,lu_2011_chart_1,271,,tag_lu_21,tax_group_0
-lu_2015_tax_FB-IC-14-n,Expenses Goods 14% - Intra-Community (-),FB-IC-14-n,none,percent,-14,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1276,,tag_lu_499,tax_group_14
-lu_2015_tax_FB-IC-14-p,Expenses Goods 14% - Intra-Community (+),FB-IC-14-p,none,percent,14,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1277,,tag_lu_318,tax_group_14
-lu_2015_tax_FB-IC-14,Expenses Goods 14% - Intra-Community,FB-IC-14,purchase,group,100,,,lu_2011_chart_1,275,"lu_2015_tax_FB-IC-14-n,lu_2015_tax_FB-IC-14-p",tag_lu_29,tax_group_14
-lu_2015_tax_FB-IC-17-n,Expenses Goods 17% - Intra-Community (-),FB-IC-17-n,none,percent,-17,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1282,,tag_lu_501,tax_group_17
-lu_2015_tax_FB-IC-17-p,Expenses Goods 17% - Intra-Community (+),FB-IC-17-p,none,percent,17,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1283,,tag_lu_314,tax_group_17
-lu_2015_tax_FB-IC-17,Expenses Goods 17% - Intra-Community,FB-IC-17,purchase,group,100,,,lu_2011_chart_1,281,"lu_2015_tax_FB-IC-17-n,lu_2015_tax_FB-IC-17-p",tag_lu_25,tax_group_17
-lu_2011_tax_FB-IC-3-n,Expenses Goods 3% - Intra-Community (-),FB-IC-3-n,none,percent,-3,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1285,,tag_lu_502,tax_group_3
-lu_2011_tax_FB-IC-3-p,Expenses Goods 3% - Intra-Community (+),FB-IC-3-p,none,percent,3,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1286,,tag_lu_306,tax_group_3
-lu_2011_tax_FB-IC-3,Expenses Goods 3% - Intra-Community,FB-IC-3,purchase,group,100,,,lu_2011_chart_1,284,"lu_2011_tax_FB-IC-3-n,lu_2011_tax_FB-IC-3-p",tag_lu_13,tax_group_3
-lu_2015_tax_FB-IC-8-n,Expenses Goods 8% - Intra-Community (-),FB-IC-8-n,none,percent,-8,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1291,,tag_lu_504,tax_group_8
-lu_2015_tax_FB-IC-8-p,Expenses Goods 8% - Intra-Community (+),FB-IC-8-p,none,percent,8,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1292,,tag_lu_322,tax_group_8
-lu_2015_tax_FB-IC-8,Expenses Goods 8% - Intra-Community,FB-IC-8,purchase,group,100,,,lu_2011_chart_1,290,"lu_2015_tax_FB-IC-8-n,lu_2015_tax_FB-IC-8-p",tag_lu_33,tax_group_8
+lu_2011_tax_AP-PA-3,Purchase Services 3% - Country,AP-PA-3,purchase,percent,3,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,224,,"tag_lu_233,tag_lu_458",tax_group_3
+lu_2015_tax_AP-PA-8,Purchase Services 8% - Country,AP-PA-8,purchase,percent,8,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,226,,"tag_lu_235,tag_lu_458",tax_group_8
+lu_2011_tax_FB-EC-0,Expenses Goods Exempted - Extra-Community,FB-EC-0,purchase,percent,0,,,lu_2011_chart_1,227,,tag_lu_195,tax_group_0
+lu_2015_tax_FB-EC-14-n,Expenses Goods 14% - Extra-Community (-),FB-EC-14-n,none,percent,-14,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1232,,tag_lu_460,tax_group_14
+lu_2015_tax_FB-EC-14-p,Expenses Goods 14% - Extra-Community (+),FB-EC-14-p,none,percent,14,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1233,,tag_lu_724,tax_group_14
+lu_2015_tax_FB-EC-14,Expenses Goods 14% - Extra-Community,FB-EC-14,purchase,group,100,,,lu_2011_chart_1,231,"lu_2015_tax_FB-EC-14-n,lu_2015_tax_FB-EC-14-p",tag_lu_723,tax_group_14
+lu_2015_tax_FB-EC-17-n,Expenses Goods 17% - Extra-Community (-),FB-EC-17-n,none,percent,-17,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1238,,tag_lu_460,tax_group_17
+lu_2015_tax_FB-EC-17-p,Expenses Goods 17% - Extra-Community (+),FB-EC-17-p,none,percent,17,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1239,,tag_lu_722,tax_group_17
+lu_2015_tax_FB-EC-17,Expenses Goods 17% - Extra-Community,FB-EC-17,purchase,group,100,,,lu_2011_chart_1,237,"lu_2015_tax_FB-EC-17-n,lu_2015_tax_FB-EC-17-p",tag_lu_721,tax_group_17
+lu_2011_tax_FB-EC-3-n,Expenses Goods 3% - Extra-Community (-),FB-EC-3-n,none,percent,-3,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1241,,tag_lu_460,tax_group_3
+lu_2011_tax_FB-EC-3-p,Expenses Goods 3% - Extra-Community (+),FB-EC-3-p,none,percent,3,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1242,,tag_lu_068,tax_group_3
+lu_2011_tax_FB-EC-3,Expenses Goods 3% - Extra-Community,FB-EC-3,purchase,group,100,,,lu_2011_chart_1,240,"lu_2011_tax_FB-EC-3-n,lu_2011_tax_FB-EC-3-p",tag_lu_059,tax_group_3
+lu_2015_tax_FB-EC-8-n,Expenses Goods 8% - Extra-Community (-),FB-EC-8-n,none,percent,-8,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1247,,tag_lu_460,tax_group_8
+lu_2015_tax_FB-EC-8-p,Expenses Goods 8% - Extra-Community (+),FB-EC-8-p,none,percent,8,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1248,,tag_lu_726,tax_group_8
+lu_2015_tax_FB-EC-8,Expenses Goods 8% - Extra-Community,FB-EC-8,purchase,group,100,,,lu_2011_chart_1,246,"lu_2015_tax_FB-EC-8-n,lu_2015_tax_FB-EC-8-p",tag_lu_725,tax_group_8
+lu_2015_tax_FB-ECP-0,Expenses Goods Exempted - Extra-Community fin privées,FB-ECP-0,purchase,percent,0,,,lu_2011_chart_1,249,,tag_lu_196,tax_group_0
+lu_2015_tax_FB-ECP-14-n,Expenses Goods 14% - Extra-Community fin privées (-),FB-ECP-14-n,none,percent,-14,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1254,,tag_lu_460,tax_group_14
+lu_2015_tax_FB-ECP-14-p,Expenses Goods 14% - Extra-Community fin privées (+),FB-ECP-14-p,none,percent,14,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1255,,tag_lu_734,tax_group_14
+lu_2015_tax_FB-ECP-14,Expenses Goods 14% - Extra-Community fin privées,FB-ECP-14,purchase,group,100,,,lu_2011_chart_1,253,"lu_2015_tax_FB-ECP-14-n,lu_2015_tax_FB-ECP-14-p",tag_lu_733,tax_group_14
+lu_2015_tax_FB-ECP-17-n,Expenses Goods 17% - Extra-Community fin privées (-),FB-ECP-17-n,none,percent,-17,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1260,,tag_lu_460,tax_group_17
+lu_2015_tax_FB-ECP-17-p,Expenses Goods 17% - Extra-Community fin privées (+),FB-ECP-17-p,none,percent,17,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1261,,tag_lu_732,tax_group_17
+lu_2015_tax_FB-ECP-17,Expenses Goods 17% - Extra-Community fin privées,FB-ECP-17,purchase,group,100,,,lu_2011_chart_1,259,"lu_2015_tax_FB-ECP-17-n,lu_2015_tax_FB-ECP-17-p",tag_lu_731,tax_group_17
+lu_2015_tax_FB-ECP-3-n,Expenses Goods 3% - Extra-Community fin privées (-),FB-ECP-3-n,none,percent,-3,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1263,,tag_lu_460,tax_group_3
+lu_2015_tax_FB-ECP-3-p,Expenses Goods 3% - Extra-Community fin privées (+),FB-ECP-3-p,none,percent,3,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1264,,tag_lu_073,tax_group_3
+lu_2015_tax_FB-ECP-3,Expenses Goods 3% - Extra-Community fin privées,FB-ECP-3,purchase,group,100,,,lu_2011_chart_1,262,"lu_2015_tax_FB-ECP-3-n,lu_2015_tax_FB-ECP-3-p",tag_lu_063,tax_group_3
+lu_2015_tax_FB-ECP-8-n,Expenses Goods 8% - Extra-Community fin privées (-),FB-ECP-8-n,none,percent,-8,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1269,,tag_lu_460,tax_group_8
+lu_2015_tax_FB-ECP-8-p,Expenses Goods 8% - Extra-Community fin privées (+),FB-ECP-8-p,none,percent,8,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1270,,tag_lu_736,tax_group_8
+lu_2015_tax_FB-ECP-8,Expenses Goods 8% - Extra-Community fin privées,FB-ECP-8,purchase,group,100,,,lu_2011_chart_1,268,"lu_2015_tax_FB-ECP-8-n,lu_2015_tax_FB-ECP-8-p",tag_lu_735,tax_group_8
+lu_2011_tax_FB-IC-0,Expenses Goods Exempted - Intra-Community,FB-IC-0,purchase,percent,0,,,lu_2011_chart_1,271,,tag_lu_194,tax_group_0
+lu_2015_tax_FB-IC-14-n,Expenses Goods 14% - Intra-Community (-),FB-IC-14-n,none,percent,-14,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1276,,tag_lu_459,tax_group_14
+lu_2015_tax_FB-IC-14-p,Expenses Goods 14% - Intra-Community (+),FB-IC-14-p,none,percent,14,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1277,,tag_lu_714,tax_group_14
+lu_2015_tax_FB-IC-14,Expenses Goods 14% - Intra-Community,FB-IC-14,purchase,group,100,,,lu_2011_chart_1,275,"lu_2015_tax_FB-IC-14-n,lu_2015_tax_FB-IC-14-p",tag_lu_713,tax_group_14
+lu_2015_tax_FB-IC-17-n,Expenses Goods 17% - Intra-Community (-),FB-IC-17-n,none,percent,-17,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1282,,tag_lu_459,tax_group_17
+lu_2015_tax_FB-IC-17-p,Expenses Goods 17% - Intra-Community (+),FB-IC-17-p,none,percent,17,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1283,,tag_lu_712,tax_group_17
+lu_2015_tax_FB-IC-17,Expenses Goods 17% - Intra-Community,FB-IC-17,purchase,group,100,,,lu_2011_chart_1,281,"lu_2015_tax_FB-IC-17-n,lu_2015_tax_FB-IC-17-p",tag_lu_711,tax_group_17
+lu_2011_tax_FB-IC-3-n,Expenses Goods 3% - Intra-Community (-),FB-IC-3-n,none,percent,-3,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1285,,tag_lu_459,tax_group_3
+lu_2011_tax_FB-IC-3-p,Expenses Goods 3% - Intra-Community (+),FB-IC-3-p,none,percent,3,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1286,,tag_lu_054,tax_group_3
+lu_2011_tax_FB-IC-3,Expenses Goods 3% - Intra-Community,FB-IC-3,purchase,group,100,,,lu_2011_chart_1,284,"lu_2011_tax_FB-IC-3-n,lu_2011_tax_FB-IC-3-p",tag_lu_049,tax_group_3
+lu_2015_tax_FB-IC-8-n,Expenses Goods 8% - Intra-Community (-),FB-IC-8-n,none,percent,-8,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1291,,tag_lu_459,tax_group_8
+lu_2015_tax_FB-IC-8-p,Expenses Goods 8% - Intra-Community (+),FB-IC-8-p,none,percent,8,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1292,,tag_lu_716,tax_group_8
+lu_2015_tax_FB-IC-8,Expenses Goods 8% - Intra-Community,FB-IC-8,purchase,group,100,,,lu_2011_chart_1,290,"lu_2015_tax_FB-IC-8-n,lu_2015_tax_FB-IC-8-p",tag_lu_715,tax_group_8
 lu_2011_tax_FB-PA-0,Expenses Goods 0% - Country,FB-PA-0,purchase,percent,0,,,lu_2011_chart_1,293,,tag_lu_236,tax_group_0
-lu_2015_tax_FB-PA-14,Expenses Goods 14% - Country,FB-PA-14,purchase,percent,14,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,295,,"tag_lu_463,tag_lu_238",tax_group_14
-lu_2015_tax_FB-PA-17,Expenses Goods 17% - Country,FB-PA-17,purchase,percent,17,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,297,,"tag_lu_240,tag_lu_465",tax_group_17
-lu_2011_tax_FB-PA-3,Expenses Goods 3% - Country,FB-PA-3,purchase,percent,3,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,298,,"tag_lu_241,tag_lu_466",tax_group_3
-lu_2015_tax_FB-PA-8,Expenses Goods 8% - Country,FB-PA-8,purchase,percent,8,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,300,,"tag_lu_468,tag_lu_243",tax_group_8
-lu_2011_tax_FP-EC-0,Expenses Services Extempted - Extra-Community,FP-EC-0,purchase,percent,0,,,lu_2011_chart_1,301,,tag_lu_154,tax_group_0
-lu_2015_tax_FP-EC-14-n,Expenses Services 14% - Extra-Community (-),FP-EC-14-n,none,percent,-14,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1306,,tag_lu_571,tax_group_14
-lu_2015_tax_FP-EC-14-p,Expenses Services 14% - Extra-Community (+),FP-EC-14-p,none,percent,14,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1307,,tag_lu_434,tax_group_14
-lu_2015_tax_FP-EC-14,Expenses Services 14% - Extra-Community,FP-EC-14,purchase,group,100,,,lu_2011_chart_1,305,"lu_2015_tax_FP-EC-14-n,lu_2015_tax_FP-EC-14-p",tag_lu_162,tax_group_14
-lu_2015_tax_FP-EC-17-n,Expenses Services 17% - Extra-Community (-),FP-EC-17-n,none,percent,-17,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1312,,tag_lu_573,tax_group_17
-lu_2015_tax_FP-EC-17-p,Expenses Services 17% - Extra-Community (+),FP-EC-17-p,none,percent,17,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1313,,tag_lu_430,tax_group_17
-lu_2015_tax_FP-EC-17,Expenses Services 17% - Extra-Community,FP-EC-17,purchase,group,100,,,lu_2011_chart_1,311,"lu_2015_tax_FP-EC-17-n,lu_2015_tax_FP-EC-17-p",tag_lu_158,tax_group_17
-lu_2011_tax_FP-EC-3-n,Expenses Services 3% - Extra-Community (-),FP-EC-3-n,none,percent,-3,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1315,,tag_lu_574,tax_group_3
-lu_2011_tax_FP-EC-3-p,Expenses Services 3% - Extra-Community (+),FP-EC-3-p,none,percent,3,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1316,,tag_lu_422,tax_group_3
-lu_2011_tax_FP-EC-3,Expenses Services 3% - Extra-Community,FP-EC-3,purchase,group,100,,,lu_2011_chart_1,314,"lu_2011_tax_FP-EC-3-n,lu_2011_tax_FP-EC-3-p",tag_lu_146,tax_group_3
-lu_2015_tax_FP-EC-8-n,Expenses Services 8% - Extra-Community (-),FP-EC-8-n,none,percent,-8,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1321,,tag_lu_576,tax_group_8
-lu_2015_tax_FP-EC-8-p,Expenses Services 8% - Extra-Community (+),FP-EC-8-p,none,percent,8,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1322,,tag_lu_438,tax_group_8
-lu_2015_tax_FP-EC-8,Expenses Services 8% - Extra-Community,FP-EC-8,purchase,group,100,,,lu_2011_chart_1,320,"lu_2015_tax_FP-EC-8-n,lu_2015_tax_FP-EC-8-p",tag_lu_166,tax_group_8
-lu_2011_tax_FP-IC-0,Expenses Services Exempted - Intra-Community,FP-IC-0,purchase,percent,0,,,lu_2011_chart_1,323,,tag_lu_121,tax_group_0
-lu_2015_tax_FP-IC-14-n,Expenses Services 14% - Intra-Community (-),FP-IC-14-n,none,percent,-14,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1328,,tag_lu_578,tax_group_14
-lu_2015_tax_FP-IC-14-p,Expenses Services 14% - Intra-Community (+),FP-IC-14-p,none,percent,14,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1329,,tag_lu_405,tax_group_14
-lu_2015_tax_FP-IC-14,Expenses Services 14% - Intra-Community,FP-IC-14,purchase,group,100,,,lu_2011_chart_1,327,"lu_2015_tax_FP-IC-14-n,lu_2015_tax_FP-IC-14-p",tag_lu_129,tax_group_14
-lu_2015_tax_FP-IC-17-n,Expenses Services 17% - Intra-Community (-),FP-IC-17-n,none,percent,-17,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1334,,tag_lu_580,tax_group_17
-lu_2015_tax_FP-IC-17-p,Expenses Services 17% - Intra-Community (+),FP-IC-17-p,none,percent,17,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1335,,tag_lu_401,tax_group_17
-lu_2015_tax_FP-IC-17,Expenses Services 17% - Intra-Community,FP-IC-17,purchase,group,100,,,lu_2011_chart_1,333,"lu_2015_tax_FP-IC-17-n,lu_2015_tax_FP-IC-17-p",tag_lu_125,tax_group_17
-lu_2011_tax_FP-IC-3-n,Expenses Services 3% - Intra-Community (-),FP-IC-3-n,none,percent,-3,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1337,,tag_lu_581,tax_group_3
-lu_2011_tax_FP-IC-3-p,Expenses Services 3% - Intra-Community (+),FP-IC-3-p,none,percent,3,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1338,,tag_lu_393,tax_group_3
-lu_2011_tax_FP-IC-3,Expenses Services 3% - Intra-Community,FP-IC-3,purchase,group,100,,,lu_2011_chart_1,336,"lu_2011_tax_FP-IC-3-n,lu_2011_tax_FP-IC-3-p",tag_lu_113,tax_group_3
-lu_2015_tax_FP-IC-8-n,Expenses Services 8% - Intra-Community (-),FP-IC-8-n,none,percent,-8,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1343,,tag_lu_583,tax_group_8
-lu_2015_tax_FP-IC-8-p,Expenses Services 8% - Intra-Community (+),FP-IC-8-p,none,percent,8,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1344,,tag_lu_409,tax_group_8
-lu_2015_tax_FP-IC-8,Expenses Services 8% - Intra-Community,FP-IC-8,purchase,group,100,,,lu_2011_chart_1,342,"lu_2015_tax_FP-IC-8-n,lu_2015_tax_FP-IC-8-p",tag_lu_133,tax_group_8
+lu_2015_tax_FB-PA-14,Expenses Goods 14% - Country,FB-PA-14,purchase,percent,14,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,295,,"tag_lu_458,tag_lu_238",tax_group_14
+lu_2015_tax_FB-PA-17,Expenses Goods 17% - Country,FB-PA-17,purchase,percent,17,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,297,,"tag_lu_240,tag_lu_458",tax_group_17
+lu_2011_tax_FB-PA-3,Expenses Goods 3% - Country,FB-PA-3,purchase,percent,3,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,298,,"tag_lu_241,tag_lu_458",tax_group_3
+lu_2015_tax_FB-PA-8,Expenses Goods 8% - Country,FB-PA-8,purchase,percent,8,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,300,,"tag_lu_458,tag_lu_243",tax_group_8
+lu_2011_tax_FP-EC-0,Expenses Services Extempted - Extra-Community,FP-EC-0,purchase,percent,0,,,lu_2011_chart_1,301,,tag_lu_445,tax_group_0
+lu_2015_tax_FP-EC-14-n,Expenses Services 14% - Extra-Community (-),FP-EC-14-n,none,percent,-14,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1306,,tag_lu_461,tax_group_14
+lu_2015_tax_FP-EC-14-p,Expenses Services 14% - Extra-Community (+),FP-EC-14-p,none,percent,14,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1307,,tag_lu_754,tax_group_14
+lu_2015_tax_FP-EC-14,Expenses Services 14% - Extra-Community,FP-EC-14,purchase,group,100,,,lu_2011_chart_1,305,"lu_2015_tax_FP-EC-14-n,lu_2015_tax_FP-EC-14-p",tag_lu_753,tax_group_14
+lu_2015_tax_FP-EC-17-n,Expenses Services 17% - Extra-Community (-),FP-EC-17-n,none,percent,-17,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1312,,tag_lu_461,tax_group_17
+lu_2015_tax_FP-EC-17-p,Expenses Services 17% - Extra-Community (+),FP-EC-17-p,none,percent,17,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1313,,tag_lu_752,tax_group_17
+lu_2015_tax_FP-EC-17,Expenses Services 17% - Extra-Community,FP-EC-17,purchase,group,100,,,lu_2011_chart_1,311,"lu_2015_tax_FP-EC-17-n,lu_2015_tax_FP-EC-17-p",tag_lu_751,tax_group_17
+lu_2011_tax_FP-EC-3-n,Expenses Services 3% - Extra-Community (-),FP-EC-3-n,none,percent,-3,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1315,,tag_lu_461,tax_group_3
+lu_2011_tax_FP-EC-3-p,Expenses Services 3% - Extra-Community (+),FP-EC-3-p,none,percent,3,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1316,,tag_lu_442,tax_group_3
+lu_2011_tax_FP-EC-3,Expenses Services 3% - Extra-Community,FP-EC-3,purchase,group,100,,,lu_2011_chart_1,314,"lu_2011_tax_FP-EC-3-n,lu_2011_tax_FP-EC-3-p",tag_lu_441,tax_group_3
+lu_2015_tax_FP-EC-8-n,Expenses Services 8% - Extra-Community (-),FP-EC-8-n,none,percent,-8,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1321,,tag_lu_461,tax_group_8
+lu_2015_tax_FP-EC-8-p,Expenses Services 8% - Extra-Community (+),FP-EC-8-p,none,percent,8,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1322,,tag_lu_756,tax_group_8
+lu_2015_tax_FP-EC-8,Expenses Services 8% - Extra-Community,FP-EC-8,purchase,group,100,,,lu_2011_chart_1,320,"lu_2015_tax_FP-EC-8-n,lu_2015_tax_FP-EC-8-p",tag_lu_755,tax_group_8
+lu_2011_tax_FP-IC-0,Expenses Services Exempted - Intra-Community,FP-IC-0,purchase,percent,0,,,lu_2011_chart_1,323,,tag_lu_435,tax_group_0
+lu_2015_tax_FP-IC-14-n,Expenses Services 14% - Intra-Community (-),FP-IC-14-n,none,percent,-14,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1328,,tag_lu_461,tax_group_14
+lu_2015_tax_FP-IC-14-p,Expenses Services 14% - Intra-Community (+),FP-IC-14-p,none,percent,14,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1329,,tag_lu_744,tax_group_14
+lu_2015_tax_FP-IC-14,Expenses Services 14% - Intra-Community,FP-IC-14,purchase,group,100,,,lu_2011_chart_1,327,"lu_2015_tax_FP-IC-14-n,lu_2015_tax_FP-IC-14-p",tag_lu_743,tax_group_14
+lu_2015_tax_FP-IC-17-n,Expenses Services 17% - Intra-Community (-),FP-IC-17-n,none,percent,-17,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1334,,tag_lu_461,tax_group_17
+lu_2015_tax_FP-IC-17-p,Expenses Services 17% - Intra-Community (+),FP-IC-17-p,none,percent,17,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1335,,tag_lu_742,tax_group_17
+lu_2015_tax_FP-IC-17,Expenses Services 17% - Intra-Community,FP-IC-17,purchase,group,100,,,lu_2011_chart_1,333,"lu_2015_tax_FP-IC-17-n,lu_2015_tax_FP-IC-17-p",tag_lu_741,tax_group_17
+lu_2011_tax_FP-IC-3-n,Expenses Services 3% - Intra-Community (-),FP-IC-3-n,none,percent,-3,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1337,,tag_lu_461,tax_group_3
+lu_2011_tax_FP-IC-3-p,Expenses Services 3% - Intra-Community (+),FP-IC-3-p,none,percent,3,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1338,,tag_lu_432,tax_group_3
+lu_2011_tax_FP-IC-3,Expenses Services 3% - Intra-Community,FP-IC-3,purchase,group,100,,,lu_2011_chart_1,336,"lu_2011_tax_FP-IC-3-n,lu_2011_tax_FP-IC-3-p",tag_lu_431,tax_group_3
+lu_2015_tax_FP-IC-8-n,Expenses Services 8% - Intra-Community (-),FP-IC-8-n,none,percent,-8,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1343,,tag_lu_461,tax_group_8
+lu_2015_tax_FP-IC-8-p,Expenses Services 8% - Intra-Community (+),FP-IC-8-p,none,percent,8,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1344,,tag_lu_746,tax_group_8
+lu_2015_tax_FP-IC-8,Expenses Services 8% - Intra-Community,FP-IC-8,purchase,group,100,,,lu_2011_chart_1,342,"lu_2015_tax_FP-IC-8-n,lu_2015_tax_FP-IC-8-p",tag_lu_745,tax_group_8
 lu_2011_tax_FP-PA-0,Expenses Services 0% - Country,FP-PA-0,purchase,percent,0,,,lu_2011_chart_1,345,,tag_lu_244,tax_group_0
-lu_2015_tax_FP-PA-14,Expenses Services 14% - Country,FP-PA-14,purchase,percent,14,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,347,,"tag_lu_470,tag_lu_246",tax_group_14
-lu_2015_tax_FP-PA-17,Expenses Services 17% - Country,FP-PA-17,purchase,percent,17,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,349,,"tag_lu_248,tag_lu_472",tax_group_17
-lu_2011_tax_FP-PA-3,Expenses Services 3% - Country,FP-PA-3,purchase,percent,3,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,350,,"tag_lu_473,tag_lu_249",tax_group_3
-lu_2015_tax_FP-PA-8,Expenses Services 8% - Country,FP-PA-8,purchase,percent,8,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,352,,"tag_lu_475,tag_lu_251",tax_group_8
-lu_2011_tax_IB-EC-0,Investment Goods Exempted - Extra-Community,IB-EC-0,purchase,percent,0,,,lu_2011_chart_1,353,,tag_lu_71,tax_group_0
-lu_2015_tax_IB-EC-14-n,Investment Goods 14% - Extra-Community (-),IB-EC-14-n,none,percent,-14,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1358,,tag_lu_542,tax_group_14
-lu_2015_tax_IB-EC-14-p,Investment Goods 14% - Extra-Community (+),IB-EC-14-p,none,percent,14,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1359,,tag_lu_364,tax_group_14
-lu_2015_tax_IB-EC-14,Investment Goods 14% - Extra-Community,IB-EC-14,purchase,group,100,,,lu_2011_chart_1,357,"lu_2015_tax_IB-EC-14-n,lu_2015_tax_IB-EC-14-p",tag_lu_83,tax_group_14
-lu_2015_tax_IB-EC-17-n,Investment Goods 17% - Extra-Community (-),IB-EC-17-n,none,percent,-17,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1364,,tag_lu_544,tax_group_17
-lu_2015_tax_IB-EC-17-p,Investment Goods 17% - Extra-Community (+),IB-EC-17-p,none,percent,17,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1365,,tag_lu_360,tax_group_17
-lu_2015_tax_IB-EC-17,Investment Goods 17% - Extra-Community,IB-EC-17,purchase,group,100,,,lu_2011_chart_1,363,"lu_2015_tax_IB-EC-17-n,lu_2015_tax_IB-EC-17-p",tag_lu_79,tax_group_17
-lu_2011_tax_IB-EC-3-n,Investment Goods 3% - Extra-Community (-),IB-EC-3-n,none,percent,-3,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1367,,tag_lu_545,tax_group_3
-lu_2011_tax_IB-EC-3-p,Investment Goods 3% - Extra-Community (+),IB-EC-3-p,none,percent,3,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1368,,tag_lu_336,tax_group_3
-lu_2011_tax_IB-EC-3,Investment Goods 3% - Extra-Community,IB-EC-3,purchase,group,100,,,lu_2011_chart_1,366,"lu_2011_tax_IB-EC-3-n,lu_2011_tax_IB-EC-3-p",tag_lu_47,tax_group_3
-lu_2015_tax_IB-EC-8-n,Investment Goods 8% - Extra-Community (-),IB-EC-8-n,none,percent,-8,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1373,,tag_lu_547,tax_group_8
-lu_2015_tax_IB-EC-8-p,Investment Goods 8% - Extra-Community (+),IB-EC-8-p,none,percent,8,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1374,,tag_lu_368,tax_group_8
-lu_2015_tax_IB-EC-8,Investment Goods 8% - Extra-Community,IB-EC-8,purchase,group,100,,,lu_2011_chart_1,372,"lu_2015_tax_IB-EC-8-n,lu_2015_tax_IB-EC-8-p",tag_lu_87,tax_group_8
-lu_2015_tax_IB-ECP-0,Investment Goods Exempted - Extra-Community fin privées,IB-ECP-0,purchase,percent,0,,,lu_2011_chart_1,375,,tag_lu_75,tax_group_0
-lu_2015_tax_IB-ECP-14-n,Investment Goods 14% - Extra-Community fin privées (-),IB-ECP-14-n,none,percent,-14,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1380,,tag_lu_549,tax_group_14
-lu_2015_tax_IB-ECP-14-p,Investment Goods 14% - Extra-Community fin privées (+),IB-ECP-14-p,none,percent,14,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1381,,tag_lu_376,tax_group_14
-lu_2015_tax_IB-ECP-14,Investment Goods 14% - Extra-Community fin privées,IB-ECP-14,purchase,group,100,,,lu_2011_chart_1,379,"lu_2015_tax_IB-ECP-14-n,lu_2015_tax_IB-ECP-14-p",tag_lu_95,tax_group_14
-lu_2015_tax_IB-ECP-17-n,Investment Goods 17% - Extra-Community fin privées (-),IB-ECP-17-n,none,percent,-17,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1386,,tag_lu_551,tax_group_17
-lu_2015_tax_IB-ECP-17-p,Investment Goods 17% - Extra-Community fin privées (+),IB-ECP-17-p,none,percent,17,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1387,,tag_lu_372,tax_group_17
-lu_2015_tax_IB-ECP-17,Investment Goods 17% - Extra-Community fin privées,IB-ECP-17,purchase,group,100,,,lu_2011_chart_1,385,"lu_2015_tax_IB-ECP-17-n,lu_2015_tax_IB-ECP-17-p",tag_lu_91,tax_group_17
-lu_2015_tax_IB-ECP-3-n,Investment Goods 3% - Extra-Community fin privées (-),IB-ECP-3-n,none,percent,-3,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1389,,tag_lu_552,tax_group_3
-lu_2015_tax_IB-ECP-3-p,Investment Goods 3% - Extra-Community fin privées (+),IB-ECP-3-p,none,percent,3,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1390,,tag_lu_352,tax_group_3
-lu_2015_tax_IB-ECP-3,Investment Goods 3% - Extra-Community fin privées,IB-ECP-3,purchase,group,100,,,lu_2011_chart_1,388,"lu_2015_tax_IB-ECP-3-n,lu_2015_tax_IB-ECP-3-p",tag_lu_63,tax_group_3
-lu_2015_tax_IB-ECP-8-n,Investment Goods 8% - Extra-Community fin privées (-),IB-ECP-8-n,none,percent,-8,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1395,,tag_lu_554,tax_group_8
-lu_2015_tax_IB-ECP-8-p,Investment Goods 8% - Extra-Community fin privées (+),IB-ECP-8-p,none,percent,8,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1396,,tag_lu_380,tax_group_8
-lu_2015_tax_IB-ECP-8,Investment Goods 8% - Extra-Community fin privées,IB-ECP-8,purchase,group,100,,,lu_2011_chart_1,394,"lu_2015_tax_IB-ECP-8-n,lu_2015_tax_IB-ECP-8-p",tag_lu_99,tax_group_8
-lu_2011_tax_IB-IC-0,Investment Goods Exempted - Intra-Community,IB-IC-0,purchase,percent,0,,,lu_2011_chart_1,397,,tag_lu_22,tax_group_0
-lu_2015_tax_IB-IC-14-n,Investment Goods 14% - Intra-Community (-),IB-IC-14-n,none,percent,-14,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1402,,tag_lu_506,tax_group_14
-lu_2015_tax_IB-IC-14-p,Investment Goods 14% - Intra-Community (+),IB-IC-14-p,none,percent,14,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1403,,tag_lu_319,tax_group_14
-lu_2015_tax_IB-IC-14,Investment Goods 14% - Intra-Community,IB-IC-14,purchase,group,100,,,lu_2011_chart_1,401,"lu_2015_tax_IB-IC-14-n,lu_2015_tax_IB-IC-14-p",tag_lu_30,tax_group_14
-lu_2015_tax_IB-IC-17-n,Investment Goods 17% - Intra-Community (-),IB-IC-17-n,none,percent,-17,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1408,,tag_lu_508,tax_group_17
-lu_2015_tax_IB-IC-17-p,Investment Goods 17% - Intra-Community (+),IB-IC-17-p,none,percent,17,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1409,,tag_lu_315,tax_group_17
-lu_2015_tax_IB-IC-17,Investment Goods 17% - Intra-Community,IB-IC-17,purchase,group,100,,,lu_2011_chart_1,407,"lu_2015_tax_IB-IC-17-n,lu_2015_tax_IB-IC-17-p",tag_lu_26,tax_group_17
-lu_2011_tax_IB-IC-3-n,Investment Goods 3% - Intra-Community (-),IB-IC-3-n,none,percent,-3,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1411,,tag_lu_509,tax_group_3
-lu_2011_tax_IB-IC-3-p,Investment Goods 3% - Intra-Community (+),IB-IC-3-p,none,percent,3,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1412,,tag_lu_307,tax_group_3
-lu_2011_tax_IB-IC-3,Investment Goods 3% - Intra-Community,IB-IC-3,purchase,group,100,,,lu_2011_chart_1,410,"lu_2011_tax_IB-IC-3-n,lu_2011_tax_IB-IC-3-p",tag_lu_14,tax_group_3
-lu_2015_tax_IB-IC-8-n,Investment Goods 8% - Intra-Community (-),IB-IC-8-n,none,percent,-8,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1417,,tag_lu_511,tax_group_8
-lu_2015_tax_IB-IC-8-p,Investment Goods 8% - Intra-Community (+),IB-IC-8-p,none,percent,8,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1418,,tag_lu_323,tax_group_8
-lu_2015_tax_IB-IC-8,Investment Goods 8% - Intra-Community,IB-IC-8,purchase,group,100,,,lu_2011_chart_1,416,"lu_2015_tax_IB-IC-8-n,lu_2015_tax_IB-IC-8-p",tag_lu_34,tax_group_8
+lu_2015_tax_FP-PA-14,Expenses Services 14% - Country,FP-PA-14,purchase,percent,14,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,347,,"tag_lu_458,tag_lu_246",tax_group_14
+lu_2015_tax_FP-PA-17,Expenses Services 17% - Country,FP-PA-17,purchase,percent,17,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,349,,"tag_lu_248,tag_lu_458",tax_group_17
+lu_2011_tax_FP-PA-3,Expenses Services 3% - Country,FP-PA-3,purchase,percent,3,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,350,,"tag_lu_458,tag_lu_249",tax_group_3
+lu_2015_tax_FP-PA-8,Expenses Services 8% - Country,FP-PA-8,purchase,percent,8,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,352,,"tag_lu_458,tag_lu_251",tax_group_8
+lu_2011_tax_IB-EC-0,Investment Goods Exempted - Extra-Community,IB-EC-0,purchase,percent,0,,,lu_2011_chart_1,353,,tag_lu_195,tax_group_0
+lu_2015_tax_IB-EC-14-n,Investment Goods 14% - Extra-Community (-),IB-EC-14-n,none,percent,-14,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1358,,tag_lu_460,tax_group_14
+lu_2015_tax_IB-EC-14-p,Investment Goods 14% - Extra-Community (+),IB-EC-14-p,none,percent,14,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1359,,tag_lu_724,tax_group_14
+lu_2015_tax_IB-EC-14,Investment Goods 14% - Extra-Community,IB-EC-14,purchase,group,100,,,lu_2011_chart_1,357,"lu_2015_tax_IB-EC-14-n,lu_2015_tax_IB-EC-14-p",tag_lu_723,tax_group_14
+lu_2015_tax_IB-EC-17-n,Investment Goods 17% - Extra-Community (-),IB-EC-17-n,none,percent,-17,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1364,,tag_lu_460,tax_group_17
+lu_2015_tax_IB-EC-17-p,Investment Goods 17% - Extra-Community (+),IB-EC-17-p,none,percent,17,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1365,,tag_lu_722,tax_group_17
+lu_2015_tax_IB-EC-17,Investment Goods 17% - Extra-Community,IB-EC-17,purchase,group,100,,,lu_2011_chart_1,363,"lu_2015_tax_IB-EC-17-n,lu_2015_tax_IB-EC-17-p",tag_lu_721,tax_group_17
+lu_2011_tax_IB-EC-3-n,Investment Goods 3% - Extra-Community (-),IB-EC-3-n,none,percent,-3,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1367,,tag_lu_460,tax_group_3
+lu_2011_tax_IB-EC-3-p,Investment Goods 3% - Extra-Community (+),IB-EC-3-p,none,percent,3,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1368,,tag_lu_068,tax_group_3
+lu_2011_tax_IB-EC-3,Investment Goods 3% - Extra-Community,IB-EC-3,purchase,group,100,,,lu_2011_chart_1,366,"lu_2011_tax_IB-EC-3-n,lu_2011_tax_IB-EC-3-p",tag_lu_059,tax_group_3
+lu_2015_tax_IB-EC-8-n,Investment Goods 8% - Extra-Community (-),IB-EC-8-n,none,percent,-8,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1373,,tag_lu_460,tax_group_8
+lu_2015_tax_IB-EC-8-p,Investment Goods 8% - Extra-Community (+),IB-EC-8-p,none,percent,8,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1374,,tag_lu_726,tax_group_8
+lu_2015_tax_IB-EC-8,Investment Goods 8% - Extra-Community,IB-EC-8,purchase,group,100,,,lu_2011_chart_1,372,"lu_2015_tax_IB-EC-8-n,lu_2015_tax_IB-EC-8-p",tag_lu_725,tax_group_8
+lu_2015_tax_IB-ECP-0,Investment Goods Exempted - Extra-Community fin privées,IB-ECP-0,purchase,percent,0,,,lu_2011_chart_1,375,,tag_lu_196,tax_group_0
+lu_2015_tax_IB-ECP-14-n,Investment Goods 14% - Extra-Community fin privées (-),IB-ECP-14-n,none,percent,-14,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1380,,tag_lu_460,tax_group_14
+lu_2015_tax_IB-ECP-14-p,Investment Goods 14% - Extra-Community fin privées (+),IB-ECP-14-p,none,percent,14,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1381,,tag_lu_734,tax_group_14
+lu_2015_tax_IB-ECP-14,Investment Goods 14% - Extra-Community fin privées,IB-ECP-14,purchase,group,100,,,lu_2011_chart_1,379,"lu_2015_tax_IB-ECP-14-n,lu_2015_tax_IB-ECP-14-p",tag_lu_733,tax_group_14
+lu_2015_tax_IB-ECP-17-n,Investment Goods 17% - Extra-Community fin privées (-),IB-ECP-17-n,none,percent,-17,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1386,,tag_lu_460,tax_group_17
+lu_2015_tax_IB-ECP-17-p,Investment Goods 17% - Extra-Community fin privées (+),IB-ECP-17-p,none,percent,17,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1387,,tag_lu_732,tax_group_17
+lu_2015_tax_IB-ECP-17,Investment Goods 17% - Extra-Community fin privées,IB-ECP-17,purchase,group,100,,,lu_2011_chart_1,385,"lu_2015_tax_IB-ECP-17-n,lu_2015_tax_IB-ECP-17-p",tag_lu_731,tax_group_17
+lu_2015_tax_IB-ECP-3-n,Investment Goods 3% - Extra-Community fin privées (-),IB-ECP-3-n,none,percent,-3,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1389,,tag_lu_460,tax_group_3
+lu_2015_tax_IB-ECP-3-p,Investment Goods 3% - Extra-Community fin privées (+),IB-ECP-3-p,none,percent,3,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1390,,tag_lu_073,tax_group_3
+lu_2015_tax_IB-ECP-3,Investment Goods 3% - Extra-Community fin privées,IB-ECP-3,purchase,group,100,,,lu_2011_chart_1,388,"lu_2015_tax_IB-ECP-3-n,lu_2015_tax_IB-ECP-3-p",tag_lu_063,tax_group_3
+lu_2015_tax_IB-ECP-8-n,Investment Goods 8% - Extra-Community fin privées (-),IB-ECP-8-n,none,percent,-8,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1395,,tag_lu_460,tax_group_8
+lu_2015_tax_IB-ECP-8-p,Investment Goods 8% - Extra-Community fin privées (+),IB-ECP-8-p,none,percent,8,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1396,,tag_lu_736,tax_group_8
+lu_2015_tax_IB-ECP-8,Investment Goods 8% - Extra-Community fin privées,IB-ECP-8,purchase,group,100,,,lu_2011_chart_1,394,"lu_2015_tax_IB-ECP-8-n,lu_2015_tax_IB-ECP-8-p",tag_lu_735,tax_group_8
+lu_2011_tax_IB-IC-0,Investment Goods Exempted - Intra-Community,IB-IC-0,purchase,percent,0,,,lu_2011_chart_1,397,,tag_lu_194,tax_group_0
+lu_2015_tax_IB-IC-14-n,Investment Goods 14% - Intra-Community (-),IB-IC-14-n,none,percent,-14,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1402,,tag_lu_459,tax_group_14
+lu_2015_tax_IB-IC-14-p,Investment Goods 14% - Intra-Community (+),IB-IC-14-p,none,percent,14,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1403,,tag_lu_714,tax_group_14
+lu_2015_tax_IB-IC-14,Investment Goods 14% - Intra-Community,IB-IC-14,purchase,group,100,,,lu_2011_chart_1,401,"lu_2015_tax_IB-IC-14-n,lu_2015_tax_IB-IC-14-p",tag_lu_713,tax_group_14
+lu_2015_tax_IB-IC-17-n,Investment Goods 17% - Intra-Community (-),IB-IC-17-n,none,percent,-17,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1408,,tag_lu_459,tax_group_17
+lu_2015_tax_IB-IC-17-p,Investment Goods 17% - Intra-Community (+),IB-IC-17-p,none,percent,17,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1409,,tag_lu_712,tax_group_17
+lu_2015_tax_IB-IC-17,Investment Goods 17% - Intra-Community,IB-IC-17,purchase,group,100,,,lu_2011_chart_1,407,"lu_2015_tax_IB-IC-17-n,lu_2015_tax_IB-IC-17-p",tag_lu_711,tax_group_17
+lu_2011_tax_IB-IC-3-n,Investment Goods 3% - Intra-Community (-),IB-IC-3-n,none,percent,-3,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1411,,tag_lu_459,tax_group_3
+lu_2011_tax_IB-IC-3-p,Investment Goods 3% - Intra-Community (+),IB-IC-3-p,none,percent,3,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1412,,tag_lu_054,tax_group_3
+lu_2011_tax_IB-IC-3,Investment Goods 3% - Intra-Community,IB-IC-3,purchase,group,100,,,lu_2011_chart_1,410,"lu_2011_tax_IB-IC-3-n,lu_2011_tax_IB-IC-3-p",tag_lu_049,tax_group_3
+lu_2015_tax_IB-IC-8-n,Investment Goods 8% - Intra-Community (-),IB-IC-8-n,none,percent,-8,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1417,,tag_lu_459,tax_group_8
+lu_2015_tax_IB-IC-8-p,Investment Goods 8% - Intra-Community (+),IB-IC-8-p,none,percent,8,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1418,,tag_lu_716,tax_group_8
+lu_2015_tax_IB-IC-8,Investment Goods 8% - Intra-Community,IB-IC-8,purchase,group,100,,,lu_2011_chart_1,416,"lu_2015_tax_IB-IC-8-n,lu_2015_tax_IB-IC-8-p",tag_lu_715,tax_group_8
 lu_2011_tax_IB-PA-0,Investment Goods 0% - Country,IB-PA-0,purchase,percent,0,,,lu_2011_chart_1,419,,tag_lu_252,tax_group_0
-lu_2015_tax_IB-PA-14,Investment Goods 14% - Country,IB-PA-14,purchase,percent,14,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,421,,"tag_lu_477,tag_lu_254",tax_group_14
-lu_2015_tax_IB-PA-17,Investment Goods 17% - Country,IB-PA-17,purchase,percent,17,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,423,,"tag_lu_479,tag_lu_256",tax_group_17
-lu_2011_tax_IB-PA-3,Investment Goods 3% - Country,IB-PA-3,purchase,percent,3,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,424,,"tag_lu_480,tag_lu_257",tax_group_3
-lu_2015_tax_IB-PA-8,Investment Goods 8% - Country,IB-PA-8,purchase,percent,8,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,426,,"tag_lu_482,tag_lu_259",tax_group_8
-lu_2011_tax_IP-EC-0,Investment Services Exempted - Extra-Community,IP-EC-0,purchase,percent,0,,,lu_2011_chart_1,427,,tag_lu_155,tax_group_0
-lu_2015_tax_IP-EC-14-n,Investment Services 14% - Extra-Community (-),IP-EC-14-n,none,percent,-14,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1432,,tag_lu_585,tax_group_14
-lu_2015_tax_IP-EC-14-p,Investment Services 14% - Extra-Community (+),IP-EC-14-p,none,percent,14,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1433,,tag_lu_435,tax_group_14
-lu_2015_tax_IP-EC-14,Investment Services 14% - Extra-Community,IP-EC-14,purchase,group,100,,,lu_2011_chart_1,431,"lu_2015_tax_IP-EC-14-n,lu_2015_tax_IP-EC-14-p",tag_lu_163,tax_group_14
-lu_2015_tax_IP-EC-17-n,Investment Services 17% - Extra-Community (-),IP-EC-17-n,none,percent,-17,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1438,,tag_lu_587,tax_group_17
-lu_2015_tax_IP-EC-17-p,Investment Services 17% - Extra-Community (+),IP-EC-17-p,none,percent,17,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1439,,tag_lu_431,tax_group_17
-lu_2015_tax_IP-EC-17,Investment Services 17% - Extra-Community,IP-EC-17,purchase,group,100,,,lu_2011_chart_1,437,"lu_2015_tax_IP-EC-17-n,lu_2015_tax_IP-EC-17-p",tag_lu_159,tax_group_17
-lu_2011_tax_IP-EC-3-n,Investment Services 3% - Extra-Community (-),IP-EC-3-n,none,percent,-3,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1441,,tag_lu_588,tax_group_3
-lu_2011_tax_IP-EC-3-p,Investment Services 3% - Extra-Community (+),IP-EC-3-p,none,percent,3,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1442,,tag_lu_423,tax_group_3
-lu_2011_tax_IP-EC-3,Investment Services 3% - Extra-Community,IP-EC-3,purchase,group,100,,,lu_2011_chart_1,440,"lu_2011_tax_IP-EC-3-n,lu_2011_tax_IP-EC-3-p",tag_lu_147,tax_group_3
-lu_2015_tax_IP-EC-8-n,Investment Services 8% - Extra-Community (-),IP-EC-8-n,none,percent,-8,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1447,,tag_lu_590,tax_group_8
-lu_2015_tax_IP-EC-8-p,Investment Services 8% - Extra-Community (+),IP-EC-8-p,none,percent,8,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1448,,tag_lu_439,tax_group_8
-lu_2015_tax_IP-EC-8,Investment Services 8% - Extra-Community,IP-EC-8,purchase,group,100,,,lu_2011_chart_1,446,"lu_2015_tax_IP-EC-8-n,lu_2015_tax_IP-EC-8-p",tag_lu_167,tax_group_8
-lu_2011_tax_IP-IC-0,Investment Services Exempted - Intra-Community,IP-IC-0,purchase,percent,0,,,lu_2011_chart_1,449,,tag_lu_122,tax_group_0
-lu_2015_tax_IP-IC-14-n,Investment Services 14% - Intra-Community (-),IP-IC-14-n,none,percent,-14,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1454,,tag_lu_592,tax_group_14
-lu_2015_tax_IP-IC-14-p,Investment Services 14% - Intra-Community (+),IP-IC-14-p,none,percent,14,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1455,,tag_lu_406,tax_group_14
-lu_2015_tax_IP-IC-14,Investment Services 14% - Intra-Community,IP-IC-14,purchase,group,100,,,lu_2011_chart_1,453,"lu_2015_tax_IP-IC-14-n,lu_2015_tax_IP-IC-14-p",tag_lu_130,tax_group_14
-lu_2015_tax_IP-IC-17-n,Investment Services 17% - Intra-Community (-),IP-IC-17-n,none,percent,-17,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1460,,tag_lu_594,tax_group_17
-lu_2015_tax_IP-IC-17-p,Investment Services 17% - Intra-Community (+),IP-IC-17-p,none,percent,17,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1461,,tag_lu_402,tax_group_17
-lu_2015_tax_IP-IC-17,Investment Services 17% - Intra-Community,IP-IC-17,purchase,group,100,,,lu_2011_chart_1,459,"lu_2015_tax_IP-IC-17-n,lu_2015_tax_IP-IC-17-p",tag_lu_126,tax_group_17
-lu_2011_tax_IP-IC-3-n,Investment Services 3% - Intra-Community (-),IP-IC-3-n,none,percent,-3,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1463,,tag_lu_595,tax_group_3
-lu_2011_tax_IP-IC-3-p,Investment Services 3% - Intra-Community (+),IP-IC-3-p,none,percent,3,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1464,,tag_lu_394,tax_group_3
-lu_2011_tax_IP-IC-3,Investment Services 3% - Intra-Community,IP-IC-3,purchase,group,100,,,lu_2011_chart_1,462,"lu_2011_tax_IP-IC-3-n,lu_2011_tax_IP-IC-3-p",tag_lu_114,tax_group_3
-lu_2015_tax_IP-IC-8-n,Investment Services 8% - Intra-Community (-),IP-IC-8-n,none,percent,-8,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1469,,tag_lu_597,tax_group_8
-lu_2015_tax_IP-IC-8-p,Investment Services 8% - Intra-Community (+),IP-IC-8-p,none,percent,8,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1470,,tag_lu_410,tax_group_8
-lu_2015_tax_IP-IC-8,Investment Services 8% - Intra-Community,IP-IC-8,purchase,group,100,,,lu_2011_chart_1,468,"lu_2015_tax_IP-IC-8-n,lu_2015_tax_IP-IC-8-p",tag_lu_134,tax_group_8
+lu_2015_tax_IB-PA-14,Investment Goods 14% - Country,IB-PA-14,purchase,percent,14,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,421,,"tag_lu_458,tag_lu_254",tax_group_14
+lu_2015_tax_IB-PA-17,Investment Goods 17% - Country,IB-PA-17,purchase,percent,17,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,423,,"tag_lu_458,tag_lu_256",tax_group_17
+lu_2011_tax_IB-PA-3,Investment Goods 3% - Country,IB-PA-3,purchase,percent,3,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,424,,"tag_lu_458,tag_lu_257",tax_group_3
+lu_2015_tax_IB-PA-8,Investment Goods 8% - Country,IB-PA-8,purchase,percent,8,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,426,,"tag_lu_458,tag_lu_259",tax_group_8
+lu_2011_tax_IP-EC-0,Investment Services Exempted - Extra-Community,IP-EC-0,purchase,percent,0,,,lu_2011_chart_1,427,,tag_lu_445,tax_group_0
+lu_2015_tax_IP-EC-14-n,Investment Services 14% - Extra-Community (-),IP-EC-14-n,none,percent,-14,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1432,,tag_lu_461,tax_group_14
+lu_2015_tax_IP-EC-14-p,Investment Services 14% - Extra-Community (+),IP-EC-14-p,none,percent,14,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1433,,tag_lu_754,tax_group_14
+lu_2015_tax_IP-EC-14,Investment Services 14% - Extra-Community,IP-EC-14,purchase,group,100,,,lu_2011_chart_1,431,"lu_2015_tax_IP-EC-14-n,lu_2015_tax_IP-EC-14-p",tag_lu_753,tax_group_14
+lu_2015_tax_IP-EC-17-n,Investment Services 17% - Extra-Community (-),IP-EC-17-n,none,percent,-17,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1438,,tag_lu_461,tax_group_17
+lu_2015_tax_IP-EC-17-p,Investment Services 17% - Extra-Community (+),IP-EC-17-p,none,percent,17,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1439,,tag_lu_752,tax_group_17
+lu_2015_tax_IP-EC-17,Investment Services 17% - Extra-Community,IP-EC-17,purchase,group,100,,,lu_2011_chart_1,437,"lu_2015_tax_IP-EC-17-n,lu_2015_tax_IP-EC-17-p",tag_lu_751,tax_group_17
+lu_2011_tax_IP-EC-3-n,Investment Services 3% - Extra-Community (-),IP-EC-3-n,none,percent,-3,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1441,,tag_lu_461,tax_group_3
+lu_2011_tax_IP-EC-3-p,Investment Services 3% - Extra-Community (+),IP-EC-3-p,none,percent,3,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1442,,tag_lu_442,tax_group_3
+lu_2011_tax_IP-EC-3,Investment Services 3% - Extra-Community,IP-EC-3,purchase,group,100,,,lu_2011_chart_1,440,"lu_2011_tax_IP-EC-3-n,lu_2011_tax_IP-EC-3-p",tag_lu_441,tax_group_3
+lu_2015_tax_IP-EC-8-n,Investment Services 8% - Extra-Community (-),IP-EC-8-n,none,percent,-8,lu_2011_account_4614113,lu_2011_account_4614113,lu_2011_chart_1,1447,,tag_lu_461,tax_group_8
+lu_2015_tax_IP-EC-8-p,Investment Services 8% - Extra-Community (+),IP-EC-8-p,none,percent,8,lu_2011_account_4216113,lu_2011_account_4216113,lu_2011_chart_1,1448,,tag_lu_756,tax_group_8
+lu_2015_tax_IP-EC-8,Investment Services 8% - Extra-Community,IP-EC-8,purchase,group,100,,,lu_2011_chart_1,446,"lu_2015_tax_IP-EC-8-n,lu_2015_tax_IP-EC-8-p",tag_lu_755,tax_group_8
+lu_2011_tax_IP-IC-0,Investment Services Exempted - Intra-Community,IP-IC-0,purchase,percent,0,,,lu_2011_chart_1,449,,tag_lu_435,tax_group_0
+lu_2015_tax_IP-IC-14-n,Investment Services 14% - Intra-Community (-),IP-IC-14-n,none,percent,-14,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1454,,tag_lu_461,tax_group_14
+lu_2015_tax_IP-IC-14-p,Investment Services 14% - Intra-Community (+),IP-IC-14-p,none,percent,14,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1455,,tag_lu_744,tax_group_14
+lu_2015_tax_IP-IC-14,Investment Services 14% - Intra-Community,IP-IC-14,purchase,group,100,,,lu_2011_chart_1,453,"lu_2015_tax_IP-IC-14-n,lu_2015_tax_IP-IC-14-p",tag_lu_743,tax_group_14
+lu_2015_tax_IP-IC-17-n,Investment Services 17% - Intra-Community (-),IP-IC-17-n,none,percent,-17,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1460,,tag_lu_461,tax_group_17
+lu_2015_tax_IP-IC-17-p,Investment Services 17% - Intra-Community (+),IP-IC-17-p,none,percent,17,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1461,,tag_lu_742,tax_group_17
+lu_2015_tax_IP-IC-17,Investment Services 17% - Intra-Community,IP-IC-17,purchase,group,100,,,lu_2011_chart_1,459,"lu_2015_tax_IP-IC-17-n,lu_2015_tax_IP-IC-17-p",tag_lu_741,tax_group_17
+lu_2011_tax_IP-IC-3-n,Investment Services 3% - Intra-Community (-),IP-IC-3-n,none,percent,-3,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1463,,tag_lu_461,tax_group_3
+lu_2011_tax_IP-IC-3-p,Investment Services 3% - Intra-Community (+),IP-IC-3-p,none,percent,3,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1464,,tag_lu_432,tax_group_3
+lu_2011_tax_IP-IC-3,Investment Services 3% - Intra-Community,IP-IC-3,purchase,group,100,,,lu_2011_chart_1,462,"lu_2011_tax_IP-IC-3-n,lu_2011_tax_IP-IC-3-p",tag_lu_431,tax_group_3
+lu_2015_tax_IP-IC-8-n,Investment Services 8% - Intra-Community (-),IP-IC-8-n,none,percent,-8,lu_2011_account_4614112,lu_2011_account_4614112,lu_2011_chart_1,1469,,tag_lu_461,tax_group_8
+lu_2015_tax_IP-IC-8-p,Investment Services 8% - Intra-Community (+),IP-IC-8-p,none,percent,8,lu_2011_account_4216112,lu_2011_account_4216112,lu_2011_chart_1,1470,,tag_lu_746,tax_group_8
+lu_2015_tax_IP-IC-8,Investment Services 8% - Intra-Community,IP-IC-8,purchase,group,100,,,lu_2011_chart_1,468,"lu_2015_tax_IP-IC-8-n,lu_2015_tax_IP-IC-8-p",tag_lu_745,tax_group_8
 lu_2011_tax_IP-PA-0,Investment Services 0% - Country,IP-PA-0,purchase,percent,0,,,lu_2011_chart_1,471,,tag_lu_260,tax_group_0
-lu_2015_tax_IP-PA-14,Investment Services 14% - Country,IP-PA-14,purchase,percent,14,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,473,,"tag_lu_484,tag_lu_262",tax_group_14
-lu_2015_tax_IP-PA-17,Investment Services 17% - Country,IP-PA-17,purchase,percent,17,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,475,,"tag_lu_486,tag_lu_264",tax_group_17
-lu_2011_tax_IP-PA-3,Investment Services 3% - Country,IP-PA-3,purchase,percent,3,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,476,,"tag_lu_265,tag_lu_487",tax_group_3
-lu_2015_tax_IP-PA-8,Investment Services 8% - Country,IP-PA-8,purchase,percent,8,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,478,,"tag_lu_489,tag_lu_267",tax_group_8
+lu_2015_tax_IP-PA-14,Investment Services 14% - Country,IP-PA-14,purchase,percent,14,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,473,,"tag_lu_458,tag_lu_262",tax_group_14
+lu_2015_tax_IP-PA-17,Investment Services 17% - Country,IP-PA-17,purchase,percent,17,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,475,,"tag_lu_458,tag_lu_264",tax_group_17
+lu_2011_tax_IP-PA-3,Investment Services 3% - Country,IP-PA-3,purchase,percent,3,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,476,,"tag_lu_265,tag_lu_458",tax_group_3
+lu_2015_tax_IP-PA-8,Investment Services 8% - Country,IP-PA-8,purchase,percent,8,lu_2011_account_4216111,lu_2011_account_4216111,lu_2011_chart_1,478,,"tag_lu_458,tag_lu_267",tax_group_8
 lu_2015_tax_V-ART-43_60b,Sales - Other Exemptions (Article 43 and 60 bis),V-ART-43_60b,sale,percent,0,,,lu_2011_chart_1,479,,tag_lu_174,tax_group_0
 lu_2015_tax_V-ART-44_56q,Sales - Other Exemptions (Article 44 and 56 quarter),V-ART-44_56q,sale,percent,0,,,lu_2011_chart_1,480,,tag_lu_176,tax_group_0
 lu_2011_tax_VB-EC-0,Sales Goods - Extra-Community,VB-EC-0,sale,percent,0,,,lu_2011_chart_1,481,,tag_lu_172,tax_group_0
-lu_2011_tax_VB-EC-Tab,Sales Goods Tabacs - Extra-Community,VB-EC-Tab,sale,percent,0,,,lu_2011_chart_1,482,,tag_lu_178,tax_group_0
+lu_2011_tax_VB-EC-Tab,Sales Goods Tabacs - Extra-Community,VB-EC-Tab,sale,percent,0,,,lu_2011_chart_1,482,,tag_lu_017,tax_group_0
 lu_2011_tax_VB-IC-0,Sales Goods - Intra-Community,VB-IC-0,sale,percent,0,,,lu_2011_chart_1,483,,tag_lu_192,tax_group_0
-lu_2011_tax_VB-IC-Tab,Sales Goods Tobacco - Intra-Community,VB-IC-Tab,sale,percent,0,,,lu_2011_chart_1,484,,tag_lu_179,tax_group_0
-lu_2011_tax_VB-PA-0,Sales Goods 0% - Country,VB-PA-0,sale,percent,0,,,lu_2011_chart_1,485,,tag_lu_208,tax_group_0
-lu_2015_tax_VB-PA-14,Sales Goods 14% - Country,VB-PA-14,sale,percent,14,lu_2011_account_4614111,lu_2011_account_4614111,lu_2011_chart_1,487,,"tag_lu_290,tag_lu_214",tax_group_14
-lu_2015_tax_VB-PA-17,Sales Goods 17% - Country,VB-PA-17,sale,percent,17,lu_2011_account_4614111,lu_2011_account_4614111,lu_2011_chart_1,489,,"tag_lu_287,tag_lu_211",tax_group_17
-lu_2011_tax_VB-PA-3,Sales Goods 3% - Country,VB-PA-3,sale,percent,3,lu_2011_account_4614111,lu_2011_account_4614111,lu_2011_chart_1,490,,"tag_lu_202,tag_lu_280",tax_group_3
-lu_2015_tax_VB-PA-8,Sales Goods 8% - Country,VB-PA-8,sale,percent,8,lu_2011_account_4614111,lu_2011_account_4614111,lu_2011_chart_1,492,,"tag_lu_293,tag_lu_217",tax_group_8
-lu_2011_tax_VB-PA-Tab,Sales Goods Tabacs - Country,VB-PA-Tab,sale,percent,0,,,lu_2011_chart_1,493,,tag_lu_180,tax_group_0
+lu_2011_tax_VB-IC-Tab,Sales Goods Tobacco - Intra-Community,VB-IC-Tab,sale,percent,0,,,lu_2011_chart_1,484,,tag_lu_017,tax_group_0
+lu_2011_tax_VB-PA-0,Sales Goods 0% - Country,VB-PA-0,sale,percent,0,,,lu_2011_chart_1,485,,tag_lu_033,tax_group_0
+lu_2015_tax_VB-PA-14,Sales Goods 14% - Country,VB-PA-14,sale,percent,14,lu_2011_account_4614111,lu_2011_account_4614111,lu_2011_chart_1,487,,"tag_lu_704,tag_lu_703",tax_group_14
+lu_2015_tax_VB-PA-17,Sales Goods 17% - Country,VB-PA-17,sale,percent,17,lu_2011_account_4614111,lu_2011_account_4614111,lu_2011_chart_1,489,,"tag_lu_702,tag_lu_701",tax_group_17
+lu_2011_tax_VB-PA-3,Sales Goods 3% - Country,VB-PA-3,sale,percent,3,lu_2011_account_4614111,lu_2011_account_4614111,lu_2011_chart_1,490,,"tag_lu_031,tag_lu_040",tax_group_3
+lu_2015_tax_VB-PA-8,Sales Goods 8% - Country,VB-PA-8,sale,percent,8,lu_2011_account_4614111,lu_2011_account_4614111,lu_2011_chart_1,492,,"tag_lu_706,tag_lu_705",tax_group_8
+lu_2011_tax_VB-PA-Tab,Sales Goods Tabacs - Country,VB-PA-Tab,sale,percent,0,,,lu_2011_chart_1,493,,tag_lu_017,tax_group_0
 lu_2015_tax_VB-TR-0,Sales Goods – Triangular Intra-Community,VB-TR-0,sale,percent,0,,,lu_2011_chart_1,494,,tag_lu_182,tax_group_0
 lu_2011_tax_VP-EC-0,Sales Services - Extra-Community,VP-EC-0,sale,percent,0,,,lu_2011_chart_1,495,,tag_lu_184,tax_group_0
 lu_2011_tax_VP-IC-0,Sales Services - Intra-Community,VP-IC-0,sale,percent,0,,,lu_2011_chart_1,496,,tag_lu_188,tax_group_0
 lu_2011_tax_VP-IC-EX,Sales Services - Intra-Community exempted in member state,VP-IC-EX,sale,percent,0,,,lu_2011_chart_1,497,,tag_lu_190,tax_group_0
-lu_2011_tax_VP-PA-0,Sales Services 0% - Country,VP-PA-0,sale,percent,0,,,lu_2011_chart_1,498,,tag_lu_209,tax_group_0
-lu_2015_tax_VP-PA-14,Sales Services 14% - Country,VP-PA-14,sale,percent,14,lu_2011_account_4614111,lu_2011_account_4614111,lu_2011_chart_1,500,,"tag_lu_291,tag_lu_215",tax_group_14
-lu_2015_tax_VP-PA-17,Sales Services 17% - Country,VP-PA-17,sale,percent,17,lu_2011_account_4614111,lu_2011_account_4614111,lu_2011_chart_1,502,,"tag_lu_288,tag_lu_212",tax_group_17
-lu_2011_tax_VP-PA-3,Sales Services 3% - Country,VP-PA-3,sale,percent,3,lu_2011_account_4614111,lu_2011_account_4614111,lu_2011_chart_1,503,,"tag_lu_281,tag_lu_203",tax_group_3
-lu_2015_tax_VP-PA-8,Sales Services 8% - Country,VP-PA-8,sale,percent,8,lu_2011_account_4614111,lu_2011_account_4614111,lu_2011_chart_1,505,,"tag_lu_294,tag_lu_218",tax_group_8
+lu_2011_tax_VP-PA-0,Sales Services 0% - Country,VP-PA-0,sale,percent,0,,,lu_2011_chart_1,498,,tag_lu_033,tax_group_0
+lu_2015_tax_VP-PA-14,Sales Services 14% - Country,VP-PA-14,sale,percent,14,lu_2011_account_4614111,lu_2011_account_4614111,lu_2011_chart_1,500,,"tag_lu_704,tag_lu_703",tax_group_14
+lu_2015_tax_VP-PA-17,Sales Services 17% - Country,VP-PA-17,sale,percent,17,lu_2011_account_4614111,lu_2011_account_4614111,lu_2011_chart_1,502,,"tag_lu_702,tag_lu_701",tax_group_17
+lu_2011_tax_VP-PA-3,Sales Services 3% - Country,VP-PA-3,sale,percent,3,lu_2011_account_4614111,lu_2011_account_4614111,lu_2011_chart_1,503,,"tag_lu_040,tag_lu_031",tax_group_3
+lu_2015_tax_VP-PA-8,Sales Services 8% - Country,VP-PA-8,sale,percent,8,lu_2011_account_4614111,lu_2011_account_4614111,lu_2011_chart_1,505,,"tag_lu_706,tag_lu_705",tax_group_8
 lu_2015_tax_SANS,Without Taxes,SANS,purchase,percent,0,,,lu_2011_chart_1,506,,tag_lu_598,tax_group_0
 lu_2015_tax_SANS_sale,Without Taxes,SANS,sale,percent,0,,,lu_2011_chart_1,507,,tag_lu_598,tax_group_0
