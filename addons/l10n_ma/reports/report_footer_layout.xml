@@ -3,7 +3,7 @@
 
     <template id="external_layout_boxed" inherit_id="web.external_layout_boxed">
         <xpath expr="//div[@class='text-center']//ul" position="inside">
-            <li t-if="company.ice" class="list-inline-item">
+            <li t-if="company.country_id.code == 'MA' and company.l10n_ma_ice" class="list-inline-item">
                 <label for="company.ice"/>
                 <span t-field="company.ice"/>
             </li>
@@ -12,27 +12,27 @@
 
     <template id="external_layout_clean" inherit_id="web.external_layout_clean">
         <xpath expr="//div[hasclass('footer','o_clean_footer')]//span[@class='company_address']" position="after">
-            <t t-if="company.ice">
-                <label for="company.ice"/>
-                <span t-field="company.ice"/>
+            <t t-if="company.country_id.code == 'MA' and company.l10n_ma_ice">
+                <label for="company.l10n_ma_ice"/>
+                <span t-field="company.l10n_ma_ice"/>
             </t>
         </xpath>
     </template>
 
     <template id="external_layout_standard" inherit_id="web.external_layout_standard">
         <xpath expr="//div[@class='text-center']//ul" position="inside">
-            <li t-if="company.ice" class="list-inline-item">
-                <label for="company.ice"/>
-                <span t-field="company.ice"/>
+            <li t-if="company.country_id.code == 'MA' and company.l10n_ma_ice" class="list-inline-item">
+                <label for="company.l10n_ma_ice"/>
+                <span t-field="company.l10n_ma_ice"/>
             </li>
         </xpath>
     </template>
 
     <template id="external_layout_background" inherit_id="web.external_layout_background">
         <xpath expr="//div[@class='text-center']//ul" position="inside">
-            <li t-if="company.ice" class="list-inline-item">
-                <label for="company.ice"/>
-                <span t-field="company.ice"/>
+            <li t-if="company.country_id.code == 'MA' and company.l10n_ma_ice" class="list-inline-item">
+                <label for="company.l10n_ma_ice"/>
+                <span t-field="company.l10n_ma_ice"/>
             </li>
         </xpath>
     </template>

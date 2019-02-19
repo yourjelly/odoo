@@ -2,9 +2,9 @@
 <odoo>
     <template id="report_invoice_document" inherit_id="account.report_invoice_document">
         <xpath expr="//div[@t-if='o.partner_id.vat']" position="after">
-            <div t-if="o.partner_id.ice">
+            <div t-if="o.company_id.country_id.code == 'MA' and o.partner_id.l10n_ma_ice">
                 ICE:
-                <span t-field="o.partner_id.ice"/>
+                <span t-field="o.partner_id.l10n_ma_ice"/>
             </div>
         </xpath>
     </template>

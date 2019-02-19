@@ -4,7 +4,7 @@
 from odoo import models, fields
 
 
-class ResComapny(models.Model):
+class Company(models.Model):
     _inherit = 'res.company'
 
-    ice = fields.Char(string='ICE', size=15, related="partner_id.ice")
+    l10n_ma_ice = fields.Char(string='ICE', size=15, related="partner_id.ice")

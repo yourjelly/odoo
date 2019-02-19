@@ -4,7 +4,7 @@
 from odoo import models, fields
 
 
-class ResPartner(models.Model):
+class Partner(models.Model):
     _inherit = 'res.partner'
 
-    ice = fields.Char(string="ICE", size=15)
+    l10n_ma_ice = fields.Char(string="ICE", size=15)

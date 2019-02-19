@@ -1,12 +1,12 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="l10n_ma.res_company_view_company_form_inherit" model="ir.ui.view">
+    <record id="view_company_form_inherit" model="ir.ui.view">
         <field name="name">view.company.form.inherit.l10n.ma</field>
         <field name="model">res.company</field>
         <field  name="inherit_id" ref="base.view_company_form"/>
         <field name="arch" type="xml">
             <field name="company_registry" position="after">
-                <field  name="ice"/>
+                <field  name="l10n_ma_ice"/>
             </field>
         </field>
     </record>
