@@ -251,15 +251,10 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
                     // then we call the route to prepare the transaction
                     return this._rpc({
                         route: $tx_url[0].value,
-                        params: {
+                        params: _.extend({}, self._getTxData(), {
                             'acquirer_id': parseInt(acquirer_id),
                             'save_token': form_save_token,
-                            'access_token': self.options.accessToken,
-                            'success_url': self.options.successUrl,
-                            'error_url': self.options.errorUrl,
-                            'callback_method': self.options.callbackMethod,
-                            'order_id': self.options.orderId,
-                        },
+                        }),
                     }).then(function (result) {
                         if (result) {
                             // if the server sent us the html form, we create a form element
@@ -516,6 +511,16 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
         $(ev.currentTarget).find('input[type="radio"]').prop("checked", true);
         this.updateNewPaymentDisplayStatus();
     },
+
+    _getTxData: function () {
+        return {
+            'access_token': this.options.accessToken,
+            'success_url': this.options.successUrl,
+            'error_url': this.options.errorUrl,
+            'callback_method': this.options.callbackMethod,
+            'order_id': this.options.orderId,
+        };
+    }
 });
 return publicWidget.registry.PaymentForm;
 });
