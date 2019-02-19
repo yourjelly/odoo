@@ -137,11 +137,17 @@ class ProductProduct(models.Model):
         }
         return action
 
+    def _prepare_sellers(self, params):
+        if params and params.get('partner_type'):
+            return self.seller_ids.filtered(lambda s: s.name.type == params['partner_type'])
+        else:
+            return self.seller_ids
 
 class SupplierInfo(models.Model):
     _inherit = 'product.supplierinfo'
 
-    is_subcontractor = fields.Boolean('Subcontracted', compute='_compute_is_subcontractor')
+    is_subcontractor = fields.Boolean('Subcontracted', compute='_compute_is_subcontractor',
+                                      help='Choose a vendor of type subcontractor if you want to subcontract the product')
     bom_subcontract = fields.Many2one('mrp.bom', 'Bill of Materials')
 
     @api.depends('name')

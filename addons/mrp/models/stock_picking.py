@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models
-
+from odoo import fields, models, _
+from odoo.exceptions import UserError
 
 class StockPickingType(models.Model):
     _inherit = 'stock.picking.type'
@@ -37,6 +37,41 @@ class StockPickingType(models.Model):
 
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
+
+    def action_confirm(self):
+        for picking in self:
+            if picking.partner_id.type == 'subcontractor' and picking.picking_type_id.code == 'incoming':
+                subcontract_details = []
+                for m in picking.move_lines:
+                    product = m.product_id
+                    params = {'partner_type': 'subcontractor'}
+                    seller = m.product_id._select_seller(
+                        partner_id=picking.partner_id,
+                        quantity=m.product_qty,
+                        date=picking.scheduled_date and picking.scheduled_date.date(),
+                        uom_id=m.product_uom,
+                        params=params)
+                    if not seller.bom_subcontract:
+                        raise UserError(_("You can't subcontract the product %s if there is no BoM of type subcontract associated to it") % product.name)
+                    subcontract_details.append((seller, m.product_id, m.product_qty))
+                picking._subcontracted_produce(subcontract_details)
+        super(StockPicking, self).action_confirm()
+
+    def _subcontracted_produce(self, subcontract_details):
+        for subcontractor, product, qty in subcontract_details:
+            mo = self.env['mrp.production'].create({
+                'product_id': product.id,
+                'product_uom_id': product.uom_id.id,
+                'bom_id': subcontractor.bom_subcontract.id,
+                'location_src_id': subcontractor.name.property_stock_supplier.id,
+                'location_dest_id': subcontractor.name.property_stock_supplier.id,
+                'product_qty': qty,
+            })
+            self.env['stock.move'].create(mo._get_moves_raw_values())
+            mo.action_confirm()
+            mo.action_assign()
+            #mo.move_finished_id.quantity_done = mo.move_finished_id.product_uom_qty
+            #mo.move_finished_id._action_done()
 
     def _less_quantities_than_expected_add_documents(self, moves, documents):
         documents = super(StockPicking, self)._less_quantities_than_expected_add_documents(moves, documents)

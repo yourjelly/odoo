@@ -539,7 +539,7 @@ class MrpProduction(models.Model):
             'procure_method': 'make_to_stock',
             'origin': self.name,
             'state': 'draft',
-            'warehouse_id': source_location.get_warehouse().id,
+            'warehouse_id': source_location.get_warehouse() and source_location.get_warehouse().id or self.picking_type_id.warehouse_id.id,
             'group_id': self.procurement_group_id.id,
             'propagate': self.propagate,
         }

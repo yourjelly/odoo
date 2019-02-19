@@ -17,10 +17,15 @@ class StockWarehouse(models.Model):
         'stock.rule', 'Picking Before Manufacturing MTO Rule')
     sam_rule_id = fields.Many2one(
         'stock.rule', 'Stock After Manufacturing Rule')
+    subcontracting_mto_pull_id = fields.Many2one(
+        'stock.rule', 'Subcontracting MTO Rule')
+    subcontracting_pull_id = fields.Many2one(
+        'stock.rule', 'Subcontracting MTS Rule'
+    )
+
     manu_type_id = fields.Many2one(
         'stock.picking.type', 'Manufacturing Operation Type',
         domain=[('code', '=', 'mrp_operation')])
-
     pbm_type_id = fields.Many2one('stock.picking.type', 'Picking Before Manufacturing Operation Type')
     sam_type_id = fields.Many2one('stock.picking.type', 'Stock After Manufacturing Operation Type')
 
@@ -35,6 +40,7 @@ class StockWarehouse(models.Model):
         transfer it to the Production location.")
 
     pbm_route_id = fields.Many2one('stock.location.route', 'Picking Before Manufacturing Route', ondelete='restrict')
+    subcontracting_route_id = fields.Many2one('stock.location.route', 'Resupply Subcontractor', ondelete='restrict')
 
     pbm_loc_id = fields.Many2one('stock.location', 'Picking before Manufacturing Location')
     sam_loc_id = fields.Many2one('stock.location', 'Stock after Manufacturing Location')
@@ -42,6 +48,7 @@ class StockWarehouse(models.Model):
     def get_rules_dict(self):
         result = super(StockWarehouse, self).get_rules_dict()
         production_location_id = self._get_production_location()
+        subcontract_location_id = self._get_subcontracting_location()
         for warehouse in self:
             result[warehouse.id].update({
                 'mrp_one_step': [],
@@ -54,6 +61,9 @@ class StockWarehouse(models.Model):
                     self.Routing(warehouse.pbm_loc_id, production_location_id, warehouse.manu_type_id, 'pull'),
                     self.Routing(warehouse.sam_loc_id, warehouse.lot_stock_id, warehouse.sam_type_id, 'push'),
                 ],
+                'subcontract': [
+                    self.Routing(warehouse.lot_stock_id, subcontract_location_id, warehouse.out_type_id, 'pull'),
+                ]
             })
         return result
 
@@ -63,6 +73,10 @@ class StockWarehouse(models.Model):
         if not location:
             raise UserError(_('Can\'t find any production location.'))
         return location
+
+    @api.model
+    def _get_subcontracting_location(self):
+        return self.company_id.subcontracting_location_id
 
     def _get_routes_values(self):
         routes = super(StockWarehouse, self)._get_routes_values()
@@ -84,7 +98,23 @@ class StockWarehouse(models.Model):
                 'rules_values': {
                     'active': True,
                 }
+            },
+            'subcontracting_route_id': {
+                'routing_key': 'subcontract',
+                'route_create_values': {
+                    'product_categ_selectable': False,
+                    'warehouse_selectable': False,
+                    'product_selectable': True,
+                    'company_id': self.company_id.id,
+                    'sequence': 10,
+                    'name': self._format_routename(name=_('Resupply Subcontractor'))
+                },
+                'route_update_values': {},
+                'rules_values': {
+                    'active': True,
+                }
             }
+
         })
         return routes
 
@@ -102,6 +132,7 @@ class StockWarehouse(models.Model):
     def _get_global_route_rules_values(self):
         rules = super(StockWarehouse, self)._get_global_route_rules_values()
         location_id = self.manufacture_steps == 'pbm_sam' and self.sam_loc_id or self.lot_stock_id
+        subcontract_location_id = self._get_subcontracting_location()
         rules.update({
             'manufacture_pull_id': {
                 'depends': ['manufacture_steps', 'manufacture_to_resupply'],
@@ -134,6 +165,40 @@ class StockWarehouse(models.Model):
                 },
                 'update_values': {
                     'active': self.manufacture_steps != 'mrp_one_step' and self.manufacture_to_resupply,
+                }
+            },
+            'subcontracting_mto_pull_id': {
+                'create_values': {
+                    'procure_method': 'make_to_order',
+                    'company_id': self.company_id.id,
+                    'action': 'pull',
+                    'auto': 'manual',
+                    'propagate': True,
+                    'route_id': self._find_global_route('stock.route_warehouse0_mto', _('Make To Order')).id,
+                    'name': self._format_rulename(self.lot_stock_id, subcontract_location_id, 'MTO'),
+                    'location_id': subcontract_location_id.id,
+                    'location_src_id': self.lot_stock_id.id,
+                    'picking_type_id': self.env.ref('stock.picking_type_in').id
+                },
+                'update_values': {
+                    'active': True,  # TODO: toggle when subcontractig is disabled/enabled
+                }
+            },
+            'subcontracting_pull_id': {
+                'create_values': {
+                    'procure_method': 'make_to_stock',
+                    'company_id': self.company_id.id,
+                    'action': 'pull',
+                    'auto': 'manual',
+                    'propagate': True,
+                    'route_id': self._find_global_route('mrp.route_resupply_subcontractor_mto', _('Resupply Subcontractor on Order')).id,
+                    'name': self._format_rulename(self.lot_stock_id, subcontract_location_id),
+                    'location_id': subcontract_location_id.id,
+                    'location_src_id': self.lot_stock_id.id,
+                    'picking_type_id': self.env.ref('stock.picking_type_in').id
+                },
+                'update_values': {
+                    'active': True,  # TODO: toggle when subcontractig is disabled/enabled
                 }
             },
             # The purpose to move sam rule in the manufacture route instead of

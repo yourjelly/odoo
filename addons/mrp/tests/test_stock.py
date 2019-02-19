@@ -13,8 +13,8 @@ class TestWarehouse(common.TestMrpCommon):
         manu_rule = self.env['stock.rule'].search([
             ('action', '=', 'manufacture'),
             ('warehouse_id', '=', self.warehouse_1.id)])
-        self.assertEqual(self.warehouse_1.manufacture_pull_id, manu_rule)
-        manu_route = manu_rule.route_id
+        self.assertIn(self.warehouse_1.manufacture_pull_id, manu_rule)
+        manu_route = self.env.ref('mrp.route_warehouse0_manufacture', raise_if_not_found=False)
         self.assertIn(manu_route, warehouse_1_stock_manager._get_all_routes())
         warehouse_1_stock_manager.write({
             'manufacture_to_resupply': False
@@ -28,7 +28,7 @@ class TestWarehouse(common.TestMrpCommon):
         manu_rule = self.env['stock.rule'].search([
             ('action', '=', 'manufacture'),
             ('warehouse_id', '=', self.warehouse_1.id)])
-        self.assertEqual(self.warehouse_1.manufacture_pull_id, manu_rule)
+        self.assertIn(self.warehouse_1.manufacture_pull_id, manu_rule)
         self.assertTrue(self.warehouse_1.manu_type_id.active)
         self.assertIn(manu_route, warehouse_1_stock_manager._get_all_routes())
 

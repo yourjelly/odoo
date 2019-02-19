@@ -31,3 +31,15 @@ class Partner(models.Model):
                 'property_stock_customer': self.env.ref('stock.stock_location_customers'),
                 'property_stock_supplier': self.env.ref('stock.stock_location_suppliers')
             })
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('type') == 'subcontractor':
+                company = vals.get('company_id') and self.env['res.company'].browse(vals['company_id']) or \
+                          self.browse(vals.get('parent_id')).company_id
+                subcontracting_location = company.subcontracting_location_id
+                if not vals.get('property_stock_supplier') and not vals.get('property_stock_customer'):
+                    vals['property_stock_supplier'] = subcontracting_location
+                    vals['property_stock_customer'] = subcontracting_location
+        return super(Partner, self).create(vals_list)
