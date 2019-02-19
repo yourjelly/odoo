@@ -4,8 +4,8 @@
     <template id="external_layout_boxed" inherit_id="web.external_layout_boxed">
         <xpath expr="//div[@class='text-center']//ul" position="inside">
             <li t-if="company.country_id.code == 'MA' and company.l10n_ma_ice" class="list-inline-item">
-                <label for="company.ice"/>
-                <span t-field="company.ice"/>
+                <label for="company.l10n_ma_ice"/>
+                <span t-field="company.l10n_ma_ice"/>
             </li>
         </xpath>
     </template>
