@@ -67,6 +67,33 @@ class AccountInvoice(models.Model):
         self.amount_total_signed = self.amount_total * sign
         self.amount_untaxed_signed = amount_untaxed_signed * sign
 
+    @api.multi
+    @api.depends('invoice_line_ids.price_subtotal', 'tax_line_ids.amount', 'tax_line_ids.amount_rounding',
+                 'currency_id', 'company_id', 'date_invoice', 'type')
+    def _compute_amount(self):
+        invoice_amounts = {inv['invoice_id'][0]: inv['price_subtotal']
+                            for inv in self.env['account.invoice.line'].read_group(
+                                [('invoice_id', 'in', self.ids)],
+                                ['invoice_id', 'price_subtotal'],
+                                ['invoice_id']
+                            )
+                          }
+        for rec in self:
+            round_curr = rec.currency_id.round
+            rec.amount_untaxed = invoice_amounts.get(rec.id, 0)
+            rec.amount_tax = sum(round_curr(line.amount_total) for line in rec.tax_line_ids)
+            rec.amount_total = rec.amount_untaxed + rec.amount_tax
+            amount_total_company_signed = rec.amount_total
+            amount_untaxed_signed = rec.amount_untaxed
+            if rec.currency_id and rec.company_id and rec.currency_id != rec.company_id.currency_id:
+                currency_id = rec.currency_id.with_context(date=rec.date_invoice)
+                amount_total_company_signed = currency_id.compute(rec.amount_total, rec.company_id.currency_id)
+                amount_untaxed_signed = currency_id.compute(rec.amount_untaxed, rec.company_id.currency_id)
+            sign = rec.type in ['in_refund', 'out_refund'] and -1 or 1
+            rec.amount_total_company_signed = amount_total_company_signed * sign
+            rec.amount_total_signed = rec.amount_total * sign
+            rec.amount_untaxed_signed = amount_untaxed_signed * sign
+
     @api.onchange('amount_total')
     def _onchange_amount_total(self):
         for inv in self:
