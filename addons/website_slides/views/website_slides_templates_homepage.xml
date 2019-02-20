@@ -123,20 +123,20 @@
             </section>
             <div class="container mt16 o_wslides_home_nav position-relative">
                 <!-- Navbar dynamically composed using displayed channel tag groups. -->
-                <nav class="navbar navbar-expand-md navbar-light shadow-sm" style="background: white!important">
-                    <div class="navbar-nav border-right pr-3">
-                        <a class="nav-link nav-item" t-att-href="'/slides?%s' % keep_query('debug')"><i class="fa fa-chevron-left"/></a>
+                <nav class="navbar navbar-expand-md navbar-light pl-0 shadow-sm" style="background: white!important">
+                    <div class="navbar-nav border-right">
+                        <a class="nav-link nav-item px-3" t-att-href="'/slides?%s' % keep_query('debug')"><i class="fa fa-chevron-left"/></a>
                     </div>
-                    <button class="navbar-toggler" type="button"
+                    <button class="navbar-toggler py-2" type="button"
                         data-toggle="collapse" data-target="#navbarTagGroups"
                         aria-controls="navbarTagGroups" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
+                        <span>Filters</span>
                     </button>
                     <div class="collapse navbar-collapse" id="navbarTagGroups">
                         <t t-set="search_tag_groups" t-value="search_tags.mapped('group_id')"/>
                         <ul class="navbar-nav flex-grow-1">
                             <t t-foreach="tag_groups" t-as="tag_group">
-                                <li t-att-class="'nav-item dropdown ml16 %s' % ('active' if tag_group in search_tag_groups else '')">
+                                <li t-att-class="'nav-item dropdown ml-3 ml-md-1 ml-lg-3 %s' % ('active' if tag_group in search_tag_groups else '')">
                                     <a class="nav-link dropdown-toggle"
                                         href="/slides/all"
                                         t-att-data-target="'#navToogleTagGroup%s' % tag_group.id"
@@ -153,14 +153,14 @@
                                 </li>
                             </t>
                             <!-- karma / profile -->
-                            <li class="nav-item ml-auto" t-if="not is_public_user">
+                            <li class="nav-item ml-3 ml-md-auto my-3 my-md-0" t-if="not is_public_user">
                                 <a t-att-href="'/profile/user/%s' % user.id" class="nav-link mr-2">
                                     <i class="fa fa-diamond"/> <t t-esc="user_id.karma"/>
                                 </a>
                             </li>
                         </ul>
                         <!-- search box -->
-                        <form method="GET" class="form-inline o_wslides_nav_navbar_right">
+                        <form method="GET" class="form-inline pl-3 o_wslides_nav_navbar_right">
                             <div class="input-group">
                                 <input type="search" name="search" class="form-control"
                                     placeholder="Search something" aria-label="Search"
@@ -341,12 +341,19 @@
                 </t>
                 <a t-att-href="'/profile/user/%s' % user.id" class="float-right">Edit</a>
                 <h3 t-esc="user.name" class="font-weight-bold mb-0"/>
-                <hr class="mt-2"/>
+                <hr class="my-2"/>
             </div>
-            <div class="col-12 mt8">
-                <span class="font-weight-bold text-muted">Current rank:</span>
-                <a href="/profile/ranks" class="float-right" t-field="user.rank_id"/>
-                <t t-call="website_profile.profile_next_rank_card"/>
+            <div class="col-12">
+                <div class="d-flex align-items-center">
+                    <span class="font-weight-bold text-muted mr-2">Current rank:</span>
+                    <img t-attf-src="/web/image/gamification.karma.rank/#{user.rank_id.id}/image_small" height="16" alt="" class="mr-1"/>
+                    <a href="/profile/ranks" t-field="user.rank_id"/>
+                </div>
+                <div class="font-weight-bold text-muted mt-1">Next rank:</div>
+                <t t-call="website_profile.profile_next_rank_card">
+                    <t t-set="bg_class">bg-200</t>
+                    <t t-set="img_max_width">50%</t>
+                </t>
                 <div t-field="user.next_rank_id.description_motivational"/>
             </div>
         </div>
