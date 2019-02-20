@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-extend="LunchKanbanWidget">
+        <t t-jquery=".o_lunch_account"  t-operation="append">
+            <a href="#" class="o_add_money">Add money</a>
+        </t>
+    </t>
+</templates>

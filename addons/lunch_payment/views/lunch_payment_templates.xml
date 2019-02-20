@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="assets_frontend" inherit_id="web.assets_frontend">
+        <xpath expr="script[last()]" position="after">
+            <script type="text/javascript" src="/lunch_payment/static/src/js/payment_form.js"></script>
+        </xpath>
+    </template>
+
+    <template id="assets_backend" name="lunch payment assets" inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/lunch_payment/static/src/js/lunch_kanban_controller.js"></script>
+            <script type="text/javascript" src="/lunch_payment/static/src/js/lunch_kanban_widget.js"></script>
+        </xpath>
+    </template>
+
+    <template id="payment_tokens_list" name="lunch payment tokens list" inherit_id="payment.payment_tokens_list">
+        <xpath expr="//form" position="attributes">
+            <attribute name="t-att-data-cashmove-id">cashmove_id or ''</attribute>
+        </xpath>
+    </template>
+
+    <template id="pay" name="lunch payment pay" inherit_id="payment.pay">
+        <xpath expr="//t[@t-set='mode']" position="after">
+            <t t-set="cashmove_id" t-value="cashmove_id or ''"/>
+        </xpath>
+    </template>
+
+    <template id="confirm" name="lunch payment confirm" inherit_id="payment.confirm">
+        <xpath expr="//a[@href='/my/home']" position="attributes">
+            <attribute name="href"></attribute>
+            <attribute name="t-att-href">'/web' if tx.cashmove_id else '/my/home'</attribute>
+        </xpath>
+    </template>
+</odoo>
