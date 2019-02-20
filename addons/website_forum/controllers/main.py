@@ -26,8 +26,6 @@ class WebsiteForum(WebsiteProfile):
         values.update({
             'header': kwargs.get('header', dict()),
             'searches': kwargs.get('searches', dict()),
-            'validation_email_sent': request.session.get('validation_email_sent', False),
-            'validation_email_done': request.session.get('validation_email_done', False),
         })
         if kwargs.get('forum'):
             values['forum'] = kwargs.get('forum')
@@ -37,32 +35,18 @@ class WebsiteForum(WebsiteProfile):
 
     # User and validation
     # --------------------------------------------------
-
+    # TODO DBE : Those 3 are deprecated. To remove in v13.
     @http.route('/forum/send_validation_email', type='json', auth='user', website=True)
-    def send_validation_email(self, forum_id=None, **kwargs):
-        if request.env.uid != request.website.user_id.id:
-            request.env.user._send_forum_validation_email(forum_id=forum_id)
-        request.session['validation_email_sent'] = True
-        return True
+    def send_forum_validation_email(self, forum_id=None, **kwargs):
+        return werkzeug.utils.redirect('/profile/send_validation_email?forum_id=%s' % forum_id, code=301)
 
     @http.route('/forum/validate_email', type='http', auth='public', website=True, sitemap=False)
-    def validate_email(self, token, id, email, forum_id=None, **kwargs):
-        if forum_id:
-            try:
-                forum_id = int(forum_id)
-            except ValueError:
-                forum_id = None
-        done = request.env['res.users'].sudo().browse(int(id)).process_forum_validation_token(token, email, forum_id=forum_id)[0]
-        if done:
-            request.session['validation_email_done'] = True
-        if forum_id:
-            return request.redirect("/forum/%s" % int(forum_id))
-        return request.redirect('/forum')
+    def forum_validate_email(self, token, id, email, forum_id=None, **kwargs):
+        return werkzeug.utils.redirect('/profile/validate_email?token=%s&id=%s&email=%sforum_id=%s' % (token, id, email, forum_id), code=301)
 
     @http.route('/forum/validate_email/close', type='json', auth='public', website=True)
-    def validate_email_done(self):
-        request.session['validation_email_done'] = False
-        return True
+    def forum_validate_email_done(self):
+        return werkzeug.utils.redirect('/profile/validate_email/close', code=301)
 
     # Forum
     # --------------------------------------------------
@@ -550,6 +534,12 @@ class WebsiteForum(WebsiteProfile):
 
     # Profile
     # -----------------------------------
+    def _get_validation_email_redirect_url(self, **kwargs):
+        result = super(WebsiteForum, self).get_validation_email_redirect_url(**kwargs)
+        if kwargs.get('forum_id'):
+            return '/forum/' + str(kwargs['forum_id'])
+        return result
+
     @http.route(['/forum/<model("forum.forum"):forum>/user/<int:user_id>'], type='http', auth="public", website=True)
     def view_user_forum_profile(self, forum, user_id, **post):
         return werkzeug.utils.redirect('/profile/user/' + str(user_id) + '?forum_id=' + str(forum.id))

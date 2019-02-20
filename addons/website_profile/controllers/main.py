@@ -56,6 +56,8 @@ class WebsiteProfile(http.Controller):
         values = {
             'user': request.env.user,
             'is_public_user': request.website.is_public_user(),
+            'validation_email_sent': request.session.get('validation_email_sent', False),
+            'validation_email_done': request.session.get('validation_email_done', False),
         }
         values.update(kwargs)
         return values
@@ -233,3 +235,29 @@ class WebsiteProfile(http.Controller):
             'pager': pager
         }
         return request.render("website_profile.users_page_main", values)
+
+    # User and validation
+    # --------------------------------------------------
+
+    def _get_validation_email_redirect_url(self, **kwargs):
+        return '/'
+
+    @http.route('/profile/send_validation_email', type='json', auth='user', website=True)
+    def send_validation_email(self, **kwargs):
+        if request.env.uid != request.website.user_id.id:
+            request.env.user._send_profile_validation_email(**kwargs)
+        request.session['validation_email_sent'] = True
+        return True
+
+    @http.route('/profile/validate_email', type='http', auth='public', website=True, sitemap=False)
+    def validate_email(self, token, id, email, **kwargs):
+        done = request.env['res.users'].sudo().browse(int(id)).process_profile_validation_token(token, email, **kwargs)[0]
+        if done:
+            request.session['validation_email_done'] = True
+        url = self._get_validation_email_redirect_url(**kwargs)
+        return request.redirect(url)
+
+    @http.route('/profile/validate_email/close', type='json', auth='public', website=True)
+    def validate_email_done(self):
+        request.session['validation_email_done'] = False
+        return True

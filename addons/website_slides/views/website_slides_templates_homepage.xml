@@ -35,7 +35,9 @@
                         </div>
                     </div>
                 </nav>
+                <t t-call="website_slides.email_validation_banner"/>
             </div>
+
             <div class="container o_wslides_home_main">
                 <div class="row">
                     <div class="col-md-9">
@@ -179,6 +181,7 @@
                         </form>
                     </div>
                 </nav>
+                <t t-call="website_slides.email_validation_banner"/>
             </div>
             <div class="container o_wslides_home_main">
                 <t t-if="search_term and not channels_layouted">
@@ -408,4 +411,23 @@
     </t>
 </template>
 
+<template id="email_validation_banner">
+    <div class="o_wprofile_email_validation_container mb16 mt16">
+        <div t-if="not validation_email_sent and not is_public_user and user.karma == 0" class="alert alert-danger alert-dismissable" role="alert">
+            <button type="button" class="close validation_email_close" data-dismiss="alert" aria-label="Close">&amp;times;</button>
+            <div>
+                <p>
+                    It appears your email has not been verified.
+                    <a class="send_validation_email" href="#" t-att-data-elearning="True">Click here to send a verification email allowing you to participate to the eLearning.</a>
+                </p>
+            </div>
+        </div>
+        <div t-if="validation_email_done" class="alert alert-success alert-dismissable" role="status">
+            <button type="button" class="close validated_email_close" data-dismiss="alert" aria-label="Close">&amp;times;</button>
+            <div>
+                <p>Congratulations! Your email has just been validated. You may now participate to our eLearning.</p>
+            </div>
+        </div>
+    </div>
+</template>
 </data></odoo>
