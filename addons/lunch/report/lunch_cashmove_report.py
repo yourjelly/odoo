@@ -34,6 +34,8 @@ class CashmoveReport(models.Model):
                     lc.user_id as user_id,
                     lc.description as description
                 FROM lunch_cashmove lc
+                WHERE
+                    lc.state in ('confirm')
                 UNION ALL
                 SELECT
                     -lol.id as id,

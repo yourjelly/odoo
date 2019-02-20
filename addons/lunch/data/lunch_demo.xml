@@ -324,6 +324,7 @@
             <field name="date" eval="(DateTime.now() + timedelta(days=3)).strftime('%Y-%m-%d')"/>
             <field name="description">Payment: 5 lunch tickets (6€)</field>
             <field name="amount">30</field>
+            <field name="state">confirm</field>
         </record>
 
         <record model="lunch.cashmove" id="cashmove_2">
@@ -331,6 +332,7 @@
             <field name="date" eval="(DateTime.now() - timedelta(days=3)).strftime('%Y-%m-%d')"/>
             <field name="description">Payment: 7 lunch tickets (6€)</field>
             <field name="amount">42</field>
+            <field name="state">confirm</field>
         </record>
 
         <record model="lunch.order" id="order_line_1">

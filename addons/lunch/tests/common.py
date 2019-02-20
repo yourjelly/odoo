@@ -72,4 +72,5 @@ class TestsCommon(common.TransactionCase):
 
         self.env['lunch.cashmove'].create({
             'amount': 100,
+            'state': 'confirm',
         })

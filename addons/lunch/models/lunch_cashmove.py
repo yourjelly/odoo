@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 from odoo.tools import float_round
 
 
@@ -17,6 +18,11 @@ class LunchCashMove(models.Model):
     date = fields.Date('Date', required=True, default=fields.Date.context_today)
     amount = fields.Float('Amount', required=True)
     description = fields.Text('Description')
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('confirm', 'Confirmed'),
+        ('cancel', 'Cancelled'),
+    ], string='Status', default='draft', readonly=True)
 
     @api.multi
     def name_get(self):
@@ -29,3 +35,19 @@ class LunchCashMove(models.Model):
         if include_config:
             result += user.company_id.lunch_minimum_threshold
         return result
+
+    @api.multi
+    def action_draft(self):
+        self.write({'state': 'draft'})
+        if self.get_wallet_balance(self.env.user) < 0:
+            raise UserError(_('Wallet cannot go off balance'))
+
+    @api.multi
+    def action_confirm(self):
+        self.write({'state': 'confirm'})
+
+    @api.multi
+    def action_cancel(self):
+        self.write({'state': 'cancel'})
+        if self.get_wallet_balance(self.env.user) < 0:
+            raise UserError(_('Wallet cannot go off balance'))
