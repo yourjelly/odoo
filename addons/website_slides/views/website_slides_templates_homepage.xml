@@ -175,30 +175,15 @@
                     </div>
                 </nav>
             </div>
-            <div class="container o_wslides_home_main">
-                <t t-if="search_term and not channels_layouted">
-                    <div class="row">
-                        <div class="col">
-                            <p class="alert alert-info">No channel was found matching your search <t t-esc="search_term"/>.</p>
-                        </div>
-                    </div>
-                </t>
-                <t t-foreach="channels_layouted" t-as="channels_row">
-                    <t t-set="missing" t-value="0"/>
-                    <div class="card-deck mb32">
-                        <t t-foreach="channels_row" t-as="channel">
-                            <t t-if="channel">
-                                <t t-call="website_slides.course_card"/>
-                            </t>
-                            <t t-else="">
-                                <t t-set="missing" t-value="missing + 1"/>
-                            </t>
-                        </t>
-                        <t t-if="missing">
-                            <div t-att-class="'col-%s' % (missing * 3)"/>
-                        </t>
-                    </div>
-                </t>
+            <div class="container o_wslides_home_main pb-5">
+                <div t-if="search_term and not channels" class="alert alert-info mb-5">
+                    No channel was found matching your search <code><t t-esc="search_term"/></code>.
+                </div>
+                <div t-else="" class="row mx-n2">
+                    <t t-foreach="channels" t-as="channel">
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-3 px-2 d-flex flex-grow-1" t-call="website_slides.course_card"/>
+                    </t>
+                </div>
             </div>
         </div>
         <t t-call="website_slides.courses_footer">
