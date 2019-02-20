@@ -826,7 +826,6 @@ QUnit.module('basic_fields', {
             data: this.data,
             arch: '<tree editable="bottom"><field name="foo"  widget="email"/></tree>',
         });
-
         assert.strictEqual(list.$('tbody td:not(.o_list_record_selector)').length, 5,
             "should have 5 cells");
         assert.strictEqual(list.$('tbody td:not(.o_list_record_selector)').first().text(), 'yop',

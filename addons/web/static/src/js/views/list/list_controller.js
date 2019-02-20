@@ -540,7 +540,6 @@ var ListController = BasicController.extend({
      * @param {OdooEvent} ev
      */
     _onSelectionChanged: function (ev) {
-        debugger;
         this.selectedRecords = ev.data.selection;
         this._toggleSidebar();
     },

@@ -543,6 +543,11 @@ var ListRenderer = BasicRenderer.extend({
         if (this.hiddenColumns) {
             $tr.append(this._renderAddColumnOption(this.hiddenColumns));
         }
+        if (this.addTrashIcon) {
+            $tr.append($("<th/>", {
+                class: 'o-header-cell',
+            }));
+        }
         if (this.hasSelectors) {
             $tr.prepend(this._renderSelector('th'));
         }
@@ -662,9 +667,10 @@ var ListRenderer = BasicRenderer.extend({
                 class: 'o-data-cell',
             }))
         }
+
         if (this.advancedColumns.length) {
             var $icon = $('<button>', {class: 'fa fa-external-link', name: 'open', 'aria-label': _t('Open ') + ($cells.length+1)});
-            var $td = $('<td>', {class: 'o_list_record_open'}).append($icon);
+            var $td = $('<td>', {class: 'o_list_record_open text-center'}).append($icon);
             $cells.push($td);
         }
         delete this.defs;
@@ -680,8 +686,8 @@ var ListRenderer = BasicRenderer.extend({
     _onOpenAdvancedFieldClick: function (ev) {
         ev.stopPropagation();
         var id = $(event.target).closest('tr').data('id');
-        // this.trigger_up('open_row', {id: id});
         this.trigger_up('open_record', {id: id});
+        // this.trigger_up('open_row', {id: id});
         /*if (id) {
             var action = {
                 name: 'Open: Order Lines',
@@ -874,10 +880,12 @@ var ListRenderer = BasicRenderer.extend({
     _onRowClicked: function (ev) {
         // The special_click property explicitely allow events to bubble all
         // the way up to bootstrap's level rather than being stopped earlier.
-        if (!$(ev.target).prop('special_click')) {
-            var id = $(ev.currentTarget).data('id');
-            if (id) {
-                this.trigger_up('open_record', { id: id, target: ev.target });
+        if (!this.advancedColumns.length || this.editable) {
+            if (!$(ev.target).prop('special_click')) {
+                var id = $(ev.currentTarget).data('id');
+                if (id) {
+                    this.trigger_up('open_record', { id: id, target: ev.target });
+                }
             }
         }
     },
