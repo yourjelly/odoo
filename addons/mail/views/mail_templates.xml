@@ -95,6 +95,7 @@
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/activity_view.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/kanban_view.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/attachment_box.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/composer_attachment.scss"/>
             </xpath>
         </template>
 
