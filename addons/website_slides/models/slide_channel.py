@@ -149,7 +149,10 @@ class Channel(models.Model):
     karma_gen_channel_share = fields.Integer(string='Course shared', default=2)
     karma_gen_channel_rank = fields.Integer(string='Course ranked', default=5)
     karma_gen_channel_finish = fields.Integer(string='Course finished', default=10)
-    # TODO DBE : Add karma based action rules (like in forum)
+    # karma based actions
+    karma_channel_rank = fields.Integer(string='Rank a channel', default=lambda self: self.karma_gen_channel_finish)
+    karma_upvote = fields.Integer(string='Upvote a slide', default=5)
+    karma_downvote = fields.Integer(string='Downvote a slide', default=50)
 
     @api.depends('slide_ids.is_published')
     def _compute_slide_last_update(self):
