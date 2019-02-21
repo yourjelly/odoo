@@ -434,3 +434,29 @@ class TestXMLTranslation(TransactionCase):
         # 'Subtotal' being src==value, it will be discared
         # 'Subtotal:' will be discarded as it match 'Subtotal' instead of 'Subtotal:<br/>'
         self.assertEqual(len(translations), 0)
+
+    def test_sync_translated(self):
+        """ Check translations after minor change in source terms. """
+        archf = '<form string="%s">%s</form>'
+        terms_en = ('Title', 'Bread and cheese')
+        terms_fr = ('Titre', 'Pain et fromache')
+        terms_nl = ('Title', 'Brood and kaas')
+        view = self.create_view(archf, terms_en, fr_FR=terms_fr, nl_NL=terms_nl)
+
+        env_en = self.env(context={})
+        env_fr = self.env(context={'lang': 'fr_FR'})
+        env_nl = self.env(context={'lang': 'nl_NL'})
+
+        self.assertEqual(view.with_env(env_en).arch_db, archf % terms_en)
+        self.assertEqual(view.with_env(env_fr).arch_db, archf % terms_fr)
+        self.assertEqual(view.with_env(env_nl).arch_db, archf % terms_nl)
+
+        # modify translated term in view (fixed typo in 'fromache')
+        terms_fr = ('Titre', 'Pain et fromage')
+        # import pudb;pu.db
+        view.with_env(env_fr).write({'arch_db': archf % terms_fr})
+
+        # check whether translations have been synchronized
+        self.assertEqual(view.with_env(env_en).arch_db, archf % terms_en)
+        self.assertEqual(view.with_env(env_fr).arch_db, archf % terms_fr)
+        self.assertEqual(view.with_env(env_nl).arch_db, archf % terms_nl)
