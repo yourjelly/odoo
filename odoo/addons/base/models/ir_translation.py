@@ -451,7 +451,7 @@ class IrTranslation(models.Model):
         return result
 
     @api.model
-    def _sync_terms_translations(self, field, records):
+    def _sync_terms_translations(self, field, records, val=None):
         """ Synchronize the translations to the terms to translate, after the
         English value of a field is modified. The algorithm tries to match
         existing translations to the terms to translate, provided the distance
@@ -464,16 +464,21 @@ class IrTranslation(models.Model):
         Translation = self.env['ir.translation']
         outdated = Translation
         discarded = Translation
+        has_translation = self.env.lang != 'en_US' and self.env.lang
+        matching_field = has_translation and 'value' or 'src'
 
         for record in records:
             # get field value and terms to translate
-            value = record[field.name]
+            value = val or record[field.name]
             terms = set(field.get_trans_terms(value))
-            translations = Translation.search([
+            domain = [
                 ('type', '=', 'model_terms'),
                 ('name', '=', "%s,%s" % (field.model_name, field.name)),
                 ('res_id', '=', record.id),
-            ])
+            ]
+            if has_translation:
+                domain += [('lang', '=', has_translation)]
+            translations = Translation.search(domain)
 
             if not terms:
                 # discard all translations for that field
@@ -486,24 +491,24 @@ class IrTranslation(models.Model):
             translations_to_match = []
 
             for translation in translations:
-                if translation.src == translation.value:
+                if not has_translation and translation.src == translation.value:
                     discarded += translation
                     # consider it done to avoid being matched against another term
                     done.add((translation.src, translation.lang))
-                elif translation.src in terms:
-                    done.add((translation.src, translation.lang))
+                elif translation[matching_field] in terms:
+                    done.add((translation[matching_field], translation.lang))
                 else:
                     translations_to_match.append(translation)
 
             for translation in translations_to_match:
-                matches = get_close_matches(translation.src, terms, 1, 0.9)
+                matches = get_close_matches(translation[matching_field], terms, 1, 0.9)
                 src = matches[0] if matches else None
                 if not src:
                     outdated += translation
                 elif (src, translation.lang) in done:
                     discarded += translation
                 else:
-                    translation.write({'src': src, 'state': translation.state})
+                    translation.write({matching_field: src, 'state': translation.state})
                     done.add((src, translation.lang))
 
         # process outdated and discarded translations
