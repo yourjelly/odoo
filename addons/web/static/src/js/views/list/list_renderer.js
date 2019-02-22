@@ -442,7 +442,10 @@ var ListRenderer = BasicRenderer.extend({
         }
         var $th = $('<th>')
             .addClass('o_group_name')
-            .text(name + ' (' + group.count + ')');
+            .append($('<span/>', {
+                'class': 'o_group_lable',
+                'text': name + ' (' + group.count + ')'
+            }));
         if (this.hasSelectors) {
             $th.attr('colspan', HEADING_COLUMNS_TO_SKIP_IN_GROUPS);
         }
