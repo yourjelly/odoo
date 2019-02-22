@@ -79,7 +79,7 @@ class StockMoveLine(models.Model):
     def _check_same_company_id(self):
         for line in self:
             if line.move_id and line.move_id.company_id != line.company_id:
-                raise ValidationError(_('The move line a a different company than its move'))
+                raise ValidationError(_('The move line has a different company than its move.'))
 
     @api.one
     def _set_product_qty(self):
@@ -154,7 +154,7 @@ class StockMoveLine(models.Model):
     @api.constrains('qty_done')
     def _check_positive_qty_done(self):
         if any([ml.qty_done < 0 for ml in self]):
-            raise ValidationError(_('You can not enter negative quantities.'))
+            raise ValidationError(_('You cannot enter negative quantities.'))
 
     def _get_similar_move_lines(self):
         self.ensure_one()
@@ -347,7 +347,7 @@ class StockMoveLine(models.Model):
         precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
         for ml in self:
             if ml.state in ('done', 'cancel'):
-                raise UserError(_('You can not delete product moves if the picking is done. You can only correct the done quantities.'))
+                raise UserError(_('You cannot delete product moves if the picking is done. You can only correct the done quantities.'))
             # Unlinking a move line should unreserve.
             if ml.product_id.type == 'product' and not ml.location_id.should_bypass_reservation() and not float_is_zero(ml.product_qty, precision_digits=precision):
                 try:
