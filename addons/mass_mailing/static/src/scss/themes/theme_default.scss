@@ -72,6 +72,7 @@ td:not([align]) {
         .o_mail_wrapper_td {
             width: $o-mm-def-body-width;
             border: 1px solid darken($o-mm-def-color-alpha, 2%);
+            background-color: $o-mm-def-color-beta;
         }
     }
 }
