@@ -856,6 +856,10 @@ actual arch.
                 attrs = {}
                 field = Model._fields.get(node.get('name'))
                 if field:
+                    if field.type == 'many2one' and node.get('domain') and node.get('context') and 'search_default' in node.get('context'):
+                        _logger.warning(_('Possible inconsistent behavior on field %s with domain %s and context %s') % (node.get('name'), node.get('domain'), node.get('context')))
+                    elif field.type == 'many2one' and node.get('context') and 'search_default' in node.get('context'):
+                        _logger.warning(_("Domains should be used instead of 'search_default_' on many2one fields %s.") % (node.get('name')))
                     editable = self.env.context.get('view_is_editable', True) and self._field_is_editable(field, node)
                     children = False
                     views = {}
