@@ -8,11 +8,17 @@
             <field name="arch" type="xml">
                 <xpath expr="//button[@name='action_view_invoice']" position="before">
                     <field name="picking_ids" invisible="1"/>
+                    <field name="procurement_group_id" invisible="1"/>
                     <button type="object"
                         name="action_view_delivery"
                         class="oe_stat_button"
                         icon="fa-truck"
-                        attrs="{'invisible': [('delivery_count', '=', 0)]}" groups="base.group_user">
+                        attrs="{'invisible': [('delivery_count', '=', 0)]}" groups="base.group_user"
+                        context="{
+                            'sale_order_id': id,
+                            'default_group_id': procurement_group_id,
+                            'default_partner_id': partner_id,
+                        }">
                         <field name="delivery_count" widget="statinfo" string="Delivery"/>
                     </button>
                 </xpath>

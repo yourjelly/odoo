@@ -66,6 +66,19 @@ class StockRule(models.Model):
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
+    def _get_parented_stockpicking(self):
+        parent_sale_order = self.env['sale.order'].browse(self._context.get('sale_order_id'))
+        if parent_sale_order.exists():
+            parented_picking = parent_sale_order.picking_ids[0]
+            if parented_picking.exists():
+                return parented_picking
+
+    def _default_picking_type_id(self):
+        parented_stockpicking = self._get_parented_stockpicking()
+        if parented_stockpicking:
+            return parented_stockpicking.picking_type_id
+
+    picking_type_id = fields.Many2one(default=_default_picking_type_id)
     sale_id = fields.Many2one(related="group_id.sale_id", string="Sales Order", store=True, readonly=False)
 
 
