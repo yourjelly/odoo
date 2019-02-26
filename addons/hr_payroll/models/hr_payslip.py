@@ -89,13 +89,15 @@ class HrPayslip(models.Model):
     @api.multi
     def action_payslip_done(self):
         self.compute_sheet()
-        return self.write({'state': 'done'})
+        self.filtered(lambda slip: slip.state != 'cancel').write({'state' : 'done'})
+        self.mapped('payslip_run_id').filtered(lambda run: run != None and run != False).close_payslip_run()
 
     @api.multi
     def action_payslip_cancel(self):
         if self.filtered(lambda slip: slip.state == 'done'):
             raise UserError(_("Cannot cancel a payslip that is done."))
-        return self.write({'state': 'cancel'})
+        self.write({'state': 'cancel'})
+        self.mapped('payslip_run_id').filtered(lambda run: run != None and run != False).close_payslip_run()
 
     @api.multi
     def refund_sheet(self):
@@ -118,19 +120,6 @@ class HrPayslip(models.Model):
             'context': {}
         }
 
-    @api.model
-    def create(self, vals):
-        res = super(HrPayslip, self).create(vals)
-        if not res.payslip_run_id:
-            self.env['hr.payslip.run'].create({
-                'name': res.name,
-                'date_start': res.date_from,
-                'date_end': res.date_to,
-                'slip_ids': [(4, res.id)],
-                'state': 'close',
-            })
-        return res
-
     @api.multi
     def unlink(self):
         if any(self.filtered(lambda payslip: payslip.state not in ('draft', 'cancel'))):
@@ -140,11 +129,12 @@ class HrPayslip(models.Model):
     @api.multi
     def compute_sheet(self):
         for payslip in self:
-            number = payslip.number or self.env['ir.sequence'].next_by_code('salary.slip')
-            # delete old payslip lines
-            payslip.line_ids.unlink()
-            lines = [(0, 0, line) for line in payslip._get_payslip_lines(payslip.contract_id)]
-            payslip.write({'line_ids': lines, 'number': number, 'state': 'verify', 'compute_date': fields.Date.today()})
+            if payslip.state != 'cancel' and payslip.state != 'done':
+                number = payslip.number or self.env['ir.sequence'].next_by_code('salary.slip')
+                # delete old payslip lines
+                payslip.line_ids.unlink()
+                lines = [(0, 0, line) for line in payslip._get_payslip_lines(payslip.contract_id)]
+                payslip.write({'line_ids': lines, 'number': number, 'state': 'verify', 'compute_date': fields.Date.today()})
         return True
 
     @api.model
@@ -422,9 +412,9 @@ class HrPayslipRun(models.Model):
         return self.write({'state': 'draft'})
 
     @api.multi
-    def close_payslip_run(self):
-        self.mapped('slip_ids').filtered(lambda payslip: payslip.state != 'done').action_payslip_done()
-        return self.write({'state': 'close'})
+    def validate_payslip_run(self):
+        self.mapped('slip_ids').action_payslip_done()
+        self.close_payslip_run()
 
     def action_open_payslips(self):
         self.ensure_one()
@@ -435,3 +425,11 @@ class HrPayslipRun(models.Model):
             "domain": [['id', 'in', self.slip_ids.ids]],
             "name": "Payslips",
         }
+    
+    @api.multi
+    def close_payslip_run(self):
+        [run.write({'state' : 'close'}) for run in self if run.check_payslips_are_ready()]
+
+    def check_payslips_are_ready(self):
+        self.ensure_one()
+        return all(slip.state in ('done', 'cancel') for slip in self.mapped('slip_ids'))

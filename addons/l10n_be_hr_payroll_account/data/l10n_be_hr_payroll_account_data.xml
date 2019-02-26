@@ -1,22 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 <!-- HR SALARY RULES-->
-    <record id="l10n_be_hr_payroll.hr_payroll_rules_onss_rule" model="hr.salary.rule">
-        <field name="account_debit" search="[('code', 'like', '4540%')]"/>
-   </record>
     <record id="hr_payroll.hr_rule_basic" model="hr.salary.rule">
         <field name="account_debit" search="[('code', 'like', '6202%')]"/>
    </record>
     <record id="hr_payroll.hr_rule_net" model="hr.salary.rule">
         <field name="account_credit" search="[('code', 'like', '4552%')]"/>
    </record>
-    <record id="l10n_be_hr_payroll.hr_payroll_rules_ch_worker" model="hr.salary.rule">
-        <field name="account_debit" search="[('code', 'like', '4597%')]"/>
+    <record id="l10n_be_hr_payroll.hr_salary_rule_atn_internet" model="hr.salary.rule">
+        <field name="account_credit" search="[('code', 'like', '740000%')]"/>
     </record>
-    <record id="l10n_be_hr_payroll.hr_payroll_rules_suppl_net" model="hr.salary.rule">
-        <field name="account_debit" search="[('code', 'like', '4552%')]"/>
+    <record id="l10n_be_hr_payroll.hr_salary_rule_atn_mobile" model="hr.salary.rule">
+        <field name="account_credit" search="[('code', 'like', '740000%')]"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_payroll_rules_employee" model="hr.salary.rule">
+        <field name="account_credit" search="[('code', 'like', '455200%')]"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_payroll_rules_onss_rule" model="hr.salary.rule">
+        <field name="account_debit" search="[('code', 'like', '621000%')]"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_payroll_rules_onss_rule" model="hr.salary.rule">
+        <field name="account_credit" search="[('code', 'like', '454000%')]"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_salary_rule_employment_bonus_employees" model="hr.salary.rule">
+        <field name="account_debit" search="[('code', 'like', '620200%')]"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_payroll_rules_reim_travel" model="hr.salary.rule">
+        <field name="account_debit" search="[('code', 'like', '620200%')]"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_payroll_rules_parent_company_car" model="hr.salary.rule">
+        <field name="account_credit" search="[('code', 'like', '740000%')]"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_salary_rule_gross_with_ip" model="hr.salary.rule">
+        <field name="account_credit" search="[('code', 'like', '455200%')]"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_salary_rule_ip_part" model="hr.salary.rule">
+        <field name="account_credit" search="[('code', 'like', '453000%')]"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_payroll_rules_bareme" model="hr.salary.rule">
+        <field name="account_credit" search="[('code', 'like', '453000%')]"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_payroll_rules_company_car_2" model="hr.salary.rule">
+        <field name="account_debit" search="[('code', 'like', '620200%')]"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_salary_rule_atn_internet_2" model="hr.salary.rule">
+        <field name="account_debit" search="[('code', 'like', '620200%')]"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_salary_rule_atn_mobile_2" model="hr.salary.rule">
+        <field name="account_debit" search="[('code', 'like', '620200%')]"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_payroll_rules_mis_ex_onss" model="hr.salary.rule">
+        <field name="account_debit" search="[('code', 'like', '620100%')]"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_payroll_rules_ch_worker" model="hr.salary.rule">
+        <field name="account_credit" search="[('code', 'like', '740000%')]"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_salary_rule_representation_fees" model="hr.salary.rule">
+        <field name="account_debit" search="[('code', 'like', '620200%')]"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_salary_rule_ip" model="hr.salary.rule">
+        <field name="account_debit" search="[('code', 'like', '620200%')]"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_salary_rule_ip_deduction" model="hr.salary.rule">
+        <field name="account_credit" search="[('code', 'like', '453000%')]"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_payroll_rules_suppl_net" model="hr.salary.rule"> 
+        <field name="account_debit" search="[('code', 'like', '620200%')]"/>
     </record>
     <record id="l10n_be_hr_payroll.hr_payroll_rules_retained_net" model="hr.salary.rule">
-        <field name="account_debit" search="[('code', 'like', '4552%')]"/>
+        <field name="account_debit" search="[('code', 'like', '620200%')]"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_payroll_rules_maj" model="hr.salary.rule">
+        <field name="account_debit" search="[('code', 'like', '620300%')]"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_salary_rule_employment_bonus_workers" model="hr.salary.rule">
+        <field name="account_debit" search="[('code', 'like', '620300%')]"/>
+    </record>
+
+    <!-- Salary Journal -->
+    <record id="salary_journal" model="account.journal">
+        <field name="name">Salaries</field>
+        <field name="code">SLR</field>
+        <field name="type">general</field>
+        <field name="company_id" ref="base.main_company"/>
+        <field name="default_credit_account_id" search="[('code', 'like', '620200%')]"/>
+        <field name="default_debit_account_id" search="[('code', 'like', '620200%')]"/>
+    </record>
+
+    <!-- Salary Structure -->
+    <record id="hr_payroll.structure_base" model="hr.payroll.structure">
+        <field name="journal_id" ref="salary_journal"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_payroll_salary_structure_employee" model="hr.payroll.structure">
+        <field name="journal_id" ref="salary_journal"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_payroll_salary_structure_worker" model="hr.payroll.structure">
+        <field name="journal_id" ref="salary_journal"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_payroll_salary_structure_double_holiday_pay" model="hr.payroll.structure">
+        <field name="journal_id" ref="salary_journal"/>
+    </record>
+    <record id="l10n_be_hr_payroll.hr_payroll_salary_structure_end_of_year_bonus" model="hr.payroll.structure">
+        <field name="journal_id" ref="salary_journal"/>
     </record>
 </odoo>
