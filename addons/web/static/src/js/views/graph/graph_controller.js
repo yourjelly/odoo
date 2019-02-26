@@ -138,6 +138,10 @@ var GraphController = AbstractController.extend(GroupByMenuMixin,{
             self._updateButtons();
         });
     },
+    _toggleStackMode: function (stacked) {
+        this.update({stacked: stacked});
+        this._updateButtons();
+    },
     /**
      * override
      *
@@ -160,6 +164,11 @@ var GraphController = AbstractController.extend(GroupByMenuMixin,{
         this.$buttons
             .find('.o_graph_button[data-mode="' + state.mode + '"]')
             .addClass('active');
+        this.$buttons
+            .find('.o_graph_button[data-mode="stack"]')
+            .data('stacked', state.stacked)
+            .toggleClass('active', state.stacked)
+            .toggleClass('o_hidden', state.mode !== 'bar');
         _.each(this.$measureList.find('.dropdown-item'), function (item) {
             var $item = $(item);
             $item.toggleClass('selected', $item.data('field') === state.measure);
@@ -180,7 +189,11 @@ var GraphController = AbstractController.extend(GroupByMenuMixin,{
         var $target = $(ev.target);
         var field;
         if ($target.hasClass('o_graph_button')) {
-            this._setMode($target.data('mode'));
+            if (_.contains(['bar','line', 'pie'],$target.data('mode'))) {
+                this._setMode($target.data('mode'));
+            } else if ($target.data('mode') === 'stack') {
+                this._toggleStackMode(!$target.data('stacked'));
+            }
         } else if ($target.parents('.o_graph_measures_list').length) {
             ev.preventDefault();
             ev.stopPropagation();

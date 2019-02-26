@@ -26,11 +26,13 @@ return AbstractModel.extend({
 
     /**
      * override
-     *
      * @returns {Object}
      */
     get: function () {
-        return this.chart;
+        var self = this;
+        return _.extend({}, this.chart, {
+            comparisonFieldIndex: self._getComparisonFieldIndex(),
+        });
     },
     /**
      * Initial loading.
@@ -44,7 +46,9 @@ return AbstractModel.extend({
      * @param {Object} params.fields
      * @param {string[]} params.comparisonTimeRange
      * @param {string[]} params.domain
-     * @param {string[]} params.groupBy a list of valid field names
+     * @param {string[]} params.groupBys a list of valid field names
+     * @param {string[]} params.groupedBy a list of valid field names
+     * @param {boolean} params.stacked
      * @param {string[]} params.timeRange
      * @param {string} params.comparisonField
      * @param {string} params.comparisonTimeRangeDescription
@@ -72,6 +76,7 @@ return AbstractModel.extend({
             measure: params.context.graph_measure || params.measure,
             mode: params.context.graph_mode || params.mode,
             origins: [],
+            stacked: params.stacked,
             timeRange: params.timeRange,
             timeRangeDescription: params.timeRangeDescription,
         };
@@ -86,6 +91,7 @@ return AbstractModel.extend({
      *
      * @param {any} handle ignored!
      * @param {Object} params
+     * @param {boolean} [params.stacked]
      * @param {Object} [params.context]
      * @param {string[]} [params.domain]
      * @param {string[]} [params.groupBy]
@@ -129,6 +135,10 @@ return AbstractModel.extend({
             this.chart.mode = params.mode;
             return Promise.resolve();
         }
+        if ('stacked' in params) {
+            this.chart.stacked = params.stacked;
+            return Promise.resolve();
+        }
         return this._loadGraph(this._getDomains());
     },
 
@@ -136,12 +146,19 @@ return AbstractModel.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    _getComparisonFieldIndex: function () {
+        var groupBys = this.chart.groupBy.map(function (gb) {
+            return gb.split(":")[0];
+        });
+        return groupBys.indexOf(this.chart.comparisonField);
+    },
     /**
-     * @returns {Object[]}
+     * @private
+     * @returns {Array[]}
      */
     _getDomains: function () {
         var domains = [this.chart.domain.concat(this.chart.timeRange)];
-        this.chart.origins = [this.chart.timeRangeDescription];
+        this.chart.origins = [this.chart.timeRangeDescription || ""];
         if (this.chart.compare) {
             domains.push(this.chart.domain.concat(this.chart.comparisonTimeRange));
             this.chart.origins.push(this.chart.comparisonTimeRangeDescription);
@@ -155,6 +172,7 @@ return AbstractModel.extend({
      * to separate date groups in the field list, because they can be defined
      * with an aggregation function, such as my_date:week.
      *
+     * @private
      * @param {Array[]} domains
      * @returns {Promise}
      */
@@ -200,6 +218,7 @@ return AbstractModel.extend({
      *  the object this.chart in argument, or an array or something. We want to
      *  avoid writing on a this.chart object modified by a subsequent read_group
      *
+     * @private
      * @param {number} originIndex
      * @param {any} rawData result from the read_group
      */
@@ -239,6 +258,7 @@ return AbstractModel.extend({
      * Helper function (for _processData), turns various values in a usable
      * string form, that we can display in the interface.
      *
+     * @private
      * @param {any} value value for the field fieldName received by the read_group rpc
      * @param {string} fieldName
      * @returns {string}

@@ -6,23 +6,29 @@ var Class = require('web.Class');
 
 var DateClasses = Class.extend({
     init: function (dateSets, interval) {
-        // dateSets are assumed pairwise disjoint and ordered naturally.
-        // at least one of them is non empty.
-
-        // we complete the first inhabited dateSet. Its elements will be
-        // the default representatives for the classes.
+        interval = interval || 'month';
+        this._formats = {
+            day: 'DD MMMM YYYY',
+            week: 'ww YYYY',
+            month: 'MMMM YYYY',
+            quarter: 'Q YYYY',
+            year: 'YYYY',
+        };
+        // At least one dateSet must be non empty.
+        // The completion of the first inhabited dateSet will serve as a reference set.
+        // The reference set elements will be the default representatives for the classes.
         this._maximalLength = 1;
-        this._referenceIndex = null;
+        this.referenceIndex = null;
         for (var i = 0; i < dateSets.length; i++) {
             var dateSet = dateSets[i];
-            if (dateSet.length && this._referenceIndex === null) {
-                this._referenceIndex = i;
+            if (dateSet.length && this.referenceIndex === null) {
+                this.referenceIndex = i;
             }
             if (dateSet.length > this._maximalLength) {
                 this._maximalLength = dateSet.length;
             }
         }
-        this._referenceSet = this._contructReferenceSet(dateSets[this._referenceIndex], interval);
+        this._referenceSet = this._contructReferenceSet(dateSets[this.referenceIndex], interval);
         this._dateClasses = this._constructDateClasses(dateSets);
     },
 
@@ -30,9 +36,19 @@ var DateClasses = Class.extend({
     // Public
     //----------------------------------------------------------------------
 
-    representative: function (date, index) {
-        index = index || this._referenceIndex;
-        return this._dateClass(date)[index];
+    dateClass: function (datesetIndex, date) {
+        var dateClass;
+        for (var i = 0; i < this._dateClasses.length; i++) {
+            dateClass = this._dateClasses[i];
+            if (dateClass[datesetIndex] === date) {
+                break;
+            }
+        }
+        return dateClass;
+    },
+    representative: function (datesetIndex, date, index) {
+        index = index || this.referenceIndex;
+        return this.dateClass(datesetIndex, date)[index];
     },
 
     //----------------------------------------------------------------------
@@ -51,7 +67,9 @@ var DateClasses = Class.extend({
         var diff = this._maximalLength - dateSetLength;
         var lastDate = dateSet[dateSetLength - 1];
         for (var i = 0; i < diff; i++) {
-            var date = moment(lastDate).add(i + 1, interval).format('DD MMM YYYY');
+            // should choose appropriate format according to interval
+            // do not work in general (--> local format)!
+            var date = moment(lastDate, this._formats[interval]).add(i + 1, interval).format(this._formats[interval]);
             additionalDates.push(date);
         }
         return dateSet.concat(additionalDates);
@@ -61,7 +79,7 @@ var DateClasses = Class.extend({
         for (var index = 0; index < this._maximalLength; index++) {
             var dateClass = [];
             for (var j = 0; j < dateSets.length; j++) {
-                var dateSet = j=== this._referenceIndex ? this._referenceSet : dateSets[j];
+                var dateSet = j === this.referenceIndex ? this._referenceSet : dateSets[j];
                 if (index < dateSet.length) {
                     dateClass.push(dateSet[index]);
                 } else {
@@ -71,16 +89,6 @@ var DateClasses = Class.extend({
             dateClasses.push(dateClass);
         }
         return dateClasses;
-    },
-    _dateClass: function (date) {
-        var dateClass;
-        for (var i = 0; i < this._dateClasses.length; i++) {
-            dateClass = this._dateClasses[i];
-            if (_.contains(dateClass, date)) {
-                break;
-            }
-        }
-        return dateClass;
     },
 });
 /**
