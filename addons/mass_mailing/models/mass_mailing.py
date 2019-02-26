@@ -10,6 +10,7 @@ import re
 import threading
 from ast import literal_eval
 from base64 import b64encode
+from lxml import etree
 
 from odoo import api, fields, models, tools, _, SUPERUSER_ID
 from odoo.exceptions import UserError
@@ -594,6 +595,9 @@ class MassMailing(models.Model):
         token = (self.env.cr.dbname, self.id, int(res_id), tools.ustr(email))
         return hmac.new(secret.encode('utf-8'), repr(token).encode('utf-8'), hashlib.sha512).hexdigest()
 
+    def _preview_token(self, res_id, email):
+        return self._unsubscribe_token(res_id, email)
+
     def _compute_next_departure(self):
         cron_next_call = self.env.ref('mass_mailing.ir_cron_mass_mailing_queue').sudo().nextcall
         str2dt = fields.Datetime.from_string
@@ -958,6 +962,16 @@ class MassMailing(models.Model):
 
     def send_mail(self, res_ids=None):
         author_id = self.env.user.partner_id.id
+        preview_link_html = """
+                <tr>
+                    <td style="text-align:left;"></td>
+                    <td style="text-align: center;font-family: Roboto,RobotoDraft,Helvetica,Arial,sans-serif;font-size: 12px;padding: 10px;text-decoration: none;">
+                        <a target="_blank" href="/preview" style="text-decoration: none;color: #808080;">Not displaying correctly?</a>
+                    </td>
+                    <td style="text-align:left;"></td>
+                </tr>
+        """
+        preview_link_html = self.env['mail.thread']._replace_local_links(preview_link_html)
 
         for mailing in self:
             if not res_ids:
@@ -965,10 +979,19 @@ class MassMailing(models.Model):
             if not res_ids:
                 raise UserError(_('There is no recipients selected.'))
 
+            # Convert links in absolute URLs before the application of the shortener
+            mailing.body_html = self.env['mail.thread']._replace_local_links(mailing.body_html)
+            body_html = mailing.convert_links()[mailing.id]
+            body = etree.HTML(body_html)
+            table = body.xpath("//table[@class='o_mail_wrapper']")
+            if table is not None:
+                table[0].insert(0, etree.fromstring(preview_link_html))
+                body_html = etree.tostring(body)
+
             composer_values = {
                 'author_id': author_id,
                 'attachment_ids': [(4, attachment.id) for attachment in mailing.attachment_ids],
-                'body': mailing.body_html,
+                'body': body_html,
                 'subject': mailing.subject,
                 'model': mailing.mailing_model_real,
                 'email_from': mailing.email_from,
@@ -997,7 +1020,6 @@ class MassMailing(models.Model):
         for mass_mailing in self:
             utm_mixin = mass_mailing.mass_mailing_campaign_id if mass_mailing.mass_mailing_campaign_id else mass_mailing
             html = mass_mailing.body_html if mass_mailing.body_html else ''
-
             vals = {'mass_mailing_id': mass_mailing.id}
 
             if mass_mailing.mass_mailing_campaign_id:
@@ -1009,7 +1031,7 @@ class MassMailing(models.Model):
             if utm_mixin.medium_id:
                 vals['medium_id'] = utm_mixin.medium_id.id
 
-            res[mass_mailing.id] = self.env['link.tracker'].convert_links(html, vals, blacklist=['/unsubscribe_from_list'])
+            res[mass_mailing.id] = self.env['link.tracker'].convert_links(html, vals, blacklist=['/unsubscribe_from_list', '/preview'])
 
         return res
 

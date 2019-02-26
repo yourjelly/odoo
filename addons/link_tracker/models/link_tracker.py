@@ -156,7 +156,6 @@ class LinkTracker(models.Model):
             long_url = match[1]
 
             vals['url'] = utils.unescape(long_url)
-
             if not blacklist or not [s for s in blacklist if s in long_url] and not long_url.startswith(short_schema):
                 link = self.create(vals)
                 shorten_url = self.browse(link.id)[0].short_url
