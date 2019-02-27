@@ -129,6 +129,7 @@
             </tree>
         </field>
     </record>
+
     <record model="ir.ui.view" id="survey_kanban">
         <field name="name">Kanban view for survey</field>
         <field name="model">survey.survey</field>

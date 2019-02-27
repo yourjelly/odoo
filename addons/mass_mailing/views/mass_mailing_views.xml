@@ -1058,7 +1058,7 @@
                                         </div>
                                     </div>
                                     <div class="o_kanban_record_body">
-                                        <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                                        <field name="tag_ids" groups="mass_mailing.group_mass_mailing_campaign" widget="many2many_tags" options="{'color_field': 'color'}"/>
                                     </div>
                                     <div class="o_kanban_record_bottom mt16" style="height:90px">
                                         <div class="oe_kanban_bottom_left" style="height:90px">
