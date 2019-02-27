@@ -49,23 +49,27 @@ class AccountInvoice(models.Model):
         return str(uuid.uuid4())
 
     @api.one
-    @api.depends('invoice_line_ids.price_subtotal', 'tax_line_ids.amount', 'tax_line_ids.amount_rounding',
-                 'currency_id', 'company_id', 'date_invoice', 'type')
+    @api.depends('invoice_line_ids.price_subtotal', 'tax_line_ids.amount', 'tax_line_ids.amount_rounding', 'currency_id')
     def _compute_amount(self):
         round_curr = self.currency_id.round
         self.amount_untaxed = sum(line.price_subtotal for line in self.invoice_line_ids)
         self.amount_tax = sum(round_curr(line.amount_total) for line in self.tax_line_ids)
         self.amount_total = self.amount_untaxed + self.amount_tax
-        amount_total_company_signed = self.amount_total
-        amount_untaxed_signed = self.amount_untaxed
-        if self.currency_id and self.company_id and self.currency_id != self.company_id.currency_id:
-            currency_id = self.currency_id.with_context(date=self.date_invoice)
-            amount_total_company_signed = currency_id.compute(self.amount_total, self.company_id.currency_id)
-            amount_untaxed_signed = currency_id.compute(self.amount_untaxed, self.company_id.currency_id)
-        sign = self.type in ['in_refund', 'out_refund'] and -1 or 1
-        self.amount_total_company_signed = amount_total_company_signed * sign
-        self.amount_total_signed = self.amount_total * sign
-        self.amount_untaxed_signed = amount_untaxed_signed * sign
+
+    @api.multi
+    @api.depends('amount_total', 'amount_untaxed', 'currency_id', 'company_id', 'date_invoice', 'type')
+    def _compute_amount_signed(self):
+        for rec in self:
+            amount_total_company_signed = rec.amount_total
+            amount_untaxed_signed = rec.amount_untaxed
+            if rec.currency_id and rec.company_id and rec.currency_id != rec.company_id.currency_id:
+                currency_id = rec.currency_id.with_context(date=rec.date_invoice)
+                amount_total_company_signed = currency_id.compute(rec.amount_total, rec.company_id.currency_id)
+                amount_untaxed_signed = currency_id.compute(rec.amount_untaxed, rec.company_id.currency_id)
+            sign = rec.type in ['in_refund', 'out_refund'] and -1 or 1
+            rec.amount_total_company_signed = amount_total_company_signed * sign
+            rec.amount_total_signed = rec.amount_total * sign
+            rec.amount_untaxed_signed = amount_untaxed_signed * sign
 
     @api.onchange('amount_total')
     def _onchange_amount_total(self):
@@ -316,16 +320,16 @@ class AccountInvoice(models.Model):
     amount_untaxed = fields.Monetary(string='Untaxed Amount',
         store=True, readonly=True, compute='_compute_amount', track_visibility='always')
     amount_untaxed_signed = fields.Monetary(string='Untaxed Amount in Company Currency', currency_field='company_currency_id',
-        store=True, readonly=True, compute='_compute_amount')
+        store=True, readonly=True, compute='_compute_amount_signed')
     amount_tax = fields.Monetary(string='Tax',
         store=True, readonly=True, compute='_compute_amount')
     amount_total = fields.Monetary(string='Total',
         store=True, readonly=True, compute='_compute_amount')
     amount_total_signed = fields.Monetary(string='Total in Invoice Currency', currency_field='currency_id',
-        store=True, readonly=True, compute='_compute_amount',
+        store=True, readonly=True, compute='_compute_amount_signed',
         help="Total amount in the currency of the invoice, negative for credit notes.")
     amount_total_company_signed = fields.Monetary(string='Total in Company Currency', currency_field='company_currency_id',
-        store=True, readonly=True, compute='_compute_amount',
+        store=True, readonly=True, compute='_compute_amount_signed',
         help="Total amount in the currency of the company, negative for credit notes.")
     currency_id = fields.Many2one('res.currency', string='Currency',
         required=True, readonly=True, states={'draft': [('readonly', False)]},
