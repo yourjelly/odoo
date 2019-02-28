@@ -11,7 +11,7 @@ except ImportError:
 
 from odoo import api, models, _
 from odoo.tools import float_round
-from datetime import datetime
+
 
 class ReportBomStructure(models.AbstractModel):
     _name = 'report.mrp.report_bom_structure'
@@ -26,20 +26,21 @@ class ReportBomStructure(models.AbstractModel):
             candidates = variant and self.env['product.product'].browse(variant) or bom.product_tmpl_id.product_variant_ids
             for product_variant_id in candidates:
                 if data and data.get('childs'):
-                    doc = self._get_pdf_line(bom_id, product_id=product_variant_id, qty=float(data.get('quantity')), child_bom_ids=json.loads(data.get('childs')))
+                    doc = self._get_pdf_line(bom_id, report_structure=data and data.get('report_type') or 'all', report_type='pdf', product_id=product_variant_id, qty=float(data.get('quantity')), child_bom_ids=json.loads(data.get('childs')))
                 else:
-                    doc = self._get_pdf_line(bom_id, product_id=product_variant_id, unfolded=True)
+                    doc = self._get_pdf_line(bom_id, report_structure=data and data.get('report_type') or 'all', report_type='pdf', product_id=product_variant_id, unfolded=True)
                 doc['report_type'] = 'pdf'
                 doc['report_structure'] = data and data.get('report_type') or 'all'
                 docs.append(doc)
             if not candidates:
                 if data and data.get('childs'):
-                    doc = self._get_pdf_line(bom_id, qty=float(data.get('quantity')), child_bom_ids=json.loads(data.get('childs')))
+                    doc = self._get_pdf_line(bom_id, qty=float(data.get('quantity')), child_bom_ids=json.loads(data.get('childs')),  report_structure=data and data.get('report_type') or 'all', report_type='pdf')
                 else:
-                    doc = self._get_pdf_line(bom_id, unfolded=True)
+                    doc = self._get_pdf_line(bom_id, unfolded=True, report_structure=data and data.get('report_type') or 'all', report_type='pdf')
                 doc['report_type'] = 'pdf'
                 doc['report_structure'] = data and data.get('report_type') or 'all'
                 docs.append(doc)
+            doc['header'] = self.get_header({'report_type': data and data.get('report_type') or 'all'})
         return {
             'doc_ids': docids,
             'doc_model': 'mrp.bom',
@@ -50,7 +51,7 @@ class ReportBomStructure(models.AbstractModel):
     def get_html(self, bom_id=False, searchQty=1, searchVariant=False):
         res = self._get_report_data(bom_id=bom_id, searchQty=searchQty, searchVariant=searchVariant)
         res['lines']['report_type'] = 'html'
-        res['lines']['report_structure'] = 'all'
+        res['lines']['report_structure'] = self._context.get('report_type') and self._context.get('report_type') or 'all'
         res['lines']['has_attachments'] = res['lines']['attachments'] or any(component['attachments'] for component in res['lines']['components'])
         res['lines'] = self.env.ref('mrp.report_mrp_bom').render({'data': res['lines']})
         return res
@@ -68,6 +69,7 @@ class ReportBomStructure(models.AbstractModel):
             'bom_id': bom_id,
             'currency': self.env.user.company_id.currency_id,
             'operations': lines,
+            'report_structure': self._context.get('report_type') and self._context.get('report_type') or 'all',
         }
         return self.env.ref('mrp.report_mrp_operation_line').render({'data': values})
 
@@ -82,12 +84,15 @@ class ReportBomStructure(models.AbstractModel):
         if bom:
             bom_uom_name = bom.product_uom_id.name
 
-            # Get variants used for search
-            if not bom.product_id:
-                for variant in bom.product_tmpl_id.product_variant_ids:
-                    bom_product_variants[variant.id] = variant.display_name
-
+        # Get variants used for search
+        if not bom.product_id:
+            for variant in bom.product_tmpl_id.product_variant_ids:
+                bom_product_variants[variant.id] = variant.display_name
         lines = self._get_bom(bom_id, product_id=searchVariant, line_qty=bom_quantity, level=1)
+        options = {
+            'report_type': self._context.get('report_type') and self._context.get('report_type') or 'all',
+            'has_attachments': lines['attachments'] or any(component['attachments'] for component in lines['components'])}
+        lines['header'] = self.get_header(options)
         return {
             'lines': lines,
             'variants': bom_product_variants,
@@ -210,195 +215,147 @@ class ReportBomStructure(models.AbstractModel):
                 price += self.env.user.company_id.currency_id.round(not_rounded_price)
         return price
 
-    def _get_pdf_line(self, bom_id, product_id=False, qty=1, child_bom_ids=[], unfolded=False):
+    def _get_pdf_line(self, bom_id, report_structure, report_type, product_id=False, qty=1, child_bom_ids=[], unfolded=False):
 
         data = self._get_bom(bom_id=bom_id, product_id=product_id, line_qty=qty)
-
-        def get_sub_lines(bom, product_id, line_qty, line_id, level, report_type=False):
-            data = self._get_bom(bom_id=bom.id, product_id=product_id, line_qty=line_qty, line_id=line_id, level=level)
-            bom_lines = data['components']
-            lines = []
-            for bom_line in bom_lines:
-                lines.append({
-                    'name': bom_line['prod_name'],
-                    'type': 'bom',
-                    'quantity': bom_line['prod_qty'],
-                    'uom': bom_line['prod_uom'],
-                    'prod_cost': bom_line['prod_cost'],
-                    'bom_cost': bom_line['total'],
-                    'level': bom_line['level'],
-                    'code': bom_line['code']
-                })
-                if bom_line['child_bom'] and (unfolded or bom_line['child_bom'] in child_bom_ids):
-                    line = self.env['mrp.bom.line'].browse(bom_line['line_id'])
-                    lines += (get_sub_lines(line.child_bom_id, line.product_id, bom_line['prod_qty'], line, level + 1))
-            if data['operations']:
-                lines.append({
-                    'name': _('Operations'),
-                    'type': 'operation',
-                    'quantity': data['operations_time'],
-                    'uom': _('minutes'),
-                    'bom_cost': data['operations_cost'],
-                    'level': level,
-                })
-                for operation in data['operations']:
-                    if unfolded or 'operation-' + str(bom.id) in child_bom_ids:
-                        lines.append({
-                            'name': operation['name'],
-                            'type': 'operation',
-                            'quantity': operation['duration_expected'],
-                            'uom': _('minutes'),
-                            'bom_cost': operation['total'],
-                            'level': level + 1,
-                        })
-            return lines
-
         bom = self.env['mrp.bom'].browse(bom_id)
         product = product_id or bom.product_id or bom.product_tmpl_id.product_variant_id
-        pdf_lines = get_sub_lines(bom, product, qty, False, 1)
+        pdf_lines = self.get_sub_lines(bom, product, qty, False, 1, report_structure, report_type, child_bom_ids, unfolded)
         data['components'] = []
         data['lines'] = pdf_lines
         return data
+
+    def get_sub_lines(self, bom, product_id, line_qty, line_id, level, report_structure, report_type, child_bom_ids=[], unfolded=False):
+        data = self._get_bom(bom_id=bom.id, product_id=product_id, line_qty=line_qty, line_id=line_id, level=level)
+        bom_lines = data['components']
+        lines = []
+        bom_key = self.get_column_key_xlsx(report_type, report_structure)
+        for bom_line in bom_lines:
+            dict_data = {}
+            for x in range(0, len(bom_key)):
+                dict_data.update({bom_key[x]: bom_line.get(bom_key[x])})
+            lines.append(dict_data)
+            if bom_line['child_bom'] and (unfolded or bom_line['child_bom'] in child_bom_ids):
+                line = self.env['mrp.bom.line'].browse(bom_line['line_id'])
+                lines += (self.get_sub_lines(line.child_bom_id, line.product_id, bom_line['prod_qty'], line, level + 1, report_structure, report_type, child_bom_ids, unfolded))
+        if data['operations']:
+            lines.append({
+                'prod_name': _('Operations'),
+                'type': 'operation',
+                'prod_qty': data['operations_time'],
+                'uom': _('minutes'),
+                'total': data['operations_cost'],
+                'level': level,
+            })
+            for operation in data['operations']:
+                if unfolded or 'operation-' + str(bom.id) in child_bom_ids:
+                    lines.append({
+                        'prod_name': operation['name'],
+                        'type': 'operation',
+                        'prod_qty': operation['duration_expected'],
+                        'uom': _('minutes'),
+                        'total': operation['total'],
+                        'level': level + 1,
+                    })
+        return lines
 
     #TO BE OVERWRITTEN
     def _get_report_name(self):
         return _('General Report')
 
     def get_header(self, options):
-        if(options.get('report_type') == 'all'):
-            data = [{'name': 'Product'}, {'name': 'BoM'}, {'name': 'Quantity'}, {'name': 'Product Cost'}, {'name': 'BoM Cost'}]
-            return data
+        data = []
+        if(options.get('report_type') in ['all', 'undefined']):
+            data += [
+                {'name': 'Product'},
+                {'name': 'BoM'},
+                {'name': 'Quantity'},
+                {'name': 'Product Cost'},
+                {'name': 'BoM Cost'}
+            ]
         elif(options.get('report_type') == 'bom_structure'):
-            return [{'name': 'Product'}, {'name': 'BoM'}, {'name': 'Quantity'}, {'name': 'Product Cost'}]
+            data += [
+                {'name': 'Product'},
+                {'name': 'BoM'},
+                {'name': 'Quantity'},
+                {'name': 'Product Cost'}
+            ]
         elif(options.get('report_type') == 'bom_cost'):
-            return [{'name': 'Product'}, {'name': 'BoM'}, {'name': 'Quantity'}, {'name': 'BoM Cost'}]
+            data += [
+                {'name': 'Product'},
+                {'name': 'BoM'},
+                {'name': 'Quantity'},
+                {'name': 'BoM Cost'}
+            ]
+        if options.get('has_attachments'):
+            data += [
+                {'name': 'Attachments'}
+            ]
+        return data
+
+    def get_column_key_xlsx(self, report_type, type=False, is_bom=False):
+        data = ['prod_name', 'prod_qty', 'prod_uom', 'prod_cost', 'total', 'level', 'code', 'type']
+        return data
+
+    def get_column_key(self, report_type, type=False, is_bom=False):
+        if is_bom:
+            data = ['bom_prod_name', 'code', 'bom_qty', 'price', 'total']
+            if(report_type == "bom_structure"):
+                data = ['bom_prod_name', 'code', 'bom_qty', 'price']
+            elif(report_type == "bom_cost"):
+                data = ['bom_prod_name', 'code', 'bom_qty', 'total']
+            else:
+                data = ['bom_prod_name', 'code', 'bom_qty', 'price', 'total']
         else:
-            return {}
-
-    def _get_xlsx_line(self, bom_id, product_id=False, qty=1, child_bom_ids=[], unfolded=True):
-        data = self._get_bom(bom_id=bom_id, product_id=product_id, line_qty=qty)
-        def get_sub_lines(bom, product_id, line_qty, line_id, level, report_type=False):
-            data = self._get_bom(bom_id=bom, product_id=product_id, line_qty=line_qty, line_id=line_id, level=level)
-            bom_lines = data['components']
-            lines = []
-            bom_line = []
-
-            if(data.get('bom_prod_name')):
-                column = []
-                column += [
-                    {'name': data['code'], 'data': 'name'},
-                    {'name': data['bom_qty'], 'data': 'qty'},
-                    {'name': data['price'], 'data': 'prod_cost'},
-                    {'name': data['total'], 'data': 'bom_cost'},
-                ]
-                lines.append({
-                    'name': data['bom_prod_name'],
-                    'type': 'bom',
-                    'columns': column,
-                    'level': 0
-                })
-            for bom_line in bom_lines:
-                column = []
-                column += [
-                    {'name': data['code'], 'data': 'name'},
-                    {'name': data['bom_qty'], 'data': 'qty'},
-                    {'name': data['price'], 'data': 'prod_cost'},
-                    {'name': data['total'], 'data': 'bom_cost'},
-                ]
-                lines.append({
-                    'name': bom_line['prod_name'],
-                    'type': 'bom',
-                    'uom': bom_line['prod_uom'],
-                    'columns': column,
-                    'level': bom_line['level'],
-                })
-                if bom_line['child_bom'] and (unfolded or bom_line['child_bom'] in child_bom_ids):
-                    line = self.env['mrp.bom.line'].browse(bom_line['line_id'])
-                    lines += (get_sub_lines(line.child_bom_id.id, line.product_id, line.product_qty * data['bom_qty'], line, level))
-            if data['operations']:
-                column = []
-                column += [
-                    { 'name': '','data': 'name'},
-                    { 'name': data['operations_time'], 'data': 'time'}, # quantity
-                    { 'name': '', 'data': ''},
-                    { 'name': data['total'] ,'data': 'bom_cost'}, # bom_cost
-                ]
-                lines.append({
-                    'name': _('Operations'),
-                    'type': 'operation',
-                    'columns': column,
-                    'uom': _('minutes'),
-                    'level': level,
-                })
-                for operation in data['operations']:
-                    operation_sub_column = []
-                    operation_sub_column += [
-                        {'name': '', 'data': 'name'},
-                        {'name': operation['duration_expected'], 'data': 'duration'}, # operation_quantity
-                        {'name': '', 'data': ''},
-                        {'name': operation['total'], 'data': 'bom_cost'}, # bom_cost
-                    ]
-                    if unfolded or 'operation-' + str(bom.id) in child_bom_ids:
-                        lines.append({
-                            'name': operation['name'],
-                            'type': 'operation',
-                            'columns': operation_sub_column,
-                            'uom': _('minutes'),
-                            'level': level + 1,
-                        })
-            return lines
-
-        bom = self.env['mrp.bom'].browse(bom_id)
-        product = product_id or bom.product_id or bom.product_tmpl_id.product_variant_id
-        xlsx_lines = get_sub_lines(bom_id, product, qty, False, 2)
-        return xlsx_lines
-
-    def _set_context(self, options):
-        """This method will set information which will pass data to another method"""
-        bom_id = options.get('bom_id')
-        qty = options.get('bom_qty')
-        report_type = options.get('report_type')
-        doc = self._get_xlsx_line(bom_id=bom_id, product_id=False, qty=qty, child_bom_ids=[], unfolded=True)
-        return doc
+            if(report_type == "bom_structure"):
+                data = ['prod_name', 'code', 'prod_qty', 'prod_cost']
+            elif(report_type == "bom_cost"):
+                data = ['prod_name', 'code', 'prod_qty', 'total']
+            else:
+                data = ['prod_name', 'code', 'prod_qty', 'prod_cost', 'total']
+        return data
 
     def get_xlsx(self, options, response):
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output, {'in_memory': True})
         sheet = workbook.add_worksheet(self._get_report_name()[:31])
 
-        date_default_col1_style = workbook.add_format({'font_name': 'Arial', 'font_size': 12, 'font_color': '#666666', 'indent': 2, 'num_format': 'yyyy-mm-dd'})
-        date_default_style = workbook.add_format({'font_name': 'Arial', 'font_size': 12, 'font_color': '#666666', 'num_format': 'yyyy-mm-dd'})
         default_col1_style = workbook.add_format({'font_name': 'Arial', 'font_size': 12, 'font_color': '#666666', 'indent': 2})
         default_style = workbook.add_format({'font_name': 'Arial', 'font_size': 12, 'font_color': '#666666'})
         title_style = workbook.add_format({'font_name': 'Arial', 'bold': True, 'bottom': 2})
-        super_col_style = workbook.add_format({'font_name': 'Arial', 'bold': True, 'align': 'center'})
         level_0_style = workbook.add_format({'font_name': 'Arial', 'bold': True, 'font_size': 13, 'bottom': 6, 'font_color': '#666666'})
+        level_1_col1_style = workbook.add_format({'font_name': 'Arial', 'bold': True, 'font_size': 13, 'bottom': 1, 'font_color': '#666666', 'indent': 1})
         level_1_style = workbook.add_format({'font_name': 'Arial', 'bold': True, 'font_size': 13, 'bottom': 1, 'font_color': '#666666'})
-        level_2_col1_style = workbook.add_format({'font_name': 'Arial', 'bold': True, 'font_size': 12, 'font_color': '#666666', 'indent': 1})
+        level_2_col1_style = workbook.add_format({'font_name': 'Arial', 'bold': True, 'font_size': 12, 'font_color': '#666666', 'indent': 2})
         level_2_col1_total_style = workbook.add_format({'font_name': 'Arial', 'bold': True, 'font_size': 12, 'font_color': '#666666'})
         level_2_style = workbook.add_format({'font_name': 'Arial', 'bold': True, 'font_size': 12, 'font_color': '#666666'})
-        level_3_col1_style = workbook.add_format({'font_name': 'Arial', 'font_size': 12, 'font_color': '#666666', 'indent': 2})
+        level_3_col1_style = workbook.add_format({'font_name': 'Arial', 'font_size': 12, 'font_color': '#666666', 'indent': 3})
         level_3_col1_total_style = workbook.add_format({'font_name': 'Arial', 'bold': True, 'font_size': 12, 'font_color': '#666666', 'indent': 1})
         level_3_style = workbook.add_format({'font_name': 'Arial', 'font_size': 12, 'font_color': '#666666'})
 
         #Set the first column width to 50
         sheet.set_column(0, 0, 50)
+        sheet.set_column(1, 1, 25)
+        sheet.set_column(4, 4, 10)
         y_offset = 1
         x = 0
-        #header
-        for column in self.get_header(options):
-            colspan = column.get('colspan', 1)
-            header_label = column.get('name', '').replace('<br/>', ' ').replace('&nbsp;', ' ')
-            if colspan == 1:
-                sheet.write(y_offset, x, header_label, title_style)
-            else:
-                sheet.merge_range(y_offset, x, y_offset, x + colspan - 1, header_label, title_style)
-            x += colspan
-        y_offset += 1
-        line= self._set_context(options)
-        lines = line
 
-        #write all data rows
+        data = self._get_report_values([options.get('bom_id')], options)
+        docs = data['docs'][0]
+        lines = docs['lines']
+
+        #header
+        header = self.get_header(options)
+        for column_x in range(0, len(header)):
+            header_label = header[column_x].get('name', '').replace('<br/>', ' ').replace('&nbsp;', ' ')
+            sheet.write(y_offset, column_x, header_label, title_style)
+
+        y_offset += 1
+        bom_key = self.get_column_key(docs['report_structure'], 'bom', True)
+        for bom_line_x in range(0, len(bom_key)):
+            sheet.write(y_offset, bom_line_x, docs.get(bom_key[bom_line_x], ''), level_0_style)
+
+        y_offset += 1
         for y in range(0, len(lines)):
             level = lines[y].get('level')
             if lines[y].get('caret_options'):
@@ -410,7 +367,7 @@ class ReportBomStructure(models.AbstractModel):
                 col1_style = style
             elif level == 1:
                 style = level_1_style
-                col1_style = style
+                col1_style = level_1_col1_style
             elif level == 2:
                 style = level_2_style
                 col1_style = 'total' in lines[y].get('class', '').split(' ') and level_2_col1_total_style or level_2_col1_style
@@ -421,37 +378,9 @@ class ReportBomStructure(models.AbstractModel):
                 style = default_style
                 col1_style = default_col1_style
 
-
-            if 'date' in lines[y].get('class', ''):
-                #write the dates with a specific format to avoid them being casted as floats in the XLSX
-                if isinstance(lines[y]['name'], (datetime.date, datetime.datetime)):
-                    sheet.write_datetime(y + y_offset, 0, lines[y]['name'], date_default_col1_style)
-                else:
-                    sheet.write(y + y_offset, 0, lines[y]['name'], date_default_col1_style)
-            else:
-                #write the first column, with a specific style to manage the indentation
-                sheet.write(y + y_offset, 0, lines[y]['name'], col1_style)
-
-            #write all the remaining cells
-            for x in range(1, len(lines[y]['columns']) + 1):
-                this_cell_style = style
-                if 'date' in lines[y]['columns'][x - 1].get('class', ''):
-                    #write the dates with a specific format to avoid them being casted as floats in the XLSX
-                    this_cell_style = date_default_style
-                    if isinstance(lines[y]['columns'][x - 1].get('name', ''), (datetime.date, datetime.datetime)):
-                        sheet.write_datetime(y + y_offset, x + lines[y].get('colspan', 1) - 1, lines[y]['columns'][x - 1].get('name', ''), this_cell_style)
-                    else:
-                        sheet.write(y + y_offset, x + lines[y].get('colspan', 1) - 1, lines[y]['columns'][x - 1].get('name', ''), this_cell_style)
-                else:
-                    if(options.get('report_type') == 'all'):
-                        sheet.write(y + y_offset, x + lines[y].get('colspan', 1) - 1, lines[y]['columns'][x - 1].get('name', ''), this_cell_style)
-                    elif(options.get('report_type') == 'bom_structure'):
-                        if(lines[y]['columns'][x-1]['data'] != 'bom_cost'):
-                            sheet.write(y + y_offset, x + lines[y].get('colspan', 1) - 1, lines[y]['columns'][x - 1].get('name', ''), this_cell_style)
-                    else:
-                        if(lines[y]['columns'][x-1]['data'] != 'bom_cost'):
-                            sheet.write(y + y_offset, x + lines[y].get('colspan', 1) - 1, lines[y]['columns'][x - 1].get('name', ''), this_cell_style)
-
+            column_key = self.get_column_key(docs['report_structure'], (lines[y].get('type', '')))
+            for x in range(0, len(column_key)):
+                sheet.write(y+y_offset, x, lines[y].get(column_key[x], ''), x > 0 and style or col1_style)
         workbook.close()
         output.seek(0)
         response.stream.write(output.read())
