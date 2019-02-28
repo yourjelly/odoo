@@ -487,7 +487,9 @@ class AccountInvoice(models.Model):
 
     @api.multi
     def _write(self, vals):
-        pre_not_reconciled = self.filtered(lambda invoice: not invoice.reconciled)
+        if self._context.get('no_invoicepaid_check', False):
+            return super(AccountInvoice, self)._write(vals)
+        pre_not_reconciled = self.search([('id', 'in', self.ids), ('reconciled', '=', False)])
         pre_reconciled = self - pre_not_reconciled
         res = super(AccountInvoice, self)._write(vals)
         reconciled = self.filtered(lambda invoice: invoice.reconciled)
