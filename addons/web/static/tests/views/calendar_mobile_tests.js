@@ -24,7 +24,7 @@ QUnit.module('Views', {
                     {id: 1, name: "event 1", start: "2016-12-11 00:00:00", stop: "2016-12-11 00:00:00"},
                 ],
                 check_access_rights: function () {
-                    return $.when(true);
+                    return Promise.resolve(true);
                 }
             },
         };

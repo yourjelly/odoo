@@ -56,7 +56,7 @@ QUnit.module('Views', {
                 mockRPC: function (route, args) {
                     if (route === '/module/hello_banner') {
                         assert.step(route);
-                        return $.when({html: banner_html});
+                        return Promise.resolve({html: banner_html});
                     }
                     return this._super(route, args);
                 },

@@ -4,7 +4,7 @@ odoo.define('web.upgrade_fields_tests', function (require) {
 var FormView = require('web.FormView');
 var testUtils = require('web.test_utils');
 
-var createView = testUtils.createView;
+var createView = testUtils.createAsyncView;
 
 QUnit.module('fields', {}, function () {
 
@@ -22,27 +22,27 @@ QUnit.module('upgrade_fields', {
 
     QUnit.module('UpgradeBoolean');
 
-    QUnit.test('widget upgrade_boolean in a form view', function (assert) {
+    QUnit.test('widget upgrade_boolean in a form view', async function (assert) {
         assert.expect(1);
 
-        var form = createView({
+        var form = await createView({
             View: FormView,
             model: 'partner',
             data: this.data,
             arch: '<form><field name="bar" widget="upgrade_boolean"/></form>',
         });
 
-        testUtils.dom.click(form.$('input:checkbox'));
+        await testUtils.dom.click(form.$('input:checkbox'));
         assert.strictEqual($('.modal').length, 1,
             "the 'Upgrade to Enterprise' dialog should be opened");
 
         form.destroy();
     });
 
-    QUnit.test('widget upgrade_boolean in a form view', function (assert) {
+    QUnit.test('widget upgrade_boolean in a form view', async function (assert) {
         assert.expect(3);
 
-        var form = createView({
+        var form = await createView({
             View: FormView,
             model: 'partner',
             data: this.data,
