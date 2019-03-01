@@ -984,7 +984,7 @@ class MassMailing(models.Model):
             body_html = mailing.convert_links()[mailing.id]
             body = etree.HTML(body_html)
             table = body.xpath("//table[@class='o_mail_wrapper']")
-            if table is not None:
+            if table:
                 table[0].insert(0, etree.fromstring(preview_link_html))
                 body_html = etree.tostring(body)
 
@@ -1020,6 +1020,7 @@ class MassMailing(models.Model):
         for mass_mailing in self:
             utm_mixin = mass_mailing.mass_mailing_campaign_id if mass_mailing.mass_mailing_campaign_id else mass_mailing
             html = mass_mailing.body_html if mass_mailing.body_html else ''
+
             vals = {'mass_mailing_id': mass_mailing.id}
 
             if mass_mailing.mass_mailing_campaign_id:
