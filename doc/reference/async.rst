@@ -150,7 +150,7 @@ the :js:func:`when` call so you will have:
 
 .. code-block:: javascript
 
-    $.when(p0, p1, p2, p3).then(
+    Promise.all([p0, p1, p2, p3]).then(
             function (results0, results1, results2, results3) {
         // code
     });
@@ -179,13 +179,11 @@ of:
 
 .. code-block:: javascript
 
-    var result = $.Deferred();
-    Model.search(condition).then(function (ids) {
-        Model.read(ids, fields).then(function (records) {
+    return Model.search(condition).then(function (ids) {
+        return Model.read(ids, fields).then(function (records) {
             result.resolve(records);
         });
     });
-    return result.promise();
 
 While it doesn't look too bad for trivial code, this quickly gets
 unwieldy.
