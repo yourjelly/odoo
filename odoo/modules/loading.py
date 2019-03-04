@@ -75,7 +75,7 @@ def load_demo(cr, package, idref, mode, report=None):
     """
     Loads demo data for the specified package.
     """
-    if not package.should_have_demo():
+    if not package.demo:
         return False
 
     try:
@@ -182,7 +182,7 @@ def load_module_graph(cr, graph, perform_checks=True,
         if needs_update:
             registry.setup_models(cr)
             registry.init_models(cr, model_names, {'module': package.name})
-        elif package.state != 'to remove':
+        elif not (package.init or package.update):
             # The current module has simply been loaded. The models extended by this module
             # and for which we updated the schema, must have their schema checked again.
             # This is because the extension may have changed the model,
@@ -209,7 +209,7 @@ def load_module_graph(cr, graph, perform_checks=True,
                 # upgrading the module information
                 module.write(module.get_values_from_terp(package.data))
             load_data(cr, idref, mode, kind='data', package=package, report=report)
-            demo_loaded = package.dbdemo = load_demo(cr, package, idref, mode, report)
+            demo_loaded = load_demo(cr, package, idref, mode, report)
             cr.execute('update ir_module_module set demo=%s where id=%s', (demo_loaded, module_id))
             module.invalidate_cache(['demo'])
 

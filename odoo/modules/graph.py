@@ -34,10 +34,9 @@ class Graph(dict):
             return
 
         # update the graph with values from the database (if exist)
-        ## Then we get the values from the database
         cr.execute('SELECT name, id, state, demo AS dbdemo, latest_version AS installed_version'
                    '  FROM ir_module_module'
-                   ' WHERE name IN %s',(tuple(self.keys()),)
+                   ' WHERE name IN %s', (tuple(self.keys()),)
                    )
 
         for name, mid, state, demo, version in cr.fetchall():
@@ -183,9 +182,6 @@ class Node(object):
         for c in self.children:
             s += '%s`-> %s' % ('   ' * depth, c._pprint(depth+1))
         return s
-
-    def should_have_demo(self):
-        return (hasattr(self, 'demo') or (self.dbdemo and self.state != 'installed')) and all(p.dbdemo for p in self.parents)
 
     @property
     def parents(self):
