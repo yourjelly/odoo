@@ -13,10 +13,12 @@
                             <div class="o_lunch_location_field py-1"/>
                             <div class="d-flex flex-row py-1 o_lunch_account">
                                 <span class="flex-grow-1">Your Account</span>
-                                <t t-call="currency_field">
-                                    <t t-set="value" t-value="widget.wallet"/>
-                                    <t t-set="currency" t-value="widget.currency"/>
-                                </t>
+                                <span>
+                                    <t t-call="currency_field">
+                                        <t t-set="value" t-value="widget.wallet"/>
+                                        <t t-set="currency" t-value="widget.currency"/>
+                                    </t>
+                                </span>
                             </div>
                         </div>
                     </div>
