@@ -5,6 +5,7 @@
             <input type="hidden" name="data_set" t-att-data-action-url="tx_url" data-remove-me=""/>
             <!-- seller -->
             <input type="hidden" name='PSPID' t-att-value='PSPID'/>
+            <input type="hidden" name='TP' t-att-value='TP'/>
             <input type="hidden" name='ORDERID' t-att-value='ORDERID'/>
             <!-- cart -->
             <input type="hidden" name='AMOUNT' t-att-value='AMOUNT or "0.0"'/>
@@ -57,6 +58,47 @@
                     <input type="text" name="cc_cvc" id="cc_cvc" class="form-control" maxlength="4" placeholder="CVC" data-is-required="true"/>
                 </div>
             </div>
+        </template>
+        <!-- Custom Payment Template -->
+        <template id="payment_ogone.checkout_template" name="Ogone">&lt;!DOCTYPE html&gt;
+            <html t-att="html_data or {}">
+                <head>
+                    <meta charset="utf-8"/>
+                    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+                    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+                    <title t-esc="name or 'Pay securely with Odoo using Ogone'"/>
+                    <t t-call-assets="payment_ogone.ogone_assets" t-js="false"/>
+                    <link type="image/x-icon" rel="shortcut icon" t-att-href="x_icon or '/web/static/src/img/favicon.ico'"/>
+                </head>
+                <body class="o_ogone_body_default">
+                    <div id="o_ogone_payment_page">
+                        <div id="o_ogone_logo">
+                            <img id="o_ogone_company_logo" t-att-src="'/web/binary/company_logo'" class="logo"/>
+                        </div>
+                        <div id="payment-zone">$$$PAYMENT ZONE$$$</div>
+                        <footer class="o_footer w-100">
+                            <div class="o_footer_copyright">
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-lg-6 text-muted text-center text-md-left">
+                                            <span>Copyright &amp;copy;</span> <span t-field="res_company.name" itemprop="name">Company name</span>
+                                        </div>
+                                        <div class="col-lg-6 text-right">
+                                            <div class="o_brand_promotion">
+                                                Powered by <a target="_blank" class="badge badge-danger" href="http://www.odoo.com/page/website-builder?utm_source=db&amp;utm_medium=website">Odoo</a>,
+                                                the #1 <a target="_blank" href="http://www.odoo.com/page/e-commerce?utm_source=db&amp;utm_medium=website">Open Source eCommerce</a>.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </footer>
+                    </div>
+                </body>
+            </html>
+        </template>
+        <template id="ogone_assets" inherit_id="" name="payment_page assets frontend">
+            <t t-call="portal.assets_frontend" t-js="false"/>
         </template>
     </data>
 </odoo>

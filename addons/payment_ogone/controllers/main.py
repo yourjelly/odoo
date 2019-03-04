@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 import logging
 import pprint
+import re
 import werkzeug
-from werkzeug.urls import url_unquote_plus
 
 from odoo import http
 from odoo.http import request
+from odoo.tools import ustr
 from odoo.addons.payment.models.payment_acquirer import ValidationError
 from odoo.addons.payment.controllers.portal import PaymentProcessing
 
@@ -17,6 +18,32 @@ class OgoneController(http.Controller):
     _decline_url = '/payment/ogone/test/decline'
     _exception_url = '/payment/ogone/test/exception'
     _cancel_url = '/payment/ogone/test/cancel'
+
+    def _replace_local_links(self, html, base_url=None):
+        if not html:
+            return html
+        html = ustr(html)
+
+        def _sub_relative2absolute(match):
+            # compute here to do it only if really necessary + cache will ensure it is done only once
+            # if not base_url
+            if not _sub_relative2absolute.base_url:
+                _sub_relative2absolute.base_url = request.env["ir.config_parameter"].sudo().get_param("web.base.url")
+            return match.group(1) + werkzeug.urls.url_join(_sub_relative2absolute.base_url, match.group(2))
+
+        _sub_relative2absolute.base_url = request.env["ir.config_parameter"].sudo().get_param("web.base.url")
+        html = re.sub(r"""(<img(?=\s)[^>]*\ssrc=")(/[^/][^"]+)""", _sub_relative2absolute, html)
+        html = re.sub(r"""(<link(?=\s)[^>]*\shref=")(/[^/][^"]+)""", _sub_relative2absolute, html)
+
+        return html
+
+    # for Ogone custome payment page
+    @http.route('/ogone.htm', type='http', auth="none", website=True, sitemap=False)
+    def ogone_html(self, **kw):
+        payment_template = request.env.ref('payment_ogone.checkout_template')
+        html = payment_template.render({'name': 'Ogone'}, engine='ir.qweb')
+        body = self._replace_local_links(html)
+        return body
 
     @http.route([
         '/payment/ogone/accept', '/payment/ogone/test/accept',
