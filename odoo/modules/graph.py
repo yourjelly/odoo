@@ -61,6 +61,7 @@ class Graph(dict):
                 packages.append((package, info))
 
         for package in later:
+            # FIXME: triggers when doing -u base
             unmet_deps = [p for p in dependencies[package] if p not in self]
             _logger.error('module %s: Unmet dependencies: %s', package, ', '.join(unmet_deps))
 
