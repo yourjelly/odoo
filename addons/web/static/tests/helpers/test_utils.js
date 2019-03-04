@@ -11,7 +11,9 @@ odoo.define('web.test_utils', function (require) {
  */
 
 var ajax = require('web.ajax');
+var concurrency = require('web.concurrency');
 var core = require('web.core');
+var relationalFields = require('web.relational_fields');
 var session = require('web.session');
 var testUtilsCreate = require('web.test_utils_create');
 var testUtilsDom = require('web.test_utils_dom');
@@ -25,10 +27,62 @@ var testUtilsModal = require('web.test_utils_modal');
 var testUtilsPivot = require('web.test_utils_pivot');
 var tools = require('web.tools');
 
+
 function deprecated(fn, type) {
     var msg = `Helper 'testUtils.${fn.name}' is deprecated. ` +
         `Please use 'testUtils.${type}.${fn.name}' instead.`;
     return tools.deprecated(fn, msg);
+}
+
+/**
+ * Helper function, make a promise with a public resolve function. Note that
+ * this is not standard and should not be used outside of tests...
+ *
+ * @returns {Promise + resolve and reject function}
+ */
+function makeTestPromise() {
+    var resolve;
+    var reject;
+    var promise = new Promise(function (_resolve, _reject) {
+        resolve = _resolve;
+        reject = _reject;
+    });
+    promise.resolve = function () {
+        resolve.apply(null, arguments);
+        return promise;
+    };
+    promise.reject = function () {
+        reject.apply(null, arguments);
+        return promise;
+    };
+    return promise;
+}
+
+function makeTestPromiseWithAssert(assert, str) {
+    var prom = makeTestPromise();
+    prom.then(() => assert.step('ok ' + str)).catch(function(){});
+    prom.catch(() => assert.step('ko ' + str));
+    return prom;
+}
+
+/**
+ * Create a new promise that can be waited by the caller in order to execute
+ * code after the next microtask tick and before the next jobqueue tick.
+ *
+ * @return {Promise} an already fulfilled promise
+ */
+async function nextMicrotaskTick() {
+    return Promise.resolve();
+}
+
+/**
+ * Returns a promise that is resolved in the next jobqueue tick so that the
+ *  caller can wait on it in order to execute code in the next jobqueue tick.
+ *
+ * @return {Promise} a promise that will be fulfilled in the next jobqueue tick
+ */
+async function nextTick() {
+    return concurrency.delay(0);
 }
 
 // Loading static files cannot be properly simulated when their real content is
@@ -36,11 +90,16 @@ function deprecated(fn, type) {
 // before starting the qunit test suite.
 // (session.js is in charge of loading the static xml bundle and we also have
 // to load xml files that are normally lazy loaded by specific widgets).
-return $.when(
+return Promise.all([
     session.is_bound,
     ajax.loadXML('/web/static/src/xml/dialog.xml', core.qweb)
-).then(function () {
+]).then(function () {
     setTimeout(function () {
+        // jquery autocomplete refines the search in a setTimeout() parameterized
+        // with a delay, so we force this delay to 0 s.t. the dropdown is filtered
+        // directly on the next tick
+        relationalFields.FieldMany2One.prototype.AUTOCOMPLETE_DELAY = 0;
+
         // this is done with the hope that tests are
         // only started all together...
         QUnit.start();
@@ -53,6 +112,7 @@ return $.when(
             patchDate: testUtilsMock.patchDate,
             unpatch: testUtilsMock.unpatch,
             fieldsViewGet: testUtilsMock.fieldsViewGet,
+            patchSetTimeout: testUtilsMock.patchSetTimeout,
         },
         dom: {
             triggerKeypressEvent: testUtilsDom.triggerKeypressEvent,
@@ -63,6 +123,7 @@ return $.when(
             click: testUtilsDom.click,
             clickFirst: testUtilsDom.clickFirst,
             clickLast: testUtilsDom.clickLast,
+            triggerEvents: testUtilsDom.triggerEvents,
         },
         form: {
             clickEdit: testUtilsForm.clickEdit,
@@ -99,6 +160,9 @@ return $.when(
             editInput: testUtilsFields.editInput,
             editSelect: testUtilsFields.editSelect,
             editAndTrigger: testUtilsFields.editAndTrigger,
+            triggerKey: testUtilsFields.triggerKey,
+            triggerKeydown: testUtilsFields.triggerKeydown,
+            triggerKeyup: testUtilsFields.triggerKeyup,
         },
         file: {
             createFile: testUtilsFile.createFile,
@@ -109,10 +173,15 @@ return $.when(
         createActionManager: testUtilsCreate.createActionManager,
         createDebugManager: testUtilsCreate.createDebugManager,
         createAsyncView: testUtilsCreate.createAsyncView,
+        createCalendarView: testUtilsCreate.createCalendarView,
         createControlPanel: testUtilsCreate.createControlPanel,
-        createView: testUtilsCreate.createView,
+        createView: testUtilsCreate.createAsyncView,
         createModel: testUtilsCreate.createModel,
         createParent: testUtilsCreate.createParent,
+        makeTestPromise: makeTestPromise,
+        makeTestPromiseWithAssert: makeTestPromiseWithAssert,
+        nextMicrotaskTick: nextMicrotaskTick,
+        nextTick: nextTick,
 
         // backward-compatibility
         addMockEnvironment: deprecated(testUtilsMock.addMockEnvironment, 'mock'),

@@ -251,7 +251,7 @@ var FormRenderer = BasicRenderer.extend({
      * @param {string} [params.mode] new mode, either 'edit' or 'readonly'
      * @param {string[]} [params.fieldNames] if given, the renderer will only
      *   update the fields in this list
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     updateState: function (state, params) {
         this.mode = (params && 'mode' in params) ? params.mode : this.mode;
@@ -355,7 +355,7 @@ var FormRenderer = BasicRenderer.extend({
      */
     _renderButtonBox: function (node) {
         var self = this;
-        var $result = $('<' + node.tag + '>', { 'class': 'o_not_full' });
+        var $result = $('<' + node.tag + '>', {class: 'o_not_full'});
         var buttons = _.map(node.children, function (child) {
             if (child.tag === 'button') {
                 return self._renderStatButton(child);
@@ -363,48 +363,60 @@ var FormRenderer = BasicRenderer.extend({
                 return self._renderNode(child);
             }
         });
-        var buttons_partition = _.partition(buttons, function ($button) {
-            return $button.is('.o_invisible_modifier');
-        });
-        var invisible_buttons = buttons_partition[0];
-        var visible_buttons = buttons_partition[1];
 
-        // Get the unfolded buttons according to window size
-        var nb_buttons = [2, 2, 4, 6][config.device.size_class] || 7;
-        var unfolded_buttons = visible_buttons.slice(0, nb_buttons).concat(invisible_buttons);
-
-        // Get the folded buttons
-        var folded_buttons = visible_buttons.slice(nb_buttons);
-        if (folded_buttons.length === 1) {
-            unfolded_buttons = buttons;
-            folded_buttons = [];
-        }
-
-        // Toggle class to tell if the button box is full (CSS requirement)
-        var full = (visible_buttons.length > nb_buttons);
-        $result.toggleClass('o_full', full).toggleClass('o_not_full', !full);
-
-        // Add the unfolded buttons
-        _.each(unfolded_buttons, function ($button) {
-            $button.appendTo($result);
+        // modifiers could not be registered yet (see renderFieldWidget) so we
+        // temporary append all buttons (some might be replaced by their
+        // corresponding widget rendering) before partitioning buttons
+        var $tempResult = $('<div>');
+        _.each(buttons, function ($button) {
+            $button.appendTo($tempResult);
         });
 
-        // Add the dropdown with folded buttons if any
-        if (folded_buttons.length) {
-            $result.append(dom.renderButton({
-                attrs: {
-                    class: 'oe_stat_button o_button_more dropdown-toggle',
-                    'data-toggle': 'dropdown',
-                },
-                text: _t("More"),
-            }));
-
-            var $dropdown = $("<div>", {'class': "dropdown-menu o_dropdown_more", role: "menu"});
-            _.each(folded_buttons, function ($button) {
-                $button.addClass('dropdown-item').appendTo($dropdown);
+        Promise.all(this.defs).then(function () {
+            buttons = $tempResult.children();
+            var buttons_partition = _.partition(buttons, function (button) {
+                return $(button).is('.o_invisible_modifier');
             });
-            $dropdown.appendTo($result);
-        }
+            var invisible_buttons = buttons_partition[0];
+            var visible_buttons = buttons_partition[1];
+
+            // Get the unfolded buttons according to window size
+            var nb_buttons = [2, 2, 4, 6][config.device.size_class] || 7;
+            var unfolded_buttons = visible_buttons.slice(0, nb_buttons).concat(invisible_buttons);
+
+            // Get the folded buttons
+            var folded_buttons = visible_buttons.slice(nb_buttons);
+            if (folded_buttons.length === 1) {
+                unfolded_buttons = buttons;
+                folded_buttons = [];
+            }
+
+            // Toggle class to tell if the button box is full (CSS requirement)
+            var full = (visible_buttons.length > nb_buttons);
+            $result.toggleClass('o_full', full).toggleClass('o_not_full', !full);
+
+            // Add the unfolded buttons
+            _.each(unfolded_buttons, function (button) {
+                $(button).appendTo($result);
+            });
+
+            // Add the dropdown with folded buttons if any
+            if (folded_buttons.length) {
+                $result.append(dom.renderButton({
+                    attrs: {
+                        'class': 'oe_stat_button o_button_more dropdown-toggle',
+                        'data-toggle': 'dropdown',
+                    },
+                    text: _t("More"),
+                }));
+
+                var $dropdown = $("<div>", {class: "dropdown-menu o_dropdown_more", role: "menu"});
+                _.each(folded_buttons, function (button) {
+                    $(button).addClass('dropdown-item').appendTo($dropdown);
+                });
+                $dropdown.appendTo($result);
+            }
+        });
 
         this._handleAttributes($result, node);
         this._registerModifiers(node, this.state, $result);
@@ -477,6 +489,7 @@ var FormRenderer = BasicRenderer.extend({
     _renderInnerGroup: function (node) {
         var self = this;
         var $result = $('<table/>', {class: 'o_group o_inner_group'});
+        var $tbody = $('<tbody />').appendTo($result);
         this._handleAttributes($result, node);
         this._registerModifiers(node, this.state, $result);
 
@@ -490,7 +503,7 @@ var FormRenderer = BasicRenderer.extend({
         var rows = [];
         var $currentRow = $('<tr/>');
         var currentColspan = 0;
-        _.each(node.children, function (child) {
+        node.children.forEach(function (child) {
             if (child.tag === 'newline') {
                 rows.push($currentRow);
                 $currentRow = $('<tr/>');
@@ -537,7 +550,7 @@ var FormRenderer = BasicRenderer.extend({
                 var $el = $(el);
                 $el.css('width', ((parseInt($el.attr('colspan'), 10) || 1) * nonLabelColSize) + '%');
             });
-            $result.append($tr);
+            $tbody.append($tr);
         });
 
         return $result;
@@ -575,7 +588,7 @@ var FormRenderer = BasicRenderer.extend({
      *
      * For fields, it will return the $el of the field widget. Note that this
      * method is synchronous, field widgets are instantiated and appended, but
-     * if they are asynchronous, they register their deferred in this.defs, and
+     * if they are asynchronous, they register their promises in this.defs, and
      * the _renderView method will properly wait.
      *
      * @private
@@ -705,7 +718,8 @@ var FormRenderer = BasicRenderer.extend({
         if (node.attrs.class) {
             $result.addClass(node.attrs.class);
         }
-        $result.append(_.map(node.children, this._renderNode.bind(this)));
+        var allNodes = node.children.map(this._renderNode.bind(this))
+        $result.append(allNodes);
         return $result;
     },
     /**
@@ -737,7 +751,6 @@ var FormRenderer = BasicRenderer.extend({
                 $statusbar.append($el);
             }
         });
-        this._handleAttributes($statusbar, node);
         this._registerModifiers(node, this.state, $statusbar);
         return $statusbar;
     },
@@ -870,7 +883,7 @@ var FormRenderer = BasicRenderer.extend({
     _renderTagSheet: function (node) {
         this.has_sheet = true;
         var $sheet = $('<div>', {class: 'clearfix o_form_sheet'});
-        $sheet.append(_.map(node.children, this._renderNode.bind(this)));
+        $sheet.append(node.children.map(this._renderNode.bind(this)));
         return $sheet;
     },
     /**
@@ -885,12 +898,12 @@ var FormRenderer = BasicRenderer.extend({
     },
     /**
      * Main entry point for the rendering.  From here, we call _renderNode on
-     * the root of the arch, then, when every deferred (from the field widgets)
+     * the root of the arch, then, when every promise (from the field widgets)
      * are done, it will resolves itself.
      *
      * @private
      * @override method from BasicRenderer
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _renderView: function () {
         var self = this;
@@ -901,17 +914,17 @@ var FormRenderer = BasicRenderer.extend({
         var $form = this._renderNode(this.arch).addClass(this.className);
         delete this.defs;
 
-        return $.when.apply($, defs).then(function () {
+        return Promise.all(defs).then(function () {
             self._updateView($form.contents());
             if (self.state.res_id in self.alertFields) {
                 self.displayTranslationAlert();
             }
-        }, function () {
-            $form.remove();
         }).then(function(){
             if (self.lastActivatedFieldIndex >= 0) {
                 self._activateNextFieldWidget(self.state, self.lastActivatedFieldIndex);
             }
+        }).guardedCatch(function () {
+            $form.remove();
         });
     },
     /**

@@ -201,6 +201,7 @@
         <!-- Special case: core.js declares $.browser needed by ba-bbq -->
         <script type="text/javascript" src="/web/static/lib/jquery.ba-bbq/jquery.ba-bbq.js"></script>
 
+        <script type="text/javascript" src="/web/static/src/js/chrome/unhandledrejection_handler.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/domain.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/mvc.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/py_utils.js"></script>
@@ -654,8 +655,8 @@
             <t t-set="html_data" t-value="{'style': 'height: 100%;'}"/>
             <t t-set="title">Web Benchmarks</t>
             <t t-set="head">
-                <link type="text/css" rel="stylesheet" href="/web/static/lib/qunit/qunit-2.3.0.css"/>
-                <script type="text/javascript" src="/web/static/lib/qunit/qunit-2.3.0.js"></script>
+                <link type="text/css" rel="stylesheet" href="/web/static/lib/qunit/qunit-2.9.1.css"/>
+                <script type="text/javascript" src="/web/static/lib/qunit/qunit-2.9.1.js"></script>
                 <script type="text/javascript" src="/web/static/tests/helpers/qunit_config.js"></script>
                 <script type="text/javascript" src="/web/static/lib/benchmarkjs/lodash.js"></script>
                 <script type="text/javascript" src="/web/static/lib/benchmarkjs/benchmark.js"></script>

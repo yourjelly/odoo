@@ -4,7 +4,7 @@ odoo.define('web_kanban_gauge.gauge_tests', function (require) {
 var KanbanView = require('web.KanbanView');
 var testUtils = require('web.test_utils');
 
-var createView = testUtils.createView;
+var createView = testUtils.createAsyncView;
 
 QUnit.module('fields', {}, function () {
 
@@ -26,10 +26,10 @@ QUnit.module('basic_fields', {
 
     QUnit.module('gauge widget');
 
-    QUnit.test('basic rendering', function (assert) {
+    QUnit.test('basic rendering', async function (assert) {
         assert.expect(1);
 
-        var kanban = createView({
+        var kanban = await createView({
             View: KanbanView,
             model: 'partner',
             data: this.data,

@@ -85,7 +85,7 @@ var SidebarFilter = Widget.extend(FieldManagerMixin, {
             });
             defs.push(def);
         }
-        return $.when.apply($, defs);
+        return Promise.all(defs);
 
     },
     /**
@@ -193,7 +193,7 @@ return AbstractRenderer.extend({
     },
     /**
      * @override
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     start: function () {
         this._initSidebar();
@@ -460,7 +460,7 @@ return AbstractRenderer.extend({
      *
      * @override method from AbstractRenderer
      * @private
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _render: function () {
         var $calendar = this.$calendar;
@@ -531,23 +531,41 @@ return AbstractRenderer.extend({
      * @private
      */
     _renderFilters: function () {
-        var self = this;
         _.each(this.filters || (this.filters = []), function (filter) {
             filter.destroy();
         });
         if (this.state.fullWidth) {
             return;
         }
-        _.each(this.state.filters, function (options) {
+        this._renderFiltersOneByOne();
+    },
+    /**
+     * Renders each filter one by one, waiting for the first filter finished to
+     * be rendered and appended to render the next one.
+     * We need to do like this since render a filter is asynchronous, we don't
+     * know which one will be appened at first and we want tp force them to be
+     * rendered in order.
+     *
+     * @param {number} filterIndex if not set, 0 by default
+     */
+    _renderFiltersOneByOne: function (filterIndex) {
+        filterIndex = filterIndex || 0;
+        var arrFilters = _.toArray(this.state.filters);
+        if (filterIndex < arrFilters.length) {
+            var options = arrFilters[filterIndex];
             if (!_.find(options.filters, function (f) {return f.display == null || f.display;})) {
                 return;
             }
-            options.getColor = self.getColor.bind(self);
-            options.fields = self.state.fields;
+
+            var self = this;
+            options.getColor = this.getColor.bind(this);
+            options.fields = this.state.fields;
             var filter = new SidebarFilter(self, options);
-            filter.appendTo(self.$sidebar);
-            self.filters.push(filter);
-        });
+            filter.appendTo(this.$sidebar).then(function () {
+                self._renderFiltersOneByOne(filterIndex + 1);
+            });
+            this.filters.push(filter);
+        }
     },
 
     //--------------------------------------------------------------------------
