@@ -181,7 +181,6 @@ var ListRenderer = BasicRenderer.extend({
      */
     _getNumberOfCols: function () {
         var n = this.columns.length;
-        n = !this.editable ? n + 1 : n;
         n = n + 1; // column for open advanced field icon
         return this.hasSelectors ? n + 1 : n;
     },
@@ -208,8 +207,8 @@ var ListRenderer = BasicRenderer.extend({
             }
             return reject;
         });
-        this.advancedColumns = _.filter(this.allColumns, function(col) {
-            return col.attrs.optional === "True" && !(col.attrs.modifiers && col.attrs.modifiers.required);
+        this.advancedColumns = _.filter(this.arch.children, function(col) {
+            return col.attrs.advanced === "True";
         });
         this.advancedColumnsList = [];
     },
@@ -629,21 +628,7 @@ var ListRenderer = BasicRenderer.extend({
     _onOpenAdvancedFieldClick: function (ev) {
         ev.stopPropagation();
         var id = $(event.target).closest('tr').data('id');
-        this.trigger_up('open_record', {id: id});
-        // this.trigger_up('open_row', {id: id});
-        /*if (id) {
-            var action = {
-                name: 'Open: Order Lines',
-                type: 'ir.actions.act_window',
-                res_model: 'sale.order.line',
-                view_mode: 'form',
-                view_type: 'form',
-                views: [[false, 'form']],
-                target: 'new',
-                res_id: 21,
-            };
-            this.do_action(action);
-        }*/
+        this.trigger_up('open_row', {id: id});
     },
     /**
      * Render all rows. This method should only called when the view is not
@@ -823,7 +808,7 @@ var ListRenderer = BasicRenderer.extend({
     _onRowClicked: function (ev) {
         // The special_click property explicitely allow events to bubble all
         // the way up to bootstrap's level rather than being stopped earlier.
-        if (!this.advancedColumns.length || this.editable) {
+        if (!this.advancedColumns.length || this.editable !== false) {
             if (!$(ev.target).prop('special_click')) {
                 var id = $(ev.currentTarget).data('id');
                 if (id) {

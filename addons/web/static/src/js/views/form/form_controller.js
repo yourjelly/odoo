@@ -17,6 +17,7 @@ var FormController = BasicController.extend({
         do_action: '_onDoAction',
         edited_list: '_onEditedList',
         open_one2many_record: '_onOpenOne2ManyRecord',
+        open_advanced_record: '_onOpenAdvancedRecord',
         open_record: '_onOpenRecord',
         toggle_column_order: '_onToggleColumnOrder',
         focus_control_button: '_onFocusControlButton',
@@ -633,6 +634,29 @@ var FormController = BasicController.extend({
             shouldSaveLocally: true,
             title: (record ? _t("Open: ") : _t("Create ")) + (ev.target.string || data.field.string),
         }).open();
+    },
+    _onOpenAdvancedRecord: function (ev) {
+        ev.stopPropagation();
+        var data = ev.data;
+        if (data.id) {
+            var record = this.model.get(data.id, {raw: true});
+
+            new dialogs.FormViewDialog(this, {
+                context: data.context,
+                domain: data.domain,
+                parentID: data.parentID,
+                model: this.model,
+                res_model: 'sale.order.line',
+                recordID: record && record.id,
+                res_id: record.res_id,
+                on_saved: data.on_saved,
+                on_remove: data.on_remove,
+                deletable: record ? data.deletable : false,
+                readonly: data.readonly,
+                shouldSaveLocally: true,
+                title: _t("Open: ") + (ev.target.string || data.field.string),
+            }).open();
+        }
     },
     /**
      * Open an existing record in a form view dialog
