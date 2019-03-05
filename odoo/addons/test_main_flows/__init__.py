@@ -14,4 +14,4 @@ def _auto_install_enterprise_dependencies(cr, registry):
     env = api.Environment(cr, SUPERUSER_ID, {})
     module_list = ['account_accountant']
     module_ids = env['ir.module.module'].search([('name', 'in', module_list), ('state', '=', 'uninstalled')])
-    module_ids.sudo().button_install()
+    return module_list
