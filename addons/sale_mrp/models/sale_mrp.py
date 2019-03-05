@@ -5,6 +5,37 @@ from odoo import api, fields, models, _
 from odoo.tools import float_compare, float_round
 
 
+class MrpProduction(models.Model):
+    _inherit = 'mrp.production'
+
+    sale_id = fields.Many2one('sale.order', string="Sales Order")
+
+
+class SaleOrder(models.Model):
+    _inherit = "sale.order"
+
+    production_ids = fields.One2many('mrp.production', 'sale_id', string='Manufacturing Order')
+    production_count = fields.Integer(string='Manufacturing Orders', compute='_compute_production_count')
+
+    @api.multi
+    def action_view_production(self):
+        production_orders = self.mapped('production_ids')
+        action = self.env.ref('mrp.mrp_production_action').read()[0]
+        if len(production_orders) > 1:
+            action['domain'] = [('id', 'in', production_orders.ids)]
+        elif len(production_orders) == 1:
+            action['views'] = [(self.env.ref('mrp.mrp_production_form_view').id, 'form')]
+            action['res_id'] = production_orders.ids[0]
+        else:
+            action = {'type': 'ir.actions.act_window_close'}
+        return action
+
+    @api.depends('production_ids')
+    def _compute_production_count(self):
+        for order in self:
+            order.production_count = len(order.production_ids)
+
+
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
@@ -101,6 +132,16 @@ class SaleOrderLine(models.Model):
         if bom and 'previous_product_uom_qty' in self.env.context:
             return previous_product_uom_qty and previous_product_uom_qty.get(self.id, 0.0)
         return super(SaleOrderLine, self)._get_qty_procurement(previous_product_uom_qty=previous_product_uom_qty)
+
+
+class StockRule(models.Model):
+    _inherit = 'stock.rule'
+
+    def _prepare_mo_vals(self, product_id, product_qty, product_uom, location_id, name, origin, company_id, values, bom):
+        res = super(StockRule, self)._prepare_mo_vals(product_id, product_qty, product_uom, location_id, name, origin, company_id, values, bom)
+        if values['group_id'].sale_id:
+            res['sale_id'] = values['group_id'].sale_id.id
+        return res
 
 
 class AccountInvoiceLine(models.Model):
