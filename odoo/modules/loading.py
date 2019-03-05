@@ -399,8 +399,6 @@ WHERE state != 'uninstallable'
 """)
             all_load = cr.fetchall()
 
-            # note: excludes both state-related values
-            to_install = [(name, *rest) for name, install, _, *rest in all_load if install]
             # note: only excludes to_install-related value
             to_load = [
                 (name, *rest)
@@ -416,7 +414,7 @@ WHERE state != 'uninstallable'
                 graph.add_modules(to_load_names)
                 for name, to_upgrade, id_, demo, version in to_load:
                     p = graph.get(name)
-                    if p is None or p in already_loaded:
+                    if p is None or name in already_loaded:
                         continue # missing deps => mod may be not loaded
 
                     p.id = id_
@@ -439,7 +437,7 @@ WHERE state != 'uninstallable'
                 graph.add_modules(modules_to_install)
                 for name, id_, demo, version in to_install:
                     p = graph.get(name)
-                    if p is None or p in already_loaded:
+                    if p is None or name in already_loaded:
                         continue
 
                     p.id = id_
