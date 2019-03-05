@@ -74,6 +74,14 @@
                                 <span class="o_stat_text">Scraps</span>
                             </div>
                         </button>
+                        <button type="object"
+                                name="action_see_childs"
+                                class="oe_stat_button"
+                                icon="fa-wrench"
+                                attrs="{'invisible': [('production_childs_count', '=', 0)]}"
+                                groups="base.group_user">
+                            <field name="production_childs_count" widget="statinfo" string="Childs MO"/>
+                        </button>
                         <field name="workorder_ids" invisible="1"/>
                     </div>
                     <div class="oe_title">

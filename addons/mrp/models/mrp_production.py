@@ -123,6 +123,10 @@ class MrpProduction(models.Model):
              "is mainly used to compute work center costs during operations and to plan future loads on "
              "work centers based on production planning.")
 
+    production_child_ids = fields.One2many('mrp.production', 'production_parent_id')
+    production_childs_count = fields.Integer(compute='_compute_production_childs_count')
+    production_parent_id = fields.Many2one('mrp.production')
+
     state = fields.Selection([
         ('draft', 'Draft'),
         ('confirmed', 'Confirmed'),
@@ -381,6 +385,12 @@ class MrpProduction(models.Model):
                 date_planned_finished_wo = finished_dates[-1].date_planned_finished if finished_dates else False
             order.date_planned_start_wo = date_planned_start_wo
             order.date_planned_finished_wo = date_planned_finished_wo
+
+    @api.multi
+    @api.depends('production_child_ids')
+    def _compute_production_childs_count(self):
+        for order in self:
+            order.production_childs_count = len(order.production_child_ids)
 
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per Company!'),
@@ -878,6 +888,13 @@ class MrpProduction(models.Model):
                         },
             'target': 'new',
         }
+
+    @api.multi
+    def action_see_childs(self):
+        self.ensure_one()
+        action = self.env.ref('mrp.mrp_production_action').read()[0]
+        action['domain'] = [('production_parent_id', '=', self.id)]
+        return action
 
     @api.multi
     def action_see_move_scrap(self):
