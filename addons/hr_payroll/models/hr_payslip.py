@@ -292,6 +292,19 @@ class HrPayslip(models.Model):
                 res = self.env.cr.fetchone()
                 return res and res[0] or 0.0
 
+            def sum_category(self, code, from_date, to_date=None):
+                if to_date is None:
+                    to_date = fields.Date.today()
+                self.env.cr.execute("""SELECT sum(case when hp.credit_note = False then (hpl.total) else (-hpl.total) end)
+                            FROM hr_payslip hp
+                                JOIN hr_payslip_line hpl ON hpl.slip_id = hp.id
+                                JOIN hr_salary_rule_category hsrc ON hsrc.id = hpl.category_id
+                            WHERE hp.employee_id = %s
+                            AND hp.date_from >= %s AND hp.date_to <= %s AND hsrc.code = %s""",
+                            (self.employee_id, from_date, to_date, code))
+                res = self.env.cr.fetchone()
+                return res and res[0] or 0.0
+
         #we keep a dict with the result because a value can be overwritten by another rule with the same code
         result_dict = {}
         rules_dict = {}

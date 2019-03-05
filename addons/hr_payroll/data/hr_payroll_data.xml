@@ -67,6 +67,17 @@
             <field name="register_id" ref="contrib_register_employees"/>
         </record>
 
+        <record id="hr_salary_rule_sum_alw_category" model="hr.salary.rule">
+            <field name="amount_select">code</field>
+            <field name="code">SUMALWCATE</field>
+            <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="name">Sum of Allowance category</field>
+            <field name="sequence" eval="99"/>
+            <field name="amount_python_compute">result = payslip.sum_category('ALW', payslip.date_from, to_date=payslip.date_to) + categories.ALW
+# payslip.sum_category() will gives you sum of all payslip line's total of ALW category in between given dates but not from self.
+# categories.ALW will gives sum of all ALW from current payslip</field>
+         </record>
+
 
         <!-- Salary Structure -->
 
