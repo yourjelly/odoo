@@ -337,8 +337,6 @@ def load_modules(db, force_demo=False, update_module=False, *, to_install=()):
         if bdemo or force_demo or {'name', 'all'} & to_demo.keys():
             base_module.demo = True
 
-        # processed_modules: for cleanup step after install
-        # loaded_modules: to avoid double loading
         report = registry._assertion_report
         load_module_graph(
             cr, graph, perform_checks=update_module, report=report,
@@ -362,12 +360,6 @@ def load_modules(db, force_demo=False, update_module=False, *, to_install=()):
             Module.update_list()
 
             _check_module_names(cr, itertools.chain(modules_to_install, to_update))
-
-            module_names = [k for k, v in to_init.items() if v]
-            if module_names:
-                modules = Module.search([('state', '=', 'uninstalled'), ('name', 'in', module_names)])
-                if modules:
-                    modules.button_install()
 
             module_names = [k for k, v in to_update.items() if v]
             if module_names:
@@ -403,7 +395,7 @@ def load_modules(db, force_demo=False, update_module=False, *, to_install=()):
             cr.execute("""
 SELECT name, state='uninstalled', state='to upgrade', id, demo, latest_version
 FROM ir_module_module
-WHERE state not in ('uninstalled', 'uninstallable')
+WHERE state != 'uninstallable'
 """)
             all_load = cr.fetchall()
 
