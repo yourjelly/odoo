@@ -264,8 +264,6 @@ def load_module_graph(cr, graph, perform_checks=True,
 
     registry.clear_caches()
 
-    cr.commit()
-
     return install_next
 
 def _check_module_names(cr, module_names):

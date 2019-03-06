@@ -363,7 +363,6 @@ class PosConfig(models.Model):
         val.update(name=_('POS order line %s') % values['name'], code='pos.order.line')
         values['sequence_line_id'] = IrSequence.create(val).id
         pos_config = super(PosConfig, self).create(values)
-        pos_config.sudo()._check_modules_to_install()
         pos_config.sudo()._check_groups_implied()
         # If you plan to add something after this, use a new environment. The one above is no longer valid after the modules install.
         return pos_config
@@ -377,7 +376,6 @@ class PosConfig(models.Model):
             super(PosConfig, config_display).write({'customer_facing_display_html': self._compute_default_customer_html()})
 
         self.sudo()._set_fiscal_position()
-        self.sudo()._check_modules_to_install()
         self.sudo()._check_groups_implied()
         return result
 
@@ -394,18 +392,6 @@ class PosConfig(models.Model):
                 config.fiscal_position_ids = [(4, config.default_fiscal_position_id.id)]
             elif not config.tax_regime_selection and not config.tax_regime and config.fiscal_position_ids.ids:
                 config.fiscal_position_ids = [(5, 0, 0)]
-
-    def _check_modules_to_install(self):
-        module_installed = False
-        for pos_config in self:
-            for field_name in [f for f in pos_config.fields_get_keys() if f.startswith('module_')]:
-                module_name = field_name.split('module_')[1]
-                module_to_install = self.env['ir.module.module'].sudo().search([('name', '=', module_name)])
-                if getattr(pos_config, field_name) and module_to_install.state not in ('installed', 'to install', 'to upgrade'):
-                    module_to_install.button_immediate_install()
-                    module_installed = True
-        # just in case we want to do something if we install a module. (like a refresh ...)
-        return module_installed
 
     def _check_groups_implied(self):
         for pos_config in self:
