@@ -76,12 +76,7 @@ class StockRule(models.Model):
                 po = self.env['purchase.order'].with_context(force_company=company_id.id).sudo().create(vals)
             else:
                 # If a purchase order is found, adapt its `origin` field.
-                if po.origin:
-                    missing_origins = origins - set(po.origin.split(', '))
-                    if missing_origins:
-                        po.write({'origin': po.origin + ', ' + ', '.join(missing_origins)})
-                else:
-                    po.write({'origin': ', '.join(origins)})
+                self._update_purchase_origin(po, procurements)
 
             procurements_to_merge = self._get_procurements_to_merge(procurements)
             procurements = self._merge_procurements(procurements_to_merge)
@@ -294,3 +289,13 @@ class StockRule(models.Model):
         res = super(StockRule, self)._push_prepare_move_copy_values(move_to_copy, new_date)
         res['purchase_line_id'] = None
         return res
+
+    @api.model
+    def _update_purchase_origin(self, po, procurements):
+        origins = set([p.origin for p in procurements])
+        if po.origin:
+            missing_origins = origins - set(po.origin.split(', '))
+            if missing_origins:
+                po.write({'origin': po.origin + ', ' + ', '.join(missing_origins)})
+        else:
+            po.write({'origin': ', '.join(origins)})

@@ -48,3 +48,10 @@ class StockRule(models.Model):
         if sale_ids:
             res['sale_ids'] = sale_ids
         return res
+
+    @api.model
+    def _update_purchase_origin(self, po, procurements):
+        super(StockRule, self)._update_purchase_origin(po, procurements)
+        sale_ids = procurements[0].values.get('sale_ids')
+        if sale_ids:
+            po.write({'sale_ids': sale_ids})
