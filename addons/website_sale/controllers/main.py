@@ -158,18 +158,24 @@ class WebsiteSale(ProductConfiguratorController):
     def _get_search_order(self, post):
         # OrderBy will be parsed in orm and so no direct sql injection
         # id is added to be sure that order is a unique sort key
-        return 'is_published desc,%s , id desc' % post.get('order', 'website_sequence desc')
+        order = post.get('order') or 'website_sequence desc'
+        return 'is_published desc, %s, id desc' % order
 
-    def _get_search_domain(self, search, category, attrib_values):
-        domain = request.website.sale_product_domain()
+    def _get_search_domain(self, search, category, attrib_values, search_in_description=True):
+        domains = [request.website.sale_product_domain()]
         if search:
             for srch in search.split(" "):
-                domain += [
-                    '|', '|', '|', ('name', 'ilike', srch), ('description', 'ilike', srch),
-                    ('description_sale', 'ilike', srch), ('product_variant_ids.default_code', 'ilike', srch)]
+                subdomains = [
+                    [('name', 'ilike', srch)],
+                    [('product_variant_ids.default_code', 'ilike', srch)]
+                ]
+                if search_in_description:
+                    subdomains.append([('description', 'ilike', srch)])
+                    subdomains.append([('description_sale', 'ilike', srch)])
+                domains.append(expression.OR(subdomains))
 
         if category:
-            domain += [('public_categ_ids', 'child_of', int(category))]
+            domains.append([('public_categ_ids', 'child_of', int(category))])
 
         if attrib_values:
             attrib = None
@@ -181,13 +187,13 @@ class WebsiteSale(ProductConfiguratorController):
                 elif value[0] == attrib:
                     ids.append(value[1])
                 else:
-                    domain += [('attribute_line_ids.value_ids', 'in', ids)]
+                    domains.append([('attribute_line_ids.value_ids', 'in', ids)])
                     attrib = value[0]
                     ids = [value[1]]
             if attrib:
-                domain += [('attribute_line_ids.value_ids', 'in', ids)]
+                domains.append([('attribute_line_ids.value_ids', 'in', ids)])
 
-        return domain
+        return expression.AND(domains)
 
     @http.route([
         '''/shop''',
@@ -1226,4 +1232,63 @@ class WebsiteSale(ProductConfiguratorController):
                 'product_variant': request.env['product.product'].browse(res['product_id']),
             })
         res['carousel'] = carousel_view
+        return res
+
+    # ------------------------------------------------------
+    # Products Search Bar
+    # ------------------------------------------------------
+
+    @http.route('/shop/products/autocomplete', type='json', auth='public', website=True)
+    def products_autocomplete(self, term, options={}, **kwargs):
+        """
+        Returns list of products according to the term and product options
+
+        Params:
+            term (str): search term written by the user
+            options (dict)
+                - 'limit' (int), default to 5: number of products to consider
+                - 'display_description' (bool), default to True
+                - 'display_price' (bool), default to True
+                - 'order' (str)
+
+        Returns:
+            dict (or False if no result)
+                - 'products' (list): products (only their needed field values)
+                - 'currency' (dict): symbol and position of the used currency
+        """
+        display_description = options.get('display_description', True)
+        display_price = options.get('display_price', True)
+        order = self._get_search_order(options)
+
+        category = options.get('category')
+        attrib_values = options.get('attrib_values')
+
+        products = request.env['product.template'].search(
+            self._get_search_domain(term, category, attrib_values, display_description),
+            limit=min(20, options.get('limit', 5)),
+            order=order
+        )
+        if not products:
+            return False
+
+        fields = ['id', 'name', 'website_url']
+        if display_description:
+            fields.append('description_sale')
+
+        res = {
+            'products': products.read(fields),
+        }
+
+        if display_price:
+            for i, product in enumerate(products):
+                combination_info = product._get_combination_info(only_template=True)
+                res['products'][i].update({
+                    'price': combination_info['price']
+                })
+
+            currency = request.website.get_current_pricelist().currency_id
+            res.update({
+                'currency': currency.read(['symbol', 'position'])[0],
+            })
+
         return res

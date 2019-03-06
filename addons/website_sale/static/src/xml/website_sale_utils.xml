@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+<!-- Products Search Bar autocomplete item -->
+<div t-name="website_sale.productsSearchBar.autocomplete"
+    class="dropdown-menu show w-100" style="min-width: 300px;">
+    <a t-foreach="products" t-as="product"
+        t-att-href="product['website_url']" class="dropdown-item text-wrap">
+        <div class="media align-items-center o_search_product_item">
+            <t t-if="widget.displayImage">
+                <img t-attf-src="/web/image/product.template/#{product['id']}/image_small"/>
+            </t>
+            <div class="media-body px-3">
+                <t t-set="description" t-value="widget.displayDescription and product['description_sale']"/>
+                <h6 t-attf-class="font-weight-bold #{description ? '' : 'mb-0'}" t-esc="product['name']"/>
+                <p t-if="description" class="mb-0" t-esc="description"/>
+            </div>
+            <t t-if="widget.displayPrice">
+                <b>
+                    <t t-if="currency['position'] === 'after'">
+                        <t t-esc="product['price']"/>
+                        <t t-esc="currency['symbol']"/>
+                    </t>
+                    <t t-else="">
+                        <t t-esc="currency['symbol']"/>
+                        <t t-esc="product['price']"/>
+                    </t>
+                </b>
+            </t>
+        </div>
+    </a>
+</div>
+
+</templates>
