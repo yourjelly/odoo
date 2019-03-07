@@ -245,6 +245,12 @@ class Manager(Thread):
                 foo = util.module_from_spec(spec)
                 spec.loader.exec_module(foo)
 
+    def check_certificate(self): # Verify the validity of the certificate
+        home = os.getenv("HOME")
+        db_uuid = 'test'
+        path = home + '/odoo/addons/point_of_sale/tools/posbox/configuration/check_certificate.sh'
+        subprocess.check_output([path, db_uuid])
+
     def send_alldevices(self): # Send device to Odoo
         server = get_odoo_server_url()
         if server:
@@ -318,6 +324,7 @@ class Manager(Thread):
         devices = {}
         updated_devices = {}
         self.send_alldevices()
+        self.check_certificate()
         while 1:
             updated_devices = self.usb_loop()
             updated_devices.update(self.video_loop())
