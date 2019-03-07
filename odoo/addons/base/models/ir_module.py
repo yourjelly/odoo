@@ -326,14 +326,12 @@ class Module(models.Model):
                 raise Exception('Unable to find %r in path' % (binary,))
 
     @classmethod
-    def check_external_dependencies(cls, module_name, newstate='to install'):
+    def check_external_dependencies(cls, module_name, newstate='to upgrade'):
         terp = cls.get_module_info(module_name)
         try:
             cls._check_external_dependencies(terp)
         except Exception as e:
-            if newstate == 'to install':
-                msg = _('Unable to install module "%s" because an external dependency is not met: %s')
-            elif newstate == 'to upgrade':
+            if newstate == 'to upgrade':
                 msg = _('Unable to upgrade module "%s" because an external dependency is not met: %s')
             else:
                 msg = _('Unable to process module "%s" because an external dependency is not met: %s')
@@ -375,7 +373,6 @@ class Module(models.Model):
     def button_install(self):
         # determine whether an auto-install module must be installed:
         #  - all its dependencies are installed or to be installed,
-        #  - at least one dependency is 'to install'
         to_install = odoo.modules.db.expand_install(self.env.cr, self.mapped('name'))
 
         install_mods = self.search([('state', 'in', ['installed', 'to upgrade'])])

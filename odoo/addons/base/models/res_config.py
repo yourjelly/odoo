@@ -245,8 +245,8 @@ class ResConfigInstaller(models.TransientModel, ResConfigModuleInstallationMixin
 
     def _already_installed(self):
         """ For each module (boolean fields in a res.config.installer),
-        check if it's already installed (either 'to install', 'to upgrade'
-        or 'installed') and if it is return the module's record
+        check if it's already installed ('to upgrade' or 'installed') and
+        if it is return the module's record
 
         :returns: a list of all installed modules in this installer
         :rtype: recordset (collection of Record)

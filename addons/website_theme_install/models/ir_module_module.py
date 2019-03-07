@@ -80,7 +80,7 @@ class IrModuleModule(models.Model):
             if module.name.startswith('theme_') and vals.get('state') == 'installed':
                 _logger.info('Module %s has been loaded as theme template (%s)' % (module.name, module.state))
 
-                if module.state in ['to install', 'to upgrade']:
+                if module.state == 'to upgrade':
                     websites_to_update = module._theme_get_stream_website_ids()
 
                     if module.state == 'to upgrade' and request:

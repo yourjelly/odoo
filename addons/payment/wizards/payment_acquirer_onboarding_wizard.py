@@ -82,7 +82,7 @@ class PaymentWizard(models.TransientModel):
 
     def _install_module(self, module_name):
         module = self.env['ir.module.module'].sudo().search([('name', '=', module_name)])
-        if module.state not in ('installed', 'to install', 'to upgrade'):
+        if module.state not in ('installed', 'to upgrade'):
             module.button_immediate_install()
 
     def _on_save_payment_acquirer(self):
