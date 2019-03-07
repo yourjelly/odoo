@@ -3,12 +3,12 @@
 
     <!-- Account Tags -->
 <!--19%-->
-        <record id="tax_ACH-19_0" model="account.account.tag">
+        <record id="tax_tag_purchase_19" model="account.account.tag">
             <field name="name">ACH-19.0</field>
             <field name="applicability">taxes</field>
         </record>
 
-        <record model="account.tax.template" id="tva_acq_normale19">
+        <record id="tva_acq_normale19" model="account.tax.template">
           <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
           <field name="name">TVA (achat) 19,0%</field>
           <field name="description">ACH-19.0</field>
@@ -18,15 +18,15 @@
           <field name="account_id" ref="pcg_44566"/>
           <field name="sequence" eval="9"/>
           <field name="type_tax_use">purchase</field>
-          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_ACH-19_0')])]"/>
+          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_tag_purchase_19')])]"/>
         </record>
 
-        <record id="tax_19_0" model="account.account.tag">
+        <record id="tax_tag_sale_19" model="account.account.tag">
             <field name="name">19.0</field>
             <field name="applicability">taxes</field>
         </record>
 
-        <record model="account.tax.template" id="tva_normale19">
+        <record id="tva_normale19" model="account.tax.template">
           <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
           <field name="name">TVA (vente) 19,0%</field>
           <field name="description">19.0</field>
@@ -37,17 +37,17 @@
           <field name="account_id" ref="pcg_44571"/>
           <field name="sequence" eval="9"/>
           <field name="type_tax_use">sale</field>
-          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_19_0')])]"/>
+          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_tag_sale_19')])]"/>
         </record>
 
 <!--9%-->
 
-        <record id="tax_ACH-9_0" model="account.account.tag">
+        <record id="tax_tag_purchase_9" model="account.account.tag">
             <field name="name">ACH-9_0</field>
             <field name="applicability">taxes</field>
         </record>
 
-        <record model="account.tax.template" id="tva_acq_specifique9">
+        <record id="tva_acq_specifique9" model="account.tax.template">
           <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
           <field name="name">TVA (achat) 9,0%</field>
           <field name="description">ACH-9.0</field>
@@ -57,15 +57,15 @@
           <field name="account_id" ref="pcg_44566"/>
           <field name="sequence" eval="10"/>
           <field name="type_tax_use">purchase</field>
-          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_ACH-9_0')])]"/>
+          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_tag_purchase_9')])]"/>
         </record>
 
-        <record id="tax_9_0" model="account.account.tag">
+        <record id="tax_tag_sale_9" model="account.account.tag">
             <field name="name">9.0</field>
             <field name="applicability">taxes</field>
         </record>
 
-        <record model="account.tax.template" id="tva_specifique9">
+        <record id="tva_specifique9" model="account.tax.template">
           <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
           <field name="name">TVA (vente) 9,0%</field>
           <field name="description">9.0</field>
@@ -75,15 +75,15 @@
           <field name="account_id" ref="pcg_44571"/>
           <field name="sequence" eval="10"/>
           <field name="type_tax_use">sale</field>
-          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_9_0')])]"/>
+          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_tag_sale_9')])]"/>
         </record>
 
-        <record id="tax_IMMO_19_0" model="account.account.tag">
+        <record id="tax_tag_purchase_immo_19" model="account.account.tag">
             <field name="name">IMMO-19.0</field>
             <field name="applicability">taxes</field>
         </record>
 
-        <record model="account.tax.template" id="tva_imm_normale19">
+        <record id="tva_imm_normale19" model="account.tax.template">
           <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
           <field name="name">TVA immobilisation (achat) 19,0%</field>
           <field name="description">IMMO-19.0</field>
@@ -93,15 +93,15 @@
           <field name="account_id" ref="pcg_44562"/>
           <field name="sequence" eval="10"/>
           <field name="type_tax_use">purchase</field>
-          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_IMMO_19_0')])]"/>
+          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_tag_purchase_immo_19')])]"/>
         </record>
 
-        <record id="tax_IMMO_9_0" model="account.account.tag">
+        <record id="tax_tag_purchase_immo_9" model="account.account.tag">
             <field name="name">IMMO_9_0</field>
             <field name="applicability">taxes</field>
         </record>
 
-        <record model="account.tax.template" id="tva_imm_specifique9">
+        <record id="tva_imm_specifique9" model="account.tax.template">
           <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
           <field name="name">TVA immobilisation (achat) 9,0%</field>
           <field name="description">IMMO-9.0</field>
@@ -111,16 +111,16 @@
           <field name="account_id" ref="pcg_44562"/>
           <field name="sequence" eval="10"/>
           <field name="type_tax_use">purchase</field>
-          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_IMMO_9_0')])]"/>
+          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_tag_purchase_immo_9')])]"/>
         </record>
 
 <!--17%-->
-        <record id="tax_ACH-17_0" model="account.account.tag">
+        <record id="tax_tag_purchase_17" model="account.account.tag">
             <field name="name">ACH-17.0</field>
             <field name="applicability">taxes</field>
         </record>
 
-        <record model="account.tax.template" id="tva_acq_normale">
+        <record id="tva_acq_normale" model="account.tax.template">
           <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
           <field name="name">TVA (achat) 17,0%</field>
           <field name="description">ACH-17.0</field>
@@ -130,15 +130,15 @@
           <field name="account_id" ref="pcg_44566"/>
           <field name="sequence" eval="10"/>
           <field name="type_tax_use">purchase</field>
-          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_ACH-17_0')])]"/>
+          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_tag_purchase_17')])]"/>
         </record>
 
-        <record id="tax_17_0" model="account.account.tag">
+        <record id="tax_tag_sale_17" model="account.account.tag">
             <field name="name">17.0</field>
             <field name="applicability">taxes</field>
         </record>
 
-        <record model="account.tax.template" id="tva_normale">
+        <record id="tva_normale" model="account.tax.template">
           <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
           <field name="name">TVA (vente) 17,0%</field>
           <field name="description">17.0</field>
@@ -149,15 +149,15 @@
           <field name="account_id" ref="pcg_44571"/>
           <field name="sequence" eval="10"/>
           <field name="type_tax_use">sale</field>
-          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_17_0')])]"/>
+          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_tag_sale_17')])]"/>
         </record>
 
-        <record id="tax_ACH-7_0" model="account.account.tag">
+        <record id="tax_tag_purchase_7" model="account.account.tag">
             <field name="name">ACH-7_0</field>
             <field name="applicability">taxes</field>
         </record>
 
-        <record model="account.tax.template" id="tva_acq_specifique">
+        <record id="tva_acq_specifique" model="account.tax.template">
           <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
           <field name="name">TVA (achat) 7,0%</field>
           <field name="description">ACH-7.0</field>
@@ -167,15 +167,15 @@
           <field name="account_id" ref="pcg_44566"/>
           <field name="sequence" eval="10"/>
           <field name="type_tax_use">purchase</field>
-          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_ACH-7_0')])]"/>
+          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_tag_purchase_7')])]"/>
         </record>
 
-        <record id="tax_7_0" model="account.account.tag">
+        <record id="tax_tag_sale_7" model="account.account.tag">
             <field name="name">7.0</field>
             <field name="applicability">taxes</field>
         </record>
 
-        <record model="account.tax.template" id="tva_specifique">
+        <record id="tva_specifique" model="account.tax.template">
           <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
           <field name="name">TVA (vente) 7,0%</field>
           <field name="description">7.0</field>
@@ -185,15 +185,15 @@
           <field name="account_id" ref="pcg_44571"/>
           <field name="sequence" eval="10"/>
           <field name="type_tax_use">sale</field>
-          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_7_0')])]"/>
+          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_tag_sale_7')])]"/>
         </record>
 
-        <record id="tax_IMMO_17_0" model="account.account.tag">
+        <record id="tax_tag_purchase_immo_17" model="account.account.tag">
             <field name="name">IMMO-17.0</field>
             <field name="applicability">taxes</field>
         </record>
 
-        <record model="account.tax.template" id="tva_imm_normale">
+        <record id="tva_imm_normale" model="account.tax.template">
           <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
           <field name="name">TVA immobilisation (achat) 17,0%</field>
           <field name="description">IMMO-17.0</field>
@@ -203,15 +203,15 @@
           <field name="account_id" ref="pcg_44562"/>
           <field name="sequence" eval="10"/>
           <field name="type_tax_use">purchase</field>
-          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_IMMO_17_0')])]"/>
+          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_tag_purchase_immo_17')])]"/>
         </record>
 
-        <record id="tax_IMMO_7_0" model="account.account.tag">
+        <record id="tax_tag_purchase_immo_7" model="account.account.tag">
             <field name="name">IMMO_7_0</field>
             <field name="applicability">taxes</field>
         </record>
 
-        <record model="account.tax.template" id="tva_imm_specifique">
+        <record id="tva_imm_specifique" model="account.tax.template">
           <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
           <field name="name">TVA immobilisation (achat) 7,0%</field>
           <field name="description">IMMO-7.0</field>
@@ -221,15 +221,15 @@
           <field name="account_id" ref="pcg_44562"/>
           <field name="sequence" eval="10"/>
           <field name="type_tax_use">purchase</field>
-          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_IMMO_7_0')])]"/>
+          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_tag_purchase_immo_7')])]"/>
         </record>
 
-        <record id="tax_EXO_ACH_0" model="account.account.tag">
+        <record id="tax_tax_purchase_exo_0" model="account.account.tag">
             <field name="name">EXO_ACH_0</field>
             <field name="applicability">taxes</field>
         </record>
 
-        <record model="account.tax.template" id="tva_exo_0">
+        <record id="tva_exo_0" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
             <field name="name">TVA 0% EXO (achat)</field>
             <field name="description">ACHAT-0</field>
@@ -237,16 +237,16 @@
             <field name="amount_type">percent</field>
             <field name="sequence" eval="10"/>
             <field name="type_tax_use">purchase</field>
-            <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_EXO_ACH_0')])]"/>
+            <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_tax_purchase_exo_0')])]"/>
         </record>
 
 
-        <record id="tax_EXO_ACH_IMPO_0" model="account.account.tag">
-            <field name="name">EXO_ACH_0</field>
+        <record id="tax_tag_purchase_0" model="account.account.tag">
+            <field name="name">ACH-0</field>
             <field name="applicability">taxes</field>
         </record>
 
-        <record model="account.tax.template" id="tva_purchase_0">
+        <record id="tva_purchase_0" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
             <field name="name">TVA 0% (achat)</field>
             <field name="description">ACHAT-0</field>
@@ -254,16 +254,16 @@
             <field name="amount_type">percent</field>
             <field name="sequence" eval="10"/>
             <field name="type_tax_use">purchase</field>
-            <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_EXO_ACH_IMPO_0')])]"/>
+            <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_tag_purchase_0')])]"/>
         </record>
 
 
-       <record id="tax_EXO_0" model="account.account.tag">
+       <record id="tax_tag_sale_0" model="account.account.tag">
             <field name="name">EXO_0</field>
             <field name="applicability">taxes</field>
         </record>
 
-        <record model="account.tax.template" id="tva_0">
+        <record id="tva_0" model="account.tax.template">
           <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
           <field name="name">TVA 0% (vente)</field>
           <field name="description">EXO-0</field>
@@ -273,15 +273,15 @@
           <field name="account_id" eval="False"/>
           <field name="sequence" eval="10"/>
           <field name="type_tax_use">sale</field>
-          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_EXO_0')])]"/>
+          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_tag_sale_0')])]"/>
         </record>
 
-        <record id="tax_EXPORT_0" model="account.account.tag">
+        <record id="tax_tag_export_0" model="account.account.tag">
             <field name="name">EXPORT-0</field>
             <field name="applicability">taxes</field>
         </record>
 
-        <record model="account.tax.template" id="tva_export_0">
+        <record id="tva_export_0" model="account.tax.template">
           <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
           <field name="name">TVA 0% export (vente)</field>
           <field name="description">EXPORT-0</field>
@@ -291,15 +291,15 @@
           <field name="account_id" eval="False"/>
           <field name="sequence" eval="10"/>
           <field name="type_tax_use">sale</field>
-          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_EXPORT_0')])]"/>
+          <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_tag_export_0')])]"/>
         </record>
 
-        <record id="tax_IMPORT_0" model="account.account.tag">
+        <record id="tax_tag_import_0" model="account.account.tag">
             <field name="name">IMPORT-0</field>
             <field name="applicability">taxes</field>
         </record>
 
-        <record model="account.tax.template" id="tva_import_0">
+        <record id="tva_import_0" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
             <field name="name">TVA 0% import (achat)</field>
             <field name="description">IMPORT-0</field>
@@ -307,7 +307,7 @@
             <field name="amount_type">percent</field>
             <field name="sequence" eval="10"/>
             <field name="type_tax_use">purchase</field>
-            <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_IMPORT_0')])]"/>
+            <field name="tag_ids" eval="[(6,0,[ref('l10n_dz.tax_tag_import_0')])]"/>
         </record>
 
        
