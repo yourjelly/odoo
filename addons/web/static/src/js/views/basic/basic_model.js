@@ -4029,8 +4029,9 @@ var BasicModel = AbstractModel.extend({
         }
 
         if (options.context !== undefined) {
-            element.context = options.context;
             element.orderedBy =  options.context.orderedBy || element.orderedBy;
+            options.context = _.omit(options.context, ['orderedBy', 'group_by']);
+            element.context = options.context;
         }
         if (options.domain !== undefined) {
             element.domain = options.domain;
