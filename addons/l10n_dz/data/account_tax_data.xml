@@ -246,7 +246,7 @@
             <field name="applicability">taxes</field>
         </record>
 
-        <record model="account.tax.template" id="tva_import_0">
+        <record model="account.tax.template" id="tva_purchase_0">
             <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
             <field name="name">TVA 0% (achat)</field>
             <field name="description">ACHAT-0</field>

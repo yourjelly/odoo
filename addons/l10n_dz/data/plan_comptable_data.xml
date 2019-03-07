@@ -1002,9 +1002,9 @@
       <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
     </record>
 
-    <record id="pcg_3227" model="account.account.template">
+    <record id="pcg_3228" model="account.account.template">
       <field name="name">Autres fournitures consommables</field>
-      <field name="code">3227</field>
+      <field name="code">3228</field>
       <field name="user_type_id" ref="account.data_account_type_current_assets" />
       <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
     </record>
@@ -1641,46 +1641,6 @@
       <field name="name">Rabais, remises, ristournes à accorder et autres avoirs à établir</field>
       <field name="code">4198</field>
       <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-      <field name="reconcile" eval="True"/>
-      <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
-    </record>
-
-    <record id="pcg_421" model="account.account.template">
-      <field name="name">Personnel - Rémunérations dues</field>
-      <field name="code">421</field>
-      <field name="user_type_id" ref="account.data_account_type_payable"/>
-      <field name="reconcile" eval="True"/>
-      <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
-    </record>
-
-    <record id="pcg_4211" model="account.account.template">
-      <field name="name">Salaires et appointements à payer</field>
-      <field name="code">4211</field>
-      <field name="user_type_id" ref="account.data_account_type_payable"/>
-      <field name="reconcile" eval="True"/>
-      <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
-    </record>
-
-    <record id="pcg_4212" model="account.account.template">
-      <field name="name">Présalaires à payer</field>
-      <field name="code">4212</field>
-      <field name="user_type_id" ref="account.data_account_type_payable"/>
-      <field name="reconcile" eval="True"/>
-      <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
-    </record>
-
-    <record id="pcg_4213" model="account.account.template">
-      <field name="name">Soldes de tout compte restant dus</field>
-      <field name="code">4213</field>
-      <field name="user_type_id" ref="account.data_account_type_payable"/>
-      <field name="reconcile" eval="True"/>
-      <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
-    </record>
-
-    <record id="pcg_421" model="account.account.template">
-      <field name="name">Personnel : Rémunérations dues</field>
-      <field name="code">421</field>
-      <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
       <field name="reconcile" eval="True"/>
       <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
     </record>
@@ -3929,13 +3889,6 @@
       <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
     </record>
 
-        <record id="pcg_6452" model="account.account.template">
-      <field name="name">Taxes spéciales et droits d'accises</field>
-      <field name="code">6452</field>
-      <field name="user_type_id" ref="account.data_account_type_expenses"/>
-      <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
-    </record>
-
     <record id="pcg_6453" model="account.account.template">
       <field name="name">Taxe sur l’environnement (écotaxe)</field>
       <field name="code">6453</field>
@@ -4573,6 +4526,7 @@
       <field name="code">762</field>
       <field name="user_type_id" ref="account.data_account_type_revenue"/>
       <field name="user_type_id" ref="account.data_account_type_revenue"/>
+      <field name="chart_template_id" ref="l10n_dz_pcg_chart_template"/>
     </record>
 
     <record id="pcg_763" model="account.account.template">
