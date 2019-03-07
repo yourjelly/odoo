@@ -9,26 +9,19 @@
     'category': 'Localization',
     'description': """
 This is the module to manage the accounting chart for Algeria in Odoo.
-========================================================================
-
+======================================================================
 This module applies to companies based in Algeria.
-.
 
 **Email:** contact@osis.dz
 """,
     'author': 'Osis',
     'website': 'http://www.osis.dz/',
-    'depends': ['account','l10n_dz_region'],
+    'depends': ['account'],
     'data': [
         'data/wizard_data.xml',
         'data/plan_comptable_data.xml',
-        'views/l10n_dz_view.xml',
         'data/account_tax_data.xml',
         'data/account_fiscal_position_template_data.xml',
-        'data/account_chart_template_data.yml',
+        'data/account_chart_template_configuration_data.xml',
     ],
-
-    'installable': True,
-    'application': False,
-    'auto_install': False,
 }
