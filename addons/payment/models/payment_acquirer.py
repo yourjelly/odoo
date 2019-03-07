@@ -260,7 +260,7 @@ class PaymentAcquirer(models.Model):
         # Search for installed acquirers modules.
         # If the trigger comes from the chart template wizard, the modules are already installed.
         acquirer_modules = self.env['ir.module.module'].search(
-            [('name', 'like', 'payment_%'), ('state', '=', 'installed'))])
+            [('name', 'like', 'payment_%'), ('state', '=', 'installed')])
         acquirer_names = [a.name.split('_')[1] for a in acquirer_modules]
 
         # Search for acquirers having no journal
