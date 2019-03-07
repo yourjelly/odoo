@@ -370,9 +370,6 @@ class ProductProduct(models.Model):
         def _name_get(d):
             name = d.get('name', '')
             code = self._context.get('display_default_code', True) and d.get('default_code', False) or False
-            # for product in self:
-            #     name = self.env['sale.order.line'].get_sale_order_line_multiline_description_sale(product)
-
             if code:
                 name = '[%s] %s' % (code,name)
             return (d['id'], name)

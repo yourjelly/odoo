@@ -808,7 +808,6 @@ var FieldX2Many = AbstractField.extend({
         edit_line: '_onEditLine',
         field_changed: '_onFieldChanged',
         open_record: '_onOpenRecord',
-        open_row: '_onOpenRow',
         kanban_record_delete: '_onRemoveRecord',
         list_record_remove: '_onRemoveRecord',
         resequence: '_onResequence',
@@ -1598,26 +1597,6 @@ var FieldOne2Many = FieldX2Many.extend({
             },
             deletable: this.activeActions.delete,
             readonly: this.mode === 'readonly',
-        });
-    },
-    _onOpenRow: function (ev) {
-        var self = this;
-        var id = ev.data.id;
-
-        this.trigger_up('open_advanced_record', {
-            id: id,
-            on_saved: function () {
-                self._setValue({ operation: 'UPDATE', id: id });
-            },
-            on_remove: function () {
-                self._setValue({operation: 'DELETE', ids: [id]});
-            },
-            deletable: this.activeActions.delete,
-            readonly: this.mode === 'readonly',
-            context: this.record.getContext(this.recordParams),
-            field: this.field,
-            parentID: this.value.id,
-            domain: this.record.getDomain(this.recordParams),
         });
     },
 });

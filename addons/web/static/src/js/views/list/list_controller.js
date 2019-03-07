@@ -30,7 +30,6 @@ var ListController = BasicController.extend({
         save_line: '_onSaveLine',
         resequence: '_onResequence',
         selection_changed: '_onSelectionChanged',
-        // open_row: '_onOpenRow',
         toggle_column_order: '_onToggleColumnOrder',
         toggle_group: '_onToggleGroup',
         navigation_move: '_onNavigationMove',
@@ -543,23 +542,6 @@ var ListController = BasicController.extend({
         this.selectedRecords = ev.data.selection;
         this._toggleSidebar();
     },
-/*    _onOpenRow: function (ev) {
-        debugger;
-        var record = this.model.get(ev.data.id, {raw: true});
-        if (record.res_id) {
-            var action = {
-                name: 'Open: Order Lines',
-                type: 'ir.actions.act_window',
-                res_model: 'sale.order.line',
-                view_mode: 'form',
-                view_type: 'form',
-                views: [[false, 'form']],
-                target: 'new',
-                res_id: record.res_id,
-            };
-            this.do_action(action);
-        }
-    },*/
     /**
      * When the user clicks on one of the sortable column headers, we need to
      * tell the model to sort itself properly, to update the pager and to

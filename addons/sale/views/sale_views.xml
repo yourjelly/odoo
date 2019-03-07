@@ -419,7 +419,7 @@
                                     />
                                     <field name="product_custom_attribute_value_ids" invisible="1" />
                                     <field name="product_no_variant_attribute_value_ids" invisible="1" />
-                                    <field name="name" widget="section_and_note_text" advanced="True" invisible="1"/>
+                                    <field name="name" widget="section_and_note_text" invisible="1"/>
                                     <field
                                         name="product_uom_qty"
                                         string="Ordered"
@@ -465,7 +465,6 @@
                                         name="analytic_tag_ids"
                                         groups="analytic.group_analytic_tags"
                                         widget="many2many_tags"
-                                        advanced="True"
                                         invisible="1"
                                     />
                                     <field
@@ -485,6 +484,7 @@
                                     <field name="price_total" widget="monetary" groups="account.group_show_line_subtotals_tax_included"/>
                                     <field name="state" invisible="1"/>
                                     <field name="invoice_status" invisible="1"/>
+                                    <field name="customer_lead" invisible="1"/>
                                     <field name="currency_id" invisible="1"/>
                                     <field name="price_tax" invisible="1"/>
                                 </tree>
@@ -626,13 +626,6 @@
                         </group>
                     </group>
                     <field name="name"/>
-                    <!-- <footer>
-                        <div>
-                            <button name="button_save" string="Save" type="object" default_focus="1" class="oe_highlight"/>
-                            <button string="Discard" class="btn btn-secondary" special="cancel" />
-                            <button string="Remove" class="btn btn-secondary" special="cancel" />
-                        </div>
-                    </footer> -->
                 </form>
             </field>
         </record>

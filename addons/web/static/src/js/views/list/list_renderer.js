@@ -43,7 +43,6 @@ var ListRenderer = BasicRenderer.extend({
         'keypress thead tr td': '_onKeyPress',
         'keydown tr': '_onKeyDown',
         'keydown thead tr': '_onKeyDown',
-        "click tr .o_list_record_open": "_onOpenAdvancedFieldClick",
     },
     /**
      * @constructor
@@ -181,7 +180,6 @@ var ListRenderer = BasicRenderer.extend({
      */
     _getNumberOfCols: function () {
         var n = this.columns.length;
-        n = n + 1; // column for open advanced field icon
         return this.hasSelectors ? n + 1 : n;
     },
     /**
@@ -207,10 +205,6 @@ var ListRenderer = BasicRenderer.extend({
             }
             return reject;
         });
-        this.advancedColumns = _.filter(this.arch.children, function(col) {
-            return col.attrs.advanced === "True";
-        });
-        this.advancedColumnsList = [];
     },
     /**
      * Render a list of <td>, with aggregates if available.  It can be displayed
@@ -530,11 +524,6 @@ var ListRenderer = BasicRenderer.extend({
     _renderHeader: function () {
         var $tr = $('<tr>')
             .append(_.map(this.columns, this._renderHeaderCell.bind(this)));
-        if (this.addTrashIcon) {
-            $tr.append($("<th/>", {
-                class: 'o-header-cell',
-            }));
-        }
         if (this.hasSelectors) {
             $tr.prepend(this._renderSelector('th'));
         }
@@ -604,18 +593,6 @@ var ListRenderer = BasicRenderer.extend({
             return self._renderBodyCell(record, node, index, { mode: 'readonly' });
         });
 
-        if (!this.addTrashIcon) {
-            $cells.push($("<td/>", {
-                class: 'o-data-cell',
-            }))
-        }
-
-        if (this.advancedColumns.length) {
-            var $icon = $('<button>', {class: 'fa fa-external-link', name: 'open', 'aria-label': _t('Open ') + ($cells.length+1)});
-            var $td = $('<td>', {class: 'o_list_record_open text-center'}).append($icon);
-            $cells.push($td);
-        }
-        delete this.defs;
         var $tr = $('<tr/>', { class: 'o_data_row' })
             .data('id', record.id)
             .append($cells);
@@ -624,11 +601,6 @@ var ListRenderer = BasicRenderer.extend({
         }
         this._setDecorationClasses(record, $tr);
         return $tr;
-    },
-    _onOpenAdvancedFieldClick: function (ev) {
-        ev.stopPropagation();
-        var id = $(event.target).closest('tr').data('id');
-        this.trigger_up('open_row', {id: id});
     },
     /**
      * Render all rows. This method should only called when the view is not
@@ -808,12 +780,10 @@ var ListRenderer = BasicRenderer.extend({
     _onRowClicked: function (ev) {
         // The special_click property explicitely allow events to bubble all
         // the way up to bootstrap's level rather than being stopped earlier.
-        if (!this.advancedColumns.length || this.editable !== false) {
-            if (!$(ev.target).prop('special_click')) {
-                var id = $(ev.currentTarget).data('id');
-                if (id) {
-                    this.trigger_up('open_record', { id: id, target: ev.target });
-                }
+        if (!$(ev.target).prop('special_click')) {
+            var id = $(ev.currentTarget).data('id');
+            if (id) {
+                this.trigger_up('open_record', { id: id, target: ev.target });
             }
         }
     },
