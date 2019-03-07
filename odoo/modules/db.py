@@ -121,6 +121,30 @@ GROUP BY m.name, m.state
     return to_install
 
 
+def expand_dependents(cr, modules):
+    cr.execute("""
+SELECT imd.name, array_agg(m.name)
+FROM ir_module_module_dependency imd
+JOIN ir_module_module m ON (imd.module_id = m.id)
+WHERE m.state not in ('uninstalled', 'uninstallable')
+GROUP BY imd.name
+    """)
+
+    dependents = {n: set(d) for n, d in cr.fetchall()}
+
+    mods = set()
+    to_check = list(modules)
+
+    while to_check:
+        m = to_check.pop()
+        if m in mods:
+            continue
+
+        mods.add(m)
+        to_check.extend(dependents.get(m, ()))
+    return mods
+
+
 def create_categories(cr, categories):
     """ Create the ir_module_category entries for some categories.
 
