@@ -57,6 +57,8 @@ SAMPLES = [
     (" Raoul O'hara  <!@historicalsociety.museum>", "Raoul O'hara", '!@historicalsociety.museum'),
 ]
 
+
+@tagged('test_base')
 class TestBase(TransactionCase):
 
     def test_00_res_partner_name_create(self):
@@ -418,6 +420,30 @@ class TestBase(TransactionCase):
         test_user.toggle_active()
         self.assertTrue(test_partner.active, 'Activating user must active related partner')
 
+    def test_80_can_archive_partner_after_user(self):
+        test_partner = self.env['res.partner'].create({'name': 'test partner'})
+        test_user = self.env['res.users'].create({
+            'login': 'test@odoo.com',
+            'partner_id': test_partner.id,
+        })
+        self.assertEqual(test_user.partner_id.user_ids, test_user)
+        test_user.active = False
+        self.assertEqual(test_user.partner_id.user_ids, self.env['res.users'])
+        # we can write on, partner_id.active
+        test_user.partner_id.active = False
+
+    def test_90_can_archive_partner_after_user_cheating(self):
+        test_partner = self.env['res.partner'].create({'name': 'test partner'})
+        test_user = self.env['res.users'].create({
+            'login': 'test@odoo.com',
+            'partner_id': test_partner.id,
+        })
+        self.assertEqual(test_user.partner_id.user_ids, test_user)
+        test_user.active = False
+        test_partner.invalidate_cache(ids=[test_partner.id], fnames=['user_ids'])
+        self.assertEqual(test_user.partner_id.user_ids, self.env['res.users'])
+        # we can write on, partner_id.active
+        test_user.partner_id.active = False
 
 class TestPartnerRecursion(TransactionCase):
 
