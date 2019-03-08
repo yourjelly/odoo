@@ -18,8 +18,9 @@ This module applies to companies based in Algeria.
     'website': 'http://www.osis.dz/',
     'depends': ['account'],
     'data': [
-        'data/wizard_data.xml',
-        'data/plan_comptable_data.xml',
+        'data/account_chart_template_data.xml',
+        'data/account.account.template.csv',
+        'data/account_chart_template_post_data.xml',
         'data/account_tax_data.xml',
         'data/account_fiscal_position_template_data.xml',
         'data/account_chart_template_configuration_data.xml',
