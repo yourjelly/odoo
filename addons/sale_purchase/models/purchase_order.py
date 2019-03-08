@@ -21,10 +21,11 @@ class PurchaseOrder(models.Model):
         sale_to_notify_map = {}  # map SO -> recordset of PO as {sale.order: set(purchase.order.line)}
         for order in self:
             for purchase_line in order.order_line:
-                if purchase_line.sale_line_id:
-                    sale_order = purchase_line.sale_line_id.order_id
-                    sale_to_notify_map.setdefault(sale_order, self.env['purchase.order.line'])
-                    sale_to_notify_map[sale_order] |= purchase_line
+                if purchase_line.sale_line_ids:
+                    sale_orders = purchase_line.sale_line_ids.mapped('order_id')
+                    for sale_order in sale_orders:
+                        sale_to_notify_map.setdefault(sale_order, self.env['purchase.order.line'])
+                        sale_to_notify_map[sale_order] |= purchase_line
 
         for sale_order, purchase_order_lines in sale_to_notify_map.items():
             sale_order.activity_schedule_with_view('mail.mail_activity_data_warning',
@@ -39,5 +40,5 @@ class PurchaseOrder(models.Model):
 class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
 
-    sale_order_id = fields.Many2one(related='sale_line_id.order_id', string="Sale Order", store=True, readonly=True)
-    sale_line_id = fields.Many2one('sale.order.line', string="Origin Sale Item", index=True)
+    sale_order_ids = fields.Many2many('sale.order', string="Sale Order", readonly=True)
+    sale_line_ids = fields.Many2many('sale.order.line', string="Origin Sale Item", index=True)

@@ -10,9 +10,9 @@
                         name="action_view_purchase"
                         class="oe_stat_button"
                         icon="fa-shopping-cart"
-                        attrs="{'invisible': [('purchase_count', '=', 0)]}"
+                        attrs="{'invisible': [('purchase_order_count', '=', 0)]}"
                         groups="base.group_user">
-                    <field name="purchase_count" widget="statinfo" string="Purchase"/>
+                    <field name="purchase_order_count" widget="statinfo" string="Purchase"/>
                 </button>
             </xpath>
         </field>

@@ -7,7 +7,7 @@ from odoo import api, models, fields
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
 
-    purchase_line_ids = fields.One2many('purchase.order.line', 'sale_line_id')
+    # purchase_line_ids = fields.One2many('purchase.order.line', 'sale__onchange_product_type_onchange_product_typeline_id')
 
     @api.multi
     def _get_qty_procurement(self, previous_product_uom_qty):
