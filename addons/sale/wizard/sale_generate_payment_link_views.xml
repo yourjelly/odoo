@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="payment_link" model="ir.ui.view">
+        <field name="name">custom.link</field>
+        <field name="model">sale.payment.link</field>
+        <field name="arch" type="xml">
+            <form string="Generate Link">
+                <group name="details" attrs="{'invisible': [('link', '!=', False)]}">
+                    <field name="reference" readonly="1"/>
+                    <field name="amount"/>
+                </group>
+                <group name="clipboard">
+                    <field name="link" readonly="1" widget="CopyClipboardChar" attrs="{'invisible': [('link', '=', False)]}" options="{'string': 'Copy Link'}"/>
+                </group>
+                <footer>
+                    <button string="Generate Link" name="generate_payment_link" type="object" attrs="{'invisible': [('link',    '!=', False)]}" class="btn-primary"/>
+                    <button string="Ok" class="btn-primary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="payment_custom_link" model="ir.actions.act_window">
+        <field name="name">Generate Link</field>
+        <field name="res_model">sale.payment.link</field>
+        <field name="src_model">sale.payment.link</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
