@@ -558,7 +558,8 @@
                 <script type="text/javascript" src="/web/static/tests/views/abstract_view_tests.js"></script>
                 <script type="text/javascript" src="/web/static/tests/views/control_panel_tests.js"></script>
                 <script type="text/javascript" src="/web/static/tests/views/form_tests.js"></script>
-                <script type="text/javascript" src="/web/static/tests/views/graph_tests.js"></script>
+                <!-- <script type="text/javascript" src="/web/static/tests/views/graph_tests.js"></script> -->
+                <script type="text/javascript" src="/web/static/tests/views/graph_view_tests.js"></script>
                 <script type="text/javascript" src="/web/static/tests/views/list_tests.js"></script>
                 <script type="text/javascript" src="/web/static/tests/views/pivot_tests.js"></script>
                 <script type="text/javascript" src="/web/static/tests/views/kanban_tests.js"></script>

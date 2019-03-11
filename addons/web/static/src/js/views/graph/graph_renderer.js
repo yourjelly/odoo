@@ -602,6 +602,7 @@ return AbstractRenderer.extend({
             } else if (this.state.mode === 'pie') {
                 this._renderPieChart(dataPoints);
             }
+            this._renderTitle();
         }
         return this._super.apply(this, arguments);
     },
