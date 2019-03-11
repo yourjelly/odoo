@@ -11,6 +11,8 @@ var core = require('web.core');
 var Dialog = require('web.Dialog');
 var dom = require('web.dom');
 var session = require('web.session');
+var Component = require('mail.Component');
+var QWebVDOM = require('mail.QWebVDOM');
 
 var QWeb = core.qweb;
 var _t = core._t;
@@ -1613,7 +1615,49 @@ var Discuss = AbstractAction.extend({
     },
 });
 
-core.action_registry.add('mail.discuss', Discuss);
+class Counter extends Component {
+    inlineTemplate = `
+        <div t-name="counter">
+        <button t-on-click="increment(-1)">-</button>
+        <span style="font-weight:bold">Value: <t t-esc="state.counter"/></span>
+        <button t-on-click="increment(1)">+</button>
+        </div>`;
+    constructor(parent, props) {
+        super(parent, props);
+        this.state = {
+            counter: props.initialState || 0
+        };
+    }
+    increment(delta) {
+        this.updateState({ counter: this.state.counter + delta });
+    }
+}
+
+class DemoWidget extends Component {
+    widgets = {Counter};
+    inlineTemplate = `
+        <div>
+            <div>hello <t t-esc="props.name"/></div>
+            <t t-widget="Counter" t-props="{initialState: 17}"/>
+        </div>`;
+}
+
+
+
+const DemoDiscuss = AbstractAction.extend({
+    on_attach_callback() {
+        let nextID = 1;
+        const env = {
+            qweb: new QWebVDOM(),
+            getID: function () { return nextID++;},
+        };
+        var counter = new DemoWidget(env,{name: 'aku'});
+        return counter.mount(this.$el[0]);
+    }
+});
+
+core.action_registry.add('mail.discuss', DemoDiscuss);
+
 
 return Discuss;
 
