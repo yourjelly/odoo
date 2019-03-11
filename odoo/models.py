@@ -1718,7 +1718,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         """Helper method for filling in empty groups for all possible values of
            the field being grouped by"""
         field = self._fields[groupby]
-        if not field.group_expand:
+        if not field.group_expand and field.type != 'selection':
             return read_group_result
 
         # field.group_expand is the name of a method that returns the groups
@@ -1743,7 +1743,13 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         else:
             # groups is a list of values
-            values = getattr(self, field.group_expand)(values, domain, None)
+            if field.group_expand:
+                values = getattr(self, field.group_expand)(values, domain, None)
+            else:
+                if callable(field.selection):
+                    values = [key for key, val in field.selection(self)]
+                else:
+                    values = [key for key, val in field.selection]
             if read_group_order == groupby + ' desc':
                 values.reverse()
             value2key = lambda value: value
