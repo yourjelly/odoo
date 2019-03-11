@@ -1628,6 +1628,15 @@ class Counter extends Component {
             counter: props.initialState || 0
         };
     }
+    mounted() {
+        console.log('i am mounted');
+    }
+    willUnmount() {
+        console.log('i will be unmounted');
+    }
+    destroyed() {
+        console.log('boom, i am dead');
+    }
     increment(delta) {
         this.updateState({ counter: this.state.counter + delta });
     }
@@ -1638,8 +1647,21 @@ class DemoWidget extends Component {
     inlineTemplate = `
         <div>
             <div>hello <t t-esc="props.name"/></div>
-            <t t-widget="Counter" t-props="{initialState: 17}"/>
+            <button t-on-click="toggleButton">Toggle Counter</button>
+            <t t-if="state.flag">
+                <t t-widget="Counter" t-props="{initialState: 17}"/>
+            </t>
         </div>`;
+    constructor(parent, props) {
+        super(parent, props);
+        this.state = {
+            flag: true
+        };
+    }
+
+    toggleButton() {
+        this.updateState({flag: !this.state.flag});
+    }
 }
 
 
