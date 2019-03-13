@@ -653,19 +653,7 @@ publicWidget.registry.websiteSaleCart = publicWidget.Widget.extend({
 publicWidget.registry.productsSearchBar = publicWidget.Widget.extend({
     selector: '.o_wsale_products_searchbar_form',
     xmlDependencies: ['/website_sale/static/src/xml/website_sale_utils.xml'],
-    events: {
-        'input .search-query': '_onInput',
-        'keydown .search-query': '_onKeydown',
-    },
 
-    /**
-     * @constructor
-     */
-    init: function () {
-        this._super.apply(this, arguments);
-        this._onInput = _.debounce(this._onInput, 400);
-        this._dp = new concurrency.DropPrevious();
-    },
     /**
      * @override
      */
@@ -679,7 +667,19 @@ publicWidget.registry.productsSearchBar = publicWidget.Widget.extend({
         this.displayImage = !!this.$input.data('displayImage');
 
         if (this.limit) {
-            this.$input.attr('autocomplete', 'off');
+            this.$input.select2({
+                ajax: {
+                    quietMillis: 400,
+                    url: '/shop/products/autocomplete',
+                    data: this._prepareFetch.bind(this),
+                    transport: this._fetch.bind(this),
+                    results: this._processFetched.bind(this),
+                },
+                formatResult: this._render.bind(this),
+                minimumInputLength: 2,
+                multiple: true,
+                dropdownCssClass: 'dropdown-menu',
+            });
         }
 
         return this._super.apply(this, arguments);
@@ -692,66 +692,46 @@ publicWidget.registry.productsSearchBar = publicWidget.Widget.extend({
     /**
      * @private
      */
-    _fetch: function () {
-        return this._rpc({
-            route: '/shop/products/autocomplete',
-            params: {
-                'term': this.$input.val(),
-                'options': {
-                    'order': this.order,
-                    'limit': this.limit,
-                    'display_description': this.displayDescription,
-                    'display_price': this.displayPrice,
-                },
+    _prepareFetch: function (term) {
+        return {
+            'term': term,
+            'options': {
+                'order': this.order,
+                'limit': this.limit,
+                'display_description': this.displayDescription,
+                'display_price': this.displayPrice,
             },
-        });
+        };
     },
     /**
      * @private
      */
-    _render: function (res) {
-        var $prevMenu = this.$menu;
-        this.$el.toggleClass('dropdown show', !!res);
-        if (res) {
-            this.$menu = $(qweb.render('website_sale.productsSearchBar.autocomplete', {
-                products: res['products'],
-                currency: res['currency'],
-                widget: this,
-            }));
-            this.$el.append(this.$menu);
-        }
-        if ($prevMenu) {
-            $prevMenu.remove();
-        }
-    },
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     */
-    _onInput: function () {
-        if (!this.limit) {
-            return;
-        }
-        this._dp.add(this._fetch()).then(this._render.bind(this));
+    _fetch: function (params) {
+        return this._rpc({
+            route: params.url,
+            params: params.data,
+        })
+        .then(params.success)
+        .guardedCatch(params.failure);
     },
     /**
      * @private
      */
-    _onKeydown: function (ev) {
-        switch (ev.which) {
-            case $.ui.keyCode.UP:
-                ev.preventDefault();
-                this.$menu.children().last().focus();
-                break;
-            case $.ui.keyCode.DOWN:
-                ev.preventDefault();
-                this.$menu.children().first().focus();
-                break;
-        }
+    _processFetched: function (data) {
+        this.currency = data['currency'];
+        return {
+            results: data['products'],
+        };
+    },
+    /**
+     * @private
+     */
+    _render: function (productData) {
+        return $(qweb.render('website_sale.productsSearchBar.autocompleteItem', {
+            product: productData,
+            currency: this.currency,
+            widget: this,
+        }));
     },
 });
 });

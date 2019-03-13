@@ -2,10 +2,8 @@
 <templates id="template" xml:space="preserve">
 
 <!-- Products Search Bar autocomplete item -->
-<div t-name="website_sale.productsSearchBar.autocomplete"
-    class="dropdown-menu show w-100" style="min-width: 300px;">
-    <a t-foreach="products" t-as="product"
-        t-att-href="product['website_url']" class="dropdown-item text-wrap">
+<t t-name="website_sale.productsSearchBar.autocompleteItem">
+    <a t-att-href="product['website_url']" class="dropdown-item">
         <div class="media align-items-center o_search_product_item">
             <t t-if="widget.displayImage">
                 <img t-attf-src="/web/image/product.template/#{product['id']}/image_small"/>
@@ -29,6 +27,6 @@
             </t>
         </div>
     </a>
-</div>
+</t>
 
 </templates>
