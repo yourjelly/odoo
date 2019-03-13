@@ -26,6 +26,7 @@ var ListController = BasicController.extend({
     custom_events: _.extend({}, BasicController.prototype.custom_events, {
         add_record: '_onAddRecord',
         button_clicked: '_onButtonClicked',
+        group_button_clicked: '_onGroupButtonClicked',
         edit_line: '_onEditLine',
         save_line: '_onSaveLine',
         resequence: '_onResequence',
@@ -560,6 +561,45 @@ var ListController = BasicController.extend({
             return field.attrs.name;
         });
         new DataExport(this, record, defaultExportFields).open();
+    },
+    /**
+     * Handles a click on a group button by performing its action.
+     * Similar to @see _callButtonAction
+     *
+     * @private
+     * @param {OdooEvent} ev
+     * @param {OdooEvent} ev.data.attrs
+     * @param {OdooEvent} ev.data.group_id
+     */
+    _onGroupButtonClicked: function (ev) {
+        ev.stopPropagation();
+
+        var self = this;
+        var def = new Promise(function (resolve, reject) {
+            var reload = function () {
+                return self.isDestroyed() ? Promise.resolve() : self.reload();
+            };
+            var list = self.model.get(self.handle);
+            var groupByField = list.fields[list.groupedBy[0]];
+            var group = self.model.get(ev.data.group_id);
+
+            self.trigger_up('execute_action', {
+                action_data: _.extend({}, ev.data.attrs, {
+                    context: group.getContext({ additionalContext: ev.data.attrs.context || {} }),
+                }),
+                env: {
+                    context: group.getContext(),
+                    currentID: group.res_id,
+                    model: groupByField.relation,
+                },
+                on_success: resolve,
+                on_fail: function () {
+                    self.update({}, { reload: false }).then(reject).guardedCatch(reject);
+                },
+                on_closed: reload,
+            });
+        });
+        return this.alive(def);
     },
     /**
      * Force a resequence of the records curently on this page.

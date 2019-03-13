@@ -68,6 +68,7 @@ var ListRenderer = BasicRenderer.extend({
         this.pagers = []; // instantiated pagers (only for grouped lists)
         this.editable = params.editable;
         this.isGrouped = this.state.groupedBy.length > 0;
+        this.groups = params.groups;
     },
 
     //--------------------------------------------------------------------------
@@ -391,6 +392,54 @@ var ListRenderer = BasicRenderer.extend({
         return $('<tfoot>').append($('<tr>').append($cells));
     },
     /**
+     * Renders the group button element.
+     *
+     * @private
+     * @param {Object} record
+     * @param {Object} group
+     * @returns {jQuery} a <button> element
+     */
+    _renderGroupButton: function (list, node) {
+        var self = this;
+        var $button = viewUtils.renderButtonFromNode(node, {
+            extraClass: node.attrs.icon ? 'o_icon_button' : undefined,
+            textAsTitle: !!node.attrs.icon,
+        });
+        this._handleAttributes($button, node);
+        this._registerModifiers(node, list, $button);
+
+        // TODO this should be moved to a handler
+        $button.on("click", function (e) {
+            e.stopPropagation();
+            self.trigger_up('group_button_clicked', {
+                attrs: node.attrs,
+                group_id: list.id,
+            });
+        });
+        return $button;
+    },
+    /**
+     * Renders the group buttons.
+     *
+     * @private
+     * @param {Object} record
+     * @param {Object} group
+     * @returns {jQuery} a <button> element
+     */
+    _renderGroupButtons: function (list, group) {
+        var self = this;
+        var $buttons = $();
+        if (list.value) {
+            // buttons make no sense for 'Undefined' group
+            group.arch.children.forEach(function (child) {
+                if (child.tag === 'button') {
+                    $buttons = $buttons.add(self._renderGroupButton(list, child));
+                }
+            });
+        }
+        return $buttons;
+    },
+    /**
      * Renders the pager for a given group
      *
      * @private
@@ -462,6 +511,13 @@ var ListRenderer = BasicRenderer.extend({
             var $pager = this._renderGroupPager(group);
             var $lastCell = $cells[$cells.length - 1] || $th;
             $lastCell.addClass('o_group_pager').append($pager);
+        }
+        if (group.isOpen && this.groups[groupBy]) {
+            var $buttons = this._renderGroupButtons(group, this.groups[groupBy]);
+            if ($buttons.length) {
+                var $firstCell = $cells[1] || $th;
+                $firstCell.addClass('o_group_buttons').append($buttons);
+            }
         }
         return $('<tr>')
             .addClass('o_group_header')

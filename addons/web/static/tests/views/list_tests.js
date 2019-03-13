@@ -1092,7 +1092,6 @@ QUnit.module('Views', {
         list.destroy();
     });
 
-
     QUnit.test('properly apply onchange in simple case', async function (assert) {
         assert.expect(2);
 
@@ -1718,6 +1717,69 @@ QUnit.module('Views', {
             "should not have any data row");
 
         assert.containsOnce(list, 'table', "should have a table in the dom");
+        list.destroy();
+    });
+
+    QUnit.test('support groupby node', async function (assert) {
+        assert.expect(19);
+
+        var list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree>' +
+                '<field name="foo"/>' +
+                '<groupby name="currency_id">' +
+                    '<field name="position"/>' +
+                    '<button string="Button 1" type="object" name="button_method" attrs=\'{"invisible": [("position", "=", "after")]}\'/>' +
+                '</groupby>' +
+            '</tree>',
+            mockRPC: function (route, args) {
+                assert.step(args.method || route);
+                if (args.method === 'read' && args.model === 'res_currency') {
+                    assert.deepEqual(args.args, [[2, 1], ['position']]);
+                }
+                return this._super.apply(this, arguments);
+            },
+            intercepts: {
+                execute_action: function (ev) {
+                    assert.deepEqual(ev.data.env.currentID, 1,
+                        'should call with correct id');
+                    assert.strictEqual(ev.data.env.model, 'res_currency',
+                        'should call with correct model');
+                    assert.strictEqual(ev.data.action_data.name, 'button_method',
+                        "should call correct method");
+                    assert.strictEqual(ev.data.action_data.type, 'object',
+                        'should have correct type');
+                    ev.data.on_success();
+                },
+            },
+        });
+
+        assert.verifySteps(['/web/dataset/search_read']);
+
+        await list.update({groupBy: ['currency_id']});
+
+        assert.verifySteps(['/web/dataset/read_group', 'read']);
+        assert.containsN(list, '.o_group_header', 2,
+            "there should be 2 group headers");
+        assert.containsNone(list, '.o_group_header button', 0,
+            "there should be no button in the header");
+
+        await testUtils.dom.click(list.$('.o_group_header:eq(0)'));
+        assert.verifySteps(['/web/dataset/search_read']);
+        assert.containsOnce(list, '.o_group_header button.o_invisible_modifier',
+            "the first group (EUR) should have an invisible button");
+
+        await testUtils.dom.click(list.$('.o_group_header:eq(1)'));
+        assert.verifySteps(['/web/dataset/search_read']);
+        assert.containsN(list, '.o_group_header button', 2,
+            "there should be two buttons (one by header)");
+        assert.doesNotHaveClass(list, '.o_group_header:eq(1) button', 'o_invisible_modifier',
+            "the second header button should be visible");
+
+        await testUtils.dom.click(list.$('.o_group_header:eq(1) button'));
+
         list.destroy();
     });
 
