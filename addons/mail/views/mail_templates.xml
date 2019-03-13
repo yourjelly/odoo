@@ -43,6 +43,7 @@
                     <script type="text/javascript" src="/mail/static/src/js/models/utils/cc_throttle_function.js"></script>
                 <!-- Widgets -->
                     <!-- thread windows -->
+                    <script type="text/javascript" src="/mail/static/lib/core.js"></script>
                     <script type="text/javascript" src="/mail/static/src/js/component_snabbdom.js"></script>
                     <script type="text/javascript" src="/mail/static/src/js/component.js"></script>
                     <script type="text/javascript" src="/mail/static/src/js/thread_windows/abstract_thread_window.js"></script>

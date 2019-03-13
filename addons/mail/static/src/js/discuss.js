@@ -11,8 +11,6 @@ var core = require('web.core');
 var Dialog = require('web.Dialog');
 var dom = require('web.dom');
 var session = require('web.session');
-var Component = require('mail.Component');
-var QWebVDOM = require('mail.QWebVDOM');
 
 var QWeb = core.qweb;
 var _t = core._t;
@@ -1615,7 +1613,7 @@ var Discuss = AbstractAction.extend({
     },
 });
 
-class Counter extends Component {
+class Counter extends odoocore.Component {
     inlineTemplate = `
         <div t-name="counter">
         <button t-on-click="increment(-1)">-</button>
@@ -1642,7 +1640,7 @@ class Counter extends Component {
     }
 }
 
-class DemoWidget extends Component {
+class DemoWidget extends odoocore.Component {
     widgets = {Counter};
     inlineTemplate = `
         <div>
@@ -1674,7 +1672,7 @@ const DemoDiscuss = AbstractAction.extend({
     on_attach_callback() {
         let nextID = 1;
         const env = {
-            qweb: new QWebVDOM(),
+            qweb: new odoocore.QWeb(),
             getID: function () { return nextID++;},
         };
         var counter = new DemoWidget(env,{name: 'aku'});
