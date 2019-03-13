@@ -27,7 +27,7 @@
             <field name="user_id" ref="base.user_demo"/>
             <field name="pricelist_id" ref="product.list0"/>
             <field name="team_id" ref="sales_team.team_sales_department"/>
-            <field name="date_order" eval="(DateTime.today() - relativedelta(months=1)).strftime('%Y-%m-%d %H:%M')"/>
+            <field name="date_order" eval="(DateTime.today() - relativedelta(months=1)).strftime('%Y-%m-%d %H:%M:00')"/>
         </record>
 
         <record id="sale_order_line_1" model="sale.order.line">
@@ -64,7 +64,7 @@
             <field name="user_id" ref="base.user_admin"/>
             <field name="pricelist_id" ref="product.list0"/>
             <field name="team_id" ref="sales_team.team_sales_department"/>
-            <field name="date_order" eval="(DateTime.today() - relativedelta(months=1)).strftime('%Y-%m-%d %H:%M')"/>
+            <field name="date_order" eval="(DateTime.today() - relativedelta(months=1)).strftime('%Y-%m-%d %H:%M:00')"/>
         </record>
 
         <record id="sale_order_line_4" model="sale.order.line">
@@ -164,7 +164,7 @@
             <field name="user_id" ref="base.user_demo"/>
             <field name="pricelist_id" ref="product.list0"/>
             <field name="team_id" ref="sales_team.crm_team_1"/>
-            <field name="date_order" eval="(DateTime.today() - relativedelta(months=1)).strftime('%Y-%m-%d %H:%M')"/>
+            <field name="date_order" eval="(DateTime.today() - relativedelta(months=1)).strftime('%Y-%m-%d %H:%M:00')"/>
         </record>
 
         <record id="sale_order_line_12" model="sale.order.line">
@@ -649,7 +649,7 @@ Thanks!</field>
             <field name="pricelist_id" ref="product.list0"/>
             <field name="state">sent</field>
             <field name="team_id" ref="sales_team.team_sales_department"/>
-            <field name="date_order" eval="(DateTime.today() - relativedelta(months=1)).strftime('%Y-%m-%d %H:%M')"/>
+            <field name="date_order" eval="(DateTime.today() - relativedelta(months=1)).strftime('%Y-%m-%d %H:%M:00')"/>
             <field name="message_partner_ids" eval="[(4, ref('base.partner_demo_portal'))]"/>
         </record>
 
@@ -687,7 +687,7 @@ Thanks!</field>
             <field name="user_id" ref="base.user_admin"/>
             <field name="pricelist_id" ref="product.list0"/>
             <field name="team_id" ref="sales_team.team_sales_department"/>
-            <field name="date_order" eval="(DateTime.today() - relativedelta(months=1)).strftime('%Y-%m-%d %H:%M')"/>
+            <field name="date_order" eval="(DateTime.today() - relativedelta(months=1)).strftime('%Y-%m-%d %H:%M:00')"/>
             <field name="message_partner_ids" eval="[(4, ref('base.partner_demo_portal'))]"/>
         </record>
 

@@ -150,7 +150,7 @@
             <field name="body">Vendor Bill attachment</field>
             <field name="message_type">comment</field>
             <field name="author_id" ref="base.partner_demo"/>
-            <field name="date" eval="(DateTime.today() - timedelta(days=5)).strftime('%Y-%m-%d %H:%M')"/>
+            <field name="date" eval="(DateTime.today() - timedelta(days=5)).strftime('%Y-%m-%d %H:%M:00')"/>
             <field name="attachment_ids" eval="[(6, 0, [ref('ir_attachment_in_invoice_draft')])]"/>
         </record>
 

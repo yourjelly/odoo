@@ -119,7 +119,7 @@
             <field name="supplier_id" ref="supplier_corner"/>
             <field name="description">Beef, Bacon, Salad, Cheddar, Fried Onion, BBQ Sauce</field>
             <field name="image" type="base64" file="lunch/static/img/bacon_burger.png"/>
-            <field name="new_until" eval="datetime.today() + relativedelta(weeks=1)"/>
+            <field name="new_until" eval="(datetime.today() + relativedelta(weeks=1)).date()"/>
         </record>
 
         <record model="lunch.product" id="product_cheeseburger">
@@ -172,7 +172,7 @@
             <field name="supplier_id" ref="supplier_sushi_shop"/>
             <field name="description">6 Maki Salmon - 6 Maki Tuna - 6 Maki Shrimp/Avocado</field>
             <field name="image" type="base64" file="lunch/static/img/maki.png"/>
-            <field name="new_until" eval="datetime.today() + relativedelta(weeks=1)"/>
+            <field name="new_until" eval="(datetime.today() + relativedelta(weeks=1)).date()"/>
         </record>
 
         <record model="lunch.product" id="product_salmon">
@@ -182,7 +182,7 @@
             <field name="supplier_id" ref="supplier_sushi_shop"/>
             <field name="description">4 Sushi Salmon - 6 Maki Salmon - 4 Sashimi Salmon </field>
             <field name="image" type="base64" file="lunch/static/img/salmon_sushi.png"/>
-            <field name="new_until" eval="datetime.today() + relativedelta(weeks=1)"/>
+            <field name="new_until" eval="(datetime.today() + relativedelta(weeks=1)).date()"/>
         </record>
 
         <record model="lunch.product" id="product_temaki">
@@ -192,7 +192,7 @@
             <field name="supplier_id" ref="supplier_sushi_shop"/>
             <field name="description">1 Avocado - 1 Salmon - 1 Eggs - 1 Tuna</field>
             <field name="image" type="base64" file="lunch/static/img/temaki.png"/>
-            <field name="new_until" eval="datetime.today() + relativedelta(weeks=1)"/>
+            <field name="new_until" eval="(datetime.today() + relativedelta(weeks=1)).date()"/>
         </record>
 
         <record model="lunch.product" id="product_chirashi">
@@ -202,7 +202,7 @@
             <field name="supplier_id" ref="supplier_sushi_shop"/>
             <field name="description">2 Tempuras, Cabbages, Onions, Sesame Sauce</field>
             <field name="image" type="base64" file="lunch/static/img/chirashi.png"/>
-            <field name="new_until" eval="datetime.today() + relativedelta(weeks=1)"/>
+            <field name="new_until" eval="(datetime.today() + relativedelta(weeks=1)).date()"/>
         </record>
 
         <record model="lunch.product" id="product_cheese_ham">

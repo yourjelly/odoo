@@ -91,7 +91,7 @@ class TestLeaveRequests(TestHrHolidaysBase):
                 'name': 'Hol22',
                 'employee_id': self.employee_emp_id,
                 'holiday_status_id': self.holidays_type_2.id,
-                'date_from': (datetime.today() + relativedelta(days=1)).strftime('%Y-%m-%d %H:%M'),
+                'date_from': (datetime.today() + relativedelta(days=1)),
                 'date_to': (datetime.today() + relativedelta(days=2)),
                 'number_of_days': 1,
             })

@@ -18,20 +18,20 @@ class TestHrAttendance(TransactionCase):
         with self.assertRaises(Exception):
             self.my_attend = self.attendance.create({
                 'employee_id': self.test_employee.id,
-                'check_in': time.strftime('%Y-%m-10 12:00'),
-                'check_out': time.strftime('%Y-%m-10 11:00'),
+                'check_in': time.strftime('%Y-%m-10 12:00:00'),
+                'check_out': time.strftime('%Y-%m-10 11:00:00'),
             })
 
     def test_attendance_no_check_out(self):
         # Make sure no second attandance without check_out can be created
         self.attendance.create({
             'employee_id': self.test_employee.id,
-            'check_in': time.strftime('%Y-%m-10 10:00'),
+            'check_in': time.strftime('%Y-%m-10 10:00:00'),
         })
         with self.assertRaises(Exception):
             self.attendance.create({
                 'employee_id': self.test_employee.id,
-                'check_in': time.strftime('%Y-%m-10 11:00'),
+                'check_in': time.strftime('%Y-%m-10 11:00:00'),
             })
 
     # 5 next tests : Make sure that when attendances overlap an error is raised
@@ -39,58 +39,58 @@ class TestHrAttendance(TransactionCase):
         with self.assertRaises(Exception):
             self.attendance.create({
                 'employee_id': self.test_employee.id,
-                'check_in': time.strftime('%Y-%m-10 08:30'),
-                'check_out': time.strftime('%Y-%m-10 09:30'),
+                'check_in': time.strftime('%Y-%m-10 08:30:00'),
+                'check_out': time.strftime('%Y-%m-10 09:30:00'),
             })
 
     def test_attendance_2(self):
         with self.assertRaises(Exception):
             self.attendance.create({
                 'employee_id': self.test_employee.id,
-                'check_in': time.strftime('%Y-%m-10 07:30'),
-                'check_out': time.strftime('%Y-%m-10 08:30'),
+                'check_in': time.strftime('%Y-%m-10 07:30:00'),
+                'check_out': time.strftime('%Y-%m-10 08:30:00'),
             })
 
     def test_attendance_3(self):
         with self.assertRaises(Exception):
             self.attendance.create({
                 'employee_id': self.test_employee.id,
-                'check_in': time.strftime('%Y-%m-10 07:30'),
-                'check_out': time.strftime('%Y-%m-10 09:30'),
+                'check_in': time.strftime('%Y-%m-10 07:30:00'),
+                'check_out': time.strftime('%Y-%m-10 09:30:00'),
             })
 
     def test_attendance_4(self):
         with self.assertRaises(Exception):
             self.attendance.create({
                 'employee_id': self.test_employee.id,
-                'check_in': time.strftime('%Y-%m-10 08:15'),
-                'check_out': time.strftime('%Y-%m-10 08:45'),
+                'check_in': time.strftime('%Y-%m-10 08:15:00'),
+                'check_out': time.strftime('%Y-%m-10 08:45:00'),
             })
 
     def test_attendance_5(self):
         self.attendance.create({
             'employee_id': self.test_employee.id,
-            'check_in': time.strftime('%Y-%m-10 10:00'),
+            'check_in': time.strftime('%Y-%m-10 10:00:00'),
         })
         with self.assertRaises(Exception):
             self.attendance.create({
                 'employee_id': self.test_employee.id,
-                'check_in': time.strftime('%Y-%m-10 09:30'),
-                'check_out': time.strftime('%Y-%m-10 10:30'),
+                'check_in': time.strftime('%Y-%m-10 09:30:00'),
+                'check_out': time.strftime('%Y-%m-10 10:30:00'),
             })
 
     def test_new_attendances(self):
         # Make sure attendance modification raises an error when it causes an overlap
         self.attendance.create({
             'employee_id': self.test_employee.id,
-            'check_in': time.strftime('%Y-%m-10 11:00'),
-            'check_out': time.strftime('%Y-%m-10 12:00'),
+            'check_in': time.strftime('%Y-%m-10 11:00:00'),
+            'check_out': time.strftime('%Y-%m-10 12:00:00'),
         })
         open_attendance = self.attendance.create({
             'employee_id': self.test_employee.id,
-            'check_in': time.strftime('%Y-%m-10 10:00'),
+            'check_in': time.strftime('%Y-%m-10 10:00:00'),
         })
         with self.assertRaises(Exception):
             open_attendance.write({
-                'check_out': time.strftime('%Y-%m-10 11:30'),
+                'check_out': time.strftime('%Y-%m-10 11:30:00'),
             })
