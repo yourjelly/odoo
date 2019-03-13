@@ -45,7 +45,7 @@ odoo.define('mail.Component', function (require) {
                 cmap: {},
                 renderId: 1,
                 renderPromise: null,
-                renderProps: props,
+                renderProps: props || null,
                 boundHandlers: {}
             };
         }
@@ -62,6 +62,23 @@ odoo.define('mail.Component', function (require) {
         //--------------------------------------------------------------------------
         // Public
         //--------------------------------------------------------------------------
+        /**
+         * Attach a child widget to a given html element
+         *
+         * This is most of the time not necessary, since widgets should primarily be
+         * created/managed with the t-widget directive in a qweb template.  However,
+         * for the cases where we need more control, this method will do what is
+         * necessary to make sure all the proper hooks are called (for example,
+         * mounted/willUnmount)
+         *
+         * Note that this method makes a few assumptions:
+         * - the child widget is indeed a child of the current widget
+         * - the target is inside the dom of the current widget (typically a ref)
+         */
+        attachChild(child, target) {
+            target.appendChild(child.el);
+            child.__mount();
+        }
         async mount(target) {
             const vnode = await this._start();
             if (this.__widget__.isDestroyed) {
@@ -135,14 +152,21 @@ odoo.define('mail.Component', function (require) {
                 return this.render();
             }
         }
-        updateProps(nextProps) {
+        async updateProps(nextProps) {
+            if (nextProps === this.__widget__.renderProps) {
+                await this.__widget__.renderPromise;
+                return;
+            }
             const shouldUpdate = this.shouldUpdate(nextProps);
-            this.props = nextProps;
-            return shouldUpdate ? this.render() : Promise.resolve();
+            return shouldUpdate ? this._updateProps(nextProps) : Promise.resolve();
         }
         //--------------------------------------------------------------------------
         // Private
         //--------------------------------------------------------------------------
+        async _updateProps(nextProps) {
+            this.props = nextProps;
+            return this.render();
+        }
         async render() {
             if (this.__widget__.isDestroyed) {
                 return;
@@ -585,6 +609,7 @@ odoo.define('mail.QWebVDOM', function (require) {
             }
             const attributes = node.attributes;
             const validDirectives = [];
+            let withHandlers = false;
             for (let directive of this.directives) {
                 // const value = attributes[i].textContent!;
                 let fullName;
@@ -595,10 +620,11 @@ odoo.define('mail.QWebVDOM', function (require) {
                         name.startsWith("t-" + directive.name + "-")) {
                         fullName = name;
                         value = attributes[i].textContent;
+                        validDirectives.push({ directive, value, fullName });
+                        if (directive.name === "on") {
+                            withHandlers = true;
+                        }
                     }
-                }
-                if (fullName) {
-                    validDirectives.push({ directive, value, fullName });
                 }
             }
             for (let { directive, value, fullName } of validDirectives) {
@@ -616,7 +642,7 @@ odoo.define('mail.QWebVDOM', function (require) {
                 }
             }
             if (node.nodeName !== "t") {
-                let nodeID = this._compileGenericNode(node, ctx);
+                let nodeID = this._compileGenericNode(node, ctx, withHandlers);
                 ctx = ctx.withParent(nodeID);
                 for (let { directive, value, fullName } of validDirectives) {
                     if (directive.atNodeCreation) {
@@ -638,7 +664,7 @@ odoo.define('mail.QWebVDOM', function (require) {
                 }
             }
         }
-        _compileGenericNode(node, ctx) {
+        _compileGenericNode(node, ctx, withHandlers = true) {
             // nodeType 1 is generic tag
             if (node.nodeType !== 1) {
                 throw new Error("unsupported node type");
@@ -698,10 +724,14 @@ odoo.define('mail.QWebVDOM', function (require) {
                 }
             }
             let nodeID = ctx.generateID();
-            let p = attrs.length + tattrs.length > 0
-                ? `{key:${nodeID},attrs:{${attrs.join(",")}}}`
-                : `{key:${nodeID}}`;
-            ctx.addLine(`let c${nodeID} = [], p${nodeID} = ${p};`);
+            const parts = [`key:${nodeID}`];
+            if (attrs.length + tattrs.length > 0) {
+                parts.push(`attrs:{${attrs.join(",")}}`);
+            }
+            if (withHandlers) {
+                parts.push(`on:{}`);
+            }
+            ctx.addLine(`let c${nodeID} = [], p${nodeID} = {${parts.join(",")}};`);
             for (let id of tattrs) {
                 ctx.addIf(`_${id} instanceof Array`);
                 ctx.addLine(`p${nodeID}.attrs[_${id}[0]] = _${id}[1];`);
@@ -771,7 +801,6 @@ odoo.define('mail.QWebVDOM', function (require) {
             return result;
         }
     }
-
     function compileValueNode(value, node, qweb, ctx) {
         if (value === "0" && ctx.caller) {
             qweb._compileNode(ctx.caller, ctx);
@@ -956,11 +985,11 @@ odoo.define('mail.QWebVDOM', function (require) {
                 return "";
             });
             if (extraArgs) {
-                ctx.addLine(`p${nodeID}.on = {${eventName}: context['${handler}'].bind(owner, ${qweb._formatExpression(extraArgs)})};`);
+                ctx.addLine(`p${nodeID}.on['${eventName}'] = context['${handler}'].bind(owner, ${qweb._formatExpression(extraArgs)});`);
             }
             else {
-                ctx.addLine(`extra.handlers[${nodeID}] = extra.handlers[${nodeID}] || context['${handler}'].bind(owner);`);
-                ctx.addLine(`p${nodeID}.on = {${eventName}: extra.handlers[${nodeID}]};`);
+                ctx.addLine(`extra.handlers['${eventName}' + ${nodeID}] = extra.handlers['${eventName}' + ${nodeID}] || context['${handler}'].bind(owner);`);
+                ctx.addLine(`p${nodeID}.on['${eventName}'] = extra.handlers['${eventName}' + ${nodeID}];`);
             }
         }
     };
@@ -1035,11 +1064,7 @@ odoo.define('mail.QWebVDOM', function (require) {
             // check if we can reuse current rendering promise
             ctx.addIf(`w${widgetID} && w${widgetID}.__widget__.renderPromise`);
             ctx.addIf(`w${widgetID}.__widget__.isStarted`);
-            ctx.addIf(`props${widgetID} === w${widgetID}.__widget__.renderProps`);
-            ctx.addLine(`def${defID} = w${widgetID}.__widget__.renderPromise;`);
-            ctx.addElse();
             ctx.addLine(`def${defID} = w${widgetID}.updateProps(props${widgetID});`);
-            ctx.closeIf();
             ctx.addElse();
             ctx.addLine(`isNew${widgetID} = true`);
             ctx.addIf(`props${widgetID} === w${widgetID}.__widget__.renderProps`);

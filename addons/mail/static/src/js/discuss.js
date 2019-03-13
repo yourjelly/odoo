@@ -1647,7 +1647,7 @@ class DemoWidget extends Component {
     inlineTemplate = `
         <div>
             <div>hello <t t-esc="props.name"/></div>
-            <button t-on-click="toggleButton">Toggle Counter</button>
+            <button t-on-click="toggleButton" t-on-mouseenter="handleMouseEnter">Toggle Counter</button>
             <t t-if="state.flag">
                 <t t-widget="Counter" t-props="{initialState: 17}"/>
             </t>
@@ -1661,6 +1661,10 @@ class DemoWidget extends Component {
 
     toggleButton() {
         this.updateState({flag: !this.state.flag});
+    }
+
+    handleMouseEnter() {
+        console.log('blip');
     }
 }
 
