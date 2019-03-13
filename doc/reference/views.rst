@@ -333,6 +333,9 @@ Possible children elements of the list view are:
               :ref:`form view <reference/views/form>` is also valid and will
               be used when setting up the inline form view
 
+``groupby`
+    TODO
+
 ``control``
   defines custom controls for the current view.
 
