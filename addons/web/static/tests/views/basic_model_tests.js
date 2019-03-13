@@ -916,15 +916,15 @@ odoo.define('web.basic_model_tests', function (require) {
             var model = createModel({
                 Model: BasicModel,
                 data: this.data,
-                mockRPC: function (route, args) {
-                    if (args.method === 'read_group' && filterEnabled) {
+                mockRPC: function (route) {
+                    if (route === '/web/dataset/read_group' && filterEnabled) {
                         // as this is not yet supported by the MockServer, simulates
                         // a read_group that returns empty groups
                         // this is the case for several models (e.g. project.task
                         // grouped by stage_id)
                         return this._super.apply(this, arguments).then(function (result) {
                             // artificially filter out records of first group
-                            result[0].product_id_count = 0;
+                            result.groups[0].product_id_count = 0;
                             return result;
                         });
                     }
@@ -982,8 +982,8 @@ odoo.define('web.basic_model_tests', function (require) {
                 Model: BasicModel,
                 data: this.data,
                 mockRPC: function (route, args) {
-                    if (args.method === 'read_group') {
-                        assert.deepEqual(args.kwargs.fields, ['foo', 'date'],
+                    if (route === '/web/dataset/read_group') {
+                        assert.deepEqual(args.fields, ['foo', 'date'],
                             "should have correctly trimmed the magic grouping info from the field name");
                     }
                     return this._super.apply(this, arguments);

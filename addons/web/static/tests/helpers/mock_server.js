@@ -808,7 +808,8 @@ var MockServer = Class.extend({
      * @param {string[]} kwargs.fields fields that we are aggregating
      * @param {Array} kwargs.domain the domain used for the read_group
      * @param {boolean} kwargs.lazy still mostly ignored
-     * @param {integer} kwargs.limit ignored as well
+     * @param {integer} [kwargs.limit]
+     * @param {integer} [kwargs.offset]
      * @returns {Object[]}
      */
     _mockReadGroup: function (model, kwargs) {
@@ -980,7 +981,39 @@ var MockServer = Class.extend({
             });
         }
 
+        if (kwargs.limit) {
+            var offset = kwargs.offset || 0;
+            result = result.slice(offset, kwargs.limit + offset);
+        }
+
         return result;
+    },
+    /**
+     * Simulate a 'read_group' operation, from the controller point of view
+     *
+     * @private
+     * @private
+     * @param {Object} args
+     * @param {Array} args.domain
+     * @param {string} args.model
+     * @param {string[]} args.groupby
+     * @param {string[]} args.fields
+     * @param {integer} [args.limit]
+     * @param {integer} [args.offset=0]
+     * @param {boolean} [args.lazy]
+     * @returns {Object}
+     */
+    _mockReadGroupController: function (args) {
+        var allGroups = this._mockReadGroup(args.model, {
+            domain: args.domain,
+            fields: ['display_name'],
+            groupby: args.groupby,
+            lazy: args.lazy,
+        });
+        return {
+            groups: this._mockReadGroup(args.model, args),
+            length: allGroups.length,
+        };
     },
     /**
      * Simulates a 'read_progress_bar' operation
@@ -1191,6 +1224,9 @@ var MockServer = Class.extend({
         switch (route) {
             case '/web/action/load':
                 return Promise.resolve(this._mockLoadAction(args.kwargs));
+
+            case '/web/dataset/read_group':
+                return Promise.resolve(this._mockReadGroupController(args));
 
             case '/web/dataset/search_read':
                 return Promise.resolve(this._mockSearchReadController(args));

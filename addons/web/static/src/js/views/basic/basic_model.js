@@ -639,6 +639,9 @@ var BasicModel = AbstractModel.extend({
             getDomain: element.getDomain,
             getFieldNames: element.getFieldNames,
             groupedBy: element.groupedBy,
+            groupsCount: element.groupsCount,
+            groupsLimit: element.groupsLimit,
+            groupsOffset: element.groupsOffset,
             id: element.id,
             isDirty: element.isDirty,
             isOpen: element.isOpen,
@@ -3702,6 +3705,9 @@ var BasicModel = AbstractModel.extend({
             fields: fields,
             fieldsInfo: params.fieldsInfo,
             groupedBy: params.groupedBy || [],
+            groupsCount: 0,
+            groupsLimit: type === 'list' && params.groupsLimit || null,
+            groupsOffset: 0,
             id: _.uniqueId(params.modelName + '_'),
             isOpen: params.isOpen,
             limit: type === 'record' ? 1 : params.limit,
@@ -4214,20 +4220,24 @@ var BasicModel = AbstractModel.extend({
         var groupByField = list.groupedBy[0];
         var rawGroupBy = groupByField.split(':')[0];
         var fields = _.uniq(list.getFieldNames().concat(rawGroupBy));
-        var orderedBy = _.filter(list.orderedBy, function(order){
+        var orderedBy = _.filter(list.orderedBy, function (order) {
             return order.name === rawGroupBy || list.fields[order.name].group_operator !== undefined;
         });
         return this._rpc({
+                route: '/web/dataset/read_group',
                 model: list.model,
-                method: 'read_group',
                 fields: fields,
                 domain: list.domain,
                 context: list.context,
                 groupBy: list.groupedBy,
+                limit: list.groupsLimit,
+                offset: list.groupsOffset,
                 orderBy: orderedBy,
                 lazy: true,
             })
-            .then(function (groups) {
+            .then(function (result) {
+                var groups = result.groups;
+                list.groupsCount = result.length;
                 var previousGroups = _.map(list.data, function (groupID) {
                     return self.localData[groupID];
                 });
@@ -4454,6 +4464,12 @@ var BasicModel = AbstractModel.extend({
         }
         if (options.offset !== undefined) {
             this._setOffset(element.id, options.offset);
+        }
+        if (options.groupsLimit !== undefined) {
+            element.groupsLimit = options.groupsLimit;
+        }
+        if (options.groupsOffset !== undefined) {
+            element.groupsOffset = options.groupsOffset;
         }
         if (options.loadMoreOffset !== undefined) {
             element.loadMoreOffset = options.loadMoreOffset;

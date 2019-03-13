@@ -37,6 +37,7 @@ return {
     buildQuery: function (options) {
         var route;
         var params = options.params || {};
+        var orderBy;
         if (options.route) {
             route = options.route;
         } else if (options.model && options.method) {
@@ -51,6 +52,7 @@ return {
         }
 
         if (options.method === 'read_group') {
+            // call the model method
             if (!(params.args && params.args[0] !== undefined)) {
                 params.kwargs.domain = options.domain || params.domain || params.kwargs.domain || [];
             }
@@ -64,9 +66,23 @@ return {
             params.kwargs.limit = options.limit || params.limit || params.kwargs.limit;
             // In kwargs, we look for "orderby" rather than "orderBy" (note the absence of capital B),
             // since the Python argument to the actual function is "orderby".
-            var orderBy = options.orderBy || params.orderBy || params.kwargs.orderby;
+            orderBy = options.orderBy || params.orderBy || params.kwargs.orderby;
             params.kwargs.orderby = orderBy ? this._serializeSort(orderBy) : orderBy;
             params.kwargs.lazy = 'lazy' in options ? options.lazy : params.lazy;
+        }
+
+        if (options.route === '/web/dataset/read_group') {
+            // specifically call the controller
+            params.model = options.model || params.model;
+            params.domain = options.domain || params.domain;
+            params.fields = options.fields || params.fields;
+            params.groupby = options.groupBy || params.groupBy;
+            params.context = options.context || params.context || {};
+            params.offset = options.offset || params.offset;
+            params.limit = options.limit || params.limit;
+            orderBy = options.orderBy || params.orderBy;
+            params.orderby = orderBy ? this._serializeSort(orderBy) : orderBy;
+            params.lazy = 'lazy' in options ? options.lazy : params.lazy;
         }
 
         if (options.method === 'search_read') {
@@ -77,7 +93,7 @@ return {
             params.kwargs.limit = options.limit || params.limit || params.kwargs.limit;
             // In kwargs, we look for "order" rather than "orderBy" since the Python
             // argument to the actual function is "order".
-            var orderBy = options.orderBy || params.orderBy || params.kwargs.order;
+            orderBy = options.orderBy || params.orderBy || params.kwargs.order;
             params.kwargs.order = orderBy ? this._serializeSort(orderBy) : orderBy;
         }
 
@@ -88,7 +104,7 @@ return {
             params.fields = options.fields || params.fields;
             params.limit = options.limit || params.limit;
             params.offset = options.offset || params.offset;
-            var orderBy = options.orderBy || params.orderBy;
+            orderBy = options.orderBy || params.orderBy;
             params.sort = orderBy ? this._serializeSort(orderBy) : orderBy;
             params.context = options.context || params.context || {};
         }

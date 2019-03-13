@@ -11,7 +11,7 @@ var core = require('web.core');
 var BasicController = require('web.BasicController');
 var DataExport = require('web.DataExport');
 var Dialog = require('web.Dialog');
-var pyUtils = require('web.py_utils');
+var Pager = require('web.Pager');
 var Sidebar = require('web.Sidebar');
 
 var _t = core._t;
@@ -341,6 +341,48 @@ var ListController = BasicController.extend({
         return _.extend(env, {domain: record.getDomain()});
     },
     /**
+     * TODO: doc
+     * @returns {Promise}
+     */
+    _renderGroupsPager: function () {
+        var self = this;
+        var state = this.model.get(this.handle, {raw: true});
+        var nbGroups = state.groupsCount;
+        var currentMin = state.groupsOffset + 1;
+        var limit = state.groupsLimit;
+
+        if (this.groupsPager) {
+            // groupsPager already exists, update it
+            this.groupsPager.updateState({
+                size: nbGroups,
+                current_min: currentMin,
+                limit: limit,
+            });
+            return Promise.resolve();
+        }
+
+        // groupsPager doesn't exist yet, create it
+        var options = {
+            single_page_hidden: true,
+        };
+        this.groupsPager = new Pager(this, nbGroups, currentMin, limit, options);
+        this.groupsPager.on('pager_changed', this, function (newState) {
+            this.groupsPager.disable(); // FIXME: duplicated logic (disable/enable + scroll)
+            state = this.model.get(this.handle, {raw: true});
+            var limitChanged = (state.limit !== newState.limit);
+            this.reload({groupsLimit: newState.limit, groupsOffset: newState.current_min - 1})
+                .then(function () {
+                    // Reset the scroll position to the top on page changed only
+                    if (!limitChanged) {
+                        self.trigger_up('scrollTo', {top: 0});
+                    }
+                    self.groupsPager.enable();
+                })
+                .guardedCatch(this.groupsPager.enable.bind(this.groupsPager));
+        });
+        return this.groupsPager.appendTo(document.createDocumentFragment());
+    },
+    /**
      * Allows to change the mode of a single row.
      *
      * @override
@@ -394,10 +436,21 @@ var ListController = BasicController.extend({
      */
     _update: function () {
         var self = this;
-        return this._super.apply(this, arguments).then(function () {
-            self._toggleSidebar();
-            self._toggleCreateButton();
-        });
+        var prom;
+        if (this._controlPanel) {
+            var state = this.model.get(this.handle, {raw: true});
+            if (state.groupedBy.length) {
+                prom = this._renderGroupsPager().then(function () {
+                    self.controlPanelElements.$pager = self.groupsPager.$el;
+                });
+            } else {
+                this.controlPanelElements.$pager = this.pager.$el;
+            }
+        }
+        return Promise.resolve(prom)
+            .then(this._super.bind(this))
+            .then(this._toggleSidebar.bind(this))
+            .then(this._toggleCreateButton.bind(this));
     },
     /**
      * This helper simply makes sure that the control panel buttons matches the

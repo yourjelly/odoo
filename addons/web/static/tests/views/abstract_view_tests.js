@@ -129,9 +129,9 @@ QUnit.module('Views', {
                 'foo,false,search': '<search></search>',
             },
             data: this.data,
-            mockRPC: function(route, args) {
-                if (args.method === 'read_group') {
-                    assert.deepEqual(args.kwargs.groupby, ['bar']);
+            mockRPC: function (route, args) {
+                if (route === '/web/dataset/read_group') {
+                    assert.deepEqual(args.groupby, ['bar']);
                 }
                 return this._super.apply(this, arguments);
             },

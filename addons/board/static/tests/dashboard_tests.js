@@ -841,8 +841,8 @@ QUnit.test("Dashboard should use correct groupby", async function (assert) {
                 '</board>' +
             '</form>',
         mockRPC: function (route, args) {
-            if (args.method === 'read_group') {
-                assert.deepEqual(args.kwargs.groupby, ['bar'],
+            if (route === '/web/dataset/read_group') {
+                assert.deepEqual(args.groupby, ['bar'],
                     'user defined groupby should have precedence on action groupby');
             }
             if (route === '/web/action/load') {

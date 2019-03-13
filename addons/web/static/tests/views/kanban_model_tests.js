@@ -117,7 +117,7 @@ QUnit.module('Views', {
 
             // check the rpcs done
             assert.strictEqual(Object.keys(calledRoutes).length, 3, 'three different routes have been called');
-            var nbReadGroups = calledRoutes['/web/dataset/call_kw/partner/read_group'];
+            var nbReadGroups = calledRoutes['/web/dataset/read_group'];
             var nbSearchRead = calledRoutes['/web/dataset/search_read'];
             var nbNameCreate = calledRoutes['/web/dataset/call_kw/product/name_create'];
             assert.strictEqual(nbReadGroups, 1, 'should have done 1 read_group');
@@ -170,8 +170,8 @@ QUnit.module('Views', {
             Model: KanbanModel,
             data: this.data,
             mockRPC: function (route, args) {
-                if (args.method === 'read_group') {
-                    assert.deepEqual(args.kwargs.groupby, ['product_id'],
+                if (route === '/web/dataset/read_group') {
+                    assert.deepEqual(args.groupby, ['product_id'],
                         "the second level of groupBy should have been removed");
                 }
                 return this._super.apply(this, arguments);

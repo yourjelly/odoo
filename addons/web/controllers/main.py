@@ -913,6 +913,44 @@ class DataSet(http.Controller):
             'records': records
         }
 
+    @http.route('/web/dataset/read_group', type='json', auth="user")
+    def read_group(self, model, domain, fields, groupby, offset=0, limit=None, orderby=False,
+                   lazy=True):
+        return self.do_read_group(model, domain, fields, groupby, offset, limit, orderby, lazy)
+
+    def do_read_group(self, model, domain, fields, groupby, offset=0, limit=None, orderby=False,
+                      lazy=True):
+        """ Performs a read_group() with an optional limit, and returns the
+        total number of groups in addition to the groups themselves.
+
+        :param str model: the name of the model to perform the read_group on
+        :param list domain: the search domain for the query
+        :param fields: list of fields present in the list view
+        :type fields: [str]
+        :param list groupby: list of groupby descriptions by which the records will be grouped.
+        :param int offset: from which index should the results start being returned
+        :param int limit: the maximum number of groups to return
+        :param list orderby: sorting directives
+        :param bool lazy: if true, the results are only grouped according to the first groupby.
+        :returns: A structure (dict) with two keys: groups (paginated) and length
+                  (total number of groups)
+        """
+        Model = request.env[model]
+
+        groups = Model.read_group(domain, fields, groupby, offset=offset or 0,
+                                  limit=limit or False, orderby=orderby or False, lazy=lazy)
+        if not groups:
+            length = 0
+        elif limit and len(groups) == limit:
+            all_groups = Model.read_group(domain, ['display_name'], groupby, lazy=lazy)
+            length = len(all_groups)
+        else:
+            length = len(groups) + (offset or 0)
+        return {
+            'length': length,
+            'groups': groups
+        }
+
     @http.route('/web/dataset/load', type='json', auth="user")
     def load(self, model, id, fields):
         value = {}
