@@ -94,9 +94,10 @@ var TableWidget = PosBaseWidget.extend({
         }
     },
     // drag and drop for moving the table, at drag start
-    dragstart_handler: function(){
+    dragstart_handler: function(event){
         if (this.selected && !this.handle_dragging) {
             this.dragging = true;
+            // event.source.style.display = 'none';
             // this.dragpos  = { x: drag.offsetX, y: drag.offsetY };
         }
     },
@@ -106,7 +107,7 @@ var TableWidget = PosBaseWidget.extend({
     },
     // drag and drop for moving the table, at every drop movement.
     dragmove_handler: function(event){
-        if (this.dragging) {
+        if (false && this.dragging) {
             debugger;
             var dx   = drag.offsetX - this.dragpos.x;
             var dy   = drag.offsetY - this.dragpos.y;
@@ -227,12 +228,16 @@ var TableWidget = PosBaseWidget.extend({
         this.selected = true;
         this.renderElement();
 
+        new Draggable.Draggable($('.pos-topheader')[0], {
+            draggable: '.username'
+        }).on('mirror:create', function(e){e.cancel()});
+
         new Draggable.Draggable($('.floor-map')[0], {
-            draggable: 'table'
+            draggable: '.table'
         })
-            .on('drag:start', this.dragstart_handler.bind(this))
-            .on('drag:move', this.dragmove_handler.bind(this))
-            .on('drag:stop', this.dragend_handler.bind(this));
+            // .on('drag:start', this.dragstart_handler.bind(this))
+            // .on('drag:move', this.dragmove_handler.bind(this))
+            // .on('drag:stop', this.dragend_handler.bind(this));
     },
     // deselect the table (should be called via the floorplan)
     deselect: function() {
