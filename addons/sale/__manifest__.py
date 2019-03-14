@@ -41,6 +41,7 @@ This module contains all the common features of Sales Management and eCommerce.
     ],
     'qweb': [
         "static/src/xml/account_reconciliation.xml",
+        "static/src/xml/advanced_fields.xml",
     ],
     'uninstall_hook': "uninstall_hook",
     'installable': True,

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+
+    <t t-name="AdvancedFields">
+        <button type="object" aria-label="Open" class="btn o_icon_button">
+            <i class="fa fa-external-link"></i>
+        </button>
+    </t>
+
+</templates>
