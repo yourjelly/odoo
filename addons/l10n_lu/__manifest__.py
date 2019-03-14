@@ -34,7 +34,7 @@ Notes:
         # basic accounting data
         'data/l10n_lu_chart_data.xml',
         'data/account.account.template-2011.csv',
-        'data/account.account.tag.csv',
+        'data/account.tax.report.line.csv',
         'data/account.tax.group.csv',
         'data/account.tax.template-2015.csv',
         'data/account.fiscal.position.template-2011.csv',
