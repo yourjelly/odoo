@@ -87,6 +87,6 @@ access_account_incoterms_manager,account.incoterms manager,model_account_incoter
 access_account_tax_repartition_line_user,account.tax repartition.line.user,model_account_tax_repartition_line,base.group_user,1,0,0,0
 access_account_tax_repartition_line_invoice,account.tax repartition.line.invoice,model_account_tax_repartition_line,account.group_account_invoice,1,0,0,0
 access_account_tax_repartition_line_manager,account.tax repartition.line.manager,model_account_tax_repartition_line,account.group_account_manager,1,1,1,1
-access_account_tax_repartition_line_template_manager,account.tax repartition.line.template.manager,model_account_tax_repartition_line_template,account.group_account_manager,1,1,1,
-access_account_tax_tag_template_invoice,account.tax tag.template.invoice,model_account_tax_tag_template,account.group_account_invoice,1,0,0,
-access_account_tax_tag_template_ac_user,account.tax tag.template.ac.user,model_account_tax_tag_template,account.group_account_user,1,1,1,
+access_account_tax_repartition_line_template_manager,account.tax repartition.line.template.manager,model_account_tax_repartition_line_template,account.group_account_manager,1,1,1,1
+access_account_tax_report_line_invoice,account.tax.report.line.invoice,model_account_tax_report_line,account.group_account_invoice,1,0,0,0
+access_account_tax_report_line_ac_user,account.tax.report.line.ac.user,model_account_tax_report_line,account.group_account_manager,1,1,1,1
