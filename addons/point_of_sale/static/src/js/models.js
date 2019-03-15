@@ -1476,11 +1476,22 @@ exports.Orderline = Backbone.Model.extend({
     },
 
     has_valid_product_lot: function(){
-        if(!this.has_product_lot){
-            return true;
+        if (this.has_product_lot) {
+            var lot = this.pack_lot_lines.get_valid_lots();
+            for (var i = 0; i < lot.length; i++) {
+                if (lot[i].order_line.quantity < 0) {
+                    continue;       // ignore if the quantity is negative (refund)
+                } else if (lot[i].available_quantity === undefined || lot[i].available_quantity < 1 || !lot[i].order_line.quantity) {
+                    return false;   // available quantity and order quantity should be at least 1
+                } else if (this.product.tracking === "lot" && lot[i].available_quantity < lot[i].order_line.quantity) {
+                    return false;   // if product tracking is lot than available quantity should be greater or equal to the quantity
+                } else if (this.product.tracking === "serial" && (lot[i].available_lot_name !== lot[i].attributes.lot_name || lot.length != lot[i].order_line.quantity)) {
+                    return false;   // if product tracking is serial then input serial, available serial, input length and quantity should be same
+                }
+            }
+            return !!lot.length;    // the order should be none 0
         }
-        var valid_product_lot = this.pack_lot_lines.get_valid_lots();
-        return this.get_required_number_of_lots() === valid_product_lot.length;
+        return true;
     },
 
     // return the unit of measure of the product
