@@ -3,6 +3,7 @@
 
 import logging
 import re
+import lxml.html
 
 from operator import itemgetter
 from email.utils import formataddr
@@ -51,6 +52,9 @@ class Message(models.Model):
         'mail.message', 'Parent Message', index=True, ondelete='set null',
         help="Initial thread message.")
     child_ids = fields.One2many('mail.message', 'parent_id', 'Child Messages')
+    # link preview
+    link_preview_id = fields.Many2one('mail.link_preview', index=True, ondelete='SET NULL')
+    requires_preview = fields.Boolean(default=False)
     # related document
     model = fields.Char('Related Document Model', index=True)
     res_id = fields.Integer('Related Document ID', index=True)
@@ -512,6 +516,8 @@ class Message(models.Model):
             notif_dict[mid]['partner_id'].append(notif.res_partner_id.id)
 
         for message in message_values:
+            if message['link_preview_id']:
+                message['link_preview_id'] = self.env['mail.link_preview'].search_read([('id', '=', message['link_preview_id'][0])], ['url', 'title', 'description', 'image_url'])
             message['needaction_partner_ids'] = notif_dict.get(message['id'], dict()).get('partner_id', [])
             message['is_note'] = message['subtype_id'] and subtypes_dict[message['subtype_id'][0]]['id'] == note_id
             message['is_discussion'] = message['subtype_id'] and subtypes_dict[message['subtype_id'][0]]['id'] == com_id
@@ -525,7 +531,7 @@ class Message(models.Model):
     def _get_message_format_fields(self):
         return [
             'id', 'body', 'date', 'author_id', 'email_from',  # base message fields
-            'message_type', 'subtype_id', 'subject',  # message specific
+            'message_type', 'subtype_id', 'subject', 'link_preview_id',  # message specific
             'model', 'res_id', 'record_name',  # document related
             'channel_ids', 'partner_ids',  # recipients
             'starred_partner_ids',  # list of partner ids for whom the message is starred
@@ -983,6 +989,11 @@ class Message(models.Model):
 
         # delegate creation of tracking after the create as sudo to avoid access rights issues
         tracking_values_cmd = values.pop('tracking_value_ids', False)
+
+        # basic heuristic to enable link preview only for channel messages
+        if values.get('model') == 'mail.channel':
+            values.update(requires_preview=True)
+
         message = super(Message, self).create(values)
 
         if values.get('attachment_ids'):
@@ -1314,3 +1325,9 @@ class Message(models.Model):
                 body=template.render({'record': moderator.partner_id}, engine='ir.qweb', minimal_qcontext=True),
                 email_from=moderator.company_id.catchall or moderator.company_id.email,
             )
+
+    @api.one
+    def _search_for_urls(self):
+        tree = lxml.html.fromstring(self.body)
+        urls = [l[2] for l in tree.iterlinks() if l[1] == 'href']
+        return urls

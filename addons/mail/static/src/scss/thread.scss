@@ -218,6 +218,22 @@
                 display: inline;
                 position: relative;
             }
+
+            .o_link_preview_test_vodooo {
+                font-family: 'Georgia', serif;
+                color: grey !important;
+                div {
+                    margin-top: 5px;
+                    margin-bottom: 5px;
+                    padding: 15px;
+                    border: 1px;
+                    border-style: solid;
+                    border-color: grey;
+                }
+                img {
+                    width: 200px;
+                }
+            }
         }
     }
     .o_thread_title {

@@ -340,6 +340,18 @@
                 </p>
                 <div class="o_thread_message_content">
                     <t t-raw="message.getBody()"/>
+                    <t t-set="link_preview" t-value="message.getLinkPreviewStuff()" />
+                    <t t-if="link_preview">
+                        <div class="o_link_preview_test_vodooo">
+                            <div>
+                                <a t-att-href="link_preview['url']" target='_blank'>
+                                    <b t-esc="link_preview['title']" t-if="link_preview['title']"/>
+                                </a>
+                                <p t-esc="link_preview['description']" t-if="link_preview['description']"/>
+                                <img t-att-src="link_preview['image_url']" t-if="link_preview['image_url']"/>
+                            </div>
+                        </div>
+                    </t>
                     <t t-if="message.hasTrackingValues()">
                         <t t-if="message.hasSubtypeDescription()">
                             <p><t t-esc="message.getSubtypeDescription()"/></p>

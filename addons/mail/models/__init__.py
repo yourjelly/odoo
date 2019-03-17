@@ -27,3 +27,4 @@ from . import ir_autovacuum
 from . import ir_http
 from . import ir_model
 from . import ir_ui_view
+from . import mail_link_preview

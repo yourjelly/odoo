@@ -39,6 +39,12 @@ var AbstractMessage =  Class.extend({
     init: function (parent, data) {
         this._attachmentIDs = data.attachment_ids || [];
         this._body = data.body || "";
+        if (!!data.link_preview_id) {
+            this._linkPreview = data.link_preview_id[0];
+        }
+        else {
+            this._linkPreview = false;
+        }
         // by default: current datetime
         this._date = data.date ? moment(time.str_to_datetime(data.date)) : moment();
         this._id = data.id;
@@ -97,6 +103,9 @@ var AbstractMessage =  Class.extend({
      */
     getBody: function () {
         return this._body;
+    },
+    getLinkPreviewStuff: function () {
+        return this._linkPreview;
     },
     /**
      * @return {moment}
