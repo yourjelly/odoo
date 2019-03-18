@@ -444,7 +444,6 @@ var FieldChar = InputField.extend(TranslatableFieldMixin, {
     },
 });
 
-
 var LinkButton = AbstractField.extend({
     events: _.extend({}, AbstractField.prototype.events, {
         'click': '_onClick'
@@ -483,7 +482,6 @@ var LinkButton = AbstractField.extend({
         event.stopPropagation();
         window.open(this.value, '_blank');
     },
-
 });
 
 var FieldDate = InputField.extend({
