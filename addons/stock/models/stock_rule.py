@@ -44,10 +44,12 @@ class StockRule(models.Model):
     route_id = fields.Many2one('stock.location.route', 'Route', required=True, ondelete='cascade')
     procure_method = fields.Selection([
         ('make_to_stock', 'Take From Stock'),
-        ('make_to_order', 'Trigger Another Rule')], string='Move Supply Method',
+        ('make_to_order', 'Trigger Another Rule'),
+        ('stock_first', 'Take From Stock, if Unavailable, Trigger Another Rule')], string='Move Supply Method',
         default='make_to_stock', required=True,
-        help="""Create Procurement: A procurement will be created in the source location and the system will try to find a rule to resolve it. The available stock will be ignored.
-             Take from Stock: The products will be taken from the available stock.""")
+        help="* Take From Stock: the products will be taken from the available stock of the source location.\n"
+             "* Trigger Another Rule: the system will try to find a stock rule to bring the products in the source location. The available stock will be ignored.\n"
+             "* Take From Stock, if Unavailable, Trigger Another Rule: the products will be taken from the available stock of the source location. If there is no stock available, the system will try to find a  rule to bring the products in the source location.")
     route_sequence = fields.Integer('Route Sequence', related='route_id.sequence', store=True, readonly=False)
     picking_type_id = fields.Many2one(
         'stock.picking.type', 'Operation Type',
@@ -109,6 +111,8 @@ class StockRule(models.Model):
             suffix = ""
             if self.procure_method == 'make_to_order' and self.location_src_id:
                 suffix = _("<br>A need is created in <b>%s</b> and a rule will be triggered to fulfill it.") % (source)
+            if self.procure_method == 'stock_first' and self.location_src_id:
+                suffix = _("<br>If the products are not available in <b>%s</b>.<br>A rule will be triggered to bring products in this location.") % (source)
             message_dict = {
                 'pull': _('When products are needed in <b>%s</b>, <br/> <b>%s</b> are created from <b>%s</b> to fulfill the need.') % (destination, operation, source) + suffix,
                 'push': _('When products arrive in <b>%s</b>, <br/> <b>%s</b> are created to send them in <b>%s</b>.') % (source, operation, destination)
@@ -175,6 +179,13 @@ class StockRule(models.Model):
                 msg = _('No source location defined on stock rule: %s!') % (rule.name, )
                 raise UserError(msg)
 
+            if rule.procure_method == 'stock_first':
+                product_available = procurement.product_id.with_context(location=procurement.location_id.id).virtual_available
+                if float_compare(procurement.product_qty, product_available, precision_rounding=procurement.product_id.uom_id.rounding) <= 0:
+                    continue
+                else:
+                    missing_quantity = float_round(procurement.product_qty - product_available, precision_rounding=procurement.product_id.uom_id.rounding)
+                    procurement = self.env['procurement.group'].Procurement(procurement.product_id, missing_quantity, *procurement[2:])
             moves_values_by_company[procurement.company_id.id].append(rule._get_stock_move_values(*procurement))
         for company_id, moves_values in moves_values_by_company.items():
             # create the move as SUPERUSER because the current user may not have the rights to do it (mto product launched by a sale for example)
@@ -217,7 +228,7 @@ class StockRule(models.Model):
             'partner_id': self.partner_address_id.id or (values.get('group_id', False) and values['group_id'].partner_id.id) or False,
             'location_id': self.location_src_id.id,
             'location_dest_id': location_id.id,
-            'move_dest_ids': values.get('move_dest_ids', False) and [(4, x.id) for x in values['move_dest_ids']] or [],
+            'move_dest_ids': self.procure_method == 'stock_first' and False or (values.get('move_dest_ids', False) and [(4, x.id) for x in values['move_dest_ids']] or []),
             'rule_id': self.id,
             'procure_method': self.procure_method,
             'origin': origin,

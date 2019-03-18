@@ -253,6 +253,54 @@ class TestPickShip(TestStockCommon):
         self.assertEqual(len(picking_ship.move_lines.mapped('move_orig_ids')), 0,
         'Scheduler should not create picking pack and pick since ship has been manually cancelled.')
 
+    def test_stock_first(self):
+        """ Create a pick pack ship with exisiting quantitie in pick. Rules
+        procure method are defined as take stock first if not trigger another
+        rule. We simulate a delivery of 4 with 2 unit available in pack zone.
+        The move from stock to pack should be only 2 units.
+        """
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.user.id)], limit=1)
+        warehouse.delivery_steps = 'pick_pack_ship'
+        warehouse.delivery_route_id.mapped('rule_ids').write({
+            'procure_method': 'stock_first',
+        })
+        pack_location = warehouse.wh_pack_stock_loc_id
+        self.env['stock.quant']._update_available_quantity(self.productA, pack_location, 2.0)
+        self.env['stock.quant']._update_available_quantity(self.productA, warehouse.lot_stock_id, 2.0)
+
+        picking_ship = self.env['stock.picking'].create({
+            'location_id': pack_location.id,
+            'location_dest_id': self.customer_location,
+            'partner_id': self.partner_delta_id,
+            'picking_type_id': self.picking_type_out,
+        })
+        self.MoveObj.create({
+            'name': self.productA.name,
+            'product_id': self.productA.id,
+            'product_uom_qty': 4,
+            'product_uom': self.productA.uom_id.id,
+            'procure_method': 'make_to_order',
+            'picking_id': picking_ship.id,
+            'location_id': self.output_location,
+            'location_dest_id': self.customer_location,
+        })
+        import pudb; pudb.set_trace()
+        picking_ship.action_confirm()
+        picking_pick = self.env['stock.picking'].search([('location_id', '=', warehouse.lot_stock_id.id), ('product_id', '=', self.productA.id)])
+        self.assertEqual(picking_pick.move_lines.product_uom_qty, 2)
+
+        picking_pack = self.env['stock.picking'].search([('location_id', '=', pack_location.id), ('product_id', '=', self.productA.id)])
+        self.assertEqual(picking_pack.move_lines.product_uom_qty, 4)
+
+        picking_pick.action_assign()
+        self.assertEqual(picking_pick.move_lines.reserved_availability, 2)
+        picking_pick.move_lines.quantity_done = 2
+        picking_pick.action_done()
+
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.productA.id, pack_location.id), 4.0)
+        picking_pack.action_assign()
+        self.assertEqual(picking_pack.move_lines.reserved_availability, 4)
+
     def test_no_backorder_1(self):
         """ Check the behavior of doing less than asked in the picking pick and chosing not to
         create a backorder. In this behavior, the second picking should obviously only be able to

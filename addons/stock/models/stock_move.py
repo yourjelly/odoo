@@ -114,8 +114,9 @@ class StockMove(models.Model):
     origin = fields.Char("Source Document")
     procure_method = fields.Selection([
         ('make_to_stock', 'Default: Take From Stock'),
-        ('make_to_order', 'Advanced: Apply Procurement Rules')], string='Supply Method',
-        default='make_to_stock', required=True,
+        ('make_to_order', 'Advanced: Apply Procurement Rules'),
+        ('stock_first', 'Take From Stock If Available Else Trigger Rules')],
+        string='Supply Method', default='make_to_stock', required=True,
         help="By default, the system will take from the stock in the source location and passively wait for availability. "
              "The other possibility allows you to directly create a procurement on the source location (and thus ignore "
              "its current stock) to gather products. If we want to chain moves and have this one to wait for the previous, "
@@ -761,7 +762,7 @@ class StockMove(models.Model):
             if move.move_orig_ids:
                 move_waiting |= move
             else:
-                if move.procure_method == 'make_to_order':
+                if move.procure_method in ('make_to_order', 'stock_first'):
                     move_create_proc |= move
                 else:
                     move_to_confirm |= move
