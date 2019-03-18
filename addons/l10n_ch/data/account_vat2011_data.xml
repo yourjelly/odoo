@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-        <record id="vat_tag_200" model="account.account.tag">
-            <field name="name">Switzerland VAT Form: grid 200</field>
-            <field name="applicability">taxes</field>
-        </record>
         <record id="vat_tag_220" model="account.account.tag">
             <field name="name">Switzerland VAT Form: grid 220</field>
             <field name="applicability">taxes</field>
