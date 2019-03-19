@@ -70,8 +70,7 @@
 
 <t t-name="KanbanView.RecordQuickCreate.buttons">
     <div>
-        <button class="btn btn-primary o_kanban_add">Add</button>
-        <button class="btn btn-primary o_kanban_edit">Edit</button>
+        <button class="btn btn-primary o_kanban_add">Save</button>
         <button class="btn btn-secondary o_kanban_cancel ml8">Discard</button>
     </div>
 </t>

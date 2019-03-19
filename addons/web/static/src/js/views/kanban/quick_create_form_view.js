@@ -10,6 +10,7 @@ var BasicModel = require('web.BasicModel');
 var FormController = require('web.FormController');
 var FormRenderer = require('web.FormRenderer');
 var FormView = require('web.FormView');
+var view_registry = require('web.view_registry');
 
 var QuickCreateFormRenderer = FormRenderer.extend({
     /**
@@ -90,6 +91,8 @@ var QuickCreateFormView = FormView.extend({
     }),
 });
 
-return QuickCreateFormView;
+view_registry.add('formoverlay', QuickCreateFormView);
+return QuickCreateFormView
+;
 
 });

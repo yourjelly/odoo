@@ -7,8 +7,8 @@ odoo.define('web.kanban_record_quick_create', function (require) {
  */
 
 var core = require('web.core');
-var QuickCreateFormView = require('web.QuickCreateFormView');
 var Widget = require('web.Widget');
+var view_registry = require('web.view_registry');
 
 var qweb = core.qweb;
 
@@ -19,8 +19,8 @@ var RecordQuickCreate = Widget.extend({
         cancel: '_onCancel',
     },
     events: {
-        'click .o_kanban_add': '_onAddClicked',
-        'click .o_kanban_edit': '_onEditClicked',
+        'click .o_kanban_add': '_onSaveClicked',
+        'click .o_kanban_expand': '_onExpandClicked',
         'click .o_kanban_cancel': '_onCancelClicked',
     },
 
@@ -37,6 +37,8 @@ var RecordQuickCreate = Widget.extend({
         this.context = options.context;
         this.formViewRef = options.formViewRef;
         this.model = options.model;
+        this.res_id = options.res_id;
+        this.db_id = options.db_id;
         this._disabled = false; // to prevent from creating multiple records (e.g. on double-clicks)
     },
     /**
@@ -68,10 +70,18 @@ var RecordQuickCreate = Widget.extend({
             viewsLoaded = Promise.resolve({form: fieldsView});
         }
         viewsLoaded = viewsLoaded.then(function (fieldsViews) {
+            var QuickCreateFormView = view_registry.get('formoverlay');
             var formView = new QuickCreateFormView(fieldsViews.form, {
                 context: self.context,
                 modelName: self.model,
                 userContext: self.getSession().user_context,
+                modelName: self.model,
+                ids: self.res_id ? [self.res_id] : [],
+                currentId: self.res_id || undefined,
+                mode: 'edit',
+                footerToButtons: true,
+                default_buttons: false,
+                withControlPanel: false,
             });
             return formView.getController(self).then(function (controller) {
                 self.controller = controller;
@@ -85,6 +95,7 @@ var RecordQuickCreate = Widget.extend({
      */
     start: function () {
         this.$el.append(this.controller.$el);
+        this.$el.append($('<button class="btn btn-default o_kanban_expand"><i class="fa fa-expand"/></button>'));
         this.$el.append(qweb.render('KanbanView.RecordQuickCreate.buttons'));
 
         // focus the first field
@@ -148,11 +159,19 @@ var RecordQuickCreate = Widget.extend({
         this.controller.commitChanges().then(function () {
             var canBeSaved = self.controller.canBeSaved();
             if (canBeSaved) {
-                self.trigger_up('quick_create_add_record', {
-                    openRecord: options && options.openRecord || false,
-                    values: self.controller.getChanges(),
-                    onFailure: self._enableQuickCreate.bind(self),
-                });
+                if (self.res_id) {
+                    debugger
+                    self.controller.saveRecord().then(function () {
+                        self.trigger_up('overlay_form_update_record', {db_id: self.db_id});
+                        self._cancel();
+                    });
+                } else {
+                    self.trigger_up('overlay_form_add_record', {
+                        openRecord: options && options.openRecord || false,
+                        values: self.controller.getChanges(),
+                        onFailure: self._enableQuickCreate.bind(self),
+                    });
+                }
             } else {
                 self._enableQuickCreate();
             }
@@ -214,7 +233,7 @@ var RecordQuickCreate = Widget.extend({
      * @private
      * @param {MouseEvent} ev
      */
-    _onAddClicked: function (ev) {
+    _onSaveClicked: function (ev) {
         ev.stopPropagation();
         this._add();
     },
@@ -241,9 +260,19 @@ var RecordQuickCreate = Widget.extend({
      * @private
      * @param {MouseEvent} ev
      */
-    _onEditClicked: function (ev) {
+    _onExpandClicked: function (ev) {
         ev.stopPropagation();
-        this._add({openRecord: true});
+        var self = this;
+        if (this.db_id) {
+            this.controller.saveRecord().then(function () {
+                self.trigger_up('open_record', {
+                    id: self.db_id,
+                    mode: 'edit',
+                });
+            });
+        } else {
+            this._add({openRecord: true});
+        }
     },
     /**
      * When a click happens outside the quick create, we want to close the quick
@@ -291,6 +320,7 @@ var RecordQuickCreate = Widget.extend({
         this.cancel();
     },
 });
+
 
 return RecordQuickCreate;
 

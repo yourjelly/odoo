@@ -43,6 +43,8 @@ var BasicView = AbstractView.extend({
         this.fieldsInfo[this.viewType] = this.fieldsView.fieldsInfo[this.viewType];
 
         this.rendererParams.viewType = this.viewType;
+        this.rendererParams.quickCreateView = this.arch.attrs.quick_create_view || null;
+        this.controllerParams.quickCreateView = this.rendererParams.quickCreateView;
 
         this.controllerParams.confirmOnDelete = true;
         this.controllerParams.archiveEnabled = 'active' in this.fields;

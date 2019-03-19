@@ -18,7 +18,8 @@ var KanbanColumn = Widget.extend({
     template: 'KanbanView.Group',
     custom_events: {
         cancel_quick_create: '_onCancelQuickCreate',
-        quick_create_add_record: '_onQuickCreateAddRecord',
+        overlay_form_add_record: '_onAddOverlayFormRecord',
+        open_overlay_form_view: 'addQuickCreate',
         tweak_column: '_onTweakColumn',
         tweak_column_records: '_onTweakColumnRecords',
     },
@@ -192,7 +193,8 @@ var KanbanColumn = Widget.extend({
      *
      * @returns {Promise}
      */
-    addQuickCreate: function () {
+    addQuickCreate: function (event) {
+        var values = event && event.data;
         if (this.folded) {
             // first open the column, and then add the quick create
             this.trigger_up('column_toggle_fold', {
@@ -202,7 +204,7 @@ var KanbanColumn = Widget.extend({
         }
 
         if (this.quickCreateWidget) {
-            return Promise.reject();
+            this._cancelQuickCreate();
         }
         this.trigger_up('close_quick_create'); // close other quick create widgets
         this.trigger_up('start_quick_create');
@@ -212,8 +214,10 @@ var KanbanColumn = Widget.extend({
             context: context,
             formViewRef: this.quickCreateView,
             model: this.modelName,
+            res_id: values && values.res_id || undefined,
+            db_id: values && values.db_id || undefined,
         });
-        return this.quickCreateWidget.insertAfter(this.$header);
+        return this.quickCreateWidget.insertAfter($('.o_action_manager .o_content'));
     },
     /**
      * Closes the quick create widget if it isn't dirty.
@@ -342,7 +346,7 @@ var KanbanColumn = Widget.extend({
      * @private
      * @param {OdooEvent} event
      */
-    _onQuickCreateAddRecord: function (event) {
+    _onAddOverlayFormRecord: function (event) {
         this.trigger_up('quick_create_record', event.data);
     },
     /**
