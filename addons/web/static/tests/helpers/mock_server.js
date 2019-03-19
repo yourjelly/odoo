@@ -420,6 +420,9 @@ var MockServer = Class.extend({
         this._mockWrite(modelName, [[id], values]);
         return id;
     },
+    _mockDateIntervalCovering: function (start, end, interval, date_type) {
+        return [];
+    },
     /**
      * Simulate a 'default_get' operation
      *
@@ -1199,6 +1202,8 @@ var MockServer = Class.extend({
 
             case '/web/dataset/resequence':
                 return Promise.resolve(this._mockResequence(args));
+            case '/web/graph/date_interval_covering':
+                return Promise.resolve(this._mockDateIntervalCovering(args));
         }
         if (route.indexOf('/web/image') >= 0 || _.contains(['.png', '.jpg'], route.substr(route.length - 4))) {
             return Promise.resolve();

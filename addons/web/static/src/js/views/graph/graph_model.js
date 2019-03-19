@@ -2,6 +2,8 @@ odoo.define('web.GraphModel', function (require) {
 "use strict";
 
 var core = require('web.core');
+var Domain = require('web.Domain');
+
 var _t = core._t;
 
 /**
@@ -29,10 +31,7 @@ return AbstractModel.extend({
      * @returns {Object}
      */
     get: function () {
-        var self = this;
-        return _.extend({}, this.chart, {
-            comparisonFieldIndex: self._getComparisonFieldIndex(),
-        });
+        return this.chart;
     },
     /**
      * Initial loading.
@@ -67,6 +66,7 @@ return AbstractModel.extend({
         this.chart = {
             comparisonField: params.comparisonField,
             comparisonTimeRange: params.comparisonTimeRange,
+            comparisonTimeRangeId: params.comparisonTimeRangeId,
             comparisonTimeRangeDescription: params.comparisonTimeRangeDescription,
             compare: params.compare,
             context: params.context,
@@ -78,8 +78,10 @@ return AbstractModel.extend({
             origins: [],
             stacked: params.stacked,
             timeRange: params.timeRange,
+            timeRangeId: params.timeRangeId,
             timeRangeDescription: params.timeRangeDescription,
         };
+        this.chart.comparisonFieldIndex = this._getComparisonFieldIndex();
         return this._loadGraph(this._getDomains());
     },
     /**
@@ -109,16 +111,20 @@ return AbstractModel.extend({
             if (timeRangeMenuData) {
                 this.chart.comparisonField = timeRangeMenuData.comparisonField || undefined;
                 this.chart.comparisonTimeRange = timeRangeMenuData.comparisonTimeRange || [];
+                this.chart.comparisonTimeRangeId = timeRangeMenuData.comparisonTimeRangeId;
                 this.chart.compare = this.chart.comparisonTimeRange.length > 0;
                 this.chart.comparisonTimeRangeDescription = timeRangeMenuData.comparisonTimeRangeDescription;
                 this.chart.timeRange = timeRangeMenuData.timeRange || [];
+                this.chart.timeRangeId = timeRangeMenuData.timeRangeId;
                 this.chart.timeRangeDescription = timeRangeMenuData.timeRangeDescription;
             } else {
                 this.chart.comparisonField = undefined;
                 this.chart.comparisonTimeRange = [];
+                this.chart.comparisonTimeRangeId = undefined;
                 this.chart.compare = false;
                 this.chart.comparisonTimeRangeDescription = undefined;
                 this.chart.timeRange = [];
+                this.chart.timeRangeId = undefined;
                 this.chart.timeRangeDescription = undefined;
             }
         }
@@ -131,6 +137,9 @@ return AbstractModel.extend({
         if ('measure' in params) {
             this.chart.measure = params.measure;
         }
+        // recompute comparisonFieldIndex
+        this.chart.comparisonFieldIndex = this._getComparisonFieldIndex();
+
         if ('mode' in params) {
             this.chart.mode = params.mode;
             return Promise.resolve();
@@ -151,6 +160,29 @@ return AbstractModel.extend({
             return gb.split(":")[0];
         });
         return groupBys.indexOf(this.chart.comparisonField);
+    },
+    _getDateCovering: function (originIndex, interval, date_type) {
+        var self = this;
+        var start;
+        var end;
+        if (originIndex === 0) {
+            start = Domain.prototype.getLeftDate(this.chart.timeRangeId);
+            end = Domain.prototype.getRightDate(this.chart.timeRangeId);
+        } else {
+            start = Domain.prototype.getLeftDate(this.chart.timeRangeId, this.chart.comparisonTimeRangeId);
+            end = Domain.prototype.getRightDate(this.chart.timeRangeId, this.chart.comparisonTimeRangeId);
+        }
+        return this._rpc({
+                route: '/web/graph/date_interval_covering',
+                params: {
+                    start: start,
+                    end: end,
+                    interval: interval,
+                    date_type: date_type,
+                },
+            }).then(function (covering) {
+                self.chart.dateCoverings[originIndex] = covering;
+            });
     },
     /**
      * @private
@@ -207,6 +239,16 @@ return AbstractModel.extend({
                 lazy: false,
             }).then(self._processData.bind(self, originIndex)));
         });
+
+        if (this.chart.comparisonFieldIndex !== -1) {
+            this.chart.dateCoverings = [];
+            var interval = this.chart.groupBy[this.chart.comparisonFieldIndex].split(":")[1] || 'month';
+            var date_type = this.fields[this.chart.groupBy[this.chart.comparisonFieldIndex].split(':')[0]].type;
+            domains.forEach(function (domain, originIndex) {
+                defs.push(self._getDateCovering(originIndex, interval, date_type));
+            });
+        }
+
         return Promise.all(defs);
     },
     /**

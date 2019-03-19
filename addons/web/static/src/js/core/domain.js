@@ -234,6 +234,142 @@ var Domain = collections.Tree.extend({
             .replace(/false/g, "False")
             .replace(/true/g, "True");
     },
+
+    getLeftDate: function (period, comparisonPeriod) {
+        var params = this.getParams(period, true, comparisonPeriod);
+        var leftBoundaryParams = params.leftBoundaryParams;
+        return pyUtils.py_eval(this.bound('datetime', leftBoundaryParams, false), pyUtils.context());
+    },
+
+    getRightDate: function (period, comparisonPeriod) {
+        var params = this.getParams(period, true, comparisonPeriod);
+        var rightBoundaryParams = params.rightBoundaryParams;
+        return pyUtils.py_eval(this.bound('datetime', rightBoundaryParams, false), pyUtils.context());
+    },
+
+    getParams: function (period, forTooltip, comparisonPeriod) {
+        var leftBoundaryParams;
+        var rightBoundaryParams;
+        var offsetPeriodParams;
+        var t = forTooltip || false;
+        switch (period) {
+            case 'today':
+                leftBoundaryParams = {};
+                rightBoundaryParams = t ? {} : {days: 1};
+                offsetPeriodParams = {days: -1};
+                break;
+            case 'this_week':
+                leftBoundaryParams = {weeks: -1, days: 1, weekday: 0};
+                rightBoundaryParams = t ? {weekday: 6} : {days: 1, weekday: 0};
+                offsetPeriodParams = {weeks: -1};
+                break;
+            case 'this_month':
+                leftBoundaryParams = {day: 1};
+                rightBoundaryParams = _.extend(t ? {days: -1} : {},
+                    {day: 1, months: 1});
+                offsetPeriodParams = {months: -1};
+                break;
+            case 'this_quarter':
+                leftBoundaryParams = {months: '- (context_today().month - 1) % 3', day: 1};
+                rightBoundaryParams = _.extend(t ? {days: -1} : {},
+                    {months: '3 - (context_today().month - 1) % 3', day: 1});
+                offsetPeriodParams = {months: -3};
+                break;
+            case 'this_year':
+                leftBoundaryParams = {month: 1, day: 1};
+                rightBoundaryParams = _.extend(t ? {days: -1} : {},
+                    {month: 1, day: 1, years: 1});
+                offsetPeriodParams = {years: -1};
+                break;
+            case 'yesterday':
+                leftBoundaryParams = {days: -1};
+                rightBoundaryParams = (t ? {days: -1} : {});
+                offsetPeriodParams = {days: -1};
+                break;
+            case 'last_week':
+                leftBoundaryParams = {weeks: -2, days: 1, weekday: 0};
+                rightBoundaryParams = t ? {weeks: -1, weekday: 6} : {weeks: -1, days: 1, weekday: 0};
+                offsetPeriodParams = {weeks: -1};
+                break;
+            case 'last_month':
+                leftBoundaryParams = {months: -1, day: 1};
+                rightBoundaryParams = _.extend(t ? {days: -1} : {}, {day: 1});
+                offsetPeriodParams = {months: -1};
+                break;
+            case 'last_quarter':
+                leftBoundaryParams = {months: '- 3 - (context_today().month - 1) % 3', day: 1};
+                rightBoundaryParams = _.extend(t ? {days: -1} : {},
+                    {months: '- (context_today().month - 1) % 3', day: 1});
+                offsetPeriodParams = {months: -3};
+                break;
+            case 'last_year':
+                leftBoundaryParams = {month: 1, day: 1, years: -1};
+                rightBoundaryParams = _.extend(t ? {days: -1} : {}, {month: 1, day: 1});
+                offsetPeriodParams = {years: -1};
+                break;
+            case 'last_7_days':
+                leftBoundaryParams = {days: -7};
+                rightBoundaryParams = t ? {days: -1} : {};
+                offsetPeriodParams = {days: -7};
+                break;
+            case 'last_30_days':
+                leftBoundaryParams = {days: -30};
+                rightBoundaryParams = t ? {days: -1} : {};
+                offsetPeriodParams = {days: -30};
+                break;
+            case 'last_365_days':
+                leftBoundaryParams = {days: -365};
+                rightBoundaryParams = t ? {days: -1} : {};
+                offsetPeriodParams = {days: -365};
+                break;
+            case 'last_5_years':
+                leftBoundaryParams = {years: -5};
+                rightBoundaryParams = t ? {days: -1} : {};
+                offsetPeriodParams = {years: -5};
+                break;
+        }
+        switch (comparisonPeriod) {
+            case 'previous_period':
+                _.each(offsetPeriodParams, function (value, key) {
+                    if (!leftBoundaryParams[key] ||_.isNumber(leftBoundaryParams[key])) {
+                        leftBoundaryParams[key] = value + (leftBoundaryParams[key] || 0);
+                    } else {
+                        leftBoundaryParams[key] = value + ' + ' + leftBoundaryParams[key];
+                    }
+                    if (!rightBoundaryParams[key] || _.isNumber(rightBoundaryParams[key])) {
+                        rightBoundaryParams[key] = value + (rightBoundaryParams[key] || 0);
+                    } else {
+                        rightBoundaryParams[key] = value + ' + ' + rightBoundaryParams[key];
+                    }
+                });
+                break;
+            case 'previous_year':
+                leftBoundaryParams.years = leftBoundaryParams.years ? leftBoundaryParams.years-- : -1;
+                rightBoundaryParams.years = rightBoundaryParams.years ? rightBoundaryParams.years-- : -1;
+                break;
+        }
+
+        var stringifyParams = function (value, key) {
+            return key + '=' + value;
+        };
+
+        var leftBoundaryStringifyParams = _.map(leftBoundaryParams, stringifyParams).join(', ');
+        var rightBoundaryStringifyParams = _.map(rightBoundaryParams, stringifyParams).join(', ');
+
+        return {
+            leftBoundaryParams: leftBoundaryStringifyParams,
+            rightBoundaryParams: rightBoundaryStringifyParams,
+        };
+
+    },
+    bound: function (type, stringifyParams, toUTC) {
+        if (type === 'date') {
+            return "(context_today() + relativedelta(" + stringifyParams + ")).strftime('%Y-%m-%d')";
+        }
+        return "(datetime.datetime.combine(context_today() + relativedelta(" + stringifyParams + "), datetime.time(0,0,0))" +
+                (toUTC ? ".to_utc()" : "") +
+                ").strftime('%Y-%m-%d %H:%M:%S')";
+    },
     /*
      * @param {string} fieldName
      * @param {string} period
@@ -243,128 +379,14 @@ var Domain = collections.Tree.extend({
      * @returns {string} a domain in string form
      */
     constructDomain: function (fieldName, period, type, forTooltip, comparisonPeriod) {
-        var leftBoundaryParams, rightBoundaryParams;
-        var offsetPeriodParams;
-        var t = forTooltip || false;
-        function makeInterval () {
-            switch (comparisonPeriod) {
-                case 'previous_period':
-                    _.each(offsetPeriodParams, function (value, key) {
-                        if (!leftBoundaryParams[key] ||_.isNumber(leftBoundaryParams[key])) {
-                            leftBoundaryParams[key] = value + (leftBoundaryParams[key] || 0);
-                        } else {
-                            leftBoundaryParams[key] = value + ' + ' + leftBoundaryParams[key];
-                        }
-                        if (!rightBoundaryParams[key] || _.isNumber(rightBoundaryParams[key])) {
-                            rightBoundaryParams[key] = value + (rightBoundaryParams[key] || 0);
-                        } else {
-                            rightBoundaryParams[key] = value + ' + ' + rightBoundaryParams[key];
-                        }
-                    });
-                    break;
-                case 'previous_year':
-                    leftBoundaryParams.years = leftBoundaryParams.years ? leftBoundaryParams.years-- : -1;
-                    rightBoundaryParams.years = rightBoundaryParams.years ? rightBoundaryParams.years-- : -1;
-                  break;
-            }
+        var params = this.getParams(period, comparisonPeriod, forTooltip);
+        var leftBoundaryParams = params.leftBoundaryParams;
+        var rightBoundaryParams = params.rightBoundaryParams;
 
-            var stringifyParams = function (value, key) {
-                return key + '=' + value;
-            };
-            var leftBoundaryStringifyParams = _.map(leftBoundaryParams, stringifyParams).join(', ');
-            var rightBoundaryStringifyParams = _.map(rightBoundaryParams, stringifyParams).join(', ');
-
-            if (type === 'date') {
-                return "['&'," +
-                    "('" + fieldName + "', '>=', (context_today() + relativedelta(" + leftBoundaryStringifyParams + ")).strftime('%Y-%m-%d'))," +
-                    "('" + fieldName + "', '<', (context_today() + relativedelta(" + rightBoundaryStringifyParams + ")).strftime('%Y-%m-%d'))"+
-                    "]";
-            }
-            else {
-                return "['&'," +
-                    "('" + fieldName + "', '>=', " +
-                    "(datetime.datetime.combine(context_today() + relativedelta(" + leftBoundaryStringifyParams + "), datetime.time(0,0,0)).to_utc()).strftime('%Y-%m-%d %H:%M:%S'))," +
-                    "('" + fieldName + "', '<', " +
-                    "(datetime.datetime.combine(context_today() + relativedelta(" + rightBoundaryStringifyParams + "), datetime.time(0,0,0)).to_utc()).strftime('%Y-%m-%d %H:%M:%S'))"+
-                    "]";
-            }
-        }
-        switch (period) {
-            case 'today':
-                leftBoundaryParams = {};
-                rightBoundaryParams = t ? {} : {days: 1};
-                offsetPeriodParams = {days: -1};
-                return makeInterval();
-            case 'this_week':
-                leftBoundaryParams = {weeks: -1, days: 1, weekday: 0};
-                rightBoundaryParams = t ? {weekday: 6} : {days: 1, weekday: 0};
-                offsetPeriodParams = {weeks: -1};
-                return makeInterval();
-            case 'this_month':
-                leftBoundaryParams = {day: 1};
-                rightBoundaryParams = _.extend(t ? {days: -1} : {},
-                    {day: 1, months: 1});
-                offsetPeriodParams = {months: -1};
-                return makeInterval();
-            case 'this_quarter':
-                leftBoundaryParams = {months: '- (context_today().month - 1) % 3', day: 1};
-                rightBoundaryParams = _.extend(t ? {days: -1} : {},
-                    {months: '3 - (context_today().month - 1) % 3', day: 1});
-                offsetPeriodParams = {months: -3};
-                return makeInterval();
-            case 'this_year':
-                leftBoundaryParams = {month: 1, day: 1};
-                rightBoundaryParams = _.extend(t ? {days: -1} : {},
-                    {month: 1, day: 1, years: 1});
-                offsetPeriodParams = {years: -1};
-                return makeInterval();
-            case 'yesterday':
-                leftBoundaryParams = {days: -1};
-                rightBoundaryParams = (t ? {days: -1} : {});
-                offsetPeriodParams = {days: -1};
-                return makeInterval();
-            case 'last_week':
-                leftBoundaryParams = {weeks: -2, days: 1, weekday: 0};
-                rightBoundaryParams = t ? {weeks: -1, weekday: 6} : {weeks: -1, days: 1, weekday: 0};
-                offsetPeriodParams = {weeks: -1};
-                return makeInterval();
-            case 'last_month':
-                leftBoundaryParams = {months: -1, day: 1};
-                rightBoundaryParams = _.extend(t ? {days: -1} : {}, {day: 1});
-                offsetPeriodParams = {months: -1};
-                return makeInterval();
-            case 'last_quarter':
-                leftBoundaryParams = {months: '- 3 - (context_today().month - 1) % 3', day: 1};
-                rightBoundaryParams = _.extend(t ? {days: -1} : {},
-                    {months: '- (context_today().month - 1) % 3', day: 1});
-                offsetPeriodParams = {months: -3};
-                return makeInterval();
-            case 'last_year':
-                leftBoundaryParams = {month: 1, day: 1, years: -1};
-                rightBoundaryParams = _.extend(t ? {days: -1} : {}, {month: 1, day: 1});
-                offsetPeriodParams = {years: -1};
-                return makeInterval();
-            case 'last_7_days':
-                leftBoundaryParams = {days: -7};
-                rightBoundaryParams = t ? {days: -1} : {};
-                offsetPeriodParams = {days: -7};
-                return makeInterval();
-            case 'last_30_days':
-                leftBoundaryParams = {days: -30};
-                rightBoundaryParams = t ? {days: -1} : {};
-                offsetPeriodParams = {days: -30};
-                return makeInterval();
-            case 'last_365_days':
-                leftBoundaryParams = {days: -365};
-                rightBoundaryParams = t ? {days: -1} : {};
-                offsetPeriodParams = {days: -365};
-                return makeInterval();
-            case 'last_5_years':
-                leftBoundaryParams = {years: -5};
-                rightBoundaryParams = t ? {days: -1} : {};
-                offsetPeriodParams = {years: -5};
-                return makeInterval();
-        }
+        return "['&'," +
+            "('" + fieldName + "', '>=', " + this.bound(type, leftBoundaryParams, true) + ")," +
+            "('" + fieldName + "', '<', " + this.bound(type, rightBoundaryParams, true) + ")" +
+            "]";
     },
     /**
      * Converts a string representation of the Python prefix-array
