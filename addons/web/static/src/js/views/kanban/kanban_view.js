@@ -68,7 +68,7 @@ var KanbanView = BasicView.extend({
             deletable: activeActions.group_delete,
             archivable: archAttrs.archivable ? !!JSON.parse(archAttrs.archivable) : true,
             group_creatable: activeActions.group_create && !config.device.isMobile,
-            quickCreateView: archAttrs.quick_create_view || null,
+            overlayFormView: archAttrs.overlay_form_view || null,
             hasProgressBar: !!progressBar,
         };
         this.rendererParams.record_options = {

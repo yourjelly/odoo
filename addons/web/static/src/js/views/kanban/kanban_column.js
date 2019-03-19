@@ -50,7 +50,7 @@ var KanbanColumn = Widget.extend({
         this.modelName = data.model;
 
         this.quick_create = options.quick_create;
-        this.quickCreateView = options.quickCreateView;
+        this.overlayFormView = options.overlayFormView;
         this.groupedBy = options.groupedBy;
         this.grouped_by_m2o = options.grouped_by_m2o;
         this.editable = options.editable;
@@ -211,7 +211,7 @@ var KanbanColumn = Widget.extend({
         context['default_' + this.groupedBy] = viewUtils.getGroupValue(this.data, this.groupedBy);
         this.quickCreateWidget = new RecordQuickCreate(this, {
             context: context,
-            formViewRef: this.quickCreateView,
+            formViewRef: this.overlayFormView,
             model: this.modelName,
             res_id: values && values.res_id || undefined,
             db_id: values && values.db_id || undefined,

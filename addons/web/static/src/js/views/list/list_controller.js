@@ -55,7 +55,7 @@ var ListController = BasicController.extend({
         this.editable = params.editable;
         this.noLeaf = params.noLeaf;
         this.selectedRecords = params.selectedRecords || [];
-        this.quickCreateView = params.quickCreateView;
+        this.overlayFormView = params.overlayFormView;
 
     },
 
@@ -73,12 +73,12 @@ var ListController = BasicController.extend({
         if (this.quickCreateWidget) {
             this._cancelQuickCreate();
         }
-        if (this.quickCreateView) {
+        if (this.overlayFormView) {
             var data = this.model.get(values && values.db_id);
             var context = data && data.getContext();
             this.quickCreateWidget = new RecordQuickCreate(this, {
                 context: context,
-                formViewRef: this.quickCreateView,
+                formViewRef: this.overlayFormView,
                 model: this.modelName,
                 res_id: data && data.res_id || undefined,
                 db_id: values && values.db_id || undefined,
@@ -602,7 +602,7 @@ var ListController = BasicController.extend({
             ev.stopPropagation();
         }
         var state = this.model.get(this.handle, {raw: true});
-        if (this.quickCreateView && state.data.length) {
+        if (this.overlayFormView && state.data.length) {
             this.addQuickCreate({});
         } else if (this.editable && !state.groupedBy.length) {
             this._addRecord(this.handle);
