@@ -206,7 +206,6 @@ var KanbanColumn = Widget.extend({
         if (this.quickCreateWidget) {
             this._cancelQuickCreate();
         }
-        this.trigger_up('close_quick_create'); // close other quick create widgets
         this.trigger_up('start_quick_create');
         var context = this.data.getContext();
         context['default_' + this.groupedBy] = viewUtils.getGroupValue(this.data, this.groupedBy);

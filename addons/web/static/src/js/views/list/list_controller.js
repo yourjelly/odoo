@@ -12,6 +12,7 @@ var BasicController = require('web.BasicController');
 var DataExport = require('web.DataExport');
 var Dialog = require('web.Dialog');
 var Sidebar = require('web.Sidebar');
+var RecordQuickCreate = require('web.kanban_record_quick_create');
 
 var _t = core._t;
 var qweb = core.qweb;
@@ -24,6 +25,9 @@ var ListController = BasicController.extend({
     buttons_template: 'ListView.buttons',
     custom_events: _.extend({}, BasicController.prototype.custom_events, {
         activate_next_widget: '_onActivateNextWidget',
+        cancel_quick_create: '_onCancelQuickCreate',
+        open_overlay_form_view: 'addQuickCreate',
+        overlay_form_add_record: '_onAddOverlayFormRecord',
         add_record: '_onAddRecord',
         button_clicked: '_onButtonClicked',
         group_edit_button_clicked: '_onEditGroupClicked',
@@ -51,11 +55,38 @@ var ListController = BasicController.extend({
         this.editable = params.editable;
         this.noLeaf = params.noLeaf;
         this.selectedRecords = params.selectedRecords || [];
+        this.quickCreateView = params.quickCreateView;
+
     },
 
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
+
+    /**
+     * Adds the quick create record to the top of the column.
+     *
+     * @returns {Deferred}
+     */
+    addQuickCreate: function (ev) {
+        var values = ev.data;
+        if (this.quickCreateWidget) {
+            this._cancelQuickCreate();
+        }
+        if (this.quickCreateView) {
+            var data = this.model.get(values && values.db_id);
+            var context = data && data.getContext();
+            this.quickCreateWidget = new RecordQuickCreate(this, {
+                context: context,
+                formViewRef: this.quickCreateView,
+                model: this.modelName,
+                res_id: data && data.res_id || undefined,
+                db_id: values && values.db_id || undefined,
+            });
+            return this.quickCreateWidget.insertAfter($('.o_action_manager .o_content'));
+        }
+        return this.trigger_up('open_record', {id: values && values.db_id});
+    },
 
     /**
      * Calculate the active domain of the list view. This should be done only
@@ -214,6 +245,19 @@ var ListController = BasicController.extend({
     //--------------------------------------------------------------------------
 
     /**
+     * @private
+     * @param {OdooEvent} event
+     */
+    _onAddOverlayFormRecord: function (event) {
+        var self = this;
+        var formController = event.target.controller;
+        return formController.saveRecord()
+        .then(function() {
+            self._cancelQuickCreate().then(self.reload.bind(self, {}));
+        })
+        .guardedCatch(event.data.onFailure);
+    },
+    /**
      * @see BasicController._abandonRecord
      * If the given abandoned record is not the main one, notifies the renderer
      * to remove the appropriate subrecord (line).
@@ -310,6 +354,25 @@ var ListController = BasicController.extend({
         var state = this.model.get(this.handle);
         return this.renderer.updateState(state, {noRender: true})
             .then(this._setMode.bind(this, 'readonly', id));
+    },
+    /**
+     * @private
+     */
+    _onCancelQuickCreate: function () {
+        this._cancelQuickCreate();
+    },
+    /**
+     * Destroys the QuickCreate widget.
+     *
+     * @private
+     * @returns {Promise}
+     */
+    _cancelQuickCreate: function () {
+        if (this.quickCreateWidget) {
+            this.quickCreateWidget.destroy();
+            this.quickCreateWidget = undefined;
+        }
+        return Promise.resolve();
     },
     /**
      * To improve performance, list view must not be rerendered if it is asked
@@ -539,7 +602,9 @@ var ListController = BasicController.extend({
             ev.stopPropagation();
         }
         var state = this.model.get(this.handle, {raw: true});
-        if (this.editable && !state.groupedBy.length) {
+        if (this.quickCreateView && state.data.length) {
+            this.addQuickCreate({});
+        } else if (this.editable && !state.groupedBy.length) {
             this._addRecord(this.handle);
         } else {
             this.trigger_up('switch_view', {view_type: 'form', res_id: undefined});

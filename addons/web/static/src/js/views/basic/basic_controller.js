@@ -16,7 +16,9 @@ var Pager = require('web.Pager');
 var _t = core._t;
 
 var BasicController = AbstractController.extend(FieldManagerMixin, {
-    custom_events: _.extend({}, AbstractController.prototype.custom_events, FieldManagerMixin.custom_events, {
+    custom_events: _.extend({
+        overlay_form_update_record: '_onUpdateOverlayFormRecord',
+    }, AbstractController.prototype.custom_events, FieldManagerMixin.custom_events, {
         discard_changes: '_onDiscardChanges',
         reload: '_onReload',
         set_dirty: '_onSetDirty',
@@ -688,6 +690,14 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
                 },
             });
         });
+    },
+    /**
+     * Update the state and view
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _onUpdateOverlayFormRecord: function (ev) {
+        this.update({});
     },
 });
 

@@ -21,7 +21,6 @@ var KanbanController = BasicController.extend({
     buttons_template: 'KanbanView.buttons',
     custom_events: _.extend({}, BasicController.prototype.custom_events, {
         quick_create_add_column: '_onAddColumn',
-        overlay_form_update_record: '_onUpdateOverlayFormRecord',
         quick_create_record: '_onQuickCreateRecord',
         resequence_columns: '_onResequenceColumn',
         button_clicked: '_onButtonClicked',
@@ -561,14 +560,6 @@ var KanbanController = BasicController.extend({
         var changes = _.clone(ev.data);
         ev.data.force_save = true;
         this._applyChanges(ev.target.db_id, changes, ev).then(onSuccess);
-    },
-    /**
-     * Update the state and view
-     * @private
-     * @param {OdooEvent} ev
-     */
-    _onUpdateOverlayFormRecord: function (ev) {
-        this.update({});
     },
     /**
      * Allow the user to archive/restore all the records of a column.

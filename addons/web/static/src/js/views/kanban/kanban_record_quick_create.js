@@ -160,7 +160,6 @@ var RecordQuickCreate = Widget.extend({
             var canBeSaved = self.controller.canBeSaved();
             if (canBeSaved) {
                 if (self.res_id) {
-                    debugger
                     self.controller.saveRecord().then(function () {
                         self.trigger_up('overlay_form_update_record', {db_id: self.db_id});
                         self._cancel();
