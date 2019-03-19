@@ -1783,6 +1783,33 @@ QUnit.module('Views', {
         list.destroy();
     });
 
+    QUnit.test('reload list view with groupby node', async function (assert) {
+        assert.expect(2);
+
+        var list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree expand="1">' +
+                '<field name="foo"/>' +
+                '<groupby name="currency_id">' +
+                    '<field name="position"/>' +
+                    '<button string="Button 1" type="object" name="button_method" attrs=\'{"invisible": [("position", "=", "after")]}\'/>' +
+                '</groupby>' +
+            '</tree>',
+            groupBy: ['currency_id'],
+        });
+
+        assert.containsOnce(list, '.o_group_header button:not(.o_invisible_modifier)',
+            "there should be one visible button");
+
+        await list.reload({ domain: [] });
+        assert.containsOnce(list, '.o_group_header button:not(.o_invisible_modifier)',
+            "there should still be one visible button");
+
+        list.destroy();
+    });
+
     QUnit.test('list view, editable, without data', async function (assert) {
         assert.expect(13);
 

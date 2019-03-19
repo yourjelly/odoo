@@ -431,14 +431,14 @@ var ListRenderer = BasicRenderer.extend({
             textAsTitle: !!node.attrs.icon,
         });
         this._handleAttributes($button, node);
-        this._registerModifiers(node, list, $button);
+        this._registerModifiers(node, list.groupData, $button);
 
         // TODO this should be moved to a handler
         $button.on("click", function (e) {
             e.stopPropagation();
-            self.trigger_up('group_button_clicked', {
+            self.trigger_up('button_clicked', {
                 attrs: node.attrs,
-                group_id: list.id,
+                record: list.groupData,
             });
         });
         return $button;

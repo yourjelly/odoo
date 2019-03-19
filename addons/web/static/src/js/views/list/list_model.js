@@ -18,11 +18,9 @@ odoo.define('web.ListModel', function (require) {
         get: function () {
             var result = this._super.apply(this, arguments);
             var dp = result && this.localData[result.id];
-            if (dp) {
-                if (dp.groupData) {
-                    result.groupData = $.extend(true, {}, dp.groupData);
-                    result.evalModifiers = dp.evalModifiers;
-                }
+            if (dp && dp.groupData) {
+                // TODO: not sure I need to deep copy it, it's a datapoint
+                result.groupData = $.extend(true, {}, dp.groupData);
             }
             return result;
         },
@@ -39,19 +37,6 @@ odoo.define('web.ListModel', function (require) {
         // Private
         //--------------------------------------------------------------------------
 
-        /**
-         * Overriden to consider `groupData` in `<groupby><button>` modifiers.
-         *
-         * @override
-         * @private
-         */
-        _getEvalContext: function (element) {
-            var result = this._super.apply(this, arguments);
-            if (element.type === 'list' && element.groupData) {
-                result = _.extend({}, result, element.groupData);
-            }
-            return result;
-        },
         /**
          *
          * @override
@@ -98,7 +83,18 @@ odoo.define('web.ListModel', function (require) {
                 }).then(function (result) {
                     _.each(list.data, function (id) {
                         var dp = self.localData[id];
-                        dp.groupData = _.findWhere(result, { id: dp.res_id });
+                        var groupData = _.findWhere(result, { id: dp.res_id });
+                        var fvg = self.groups[groupByFieldName];
+                        dp.groupData = self._makeDataPoint({
+                            context: dp.context,
+                            data: groupData,
+                            fields: fvg.fields,
+                            fieldsInfo: fvg.fieldsInfo,
+                            modelName: fvg.model,
+                            parentID: dp.id,
+                            res_id: dp.res_id,
+                            viewType: dp.viewType,
+                        });
                     });
                 });
             }
