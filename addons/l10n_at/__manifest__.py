@@ -1,22 +1,34 @@
 # -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-# Copyright (C) conexus.at
+# © 2015 WT-IO IT GmbH <https://www.wt-io-it.at>
+# See LICENSE file for full copyright and licensing details.
 
 {
-    'name': 'Austria - Accounting',
-    'version': '2.0',
-    'author': 'conexus.at',
-    'website': 'http://www.conexus.at',
-    'category': 'Localization',
-    'depends': ['account'],
-    'description': """
-This module provides the standard Accounting Chart for Austria which is based on the Template from BMF.gv.at.
-============================================================================================================= 
-Please keep in mind that you should review and adapt it with your Accountant, before using it in a live Environment.
-""",
-    'data': ['data/l10n_at_chart_data.xml',
-             'data/account_data.xml',
-             'data/account_tax_data.xml',
-             'data/account_chart_template_data.xml'],
+    "name": "Austrian Localization",
+    "version": "1.0",
+    "sequence": 12,
+    "author": "WT-IO-IT GmbH, Wolfgang Taferner",
+    "website": "https://www.wt-io-it.at",
+    "license": 'Other proprietary',
+    "category": "Localization",
+    'summary': "Austrian Standarized Charts & Tax",
+    "description": """""",
+    "depends": [
+        'account',
+        'base_iban',
+        'base_vat',
+    ],
+    "demo": [],
+    "data": [
+        'data/account_account_tags_accounts.xml',
+        'data/account_account_tag.xml',
+        'data/account_account_template.xml',
+        'data/account_tax_group.xml',
+        'data/account_chart_template.xml',
+        'data/account_tax_template.xml',
+        'data/account_fiscal_position_template.xml',
+        'data/account_chart_template_configure_data.xml',
+    ],
+    'test': [],
+    'installable': True,
+    'application': False,
 }

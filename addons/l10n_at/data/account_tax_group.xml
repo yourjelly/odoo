@@ -4,14 +4,16 @@
 
         <!-- Account Tax Group -->
         <record id="tax_group_0" model="account.tax.group">
-            <field name="name">Tax 0%</field>
+            <field name="name">VAT 0%</field>
         </record>
         <record id="tax_group_10" model="account.tax.group">
-            <field name="name">Tax 10%</field>
+            <field name="name">VAT 10%</field>
+        </record>
+        <record id="tax_group_13" model="account.tax.group">
+            <field name="name">VAT 13%</field>
         </record>
         <record id="tax_group_20" model="account.tax.group">
-            <field name="name">Tax 20%</field>
+            <field name="name">VAT 20%</field>
         </record>
-
     </data>
 </odoo>
