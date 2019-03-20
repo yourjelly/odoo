@@ -27,3 +27,19 @@ class ResConfigSettings(models.TransientModel):
     @api.onchange('group_mrp_routings')
     def _onchange_group_mrp_routings(self):
         self.module_mrp_workorder = self.group_mrp_routings
+
+    @api.multi
+    def set_values(self):
+        super(ResConfigSettings, self).set_values()
+
+        """ If subcontracting is enabled, the routes and locations related to it must be active.
+        """
+        warehouses = self.env['stock.warehouse'].search([])
+        if self.group_mrp_subcontracting:
+            for wh in warehouses:
+                subcontracting_location = wh._get_subcontracting_location()
+                subcontracting_location.active = True
+        else:
+            for wh in warehouses:
+                subcontracting_location = wh._get_subcontracting_location()
+                subcontracting_location.active = False
