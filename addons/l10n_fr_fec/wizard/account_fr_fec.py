@@ -370,7 +370,7 @@ class AccountFrFec(models.TransientModel):
             }
         return action
 
-    def _csv_write_rows(self, rows, lineterminator=u'\r\n'):
+    def _csv_write_rows(self, rows, lineterminator=u'\r\n', delimiter='|'):
         """
         Write FEC rows into a file
         It seems that Bercy's bureaucracy is not too happy about the
@@ -384,12 +384,14 @@ class AccountFrFec(models.TransientModel):
         @return the value of the file
         """
         fecfile = io.BytesIO()
-        writer = pycompat.csv_writer(fecfile, delimiter='|', lineterminator='')
+        writer = pycompat.csv_writer(fecfile, delimiter=delimiter, lineterminator='')
 
         rows_length = len(rows)
         for i, row in enumerate(rows):
-            if not i == rows_length - 1:
+            if not i == rows_length - 1:  # all lines except the last
                 row.append(lineterminator)
+            else:  # last line
+                row.append(delimiter)
             writer.writerow(row)
 
         fecvalue = fecfile.getvalue()
