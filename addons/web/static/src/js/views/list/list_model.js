@@ -32,6 +32,43 @@ odoo.define('web.ListModel', function (require) {
             this.groups = params.groups;
             return this._super.apply(this, arguments);
         },
+        /**
+         * For a list of records, performs a write with all changes and fetches
+         * all data.
+         *
+         * @param {string[]} recordIds a list of record datapoint ids
+         */
+        saveRecords: function (recordIds) {
+            var self = this;
+            var changes = this._generateChanges(this.localData[recordIds[0]]);
+            var records = recordIds.map(function (recordId) {
+                return self.localData[recordId];
+            });
+            var model = records[0].model;
+            var recordResIds = _.pluck(records, 'res_id');
+            var fieldNames = records[0].getFieldNames();
+
+            return this._rpc({
+                model: model,
+                method: 'write',
+                args: [recordResIds, changes],
+                context: records[0].getContext(),
+            }).then(function () {
+                return self._rpc({
+                    model: model,
+                    method: 'read',
+                    args: [recordResIds, fieldNames],
+                });
+            }).then(function (result) {
+                result.forEach(function (data) {
+                    var record = _.findWhere(records, {res_id: data.id});
+                    record.data = _.extend({}, record.data, data);
+                    record._changes = {};
+                    self._parseServerData(fieldNames, record, record.data);
+                });
+            // TODO: fetch additionnal (m2o, x2m, references, etc.) ?
+            });
+        },
 
         //--------------------------------------------------------------------------
         // Private

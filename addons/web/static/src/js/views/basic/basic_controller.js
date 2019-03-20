@@ -591,7 +591,7 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
         if (this.mode === 'readonly') {
             ev.data.force_save = true;
         }
-        FieldManagerMixin._onFieldChanged.apply(this, arguments);
+        return FieldManagerMixin._onFieldChanged.apply(this, arguments);
     },
     /**
      * When a reload event triggers up, we need to reload the full view.
