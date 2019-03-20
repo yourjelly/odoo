@@ -36,6 +36,7 @@
                     }),
                 ]"/>
         </record>
+
         <record id="sg_sale_tax_ds_7" model="account.tax.template">
             <field name="name">Sales Tax 7% DS</field>
             <field name="description">7% DS</field>
@@ -749,6 +750,5 @@
                     }),
                 ]"/>
         </record>
-
     </data>
 </odoo>

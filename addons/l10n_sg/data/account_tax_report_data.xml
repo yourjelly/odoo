@@ -6,59 +6,67 @@
             <field name="sequence" eval="1"/>
             <field name="country_id" ref="base.sg"/>    
         </record>
+
         <record id="account_tax_report_line_l10n_sg_gst_returns_box1" model="account.tax.report.line">
             <field name="name">Box 1 - Total value of standard-rated supplies</field>
             <field name="tag_name">Box 1</field>
-            <field name="parent_line_id" ref='account_tax_report_line_l10n_sg_gst_returns_supplies'/>
             <field name="sequence" eval="1"/>
+            <field name="parent_line_id" ref='account_tax_report_line_l10n_sg_gst_returns_supplies'/>
             <field name="country_id" ref="base.sg"/>   
         </record>
+
         <record id="account_tax_report_line_l10n_sg_gst_returns_box2" model="account.tax.report.line">
             <field name="name">Box 2 - Total value of zero-rated supplies</field>
             <field name="tag_name">Box 2</field>
-            <field name="parent_line_id" ref='account_tax_report_line_l10n_sg_gst_returns_supplies'/>
             <field name="sequence" eval="2"/>
+            <field name="parent_line_id" ref='account_tax_report_line_l10n_sg_gst_returns_supplies'/>
             <field name="country_id" ref="base.sg"/>
         </record>
+
         <record id="account_tax_report_line_l10n_sg_gst_returns_box3" model="account.tax.report.line">
             <field name="name">Box 3 - Total value of exempt supplies</field>
             <field name="tag_name">Box 3</field>
-            <field name="parent_line_id" ref='account_tax_report_line_l10n_sg_gst_returns_supplies'/>
             <field name="sequence" eval="3"/>
+            <field name="parent_line_id" ref='account_tax_report_line_l10n_sg_gst_returns_supplies'/>
             <field name="country_id" ref="base.sg"/>
-            <field name="groupby">account_id</field>    
         </record>
+
         <record id="account_tax_report_line_l10n_sg_gst_returns_box4" model="account.tax.report.line">
             <field name="name">Box 4 - Total value of (1) + (2) + (3)</field>
             <field name="tag_name">Box 4</field>
-            <field name="parent_line_id" ref='account_tax_report_line_l10n_sg_gst_returns_supplies'/>
             <field name="sequence" eval="4"/>
+            <field name="parent_line_id" ref='account_tax_report_line_l10n_sg_gst_returns_supplies'/>
             <field name="country_id" ref="base.sg"/>    
         </record>
+
         <record id="account_tax_report_line_l10n_sg_gst_returns_purchases" model="account.tax.report.line">
             <field name="name">Purchases</field>
             <field name="sequence" eval="2"/>
             <field name="country_id" ref="base.sg"/>    
         </record>
+
         <record id="account_tax_report_line_l10n_sg_gst_returns_box5" model="account.tax.report.line">
             <field name="name">Box 5 - Total value of taxable purchases</field>
             <field name="tag_name">Box 5</field>
-            <field name="parent_line_id" ref='account_tax_report_line_l10n_sg_gst_returns_purchases'/>
             <field name="sequence" eval="1"/>
+            <field name="parent_line_id" ref='account_tax_report_line_l10n_sg_gst_returns_purchases'/>
             <field name="country_id" ref="base.sg"/>     
         </record>
+
         <record id="account_tax_report_line_l10n_sg_gst_returns_taxes" model="account.tax.report.line">
             <field name="name">Taxes</field>
             <field name="sequence" eval="3"/>
             <field name="country_id" ref="base.sg"/>   
         </record>
+
         <record id="account_tax_report_line_l10n_sg_gst_returns_box6" model="account.tax.report.line">
             <field name="name">Box 6 - Output tax due</field>
             <field name="tag_name">Box 6</field>
-            <field name="parent_line_id" ref='account_tax_report_line_l10n_sg_gst_returns_taxes'/>
             <field name="sequence" eval="1"/>
+            <field name="parent_line_id" ref='account_tax_report_line_l10n_sg_gst_returns_taxes'/>
             <field name="country_id" ref="base.sg"/>   
         </record>
+
         <record id="account_tax_report_line_l10n_sg_gst_returns_box7" model="account.tax.report.line">
             <field name="name">Box 7 - Less : Input tax and refunds claimed</field>
             <field name="tag_name">Box 7</field>
@@ -66,6 +74,7 @@
             <field name="sequence" eval="2"/>
             <field name="country_id" ref="base.sg"/>    
         </record>
+
         <record id="account_tax_report_line_l10n_sg_gst_returns_box8" model="account.tax.report.line">
             <field name="name">Box 8 - Equals : Net GST to be paid to IRAS</field>
             <field name="tag_name">Box 8</field>
@@ -73,23 +82,27 @@
             <field name="sequence" eval="3"/>
             <field name="country_id" ref="base.sg"/>   
         </record>
+
         <record id="account_tax_report_line_l10n_sg_gst_returns_applicable" model="account.tax.report.line">
             <field name="name">Applicable to Taxable Persons under Major Exported Scheme / Approved 3rd Party Logistics Company / Other Approved Schemes Only</field>
             <field name="sequence" eval="4"/>
             <field name="country_id" ref="base.sg"/>    
         </record>
+
         <record id="account_tax_report_line_l10n_sg_gst_returns_applicable_box9" model="account.tax.report.line">
             <field name="name">Box 9 - Total value of goods imported under this scheme</field>
             <field name="tag_name">Box 9</field>
             <field name="sequence" eval="1"/>
-            <field name="country_id" ref="base.sg"/>
             <field name="parent_line_id" ref="account_tax_report_line_l10n_sg_gst_returns_applicable"/>
+            <field name="country_id" ref="base.sg"/>
         </record>
+
         <record id="account_tax_report_line_l10n_sg_gst_returns_revenues" model="account.tax.report.line">
             <field name="name">Revenue</field>
             <field name="sequence" eval="6"/>
             <field name="country_id" ref="base.sg"/>
         </record>
+
         <record id="account_tax_report_line_l10n_sg_gst_returns_revenues_box13" model="account.tax.report.line">
             <field name="name">Box 13 - Revenue for the accounting period</field>
             <field name="tag_name">Box 13</field>
