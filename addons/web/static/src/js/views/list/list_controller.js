@@ -577,6 +577,39 @@ var ListController = BasicController.extend({
         });
     },
     /**
+     * Overridden to deal with the edition of multiple records.
+     *
+     * @private
+     * @override
+     */
+    _onFieldChanged: function (ev) {
+        ev.stopPropagation();
+
+        var self = this;
+        var _super = this._super;
+        var args = arguments;
+        var recordIds = _.union([ev.data.dataPointID], this.selectedRecords);
+        if (recordIds.length > 1) {
+            var message = _.str.sprintf(_t('Do you want to apply the changes on all selected records (%s)?'), this.selectedRecords.length);
+            Dialog.confirm(this, message, {
+                confirm_callback: function () {
+                    ev.data.onSuccess = function () {
+                        self.model.saveRecords(ev.data.dataPointID, recordIds)
+                            .then(function () {
+                                var state = self.model.get(self.handle);
+                                return self.renderer.updateState(state, {});
+                            })
+                            .then(self._setMode.bind(self, 'edit', ev.data.dataPointID));
+                    };
+                    _super.apply(self, args);
+                },
+                cancel_callback: this._super.bind(this, ev),
+            });
+        } else {
+            this._super.apply(this, arguments);
+        }
+    },
+    /**
      * Force a resequence of the records curently on this page.
      *
      * @private
@@ -610,8 +643,7 @@ var ListController = BasicController.extend({
      * @param {OdooEvent} ev
      */
     _onSaveLine: function (ev) {
-        var recordID = ev.data.recordID;
-        this.saveRecord(recordID)
+        this.saveRecord(ev.data.recordID)
             .then(ev.data.onSuccess)
             .guardedCatch(ev.data.onFailure);
     },
