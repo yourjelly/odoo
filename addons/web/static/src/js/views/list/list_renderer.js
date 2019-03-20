@@ -191,7 +191,6 @@ var ListRenderer = BasicRenderer.extend({
     _processColumns: function (columnInvisibleFields) {
         var self = this;
         self.handleField = null;
-
         this.columns = _.reject(this.arch.children, function (c) {
             if (c.tag === 'control') {
                 return true;
@@ -206,30 +205,6 @@ var ListRenderer = BasicRenderer.extend({
                 self.handleField = c.attrs.name;
             }
             return reject;
-        });
-
-        this.columns.forEach(function (column) {
-            if (!column.attrs.colspan) {
-                if (column.tag !== 'field') {
-                    column.attrs.colspan = 2;
-                    return;
-                }
-                switch (self.state.fields[column.attrs.name].type) {
-                    case 'text':
-                        column.attrs.colspan = 6;
-                        break;
-                    case 'many2one':
-                    case 'char':
-                        column.attrs.colspan = 4;
-                        break;
-                    case 'boolean':
-                        column.attrs.colspan = 1;
-                        break;
-                    default:
-                        column.attrs.colspan = 2;
-                }
-
-            }
         });
     },
     /**
@@ -614,15 +589,8 @@ var ListRenderer = BasicRenderer.extend({
      * @returns {jQueryElement} a <thead> element
      */
     _renderHeader: function () {
-        var self = this;
-        var totalColspan = this.columns.reduce(function (acc, column) {
-            return acc + column.attrs.colspan;
-        }, 0);
-        var $tr = $('<tr>').append(this.columns.map(function (column) {
-            var $cell = self._renderHeaderCell(column);
-            $cell.css('width', (column.attrs.colspan / totalColspan) + '%');
-            return $cell;
-        }));
+        var $tr = $('<tr>')
+            .append(_.map(this.columns, this._renderHeaderCell.bind(this)));
         if (this.hasSelectors) {
             $tr.prepend(this._renderSelector('th'));
         }
@@ -676,8 +644,6 @@ var ListRenderer = BasicRenderer.extend({
                 attrs: node.attrs,
             };
             this._addFieldTooltip(fieldDescr, $th);
-        } else {
-            $th.attr('title', description);
         }
         return $th;
     },
@@ -731,7 +697,7 @@ var ListRenderer = BasicRenderer.extend({
         if (disableInput) {
             $content.find("input[type='checkbox']").prop('disabled', disableInput);
         }
-        return $('<' + tag + '>')
+        return $('<' + tag + ' width="1">')
             .addClass('o_list_record_selector')
             .append($content);
     },

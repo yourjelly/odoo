@@ -627,19 +627,6 @@ ListRenderer.include({
         return $body;
     },
     /**
-     * Override to optionally add a th in the header for the remove icon column.
-     *
-     * @override
-     * @private
-     */
-    _renderHeader: function () {
-        var $thead = this._super.apply(this, arguments);
-        if (this.addTrashIcon) {
-            $thead.find('tr').append($('<th>', {class: 'o_list_record_remove_header'}));
-        }
-        return $thead;
-    },
-    /**
      * Editable rows are possibly extended with a trash icon on their right, to
      * allow deleting the corresponding record.
      * For many2many editable lists, the trash bin is replaced by X.

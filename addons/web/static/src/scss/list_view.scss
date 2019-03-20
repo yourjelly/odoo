@@ -1,6 +1,5 @@
 
 .o_list_view {
-    table-layout: fixed;
     position: relative;
     cursor: pointer;
     background-color: $o-view-background-color;
@@ -24,7 +23,9 @@
         border-bottom: 1px solid #cacaca;
         > tr > th {
             border-left: 1px solid #dfdfdf;
-            @include o-text-overflow(table-cell);
+            @include media-breakpoint-down(sm) {
+                white-space: nowrap;
+            }
             &:not(.o_column_sortable):hover {
                 cursor: default;
             }
@@ -38,13 +39,6 @@
         font-weight: $o-list-footer-font-weight;
         border-top: 2px solid #cacaca;
         border-bottom: 1px solid #cacaca;
-    }
-
-    .o_list_record_selector {
-        width: 40px;
-    }
-    .o_list_record_remove_header {
-        width: 30px;
     }
 
     .o_column_sortable {
@@ -82,9 +76,9 @@
         }
     }
 
-    // .o_list_record_selector, .o_list_record_remove, .o_handle_cell {
-    //     width: 1px;  // to prevent the column to expand
-    // }
+    .o_list_record_selector, .o_list_record_remove, .o_handle_cell {
+        width: 1px;  // to prevent the column to expand
+    }
 
     .o_list_record_remove button {
         padding: 0px;
