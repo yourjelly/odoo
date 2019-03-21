@@ -588,7 +588,7 @@ class TestExpression(TransactionCase):
         with self.assertRaises(ValueError):
             Country.search([('create_date', '>>', 'foo')])
 
-        with self.assertRaises(psycopg2.DataError):
+        with self.assertRaises((ValueError, psycopg2.DataError)):
             Country.search([('create_date', '=', "1970-01-01'); --")])
 
     def test_active(self):
