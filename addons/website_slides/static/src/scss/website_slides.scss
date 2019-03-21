@@ -14,14 +14,13 @@ $o-wslides-fs-side-width: 300px;
 }
 
 .o_wslides_course_pict {
-    @include size(100%, 30%);
+    @include size(100%);
     padding-top: 30%;
     background-size: cover;
     background-position: center;
 
     @include media-breakpoint-up(md)  {
-        @include size(100%);
-        padding-top: 100%;
+        padding-top: 70%;
     }
 }
 
