@@ -1628,6 +1628,9 @@ class Date(Field):
         """
         return value.strftime(DATE_FORMAT) if value else False
 
+    def convert_to_column(self, value, record, values=None, validate=True):
+        return self.to_date(value)
+
     def convert_to_cache(self, value, record, validate=True):
         if not value:
             return False
@@ -1737,6 +1740,9 @@ class Datetime(Field):
         :rtype: str
         """
         return value.strftime(DATETIME_FORMAT) if value else False
+
+    def convert_to_column(self, value, record, values=None, validate=True):
+        return self.to_datetime(value)
 
     def convert_to_cache(self, value, record, validate=True):
         if not value:
