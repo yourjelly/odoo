@@ -802,6 +802,7 @@ class Environment(Mapping):
         self.registry = Registry(cr.dbname)
         self.cache = envs.cache
         self._cache_key = (cr, uid)
+        self._cache_key_full = (cr, uid, context.get('lang'), context.get('force_company'))
         self._protected = StackMap()                # {field: ids, ...}
         self.dirty = defaultdict(set)               # {record: set(field_name), ...}
         self.all = envs
@@ -1000,7 +1001,7 @@ class Environment(Mapping):
         """ Return the key to store the value of ``field`` in cache, the full
             cache key being ``(key, field, record.id)``.
         """
-        return self if field.context_dependent else self._cache_key
+        return self._cache_key_full if field.context_dependent else self._cache_key
 
 
 class Environments(object):
@@ -1112,7 +1113,7 @@ class Cache(object):
     def copy(self, records, env):
         """ Copy the cache of ``records`` to ``env``. """
         src, dst = records.env, env
-        for src_key, dst_key in [(src, dst), (src._cache_key, dst._cache_key)]:
+        for src_key, dst_key in [(src._cache_key_full, dst._cache_key_full), (src._cache_key, dst._cache_key)]:
             if src_key == dst_key:
                 break
             src_cache = self._data[src_key]
@@ -1145,7 +1146,7 @@ class Cache(object):
         """ Check the consistency of the cache for the given environment. """
         # make a full copy of the cache, and invalidate it
         dump = defaultdict(dict)
-        for key in [env, env._cache_key]:
+        for key in [env._cache_key_full, env._cache_key]:
             key_cache = self._data[key]
             for field, field_cache in key_cache.items():
                 for record_id, value in field_cache.items():
