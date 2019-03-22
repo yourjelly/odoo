@@ -31,8 +31,6 @@ var FIELD_CLASSES = {
     text: 'o_list_text',
 };
 
-var HEADING_COLUMNS_TO_SKIP_IN_GROUPS = 2;
-
 var ListRenderer = BasicRenderer.extend({
     events: {
         'click tbody tr': '_onRowClicked',
@@ -218,16 +216,17 @@ var ListRenderer = BasicRenderer.extend({
      */
     _renderAggregateCells: function (aggregateValues, isHeader) {
         var self = this;
-
-        return _.map(this.columns, function (column, index) {
-            if (isHeader  && index === 0) {
-                return;
+        var aggregateStarted = false;
+        var aggregateCells = this.columns.reduce(function (cells, column, index) {
+            if (isHeader && index === 0) {
+                return cells;
             }
             var $cell = $('<td>');
             if (config.debug) {
                 $cell.addClass(column.attrs.name);
             }
             if (column.attrs.name in aggregateValues) {
+                aggregateStarted = true;
                 var field = self.state.fields[column.attrs.name];
                 var value = aggregateValues[column.attrs.name].value;
                 var help = aggregateValues[column.attrs.name].help;
@@ -238,8 +237,13 @@ var ListRenderer = BasicRenderer.extend({
                 var formattedValue = formatFunc(value, field, { escape: true });
                 $cell.addClass('o_list_number').attr('title', help).html(formattedValue);
             }
-            return $cell;
-        });
+            if (isHeader && !aggregateStarted) {
+                return cells;
+            }
+            cells.push($cell);
+            return cells;
+        }, []);
+        return aggregateCells;
     },
     /**
      * Render the main body of the table, with all its content.  Note that it
@@ -475,7 +479,7 @@ var ListRenderer = BasicRenderer.extend({
         this.defs.push(pagerProm);
         var $el =  $('<div>');
         pagerProm.then(function () {
-            $el.replaceWith(pager.$el);
+            $el.replaceWith(pager.$el.addClass('o_pager'));
         });
 
         return $el;
@@ -489,6 +493,7 @@ var ListRenderer = BasicRenderer.extend({
      * @returns {jQueryElement} a <tr> element
      */
     _renderGroupRow: function (group, groupLevel) {
+        var aggregateKeys = Object.keys(group.aggregateValues);
         var aggregateValues = _.mapObject(group.aggregateValues, function (value) {
             return { value: value };
         });
@@ -498,12 +503,17 @@ var ListRenderer = BasicRenderer.extend({
         if (group.fields[groupBy.split(':')[0]].type !== 'boolean') {
             name = name || _t('Undefined');
         }
+        var firstAggregateIndex = _.findIndex(this.columns, function (column) {
+            return column.tag === 'field' && _.contains(aggregateKeys, column.attrs.name);
+        });
+        var colspanBeforeAggregate = firstAggregateIndex === -1 ? this.columns.length : firstAggregateIndex;
+        if (this.hasSelectors) {
+            colspanBeforeAggregate += 1;
+        }
         var $th = $('<th>')
             .addClass('o_group_name')
-            .text(name + ' (' + group.count + ')');
-        if (this.hasSelectors) {
-            $th.attr('colspan', HEADING_COLUMNS_TO_SKIP_IN_GROUPS);
-        }
+            .text(name + ' (' + group.count + ')')
+            .attr('colspan', colspanBeforeAggregate);
         var $arrow = $('<span>')
             .css('padding-left', (groupLevel * 20) + 'px')
             .css('padding-right', '5px')
@@ -521,8 +531,7 @@ var ListRenderer = BasicRenderer.extend({
         if (group.isOpen && this.groups[groupBy]) {
             var $buttons = this._renderGroupButtons(group, this.groups[groupBy]);
             if ($buttons.length) {
-                var $firstCell = $cells[1] || $th;
-                $firstCell.addClass('o_group_buttons').append($buttons);
+                $th.addClass('o_group_buttons').append($buttons);
             }
         }
         return $('<tr>')
