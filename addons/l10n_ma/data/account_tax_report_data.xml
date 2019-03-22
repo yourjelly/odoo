@@ -1,0 +1,1066 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="tax_report_ventilation_chiffre_total" model="account.tax.report.line">
+        <field name="name">Ventilation du chiffre d’affaires total</field>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_montant_chiffre_affaires_imposables" model="account.tax.report.line">
+        <field name="name">Montant du chiffre d’affaires réalisé y compris les affaires non imposables (HT)</field>
+        <field name="parent_line_id" ref="tax_report_ventilation_chiffre_total"/>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_ooperations_situees_hors_tva" model="account.tax.report.line">
+        <field name="name">-Opérations situées hors champ d’application de la TVA</field>
+        <field name="parent_line_id" ref="tax_report_ventilation_chiffre_total"/>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_exonerees_sans_deduction" model="account.tax.report.line">
+        <field name="name">-Opérations exonérées sans droit à déduction (art 91du CGI)</field>
+        <field name="parent_line_id" ref="tax_report_ventilation_chiffre_total"/>
+        <field name="sequence" eval="3"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_exonerees_avec_deduction" model="account.tax.report.line">
+        <field name="name">-Opérations exonérées avec droit à déduction (art 92 du CGI)</field>
+        <field name="parent_line_id" ref="tax_report_ventilation_chiffre_total"/>
+        <field name="sequence" eval="4"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_faites_tva" model="account.tax.report.line">
+        <field name="name">-Opérations faites en suspension de la TVA (art 94 du CGI)</field>
+        <field name="parent_line_id" ref="tax_report_ventilation_chiffre_total"/>
+        <field name="sequence" eval="5"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_chiffre_affaires_imposable" model="account.tax.report.line">
+        <field name="name">Chiffre d’affaires imposable à répartir (différence : ligne 10 – (20 + 30 +40 +50) (HT)</field>
+        <field name="parent_line_id" ref="tax_report_ventilation_chiffre_total"/>
+        <field name="sequence" eval="6"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_ventilation_chiffre_affaires_imposable" model="account.tax.report.line">
+        <field name="name">Ventilation du chiffre d’affaires imposable</field>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_taux_normal_20" model="account.tax.report.line">
+        <field name="name">TAUX NORMAL DE 20% (Base HT)</field>
+        <field name="tag_name">TAUX NORMAL DE 20% (Base HT)</field>
+        <field name="parent_line_id" ref="tax_report_ventilation_chiffre_affaires_imposable"/>
+        <field name="sequence" eval="1"/>
+        <field name="code">MATAXB_1</field>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_production_distribution_ht" model="account.tax.report.line">
+        <field name="name">-Opération de production et de distribution (HT)</field>
+        <field name="parent_line_id" ref="tax_report_taux_normal_20"/>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_enterprises_travaux_immobiliers_ht" model="account.tax.report.line">
+        <field name="name">-Opérations d'entreprises de travaux immobiliers (HT)</field>
+        <field name="parent_line_id" ref="tax_report_taux_normal_20"/>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_prestations_services_ht" model="account.tax.report.line">
+        <field name="name">-Prestations de services (HT)</field>
+        <field name="parent_line_id" ref="tax_report_taux_normal_20"/>
+        <field name="sequence" eval="3"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_credit_bail_ht" model="account.tax.report.line">
+        <field name="name">-Opérations de crédit bail (HT)</field>
+        <field name="parent_line_id" ref="tax_report_taux_normal_20"/>
+        <field name="sequence" eval="4"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_professions_liberales_visees_cgi_ht" model="account.tax.report.line">
+        <field name="name">-Professions libérales visées à l’article 89-I-12°-b du CGI(HT)</field>
+        <field name="parent_line_id" ref="tax_report_taux_normal_20"/>
+        <field name="sequence" eval="5"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_taux_normal_tva_20" model="account.tax.report.line">
+        <field name="name">TAUX NORMAL DE 20% (TVA exigible)</field>
+        <field name="tag_name">TAUX NORMAL DE 20% (TVA exigible)</field>
+        <field name="parent_line_id" ref="tax_report_ventilation_chiffre_affaires_imposable"/>
+        <field name="sequence" eval="2"/>
+        <field name="code">MATAXB_2</field>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_production_distribution_tva" model="account.tax.report.line">
+        <field name="name">-Opération de production et de distribution (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_normal_tva_20"/>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_enterprises_travaux_immobiliers_tva" model="account.tax.report.line">
+        <field name="name">-Opérations d'entreprises de travaux immobiliers (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_normal_tva_20"/>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_prestations_services_tva" model="account.tax.report.line">
+        <field name="name">-Prestations de services (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_normal_tva_20"/>
+        <field name="sequence" eval="3"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_credit_bail_tva" model="account.tax.report.line">
+        <field name="name">-Opérations de crédit bail (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_normal_tva_20"/>
+        <field name="sequence" eval="4"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_professions_liberales_visees_cgi_tva" model="account.tax.report.line">
+        <field name="name">-Professions libérales visées à l’article 89-I-12°-b du CGI(TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_normal_tva_20"/>
+        <field name="sequence" eval="5"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+     <record id="tax_report_tauz_reduit_ht_14" model="account.tax.report.line">
+        <field name="name">TAUX REDUIT DE 14% (Base HT)</field>
+        <field name="tag_name">TAUX REDUIT DE 14% (Base HT)</field>
+        <field name="parent_line_id" ref="tax_report_ventilation_chiffre_affaires_imposable"/>
+        <field name="sequence" eval="3"/>
+        <field name="code">MATAXB_3</field>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_avec_droit_deduction_ht_14" model="account.tax.report.line">
+        <field name="name">TR 14%- Avec droit à déduction (HT)</field>
+        <field name="parent_line_id" ref="tax_report_tauz_reduit_ht_14"/>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_beurre_exclusion_beuree_febrication_ia" model="account.tax.report.line">
+        <field name="name">-Beurre à l’exclusion du beurre de fabrication artisanale visé à l’article 91 (IA. 2°)</field>
+        <field name="parent_line_id" ref="tax_report_avec_droit_deduction_ht_14"/>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_graisses_alimentaires_margarines" model="account.tax.report.line">
+        <field name="name">-Graisses alimentaires (animales ou végétales), margarines ou saindoux</field>
+        <field name="parent_line_id" ref="tax_report_avec_droit_deduction_ht_14"/>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_the_vrac_conditionne" model="account.tax.report.line">
+        <field name="name">-Thé (en vrac ou conditionné)</field>
+        <field name="parent_line_id" ref="tax_report_avec_droit_deduction_ht_14"/>
+        <field name="sequence" eval="3"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_transport_voyageurs_marchandises" model="account.tax.report.line">
+        <field name="name">-Opérations de transport de voyageurs et de marchandises</field>
+        <field name="parent_line_id" ref="tax_report_avec_droit_deduction_ht_14"/>
+        <field name="sequence" eval="4"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_vehicule_utilitaire_fabrication" model="account.tax.report.line">
+        <field name="name">-Véhicule utilitaire léger économique, et cyclomoteur économique et produits et matières entrant dans leur fabrication</field>
+        <field name="parent_line_id" ref="tax_report_avec_droit_deduction_ht_14"/>
+        <field name="sequence" eval="5"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_energie_electrique" model="account.tax.report.line">
+        <field name="name">Énergie électrique</field>
+        <field name="parent_line_id" ref="tax_report_avec_droit_deduction_ht_14"/>
+        <field name="sequence" eval="6"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_avec_droit_deduction_ht_14_1" model="account.tax.report.line">
+        <field name="name">TR 14%- Avec droit à déduction (HT)</field>
+        <field name="parent_line_id" ref="tax_report_tauz_reduit_ht_14"/>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_prestations_services_enterprise_assurances" model="account.tax.report.line">
+        <field name="name">Les prestations de services rendues par tout agent démarcheur ou courtier d’assurances à raison des contrats apportés par lui à une entreprise d’assurances</field>
+        <field name="parent_line_id" ref="tax_report_avec_droit_deduction_ht_14_1"/>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_taux_rediut_tva_14" model="account.tax.report.line">
+        <field name="name">TAUX REDUIT DE 14% (TVA exigible)</field>
+        <field name="tag_name">TAUX REDUIT DE 14% (TVA exigible)</field>
+        <field name="parent_line_id" ref="tax_report_ventilation_chiffre_affaires_imposable"/>
+        <field name="sequence" eval="4"/>
+        <field name="code">MATAXB_4</field>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_avec_droit_deduction_tva_14" model="account.tax.report.line">
+        <field name="name">TR 14%- Avec droit à déduction (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_rediut_tva_14"/>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_beurre_exclusion_beuree_febrication_tva" model="account.tax.report.line">
+        <field name="name">-Beurre à l’exclusion du beurre de fabrication artisanale visé à l’article 91 (IA. 2°)(TVA)</field>
+        <field name="parent_line_id" ref="tax_report_avec_droit_deduction_tva_14"/>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_graisses_alimentaires_margarines_tva" model="account.tax.report.line">
+        <field name="name">-Graisses alimentaires (animales ou végétales), margarines ou saindoux(TVA)</field>
+        <field name="parent_line_id" ref="tax_report_avec_droit_deduction_tva_14"/>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_the_vrac_conditionne_tva" model="account.tax.report.line">
+        <field name="name">-Thé (en vrac ou conditionné)(TVA)</field>
+        <field name="parent_line_id" ref="tax_report_avec_droit_deduction_tva_14"/>
+        <field name="sequence" eval="3"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_transport_voyageurs_marchandises_tva" model="account.tax.report.line">
+        <field name="name">-Opérations de transport de voyageurs et de marchandises(TVA)</field>
+        <field name="parent_line_id" ref="tax_report_avec_droit_deduction_tva_14"/>
+        <field name="sequence" eval="4"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_vehicule_utilitaire_fabrication_tva" model="account.tax.report.line">
+        <field name="name">-Véhicule utilitaire léger économique, et cyclomoteur économique et produits et matières entrant dans leur fabrication(TVA)</field>
+        <field name="parent_line_id" ref="tax_report_avec_droit_deduction_tva_14"/>
+        <field name="sequence" eval="5"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_energie_electrique_tva" model="account.tax.report.line">
+        <field name="name">Énergie électrique(TVA)</field>
+        <field name="parent_line_id" ref="tax_report_avec_droit_deduction_tva_14"/>
+        <field name="sequence" eval="6"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_avec_droit_deduction_tva_14_1" model="account.tax.report.line">
+        <field name="name">TR 14%- Avec droit à déduction (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_rediut_tva_14"/>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_prestations_services_enterprise_assurances_tva" model="account.tax.report.line">
+        <field name="name">Les prestations de services rendues par tout agent démarcheur ou courtier d’assurances à raison des contrats apportés par lui à une entreprise d’assurances(TVA)</field>
+        <field name="parent_line_id" ref="tax_report_avec_droit_deduction_tva_14_1"/>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="account_report_taux_reduit_base_ht_10" model="account.tax.report.line">
+        <field name="name">TAUX REDUIT DE 1O% (Base HT)</field>
+        <field name="tag_name">TAUX REDUIT DE 1O% (Base HT)</field>
+        <field name="parent_line_id" ref="tax_report_ventilation_chiffre_affaires_imposable"/>
+        <field name="sequence" eval="5"/>
+        <field name="code">MATAXB_5</field>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_credit_foncier_ht" model="account.tax.report.line">
+        <field name="name">-Les opérations de crédit foncier, de crédit à la construction et de crédit à l’hôtellerie (HT)</field>
+        <field name="parent_line_id" ref="account_report_taux_reduit_base_ht_10"/>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_transactions_portant_sociales_ht" model="account.tax.report.line">
+        <field name="name">-Les transactions portant sur les actions et les parts sociales (HT)</field>
+        <field name="parent_line_id" ref="account_report_taux_reduit_base_ht_10"/>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_credit_agricole_ht" model="account.tax.report.line">
+        <field name="name">-Les opérations de crédit agricole (HT)</field>
+        <field name="parent_line_id" ref="account_report_taux_reduit_base_ht_10"/>
+        <field name="sequence" eval="3"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_afferentes_aux_avances_ht" model="account.tax.report.line">
+        <field name="name">Les opérations afférentes aux prêts et avances consentis aux collectivités locales par le fonds d’équipement communal ainsi que celles au profit dudit fonds (HT)</field>
+        <field name="parent_line_id" ref="account_report_taux_reduit_base_ht_10"/>
+        <field name="sequence" eval="4"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_veterinaires_ht" model="account.tax.report.line">
+        <field name="name">-Les opérations des avocats, interprètes, notaires, adoul, huissiers de justice et vétérinaires (HT)</field>
+        <field name="parent_line_id" ref="account_report_taux_reduit_base_ht_10"/>
+        <field name="sequence" eval="5"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_restaurant_logement_hotels_ht" model="account.tax.report.line">
+        <field name="name">-Opérations de restauration et de logement dans des hôtels (HT)</field>
+        <field name="parent_line_id" ref="account_report_taux_reduit_base_ht_10"/>
+        <field name="sequence" eval="6"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_restaurant_fournies_enterprises_ht" model="account.tax.report.line">
+        <field name="name">-Opérations de restauration fournies par les prestataires de services au personnel salarié des entreprises (HT)</field>
+        <field name="parent_line_id" ref="account_report_taux_reduit_base_ht_10"/>
+        <field name="sequence" eval="7"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_explotation_location_hotel_toouristique_ht" model="account.tax.report.line">
+        <field name="name">-Exploitation ou location d’hôtel ou ensemble immobilier à destination touristique (HT)</field>
+        <field name="parent_line_id" ref="account_report_taux_reduit_base_ht_10"/>
+        <field name="sequence" eval="8"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_huiles_fluides_alimentaires_ht" model="account.tax.report.line">
+        <field name="name">-Les huiles fluides alimentaires (HT)</field>
+        <field name="parent_line_id" ref="account_report_taux_reduit_base_ht_10"/>
+        <field name="sequence" eval="9"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_sel_cuisines_marin_ht" model="account.tax.report.line">
+        <field name="name">-Le sel de cuisines (gemme ou marin) (HT)</field>
+        <field name="parent_line_id" ref="account_report_taux_reduit_base_ht_10"/>
+        <field name="sequence" eval="10"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_garines_semouls_alimentaires_ht" model="account.tax.report.line">
+        <field name="name">-Le riz usiné, les farines et semoules de riz et les farines de féculents, les pâtes alimentaires (HT)</field>
+        <field name="parent_line_id" ref="account_report_taux_reduit_base_ht_10"/>
+        <field name="sequence" eval="11"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_banque_credit_ht" model="account.tax.report.line">
+        <field name="name">-Les opérations de banque et de crédit et les commissions de change (HT)</field>
+        <field name="parent_line_id" ref="account_report_taux_reduit_base_ht_10"/>
+        <field name="sequence" eval="12"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_transactions_aux_valeurs_mobilieres_ht" model="account.tax.report.line">
+        <field name="name">-Les transactions relatives aux valeurs mobilières (HT)</field>
+        <field name="parent_line_id" ref="account_report_taux_reduit_base_ht_10"/>
+        <field name="sequence" eval="13"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_taux_reduit_tva_10" model="account.tax.report.line">
+        <field name="name">TAUX REDUIT DE 1O% (TVA exigible)</field>
+        <field name="tag_name">TAUX REDUIT DE 1O% (TVA exigible)</field>
+        <field name="parent_line_id" ref="tax_report_ventilation_chiffre_affaires_imposable"/>
+        <field name="sequence" eval="6"/>
+        <field name="code">MATAXB_6</field>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_credit_foncier_tva" model="account.tax.report.line">
+        <field name="name">-Les opérations de crédit foncier, de crédit à la construction et de crédit à l’hôtellerie (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_10"/>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_transactions_portant_sociales_tva" model="account.tax.report.line">
+        <field name="name">-Les transactions portant sur les actions et les parts sociales (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_10"/>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_credit_agricole_tva" model="account.tax.report.line">
+        <field name="name">-Les opérations de crédit agricole (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_10"/>
+        <field name="sequence" eval="3"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_afferentes_aux_avances_tva" model="account.tax.report.line">
+        <field name="name">Les opérations afférentes aux prêts et avances consentis aux collectivités locales par le fonds d’équipement communal ainsi que celles au profit dudit fonds (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_10"/>
+        <field name="sequence" eval="4"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_avocats_veterinaires_tva" model="account.tax.report.line">
+        <field name="name">-Les opérations des avocats, interprètes, notaires, adoul, huissiers de justice et vétérinaires (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_10"/>
+        <field name="sequence" eval="5"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_restaurant_logement_hotels_tva" model="account.tax.report.line">
+        <field name="name">-Opérations de restauration et de logement dans des hôtels (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_10"/>
+        <field name="sequence" eval="6"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_restaurant_fournies_enterprises_tva" model="account.tax.report.line">
+        <field name="name">-Opérations de restauration fournies par les prestataires de services au personnel salarié des entreprises (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_10"/>
+        <field name="sequence" eval="7"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_explotation_location_hotel_toouristique_tva" model="account.tax.report.line">
+        <field name="name">-Exploitation ou location d’hôtel ou ensemble immobilier à destination touristique (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_10"/>
+        <field name="sequence" eval="8"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_huiles_fluides_alimentaires_tva" model="account.tax.report.line">
+        <field name="name">-Les huiles fluides alimentaires (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_10"/>
+        <field name="sequence" eval="9"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_sel_cuisines_marin_tva" model="account.tax.report.line">
+        <field name="name">-Le sel de cuisines (gemme ou marin) (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_10"/>
+        <field name="sequence" eval="10"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_garines_semouls_alimentaires_tva" model="account.tax.report.line">
+        <field name="name">-Le riz usiné, les farines et semoules de riz et les farines de féculents, les pâtes alimentaires (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_10"/>
+        <field name="sequence" eval="11"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_banque_credit_tva" model="account.tax.report.line">
+        <field name="name">-Les opérations de banque et de crédit et les commissions de change (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_10"/>
+        <field name="sequence" eval="12"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_transactions_aux_valeurs_mobilieres_tva" model="account.tax.report.line">
+        <field name="name">-Les transactions relatives aux valeurs mobilières (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_10"/>
+        <field name="sequence" eval="13"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_taux_reduit_ht_7" model="account.tax.report.line">
+        <field name="name">TAUX REDUIT DE 7% (Base HT)</field>
+        <field name="tag_name">TAUX REDUIT DE 7% (Base HT)</field>
+        <field name="parent_line_id" ref="tax_report_ventilation_chiffre_affaires_imposable"/>
+        <field name="sequence" eval="7"/>
+        <field name="code">MATAXB_7</field>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_livree_auz_reseaus_assainissement_ht" model="account.tax.report.line">
+        <field name="name">L’eau livrée aux réseaux de distribution publique et les prestations d’assainissement (HT)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_ht_7"/>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_location_compteurs_electricite_ht" model="account.tax.report.line">
+        <field name="name">Location de compteurs d'eau et d'électricité (HT)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_ht_7"/>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_gaz_petrole_autres_gazeux_ht" model="account.tax.report.line">
+        <field name="name">Gaz de pétrole et les autres hydrocarbures gazeux (HT)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_ht_7"/>
+        <field name="sequence" eval="3"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_huiles_petrole_ruffinees_ht" model="account.tax.report.line">
+        <field name="name">Huiles de pétrole ou de schistes, brutes ou raffinées (HT)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_ht_7"/>
+        <field name="sequence" eval="4"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_produits_pharmaceutiques_matieres_ht" model="account.tax.report.line">
+        <field name="name">Produits pharmaceutiques, matières premières et produits entrant dans leurs compositions ainsi que les emballages non récupérables de ces produits et matières (HT)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_ht_7"/>
+        <field name="sequence" eval="5"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_fournitures_scolaires_composition_ht" model="account.tax.report.line">
+        <field name="name">Les fournitures scolaires, produits et matières entrant dans leur composition (HT)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_ht_7"/>
+        <field name="sequence" eval="6"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_aliments_betail_animaux_ht" model="account.tax.report.line">
+        <field name="name">Aliments de bétail et des animaux de basse cour (HT)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_ht_7"/>
+        <field name="sequence" eval="7"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_sucre_raffine_agglomere_ht" model="account.tax.report.line">
+        <field name="name">Sucre raffiné ou aggloméré (HT)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_ht_7"/>
+        <field name="sequence" eval="8"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_conserves_sardines_ht" model="account.tax.report.line">
+        <field name="name">Conserves de sardines (HT)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_ht_7"/>
+        <field name="sequence" eval="9"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_lait_poudre_ht" model="account.tax.report.line">
+        <field name="name">Lait en poudre (HT)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_ht_7"/>
+        <field name="sequence" eval="10"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_savon_menage_ht" model="account.tax.report.line">
+        <field name="name">Savon de ménage (HT)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_ht_7"/>
+        <field name="sequence" eval="11"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_voiture_economique_fabrication_ht" model="account.tax.report.line">
+        <field name="name">Voiture économique et produits et matières entrant dans sa fabrication (HT)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_ht_7"/>
+        <field name="sequence" eval="12"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_peage_dans_autoroutes_ht" model="account.tax.report.line">
+        <field name="name">Péage dans les autoroutes (HT)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_ht_7"/>
+        <field name="sequence" eval="13"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_reversement_differents_titres_tva" model="account.tax.report.line">
+        <field name="name">Reversement de la TVA à différents titres (cessation, régularisation,....)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_ht_7"/>
+        <field name="sequence" eval="14"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_total_exigible_tva" model="account.tax.report.line">
+        <field name="name">TOTAL de la TVA exigible</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_ht_7"/>
+        <field name="sequence" eval="15"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_taux_reduit_tva_7" model="account.tax.report.line">
+        <field name="name">TAUX REDUIT DE 7% (TVA exigible)</field>
+        <field name="tag_name">TAUX REDUIT DE 7% (TVA exigible)</field>
+        <field name="parent_line_id" ref="tax_report_ventilation_chiffre_affaires_imposable"/>
+        <field name="sequence" eval="8"/>
+        <field name="code">MATAXB_8</field>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_livree_auz_reseaus_assainissement_tva" model="account.tax.report.line">
+        <field name="name">L’eau livrée aux réseaux de distribution publique et les prestations d’assainissement (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_7"/>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_location_compteurs_electricite_tva" model="account.tax.report.line">
+        <field name="name">Location de compteurs d'eau et d'électricité (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_7"/>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_gaz_petrole_autres_gazeux_tva" model="account.tax.report.line">
+        <field name="name">Gaz de pétrole et les autres hydrocarbures gazeux (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_7"/>
+        <field name="sequence" eval="3"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_huiles_petrole_ruffinees_tva" model="account.tax.report.line">
+        <field name="name">Huiles de pétrole ou de schistes, brutes ou raffinées (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_7"/>
+        <field name="sequence" eval="4"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_produits_pharmaceutiques_matieres_tva" model="account.tax.report.line">
+        <field name="name">Produits pharmaceutiques, matières premières et produits entrant dans leurs compositions ainsi que les emballages non récupérables de ces produits et matières (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_7"/>
+        <field name="sequence" eval="5"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_fournitures_scolaires_composition_tva" model="account.tax.report.line">
+        <field name="name">Les fournitures scolaires, produits et matières entrant dans leur composition (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_7"/>
+        <field name="sequence" eval="6"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_aliments_betail_animaux_tva" model="account.tax.report.line">
+        <field name="name">Aliments de bétail et des animaux de basse cour (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_7"/>
+        <field name="sequence" eval="7"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_sucre_raffine_agglomere_tva" model="account.tax.report.line">
+        <field name="name">Sucre raffiné ou aggloméré (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_7"/>
+        <field name="sequence" eval="8"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_conserves_sardines_tva" model="account.tax.report.line">
+        <field name="name">Conserves de sardines (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_7"/>
+        <field name="sequence" eval="9"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_lait_poudre_tva" model="account.tax.report.line">
+        <field name="name">Lait en poudre (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_7"/>
+        <field name="sequence" eval="10"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_savon_menage_tva" model="account.tax.report.line">
+        <field name="name">Savon de ménage (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_7"/>
+        <field name="sequence" eval="11"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_voiture_economique_fabrication_tva" model="account.tax.report.line">
+        <field name="name">Voiture économique et produits et matières entrant dans sa fabrication (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_7"/>
+        <field name="sequence" eval="12"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_peage_dans_autoroutes_tva" model="account.tax.report.line">
+        <field name="name">Péage dans les autoroutes (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_taux_reduit_tva_7"/>
+        <field name="sequence" eval="13"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_ventilation_des_deductions" model="account.tax.report.line">
+        <field name="name">Ventilation des déductions</field>
+        <field name="sequence" eval="3"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_achats_non_immobilises_ht" model="account.tax.report.line">
+        <field name="name">1-ACHATS NON IMMOBILISES (Base HT)</field>
+        <field name="parent_line_id" ref="tax_report_ventilation_des_deductions"/>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_travaux_facons_ht" model="account.tax.report.line">
+        <field name="name">Travaux à façons (HT)</field>
+        <field name="parent_line_id" ref="tax_report_achats_non_immobilises_ht"/>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_sous_traitance_immobiliers_ht" model="account.tax.report.line">
+        <field name="name">Sous-traitance (travaux immobiliers) (HT)</field>
+        <field name="parent_line_id" ref="tax_report_achats_non_immobilises_ht"/>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_biens_materiel_child_ht" model="account.tax.report.line">
+        <field name="name">Biens matériels (Base HT) (Child)</field>
+        <field name="tag_name">Biens matériels (Base HT) (Child)</field>
+        <field name="parent_line_id" ref="tax_report_achats_non_immobilises_ht"/>
+        <field name="sequence" eval="3"/>
+        <field name="code">MATAXC_102_1</field>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_biens_materiels_ht" model="account.tax.report.line">
+        <field name="name">Biens matériels (Base HT)</field>
+        <field name="parent_line_id" ref="tax_report_achats_non_immobilises_ht"/>
+        <field name="sequence" eval="3"/>
+        <field name="code">MATAXC_1_1</field>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_achats_importation_ht_20" model="account.tax.report.line">
+        <field name="name">-Achats à l'importation (20%) (HT)</field>
+        <field name="tag_name">-Achats à l'importation (20%) (HT)</field>
+        <field name="parent_line_id" ref="tax_report_biens_materiels_ht"/>
+        <field name="sequence" eval="1"/>
+        <field name="code">MATAXHT124</field>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_achats_interieur_ht_20" model="account.tax.report.line">
+        <field name="name">-Achats à l'intérieur (20%) (HT)</field>
+        <field name="parent_line_id" ref="tax_report_biens_materiels_ht"/>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_achats_importation_ht_14" model="account.tax.report.line">
+        <field name="name">-Achats à l'importation (14%) (HT)</field>
+        <field name="tag_name">-Achats à l'importation (14%) (HT)</field>
+        <field name="parent_line_id" ref="tax_report_biens_materiels_ht"/>
+        <field name="sequence" eval="3"/>
+        <field name="code">MATAXHT126</field>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_achats_interieur_ht_14" model="account.tax.report.line">
+        <field name="name">-Achats à l'intérieur (14%) (HT)</field>
+        <field name="parent_line_id" ref="tax_report_biens_materiels_ht"/>
+        <field name="sequence" eval="4"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_achat_importation_ht_7" model="account.tax.report.line">
+        <field name="name">-Achat à l'importation (7%) (HT)</field>
+        <field name="tag_name">-Achat à l'importation (7%) (HT)</field>
+        <field name="parent_line_id" ref="tax_report_biens_materiels_ht"/>
+        <field name="sequence" eval="5"/>
+        <field name="code">MATAXHT128</field>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_achats_interieur_ht_7" model="account.tax.report.line">
+        <field name="name">-Achat à l'intérieur (7%) (HT)</field>
+        <field name="parent_line_id" ref="tax_report_biens_materiels_ht"/>
+        <field name="sequence" eval="6"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_prestations_services_ht_1" model="account.tax.report.line">
+        <field name="name">Prestations de services (Base HT)</field>
+        <field name="parent_line_id" ref="tax_report_achats_non_immobilises_ht"/>
+        <field name="sequence" eval="4"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_prestations_service_taux_ht" model="account.tax.report.line">
+        <field name="name">Prestations de service au taux normal (HT)</field>
+        <field name="parent_line_id" ref="tax_report_prestations_services_ht_1"/>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_transport_ht" model="account.tax.report.line">
+        <field name="name">Transport (HT)</field>
+        <field name="parent_line_id" ref="tax_report_prestations_services_ht_1"/>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_banque_ht" model="account.tax.report.line">
+        <field name="name">Opérations de banque (HT)</field>
+        <field name="parent_line_id" ref="tax_report_prestations_services_ht_1"/>
+        <field name="sequence" eval="3"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_hotels_voyageurs_touristique_ht" model="account.tax.report.line">
+        <field name="name">Hôtels de voyageurs, et ensemble immobiliers à destination touristique (HT)</field>
+        <field name="parent_line_id" ref="tax_report_prestations_services_ht_1"/>
+        <field name="sequence" eval="4"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_achats_immobilises_deductible_tva" model="account.tax.report.line">
+        <field name="name">1-ACHATS NON IMMOBILISES (TVA déductible)</field>
+        <field name="parent_line_id" ref="tax_report_ventilation_des_deductions"/>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_travaux_facons_tva" model="account.tax.report.line">
+        <field name="name">Travaux à façons (TVA déductible)</field>
+        <field name="parent_line_id" ref="tax_report_achats_immobilises_deductible_tva"/>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_sous_traitance_immobiliers_tva" model="account.tax.report.line">
+        <field name="name">Sous-traitance (travaux immobiliers) (TVA déductible)</field>
+        <field name="parent_line_id" ref="tax_report_achats_immobilises_deductible_tva"/>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_biens_materiels_tva" model="account.tax.report.line">
+        <field name="name">Biens matériels (TVA déductible)</field>
+        <field name="parent_line_id" ref="tax_report_achats_immobilises_deductible_tva"/>
+        <field name="sequence" eval="3"/>
+        <field name="code">MATAXC_2_1</field>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_biens_materiel_child_tva" model="account.tax.report.line">
+        <field name="name">Biens matériels (TVA déductible) (Child)</field>
+        <field name="tag_name">Biens matériels (TVA déductible) (Child)</field>
+        <field name="parent_line_id" ref="tax_report_achats_immobilises_deductible_tva"/>
+        <field name="sequence" eval="3"/>
+        <field name="code">MATAXC_117_1</field>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_achats_importation_tva_20" model="account.tax.report.line">
+        <field name="name">-Achats à l'importation (20%) (TVA)</field>
+        <field name="tag_name">-Achats à l'importation (20%) (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_biens_materiels_tva"/>
+        <field name="sequence" eval="1"/>
+        <field name="code">MATAXTVA124</field>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_achats_interieur_tva_20" model="account.tax.report.line">
+        <field name="name">-Achats à l'intérieur (20%) (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_biens_materiels_tva"/>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_achats_importation_tva_14" model="account.tax.report.line">
+        <field name="name">-Achats à l'importation (14%) (TVA)</field>
+        <field name="tag_name">-Achats à l'importation (14%) (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_biens_materiels_tva"/>
+        <field name="sequence" eval="3"/>
+        <field name="code">MATAXTVA126</field>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_achats_interieur_tva_14" model="account.tax.report.line">
+        <field name="name">-Achats à l'intérieur (14%) (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_biens_materiels_tva"/>
+        <field name="sequence" eval="4"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_achats_importation_tva_7" model="account.tax.report.line">
+        <field name="name">-Achat à l'importation (7%) (TVA)</field>
+        <field name="tag_name">-Achat à l'importation (7%) (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_biens_materiels_tva"/>
+        <field name="sequence" eval="5"/>
+        <field name="code">MATAXTVA128</field>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_achats_interieur_tva_7" model="account.tax.report.line">
+        <field name="name">-Achat à l'intérieur (7%) (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_biens_materiels_tva"/>
+        <field name="sequence" eval="6"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_prestations_service_deductible_tva" model="account.tax.report.line">
+        <field name="name">Prestations de services (TVA déductible)</field>
+        <field name="parent_line_id" ref="tax_report_achats_immobilises_deductible_tva"/>
+        <field name="sequence" eval="4"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_prestations_service_taux_tva" model="account.tax.report.line">
+        <field name="name">Prestations de service au taux normal (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_prestations_service_deductible_tva"/>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_transport_ht_1" model="account.tax.report.line">
+        <field name="name">Transport (HT)</field>
+        <field name="parent_line_id" ref="tax_report_prestations_service_deductible_tva"/>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_operations_banque_tva" model="account.tax.report.line">
+        <field name="name">Opérations de banque (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_prestations_service_deductible_tva"/>
+        <field name="sequence" eval="3"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_hotels_voyageurs_touristique_tva" model="account.tax.report.line">
+        <field name="name">Hôtels de voyageurs, et ensemble immobiliers à destination touristique (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_prestations_service_deductible_tva"/>
+        <field name="sequence" eval="4"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_immobilisations_base_ht" model="account.tax.report.line">
+        <field name="name">2-IMMOBILISATIONS (Base HT)</field>
+        <field name="tag_name">2-IMMOBILISATIONS (Base HT)</field>
+        <field name="parent_line_id" ref="tax_report_ventilation_des_deductions"/>
+        <field name="sequence" eval="3"/>
+        <field name="code">MATAXC_3</field>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_achats_importation_ht" model="account.tax.report.line">
+        <field name="name">-Achats à l'importation (HT)</field>
+        <field name="parent_line_id" ref="tax_report_immobilisations_base_ht"/>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_achats_interieur_ht" model="account.tax.report.line">
+        <field name="name">-Achats à l'intérieur (HT)</field>
+        <field name="parent_line_id" ref="tax_report_immobilisations_base_ht"/>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_livrasion_autre_constructions_ht" model="account.tax.report.line">
+        <field name="name">-Livraison à soi-même autre que les constructions (HT)</field>
+        <field name="parent_line_id" ref="tax_report_immobilisations_base_ht"/>
+        <field name="sequence" eval="3"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_installation_pose_ht" model="account.tax.report.line">
+        <field name="name">-Installation et pose (HT)</field>
+        <field name="parent_line_id" ref="tax_report_immobilisations_base_ht"/>
+        <field name="sequence" eval="4"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_constructions_ht" model="account.tax.report.line">
+        <field name="name">-Constructions (HT)</field>
+        <field name="parent_line_id" ref="tax_report_immobilisations_base_ht"/>
+        <field name="sequence" eval="5"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_livrasion_constructions_ht" model="account.tax.report.line">
+        <field name="name">-Livraison à soi-même de constructions (HT)</field>
+        <field name="parent_line_id" ref="tax_report_immobilisations_base_ht"/>
+        <field name="sequence" eval="6"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_deduction_complementaire_prorata_ht" model="account.tax.report.line">
+        <field name="name">-Déduction complémentaire de la régularisation du prorata (HT)</field>
+        <field name="parent_line_id" ref="tax_report_immobilisations_base_ht"/>
+        <field name="sequence" eval="7"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_immobilisations_deductible_tva" model="account.tax.report.line">
+        <field name="name">2-IMMOBILISATIONS (TVA déductible)</field>
+        <field name="tag_name">2-IMMOBILISATIONS (TVA déductible)</field>
+        <field name="parent_line_id" ref="tax_report_ventilation_des_deductions"/>
+        <field name="sequence" eval="4"/>
+        <field name="code">MATAXC_4</field>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_achats_importation_tva" model="account.tax.report.line">
+        <field name="name">-Achats à l'importation (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_immobilisations_deductible_tva"/>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_achats_interieur_tva" model="account.tax.report.line">
+        <field name="name">-Achats à l'intérieur (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_immobilisations_deductible_tva"/>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_livrasion_autre_constructions_tva" model="account.tax.report.line">
+        <field name="name">-Livraison à soi-même autre que les constructions (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_immobilisations_deductible_tva"/>
+        <field name="sequence" eval="3"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_installation_pose_tva" model="account.tax.report.line">
+        <field name="name">-Installation et pose (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_immobilisations_deductible_tva"/>
+        <field name="sequence" eval="4"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_constructions_tva" model="account.tax.report.line">
+        <field name="name">-Constructions (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_immobilisations_deductible_tva"/>
+        <field name="sequence" eval="5"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_livrasion_constructions_tva" model="account.tax.report.line">
+        <field name="name">-Livraison à soi-même de constructions (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_immobilisations_deductible_tva"/>
+        <field name="sequence" eval="6"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+
+    <record id="tax_report_deduction_complementaire_prorata_tva" model="account.tax.report.line">
+        <field name="name">-Déduction complémentaire de la régularisation du prorata (TVA)</field>
+        <field name="parent_line_id" ref="tax_report_immobilisations_deductible_tva"/>
+        <field name="sequence" eval="7"/>
+        <field name="country_id" ref="base.ma"/>
+    </record>
+</odoo>
