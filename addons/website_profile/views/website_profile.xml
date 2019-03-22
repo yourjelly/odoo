@@ -322,7 +322,10 @@
                     <t t-set="user_points" t-value="0"/>
                 </t>
                 <path class="o_pc_circle_bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                <path class="o_pc_circle" t-attf-stroke-dasharray="#{user_points}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="url(#gradient)" />
+                <path class="o_pc_circle" t-attf-stroke-dasharray="#{user_points}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="url(#gradient)" mask="url(#mask)"/>
+                <mask id="mask">
+                    <polygon points="0,0 17.2,0 17.2,10 18,10 18,0 36,0 36,36 0,36" fill="white"/>
+                </mask>
                 <linearGradient id="gradient">
                     <stop offset="0%" stop-color="var(--o-pc-color-stop-1)"/>
                     <stop offset="100%" stop-color="var(--o-pc-color-stop-2)"/>
