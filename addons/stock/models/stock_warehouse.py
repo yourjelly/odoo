@@ -644,6 +644,7 @@ class Warehouse(models.Model):
             'warehouse_selectable': True,
             'product_selectable': True,
             'product_categ_selectable': True,
+            'sequence': 10,
             'supplied_wh_id': self.id,
             'supplier_wh_id': supplier_warehouse.id,
             'company_id': self.company_id.id,
