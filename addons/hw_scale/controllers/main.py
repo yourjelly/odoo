@@ -149,8 +149,8 @@ ADAMEquipmentProtocol = ScaleProtocol(
 
 SCALE_PROTOCOLS = (
     WeightOnlyProtocol,
-    Toledo8217Protocol,
-    ADAMEquipmentProtocol, # must be listed last, as it supports no probing!
+    # Toledo8217Protocol,
+    # ADAMEquipmentProtocol, # must be listed last, as it supports no probing!
 )
 
 class Scale(Thread):
