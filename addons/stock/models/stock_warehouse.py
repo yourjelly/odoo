@@ -19,11 +19,13 @@ _logger = logging.getLogger(__name__)
 class Warehouse(models.Model):
     _name = "stock.warehouse"
     _description = "Warehouse"
+    _order = "sequence"
     # namedtuple used in helper methods generating values for routes
     Routing = namedtuple('Routing', ['from_loc', 'dest_loc', 'picking_type', 'action'])
 
     name = fields.Char('Warehouse', index=True, required=True, default=lambda self: self.env['res.company']._company_default_get('stock.inventory').name)
     active = fields.Boolean('Active', default=True)
+    sequence = fields.Integer('Sequence', default=0)
     company_id = fields.Many2one(
         'res.company', 'Company', default=lambda self: self.env['res.company']._company_default_get('stock.inventory'),
         index=True, readonly=True, required=True,
