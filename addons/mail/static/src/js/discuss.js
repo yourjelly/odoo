@@ -14,6 +14,7 @@ var Dialog = require('web.Dialog');
 var dom = require('web.dom');
 var pyUtils = require('web.py_utils');
 var SearchView = require('web.SearchView');
+var Widget = require('web.Widget');
 var session = require('web.session');
 
 var QWeb = core.qweb;
@@ -1448,7 +1449,264 @@ var Discuss = AbstractAction.extend(ControlPanelMixin, {
     },
 });
 
-core.action_registry.add('mail.discuss', Discuss);
+//-----------------------------------------------------------
+
+var Counter = Widget.extend({
+    template: 'demo.counter',
+    events: {
+        'click .o_decrement': '_onDecrement',
+        'click .o_increment': '_onIncrement',
+    },
+    init: function(parent, initialValue) {
+        this._super(parent);
+        this.value = initialValue || 0;
+    },
+    on_attach_callback: function () {},
+    on_detach_callback: function () {},
+    updateCounter: function() {
+        this.$('.o_content').html('Value: ' + this.value);
+    },
+    _onDecrement: function(ev) {
+        ev.stopPropagation();
+        this.value -= 1;
+        this.updateCounter();
+    },
+    _onIncrement: function(ev) {
+        ev.stopPropagation();
+        this.value += 1;
+        this.updateCounter();
+    }
+});
+
+var Message = Widget.extend({
+    template: 'demo.message',
+    events: {
+        'click .remove': '_onRemove'
+    },
+
+    init: function(parent, message) {
+        this._super(parent);
+        this.author = message.author;
+        this.msg = message.msg;
+        this.id = message.id;
+    },
+    willStart: function () {
+        this.counter = new Counter(this, this.id);
+        return this.counter.appendTo($('<div>'));
+    },
+
+    start: function () {
+        dom.append(this.$el, this.counter.$el, {
+            in_DOM: this.isInDom,
+            callbacks: [{widget: this.counter}]
+        });
+    },
+    on_attach_callback: function () {
+        this.isInDom = true;
+        if (this.counter) {
+            this.counter.on_attach_callback();
+        }
+    },
+    on_detach_callback: function () {
+        this.isInDom = true;
+        if (this.counter) {
+            this.counter.on_detach_callback();
+        }
+    },
+
+    _onRemove: function () {
+        this.trigger_up('remove_message', {id:this.id});
+    },
+
+});
+
+
+// const template = `
+//     <div class="main">
+//         <div class="left-thing">
+//             <div class="counter">
+//                 <button t-on-click="increment(-1)">-</button>
+//                 <span style="font-weight:bold">Value: <t t-esc="state.messages.length"/></span>
+//                 <button t-on-click="increment(1)">+</button>
+//             </div>
+//             <button t-on-click="setMessageCount(10)">10 messages</button>
+//             <button t-on-click="setMessageCount(20)">20 messages</button>
+//             <button t-on-click="setMessageCount(500)">500 messages</button>
+//             <button t-on-click="setMessageCount(1000)">1000 messages</button>
+//             <button t-on-click="setMessageCount(5000)">5000 messages</button>
+//             <button t-on-click="setMessageCount(15000)">15000 messages</button>
+//         </div>
+//         <div class="right-thing">
+//             <div class="content">
+//                 <t t-foreach="state.messages" t-as="message">
+//                     <t t-widget="Message" t-att-key="message.id" t-props="message" t-on-remove_message="removeMessage"/>
+//                 </t>
+//             </div>
+//         </div>
+//     </div>`;
+
+// export class App extends odoo.core.Component {
+//   constructor(parent, props) {
+//     super(parent, props);
+//     this.inlineTemplate = template;
+//     this.widgets = { Message };
+//     this.state = {
+//       messages: messages.slice(0, 10)
+//     };
+//   }
+
+//   setMessageCount(n) {
+//     this.updateState({
+//       messages: messages.slice(0, n)
+//     });
+//   }
+
+//   removeMessage(data) {
+//     const index = messages.findIndex(m => m.id === data.id);
+//     const n = this.state.messages.length;
+//     messages.splice(index, 1);
+//     this.updateState({ messages: messages.slice(0, n - 1) });
+//   }
+
+//   increment(delta) {
+//     const n = this.state.messages.length + delta;
+//     this.setMessageCount(n);
+//   }
+// }
+
+const messages = [];
+
+const authors = ["Aaron", "David", "Vincent"];
+const content = [
+  "Lorem ipsum dolor sit amet",
+  "Sed ut perspiciatis unde omnis iste natus error sit voluptatem",
+  "Excepteur sint occaecat cupidatat non proident"
+];
+
+function chooseRandomly(array) {
+  const index = Math.floor(Math.random() * array.length);
+  return array[index];
+}
+
+for (let i = 1; i < 16000; i++) {
+  messages.push({
+    id: i,
+    author: chooseRandomly(authors),
+    msg: `${i}: ${chooseRandomly(content)}`,
+    likes: 0
+  });
+}
+
+
+var Demo = AbstractAction.extend({
+    template: 'demo.main',
+    events: {
+        'click .o_decrement': function () {this.setMessageNumber(this.messages.length - 1);},
+        'click .o_increment': function () {this.setMessageNumber(this.messages.length + 1);},
+        'click .o_btn_msg.10': function () { this.setMessageNumber(10);},
+        'click .o_btn_msg.20': function () { this.setMessageNumber(20);},
+        'click .o_btn_msg.500': function () { this.setMessageNumber(500);},
+        'click .o_btn_msg.1000': function () { this.setMessageNumber(1000);},
+        'click .o_btn_msg.5000': function () { this.setMessageNumber(5000);},
+        'click .o_btn_msg.15000': function () { this.setMessageNumber(15000);},
+    },
+    custom_events: {
+        remove_message: '_onRemoveMessage',
+    },
+
+    init: function (parent) {
+        this._super(parent);
+        this.messages = messages.slice(0, 10);
+        this.widgets = {};
+        this.isInDom = false;
+    },
+    willStart: function () {
+        var defs = [];
+        for (let m of this.messages) {
+            let w = new Message(this, m);
+            this.widgets[m.id] = w;
+            defs.push(w.appendTo($('<div>')));
+        }
+        return $.when(defs);
+    },
+    start: function () {
+        this.$content = this.$('.content');
+        this.$valText = this.$('.left-thing .counter span');
+        this.$el.addClass('o_benchmark');
+        for (let m of this.messages) {
+            const widget = this.widgets[m.id];
+            dom.append(this.$content, widget.$el, {
+                in_DOM: this.isInDom,
+                callbacks: [{widget: widget}]
+            });
+        }
+    },
+    on_attach_callback: function () {
+        this.isInDom = true;
+        for (let widget of Object.values(this.widgets)) {
+            if (widget.on_attach_callback) {
+                widget.on_attach_callback();
+            }
+        }
+    },
+    on_detach_callback: function () {
+        this.isInDom = true;
+        for (let widget of Object.values(this.widgets)) {
+            if (widget.on_detach_callback) {
+                widget.on_detach_callback();
+            }
+        }
+    },
+
+    setMessageNumber: function (n) {
+        var self = this;
+        var currentVal = this.messages.length;
+        if (currentVal > n) {
+            // we need to destroy extra widgets
+            for (var i = n; i < currentVal; i++) {
+                let m = this.messages[i];
+                this.widgets[m.id].destroy();
+                delete this.widgets[m.id];
+            }
+            this.messages = messages.slice(0, n);
+            self.$valText.text('Value: ' + self.messages.length);
+        } else {
+            this.messages = messages.slice(0, n);
+            // we need to create missing widgets
+            var defs = [];
+            for (var i = currentVal; i < n; i++) {
+                let m = this.messages[i];
+                let w = new Message(this, m);
+                this.widgets[m.id] = w;
+                defs.push(w.appendTo($('<div>')));
+            }
+            $.when(defs).then(function () {
+                for (var i = currentVal; i < n; i++) {
+                    let m = self.messages[i];
+                    let widget = self.widgets[m.id];
+                    dom.append(self.$content, widget.$el, {
+                        in_DOM: this.isInDom,
+                        callbacks: [{widget: widget}]
+                    });
+                }
+            }).then(function () {
+                self.$valText.text('Value: ' + self.messages.length);
+            });
+        }
+    },
+    _onRemoveMessage: function (ev) {
+        const id = ev.data.id;
+        const index = messages.findIndex(m => m.id === id);
+        const n = this.messages.length;
+        messages.splice(index, 1);
+        this.messages = messages.slice(0, n-1);
+        ev.target.destroy();
+        this.$valText.text('Value: ' + (n-1));
+        delete this.widgets[id];
+    },
+});
+
+core.action_registry.add('mail.discuss', Demo);
 
 return Discuss;
 

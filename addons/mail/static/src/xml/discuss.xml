@@ -1,6 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
+    <div class="main" t-name="demo.main">
+        <div class="left-thing">
+            <div class="counter">
+                <button class="o_decrement">-</button>
+                <span style="font-weight:bold">Value: <t t-esc="widget.messages.length"/></span>
+                <button class="o_increment">+</button>
+            </div>
+            <button class="o_btn_msg 10">10 messages</button>
+            <button class="o_btn_msg 20">20 messages</button>
+            <button class="o_btn_msg 500">500 messages</button>
+            <button class="o_btn_msg 1000">1000 messages</button>
+            <button class="o_btn_msg 5000">5000 messages</button>
+            <button class="o_btn_msg 15000">15000 messages</button>
+        </div>
+        <div class="right-thing">
+            <div class="content">
+            </div>
+        </div>
+    </div>`;
+
+    <div t-name="demo.counter">
+        <button class="o_decrement">-</button>
+        <span class="o_content">Value: <t t-esc="widget.value"/></span>
+        <button class="o_increment">+</button>
+    </div>
+
+    <div t-name="demo.message" class="message">
+        <span class="author"><t t-esc="widget.author"/></span>
+        <span class="msg"><t t-esc="widget.msg"/></span>
+        <button class="remove" >Remove</button>
+    </div>
+
     <!--
         Discuss Main template
 
