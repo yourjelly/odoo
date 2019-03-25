@@ -120,7 +120,7 @@ var ListRenderer = BasicRenderer.extend({
             data = this.state.data;
         }
 
-        _.each(this.columns, this._computeColumnAggregates.bind(this, data));
+        this.columns.forEach(this._computeColumnAggregates.bind(this, data));
     },
     /**
      * Compute the aggregate values for a given column and a set of records.
@@ -146,7 +146,7 @@ var ListRenderer = BasicRenderer.extend({
         if (func) {
             var count = 0;
             var aggregateValue = (func === 'max') ? -Infinity : (func === 'min') ? Infinity : 0;
-            _.each(data, function (d) {
+            data.forEach(function (d) {
                 count += 1;
                 var value = (d.type === 'record') ? d.data[attrs.name] : d.aggregateValues[attrs.name];
                 if (func === 'avg') {
@@ -384,7 +384,7 @@ var ListRenderer = BasicRenderer.extend({
      */
     _renderFooter: function () {
         var aggregates = {};
-        _.each(this.columns, function (column) {
+        this.columns.forEach(function (column) {
             if ('aggregate' in column) {
                 aggregates[column.attrs.name] = column.aggregate;
             }
@@ -557,7 +557,7 @@ var ListRenderer = BasicRenderer.extend({
             return this._renderGroups(group.data, groupLevel + 1);
         } else {
             // the opened group contains records
-            var $records = _.map(group.data, function (record) {
+            var $records = group.data.map(function (record) {
                 return self._renderRow(record);
             });
             return [$('<tbody>').append($records)];
@@ -580,7 +580,7 @@ var ListRenderer = BasicRenderer.extend({
         groupLevel = groupLevel || 0;
         var result = [];
         var $tbody = $('<tbody>');
-        _.each(data, function (group) {
+        data.forEach(function (group) {
             if (!$tbody) {
                 $tbody = $('<tbody>');
             }
@@ -793,7 +793,9 @@ var ListRenderer = BasicRenderer.extend({
      * @param {jQueryElement} $tr a jquery <tr> element (the row to add decoration)
      */
     _setDecorationClasses: function (record, $tr) {
-        _.each(this.rowDecorations, function (expr, decoration) {
+        var self = this;
+        Object.keys(this.rowDecorations).forEach(function (decoration) {
+            var expr = self.rowDecorations[decoration];
             var cssClass = decoration.replace('decoration', 'text');
             $tr.toggleClass(cssClass, py.PY_isTrue(py.evaluate(expr, record.evalContext)));
         });
