@@ -39,8 +39,8 @@ var ListRenderer = BasicRenderer.extend({
         'click .o_group_header': '_onToggleGroup',
         'click thead .o_list_record_selector input': '_onToggleSelection',
         'keypress thead tr td': '_onKeyPress',
-        'keydown tr': '_onKeyDown',
-        'keydown thead tr': '_onKeyDown',
+        'keydown td': '_onKeyDown',
+        'keydown th': '_onKeyDown',
     },
     /**
      * @constructor
@@ -283,7 +283,7 @@ var ListRenderer = BasicRenderer.extend({
                 tdClassName += (' o_' + node.attrs.widget + '_cell');
             }
         }
-        var $td = $('<td>', { class: tdClassName });
+        var $td = $('<td>', { class: tdClassName, tabindex: -1 });
 
         // We register modifiers on the <td> element so that it gets the correct
         // modifiers classes (for styling)
@@ -492,6 +492,7 @@ var ListRenderer = BasicRenderer.extend({
         }
         var $th = $('<th>')
             .addClass('o_group_name')
+            .attr('tabindex', -1)
             .text(name + ' (' + group.count + ')')
         var $arrow = $('<span>')
             .css('padding-left', (groupLevel * 20) + 'px')
@@ -646,6 +647,7 @@ var ListRenderer = BasicRenderer.extend({
         }
         $th.text(description)
             .attr('data-name', name)
+            .attr('tabindex', -1)
             .toggleClass('o-sort-down', isNodeSorted ? !order[0].asc : false)
             .toggleClass('o-sort-up', isNodeSorted ? order[0].asc : false)
             .addClass(field.sortable && 'o_column_sortable');
@@ -847,23 +849,129 @@ var ListRenderer = BasicRenderer.extend({
      * @param {KeyboardEvent} ev
      */
     _onKeyDown: function (ev) {
-        if (!this.editable) {
-            switch (ev.which) {
-                case $.ui.keyCode.DOWN:
-                    $(ev.currentTarget).next().find('input').focus();
-                    ev.preventDefault();
-                    break;
-                case $.ui.keyCode.UP:
-                    $(ev.currentTarget).prev().find('input').focus();
-                    ev.preventDefault();
-                    break;
-                case $.ui.keyCode.ENTER:
-                    ev.preventDefault();
-                    var id = $(ev.currentTarget).data('id');
+        var findConectedCell = function ($cell, direction, index) {
+
+            var findConnected = function (element, selector) {
+                if (direction === 'up' || direction === 'left') {
+                    return element.prev(selector);
+                } else {
+                    return element.next(selector);
+                }
+            }
+
+            var connectedRow = findConnected($cell.closest('tr'), 'tr');
+
+            if (!connectedRow.length) {
+                // Is there another group ? Look at our parent's sibling
+                var tbody = $cell.closest('tbody');
+                if (!tbody.length) {
+                    // We can have th in tbody so we can't simply look for thead
+                    // if cell is a th and tbody instead
+                    tbody = $cell.closest('thead');
+                }
+
+                var connectedGroup = findConnected(tbody, 'tbody');
+                if (!connectedGroup.length) {
+                    // Maybe the next group is a thead ?
+                    connectedGroup = findConnected(tbody, 'thead');
+                }
+                if (connectedGroup.length) {
+                    // Found another group
+                    // TODO: focus correct row
+                    var connectedRows = connectedGroup.find('tr');
+                    var rowIndex;
+                    if (direction === 'up' || direction == 'left') {
+                        rowIndex = connectedRows.length - 1
+                    } else {
+                        rowIndex = 0;
+                    }
+                    connectedRow = connectedRows.eq(rowIndex);
+                } else {
+                    // End of the table
+                    return;
+                }
+            }
+
+            var connectedCell;
+            if (connectedRow.hasClass('o_group_header')) {
+                connectedCell = connectedRow.children();
+                connectedCell.data('o_list_col_index', index);
+            } else if (connectedRow.has('td.o_group_field_row_add').length) {
+                connectedCell = connectedRow.find('.o_group_field_row_add');
+                connectedCell.data('o_list_col_index', index);
+            } else {
+                var connectedRowChildren = connectedRow.children();
+                if (index === -1) {
+                    index = connectedRowChildren.length - 1;
+                }
+                connectedCell = connectedRowChildren.eq(index);
+            }
+
+            return connectedCell;
+        }
+        var $cell = $(ev.currentTarget);
+        var futureCell;
+        switch (ev.keyCode) {
+            case $.ui.keyCode.LEFT:
+                ev.preventDefault();
+                futureCell = $cell.prev();
+                if (!futureCell.length || $cell.hasClass('o_group_field_row_add')) {
+                    // Special case for the "Add a Line" row, it has an empty TD
+                    // as first child just to make some margin, skip it
+                    futureCell = findConectedCell($cell, 'left', -1);
+                }
+                break;
+            case $.ui.keyCode.RIGHT:
+                ev.preventDefault();
+                futureCell = $cell.next();
+                if (!futureCell.length) {
+                    futureCell = findConectedCell($cell, 'right', 0);
+                }
+                break;
+            case $.ui.keyCode.UP:
+                ev.preventDefault();
+                var colIndex = $cell.data('o_list_col_index') || $cell.index();
+                futureCell = findConectedCell($cell, 'up', colIndex);
+                break;
+            case $.ui.keyCode.DOWN:
+                ev.preventDefault();
+                var colIndex = $cell.data('o_list_col_index') || $cell.index();
+                futureCell = findConectedCell($cell, 'down', colIndex);
+                break;
+            case $.ui.keyCode.ENTER:
+                ev.preventDefault();
+                var $target = $(ev.currentTarget);
+                var $tr = $target.closest('tr');
+                if ($tr.hasClass('o_group_header')) {
+                    var colIndex = $cell.data('o_list_col_index') || $cell.index();
+                    var group = $tr.data('group');
+                    if (group.count) {
+                        this.trigger_up('toggle_group', {
+                            group: group,
+                            onSuccess: function () {
+                                var groupHeaders = $('tr.o_group_header:data("group")');
+                                var header = groupHeaders.filter(function () {
+                                    return $(this).data('group').id === group.id;
+                                })
+                                header.find('.o_group_name').data('o_list_col_index', colIndex).focus();
+                            },
+                        });
+                    }
+                } else {
+                    var id = $tr.data('id');
                     if (id) {
                         this.trigger_up('open_record', { id: id, target: ev.target });
                     }
-                    break;
+                }
+                break;
+        }
+        if (futureCell) {
+            // If the cell contains activable elements, focus them instead
+            var activables = futureCell.find('input, a');
+            if (activables.length) {
+                activables[0].focus();
+            } else {
+                futureCell.focus();
             }
         }
     },

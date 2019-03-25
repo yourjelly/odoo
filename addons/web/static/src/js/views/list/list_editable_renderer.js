@@ -658,10 +658,10 @@ ListRenderer.include({
                                         // nextRowIndex as that row has been removed meanwhile
                                         nextRowIndex--;
                                     }
-                                    self._selectCell(nextRowIndex, 0);
+                                    self._selectCell(nextRowIndex, self.currentFieldIndex);
                                 } else {
                                     // we were in the last group, so go back to the top
-                                    self._selectCell(self._getFirstDataRowIndex(), 0, {});
+                                    self._selectCell(self._getFirstDataRowIndex(), self.currentFieldIndex, {});
                                 }
                             },
                         });
@@ -681,7 +681,7 @@ ListRenderer.include({
             // if there is a (record) row to select, select it, otherwise, add a new record (in the
             // correct group, if the view is grouped)
             if (nextRowIndex !== null) {
-                self._selectCell(nextRowIndex, 0);
+                self._selectCell(nextRowIndex, self.currentFieldIndex);
             } else {
                 self.unselectRow().then(function () {
                     // if for some reason (e.g. create feature is disabled) we can't add a new
@@ -744,6 +744,7 @@ ListRenderer.include({
             var $td = $('<td>')
                         .attr('colspan', this._getNumberOfCols())
                         .addClass('o_group_field_row_add')
+                        .attr('tabindex', -1)
                         .append($a);
             var $tr = $('<tr>', {class: 'o_add_record_row'})
                         .data('groupID', group.id)
@@ -1033,6 +1034,7 @@ ListRenderer.include({
 
         var self = this;
         var groupId = $(ev.target).data('groupID');
+        this.currentGroupId = groupId;
         this.unselectRow().then(function () {
             self.trigger_up('add_record', {
                 groupId: groupId,
@@ -1091,6 +1093,27 @@ ListRenderer.include({
      */
     _onFooterClick: function () {
         this.unselectRow();
+    },
+    /**
+     * Manages the keyboard events on the list. If the list is not editable, when the user navigates to
+     * a cell using the keyboard, if he presses enter, enter the model represented by the line
+     *
+     * @private
+     * @param {KeyboardEvent} ev
+     * @override
+     */
+    _onKeyDown: function (ev) {
+        var $target = $(ev.currentTarget);
+        var $tr = $target.closest('tr');
+        if (this.editable && ev.keyCode === $.ui.keyCode.ENTER && !$tr.hasClass('o_selected_row') && !$tr.hasClass('o_group_header')) {
+            if ($target.closest('td').hasClass('o_group_field_row_add')) {
+                this._onAddRecordToGroup(ev);
+            } else {
+                this._onCellClick(ev);
+            }
+        } else {
+            this._super.apply(this, arguments);
+        }
     },
     /**
      * @private
@@ -1175,10 +1198,24 @@ ListRenderer.include({
                 // prevent from closing the potential dialog containing this list
                 // also auto-focus the 1st control, if any.
                 ev.data.originalEvent.stopPropagation();
+                var rowIndex = this.currentRow;
+                var cellIndex = this.currentFieldIndex + 1;
                 this.trigger_up('discard_changes', {
                     recordID: ev.target.dataPointID,
                     onSuccess: function () {
-                        self.$('.o_field_x2many_list_row_add a:first').focus(); // FIXME
+                        var recordId = self._getRecordID(rowIndex);
+                        if (recordId) {
+                            var correspondingRow = self._getRow(recordId);
+                            correspondingRow.children().eq(cellIndex).focus();
+                        } else if (self.currentGroupId) {
+                                var groupAddRecordButtons = $('a:data("groupID")');
+                                var addButton = groupAddRecordButtons.filter(function () {
+                                    return $(this).data('groupID') === self.currentGroupId;
+                                })
+                                addButton.focus();
+                        } else {
+                            self.$('.o_field_x2many_list_row_add a:first').focus(); // FIXME
+                        }
                     }
                 });
                 break;

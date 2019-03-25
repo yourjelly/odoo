@@ -135,10 +135,12 @@
         border-top: none;  // Override bootstrap for grouped list views
     }
 
-    tbody {
-        tr:focus-within {
-            background-color: $o-form-lightsecondary;
-        }
+    tr:focus-within {
+        background-color: lighten($o-form-lightsecondary, 10%);
+    }
+    th:focus-within, td:focus-within {
+        background-color: $o-form-lightsecondary;
+        outline: none;
     }
 
     // Values styling
