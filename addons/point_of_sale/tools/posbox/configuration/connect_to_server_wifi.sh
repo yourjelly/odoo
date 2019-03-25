@@ -7,8 +7,8 @@
 function connect () {
 	SERVER="${1}"
 	CURRENT_SERVER_FILE=/home/pi/odoo-remote-server.conf
-	HOSTS=/root_bypass_ramdisks/etc/hosts
-	HOST_FILE=/root_bypass_ramdisks/etc/hostname
+	HOSTS=/etc/hosts
+	HOST_FILE=/etc/hostname
 	HOSTNAME="$(hostname)"
 	TOKEN_FILE=/home/pi/token
 	TOKEN="${3}"
@@ -19,8 +19,6 @@ function connect () {
 	then
 		IOT_NAME="${HOSTNAME}"
 	fi
-	sudo mount -o remount,rw /
-	sudo mount -o remount,rw /root_bypass_ramdisks
 	if [ ! -z "${1}" ]
 	then
 		echo "${SERVER}" > ${CURRENT_SERVER_FILE}
@@ -32,14 +30,12 @@ function connect () {
 		echo "${IOT_NAME}" > /tmp/hostname
 		sudo cp /tmp/hostname "${HOST_FILE}"
 
-		echo "interface=wlan0" > /root_bypass_ramdisks/etc/hostapd/hostapd.conf
-		echo "ssid=${IOT_NAME}" >> /root_bypass_ramdisks/etc/hostapd/hostapd.conf
-		echo "channel=1" >> /root_bypass_ramdisks/etc/hostapd/hostapd.conf
+		echo "interface=wlan0" > /etc/hostapd/hostapd.conf
+		echo "ssid=${IOT_NAME}" >> /etc/hostapd/hostapd.conf
+		echo "channel=1" >> /etc/hostapd/hostapd.conf
 		
 		sudo hostname "${IOT_NAME}"
 	fi
-	sudo mount -o remount,ro /
-	sudo mount -o remount,ro /root_bypass_ramdisks
 
 	WPA_PASS_FILE="/tmp/wpa_pass.txt"
 	PERSISTENT_WIFI_NETWORK_FILE="/home/pi/wifi_network.txt"
@@ -59,10 +55,8 @@ function connect () {
 	if [ -n "${ESSID}" ] ; then
 		if [ -n "${PERSIST}" ] ; then
 			logger -t posbox_connect_to_wifi "Making network selection permanent"
-			sudo mount -o remount,rw /
 			echo "${ESSID}" > ${PERSISTENT_WIFI_NETWORK_FILE}
 			echo "${PASSWORD}" >> ${PERSISTENT_WIFI_NETWORK_FILE}
-			sudo mount -o remount,ro /
 		fi
 	else
 		logger -t posbox_connect_to_wifi "Reading configuration from ${PERSISTENT_WIFI_NETWORK_FILE}"

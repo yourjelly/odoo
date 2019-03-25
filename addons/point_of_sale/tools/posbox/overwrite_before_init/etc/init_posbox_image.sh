@@ -140,7 +140,6 @@ update-rc.d -f nginx remove
 update-rc.d -f dnsmasq remove
 
 systemctl daemon-reload
-systemctl enable ramdisks.service
 systemctl disable dphys-swapfile.service
 systemctl enable ssh
 
@@ -178,16 +177,5 @@ setupcon
 mkdir /home/pi/odoo/addons/hw_drivers/drivers/
 chmod 777 /home/pi/odoo/addons/hw_drivers/drivers/
 echo "addons/hw_drivers/drivers/" > /home/pi/odoo/.git/info/exclude
-
-# create dirs for ramdisks
-create_ramdisk_dir () {
-    mkdir "${1}_ram"
-}
-
-create_ramdisk_dir "/var"
-create_ramdisk_dir "/etc"
-create_ramdisk_dir "/tmp"
-mkdir /root_bypass_ramdisks
-umount /dev/sda1
 
 reboot
