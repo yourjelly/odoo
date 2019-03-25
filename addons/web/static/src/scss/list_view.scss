@@ -31,7 +31,6 @@
     }
     tbody > tr > td:not(.o_list_record_selector) {
         @include o-text-overflow(table-cell);
-        white-space: normal;
     }
 
     tfoot {
@@ -178,16 +177,14 @@
         .o_input {
             padding: 0;
             @include o-text-overflow();
-            // FIXME: those rules should be moved to enterprise
-            border-bottom: 1px solid $o-form-lightsecondary;
-            &.o_required_modifier {
-                border-color: black;
-            }
+            border: none;
         }
         .o_field_widget > .o_external_button {
             padding: 0;
+            border: none;
             background-color: inherit;
-            margin-left: 3px;
+            margin-left: 5px;
+            font-size: 12px;
         }
         .o_field_monetary input {
             width: 100%; // override width: 100px

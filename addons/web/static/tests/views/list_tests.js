@@ -25,6 +25,7 @@ QUnit.module('Views', {
                     bar: {string: "Bar", type: "boolean"},
                     date: {string: "Some Date", type: "date"},
                     int_field: {string: "int_field", type: "integer", sortable: true, group_operator: "sum"},
+                    text: {string: "text field", type: "text"},
                     qux: {string: "my float", type: "float"},
                     m2o: {string: "M2O field", type: "many2one", relation: "bar"},
                     o2m: {string: "O2M field", type: "one2many", relation: "bar"},
@@ -1167,6 +1168,42 @@ QUnit.module('Views', {
             "table should have kept the same width when switching from edit to readonly mode");
         assert.deepEqual(readonlyWidths, editionWidths,
             "width of columns should remain unchanged when switching from edit to readonly mode");
+
+        list.destroy();
+    });
+
+    QUnit.test('row height should not change when switching mode', async function (assert) {
+        assert.expect(3);
+
+        // Warning: this test is css dependant
+        var list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree editable="top">' +
+                        '<field name="foo"/>' +
+                        '<field name="int_field" readonly="1"/>' +
+                        '<field name="text"/>' +
+                        '<field name="m2o"/>' +
+                        '<field name="m2m" widget="many2many_tags"/>' +
+                    '</tree>',
+        });
+
+        var startHeight = list.$('.o_data_row:first').height();
+
+        // start edition of first row
+        await testUtils.dom.click(list.$('.o_data_row:first > td:not(.o_list_record_selector)').first());
+
+        assert.hasClass(list.$('.o_data_row:first'), 'o_selected_row');
+        var editionHeight = list.$('.o_data_row:first').height();
+
+        // leave edition
+        await testUtils.dom.click(list.$buttons.find('.o_list_button_save'));
+
+        var readonlyHeight = list.$('.o_data_row:first').height();
+
+        assert.strictEqual(startHeight, editionHeight);
+        assert.strictEqual(startHeight, readonlyHeight);
 
         list.destroy();
     });
