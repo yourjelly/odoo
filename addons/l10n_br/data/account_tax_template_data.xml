@@ -1,97 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-        <!-- Account Tags -->
-
-        <record id="tag_br_02" model="account.account.tag">
-            <field name="name">ICMSST_1</field>
-            <field name="applicability">taxes</field>
-        </record>
-
-        <record id="tag_br_03" model="account.account.tag">
-            <field name="name">ICMSST_2</field>
-            <field name="applicability">taxes</field>
-        </record>
-
-        <record id="tag_br_05" model="account.account.tag">
-            <field name="name">IRPJ_1</field>
-            <field name="applicability">taxes</field>
-        </record>
-
-        <record id="tag_br_06" model="account.account.tag">
-            <field name="name">IRPJ_2</field>
-            <field name="applicability">taxes</field>
-        </record>
-
-        <record id="tag_br_08" model="account.account.tag">
-            <field name="name">IR_1</field>
-            <field name="applicability">taxes</field>
-        </record>
-
-        <record id="tag_br_09" model="account.account.tag">
-            <field name="name">IR_2</field>
-            <field name="applicability">taxes</field>
-        </record>
-
-        <record id="tag_br_11" model="account.account.tag">
-            <field name="name">ISSQN_1</field>
-            <field name="applicability">taxes</field>
-        </record>
-
-        <record id="tag_br_12" model="account.account.tag">
-            <field name="name">ISSQN_2</field>
-            <field name="applicability">taxes</field>
-        </record>
-
-        <record id="tag_br_14" model="account.account.tag">
-            <field name="name">CSLL_1</field>
-            <field name="applicability">taxes</field>
-        </record>
-
-        <record id="tag_br_15" model="account.account.tag">
-            <field name="name">CSLL_2</field>
-            <field name="applicability">taxes</field>
-        </record>
-
-        <record id="tag_br_17" model="account.account.tag">
-            <field name="name">COFINS_1</field>
-            <field name="applicability">taxes</field>
-        </record>
-
-        <record id="tag_br_18" model="account.account.tag">
-            <field name="name">COFINS_2</field>
-            <field name="applicability">taxes</field>
-        </record>
-
-        <record id="tag_br_20" model="account.account.tag">
-            <field name="name">PIS_1</field>
-            <field name="applicability">taxes</field>
-        </record>
-
-        <record id="tag_br_21" model="account.account.tag">
-            <field name="name">PIS_2</field>
-            <field name="applicability">taxes</field>
-        </record>
-
-        <record id="tag_br_23" model="account.account.tag">
-            <field name="name">IPI_1</field>
-            <field name="applicability">taxes</field>
-        </record>
-
-        <record id="tag_br_24" model="account.account.tag">
-            <field name="name">IPI_2</field>
-            <field name="applicability">taxes</field>
-        </record>
-
-        <record id="tag_br_26" model="account.account.tag">
-            <field name="name">ICMS_1</field>
-            <field name="applicability">taxes</field>
-        </record>
-
-        <record id="tag_br_27" model="account.account.tag">
-            <field name="name">ICMS_2</field>
-            <field name="applicability">taxes</field>
-        </record>
-
         <record id="ch_br_3_01_03_01_01_03_00" model="account.account.template">
             <field name="code">3.01.03.01.01.03.00</field>
             <field name="name">ganho cambial</field>
@@ -120,13 +28,36 @@
 			<field name="name">IPI Saída</field>
 			<field name="amount">0.00</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_24'), ref('tag_br_23')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_0"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi2" model="account.tax.template">
@@ -134,13 +65,36 @@
 			<field name="name">IPI Saída 2%</field>
 			<field name="amount">2</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_24'), ref('tag_br_23')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_2"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi3" model="account.tax.template">
@@ -148,13 +102,36 @@
 			<field name="name">IPI Saída 3%</field>
 			<field name="amount">3</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_24'), ref('tag_br_23')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_3"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi4" model="account.tax.template">
@@ -162,13 +139,36 @@
 			<field name="name">IPI Saída 4%</field>
 			<field name="amount">4</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_24'), ref('tag_br_23')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_4"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi5" model="account.tax.template">
@@ -176,13 +176,36 @@
 			<field name="name">IPI Saída 5%</field>
 			<field name="amount">5</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_24'), ref('tag_br_23')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_5"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi7" model="account.tax.template">
@@ -190,27 +213,73 @@
 			<field name="name">IPI Saída 7%</field>
 			<field name="amount">7</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_7"/>
-        	</record>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+        </record>
 
 		<record id="tax_template_out_ipi8" model="account.tax.template">
 			<field name="description">IPI 8%</field>
 			<field name="name">IPI Saída 8%</field>
 			<field name="amount">8</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_8"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi10" model="account.tax.template">
@@ -218,13 +287,36 @@
 			<field name="name">IPI Saída 10%</field>
 			<field name="amount">10</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_10"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi12" model="account.tax.template">
@@ -232,13 +324,36 @@
 			<field name="name">IPI Saída 12%</field>
 			<field name="amount">12</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_12"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi13" model="account.tax.template">
@@ -246,13 +361,36 @@
 			<field name="name">IPI Saída 13%</field>
 			<field name="amount">13</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_13"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi15" model="account.tax.template">
@@ -260,13 +398,36 @@
 			<field name="name">IPI Saída 15%</field>
 			<field name="amount">15</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_15"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi16" model="account.tax.template">
@@ -274,13 +435,36 @@
 			<field name="name">IPI Saída 16%</field>
 			<field name="amount">16</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_16"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi18" model="account.tax.template">
@@ -288,13 +472,36 @@
 			<field name="name">IPI Saída 18%</field>
 			<field name="amount">18</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_18"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi20" model="account.tax.template">
@@ -302,13 +509,36 @@
 			<field name="name">IPI Saída 20%</field>
 			<field name="amount">20</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_20"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
 		</record>
 
 		<record id="tax_template_out_ipi22" model="account.tax.template">
@@ -316,13 +546,36 @@
 			<field name="name">IPI Saída 22%</field>
 			<field name="amount">22</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_22"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi24" model="account.tax.template">
@@ -330,13 +583,36 @@
 			<field name="name">IPI Saída 24%</field>
 			<field name="amount">24</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_24"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi25" model="account.tax.template">
@@ -344,13 +620,36 @@
 			<field name="name">IPI Saída 25%</field>
 			<field name="amount">25</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_25"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi27" model="account.tax.template">
@@ -358,13 +657,36 @@
 			<field name="name">IPI Saída 27%</field>
 			<field name="amount">27</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_27"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi30" model="account.tax.template">
@@ -372,13 +694,36 @@
 			<field name="name">IPI Saída 30%</field>
 			<field name="amount">30</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_30"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi35" model="account.tax.template">
@@ -386,13 +731,36 @@
 			<field name="name">IPI Saída 35%</field>
 			<field name="amount">35</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_35"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
 		</record>
 
 		<record id="tax_template_out_ipi40" model="account.tax.template">
@@ -400,13 +768,36 @@
 			<field name="name">IPI Saída 40%</field>
 			<field name="amount">40</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_40"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi42" model="account.tax.template">
@@ -414,13 +805,36 @@
 			<field name="name">IPI Saída 42%</field>
 			<field name="amount">42</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_42"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi45" model="account.tax.template">
@@ -428,13 +842,36 @@
 			<field name="name">IPI Saída 45%</field>
 			<field name="amount">45</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_45"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi50" model="account.tax.template">
@@ -442,13 +879,36 @@
 			<field name="name">IPI Saída 50%</field>
 			<field name="amount">50</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_50"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi60" model="account.tax.template">
@@ -456,13 +916,36 @@
 			<field name="name">IPI Saída 60%</field>
 			<field name="amount">60</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_60"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi300" model="account.tax.template">
@@ -470,13 +953,36 @@
 			<field name="name">IPI Saída 300%</field>
 			<field name="amount">300</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_300"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_ipi330" model="account.tax.template">
@@ -484,13 +990,36 @@
 			<field name="name">IPI Saída 330%</field>
 			<field name="amount">330</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010301" name="account_id"/>
-			<field ref="account_template_101050502" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_330"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
        	
        	<record id="tax_template_in_ipi" model="account.tax.template">
@@ -498,13 +1027,36 @@
 			<field name="name">IPI Entrada</field>
 			<field name="amount">0.00</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_0"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi2" model="account.tax.template">
@@ -512,13 +1064,36 @@
 			<field name="name">IPI Entrada 2%</field>
 			<field name="amount">2</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_2"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi3" model="account.tax.template">
@@ -526,13 +1101,36 @@
 			<field name="name">IPI Entrada 3%</field>
 			<field name="amount">3</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_3"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi4" model="account.tax.template">
@@ -540,13 +1138,36 @@
 			<field name="name">IPI Entrada 4%</field>
 			<field name="amount">4</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_4"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi5" model="account.tax.template">
@@ -554,13 +1175,36 @@
 			<field name="name">IPI Entrada 5%</field>
 			<field name="amount">5</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_5"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi7" model="account.tax.template">
@@ -568,13 +1212,36 @@
 			<field name="name">IPI Entrada 7%</field>
 			<field name="amount">7</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_7"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
         	</record>
 
 		<record id="tax_template_in_ipi8" model="account.tax.template">
@@ -582,13 +1249,36 @@
 			<field name="name">IPI Entrada 8%</field>
 			<field name="amount">8</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_8"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi10" model="account.tax.template">
@@ -596,13 +1286,36 @@
 			<field name="name">IPI Entrada 10%</field>
 			<field name="amount">10</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_10"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi12" model="account.tax.template">
@@ -610,13 +1323,36 @@
 			<field name="name">IPI Entrada 12%</field>
 			<field name="amount">12</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_12"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi13" model="account.tax.template">
@@ -624,13 +1360,36 @@
 			<field name="name">IPI Entrada 13%</field>
 			<field name="amount">13</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_13"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi15" model="account.tax.template">
@@ -638,13 +1397,36 @@
 			<field name="name">IPI Entrada 15%</field>
 			<field name="amount">15</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_15"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi16" model="account.tax.template">
@@ -652,13 +1434,36 @@
 			<field name="name">IPI Entrada 16%</field>
 			<field name="amount">16</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_16"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi18" model="account.tax.template">
@@ -666,13 +1471,36 @@
 			<field name="name">IPI Entrada 18%</field>
 			<field name="amount">18</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_18"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi20" model="account.tax.template">
@@ -680,13 +1508,36 @@
 			<field name="name">IPI Entrada 20%</field>
 			<field name="amount">20</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_20"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
         </record>
 
 		<record id="tax_template_in_ipi22" model="account.tax.template">
@@ -694,13 +1545,36 @@
 			<field name="name">IPI Entrada 22%</field>
 			<field name="amount">22</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_22"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi24" model="account.tax.template">
@@ -708,13 +1582,36 @@
 			<field name="name">IPI Entrada 24%</field>
 			<field name="amount">24</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_24"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'mins_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi25" model="account.tax.template">
@@ -722,13 +1619,36 @@
 			<field name="name">IPI Entrada 25%</field>
 			<field name="amount">25</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_25"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi27" model="account.tax.template">
@@ -736,13 +1656,36 @@
 			<field name="name">IPI Entrada 27%</field>
 			<field name="amount">27</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_27"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi30" model="account.tax.template">
@@ -750,13 +1693,36 @@
 			<field name="name">IPI Entrada 30%</field>
 			<field name="amount">30</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_30"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi35" model="account.tax.template">
@@ -764,13 +1730,36 @@
 			<field name="name">IPI Entrada 35%</field>
 			<field name="amount">35</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_35"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
 		</record>
 
 		<record id="tax_template_in_ipi40" model="account.tax.template">
@@ -778,13 +1767,36 @@
 			<field name="name">IPI Entrada 40%</field>
 			<field name="amount">40</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_40"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi42" model="account.tax.template">
@@ -792,13 +1804,36 @@
 			<field name="name">IPI Entrada 42%</field>
 			<field name="amount">42</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_42"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi45" model="account.tax.template">
@@ -806,13 +1841,36 @@
 			<field name="name">IPI Entrada 45%</field>
 			<field name="amount">45</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_45"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi50" model="account.tax.template">
@@ -820,13 +1878,36 @@
 			<field name="name">IPI Entrada 50%</field>
 			<field name="amount">50</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_50"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi60" model="account.tax.template">
@@ -834,13 +1915,36 @@
 			<field name="name">IPI Entrada 60%</field>
 			<field name="amount">60</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_60"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi300" model="account.tax.template">
@@ -848,13 +1952,36 @@
 			<field name="name">IPI Entrada 300%</field>
 			<field name="amount">300</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_300"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_ipi330" model="account.tax.template">
@@ -862,13 +1989,36 @@
 			<field name="name">IPI Entrada 330%</field>
 			<field name="amount">330</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050502" name="account_id"/>
-			<field ref="account_template_201010301" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_23'), ref('tag_br_24')])]"/>
 			<field name="tax_group_id" ref="tax_group_ipi_330"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050502'),
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ipi_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010301'),
+	                'plus_tag_ids': [ref('tax_report_ipi_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_icms_interno" model="account.tax.template">
@@ -876,13 +2026,36 @@
 			<field name="name">ICMS Saida Interno</field>
 			<field name="amount">0.00</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010302" name="account_id"/>
-			<field ref="account_template_101050505" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_26'), ref('tag_br_27')])]"/>
 			<field name="tax_group_id" ref="tax_group_icms_0"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010302'),
+	                'plus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050505'),
+	                'minus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_icms_externo" model="account.tax.template">
@@ -890,13 +2063,36 @@
 			<field name="name">ICMS Saida Externo</field>
 			<field name="amount">0.00</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010302" name="account_id"/>
-			<field ref="account_template_101050505" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_26'), ref('tag_br_27')])]"/>
 			<field name="tax_group_id" ref="tax_group_icms_0"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010302'),
+	                'plus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050505'),
+	                'minus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_icms_subist" model="account.tax.template">
@@ -907,8 +2103,31 @@
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_02'), ref('tag_br_03')])]"/>
 			<field name="tax_group_id" ref="tax_group_icms_0"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_icmsst_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'minus_tag_ids': [ref('tax_report_icmsst_1')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_icmsst_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'plus_tag_ids': [ref('tax_report_icmsst_1')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_icms_externo7" model="account.tax.template">
@@ -916,13 +2135,36 @@
 			<field name="name">ICMS Saida Externo 7%</field>
 			<field name="amount">7</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010302" name="account_id"/>
-			<field ref="account_template_101050505" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('l10n_br.tag_br_26'), ref('l10n_br.tag_br_27')])]"/>
 			<field name="tax_group_id" ref="tax_group_icms_7"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010302'),
+	                'plus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050505'),
+	                'minus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_icms_externo12" model="account.tax.template">
@@ -930,13 +2172,36 @@
 			<field name="name">ICMS Saida Externo 12%</field>
 			<field name="amount">12</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010302" name="account_id"/>
-			<field ref="account_template_101050505" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('l10n_br.tag_br_26'), ref('l10n_br.tag_br_27')])]"/>
 			<field name="tax_group_id" ref="tax_group_icms_12"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010302'),
+	                'plus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050505'),
+	                'minus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_icms_interno19" model="account.tax.template">
@@ -944,13 +2209,36 @@
 			<field name="name">ICMS Saida Interno 19%</field>
 			<field name="amount">19</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010302" name="account_id"/>
-			<field ref="account_template_101050505" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('l10n_br.tag_br_26'), ref('l10n_br.tag_br_27')])]"/>
 			<field name="tax_group_id" ref="tax_group_icms_19"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010302'),
+	                'plus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050505'),
+	                'minus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_icms_interno26" model="account.tax.template">
@@ -958,13 +2246,36 @@
 			<field name="name">ICMS Saida Interno 26%</field>
 			<field name="amount">26</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010302" name="account_id"/>
-			<field ref="account_template_101050505" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('l10n_br.tag_br_26'), ref('l10n_br.tag_br_27')])]"/>
 			<field name="tax_group_id" ref="tax_group_icms_26"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010302'),
+	                'plus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050505'),
+	                'minus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
        	</record>
        	
        	<record id="tax_template_in_icms_interno" model="account.tax.template">
@@ -972,13 +2283,36 @@
 			<field name="name">ICMS Entrada Interno</field>
 			<field name="amount">0.00</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050505" name="account_id"/>
-			<field ref="account_template_201010302" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('l10n_br.tag_br_26'), ref('l10n_br.tag_br_27')])]"/>
 			<field name="tax_group_id" ref="tax_group_icms_0"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010302'),
+	                'minus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050505'),
+	                'plus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_icms_externo" model="account.tax.template">
@@ -986,13 +2320,36 @@
 			<field name="name">ICMS Entrada Externo</field>
 			<field name="amount">0.00</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050505" name="account_id"/>
-			<field ref="account_template_201010302" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('l10n_br.tag_br_26'), ref('l10n_br.tag_br_27')])]"/>
 			<field name="tax_group_id" ref="tax_group_icms_0"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010302'),
+	                'minus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050505'),
+	                'plus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_icms_subist" model="account.tax.template">
@@ -1003,8 +2360,31 @@
 			<field eval="0" name="price_include"/>
 			<field eval="0" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_02'), ref('tag_br_03')])]"/>
 			<field name="tax_group_id" ref="tax_group_icms_0"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_icmsst_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'plus_tag_ids': [ref('tax_report_icmsst_1')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_icmsst_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'minus_tag_ids': [ref('tax_report_icmsst_1')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_icms_externo7" model="account.tax.template">
@@ -1012,13 +2392,36 @@
 			<field name="name">ICMS Entrada Externo 7%</field>
 			<field name="amount">7</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050505" name="account_id"/>
-			<field ref="account_template_201010302" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('l10n_br.tag_br_26'), ref('l10n_br.tag_br_27')])]"/>
 			<field name="tax_group_id" ref="tax_group_icms_7"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010302'),
+	                'minus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050505'),
+	                'plus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_icms_externo12" model="account.tax.template">
@@ -1026,13 +2429,36 @@
 			<field name="name">ICMS Entrada Externo 12%</field>
 			<field name="amount">12</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050505" name="account_id"/>
-			<field ref="account_template_201010302" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('l10n_br.tag_br_26'), ref('l10n_br.tag_br_27')])]"/>
 			<field name="tax_group_id" ref="tax_group_icms_12"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010302'),
+	                'minus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050505'),
+	                'plus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_icms_interno19" model="account.tax.template">
@@ -1040,13 +2466,36 @@
 			<field name="name">ICMS Entrada Interno 19%</field>
 			<field name="amount">19</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050505" name="account_id"/>
-			<field ref="account_template_201010302" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('l10n_br.tag_br_26'), ref('l10n_br.tag_br_27')])]"/>
 			<field name="tax_group_id" ref="tax_group_icms_19"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010302'),
+	                'minus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050505'),
+	                'plus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_icms_interno26" model="account.tax.template">
@@ -1054,13 +2503,36 @@
 			<field name="name">ICMS Entrada Interno 26%</field>
 			<field name="amount">26</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050505" name="account_id"/>
-			<field ref="account_template_201010302" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('l10n_br.tag_br_26'), ref('l10n_br.tag_br_27')])]"/>
 			<field name="tax_group_id" ref="tax_group_icms_26"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010302'),
+	                'minus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_icms_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050505'),
+	                'plus_tag_ids': [ref('tax_report_icms_1')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_pis" model="account.tax.template">
@@ -1068,13 +2540,36 @@
 			<field name="name">PIS Saida</field>
 			<field name="amount">0.00</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010500" name="account_id"/>
-			<field ref="account_template_101050503" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_20'), ref('tag_br_21')])]"/>
 			<field name="tax_group_id" ref="tax_group_pis_0"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_pis_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010500'),
+	                'plus_tag_ids': [ref('tax_report_pis_1')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_pis_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050503'),
+	                'minus_tag_ids': [ref('tax_report_pis_1')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_pis065" model="account.tax.template">
@@ -1082,13 +2577,36 @@
 			<field name="name">PIS Saida 0,65%</field>
 			<field name="amount">0.65</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010500" name="account_id"/>
-			<field ref="account_template_101050503" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_20'), ref('tag_br_21')])]"/>
 			<field name="tax_group_id" ref="tax_group_pis_065"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_pis_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010500'),
+	                'plus_tag_ids': [ref('tax_report_pis_1')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_pis_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050503'),
+	                'minus_tag_ids': [ref('tax_report_pis_1')],
+	            }),
+	        ]"/>
        	</record>
        	
        	<record id="tax_template_in_pis" model="account.tax.template">
@@ -1096,13 +2614,36 @@
 			<field name="name">PIS Entrada</field>
 			<field name="amount">0.00</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050503" name="account_id"/>
-			<field ref="account_template_201010500" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_20'), ref('tag_br_21')])]"/>
 			<field name="tax_group_id" ref="tax_group_pis_0"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_pis_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050503'),
+	                'minus_tag_ids': [ref('tax_report_pis_1')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_pis_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010500'),
+	                'plus_tag_ids': [ref('tax_report_pis_1')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_pis065" model="account.tax.template">
@@ -1110,13 +2651,36 @@
 			<field name="name">PIS Entrada 0,65%</field>
 			<field name="amount">0.65</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050503" name="account_id"/>
-			<field ref="account_template_201010500" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_20'), ref('tag_br_21')])]"/>
 			<field name="tax_group_id" ref="tax_group_pis_065"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_pis_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050503'),
+	                'minus_tag_ids': [ref('tax_report_pis_1')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_pis_2')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010500'),
+	                'plus_tag_ids': [ref('tax_report_pis_1')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_cofins" model="account.tax.template">
@@ -1124,13 +2688,36 @@
 			<field name="name">COFINS Saida</field>
 			<field name="amount">0.00</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010500" name="account_id"/>
-			<field ref="account_template_101050503" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_17'), ref('tag_br_18')])]"/>
 			<field name="tax_group_id" ref="tax_group_cofins_0"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_cofins_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010500'),
+	                'plus_tag_ids': [ref('tax_report_cofins_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_cofins_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050503'),
+	                'minus_tag_ids': [ref('tax_report_cofins_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_out_cofins3" model="account.tax.template">
@@ -1138,13 +2725,36 @@
 			<field name="name">COFINS Saida 3%</field>
 			<field name="amount">3</field>
 			<field name="type_tax_use">sale</field>
-			<field ref="account_template_201010500" name="account_id"/>
-			<field ref="account_template_101050503" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_17'), ref('tag_br_18')])]"/>
 			<field name="tax_group_id" ref="tax_group_cofins_3"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_cofins_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010500'),
+	                'plus_tag_ids': [ref('tax_report_cofins_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_cofins_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050503'),
+	                'minus_tag_ids': [ref('tax_report_cofins_2')],
+	            }),
+	        ]"/>
         </record>
         
         <record id="tax_template_in_cofins" model="account.tax.template">
@@ -1152,13 +2762,36 @@
 			<field name="name">COFINS Entrada</field>
 			<field name="amount">0.00</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050503" name="account_id"/>
-			<field ref="account_template_201010500" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_17'), ref('tag_br_18')])]"/>
 			<field name="tax_group_id" ref="tax_group_cofins_0"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_cofins_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050503'),
+	                'minus_tag_ids': [ref('tax_report_cofins_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_cofins_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010500'),
+	                'plus_tag_ids': [ref('tax_report_cofins_2')],
+	            }),
+	        ]"/>
        	</record>
 
 		<record id="tax_template_in_cofins3" model="account.tax.template">
@@ -1166,13 +2799,36 @@
 			<field name="name">COFINS Entrada 3%</field>
 			<field name="amount">3</field>
 			<field name="type_tax_use">purchase</field>
-			<field ref="account_template_101050503" name="account_id"/>
-			<field ref="account_template_201010500" name="refund_account_id"/>
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_17'), ref('tag_br_18')])]"/>
 			<field name="tax_group_id" ref="tax_group_cofins_3"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_cofins_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_101050503'),
+	                'minus_tag_ids': [ref('tax_report_cofins_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_cofins_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'account_id': ref('account_template_201010500'),
+	                'plus_tag_ids': [ref('tax_report_cofins_2')],
+	            }),
+	        ]"/>
         </record>
 
 		<record id="tax_template_out_irpj" model="account.tax.template">
@@ -1183,8 +2839,31 @@
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_05'), ref('tag_br_06')])]"/>
 			<field name="tax_group_id" ref="tax_group_irpj_0"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_irpj_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'minus_tag_ids': [ref('tax_report_irpj_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_irpj_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'plus_tag_ids': [ref('tax_report_irpj_2')],
+	            }),
+	        ]"/>
         </record>
 
 		<record id="tax_template_out_ir" model="account.tax.template">
@@ -1195,8 +2874,31 @@
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_08'),ref('tag_br_09')])]"/>
 			<field name="tax_group_id" ref="tax_group_ir_0"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_ir_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'minus_tag_ids': [ref('tax_report_ir_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_ir_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'plus_tag_ids': [ref('tax_report_ir_2')],
+	            }),
+	        ]"/>
         </record>
 
 		<record id="tax_template_out_issqn" model="account.tax.template">
@@ -1207,8 +2909,31 @@
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_11'), ref('tag_br_12')])]"/>
 			<field name="tax_group_id" ref="tax_group_issqn_0"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_issqn_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'plus_tag_ids': [ref('tax_report_issqn_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_issqn_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'minus_tag_ids': [ref('tax_report_issqn_2')],
+	            }),
+	        ]"/>
         </record>
         
         <record id="tax_template_out_issqn1" model="account.tax.template">
@@ -1219,8 +2944,31 @@
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_11'), ref('tag_br_12')])]"/>
 			<field name="tax_group_id" ref="tax_group_issqn_1"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_issqn_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'plus_tag_ids': [ref('tax_report_issqn_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_issqn_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'minus_tag_ids': [ref('tax_report_issqn_2')],
+	            }),
+	        ]"/>
         </record>
         
         <record id="tax_template_out_issqn2" model="account.tax.template">
@@ -1231,8 +2979,31 @@
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_11'), ref('tag_br_12')])]"/>
 			<field name="tax_group_id" ref="tax_group_issqn_2"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_issqn_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'plus_tag_ids': [ref('tax_report_issqn_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_issqn_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'minus_tag_ids': [ref('tax_report_issqn_2')],
+	            }),
+	        ]"/>
         </record>
 		<record id="tax_template_in_issqn2" model="account.tax.template">
 			<field name="description">ISSQN 2%</field>
@@ -1242,8 +3013,31 @@
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_11'), ref('tag_br_12')])]"/>
 			<field name="tax_group_id" ref="tax_group_issqn_2"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_issqn_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'minus_tag_ids': [ref('tax_report_issqn_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_issqn_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'plus_tag_ids': [ref('tax_report_issqn_2')],
+	            }),
+	        ]"/>
 		</record>
 
         <record id="tax_template_out_issqn3" model="account.tax.template">
@@ -1254,8 +3048,31 @@
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_11'), ref('tag_br_12')])]"/>
 			<field name="tax_group_id" ref="tax_group_issqn_3"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_issqn_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'plus_tag_ids': [ref('tax_report_issqn_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_issqn_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'minus_tag_ids': [ref('tax_report_issqn_2')],
+	            }),
+	        ]"/>
         </record>
         
         <record id="tax_template_out_issqn4" model="account.tax.template">
@@ -1266,8 +3083,31 @@
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_11'), ref('tag_br_12')])]"/>
 			<field name="tax_group_id" ref="tax_group_issqn_4"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_issqn_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'plus_tag_ids': [ref('tax_report_issqn_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_issqn_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'minus_tag_ids': [ref('tax_report_issqn_2')],
+	            }),
+	        ]"/>
         </record>
         
         <record id="tax_template_out_issqn5" model="account.tax.template">
@@ -1278,8 +3118,31 @@
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_11'), ref('tag_br_12')])]"/>
 			<field name="tax_group_id" ref="tax_group_issqn_5"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_issqn_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'plus_tag_ids': [ref('tax_report_issqn_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_issqn_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'minus_tag_ids': [ref('tax_report_issqn_2')],
+	            }),
+	        ]"/>
         </record>
 
 		<record id="tax_template_out_csll" model="account.tax.template">
@@ -1290,8 +3153,31 @@
 			<field eval="0" name="price_include"/>
 			<field eval="1" name="tax_discount"/>
 			<field ref="l10n_br_account_chart_template" name="chart_template_id"/>
-			<field name="tag_ids" eval="[(6,0,[ref('tag_br_14'), ref('tag_br_15')])]"/>
 			<field name="tax_group_id" ref="tax_group_csll_0"/>
+			<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'plus_tag_ids': [ref('tax_report_csll_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'minus_tag_ids': [ref('tax_report_csll_2')],
+	            }),
+	        ]"/>
+	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'base',
+	                'minus_tag_ids': [ref('tax_report_csll_1')],
+	            }),
+	            (0,0, {
+	                'factor_percent': 100,
+	                'repartition_type': 'tax',
+	                'plus_tag_ids': [ref('tax_report_csll_2')],
+	            }),
+	        ]"/>
         </record>
 
         <data noupdate="1">
