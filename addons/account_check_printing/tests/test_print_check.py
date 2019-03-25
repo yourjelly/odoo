@@ -15,8 +15,8 @@ class TestPrintCheck(AccountingTestCase):
     def setUp(self):
         super(TestPrintCheck, self).setUp()
 
-        self.invoice_model = self.env['account.invoice']
-        self.invoice_line_model = self.env['account.invoice.line']
+        self.invoice_model = self.env['account.move']
+        self.invoice_line_model = self.env['account.move.line']
         self.register_payments_model = self.env['account.register.payments']
 
         self.partner_axelor = self.env.ref("base.res_partner_2")
@@ -41,7 +41,7 @@ class TestPrintCheck(AccountingTestCase):
             'product_id': self.product.id,
             'quantity': 1,
             'price_unit': is_refund and amount / 4 or amount,
-            'invoice_id': invoice.id,
+            'move_id': invoice.id,
             'name': 'something',
             'account_id': self.account_expenses.id,
         })
@@ -50,7 +50,7 @@ class TestPrintCheck(AccountingTestCase):
 
     def create_payment(self, invoices):
         register_payments = self.register_payments_model.with_context({
-            'active_model': 'account.invoice',
+            'active_model': 'account.move',
             'active_ids': invoices.ids
         }).create({
             'payment_date': time.strftime('%Y') + '-07-15',
@@ -62,7 +62,7 @@ class TestPrintCheck(AccountingTestCase):
 
     def test_print_check(self):
         # Make a payment for 10 invoices and 5 credit notes
-        invoices = self.env['account.invoice']
+        invoices = self.env['account.move']
         for i in range(0,15):
             invoices |= self.create_invoice(is_refund=(i % 3 == 0))
         payment = self.create_payment(invoices)
