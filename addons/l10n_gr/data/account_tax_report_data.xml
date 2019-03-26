@@ -17,7 +17,7 @@
     </record>
 
     <record id="account_tax_report_line_303" model="account.tax.report.line">
-        <field name="name">303 Πωλήσεις 19-23%</field>
+        <field name="name">303 Πωλήσεις 19-23%f</field>
         <field name="tag_name">303 Πωλήσεις 19-23%</field>
         <field name="code">GRTAX_303</field>
         <field name="sequence" eval="1"/>
