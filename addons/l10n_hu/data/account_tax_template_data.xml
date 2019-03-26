@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="F27" model="account.tax.template">
+        <field name="description">27%</field>
+        <field name="chart_template_id" ref="hungarian_chart_template"/>
+        <field name="type_tax_use">sale</field>
+        <field name="name">Fizetendő - 27%</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">27</field>
+        <field name="sequence">1</field>
+        <field name="price_include" eval="0"/>
+        <field name="account_id">chart_hu_467</field>
+        <field name="refund_account_id">chart_hu_467</field>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_08'), ref('tag_hu_21')])]"/>
+        <field name="tax_group_id" ref="tax_group_afa_27"/>
+    </record>
+    <record id="F18" model="account.tax.template">
+        <field name="description">18%</field>
+        <field name="chart_template_id" ref="hungarian_chart_template"/>
+        <field name="type_tax_use">sale</field>
+        <field name="name">Fizetendő – 18%</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">18</field>
+        <field name="sequence">2</field>
+        <field name="price_include" eval="0"/>
+        <field name="account_id">chart_hu_467</field>
+        <field name="refund_account_id">chart_hu_467</field>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_07'), ref('tag_hu_20')])]"/>
+        <field name="tax_group_id" ref="tax_group_afa_18"/>
+    </record>
+    <record id="F5" model="account.tax.template">
+        <field name="description">5%</field>
+        <field name="chart_template_id" ref="hungarian_chart_template"/>
+        <field name="type_tax_use">sale</field>
+        <field name="name">Fizetendő – 5%</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">5</field>
+        <field name="sequence">2</field>
+        <field name="price_include" eval="0"/>
+        <field name="account_id">chart_hu_467</field>
+        <field name="refund_account_id">chart_hu_467</field>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_06'), ref('tag_hu_19')])]"/>
+        <field name="tax_group_id" ref="tax_group_afa_5"/>
+    </record>
+    <record id="FA" model="account.tax.template">
+        <field name="description">AAM</field>
+        <field name="chart_template_id" ref="hungarian_chart_template"/>
+        <field name="type_tax_use">sale</field>
+        <field name="name">Fizetendő – Alanyi Adómentes</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="sequence">2</field>
+        <field name="price_include" eval="0"/>
+        <field name="account_id">chart_hu_467</field>
+        <field name="refund_account_id">chart_hu_467</field>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_05')])]"/>
+        <field name="tax_group_id" ref="tax_group_afa_0"/>
+    </record>
+    <record id="FT" model="account.tax.template">
+        <field name="description">TAM</field>
+        <field name="chart_template_id" ref="hungarian_chart_template"/>
+        <field name="type_tax_use">sale</field>
+        <field name="name">Fizetendő – Tárgyi Adómentes</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="sequence">2</field>
+        <field name="price_include" eval="0"/>
+        <field name="account_id">chart_hu_467</field>
+        <field name="refund_account_id">chart_hu_467</field>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_04')])]"/>
+        <field name="tax_group_id" ref="tax_group_afa_0"/>
+    </record>
+    <record id="FF" model="account.tax.template">
+        <field name="description">FORD</field>
+        <field name="chart_template_id" ref="hungarian_chart_template"/>
+        <field name="type_tax_use">sale</field>
+        <field name="name">Fizetendő – Fordított ÁFA</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="sequence">2</field>
+        <field name="price_include" eval="0"/>
+        <field name="account_id">chart_hu_467</field>
+        <field name="refund_account_id">chart_hu_467</field>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_10')])]"/>
+        <field name="tax_group_id" ref="tax_group_afa_0"/>
+    </record>
+    <record id="FEUO" model="account.tax.template">
+        <field name="description">Export</field>
+        <field name="chart_template_id" ref="hungarian_chart_template"/>
+        <field name="type_tax_use">sale</field>
+        <field name="name">Fizetendő – Export</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="sequence">2</field>
+        <field name="price_include" eval="0"/>
+        <field name="account_id">chart_hu_467</field>
+        <field name="refund_account_id">chart_hu_467</field>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_02')])]"/>
+        <field name="tax_group_id" ref="tax_group_afa_0"/>
+    </record>
+    <record id="FEU" model="account.tax.template">
+        <field name="description">EU</field>
+        <field name="chart_template_id" ref="hungarian_chart_template"/>
+        <field name="type_tax_use">sale</field>
+        <field name="name">Fizetendő – EU</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="sequence">2</field>
+        <field name="price_include" eval="0"/>
+        <field name="account_id">chart_hu_467</field>
+        <field name="refund_account_id">chart_hu_467</field>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_03')])]"/>
+        <field name="tax_group_id" ref="tax_group_afa_0"/>
+    </record>
+    <record id="V18" model="account.tax.template">
+        <field name="description">18%</field>
+        <field name="chart_template_id" ref="hungarian_chart_template"/>
+        <field name="type_tax_use">purchase</field>
+        <field name="name">Visszaigényelhető – 18%</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">18</field>
+        <field name="sequence">2</field>
+        <field name="price_include" eval="0"/>
+        <field name="account_id">chart_hu_466</field>
+        <field name="refund_account_id">chart_hu_466</field>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_16'), ref('tag_hu_23')])]"/>
+        <field name="tax_group_id" ref="tax_group_afa_18"/>
+    </record>
+    <record id="V27" model="account.tax.template">
+        <field name="description">27%</field>
+        <field name="chart_template_id" ref="hungarian_chart_template"/>
+        <field name="type_tax_use">purchase</field>
+        <field name="name">Visszaigényelhető – 27%</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">27</field>
+        <field name="sequence">1</field>
+        <field name="price_include" eval="0"/>
+        <field name="account_id">chart_hu_466</field>
+        <field name="refund_account_id">chart_hu_466</field>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_17'), ref('tag_hu_24')])]"/>
+        <field name="tax_group_id" ref="tax_group_afa_27"/>
+    </record>
+    <record id="V5" model="account.tax.template">
+        <field name="description">5%</field>
+        <field name="chart_template_id" ref="hungarian_chart_template"/>
+        <field name="type_tax_use">purchase</field>
+        <field name="name">Visszaigényelhető – 5%</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">5</field>
+        <field name="sequence">2</field>
+        <field name="price_include" eval="0"/>
+        <field name="account_id">chart_hu_466</field>
+        <field name="refund_account_id">chart_hu_466</field>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_15'), ref('tag_hu_22')])]"/>
+        <field name="tax_group_id" ref="tax_group_afa_5"/>
+    </record>
+    <record id="VA" model="account.tax.template">
+        <field name="description">AAM</field>
+        <field name="chart_template_id" ref="hungarian_chart_template"/>
+        <field name="type_tax_use">purchase</field>
+        <field name="name">Visszaigényelhető – Alanyi Adómentes</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="sequence">2</field>
+        <field name="price_include" eval="0"/>
+        <field name="account_id">chart_hu_466</field>
+        <field name="refund_account_id">chart_hu_466</field>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_13')])]"/>
+        <field name="tax_group_id" ref="tax_group_afa_0"/>
+    </record>
+    <record id="VT" model="account.tax.template">
+        <field name="description">TAM</field>
+        <field name="chart_template_id" ref="hungarian_chart_template"/>
+        <field name="type_tax_use">purchase</field>
+        <field name="name">Visszaigényelhető – Tárgyi Adómentes</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="sequence">2</field>
+        <field name="price_include" eval="0"/>
+        <field name="account_id">chart_hu_466</field>
+        <field name="refund_account_id">chart_hu_466</field>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_14')])]"/>
+        <field name="tax_group_id" ref="tax_group_afa_0"/>
+    </record>
+    <record id="VAHT" model="account.tax.template">
+        <field name="description">ÁHT</field>
+        <field name="chart_template_id" ref="hungarian_chart_template"/>
+        <field name="type_tax_use">purchase</field>
+        <field name="name">Visszaigényelhető – ÁFA hatályán kívüli</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="sequence">2</field>
+        <field name="price_include" eval="0"/>
+        <field name="account_id">chart_hu_466</field>
+        <field name="refund_account_id">chart_hu_466</field>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_25')])]"/>
+        <field name="tax_group_id" ref="tax_group_afa_0"/>
+    </record>
+    <record id="VEU" model="account.tax.template">
+        <field name="description">EU</field>
+        <field name="chart_template_id" ref="hungarian_chart_template"/>
+        <field name="type_tax_use">purchase</field>
+        <field name="name">Visszaigényelhető – EU</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="sequence">2</field>
+        <field name="price_include" eval="0"/>
+        <field name="account_id">chart_hu_466</field>
+        <field name="refund_account_id">chart_hu_466</field>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_09')])]"/>
+        <field name="tax_group_id" ref="tax_group_afa_0"/>
+    </record>
+    <record id="VEUO" model="account.tax.template">
+        <field name="description">Import</field>
+        <field name="chart_template_id" ref="hungarian_chart_template"/>
+        <field name="type_tax_use">purchase</field>
+        <field name="name">Visszaigényelhető – Import</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="sequence">2</field>
+        <field name="price_include" eval="0"/>
+        <field name="account_id">chart_hu_466</field>
+        <field name="refund_account_id">chart_hu_466</field>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_11')])]"/>
+        <field name="tax_group_id" ref="tax_group_afa_0"/>
+    </record>
+    <record id="VF" model="account.tax.template">
+        <field name="description">FORD</field>
+        <field name="chart_template_id" ref="hungarian_chart_template"/>
+        <field name="type_tax_use">purchase</field>
+        <field name="name">Visszaigényelhető – Fordított ÁFA</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="sequence">2</field>
+        <field name="price_include" eval="0"/>
+        <field name="account_id">chart_hu_466</field>
+        <field name="refund_account_id">chart_hu_466</field>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_10')])]"/>
+        <field name="tax_group_id" ref="tax_group_afa_0"/>
+    </record>
+</odoo>
