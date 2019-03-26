@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
     <record id="F27" model="account.tax.template">
         <field name="description">27%</field>
         <field name="chart_template_id" ref="hungarian_chart_template"/>
@@ -9,11 +10,35 @@
         <field name="amount">27</field>
         <field name="sequence">1</field>
         <field name="price_include" eval="0"/>
-        <field name="account_id">chart_hu_467</field>
-        <field name="refund_account_id">chart_hu_467</field>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_08'), ref('tag_hu_21')])]"/>
         <field name="tax_group_id" ref="tax_group_afa_27"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_tag_ids': [ref('financial_report_line_hu_01_07')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_467'),
+                'plus_tag_ids': [ref('financial_report_line_hu_02_03')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_tag_ids': [ref('financial_report_line_hu_01_07')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_467'),
+                'minus_tag_ids': [ref('financial_report_line_hu_02_03')],
+            }),
+        ]"/>
     </record>
+
     <record id="F18" model="account.tax.template">
         <field name="description">18%</field>
         <field name="chart_template_id" ref="hungarian_chart_template"/>
@@ -23,11 +48,35 @@
         <field name="amount">18</field>
         <field name="sequence">2</field>
         <field name="price_include" eval="0"/>
-        <field name="account_id">chart_hu_467</field>
-        <field name="refund_account_id">chart_hu_467</field>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_07'), ref('tag_hu_20')])]"/>
         <field name="tax_group_id" ref="tax_group_afa_18"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_tag_ids': [ref('financial_report_line_hu_01_06')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_467'),
+                'plus_tag_ids': [ref('financial_report_line_hu_02_02')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_tag_ids': [ref('financial_report_line_hu_01_06')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_467'),
+                'minus_tag_ids': [ref('financial_report_line_hu_02_02')],
+            }),
+        ]"/>
     </record>
+
     <record id="F5" model="account.tax.template">
         <field name="description">5%</field>
         <field name="chart_template_id" ref="hungarian_chart_template"/>
@@ -37,11 +86,35 @@
         <field name="amount">5</field>
         <field name="sequence">2</field>
         <field name="price_include" eval="0"/>
-        <field name="account_id">chart_hu_467</field>
-        <field name="refund_account_id">chart_hu_467</field>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_06'), ref('tag_hu_19')])]"/>
         <field name="tax_group_id" ref="tax_group_afa_5"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_tag_ids': [ref('financial_report_line_hu_01_05')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_467'),
+                'plus_tag_ids': [ref('financial_report_line_hu_02_01')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_tag_ids': [ref('financial_report_line_hu_01_05')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_467'),
+                'minus_tag_ids': [ref('financial_report_line_hu_02_01')],
+            }),
+        ]"/>
     </record>
+
     <record id="FA" model="account.tax.template">
         <field name="description">AAM</field>
         <field name="chart_template_id" ref="hungarian_chart_template"/>
@@ -51,11 +124,33 @@
         <field name="amount">0</field>
         <field name="sequence">2</field>
         <field name="price_include" eval="0"/>
-        <field name="account_id">chart_hu_467</field>
-        <field name="refund_account_id">chart_hu_467</field>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_05')])]"/>
         <field name="tax_group_id" ref="tax_group_afa_0"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_tag_ids': [ref('financial_report_line_hu_01_04')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_467'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_tag_ids': [ref('financial_report_line_hu_01_04')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_467'),
+            }),
+        ]"/>
     </record>
+
     <record id="FT" model="account.tax.template">
         <field name="description">TAM</field>
         <field name="chart_template_id" ref="hungarian_chart_template"/>
@@ -65,11 +160,33 @@
         <field name="amount">0</field>
         <field name="sequence">2</field>
         <field name="price_include" eval="0"/>
-        <field name="account_id">chart_hu_467</field>
-        <field name="refund_account_id">chart_hu_467</field>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_04')])]"/>
         <field name="tax_group_id" ref="tax_group_afa_0"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_tag_ids': [ref('financial_report_line_hu_01_03')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_467'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_tag_ids': [ref('financial_report_line_hu_01_03')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_467'),
+            }),
+        ]"/>
     </record>
+
     <record id="FF" model="account.tax.template">
         <field name="description">FORD</field>
         <field name="chart_template_id" ref="hungarian_chart_template"/>
@@ -79,11 +196,33 @@
         <field name="amount">0</field>
         <field name="sequence">2</field>
         <field name="price_include" eval="0"/>
-        <field name="account_id">chart_hu_467</field>
-        <field name="refund_account_id">chart_hu_467</field>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_10')])]"/>
         <field name="tax_group_id" ref="tax_group_afa_0"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_tag_ids': [ref('financial_report_line_hu_01_11')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_467'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_tag_ids': [ref('financial_report_line_hu_01_11')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_467'),
+            }),
+        ]"/>
     </record>
+
     <record id="FEUO" model="account.tax.template">
         <field name="description">Export</field>
         <field name="chart_template_id" ref="hungarian_chart_template"/>
@@ -93,11 +232,33 @@
         <field name="amount">0</field>
         <field name="sequence">2</field>
         <field name="price_include" eval="0"/>
-        <field name="account_id">chart_hu_467</field>
-        <field name="refund_account_id">chart_hu_467</field>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_02')])]"/>
         <field name="tax_group_id" ref="tax_group_afa_0"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_tag_ids': [ref('financial_report_line_hu_01_01')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_467'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_tag_ids': [ref('financial_report_line_hu_01_01')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_467'),
+            }),
+        ]"/>
     </record>
+
     <record id="FEU" model="account.tax.template">
         <field name="description">EU</field>
         <field name="chart_template_id" ref="hungarian_chart_template"/>
@@ -107,11 +268,33 @@
         <field name="amount">0</field>
         <field name="sequence">2</field>
         <field name="price_include" eval="0"/>
-        <field name="account_id">chart_hu_467</field>
-        <field name="refund_account_id">chart_hu_467</field>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_03')])]"/>
         <field name="tax_group_id" ref="tax_group_afa_0"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_tag_ids': [ref('financial_report_line_hu_01_02')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_467'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_tag_ids': [ref('financial_report_line_hu_01_02')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_467'),
+            }),
+        ]"/>
     </record>
+
     <record id="V18" model="account.tax.template">
         <field name="description">18%</field>
         <field name="chart_template_id" ref="hungarian_chart_template"/>
@@ -121,11 +304,35 @@
         <field name="amount">18</field>
         <field name="sequence">2</field>
         <field name="price_include" eval="0"/>
-        <field name="account_id">chart_hu_466</field>
-        <field name="refund_account_id">chart_hu_466</field>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_16'), ref('tag_hu_23')])]"/>
         <field name="tax_group_id" ref="tax_group_afa_18"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_tag_ids': [ref('financial_report_line_hu_01_15')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_466'),
+                'plus_tag_ids': [ref('financial_report_line_hu_02_05')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_tag_ids': [ref('financial_report_line_hu_01_15')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_466'),
+                'minus_tag_ids': [ref('financial_report_line_hu_02_05')]
+            }),
+        ]"/>
     </record>
+
     <record id="V27" model="account.tax.template">
         <field name="description">27%</field>
         <field name="chart_template_id" ref="hungarian_chart_template"/>
@@ -135,11 +342,35 @@
         <field name="amount">27</field>
         <field name="sequence">1</field>
         <field name="price_include" eval="0"/>
-        <field name="account_id">chart_hu_466</field>
-        <field name="refund_account_id">chart_hu_466</field>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_17'), ref('tag_hu_24')])]"/>
         <field name="tax_group_id" ref="tax_group_afa_27"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_tag_ids': [ref('financial_report_line_hu_01_16')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_466'),
+                'plus_tag_ids': [ref('financial_report_line_hu_02_06')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_tag_ids': [ref('financial_report_line_hu_01_16')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_466'),
+                'minus_tag_ids': [ref('financial_report_line_hu_02_06')]
+            }),
+        ]"/>
     </record>
+
     <record id="V5" model="account.tax.template">
         <field name="description">5%</field>
         <field name="chart_template_id" ref="hungarian_chart_template"/>
@@ -149,11 +380,35 @@
         <field name="amount">5</field>
         <field name="sequence">2</field>
         <field name="price_include" eval="0"/>
-        <field name="account_id">chart_hu_466</field>
-        <field name="refund_account_id">chart_hu_466</field>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_15'), ref('tag_hu_22')])]"/>
         <field name="tax_group_id" ref="tax_group_afa_5"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_tag_ids': [ref('financial_report_line_hu_01_14')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_466'),
+                'plus_tag_ids': [ref('financial_report_line_hu_02_04')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_tag_ids': [ref('financial_report_line_hu_01_14')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_466'),
+                'minus_tag_ids': [ref('financial_report_line_hu_02_04')]
+            }),
+        ]"/>
     </record>
+
     <record id="VA" model="account.tax.template">
         <field name="description">AAM</field>
         <field name="chart_template_id" ref="hungarian_chart_template"/>
@@ -163,11 +418,33 @@
         <field name="amount">0</field>
         <field name="sequence">2</field>
         <field name="price_include" eval="0"/>
-        <field name="account_id">chart_hu_466</field>
-        <field name="refund_account_id">chart_hu_466</field>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_13')])]"/>
         <field name="tax_group_id" ref="tax_group_afa_0"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_tag_ids': [ref('financial_report_line_hu_01_12')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_466'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_tag_ids': [ref('financial_report_line_hu_01_12')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_466'),
+            }),
+        ]"/>
     </record>
+
     <record id="VT" model="account.tax.template">
         <field name="description">TAM</field>
         <field name="chart_template_id" ref="hungarian_chart_template"/>
@@ -177,11 +454,33 @@
         <field name="amount">0</field>
         <field name="sequence">2</field>
         <field name="price_include" eval="0"/>
-        <field name="account_id">chart_hu_466</field>
-        <field name="refund_account_id">chart_hu_466</field>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_14')])]"/>
         <field name="tax_group_id" ref="tax_group_afa_0"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_tag_ids': [ref('financial_report_line_hu_01_13')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_466'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_tag_ids': [ref('financial_report_line_hu_01_13')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_466'),
+            }),
+        ]"/>
     </record>
+
     <record id="VAHT" model="account.tax.template">
         <field name="description">ÁHT</field>
         <field name="chart_template_id" ref="hungarian_chart_template"/>
@@ -191,11 +490,31 @@
         <field name="amount">0</field>
         <field name="sequence">2</field>
         <field name="price_include" eval="0"/>
-        <field name="account_id">chart_hu_466</field>
-        <field name="refund_account_id">chart_hu_466</field>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_25')])]"/>
         <field name="tax_group_id" ref="tax_group_afa_0"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_466'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_466'),
+            }),
+        ]"/>
     </record>
+
     <record id="VEU" model="account.tax.template">
         <field name="description">EU</field>
         <field name="chart_template_id" ref="hungarian_chart_template"/>
@@ -205,11 +524,33 @@
         <field name="amount">0</field>
         <field name="sequence">2</field>
         <field name="price_include" eval="0"/>
-        <field name="account_id">chart_hu_466</field>
-        <field name="refund_account_id">chart_hu_466</field>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_09')])]"/>
         <field name="tax_group_id" ref="tax_group_afa_0"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_tag_ids': [ref('financial_report_line_hu_01_08')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_466'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_tag_ids': [ref('financial_report_line_hu_01_08')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_466'),
+            }),
+        ]"/>
     </record>
+
     <record id="VEUO" model="account.tax.template">
         <field name="description">Import</field>
         <field name="chart_template_id" ref="hungarian_chart_template"/>
@@ -219,11 +560,33 @@
         <field name="amount">0</field>
         <field name="sequence">2</field>
         <field name="price_include" eval="0"/>
-        <field name="account_id">chart_hu_466</field>
-        <field name="refund_account_id">chart_hu_466</field>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_11')])]"/>
         <field name="tax_group_id" ref="tax_group_afa_0"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_tag_ids': [ref('financial_report_line_hu_01_10')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_466'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_tag_ids': [ref('financial_report_line_hu_01_10')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_466'),
+            }),
+        ]"/>
     </record>
+
     <record id="VF" model="account.tax.template">
         <field name="description">FORD</field>
         <field name="chart_template_id" ref="hungarian_chart_template"/>
@@ -233,9 +596,31 @@
         <field name="amount">0</field>
         <field name="sequence">2</field>
         <field name="price_include" eval="0"/>
-        <field name="account_id">chart_hu_466</field>
-        <field name="refund_account_id">chart_hu_466</field>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_hu_10')])]"/>
         <field name="tax_group_id" ref="tax_group_afa_0"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_tag_ids': [ref('financial_report_line_hu_01_11')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_466'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_tag_ids': [ref('financial_report_line_hu_01_11')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('chart_hu_466'),
+            }),
+        ]"/>
     </record>
+
 </odoo>

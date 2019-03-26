@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="financial_report_line_hu_01" model="account.tax.report.line">
+        <field name="name">ÁFA alap</field>
+        <field name="sequence" eval="1"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_01_01" model="account.tax.report.line">
+        <field name="name">Adóalap - Fizetendő ÁFA Export</field>
+        <field name="tag_name">Adóalap - Fizetendő ÁFA Export</field>
+        <field name="sequence" eval="1"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_01"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_01_02" model="account.tax.report.line">
+        <field name="name">Adóalap - Fizetendő ÁFA EU</field>
+        <field name="tag_name">Adóalap - Fizetendő ÁFA EU</field>
+        <field name="sequence" eval="2"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_01"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_01_03" model="account.tax.report.line">
+        <field name="name">Adóalap - Fizetendő ÁFA tárgyi adómentes</field>
+        <field name="tag_name">Adóalap - Fizetendő ÁFA tárgyi adómentes</field>
+        <field name="sequence" eval="3"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_01"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_01_04" model="account.tax.report.line">
+        <field name="name">Adóalap - Fizetendő ÁFA alanyi adómentes</field>
+        <field name="tag_name">Adóalap - Fizetendő ÁFA alanyi adómentes</field>
+        <field name="sequence" eval="4"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_01"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_01_05" model="account.tax.report.line">
+        <field name="name">Adóalap - Fizetendő ÁFA 5%</field>
+        <field name="tag_name">Adóalap - Fizetendő ÁFA 5%</field>
+        <field name="sequence" eval="5"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_01"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_01_06" model="account.tax.report.line">
+        <field name="name">Adóalap - Fizetendő ÁFA 18%</field>
+        <field name="tag_name">Adóalap - Fizetendő ÁFA 18%</field>
+        <field name="sequence" eval="6"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_01"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_01_07" model="account.tax.report.line">
+        <field name="name">Adóalap - Fizetendő ÁFA 27%</field>
+        <field name="tag_name">Adóalap - Fizetendő ÁFA 27%</field>
+        <field name="sequence" eval="7"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_01"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_01_08" model="account.tax.report.line">
+        <field name="name">Adóalap - Visszaigényelhető ÁFA EU</field>
+        <field name="tag_name">Adóalap - Visszaigényelhető ÁFA EU</field>
+        <field name="sequence" eval="8"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_01"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_01_09" model="account.tax.report.line">
+        <field name="name">Adóalap – Fordított ÁFA</field>
+        <field name="tag_name">Adóalap – Fordított ÁFA</field>
+        <field name="sequence" eval="9"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_01"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_01_10" model="account.tax.report.line">
+        <field name="name">Adóalap – Import ÁFA</field>
+        <field name="tag_name">Adóalap – Import ÁFA</field>
+        <field name="sequence" eval="10"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_01"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_01_11" model="account.tax.report.line">
+        <field name="name">Adóalap – Fordított ÁFA</field>
+        <field name="tag_name">Adóalap – Fordított ÁFA</field>
+        <field name="sequence" eval="11"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_01"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_01_12" model="account.tax.report.line">
+        <field name="name">Adóalap - Visszaigényelhető ÁFA alanyi adómentes</field>
+        <field name="tag_name">Adóalap - Visszaigényelhető ÁFA alanyi adómentes</field>
+        <field name="sequence" eval="12"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_01"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_01_13" model="account.tax.report.line">
+        <field name="name">Adóalap - Visszaigényelhető ÁFA tárgyi adómentes</field>
+        <field name="tag_name">Adóalap - Visszaigényelhető ÁFA tárgyi adómentes</field>
+        <field name="sequence" eval="13"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_01"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_01_14" model="account.tax.report.line">
+        <field name="name">Adóalap - Visszaigényelhető ÁFA 5%</field>
+        <field name="tag_name">Adóalap - Visszaigényelhető ÁFA 5%</field>
+        <field name="sequence" eval="14"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_01"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_01_15" model="account.tax.report.line">
+        <field name="name">Adóalap - Visszaigényelhető ÁFA 18%</field>
+        <field name="tag_name">Adóalap - Visszaigényelhető ÁFA 18%</field>
+        <field name="sequence" eval="15"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_01"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_01_16" model="account.tax.report.line">
+        <field name="name">Adóalap - Visszaigényelhető ÁFA 27%</field>
+        <field name="tag_name">Adóalap - Visszaigényelhető ÁFA 27%</field>
+        <field name="sequence" eval="16"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_01"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_02" model="account.tax.report.line">
+        <field name="name">ÁFA fizetndő / visszaigényelhető</field>
+        <field name="sequence" eval="2"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_02_01" model="account.tax.report.line">
+        <field name="name">Fizetendő ÁFA 5%</field>
+        <field name="tag_name">Fizetendő ÁFA 5%</field>
+        <field name="sequence" eval="1"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_02"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_02_02" model="account.tax.report.line">
+        <field name="name">Fizetendő ÁFA 18%</field>
+        <field name="tag_name">Fizetendő ÁFA 18%</field>
+        <field name="sequence" eval="2"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_02"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_02_03" model="account.tax.report.line">
+        <field name="name">Fizetendő ÁFA 27%</field>
+        <field name="tag_name">Fizetendő ÁFA 27%</field>
+        <field name="sequence" eval="3"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_02"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_02_04" model="account.tax.report.line">
+        <field name="name">Visszaigényelhető ÁFA 5%</field>
+        <field name="tag_name">Visszaigényelhető ÁFA 5%</field>
+        <field name="sequence" eval="4"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_02"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_02_05" model="account.tax.report.line">
+        <field name="name">Visszaigényelhető ÁFA 18%</field>
+        <field name="tag_name">Visszaigényelhető ÁFA 18%</field>
+        <field name="sequence" eval="5"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_02"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+    <record id="financial_report_line_hu_02_06" model="account.tax.report.line">
+        <field name="name">Visszaigényelhető ÁFA 27%</field>
+        <field name="tag_name">Visszaigényelhető ÁFA 27%</field>
+        <field name="sequence" eval="6"/>
+        <field name="parent_line_id" ref="financial_report_line_hu_02"/>
+        <field name="country_id" ref="base.hu"/>
+    </record>
+
+</odoo>
