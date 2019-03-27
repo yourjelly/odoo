@@ -1021,7 +1021,7 @@
 	            }),
 	        ]"/>
        	</record>
-       	
+
        	<record id="tax_template_in_ipi" model="account.tax.template">
 			<field name="description">IPI</field>
 			<field name="name">IPI Entrada</field>
@@ -1596,7 +1596,7 @@
 	                'factor_percent': 100,
 	                'repartition_type': 'tax',
 	                'account_id': ref('account_template_101050502'),
-	                'mins_tag_ids': [ref('tax_report_ipi_2')],
+	                'minus_tag_ids': [ref('tax_report_ipi_2')],
 	            }),
 	        ]"/>
 	        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -2277,7 +2277,7 @@
 	            }),
 	        ]"/>
        	</record>
-       	
+
        	<record id="tax_template_in_icms_interno" model="account.tax.template">
 			<field name="description">ICMS Interno</field>
 			<field name="name">ICMS Entrada Interno</field>
@@ -2608,7 +2608,7 @@
 	            }),
 	        ]"/>
        	</record>
-       	
+
        	<record id="tax_template_in_pis" model="account.tax.template">
 			<field name="description">PIS</field>
 			<field name="name">PIS Entrada</field>
@@ -2756,7 +2756,7 @@
 	            }),
 	        ]"/>
         </record>
-        
+
         <record id="tax_template_in_cofins" model="account.tax.template">
 			<field name="description">COFINS</field>
 			<field name="name">COFINS Entrada</field>
@@ -2935,7 +2935,7 @@
 	            }),
 	        ]"/>
         </record>
-        
+
         <record id="tax_template_out_issqn1" model="account.tax.template">
 			<field name="description">ISSQN 1%</field>
 			<field name="name">ISSQN Saida 1%</field>
@@ -2970,7 +2970,7 @@
 	            }),
 	        ]"/>
         </record>
-        
+
         <record id="tax_template_out_issqn2" model="account.tax.template">
 			<field name="description">ISSQN 2%</field>
 			<field name="name">ISSQN Saida 2%</field>
@@ -3074,7 +3074,7 @@
 	            }),
 	        ]"/>
         </record>
-        
+
         <record id="tax_template_out_issqn4" model="account.tax.template">
 			<field name="description">ISS 4%</field>
 			<field name="name">ISSQN Saida 4%</field>
@@ -3109,7 +3109,7 @@
 	            }),
 	        ]"/>
         </record>
-        
+
         <record id="tax_template_out_issqn5" model="account.tax.template">
 			<field name="description">ISSQN 5%</field>
 			<field name="name">ISSQN Saida 5%</field>

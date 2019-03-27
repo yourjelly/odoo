@@ -117,11 +117,18 @@
         <field name="country_id" ref="base.br"/>
     </record>
 
+    <record id="tax_report_cofins_oper_bas" model="account.tax.report.line">
+        <field name="name">Operação Tributável com Alíquota Básica</field>
+        <field name="sequence" eval="1"/>
+        <field name="parent_line_id" ref="tax_report_cofins"/>
+        <field name="country_id" ref="base.br"/>
+    </record>
+
     <record id="tax_report_cofins_1" model="account.tax.report.line">
         <field name="name">COFINS_1</field>
         <field name="tag_name">COFINS_1</field>
         <field name="sequence" eval="1"/>
-        <field name="parent_line_id" ref="tax_report_cofins"/>
+        <field name="parent_line_id" ref="tax_report_cofins_oper_bas"/>
         <field name="country_id" ref="base.br"/>
     </record>
 
@@ -129,82 +136,7 @@
         <field name="name">COFINS_2</field>
         <field name="tag_name">COFINS_2</field>
         <field name="sequence" eval="2"/>
-        <field name="parent_line_id" ref="tax_report_cofins"/>
-        <field name="country_id" ref="base.br"/>
-    </record>
-
-    <record id="tax_report_pis" model="account.tax.report.line">
-        <field name="name">PIS</field>
-        <field name="sequence" eval="7"/>
-        <field name="country_id" ref="base.br"/>
-    </record>
-
-    <record id="tax_report_pis_1" model="account.tax.report.line">
-        <field name="name">PIS_1</field>
-        <field name="tag_name">PIS_1</field>
-        <field name="sequence" eval="1"/>
-        <field name="parent_line_id" ref="tax_report_pis"/>
-        <field name="country_id" ref="base.br"/>
-    </record>
-
-    <record id="tax_report_pis_2" model="account.tax.report.line">
-        <field name="name">PIS_2</field>
-        <field name="tag_name">PIS_2</field>
-        <field name="sequence" eval="2"/>
-        <field name="parent_line_id" ref="tax_report_pis"/>
-        <field name="country_id" ref="base.br"/>
-    </record>
-
-    <record id="tax_report_ipi" model="account.tax.report.line">
-        <field name="name">IPI</field>
-        <field name="code">BRTAX07</field>
-        <field name="sequence" eval="8"/>
-        <field name="country_id" ref="base.br"/>
-    </record>
-
-    <record id="tax_report_ipi_1" model="account.tax.report.line">
-        <field name="name">IPI_1</field>
-        <field name="tag_name">IPI_1</field>
-        <field name="code">BRTAX07_1</field>
-        <field name="sequence" eval="1"/>
-        <field name="parent_line_id" ref="tax_report_ipi"/>
-        <field name="country_id" ref="base.br"/>
-    </record>
-
-    <record id="tax_report_ipi_2" model="account.tax.report.line">
-        <field name="name">IPI_2</field>
-        <field name="tag_name">IPI_2</field>
-        <field name="sequence" eval="2"/>
-        <field name="parent_line_id" ref="tax_report_ipi"/>
-        <field name="country_id" ref="base.br"/>
-    </record>
-
-    <record id="tax_report_icms" model="account.tax.report.line">
-        <field name="name">ICMS</field>
-        <field name="sequence" eval="9"/>
-        <field name="country_id" ref="base.br"/>
-    </record>
-
-    <record id="tax_report_icms_1" model="account.tax.report.line">
-        <field name="name">ICMS_1</field>
-        <field name="tag_name">ICMS_1</field>
-        <field name="sequence" eval="1"/>
-        <field name="parent_line_id" ref="tax_report_icms"/>
-        <field name="country_id" ref="base.br"/>
-    </record>
-
-    <record id="tax_report_icms_2" model="account.tax.report.line">
-        <field name="name">ICMS_2</field>
-        <field name="tag_name">ICMS_2</field>
-        <field name="sequence" eval="2"/>
-        <field name="parent_line_id" ref="tax_report_icms"/>
-        <field name="country_id" ref="base.br"/>
-    </record>
-
-    <record id="tax_report_cofins_oper_bas" model="account.tax.report.line">
-        <field name="name">Operação Tributável com Alíquota Básica</field>
-        <field name="sequence" eval="1"/>
-        <field name="parent_line_id" ref="tax_report_cofins"/>
+        <field name="parent_line_id" ref="tax_report_cofins_oper_bas"/>
         <field name="country_id" ref="base.br"/>
     </record>
 
@@ -432,10 +364,32 @@
         <field name="country_id" ref="base.br"/>
     </record>
 
+    <record id="tax_report_pis" model="account.tax.report.line">
+        <field name="name">PIS</field>
+        <field name="sequence" eval="7"/>
+        <field name="country_id" ref="base.br"/>
+    </record>
+
     <record id="tax_report_pis_oper_tri_basica" model="account.tax.report.line">
         <field name="name">Operação Tributável com Alíquota Básica</field>
         <field name="sequence" eval="1"/>
         <field name="parent_line_id" ref="tax_report_pis"/>
+        <field name="country_id" ref="base.br"/>
+    </record>
+
+    <record id="tax_report_pis_1" model="account.tax.report.line">
+        <field name="name">PIS_1</field>
+        <field name="tag_name">PIS_1</field>
+        <field name="sequence" eval="1"/>
+        <field name="parent_line_id" ref="tax_report_pis_oper_tri_basica"/>
+        <field name="country_id" ref="base.br"/>
+    </record>
+
+    <record id="tax_report_pis_2" model="account.tax.report.line">
+        <field name="name">PIS_2</field>
+        <field name="tag_name">PIS_2</field>
+        <field name="sequence" eval="2"/>
+        <field name="parent_line_id" ref="tax_report_pis_oper_tri_basica"/>
         <field name="country_id" ref="base.br"/>
     </record>
 
@@ -663,6 +617,13 @@
         <field name="country_id" ref="base.br"/>
     </record>
 
+    <record id="tax_report_ipi" model="account.tax.report.line">
+        <field name="name">IPI</field>
+        <field name="code">BRTAX07</field>
+        <field name="sequence" eval="8"/>
+        <field name="country_id" ref="base.br"/>
+    </record>
+
     <record id="tax_report_ipi_extrada_com" model="account.tax.report.line">
         <field name="name">Entrada com recuperação de crédito</field>
         <field name="sequence" eval="1"/>
@@ -670,10 +631,27 @@
         <field name="country_id" ref="base.br"/>
     </record>
 
+    <record id="tax_report_ipi_1" model="account.tax.report.line">
+        <field name="name">IPI_1</field>
+        <field name="tag_name">IPI_1</field>
+        <field name="code">BRTAX07_1</field>
+        <field name="sequence" eval="1"/>
+        <field name="parent_line_id" ref="tax_report_ipi_extrada_com"/>
+        <field name="country_id" ref="base.br"/>
+    </record>
+
     <record id="tax_report_ipi_extrada_tributada" model="account.tax.report.line">
         <field name="name">Entrada tributada com alíquota zero</field>
         <field name="sequence" eval="2"/>
         <field name="parent_line_id" ref="tax_report_ipi"/>
+        <field name="country_id" ref="base.br"/>
+    </record>
+
+    <record id="tax_report_ipi_2" model="account.tax.report.line">
+        <field name="name">IPI_2</field>
+        <field name="tag_name">IPI_2</field>
+        <field name="sequence" eval="1"/>
+        <field name="parent_line_id" ref="tax_report_ipi_extrada_tributada"/>
         <field name="country_id" ref="base.br"/>
     </record>
 
@@ -761,6 +739,12 @@
         <field name="country_id" ref="base.br"/>
     </record>
 
+    <record id="tax_report_icms" model="account.tax.report.line">
+        <field name="name">ICMS</field>
+        <field name="sequence" eval="9"/>
+        <field name="country_id" ref="base.br"/>
+    </record>
+
     <record id="tax_report_icms_tributada" model="account.tax.report.line">
         <field name="name">Tributada integralmente</field>
         <field name="sequence" eval="1"/>
@@ -768,10 +752,26 @@
         <field name="country_id" ref="base.br"/>
     </record>
 
+    <record id="tax_report_icms_1" model="account.tax.report.line">
+        <field name="name">ICMS_1</field>
+        <field name="tag_name">ICMS_1</field>
+        <field name="sequence" eval="1"/>
+        <field name="parent_line_id" ref="tax_report_icms_tributada"/>
+        <field name="country_id" ref="base.br"/>
+    </record>
+
     <record id="tax_report_icms_tributada_com" model="account.tax.report.line">
         <field name="name">Tributada e com cobrança do ICMS por substituição tributária</field>
         <field name="sequence" eval="2"/>
         <field name="parent_line_id" ref="tax_report_icms"/>
+        <field name="country_id" ref="base.br"/>
+    </record>
+
+    <record id="tax_report_icms_2" model="account.tax.report.line">
+        <field name="name">ICMS_2</field>
+        <field name="tag_name">ICMS_2</field>
+        <field name="sequence" eval="1"/>
+        <field name="parent_line_id" ref="tax_report_icms_tributada_com"/>
         <field name="country_id" ref="base.br"/>
     </record>
 
