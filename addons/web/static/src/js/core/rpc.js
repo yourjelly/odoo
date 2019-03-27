@@ -68,6 +68,11 @@ return {
             orderBy = options.orderBy || params.orderBy || params.kwargs.orderby;
             params.kwargs.orderby = orderBy ? this._serializeSort(orderBy) : orderBy;
             params.kwargs.lazy = 'lazy' in options ? options.lazy : params.lazy;
+
+            if (options.method === 'web_read_group') {
+                params.kwargs.expand = options.expand || params.expand || params.kwargs.expand;
+                params.kwargs.expand_limit = options.expand_limit || params.expand_limit || params.kwargs.expand_limit;
+            }
         }
 
         if (options.method === 'search_read') {

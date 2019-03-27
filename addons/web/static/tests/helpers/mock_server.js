@@ -1210,6 +1210,18 @@ var MockServer = Class.extend({
      * @returns {Object[]}
      */
     _mockWebReadGroup: function (model, kwargs) {
+        var self = this;
+        var groups = this._mockReadGroup(model, kwargs);
+        if (kwargs.expand) {
+            groups.forEach(function (group) {
+                group.__data = self._mockSearchReadController({
+                    domain: group.__domain,
+                    model: model,
+                    fields: kwargs.fields,
+                    limit: kwargs.limit,
+                });
+            });
+        }
         var allGroups = this._mockReadGroup(model, {
             domain: kwargs.domain,
             fields: ['display_name'],
@@ -1217,7 +1229,7 @@ var MockServer = Class.extend({
             lazy: kwargs.lazy,
         });
         return {
-            groups: this._mockReadGroup(model, kwargs),
+            groups: groups,
             length: allGroups.length,
         };
     },

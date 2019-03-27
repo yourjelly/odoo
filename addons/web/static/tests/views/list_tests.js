@@ -4351,7 +4351,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('grouped list with expand attribute', async function (assert) {
-        assert.expect(6);
+        assert.expect(5);
 
         var list = await createView({
             View: ListView,
@@ -4367,11 +4367,10 @@ QUnit.module('Views', {
 
         assert.containsN(list, '.o_group_header', 2);
         assert.containsN(list, '.o_data_row', 4);
+        assert.strictEqual(list.$('.o_data_cell').text(), 'yopblipgnapblip');
 
         assert.verifySteps([
-            'web_read_group',
-            '/web/dataset/search_read',
-            '/web/dataset/search_read',
+            'web_read_group', // records are fetched alongside groups
         ]);
 
         list.destroy();
@@ -4405,13 +4404,12 @@ QUnit.module('Views', {
     });
 
     QUnit.test('grouped lists with expand attribute and a lot of groups', async function (assert) {
-        assert.expect(10);
+        assert.expect(8);
 
         for (var i = 0; i < 15; i++) {
             this.data.foo.records.push({foo: 'record ' + i, int_field: i});
         }
 
-        var nbSearchRead = 0;
         var list = await createView({
             View: ListView,
             model: 'foo',
@@ -4422,24 +4420,18 @@ QUnit.module('Views', {
                 if (args.method === 'web_read_group') {
                     assert.step(args.method);
                 }
-                if (route === '/web/dataset/search_read') {
-                    nbSearchRead++;
-                }
                 return this._super.apply(this, arguments);
             },
         });
 
         assert.containsN(list, '.o_group_header', 10); // page 1
         assert.containsN(list, '.o_data_row', 11); // one group contains two records
-        assert.strictEqual(nbSearchRead, 10);
         assert.containsOnce(list, '.o_pager_counter'); // has a pager
 
-        nbSearchRead = 0;
         await testUtils.dom.click(list.$('.o_pager_next')); // switch to page 2
 
         assert.containsN(list, '.o_group_header', 7); // page 2
         assert.containsN(list, '.o_data_row', 7);
-        assert.strictEqual(nbSearchRead, 7);
 
         assert.verifySteps([
             'web_read_group', // read_group page 1
