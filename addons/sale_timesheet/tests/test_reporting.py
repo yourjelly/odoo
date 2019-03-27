@@ -236,7 +236,7 @@ class TestReporting(TestCommonSaleTimesheetNoChart):
         })
         action_invoice = payment.with_context(context).create_invoices()
         invoice_id = action_invoice['res_id']
-        invoice_1 = self.env['account.invoice'].browse(invoice_id)
+        invoice_1 = self.env['account.move'].browse(invoice_id)
         invoice_1.post()
 
         # deliver project should now have cost and something invoiced
@@ -290,7 +290,7 @@ class TestReporting(TestCommonSaleTimesheetNoChart):
         })
         action_invoice = payment.with_context(context).create_invoices()
         invoice_id = action_invoice['res_id']
-        invoice_2 = self.env['account.invoice'].browse(invoice_id)
+        invoice_2 = self.env['account.move'].browse(invoice_id)
         invoice_2.post()
 
         # deliver project should not be impacted by the invoice of the other SO

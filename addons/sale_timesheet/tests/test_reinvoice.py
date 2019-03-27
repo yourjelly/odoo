@@ -44,23 +44,7 @@ class TestReInvoice(TestCommonSaleTimesheetNoChart):
             'analytic_account_id': cls.analytic_account.id,
         })
 
-        Invoice = cls.env['account.invoice'].with_context(mail_notrack=True, mail_create_nolog=True)
-        cls.invoiceA = Invoice.create({
-            'name': 'Test Invoice',
-            'type': 'in_invoice',
-            'partner_id': cls.partner_customer_usd.id,
-            'account_id': cls.account_payable.id,
-            'journal_id': cls.journal_purchase.id,
-            'currency_id': cls.env.user.company_id.currency_id.id,
-        })
-        cls.invoiceB = Invoice.create({
-            'name': 'Test Invoice 2',
-            'type': 'in_invoice',
-            'partner_id': cls.partner_customer_usd.id,
-            'account_id': cls.account_payable.id,
-            'journal_id': cls.journal_purchase.id,
-            'currency_id': cls.env.user.company_id.currency_id.id,
-        })
+        cls.Invoice = cls.env['account.move'].with_context(mail_notrack=True, mail_create_nolog=True, assist_move_creation=True)
 
     def test_at_cost(self):
         """ Test vendor bill at cost for product based on ordered and delivered quantities. """
@@ -101,28 +85,37 @@ class TestReInvoice(TestCommonSaleTimesheetNoChart):
             'employee_id': self.employee_user.id,
         })
 
-        # create invoice lines and validate it
-        invoice_lineA1 = self.env['account.invoice.line'].create({
+        invoiceA = self.Invoice.create({
+            'name': 'Test Invoice 1',
+            'type': 'in_invoice',
+            'partner_id': self.partner_customer_usd.id,
+            'account_id': self.account_payable.id,
+            'journal_id': self.journal_purchase.id,
+            'currency_id': self.env.user.company_id.currency_id.id,
+            'line_ids': [
+                (0, None, {
             'name': self.product_ordered_cost.name,
             'product_id': self.product_ordered_cost.id,
             'quantity': 3,
             'uom_id': self.product_ordered_cost.uom_id.id,
             'price_unit': self.product_ordered_cost.standard_price,
-            'account_analytic_id': self.analytic_account.id,
+                    'analytic_account_id': self.analytic_account.id,
             'account_id': self.account_income.id,
-            'invoice_id': self.invoiceA.id,
-        })
-        invoice_lineA2 = self.env['account.invoice.line'].create({
+                }),
+                (0, None, {
             'name': self.product_deliver_cost.name,
             'product_id': self.product_deliver_cost.id,
             'quantity': 3,
             'uom_id': self.product_deliver_cost.uom_id.id,
             'price_unit': self.product_deliver_cost.standard_price,
-            'account_analytic_id': self.analytic_account.id,
+                    'analytic_account_id': self.analytic_account.id,
             'account_id': self.account_income.id,
-            'invoice_id': self.invoiceA.id,
         })
-        self.invoiceA.post()
+            ]
+        })
+        invoice_lineA1 = invoiceA.invoice_line_ids[0]
+        invoice_lineA2 = invoiceA.invoice_line_ids[1]
+        invoiceA.post()
 
         sale_order_line3 = self.sale_order.order_line.filtered(lambda sol: sol != sale_order_line1 and sol.product_id == self.product_ordered_cost)
         sale_order_line4 = self.sale_order.order_line.filtered(lambda sol: sol != sale_order_line2 and sol.product_id == self.product_deliver_cost)
@@ -146,27 +139,36 @@ class TestReInvoice(TestCommonSaleTimesheetNoChart):
         self.assertEquals(sale_order_line4.qty_delivered_method, 'analytic', "Delivered quantity of 'expense' SO line should be computed by analytic amount")
 
         # create second invoice lines and validate it
-        invoice_lineB1 = self.env['account.invoice.line'].create({
+        invoiceB = self.Invoice.create({
+            'name': 'Test Invoice 3',
+            'type': 'in_invoice',
+            'partner_id': self.partner_customer_usd.id,
+            'account_id': self.account_payable.id,
+            'journal_id': self.journal_purchase.id,
+            'currency_id': self.env.user.company_id.currency_id.id,
+            'line_ids': [
+                (0, None, {
             'name': self.product_ordered_cost.name,
             'product_id': self.product_ordered_cost.id,
             'quantity': 2,
             'uom_id': self.product_ordered_cost.uom_id.id,
             'price_unit': self.product_ordered_cost.standard_price,
-            'account_analytic_id': self.analytic_account.id,
+                    'analytic_account_id': self.analytic_account.id,
             'account_id': self.account_income.id,
-            'invoice_id': self.invoiceB.id,
-        })
-        invoice_lineB2 = self.env['account.invoice.line'].create({
+                }), (0,None, {
             'name': self.product_deliver_cost.name,
             'product_id': self.product_deliver_cost.id,
             'quantity': 2,
             'uom_id': self.product_deliver_cost.uom_id.id,
             'price_unit': self.product_deliver_cost.standard_price,
-            'account_analytic_id': self.analytic_account.id,
+                    'analytic_account_id': self.analytic_account.id,
             'account_id': self.account_income.id,
-            'invoice_id': self.invoiceB.id,
         })
-        self.invoiceB.post()
+            ]
+        })
+        invoice_lineB1 = invoiceB.invoice_line_ids[0]
+        invoice_lineB2 = invoiceB.invoice_line_ids[1]
+        invoiceB.post()
 
         sale_order_line5 = self.sale_order.order_line.filtered(lambda sol: sol != sale_order_line1 and sol != sale_order_line3 and sol.product_id == self.product_ordered_cost)
         sale_order_line6 = self.sale_order.order_line.filtered(lambda sol: sol != sale_order_line2 and sol != sale_order_line4 and sol.product_id == self.product_deliver_cost)
@@ -219,27 +221,37 @@ class TestReInvoice(TestCommonSaleTimesheetNoChart):
         })
 
         # create invoice lines and validate it
-        invoice_lineA1 = self.env['account.invoice.line'].create({
+        invoiceA = self.Invoice.create({
+            'name': 'Test Invoice 1',
+            'type': 'in_invoice',
+            'partner_id': self.partner_customer_usd.id,
+            'account_id': self.account_payable.id,
+            'journal_id': self.journal_purchase.id,
+            'currency_id': self.env.user.company_id.currency_id.id,
+            'line_ids': [
+                (0, None, {
             'name': self.product_deliver_sales_price.name,
             'product_id': self.product_deliver_sales_price.id,
             'quantity': 3,
             'uom_id': self.product_deliver_sales_price.uom_id.id,
             'price_unit': self.product_deliver_sales_price.standard_price,
-            'account_analytic_id': self.analytic_account.id,
+                    'analytic_account_id': self.analytic_account.id,
             'account_id': self.account_income.id,
-            'invoice_id': self.invoiceA.id,
-        })
-        invoice_lineA2 = self.env['account.invoice.line'].create({
+                }),
+                (0, None, {
             'name': self.product_order_sales_price.name,
             'product_id': self.product_order_sales_price.id,
             'quantity': 3,
             'uom_id': self.product_order_sales_price.uom_id.id,
             'price_unit': self.product_order_sales_price.standard_price,
-            'account_analytic_id': self.analytic_account.id,
+                    'analytic_account_id': self.analytic_account.id,
             'account_id': self.account_income.id,
-            'invoice_id': self.invoiceA.id,
+                })
+            ]
         })
-        self.invoiceA.post()
+        invoice_lineA1 = invoiceA.invoice_line_ids[0]
+        invoice_lineA2 = invoiceA.invoice_line_ids[1]
+        invoiceA.post()
 
         sale_order_line3 = self.sale_order.order_line.filtered(lambda sol: sol != sale_order_line1 and sol.product_id == self.product_deliver_sales_price)
         sale_order_line4 = self.sale_order.order_line.filtered(lambda sol: sol != sale_order_line2 and sol.product_id == self.product_order_sales_price)
@@ -263,27 +275,36 @@ class TestReInvoice(TestCommonSaleTimesheetNoChart):
         self.assertEquals(sale_order_line4.qty_delivered_method, 'analytic', "Delivered quantity of 'expense' SO line 4 should be computed by analytic amount")
 
         # create second invoice lines and validate it
-        invoice_lineB1 = self.env['account.invoice.line'].create({
+        invoiceB = self.Invoice.create({
+            'name': 'Test Invoice 3',
+            'type': 'in_invoice',
+            'partner_id': self.partner_customer_usd.id,
+            'account_id': self.account_payable.id,
+            'journal_id': self.journal_purchase.id,
+            'currency_id': self.env.user.company_id.currency_id.id,
+            'line_ids': [
+                (0, None, {
             'name': self.product_deliver_sales_price.name,
             'product_id': self.product_deliver_sales_price.id,
             'quantity': 2,
             'uom_id': self.product_deliver_sales_price.uom_id.id,
             'price_unit': self.product_deliver_sales_price.standard_price,
-            'account_analytic_id': self.analytic_account.id,
+                    'analytic_account_id': self.analytic_account.id,
             'account_id': self.account_income.id,
-            'invoice_id': self.invoiceB.id,
-        })
-        invoice_lineB2 = self.env['account.invoice.line'].create({
+                }), (0,None, {
             'name': self.product_order_sales_price.name,
             'product_id': self.product_order_sales_price.id,
             'quantity': 2,
             'uom_id': self.product_order_sales_price.uom_id.id,
             'price_unit': self.product_order_sales_price.standard_price,
-            'account_analytic_id': self.analytic_account.id,
+                    'analytic_account_id': self.analytic_account.id,
             'account_id': self.account_income.id,
-            'invoice_id': self.invoiceB.id,
+                })
+            ]
         })
-        self.invoiceB.post()
+        invoice_lineB1 = invoiceB.invoice_line_ids[0]
+        invoice_lineB2 = invoiceB.invoice_line_ids[1]
+        invoiceB.post()
 
         sale_order_line5 = self.sale_order.order_line.filtered(lambda sol: sol != sale_order_line1 and sol != sale_order_line3 and sol.product_id == self.product_deliver_sales_price)
         sale_order_line6 = self.sale_order.order_line.filtered(lambda sol: sol != sale_order_line2 and sol != sale_order_line4 and sol.product_id == self.product_order_sales_price)
@@ -312,17 +333,27 @@ class TestReInvoice(TestCommonSaleTimesheetNoChart):
         self.sale_order.action_confirm()
 
         # create invoice lines and validate it
-        invoice_lineA1 = self.env['account.invoice.line'].create({
+        invoiceA = self.Invoice.create({
+            'name': 'Test Invoice 1',
+            'type': 'in_invoice',
+            'partner_id': self.partner_customer_usd.id,
+            'account_id': self.account_payable.id,
+            'journal_id': self.journal_purchase.id,
+            'currency_id': self.env.user.company_id.currency_id.id,
+            'line_ids': [
+                (0, None, {
             'name': self.product_no_expense.name,
             'product_id': self.product_no_expense.id,
             'quantity': 3,
             'uom_id': self.product_no_expense.uom_id.id,
             'price_unit': self.product_no_expense.standard_price,
-            'account_analytic_id': self.analytic_account.id,
+                    'analytic_account_id': self.analytic_account.id,
             'account_id': self.account_income.id,
-            'invoice_id': self.invoiceA.id,
+                }),
+            ]
         })
-        self.invoiceA.post()
+        invoice_lineA1 = invoiceA.invoice_line_ids[0]
+        invoiceA.post()
 
         # let's log some timesheets (on the project created by sale_order_line1)
         task_sol1 = sale_order_line.task_id
@@ -336,4 +367,4 @@ class TestReInvoice(TestCommonSaleTimesheetNoChart):
 
         self.assertEquals(len(self.sale_order.order_line), 1, "No SO line should have been created (or removed) when validating vendor bill")
         self.assertEquals(sale_order_line.qty_delivered, 1, "The delivered quantity of SO line should not have been incremented")
-        self.assertTrue(invoice_lineA1.invoice_id.move_id.mapped('line_ids.analytic_line_ids'), "Analytic lines should be generated")
+        self.assertTrue(invoice_lineA1.move_id.mapped('line_ids.analytic_line_ids'), "Analytic lines should be generated")

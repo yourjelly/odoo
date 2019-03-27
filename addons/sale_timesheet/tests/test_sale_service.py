@@ -168,8 +168,7 @@ class TestSaleService(TestCommonSaleTimesheetNoChart):
         self.assertEqual(task_serv2.timesheet_ids.mapped('so_line'), so_line_deliver_global_project, "Old timesheet are not modified when changing the task SO line")
 
         # invoice SO, and validate invoice
-        invoice_id = self.sale_order._create_invoices()[0]
-        invoice = self.env['account.invoice'].browse(invoice_id)
+        invoice = self.sale_order._create_invoices()[0]
         invoice.post()
 
         # try to update timesheets, catch error 'You cannot modify invoiced timesheet'
