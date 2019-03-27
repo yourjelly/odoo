@@ -200,7 +200,7 @@ class AccountMove(models.Model):
     # ==== Vendor bill fields ====
     invoice_vendor_bill_id = fields.Many2one('account.move', store=False, readonly=True,
         states={'draft': [('readonly', False)]},
-        string='Auto-complete',
+        string='Vendor Bill',
         help="Auto-complete from a past bill.")
     invoice_source_email = fields.Char(string='Source Email', tracking=True)
     invoice_vendor_display_name = fields.Char(compute='_compute_invoice_vendor_display_info', store=True)
@@ -230,109 +230,6 @@ class AccountMove(models.Model):
     # ONCHANGE METHODS
     # -------------------------------------------------------------------------
 
-    @api.multi
-    def _compute_move_lines(self, field_names):
-        ''' Compute changes to make in journal items.
-
-        :param field_name:  The fields triggering the changes. Its values could be (sorted by priority):
-        - partner_id
-        - fiscal_position_id
-        - invoice_date
-        - date
-        - currency_id
-        - invoice_line_ids
-        '''
-        self.ensure_one()
-
-        # TODO: avoid multiple recomputations
-
-        todo = list(field_names)
-        done = set()
-
-        while todo:
-            field_name = todo.pop(0)
-            if field_name in done:
-                continue
-
-            if field_name == 'partner_id':
-                # Perform changes implied by the partner.
-
-                # Recompute payment terms.
-                if self.type in ('out_invoice', 'out_refund', 'out_receipt'):
-                    self.invoice_payment_term_id = self.partner_id.property_payment_term_id
-                elif self.type in ('in_invoice', 'in_refund', 'in_receipt'):
-                    self.invoice_payment_term_id = self.partner_id.property_supplier_payment_term_id
-
-                # Recompute fiscal position.
-                if self.partner_id:
-                    delivery_partner_id = self._get_invoice_delivery_partner_id()
-                    new_fiscal_position_id = self.env['account.fiscal.position'].get_fiscal_position(
-                        self.partner_id.id, delivery_id=delivery_partner_id)
-                else:
-                    new_fiscal_position_id = False
-
-                if not new_fiscal_position_id:
-                    self.fiscal_position_id = new_fiscal_position_id
-                elif new_fiscal_position_id != self.fiscal_position_id.id:
-                    self.fiscal_position_id = self.env['account.fiscal.position'].browse(new_fiscal_position_id)
-                    todo.append('fiscal_position_id')
-
-            elif field_name == 'fiscal_position_id':
-                # Perform changes implied by a change in the fiscal position. Each account / taxes could be mapped.
-
-                for line in self.line_ids:
-                    line.account_id = self.fiscal_position_id.map_account(line.account_id)
-                    line.tax_ids = self.fiscal_position_id.map_tax(line.tax_ids)
-                    line.recompute_tax_line = True
-
-            elif field_name == 'invoice_date':
-                if self.date != self.invoice_date:
-                    self.date = self.invoice_date
-                    todo.append('date')
-
-            elif field_name == 'date':
-                if any(line.currency_id for line in self.line_ids):
-                    todo.append('currency_id')
-
-            elif field_name == 'currency_id':
-                company_currency = self.company_id.currency_id
-                has_foreign_currency = self.currency_id and self.currency_id != company_currency
-
-                for line in self.line_ids:
-                    line.currency_id = has_foreign_currency and self.currency_id
-                self.line_ids._onchange_price_subtotal()
-
-            elif field_name == 'invoice_line_ids':
-                self.line_ids = self.invoice_line_ids + self.invoice_others_line_ids
-
-
-
-    @api.multi
-    def _check_onchange_history(self, onchange_name, others=[]):
-        ''' Technical method used to synchronize onchange together.
-        The idea is to prevent calling the onchanges twice by marking them.
-
-        :param onchange_name:   The name of the onchange to check.
-        :param others:          Others onchanges to be marked
-        :return:                True if the onchange hasn't be already marked, False otherwise.
-        '''
-        self.ensure_one()
-
-        # Skip when called manually outside the form view to ensure the consistency of a newly created move.
-        if not self.env.in_onchange:
-            return True
-
-        log_msg = 'Checking onchange history of %s: %s'
-        res = True
-        if not hasattr(self, '_account_move_onchange_history'):
-            self._account_move_onchange_history = set([onchange_name] + others)
-        elif onchange_name in self._account_move_onchange_history:
-            res = False
-        else:
-            self._account_move_onchange_history.update(set([onchange_name] + others))
-        _logger.debug(log_msg % (onchange_name, res))
-        return res
-
     @api.model
     def _search_candidate_records(self, records, searched_values):
         ''' Helper to find matching record based on some values.
@@ -341,7 +238,7 @@ class AccountMove(models.Model):
         :param searched_values: A dictionary of values to match.
         :return:                A record in records or None.
         '''
-        for record in records:
+        for i, record in enumerate(records):
             match = True
             for field_name in searched_values.keys():
                 record_value = record[field_name]
@@ -383,33 +280,8 @@ class AccountMove(models.Model):
                     match = False
                     break
             if match:
-                return record
-        return None
-
-    @api.onchange('date')
-    def _onchange_date(self):
-        '''On the form view, a change on the date will trigger onchange() on account.move
-        but not on account.move.line even the date field is related to account.move.
-        Then, trigger the _inverse_amount_currency manually.
-        '''
-        self.line_ids._onchange_price_subtotal()
-
-    @api.onchange('type')
-    def _onchange_type(self):
-        ''' Onchange made to filter the partners depending of the type. '''
-        if self.type in ('out_invoice', 'out_refund', 'out_receipt'):
-            return {'domain': {'partner_id': [('customer', '=', True)]}}
-        elif self.type in ('in_invoice', 'in_refund', 'in_receipt'):
-            return {'domain': {'partner_id': [('supplier', '=', True)]}}
-
-    @api.onchange('company_id')
-    def _onchange_company_id(self):
-        if self.type in ('out_invoice', 'in_refund') and self.company_id.partner_id:
-            partner_bank_result = self.env['res.partner.bank'].search(
-                [('partner_id', '=', self.company_id.partner_id.id)], limit=1)
-            if partner_bank_result:
-                self.invoice_partner_bank_id = partner_bank_result
-            return {'domain': {'invoice_partner_bank_id': [('partner_id', '=', self.company_id.partner_id.id)]}}
+                return i, record
+        return -1, None
 
     @api.multi
     def _compute_diff_payment_terms_lines(self):
@@ -484,7 +356,7 @@ class AccountMove(models.Model):
                         'date_maturity': date_maturity,
                         'display_type': 'other',
                     }
-                    candidate = self._search_candidate_records(lines_to_remove, to_search)
+                    index, candidate = self._search_candidate_records(lines_to_remove, to_search)
                     if candidate:
                         # Update existing candidate.
                         candidate.amount_currency = amount_currency
@@ -521,49 +393,14 @@ class AccountMove(models.Model):
         self.invoice_date_due = max_date_maturity
 
     @api.multi
-    def _onchange_invoice_payment_term_id_hook(self, vals={}):
-        # Body of the '_onchange_invoice_payment_term_id' method allowing to override the behavior of the onchange
-        # without breaking the order on which the onchanges must be called.
-        self.ensure_one()
-
-        # Ensure an 'invoice_date' is set.
-        if not self.invoice_date:
-            self.invoice_date = fields.Date.context_today(self)
-
-        # Compute the payment terms but do nothing if the balance is zero.
-        self._compute_diff_payment_terms_lines()
-
-    @api.onchange('invoice_payment_term_id', 'invoice_date')
-    def _onchange_invoice_payment_term_id(self):
-        # DO NOT OVERRIDE THIS METHOD, do it in '_onchange_invoice_payment_term_id_hook' instead.
-        # This onchange must be always called at the end when all 'new' lines have been processed to:
-        # - Auto balance the invoices with the payment terms.
-        # - Ensure the consistency between the one2manys.
-        # /!\ '_check_onchange_history' prevents recomputing twice the full dynamic lines.
-        if not self._check_onchange_history('_onchange_invoice_payment_term_id', others=[
-            '_onchange_line_ids',
-            '_onchange_invoice_date_due',
-            '_onchange_invoice_line_ids']):
-            return
-
-        self._onchange_invoice_payment_term_id_hook()
-
-        # Recompute business fields.
-        if self.currency_id and self.currency_id != self.company_id.currency_id:
-            self.line_ids._inverse_amount_currency()
-        else:
-            self.line_ids._inverse_balance()
-
-        # HACK one2many part 2: line_ids has been updated dynamically.
-        self.invoice_line_ids = self.line_ids.filtered(lambda line: line._is_invoice_line())
-        self.invoice_others_line_ids = self.line_ids.filtered(lambda line: not line._is_invoice_line())
-
-    @api.multi
     def _compute_diff_cash_rounding(self):
         ''' Recompute the cash rounding on the current move.
         The computation is done only in cache and could add some 'new' lines.
         '''
         self.ensure_one()
+
+        if self.type not in ('out_invoice', 'out_refund'):
+            return
 
         lines_to_remove = self.line_ids.filtered(lambda line: line._is_invoice_cash_rounding_line())
         self.line_ids -= lines_to_remove
@@ -625,30 +462,6 @@ class AccountMove(models.Model):
             })
 
     @api.multi
-    def _onchange_cash_rounding_id_hook(self, vals={}):
-        # Body of the '_onchange_cash_rounding_id' method allowing to override the behavior of the onchange without
-        # breaking the order on which the onchanges must be called.
-        self.ensure_one()
-
-        # Cash rounding only works for customer invoices.
-        if self.type in ('out_invoice', 'out_refund'):
-            self._compute_diff_cash_rounding()
-
-    @api.onchange('invoice_cash_rounding_id')
-    def _onchange_cash_rounding_id(self):
-        # DO NOT OVERRIDE THIS METHOD, do it in '_onchange_cash_rounding_id_hook' instead.
-        # This onchange must be always called right before the payment terms to ensure the total amount of the invoice
-        # is well rounded to the smallest coinage.
-        # /!\ '_check_onchange_history' prevents recomputing twice the full dynamic lines.
-        if not self._check_onchange_history('_onchange_cash_rounding_id', others=['_onchange_line_ids']):
-            return
-
-        self._onchange_cash_rounding_id_hook()
-
-        # Trigger manually '_onchange_invoice_payment_term_id'.
-        self._onchange_invoice_payment_term_id()
-
-    @api.multi
     def _compute_diff_taxes_lines(self):
         ''' Recompute the tax lines on the current move.
         The computation is done only in cache and could add some 'new' lines.
@@ -691,12 +504,12 @@ class AccountMove(models.Model):
                     'display_type': 'other',
                 }
 
-                candidate = self._search_candidate_records(lines_to_remove, to_search)
+                index, candidate = self._search_candidate_records(lines_to_remove, to_search)
                 if candidate:
                     lines_to_keep += candidate
                     lines_to_remove -= candidate
                 if not candidate:
-                    candidate = self._search_candidate_records(lines_to_keep, to_search)
+                    index, candidate = self._search_candidate_records(lines_to_keep, to_search)
 
                 if candidate:
                     # Update existing candidate.
@@ -734,11 +547,86 @@ class AccountMove(models.Model):
         self.line_ids -= lines_to_remove
 
     @api.multi
-    def _onchange_line_ids_hook(self, vals={}):
-        # Body of the '_onchange_line_ids' method allowing to override the behavior of the onchange without breaking
-        # the order on which the onchanges must be called.
+    def _compute_move_lines(self, field_names=[]):
+        ''' Compute changes to make in journal items.
+
+        :param field_name:  The fields triggering the changes. Its values could be (sorted by priority):
+        - invoice_line_ids
+        - partner_id
+        - fiscal_position_id
+        - invoice_date
+        - date
+        - currency_id
+        '''
         self.ensure_one()
 
+        todo = list(field_names)
+        done = set()
+
+        while todo:
+            field_name = todo.pop(0)
+            if field_name in done:
+                continue
+
+            if field_name == 'invoice_line_ids':
+                self.line_ids = self.invoice_line_ids + self.invoice_others_line_ids
+
+                # Mark manually both 'invoice_line_ids' & 'invoice_tax_line_ids' in case
+                # of the deletion of the last invoice line, you need to remove the tax lines as well. E.g:
+                # - Add an invoice line having a tax.
+                # - Remove the invoice line.
+                for line in self.line_ids:
+                    line.recompute_tax_line = True
+
+            elif field_name == 'partner_id':
+                # Perform changes implied by the partner.
+
+                # Recompute payment terms.
+                if self.type in ('out_invoice', 'out_refund', 'out_receipt'):
+                    self.invoice_payment_term_id = self.partner_id.property_payment_term_id
+                elif self.type in ('in_invoice', 'in_refund', 'in_receipt'):
+                    self.invoice_payment_term_id = self.partner_id.property_supplier_payment_term_id
+
+                # Recompute fiscal position.
+                if self.partner_id:
+                    delivery_partner_id = self._get_invoice_delivery_partner_id()
+                    new_fiscal_position_id = self.env['account.fiscal.position'].get_fiscal_position(
+                        self.partner_id.id, delivery_id=delivery_partner_id)
+                else:
+                    new_fiscal_position_id = False
+
+                if not new_fiscal_position_id:
+                    self.fiscal_position_id = new_fiscal_position_id
+                elif new_fiscal_position_id != self.fiscal_position_id.id:
+                    self.fiscal_position_id = self.env['account.fiscal.position'].browse(new_fiscal_position_id)
+                    todo.append('fiscal_position_id')
+
+            elif field_name == 'fiscal_position_id':
+                # Perform changes implied by a change in the fiscal position. Each account / taxes could be mapped.
+
+                for line in self.line_ids:
+                    line.account_id = self.fiscal_position_id.map_account(line.account_id)
+                    line.tax_ids = self.fiscal_position_id.map_tax(line.tax_ids)
+                    line.recompute_tax_line = True
+
+            elif field_name == 'invoice_date':
+                if self.date != self.invoice_date:
+                    self.date = self.invoice_date
+                    todo.append('date')
+
+            elif field_name == 'date':
+                if any(line.currency_id for line in self.line_ids):
+                    todo.append('currency_id')
+
+            elif field_name == 'currency_id':
+                company_currency = self.company_id.currency_id
+                has_foreign_currency = self.currency_id and self.currency_id != company_currency
+
+                for line in self.line_ids:
+                    line.currency_id = has_foreign_currency and self.currency_id
+                self.line_ids._onchange_price_subtotal()
+
+        # Recompute taxes.
         # When the user modifies a tax line, the 'recompute_tax_line' is not set. It allows him to manually change
         # the taxes lines without triggering the recompute.
         marked_lines = self.line_ids.filtered(lambda line: line.recompute_tax_line)
@@ -750,132 +638,67 @@ class AccountMove(models.Model):
             # Recompute taxes lines.
             self._compute_diff_taxes_lines()
 
-    @api.onchange('line_ids')
-    def _onchange_line_ids(self):
-        # DO NOT OVERRIDE THIS METHOD, do it in '_onchange_line_ids_hook' instead.
-        # This onchange is triggered after any changes on the journal items and is called right before the cash
-        # rounding.
-        # /!\ '_check_onchange_history' prevents recomputing twice the full dynamic lines.
-        if not self._check_onchange_history('_onchange_line_ids'):
-            return
+        # Recompute cash rounding.
+        self._compute_diff_cash_rounding()
 
-        self._onchange_line_ids_hook()
+        # Recompute payment terms.
+        if not self.invoice_date:
+            self.invoice_date = fields.Date.context_today(self)
+        self._compute_diff_payment_terms_lines()
 
-        # Trigger manually '_onchange_invoice_payment_term_id'.
-        self._onchange_cash_rounding_id()
-
-    @api.multi
-    def _onchange_partner_id_hook(self, vals={}):
-        self.ensure_one()
-
-        # Recompute 'partner_id' on lines.
-        for line in self.line_ids:
-            line.partner_id = self.commercial_partner_id
-
-        # Recompute 'invoice_payment_term_id'.
-        if 'invoice_payment_term_id' not in vals and 'invoice_date_due' not in vals:
-            if self.type in ('out_invoice', 'out_refund'):
-                # Out invoice.
-                self.invoice_payment_term_id = self.partner_id.property_payment_term_id
-            elif self.type in ('in_invoice', 'in_refund'):
-                # In invoice.
-                self.invoice_payment_term_id = self.partner_id.property_supplier_payment_term_id
-
-        # Recompute 'fiscal_position_id'.
-        if 'fiscal_position_id' not in vals:
-            # Retrieve the fiscal position from the partner.
-            if self.partner_id:
-                delivery_partner_id = self._get_invoice_delivery_partner_id()
-                new_fiscal_position = self.env['account.fiscal.position'].get_fiscal_position(
-                    self.partner_id.id, delivery_id=delivery_partner_id)
-                if self.fiscal_position_id.id == new_fiscal_position:
-                    # Don't recompute the fiscal position as the new one is the same as before.
-                    new_fiscal_position = False
-            else:
-                new_fiscal_position = False
+        # Recompute business fields.
+        if self.currency_id and self.currency_id != self.company_id.currency_id:
+            self.line_ids._inverse_amount_currency()
         else:
-            # Keep the current fiscal position but apply it.
-            new_fiscal_position = self.fiscal_position_id
+            self.line_ids._inverse_balance()
 
-        # Apply the new 'fiscal_position_id'.
-        if new_fiscal_position:
-            self.fiscal_position_id = new_fiscal_position
-            for line in self.line_ids.filtered(lambda line: line._is_invoice_line()):
-                line.account_id = self.fiscal_position_id.map_account(line.account_id)
-                line.tax_ids = self.fiscal_position_id.map_tax(line.tax_ids)
-                line._onchange_mark_recompute_taxes()
+        # HACK synchronizing the one2manys all together.
+        self.invoice_line_ids = self.line_ids.filtered(lambda line: line._is_invoice_line())
+        self.invoice_others_line_ids = self.line_ids.filtered(lambda line: not line._is_invoice_line())
 
-        # Recompute 'invoice_partner_bank_id'.
-        if 'invoice_partner_bank_id' not in vals and self.type in ('in_invoice', 'out_refund'):
-            bank_ids = self.commercial_partner_id.bank_ids
-            self.invoice_partner_bank_id = bank_ids and bank_ids[0] or False
+    @api.onchange('line_ids', 'invoice_cash_rounding_id', 'invoice_payment_term_id')
+    def _onchange_recompute_move_lines(self):
+        self._compute_move_lines()
+
+    @api.onchange('invoice_line_ids')
+    def _onchange_invoice_line_ids(self):
+        self._compute_move_lines(field_names=['invoice_line_ids'])
 
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
-        # DO NOT OVERRIDE THIS METHOD, do it in '_onchange_partner_id_hook' instead.
-        # A change of the partner could:
-        # Change the fiscal position -> _onchange_line_ids -> _onchange_cash_rounding_id -> _onchange_invoice_payment_term_id
-        # OR
-        # Change the payment terms -> _onchange_invoice_payment_term_id
-        if not self._check_onchange_history('_onchange_partner_id'):
-            return
-        old_fiscal_position = self.fiscal_position_id
+        self._compute_move_lines(field_names=['partner_id'])
 
-        # Clean up payment terms lines to force the recomputing of the receivable / payable.
-        self.line_ids -= self.line_ids.filtered(lambda line: line._is_invoice_payment_term_line())
-
-        self._onchange_partner_id_hook()
-
-        res = {}
         if self.invoice_partner_bank_id:
-            res['domain'] = {'partner_bank_id': [('id', 'in', self.commercial_partner_id.bank_ids.ids)]}
+            return {'domain': {'partner_bank_id': [('id', 'in', self.commercial_partner_id.bank_ids.ids)]}}
 
-        if self.fiscal_position_id and self.fiscal_position_id != old_fiscal_position:
-            self._onchange_line_ids()
-        else:
-            self._onchange_invoice_payment_term_id()
-        return res
-
-    @api.onchange('currency_id')
-    def _onchange_currency_id(self):
-        if not self._check_onchange_history('_onchange_currency_id'):
-            return
-
-        company_currency = self.company_id.currency_id
-        has_foreign_currency = self.currency_id and self.currency_id != company_currency
-
-        for line in self.line_ids:
-            line.currency_id = has_foreign_currency and self.currency_id
-        self.line_ids._onchange_price_subtotal()
+    @api.onchange('invoice_date')
+    def _onchange_invoice_date(self):
+        self._compute_move_lines(field_names=['invoice_date'])
 
     @api.onchange('invoice_date_due')
     def _onchange_invoice_date_due(self):
-        # /!\ '_check_onchange_history' prevents triggering '_onchange_line_ids' that is not necessary when only
-        # the due date has changed.
-        if not self._check_onchange_history('_onchange_invoice_date_due', others=['_onchange_line_ids']):
-            return
-
-        # Recompute 'date_maturity'.
         for line in self.line_ids:
             line.date_maturity = self.invoice_date_due
 
+    @api.onchange('date')
+    def _onchange_date(self):
+        self._compute_move_lines(field_names=['date'])
+
+    @api.onchange('currency_id')
+    def _onchange_currency_id(self):
+        self._compute_move_lines(field_names=['currency_id'])
+
     @api.onchange('invoice_payment_ref')
     def _onchange_invoice_payment_ref(self):
-        # /!\ '_check_onchange_history' prevents triggering '_onchange_line_ids' that is not necessary when only
-        # the label on lines has changed.
-        if not self._check_onchange_history('_onchange_invoice_payment_ref', others=['_onchange_line_ids']):
-            return
-
-        # Recompute 'name' on payment term lines.
         for line in self.line_ids.filtered(lambda line: line._is_invoice_payment_term_line()):
             line.name = self.invoice_payment_ref or '/'
 
-    @api.multi
-    def _compute_diff_old_vendor_bill(self):
-        self.ensure_one()
-
+    @api.onchange('invoice_vendor_bill_id')
+    def _onchange_invoice_vendor_bill_id(self):
         if not self.invoice_vendor_bill_id:
             return
+
+        field_names = []
 
         # Copy invoice lines.
         for line in self.invoice_vendor_bill_id.line_ids.filtered(lambda line: line._is_invoice_line()):
@@ -888,54 +711,29 @@ class AccountMove(models.Model):
         # Copy currency.
         if self.currency_id != self.invoice_vendor_bill_id.currency_id:
             self.currency_id = self.invoice_vendor_bill_id.currency_id
-
-            # We must trigger '_onchange_currency_id' as the recomputation of taxes
-            # group by taxes depending of the currency set of the tax lines. E.g:
-            # - Ensure your invoice uses the USD currency with some taxes lines.
-            # - Pull invoice lines from a vendor bill having a different currency and using the same taxes.
-            # => Taxes must be added to existing lines.
-            self._onchange_currency_id()
+            field_names.append('currency_id')
 
         # Reset
         self.invoice_vendor_bill_id = False
 
-    @api.multi
-    def _onchange_invoice_line_ids_hook(self, vals={}):
-        self.ensure_one()
+        self._compute_move_lines(field_names=field_names)
 
-        self._compute_diff_old_vendor_bill()
+    @api.onchange('type')
+    def _onchange_type(self):
+        ''' Onchange made to filter the partners depending of the type. '''
+        if self.type in ('out_invoice', 'out_refund', 'out_receipt'):
+            return {'domain': {'partner_id': [('customer', '=', True)]}}
+        elif self.type in ('in_invoice', 'in_refund', 'in_receipt'):
+            return {'domain': {'partner_id': [('supplier', '=', True)]}}
 
-    @api.onchange('invoice_line_ids', 'invoice_vendor_bill_id')
-    def _onchange_invoice_line_ids(self):
-        # DO NOT OVERRIDE THIS METHOD, do it in '_onchange_invoice_line_ids_hook' instead.
-        # This method calls directly the '_onchange_line_ids' method.
-        # /!\ '_check_onchange_history' prevents recomputing twice the full dynamic lines.
-        if not self._check_onchange_history('_onchange_invoice_line_ids'):
-            return
-
-        # HACK one2many part 1: Update line_ids based on invoice_line_ids/invoice_tax_line_ids.
-        # The lines used to auto balance the move are skipped and recomputed on _onchange_invoice_payment_term_id.
-        self.line_ids = self.invoice_line_ids + self.invoice_others_line_ids
-
-        self._onchange_invoice_line_ids_hook()
-
-        # Mark manually both 'invoice_line_ids' & 'invoice_tax_line_ids' in case
-        # of the deletion of the last invoice line, you need to remove the tax lines as well. E.g:
-        # - Add an invoice line having a tax.
-        # - Remove the invoice line.
-        # => Tax line must be removed.
-        for line in self.line_ids:
-            line.recompute_tax_line = True
-
-        # Call '_onchange_line_ids' manually as we don't know in which order the
-        # onchange would be triggered.
-        self._onchange_line_ids()
-
-    @api.onchange('invoice_date')
-    def _onchange_invoice_date(self):
-        self.date = self.invoice_date
-        if not self.invoice_date_due:
-            self.invoice_date_due = self.invoice_date
+    @api.onchange('company_id')
+    def _onchange_company_id(self):
+        if self.type in ('out_invoice', 'in_refund') and self.company_id.partner_id:
+            partner_bank_result = self.env['res.partner.bank'].search(
+                [('partner_id', '=', self.company_id.partner_id.id)], limit=1)
+            if partner_bank_result:
+                self.invoice_partner_bank_id = partner_bank_result
+            return {'domain': {'invoice_partner_bank_id': [('partner_id', '=', self.company_id.partner_id.id)]}}
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
@@ -1003,6 +801,7 @@ class AccountMove(models.Model):
                 move.amount_untaxed = move.amount_total - move.amount_tax
                 residual_field = 'amount_residual'
                 move.residual = abs(sum(move.line_ids.mapped(residual_field)))
+                is_paid = move.company_id.currency_id.is_zero(move.residual)
             else:
                 # Invoice.
                 # /!\ Don't use payment terms lines because the partner account could not be set.
@@ -1011,9 +810,10 @@ class AccountMove(models.Model):
                 move.amount_total = move.amount_untaxed + move.amount_tax
                 residual_field = 'amount_residual' if move.currency_id == move.company_id.currency_id else 'amount_residual_currency'
                 move.residual = abs(sum(move.line_ids.filtered(lambda line: line._is_invoice_payment_term_line()).mapped(residual_field)))
+                is_paid = move.currency_id.is_zero(move.residual)
 
             # Compute 'invoice_payment_state'.
-            if move.state == 'posted' and move.currency_id.is_zero(move.residual):
+            if move.state == 'posted' and is_paid:
                 if move.journal_id.post_at_bank_rec:
                     move.invoice_payment_state = 'in_payment'
                 else:
@@ -1337,7 +1137,7 @@ class AccountMove(models.Model):
         for vals in vals_list:
             new_values = self._add_missing_default_values(vals)
 
-            if new_values.get('type') not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'):
+            if new_values.get('type') not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'):
                 new_vals_list.append(vals)
                 continue
 
@@ -1345,8 +1145,10 @@ class AccountMove(models.Model):
                 move = self.new(new_values)
 
                 for line, line_vals in zip(move.line_ids, vals.get('line_ids', [])):
+                    # Do something only on invoice lines.
                     if not line._is_invoice_line() or line.display_type in ('line_section', 'line_note'):
                         continue
+
                     if 'name' not in line_vals[2]:
                         line.name = line._get_computed_name()
                     if 'account_id' not in line_vals[2]:
@@ -1378,10 +1180,18 @@ class AccountMove(models.Model):
                     new_vals_list.append(vals)
                     continue
 
-                move._onchange_partner_id_hook(vals)
-                move._onchange_line_ids_hook(vals)
-                move._onchange_cash_rounding_id_hook(vals)
-                move._onchange_invoice_payment_term_id_hook(vals)
+                field_names = []
+                if 'invoice_line_ids' in vals and not 'line_ids' in vals:
+                    field_names.append('invoice_line_ids')
+                if 'partner_id' in vals and not 'invoice_payment_term_id' in vals and not 'fiscal_position_id' in vals:
+                    field_names.append('partner_id')
+                if 'fiscal_position_id' in vals:
+                    field_names.append('fiscal_position_id')
+                if 'invoice_date' in vals and not 'date' in vals:
+                    field_names.append('invoice_date')
+                if 'currency_id' in vals:
+                    field_names.append('currency_id')
+                move._compute_move_lines(field_names=field_names)
 
             values = {name: move[name] for name in move._cache}
             values = move._convert_to_write(values)
@@ -1442,6 +1252,19 @@ class AccountMove(models.Model):
         not_paid_invoices.filtered(lambda move: move.invoice_payment_state in ('paid', 'in_payment')).action_invoice_paid()
 
         return res
+
+    @api.model
+    def default_get(self, default_fields):
+        # OVERRIDE
+        values = super(AccountMove, self).default_get(default_fields)
+
+        if values.get('type') and 'journal_id' in default_fields and not values.get('journal_id'):
+            values['journal_id'] = self._get_default_journal(values['type']).id
+        if values.get('journal_id') and 'currency_id' in default_fields and not values.get('currency_id'):
+            journal = self.env['account.journal'].browse(values['journal_id'])
+            values['currency_id'] = self._get_default_currency(journal).id
+
+        return values
 
     @api.multi
     def unlink(self):
@@ -2119,7 +1942,6 @@ class AccountMoveLine(models.Model):
         else:
             return False
 
-
     # -------------------------------------------------------------------------
     # ONCHANGE METHODS
     # -------------------------------------------------------------------------
@@ -2160,7 +1982,7 @@ class AccountMoveLine(models.Model):
         self.tax_ids = self._get_computed_taxes()
 
     @api.model
-    def _convert_price_subtotal(self, price_subtotal, move_type, currency, company, date):
+    def _compute_balance_from_price_subtotal(self, price_subtotal, move_type, currency, company, date):
         if move_type in ('out_refund', 'in_invoice', 'in_receipt'):
             sign = 1
         elif move_type in ('in_refund', 'out_invoice', 'out_receipt'):
@@ -2191,7 +2013,13 @@ class AccountMoveLine(models.Model):
     def _onchange_price_subtotal(self):
         ''' Recompute 'amount_currency' OR 'debit' / 'credit' based on the 'price_subtotal'. '''
         for line in self:
-            line.update(line._convert_price_subtotal(line.price_subtotal, line.move_id.type, line.currency_id, line.move_id.company_id, line.date))
+            line.update(line._compute_balance_from_price_subtotal(
+                line.price_subtotal,
+                line.move_id.type,
+                line.currency_id,
+                line.move_id.company_id,
+                line.date)
+            )
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
@@ -2479,12 +2307,6 @@ class AccountMoveLine(models.Model):
     def default_get(self, default_fields):
         # OVERRIDE
         values = super(AccountMoveLine, self).default_get(default_fields)
-
-        if values.get('type') and 'journal_id' in default_fields and not values.get('journal_id'):
-            values['journal_id'] = self._get_default_journal(values['type']).id
-        if values.get('journal_id') and 'currency_id' in default_fields and not values.get('currency_id'):
-            journal = self.env['account.journal'].browse(values['journal_id'])
-            values['currency_id'] = self._get_default_currency(journal).id
 
         if 'account_id' in default_fields \
             and self._context.get('journal_id') \

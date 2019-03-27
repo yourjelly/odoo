@@ -398,9 +398,6 @@ class PurchaseOrder(models.Model):
         result['context'] = {
             'type': 'in_invoice',
             'default_purchase_id': self.id,
-            'default_currency_id': self.currency_id.id,
-            'default_company_id': self.company_id.id,
-            'company_id': self.company_id.id
         }
         # choose the view_mode accordingly
         if len(self.invoice_ids) > 1 and not create_bill:

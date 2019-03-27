@@ -96,7 +96,7 @@ class AccountMove(models.Model):
                     'analytic_tag_ids': [(6, 0, line.analytic_tag_ids.ids)],
                     'display_type': 'cogs',
                 }
-                vals.update(line._convert_price_subtotal(
+                vals.update(line._compute_balance_from_price_subtotal(
                     vals['price_subtotal'], move.type, line.currency_id, line.company_id, line.date))
                 lines_vals_list.append(vals)
 
@@ -114,7 +114,7 @@ class AccountMove(models.Model):
                     'analytic_tag_ids': [(6, 0, line.analytic_tag_ids.ids)],
                     'display_type': 'cogs',
                 }
-                vals.update(line._convert_price_subtotal(
+                vals.update(line._compute_balance_from_price_subtotal(
                     vals['price_subtotal'], move.type, line.currency_id, line.company_id, line.date))
                 lines_vals_list.append(vals)
         return lines_vals_list

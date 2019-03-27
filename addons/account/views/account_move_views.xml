@@ -438,7 +438,7 @@
                                 <field name="ref"/>
                                 <field name="invoice_vendor_bill_id"
                                        attrs="{'invisible': ['|', ('state', '!=', 'draft'), ('type', '!=', 'in_invoice')]}"
-                                       domain="[('company_id', '=', company_id), ('partner_id','child_of', [partner_id]), ('state', '=', 'posted'), ('type','=','in_invoice')]"
+                                       domain="[('company_id', '=', company_id), ('partner_id','child_of', [partner_id]), ('type','=','in_invoice')]"
                                        string="Auto-Complete" placeholder="Select an old vendor bill"
                                        options="{'no_create': True}" context="{'show_total_amount': True}"/>
                             </group>
@@ -549,7 +549,7 @@
                                         <field name="tax_line_id" invisible="1"/>
                                         <field name="company_id" invisible="1"/>
                                         <field name="company_currency_id" invisible="1"/>
-                                        <field name="recompute_tax_line" invisible="1"/>
+                                        <field name="recompute_tax_line" invisible="1" force_save="1"/>
                                         <field name="display_type" invisible="1"/>
                                     </tree>
                                 </field>
@@ -614,7 +614,7 @@
                                         <field name="tax_line_id" invisible="1"/>
                                         <field name="company_id" invisible="1"/>
                                         <field name="company_currency_id" invisible="1"/>
-                                        <field name="recompute_tax_line" invisible="1"/>
+                                        <field name="recompute_tax_line" invisible="1" force_save="1"/>
                                         <field name="display_type" invisible="1"/>
                                     </tree>
                                 </field>
@@ -649,6 +649,11 @@
                             </page>
                         </notebook>
                     </sheet>
+                    <!-- Attachment preview -->
+                    <div class="o_attachment_preview"
+                         attrs="{'invisible': ['|', '|',
+                                ('type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund')),
+                                ('state', '!=', 'draft')]}" />
                     <!-- Chatter -->
                     <div class="oe_chatter">
                         <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>

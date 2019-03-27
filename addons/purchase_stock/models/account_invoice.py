@@ -114,25 +114,43 @@ class AccountMove(models.Model):
                         # valuation difference, it means this difference is due to exchange rates,
                         # so we don't create anything, the exchange rate entries will
                         # be processed automatically by the rest of the code.
+                        price_unit_val_dif = move.currency_id.round(price_unit_val_dif)
 
-                        # Price difference journal item.
-                        default_values = {
+                        # Add price difference account line.
+                        vals = {
+                            'name': line.name[:64],
+                            'move_id': move.id,
+                            'product_id': line.product_id.id,
+                            'product_uom_id': line.product_uom_id.id,
+                            'quantity': line.quantity,
+                            'price_unit': price_unit_val_dif,
+                            'price_subtotal': line.quantity * price_unit_val_dif,
                             'account_id': debit_pdiff_account.id,
-                            'quantity': line.quantity,
-                            'price_unit': move.currency_id.round(price_unit_val_dif),
+                            'analytic_account_id': line.analytic_account_id.id,
+                            'analytic_tag_ids': [(6, 0, line.analytic_tag_ids.ids)],
+                            'display_type': 'cogs',
                         }
-                        default_values.update(line._convert_price_subtotal(
-                            default_values['quantity'] * default_values['price_unit'], move.type, line.currency_id, line.company_id, line.date))
-                        lines_vals_list.append(line.copy_data(default=default_values))
+                        vals.update(line._compute_balance_from_price_subtotal(
+                            vals['price_subtotal'], move.type, line.currency_id, line.company_id, line.date))
+                        lines_vals_list.append(vals)
 
-                        # Correction of the current journal item.
-                        default_values = {
+                        # Correct the amount of the current line.
+                        vals = {
+                            'name': line.name[:64],
+                            'move_id': move.id,
+                            'product_id': line.product_id.id,
+                            'product_uom_id': line.product_uom_id.id,
                             'quantity': line.quantity,
-                            'price_unit': -default_values['price_unit'],
+                            'price_unit': -price_unit_val_dif,
+                            'price_subtotal': line.quantity * -price_unit_val_dif,
+                            'account_id': line.account_id.id,
+                            'analytic_account_id': line.analytic_account_id.id,
+                            'analytic_tag_ids': [(6, 0, line.analytic_tag_ids.ids)],
+                            'display_type': 'cogs',
                         }
-                        default_values.update(line._convert_price_subtotal(
-                            default_values['quantity'] * default_values['price_unit'], move.type, line.currency_id, line.company_id, line.date))
-                        lines_vals_list.append(line.copy_data(default=default_values))
+                        vals.update(line._compute_balance_from_price_subtotal(
+                            vals['price_subtotal'], move.type, line.currency_id, line.company_id, line.date))
+                        lines_vals_list.append(vals)
 
             return lines_vals_list
 

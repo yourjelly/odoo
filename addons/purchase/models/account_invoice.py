@@ -14,7 +14,7 @@ class AccountMove(models.Model):
         help="Auto-complete from a past bill / purchase order.")
     purchase_id = fields.Many2one('purchase.order', store=False, readonly=True,
         states={'draft': [('readonly', False)]},
-        string='Auto-complete',
+        string='Purchase Order',
         help="Auto-complete from a past purchase order.")
 
     @api.onchange('purchase_id')
@@ -24,12 +24,12 @@ class AccountMove(models.Model):
         if not self.purchase_id:
             return
 
-        self._check_onchange_history('_compute_diff_old_purchase_order',
-                                     others=['_onchange_invoice_line_ids', '_onchange_partner_id'])
-
         # Copy partner.
         self.partner_id = self.purchase_id.partner_id
-        self._onchange_partner_id_hook() # Don't trigger the full recomputation.
+        self.fiscal_position_id = self.purchase_id.fiscal_position_id
+        self.invoice_payment_term_id = self.purchase_id.payment_term_id
+        self.currency_id = self.purchase_id.currency_id
+        field_names = ['fiscal_position_id', 'currency_id']
 
         # Copy purchase lines.
         po_lines = self.purchase_id.order_line - self.line_ids.mapped('purchase_line_id')
@@ -40,20 +40,6 @@ class AccountMove(models.Model):
             new_lines += new_line
         new_lines._onchange_price_subtotal()
         new_lines._onchange_mark_recompute_taxes()
-
-        # Copy payment terms.
-        self.invoice_payment_term_id = self.purchase_id.payment_term_id
-
-        # Copy currency.
-        if self.currency_id != self.purchase_id.currency_id:
-            self.currency_id = self.purchase_id.currency_id
-
-            # We must trigger '_onchange_currency_id' as the recomputation of taxes
-            # group by taxes depending of the currency set of the tax lines. E.g:
-            # - Ensure your invoice uses the USD currency with some taxes lines.
-            # - Pull invoice lines from a vendor bill having a different currency and using the same taxes.
-            # => Taxes must be added to existing lines.
-            self._onchange_currency_id()
 
         # Compute invoice_origin.
         origins = set(self.line_ids.mapped('purchase_line_id.order_id.name'))
@@ -68,12 +54,9 @@ class AccountMove(models.Model):
         if len(refs) == 1:
             self._invoice_payment_ref = refs[0]
 
-        # Recompute all.
-        self._account_move_onchange_history.remove('_onchange_line_ids')
-        self._account_move_onchange_history.remove('_onchange_invoice_payment_term_id')
-        self._onchange_line_ids()
-
         self.purchase_id = False
+
+        self._compute_move_lines(field_names=field_names)
 
     @api.onchange('purchase_vendor_bill_id')
     def _onchange_purchase_vendor_bill_id(self):
