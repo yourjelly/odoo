@@ -431,6 +431,36 @@ QUnit.module('Views', {
         list.destroy();
     });
 
+    QUnit.test('basic grouped list rendering 7 cols with aggregates and selector', async function (assert) {
+        assert.expect(4);
+
+        var list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree>' +
+                    '<field name="datetime"/>' +
+                    '<field name="foo"/>' +
+                    '<field name="int_field" sum="Sum1"/>' +
+                    '<field name="bar"/>' +
+                    '<field name="qux" sum="Sum2"/>' +
+                    '<field name="date"/>' +
+                    '<field name="text"/>' +
+                '</tree>',
+            groupBy: ['bar'],
+        });
+
+        assert.strictEqual(list.$('.o_group_header:first').children().length, 5,
+            "group header should have exactly 5 columns (one before first aggregate, one after last aggregate, and all in between");
+        assert.strictEqual(list.$('.o_group_header:first th').attr('colspan'), "3",
+            "header name should span on the two first fields + selector (colspan 3)");
+        assert.containsN(list, '.o_group_header:first td', 3,
+            "there should be 3 tds (aggregates + fields in between)");
+        assert.strictEqual(list.$('.o_group_header:first th:last').attr('colspan'), "2",
+            "header last cell should span on the two last fields (to give space for the pager) (colspan 2)");
+        list.destroy();
+    });
+
     QUnit.test('ordered list, sort attribute in context', async function (assert) {
         assert.expect(1);
         // Equivalent to saving a custom filter
