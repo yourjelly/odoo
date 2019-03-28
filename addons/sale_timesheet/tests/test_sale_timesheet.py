@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+from odoo.tests import tagged, Form
 from odoo.tools import float_is_zero
 from odoo.exceptions import UserError
 
 from odoo.addons.sale_timesheet.tests.common import TestCommonSaleTimesheetNoChart
 
 
+@tagged('-standard', '-at_install', 'migration', 'post_install')
 class TestSaleTimesheet(TestCommonSaleTimesheetNoChart):
     """ This test suite provide tests for the 3 main flows of selling services:
             - Selling services based on ordered quantities
@@ -31,33 +34,34 @@ class TestSaleTimesheet(TestCommonSaleTimesheetNoChart):
                 5. create new invoice
         """
         # create SO and confirm it
-        sale_order = self.env['sale.order'].create({
-            'partner_id': self.partner_customer_usd.id,
-            'partner_invoice_id': self.partner_customer_usd.id,
-            'partner_shipping_id': self.partner_customer_usd.id,
-            'pricelist_id': self.pricelist_usd.id,
-        })
-        so_line_ordered_project_only = self.env['sale.order.line'].create({
-            'name': self.product_order_timesheet4.name,
-            'product_id': self.product_order_timesheet4.id,
-            'product_uom_qty': 10,
-            'product_uom': self.product_order_timesheet4.uom_id.id,
-            'price_unit': self.product_order_timesheet4.list_price,
-            'order_id': sale_order.id,
-        })
-        so_line_ordered_global_project = self.env['sale.order.line'].create({
-            'name': self.product_order_timesheet2.name,
-            'product_id': self.product_order_timesheet2.id,
-            'product_uom_qty': 50,
-            'product_uom': self.product_order_timesheet2.uom_id.id,
-            'price_unit': self.product_order_timesheet2.list_price,
-            'order_id': sale_order.id,
-        })
-        so_line_ordered_project_only.product_id_change()
-        so_line_ordered_global_project.product_id_change()
+        order = Form(self.env['sale.order'])
+        order.partner_id = self.partner_customer_usd
+        order.partner_invoice_id = self.partner_customer_usd
+        order.partner_shipping_id = self.partner_customer_usd
+        order.pricelist_id = self.pricelist_usd
+        with order.order_line.new() as line:
+            line.name = self.product_order_timesheet4.name
+            line.product_id = self.product_order_timesheet4
+            line.product_uom_qty = 10
+            line.product_uom = self.product_order_timesheet4.uom_id
+            line.price_unit = self.product_order_timesheet4.list_price
+        with order.order_line.new() as line:
+            line.name = self.product_order_timesheet2.name
+            line.product_id = self.product_order_timesheet2
+            line.product_uom_qty = 50
+            line.product_uom = self.product_order_timesheet2.uom_id
+            line.price_unit = self.product_order_timesheet2.list_price
+
+        sale_order = order.save()
+
+        # sale order confirm
         sale_order.action_confirm()
-        task_serv2 = self.env['project.task'].search([('sale_line_id', '=', so_line_ordered_global_project.id)])
-        project_serv1 = self.env['project.project'].search([('sale_line_id', '=', so_line_ordered_project_only.id)])
+
+        task_serv2 = self.env['project.task'].search([('sale_line_id.product_id', '=', self.product_order_timesheet2.id)])
+        project_serv1 = self.env['project.project'].search([('sale_line_id.product_id', '=', self.product_order_timesheet4.id)])
+
+        so_line_ordered_global_project = task_serv2.sale_line_id
+        so_line_ordered_project_only = project_serv1.sale_line_id
 
         self.assertEqual(sale_order.tasks_count, 1, "One task should have been created on SO confirmation")
         self.assertEqual(len(sale_order.project_ids), 2, "One project should have been created by the SO, when confirmed + the one from SO line 2 'task in global project'")
@@ -114,17 +118,19 @@ class TestSaleTimesheet(TestCommonSaleTimesheetNoChart):
         self.assertFalse(timesheet4.timesheet_invoice_id, "The timesheet should not be linked to the invoice, since we are in ordered quantity")
 
         # add so line with produdct "create task in new project".
-        so_line_ordered_task_in_project = self.env['sale.order.line'].create({
-            'name': self.product_order_timesheet3.name,
-            'product_id': self.product_order_timesheet3.id,
-            'product_uom_qty': 3,
-            'product_uom': self.product_order_timesheet3.uom_id.id,
-            'price_unit': self.product_order_timesheet3.list_price,
-            'order_id': sale_order.id,
-        })
+        with Form(sale_order) as sale:
+            with sale.order_line.new() as line:
+                line.name = self.product_order_timesheet3.name
+                line.product_id = self.product_order_timesheet3
+                line.product_uom_qty = 3
+                line.product_uom = self.product_order_timesheet3.uom_id
+                line.price_unit = self.product_order_timesheet3.list_price
+
+        so_line_ordered_task_in_project = self.env['sale.order.line'].search([('product_id', '=', self.product_order_timesheet3.id)])
 
         self.assertEqual(sale_order.invoice_status, 'to invoice', 'Sale Timesheet: Adding a new service line (so line) should put the SO in "to invocie" state.')
         self.assertEqual(sale_order.tasks_count, 2, "Two tasks (1 per SO line) should have been created on SO confirmation")
+        self.assertEqual(len(sale_order.project_ids), 2, "No new project should have been created by the SO, when selling 'new task in new project' product, since it reuse the one from 'project only'.")
         self.assertEqual(len(sale_order.project_ids), 2, "No new project should have been created by the SO, when selling 'new task in new project' product, since it reuse the one from 'project only'.")
 
         # get first invoice line of sale line linked to timesheet1
@@ -171,36 +177,35 @@ class TestSaleTimesheet(TestCommonSaleTimesheetNoChart):
                 6. add new SO line (delivered service)
         """
         # create SO and confirm it
-        sale_order = self.env['sale.order'].create({
-            'partner_id': self.partner_customer_usd.id,
-            'partner_invoice_id': self.partner_customer_usd.id,
-            'partner_shipping_id': self.partner_customer_usd.id,
-            'pricelist_id': self.pricelist_usd.id,
-        })
-        so_line_deliver_global_project = self.env['sale.order.line'].create({
-            'name': self.product_delivery_timesheet2.name,
-            'product_id': self.product_delivery_timesheet2.id,
-            'product_uom_qty': 50,
-            'product_uom': self.product_delivery_timesheet2.uom_id.id,
-            'price_unit': self.product_delivery_timesheet2.list_price,
-            'order_id': sale_order.id,
-        })
-        so_line_deliver_task_project = self.env['sale.order.line'].create({
-            'name': self.product_delivery_timesheet3.name,
-            'product_id': self.product_delivery_timesheet3.id,
-            'product_uom_qty': 20,
-            'product_uom': self.product_delivery_timesheet3.uom_id.id,
-            'price_unit': self.product_delivery_timesheet3.list_price,
-            'order_id': sale_order.id,
-        })
-        so_line_deliver_global_project.product_id_change()
-        so_line_deliver_task_project.product_id_change()
+        order = Form(self.env['sale.order'])
+        order.partner_id = self.partner_customer_usd
+        order.partner_invoice_id = self.partner_customer_usd
+        order.partner_shipping_id = self.partner_customer_usd
+        order.pricelist_id = self.pricelist_usd
+        with order.order_line.new() as line:
+            line.name = self.product_delivery_timesheet2.name
+            line.product_id = self.product_delivery_timesheet2
+            line.product_uom_qty = 50
+            line.product_uom = self.product_delivery_timesheet2.uom_id
+            line.price_unit = self.product_delivery_timesheet2.list_price
+        with order.order_line.new() as line:
+            line.name = self.product_delivery_timesheet3.name
+            line.product_id = self.product_delivery_timesheet3
+            line.product_uom_qty = 20
+            line.product_uom = self.product_delivery_timesheet3.uom_id
+            line.price_unit = self.product_delivery_timesheet3.list_price
+
+        sale_order = order.save()
 
         # confirm SO
         sale_order.action_confirm()
-        task_serv1 = self.env['project.task'].search([('sale_line_id', '=', so_line_deliver_global_project.id)])
-        task_serv2 = self.env['project.task'].search([('sale_line_id', '=', so_line_deliver_task_project.id)])
-        project_serv2 = self.env['project.project'].search([('sale_line_id', '=', so_line_deliver_task_project.id)])
+
+        task_serv1 = self.env['project.task'].search([('sale_line_id.product_id', '=', self.product_delivery_timesheet2.id)])
+        task_serv2 = self.env['project.task'].search([('sale_line_id.product_id', '=', self.product_delivery_timesheet3.id)])
+        project_serv2 = self.env['project.project'].search([('sale_line_id.product_id', '=', self.product_delivery_timesheet3.id)])
+
+        so_line_deliver_global_project = task_serv1.sale_line_id
+        so_line_deliver_task_project = task_serv2.sale_line_id
 
         self.assertEqual(task_serv1.project_id, self.project_global, "Sale Timesheet: task should be created in global project")
         self.assertTrue(task_serv1, "Sale Timesheet: on SO confirmation, a task should have been created in global project")
@@ -258,14 +263,15 @@ class TestSaleTimesheet(TestCommonSaleTimesheetNoChart):
             timesheet2.write({'unit_amount': 42})
 
         # add a line on SO
-        so_line_deliver_only_project = self.env['sale.order.line'].create({
-            'name': self.product_delivery_timesheet4.name,
-            'product_id': self.product_delivery_timesheet4.id,
-            'product_uom_qty': 5,
-            'product_uom': self.product_delivery_timesheet4.uom_id.id,
-            'price_unit': self.product_delivery_timesheet4.list_price,
-            'order_id': sale_order.id,
-        })
+        with Form(sale_order) as sale:
+            with sale.order_line.new() as line:
+                line.name = self.product_delivery_timesheet4.name
+                line.product_id = self.product_delivery_timesheet4
+                line.product_uom_qty = 5
+                line.product_uom = self.product_delivery_timesheet4.uom_id
+                line.price_unit = self.product_delivery_timesheet4.list_price
+
+        so_line_deliver_only_project = self.env['sale.order.line'].search([('product_id', '=', self.product_delivery_timesheet4.id)])
         self.assertEqual(len(sale_order.project_ids), 2, "No new project should have been created by the SO, when selling 'project only' product, since it reuse the one from 'new task in new project'.")
 
         # let's log some timesheets on the project
@@ -307,33 +313,32 @@ class TestSaleTimesheet(TestCommonSaleTimesheetNoChart):
         """ Test timesheet invoicing with 'invoice on delivery' timetracked products
         """
         # create SO and confirm it
-        sale_order = self.env['sale.order'].create({
-            'partner_id': self.partner_customer_usd.id,
-            'partner_invoice_id': self.partner_customer_usd.id,
-            'partner_shipping_id': self.partner_customer_usd.id,
-            'pricelist_id': self.pricelist_usd.id,
-        })
-        so_line_manual_global_project = self.env['sale.order.line'].create({
-            'name': self.product_delivery_manual2.name,
-            'product_id': self.product_delivery_manual2.id,
-            'product_uom_qty': 50,
-            'product_uom': self.product_delivery_manual2.uom_id.id,
-            'price_unit': self.product_delivery_manual2.list_price,
-            'order_id': sale_order.id,
-        })
-        so_line_manual_only_project = self.env['sale.order.line'].create({
-            'name': self.product_delivery_manual4.name,
-            'product_id': self.product_delivery_manual4.id,
-            'product_uom_qty': 20,
-            'product_uom': self.product_delivery_manual4.uom_id.id,
-            'price_unit': self.product_delivery_manual4.list_price,
-            'order_id': sale_order.id,
-        })
+        order = Form(self.env['sale.order'])
+        order.partner_id = self.partner_customer_usd
+        order.partner_invoice_id = self.partner_customer_usd
+        order.partner_shipping_id = self.partner_customer_usd
+        order.pricelist_id = self.pricelist_usd
+        with order.order_line.new() as line:
+            line.name = self.product_delivery_manual2.name
+            line.product_id = self.product_delivery_manual2
+            line.product_uom_qty = 50
+            line.product_uom = self.product_delivery_manual2.uom_id
+            line.price_unit = self.product_delivery_manual2.list_price
+        with order.order_line.new() as line:
+            line.name = self.product_delivery_manual4.name
+            line.product_id = self.product_delivery_manual4
+            line.product_uom_qty = 20
+            line.product_uom = self.product_delivery_manual4.uom_id
+            line.price_unit = self.product_delivery_manual4.list_price
+
+        sale_order = order.save()
 
         # confirm SO
         sale_order.action_confirm()
         self.assertTrue(sale_order.project_ids, "Sales Order should have create a project")
         self.assertEqual(sale_order.invoice_status, 'no', 'Sale Timesheet: manually product should not need to be invoiced on so confirmation')
+        so_line_manual_global_project = sale_order.order_line.filtered(lambda line: line.product_id.id == self.product_delivery_manual2.id)
+        so_line_manual_only_project = sale_order.order_line.filtered(lambda line: line.product_id.id == self.product_delivery_manual4.id)
 
         project_serv2 = so_line_manual_only_project.project_id
         self.assertTrue(project_serv2, "A second project is created when selling 'project only' after SO confirmation.")
