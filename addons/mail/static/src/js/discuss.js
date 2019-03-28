@@ -1627,7 +1627,7 @@ var Demo = AbstractAction.extend({
             this.widgets[m.id] = w;
             defs.push(w.appendTo($('<div>')));
         }
-        return $.when(defs);
+        return $.when.apply($, defs);
     },
     start: function () {
         this.$content = this.$('.content');
@@ -1680,7 +1680,7 @@ var Demo = AbstractAction.extend({
                 this.widgets[m.id] = w;
                 defs.push(w.appendTo($('<div>')));
             }
-            $.when(defs).then(function () {
+            $.when.apply($, defs).then(function () {
                 for (var i = currentVal; i < n; i++) {
                     let m = self.messages[i];
                     let widget = self.widgets[m.id];
