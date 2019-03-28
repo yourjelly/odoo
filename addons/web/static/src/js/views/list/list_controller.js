@@ -24,6 +24,7 @@ var ListController = BasicController.extend({
      */
     buttons_template: 'ListView.buttons',
     custom_events: _.extend({}, BasicController.prototype.custom_events, {
+        activate_next_widget: '_onActivateNextWidget',
         add_record: '_onAddRecord',
         button_clicked: '_onButtonClicked',
         group_edit_button_clicked: '_onEditGroupClicked',
@@ -469,6 +470,17 @@ var ListController = BasicController.extend({
     // Handlers
     //--------------------------------------------------------------------------
 
+    /**
+     * Triggered when navigating with TAB, when the end of the list has been
+     * reached. Go back to the first row in that case.
+     *
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _onActivateNextWidget: function (ev) {
+        ev.stopPropagation();
+        this.renderer.editFirstRecord();
+    },
     /**
      * Add a record to the list
      *

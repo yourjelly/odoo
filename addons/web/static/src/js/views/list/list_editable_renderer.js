@@ -258,6 +258,12 @@ ListRenderer.include({
         });
     },
     /**
+     * Edit the first record in the list
+     */
+    editFirstRecord: function () {
+        this._selectCell(this._getFirstDataRowIndex(), 0);
+    },
+    /**
      * Edit a given record in the list
      *
      * @param {string} recordID
@@ -475,32 +481,30 @@ ListRenderer.include({
 
     },
     /**
+     * Returns the index of first (record) data row in the table (whether it is
+     * grouped or not).
      *
-     * @private
-     * @param {integer} index
-     * @param {object} options
-     * @param {position} [options.position] position previous and next
      * @returns {integer}
      */
-    _getNavigationLineIndex: function (index, options) {
-        var newIndex;
-        var recordID = this._getRecordID(index);
-        var allRecordIds = [];
-        utils.traverse_records(this.state, function (data) {
-            allRecordIds.push(data.id);
-        });
-        var indexPos = allRecordIds.indexOf(recordID);
-        if (options.position === 'next') {
-            newIndex = this.state.groupedBy.length ? (indexPos + 1) % allRecordIds.length : indexPos + 1;
-        } else {
-            newIndex = this.state.groupedBy.length ? (indexPos === 0) && allRecordIds.length - 1 || indexPos - 1 : indexPos - 1;
+    _getFirstDataRowIndex: function () {
+        return this.$('.o_data_row:first').prop('rowIndex') - 1;
+    },
+    /**
+     * Given a table row inside a group, returns the index of the first data
+     * row of the next group (if any).
+     *
+     * @param {jQuery} $row this row must be inside a group
+     * @returns {integer|null}
+     */
+    _getNextGroupFirstRowIndex: function ($row) {
+        var $nextBody = $row.closest('tbody').next();
+        while ($nextBody.length && !$nextBody.find('.o_data_row').length) {
+            $nextBody = $nextBody.next();
         }
-        if (newIndex > allRecordIds.length - 1 || newIndex < 0) {
-            return -1;
+        if ($nextBody.find('.o_data_row').length) {
+            return $nextBody.find('.o_data_row:first').prop('rowIndex') - 1;
         }
-        var $row = this._getRow(allRecordIds[newIndex]);
-        var rowIndex = $row.prop('rowIndex') - 1;
-        return rowIndex;
+        return null;
     },
     /**
      * Returns the current number of columns.  The editable renderer may add a
@@ -566,44 +570,125 @@ ListRenderer.include({
         return this.editable;
     },
     /**
-     * Move the cursor on the end of the previous line, if possible.
-     * If there is no previous line, then we create a new record.
+     * Move the cursor on the end of the previous line (or of the last line if
+     * we are on the first one).
      *
      * @private
      */
     _moveToPreviousLine: function () {
-        var prevRowIndex = this._getNavigationLineIndex(this.currentRow, {
-            position: 'previous'
+        var allRecordIds = [];
+        utils.traverse_records(this.state, function (data) {
+            allRecordIds.push(data.id);
         });
-        if (prevRowIndex >= 0) {
-            this._selectCell(prevRowIndex, this.columns.length - 1);
-        } else {
-            this.unselectRow().then(this.trigger_up.bind(this, 'add_record'));
-        }
+        var curRecordId = this._getRecordID(this.currentRow);
+        var curRecordIndex = allRecordIds.indexOf(curRecordId);
+        var prevRecordIndex = curRecordIndex === 0 ? allRecordIds.length - 1 : curRecordIndex - 1;
+        var $prevRow = this._getRow(allRecordIds[prevRecordIndex]);
+        var prevRowIndex = $prevRow.prop('rowIndex') - 1;
+        this._selectCell(prevRowIndex, this.columns.length - 1);
     },
     /**
      * Move the cursor on the beginning of the next line, if possible.
-     * If there is no next line, then we create a new record.
+     * If we are on the last line (of a group in the grouped case) and the list
+     * is editable="bottom", we create a new record, otherwise, we move the
+     * cursor to the first line (of the next group in the grouped case).
      *
      * @private
+     * @param {Object} [options]
+     * @param {boolean} [options.forceCreate=false] typically set to true when
+     *   navigating with ENTER ; in this case, if the next row is the 'Add a
+     *   line' row, always create a new record (never skip it, like TAB does
+     *   under some conditions)
      */
-    _moveToNextLine: function () {
+    _moveToNextLine: function (options) {
         var self = this;
+        options = options || {};
         var recordID = this._getRecordID(this.currentRow);
+        var record = this._getRecord(recordID);
+
         this.commitChanges(recordID).then(function () {
             var fieldNames = self.canBeSaved(recordID);
-            if (fieldNames.length) {
+            if (fieldNames.length && (record.isDirty() || options.forceCreate)) {
+                // the current row is invalid, we only leave it if it is not dirty
+                // (we didn't make any change on this row, which is a new one) and
+                // we are navigating with TAB (forceCreate=false)
                 return;
             }
-            var nextRowIndex = self._getNavigationLineIndex(self.currentRow, {
-                position: 'next',
-            });
-            if (nextRowIndex >= 0) {
+
+            // compute the index of the next (record) row to select, if any
+            var nextRowIndex = null;
+            var groupId;
+            if (!self.isGrouped) {
+                // ungrouped case
+                if (self.currentRow < self.state.data.length - 1) {
+                    nextRowIndex = self.currentRow + 1;
+                } else if (!options.forceCreate && !record.isDirty()) {
+                    self.trigger_up('discard_changes', {
+                        recordID: recordID,
+                        onSuccess: function () {
+                            self.trigger_up('activate_next_widget');
+                        },
+                    });
+                    return;
+                }
+            } else {
+                // grouped case
+                var $currentRow = self._getRow(recordID);
+                var $nextRow = $currentRow.next();
+                if ($nextRow.hasClass('o_data_row')) {
+                    // the next row is a record row (in same group), select it
+                    nextRowIndex = self.currentRow + 1;
+                } else if ($nextRow.hasClass('o_add_record_row') && self.editable === "bottom") {
+                    // the next row is the 'Add a line' row (i.e. the current one is the last record
+                    // row of the group)
+                    if (options.forceCreate || record.isDirty()) {
+                        // if we modified the current record, add a row to create a new record
+                        groupId = $nextRow.data('groupID');
+                    } else {
+                        // if we didn't change anything to the current line (e.g. we pressed TAB on
+                        // each cell without modifying/entering any data), we discard that line (if
+                        // it was a new one) and move to the first record of the next group
+                        nextRowIndex = self._getNextGroupFirstRowIndex($currentRow);
+                        self.trigger_up('discard_changes', {
+                            recordID: recordID,
+                            onSuccess: function () {
+                                if (nextRowIndex !== null) {
+                                    if (!record.res_id) {
+                                        // the current record was a new one, so we decrement
+                                        // nextRowIndex as that row has been removed meanwhile
+                                        nextRowIndex--;
+                                    }
+                                    self._selectCell(nextRowIndex, 0);
+                                } else {
+                                    // we were in the last group, so go back to the top
+                                    self._selectCell(self._getFirstDataRowIndex(), 0, {});
+                                }
+                            },
+                        });
+                        return;
+                    }
+                } else {
+                    // there is no 'Add a line' row (i.e. the create feature is disabled), or the
+                    // list is editable="top", we focus the first record of the next group if any
+                    nextRowIndex = self._getNextGroupFirstRowIndex($currentRow);
+                    if (nextRowIndex === null) {
+                        // we were on the last group, so we go back to the top of the list
+                        nextRowIndex = self._getFirstDataRowIndex();
+                    }
+                }
+            }
+
+            // if there is a (record) row to select, select it, otherwise, add a new record (in the
+            // correct group, if the view is grouped)
+            if (nextRowIndex !== null) {
                 self._selectCell(nextRowIndex, 0);
             } else {
                 self.unselectRow().then(function () {
+                    // if for some reason (e.g. create feature is disabled) we can't add a new
+                    // record, select the first record row
                     self.trigger_up('add_record', {
-                        onFail: self._selectCell.bind(self, 0, 0, {}),
+                        groupId: groupId,
+                        onFail: self._selectCell.bind(self, self._getFirstDataRowIndex(), 0, {}),
                     });
                 });
             }
@@ -660,7 +745,9 @@ ListRenderer.include({
                         .attr('colspan', this._getNumberOfCols())
                         .addClass('o_group_field_row_add')
                         .append($a);
-            var $tr = $('<tr>').append($td);
+            var $tr = $('<tr>', {class: 'o_add_record_row'})
+                        .data('groupID', group.id)
+                        .append($td);
             $groupBody.append($tr.prepend($('<td>').html('&nbsp;')));
         }
         return result;
@@ -1067,25 +1154,10 @@ ListRenderer.include({
                 }
                 break;
             case 'next':
-                // When navigating with the keyboard, we want to get out of the list editable if the
-                // entire line is left unmodified and we are on the next line.
                 var column = this.columns[this.currentFieldIndex];
                 var lastWidget = this._getLastWidget();
                 if (column.attrs.name === lastWidget.name) {
-                    var nbRecordRows = this.$('.o_data_row').length;
-                    var nbGroupRows = this.$('.o_group_header').length;
-                    if (this.currentRow + 1 < (nbRecordRows + nbGroupRows)) {
-                        this._selectCell(this.currentRow+1, 0, {wrap:false})
-                            .guardedCatch(this._moveToNextLine.bind(this));
-                    } else {
-                        var currentRowData = this.state.data[this.currentRow];
-                        if (currentRowData.isDirty(currentRowData.id)) {
-                            this._moveToNextLine();
-                        }
-                        else {
-                            this.trigger_up('activate_next_widget');
-                        }
-                    }
+                    this._moveToNextLine();
                 } else {
                     if (this.currentFieldIndex + 1 < this.columns.length) {
                         this._selectCell(this.currentRow, this.currentFieldIndex + 1, {wrap: false})
@@ -1096,7 +1168,7 @@ ListRenderer.include({
                  }
                 break;
             case 'next_line':
-                this._moveToNextLine();
+                this._moveToNextLine({forceCreate: true});
                 break;
             case 'cancel':
                 // stop the original event (typically an ESCAPE keydown), to
@@ -1106,7 +1178,7 @@ ListRenderer.include({
                 this.trigger_up('discard_changes', {
                     recordID: ev.target.dataPointID,
                     onSuccess: function () {
-                        self.$('.o_field_x2many_list_row_add a:first').focus();
+                        self.$('.o_field_x2many_list_row_add a:first').focus(); // FIXME
                     }
                 });
                 break;
