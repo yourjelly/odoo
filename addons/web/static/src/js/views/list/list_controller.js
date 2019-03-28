@@ -596,30 +596,45 @@ var ListController = BasicController.extend({
      */
     _onFieldChanged: function (ev) {
         ev.stopPropagation();
-
         var self = this;
-        var _super = this._super;
-        var args = arguments;
+
         var recordIds = _.union([ev.data.dataPointID], this.selectedRecords);
         if (recordIds.length > 1) {
-            var message = _.str.sprintf(_t('Do you want to apply the changes on all selected records (%s)?'), this.selectedRecords.length);
-            Dialog.confirm(this, message, {
-                confirm_callback: function () {
-                    ev.data.onSuccess = function () {
-                        self.model.saveRecords(ev.data.dataPointID, recordIds)
-                            .then(function () {
-                                var state = self.model.get(self.handle);
-                                return self.renderer.updateState(state, {});
-                            })
-                            .then(self._setMode.bind(self, 'edit', ev.data.dataPointID));
-                    };
-                    _super.apply(self, args);
-                },
-                cancel_callback: this._super.bind(this, ev),
-            });
-        } else {
-            this._super.apply(this, arguments);
+            // deal with edition of multiple lines
+            var _onSuccess = ev.data.onSuccess;
+            ev.data.onSuccess = function () {
+                Promise.resolve(_onSuccess()).then(function () {
+                    var node = ev.target.__node;
+                    var value = Object.values(ev.data.changes)[0];
+                    var validRecordIds = recordIds.reduce(function (result, recordId) {
+                        var record = self.model.get(recordId);
+                        var modifiers = self.renderer._registerModifiers(node, record);
+                        if (!modifiers.readonly && (!modifiers.required || value)) {
+                            result.push(recordId);
+                        }
+                        return result;
+                    }, []);
+                    var message = _.str.sprintf(
+                        _t('Do you want to set the value on the %d valid selected records?'),
+                        validRecordIds.length);
+                    if (recordIds.length !== validRecordIds.length) {
+                        var nbInvalid = recordIds.length - validRecordIds.length;
+                        message += ' ' + _.str.sprintf(_t('(%d invalid)'), nbInvalid);
+                    }
+                    Dialog.confirm(self, message, {
+                        confirm_callback: function () {
+                            self.model.saveRecords(ev.data.dataPointID, validRecordIds)
+                                .then(function () {
+                                    self._updateButtons('readonly');
+                                    var state = self.model.get(self.handle);
+                                    self.renderer.updateState(state, {});
+                                });
+                        },
+                    });
+                });
+            };
         }
+        this._super.apply(this, arguments);
     },
     /**
      * Force a resequence of the records curently on this page.

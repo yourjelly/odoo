@@ -3872,7 +3872,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('editable list view: multi edition', async function (assert) {
-        assert.expect(13);
+        assert.expect(11);
 
         var list = await createView({
             View: ListView,
@@ -3903,24 +3903,55 @@ QUnit.module('Views', {
         await testUtils.dom.click(list.$('.o_data_row:eq(0) .o_data_cell:eq(1)'));
         await testUtils.fields.editInput(list.$('.o_field_widget[name=int_field]'), 666);
         assert.containsOnce($, '.modal', "there should be an opened modal");
-        assert.ok($('.modal').text().includes('records (2)'), "the number of records should be correctly displayed");
+        assert.ok($('.modal').text().includes('2 valid'), "the number of records should be correctly displayed");
 
         await testUtils.dom.click($('.modal .btn-primary'));
         assert.verifySteps(['write', 'read']);
-
-        assert.hasClass(list.$('.o_data_row:eq(0)'), 'o_selected_row',
-            "the first row should still be in edition");
-        assert.strictEqual(list.$('.o_data_row:eq(1) .o_data_cell').text(), "blip666",
-            "the second row should be updated");
-
-        await testUtils.dom.click(list.$buttons.find('.o_list_button_save'));
-
         assert.strictEqual(list.$('.o_data_row:eq(0) .o_data_cell').text(), "yop666",
             "the first row should be updated");
         assert.strictEqual(list.$('.o_data_row:eq(1) .o_data_cell').text(), "blip666",
             "the second row should be updated");
 
-        // TODO: maybe test it with m2o and x2m
+        list.destroy();
+    });
+
+    QUnit.test('editable list view: multi edition with readonly modifiers', async function (assert) {
+        assert.expect(5);
+
+        var list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree editable="top">' +
+                        '<field name="id"/>' +
+                        '<field name="foo"/>' +
+                        '<field name="int_field" attrs=\'{"readonly": [("id", ">" , 2)]}\'/>' +
+                    '</tree>',
+            mockRPC: function (route, args) {
+                if (args.method === 'write') {
+                    assert.deepEqual(args.args, [[1, 2], { int_field: 666 }],
+                        "should only write on the valid records");
+                }
+                return this._super.apply(this, arguments);
+            },
+        });
+
+        // select all records
+        await testUtils.dom.click(list.$('th.o_list_record_selector input'));
+
+        // edit a field
+        await testUtils.dom.click(list.$('.o_data_row:eq(0) .o_data_cell:eq(1)'));
+        await testUtils.fields.editInput(list.$('.o_field_widget[name=int_field]'), 666);
+        assert.ok($('.modal').text().includes('2 valid'),
+            "the number of records should be correctly displayed (only 2 not readonly)");
+        assert.ok($('.modal').text().includes('2 invalid'),
+            "should display the number of invalid records");
+
+        await testUtils.dom.click($('.modal .btn-primary'));
+        assert.strictEqual(list.$('.o_data_row:eq(0) .o_data_cell').text(), "1yop666",
+            "the first row should be updated");
+        assert.strictEqual(list.$('.o_data_row:eq(1) .o_data_cell').text(), "2blip666",
+            "the second row should be updated");
 
         list.destroy();
     });
