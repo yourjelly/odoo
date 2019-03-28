@@ -216,7 +216,7 @@ var KanbanColumn = Widget.extend({
             res_id: values && values.res_id || undefined,
             db_id: values && values.db_id || undefined,
         });
-        return this.quickCreateWidget.insertAfter($('.o_action_manager .o_content'));
+        return this.quickCreateWidget.insertAfter($('.o_action_manager .o_content .o_kanban_view'));
     },
     /**
      * Closes the quick create widget if it isn't dirty.

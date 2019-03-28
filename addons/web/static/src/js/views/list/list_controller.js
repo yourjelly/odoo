@@ -83,7 +83,7 @@ var ListController = BasicController.extend({
                 res_id: data && data.res_id || undefined,
                 db_id: values && values.db_id || undefined,
             });
-            return this.quickCreateWidget.insertAfter($('.o_action_manager .o_content'));
+            return this.quickCreateWidget.insertAfter($('.o_action_manager .o_content .o_list_view'));
         }
         return this.trigger_up('open_record', {id: values && values.db_id});
     },

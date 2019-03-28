@@ -68,10 +68,11 @@
     </div>
 </t>
 
-<t t-name="KanbanView.RecordQuickCreate.buttons">
-    <div>
+<t t-name="Overlay.FormView.buttons">
+    <div class="overlay_formview_buttons">
         <button class="btn btn-primary o_kanban_add">Save</button>
         <button class="btn btn-secondary o_kanban_cancel ml8">Discard</button>
+        <button class="btn btn-default o_kanban_expand"><i class="fa fa-expand"/></button>
     </div>
 </t>
 

@@ -765,3 +765,39 @@
         }
     }
 }
+
+// overlay form view in list/kanban view
+
+.o_kanban_quick_create {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50%;
+    height: 100vh;
+    z-index: 1000;
+    border: 1px solid gray('300');
+    background-color: white;
+    overflow: scroll;
+    box-shadow: 0 0 20px -10px;
+
+    .overlay_formview_buttons {
+        padding: 15px 15px 10px;
+        border-bottom: 1px solid gray('300');
+        .o_kanban_expand {
+            position: absolute;
+            right: 0;
+        }
+    }
+
+    .o_form_view {
+        padding: 0;
+        .o_group.o_inner_group {
+            margin: 0;
+        }
+    }
+
+    &.o_disabled {
+        pointer-events: none;
+        opacity: 0.7;
+    }
+}

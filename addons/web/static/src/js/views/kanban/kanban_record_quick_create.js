@@ -94,9 +94,8 @@ var RecordQuickCreate = Widget.extend({
      * @override
      */
     start: function () {
+        this.$el.append(qweb.render('Overlay.FormView.buttons'));
         this.$el.append(this.controller.$el);
-        this.$el.append($('<button class="btn btn-default o_kanban_expand"><i class="fa fa-expand"/></button>'));
-        this.$el.append(qweb.render('KanbanView.RecordQuickCreate.buttons'));
 
         // focus the first field
         this.controller.autofocus();
