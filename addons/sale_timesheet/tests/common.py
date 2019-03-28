@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo.tests import tagged
 from odoo.addons.sale.tests.test_sale_common import TestCommonSaleNoChart
 
 
+@tagged('-standard', '-at_install', 'migration', 'post_install')
 class TestCommonSaleTimesheetNoChart(TestCommonSaleNoChart):
 
     @classmethod

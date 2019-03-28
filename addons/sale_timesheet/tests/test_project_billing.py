@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo.tests import tagged, Form
 from odoo.addons.sale_timesheet.tests.common import TestCommonSaleTimesheetNoChart
 from odoo.exceptions import UserError
 
 
+@tagged('-standard', '-at_install', 'migration', 'post_install')
 class TestProjectBilling(TestCommonSaleTimesheetNoChart):
     """ This test suite provide checks for miscellaneous small things. """
 
@@ -117,17 +119,21 @@ class TestProjectBilling(TestCommonSaleTimesheetNoChart):
     def test_make_billable_at_task_rate(self):
         """ Starting from a non billable project, make it billable at task rate, using the wizard """
         Timesheet = self.env['account.analytic.line']
-        Task = self.env['project.task']
         # set a customer on the project
-        self.project_non_billable.write({
-            'partner_id': self.partner_2.id
-        })
+        with Form(self.project_non_billable) as p:
+            p.partner_id = self.partner_2
+
         # create a task and 2 timesheets
-        task = Task.with_context(default_project_id=self.project_non_billable.id).create({
+
+        # note: This domain is syntactically not correct: attrs="{'invisible': ['|', ('partner_id', '=', False)]}"
+        # addons/sale_timesheet/views/project_task_views.xml, line 72
+        # there needs to be fix, when we used 'Form' for creating a new task
+        task = self.env['project.task'].with_context(default_project_id=self.project_non_billable.id).create({
             'name': 'first task',
             'partner_id': self.project_non_billable.partner_id.id,
             'planned_hours': 10,
         })
+        # note: fields not available in view
         timesheet1 = Timesheet.create({
             'name': 'Test Line',
             'project_id': task.project_id.id,
@@ -144,11 +150,12 @@ class TestProjectBilling(TestCommonSaleTimesheetNoChart):
         })
 
         # create wizard
-        wizard = self.env['project.create.sale.order'].with_context(active_id=self.project_non_billable.id, active_model='project.project').create({
-            'product_id': self.product_delivery_timesheet3.id,  # product creates new T in new P
-            'price_unit': self.product_delivery_timesheet3.list_price,
-            'billable_type': 'project_rate',
-        })
+        wizard = Form(self.env['project.create.sale.order'].with_context(active_id=self.project_non_billable.id, active_model='project.project'), view='sale_timesheet.project_create_sale_order_view_form')
+        wizard.product_id = self.product_delivery_timesheet3
+        wizard.price_unit = self.product_delivery_timesheet3.list_price
+        wizard.billable_type = 'project_rate'
+
+        wizard = wizard.save()
 
         self.assertEqual(self.project_non_billable.billable_type, 'no', "The project should still be non billable")
         self.assertEqual(wizard.partner_id, self.project_non_billable.partner_id, "The wizard should have the same partner as the project")
@@ -169,13 +176,12 @@ class TestProjectBilling(TestCommonSaleTimesheetNoChart):
     def test_make_billable_at_employee_rate(self):
         """ Starting from a non billable project, make it billable at employee rate, using the wizard """
         Timesheet = self.env['account.analytic.line']
-        Task = self.env['project.task']
         # set a customer on the project
-        self.project_non_billable.write({
-            'partner_id': self.partner_2.id
-        })
+        with Form(self.project_non_billable) as p:
+            p.partner_id = self.partner_2
+
         # create a task and 2 timesheets
-        task = Task.with_context(default_project_id=self.project_non_billable.id).create({
+        task = self.env['project.task'].with_context(default_project_id=self.project_non_billable.id).create({
             'name': 'first task',
             'partner_id': self.project_non_billable.partner_id.id,
             'planned_hours': 10,
@@ -196,15 +202,23 @@ class TestProjectBilling(TestCommonSaleTimesheetNoChart):
         })
 
         # create wizard
-        wizard = self.env['project.create.sale.order'].with_context(active_id=self.project_non_billable.id, active_model='project.project').create({
-            'billable_type': 'employee_rate',
-            'partner_id': self.partner_2.id,
-            'line_ids': [
-                (0, 0, {'product_id': self.product_delivery_timesheet1.id, 'price_unit': 15, 'employee_id': self.employee_tde.id}),  # product creates no T
-                (0, 0, {'product_id': self.product_delivery_timesheet1.id, 'price_unit': 15, 'employee_id': self.employee_manager.id}),  # product creates no T (same product than previous one)
-                (0, 0, {'product_id': self.product_delivery_timesheet3.id, 'price_unit': self.product_delivery_timesheet3.list_price, 'employee_id': self.employee_user.id}),  # product creates new T in new P
-            ]
-        })
+        wizard = Form(self.env['project.create.sale.order'].with_context(active_id=self.project_non_billable.id, active_model='project.project'), view='sale_timesheet.project_create_sale_order_view_form')
+        wizard.partner_id = self.partner_2
+        wizard.billable_type = 'employee_rate'
+        with wizard.line_ids.new() as w: # product creates no T
+            w.product_id = self.product_delivery_timesheet1
+            w.price_unit = 15
+            w.employee_id = self.employee_tde
+        with wizard.line_ids.new() as w: # product creates no T (same product than previous one)
+            w.product_id = self.product_delivery_timesheet1
+            w.price_unit = 15
+            w.employee_id = self.employee_manager
+        with wizard.line_ids.new() as w: # product creates new T in new P
+            w.product_id = self.product_delivery_timesheet3
+            w.price_unit = self.product_delivery_timesheet3.list_price
+            w.employee_id = self.employee_user
+
+        wizard = wizard.save()
 
         self.assertEqual(self.project_non_billable.billable_type, 'no', "The project should still be non billable")
         self.assertEqual(wizard.partner_id, self.project_non_billable.partner_id, "The wizard should have the same partner as the project")
@@ -327,7 +341,8 @@ class TestProjectBilling(TestCommonSaleTimesheetNoChart):
         self.assertFalse(timesheet3.so_line, "The timesheet should not be linked to SOL as there is no fallback at all (no map, no SOL on task, no SOL on project)")
 
         # add a SOL on the project as fallback
-        self.project_employee_rate.write({'sale_line_id': self.so1_line_deliver_no_task.id})
+        with Form(self.project_employee_rate) as project:
+            project.sale_line_id = self.so1_line_deliver_no_task
 
         # log timesheet on task in 'employee rate' project wit the project fallback only (no map, no SOL on task, but SOL on project)
         timesheet4 = Timesheet.create({
@@ -346,7 +361,8 @@ class TestProjectBilling(TestCommonSaleTimesheetNoChart):
         Timesheet = self.env['account.analytic.line']
 
         # set subtask project on task rate project
-        self.project_task_rate.write({'subtask_project_id': self.project_subtask.id})
+        with Form(self.project_task_rate) as project:
+            project.subtask_project_id = self.project_subtask
 
         # create a task
         task = Task.with_context(default_project_id=self.project_task_rate.id).create({
