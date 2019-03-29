@@ -8,9 +8,28 @@
         <field name="name">Zero rated sales (IE)</field>
         <field name="amount_type">percent</field>
         <field name="amount">0</field>
-        <field name="account_id">l10n_ie_a2200</field>
-        <field name="refund_account_id">l10n_ie_a2200</field>
-        <field name="tag_ids" eval="[(6,0,[ref('l10n_ie_tag_st0')])]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2200'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2200'),
+            }),
+        ]"/>
     </record>
 
     <record id="l10n_ie_tax_st1" model="account.tax.template">
@@ -20,9 +39,28 @@
         <field name="name">Standard rate sales (13.5%) (IE)</field>
         <field name="amount_type">percent</field>
         <field name="amount">13.5</field>
-        <field name="account_id">l10n_ie_a2200</field>
-        <field name="refund_account_id">l10n_ie_a2200</field>
-        <field name="tag_ids" eval="[(6,0,[ref('l10n_ie_tag_st1')])]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2200'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2200'),
+            }),
+        ]"/>
     </record>
 
     <record id="l10n_ie_tax_st2" model="account.tax.template">
@@ -32,9 +70,28 @@
         <field name="name">Exempt sales (IE)</field>
         <field name="amount_type">percent</field>
         <field name="amount">0</field>
-        <field name="account_id">l10n_ie_a2200</field>
-        <field name="refund_account_id">l10n_ie_a2200</field>
-        <field name="tag_ids" eval="[(6,0,[ref('l10n_ie_tag_st2')])]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2200'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2200'),
+            }),
+        ]"/>
     </record>
 
     <record id="l10n_ie_tax_pt0" model="account.tax.template">
@@ -44,9 +101,28 @@
         <field name="name">Zero rated purchases (IE)</field>
         <field name="amount_type">percent</field>
         <field name="amount">0</field>
-        <field name="account_id">l10n_ie_a2201</field>
-        <field name="refund_account_id">l10n_ie_a2201</field>
-        <field name="tag_ids" eval="[(6,0,[ref('l10n_ie_tag_pt0')])]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2201'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2201'),
+            }),
+        ]"/>
     </record>
 
     <record id="l10n_ie_tax_pt1" model="account.tax.template">
@@ -56,9 +132,28 @@
         <field name="name">Standard rate purchases (13.5%) (IE)</field>
         <field name="amount_type">percent</field>
         <field name="amount">13.5</field>
-        <field name="account_id">l10n_ie_a2201</field>
-        <field name="refund_account_id">l10n_ie_a2201</field>
-        <field name="tag_ids" eval="[(6,0,[ref('l10n_ie_tag_pt1')])]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2201'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2201'),
+            }),
+        ]"/>
     </record>
 
     <record id="l10n_ie_tax_pt2" model="account.tax.template">
@@ -68,33 +163,28 @@
         <field name="name">Exempt purchases (IE)</field>
         <field name="amount_type">percent</field>
         <field name="amount">0</field>
-        <field name="account_id">l10n_ie_a2201</field>
-        <field name="refund_account_id">l10n_ie_a2201</field>
-        <field name="tag_ids" eval="[(6,0,[ref('l10n_ie_tag_pt2')])]"/>
-    </record>
-
-    <record id="l10n_ie_tax_pt8m" model="account.tax.template">
-        <field name="description">PT8M</field>
-        <field name="chart_template_id" ref="l10n_ie"/>
-        <field name="type_tax_use">none</field>
-        <field name="name">Standard rated purchases from EU (IE)</field>
-        <field name="amount_type">percent</field>
-        <field name="amount">17.5</field>
-        <field name="account_id">l10n_ie_a2201</field>
-        <field name="refund_account_id">l10n_ie_a2201</field>
-        <field name="tag_ids" eval="[(6,0,[ref('l10n_ie_tag_pt8m')])]"/>
-    </record>
-
-    <record id="l10n_ie_tax_pt8r" model="account.tax.template">
-        <field name="description">PT8R</field>
-        <field name="chart_template_id" ref="l10n_ie"/>
-        <field name="type_tax_use">none</field>
-        <field name="name">Reverse EU Purchase VAT (IE)</field>
-        <field name="amount_type">percent</field>
-        <field name="amount">-17.5</field>
-        <field name="account_id">l10n_ie_a2201</field>
-        <field name="refund_account_id">l10n_ie_a2201</field>
-        <field name="tag_ids" eval="[(6,0,[ref('l10n_ie_tag_pt8r')])]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2201'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2201'),
+            }),
+        ]"/>
     </record>
 
     <record id="l10n_ie_tax_pt8" model="account.tax.template">
@@ -102,12 +192,30 @@
         <field name="chart_template_id" ref="l10n_ie"/>
         <field name="type_tax_use">purchase</field>
         <field name="name">Standard rated purchases from EU (IE)</field>
-        <field name="amount_type">group</field>
-        <field name="amount"></field>
-        <field name="account_id">l10n_ie_a2201</field>
-        <field name="refund_account_id">l10n_ie_a2201</field>
-        <field name="children_tax_ids" eval="[(6,0,[ref('l10n_ie_tax_pt8m'),ref('l10n_ie_tax_pt8r')])]"/>
-        <field name="tag_ids" eval="[(6,0,[ref('l10n_ie_tag_pt8')])]"/>
+        <field name="amount_type">percent</field>
+        <field name="amount">17.5</field>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2201'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2201'),
+            }),
+        ]"/>
     </record>
 
     <record id="l10n_ie_tax_pt9" model="account.tax.template">
@@ -117,9 +225,28 @@
         <field name="name">Lower rate purchases (9%) (IE)</field>
         <field name="amount_type">percent</field>
         <field name="amount">9</field>
-        <field name="account_id">l10n_ie_a2201</field>
-        <field name="refund_account_id">l10n_ie_a2201</field>
-        <field name="tag_ids" eval="[(6,0,[ref('l10n_ie_tag_pt9')])]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2201'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2201'),
+            }),
+        ]"/>
     </record>
 
     <record id="l10n_ie_tax_st4" model="account.tax.template">
@@ -129,9 +256,28 @@
         <field name="name">Sales to customers in EU (IE)</field>
         <field name="amount_type">percent</field>
         <field name="amount">0</field>
-        <field name="account_id">l10n_ie_a2200</field>
-        <field name="refund_account_id">l10n_ie_a2200</field>
-        <field name="tag_ids" eval="[(6,0,[ref('l10n_ie_tag_st4')])]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2200'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2200'),
+            }),
+        ]"/>
     </record>
 
     <record id="l10n_ie_tax_pt7" model="account.tax.template">
@@ -141,9 +287,28 @@
         <field name="name">Zero rated purchases from EU (IE)</field>
         <field name="amount_type">percent</field>
         <field name="amount">0</field>
-        <field name="account_id">l10n_ie_a2201</field>
-        <field name="refund_account_id">l10n_ie_a2201</field>
-        <field name="tag_ids" eval="[(6,0,[ref('l10n_ie_tag_pt7')])]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2201'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2201'),
+            }),
+        ]"/>
     </record>
 
     <record id="l10n_ie_tax_st11" model="account.tax.template">
@@ -153,9 +318,28 @@
         <field name="name">Standard rate sales (23%) (IE)</field>
         <field name="amount_type">percent</field>
         <field name="amount">23</field>
-        <field name="account_id">l10n_ie_a2200</field>
-        <field name="refund_account_id">l10n_ie_a2200</field>
-        <field name="tag_ids" eval="[(6,0,[ref('l10n_ie_tag_st11')])]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2200'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2200'),
+            }),
+        ]"/>
     </record>
 
     <record id="l10n_ie_tax_pt11" model="account.tax.template">
@@ -165,9 +349,28 @@
         <field name="name">Standard rate purchases (23%) (IE)</field>
         <field name="amount_type">percent</field>
         <field name="amount">23</field>
-        <field name="account_id">l10n_ie_a2201</field>
-        <field name="refund_account_id">l10n_ie_a2201</field>
-        <field name="tag_ids" eval="[(6,0,[ref('l10n_ie_tag_pt11')])]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2201'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2201'),
+            }),
+        ]"/>
     </record>
 
     <record id="l10n_ie_tax_st9" model="account.tax.template">
@@ -177,9 +380,28 @@
         <field name="name">Lower rate sale (9%) (IE)</field>
         <field name="amount_type">percent</field>
         <field name="amount">9</field>
-        <field name="account_id">l10n_ie_a2202</field>
-        <field name="refund_account_id">l10n_ie_a2202</field>
-        <field name="tag_ids" eval="[(6,0,[ref('l10n_ie_tag_st9')])]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2202'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2202'),
+            }),
+        ]"/>
     </record>
 
     <record id="l10n_ie_tax_pt6" model="account.tax.template">
@@ -189,9 +411,28 @@
         <field name="name">Lower rate purchases (4.8%) (IE)</field>
         <field name="amount_type">percent</field>
         <field name="amount">4.8</field>
-        <field name="account_id">l10n_ie_a2201</field>
-        <field name="refund_account_id">l10n_ie_a2201</field>
-        <field name="tag_ids" eval="[(6,0,[ref('l10n_ie_tag_pt6')])]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2201'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2201'),
+            }),
+        ]"/>
     </record>
 
     <record id="l10n_ie_tax_st6" model="account.tax.template">
@@ -201,9 +442,28 @@
         <field name="name">Lower rate sale (4.8%) (IE)</field>
         <field name="amount_type">percent</field>
         <field name="amount">4.8</field>
-        <field name="account_id">l10n_ie_a2201</field>
-        <field name="refund_account_id">l10n_ie_a2201</field>
-        <field name="tag_ids" eval="[(6,0,[ref('l10n_ie_tag_st6')])]"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2201'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('l10n_ie_a2201'),
+            }),
+        ]"/>
     </record>
 
 </odoo>
