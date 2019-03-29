@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<odoo>
+    <data>
+
+        <record id="tax_in_e" model="account.tax.template">
+            <field name="name">仮受消費税(外)</field>
+            <field name="description">仮受消費税(外)</field>
+            <field name="chart_template_id" ref="l10n_jp1"/>
+            <field name="type_tax_use">sale</field>
+            <field name="amount_type">percent</field>
+            <field name="amount">8</field>
+            <field name="price_include">FALSE</field>
+            <field name="sequence" eval="1"/>
+            <field name="include_base_amount">FALSE</field>
+            <field name="account_id" ref="A21807"/>
+            <field name="refund_account_id" ref="A21807"/>
+            <field name="tag_ids" eval="[(6,0,[ref(tag_jp_03),ref('tag_jp_12')])]"/>
+            <field name="tax_group_id" ref="tax_group_8"/>
+        </record>
+ 
+        <record id="tax_in_i" model="account.tax.template">
+            <field name="name">仮受消費税(内)</field>
+            <field name="description">仮受消費税(内)</field>
+            <field name="chart_template_id" ref="l10n_jp1"/>
+            <field name="type_tax_use">sale</field>
+            <field name="amount_type">percent</field>
+            <field name="amount">8</field>
+            <field name="price_include">TRUE</field>
+            <field name="sequence" eval="1"/>
+            <field name="include_base_amount">FALSE</field>
+            <field name="account_id" ref="A21807"/>
+            <field name="refund_account_id" ref="A21807"/>
+            <field name="tag_ids" eval="[(6,0,[ref('tag_jp_03'),ref('tag_jp_12')])]"/>
+            <field name="tax_group_id" ref="tax_group_8"/>
+        </record>
+ 
+        <record id="tax_in_x" model="account.tax.template">
+            <field name="name">輸出免税</field>
+            <field name="description">輸出免税</field>
+            <field name="chart_template_id" ref="l10n_jp1"/>
+            <field name="type_tax_use">sale</field>
+            <field name="amount_type">percent</field>
+            <field name="amount">0</field>
+            <field name="price_include">FALSE</field>
+            <field name="sequence" eval="1"/>
+            <field name="include_base_amount">FALSE</field>
+            <field name="tag_ids" eval="[(6,0,[ref('tag_jp_04'),ref('tag_jp_13')])]"/>
+            <field name="tax_group_id" ref="tax_group_0"/>
+        </record>
+ 
+        <record id="tax_in_o" model="account.tax.template">
+            <field name="name">非課税販売</field>
+            <field name="description">非課税販売</field>
+            <field name="chart_template_id" ref="l10n_jp1"/>
+            <field name="type_tax_use">sale</field>
+            <field name="amount_type">percent</field>
+            <field name="amount">0</field>
+            <field name="price_include">FALSE</field>
+            <field name="sequence" eval="1"/>
+            <field name="include_base_amount">FALSE</field>
+            <field name="tag_ids" eval="[(6,0,[ref('tag_jp_09'),ref('tag_jp_14')])]"/>
+            <field name="tax_group_id" ref="tax_group_0"/>
+        </record>
+ 
+        <record id="tax_out_e" model="account.tax.template">
+            <field name="name">仮払消費税(外)</field
+            <field name="description">仮払消費税(外)</field>
+            <field name="chart_template_id" ref="l10n_jp1"/>
+            <field name="type_tax_use">purchase</field>
+            <field name="amount_type">percent</field>
+            <field name="amount">8</field>
+            <field name="price_include">FALSE</field>
+            <field name="sequence" eval="1"/>
+            <field name="include_base_amount">FALSE</field>
+            <field name="account_id" ref="A11807"/>
+            <field name="refund_account_id" ref="A11807"/>
+            <field name="tag_ids" eval="[(6,0,[ref('tag_jp_07'),ref('tag_jp_16')])]"/>
+            <field name="tax_group_id" ref="tax_group_8"/>
+        </record>
+ 
+        <record id="tax_out_i" model="account.tax.template">
+            <field name="name">仮払消費税(内)</field
+            <field name="description">仮払消費税(内)</field>
+            <field name="chart_template_id" ref="l10n_jp1"/>
+            <field name="type_tax_use">purchase</field>
+            <field name="amount_type">percent</field>
+            <field name="amount">8</field>
+            <field name="price_include">TRUE</field>
+            <field name="sequence" eval="1"/>
+            <field name="include_base_amount">FALSE</field>
+            <field name="account_id" ref="A11807"/>
+            <field name="refund_account_id" ref="A11807"/>
+             <field name="tag_ids" eval="[(6,0,[ref('tag_jp_07'),ref('tag_jp_16')])]"/>
+             <field name="tax_group_id" ref="tax_group_8"/>
+        </record>
+ 
+        <record id="tax_out_im" model="account.tax.template">
+            <field name="name">海外仕入</field>
+            <field name="description">海外仕入</field>
+            <field name="chart_template_id" ref="l10n_jp1"/>
+            <field name="type_tax_use">purchase</field>
+            <field name="amount_type">percent</field>
+            <field name="amount">0</field>
+            <field name="price_include">FALSE</field>
+            <field name="sequence" eval="1"/>
+            <field name="include_base_amount">FALSE</field>
+            <field name="tag_ids" eval="[(6,0,[ref('tag_jp_08'),ref('tag_jp_17')])]"/>
+            <field name="tax_group_id" ref="tax_group_0"/>
+        </record>
+ 
+        <record id="tax_out_o" model="account.tax.template">
+            <field name="name">非課税購買</field>
+            <field name="description">非課税購買</field>
+            <field name="chart_template_id" ref="l10n_jp1"/>
+            <field name="type_tax_use">purchase</field>
+            <field name="amount_type">percent</field>
+            <field name="amount">0</field>
+            <field name="price_include">FALSE</field>
+            <field name="sequence" eval="1"/>
+            <field name="include_base_amount">FALSE</field>
+            <field name="tag_ids" eval="[(6,0,[ref('tag_jp_18')])]"/>
+            <field name="tax_group_id" ref="tax_group_0"/>
+        </record>
+
+    </data>
+</odoo>
