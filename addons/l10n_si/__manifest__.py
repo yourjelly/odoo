@@ -21,7 +21,7 @@
         "data/account.chart.template.csv",
         'data/account.account.tag.csv',
         "data/account.tax.group.csv",
-        "data/account.tax.template.csv",
+        "data/account_tax_data.xml",
         "data/account.fiscal.position.template.csv",
         "data/account.fiscal.position.account.template.csv",
         "data/account.fiscal.position.tax.template.csv",

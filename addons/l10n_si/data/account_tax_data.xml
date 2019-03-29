@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="gd_taxr_1" model="account.tax.template">
+        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="name">Izstopni DDV 0%</field>
+        <field name="description">DDV-I-0</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="type_tax_use">sale</field>
+        <field name="price_include" eval="1"/>
+        <field name="refund_account_id"></field>
+        <field name="account_id"></field>
+        <field name="tag_ids" eval="[(6,0,[ref('DDV_I_0')])]"/>
+        <field name="tax_group_id">tax_group_0</field>
+    </record>
+    <record id="gd_taxr_2" model="account.tax.template">
+        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="name">Izstopni DDV 9.5%</field>
+        <field name="description">DDV-I-9.5</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">9.5</field>
+        <field name="type_tax_use">sale</field>
+        <field name="price_include" eval="1"/>
+        <field name="refund_account_id">gd_acc_260001</field>
+        <field name="account_id">gd_acc_260001</field>
+        <field name="tag_ids" eval="[(6,0,[ref('DDV_I_9_5')])]"/>
+        <field name="tax_group_id">tax_group_95</field>
+    </record>
+    <record id="gd_taxr_3" model="account.tax.template">
+        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="name">Izstopni DDV 22%</field>
+        <field name="description">DDV-I-22</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">22</field>
+        <field name="type_tax_use">sale</field>
+        <field name="price_include" eval="1"/>
+        <field name="refund_account_id">gd_acc_260002</field>
+        <field name="account_id">gd_acc_260002</field>
+        <field name="tag_ids" eval="[(6,0,[ref('DDV_I_22')])]"/>
+        <field name="tax_group_id">tax_group_22</field>
+    </record>
+    <record id="gd_taxp_1" model="account.tax.template">
+        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="name">Vstopni DDV 0%</field>
+        <field name="description">DDV-V-0</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include" eval="1"/>
+        <field name="refund_account_id"></field>
+        <field name="account_id"></field>
+        <field name="tag_ids" eval="[(6,0,[ref('DDV_V_0')])]"/>
+        <field name="tax_group_id">tax_group_0</field>
+    </record>
+    <record id="gd_taxp_2" model="account.tax.template">
+        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="name">Vstopni DDV 9.5%</field>
+        <field name="description">DDV-V-9.5</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">9.5</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include" eval="1"/>
+        <field name="refund_account_id">gd_acc_160002</field>
+        <field name="account_id">gd_acc_160002</field>
+        <field name="tag_ids" eval="[(6,0,[ref('DDV_V_9_5')])]"/>
+        <field name="tax_group_id">tax_group_95</field>
+    </record>
+    <record id="gd_taxp_3" model="account.tax.template">
+        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="name">Vstopni DDV 22%</field>
+        <field name="description">DDV-V-22</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">22</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include" eval="1"/>
+        <field name="refund_account_id">gd_acc_160003</field>
+        <field name="account_id">gd_acc_160003</field>
+        <field name="tag_ids" eval="[(6,0,[ref('DDV_V_22')])]"/>
+        <field name="tax_group_id">tax_group_22</field>
+    </record>
+    <record id="gd_taxp_nr_1" model="account.tax.template">
+        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="name">Vstopni DDV 9.5% - neodbitni</field>
+        <field name="description">DDV-V-9.5-NE</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">9.5</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include" eval="1"/>
+        <field name="refund_account_id">gd_acc_160001</field>
+        <field name="account_id">gd_acc_160001</field>
+        <field name="tag_ids" eval="[(6,0,[ref('DDV_V_9_5_NE')])]"/>
+        <field name="tax_group_id">tax_group_95</field>
+    </record>
+    <record id="gd_taxp_nr_2" model="account.tax.template">
+        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="name">Vstopni DDV 22% - neodbitni</field>
+        <field name="description">DDV-V-22-NE</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">22</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include" eval="1"/>
+        <field name="refund_account_id">gd_acc_160001</field>
+        <field name="account_id">gd_acc_160001</field>
+        <field name="tag_ids" eval="[(6,0,[ref('DDV_V_22_NE')])]"/>
+        <field name="tax_group_id">tax_group_22</field>
+    </record>
+    <record id="gd_taxp_st_1_1" model="account.tax.template">
+        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="name">Vstopni DDV 9.5% - SO</field>
+        <field name="description">SO-DDV-V-9.5</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">9.5</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include" eval="0"/>
+        <field name="refund_account_id">gd_acc_160002</field>
+        <field name="account_id">gd_acc_160002</field>
+        <field name="tag_ids" eval="[(6,0,[ref('DDV_V_9_5_SO')])]"/>
+        <field name="tax_group_id">tax_group_0</field>
+    </record>
+    <record id="gd_taxp_st_1_2" model="account.tax.template">
+        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="name">Izstopni DDV 9.5% - SO</field>
+        <field name="description">SO-DDV-I-9.5</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">-9.5</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include" eval="0"/>
+        <field name="refund_account_id">gd_acc_260001</field>
+        <field name="account_id">gd_acc_260001</field>
+        <field name="tag_ids" eval="[(6,0,[ref('DDV_I_9_5_SO')])]"/>
+        <field name="tax_group_id">tax_group_0</field>
+    </record>
+    <record id="gd_taxp_st_1" model="account.tax.template">
+        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="name">Vstopni DDV 9.5% - samoobdavčitev</field>
+        <field name="description">DDV-V-9.5-SO</field>
+        <field name="amount_type">group</field>
+        <field name="amount">0</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include" eval="0"/>
+        <field name="refund_account_id"></field>
+        <field name="account_id"></field>
+        <field name="tag_ids" eval="[(6,0,[ref('DDV_V_9_5_sam')])]"/>
+        <field name="children_tax_ids" eval="[(6,0,[ref('gd_taxp_st_1_1'),ref('gd_taxp_st_1_2')])]"/>
+        <field name="tax_group_id">tax_group_0</field>
+    </record>
+    <record id="gd_taxp_st_2_1" model="account.tax.template">
+        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="name">Vstopni DDV 22% - SO</field>
+        <field name="description">SO-DDV-V-22</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">22</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include" eval="0"/>
+        <field name="refund_account_id">gd_acc_160003</field>
+        <field name="account_id">gd_acc_160003</field>
+        <field name="tag_ids" eval="[(6,0,[ref('DDV_V_22_SO')])]"/>
+        <field name="tax_group_id">tax_group_0</field>
+    </record>
+    <record id="gd_taxp_st_2_2" model="account.tax.template">
+        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="name">Izstopni DDV 22% - SO</field>
+        <field name="description">SO-DDV-I-22</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">-22</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include" eval="0"/>
+        <field name="refund_account_id">gd_acc_260002</field>
+        <field name="account_id">gd_acc_260002</field>
+        <field name="tag_ids" eval="[(6,0,[ref('DDV_I_22_SO')])]"/>
+        <field name="tax_group_id">tax_group_0</field>
+    </record>
+    <record id="gd_taxp_st_2" model="account.tax.template">
+        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="name">Vstopni DDV 22% - samoobdavčitev</field>
+        <field name="description">DDV-V-22-SO</field>
+        <field name="amount_type">group</field>
+        <field name="amount">0</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include" eval="0"/>
+        <field name="refund_account_id"></field>
+        <field name="account_id"></field>
+        <field name="tag_ids" eval="[(6,0,[ref('DDV_V_22_sam')])]"/>
+        <field name="children_tax_ids" eval="[(6,0,[ref('gd_taxp_st_2_1'),ref('gd_taxp_st_2_2')])]"/>
+        <field name="tax_group_id">tax_group_0</field>
+    </record>
+
+</odoo>
