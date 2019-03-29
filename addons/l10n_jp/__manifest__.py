@@ -33,6 +33,7 @@ need to use these at all under normal circumstances.
         'data/l10n_jp_chart_data.xml',
         'data/account.account.template.csv',
         'data/account.tax.group.csv',
+        'data/account_tax_report_data.xml',
         'data/account_tax_data.xml',
         'data/account_chart_template_data.xml',
         'data/account.fiscal.position.template.csv',

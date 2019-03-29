@@ -16,6 +16,32 @@
             <field name="refund_account_id" ref="A21807"/>
             <field name="tag_ids" eval="[(6,0,[ref(tag_jp_03),ref('tag_jp_12')])]"/>
             <field name="tax_group_id" ref="tax_group_8"/>
+            <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_tag_ids': [ref('account_tax_report_l10n_jp_line_11')],
+                }),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('A21807'),
+                    'minus_tag_ids': [ref('account_tax_report_l10n_jp_line_2')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'plus_tag_ids': [ref('account_tax_report_l10n_jp_line_11')],
+                }),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('A21807'),
+                    'plus_tag_ids': [ref('account_tax_report_l10n_jp_line_2')],
+                }),
+            ]"/>
         </record>
  
         <record id="tax_in_i" model="account.tax.template">
@@ -32,6 +58,32 @@
             <field name="refund_account_id" ref="A21807"/>
             <field name="tag_ids" eval="[(6,0,[ref('tag_jp_03'),ref('tag_jp_12')])]"/>
             <field name="tax_group_id" ref="tax_group_8"/>
+            <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_tag_ids': [ref('account_tax_report_l10n_jp_line_11')],
+                }),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('A21807'),
+                    'minus_tag_ids': [ref('account_tax_report_l10n_jp_line_2')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'plus_tag_ids': [ref('account_tax_report_l10n_jp_line_11')],
+                }),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('A21807'),
+                    'plus_tag_ids': [ref('account_tax_report_l10n_jp_line_2')],
+                }),
+            ]"/>
         </record>
  
         <record id="tax_in_x" model="account.tax.template">
@@ -46,6 +98,28 @@
             <field name="include_base_amount">FALSE</field>
             <field name="tag_ids" eval="[(6,0,[ref('tag_jp_04'),ref('tag_jp_13')])]"/>
             <field name="tax_group_id" ref="tax_group_0"/>
+            <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'plus_tag_ids': [ref('account_tax_report_l10n_jp_line_12')],
+                }),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_tag_ids': [ref('account_tax_report_l10n_jp_line_12')],
+                }),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                }),
+            ]"/>
         </record>
  
         <record id="tax_in_o" model="account.tax.template">
@@ -60,6 +134,30 @@
             <field name="include_base_amount">FALSE</field>
             <field name="tag_ids" eval="[(6,0,[ref('tag_jp_09'),ref('tag_jp_14')])]"/>
             <field name="tax_group_id" ref="tax_group_0"/>
+            <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'plus_tag_ids': [ref('account_tax_report_l10n_jp_line_13')],
+                }),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('chart2701'),
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_tag_ids': [ref('account_tax_report_l10n_jp_line_13')],
+                }),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('chart2701'),
+                }),
+            ]"/>
         </record>
  
         <record id="tax_out_e" model="account.tax.template">
@@ -76,6 +174,32 @@
             <field name="refund_account_id" ref="A11807"/>
             <field name="tag_ids" eval="[(6,0,[ref('tag_jp_07'),ref('tag_jp_16')])]"/>
             <field name="tax_group_id" ref="tax_group_8"/>
+            <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'plus_tag_ids': [ref('account_tax_report_l10n_jp_line_15')],
+                }),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('A11807'),
+                    'plus_tag_ids': [ref('account_tax_report_l10n_jp_line_6')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_tag_ids': [ref('account_tax_report_l10n_jp_line_15')],
+                }),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('A11807'),
+                    'minus_tag_ids': [ref('account_tax_report_l10n_jp_line_6')],
+                }),
+            ]"/>
         </record>
  
         <record id="tax_out_i" model="account.tax.template">
@@ -92,6 +216,30 @@
             <field name="refund_account_id" ref="A11807"/>
              <field name="tag_ids" eval="[(6,0,[ref('tag_jp_07'),ref('tag_jp_16')])]"/>
              <field name="tax_group_id" ref="tax_group_8"/>
+            <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                }),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('A11807'),
+                    'plus_tag_ids': [ref('account_tax_report_l10n_jp_line_6')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                }),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('A11807'),
+                    'minus_tag_ids': [ref('account_tax_report_l10n_jp_line_6')],
+                }),
+            ]"/>
         </record>
  
         <record id="tax_out_im" model="account.tax.template">
@@ -106,6 +254,28 @@
             <field name="include_base_amount">FALSE</field>
             <field name="tag_ids" eval="[(6,0,[ref('tag_jp_08'),ref('tag_jp_17')])]"/>
             <field name="tax_group_id" ref="tax_group_0"/>
+            <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'plus_tag_ids': [ref('account_tax_report_l10n_jp_line_16')],
+                }),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_tag_ids': [ref('account_tax_report_l10n_jp_line_16')],
+                }),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                }),
+            ]"/>
         </record>
  
         <record id="tax_out_o" model="account.tax.template">
@@ -120,6 +290,28 @@
             <field name="include_base_amount">FALSE</field>
             <field name="tag_ids" eval="[(6,0,[ref('tag_jp_18')])]"/>
             <field name="tax_group_id" ref="tax_group_0"/>
+            <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'plus_tag_ids': [ref('account_tax_report_l10n_jp_line_17')],
+                }),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_tag_ids': [ref('account_tax_report_l10n_jp_line_17')],
+                }),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                }),
+            ]"/>
         </record>
 
     </data>
