@@ -11,7 +11,6 @@
         <field name="price_include">FALSE</field>
         <field name="account_id" ref="nz_21310"/>
         <field name="refund_account_id" ref="nz_21310"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('tag_nz_tax_sale_15')])]"/>
         <field name="tax_group_id" ref="tax_group_15"/>
     </record>
     <record id="nz_tax_sale_inc_15" model="account.tax.template">
@@ -25,7 +24,6 @@
         <field name="price_include">TRUE</field>
         <field name="account_id" ref="nz_21310"/>
         <field name="refund_account_id" ref="nz_21310"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('tag_nz_tax_sale_inc_15')])]"/>
         <field name="tax_group_id" ref="tax_group_gst_15"/>
     </record>
     <record id="nz_tax_sale_0" model="account.tax.template">
@@ -39,7 +37,6 @@
         <field name="price_include">FALSE</field>
         <field name="account_id" ref="nz_21310"/>
         <field name="refund_account_id" ref="nz_21310"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('tag_nz_tax_sale_0')])]"/>
         <field name="tax_group_id" ref="tax_group_0"/>
     </record>
     <record id="nz_tax_purchase_15" model="account.tax.template">
@@ -53,7 +50,6 @@
         <field name="price_include">FALSE</field>
         <field name="account_id" ref="nz_21330"/>
         <field name="refund_account_id" ref="nz_21330"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('tag_nz_tax_purchase_15')])]"/>
         <field name="tax_group_id" ref="tax_group_15"/>
     </record>
     <record id="nz_tax_purchase_inc_15" model="account.tax.template">
@@ -67,7 +63,6 @@
         <field name="price_include">TRUE</field>
         <field name="account_id" ref="nz_21330"/>
         <field name="refund_account_id" ref="nz_21330"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('tag_nz_tax_purchase_inc_15')])]"/>
         <field name="tax_group_id" ref="tax_group_gst_15"/>
     </record>
     <record id="nz_tax_purchase_0" model="account.tax.template">
@@ -81,7 +76,6 @@
         <field name="price_include">FALSE</field>
         <field name="account_id" ref="nz_21330"/>
         <field name="refund_account_id" ref="nz_21330"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('tag_nz_tax_purchase_0')])]"/>
         <field name="tax_group_id" ref="tax_group_0"/>
     </record>
     <record id="nz_tax_purchase_taxable_import" model="account.tax.template">
@@ -95,7 +89,6 @@
         <field name="price_include">FALSE</field>
         <field name="account_id" ref="nz_21330"/>
         <field name="refund_account_id" ref="nz_21330"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('tag_nz_tax_purchase_taxable_import')])]"/>
         <field name="tax_group_id" ref="tax_group_0"/>
     </record>
     <record id="nz_tax_purchase_gst_only" model="account.tax.template">
@@ -109,7 +102,6 @@
         <field name="price_include">TRUE</field>
         <field name="account_id" ref="nz_21330"/>
         <field name="refund_account_id" ref="nz_21330"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('tag_nz_tax_purchase_gst_only')])]"/>
         <field name="tax_group_id" ref="tax_group_100000000"/>
     </record>
 </odoo>

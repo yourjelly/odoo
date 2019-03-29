@@ -24,7 +24,6 @@ Also:
              'data/l10n_nz_chart_data.xml',
              'data/account.account.template.csv',
              'data/account_chart_template_data.xml',
-             'data/account.account.tag.csv',
              'data/account.tax.group.csv',
              'data/account_tax_template_data.xml',
              'data/account_fiscal_position_tax_template_data.xml',
