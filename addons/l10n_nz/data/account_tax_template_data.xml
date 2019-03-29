@@ -9,9 +9,31 @@
         <field name="amount_type">percent</field>
         <field name="amount">15</field>
         <field name="price_include">FALSE</field>
-        <field name="account_id" ref="nz_21310"/>
-        <field name="refund_account_id" ref="nz_21310"/>
         <field name="tax_group_id" ref="tax_group_15"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('nz_21310'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('nz_21310'),
+            }),
+        ]"/>
     </record>
     <record id="nz_tax_sale_inc_15" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_nz_chart_template"/>
@@ -22,9 +44,31 @@
         <field name="amount_type">percent</field>
         <field name="amount">15</field>
         <field name="price_include">TRUE</field>
-        <field name="account_id" ref="nz_21310"/>
-        <field name="refund_account_id" ref="nz_21310"/>
         <field name="tax_group_id" ref="tax_group_gst_15"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('nz_21310'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('nz_21310'),
+            }),
+        ]"/>
     </record>
     <record id="nz_tax_sale_0" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_nz_chart_template"/>
@@ -35,9 +79,31 @@
         <field name="amount_type">percent</field>
         <field name="amount">0</field>
         <field name="price_include">FALSE</field>
-        <field name="account_id" ref="nz_21310"/>
-        <field name="refund_account_id" ref="nz_21310"/>
         <field name="tax_group_id" ref="tax_group_0"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('nz_21310'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('nz_21310'),
+            }),
+        ]"/>
     </record>
     <record id="nz_tax_purchase_15" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_nz_chart_template"/>
@@ -48,9 +114,31 @@
         <field name="amount_type">percent</field>
         <field name="amount">15</field>
         <field name="price_include">FALSE</field>
-        <field name="account_id" ref="nz_21330"/>
-        <field name="refund_account_id" ref="nz_21330"/>
         <field name="tax_group_id" ref="tax_group_15"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('nz_21330'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('nz_21330'),
+            }),
+        ]"/>
     </record>
     <record id="nz_tax_purchase_inc_15" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_nz_chart_template"/>
@@ -61,9 +149,31 @@
         <field name="amount_type">percent</field>
         <field name="amount">15</field>
         <field name="price_include">TRUE</field>
-        <field name="account_id" ref="nz_21330"/>
-        <field name="refund_account_id" ref="nz_21330"/>
         <field name="tax_group_id" ref="tax_group_gst_15"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('nz_21330'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('nz_21330'),
+            }),
+        ]"/>
     </record>
     <record id="nz_tax_purchase_0" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_nz_chart_template"/>
@@ -74,9 +184,31 @@
         <field name="amount_type">percent</field>
         <field name="amount">0</field>
         <field name="price_include">FALSE</field>
-        <field name="account_id" ref="nz_21330"/>
-        <field name="refund_account_id" ref="nz_21330"/>
         <field name="tax_group_id" ref="tax_group_0"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('nz_21330'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('nz_21330'),
+            }),
+        ]"/>
     </record>
     <record id="nz_tax_purchase_taxable_import" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_nz_chart_template"/>
@@ -87,9 +219,31 @@
         <field name="amount_type">percent</field>
         <field name="amount">0</field>
         <field name="price_include">FALSE</field>
-        <field name="account_id" ref="nz_21330"/>
-        <field name="refund_account_id" ref="nz_21330"/>
         <field name="tax_group_id" ref="tax_group_0"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('nz_21330'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('nz_21330'),
+            }),
+        ]"/>
     </record>
     <record id="nz_tax_purchase_gst_only" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_nz_chart_template"/>
@@ -100,8 +254,30 @@
         <field name="amount_type">percent</field>
         <field name="amount">100000000</field>
         <field name="price_include">TRUE</field>
-        <field name="account_id" ref="nz_21330"/>
-        <field name="refund_account_id" ref="nz_21330"/>
         <field name="tax_group_id" ref="tax_group_100000000"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('nz_21330'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('nz_21330'),
+            }),
+        ]"/>
     </record>
 </odoo>
