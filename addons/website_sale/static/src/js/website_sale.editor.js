@@ -154,7 +154,10 @@ options.registry.website_sale = options.Class.extend({
                     x: x,
                     y: y,
                 },
-            }).then(self.reload);
+            }).then(function (result) {
+                self.$target.closest("#products_grid > #product_table").replaceWith(result.template);
+                $('.oe_overlay').detach();
+            });
         });
     },
     style: function (previewMode, value, $li) {
@@ -167,13 +170,17 @@ options.registry.website_sale = options.Class.extend({
         });
     },
     go_to: function (previewMode, value) {
+        var self = this;
         this._rpc({
             route: '/shop/change_sequence',
             params: {
                 id: this.product_tmpl_id,
                 sequence: value,
             },
-        }).then(this.reload);
+        }).then(function (result) {
+            self.$target.closest("#products_grid > #product_table").replaceWith(result.template);
+            $('.oe_overlay').detach();
+        });
     }
 });
 
@@ -234,6 +241,77 @@ options.registry.ProductsSearchBar = options.Class.extend({
                 },
             ],
         }).open();
+    },
+});
+});
+
+// ===================================================================
+odoo.define('website_sale.shop_editor_menu', function (require) {
+'use strict';
+
+var EditorMenu = require('website.editor.menu');
+
+EditorMenu.include({
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * Asks the user if they really wants to discard their changes (if any),
+     * then simply reloads the page if they want to.
+     *
+     * @override
+     * @param {boolean} [reload=true]
+     *        true if the page has to be reloaded when the user answers yes
+     *        (do nothing otherwise but add this to allow class extension)
+     * @returns {Deferred}
+     */
+    cancel: function (reload) {
+        // overridden this method for remove 'ChangeSize' compute custom values from global variable
+        this._computeChangeSize(true);
+        return this._super.apply(this, arguments);
+    },
+
+    /**
+     * Asks the snippets to clean themself, then saves the page, then reloads it
+     * if asked to.
+     *
+     * @override
+     * @param {boolean} [reload=true]
+     *        true if the page has to be reloaded after the save
+     * @returns {Deferred}
+     */
+    save: function (reload) {
+        this._computeChangeSize();
+        return this._super.apply(this, arguments);
+    },
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     */
+    _computeChangeSize: function (discard) {
+        var $target = $('#wrapwrap').find('#products_grid > #product_table');
+        var $optionChanges = $target.find('.o_product_change_size');
+        if ($optionChanges.length) {
+            // save product change size, when we hit save button
+            var products = _.map($optionChanges, function ($optionChange) {
+                return {
+                    id: parseInt($($optionChange).find('[data-oe-model="product.template"]').data('oe-id')),
+                    x: discard ? false : parseInt($optionChange.getAttribute('colspan')) || 1,
+                    y: discard ? false : parseInt($optionChange.getAttribute('rowspan')) || 1,
+                };
+            });
+            this._rpc({
+                route: '/shop/change_save',
+                params: {
+                    products: products,
+                },
+            });
+        }
     },
 });
 });

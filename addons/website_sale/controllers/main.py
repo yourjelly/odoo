@@ -19,6 +19,8 @@ _logger = logging.getLogger(__name__)
 
 PPG = 20  # Products Per Page
 PPR = 4   # Products Per Row
+# ChangeSize for use to show custom compute size of products without saving database, when shop page customize
+ChangeSize = {}
 
 
 class TableCompute(object):
@@ -41,15 +43,22 @@ class TableCompute(object):
                 self.table[posy + y].setdefault(x, None)
         return res
 
-    def process(self, products, ppg=PPG):
+    def process(self, products, ppg=PPG, custom_size=None):
         # Compute products positions on the grid
+        # custom_size: params use to show product bins size only while customize page
         minpos = 0
         index = 0
         maxy = 0
         x = 0
         for p in products:
-            x = min(max(p.website_size_x, 1), PPR)
-            y = min(max(p.website_size_y, 1), PPR)
+            if custom_size and ChangeSize and ChangeSize.get(p.id):
+                # compute col and row size
+                val = ChangeSize.get(p.id)
+                x = min(max(val['x'], 1), PPR)
+                y = min(max(val['y'], 1), PPR)
+            else:
+                x = min(max(p.website_size_x, 1), PPR)
+                y = min(max(p.website_size_y, 1), PPR)
             if index >= ppg:
                 x = y = 1
 
@@ -72,7 +81,9 @@ class TableCompute(object):
                     self.table[(pos // PPR) + y2][(pos % PPR) + x2] = False
             self.table[pos // PPR][pos % PPR] = {
                 'product': p, 'x': x, 'y': y,
-                'class': " ".join(x.html_class for x in p.website_style_ids if x.html_class)
+                'class': " ".join(x.html_class for x in p.website_style_ids if x.html_class),
+                # for highlight, which product have changed size
+                'change_size': True if custom_size and ChangeSize and ChangeSize.get(p.id) else False
             }
             if index <= ppg:
                 maxy = max(maxy, y + (pos // PPR))
@@ -201,6 +212,12 @@ class WebsiteSale(http.Controller):
         '''/shop/category/<model("product.public.category", "[('website_id', 'in', (False, current_website_id))]"):category>/page/<int:page>'''
     ], type='http', auth="public", website=True)
     def shop(self, page=0, category=None, search='', ppg=False, **post):
+        values = self._prepare_bins(page, category, search, ppg, **post)
+        if category:
+            values['main_object'] = category
+        return request.render("website_sale.products", values)
+
+    def _prepare_bins(self, page=0, category=None, search='', ppg=False, **post):
         add_qty = int(post.get('add_qty', 1))
         if category:
             category = request.env['product.public.category'].search([('id', '=', int(category))], limit=1)
@@ -269,7 +286,7 @@ class WebsiteSale(http.Controller):
 
         compute_currency = self._get_compute_currency(pricelist, products[:1])
 
-        values = {
+        return {
             'search': search,
             'category': category,
             'attrib_values': attrib_values,
@@ -279,7 +296,7 @@ class WebsiteSale(http.Controller):
             'add_qty': add_qty,
             'products': products,
             'search_count': product_count,  # common for all searchbox
-            'bins': TableCompute().process(products, ppg),
+            'bins': TableCompute().process(products, ppg, custom_size=post.get('custom_size')),
             'rows': PPR,
             'categories': categs,
             'attributes': attributes,
@@ -288,9 +305,6 @@ class WebsiteSale(http.Controller):
             'parent_category_ids': parent_category_ids,
             'search_categories_ids': search_categories and search_categories.ids,
         }
-        if category:
-            values['main_object'] = category
-        return request.render("website_sale.products", values)
 
     @http.route(['/shop/product/<model("product.template"):product>'], type='http', auth="public", website=True)
     def product(self, product, category='', search='', **kwargs):
@@ -1053,22 +1067,33 @@ class WebsiteSale(http.Controller):
 
         return not active
 
-    @http.route(['/shop/change_sequence'], type='json', auth="public")
+    @http.route(['/shop/change_sequence'], type='json', auth="public", website=True)
     def change_sequence(self, id, sequence):
         product_tmpl = request.env['product.template'].browse(id)
-        if sequence == "top":
-            product_tmpl.set_sequence_top()
-        elif sequence == "bottom":
-            product_tmpl.set_sequence_bottom()
-        elif sequence == "up":
-            product_tmpl.set_sequence_up()
-        elif sequence == "down":
-            product_tmpl.set_sequence_down()
+        if hasattr(product_tmpl, 'set_sequence_' + sequence):
+            getattr(product_tmpl, 'set_sequence_' + sequence)()
+            values = self._prepare_bins()
+            return {'template': request.env['ir.ui.view'].render_template("website_sale.product_table", values)}
+        return None
 
-    @http.route(['/shop/change_size'], type='json', auth="public")
+    @http.route(['/shop/change_size'], type='json', auth="public", website=True)
     def change_size(self, id, x, y):
-        product = request.env['product.template'].browse(id)
-        return product.write({'website_size_x': x, 'website_size_y': y})
+        # stored temporary based product col and row size
+        # when we have used to option for change the bins size
+        ChangeSize.update({id: {'x': x, 'y': y}})
+        return {'template': request.env['ir.ui.view'].render_template("website_sale.product_table", self._prepare_bins(custom_size=True))}
+
+    @http.route(['/shop/change_save'], type='json', auth="public")
+    def change_save(self, products):
+        product_tmpl = request.env['product.template']
+        for product in products:
+            if product.get('x') and product.get('y'):
+                product_tmpl.browse(product['id']).write({
+                    'website_size_x': product['x'],
+                    'website_size_y': product['y']
+                })
+            # remove stored value for accurate result for the customize page
+            ChangeSize.pop(product['id'])
 
     def order_lines_2_google_api(self, order_lines):
         """ Transforms a list of order lines into a dict for google analytics """
