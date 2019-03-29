@@ -1,0 +1,35 @@
+<grammar xmlns="http://relaxng.org/ns/structure/1.0"
+         datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+<include href='common.rng'/>
+<define name="map">
+    <element name="map">
+        <zeroOrMore>
+            <choice>
+                <group>
+                    <ref name ="coordinates"/>
+                </group>
+                <attribute name ="address"/>
+            </choice>
+            <optional>
+                <zeroOrMore>
+                    <ref name="marker-popup"/>
+                </zeroOrMore>
+            </optional>
+        </zeroOrMore>
+    </element>
+</define>
+
+<define name ="marker-popup">
+    <element name="marker-popup">
+        <element name='field'/>
+    </element>
+</define>
+
+<define name="coordinates">
+    <attribute name="latitude"/>
+    <attribute name ="longitude"/>
+</define>
+<start>
+    <ref name="map"/>
+</start>
+</grammar>
