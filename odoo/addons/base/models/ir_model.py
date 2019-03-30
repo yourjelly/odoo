@@ -284,8 +284,8 @@ class IrModel(models.Model):
             cr.execute("SELECT * FROM ir_model_data WHERE name=%s AND module=%s",
                        (xmlid, self._context['module']))
             if not cr.rowcount:
-                cr.execute(""" INSERT INTO ir_model_data (module, name, model, res_id, date_init, date_update)
-                               VALUES (%s, %s, %s, %s, (now() at time zone 'UTC'), (now() at time zone 'UTC')) """,
+                cr.execute(""" INSERT INTO ir_model_data (module, name, model, res_id, noupdate, date_init, date_update)
+                               VALUES (%s, %s, %s, %s, true, (now() at time zone 'UTC'), (now() at time zone 'UTC')) """,
                            (self._context['module'], xmlid, record._name, record.id))
 
         return record
@@ -612,9 +612,9 @@ class IrModelFields(models.Model):
                 else:
                     # field hasn't been loaded (yet?)
                     continue
-                for dependant, path in model._field_triggers.get(field, ()):
-                    if dependant.manual:
-                        failed_dependencies.append((field, dependant))
+                for dep in model._dependent_fields(field):
+                    if dep.manual:
+                        failed_dependencies.append((field, dep))
                 for inverse in model._field_inverses.get(field, ()):
                     if inverse.manual and inverse.type == 'one2many':
                         failed_dependencies.append((field, inverse))
@@ -631,6 +631,12 @@ class IrModelFields(models.Model):
         if not self:
             return
 
+        # remove pending write of this field
+        # DLE P16: if there are pending towrite of the field we currently try to unlink, pop them out from the towrite queue
+        # test `test_unlink_with_dependant`
+        for record in self:
+            for record_values in self.env.all.towrite[record.model].values():
+                record_values.pop(record.name, None)
         # remove fields from registry, and check that views are not broken
         fields = [self.env[record.model]._pop_field(record.name) for record in self]
         domain = expression.OR([('arch_db', 'like', record.name)] for record in self)
@@ -1206,7 +1212,7 @@ class IrModelAccess(models.Model):
                                 JOIN ir_model m ON (a.model_id=m.id)
                                 JOIN res_groups g ON (a.group_id=g.id)
                                 LEFT JOIN ir_module_category c ON (c.id=g.category_id)
-                            WHERE m.model=%s AND a.active IS TRUE AND a.perm_""" + access_mode,
+                            WHERE m.model=%s AND a.active IS TRUE AND a.perm_""" + access_mode + " ORDER BY g.id",
                          (model_name,))
         return [('%s/%s' % x) if x[0] else x[1] for x in self._cr.fetchall()]
 

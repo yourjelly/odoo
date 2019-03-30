@@ -119,7 +119,7 @@ class Lead(models.Model):
     zip = fields.Char('Zip', change_default=True)
     city = fields.Char('City')
     state_id = fields.Many2one("res.country.state", string='State')
-    country_id = fields.Many2one('res.country', string='Country')
+    country_id = fields.Many2one('res.country', string='Country', compute="_get_country_id", store=True, readonly=False)
     phone = fields.Char('Phone', tracking=50)
     mobile = fields.Char('Mobile')
     function = fields.Char('Job Position')
@@ -271,10 +271,14 @@ class Lead(models.Model):
                 if values:
                     lead.update(values)
 
-    @api.onchange('state_id')
-    def _onchange_state(self):
-        if self.state_id:
-            self.country_id = self.state_id.country_id.id
+    @api.depends('state_id')
+    def _get_country_id(self):
+        # DLE P30: _on_change methods might have been coded to handle only one record (`api.ensure_one`),
+        # because practicaly it was always the case. Nevertheless, when converting them to compute fields,
+        # you must handle the possibility of `api.multi`.
+        for record in self:
+            if record.state_id:
+                record.country_id = record.state_id.country_id.id
 
     @api.onchange('country_id')
     def _onchange_country_id(self):
