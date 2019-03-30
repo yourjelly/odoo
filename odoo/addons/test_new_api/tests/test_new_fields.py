@@ -467,6 +467,7 @@ class TestFields(common.TransactionCase):
         self.assertIn(record.amount, [ramount, samount], msg)
 
         # check the value in the database
+        record.flush()
         self.cr.execute('SELECT amount FROM test_new_api_mixed WHERE id=%s', [record.id])
         value = self.cr.fetchone()[0]
         self.assertEqual(value, samount, msg)
@@ -524,8 +525,9 @@ class TestFields(common.TransactionCase):
         record.date = date(2012, 5, 1)
         self.assertEqual(record.date, date(2012, 5, 1))
 
-        with self.assertRaises(TypeError):
-            record.date = datetime(2012, 5, 1, 10, 45, 0)
+        # DLE P41: We now support to assign datetime to date. Not sure this is the good practice though.
+        # with self.assertRaises(TypeError):
+        #     record.date = datetime(2012, 5, 1, 10, 45, 0)
 
         # one may assign dates and datetime in the default format, and it must be checked
         record.date = '2012-05-01'
@@ -816,7 +818,6 @@ class TestFields(common.TransactionCase):
             'moment': '1932-11-09 00:00:00',
             'tag_id': tag1.id,
         })
-        record.invalidate_cache()
         self.assertEqual(record.with_user(user0).foo, 'main')
         self.assertEqual(record.with_user(user1).foo, 'default')
         self.assertEqual(record.with_user(user2).foo, 'default')
@@ -836,7 +837,6 @@ class TestFields(common.TransactionCase):
             'moment': '1932-12-10 23:59:59',
             'tag_id': tag2.id,
         })
-        record.invalidate_cache()
         self.assertEqual(record.with_user(user0).foo, 'main')
         self.assertEqual(record.with_user(user1).foo, 'alpha')
         self.assertEqual(record.with_user(user2).foo, 'default')
@@ -857,7 +857,6 @@ class TestFields(common.TransactionCase):
         self.assertEqual(record.with_user(user2).tag_id, tag0)
 
         record.with_user(user1).foo = False
-        record.invalidate_cache()
         self.assertEqual(record.with_user(user0).foo, 'main')
         self.assertEqual(record.with_user(user1).foo, False)
         self.assertEqual(record.with_user(user2).foo, 'default')
@@ -906,6 +905,7 @@ class TestFields(common.TransactionCase):
         })
         with self.assertRaises(AccessError):
             record.with_user(user0).foo = 'forbidden'
+            record.with_user(user0).flush()
 
     def test_30_read(self):
         """ test computed fields as returned by read(). """
@@ -1223,6 +1223,26 @@ class TestFields(common.TransactionCase):
         self.assertEqual(len(discussion.messages), 5)
         self.assertEqual(len(discussion.important_messages), 2)
         self.assertEqual(len(discussion.very_important_messages), 2)
+
+    def test_70_relational_inverse(self):
+        """ Check the consistency of relational fields with inverse(s). """
+        discussion = self.env.ref('test_new_api.discussion_0')
+        demo_discussion = discussion.sudo(self.env.ref('base.user_demo'))
+
+        # check that the demo user sees the same messages
+        self.assertEqual(demo_discussion.messages, discussion.messages)
+
+        # add a message as user demo
+        messages = demo_discussion.messages
+        message = messages.create({'discussion': discussion.id})
+        self.assertEqual(demo_discussion.messages, messages + message)
+        self.assertEqual(demo_discussion.messages, discussion.messages)
+
+        # add a message as superuser
+        messages = discussion.messages
+        message = messages.create({'discussion': discussion.id})
+        self.assertEqual(discussion.messages, messages + message)
+        self.assertEqual(demo_discussion.messages, discussion.messages)
 
     def test_80_copy(self):
         Translations = self.env['ir.translation']
