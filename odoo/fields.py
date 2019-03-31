@@ -988,9 +988,9 @@ class Field(MetaField('DummyField', (object,), {})):
         if record:
             # only a single record may be accessed
             record.ensure_one()
-            try:
+            if record.env.cache.contains(record, self) and not record.env.check_todo(self, record):
                 value = record.env.cache.get(record, self)
-            except KeyError:
+            else:
                 # cache miss, determine value and retrieve it
                 if record.id:
                     self.determine_value(record)
@@ -1027,7 +1027,12 @@ class Field(MetaField('DummyField', (object,), {})):
             # determine more dependent fields, and invalidate them
             if self.relational:
                 spec += self.modified_draft(record)
-            env.cache.invalidate(spec)
+
+            # TOOD?
+            # FP Fix: van not invalidate (what if the compute does not change the value?)
+            # env.cache.invalidate(spec)
+            for field in spec:
+                env.add_todo(field[0], record)
 
         else:
             # Write to database
@@ -1049,7 +1054,8 @@ class Field(MetaField('DummyField', (object,), {})):
         cache = records.env.cache
         for field in fields:
             for record in records:
-                cache.set(record, field, field.convert_to_cache(False, record, validate=False))
+                if not cache.contains(record, field):
+                    cache.set(record, field, field.convert_to_cache(False, record, validate=False))
         if isinstance(self.compute, str):
             getattr(records, self.compute)()
         else:

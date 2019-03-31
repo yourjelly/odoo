@@ -141,7 +141,7 @@ class AccountInvoiceReport(models.Model):
                     LEFT JOIN uom_uom uom_line ON uom_line.id = line.product_uom_id
                     LEFT JOIN uom_uom uom_template ON uom_template.id = template.uom_id
                     INNER JOIN account_move move ON move.id = line.move_id
-                    LEFT JOIN res_partner commercial_partner ON commercial_partner.id = move.commercial_partner_id
+                    LEFT JOIN res_partner commercial_partner ON commercial_partner.id = line.partner_id
                 WHERE move.type IN ('out_invoice', 'out_refund', 'in_invoice', 'in_refund')
                     AND line.account_id IS NOT NULL
                     AND user_type.type NOT IN ('receivable', 'payable')

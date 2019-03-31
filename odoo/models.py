@@ -5264,10 +5264,11 @@ Fields:
                     target = target0 - self.env.protected(field)
                     if not target:
                         continue
-                    invalids.append((field, target._ids))
+                    # FP TODO:
                     # do not recompute if a value is provided (on_change and default optimization)
                     if (target==self) and (field.name in fnames):
                         continue
+                    invalids.append((field, target._ids))
                     # mark field to be recomputed on target
                     if field.compute_sudo:
                         target = target.sudo()
@@ -5314,12 +5315,15 @@ Fields:
             # update records in batch when possible
             with recs.env.norecompute():
                 for vals, ids in updates.items():
+                    import pdb
+                    pdb.set_trace()
                     target = recs.browse(ids)
-                    try:
-                        target._write(dict(vals))
-                    except MissingError:
-                        # retry without missing records
-                        target.exists()._write(dict(vals))
+                    if vals:
+                        try:
+                            target._write(dict(vals))
+                        except MissingError:
+                            # retry without missing records
+                            target.exists()._write(dict(vals))
 
             # mark computed fields as done
             for f in fs:
@@ -5524,6 +5528,10 @@ Fields:
                     # do not nullify all fields of parent record for new records
                     continue
                 record[name] = value
+
+        import pdb
+        pdb.set_trace()
+        record.recompute()
 
         result = {'warnings': OrderedSet()}
 
