@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="ST0" model="account.tax.template"> 
+        <field name="description">ST0</field> 
+        <field name="chart_template_id" ref="l10n_uk"/> 
+        <field name="type_tax_use">sale</field> 
+        <field name="name">Zero rated sales</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field> 
+        <field name="account_id" ref="2200"/> 
+        <field name="refund_account_id" ref="2200"/> 
+        <field name="tag_ids" eval="[(6,0,[ref('vat_tag_box1'),ref('vat_tag_box6')])]"/> 
+        <field name="tax_group_id" ref="tax_group_0"/> 
+    </record>
+
+    <record id="ST2" model="account.tax.template"> 
+        <field name="description">ST2</field> 
+        <field name="chart_template_id" ref="l10n_uk"/> 
+        <field name="type_tax_use">sale</field> 
+        <field name="name">Exempt sales</field>
+        <field name="amount_type">percent</field> 
+        <field name="amount">0</field> 
+        <field name="account_id" ref="2200"/> 
+        <field name="refund_account_id" ref="2200"/> 
+        <field name="tag_ids" eval="[(6,0,[ref('vat_tag_box1'),ref('vat_tag_box6')])]"/>
+        <field name="tax_group_id" ref="tax_group_0"/> 
+    </record>
+
+    <record id="PT0" model="account.tax.template"> 
+        <field name="description">PT0</field> 
+        <field name="chart_template_id" ref="l10n_uk"/> 
+        <field name="type_tax_use">purchase</field> 
+        <field name="name">Zero rated purchases</field>
+        <field name="amount_type">percent</field> 
+        <field name="amount">0</field> 
+        <field name="account_id" ref="2201"/> 
+        <field name="refund_account_id" ref="2201"/> 
+        <field name="tag_ids" eval="[(6,0,[ref('vat_tag_box4'),ref('vat_tag_box7')])]"/>
+        <field name="tax_group_id" ref="tax_group_0"/> 
+    </record>
+
+    <record id="PT2" model="account.tax.template"> 
+        <field name="description">PT2</field> 
+        <field name="chart_template_id" ref="l10n_uk"/> 
+        <field name="type_tax_use">purchase</field> 
+        <field name="name">Exempt purchases</field>
+        <field name="amount_type">percent</field> 
+        <field name="amount">0</field> 
+        <field name="account_id" ref="2201"/> 
+        <field name="refund_account_id" ref="2201"/> 
+        <field name="tag_ids" eval="[(6,0,[ref('vat_tag_box4'),ref('vat_tag_box7')])]"/>
+        <field name="tax_group_id" ref="tax_group_0"/> 
+    </record>
+
+    <record id="PT8M" model="account.tax.template"> 
+        <field name="description">PT8M</field> 
+        <field name="chart_template_id" ref="l10n_uk"/> 
+        <field name="type_tax_use">none</field> 
+        <field name="name">Standard rated purchases from EC</field>
+        <field name="amount_type">percent</field> 
+        <field name="amount">17.5</field> 
+        <field name="account_id" ref="2201"/> 
+        <field name="refund_account_id" ref="2201"/> 
+        <field name="tag_ids" eval="[(6,0,[ref('vat_tag_box2')])]"/>
+        <field name="tax_group_id" ref="tax_group_0"/> 
+    </record>
+
+    <record id="PT8R" model="account.tax.template"> 
+        <field name="description">PT8R</field> 
+        <field name="chart_template_id" ref="l10n_uk"/> 
+        <field name="type_tax_use">none</field> 
+        <field name="name">Reverse EC Purchase VAT</field>
+        <field name="amount_type">percent</field> 
+        <field name="amount">-17.5</field> 
+        <field name="account_id" ref="2201"/> 
+        <field name="refund_account_id" ref="2201"/> 
+        <field name="tag_ids" eval="[(6,0,[ref('vat_tag_box4')])]"/>
+        <field name="tax_group_id" ref="tax_group_0"/> 
+    </record>
+
+    <record id="PT8" model="account.tax.template"> 
+        <field name="description">PT8</field> 
+        <field name="chart_template_id" ref="l10n_uk"/> 
+        <field name="type_tax_use">purchase</field> 
+        <field name="name">Standard rated purchases from E</field>
+        <field name="amount_type">group</field> 
+        <field name="amount"></field> 
+        <field name="account_id" ref="2201"/> 
+        <field name="refund_account_id" ref="2201"/> 
+        <field name="children_tax_ids" eval="[(6, 0, [ref('PT8M'), ref('PT8R')])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('vat_tag_box9'),ref('vat_tag_box2')])]"/>
+        <field name="tax_group_id" ref="tax_group_0"/> 
+    </record>
+
+    <record id="PT5" model="account.tax.template"> 
+        <field name="description">PT5</field> 
+        <field name="chart_template_id" ref="l10n_uk"/> 
+        <field name="type_tax_use">purchase</field> 
+        <field name="name">Lower rate purchases (5%)</field>
+        <field name="amount_type">percent</field> 
+        <field name="amount">5</field> 
+        <field name="account_id" ref="2201"/> 
+        <field name="refund_account_id" ref="2201"/> 
+        <field name="tag_ids" eval="[(6,0,[ref('vat_tag_box7'),ref('vat_tag_box4')])]"/>
+        <field name="tax_group_id" ref="tax_group_5"/> 
+    </record>
+
+	<record id="ST5" model="account.tax.template"> 
+        <field name="description">ST5</field> 
+        <field name="chart_template_id" ref="l10n_uk"/> 
+        <field name="type_tax_use">sale</field> 
+        <field name="name">Lower rate purchases (5%)</field>
+        <field name="amount_type">percent</field> 
+        <field name="amount">5</field> 
+        <field name="account_id" ref="2200"/> 
+        <field name="refund_account_id" ref="2200"/> 
+        <field name="tag_ids" eval="[(6,0,[ref('vat_tag_box1'),ref('vat_tag_box6')])]"/>
+        <field name="tax_group_id" ref="tax_group_0"/> 
+    </record>
+
+    <record id="ST4" model="account.tax.template"> 
+        <field name="description">ST4</field> 
+        <field name="chart_template_id" ref="l10n_uk"/> 
+        <field name="type_tax_use">sale</field> 
+        <field name="name">Sales to customers in EC</field>
+        <field name="amount_type">percent</field> 
+        <field name="amount">0</field> 
+        <field name="account_id" ref="2200"/> 
+        <field name="refund_account_id" ref="2200"/> 
+        <field name="tag_ids" eval="[(6,0,[ref('vat_tag_box8')])]"/>
+        <field name="tax_group_id" ref="tax_group_0"/> 
+    </record>
+
+    <record id="PT7" model="account.tax.template"> 
+        <field name="description">PT7</field> 
+        <field name="chart_template_id" ref="l10n_uk"/> 
+        <field name="type_tax_use">purchase</field> 
+        <field name="name">Zero rated purchases from EC</field>
+        <field name="amount_type">percent</field> 
+        <field name="amount">0</field> 
+        <field name="account_id" ref="2201"/> 
+        <field name="refund_account_id" ref="2201"/> 
+        <field name="tag_ids" eval="[(6,0,[ref('vat_tag_box9')])]"/>
+        <field name="tax_group_id" ref="tax_group_0"/> 
+    </record>
+
+    <record id="ST11" model="account.tax.template"> 
+        <field name="description">ST11</field> 
+        <field name="chart_template_id" ref="l10n_uk"/> 
+        <field name="type_tax_use">sale</field> 
+        <field name="name">Standard rate sales (20%)</field>
+        <field name="amount_type">percent</field> 
+        <field name="amount">20</field> 
+        <field name="account_id" ref="2200"/> 
+        <field name="refund_account_id" ref="2200"/> 
+        <field name="tag_ids" eval="[(6,0,[ref('vat_tag_box1'),ref('vat_tag_box6')])]"/>
+        <field name="tax_group_id" ref="tax_group_20"/> 
+    </record>
+
+    <record id="PT11" model="account.tax.template"> 
+        <field name="description">PT11</field> 
+        <field name="chart_template_id" ref="l10n_uk"/> 
+        <field name="type_tax_use">purchase</field> 
+        <field name="name">Standard rate purchases (20%)</field>
+        <field name="amount_type">percent</field> 
+        <field name="amount">20</field> 
+        <field name="account_id" ref="2201"/> 
+        <field name="refund_account_id" ref="2201"/>
+        <field name="tag_ids" eval="[(6,0,[ref('vat_tag_box7'),ref('vat_tag_box4')])]"/>
+        <field name="tax_group_id" ref="tax_group_20"/> 
+    </record>
+
+</odoo>
