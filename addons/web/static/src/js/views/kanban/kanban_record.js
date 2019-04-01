@@ -44,7 +44,6 @@ var KanbanRecord = Widget.extend({
     init: function (parent, state, options) {
         this._super(parent);
 
-        this.overlayFormEnable = parent.groupedBy ? true : false;
         this.fields = state.fields;
         this.fieldsInfo = state.fieldsInfo.kanban;
         this.modelName = state.model;
@@ -85,6 +84,12 @@ var KanbanRecord = Widget.extend({
     // Public
     //--------------------------------------------------------------------------
 
+    /**
+     * @private
+     */
+    addOverlayForm: function () {
+        this.trigger_up('open_overlay_form_view');
+    },
     /**
      * Re-renders the record with a new state
      *
@@ -224,17 +229,9 @@ var KanbanRecord = Widget.extend({
             // want to open it.
             return;
         }
-        if (this.overlayFormEnable) {
-            return this.trigger_up('open_overlay_form_view', {
-                res_id: this.res_id,
-                db_id: this.db_id
-            });
-        }
-
-        var editMode = this.$el.hasClass('oe_kanban_global_click_edit');
-        this.trigger_up('open_record', {
-            id: this.db_id,
-            mode: editMode ? 'edit' : 'readonly',
+        this.trigger_up('open_overlay_form_view', {
+            res_id: this.res_id,
+            db_id: this.db_id
         });
     },
     /**

@@ -29,13 +29,13 @@ var RecordQuickCreate = Widget.extend({
      * @param {Widget} parent
      * @param {Object} options
      * @param {Object} options.context
-     * @param {string|null} options.formViewRef
+     * @param {string|null} options.formViewID
      * @param {string} options.model
      */
     init: function (parent, options) {
         this._super.apply(this, arguments);
         this.context = options.context;
-        this.formViewRef = options.formViewRef;
+        this.formViewID = options.formViewID;
         this.model = options.model;
         this.res_id = options.res_id;
         this.db_id = options.db_id;
@@ -51,11 +51,15 @@ var RecordQuickCreate = Widget.extend({
         var self = this;
         var superWillStart = this._super.apply(this, arguments);
         var viewsLoaded;
-        if (this.formViewRef) {
-            var views = [[false, 'form']];
-            var context = _.extend({}, this.context, {
-                form_view_ref: this.formViewRef,
-            });
+        if (this.formViewID) {
+            if (typeof(this.formViewID) == "number") {
+                var views = [[this.formViewID, 'form']];
+            } else {
+                var views = [[false, 'form']];
+                var context = _.extend({}, this.context, {
+                    form_view_ref: this.formViewID,
+                });
+            }
             viewsLoaded = this.loadViews(this.model, context, views);
         } else {
             var fieldsView = {};
@@ -182,7 +186,7 @@ var RecordQuickCreate = Widget.extend({
      * @returns {Promise}
      */
     _cancel: function () {
-        this.trigger_up('cancel_quick_create');
+        this.trigger_up('cancel_overlay_form');
     },
     /**
      * Disable the widget to indicate the user that it can't interact with it.

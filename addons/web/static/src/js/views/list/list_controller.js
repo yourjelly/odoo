@@ -25,8 +25,8 @@ var ListController = BasicController.extend({
     buttons_template: 'ListView.buttons',
     custom_events: _.extend({}, BasicController.prototype.custom_events, {
         activate_next_widget: '_onActivateNextWidget',
-        cancel_quick_create: '_onCancelQuickCreate',
-        open_overlay_form_view: 'addQuickCreate',
+        cancel_overlay_form: '_onCancelOverlayForm',
+        open_overlay_form_view: 'openOverlayForm',
         overlay_form_add_record: '_onAddOverlayFormRecord',
         add_record: '_onAddRecord',
         button_clicked: '_onButtonClicked',
@@ -55,7 +55,7 @@ var ListController = BasicController.extend({
         this.editable = params.editable;
         this.noLeaf = params.noLeaf;
         this.selectedRecords = params.selectedRecords || [];
-        this.overlayFormView = params.overlayFormView;
+        this.overlayFormViewID = params.overlayFormViewID;
 
     },
 
@@ -68,22 +68,22 @@ var ListController = BasicController.extend({
      *
      * @returns {Deferred}
      */
-    addQuickCreate: function (ev) {
+    openOverlayForm: function (ev) {
         var values = ev.data;
-        if (this.quickCreateWidget) {
-            this._cancelQuickCreate();
+        if (this.overlayFormWidget) {
+            this._cancelOverlayForm();
         }
-        if (this.overlayFormView) {
+        if (this.overlayFormViewID) {
             var data = this.model.get(values && values.db_id);
             var context = data && data.getContext();
-            this.quickCreateWidget = new RecordQuickCreate(this, {
+            this.overlayFormWidget = new RecordQuickCreate(this, {
                 context: context,
-                formViewRef: this.overlayFormView,
+                formViewID: this.overlayFormViewID,
                 model: this.modelName,
                 res_id: data && data.res_id || undefined,
                 db_id: values && values.db_id || undefined,
             });
-            return this.quickCreateWidget.insertAfter($('.o_action_manager .o_content .o_list_view'));
+            return this.overlayFormWidget.insertAfter($('.o_action_manager .o_content .o_list_view'));
         }
         return this.trigger_up('open_record', {id: values && values.db_id});
     },
@@ -253,7 +253,7 @@ var ListController = BasicController.extend({
         var formController = event.target.controller;
         return formController.saveRecord()
         .then(function() {
-            self._cancelQuickCreate().then(self.reload.bind(self, {}));
+            self._cancelOverlayForm().then(self.reload.bind(self, {}));
         })
         .guardedCatch(event.data.onFailure);
     },
@@ -358,8 +358,8 @@ var ListController = BasicController.extend({
     /**
      * @private
      */
-    _onCancelQuickCreate: function () {
-        this._cancelQuickCreate();
+    _onCancelOverlayForm: function () {
+        this._cancelOverlayForm();
     },
     /**
      * Destroys the QuickCreate widget.
@@ -367,10 +367,10 @@ var ListController = BasicController.extend({
      * @private
      * @returns {Promise}
      */
-    _cancelQuickCreate: function () {
-        if (this.quickCreateWidget) {
-            this.quickCreateWidget.destroy();
-            this.quickCreateWidget = undefined;
+    _cancelOverlayForm: function () {
+        if (this.overlayFormWidget) {
+            this.overlayFormWidget.destroy();
+            this.overlayFormWidget = undefined;
         }
         return Promise.resolve();
     },
@@ -602,8 +602,8 @@ var ListController = BasicController.extend({
             ev.stopPropagation();
         }
         var state = this.model.get(this.handle, {raw: true});
-        if (this.overlayFormView && state.data.length) {
-            this.addQuickCreate({});
+        if (this.overlayFormViewID && state.data.length) {
+            this.openOverlayForm({});
         } else if (this.editable && !state.groupedBy.length) {
             this._addRecord(this.handle);
         } else {

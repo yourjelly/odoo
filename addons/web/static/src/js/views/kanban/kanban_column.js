@@ -5,7 +5,6 @@ var config = require('web.config');
 var core = require('web.core');
 var Dialog = require('web.Dialog');
 var KanbanRecord = require('web.KanbanRecord');
-var RecordQuickCreate = require('web.kanban_record_quick_create');
 var view_dialogs = require('web.view_dialogs');
 var viewUtils = require('web.viewUtils');
 var Widget = require('web.Widget');
@@ -17,16 +16,13 @@ var QWeb = core.qweb;
 var KanbanColumn = Widget.extend({
     template: 'KanbanView.Group',
     custom_events: {
-        cancel_quick_create: '_onCancelQuickCreate',
-        overlay_form_add_record: '_onAddOverlayFormRecord',
-        open_overlay_form_view: 'addQuickCreate',
         tweak_column: '_onTweakColumn',
         tweak_column_records: '_onTweakColumnRecords',
     },
     events: {
         'click .o_column_edit': '_onEditColumn',
         'click .o_column_delete': '_onDeleteColumn',
-        'click .o_kanban_quick_add': '_onAddQuickCreate',
+        'click .o_kanban_quick_add': 'addOverlayForm',
         'click .o_kanban_load_more': '_onLoadMore',
         'click .o_kanban_toggle_fold': '_onToggleFold',
         'click .o_column_archive_records': '_onArchiveRecords',
@@ -50,7 +46,6 @@ var KanbanColumn = Widget.extend({
         this.modelName = data.model;
 
         this.quick_create = options.quick_create;
-        this.overlayFormView = options.overlayFormView;
         this.groupedBy = options.groupedBy;
         this.grouped_by_m2o = options.grouped_by_m2o;
         this.editable = options.editable;
@@ -179,53 +174,12 @@ var KanbanColumn = Widget.extend({
      */
     on_attach_callback: function () {
         _.invoke(this.records, 'on_attach_callback');
-        if (this.quickCreateWidget) {
-            this.quickCreateWidget.on_attach_callback();
-        }
     },
 
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
 
-    /**
-     * Adds the quick create record to the top of the column.
-     *
-     * @returns {Promise}
-     */
-    addQuickCreate: function (event) {
-        var values = event && event.data;
-        if (this.folded) {
-            // first open the column, and then add the quick create
-            this.trigger_up('column_toggle_fold', {
-                openQuickCreate: true,
-            });
-            return;
-        }
-
-        if (this.quickCreateWidget) {
-            this._cancelQuickCreate();
-        }
-        this.trigger_up('start_quick_create');
-        var context = this.data.getContext();
-        context['default_' + this.groupedBy] = viewUtils.getGroupValue(this.data, this.groupedBy);
-        this.quickCreateWidget = new RecordQuickCreate(this, {
-            context: context,
-            formViewRef: this.overlayFormView,
-            model: this.modelName,
-            res_id: values && values.res_id || undefined,
-            db_id: values && values.db_id || undefined,
-        });
-        return this.quickCreateWidget.insertAfter($('.o_action_manager .o_content .o_kanban_view'));
-    },
-    /**
-     * Closes the quick create widget if it isn't dirty.
-     */
-    cancelQuickCreate: function () {
-        if (this.quickCreateWidget) {
-            this.quickCreateWidget.cancel();
-        }
-    },
     /**
      * @returns {Boolean} true iff the column is empty
      */
@@ -251,7 +205,7 @@ var KanbanColumn = Widget.extend({
         var record = new this.KanbanRecord(this, recordState, this.record_options);
         this.records.push(record);
         if (options && options.position === 'before') {
-            return record.insertAfter(this.quickCreateWidget ? this.quickCreateWidget.$el : this.$header);
+            return record.insertAfter(this.$header);
         } else {
             var $load_more = this.$('.o_kanban_load_more');
             if ($load_more.length) {
@@ -260,15 +214,6 @@ var KanbanColumn = Widget.extend({
                 return record.appendTo(this.$el);
             }
         }
-    },
-    /**
-     * Destroys the QuickCreate widget.
-     *
-     * @private
-     */
-    _cancelQuickCreate: function () {
-        this.quickCreateWidget.destroy();
-        this.quickCreateWidget = undefined;
     },
     /**
      * @returns {integer[]} the res_ids of the records in the column
@@ -288,14 +233,8 @@ var KanbanColumn = Widget.extend({
     /**
      * @private
      */
-    _onAddQuickCreate: function () {
-        this.addQuickCreate();
-    },
-    /**
-     * @private
-     */
-    _onCancelQuickCreate: function () {
-        this._cancelQuickCreate();
+    addOverlayForm: function (event) {
+        this.trigger_up('open_overlay_form_view', {targetDbId: this.db_id});
     },
     /**
      * @private
@@ -340,13 +279,6 @@ var KanbanColumn = Widget.extend({
     _onLoadMore: function (event) {
         event.preventDefault();
         this.trigger_up('kanban_load_more');
-    },
-    /**
-     * @private
-     * @param {OdooEvent} event
-     */
-    _onAddOverlayFormRecord: function (event) {
-        this.trigger_up('quick_create_record', event.data);
     },
     /**
      * @private

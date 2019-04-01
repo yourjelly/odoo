@@ -77,8 +77,8 @@ KanbanRenderer.include({
      *
      * @returns {Promise}
      */
-    addQuickCreate: function () {
-        return this.widgets[this.activeColumnIndex].addQuickCreate();
+    openOverlayForm: function () {
+        return this.widgets[this.activeColumnIndex].openOverlayForm
     },
     /**
      * Overrides to restore the left property and the scrollTop on the updated

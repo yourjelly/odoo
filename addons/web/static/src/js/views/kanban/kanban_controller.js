@@ -11,6 +11,7 @@ var BasicController = require('web.BasicController');
 var Context = require('web.Context');
 var core = require('web.core');
 var Domain = require('web.Domain');
+var RecordQuickCreate = require('web.kanban_record_quick_create');
 var view_dialogs = require('web.view_dialogs');
 var viewUtils = require('web.viewUtils');
 
@@ -20,8 +21,10 @@ var qweb = core.qweb;
 var KanbanController = BasicController.extend({
     buttons_template: 'KanbanView.buttons',
     custom_events: _.extend({}, BasicController.prototype.custom_events, {
+        cancel_overlay_form: '_onCancelOverlayForm',
+        overlay_form_add_record: '_onAddOverlayFormRecord',
+        open_overlay_form_view: 'openOverlayForm',
         quick_create_add_column: '_onAddColumn',
-        quick_create_record: '_onQuickCreateRecord',
         resequence_columns: '_onResequenceColumn',
         button_clicked: '_onButtonClicked',
         kanban_record_delete: '_onRecordDelete',
@@ -41,7 +44,7 @@ var KanbanController = BasicController.extend({
     /**
      * @override
      * @param {Object} params
-     * @param {boolean} params.quickCreateEnabled set to false to disable the
+     * @param {boolean} params.overlayFormViewID set to false to disable the
      *   quick create feature
      * @param {SearchPanel} [params.searchPanel]
      * @param {Array[]} [params.controlPanelDomain=[]] initial domain coming
@@ -51,7 +54,7 @@ var KanbanController = BasicController.extend({
         this._super.apply(this, arguments);
         this.on_create = params.on_create;
         this.hasButtons = params.hasButtons;
-        this.quickCreateEnabled = params.quickCreateEnabled;
+        this.overlayFormViewID = params.overlayFormViewID;
 
         // the following attributes are used when there is a searchPanel
         this._searchPanel = params.searchPanel;
@@ -74,6 +77,41 @@ var KanbanController = BasicController.extend({
     // Public
     //--------------------------------------------------------------------------
 
+    /**
+     * Adds the quick create record to the top of the column.
+     *
+     * @returns {Promise}
+     */
+    openOverlayForm: function (event) {
+        var values = event && event.data;
+        this.overlayFormTarget = event.data.targetDbId;
+        if (this.folded) {
+            // first open the column, and then add the quick create
+            this.trigger_up('column_toggle_fold', {
+                openQuickCreate: true,
+            });
+            return;
+        }
+
+        if (this.overlayFormWidget) {
+            this._cancelOverlayForm();
+        }
+        this.trigger_up('start_quick_create');
+        var data = this.model.get(this.handle, {raw: true});
+        var context = data.getContext();
+        var groupedBy = data.groupedBy[0];
+        if (groupedBy) {
+            context['default_' + groupedBy] = viewUtils.getGroupValue(data, groupedBy);
+        }
+        this.overlayFormWidget = new RecordQuickCreate(this, {
+            context: context,
+            formViewID: this.overlayFormViewID,
+            model: this.modelName,
+            res_id: values && values.res_id || undefined,
+            db_id: values && values.db_id || undefined,
+        });
+        return this.overlayFormWidget.insertAfter($('.o_action_manager .o_content .o_kanban_view'));
+    },
     /**
      * @param {jQueryElement} $node
      * @returns {Promise}
@@ -122,6 +160,15 @@ var KanbanController = BasicController.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * Destroys the QuickCreate widget.
+     *
+     * @private
+     */
+    _cancelOverlayForm: function () {
+        this.overlayFormWidget.destroy();
+        this.overlayFormWidget = undefined;
+    },
     /**
      * @override method comes from field manager mixin
      * @private
@@ -293,6 +340,13 @@ var KanbanController = BasicController.extend({
     },
     /**
      * @private
+     * @param {OdooEvent} event
+     */
+    _onAddOverlayFormRecord: function (event) {
+        this._onQuickCreateRecord(event.data);
+    },
+    /**
+     * @private
      * @param {OdooEvent} ev
      */
     _onAddRecordToColumn: function (ev) {
@@ -343,13 +397,12 @@ var KanbanController = BasicController.extend({
     _onButtonNew: function () {
         var self = this;
         var state = this.model.get(this.handle, {raw: true});
-        var quickCreateEnabled = this.quickCreateEnabled && viewUtils.isQuickCreateEnabled(state);
-        if (this.on_create === 'quick_create' && quickCreateEnabled && state.data.length) {
+        if (this.overlayFormViewID && state.data.length) {
             // activate the quick create in the first column when the mutex is
             // unlocked, to ensure that there is no pending re-rendering that
             // would remove it (e.g. if we are currently adding a new column)
             this.mutex.getUnlockedDef().then(function () {
-                self.renderer.addQuickCreate();
+                self.renderer.openOverlayForm();
             });
         } else if (this.on_create && this.on_create !== 'quick_create') {
             // Execute the given action
@@ -376,6 +429,12 @@ var KanbanController = BasicController.extend({
             case $.ui.keyCode.DOWN:
                 this.$('.o_kanban_record:first').focus();
         }
+    },
+    /**
+     * @private
+     */
+    _onCancelOverlayForm: function () {
+        this._cancelOverlayForm();
     },
     /**
      * Bounce the 'Create' button.
@@ -450,53 +509,56 @@ var KanbanController = BasicController.extend({
     },
     /**
      * @private
-     * @param {OdooEvent} ev
-     * @param {KanbanColumn} ev.target the column in which the record should
-     *   be added
-     * @param {Object} ev.data.values the field values of the record to
+     * @param {Object} data.values the field values of the record to
      *   create; if values only contains the value of the 'display_name', a
      *   'name_create' is performed instead of 'create'
-     * @param {function} [ev.data.onFailure] called when the quick creation
+     * @param {function} [data.onFailure] called when the quick creation
      *   failed
      */
-    _onQuickCreateRecord: function (ev) {
+    _onQuickCreateRecord: function (data) {
         var self = this;
-        var values = ev.data.values;
-        var column = ev.target;
-        var onFailure = ev.data.onFailure || function () {};
+        var values = data.values;
+        var columnDbId = this.overlayFormTarget ? this.overlayFormTarget : this.handle;
+        var onFailure = data.onFailure || function () {};
 
         // function that updates the kanban view once the record has been added
         // it receives the local id of the created record in arguments
         var update = function (db_id) {
             self._updateEnv();
 
-            var columnState = self.model.getColumn(db_id);
             var state = self.model.get(self.handle);
-            return self.renderer
-                .updateColumn(columnState.id, columnState, {openQuickCreate: true, state: state})
-                .then(function () {
-                    if (ev.data.openRecord) {
-                        self.trigger_up('open_record', {id: db_id, mode: 'edit'});
-                    }
-                });
+            if (state.groupedBy.length) {
+                var columnState = self.model.getColumn(db_id);
+                return self.renderer
+                    .updateColumn(columnState.id, columnState, {openQuickCreate: true, state: state})
+                    .then(function () {
+                        if (data.openRecord) {
+                            self.trigger_up('open_record', {id: db_id, mode: 'edit'});
+                        }
+                    });
+            } else {
+                return self.update({});
+            }
         };
 
-        this.model.createRecordInGroup(column.db_id, values)
+        this.model.createRecordInGroup(columnDbId, values)
             .then(update)
             .guardedCatch(function (reason) {
                 reason.event.preventDefault();
-                var columnState = self.model.get(column.db_id, {raw: true});
+                var columnState = self.model.get(columnDbId, {raw: true});
                 var context = columnState.getContext();
                 var state = self.model.get(self.handle, {raw: true});
                 var groupedBy = state.groupedBy[0];
-                context['default_' + groupedBy] = viewUtils.getGroupValue(columnState, groupedBy);
+                if (groupedBy) {
+                    context['default_' + groupedBy] = viewUtils.getGroupValue(columnState, groupedBy);
+                }
                 new view_dialogs.FormViewDialog(self, {
                     res_model: state.model,
                     context: _.extend({default_name: values.name || values.display_name}, context),
                     title: _t("Create"),
                     disable_multiple_selection: true,
                     on_saved: function (record) {
-                        self.model.addRecordToGroup(column.db_id, record.res_id)
+                        self.model.addRecordToGroup(columnDbId, record.res_id)
                             .then(update);
                     },
                 }).open().opened(onFailure);

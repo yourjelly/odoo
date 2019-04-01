@@ -148,8 +148,8 @@ var KanbanRenderer = BasicRenderer.extend({
      *
      * @returns {Promise}
      */
-    addQuickCreate: function () {
-        return this.widgets[0].addQuickCreate();
+    openOverlayForm: function () {
+        return this.widgets[0].addOverlayForm();
     },
     /**
      * Focuses the first kanban record
@@ -200,7 +200,7 @@ var KanbanRenderer = BasicRenderer.extend({
         return newColumn.appendTo(document.createDocumentFragment()).then(function () {
             var def;
             if (options && options.openQuickCreate) {
-                def = newColumn.addQuickCreate();
+                def = newColumn.addOverlayForm();
             }
             return Promise.resolve(def).then(function () {
                 newColumn.$el.insertAfter(column.$el);

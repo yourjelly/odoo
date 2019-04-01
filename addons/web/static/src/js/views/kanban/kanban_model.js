@@ -40,8 +40,10 @@ var KanbanModel = BasicModel.extend({
             group.count++;
 
             // update the res_ids and count of the parent
-            self.localData[group.parentID].count++;
-            self._updateParentResIDs(group);
+            if (group.parentID) {
+                self.localData[group.parentID].count++;
+                self._updateParentResIDs(group);
+            }
 
             return result.id;
         });
@@ -106,13 +108,16 @@ var KanbanModel = BasicModel.extend({
         var group = this.localData[groupID];
         var context = this._getContext(group);
         var parent = this.localData[group.parentID];
-        var groupedBy = parent.groupedBy;
-        context['default_' + groupedBy] = viewUtils.getGroupValue(group, groupedBy);
+        var model = parent ? parent.model : group.model;
+        var groupedBy = parent && parent.groupedBy[0];
+        if (groupedBy) {
+            context['default_' + groupedBy] = viewUtils.getGroupValue(group, groupedBy);
+        }
         var def;
         if (Object.keys(values).length === 1 && 'display_name' in values) {
             // only 'display_name is given, perform a 'name_create'
             def = this._rpc({
-                    model: parent.model,
+                    model: model,
                     method: 'name_create',
                     args: [values.display_name],
                     context: context,
@@ -122,7 +127,7 @@ var KanbanModel = BasicModel.extend({
         } else {
             // other fields are specified, perform a classical 'create'
             def = this._rpc({
-                model: parent.model,
+                model: model,
                 method: 'create',
                 args: [values],
                 context: context,
