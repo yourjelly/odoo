@@ -358,6 +358,8 @@ class Manager(Thread):
             devices = updated_devices
             for path in [device_rm for device_rm in removed if device_rm in iot_devices]:
                 iot_devices[path].disconnect()
+                self.send_alldevices()
+                _logger.info('For device %s will be remove', path)
             for path in [device_add for device_add in added if device_add not in iot_devices]:
                 for driverclass in [d for d in drivers if d.connection_type == devices[path].connection_type]:
                     if driverclass.supported(device = updated_devices[path].dev):
