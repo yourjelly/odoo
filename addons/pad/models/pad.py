@@ -5,6 +5,8 @@ import logging
 import random
 import re
 import string
+from html.parser import HTMLParser
+import html
 
 import requests
 
@@ -83,6 +85,7 @@ class PadCommon(models.AbstractModel):
             path = len(split_url) == 2 and split_url[1]
             try:
                 content = myPad.getHtml(path).get('html', '')
+                content = self.expand_url(self.shorten_url(HTMLParser().unescape(content)))
             except IOError:
                 _logger.warning('Http Error: the credentials might be absent for url: "%s". Falling back.' % url)
                 try:
@@ -96,6 +99,14 @@ class PadCommon(models.AbstractModel):
                         content = mo.group(1)
 
         return content
+
+    def shorten_url(self, string):
+        regex = re.compile(r'<a href="(?P<addr>.*?[^_]+?id=(?P<id>\d+).*?model=(?P<model>[\w\.]+?)&.*?)">.+?</a>')
+        return regex.sub(r'<a href="\g<addr>">\g<model>:\g<id></a>', string)
+
+    def expand_url(self, string):
+        regex = re.compile(r'(?P<begin>^|\n|\r|\s|<\\?br>)(?P<model>[a-z\.]+):(?P<id>\d+)(?P<end>$|\n|\r|\s|<\\?br>)')
+        return regex.sub(r'\g<begin><a href="/web#id=\g<id>&model=\g<model>">\g<model>:\g<id>\g<end></a>', string)
 
     # TODO
     # reverse engineer protocol to be setHtml without using the api key
