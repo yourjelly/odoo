@@ -1,0 +1,1154 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <record id="22v" model="account.tax.template">
+        <field name="description">22v</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 22% (debito)</field>
+        <field name="sequence">1</field>
+        <field name="amount">22</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="2601"/>
+        <field name="refund_account_id" ref="2601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_39')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_22"/>
+    </record>
+
+    <record id="22a" model="account.tax.template">
+        <field name="description">22a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 22% (credito)</field>
+        <field name="sequence">2</field>
+        <field name="amount">22</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_15')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_22"/>
+    </record>
+
+    <record id="21v" model="account.tax.template">
+        <field name="description">21v</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 21% (debito)</field>
+        <field name="sequence">3</field>
+        <field name="amount">21</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="2601"/>
+        <field name="refund_account_id" ref="2601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_37')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_21"/>
+    </record>
+
+    <record id="21a" model="account.tax.template">
+        <field name="description">21a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 21% (credito)</field>
+        <field name="sequence">4</field>
+        <field name="amount">21</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_10')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_21"/>
+    </record>
+
+    <record id="20v" model="account.tax.template">
+        <field name="description">20v</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 20% (debito)</field>
+        <field name="sequence">3</field>
+        <field name="amount">20</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="2601"/>
+        <field name="refund_account_id" ref="2601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_35')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_20"/>
+    </record>
+
+    <record id="20a" model="account.tax.template">
+        <field name="description">20a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 20% (credito)</field>
+        <field name="sequence">4</field>
+        <field name="amount">20</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_05')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_20"/>
+    </record>
+
+    <record id="10v" model="account.tax.template">
+        <field name="description">10v</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 10% (debito)</field>
+        <field name="sequence">5</field>
+        <field name="amount">10</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="2601"/>
+        <field name="refund_account_id" ref="2601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_29')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_10"/>
+    </record>
+
+    <record id="10a" model="account.tax.template">
+        <field name="description">10a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 10% (credito)</field>
+        <field name="sequence">6</field>
+        <field name="amount">10</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_01')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_10"/>
+    </record>
+
+    <record id="10AOb" model="account.tax.template">
+        <field name="description">10AOb</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 10% indetraibile (D)</field>
+        <field name="sequence">200</field>
+        <field name="amount">0</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tax_group_id" ref="tax_group_iva_10"/>
+    </record>
+
+    <record id="10AOa" model="account.tax.template">
+        <field name="description">10AOa</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 10% indetraibile (I)</field>
+        <field name="sequence">100</field>
+        <field name="amount">10</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="tax_group_id" ref="tax_group_iva_10"/>
+    </record>
+
+    <record id="10AO" model="account.tax.template">
+        <field name="description">10AO</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 10% indetraibile</field>
+        <field name="sequence">7</field>
+        <field name="amount">10</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_23')])]"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('10AOb'),ref('10AOa')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_10"/>
+    </record>
+
+    <record id="12v" model="account.tax.template">
+        <field name="description">12v</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva 12% (debito)</field>
+        <field name="sequence">8</field>
+        <field name="amount">12</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="2601"/>
+        <field name="refund_account_id" ref="2601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_31')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_12"/>
+    </record>
+
+    <record id="12a" model="account.tax.template">
+        <field name="description">12a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva 12% (credito)</field>
+        <field name="sequence">9</field>
+        <field name="amount">12</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_03')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_12"/>
+    </record>
+
+    <record id="2010b" model="account.tax.template">
+        <field name="description">2010b</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 20% detraibile 10% (D)</field>
+        <field name="sequence">200</field>
+        <field name="amount">2</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tax_group_id" ref="tax_group_iva_20_de_10"/>
+    </record>
+
+    <record id="2010a" model="account.tax.template">
+        <field name="description">2010a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 20% detraibile 10% (I)</field>
+        <field name="sequence">100</field>
+        <field name="amount">18</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="tax_group_id" ref="tax_group_iva_20_de_10"/>
+    </record>
+
+    <record id="2010" model="account.tax.template">
+        <field name="description">2010</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 20% detraibile 10%</field>
+        <field name="sequence">10</field>
+        <field name="amount">20</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_06')])]"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('2010b'),ref('2010a')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_20_de_10"/>
+    </record>
+
+    <record id="2015b" model="account.tax.template">
+        <field name="description">2015b</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 20% detraibile 15% (D)</field>
+        <field name="sequence">200</field>
+        <field name="amount">3</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tax_group_id" ref="tax_group_iva_20_de_15"/>
+    </record>
+
+    <record id="2015a" model="account.tax.template">
+        <field name="description">2015a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 20% detraibile 15% (I)</field>
+        <field name="sequence">100</field>
+        <field name="amount">17</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="tax_group_id" ref="tax_group_iva_20_de_15"/>
+    </record>
+
+    <record id="2015" model="account.tax.template">
+        <field name="description">2015</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 20% detraibile 15%</field>
+        <field name="sequence">11</field>
+        <field name="amount">20</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_07')])]"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('2015b'),ref('2015a')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_20_de_15"/>
+    </record>
+
+    <record id="2040b" model="account.tax.template">
+        <field name="description">2040b</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 20% detraibile 40% (D)</field>
+        <field name="sequence">200</field>
+        <field name="amount">8</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tax_group_id" ref="tax_group_iva_20_de_40"/>
+    </record>
+
+    <record id="2040a" model="account.tax.template">
+        <field name="description">2040a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 20% detraibile 40% (I)</field>
+        <field name="sequence">100</field>
+        <field name="amount">12</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="tax_group_id" ref="tax_group_iva_20_de_40"/>
+    </record>
+
+    <record id="2040" model="account.tax.template">
+        <field name="description">2040</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 20% detraibile 40%</field>
+        <field name="sequence">12</field>
+        <field name="amount">20</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_08')])]"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('2040b'),ref('2040a')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_20_de_40"/>
+    </record>
+
+    <record id="20AOb" model="account.tax.template">
+        <field name="description">20AOb</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 20% indetraibile (D)</field>
+        <field name="sequence">200</field>
+        <field name="amount">0</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tax_group_id" ref="tax_group_iva_20"/>
+    </record>
+
+    <record id="20AOa" model="account.tax.template">
+        <field name="description">20AOa</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 20% indetraibile (I)</field>
+        <field name="sequence">100</field>
+        <field name="amount">20</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="tax_group_id" ref="tax_group_iva_20"/>
+    </record>
+
+    <record id="20AO" model="account.tax.template">
+        <field name="description">20AO</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 20% indetraibile</field>
+        <field name="sequence">13</field>
+        <field name="amount">20</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_24')])]"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('20AOb'),ref('20AOa')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_20"/>
+    </record>
+
+    <record id="20I5b" model="account.tax.template">
+        <field name="description">20I5b</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">IVA al 20% detraibile al 50% (D)</field>
+        <field name="sequence">200</field>
+        <field name="amount">10</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tax_group_id" ref="tax_group_iva_20_de_50"/>
+    </record>
+
+    <record id="20I5a" model="account.tax.template">
+        <field name="description">20I5a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">IVA al 20% detraibile al 50% (I)</field>
+        <field name="sequence">100</field>
+        <field name="amount">10</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="tax_group_id" ref="tax_group_iva_20_de_50"/>
+    </record>
+
+    <record id="20I5" model="account.tax.template">
+        <field name="description">20I5</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">IVA al 20% detraibile al 50%</field>
+        <field name="sequence">14</field>
+        <field name="amount">20</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_09')])]"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('20I5b'),ref('20I5a')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_20_de_50"/>
+    </record>
+
+    <record id="2v" model="account.tax.template">
+        <field name="description">2v</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva 2% (debito)</field>
+        <field name="sequence">15</field>
+        <field name="amount">2</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="2601"/>
+        <field name="refund_account_id" ref="2601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_33')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_2"/>
+    </record>
+
+    <record id="2a" model="account.tax.template">
+        <field name="description">2a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva 2% (credito)</field>
+        <field name="sequence">16</field>
+        <field name="amount">2</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_04')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_2"/>
+    </record>
+
+    <record id="4v" model="account.tax.template">
+        <field name="description">4v</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva 4% (debito)</field>
+        <field name="sequence">17</field>
+        <field name="amount">4</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="2601"/>
+        <field name="refund_account_id" ref="2601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_41')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_4"/>
+    </record>
+
+    <record id="4a" model="account.tax.template">
+        <field name="description">4a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva 4% (credito)</field>
+        <field name="sequence">18</field>
+        <field name="amount">4</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_20')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_4"/>
+    </record>
+
+    <record id="4AOb" model="account.tax.template">
+        <field name="description">4AOb</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 4% indetraibile (D)</field>
+        <field name="sequence">200</field>
+        <field name="amount">0</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tax_group_id" ref="tax_group_iva_4"/>
+    </record>
+
+    <record id="4AOa" model="account.tax.template">
+        <field name="description">4AOa</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 4% indetraibile (I)</field>
+        <field name="sequence">100</field>
+        <field name="amount">4</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="tax_group_id" ref="tax_group_iva_4"/>
+    </record>
+
+    <record id="4AO" model="account.tax.template">
+        <field name="description">4AO</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 4% indetraibile</field>
+        <field name="sequence">19</field>
+        <field name="amount">4</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_27')])]"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('4AOb'),ref('4AOa')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_4"/>
+    </record>
+
+    <record id="10I5b" model="account.tax.template">
+        <field name="description">10I5b</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">IVA al 10% detraibile al 50% (D)</field>
+        <field name="sequence">200</field>
+        <field name="amount">5</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tax_group_id" ref="tax_group_iva_10_de_50"/>
+    </record>
+
+    <record id="10I5a" model="account.tax.template">
+        <field name="description">10I5a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">IVA al 10% detraibile al 50% (I)</field>
+        <field name="sequence">100</field>
+        <field name="amount">5</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="tax_group_id" ref="tax_group_iva_10_de_50"/>
+    </record>
+
+    <record id="10I5" model="account.tax.template">
+        <field name="description">10I5</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">IVA al 10% detraibile al 50%</field>
+        <field name="sequence">20</field>
+        <field name="amount">10</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_02')])]"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('10I5b'),ref('10I5a')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_10_de_50"/>
+    </record>
+
+    <record id="4I5b" model="account.tax.template">
+        <field name="description">4I5b</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">IVA al 4% detraibile al 50% (D)</field>
+        <field name="sequence">200</field>
+        <field name="amount">2</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tax_group_id" ref="tax_group_iva_4_de_50"/>
+    </record>
+
+    <record id="4I5a" model="account.tax.template">
+        <field name="description">4I5a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">IVA al 4% detraibile al 50% (I)</field>
+        <field name="sequence">100</field>
+        <field name="amount">2</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="tax_group_id" ref="tax_group_iva_4_de_50"/>
+    </record>
+
+    <record id="4I5" model="account.tax.template">
+        <field name="description">4I5</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">IVA al 4% detraibile al 50%</field>
+        <field name="sequence">21</field>
+        <field name="amount">4</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_21')])]"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('4I5b'),ref('4I5a')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_4_de_50"/>
+    </record>
+
+    <record id="00v" model="account.tax.template">
+        <field name="description">00v</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Fuori Campo IVA (debito)</field>
+        <field name="sequence">22</field>
+        <field name="amount">0</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="2601"/>
+        <field name="refund_account_id" ref="2601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_43')])]"/>
+        <field name="tax_group_id" ref="tax_group_fuori"/>
+    </record>
+
+    <record id="00a" model="account.tax.template">
+        <field name="description">00a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Fuori Campo IVA (credito)</field>
+        <field name="sequence">23</field>
+        <field name="amount">0</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_22')])]"/>
+        <field name="tax_group_id" ref="tax_group_fuori"/>
+    </record>
+
+    <record id="00art15v" model="account.tax.template">
+        <field name="description">00art15v</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Imponibile Escluso Art.15 (debito)</field>
+        <field name="sequence">22</field>
+        <field name="amount">0</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="2601"/>
+        <field name="refund_account_id" ref="2601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_45')])]"/>
+        <field name="tax_group_id" ref="tax_group_imp_esc_art_15"/>
+    </record>
+
+    <record id="00art15a" model="account.tax.template">
+        <field name="description">00art15a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Imponibile Escluso Art.15 (credito)</field>
+        <field name="sequence">23</field>
+        <field name="amount">0</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_28')])]"/>
+        <field name="tax_group_id" ref="tax_group_imp_esc_art_15"/>
+    </record>
+
+    <record id="22v INC" model="account.tax.template">
+        <field name="description">22v INC</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 22% (debito) INC</field>
+        <field name="sequence">24</field>
+        <field name="amount">22</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="price_include">True</field>
+        <field name="account_id" ref="2601"/>
+        <field name="refund_account_id" ref="2601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_40')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_22"/>
+    </record>
+
+    <record id="21v INC" model="account.tax.template">
+        <field name="description">21v INC</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 21% (debito) INC</field>
+        <field name="sequence">25</field>
+        <field name="amount">21</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="price_include">True</field>
+        <field name="account_id" ref="2601"/>
+        <field name="refund_account_id" ref="2601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_38')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_21"/>
+    </record>
+
+    <record id="20v INC" model="account.tax.template">
+        <field name="description">20v INC</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 20% (debito) INC</field>
+        <field name="sequence">25</field>
+        <field name="amount">20</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="price_include">True</field>
+        <field name="account_id" ref="2601"/>
+        <field name="refund_account_id" ref="2601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_36')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_20"/>
+    </record>
+
+    <record id="10v INC" model="account.tax.template">
+        <field name="description">10v INC</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 10% (debito) INC</field>
+        <field name="sequence">26</field>
+        <field name="amount">10</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="price_include">True</field>
+        <field name="account_id" ref="2601"/>
+        <field name="refund_account_id" ref="2601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_30')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_10"/>
+    </record>
+
+    <record id="12v INC" model="account.tax.template">
+        <field name="description">12v INC</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva 12% (debito) INC</field>
+        <field name="sequence">27</field>
+        <field name="amount">12</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="price_include">True</field>
+        <field name="account_id" ref="2601"/>
+        <field name="refund_account_id" ref="2601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_32')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_12"/>
+    </record>
+
+    <record id="2v INC" model="account.tax.template">
+        <field name="description">2v INC</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva 2% (debito) INC</field>
+        <field name="sequence">28</field>
+        <field name="amount">2</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="price_include">True</field>
+        <field name="account_id" ref="2601"/>
+        <field name="refund_account_id" ref="2601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_34')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_2"/>
+    </record>
+
+    <record id="4v INC" model="account.tax.template">
+        <field name="description">4v INC</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva 4% (debito) INC</field>
+        <field name="sequence">29</field>
+        <field name="amount">4</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="price_include">True</field>
+        <field name="account_id" ref="2601"/>
+        <field name="refund_account_id" ref="2601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_42')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_4"/>
+    </record>
+
+    <record id="00v INC" model="account.tax.template">
+        <field name="description">00v INC</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Fuori Campo IVA (debito) INC</field>
+        <field name="sequence">30</field>
+        <field name="amount">0</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="price_include">True</field>
+        <field name="account_id" ref="2601"/>
+        <field name="refund_account_id" ref="2601"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_44')])]"/>
+        <field name="tax_group_id" ref="tax_group_fuori"/>
+    </record>
+
+    <record id="2110b" model="account.tax.template">
+        <field name="description">2110b</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 21% detraibile 10% (D)</field>
+        <field name="sequence">200</field>
+        <field name="amount">2.1</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tax_group_id" ref="tax_group_iva_21_de_10"/>
+    </record>
+
+    <record id="2110a" model="account.tax.template">
+        <field name="description">2110a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 21% detraibile 10% (I)</field>
+        <field name="sequence">100</field>
+        <field name="amount">18.9</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="tax_group_id" ref="tax_group_iva_21_de_10"/>
+    </record>
+
+    <record id="2110" model="account.tax.template">
+        <field name="description">2110</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 21% detraibile 10%</field>
+        <field name="sequence">31</field>
+        <field name="amount">21</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_11')])]"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('2110b'),ref('2110a')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_21_de_10"/>
+    </record>
+
+    <record id="2115b" model="account.tax.template">
+        <field name="description">2115b</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 21% detraibile 15% (D)</field>
+        <field name="sequence">200</field>
+        <field name="amount">3.15</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tax_group_id" ref="tax_group_iva_21_de_15"/>
+    </record>
+
+    <record id="2115a" model="account.tax.template">
+        <field name="description">2115a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 21% detraibile 15% (I)</field>
+        <field name="sequence">100</field>
+        <field name="amount">17.85</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="tax_group_id" ref="tax_group_iva_21_de_15"/>
+    </record>
+
+    <record id="2115" model="account.tax.template">
+        <field name="description">2115</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 21% detraibile 15%</field>
+        <field name="sequence">32</field>
+        <field name="amount">21</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_12')])]"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('2115b'),ref('2115a')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_21_de_15"/>
+    </record>
+
+    <record id="2140b" model="account.tax.template">
+        <field name="description">2140b</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 21% detraibile 40% (D)</field>
+        <field name="sequence">200</field>
+        <field name="amount">8.4</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tax_group_id" ref="tax_group_iva_21_de_40"/>
+    </record>
+
+    <record id="2140a" model="account.tax.template">
+        <field name="description">2140a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 21% detraibile 40% (I)</field>
+        <field name="sequence">100</field>
+        <field name="amount">12.6</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="tax_group_id" ref="tax_group_iva_21_de_40"/>
+    </record>
+
+    <record id="2140" model="account.tax.template">
+        <field name="description">2140</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 21% detraibile 40%</field>
+        <field name="sequence">33</field>
+        <field name="amount">21</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_13')])]"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('2140b'),ref('2140a')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_21_de_40"/>
+    </record>
+
+    <record id="21AOb" model="account.tax.template">
+        <field name="description">21AOb</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 21% indetraibile (D)</field>
+        <field name="sequence">200</field>
+        <field name="amount">0</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tax_group_id" ref="tax_group_iva_21_inde"/>
+    </record>
+
+    <record id="21AOa" model="account.tax.template">
+        <field name="description">21AOa</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 21% indetraibile (I)</field>
+        <field name="sequence">100</field>
+        <field name="amount">21</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="tax_group_id" ref="tax_group_iva_21_inde"/>
+    </record>
+
+    <record id="21AO" model="account.tax.template">
+        <field name="description">21AO</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 21% indetraibile</field>
+        <field name="sequence">34</field>
+        <field name="amount">21</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_25')])]"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('21AOb'),ref('21AOa')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_21_inde"/>
+    </record>
+
+    <record id="21I5b" model="account.tax.template">
+        <field name="description">21I5b</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">IVA al 21% detraibile al 50% (D)</field>
+        <field name="sequence">200</field>
+        <field name="amount">10.5</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tax_group_id" ref="tax_group_iva_21_de_50"/>
+    </record>
+
+    <record id="21I5a" model="account.tax.template">
+        <field name="description">21I5a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">IVA al 21% detraibile al 50% (I)</field>
+        <field name="sequence">100</field>
+        <field name="amount">10.5</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="tax_group_id" ref="tax_group_iva_21_de_50"/>
+    </record>
+
+    <record id="21I5" model="account.tax.template">
+        <field name="description">21I5</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">IVA al 21% detraibile al 50%</field>
+        <field name="sequence">35</field>
+        <field name="amount">21</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_14')])]"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('21I5b'),ref('21I5a')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_21_de_50"/>
+    </record>
+
+    <record id="2210b" model="account.tax.template">
+        <field name="description">2210b</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 22% detraibile 10% (D)</field>
+        <field name="sequence">200</field>
+        <field name="amount">2.2</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tax_group_id" ref="tax_group_iva_22_de_10"/>
+    </record>
+
+    <record id="2210a" model="account.tax.template">
+        <field name="description">2210a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 22% detraibile 10% (I)</field>
+        <field name="sequence">100</field>
+        <field name="amount">19.8</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="tax_group_id" ref="tax_group_iva_22_de_10"/>
+    </record>
+
+    <record id="2210" model="account.tax.template">
+        <field name="description">2210</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 22% detraibile 10%</field>
+        <field name="sequence">31</field>
+        <field name="amount">22</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_16')])]"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('2210b'),ref('2210a')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_22_de_10"/>
+    </record>
+
+    <record id="2215b" model="account.tax.template">
+        <field name="description">2215b</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 22% detraibile 15% (D)</field>
+        <field name="sequence">200</field>
+        <field name="amount">3.3</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tax_group_id" ref="tax_group_iva_22_de_15"/>
+    </record>
+
+    <record id="2215a" model="account.tax.template">
+        <field name="description">2215a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 22% detraibile 15% (I)</field>
+        <field name="sequence">100</field>
+        <field name="amount">18.7</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="tax_group_id" ref="tax_group_iva_22_de_15"/>
+    </record>
+
+    <record id="2215" model="account.tax.template">
+        <field name="description">2215</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 22% detraibile 15%</field>
+        <field name="sequence">32</field>
+        <field name="amount">22</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_17')])]"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('2215b'),ref('2215a')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_22_de_15"/>
+    </record>
+
+    <record id="2240b" model="account.tax.template">
+        <field name="description">2240b</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 22% detraibile 40% (D)</field>
+        <field name="sequence">200</field>
+        <field name="amount">8.8</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tax_group_id" ref="tax_group_iva_22_de_40"/>
+    </record>
+
+    <record id="2240a" model="account.tax.template">
+        <field name="description">2240a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 22% detraibile 40% (I)</field>
+        <field name="sequence">100</field>
+        <field name="amount">13.2</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="tax_group_id" ref="tax_group_iva_22_de_40"/>
+    </record>
+
+    <record id="2240" model="account.tax.template">
+        <field name="description">2240</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 22% detraibile 40%</field>
+        <field name="sequence">33</field>
+        <field name="amount">22</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_18')])]"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('2240b'),ref('2240a')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_22_de_40"/>
+    </record>
+
+    <record id="22AOb" model="account.tax.template">
+        <field name="description">22AOb</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 22% indetraibile (D)</field>
+        <field name="sequence">200</field>
+        <field name="amount">0</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tax_group_id" ref="tax_group_iva_22_inde"/>
+    </record>
+
+    <record id="22AOa" model="account.tax.template">
+        <field name="description">22AOa</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 22% indetraibile (I)</field>
+        <field name="sequence">100</field>
+        <field name="amount">22</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="tax_group_id" ref="tax_group_iva_22_inde"/>
+    </record>
+
+    <record id="22AO" model="account.tax.template">
+        <field name="description">22AO</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">Iva al 22% indetraibile</field>
+        <field name="sequence">34</field>
+        <field name="amount">22</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_26')])]"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('22AOb'),ref('22AOa')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_22_inde"/>
+    </record>
+
+    <record id="22I5b" model="account.tax.template">
+        <field name="description">22I5b</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">IVA al 22% detraibile al 50% (D)</field>
+        <field name="sequence">200</field>
+        <field name="amount">11</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="account_id" ref="1601"/>
+        <field name="refund_account_id" ref="1601"/>
+        <field name="tax_group_id" ref="tax_group_iva_22_de_50"/>
+    </record>
+
+    <record id="22I5a" model="account.tax.template">
+        <field name="description">22I5a</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">IVA al 22% detraibile al 50% (I)</field>
+        <field name="sequence">100</field>
+        <field name="amount">11</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">none</field>
+        <field name="price_include">False</field>
+        <field name="tax_group_id" ref="tax_group_iva_22_de_50"/>
+    </record>
+
+    <record id="22I5" model="account.tax.template">
+        <field name="description">22I5</field>
+        <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
+        <field name="name">IVA al 22% detraibile al 50%</field>
+        <field name="sequence">35</field>
+        <field name="amount">22</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include">False</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('tax_tag_19')])]"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('22I5b'),ref('22I5a')])]"/>
+        <field name="tax_group_id" ref="tax_group_iva_22_de_50"/>
+    </record>
+
+</odoo>
