@@ -180,7 +180,7 @@ class ResourceCalendar(models.Model):
         'resource.calendar.leaves', 'calendar_id', 'Global Time Off',
         domain=[('resource_id', '=', False)]
         )
-    hours_per_day = fields.Float("Average Hour per Day", default=HOURS_PER_DAY,
+    hours_per_day = fields.Float("Average Hour per Day", default=lambda self: self.env.user.company_id.resource_calendar_id.hours_per_day or HOURS_PER_DAY,
                                  help="Average hours per day a resource is supposed to work with this calendar.")
     tz = fields.Selection(
         _tz_get, string='Timezone', required=True,

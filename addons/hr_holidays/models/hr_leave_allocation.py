@@ -9,7 +9,6 @@ from datetime import datetime, time
 from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models
-from odoo.addons.resource.models.resource import HOURS_PER_DAY
 from odoo.exceptions import AccessError, UserError
 from odoo.tools.translate import _
 
@@ -186,7 +185,11 @@ class HolidaysAllocation(models.Model):
                 # As we encode everything in days in the database we need to convert
                 # the number of hours into days for this we use the
                 # mean number of hours set on the employee's calendar
-                days_to_give = days_to_give / (holiday.employee_id.resource_calendar_id.hours_per_day or HOURS_PER_DAY)
+                start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+                end_date = datetime.now().replace(hour=23, minute=59, second=0, microsecond=0)
+                calendar = holiday.employee_id.resource_calendar_id or self.env.user.company_id.resource_calendar_id
+                number_of_hours = calendar.get_work_hours_count(start_date, end_date)
+                days_to_give = days_to_give / (number_of_hours or calendar.hours_per_day)
 
             values['number_of_days'] = holiday.number_of_days + days_to_give * prorata
             if holiday.accrual_limit > 0:
@@ -204,7 +207,11 @@ class HolidaysAllocation(models.Model):
     @api.depends('number_of_days', 'employee_id')
     def _compute_number_of_hours_display(self):
         for allocation in self:
-            allocation.number_of_hours_display = allocation.number_of_days * (allocation.employee_id.resource_calendar_id.hours_per_day or HOURS_PER_DAY)
+            start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            end_date = datetime.now().replace(hour=23, minute=59, second=0, microsecond=0)
+            calendar = allocation.employee_id.resource_calendar_id or self.env.user.company_id.resource_calendar_id
+            number_of_hours = calendar.get_work_hours_count(start_date, end_date)
+            allocation.number_of_hours_display = allocation.number_of_days * (number_of_hours or calendar.hours_per_day)
 
     @api.multi
     @api.depends('state', 'employee_id', 'department_id')
@@ -234,7 +241,11 @@ class HolidaysAllocation(models.Model):
     @api.onchange('number_of_hours_display')
     def _onchange_number_of_hours_display(self):
         for allocation in self:
-            allocation.number_of_days = allocation.number_of_hours_display / (allocation.employee_id.resource_calendar_id.hours_per_day or HOURS_PER_DAY)
+            start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            end_date = datetime.now().replace(hour=23, minute=59, second=0, microsecond=0)
+            calendar = allocation.employee_id.resource_calendar_id or self.env.user.company_id.resource_calendar_id
+            number_of_hours = calendar.get_work_hours_count(start_date, end_date)
+            allocation.number_of_days = allocation.number_of_hours_display / (number_of_hours or calendar.hours_per_day)
 
     @api.multi
     @api.onchange('number_of_days_display')

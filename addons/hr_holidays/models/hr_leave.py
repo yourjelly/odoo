@@ -10,7 +10,7 @@ from datetime import datetime, time
 from pytz import timezone, UTC
 
 from odoo import api, fields, models, tools, SUPERUSER_ID
-from odoo.addons.resource.models.resource import float_to_time, HOURS_PER_DAY
+from odoo.addons.resource.models.resource import float_to_time
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tools import float_compare
 from odoo.tools.translate import _
@@ -379,7 +379,7 @@ class HolidaysRequest(models.Model):
             calendar = holiday.employee_id.resource_calendar_id or self.env.user.company_id.resource_calendar_id
             if holiday.date_from and holiday.date_to:
                 number_of_hours = calendar.get_work_hours_count(holiday.date_from, holiday.date_to)
-                holiday.number_of_hours_display = number_of_hours or (holiday.number_of_days * HOURS_PER_DAY)
+                holiday.number_of_hours_display = number_of_hours or (holiday.number_of_days * calendar.hours_per_day)
             else:
                 holiday.number_of_hours_display = 0
 
@@ -434,16 +434,17 @@ class HolidaysRequest(models.Model):
 
     def _get_number_of_days(self, date_from, date_to, employee_id):
         """ Returns a float equals to the timedelta between two dates given as string."""
+        calendar = self.env.user.company_id.resource_calendar_id
         if employee_id:
             employee = self.env['hr.employee'].browse(employee_id)
             return employee._get_work_days_data(date_from, date_to)['days']
 
-        today_hours = self.env.user.company_id.resource_calendar_id.get_work_hours_count(
+        today_hours = calendar.get_work_hours_count(
             datetime.combine(date_from.date(), time.min),
             datetime.combine(date_from.date(), time.max),
             False)
 
-        return self.env.user.company_id.resource_calendar_id.get_work_hours_count(date_from, date_to) / (today_hours or HOURS_PER_DAY)
+        return calendar.get_work_hours_count(date_from, date_to) / (today_hours or calendar.hours_per_day)
 
     ####################################################
     # ORM Overrides methods
@@ -607,11 +608,12 @@ class HolidaysRequest(models.Model):
     def _prepare_holidays_meeting_values(self):
         self.ensure_one()
         calendar = self.employee_id.resource_calendar_id or self.env.user.company_id.resource_calendar_id
+        number_of_hours = calendar.get_work_hours_count(self.date_from, self.date_to)
         meeting_values = {
             'name': self.display_name,
             'categ_ids': [(6, 0, [
                 self.holiday_status_id.categ_id.id])] if self.holiday_status_id.categ_id else [],
-            'duration': self.number_of_days * (calendar.hours_per_day or HOURS_PER_DAY),
+            'duration': self.number_of_days * (number_of_hours or calendar.hours_per_day),
             'description': self.notes,
             'user_id': self.user_id.id,
             'start': self.date_from,
