@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-   <menuitem id="account_reports_jp_statements_menu" name="Japan" parent="account.menu_finance_reports" sequence="0" groups="account.group_account_user"/>
-
     <!-- Chart Template -->
     <record id="l10n_jp1" model="account.chart.template">
         <field name="name">日本勘定設定テンプレート</field>
@@ -12,77 +10,122 @@
         <field name="currency_id" ref="base.JPY"/>
     </record>
 
-    <!-- Account Tags -->
-    <record id="tag_jp_01" model="account.account.tag">
+    <record id="tax_report_jp_tag_01" model="account.tax.report.line">
         <field name="name">支払対象税額</field>
-        <field name="applicability">taxes</field>
+        <field name="sequence">1</field>
+        <field name="country_id" ref="base.jp"/>
     </record>
-    <record id="tag_jp_02" model="account.account.tag">
+    <record id="tax_report_jp_tag_02" model="account.tax.report.line">
         <field name="name">仮受税額</field>
-        <field name="applicability">taxes</field>
+        <field name="parent_line_id" ref="tax_report_jp_tag_01"/>
+        <field name="sequence">1</field>
+        <field name="country_id" ref="base.jp"/>
     </record>
-    <record id="tag_jp_03" model="account.account.tag">
+    <record id="tax_report_jp_tag_03" model="account.tax.report.line">
         <field name="name">仮受消費税(8%)</field>
-        <field name="applicability">taxes</field>
+        <field name="parent_line_id" ref="tax_report_jp_tag_02"/>
+        <field name="sequence">1</field>
+        <field name="tag_name">JPTAXOutput_tax_8</field>
+        <field name="country_id" ref="base.jp"/>
     </record>
-    <record id="tag_jp_04" model="account.account.tag">
+    <record id="tax_report_jp_tag_04" model="account.tax.report.line">
         <field name="name">免税</field>
-        <field name="applicability">taxes</field>
+        <field name="parent_line_id" ref="tax_report_jp_tag_02"/>
+        <field name="sequence">2</field>
+        <field name="tag_name">JPTAXDuty_free</field>
+        <field name="country_id" ref="base.jp"/>
     </record>
-    <record id="tag_jp_05" model="account.account.tag">
+    <record id="tax_report_jp_tag_05" model="account.tax.report.line">
         <field name="name">不課税</field>
-        <field name="applicability">taxes</field>
+        <field name="parent_line_id" ref="tax_report_jp_tag_02"/>
+        <field name="sequence">3</field>
+        <field name="tag_name">JPTAXNon_taxation</field>
+        <field name="country_id" ref="base.jp"/>
     </record>
-    <record id="tag_jp_06" model="account.account.tag">
+    <record id="tax_report_jp_tag_06" model="account.tax.report.line">
         <field name="name">仮払税額</field>
-        <field name="applicability">taxes</field>
+        <field name="parent_line_id" ref="tax_report_jp_tag_01"/>
+        <field name="sequence">2</field>
+        <field name="country_id" ref="base.jp"/>
     </record>
-    <record id="tag_jp_07" model="account.account.tag">
+    <record id="tax_report_jp_tag_07" model="account.tax.report.line">
         <field name="name">仮払消費税(8%)</field>
-        <field name="applicability">taxes</field>
+        <field name="parent_line_id" ref="tax_report_jp_tag_06"/>
+        <field name="sequence">1</field>
+        <field name="tag_name">JPTAXSuspense_consumption_tax_8</field>
+        <field name="country_id" ref="base.jp"/>
     </record>
-    <record id="tag_jp_08" model="account.account.tag">
+    <record id="tax_report_jp_tag_08" model="account.tax.report.line">
         <field name="name">輸入</field>
-        <field name="applicability">taxes</field>
+        <field name="parent_line_id" ref="tax_report_jp_tag_06"/>
+        <field name="sequence">2</field>
+        <field name="tag_name">JPTAXImport</field>
+        <field name="country_id" ref="base.jp"/>
     </record>
-    <record id="tag_jp_09" model="account.account.tag">
+    <record id="tax_report_jp_tag_09" model="account.tax.report.line">
         <field name="name">不課税</field>
-        <field name="applicability">taxes</field>
+        <field name="parent_line_id" ref="tax_report_jp_tag_06"/>
+        <field name="sequence">3</field>
+        <field name="tag_name">JPTAXNon_taxation2</field>
+        <field name="country_id" ref="base.jp"/>
     </record>
-    <record id="tag_jp_10" model="account.account.tag">
+    <record id="tax_report_jp_tag_10" model="account.tax.report.line">
         <field name="name">税計算基準額</field>
-        <field name="applicability">taxes</field>
+        <field name="sequence">2</field>
+        <field name="country_id" ref="base.jp"/>
     </record>
-    <record id="tag_jp_11" model="account.account.tag">
+    <record id="tax_report_jp_tag_11" model="account.tax.report.line">
         <field name="name">販売基準額</field>
-        <field name="applicability">taxes</field>
+        <field name="parent_line_id" ref="tax_report_jp_tag_10"/>
+        <field name="sequence">1</field>
+        <field name="country_id" ref="base.jp"/>
     </record>
-    <record id="tag_jp_12" model="account.account.tag">
+    <record id="tax_report_jp_tag_12" model="account.tax.report.line">
         <field name="name">課税対象売上(8%)</field>
-        <field name="applicability">taxes</field>
+        <field name="parent_line_id" ref="tax_report_jp_tag_11"/>
+        <field name="sequence">1</field>
+        <field name="tag_name">JPTAXTaxable_sales_8</field>
+        <field name="country_id" ref="base.jp"/>
     </record>
-    <record id="tag_jp_13" model="account.account.tag">
+    <record id="tax_report_jp_tag_13" model="account.tax.report.line">
         <field name="name">免税売上</field>
-        <field name="applicability">taxes</field>
+        <field name="parent_line_id" ref="tax_report_jp_tag_11"/>
+        <field name="sequence">2</field>
+        <field name="tag_name">JPTAXDuty_free_sales</field>
+        <field name="country_id" ref="base.jp"/>
     </record>
-    <record id="tag_jp_14" model="account.account.tag">
+    <record id="tax_report_jp_tag_14" model="account.tax.report.line">
         <field name="name">不課税売上</field>
-        <field name="applicability">taxes</field>
+        <field name="parent_line_id" ref="tax_report_jp_tag_11"/>
+        <field name="sequence">3</field>
+        <field name="tag_name">JPTAXNon_taxable_sales</field>
+        <field name="country_id" ref="base.jp"/>
     </record>
-    <record id="tag_jp_15" model="account.account.tag">
+    <record id="tax_report_jp_tag_15" model="account.tax.report.line">
         <field name="name">購買基準額</field>
-        <field name="applicability">taxes</field>
+        <field name="parent_line_id" ref="tax_report_jp_tag_10"/>
+        <field name="sequence">2</field>
+        <field name="country_id" ref="base.jp"/>
     </record>
-    <record id="tag_jp_16" model="account.account.tag">
+    <record id="tax_report_jp_tag_16" model="account.tax.report.line">
         <field name="name">課税対象仕入(8%)</field>
-        <field name="applicability">taxes</field>
+        <field name="parent_line_id" ref="tax_report_jp_tag_15"/>
+        <field name="sequence">1</field>
+        <field name="tag_name">JPTAXTaxable_purchases_8</field>
+        <field name="country_id" ref="base.jp"/>
     </record>
-    <record id="tag_jp_17" model="account.account.tag">
+    <record id="tax_report_jp_tag_17" model="account.tax.report.line">
         <field name="name">輸入仕入</field>
-        <field name="applicability">taxes</field>
+        <field name="parent_line_id" ref="tax_report_jp_tag_15"/>
+        <field name="sequence">2</field>
+        <field name="tag_name">JPTAXThe_import_purchase</field>
+        <field name="country_id" ref="base.jp"/>
     </record>
-    <record id="tag_jp_18" model="account.account.tag">
+    <record id="tax_report_jp_tag_18" model="account.tax.report.line">
         <field name="name">不課税仕入</field>
-        <field name="applicability">taxes</field>
+        <field name="parent_line_id" ref="tax_report_jp_tag_15"/>
+        <field name="sequence">3</field>
+        <field name="tag_name">JPTAXNon_taxable_purchases</field>
+        <field name="country_id" ref="base.jp"/>
     </record>
 </odoo>
