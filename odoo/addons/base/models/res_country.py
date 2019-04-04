@@ -49,7 +49,7 @@ class Country(models.Model):
         default='%(street)s\n%(street2)s\n%(city)s %(state_code)s %(zip)s\n%(country_name)s')
     address_view_id = fields.Many2one(
         comodel_name='ir.ui.view', string="Input View",
-        domain=[('model', '=', 'res.partner'), ('type', '=', 'form')],
+        domain=[('model', '=', 'format.address.mixin'), ('type', '=', 'form')],
         help="Use this field if you want to replace the usual way to encode a complete address. "
              "Note that the address_format field is used to modify the way to display addresses "
              "(in reports for example), while this field is used to modify the input form for "

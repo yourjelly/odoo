@@ -69,19 +69,16 @@ class FormatAddressMixin(models.AbstractModel):
         # consider the country of the user, not the country of the partner we want to display
         address_view_id = self.env.user.company_id.country_id.address_view_id
         if address_view_id and not self._context.get('no_address_format'):
-            #render the partner address accordingly to address_view_id
+            # render the partner address accordingly to address_view_id
             doc = etree.fromstring(arch)
             for address_node in doc.xpath("//div[hasclass('o_address_format')]"):
                 self_no_addr_context = self.with_context(no_address_format=True)
                 sub_view = self_no_addr_context.fields_view_get(view_id=address_view_id.id, view_type='form', toolbar=False, submenu=False)
                 sub_view_node = etree.fromstring(sub_view['arch'])
-                #if the model is different than res.partner, there are chances that the view won't work
-                #(e.g fields not present on the model). In that case we just return arch
-                if self._name != 'res.partner':
-                    try:
-                        self.env['ir.ui.view'].postprocess_and_fields(self._name, sub_view_node, None)
-                    except ValueError:
-                        return arch
+
+                # As the view's model is `form.address.mixin`, we can apply the postprocess since we are sure the view will only contain mixin's fields
+                self.env['ir.ui.view'].postprocess_and_fields(self._name, sub_view_node, None)
+
                 address_node.getparent().replace(address_node, sub_view_node)
             arch = etree.tostring(doc, encoding='unicode')
         return arch
