@@ -302,10 +302,14 @@ class Manager(Thread):
     def usb_loop(self):
         usb_devices = {}
         devs = core.find(find_all=True)
+        cpt = 2
         for dev in devs:
-            path =  "usb_%04x:%04x_%03d_%03d_" % (dev.idVendor, dev.idProduct, dev.bus, dev.address)
+            dev.identifier =  "usb_%04x:%04x" % (dev.idVendor, dev.idProduct)
+            if dev.identifier in usb_devices:
+                dev.identifier += '_%s' % cpt
+                cpt += 1
             iot_device = IoTDevice(dev, 'usb')
-            usb_devices[path] = iot_device
+            usb_devices[dev.identifier] = iot_device
         return usb_devices
 
     def video_loop(self):
