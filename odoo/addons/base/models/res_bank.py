@@ -18,15 +18,12 @@ def sanitize_account_number(acc_number):
 class Bank(models.Model):
     _description = 'Bank'
     _name = 'res.bank'
+    _inherit = 'format.address.mixin'
     _order = 'name'
 
     name = fields.Char(required=True)
-    street = fields.Char()
-    street2 = fields.Char()
-    zip = fields.Char()
-    city = fields.Char()
-    state = fields.Many2one('res.country.state', 'Fed. State', domain="[('country_id', '=?', country)]")
-    country = fields.Many2one('res.country')
+    country_id = fields.Many2one('res.country', oldname='country')  # keep this with oldname for migration. Can be remove in 13.0
+    state_id = fields.Many2one("res.country.state", oldname='state')  # keep this with oldname for migration. Can be remove in 13.0
     email = fields.Char()
     phone = fields.Char()
     active = fields.Boolean(default=True)
@@ -50,16 +47,6 @@ class Bank(models.Model):
                 domain = ['&'] + domain
         bank_ids = self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
         return self.browse(bank_ids).name_get()
-        
-    @api.onchange('country')
-    def _onchange_country_id(self):
-        if self.country and self.country != self.state.country_id:
-            self.state = False
-            
-    @api.onchange('state')
-    def _onchange_state(self):
-        if self.state.country_id:
-            self.country = self.state.country_id
 
 
 class ResPartnerBank(models.Model):
