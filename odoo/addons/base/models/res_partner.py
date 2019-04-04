@@ -29,7 +29,6 @@ WARNING_MESSAGE = [
 WARNING_HELP = _('Selecting the "Warning" option will notify user with the message, Selecting "Blocking Message" will throw an exception with the message and block the flow. The Message has to be written in the next field.')
 
 
-ADDRESS_FIELDS = ('street', 'street2', 'zip', 'city', 'state_id', 'country_id')
 @api.model
 def _lang_get(self):
     return self.env['res.lang'].get_installed()
@@ -45,6 +44,27 @@ class FormatAddressMixin(models.AbstractModel):
     _name = "format.address.mixin"
     _description = 'Fomat Address'
 
+    street = fields.Char('Street')
+    street2 = fields.Char('Street2')
+    zip = fields.Char('Zip', change_default=True)
+    city = fields.Char('City')
+    state_id = fields.Many2one("res.country.state", string="State", domain="[('country_id', '=', country_id)]")
+    country_id = fields.Many2one('res.country', string='Country')
+
+    @api.onchange('state_id')
+    def _onchange_state(self):
+        if self.state_id:
+            self.country_id = self.state_id.country_id.id
+
+    @api.onchange('country_id')
+    def _onchange_country_id(self):
+        if self.country_id and self.country_id != self.state_id.country_id:
+            self.state_id = False
+
+    def _address_get_fields(self):
+        """ Return the list of fields the mixin is responible of """
+        return ['street', 'street2', 'zip', 'city', 'state_id', 'country_id']
+
     def _fields_view_get_address(self, arch):
         # consider the country of the user, not the country of the partner we want to display
         address_view_id = self.env.user.company_id.country_id.address_view_id
@@ -52,9 +72,8 @@ class FormatAddressMixin(models.AbstractModel):
             #render the partner address accordingly to address_view_id
             doc = etree.fromstring(arch)
             for address_node in doc.xpath("//div[hasclass('o_address_format')]"):
-                Partner = self.env['res.partner'].with_context(no_address_format=True)
-                sub_view = Partner.fields_view_get(
-                    view_id=address_view_id.id, view_type='form', toolbar=False, submenu=False)
+                self_no_addr_context = self.with_context(no_address_format=True)
+                sub_view = self_no_addr_context.fields_view_get(view_id=address_view_id.id, view_type='form', toolbar=False, submenu=False)
                 sub_view_node = etree.fromstring(sub_view['arch'])
                 #if the model is different than res.partner, there are chances that the view won't work
                 #(e.g fields not present on the model). In that case we just return arch
@@ -66,6 +85,7 @@ class FormatAddressMixin(models.AbstractModel):
                 address_node.getparent().replace(address_node, sub_view_node)
             arch = etree.tostring(doc, encoding='unicode')
         return arch
+
 
 class PartnerCategory(models.Model):
     _description = 'Partner Tags'
@@ -186,12 +206,6 @@ class Partner(models.Model):
         ], string='Address Type',
         default='contact',
         help="Invoice & Delivery addresses are used in sales orders. Private addresses are only visible by authorized users.")
-    street = fields.Char()
-    street2 = fields.Char()
-    zip = fields.Char(change_default=True)
-    city = fields.Char()
-    state_id = fields.Many2one("res.country.state", string='State', ondelete='restrict', domain="[('country_id', '=?', country_id)]")
-    country_id = fields.Many2one('res.country', string='Country', ondelete='restrict')
     email = fields.Char()
     email_formatted = fields.Char(
         'Formatted Email', compute='_compute_email_formatted',
@@ -374,16 +388,6 @@ class Partner(models.Model):
                 result['value'] = {key: convert(self.parent_id[key]) for key in address_fields}
         return result
 
-    @api.onchange('country_id')
-    def _onchange_country_id(self):
-        if self.country_id and self.country_id != self.state_id.country_id:
-            self.state_id = False
-
-    @api.onchange('state_id')
-    def _onchange_state(self):
-        if self.state_id.country_id:
-            self.country_id = self.state_id.country_id
-
     @api.onchange('email')
     def onchange_email(self):
         if not self.image and self._context.get('gravatar_image') and self.email:
@@ -431,7 +435,7 @@ class Partner(models.Model):
     @api.model
     def _address_fields(self):
         """Returns the list of address fields that are synced from the parent."""
-        return list(ADDRESS_FIELDS)
+        return self._address_get_fields()  # currently the one from the address mixin
 
     @api.multi
     def update_address(self, vals):

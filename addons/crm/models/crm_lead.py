@@ -113,13 +113,7 @@ class Lead(models.Model):
     user_email = fields.Char('User Email', related='user_id.email', readonly=True)
     user_login = fields.Char('User Login', related='user_id.login', readonly=True)
 
-    # Fields for address, due to separation from crm and res.partner
-    street = fields.Char('Street')
-    street2 = fields.Char('Street2')
-    zip = fields.Char('Zip', change_default=True)
-    city = fields.Char('City')
-    state_id = fields.Many2one("res.country.state", string='State')
-    country_id = fields.Many2one('res.country', string='Country')
+    # Fields for address (comes from the format.address.mixin) and contact, due to separation from crm and res.partner
     phone = fields.Char('Phone', tracking=50)
     mobile = fields.Char('Mobile')
     function = fields.Char('Job Position')
@@ -270,18 +264,6 @@ class Lead(models.Model):
                 values = lead.with_context(team_id=lead.team_id.id)._onchange_user_values(lead.user_id.id)
                 if values:
                     lead.update(values)
-
-    @api.onchange('state_id')
-    def _onchange_state(self):
-        if self.state_id:
-            self.country_id = self.state_id.country_id.id
-
-    @api.onchange('country_id')
-    def _onchange_country_id(self):
-        res = {'domain': {'state_id': []}}
-        if self.country_id:
-            res['domain']['state_id'] = [('country_id', '=', self.country_id.id)]
-        return res
 
     # ----------------------------------------
     # ORM override (CRUD, fields_view_get, ...)
