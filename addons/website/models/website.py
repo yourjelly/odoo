@@ -953,11 +953,15 @@ class WebsitePublishedMultiMixin(WebsitePublishedMixin):
     @api.depends('is_published', 'website_id')
     def _compute_website_published(self):
         current_website_id = self._context.get('website_id')
-        for record in self:
+        # this is an optimization, to avoid the prefetch while still storing
+        # in the appropriate cache
+        for record, no_prefetch in pycompat.izip(self, self.with_context(prefetch=False)):
             if current_website_id:
-                record.website_published = record.is_published and (not record.website_id or record.website_id.id == current_website_id)
+                record.website_published = no_prefetch.is_published and (
+                        not no_prefetch.website_id or
+                        no_prefetch.website_id.id == current_website_id)
             else:
-                record.website_published = record.is_published
+                record.website_published = no_prefetch.is_published
 
     @api.multi
     def _inverse_website_published(self):
