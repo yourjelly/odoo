@@ -259,18 +259,6 @@ class WebsiteForum(WebsiteProfile):
         question.sudo().write({'favourite_ids': favourite_ids})
         return favourite
 
-    def question_toggle_other_user_favorite(self, forum, question, targetUser, **post):
-        if not request.session.uid: 
-            return {'error': 'anonymous_user'}
-
-        #TODO : check if the user is an employee
-
-        if targetUser in question.favourite_ids:
-            # favourite_ids = [(4, request.uid)]
-            question.sudo().write({'favourite_ids': [(4, request.uid)]})
-        
-        # return favourite
-
     @http.route('/forum/<model("forum.forum"):forum>/question/<model("forum.post"):question>/ask_for_close', type='http', auth="user", methods=['POST'], website=True)
     def question_ask_for_close(self, forum, question, **post):
         reasons = request.env['forum.post.reason'].search([('reason_type', '=', 'basic')])
