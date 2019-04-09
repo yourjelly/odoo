@@ -170,17 +170,13 @@ options.registry.website_sale = options.Class.extend({
         });
     },
     go_to: function (previewMode, value) {
-        var self = this;
         this._rpc({
             route: '/shop/change_sequence',
             params: {
                 id: this.product_tmpl_id,
                 sequence: value,
             },
-        }).then(function (result) {
-            self.$target.closest("#products_grid > #product_table").replaceWith(result.template);
-            $('.oe_overlay').detach();
-        });
+        }).then(this.reload);
     }
 });
 

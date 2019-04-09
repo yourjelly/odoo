@@ -1067,14 +1067,11 @@ class WebsiteSale(http.Controller):
 
         return not active
 
-    @http.route(['/shop/change_sequence'], type='json', auth="public", website=True)
+    @http.route(['/shop/change_sequence'], type='json', auth="public")
     def change_sequence(self, id, sequence):
         product_tmpl = request.env['product.template'].browse(id)
         if hasattr(product_tmpl, 'set_sequence_' + sequence):
             getattr(product_tmpl, 'set_sequence_' + sequence)()
-            values = self._prepare_bins()
-            return {'template': request.env['ir.ui.view'].render_template("website_sale.product_table", values)}
-        return None
 
     @http.route(['/shop/change_size'], type='json', auth="public", website=True)
     def change_size(self, id, x, y):
