@@ -18,7 +18,7 @@ Suggest Question, Read Question, No Distractions
     #     'data/forum_data.xml',
     #     'views/forum.xml',
     #     'views/res_users_views.xml',
-    #     'views/website_forum.xml',
+        'views/website_forum.xml',
     #     'views/website_forum_profile.xml',
     #     'views/ir_qweb.xml',
     #     'security/ir.model.access.csv',

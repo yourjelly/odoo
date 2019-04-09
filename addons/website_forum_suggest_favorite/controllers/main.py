@@ -13,7 +13,7 @@ from datetime import datetime
 from odoo import http, tools, _
 from odoo.addons.http_routing.models.ir_http import slug
 from odoo.addons.website.models.ir_http import sitemap_qs2dom
-from odoo.addons.website_profile.controllers.main import WebsiteProfile
+from odoo.addons.website_forum.controllers.main import WebsiteForum
 from odoo.http import request
 
 class WebsiteForumSuggestFavorite(WebsiteForum):

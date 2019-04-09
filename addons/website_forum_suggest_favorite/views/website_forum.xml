@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="header_extended" name="Forum Index Extended" inherit_id="website_forum.header">
+            <xpath expr='//div[@id="right-column"]/a' position='after'>
+                <a role="button" type="button" class="btn btn-secondary btn-lg btn-block mb-3" t-attf-href="/forum/#{slug(forum)}/question/#{slug(question)}/suggest_favorite" t-if="question">Suggest as favorite</a>
+            </xpath>
+        </template>
+    </data>
+</odoo>
