@@ -1362,7 +1362,7 @@
 
 
     <template id="short_cart_summary" name="Short Cart right column">
-        <div class="card js_cart_summary" t-if="website_sale_order and website_sale_order.website_order_line" >
+        <div class="card js_cart_summary" t-if="website_sale_order and website_sale_order.website_order_line">
             <div class="card-body">
                 <h4 class="d-none d-xl-block">Order Total</h4>
                 <hr class="d-none d-xl-block"/>
@@ -1393,13 +1393,13 @@
                     Your cart is empty!
                 </div>
                 <div class="toggle_summary_div d-none d-xl-block">
-                    <table class="table table-striped table-sm" id="cart_products" t-if="website_sale_order and website_sale_order.website_order_line">
+                    <table class="table table-striped" id="cart_products" t-if="website_sale_order and website_sale_order.website_order_line">
                         <thead>
                             <tr>
                                 <th class="border-top-0 td-img">Product</th>
                                 <th class="border-top-0"></th>
-                                <th class="border-top-0 td-qty">Quantity</th>
-                                <th class="border-top-0 text-center td-price">Price</th>
+                                <th class="border-top-0 text-right td-qty">Quantity</th>
+                                <th class="border-top-0 text-right td-price">Price</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1413,10 +1413,10 @@
                                         <strong t-field="line.name_short" />
                                     </div>
                                 </td>
-                                <td class='td-qty'>
+                                <td class='text-right td-qty'>
                                     <div t-esc="line.product_uom_qty" />
                                 </td>
-                                <td class="text-center td-price">
+                                <td class="text-right td-price">
                                     <span t-field="line.price_reduce_taxexcl" style="white-space: nowrap;" t-options="{'widget': 'monetary', 'display_currency': website_sale_order.currency_id}" groups="account.group_show_line_subtotals_tax_excluded" />
                                     <span t-field="line.price_reduce_taxinc" style="white-space: nowrap;" t-options="{'widget': 'monetary', 'display_currency': website_sale_order.currency_id}" groups="account.group_show_line_subtotals_tax_included" />
                                 </td>
@@ -1515,23 +1515,23 @@
                   <tr id="empty">
                       <t t-if='not no_rowspan'><td rowspan="10" class="noborder"/></t>
                       <td class="col-md-2 col-3 noborder"></td>
-                      <td class="col-md-2 col-3 noborder" ></td>
+                      <td class="col-md-2 col-3 noborder"></td>
                   </tr>
                   <tr id="order_total_untaxed">
                       <td class="text-right noborder">Subtotal:</td>
-                      <td class="text-xl-right noborder" >
+                      <td class="text-xl-right noborder">
                           <span t-field="website_sale_order.amount_untaxed" class="monetary_field" style="white-space: nowrap;" t-options="{'widget': 'monetary', 'display_currency': website_sale_order.currency_id}"/>
                       </td>
                   </tr>
                   <tr id="order_total_taxes">
                       <td class="text-right noborder">Taxes:</td>
-                      <td class="text-xl-right noborder">
-                           <span t-field="website_sale_order.amount_tax" class="monetary_field" style="white-space: nowrap;" t-options="{'widget': 'monetary', 'display_currency': website_sale_order.currency_id}" />
+                      <td class="text-right noborder">
+                           <span t-field="website_sale_order.amount_tax" class="monetary_field" style="white-space: nowrap;" t-options="{'widget': 'monetary', 'display_currency': website_sale_order.currency_id}"/>
                       </td>
                   </tr>
                   <tr id="order_total">
                       <td class="text-right"><strong>Total:</strong></td>
-                      <td class="text-xl-right">
+                      <td class="text-right">
                           <strong t-field="website_sale_order.amount_total" class="monetary_field"
                               t-options='{"widget": "monetary", "display_currency": website_sale_order.pricelist_id.currency_id}'/>
                       </td>
