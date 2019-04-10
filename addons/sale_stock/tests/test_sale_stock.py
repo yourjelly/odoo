@@ -498,3 +498,95 @@ class TestSaleStock(TestSale):
         so1.picking_ids.button_validate()
         self.assertEqual(so1.picking_ids.state, 'done')
         self.assertEqual(so1.order_line.mapped('qty_delivered'), [1, 1, 1])
+
+    def test_mtso_mto(self):
+        """ Make a sale order for 5 products when there are only 4 in stock then
+        check that MTO is applied on the moves when the rule is set to 'mts_then_mto'
+        """
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.user.id)], limit=1)
+        warehouse.delivery_steps = 'pick_pack_ship'
+        partner_demo_customer = self.env.ref('base.res_partner_1')
+        final_location = partner_demo_customer.property_stock_customer
+        product_a = self.env['product.product'].create({
+            'name': 'ProductA',
+            'type': 'product',
+        })
+
+        self.env['stock.quant']._update_available_quantity(product_a, warehouse.wh_output_stock_loc_id, 4.0)
+
+        # We set quantities in the stock location to avoid warnings
+        # triggered by '_onchange_product_id_check_availability'
+        self.env['stock.quant']._update_available_quantity(product_a, warehouse.lot_stock_id, 4.0)
+        values = {'warehouse_id': warehouse}
+
+        # We alter one rule and we set it to 'mts_then_mto'
+        rule = self.env['procurement.group']._get_rule(product_a, final_location, values)
+        rule.procure_method = 'mts_then_mto'
+
+        # We create an SO, then validate it to trigger a procurement
+        f = Form(self.env['sale.order'])
+        f.partner_id = partner_demo_customer
+        f.warehouse_id = warehouse
+        with f.order_line.new() as line:
+            line.product_id = product_a
+            line.product_uom_qty = 5.0
+
+        so = f.save()
+        so.action_confirm()
+
+        qty_available = self.env['stock.quant']._get_available_quantity(product_a, warehouse.wh_output_stock_loc_id)
+
+        # 3 pickings shloud be created.
+        self.assertEquals(len(so.picking_ids), 3)
+        for picking in so.picking_ids:
+            # Only the picking from Stock to Pack should be MTS
+            if picking.location_id == warehouse.lot_stock_id:
+                self.assertEquals(picking.move_lines.procure_method, 'make_to_stock')
+            else:
+                self.assertEquals(picking.move_lines.procure_method, 'make_to_order')
+
+            # TODO: To update if we change the 'all or nothing' mechanism
+            self.assertEquals(len(picking.move_lines), 1)
+            self.assertEquals(picking.move_lines.product_uom_qty, 5, 'The quantity of the move should be the same as on the SO')
+        self.assertEqual(qty_available, 4, 'The 4 products should still be available')
+
+    def test_mtso_mts(self):
+        """ Make a sale order for 4 products when there are  4 in stock then
+        check that MTS is applied on the moves when the rule is set to 'mts_then_mto'
+        """
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.user.id)], limit=1)
+        warehouse.delivery_steps = 'pick_pack_ship'
+        partner_demo_customer = self.env.ref('base.res_partner_1')
+        final_location = partner_demo_customer.property_stock_customer
+        product_a = self.env['product.product'].create({
+            'name': 'ProductA',
+            'type': 'product',
+        })
+
+        self.env['stock.quant']._update_available_quantity(product_a, warehouse.wh_output_stock_loc_id, 4.0)
+        values = {'warehouse_id': warehouse}
+
+        # We alter one rule and we set it to 'mts_then_mto'
+        rule = self.env['procurement.group']._get_rule(product_a, final_location, values)
+        rule.procure_method = 'mts_then_mto'
+
+        # We create an SO, then validate it to trigger a procurement
+        f = Form(self.env['sale.order'])
+        f.partner_id = partner_demo_customer
+        f.warehouse_id = warehouse
+        with f.order_line.new() as line:
+            line.product_id = product_a
+            line.product_uom_qty = 4.0
+
+        so = f.save()
+        so.action_confirm()
+
+        # A picking shloud be created with its move having MTS as procure method.
+        self.assertEquals(len(so.picking_ids), 1)
+        picking = so.picking_ids
+        self.assertEquals(picking.move_lines.procure_method, 'make_to_stock')
+        self.assertEquals(len(picking.move_lines), 1)
+        self.assertEquals(picking.move_lines.product_uom_qty, 4)
+
+        qty_available = self.env['stock.quant']._get_available_quantity(product_a, warehouse.wh_output_stock_loc_id)
+        self.assertEqual(qty_available, 0, 'The 4 products should be reserved')
