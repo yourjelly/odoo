@@ -71,10 +71,18 @@ class StatusController(http.Controller):
         """
         iot_device = iot_devices.get(device_id)
         if iot_device:
+            _logger.warning(iot_device)
             iot_device.data['owner'] = session_id
             data = json.loads(data)
-            iot_device.action(data)
+            if 'paired' in data.values():
+                iot_device.link_device()
+            else:
+                iot_device.action(data)
             return True
+        else:
+            _logger.warning('no iot_device')
+            _logger.warning(bt_devices)
+            _logger.warning(iot_devices)
         return False
 
     @http.route('/hw_drivers/event', type='json', auth='none', cors='*', csrf=False, save_session=False)
@@ -163,11 +171,40 @@ class Driver(Thread, metaclass=DriverMetaClass):
         """
         return self._device_type
 
+    @property
+    def device_paired(self):
+        """
+        If device is paired on Odoo DB or not
+        return bool
+        """
+        return self._paired
+
+    # @device_paired.setter
+    # def device_paired(self, paired):
+    #     self._paired = paired
+
     @classmethod
     def supported(cls, device):
         """
         On specific driver override this method to check if device is supported or not
         return True or False
+        """
+        pass
+
+    def link_device(self):
+        """
+        Switch the boolean _paired with the box
+        On specific driver override this method to make connection with device
+        """
+        self._paired = not self._paired
+        # self.device_paired = not self.device_paired
+        m.send_alldevices('link_device')
+        _logger.warning('link_device')
+        _logger.warning(self.device_paired)
+
+    def connect_device(self):
+        """
+        On driver override this method to connect the device to a specific communication protocol
         """
         pass
 
@@ -256,7 +293,7 @@ class Manager(Thread):
                 module = util.module_from_spec(spec)
                 spec.loader.exec_module(module)
 
-    def send_alldevices(self):
+    def send_alldevices(self, action_device):
         """
         This method send IoT Box and devices informations to Odoo database
         """
@@ -276,6 +313,8 @@ class Manager(Thread):
                     'name': iot_devices[device].device_name,
                     'type': iot_devices[device].device_type,
                     'connection': iot_devices[device].device_connection,
+                    'paired': iot_devices[device].device_paired,
+                    'action_device': action_device
                 }
             data = {
                 'params': {
@@ -287,7 +326,7 @@ class Manager(Thread):
             urllib3.disable_warnings()
             http = urllib3.PoolManager(cert_reqs='CERT_NONE')
             try:
-                http.request(
+                resp = http.request(
                     'POST',
                     server + "/iot/setup",
                     body = json.dumps(data).encode('utf8'),
@@ -296,6 +335,11 @@ class Manager(Thread):
             except Exception as e:
                 _logger.error('Could not reach configured server')
                 _logger.error('A error encountered : %s ' % e)
+
+            data = json.loads(resp.data.decode())
+            for device in data['result']:
+                iot_devices[device]._paired = data['result'][device]['paired']
+                iot_devices[device].connect_device()
         else:
             _logger.warning('Odoo server not set')
 
@@ -342,7 +386,7 @@ class Manager(Thread):
         """
         devices = {}
         updated_devices = {}
-        self.send_alldevices()
+        self.send_alldevices('detect_device')
         cpt = 0
         while 1:
             updated_devices = self.usb_loop()
@@ -355,6 +399,7 @@ class Manager(Thread):
             cpt += 1
             added = updated_devices.keys() - devices.keys()
             removed = devices.keys() - updated_devices.keys()
+            _logger.warning(removed)
             devices = updated_devices
             for path in [device_rm for device_rm in removed if device_rm in iot_devices]:
                 iot_devices[path].disconnect()
@@ -366,24 +411,26 @@ class Manager(Thread):
                         d.daemon = True
                         d.start()
                         iot_devices[path] = d
-                        self.send_alldevices()
+                        self.send_alldevices('detect_device')
                         break
             time.sleep(3)
 
 class GattBtManager(Gatt_DeviceManager):
 
     def device_discovered(self, device):
-        path = "bt_%s" % (device.mac_address,)
-        if path not in bt_devices:
+        device.identifier = "bt_%s" % (device.mac_address,)
+        if device.identifier not in bt_devices:
             device.manager = self
             iot_device = IoTDevice(device, 'bluetooth')
-            bt_devices[path] = iot_device
+            bt_devices[device.identifier] = iot_device
 
 class BtManager(Thread):
 
     def run(self):
         dm = GattBtManager(adapter_name='hci0')
         for device in [device_con for device_con in dm.devices() if device_con.is_connected()]:
+            _logger.error(device.mac_address)
+            _logger.error(device.is_connected())
             device.disconnect()
         dm.start_discovery()
         dm.run()
