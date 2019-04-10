@@ -16,26 +16,26 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_01_06')],
+              'plus_tag_ids': [ref('account_tax_report_line_kraj_22_lub_23')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030400'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_03')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_kraj_22_lub_23')],
           }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_01_06')],
+              'minus_tag_ids': [ref('account_tax_report_line_kraj_22_lub_23')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030400'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_03')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_kraj_22_lub_23')],
           }),
       ]"/>
       <field name="tax_group_id" ref="tax_group_vat_23"/>
@@ -52,26 +52,26 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_01_06')],
+              'plus_tag_ids': [ref('account_tax_report_line_kraj_22_lub_23')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030100'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_03')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_kraj_22_lub_23')],
           }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_01_06')],
+              'minus_tag_ids': [ref('account_tax_report_line_kraj_22_lub_23')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030100'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_03')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_kraj_22_lub_23')],
           }),
       ]"/>
       <field name="tax_group_id" ref="tax_group_vat_22"/>
@@ -88,26 +88,26 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_01_05')],
+              'plus_tag_ids': [ref('account_tax_report_line_kraj_7_lub_8')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030500'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_02')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_kraj_7_lub_8')],
           }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_01_05')],
+              'minus_tag_ids': [ref('account_tax_report_line_kraj_7_lub_8')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030500'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_02')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_kraj_7_lub_8')],
           }),
       ]"/>
       <field name="tax_group_id" ref="tax_group_vat_8"/>
@@ -124,26 +124,26 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_01_05')],
+              'plus_tag_ids': [ref('account_tax_report_line_kraj_7_lub_8')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030200'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_02')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_kraj_7_lub_8')],
           }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_01_05')],
+              'minus_tag_ids': [ref('account_tax_report_line_kraj_7_lub_8')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030200'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_02')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_kraj_7_lub_8')],
           }),
       ]"/>
       <field name="tax_group_id" ref="tax_group_vat_7"/>
@@ -160,26 +160,26 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_01_04')],
+              'plus_tag_ids': [ref('account_tax_report_line_kraj_3_lub_5')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030600'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_01')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_kraj_3_lub_5')],
           }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_01_04')],
+              'minus_tag_ids': [ref('account_tax_report_line_kraj_3_lub_5')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030600'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_01')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_kraj_3_lub_5')],
           }),
       ]"/>
       <field name="tax_group_id" ref="tax_group_vat_5"/>
@@ -196,26 +196,26 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_01_04')],
+              'plus_tag_ids': [ref('account_tax_report_line_kraj_3_lub_5')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030300'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_01')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_kraj_3_lub_5')],
           }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_01_04')],
+              'minus_tag_ids': [ref('account_tax_report_line_kraj_3_lub_5')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030300'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_01')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_kraj_3_lub_5')],
           }),
       ]"/>
       <field name="tax_group_id" ref="tax_group_vat_3"/>
@@ -232,7 +232,7 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_01_03')],
+              'plus_tag_ids': [ref('account_tax_report_line_uslugi_kraj_0')],
           }),
           (0,0, {
               'factor_percent': 100,
@@ -243,7 +243,7 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_01_03')],
+              'minus_tag_ids': [ref('account_tax_report_line_uslugi_kraj_0')],
           }),
           (0,0, {
               'factor_percent': 100,
@@ -264,7 +264,7 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_01_01')],
+              'plus_tag_ids': [ref('account_tax_report_line_kraj_zwolnione')],
           }),
           (0,0, {
               'factor_percent': 100,
@@ -275,7 +275,7 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_01_01')],
+              'minus_tag_ids': [ref('account_tax_report_line_kraj_zwolnione')],
           }),
           (0,0, {
               'factor_percent': 100,
@@ -296,26 +296,26 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_01_06')],
+              'plus_tag_ids': [ref('account_tax_report_line_kraj_22_lub_23')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030400'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_03')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_kraj_22_lub_23')],
           }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_01_06')],
+              'minus_tag_ids': [ref('account_tax_report_line_kraj_22_lub_23')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030400'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_03')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_kraj_22_lub_23')],
           }),
       ]"/>
       <field name="tax_group_id" ref="tax_group_vat_23"/>
@@ -332,26 +332,26 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_01_06')],
+              'plus_tag_ids': [ref('account_tax_report_line_kraj_22_lub_23')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030100'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_03')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_kraj_22_lub_23')],
           }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_01_06')],
+              'minus_tag_ids': [ref('account_tax_report_line_kraj_22_lub_23')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030100'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_03')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_kraj_22_lub_23')],
           }),
       ]"/>
       <field name="tax_group_id" ref="tax_group_vat_22"/>
@@ -372,26 +372,26 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'plus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020400'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'minus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020400'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
       ]"/>
     </record>
@@ -408,26 +408,26 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'plus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020100'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'minus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020100'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
       ]"/>
     </record>
@@ -443,26 +443,26 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'plus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020500'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'minus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020500'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
       ]"/>
       <field name="tax_group_id" ref="tax_group_vat_8"/>
@@ -479,26 +479,26 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'plus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020200'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'minus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020200'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
       ]"/>
       <field name="tax_group_id" ref="tax_group_vat_7"/>
@@ -515,26 +515,26 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'plus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020600'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'minus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020600'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
       ]"/>
       <field name="tax_group_id" ref="tax_group_vat_5"/>
@@ -551,26 +551,26 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'plus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020300'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'minus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020300'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
       ]"/>
       <field name="tax_group_id" ref="tax_group_vat_3"/>
@@ -587,24 +587,24 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'plus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'minus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
       ]"/>
       <field name="tax_group_id" ref="tax_group_vat_0"/>
@@ -621,24 +621,24 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'plus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'minus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
       ]"/>
       <field name="tax_group_id" ref="tax_group_vat_0"/>
@@ -655,26 +655,26 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'plus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020400'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'minus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020400'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
       ]"/>
       <field name="tax_group_id" ref="tax_group_vat_23"/>
@@ -691,26 +691,26 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'plus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020100'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
                 ]"/>
             <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'minus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020100'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
       ]"/>
       <field name="tax_group_id" ref="tax_group_vat_22"/>
@@ -731,13 +731,13 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_02_02b')],
+              'plus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_b')],
           }),
           (0,0, {
               'factor_percent': 60,
               'repartition_type': 'tax',
               'account_id': ref('chart22020400'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04b')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_b')],
           }),
           (0,0, {
               'factor_percent': 40,
@@ -749,13 +749,13 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_02_02b')],
+              'minus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_b')],
           }),
           (0,0, {
               'factor_percent': 60,
               'repartition_type': 'tax',
               'account_id': ref('chart22020400'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04b')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_b')],
           }),
           (0,0, {
               'factor_percent': 40,
@@ -778,13 +778,13 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'plus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 60,
               'repartition_type': 'tax',
               'account_id': ref('chart22020400'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 40,
@@ -796,13 +796,13 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_02_02a')],
+              'minus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 60,
               'repartition_type': 'tax',
               'account_id': ref('chart22020400'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': 40,
@@ -826,7 +826,7 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_01_12b')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatnik_nabywca_b')],
           }),
           (0,0, {
               'factor_percent': 100,
@@ -837,7 +837,7 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_01_12b')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatnik_nabywca_b')],
           }),
           (0,0, {
               'factor_percent': 100,
@@ -858,38 +858,38 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_02_02a'), ref('account_tax_report_line_pl_01_12a')],
+              'plus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a'), ref('account_tax_report_line_podatnik_nabywca_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020400'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': -100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030400'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_07')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_podatnik_nabywca')],
           }),
       ]"/>
       <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_02_02a'), ref('account_tax_report_line_pl_01_12a')],
+              'minus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a'), ref('account_tax_report_line_podatnik_nabywca_a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020400'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': -100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030400'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_07')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_podatnik_nabywca')],
           }),
       ]"/>
       <field name="tax_group_id" ref="tax_group_vat_0"/>
@@ -909,7 +909,7 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_01_07')],
+              'plus_tag_ids': [ref('account_tax_report_line_dostawa_towarow')],
           }),
           (0,0, {
               'factor_percent': 100,
@@ -920,7 +920,7 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_01_07')],
+              'minus_tag_ids': [ref('account_tax_report_line_dostawa_towarow')],
           }),
           (0,0, {
               'factor_percent': 100,
@@ -941,38 +941,38 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_02_02a'), ref('account_tax_report_line_pl_01_09')],
+              'plus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a'), ref('account_tax_report_line_nabycie_towarow')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020400'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': -100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030400'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_04')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_nabycie_towarow')],
           }),
       ]"/>
       <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_02_02a'), ref('account_tax_report_line_pl_01_09')],
+              'minus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a'), ref('account_tax_report_line_nabycie_towarow')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020400'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': -100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030400'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_04')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_nabycie_towarow')],
           }),
       ]"/>
       <field name="tax_group_id" ref="tax_group_vat_0"/>
@@ -989,7 +989,7 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_01_02_01')],
+              'plus_tag_ids': [ref('account_tax_report_line_uslugi_art_100_1_4')],
           }),
           (0,0, {
               'factor_percent': 100,
@@ -1000,7 +1000,7 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_01_02_01')],
+              'minus_tag_ids': [ref('account_tax_report_line_uslugi_art_100_1_4')],
           }),
           (0,0, {
               'factor_percent': 100,
@@ -1021,38 +1021,38 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_02_02a'), ref('account_tax_report_line_pl_01_11_01')],
+              'plus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a'), ref('account_tax_report_line_art_28b')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020400'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': -100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030400'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_06_01')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_art_28b')],
           }),
       ]"/>
       <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_02_02a'), ref('account_tax_report_line_pl_01_11_01')],
+              'minus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a'), ref('account_tax_report_line_art_28b')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020400'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': -100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030400'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_06_01')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_art_28b')],
           }),
       ]"/>
       <field name="tax_group_id" ref="tax_group_vat_0"/>
@@ -1073,7 +1073,7 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_01_08')],
+              'plus_tag_ids': [ref('account_tax_report_line_eksport_towarow')],
           }),
           (0,0, {
               'factor_percent': 100,
@@ -1084,7 +1084,7 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_01_08')],
+              'minus_tag_ids': [ref('account_tax_report_line_eksport_towarow')],
           }),
           (0,0, {
               'factor_percent': 100,
@@ -1105,38 +1105,38 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_02_02a'), ref('account_tax_report_line_pl_01_10')],
+              'plus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a'), ref('account_tax_report_line_art_33a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020400'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': -100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030400'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_05')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_art_33a')],
           }),
       ]"/>
       <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_02_02a'), ref('account_tax_report_line_pl_01_10')],
+              'minus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a'), ref('account_tax_report_line_art_33a')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020400'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': -100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030400'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_05')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_art_33a')],
           }),
       ]"/>
       <field name="tax_group_id" ref="tax_group_vat_0"/>
@@ -1153,7 +1153,7 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_01_02')],
+              'plus_tag_ids': [ref('account_tax_report_line_poza_kraj')],
           }),
           (0,0, {
               'factor_percent': 100,
@@ -1164,7 +1164,7 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_01_02')],
+              'minus_tag_ids': [ref('account_tax_report_line_poza_kraj')],
           }),
           (0,0, {
               'factor_percent': 100,
@@ -1185,38 +1185,38 @@
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'plus_tag_ids': [ref('account_tax_report_line_pl_02_02a'), ref('account_tax_report_line_pl_01_11')],
+              'plus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a'), ref('account_tax_report_line_import_uslug')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020400'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': -100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030400'),
-              'plus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_06')],
+              'plus_tag_ids': [ref('account_tax_report_line_podatek_import_uslug')],
           }),
       ]"/>
       <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'base',
-              'minus_tag_ids': [ref('account_tax_report_line_pl_02_02a'), ref('account_tax_report_line_pl_01_11')],
+              'minus_tag_ids': [ref('account_tax_report_line_uslug_pozostalych_a'), ref('account_tax_report_line_import_uslug')],
           }),
           (0,0, {
               'factor_percent': 100,
               'repartition_type': 'tax',
               'account_id': ref('chart22020400'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_04_04a')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_uslug_pozostalych_a')],
           }),
           (0,0, {
               'factor_percent': -100,
               'repartition_type': 'tax',
               'account_id': ref('chart22030400'),
-              'minus_tag_ids': [ref('account_tax_report_line_pl_03_01_01_03_06')],
+              'minus_tag_ids': [ref('account_tax_report_line_podatek_import_uslug')],
           }),
       ]"/>
       <field name="tax_group_id" ref="tax_group_vat_0"/>
