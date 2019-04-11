@@ -18,6 +18,7 @@ from cups import Connection as cups_connection
 from glob import glob
 from base64 import b64decode
 from pathlib import Path
+from serial.tools.list_ports import comports
 
 from odoo import http, _
 from odoo.modules.module import get_resource_path
@@ -299,6 +300,14 @@ class Manager(Thread):
         else:
             _logger.warning('Odoo server not set')
 
+    def serial_loop(self):
+        serial_devices = {}
+        devs = comports()
+        for dev in devs:
+            iot_device = IoTDevice(dev, 'serial')
+            serial_devices[dev.device] = iot_device
+        return serial_devices
+
     def usb_loop(self):
         usb_devices = {}
         devs = core.find(find_all=True)
@@ -340,35 +349,41 @@ class Manager(Thread):
         """
         Thread that will check connected/disconnected device, load drivers if needed and contact the odoo server with the updates
         """
-        devices = {}
-        updated_devices = {}
-        self.send_alldevices()
-        cpt = 0
-        while 1:
-            updated_devices = self.usb_loop()
-            updated_devices.update(self.video_loop())
-            updated_devices.update(bt_devices)
-            if cpt % 40 == 0:
-                printer_devices = self.printer_loop()
-                cpt = 0
-            updated_devices.update(printer_devices)
-            cpt += 1
-            added = updated_devices.keys() - devices.keys()
-            removed = devices.keys() - updated_devices.keys()
-            devices = updated_devices
-            for path in [device_rm for device_rm in removed if device_rm in iot_devices]:
-                iot_devices[path].disconnect()
-            for path in [device_add for device_add in added if device_add not in iot_devices]:
-                for driverclass in [d for d in drivers if d.connection_type == devices[path].connection_type]:
-                    if driverclass.supported(device = updated_devices[path].dev):
-                        _logger.info('For device %s will be driven', path)
-                        d = driverclass(device = updated_devices[path].dev)
-                        d.daemon = True
-                        d.start()
-                        iot_devices[path] = d
-                        self.send_alldevices()
-                        break
-            time.sleep(3)
+
+        try:
+            devices = {}
+            updated_devices = {}
+            self.send_alldevices()
+            cpt = 0
+            while 1:
+                updated_devices = self.usb_loop()
+                updated_devices.update(self.serial_loop())
+                updated_devices.update(self.video_loop())
+                updated_devices.update(bt_devices)
+                if cpt % 40 == 0:
+                    printer_devices = self.printer_loop()
+                    cpt = 0
+                updated_devices.update(printer_devices)
+                cpt += 1
+                added = updated_devices.keys() - devices.keys()
+                removed = devices.keys() - updated_devices.keys()
+                devices = updated_devices
+                for path in [device_rm for device_rm in removed if device_rm in iot_devices]:
+                    iot_devices[path].disconnect()
+                for path in [device_add for device_add in added if device_add not in iot_devices]:
+                    for driverclass in [d for d in drivers if d.connection_type == devices[path].connection_type]:
+                        if driverclass.supported(device = updated_devices[path].dev):
+                            _logger.info('For device %s will be driven', path)
+                            d = driverclass(device = updated_devices[path].dev)
+                            d.daemon = True
+                            d.start()
+                            iot_devices[path] = d
+                            self.send_alldevices()
+                            break
+                time.sleep(3)
+        except Exception as e:
+            _logger.exception('Error in drivers.py run')
+            raise e
 
 class GattBtManager(Gatt_DeviceManager):
 
