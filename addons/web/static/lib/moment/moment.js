@@ -187,6 +187,9 @@ function copyConfig(to, from) {
     if (!isUndefined(from._isAMomentObject)) {
         to._isAMomentObject = from._isAMomentObject;
     }
+    if (!isUndefined(from._isHoliday)) {
+        to._isHoliday = from._isHoliday;
+    }
     if (!isUndefined(from._i)) {
         to._i = from._i;
     }
@@ -2477,6 +2480,7 @@ function createLocalOrUTC (input, format, locale, strict, isUTC) {
     c._i = input;
     c._f = format;
     c._strict = strict;
+    c._isHoliday = false;
 
     return createFromConfig(c);
 }

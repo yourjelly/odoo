@@ -414,7 +414,18 @@ return AbstractModel.extend({
             dayNamesShort: moment.weekdaysShort(),
             firstDay: week_start,
             slotLabelFormat: _t.database.parameters.time_format.search("%H") != -1 ? 'H:mm': 'h(:mm)a',
+            globalHolidayList: this._get_global_holidays(),
+            weekends: ["sun", "sat"],
         };
+    },
+    _get_global_holidays: function () {
+        var holdays = this._rpc({
+                    model: 'resource.calender',
+                    method: 'search_read',
+                    context: self.data.context,
+                    fields: self.fieldNames,
+                    domain: self.data.domain.concat(self._getRangeDomain()).concat(self._getFilterDomain())
+            })
     },
     /**
      * Return a domain from the date range

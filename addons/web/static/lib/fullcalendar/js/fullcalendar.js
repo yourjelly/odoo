@@ -3817,6 +3817,14 @@ var Grid = FC.Grid = Class.extend(ListenerMixin, MouseIgnorerMixin, {
 		else {
 			classes.push('fc-future');
 		}
+		if (date._isHoliday) {
+            classes.push('fc-holiday');
+       }
+       	for (d in view.calendar.options.weekends) {
+   			if (view.calendar.options.weekends[d] === dayIDs[date.day()]) {
+   				classes.push('fc-holiday');
+   			}
+       	}
 
 		return classes;
 	}
@@ -9520,6 +9528,9 @@ function Calendar_constructor(element, overrides) {
 		return t.moment(now).stripZone();
 	};
 
+    t.is_holiday = function(date) {
+        return true;
+    };
 
 	// Get an event's normalized end date. If not present, calculate it from the defaults.
 	t.getEventEnd = function(event) {

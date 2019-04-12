@@ -53,6 +53,10 @@ body .fc { /* extra precedence to overcome jqui */
 	background: #fcf8e3;
 }
 
+.fc-unthemed .fc-holiday {
+	background: rgb(201,201,201);
+}
+
 .fc-highlight { /* when user is selecting cells */
 	background: #bce8f1;
 	opacity: .3;
@@ -388,6 +392,10 @@ hr.fc-divider {
 
 .fc td.fc-today {
 	border-style: double; /* overcome neighboring borders */
+}
+
+.fc td.fc-holiday {
+    border-style: double; /* overcome neighboring borders */
 }
 
 
