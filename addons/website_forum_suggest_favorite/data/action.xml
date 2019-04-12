@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_suggest_post" model="ir.actions.server">
+        <field name="name">Action Suggest Post</field>
+        <field name="model_id" ref="website.model_website"/>
+        <field name="website_published">1</field>
+        <field name="website_path">suggest_post</field>
+        <field name="state">code</field>
+        <field name="code">
+user_ids = [int(x) for x in request.params['suggest_user_ids'].split(',')]
+post_id = env['forum.post'].search([('id', '=', int(request.params['post_id']))])
+
+for user_id in user_ids:
+    post_id.write({
+        'favourite_ids':[(4, user_id)]
+    })
+
+response = request.redirect(request.httprequest.headers['Referer'])
+        </field>
+    </record>
+</odoo>

@@ -15,9 +15,7 @@ Suggest Question, Read Question, No Distractions
         'website_forum',
     ],
     'data': [
-    #     'data/forum_data.xml',
-    #     'views/forum.xml',
-    #     'views/res_users_views.xml',
+        'data/action.xml',
         'views/website_forum.xml',
     #     'views/website_forum_profile.xml',
     #     'views/ir_qweb.xml',

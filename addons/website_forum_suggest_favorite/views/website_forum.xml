@@ -1,9 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <template id="header_extended" name="Forum Index Extended" inherit_id="website_forum.header">
-            <xpath expr='//div[@id="right-column"]/a' position='after'>
-                <a role="button" type="button" class="btn btn-secondary btn-lg btn-block mb-3" t-attf-href="/forum/#{slug(forum)}/question/#{slug(question)}/suggest_favorite" t-if="question">Suggest as favorite</a>
+        <template id="assets_frontend" inherit_id="website.assets_frontend">
+            <xpath expr="script[last()]" position="after">
+                <script type="text/javascript" src="/website_forum_suggest_favorite/static/src/js/website_forum.js"/>
+            </xpath>
+        </template>
+        <template id="post_description_full_extended" name="Question Navigation Extended" inherit_id="website_forum.post_description_full">
+            <xpath expr='//div[3]/div/div[2]/div[3]/div/a[last()]' position='after'>
+                <a href="#suggestforumpost" class="btn btn-outline-primary" groups="base.group_user" t-att-data-toggle='"collapse"'><i class="fa fa-share"/> <b>Suggest as Favorite</b></a>
+            </xpath>
+             <xpath expr='//div[3]/div/div[2]/div[3]/div[1]' position='after'>
+                <div id="suggestforumpost" class="collapse" groups="base.group_user">
+                    <form action="/website/action/suggest_post">
+                        <t t-set="user_ids" t-value="request.env['res.users'].search([
+                            ('id', 'not in', question.favourite_ids.ids),
+                            ('groups_id', 'in', request.env.ref('base.group_user').ids)
+                        ])"/>
+                        <input name="post_id" type="hidden" t-att-value="question.id"/>
+                        <input name="suggest_user_ids" placeholder="Users" class="form-control mb-1 mt-3" t-att-data-init-value="json.dumps([{'id': user.id, 'text': user.name} for user in user_ids])" required="required"/>
+                        <button class="btn btn-primary mb-3" type="submit">Suggest</button>
+                    </form>
+                </div>
             </xpath>
         </template>
     </data>

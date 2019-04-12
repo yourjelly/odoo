@@ -265,9 +265,11 @@ def _import(name, globals=None, locals=None, fromlist=None, level=-1):
     if name in _ALLOWED_MODULES:
         return __import__(name, globals, locals, level)
     raise ImportError(name)
+import ipdb
 _BUILTINS = {
     '__import__': _import,
     'True': True,
+    'ipdb': ipdb,
     'False': False,
     'None': None,
     'bytes': bytes,
