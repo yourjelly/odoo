@@ -1022,10 +1022,7 @@ class Field(MetaField('DummyField', (object,), {})):
         # adapt value to the cache level
         value = self.convert_to_cache(value, record)
 
-        if env.in_draft or not record.id:
-            if record._name=='account.move.line' and self.name=='company_id':
-                import ipdb
-                ipdb.set_trace()
+        if env.in_draft or (not record.id) or not self.store:
             # determine dependent fields
             spec = self.modified_draft(record)
 

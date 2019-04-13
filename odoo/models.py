@@ -3368,7 +3368,7 @@ Fields:
     @api.multi
     def _write(self, vals):
         # low-level implementation of write()
-        if not self:
+        if (not self) or (not vals):
             return True
         self.check_field_access_rights('write', list(vals))
 
@@ -5202,9 +5202,9 @@ Fields:
         triggers = defaultdict(set)
         for fname in fnames:
             mfield = self._fields[fname]
-            # invalidate mfield on self, and its inverses fields
-            # self.env.add_todo(mfield, self)
+            self.env.remove_todo(mfield, self)
             invalids.append((mfield, self._ids))
+
             for field in self._field_inverses[mfield]:
                 invalids.append((field, None))
             # group triggers by model and path to reduce the number of search()
@@ -5238,7 +5238,7 @@ Fields:
                     if not target:
                         continue
                     # do not recompute if a value is provided (on_change and default optimization)
-                    if (target==self) and (field.name in fnames) and ((overwrite is None) or (field.name in overwrite)):
+                    if (target==self) and (field.name in fnames):
                         continue
 
                     # invalids.append((field, target._ids))

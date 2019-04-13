@@ -1060,12 +1060,6 @@ class Cache(object):
 
     def update(self, records, field, values):
         """ Set the values of ``field`` for several ``records``. """
-        if field.name in ('company_id','journal_id'):
-            print(' update', field.name, records, values)
-            for v in values:
-                if not v:
-                    import ipdb
-                    ipdb.set_trace()
         key = records.env.cache_key(field)
         self._data[key][field].update(zip(records._ids, values))
 
