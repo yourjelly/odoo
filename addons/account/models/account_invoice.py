@@ -425,7 +425,15 @@ class AccountInvoice(models.Model):
                     vendor_display_name = _('From: ') + invoice.source_email
                     invoice.invoice_icon = '@'
                 else:
-                    vendor_display_name = ('Created by: ') + invoice.create_uid.name
+                    # FP TODO: fix that shit, and unify the behavior between new() and create(), currently:
+                    #     new() / onchange(): first compute(), then complete with default()
+                    #     create():           first default(), then compute()
+                    # so, seld.create_uid is not defined in onchange context (crashes from the UI, but not in demo tests)
+
+                    if invoice.create_uid:
+                        vendor_display_name = _('Created by: ') + invoice.create_uid.name
+                    else:
+                        vendor_display_name = _('Created by: ') + self.env.user.name
                     invoice.invoice_icon = '#'
             invoice.vendor_display_name = vendor_display_name
 
