@@ -989,7 +989,7 @@ class Field(MetaField('DummyField', (object,), {})):
             # only a single record may be accessed
             record.ensure_one()
             if env.check_todo(self, record):
-                recs = record._in_cache_without(self)
+                recs = env.field_todo(self)
                 self.compute_value(recs)
 
             if not env.cache.contains(record, self):
@@ -1024,8 +1024,8 @@ class Field(MetaField('DummyField', (object,), {})):
 
 
         # FP TO DO: what's the case of env.in_draft? --> should we remove the concept?
-        if env.in_draft or (not record.id) or (not self.store):
-        # if (not record.id) or (not self.store):
+        if (not record.id) or (not self.store):
+        # if env.in_draft or (not record.id) or (not self.store):
             # determine dependent fields
             spec = self.modified_draft(record)
 
@@ -1066,20 +1066,16 @@ class Field(MetaField('DummyField', (object,), {})):
     def _compute_value(self, records):
         """ Invoke the compute method on ``records``. """
         # initialize the fields to their corresponding null value in cache
-        if (records._name.startswith('account.move')) and (self.name in ('company_id','journal_id','currency_id')):
-            print('         computing', self.name, records._name, records.ids)
         fields = records._field_computed[self]
         cache = records.env.cache
 
+        for record in records:
+            for field in fields:
+                record.env.remove_todo(field, record)
         if isinstance(self.compute, str):
-            for record in records:
-                for field in fields:
-                    record.env.remove_todo(field, record)
             getattr(records, self.compute)()
         else:
             self.compute(records)
-        if (records._name.startswith('account.move')) and (self.name in ('company_id','journal_id','currency_id')):
-            print('         end computing', self.name, records._name, records.ids)
         # for field in fields:
         #     for record in records:
         #         if not cache.contains(record, field):
