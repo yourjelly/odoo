@@ -936,8 +936,13 @@ class Environment(Mapping):
 
     def field_todo(self, field):
         """ Return a recordset with all records to recompute for ``field``. """
-        ids = {rid for recs in self.all.todo.get(field, ()) for rid in recs.ids}
-        return self[field.model_name].browse(ids)
+        rec_lists = self.all.todo.get(field, ())
+        if not rec_lists:
+            return ()
+        result = rec_lists[0]
+        for records in rec_lists[1:]:
+            result += records
+        return result
 
     def check_todo(self, field, record):
         """ Check whether ``field`` must be recomputed on ``record``, and if so,

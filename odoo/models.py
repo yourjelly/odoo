@@ -5536,13 +5536,13 @@ Fields:
                 if field_onchange.get(name):
                     record._onchange_eval(name, field_onchange[name], result)
 
-                # make a snapshot (this forces evaluation of computed fields)
-                snapshot1 = Snapshot(record, nametree)
+        # make a snapshot (this forces evaluation of computed fields)
+        snapshot1 = Snapshot(record, nametree)
 
-                # determine which fields have been modified
-                for name in nametree:
-                    if snapshot1[name] != snapshot0[name]:
-                        todo.append(name)
+        # determine which fields have been modified
+        for name in nametree:
+            if snapshot1[name] != snapshot0[name]:
+                todo.append(name)
 
         # determine values that have changed by comparing snapshots
 
