@@ -47,7 +47,7 @@ class TestAPI(common.TransactionCase):
 
     @mute_logger('odoo.models')
     def test_02_query_limit(self):
-        """ Build a recordset with offset, and check equivalence. """
+        """ Build a recordset with limit, and check equivalence. """
         partners1 = self.env['res.partner'].search([], limit=10)
         partners2 = self.env['res.partner'].search([])[:10]
         self.assertIsRecordset(partners1, 'res.partner')

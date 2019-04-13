@@ -2846,7 +2846,8 @@ Fields:
                 # discard fields that must be recomputed
                 if not (f.compute and self.env.field_todo(f))
             )
-        self._read([f.name for f in fs])
+        fields = self.check_field_access_rights('read', [f.name for f in fs])
+        self._read(fields)
 
     @api.multi
     def _read(self, fields):
@@ -4107,6 +4108,9 @@ Fields:
         """
         self.sudo(access_rights_uid or self._uid).check_access_rights('read')
 
+        # FP TODO: optimize here to only compute fields in the domain
+        self.recompute()
+
         if expression.is_false(self, args):
             # optimization: no need to query, as no record satisfies the domain
             return 0 if count else []
@@ -5238,7 +5242,7 @@ Fields:
                     if not target:
                         continue
                     # do not recompute if a value is provided (on_change and default optimization)
-                    if (target==self) and (field.name in fnames):
+                    if (target==self) and ((overwrite is None) or (field.name in overwrite)):
                         continue
 
                     # invalids.append((field, target._ids))

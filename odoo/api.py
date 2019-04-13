@@ -949,8 +949,6 @@ class Environment(Mapping):
 
     def add_todo(self, field, records):
         """ Mark ``field`` to be recomputed on ``records``. """
-        if (records._name.startswith('account.move')) and (field.name in ('company_id','journal_id', 'currency_id')):
-            print('   Add Todo: ', field.name, records._name, records.ids)
         recs_list = self.all.todo.setdefault(field, [])
         for i, recs in enumerate(recs_list):
             if recs.env == records.env:
@@ -970,8 +968,6 @@ class Environment(Mapping):
     # FP NOTE: why is this so complex, rewrite it?
     def remove_todo(self, field, records):
         """ Mark ``field`` as recomputed on ``records``. """
-        if (records._name.startswith('account.move')) and (field.name in ('company_id','journal_id', 'currency_id')):
-            print('   Remove Todo: ', field.name, records._name, records.ids)
         try:
             recs_list = [recs - records for recs in self.all.todo.pop(field, [])]
         except TypeError:

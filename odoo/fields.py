@@ -1022,7 +1022,10 @@ class Field(MetaField('DummyField', (object,), {})):
         # adapt value to the cache level
         value = self.convert_to_cache(value, record)
 
-        if env.in_draft or (not record.id) or not self.store:
+
+        # FP TO DO: what's the case of env.in_draft? --> should we remove the concept?
+        if env.in_draft or (not record.id) or (not self.store):
+        # if (not record.id) or (not self.store):
             # determine dependent fields
             spec = self.modified_draft(record)
 
