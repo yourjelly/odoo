@@ -990,7 +990,7 @@ class Environment(Mapping):
             The field is such that none of its dependencies must be recomputed.
         """
         field = next(iter(self.all.todo))
-        return field, self.all.todo[field][0]
+        return field
 
     @property
     def recompute(self):
