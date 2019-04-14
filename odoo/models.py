@@ -3672,9 +3672,10 @@ Fields:
         # update parent_path
         records._parent_store_create()
 
+
         # mark computed fields as todo
         for d in data_list:
-            d['record'].modified(self._fields, d['stored'])
+            d['record'].modified(self._fields, d['stored'], followlink=False)
 
         protected = [(data['protected'], data['record']) for data in data_list]
         with self.env.protecting(protected):
@@ -4122,8 +4123,6 @@ Fields:
                     break
                 recs._recompute(field)
                 obj = self.env[field.comodel]
-
-
 
         if expression.is_false(self, args):
             # optimization: no need to query, as no record satisfies the domain
@@ -5204,7 +5203,7 @@ Fields:
         self.env.cache.invalidate(spec)
 
     @api.multi
-    def modified(self, fnames, overwrite=None):
+    def modified(self, fnames, overwrite=None, followlink=True):
         """ Notify that fields have been modified on ``self``. This invalidates
             the cache, and prepares the recomputation of stored function fields
             (new-style fields only).
@@ -5213,6 +5212,7 @@ Fields:
                 records ``self``
             :param overwrite: list of fields who will not be overwrited, or None
                 for all
+            :param followlink: set as False if you expect no record to link to this one (when create)
         """
         # group triggers by (model, path) to minimize the calls to search()
 
@@ -5235,6 +5235,8 @@ Fields:
             stored = {field for field in fields if field.compute and field.store}
             # process stored fields
             if path and stored:
+                if ('.' in path) and not followlink:
+                    continue
                 # determine records of model_name linked by path to self
                 if path == 'id':
                     target0 = self
