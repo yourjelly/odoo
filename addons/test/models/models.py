@@ -35,12 +35,10 @@ class test(models.Model):
                 record.dest = record.source
 
     def testme(self):
-        partner = self.env.get('res.partner')
-        pid = partner.create({'name': 'Testing Boum'})
-        res = partner.search([('display_name','=','Testing Boum')])
-        print('Got', pid, '==', res)
-        if not (pid==res):
-            crash_to_rollback
+        partner = self.env.get('test.test')
+        pid = partner.create({'name': 'Testing Boum', 'line_ids': [(0,0,{'name': 'line 1'}),(0,0,{'name': 'line 2'}), (0,0,{'name': 'line 3'})] })
+        partner.recompute()
+        # res = partner.search([('display_name','=','Testing Boum')])
         return True
 
 class test_line(models.Model):
