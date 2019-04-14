@@ -1117,13 +1117,13 @@ class Cache(object):
         """ Return the ids of ``records`` that have no value for ``field``. """
         key = records.env.cache_key(field)
         field_cache = self._data[key][field]
-        ids = []
+        result = []
         for record_id in ids:
             if record_id and (record_id not in field_cache):
-                ids.append(record_id)
+                result.append(record_id)
                 limit = limit-1
                 if limit<1: break
-        return ids
+        return result
 
     def copy(self, records, env):
         """ Copy the cache of ``records`` to ``env``. """

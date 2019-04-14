@@ -1056,7 +1056,6 @@ class Field(MetaField('DummyField', (object,), {})):
             # Update the cache unless value contains a new record
             if not (self.relational and not all(value)):
                 env.cache.set(record, self, value)
-                env.remove_todo(self, record)
 
     ############################################################################
     #

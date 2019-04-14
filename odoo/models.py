@@ -3361,9 +3361,6 @@ Fields:
                 # check Python constraints for inversed fields
                 self._validate_fields(set(inverse_vals) - set(store_vals))
 
-            # recompute fields
-            self.recompute()
-
         return True
 
     @api.multi
@@ -3443,7 +3440,7 @@ Fields:
         # mark fields to recompute; do this before setting other fields, because
         # the latter can require the value of computed fields, e.g., a one2many
         # checking constraints on records
-        self.modified(vals)
+        self.modified(vals, vals)
 
         # set the value of non-column fields
         if other_fields:
@@ -3672,10 +3669,11 @@ Fields:
         # update parent_path
         records._parent_store_create()
 
-
         # mark computed fields as todo
-        for d in data_list:
-            d['record'].modified(self._fields, d['stored'], followlink=False)
+        if data_list:
+            records.modified(self._fields, data_list[0]['stored'], followlink=False)
+        # for d in data_list:
+        #     d['record'].modified(self._fields, d['stored'], followlink=False)
 
         protected = [(data['protected'], data['record']) for data in data_list]
         with self.env.protecting(protected):
@@ -5235,8 +5233,16 @@ Fields:
             stored = {field for field in fields if field.compute and field.store}
             # process stored fields
             if path and stored:
-                if ('.' in path) and not followlink:
-                    continue
+                if not followlink:
+                    obj = self.env[model_name]
+                    f = None
+                    for p in path.split('.'):
+                        if p=='id': continue
+                        f = obj._fields[p]
+                        obj = self.env[f.comodel_name]
+                    if f and (f.type=='many2one'):
+                        continue
+
                 # determine records of model_name linked by path to self
                 if path == 'id':
                     target0 = self
@@ -5309,36 +5315,37 @@ Fields:
     def _recompute(self, field):
         # determine the fields to recompute
         fs = self.env[field.model_name]._field_computed[field]
-        ns = [f.name for f in fs if f.store]
+        ns = [(f.name, f) for f in fs if f.store]
+
         # evaluate fields, and group record ids by update
         updates = defaultdict(set)
+        cache = self.env.cache
         for rec in self:
-            vals = {n: rec[n] for n in ns}
+            # do not write if the value does not change
+            vals = {}
+            for n,f in ns:
+                if cache.contains(rec, f):
+                    old = cache.get(rec, f)
+                    rec[n]
+                    new = cache.get(rec, f)
+                    if new!=old:
+                        vals[n] = new
+                else:
+                    vals[n] = rec[n]
 
-            # FP TODO: possible optimization here; do not write field if value is the same in cache
-            # vals = {}
-            # for f in fs:
-            #     if f.store:
-            #         if self.env.cache.contains(rec, f):
-            #             v = self.env.cache.get(rec, f)
-            #             if v != rec[f.name]:
-            #                 vals[f.name] = rec[f.name]
-            #         else:
-            #             vals[f.name] = rec[f.name]
+	# FP TODO: reintroduce the write multi, but avoid making it uphere        
+	#     vals = rec._convert_to_write(vals)
+        #     updates[frozendict(vals)].add(rec.id)
+        # # update records in batch when possible
 
-            vals = rec._convert_to_write(vals)
-            updates[frozendict(vals)].add(rec.id)
-        # update records in batch when possible
-
-
-        with self.env.norecompute():
-            for vals, ids in updates.items():
-                target = self.browse([x for x in ids if x])
-                try:
-                    target._write(dict(vals))
-                except MissingError:
-                    # retry without missing records
-                    target.exists()._write(dict(vals))
+        # with self.env.norecompute():
+        #     for vals, ids in updates.items():
+        #         target = self.browse([x for x in ids if x])
+        #         try:
+        #             target._write(dict(vals))
+        #         except MissingError:
+        #             # retry without missing records
+        #             target.exists()._write(dict(vals))
 
         # mark computed fields as done
         for f in fs:
