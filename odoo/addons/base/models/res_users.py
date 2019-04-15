@@ -920,8 +920,8 @@ class GroupsImplied(models.Model):
             a = g
             result = self.browse()
             while a:
-                a = a.implied_ids
                 result += a
+                a = a.mapped('implied_ids')
             g.trans_implied_ids = result
 
             # if g.implied_ids:

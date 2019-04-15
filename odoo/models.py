@@ -4891,7 +4891,6 @@ Fields:
             recs = self
             for name in func.split('.'):
                 recs = recs._mapped_func(operator.itemgetter(name))
-                if not recs: break
             return recs
         else:
             return self._mapped_func(func)
@@ -5295,6 +5294,7 @@ Fields:
         """ Recompute stored function fields. The fields and records to
             recompute have been determined by method :meth:`modified`.
         """
+        print('RECOMPUTE')
         if not(self.env.recompute and self._context.get('recompute', True)):
             return False
 
