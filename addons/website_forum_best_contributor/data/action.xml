@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="server_action_find_best_contributeur" model="ir.actions.server">
+        <field name="name">Find Best Contributeur</field>
+        <field name="model_id" ref="base.model_ir_actions_server"/>
+        <field name="state">code</field>
+        <field name="code"><![CDATA[
+def get_score(user):
+    votes = env['forum.post.vote'].read_group([('recipient_id', '=', user.id)], ["vote"], groupby=["vote"])
+    up_votes, down_votes = 0, 0
+    for vote in votes:
+        if vote['vote'] == '1':
+          up_votes = vote['vote_count']
+        elif vote['vote'] == '-1':
+          down_votes = vote['vote_count']
+    return up_votes - down_votes
+
+internal_contributors = env['res.users'].search([('is_published', '=', True),('share','=',False)])
+users= []
+for user in internal_contributors:
+    users.append({'score' : get_score(user),'user' : user})
+
+users.sort(key=lambda k: k['score'], reverse=True) 
+best_user = users[0]
+raise Warning("Best Contributor %s (%s)"% (best_user['user'].name, best_user['score']))
+        ]]>
+        </field>
+    </record>
+</odoo>
