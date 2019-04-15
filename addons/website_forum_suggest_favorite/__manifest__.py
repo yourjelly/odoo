@@ -17,21 +17,11 @@ Suggest Question, Read Question, No Distractions
     'data': [
         'data/action.xml',
         'views/website_forum.xml',
-    #     'views/website_forum_profile.xml',
-    #     'views/ir_qweb.xml',
-    #     'security/ir.model.access.csv',
-    #     'data/badges_question.xml',
-    #     'data/badges_answer.xml',
-    #     'data/badges_participation.xml',
-    #     'data/badges_moderation.xml',
     ],
     'qweb': [
-        # 'static/src/xml/*.xml'
     ],
     'demo': [
-        # 'data/forum_demo.xml',
     ],
     'installable': True,
-    'application': True,
-    # True ?
+    'application': False,
 }

@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <record id="post_suggest_reading_mail_template" model="mail.template">
+        <field name="name">Forum Post Suggestion</field>
+        <field name="model_id" ref="base.model_res_users"/>
+        <field name="email_from">mail@forum.odoo.com</field>
+        <field name="email_to">${ctx['email_to'].email}</field>
+        <field name="subject">Odoo Forum : New reading recommendation</field>
+        <field name="auto_delete" eval="False"/>
+        <field name="body_html"><![CDATA[
+<h2>Dear ${ctx['email_to'].name}</h2>
+The post ${ctx['post_id'].name} has just been added to your favorite list!
+<br/>
+
+You can read it on the <a href="https://www.odoo.com/forum">Forum</a>.
+]]>
+        </field>
+    </record>
+
     <record id="action_suggest_post" model="ir.actions.server">
         <field name="name">Action Suggest Post</field>
         <field name="model_id" ref="website.model_website"/>
@@ -7,6 +24,13 @@
         <field name="website_path">suggest_post</field>
         <field name="state">code</field>
         <field name="code">
+def send_mail(user_id, post_id):
+    env.ref('website_forum_suggest_favorite.post_suggest_reading_mail_template').sudo().with_context(
+        env.context,
+        email_to=user_id,
+        post_id=post_id,
+        ).send_mail(user_id.id)
+
 user_ids = [int(x) for x in request.params['suggest_user_ids'].split(',')]
 post_id = env['forum.post'].search([('id', '=', int(request.params['post_id']))])
 
@@ -14,6 +38,8 @@ for user_id in user_ids:
     post_id.write({
         'favourite_ids':[(4, user_id)]
     })
+
+    send_mail(env['res.users'].browse(user_id), post_id)
 
 response = request.redirect(request.httprequest.headers['Referer'])
         </field>
