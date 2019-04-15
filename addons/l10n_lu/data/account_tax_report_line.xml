@@ -15,156 +15,41 @@
 
     <record id="account_tax_report_line_2b_base_3" model="account.tax.report.line">
       <field name="name">II.B. base 3%</field>
+      <field name="tag_name">II.B. base 3%</field>
       <field name="sequence">3</field>
       <field name="parent_line_id" ref="account_tax_report_line_2b_acquisitions_intracommunautaires_de_biens_base"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_achat_biens_3_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Achat Biens 3% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Achat Biens 3% - Intracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_base_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_biens_3_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Frais Biens 3% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Frais Biens 3% - Intracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_base_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_biens_3_intracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Investissement Biens 3% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Investissement Biens 3% - Intracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_base_3"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
     <record id="account_tax_report_line_2b_base_exoneree" model="account.tax.report.line">
       <field name="name">II.B. base exonérée</field>
+      <field name="tag_name">II.B. base exonérée</field>
       <field name="sequence">5</field>
       <field name="parent_line_id" ref="account_tax_report_line_2b_acquisitions_intracommunautaires_de_biens_base"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_achat_biens_exonere_intracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Achat Biens Exonéré - Intracommunautaire</field>
-      <field name="tag_name">Base - Achat Biens Exonéré - Intracommunautaire</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_base_exoneree"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_biens_exonere_intracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Frais Biens Exonéré - Intracommunautaire</field>
-      <field name="tag_name">Base - Frais Biens Exonéré - Intracommunautaire</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_base_exoneree"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_biens_exonere" model="account.tax.report.line">
-      <field name="name">Base - Investissement Biens Exonéré - Intracommunautaire</field>
-      <field name="tag_name">Base - Investissement Biens Exonéré - Intracommunautaire</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_base_exoneree"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2b_base_17" model="account.tax.report.line">
       <field name="name">II.B. base 17%</field>
+      <field name="tag_name">II.B. base 17%</field>
       <field name="sequence">6</field>
       <field name="parent_line_id" ref="account_tax_report_line_2b_acquisitions_intracommunautaires_de_biens_base"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_achat_biens_17_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Achat Biens 17% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Achat Biens 17% - Intracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_base_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_biens_17_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Frais Biens 17% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Frais Biens 17% - Intracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_base_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_biens_17_intracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Investissement Biens 17% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Investissement Biens 17% - Intracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_base_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2b_base_14" model="account.tax.report.line">
       <field name="name">II.B. base 14%</field>
+      <field name="tag_name">II.B. base 14%</field>
       <field name="sequence">7</field>
       <field name="parent_line_id" ref="account_tax_report_line_2b_acquisitions_intracommunautaires_de_biens_base"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_achat_biens_14_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Achat Biens 14% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Achat Biens 14% - Intracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_base_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_biens_14_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Frais Biens 14% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Frais Biens 14% - Intracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_base_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_biens_14_intracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Investissement Biens 14% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Investissement Biens 14% - Intracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_base_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2b_base_8" model="account.tax.report.line">
       <field name="name">II.B. base 8%</field>
+      <field name="tag_name">II.B. base 8%</field>
       <field name="sequence">8</field>
       <field name="parent_line_id" ref="account_tax_report_line_2b_acquisitions_intracommunautaires_de_biens_base"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_achat_biens_8_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Achat Biens 8% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Achat Biens 8% - Intracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_base_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_biens_8_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Frais Biens 8% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Frais Biens 8% - Intracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_base_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_biens_8_intracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Investissement Biens 8% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Investissement Biens 8% - Intracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_base_8"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -177,311 +62,81 @@
 
     <record id="account_tax_report_line_2d_2_base_exoneree" model="account.tax.report.line">
       <field name="name">II.D.2.. base exonérée</field>
+      <field name="tag_name">II.D.2.. base exonérée</field>
       <field name="sequence">10</field>
       <field name="parent_line_id" ref="account_tax_report_line_2d_importations_de_biens_base"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_achat_biens_exonere_extracommunautaire_fin" model="account.tax.report.line">
-      <field name="name">Base - Achat Biens Exonéré - Extracommunautaire fin privées</field>
-      <field name="tag_name">Base - Achat Biens Exonéré - Extracommunautaire fin privées</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_base_exoneree"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_biens_exonere_extracommunautaire_fin" model="account.tax.report.line">
-      <field name="name">Base - Frais Biens Exonéré - Extracommunautaire fin privées</field>
-      <field name="tag_name">Base - Frais Biens Exonéré - Extracommunautaire fin privées</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_base_exoneree"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_biens_exonere_extracommunautaire_fin_privees" model="account.tax.report.line">
-      <field name="name">Base - Investissement Biens Exonéré - Extracommunautaire fin privées</field>
-      <field name="tag_name">Base - Investissement Biens Exonéré - Extracommunautaire fin privées</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_base_exoneree"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2d_1_base_17" model="account.tax.report.line">
       <field name="name">II.D.1. base 17%</field>
+      <field name="tag_name">II.D.1. base 17%</field>
       <field name="sequence">11</field>
       <field name="parent_line_id" ref="account_tax_report_line_2d_importations_de_biens_base"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_achat_biens_17_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Achat Biens 17% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Achat Biens 17% - Extracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_base_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_biens_17_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Frais Biens 17% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Frais Biens 17% - Extracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_base_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_biens_17_extracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Investissement Biens 17% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Investissement Biens 17% - Extracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_base_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2d_1_base_14" model="account.tax.report.line">
       <field name="name">II.D.1. base 14%</field>
+      <field name="tag_name">II.D.1. base 14%</field>
       <field name="sequence">12</field>
       <field name="parent_line_id" ref="account_tax_report_line_2d_importations_de_biens_base"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_achat_biens_14_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Achat Biens 14% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Achat Biens 14% - Extracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_base_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_biens_14_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Frais Biens 14% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Frais Biens 14% - Extracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_base_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_biens_14_extracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Investissement Biens 14% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Investissement Biens 14% - Extracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_base_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2d_1_base_8" model="account.tax.report.line">
       <field name="name">II.D.1. base 8%</field>
+      <field name="tag_name">II.D.1. base 8%</field>
       <field name="sequence">13</field>
       <field name="parent_line_id" ref="account_tax_report_line_2d_importations_de_biens_base"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_achat_biens_8_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Achat Biens 8% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Achat Biens 8% - Extracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_base_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_biens_8_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Frais Biens 8% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Frais Biens 8% - Extracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_base_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_biens_8_extracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Investissement Biens 8% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Investissement Biens 8% - Extracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_base_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2d_2_base_17" model="account.tax.report.line">
       <field name="name">II.D.2.. base 17%</field>
+      <field name="tag_name">II.D.2.. base 17%</field>
       <field name="sequence">14</field>
       <field name="parent_line_id" ref="account_tax_report_line_2d_importations_de_biens_base"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_achat_biens_17_extracommunautaire_fin_privees" model="account.tax.report.line">
-      <field name="name">Base - Achat Biens 17% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Base - Achat Biens 17% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_base_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_biens_17_extracommunautaire_fin_privees" model="account.tax.report.line">
-      <field name="name">Base - Frais Biens 17% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Base - Frais Biens 17% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_base_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_biens_17_extracommunautaire_fin_privees_plus" model="account.tax.report.line">
-      <field name="name">Base - Investissement Biens 17% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Base - Investissement Biens 17% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_base_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2d_2_base_14" model="account.tax.report.line">
       <field name="name">II.D.2.. base 14%</field>
+      <field name="tag_name">II.D.2.. base 14%</field>
       <field name="sequence">15</field>
       <field name="parent_line_id" ref="account_tax_report_line_2d_importations_de_biens_base"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_achat_biens_14_extracommunautaire_fin_privees" model="account.tax.report.line">
-      <field name="name">Base - Achat Biens 14% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Base - Achat Biens 14% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_base_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_biens_14_extracommunautaire_fin_privees" model="account.tax.report.line">
-      <field name="name">Base - Frais Biens 14% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Base - Frais Biens 14% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_base_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_biens_14_extracommunautaire_fin_privees_plus" model="account.tax.report.line">
-      <field name="name">Base - Investissement Biens 14% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Base - Investissement Biens 14% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_base_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2d_2_base_8" model="account.tax.report.line">
       <field name="name">II.D.2.. base 8%</field>
+      <field name="tag_name">II.D.2.. base 8%</field>
       <field name="sequence">16</field>
       <field name="parent_line_id" ref="account_tax_report_line_2d_importations_de_biens_base"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_achat_biens_8_extracommunautaire_fin_privees" model="account.tax.report.line">
-      <field name="name">Base - Achat Biens 8% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Base - Achat Biens 8% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_base_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_biens_8_extracommunautaire_fin_privees" model="account.tax.report.line">
-      <field name="name">Base - Frais Biens 8% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Base - Frais Biens 8% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_base_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_biens_8_extracommunautaire_fin" model="account.tax.report.line">
-      <field name="name">Base - Investissement Biens 8% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Base - Investissement Biens 8% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_base_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2d_1_base_3" model="account.tax.report.line">
       <field name="name">II.D.1. base 3%</field>
+      <field name="tag_name">II.D.1. base 3%</field>
       <field name="sequence">3</field>
       <field name="parent_line_id" ref="account_tax_report_line_2d_importations_de_biens_base"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_achat_biens_3_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Achat Biens 3% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Achat Biens 3% - Extracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_base_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_biens_3_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Frais Biens 3% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Frais Biens 3% - Extracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_base_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_biens_3_extracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Investissement Biens 3% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Investissement Biens 3% - Extracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_base_3"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
     <record id="account_tax_report_line_2d_2_base_3" model="account.tax.report.line">
       <field name="name">II.D.2.. base 3%</field>
+      <field name="tag_name">II.D.2.. base 3%</field>
       <field name="sequence">7</field>
       <field name="parent_line_id" ref="account_tax_report_line_2d_importations_de_biens_base"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_achat_biens_3_extracommunautaire_fin_privees" model="account.tax.report.line">
-      <field name="name">Base - Achat Biens 3% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Base - Achat Biens 3% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_base_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_biens_3_extracommunautaire_fin_privees" model="account.tax.report.line">
-      <field name="name">Base - Frais Biens 3% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Base - Frais Biens 3% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_base_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_biens_3_extracommunautaire_fin" model="account.tax.report.line">
-      <field name="name">Base - Investissement Biens 3% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Base - Investissement Biens 3% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_base_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2d_1_base_exoneree" model="account.tax.report.line">
       <field name="name">II.D.1. base exonérée</field>
+      <field name="tag_name">II.D.1. base exonérée</field>
       <field name="sequence">9</field>
       <field name="parent_line_id" ref="account_tax_report_line_2d_importations_de_biens_base"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_achat_biens_exonere_extracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Achat Biens Exonéré - Extracommunautaire</field>
-      <field name="tag_name">Base - Achat Biens Exonéré - Extracommunautaire</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_base_exoneree"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_biens_exonere_extracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Frais Biens Exonéré - Extracommunautaire</field>
-      <field name="tag_name">Base - Frais Biens Exonéré - Extracommunautaire</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_base_exoneree"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_biens_exonere_extracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Investissement Biens Exonéré - Extracommunautaire</field>
-      <field name="tag_name">Base - Investissement Biens Exonéré - Extracommunautaire</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_base_exoneree"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -508,156 +163,41 @@
 
     <record id="account_tax_report_line_2e_1_a_base_3" model="account.tax.report.line">
       <field name="name">II.E.1.a) base 3%</field>
+      <field name="tag_name">II.E.1.a) base 3%</field>
       <field name="sequence">3</field>
       <field name="parent_line_id" ref="account_tax_report_line_2e_1_base"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_achat_prestations_3_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Achat Prestations 3% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Achat Prestations 3% - Intracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_base_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_prestations_3_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Frais Prestations 3% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Frais Prestations 3% - Intracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_base_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_prestations_3" model="account.tax.report.line">
-      <field name="name">Base - Investissement Prestations 3% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Investissement Prestations 3% - Intracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_base_3"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
     <record id="account_tax_report_line_2e_1_b_exonerees" model="account.tax.report.line">
       <field name="name">II.E.1.b) exonérées</field>
+      <field name="tag_name">II.E.1.b) exonérées</field>
       <field name="sequence">5</field>
       <field name="parent_line_id" ref="account_tax_report_line_2e_1_base"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_achat_prestations_exonerees" model="account.tax.report.line">
-      <field name="name">Base - Achat Prestations Exonérées - Intracommunautaire</field>
-      <field name="tag_name">Base - Achat Prestations Exonérées - Intracommunautaire</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_b_exonerees"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_prestations_exonerees" model="account.tax.report.line">
-      <field name="name">Base - Frais Prestations Exonérées - Intracommunautaire</field>
-      <field name="tag_name">Base - Frais Prestations Exonérées - Intracommunautaire</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_b_exonerees"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_prestations_exonerees" model="account.tax.report.line">
-      <field name="name">Base - Investissement Prestations Exonérées - Intracommunautaire</field>
-      <field name="tag_name">Base - Investissement Prestations Exonérées - Intracommunautaire</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_b_exonerees"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2e_1_a_base_17" model="account.tax.report.line">
       <field name="name">II.E.1.a) base 17%</field>
+      <field name="tag_name">II.E.1.a) base 17%</field>
       <field name="sequence">6</field>
       <field name="parent_line_id" ref="account_tax_report_line_2e_1_base"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_achat_prestations_17_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Achat Prestations 17% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Achat Prestations 17% - Intracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_base_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_prestations_17_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Frais Prestations 17% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Frais Prestations 17% - Intracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_base_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_prestations_17" model="account.tax.report.line">
-      <field name="name">Base - Investissement Prestations 17% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Investissement Prestations 17% - Intracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_base_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2e_1_a_base_14" model="account.tax.report.line">
       <field name="name">II.E.1.a) base 14%</field>
+      <field name="tag_name">II.E.1.a) base 14%</field>
       <field name="sequence">7</field>
       <field name="parent_line_id" ref="account_tax_report_line_2e_1_base"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_achat_prestations_14_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Achat Prestations 14% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Achat Prestations 14% - Intracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_base_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_prestations_14_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Frais Prestations 14% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Frais Prestations 14% - Intracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_base_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_prestations_14" model="account.tax.report.line">
-      <field name="name">Base - Investissement Prestations 14% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Investissement Prestations 14% - Intracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_base_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2e_1_a_base_8" model="account.tax.report.line">
       <field name="name">II.E.1.a) base 8%</field>
+      <field name="tag_name">II.E.1.a) base 8%</field>
       <field name="sequence">8</field>
       <field name="parent_line_id" ref="account_tax_report_line_2e_1_base"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_achat_prestations_8_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Achat Prestations 8% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Achat Prestations 8% - Intracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_base_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_prestations_8_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Frais Prestations 8% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Frais Prestations 8% - Intracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_base_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_prestations_8" model="account.tax.report.line">
-      <field name="name">Base - Investissement Prestations 8% - Intracommunautaire (+)</field>
-      <field name="tag_name">Base - Investissement Prestations 8% - Intracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_base_8"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -670,156 +210,41 @@
 
     <record id="account_tax_report_line_2e_2_base_3" model="account.tax.report.line">
       <field name="name">II.E.2. base 3%</field>
+      <field name="tag_name">II.E.2. base 3%</field>
       <field name="sequence">3</field>
       <field name="parent_line_id" ref="account_tax_report_line_2e_2_base"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_achat_prestations_3_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Achat Prestations 3% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Achat Prestations 3% - Extracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_base_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_prestations_3_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Frais Prestations 3% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Frais Prestations 3% - Extracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_base_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_prestations_3_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Investissement Prestations 3% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Investissement Prestations 3% - Extracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_base_3"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
     <record id="account_tax_report_line_2e_2_exonerees" model="account.tax.report.line">
       <field name="name">II.E.2. exonérées</field>
+      <field name="tag_name">II.E.2. exonérées</field>
       <field name="sequence">5</field>
       <field name="parent_line_id" ref="account_tax_report_line_2e_2_base"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_achat_prestations_exonerees_extracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Achat Prestations Exonérées - Extracommunautaire</field>
-      <field name="tag_name">Base - Achat Prestations Exonérées - Extracommunautaire</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_exonerees"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_prestations_exonerees_extracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Frais Prestations Exonérées - Extracommunautaire</field>
-      <field name="tag_name">Base - Frais Prestations Exonérées - Extracommunautaire</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_exonerees"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_prestations_exonerees_extracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Investissement Prestations Exonérées - Extracommunautaire</field>
-      <field name="tag_name">Base - Investissement Prestations Exonérées - Extracommunautaire</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_exonerees"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2e_2_base_17" model="account.tax.report.line">
       <field name="name">II.E.2. base 17%</field>
+      <field name="tag_name">II.E.2. base 17%</field>
       <field name="sequence">6</field>
       <field name="parent_line_id" ref="account_tax_report_line_2e_2_base"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_achat_prestations_17_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Achat Prestations 17% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Achat Prestations 17% - Extracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_base_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_prestations_17_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Frais Prestations 17% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Frais Prestations 17% - Extracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_base_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_prestations_17_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Investissement Prestations 17% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Investissement Prestations 17% - Extracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_base_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2e_2_base_14" model="account.tax.report.line">
       <field name="name">II.E.2. base 14%</field>
+      <field name="tag_name">II.E.2. base 14%</field>
       <field name="sequence">7</field>
       <field name="parent_line_id" ref="account_tax_report_line_2e_2_base"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_achat_prestations_14_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Achat Prestations 14% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Achat Prestations 14% - Extracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_base_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_prestations_14_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Frais Prestations 14% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Frais Prestations 14% - Extracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_base_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_prestations_14_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Investissement Prestations 14% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Investissement Prestations 14% - Extracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_base_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2e_2_base_8" model="account.tax.report.line">
       <field name="name">II.E.2. base 8%</field>
+      <field name="tag_name">II.E.2. base 8%</field>
       <field name="sequence">8</field>
       <field name="parent_line_id" ref="account_tax_report_line_2e_2_base"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_achat_prestations_8_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Achat Prestations 8% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Achat Prestations 8% - Extracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_base_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_frais_prestations_8_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Frais Prestations 8% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Frais Prestations 8% - Extracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_base_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_investissement_prestations_8_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Base - Investissement Prestations 8% - Extracommunautaire (+)</field>
-      <field name="tag_name">Base - Investissement Prestations 8% - Extracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_base_8"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -845,142 +270,71 @@
 
     <record id="account_tax_report_line_1b_2_exportations_art_43/1/a_et_b" model="account.tax.report.line">
       <field name="name">I.B.2. Exportations (art.43/1/a et b)</field>
+      <field name="tag_name">I.B.2. Exportations (art.43/1/a et b)</field>
       <field name="sequence">1</field>
       <field name="parent_line_id" ref="account_tax_report_line_1b_exonerations_et_montants_deductibles"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_vente_biens_extracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Vente Biens - Extracommunautaire</field>
-      <field name="tag_name">Base - Vente Biens - Extracommunautaire</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_1b_2_exportations_art_43/1/a_et_b"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_1b_6_b2_prestations_de_services_a_des_identifies_a" model="account.tax.report.line">
-      <field name="name">I.B.6.b)2)  Prestations de services à des identifiés à la TVA dans un autre Etat membre exonérées dans l'Etat membre du preneur (art.17/1/b)</field>
+      <field name="name">I.B.6.b)2) Prestations de services à des identifiés à la TVA dans un autre Etat membre exonérées dans l'Etat membre du preneur (art.17/1/b)</field>
+      <field name="tag_name">I.B.6.b)2) Prestations de services à des identifiés à la TVA dans un autre Etat membre exonérées dans l'Etat membre du preneur (art.17/1/b)</field>
       <field name="sequence">10</field>
       <field name="parent_line_id" ref="account_tax_report_line_1b_exonerations_et_montants_deductibles"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_vente_prestations_intracommunautaire_exonerees_dans_letat_membre" model="account.tax.report.line">
-      <field name="name">Base - Vente Prestations - Intracommunautaire exonérées dans l'état membre</field>
-      <field name="tag_name">Base - Vente Prestations - Intracommunautaire exonérées dans l'état membre</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_1b_6_b2_prestations_de_services_a_des_identifies_a"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_1b_1_livraisons_intracommunautaires_de_biens_a_des" model="account.tax.report.line">
       <field name="name">I.B.1. Livraisons intracommunautaires de biens à des personnes identifiées à la TVA dans un autre Etat membre (art.43/1/d,e et f) (3)</field>
+      <field name="tag_name">I.B.1. Livraisons intracommunautaires de biens à des personnes identifiées à la TVA dans un autre Etat membre (art.43/1/d,e et f) (3)</field>
       <field name="sequence">11</field>
       <field name="parent_line_id" ref="account_tax_report_line_1b_exonerations_et_montants_deductibles"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_vente_biens_intracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Vente Biens - Intracommunautaire</field>
-      <field name="tag_name">Base - Vente Biens - Intracommunautaire</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_1b_1_livraisons_intracommunautaires_de_biens_a_des"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_1b_3_autres_exonerations_art_43_et_60bis" model="account.tax.report.line">
       <field name="name">I.B.3. Autres exonérations (art.43 et 60bis)</field>
+      <field name="tag_name">I.B.3. Autres exonérations (art.43 et 60bis)</field>
       <field name="sequence">2</field>
       <field name="parent_line_id" ref="account_tax_report_line_1b_exonerations_et_montants_deductibles"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_vente_autres_exonerations_article_43_et_60" model="account.tax.report.line">
-      <field name="name">Base - Vente - Autres Exonérations (Article 43 et 60 bis)</field>
-      <field name="tag_name">Base - Vente - Autres Exonérations (Article 43 et 60 bis)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_1b_3_autres_exonerations_art_43_et_60bis"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
     <record id="account_tax_report_line_1b_4_autres_exonerations_art_44_et_56quater" model="account.tax.report.line">
       <field name="name">I.B.4. Autres exonérations (art.44 et 56quater)</field>
+      <field name="tag_name">I.B.4. Autres exonérations (art.44 et 56quater)</field>
       <field name="sequence">3</field>
       <field name="parent_line_id" ref="account_tax_report_line_1b_exonerations_et_montants_deductibles"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_vente_autres_exonerations_article_44_et_56" model="account.tax.report.line">
-      <field name="name">Base - Vente - Autres Exonérations (Article 44 et 56 quarter)</field>
-      <field name="tag_name">Base - Vente - Autres Exonérations (Article 44 et 56 quarter)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_1b_4_autres_exonerations_art_44_et_56quater"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
     <record id="account_tax_report_line_1b_5_tabacs_fabriques" model="account.tax.report.line">
       <field name="name">I.B.5. Tabacs fabriqués</field>
+      <field name="tag_name">I.B.5. Tabacs fabriqués</field>
       <field name="sequence">4</field>
       <field name="parent_line_id" ref="account_tax_report_line_1b_exonerations_et_montants_deductibles"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_vente_biens_tabacs_extracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Vente Biens Tabacs - Extracommunautaire</field>
-      <field name="tag_name">Base - Vente Biens Tabacs - Extracommunautaire</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_1b_5_tabacs_fabriques"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_vente_biens_tabacs_intracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Vente Biens Tabacs - Intracommunautaire</field>
-      <field name="tag_name">Base - Vente Biens Tabacs - Intracommunautaire</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_1b_5_tabacs_fabriques"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_vente_biens_tabacs_pays" model="account.tax.report.line">
-      <field name="name">Base - Vente Biens Tabacs - Pays</field>
-      <field name="tag_name">Base - Vente Biens Tabacs - Pays</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_1b_5_tabacs_fabriques"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_1b_6_a_livraisons_subsequentes_a_des_acquisitions" model="account.tax.report.line">
       <field name="name">I.B.6.a) Livraisons subséquentes à des acquisitions intracommunautaires dans le cadre d'opérations triangulaires, lorsque le destinataire identifié à la TVA dans l'Etat membre de destination des biens y est le redevable de la taxe (4)</field>
+      <field name="tag_name">I.B.6.a) Livraisons subséquentes à des acquisitions intracommunautaires dans le cadre d'opérations triangulaires, lorsque le destinataire identifié à la TVA dans l'Etat membre de destination des biens y est le redevable de la taxe (4)</field>
       <field name="sequence">5</field>
       <field name="parent_line_id" ref="account_tax_report_line_1b_exonerations_et_montants_deductibles"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_vente_biens_triangulaire_intracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Vente Biens – Triangulaire Intracommunautaire</field>
-      <field name="tag_name">Base - Vente Biens – Triangulaire Intracommunautaire</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_1b_6_a_livraisons_subsequentes_a_des_acquisitions"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_1b_6_d_autres_operations_realisees_imposables_a" model="account.tax.report.line">
       <field name="name">I.B.6.d) Autres opérations réalisées (imposables) à l'étranger</field>
+      <field name="tag_name">I.B.6.d) Autres opérations réalisées (imposables) à l'étranger</field>
       <field name="sequence">6</field>
       <field name="parent_line_id" ref="account_tax_report_line_1b_exonerations_et_montants_deductibles"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_vente_prestations_extracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Vente Prestations - Extracommunautaire</field>
-      <field name="tag_name">Base - Vente Prestations - Extracommunautaire</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_1b_6_d_autres_operations_realisees_imposables_a"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_1b_6_c_operations_realisees_dans_le_cadre_du" model="account.tax.report.line">
       <field name="name">I.B.6.c) Opérations réalisées dans le cadre du régime particulier de l'article 56sexies</field>
+      <field name="tag_name">I.B.6.c) Opérations réalisées dans le cadre du régime particulier de l'article 56sexies</field>
       <field name="sequence">7</field>
       <field name="parent_line_id" ref="account_tax_report_line_1b_exonerations_et_montants_deductibles"/>
       <field name="country_id" ref="base.lu"/>
@@ -988,6 +342,7 @@
 
     <record id="account_tax_report_line_1b_7_operations_a_linterieur_du_pays_pour" model="account.tax.report.line">
       <field name="name">I.B.7. Opérations à l'intérieur du pays pour lesquelles le preneur est le redevable</field>
+      <field name="tag_name">I.B.7. Opérations à l'intérieur du pays pour lesquelles le preneur est le redevable</field>
       <field name="sequence">8</field>
       <field name="parent_line_id" ref="account_tax_report_line_1b_exonerations_et_montants_deductibles"/>
       <field name="country_id" ref="base.lu"/>
@@ -995,16 +350,9 @@
 
     <record id="account_tax_report_line_1b_6_b1_prestations_de_services_a_des_identifies_a" model="account.tax.report.line">
       <field name="name">I.B.6.b)1)  Prestations de services à des identifiés à la TVA dans un autre Etat membre non exonérées dans l'Etat membre du preneur redevable (art.17/1/b) (5)</field>
+      <field name="tag_name">I.B.6.b)1)  Prestations de services à des identifiés à la TVA dans un autre Etat membre non exonérées dans l'Etat membre du preneur redevable (art.17/1/b) (5)</field>
       <field name="sequence">9</field>
       <field name="parent_line_id" ref="account_tax_report_line_1b_exonerations_et_montants_deductibles"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_vente_prestations_intracommunautaire" model="account.tax.report.line">
-      <field name="name">Base - Vente Prestations - Intracommunautaire</field>
-      <field name="tag_name">Base - Vente Prestations - Intracommunautaire</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_1b_6_b1_prestations_de_services_a_des_identifies_a"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -1024,116 +372,41 @@
 
     <record id="account_tax_report_line_2a_base_3" model="account.tax.report.line">
       <field name="name">II.A. base 3%</field>
+      <field name="tag_name">II.A. base 3%</field>
       <field name="sequence">3</field>
       <field name="parent_line_id" ref="account_tax_report_line_2a_ventilation_du_chiffre_daffaires_imposable_base"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_vente_biens_3_pays" model="account.tax.report.line">
-      <field name="name">Base - Vente Biens 3% - Pays</field>
-      <field name="tag_name">Base - Vente Biens 3% - Pays</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2a_base_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_vente_prestations_3_pays" model="account.tax.report.line">
-      <field name="name">Base - Vente Prestations 3% - Pays</field>
-      <field name="tag_name">Base - Vente Prestations 3% - Pays</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2a_base_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2a_base_0" model="account.tax.report.line">
       <field name="name">II.A. base 0%</field>
+      <field name="tag_name">II.A. base 0%</field>
       <field name="sequence">5</field>
       <field name="parent_line_id" ref="account_tax_report_line_2a_ventilation_du_chiffre_daffaires_imposable_base"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_vente_biens_0_pays" model="account.tax.report.line">
-      <field name="name">Base - Vente Biens 0% - Pays</field>
-      <field name="tag_name">Base - Vente Biens 0% - Pays</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2a_base_0"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_vente_prestations_0_pays" model="account.tax.report.line">
-      <field name="name">Base - Vente Prestations 0% - Pays</field>
-      <field name="tag_name">Base - Vente Prestations 0% - Pays</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2a_base_0"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2a_base_17" model="account.tax.report.line">
       <field name="name">II.A. base 17%</field>
+      <field name="tag_name">II.A. base 17%</field>
       <field name="sequence">6</field>
       <field name="parent_line_id" ref="account_tax_report_line_2a_ventilation_du_chiffre_daffaires_imposable_base"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_vente_biens_17_pays" model="account.tax.report.line">
-      <field name="name">Base - Vente Biens 17% - Pays</field>
-      <field name="tag_name">Base - Vente Biens 17% - Pays</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2a_base_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_vente_prestations_17_pays" model="account.tax.report.line">
-      <field name="name">Base - Vente Prestations 17% - Pays</field>
-      <field name="tag_name">Base - Vente Prestations 17% - Pays</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2a_base_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2a_base_14" model="account.tax.report.line">
       <field name="name">II.A. base 14%</field>
+      <field name="tag_name">II.A. base 14%</field>
       <field name="sequence">7</field>
       <field name="parent_line_id" ref="account_tax_report_line_2a_ventilation_du_chiffre_daffaires_imposable_base"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_base_vente_biens_14_pays" model="account.tax.report.line">
-      <field name="name">Base - Vente Biens 14% - Pays</field>
-      <field name="tag_name">Base - Vente Biens 14% - Pays</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2a_base_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_vente_prestations_14_pays" model="account.tax.report.line">
-      <field name="name">Base - Vente Prestations 14% - Pays</field>
-      <field name="tag_name">Base - Vente Prestations 14% - Pays</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2a_base_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2a_base_8" model="account.tax.report.line">
       <field name="name">II.A. base 8%</field>
+      <field name="tag_name">II.A. base 8%</field>
       <field name="sequence">8</field>
       <field name="parent_line_id" ref="account_tax_report_line_2a_ventilation_du_chiffre_daffaires_imposable_base"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_vente_biens_8_pays" model="account.tax.report.line">
-      <field name="name">Base - Vente Biens 8% - Pays</field>
-      <field name="tag_name">Base - Vente Biens 8% - Pays</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2a_base_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_base_vente_prestations_8_pays" model="account.tax.report.line">
-      <field name="name">Base - Vente Prestations 8% - Pays</field>
-      <field name="tag_name">Base - Vente Prestations 8% - Pays</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2a_base_8"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -1421,24 +694,9 @@
 
     <record id="account_tax_report_line_2a_taxe_3" model="account.tax.report.line">
       <field name="name">II.A. taxe 3%</field>
+      <field name="tag_name">II.A. taxe 3%</field>
       <field name="sequence">3</field>
       <field name="parent_line_id" ref="account_tax_report_line_2a_ventilation_du_chiffre_daffaires_imposable_taxe"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_vente_biens_3_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Vente Biens 3% - Pays</field>
-      <field name="tag_name">Taxe - Vente Biens 3% - Pays</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2a_taxe_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_vente_prestations_3_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Vente Prestations 3% - Pays</field>
-      <field name="tag_name">Taxe - Vente Prestations 3% - Pays</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2a_taxe_3"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -1451,70 +709,25 @@
 
     <record id="account_tax_report_line_2a_taxe_17" model="account.tax.report.line">
       <field name="name">II.A. taxe 17%</field>
+      <field name="tag_name">II.A. taxe 17%</field>
       <field name="sequence">6</field>
       <field name="parent_line_id" ref="account_tax_report_line_2a_ventilation_du_chiffre_daffaires_imposable_taxe"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_taxe_vente_biens_17_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Vente Biens 17% - Pays</field>
-      <field name="tag_name">Taxe - Vente Biens 17% - Pays</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2a_taxe_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_vente_prestations_17_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Vente Prestations 17% - Pays</field>
-      <field name="tag_name">Taxe - Vente Prestations 17% - Pays</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2a_taxe_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2a_taxe_14" model="account.tax.report.line">
       <field name="name">II.A. taxe 14%</field>
+      <field name="tag_name">II.A. taxe 14%</field>
       <field name="sequence">7</field>
       <field name="parent_line_id" ref="account_tax_report_line_2a_ventilation_du_chiffre_daffaires_imposable_taxe"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_taxe_vente_biens_14_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Vente Biens 14% - Pays</field>
-      <field name="tag_name">Taxe - Vente Biens 14% - Pays</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2a_taxe_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_vente_prestations_14_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Vente Prestations 14% - Pays</field>
-      <field name="tag_name">Taxe - Vente Prestations 14% - Pays</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2a_taxe_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2a_taxe_8" model="account.tax.report.line">
       <field name="name">II.A. taxe 8%</field>
+      <field name="tag_name">II.A. taxe 8%</field>
       <field name="sequence">8</field>
       <field name="parent_line_id" ref="account_tax_report_line_2a_ventilation_du_chiffre_daffaires_imposable_taxe"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_vente_biens_8_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Vente Biens 8% - Pays</field>
-      <field name="tag_name">Taxe - Vente Biens 8% - Pays</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2a_taxe_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_vente_prestations_8_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Vente Prestations 8% - Pays</field>
-      <field name="tag_name">Taxe - Vente Prestations 8% - Pays</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2a_taxe_8"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -1527,125 +740,33 @@
 
     <record id="account_tax_report_line_2b_taxe_3" model="account.tax.report.line">
       <field name="name">II.B. taxe 3%</field>
+      <field name="tag_name">II.B. taxe 3%</field>
       <field name="sequence">3</field>
       <field name="parent_line_id" ref="account_tax_report_line_2b_acquisitions_intracommunautaires_de_biens_taxe"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_biens_3_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 3% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Achat Biens 3% - Intracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_taxe_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_3_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 3% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Frais Biens 3% - Intracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_taxe_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_3_intracommunautaire" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 3% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Investissement Biens 3% - Intracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_taxe_3"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
     <record id="account_tax_report_line_2b_taxe_17" model="account.tax.report.line">
       <field name="name">II.B. taxe 17%</field>
+      <field name="tag_name">II.B. taxe 17%</field>
       <field name="sequence">5</field>
       <field name="parent_line_id" ref="account_tax_report_line_2b_acquisitions_intracommunautaires_de_biens_taxe"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_taxe_achat_biens_17_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 17% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Achat Biens 17% - Intracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_taxe_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_17_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 17% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Frais Biens 17% - Intracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_taxe_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_17_intracommunautaire" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 17% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Investissement Biens 17% - Intracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_taxe_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2b_taxe_14" model="account.tax.report.line">
       <field name="name">II.B. taxe 14%</field>
+      <field name="tag_name">II.B. taxe 14%</field>
       <field name="sequence">6</field>
       <field name="parent_line_id" ref="account_tax_report_line_2b_acquisitions_intracommunautaires_de_biens_taxe"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_taxe_achat_biens_14_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 14% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Achat Biens 14% - Intracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_taxe_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_14_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 14% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Frais Biens 14% - Intracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_taxe_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_14_intracommunautaire" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 14% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Investissement Biens 14% - Intracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_taxe_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2b_taxe_8" model="account.tax.report.line">
       <field name="name">II.B. taxe 8%</field>
+      <field name="tag_name">II.B. taxe 8%</field>
       <field name="sequence">7</field>
       <field name="parent_line_id" ref="account_tax_report_line_2b_acquisitions_intracommunautaires_de_biens_taxe"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_biens_8_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 8% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Achat Biens 8% - Intracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_taxe_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_8_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 8% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Frais Biens 8% - Intracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_taxe_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_8_intracommunautaire" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 8% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Investissement Biens 8% - Intracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2b_taxe_8"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -1658,249 +779,65 @@
 
     <record id="account_tax_report_line_2d_1_taxe_14" model="account.tax.report.line">
       <field name="name">II.D.1. taxe 14%</field>
+      <field name="tag_name">II.D.1. taxe 14%</field>
       <field name="sequence">10</field>
       <field name="parent_line_id" ref="account_tax_report_line_2d_importations_de_biens_taxe"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_taxe_achat_biens_14_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 14% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Achat Biens 14% - Extracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_taxe_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_14_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 14% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Frais Biens 14% - Extracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_taxe_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_14_extracommunautaire" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 14% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Investissement Biens 14% - Extracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_taxe_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2d_1_taxe_8" model="account.tax.report.line">
       <field name="name">II.D.1. taxe 8%</field>
+      <field name="tag_name">II.D.1. taxe 8%</field>
       <field name="sequence">11</field>
       <field name="parent_line_id" ref="account_tax_report_line_2d_importations_de_biens_taxe"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_taxe_achat_biens_8_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 8% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Achat Biens 8% - Extracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_taxe_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_8_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 8% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Frais Biens 8% - Extracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_taxe_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_8_extracommunautaire" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 8% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Investissement Biens 8% - Extracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_taxe_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2d_2_taxe_17" model="account.tax.report.line">
-      <field name="name">II.D.2.. taxe 17%</field>
+      <field name="name">II.D.2. taxe 17%</field>
+      <field name="tag_name">II.D.2. taxe 17%</field>
       <field name="sequence">12</field>
       <field name="parent_line_id" ref="account_tax_report_line_2d_importations_de_biens_taxe"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_taxe_achat_biens_17_extracommunautaire_fin_privees" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 17% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Taxe - Achat Biens 17% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_taxe_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_17_extracommunautaire_fin_privees" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 17% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Taxe - Frais Biens 17% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_taxe_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_17_extracommunautaire" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 17% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Taxe - Investissement Biens 17% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_taxe_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2d_2_taxe_14" model="account.tax.report.line">
       <field name="name">II.D.2.. taxe 14%</field>
+      <field name="tag_name">II.D.2.. taxe 14%</field>
       <field name="sequence">13</field>
       <field name="parent_line_id" ref="account_tax_report_line_2d_importations_de_biens_taxe"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_taxe_achat_biens_14_extracommunautaire_fin_privees" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 14% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Taxe - Achat Biens 14% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_taxe_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_14_extracommunautaire_fin_privees" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 14% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Taxe - Frais Biens 14% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_taxe_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_14_extracommunautaire_fin_privees_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 14% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Taxe - Investissement Biens 14% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_taxe_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2d_2_taxe_8" model="account.tax.report.line">
       <field name="name">II.D.2.. taxe 8%</field>
+      <field name="tag_name">II.D.2.. taxe 8%</field>
       <field name="sequence">14</field>
       <field name="parent_line_id" ref="account_tax_report_line_2d_importations_de_biens_taxe"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_taxe_achat_biens_8_extracommunautaire_fin_privees" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 8% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Taxe - Achat Biens 8% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_taxe_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_8_extracommunautaire_fin_privees" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 8% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Taxe - Frais Biens 8% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_taxe_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_8_extracommunautaire_fin" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 8% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Taxe - Investissement Biens 8% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_taxe_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2d_1_taxe_3" model="account.tax.report.line">
       <field name="name">II.D.1. taxe 3%</field>
+      <field name="tag_name">II.D.1. taxe 3%</field>
       <field name="sequence">3</field>
       <field name="parent_line_id" ref="account_tax_report_line_2d_importations_de_biens_taxe"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_biens_3_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 3% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Achat Biens 3% - Extracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_taxe_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_3_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 3% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Frais Biens 3% - Extracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_taxe_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_3_extracommunautaire" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 3% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Investissement Biens 3% - Extracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_taxe_3"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
     <record id="account_tax_report_line_2d_2_taxe_3" model="account.tax.report.line">
       <field name="name">II.D.2.. taxe 3%</field>
+      <field name="tag_name">II.D.2.. taxe 3%</field>
       <field name="sequence">7</field>
       <field name="parent_line_id" ref="account_tax_report_line_2d_importations_de_biens_taxe"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_taxe_achat_biens_3_extracommunautaire_fin_privees" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 3% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Taxe - Achat Biens 3% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_taxe_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_3_extracommunautaire_fin_privees" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 3% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Taxe - Frais Biens 3% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_taxe_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_3_extracommunautaire_fin" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 3% - Extracommunautaire fin privées (+)</field>
-      <field name="tag_name">Taxe - Investissement Biens 3% - Extracommunautaire fin privées (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_2_taxe_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2d_1_taxe_17" model="account.tax.report.line">
       <field name="name">II.D.1. taxe 17%</field>
+      <field name="tag_name">II.D.1. taxe 17%</field>
       <field name="sequence">9</field>
       <field name="parent_line_id" ref="account_tax_report_line_2d_importations_de_biens_taxe"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_biens_17_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 17% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Achat Biens 17% - Extracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_taxe_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_17_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 17% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Frais Biens 17% - Extracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_taxe_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_17_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 17% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Investissement Biens 17% - Extracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2d_1_taxe_17"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -1920,125 +857,33 @@
 
     <record id="account_tax_report_line_2e_1_a_taxe_3" model="account.tax.report.line">
       <field name="name">II.E.1.a) taxe 3%</field>
+      <field name="tag_name">II.E.1.a) taxe 3%</field>
       <field name="sequence">3</field>
       <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_taxe"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_prestations_3_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Prestations 3% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Achat Prestations 3% - Intracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_taxe_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_prestations_3_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Prestations 3% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Frais Prestations 3% - Intracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_taxe_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_prestations_3" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Prestations 3% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Investissement Prestations 3% - Intracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_taxe_3"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
     <record id="account_tax_report_line_2e_1_a_taxe_17" model="account.tax.report.line">
       <field name="name">II.E.1.a) taxe 17%</field>
+      <field name="tag_name">II.E.1.a) taxe 17%</field>
       <field name="sequence">5</field>
       <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_taxe"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_taxe_achat_prestations_17_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Prestations 17% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Achat Prestations 17% - Intracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_taxe_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_prestations_17_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Prestations 17% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Frais Prestations 17% - Intracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_taxe_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_prestations_17" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Prestations 17% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Investissement Prestations 17% - Intracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_taxe_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2e_1_a_taxe_14" model="account.tax.report.line">
       <field name="name">II.E.1.a) taxe 14%</field>
+      <field name="tag_name">II.E.1.a) taxe 14%</field>
       <field name="sequence">6</field>
       <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_taxe"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_taxe_achat_prestations_14_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Prestations 14% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Achat Prestations 14% - Intracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_taxe_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_prestations_14_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Prestations 14% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Frais Prestations 14% - Intracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_taxe_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_prestations_14" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Prestations 14% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Investissement Prestations 14% - Intracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_taxe_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2e_1_a_taxe_8" model="account.tax.report.line">
       <field name="name">II.E.1.a) taxe 8%</field>
+      <field name="tag_name">II.E.1.a) taxe 8%</field>
       <field name="sequence">7</field>
       <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_taxe"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_prestations_8_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Prestations 8% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Achat Prestations 8% - Intracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_taxe_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_prestations_8_intracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Prestations 8% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Frais Prestations 8% - Intracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_taxe_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_prestations_8" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Prestations 8% - Intracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Investissement Prestations 8% - Intracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_1_a_taxe_8"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -2051,125 +896,33 @@
 
     <record id="account_tax_report_line_2e_2_taxe_3" model="account.tax.report.line">
       <field name="name">II.E.2. taxe 3%</field>
+      <field name="tag_name">II.E.2. taxe 3%</field>
       <field name="sequence">3</field>
       <field name="parent_line_id" ref="account_tax_report_line_2e_2_taxe"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_prestations_3_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Prestations 3% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Achat Prestations 3% - Extracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_taxe_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_prestations_3_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Prestations 3% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Frais Prestations 3% - Extracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_taxe_3"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_prestations_3_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Prestations 3% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Investissement Prestations 3% - Extracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_taxe_3"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
     <record id="account_tax_report_line_2e_2_taxe_17" model="account.tax.report.line">
       <field name="name">II.E.2. taxe 17%</field>
+      <field name="tag_name">II.E.2. taxe 17%</field>
       <field name="sequence">5</field>
       <field name="parent_line_id" ref="account_tax_report_line_2e_2_taxe"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_taxe_achat_prestations_17_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Prestations 17% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Achat Prestations 17% - Extracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_taxe_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_prestations_17_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Prestations 17% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Frais Prestations 17% - Extracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_taxe_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_prestations_17_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Prestations 17% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Investissement Prestations 17% - Extracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_taxe_17"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2e_2_taxe_14" model="account.tax.report.line">
       <field name="name">II.E.2. taxe 14%</field>
+      <field name="tag_name">II.E.2. taxe 14%</field>
       <field name="sequence">6</field>
       <field name="parent_line_id" ref="account_tax_report_line_2e_2_taxe"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_taxe_achat_prestations_14_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Prestations 14% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Achat Prestations 14% - Extracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_taxe_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_prestations_14_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Prestations 14% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Frais Prestations 14% - Extracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_taxe_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_prestations_14_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Prestations 14% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Investissement Prestations 14% - Extracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_taxe_14"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_2e_2_taxe_8" model="account.tax.report.line">
       <field name="name">II.E.2. taxe 8%</field>
+      <field name="tag_name">II.E.2. taxe 8%</field>
       <field name="sequence">7</field>
       <field name="parent_line_id" ref="account_tax_report_line_2e_2_taxe"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_prestations_8_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Prestations 8% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Achat Prestations 8% - Extracommunautaire (+)</field>
-      <field name="sequence">1</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_taxe_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_prestations_8_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Prestations 8% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Frais Prestations 8% - Extracommunautaire (+)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_taxe_8"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_prestations_8_extracommunautaire_plus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Prestations 8% - Extracommunautaire (+)</field>
-      <field name="tag_name">Taxe - Investissement Prestations 8% - Extracommunautaire (+)</field>
-      <field name="sequence">3</field>
-      <field name="parent_line_id" ref="account_tax_report_line_2e_2_taxe_8"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -2197,6 +950,7 @@
 
     <record id="account_tax_report_line_3a_4_affectations_de_biens_art_48/1/d" model="account.tax.report.line">
       <field name="name">III.A.4. Affectations de biens (art.48/1/d)</field>
+      <field name="tag_name">III.A.4. Affectations de biens (art.48/1/d)</field>
       <field name="sequence">1</field>
       <field name="parent_line_id" ref="account_tax_report_line_3a_total_de_la_taxe_en_amont"/>
       <field name="country_id" ref="base.lu"/>
@@ -2204,6 +958,7 @@
 
     <record id="account_tax_report_line_3a_6_taxe_acquittee_comme_caution_solidaire" model="account.tax.report.line">
       <field name="name">III.A.6. Taxe acquittée comme caution solidaire</field>
+      <field name="tag_name">III.A.6. Taxe acquittée comme caution solidaire</field>
       <field name="sequence">2</field>
       <field name="parent_line_id" ref="account_tax_report_line_3a_total_de_la_taxe_en_amont"/>
       <field name="country_id" ref="base.lu"/>
@@ -2211,6 +966,7 @@
 
     <record id="account_tax_report_line_3a_7_taxe_regularisee_regime_particulier_suspensif" model="account.tax.report.line">
       <field name="name">III.A.7. Taxe régularisée - régime particulier suspensif (art.60bis/9, al. 2)</field>
+      <field name="tag_name">III.A.7. Taxe régularisée - régime particulier suspensif (art.60bis/9, al. 2)</field>
       <field name="sequence">3</field>
       <field name="parent_line_id" ref="account_tax_report_line_3a_total_de_la_taxe_en_amont"/>
       <field name="country_id" ref="base.lu"/>
@@ -2218,701 +974,33 @@
 
     <record id="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur" model="account.tax.report.line">
       <field name="name">III.A.1. Achats de biens et de services à l'intérieur du pays (art.48/1/a)</field>
+      <field name="tag_name">III.A.1. Achats de biens et de services à l'intérieur du pays (art.48/1/a)</field>
       <field name="sequence">4</field>
       <field name="parent_line_id" ref="account_tax_report_line_3a_total_de_la_taxe_en_amont"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_prestations_17_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Prestations 17% - Pays</field>
-      <field name="tag_name">Taxe - Achat Prestations 17% - Pays</field>
-      <field name="sequence">11</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_prestations_3_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Prestations 3% - Pays</field>
-      <field name="tag_name">Taxe - Achat Prestations 3% - Pays</field>
-      <field name="sequence">12</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_prestations_8_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Prestations 8% - Pays</field>
-      <field name="tag_name">Taxe - Achat Prestations 8% - Pays</field>
-      <field name="sequence">14</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_14_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 14% - Pays</field>
-      <field name="tag_name">Taxe - Frais Biens 14% - Pays</field>
-      <field name="sequence">16</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_17_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 17% - Pays</field>
-      <field name="tag_name">Taxe - Frais Biens 17% - Pays</field>
-      <field name="sequence">18</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_3_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 3% - Pays</field>
-      <field name="tag_name">Taxe - Frais Biens 3% - Pays</field>
-      <field name="sequence">19</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_biens_14_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 14% - Pays</field>
-      <field name="tag_name">Taxe - Achat Biens 14% - Pays</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_8_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 8% - Pays</field>
-      <field name="tag_name">Taxe - Frais Biens 8% - Pays</field>
-      <field name="sequence">21</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_prestations_14_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Prestations 14% - Pays</field>
-      <field name="tag_name">Taxe - Frais Prestations 14% - Pays</field>
-      <field name="sequence">23</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_prestations_17_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Prestations 17% - Pays</field>
-      <field name="tag_name">Taxe - Frais Prestations 17% - Pays</field>
-      <field name="sequence">25</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_prestations_3_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Prestations 3% - Pays</field>
-      <field name="tag_name">Taxe - Frais Prestations 3% - Pays</field>
-      <field name="sequence">26</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_prestations_8_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Prestations 8% - Pays</field>
-      <field name="tag_name">Taxe - Frais Prestations 8% - Pays</field>
-      <field name="sequence">28</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_14_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 14% - Pays</field>
-      <field name="tag_name">Taxe - Investissement Biens 14% - Pays</field>
-      <field name="sequence">30</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_17_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 17% - Pays</field>
-      <field name="tag_name">Taxe - Investissement Biens 17% - Pays</field>
-      <field name="sequence">32</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_3_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 3% - Pays</field>
-      <field name="tag_name">Taxe - Investissement Biens 3% - Pays</field>
-      <field name="sequence">33</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_8_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 8% - Pays</field>
-      <field name="tag_name">Taxe - Investissement Biens 8% - Pays</field>
-      <field name="sequence">35</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_prestations_14_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Prestations 14% - Pays</field>
-      <field name="tag_name">Taxe - Investissement Prestations 14% - Pays</field>
-      <field name="sequence">37</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_prestations_17_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Prestations 17% - Pays</field>
-      <field name="tag_name">Taxe - Investissement Prestations 17% - Pays</field>
-      <field name="sequence">39</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_biens_17_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 17% - Pays</field>
-      <field name="tag_name">Taxe - Achat Biens 17% - Pays</field>
-      <field name="sequence">4</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_prestations_3_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Prestations 3% - Pays</field>
-      <field name="tag_name">Taxe - Investissement Prestations 3% - Pays</field>
-      <field name="sequence">40</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_prestations_8_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Prestations 8% - Pays</field>
-      <field name="tag_name">Taxe - Investissement Prestations 8% - Pays</field>
-      <field name="sequence">42</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_biens_3_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 3% - Pays</field>
-      <field name="tag_name">Taxe - Achat Biens 3% - Pays</field>
-      <field name="sequence">5</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_biens_8_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 8% - Pays</field>
-      <field name="tag_name">Taxe - Achat Biens 8% - Pays</field>
-      <field name="sequence">7</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_prestations_14_pays" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Prestations 14% - Pays</field>
-      <field name="tag_name">Taxe - Achat Prestations 14% - Pays</field>
-      <field name="sequence">9</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
     <record id="account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art" model="account.tax.report.line">
       <field name="name">III.A.2. Acquisitions intracommunautaires de biens (art.48/1/b)</field>
+      <field name="tag_name">III.A.2. Acquisitions intracommunautaires de biens (art.48/1/b)</field>
       <field name="sequence">5</field>
       <field name="parent_line_id" ref="account_tax_report_line_3a_total_de_la_taxe_en_amont"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_17_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 17% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Frais Biens 17% - Intracommunautaire (-)</field>
-      <field name="sequence">11</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_3_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 3% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Frais Biens 3% - Intracommunautaire (-)</field>
-      <field name="sequence">12</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_8_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 8% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Frais Biens 8% - Intracommunautaire (-)</field>
-      <field name="sequence">14</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_14_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 14% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Investissement Biens 14% - Intracommunautaire (-)</field>
-      <field name="sequence">16</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_17_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 17% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Investissement Biens 17% - Intracommunautaire (-)</field>
-      <field name="sequence">18</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_3_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 3% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Investissement Biens 3% - Intracommunautaire (-)</field>
-      <field name="sequence">19</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_biens_14_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 14% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Achat Biens 14% - Intracommunautaire (-)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_8_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 8% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Investissement Biens 8% - Intracommunautaire (-)</field>
-      <field name="sequence">21</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_biens_17_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 17% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Achat Biens 17% - Intracommunautaire (-)</field>
-      <field name="sequence">4</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_biens_3_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 3% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Achat Biens 3% - Intracommunautaire (-)</field>
-      <field name="sequence">5</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_biens_8_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 8% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Achat Biens 8% - Intracommunautaire (-)</field>
-      <field name="sequence">7</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_14_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 14% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Frais Biens 14% - Intracommunautaire (-)</field>
-      <field name="sequence">9</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
     <record id="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee" model="account.tax.report.line">
       <field name="name">III.A.3. Importations de biens (taxe déclarée ou payée) (art.48/1/c)</field>
+      <field name="tag_name">III.A.3. Importations de biens (taxe déclarée ou payée) (art.48/1/c)</field>
       <field name="sequence">6</field>
       <field name="parent_line_id" ref="account_tax_report_line_3a_total_de_la_taxe_en_amont"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 
-    <record id="account_tax_report_line_taxe_achat_biens_17_extracommunautaire_fin_privees_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 17% - Extracommunautaire fin privées (-)</field>
-      <field name="tag_name">Taxe - Achat Biens 17% - Extracommunautaire fin privées (-)</field>
-      <field name="sequence">11</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_biens_3_extracommunautaire_fin_privees_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 3% - Extracommunautaire fin privées (-)</field>
-      <field name="tag_name">Taxe - Achat Biens 3% - Extracommunautaire fin privées (-)</field>
-      <field name="sequence">12</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_biens_8_extracommunautaire_fin_privees_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 8% - Extracommunautaire fin privées (-)</field>
-      <field name="tag_name">Taxe - Achat Biens 8% - Extracommunautaire fin privées (-)</field>
-      <field name="sequence">14</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_14_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 14% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Frais Biens 14% - Extracommunautaire (-)</field>
-      <field name="sequence">16</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_17_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 17% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Frais Biens 17% - Extracommunautaire (-)</field>
-      <field name="sequence">18</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_3_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 3% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Frais Biens 3% - Extracommunautaire (-)</field>
-      <field name="sequence">19</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_biens_14_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 14% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Achat Biens 14% - Extracommunautaire (-)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_8_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 8% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Frais Biens 8% - Extracommunautaire (-)</field>
-      <field name="sequence">21</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_14_extracommunautaire_fin_privees_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 14% - Extracommunautaire fin privées (-)</field>
-      <field name="tag_name">Taxe - Frais Biens 14% - Extracommunautaire fin privées (-)</field>
-      <field name="sequence">23</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_17_extracommunautaire_fin_privees_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 17% - Extracommunautaire fin privées (-)</field>
-      <field name="tag_name">Taxe - Frais Biens 17% - Extracommunautaire fin privées (-)</field>
-      <field name="sequence">25</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_3_extracommunautaire_fin_privees_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 3% - Extracommunautaire fin privées (-)</field>
-      <field name="tag_name">Taxe - Frais Biens 3% - Extracommunautaire fin privées (-)</field>
-      <field name="sequence">26</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_biens_8_extracommunautaire_fin_privees_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Biens 8% - Extracommunautaire fin privées (-)</field>
-      <field name="tag_name">Taxe - Frais Biens 8% - Extracommunautaire fin privées (-)</field>
-      <field name="sequence">28</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_14_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 14% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Investissement Biens 14% - Extracommunautaire (-)</field>
-      <field name="sequence">30</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_17_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 17% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Investissement Biens 17% - Extracommunautaire (-)</field>
-      <field name="sequence">32</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_3_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 3% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Investissement Biens 3% - Extracommunautaire (-)</field>
-      <field name="sequence">33</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_8_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 8% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Investissement Biens 8% - Extracommunautaire (-)</field>
-      <field name="sequence">35</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_14_extracommunautaire_fin_privees_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 14% - Extracommunautaire fin privées (-)</field>
-      <field name="tag_name">Taxe - Investissement Biens 14% - Extracommunautaire fin privées (-)</field>
-      <field name="sequence">37</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_17_extracommunautaire_fin_privees_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 17% - Extracommunautaire fin privées (-)</field>
-      <field name="tag_name">Taxe - Investissement Biens 17% - Extracommunautaire fin privées (-)</field>
-      <field name="sequence">39</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_biens_17_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 17% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Achat Biens 17% - Extracommunautaire (-)</field>
-      <field name="sequence">4</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_3_extracommunautaire_fin_privees_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 3% - Extracommunautaire fin privées (-)</field>
-      <field name="tag_name">Taxe - Investissement Biens 3% - Extracommunautaire fin privées (-)</field>
-      <field name="sequence">40</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_biens_8_extracommunautaire_fin_privees_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Biens 8% - Extracommunautaire fin privées (-)</field>
-      <field name="tag_name">Taxe - Investissement Biens 8% - Extracommunautaire fin privées (-)</field>
-      <field name="sequence">42</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_biens_3_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 3% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Achat Biens 3% - Extracommunautaire (-)</field>
-      <field name="sequence">5</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_biens_8_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 8% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Achat Biens 8% - Extracommunautaire (-)</field>
-      <field name="sequence">7</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_biens_14_extracommunautaire_fin_privees_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Biens 14% - Extracommunautaire fin privées (-)</field>
-      <field name="tag_name">Taxe - Achat Biens 14% - Extracommunautaire fin privées (-)</field>
-      <field name="sequence">9</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
     <record id="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e" model="account.tax.report.line">
       <field name="name">III.A.5. Taxe déclarée comme débiteur (voir points II.E et F)</field>
+      <field name="tag_name">III.A.5. Taxe déclarée comme débiteur (voir points II.E et F)</field>
       <field name="sequence">7</field>
       <field name="parent_line_id" ref="account_tax_report_line_3a_total_de_la_taxe_en_amont"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_prestations_17_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Prestations 17% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Achat Prestations 17% - Intracommunautaire (-)</field>
-      <field name="sequence">11</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_prestations_3_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Prestations 3% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Achat Prestations 3% - Intracommunautaire (-)</field>
-      <field name="sequence">12</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_prestations_8_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Prestations 8% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Achat Prestations 8% - Intracommunautaire (-)</field>
-      <field name="sequence">14</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_prestations_14_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Prestations 14% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Frais Prestations 14% - Extracommunautaire (-)</field>
-      <field name="sequence">16</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_prestations_17_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Prestations 17% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Frais Prestations 17% - Extracommunautaire (-)</field>
-      <field name="sequence">18</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_prestations_3_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Prestations 3% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Frais Prestations 3% - Extracommunautaire (-)</field>
-      <field name="sequence">19</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_prestations_14_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Prestations 14% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Achat Prestations 14% - Extracommunautaire (-)</field>
-      <field name="sequence">2</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_prestations_8_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Prestations 8% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Frais Prestations 8% - Extracommunautaire (-)</field>
-      <field name="sequence">21</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_prestations_14_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Prestations 14% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Frais Prestations 14% - Intracommunautaire (-)</field>
-      <field name="sequence">23</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_prestations_17_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Prestations 17% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Frais Prestations 17% - Intracommunautaire (-)</field>
-      <field name="sequence">25</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_prestations_3_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Prestations 3% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Frais Prestations 3% - Intracommunautaire (-)</field>
-      <field name="sequence">26</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_frais_prestations_8_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Frais Prestations 8% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Frais Prestations 8% - Intracommunautaire (-)</field>
-      <field name="sequence">28</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_prestations_14_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Prestations 14% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Investissement Prestations 14% - Extracommunautaire (-)</field>
-      <field name="sequence">30</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_prestations_17_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Prestations 17% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Investissement Prestations 17% - Extracommunautaire (-)</field>
-      <field name="sequence">32</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_prestations_3_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Prestations 3% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Investissement Prestations 3% - Extracommunautaire (-)</field>
-      <field name="sequence">33</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_prestations_8_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Prestations 8% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Investissement Prestations 8% - Extracommunautaire (-)</field>
-      <field name="sequence">35</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_prestations_14_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Prestations 14% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Investissement Prestations 14% - Intracommunautaire (-)</field>
-      <field name="sequence">37</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_prestations_17_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Prestations 17% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Investissement Prestations 17% - Intracommunautaire (-)</field>
-      <field name="sequence">39</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_prestations_17_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Prestations 17% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Achat Prestations 17% - Extracommunautaire (-)</field>
-      <field name="sequence">4</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_prestations_3_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Prestations 3% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Investissement Prestations 3% - Intracommunautaire (-)</field>
-      <field name="sequence">40</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_investissement_prestations_8_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Investissement Prestations 8% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Investissement Prestations 8% - Intracommunautaire (-)</field>
-      <field name="sequence">42</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_prestations_3_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Prestations 3% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Achat Prestations 3% - Extracommunautaire (-)</field>
-      <field name="sequence">5</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_prestations_8_extracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Prestations 8% - Extracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Achat Prestations 8% - Extracommunautaire (-)</field>
-      <field name="sequence">7</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
-      <field name="country_id" ref="base.lu"/>
-    </record>
-
-    <record id="account_tax_report_line_taxe_achat_prestations_14_intracommunautaire_minus" model="account.tax.report.line">
-      <field name="name">Taxe - Achat Prestations 14% - Intracommunautaire (-)</field>
-      <field name="tag_name">Taxe - Achat Prestations 14% - Intracommunautaire (-)</field>
-      <field name="sequence">9</field>
-      <field name="parent_line_id" ref="account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e"/>
       <field name="country_id" ref="base.lu"/>
     </record>
 

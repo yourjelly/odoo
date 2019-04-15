@@ -12,7 +12,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_exonere_extracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_base_exoneree')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -23,7 +23,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_exonere_extracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_base_exoneree')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -45,38 +45,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_14_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_14_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_14_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_14')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_14_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_14_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_14_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_14')],
 		    }),
 		]"/>
 	</record>
@@ -94,38 +94,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_17_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_17_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_17_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_17')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_17_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_17_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_17_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_17')],
 		    }),
 		]"/>
 	</record>
@@ -143,38 +143,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_3_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_3_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_3_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_3')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_3_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_3_extracommunautaire_minus')]
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')]
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_3_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_3')],
 		    }),
 		]"/>
 	</record>
@@ -192,38 +192,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_8_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_8_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_8_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_8')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_8_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_8_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_8_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_8')],
 		    }),
 		]"/>
 	</record>
@@ -241,7 +241,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_exonere_extracommunautaire_fin')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_base_exoneree')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -252,7 +252,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_exonere_extracommunautaire_fin')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_base_exoneree')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -274,38 +274,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_14_extracommunautaire_fin_privees')]
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_base_14')]
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_14_extracommunautaire_fin_privees_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_14_extracommunautaire_fin_privees')]
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_14')]
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_14_extracommunautaire_fin_privees')]
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_base_14')]
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_14_extracommunautaire_fin_privees_minus')]
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')]
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_14_extracommunautaire_fin_privees')]
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_14')]
 		    }),
 		]"/>
 	</record>
@@ -323,38 +323,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_17_extracommunautaire_fin_privees')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_17_extracommunautaire_fin_privees_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_17_extracommunautaire_fin_privees')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_17')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_17_extracommunautaire_fin_privees')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_17_extracommunautaire_fin_privees_minus')]
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')]
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_17_extracommunautaire_fin_privees')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_17')],
 		    }),
 		]"/>
 	</record>
@@ -372,38 +372,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_3_extracommunautaire_fin_privees')]
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_base_3')]
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_3_extracommunautaire_fin_privees_minus')]
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')]
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_3_extracommunautaire_fin_privees')]
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_3')]
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_3_extracommunautaire_fin_privees')]
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_base_3')]
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_3_extracommunautaire_fin_privees_minus')]
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')]
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_3_extracommunautaire_fin_privees')]
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_3')]
 		    }),
 		]"/>
 	</record>
@@ -421,38 +421,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_8_extracommunautaire_fin_privees')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_8_extracommunautaire_fin_privees_minus')]
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')]
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_8_extracommunautaire_fin_privees')]
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_8')]
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_8_extracommunautaire_fin_privees')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_8_extracommunautaire_fin_privees_minus')]
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')]
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_8_extracommunautaire_fin_privees')]
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_8')]
 		    }),
 		]"/>
 	</record>
@@ -470,7 +470,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_exonere_intracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_base_exoneree')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -481,7 +481,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_exonere_intracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_base_exoneree')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -503,38 +503,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_14_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_14_intracommunautaire_minus')]
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')]
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_14_intracommunautaire_plus')]
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_taxe_14')]
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_14_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_14_intracommunautaire_minus')]
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')]
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_14_intracommunautaire_plus')]
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_taxe_14')]
 		    }),
 		]"/>
 	</record>
@@ -552,38 +552,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_17_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_17_intracommunautaire_minus')]
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')]
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_17_intracommunautaire_plus')]
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_taxe_17')]
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_17_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_17_intracommunautaire_minus')]
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')]
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_17_intracommunautaire_plus')]
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_taxe_17')]
 		    }),
 		]"/>
 	</record>
@@ -601,38 +601,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_3_intracommunautaire_plus')]
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_base_3')]
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_3_intracommunautaire_minus')]
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')]
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_3_intracommunautaire_plus')]
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_taxe_3')]
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_3_intracommunautaire_plus')]
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_base_3')]
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_3_intracommunautaire_minus')]
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')]
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_3_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_taxe_3')],
 		    }),
 		]"/>
 	</record>
@@ -650,38 +650,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_8_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_8_intracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_8_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_taxe_8')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_8_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_8_intracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_8_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_taxe_8')],
 		    }),
 		]"/>
 	</record>
@@ -738,7 +738,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_14_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -751,7 +751,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_14_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -776,7 +776,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_17_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -789,7 +789,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_17_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -813,7 +813,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_3_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -826,7 +826,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_3_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -850,7 +850,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_8_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -863,7 +863,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_8_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -881,7 +881,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_exonerees_extracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_exonerees')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -892,7 +892,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_exonerees_extracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_exonerees')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -914,38 +914,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_14_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_14_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_14_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_14')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_14_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_14_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_14_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_14')],
 		    }),
 		]"/>
 	</record>
@@ -963,38 +963,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_17_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_17_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_17_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_17')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_17_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_17_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_17_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_17')],
 		    }),
 		]"/>
 	</record>
@@ -1012,38 +1012,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_3_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_3_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_3_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_3')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_3_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_3_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_3_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_3')],
 		    }),
 		]"/>
 	</record>
@@ -1061,38 +1061,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_8_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_8_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_8_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_8')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_8_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_8_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_8_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_8')],
 		    }),
 		]"/>
 	</record>
@@ -1110,7 +1110,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_exonerees')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_b_exonerees')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -1121,7 +1121,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_exonerees')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_b_exonerees')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -1143,38 +1143,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_14_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_14_intracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_14_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_14')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_14_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_14_intracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_14_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_14')],
 		    }),
 		]"/>
 	</record>
@@ -1192,38 +1192,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_17_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_17_intracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_17_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_17')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_17_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_17_intracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_17_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_17')],
 		    }),
 		]"/>
 	</record>
@@ -1241,38 +1241,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_3_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_3_intracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_3_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_3')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_3_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_3_intracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_3_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_3')],
 		    }),
 		]"/>
 	</record>
@@ -1290,38 +1290,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_8_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_8_intracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_8_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_8')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_8_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_8_intracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_8_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_8')],
 		    }),
 		]"/>
 	</record>
@@ -1378,7 +1378,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_14_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -1391,7 +1391,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_14_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -1415,7 +1415,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_17_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -1428,7 +1428,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_17_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -1452,7 +1452,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_3_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -1465,7 +1465,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_3_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -1489,7 +1489,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_8_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -1502,7 +1502,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_8_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -1520,7 +1520,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_exonere_extracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_base_exoneree')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -1531,7 +1531,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_exonere_extracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_base_exoneree')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -1553,38 +1553,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_14_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_14_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_14_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_14')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_14_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_14_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_14_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_14')],
 		    }),
 		]"/>
 	</record>
@@ -1602,38 +1602,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_17_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_17_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_17_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_17')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_17_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_17_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_17_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_17')],
 		    }),
 		]"/>
 	</record>
@@ -1651,38 +1651,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_3_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_3_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_3_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_3')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_3_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_3_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_3_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_3')],
 		    }),
 		]"/>
 	</record>
@@ -1700,38 +1700,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_8_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_8_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_8_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_8')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_8_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_8_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_8_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_8')],
 		    }),
 		]"/>
 	</record>
@@ -1749,7 +1749,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_exonere_extracommunautaire_fin')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_base_exoneree')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -1760,7 +1760,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_exonere_extracommunautaire_fin')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_base_exoneree')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -1782,38 +1782,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_14_extracommunautaire_fin_privees')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_14_extracommunautaire_fin_privees_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_14_extracommunautaire_fin_privees')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_14')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_14_extracommunautaire_fin_privees')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_14_extracommunautaire_fin_privees_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_14_extracommunautaire_fin_privees')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_14')],
 		    }),
 		]"/>
 	</record>
@@ -1831,38 +1831,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_17_extracommunautaire_fin_privees')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_17_extracommunautaire_fin_privees_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_17_extracommunautaire_fin_privees')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_17')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_17_extracommunautaire_fin_privees')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_17_extracommunautaire_fin_privees_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_17_extracommunautaire_fin_privees')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_17')],
 		    }),
 		]"/>
 	</record>
@@ -1880,38 +1880,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_3_extracommunautaire_fin_privees')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_3_extracommunautaire_fin_privees_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_3_extracommunautaire_fin_privees')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_3')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_3_extracommunautaire_fin_privees')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_3_extracommunautaire_fin_privees_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_3_extracommunautaire_fin_privees')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_3')],
 		    }),
 		]"/>
 	</record>
@@ -1929,38 +1929,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_8_extracommunautaire_fin_privees')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_8_extracommunautaire_fin_privees_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_8_extracommunautaire_fin_privees')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_8')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_8_extracommunautaire_fin_privees')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_8_extracommunautaire_fin_privees_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_8_extracommunautaire_fin_privees')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_8')],
 		    }),
 		]"/>
 	</record>
@@ -1978,7 +1978,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_exonere_intracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_base_exoneree')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -1989,7 +1989,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_exonere_intracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_base_exoneree')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -2011,38 +2011,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_14_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_14_intracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_14_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_taxe_14')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_14_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_14_intracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_14_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_taxe_14')],
 		    }),
 		]"/>
 	</record>
@@ -2060,38 +2060,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_17_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_17_intracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_17_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_taxe_17')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_17_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_17_intracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_17_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_taxe_17')],
 		    }),
 		]"/>
 	</record>
@@ -2109,38 +2109,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_3_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_3_intracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_3_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_taxe_3')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_3_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_3_intracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_3_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_taxe_3')],
 		    }),
 		]"/>
 	</record>
@@ -2158,38 +2158,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_8_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_8_intracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_8_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_taxe_8')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_8_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_8_intracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_8_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_taxe_8')],
 		    }),
 		]"/>
 	</record>
@@ -2246,7 +2246,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_14_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -2259,7 +2259,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_14_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -2283,7 +2283,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_17_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -2296,7 +2296,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_17_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -2320,7 +2320,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_3_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -2333,7 +2333,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_3_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -2357,7 +2357,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_8_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -2370,7 +2370,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_8_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -2388,7 +2388,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_exonerees_extracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_exonerees')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -2399,7 +2399,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_exonerees_extracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_exonerees')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -2421,38 +2421,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_14_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_14_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_14_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_14')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_14_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_14_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_14_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_14')],
 		    }),
 		]"/>
 	</record>
@@ -2470,38 +2470,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_17_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_17_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_17_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_17')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_17_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_17_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_17_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_17')],
 		    }),
 		]"/>
 	</record>
@@ -2519,38 +2519,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_3_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_3_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_3_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_3')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_3_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_3_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_3_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_3')],
 		    }),
 		]"/>
 	</record>
@@ -2568,38 +2568,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_8_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_8_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_8_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_8')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_8_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_8_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_8_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_8')],
 		    }),
 		]"/>
 	</record>
@@ -2617,7 +2617,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_exonerees')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_b_exonerees')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -2628,7 +2628,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_exonerees')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_b_exonerees')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -2650,38 +2650,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_14_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_14_intracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_14_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_14')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_14_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_14_intracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_14_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_14')],
 		    }),
 		]"/>
 	</record>
@@ -2699,38 +2699,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_17_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_17_intracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_17_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_17')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_17_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_17_intracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_17_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_17')],
 		    }),
 		]"/>
 	</record>
@@ -2748,38 +2748,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_3_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_3_intracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_3_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_3')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_3_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_3_intracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_3_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_3')],
 		    }),
 		]"/>
 	</record>
@@ -2797,38 +2797,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_8_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_8_intracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_8_intracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_8')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_8_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_8_intracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_8_intracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_8')],
 		    }),
 		]"/>
 	</record>
@@ -2885,7 +2885,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_14_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -2898,7 +2898,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_14_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -2922,7 +2922,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_17_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -2935,7 +2935,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_17_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -2959,7 +2959,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_3_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -2972,7 +2972,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_3_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -2996,7 +2996,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_8_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -3009,7 +3009,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_8_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -3027,7 +3027,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_exonere_extracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_base_exoneree')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -3038,7 +3038,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_exonere_extracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_base_exoneree')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -3060,38 +3060,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_14_extracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_14_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_14_extracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_14')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_14_extracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_14_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_14_extracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_14')],
 		    }),
 		]"/>
 	</record>
@@ -3109,38 +3109,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_17_extracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_17_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_17_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_17')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_17_extracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_17_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_17_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_17')],
 		    }),
 		]"/>
 	</record>
@@ -3158,38 +3158,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_3_extracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_3_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_3_extracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_3')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_3_extracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_3_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_3_extracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_3')],
 		    }),
 		]"/>
 	</record>
@@ -3207,38 +3207,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_8_extracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_8_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_8_extracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_8')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_8_extracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_8_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_8_extracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_1_taxe_8')],
 		    }),
 		]"/>
 	</record>
@@ -3256,7 +3256,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_exonere_extracommunautaire_fin_privees')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_base_exoneree')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -3267,7 +3267,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_exonere_extracommunautaire_fin_privees')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_base_exoneree')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -3289,38 +3289,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_14_extracommunautaire_fin_privees_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_14_extracommunautaire_fin_privees_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_14_extracommunautaire_fin_privees_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_14')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_14_extracommunautaire_fin_privees_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_14_extracommunautaire_fin_privees_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_14_extracommunautaire_fin_privees_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_14')],
 		    }),
 		]"/>
 	</record>
@@ -3338,38 +3338,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_17_extracommunautaire_fin_privees_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_17_extracommunautaire_fin_privees_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_17_extracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_17')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_17_extracommunautaire_fin_privees_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_17_extracommunautaire_fin_privees_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_17_extracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_17')],
 		    }),
 		]"/>
 	</record>
@@ -3387,38 +3387,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_3_extracommunautaire_fin')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_3_extracommunautaire_fin_privees_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_3_extracommunautaire_fin')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_3')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_3_extracommunautaire_fin')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_3_extracommunautaire_fin_privees_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_3_extracommunautaire_fin')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_3')],
 		    }),
 		]"/>
 	</record>
@@ -3436,38 +3436,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_8_extracommunautaire_fin')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_8_extracommunautaire_fin_privees_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_8_extracommunautaire_fin')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_8')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_8_extracommunautaire_fin')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_8_extracommunautaire_fin_privees_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_3_importations_de_biens_taxe_declaree_ou_payee')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_8_extracommunautaire_fin')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2d_2_taxe_8')],
 		    }),
 		]"/>
 	</record>
@@ -3485,7 +3485,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_exonere')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_base_exoneree')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -3496,7 +3496,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_exonere')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_base_exoneree')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -3518,38 +3518,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_14_intracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_14_intracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_14_intracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_taxe_14')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_14_intracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_14_intracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_14_intracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_taxe_14')],
 		    }),
 		]"/>
 	</record>
@@ -3567,38 +3567,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_17_intracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_17_intracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_17_intracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_taxe_17')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_17_intracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_17_intracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_17_intracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_taxe_17')],
 		    }),
 		]"/>
 	</record>
@@ -3616,38 +3616,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_3_intracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_3_intracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_3_intracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_taxe_3')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_3_intracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_3_intracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_3_intracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_taxe_3')],
 		    }),
 		]"/>
 	</record>
@@ -3665,38 +3665,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_8_intracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_8_intracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_8_intracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2b_taxe_8')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_8_intracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_8_intracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_2_acquisitions_intracommunautaires_de_biens_art')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_8_intracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2b_taxe_8')],
 		    }),
 		]"/>
 	</record>
@@ -3753,7 +3753,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_14_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -3766,7 +3766,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_14_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -3790,7 +3790,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_17_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -3803,7 +3803,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_17_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -3827,7 +3827,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_3_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -3840,7 +3840,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_3_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -3864,7 +3864,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_8_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -3877,7 +3877,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_8_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -3895,7 +3895,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_exonerees_extracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_exonerees')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -3906,7 +3906,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_exonerees_extracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_exonerees')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -3928,38 +3928,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_14_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_14_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_14_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_14')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_14_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_14_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_14_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_14')],
 		    }),
 		]"/>
 	</record>
@@ -3977,38 +3977,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_17_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_17_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_17_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_17')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_17_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_17_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_17_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_17')],
 		    }),
 		]"/>
 	</record>
@@ -4026,38 +4026,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_3_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_3_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_3_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_3')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_3_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_3_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_3_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_3')],
 		    }),
 		]"/>
 	</record>
@@ -4075,38 +4075,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_8_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_8_extracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_8_extracommunautaire_plus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_8')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_8_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_8_extracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_8_extracommunautaire_plus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_2_taxe_8')],
 		    }),
 		]"/>
 	</record>
@@ -4124,7 +4124,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_exonerees')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_b_exonerees')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -4135,7 +4135,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_exonerees')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_b_exonerees')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -4157,38 +4157,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_14')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_14_intracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_14')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_14')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_14')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_14_intracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_14')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_14')],
 		    }),
 		]"/>
 	</record>
@@ -4206,38 +4206,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_17')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_17_intracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_17')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_17')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_17')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_17_intracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_17')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_17')],
 		    }),
 		]"/>
 	</record>
@@ -4255,38 +4255,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_3')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_3_intracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_3')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_3')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_3')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_3_intracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_3')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_3')],
 		    }),
 		]"/>
 	</record>
@@ -4304,38 +4304,38 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_8')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_8_intracommunautaire_minus')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_8')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_8')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_8')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': -100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_8_intracommunautaire_minus')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_5_taxe_declaree_comme_debiteur_voir_points_ii_e')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_8')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2e_1_a_taxe_8')],
 		    }),
 		]"/>
 	</record>
@@ -4392,7 +4392,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_14_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -4405,7 +4405,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_14_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -4429,7 +4429,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_17_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -4442,7 +4442,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_17_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -4466,7 +4466,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_3_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -4479,7 +4479,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_3_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -4503,7 +4503,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_8_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -4516,7 +4516,7 @@
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_8_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_3a_1_achats_de_biens_et_de_services_a_linterieur')],
 		    }),
 		]"/>
 	</record>
@@ -4534,7 +4534,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_autres_exonerations_article_43_et_60')],
+		        'plus_tag_ids': [ref('account_tax_report_line_1b_3_autres_exonerations_art_43_et_60bis')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -4545,7 +4545,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_autres_exonerations_article_43_et_60')],
+		        'minus_tag_ids': [ref('account_tax_report_line_1b_3_autres_exonerations_art_43_et_60bis')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -4567,7 +4567,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_autres_exonerations_article_44_et_56')],
+		        'plus_tag_ids': [ref('account_tax_report_line_1b_4_autres_exonerations_art_44_et_56quater')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -4578,7 +4578,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_autres_exonerations_article_44_et_56')],
+		        'minus_tag_ids': [ref('account_tax_report_line_1b_4_autres_exonerations_art_44_et_56quater')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -4600,7 +4600,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_biens_extracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_1b_2_exportations_art_43/1/a_et_b')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -4611,7 +4611,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_biens_extracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_1b_2_exportations_art_43/1/a_et_b')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -4633,7 +4633,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_biens_tabacs_extracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_1b_5_tabacs_fabriques')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -4644,7 +4644,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_biens_tabacs_extracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_1b_5_tabacs_fabriques')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -4666,7 +4666,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_biens_intracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_1b_1_livraisons_intracommunautaires_de_biens_a_des')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -4677,7 +4677,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_biens_intracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_1b_1_livraisons_intracommunautaires_de_biens_a_des')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -4699,7 +4699,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_biens_tabacs_intracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_1b_5_tabacs_fabriques')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -4710,7 +4710,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_biens_tabacs_intracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_1b_5_tabacs_fabriques')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -4732,7 +4732,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_biens_0_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2a_base_0')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -4743,7 +4743,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_biens_0_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2a_base_0')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -4765,26 +4765,26 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_biens_14_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2a_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_vente_biens_14_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2a_taxe_14')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_biens_14_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2a_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_vente_biens_14_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2a_taxe_14')],
 		    }),
 		]"/>
 	</record>
@@ -4802,26 +4802,26 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_biens_17_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2a_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_vente_biens_17_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2a_taxe_17')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_biens_17_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2a_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_vente_biens_17_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2a_taxe_17')],
 		    }),
 		]"/>
 	</record>
@@ -4839,26 +4839,26 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_biens_3_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2a_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_vente_biens_3_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2a_taxe_3')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_biens_3_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2a_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_vente_biens_3_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2a_taxe_3')],
 		    }),
 		]"/>
 	</record>
@@ -4876,26 +4876,26 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_biens_8_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2a_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_vente_biens_8_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2a_taxe_8')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_biens_8_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2a_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_vente_biens_8_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2a_taxe_8')],
 		    }),
 		]"/>
 	</record>
@@ -4913,7 +4913,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_biens_tabacs_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_1b_5_tabacs_fabriques')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -4924,7 +4924,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_biens_tabacs_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_1b_5_tabacs_fabriques')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -4946,7 +4946,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_biens_triangulaire_intracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_1b_6_a_livraisons_subsequentes_a_des_acquisitions')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -4957,7 +4957,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_biens_triangulaire_intracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_1b_6_a_livraisons_subsequentes_a_des_acquisitions')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -4979,7 +4979,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_extracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_1b_6_d_autres_operations_realisees_imposables_a')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -4990,7 +4990,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_extracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_1b_6_d_autres_operations_realisees_imposables_a')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -5012,7 +5012,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_intracommunautaire')],
+		        'plus_tag_ids': [ref('account_tax_report_line_1b_6_b1_prestations_de_services_a_des_identifies_a')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -5023,7 +5023,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_intracommunautaire')],
+		        'minus_tag_ids': [ref('account_tax_report_line_1b_6_b1_prestations_de_services_a_des_identifies_a')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -5045,7 +5045,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_intracommunautaire_exonerees_dans_letat_membre')],
+		        'plus_tag_ids': [ref('account_tax_report_line_1b_6_b2_prestations_de_services_a_des_identifies_a')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -5056,7 +5056,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_intracommunautaire_exonerees_dans_letat_membre')],
+		        'minus_tag_ids': [ref('account_tax_report_line_1b_6_b2_prestations_de_services_a_des_identifies_a')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -5078,7 +5078,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_0_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2a_base_0')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -5089,7 +5089,7 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_0_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2a_base_0')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
@@ -5111,26 +5111,26 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_14_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2a_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_vente_prestations_14_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2a_taxe_14')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_14_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2a_base_14')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_vente_prestations_14_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2a_taxe_14')],
 		    }),
 		]"/>
 	</record>
@@ -5148,26 +5148,26 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_17_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2a_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_vente_prestations_17_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2a_taxe_17')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_17_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2a_base_17')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_vente_prestations_17_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2a_taxe_17')],
 		    }),
 		]"/>
 	</record>
@@ -5185,26 +5185,26 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_3_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2a_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_vente_prestations_3_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2a_taxe_3')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_3_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2a_base_3')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_vente_prestations_3_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2a_taxe_3')],
 		    }),
 		]"/>
 	</record>
@@ -5222,26 +5222,26 @@
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_8_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2a_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_vente_prestations_8_pays')],
+		        'plus_tag_ids': [ref('account_tax_report_line_2a_taxe_8')],
 		    }),
 		]"/>
 		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_8_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2a_base_8')],
 		    }),
 		    (0,0, {
 		        'factor_percent': 100,
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_vente_prestations_8_pays')],
+		        'minus_tag_ids': [ref('account_tax_report_line_2a_taxe_8')],
 		    }),
 		]"/>
 	</record>
