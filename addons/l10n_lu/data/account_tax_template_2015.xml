@@ -32,56 +32,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_AB-EC-12" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">102</field>
-        <field name="description">AB-EC-12</field>
-        <field name="name">Purchase Goods 12% - Extra-Community</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_12_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_12_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_12_extracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_12_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_12_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_12_extracommunautaire_plus')],
-		    }),
-
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_AB-EC-14" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">105</field>
         <field name="description">AB-EC-14</field>
@@ -127,55 +77,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_14_extracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_AB-EC-15" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">108</field>
-        <field name="description">AB-EC-15</field>
-        <field name="name">Purchase Goods 15% - Extra-Community</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_15_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_15_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_15_extracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_15_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_15_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_15_extracommunautaire_plus')],
 		    }),
 		]"/>
 	</record>
@@ -278,55 +179,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_AB-EC-6" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">117</field>
-        <field name="description">AB-EC-6</field>
-        <field name="name">Purchase Goods 6% - Extra-Community</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_6_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_6_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_6_extracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_6_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_6_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_6_extracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_AB-EC-8" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">120</field>
         <field name="description">AB-EC-8</field>
@@ -409,55 +261,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_AB-ECP-12" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">124</field>
-        <field name="description">AB-ECP-12</field>
-        <field name="name">Purchase Goods 12% - Extra-Community fin privées</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_12_extracommunautaire_fin_privees')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_12_extracommunautaire_fin_privees_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_12_extracommunautaire_fin_privees')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_12_extracommunautaire_fin_privees')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_12_extracommunautaire_fin_privees_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_12_extracommunautaire_fin_privees')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_AB-ECP-14" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">127</field>
         <field name="description">AB-ECP-14</field>
@@ -503,55 +306,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_14_extracommunautaire_fin_privees')]
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2015_tax_AB-ECP-15" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">130</field>
-        <field name="description">AB-ECP-15</field>
-        <field name="name">Purchase Goods 15% - Extra-Community fin privées</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_15_extracommunautaire_fin_privees')]
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_15_extracommunautaire_fin_privees_minus')]
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_15_extracommunautaire_fin_privees')]
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_15_extracommunautaire_fin_privees')]
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_15_extracommunautaire_fin_privees_minus')]
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_15_extracommunautaire_fin_privees')]
 		    }),
 		]"/>
 	</record>
@@ -654,55 +408,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_AB-ECP-6" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">139</field>
-        <field name="description">AB-ECP-6</field>
-        <field name="name">Purchase Goods 6% - Extra-Community fin privées</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_6_extracommunautaire_fin_privees')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_6_extracommunautaire_fin_privees_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_6_extracommunautaire_fin_privees')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_6_extracommunautaire_fin_privees')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_6_extracommunautaire_fin_privees_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_6_extracommunautaire_fin_privees')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_AB-ECP-8" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">142</field>
         <field name="description">AB-ECP-8</field>
@@ -785,55 +490,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_AB-IC-12" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">146</field>
-        <field name="description">AB-IC-12</field>
-        <field name="name">Purchase Goods 12% - Intra-Community</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_12_intracommunautaire_plus')]
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_12_intracommunautaire_minus')]
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_12_intracommunautaire_plus')]
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_12_intracommunautaire_plus')]
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_12_intracommunautaire_minus')]
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_12_intracommunautaire_plus')]
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_AB-IC-14" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">149</field>
         <field name="description">AB-IC-14</field>
@@ -879,55 +535,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_14_intracommunautaire_plus')]
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_AB-IC-15" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">152</field>
-        <field name="description">AB-IC-15</field>
-        <field name="name">Purchase Goods 15% - Intra-Community</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_15_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_15_intracommunautaire_minus')]
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_15_intracommunautaire_plus')]
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_15_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_15_intracommunautaire_minus')]
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_15_intracommunautaire_plus')]
 		    }),
 		]"/>
 	</record>
@@ -1030,55 +637,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_AB-IC-6" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">161</field>
-        <field name="description">AB-IC-6</field>
-        <field name="name">Purchase Goods 6% - Intra-Community</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_6_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_6_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_6_intracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_6_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_6_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_6_intracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_AB-IC-8" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">164</field>
         <field name="description">AB-IC-8</field>
@@ -1161,43 +719,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_AB-PA-12" model="account.tax.template">
-		<field name="sequence">168</field>
-        <field name="description">AB-PA-12</field>
-        <field name="name">Purchase Goods 12% - Country</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_12_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_12_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_12_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_12_pays')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_AB-PA-14" model="account.tax.template">
 		<field name="sequence">169</field>
         <field name="description">AB-PA-14</field>
@@ -1231,43 +752,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_14_pays')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_AB-PA-15" model="account.tax.template">
-		<field name="sequence">170</field>
-        <field name="description">AB-PA-15</field>
-        <field name="name">Purchase Goods 15% - Country</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_15_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_15_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_15_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_15_pays')],
 		    }),
 		]"/>
 	</record>
@@ -1347,43 +831,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_AB-PA-6" model="account.tax.template">
-		<field name="sequence">173</field>
-        <field name="description">AB-PA-6</field>
-        <field name="name">Purchase Goods 6% - Country</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_biens_6_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_6_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_biens_6_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_biens_6_pays')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_AB-PA-8" model="account.tax.template">
 		<field name="sequence">174</field>
         <field name="description">AB-PA-8</field>
@@ -1454,55 +901,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_AP-EC-12" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">176</field>
-        <field name="description">AP-EC-12</field>
-        <field name="name">Purchase Services 12% - Extra-Community</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_12_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_12_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_12_extracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_12_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_12_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_12_extracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_AP-EC-14" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">179</field>
         <field name="description">AP-EC-14</field>
@@ -1548,55 +946,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_14_extracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_AP-EC-15" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">182</field>
-        <field name="description">AP-EC-15</field>
-        <field name="name">Purchase Services 15% - Extra-Community</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_15_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_15_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_15_extracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_15_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_15_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_15_extracommunautaire_plus')],
 		    }),
 		]"/>
 	</record>
@@ -1699,55 +1048,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_AP-EC-6" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">191</field>
-        <field name="description">AP-EC-6</field>
-        <field name="name">Purchase Services 6% - Extra-Community</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_6_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_6_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_6_extracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_6_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_6_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_6_extracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_AP-EC-8" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">194</field>
         <field name="description">AP-EC-8</field>
@@ -1830,55 +1130,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_AP-IC-12" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">198</field>
-        <field name="description">AP-IC-12</field>
-        <field name="name">Purchase Services 12% - Intra-Community</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_12_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_12_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_12_intracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_12_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_12_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_12_intracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_AP-IC-14" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">201</field>
         <field name="description">AP-IC-14</field>
@@ -1924,55 +1175,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_14_intracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_AP-IC-15" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">204</field>
-        <field name="description">AP-IC-15</field>
-        <field name="name">Purchase Services 15% - Intra-Community</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_15_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_15_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_15_intracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_15_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_15_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_15_intracommunautaire_plus')],
 		    }),
 		]"/>
 	</record>
@@ -2075,55 +1277,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_AP-IC-6" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">213</field>
-        <field name="description">AP-IC-6</field>
-        <field name="name">Purchase Services 6% - Intra-Community</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_6_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_6_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_6_intracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_6_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_6_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_6_intracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_AP-IC-8" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">216</field>
         <field name="description">AP-IC-8</field>
@@ -2206,43 +1359,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_AP-PA-12" model="account.tax.template">
-		<field name="sequence">220</field>
-        <field name="description">AP-PA-12</field>
-        <field name="name">Purchase Services 12% - Country</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_12_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_12_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_12_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_12_pays')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_AP-PA-14" model="account.tax.template">
 		<field name="sequence">221</field>
         <field name="description">AP-PA-14</field>
@@ -2276,43 +1392,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_14_pays')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_AP-PA-15" model="account.tax.template">
-		<field name="sequence">222</field>
-        <field name="description">AP-PA-15</field>
-        <field name="name">Purchase Services 15% - Country</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_15_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_15_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_15_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_15_pays')],
 		    }),
 		]"/>
 	</record>
@@ -2391,43 +1470,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_AP-PA-6" model="account.tax.template">
-		<field name="sequence">225</field>
-        <field name="description">AP-PA-6</field>
-        <field name="name">Purchase Services 6% - Country</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_6_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_6_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_achat_prestations_6_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_achat_prestations_6_pays')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_AP-PA-8" model="account.tax.template">
 		<field name="sequence">226</field>
         <field name="description">AP-PA-8</field>
@@ -2498,55 +1540,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_FB-EC-12" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">228</field>
-        <field name="description">FB-EC-12</field>
-        <field name="name">Expenses Goods 12% - Extra-Community</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_12_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_12_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_12_extracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_12_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_12_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_12_extracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_FB-EC-14" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">231</field>
         <field name="description">FB-EC-14</field>
@@ -2592,55 +1585,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_14_extracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_FB-EC-15" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">234</field>
-        <field name="description">FB-EC-15</field>
-        <field name="name">Expenses Goods 15% - Extra-Community</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_15_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_15_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_15_extracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_15_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_15_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_15_extracommunautaire_plus')],
 		    }),
 		]"/>
 	</record>
@@ -2743,55 +1687,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_FB-EC-6" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">243</field>
-        <field name="description">FB-EC-6</field>
-        <field name="name">Expenses Goods 6% - Extra-Community</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_6_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_6_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_6_extracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_6_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_6_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_6_extracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_FB-EC-8" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">246</field>
         <field name="description">FB-EC-8</field>
@@ -2874,55 +1769,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_FB-ECP-12" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">250</field>
-        <field name="description">FB-ECP-12</field>
-        <field name="name">Expenses Goods 12% - Extra-Community fin privées</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_12_extracommunautaire_fin_privees')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_12_extracommunautaire_fin_privees_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_12_extracommunautaire_fin_privees')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_12_extracommunautaire_fin_privees')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_12_extracommunautaire_fin_privees_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_12_extracommunautaire_fin_privees')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_FB-ECP-14" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">253</field>
         <field name="description">FB-ECP-14</field>
@@ -2968,55 +1814,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_14_extracommunautaire_fin_privees')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2015_tax_FB-ECP-15" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">256</field>
-        <field name="description">FB-ECP-15</field>
-        <field name="name">Expenses Goods 15% - Extra-Community fin privées</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_15_extracommunautaire_fin_privees')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_15_extracommunautaire_fin_privees_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_15_extracommunautaire_fin_privees')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_15_extracommunautaire_fin_privees')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_15_extracommunautaire_fin_privees_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_15_extracommunautaire_fin_privees')],
 		    }),
 		]"/>
 	</record>
@@ -3119,55 +1916,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_FB-ECP-6" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">265</field>
-        <field name="description">FB-ECP-6</field>
-        <field name="name">Expenses Goods 6% - Extra-Community fin privées</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_6_extracommunautaire_fin_privees')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_6_extracommunautaire_fin_privees_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_6_extracommunautaire_fin_privees')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_6_extracommunautaire_fin_privees')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_6_extracommunautaire_fin_privees_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_6_extracommunautaire_fin_privees')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_FB-ECP-8" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">268</field>
         <field name="description">FB-ECP-8</field>
@@ -3250,55 +1998,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_FB-IC-12" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">272</field>
-        <field name="description">FB-IC-12</field>
-        <field name="name">Expenses Goods 12% - Intra-Community</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_12_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_12_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_12_intracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_12_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_12_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_12_intracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_FB-IC-14" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">275</field>
         <field name="description">FB-IC-14</field>
@@ -3344,55 +2043,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_14_intracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_FB-IC-15" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">278</field>
-        <field name="description">FB-IC-15</field>
-        <field name="name">Expenses Goods 15% - Intra-Community</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_15_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_15_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_15_intracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_15_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_15_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_15_intracommunautaire_plus')],
 		    }),
 		]"/>
 	</record>
@@ -3495,55 +2145,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_FB-IC-6" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">287</field>
-        <field name="description">FB-IC-6</field>
-        <field name="name">Expenses Goods 6% - Intra-Community</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_6_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_6_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_6_intracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_6_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_6_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_6_intracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_FB-IC-8" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">290</field>
         <field name="description">FB-IC-8</field>
@@ -3626,43 +2227,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_FB-PA-12" model="account.tax.template">
-		<field name="sequence">294</field>
-        <field name="description">FB-PA-12</field>
-        <field name="name">Expenses Goods 12% - Country</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_12_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_12_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_12_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_12_pays')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_FB-PA-14" model="account.tax.template">
 		<field name="sequence">295</field>
         <field name="description">FB-PA-14</field>
@@ -3696,43 +2260,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_14_pays')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_FB-PA-15" model="account.tax.template">
-		<field name="sequence">296</field>
-        <field name="description">FB-PA-15</field>
-        <field name="name">Expenses Goods 15% - Country</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_15_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_15_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_15_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_15_pays')],
 		    }),
 		]"/>
 	</record>
@@ -3811,43 +2338,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_FB-PA-6" model="account.tax.template">
-		<field name="sequence">299</field>
-        <field name="description">FB-PA-6</field>
-        <field name="name">Expenses Goods 6% - Country</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_biens_6_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_6_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_biens_6_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_biens_6_pays')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_FB-PA-8" model="account.tax.template">
 		<field name="sequence">300</field>
         <field name="description">FB-PA-8</field>
@@ -3918,55 +2408,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_FP-EC-12" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">302</field>
-        <field name="description">FP-EC-12</field>
-        <field name="name">Expenses Services 12% - Extra-Community</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_12_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_12_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_12_extracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_12_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_12_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_12_extracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_FP-EC-14" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">305</field>
         <field name="description">FP-EC-14</field>
@@ -4012,55 +2453,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_14_extracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_FP-EC-15" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">308</field>
-        <field name="description">FP-EC-15</field>
-        <field name="name">Expenses Services 15% - Extra-Community</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_15_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_15_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_15_extracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_15_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_15_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_15_extracommunautaire_plus')],
 		    }),
 		]"/>
 	</record>
@@ -4163,55 +2555,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_FP-EC-6" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">317</field>
-        <field name="description">FP-EC-6</field>
-        <field name="name">Expenses Services 6% - Extra-Community</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_6_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_6_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_6_extracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_6_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_6_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_6_extracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_FP-EC-8" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">320</field>
         <field name="description">FP-EC-8</field>
@@ -4294,55 +2637,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_FP-IC-12" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">324</field>
-        <field name="description">FP-IC-12</field>
-        <field name="name">Expenses Services 12% - Intra-Community</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_12_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_12_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_12_intracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_12_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_12_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_12_intracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_FP-IC-14" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">327</field>
         <field name="description">FP-IC-14</field>
@@ -4388,55 +2682,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_14_intracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_FP-IC-15" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">330</field>
-        <field name="description">FP-IC-15</field>
-        <field name="name">Expenses Services 15% - Intra-Community</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_15_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_15_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_15_intracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_15_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_15_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_15_intracommunautaire_plus')],
 		    }),
 		]"/>
 	</record>
@@ -4539,55 +2784,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_FP-IC-6" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">339</field>
-        <field name="description">FP-IC-6</field>
-        <field name="name">Expenses Services 6% - Intra-Community</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_6_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_6_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_6_intracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_6_intracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_6_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_6_intracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_FP-IC-8" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">342</field>
         <field name="description">FP-IC-8</field>
@@ -4670,43 +2866,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_FP-PA-12" model="account.tax.template">
-		<field name="sequence">346</field>
-        <field name="description">FP-PA-12</field>
-        <field name="name">Expenses Services 12% - Country</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_12_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_12_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_12_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_12_pays')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_FP-PA-14" model="account.tax.template">
 		<field name="sequence">347</field>
         <field name="description">FP-PA-14</field>
@@ -4740,43 +2899,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_14_pays')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_FP-PA-15" model="account.tax.template">
-		<field name="sequence">348</field>
-        <field name="description">FP-PA-15</field>
-        <field name="name">Expenses Services 15% - Country</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_15_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_15_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_15_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_15_pays')],
 		    }),
 		]"/>
 	</record>
@@ -4855,43 +2977,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_FP-PA-6" model="account.tax.template">
-		<field name="sequence">351</field>
-        <field name="description">FP-PA-6</field>
-        <field name="name">Expenses Services 6% - Country</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_6_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_6_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_frais_prestations_6_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_frais_prestations_6_pays')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_FP-PA-8" model="account.tax.template">
 		<field name="sequence">352</field>
         <field name="description">FP-PA-8</field>
@@ -4962,55 +3047,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_IB-EC-12" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">354</field>
-        <field name="description">IB-EC-12</field>
-        <field name="name">Investment Goods 12% - Extra-Community</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_12_extracommunautaire')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_12_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_12_extracommunautaire')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_12_extracommunautaire')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_12_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_12_extracommunautaire')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_IB-EC-14" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">357</field>
         <field name="description">IB-EC-14</field>
@@ -5056,55 +3092,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_14_extracommunautaire')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_IB-EC-15" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">360</field>
-        <field name="description">IB-EC-15</field>
-        <field name="name">Investment Goods 15% - Extra-Community</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_15_extracommunautaire')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_15_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_15_extracommunautaire')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_15_extracommunautaire')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_15_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_15_extracommunautaire')],
 		    }),
 		]"/>
 	</record>
@@ -5207,55 +3194,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_IB-EC-6" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">369</field>
-        <field name="description">IB-EC-6</field>
-        <field name="name">Investment Goods 6% - Extra-Community</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_6_extracommunautaire')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_6_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_6_extracommunautaire')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_6_extracommunautaire')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_6_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_6_extracommunautaire')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_IB-EC-8" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">372</field>
         <field name="description">IB-EC-8</field>
@@ -5338,55 +3276,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_IB-ECP-12" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">376</field>
-        <field name="description">IB-ECP-12</field>
-        <field name="name">Investment Goods 12% - Extra-Community fin privées</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_12_extracommunautaire_fin_privees_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_12_extracommunautaire_fin_privees_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_12_extracommunautaire_fin_privees_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_12_extracommunautaire_fin_privees_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_12_extracommunautaire_fin_privees_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_12_extracommunautaire_fin_privees_plus')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_IB-ECP-14" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">379</field>
         <field name="description">IB-ECP-14</field>
@@ -5432,55 +3321,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_14_extracommunautaire_fin_privees_plus')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2015_tax_IB-ECP-15" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">382</field>
-        <field name="description">IB-ECP-15</field>
-        <field name="name">Investment Goods 15% - Extra-Community fin privées</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_15_extracommunautaire_fin_privees_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_15_extracommunautaire_fin_privees_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_15_extracommunautaire_fin_privees_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_15_extracommunautaire_fin_privees_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_15_extracommunautaire_fin_privees_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_15_extracommunautaire_fin_privees_plus')],
 		    }),
 		]"/>
 	</record>
@@ -5583,55 +3423,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_IB-ECP-6" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">391</field>
-        <field name="description">IB-ECP-6</field>
-        <field name="name">Investment Goods 6% - Extra-Community fin privées</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_6_extracommunautaire_fin')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_6_extracommunautaire_fin_privees_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_6_extracommunautaire_fin')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_6_extracommunautaire_fin')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_6_extracommunautaire_fin_privees_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_6_extracommunautaire_fin')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_IB-ECP-8" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">394</field>
         <field name="description">IB-ECP-8</field>
@@ -5714,55 +3505,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_IB-IC-12" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">398</field>
-        <field name="description">IB-IC-12</field>
-        <field name="name">Investment Goods 12% - Intra-Community</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_12_intracommunautaire')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_12_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_12_intracommunautaire')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_12_intracommunautaire')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_12_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_12_intracommunautaire')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_IB-IC-14" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">401</field>
         <field name="description">IB-IC-14</field>
@@ -5808,55 +3550,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_14_intracommunautaire')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_IB-IC-15" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">404</field>
-        <field name="description">IB-IC-15</field>
-        <field name="name">Investment Goods 15% - Intra-Community</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_15_intracommunautaire')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_15_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_15_intracommunautaire')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_15_intracommunautaire')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_15_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_15_intracommunautaire')],
 		    }),
 		]"/>
 	</record>
@@ -5959,55 +3652,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_IB-IC-6" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">413</field>
-        <field name="description">IB-IC-6</field>
-        <field name="name">Investment Goods 6% - Intra-Community</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_6_intracommunautaire')],
-		    }),
-		     (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_6_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_6_intracommunautaire')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_6_intracommunautaire')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_6_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_6_intracommunautaire')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_IB-IC-8" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">416</field>
         <field name="description">IB-IC-8</field>
@@ -6090,43 +3734,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_IB-PA-12" model="account.tax.template">
-		<field name="sequence">420</field>
-        <field name="description">IB-PA-12</field>
-        <field name="name">Investment Goods 12% - Country</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_12_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_12_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_12_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_12_pays')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_IB-PA-14" model="account.tax.template">
 		<field name="sequence">421</field>
         <field name="description">IB-PA-14</field>
@@ -6160,43 +3767,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_14_pays')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_IB-PA-15" model="account.tax.template">
-		<field name="sequence">422</field>
-        <field name="description">IB-PA-15</field>
-        <field name="name">Investment Goods 15% - Country</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_15_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_15_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_15_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_15_pays')],
 		    }),
 		]"/>
 	</record>
@@ -6275,43 +3845,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_IB-PA-6" model="account.tax.template">
-		<field name="sequence">425</field>
-        <field name="description">IB-PA-6</field>
-        <field name="name">Investment Goods 6% - Country</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_6_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_6_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_biens_6_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_biens_6_pays')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_IB-PA-8" model="account.tax.template">
 		<field name="sequence">426</field>
         <field name="description">IB-PA-8</field>
@@ -6382,55 +3915,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_IP-EC-12" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">428</field>
-        <field name="description">IP-EC-12</field>
-        <field name="name">Investment Services 12% - Extra-Community</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_12_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_12_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_12_extracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_12_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_12_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_12_extracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_IP-EC-14" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">431</field>
         <field name="description">IP-EC-14</field>
@@ -6476,55 +3960,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216113'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_14_extracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_IP-EC-15" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">434</field>
-        <field name="description">IP-EC-15</field>
-        <field name="name">Investment Services 15% - Extra-Community</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_15_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_15_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_15_extracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_15_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_15_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_15_extracommunautaire_plus')],
 		    }),
 		]"/>
 	</record>
@@ -6627,55 +4062,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_IP-EC-6" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">443</field>
-        <field name="description">IP-EC-6</field>
-        <field name="name">Investment Services 6% - Extra-Community</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_6_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_6_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_6_extracommunautaire_plus')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_6_extracommunautaire_plus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_6_extracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216113'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_6_extracommunautaire_plus')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_IP-EC-8" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">446</field>
         <field name="description">IP-EC-8</field>
@@ -6758,55 +4144,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_IP-IC-12" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">450</field>
-        <field name="description">IP-IC-12</field>
-        <field name="name">Investment Services 12% - Intra-Community</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_12')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_12_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_12')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_12')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_12_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_12')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_IP-IC-14" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">453</field>
         <field name="description">IP-IC-14</field>
@@ -6852,55 +4189,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216112'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_14')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_IP-IC-15" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">456</field>
-        <field name="description">IP-IC-15</field>
-        <field name="name">Investment Services 15% - Intra-Community</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_15')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_15_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_15')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_15')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_15_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_15')],
 		    }),
 		]"/>
 	</record>
@@ -7003,55 +4291,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_IP-IC-6" model="account.tax.template"> <!--TODO OCO merged group-->
-		<field name="sequence">465</field>
-        <field name="description">IP-IC-6</field>
-        <field name="name">Investment Services 6% - Intra-Community</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_6')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_6_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_6')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_6')],
-		    }),
-		    (0,0, {
-		        'factor_percent': -100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_6_intracommunautaire_minus')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216112'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_6')],
-            }),
-        ]"/>
-	</record>
-
 	<record id="lu_2015_tax_IP-IC-8" model="account.tax.template"> <!--TODO OCO merged group-->
 		<field name="sequence">468</field>
         <field name="description">IP-IC-8</field>
@@ -7134,43 +4373,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_IP-PA-12" model="account.tax.template">
-		<field name="sequence">472</field>
-        <field name="description">IP-PA-12</field>
-        <field name="name">Investment Services 12% - Country</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_12_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_12_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_12_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_12_pays')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_IP-PA-14" model="account.tax.template">
 		<field name="sequence">473</field>
         <field name="description">IP-PA-14</field>
@@ -7204,43 +4406,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_14_pays')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_IP-PA-15" model="account.tax.template">
-		<field name="sequence">474</field>
-        <field name="description">IP-PA-15</field>
-        <field name="name">Investment Services 15% - Country</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_15_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_15_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_15_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_15_pays')],
 		    }),
 		]"/>
 	</record>
@@ -7315,43 +4480,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4216111'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_3_pays')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_IP-PA-6" model="account.tax.template">
-		<field name="sequence">477</field>
-        <field name="description">IP-PA-6</field>
-        <field name="name">Investment Services 6% - Country</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_6_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_6_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_investissement_prestations_6_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4216111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_investissement_prestations_6_pays')],
 		    }),
 		]"/>
 	</record>
@@ -7624,43 +4752,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_VB-PA-12" model="account.tax.template">
-		<field name="sequence">486</field>
-        <field name="description">VB-PA-12</field>
-        <field name="name">Sales Goods 12% - Country</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">sale</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_biens_12_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_vente_biens_12_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_biens_12_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_vente_biens_12_pays')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_VB-PA-14" model="account.tax.template">
 		<field name="sequence">487</field>
         <field name="description">VB-PA-14</field>
@@ -7694,43 +4785,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614111'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_vente_biens_14_pays')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_VB-PA-15" model="account.tax.template">
-		<field name="sequence">488</field>
-        <field name="description">VB-PA-15</field>
-        <field name="name">Sales Goods 15% - Country</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">sale</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_biens_15_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_vente_biens_15_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_biens_15_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_vente_biens_15_pays')],
 		    }),
 		]"/>
 	</record>
@@ -7805,43 +4859,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614111'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_vente_biens_3_pays')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_VB-PA-6" model="account.tax.template">
-		<field name="sequence">491</field>
-        <field name="description">VB-PA-6</field>
-        <field name="name">Sales Goods 6% - Country</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">sale</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_biens_6_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_vente_biens_6_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_biens_6_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_vente_biens_6_pays')],
 		    }),
 		]"/>
 	</record>
@@ -8081,43 +5098,6 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_VP-PA-12" model="account.tax.template">
-		<field name="sequence">499</field>
-        <field name="description">VP-PA-12</field>
-        <field name="name">Sales Services 12% - Country</field>
-        <field name="amount">12</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">sale</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_12"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_12_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_vente_prestations_12_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_12_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_vente_prestations_12_pays')],
-		    }),
-		]"/>
-	</record>
-
 	<record id="lu_2015_tax_VP-PA-14" model="account.tax.template">
 		<field name="sequence">500</field>
         <field name="description">VP-PA-14</field>
@@ -8151,43 +5131,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614111'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_vente_prestations_14_pays')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_VP-PA-15" model="account.tax.template">
-		<field name="sequence">501</field>
-        <field name="description">VP-PA-15</field>
-        <field name="name">Sales Services 15% - Country</field>
-        <field name="amount">15</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">sale</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_15"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_15_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_vente_prestations_15_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_15_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_vente_prestations_15_pays')],
 		    }),
 		]"/>
 	</record>
@@ -8262,43 +5205,6 @@
 		        'repartition_type': 'tax',
 		        'account_id': ref('lu_2011_account_4614111'),
 		        'minus_tag_ids': [ref('account_tax_report_line_taxe_vente_prestations_3_pays')],
-		    }),
-		]"/>
-	</record>
-
-	<record id="lu_2011_tax_VP-PA-6" model="account.tax.template">
-		<field name="sequence">504</field>
-        <field name="description">VP-PA-6</field>
-        <field name="name">Sales Services 6% - Country</field>
-        <field name="amount">6</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">sale</field>
-        <field name="chart_template_id" ref="lu_2011_chart_1"/>
-        <field name="tax_group_id" ref="tax_group_6"/>
-		<field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'plus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_6_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614111'),
-		        'plus_tag_ids': [ref('account_tax_report_line_taxe_vente_prestations_6_pays')],
-		    }),
-		]"/>
-		<field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'base',
-		        'minus_tag_ids': [ref('account_tax_report_line_base_vente_prestations_6_pays')],
-		    }),
-		    (0,0, {
-		        'factor_percent': 100,
-		        'repartition_type': 'tax',
-		        'account_id': ref('lu_2011_account_4614111'),
-		        'minus_tag_ids': [ref('account_tax_report_line_taxe_vente_prestations_6_pays')],
 		    }),
 		]"/>
 	</record>
