@@ -1020,6 +1020,7 @@ class Environments(object):
         self.todo = {}                  # recomputations {field: [records]}
         self.mode = False               # flag for draft/onchange
         self.recompute = True
+        self.towrite = None
 
     def add(self, env):
         """ Add the environment ``env``. """

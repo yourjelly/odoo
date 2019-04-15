@@ -3460,6 +3460,7 @@ Fields:
         if parent_records:
             parent_records._parent_store_update()
 
+        self.recompute()
         return True
 
     @api.model_create_multi
@@ -4119,7 +4120,7 @@ Fields:
                 recs = self.env.field_todo(fname)
                 if not recs:
                     break
-                recs._recompute(field)
+                field.compute_value(recs)
                 obj = self.env[field.comodel]
 
         if expression.is_false(self, args):
@@ -5287,16 +5288,11 @@ Fields:
         """
         return self.env.check_todo(field, self)
 
-    def _recompute_done(self, field):
-        """ Mark ``field`` as recomputed. """
-        self.env.remove_todo(field, self)
-
     @api.model
     def recompute(self):
         """ Recompute stored function fields. The fields and records to
             recompute have been determined by method :meth:`modified`.
         """
-
         if not(self.env.recompute and self._context.get('recompute', True)):
             return False
 
@@ -5305,51 +5301,54 @@ Fields:
         while self.env.has_todo():
             field = self.env.get_todo()
             recs = self.env.field_todo(field)
-            recs._recompute(field)
+            field.compute_value(recs)
+
+            # recs._recompute(field)
 
             count+= 1                      # Loop Detection in computed fields
             if count > 100:
                 print('Cycling computed fields', recs, field)
 
-    @api.multi
-    def _recompute(self, field):
-        # determine the fields to recompute
-        fs = self.env[field.model_name]._field_computed[field]
-        ns = [(f.name, f) for f in fs if f.store]
+    # FP TODO: merge this method, with fields.py, compute value
+    # @api.multi
+    # def _recompute(self, field):
+    #     # determine the fields to recompute
+    #     fs = self.env[field.model_name]._field_computed[field]
+    #     ns = [(f.name, f) for f in fs if f.store]
 
-        # evaluate fields, and group record ids by update
-        updates = defaultdict(set)
-        cache = self.env.cache
-        for rec in self:
-            # do not write if the value does not change
-            vals = {}
-            for n,f in ns:
-                if cache.contains(rec, f):
-                    old = cache.get(rec, f)
-                    rec[n]
-                    new = cache.get(rec, f)
-                    if new!=old:
-                        vals[n] = new
-                else:
-                    vals[n] = rec[n]
+    #     # evaluate fields, and group record ids by update
+    #     updates = defaultdict(set)
+    #     cache = self.env.cache
+    #     for rec in self:
+    #         # do not write if the value does not change
+    #         vals = {}
+    #         for n,f in ns:
+    #             if cache.contains(rec, f):
+    #                 old = cache.get(rec, f)
+    #                 rec[n]
+    #                 new = cache.get(rec, f)
+    #                 if new!=old:
+    #                     vals[n] = new
+    #             else:
+    #                 vals[n] = rec[n]
 
-        # FP TODO: reintroduce the write multi, but avoid making it uphere
-        #     vals = rec._convert_to_write(vals)
-        #     updates[frozendict(vals)].add(rec.id)
-        # # update records in batch when possible
+    #     # FP TODO: reintroduce the write multi, but avoid making it uphere
+    #     #     vals = rec._convert_to_write(vals)
+    #     #     updates[frozendict(vals)].add(rec.id)
+    #     # # update records in batch when possible
 
-        # with self.env.norecompute():
-        #     for vals, ids in updates.items():
-        #         target = self.browse([x for x in ids if x])
-        #         try:
-        #             target._write(dict(vals))
-        #         except MissingError:
-        #             # retry without missing records
-        #             target.exists()._write(dict(vals))
+    #     # with self.env.norecompute():
+    #     #     for vals, ids in updates.items():
+    #     #         target = self.browse([x for x in ids if x])
+    #     #         try:
+    #     #             target._write(dict(vals))
+    #     #         except MissingError:
+    #     #             # retry without missing records
+    #     #             target.exists()._write(dict(vals))
 
-        # mark computed fields as done
-        for f in fs:
-            self._recompute_done(f)
+    #     # mark computed fields as done
+    #     for f in fs:
+    #         self.env.remove_todo(f, self)
 
     #
     # Generic onchange method

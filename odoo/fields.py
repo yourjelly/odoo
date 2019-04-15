@@ -1049,51 +1049,61 @@ class Field(MetaField('DummyField', (object,), {})):
 
         else:
             # Write to database
+            print('      set', self.name, value)
             write_value = self.convert_to_write(self.convert_to_record(value, record), record)
-            record.write({self.name: write_value})
+            if (not env.cache.contains(record, self)) or (env.cache.get(record, self) != value):
+                if env.all.towrite is None:
+                    record.write({self.name: write_value})
+                else:
+                    record.write({self.name: write_value})
+                    # env.all.towrite[self][write_value].add(record.id)
 
-            # FP TODO: not sure to understand why? if it's a many2one, it's good to set it in the cache
-            # Update the cache unless value contains a new record
-            if not (self.relational and not all(value)):
-                env.cache.set(record, self, value)
+                # FP TODO: not sure to understand why? if it's a many2one, it's good to set it in the cache
+                # Update the cache unless value contains a new record
+                if not (self.relational and not all(value)):
+                    env.cache.set(record, self, value)
+
+            # Already done in the write
+            # env.remove_todo(self, record)
 
     ############################################################################
     #
     # Computation of field values
     #
 
-    def _compute_value(self, records):
-        """ Invoke the compute method on ``records``. """
-        # initialize the fields to their corresponding null value in cache
+    def compute_value(self, records):
+        """ Invoke the compute method on ``records``; the results are in cache. """
         fields = records._field_computed[self]
-        cache = records.env.cache
 
-        for record in records:
-            for field in fields:
-                record.env.remove_todo(field, record)
+        # do not write at __set__, instead write in batch after
+        towrite = records.env.all.towrite
+        if towrite is None:
+            records.env.all.towrite = defaultdict(lambda : defaultdict(set))
+
+        for field in fields:
+            records.env.remove_todo(field, records)
+
         if isinstance(self.compute, str):
             getattr(records, self.compute)()
         else:
             self.compute(records)
-        # for field in fields:
-        #     for record in records:
-        #         if not cache.contains(record, field):
-        #             cache.set(record, field, field.convert_to_cache(False, record, validate=False))
 
-
-    def compute_value(self, records):
-        """ Invoke the compute method on ``records``; the results are in cache. """
-        fields = records._field_computed[self]
-        with records.env.do_in_draft(), records.env.protecting(fields, records):
-            try:
-                self._compute_value(records)
-            except (AccessError, MissingError):
-                # some record is forbidden or missing, retry record by record
-                for record in records:
+        # FP TO CHECK: We could also optimize multi-column write, but I am not sure it's worth it
+        if (towrite is None) and records.env.all.towrite:
+            while records.env.all.towrite:
+                field = next(iter(records.env.all.towrite))
+                values = records.env.all.towrite.pop(field)
+                for value, ids in values.items():
+                    recs = records.env[field.model_name].browse(ids)
                     try:
-                        self._compute_value(record)
-                    except Exception as exc:
-                        record.env.cache.set_failed(record, [self], exc)
+                        recs._write({field.name: value})
+                    except MissingError:
+                        recs.exists()._write({field.name: value})
+            records.env.all.towrite = None
+
+        for field in fields:
+            records.env.remove_todo(field, records)
+
 
     def determine_inverse(self, records):
         """ Given the value of ``self`` on ``records``, inverse the computation. """

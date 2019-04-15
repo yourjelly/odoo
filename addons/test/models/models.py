@@ -6,28 +6,28 @@ class test(models.Model):
     _name = 'test.test'
 
     name = fields.Char()
-    # source = fields.Selection([('out_invoice', 'Set to Invoice'),('in_invoice','Set to Bill'),('other','Set to Others'),('no','Do Not Change'), ('use_source2', 'Use Source 2')], 'Source', default='other')
-    # dest = fields.Selection([('out_invoice', 'Invoice'),('in_invoice','Bill'),('other','Others')], 'Destination', compute='_get_dest', store=True, readonly=False)
+    source = fields.Selection([('out_invoice', 'Set to Invoice'),('in_invoice','Set to Bill'),('other','Set to Others'),('no','Do Not Change'), ('use_source2', 'Use Source 2')], 'Source', default='other')
+    dest = fields.Selection([('out_invoice', 'Invoice'),('in_invoice','Bill'),('other','Others')], 'Destination', compute='_get_dest', store=True, readonly=False)
 
-    # user_id = fields.Many2one('res.users', 'User', default=lambda x: x.env.user.id)
-    # company_id = fields.Many2one('res.company', 'Company', compute='_get_company', store=True)
+    user_id = fields.Many2one('res.users', 'User', default=lambda x: x.env.user.id)
+    company_id = fields.Many2one('res.company', 'Company', compute='_get_company', store=True)
     currency_id = fields.Many2one('res.currency', 'Currency')
     nbr_currency = fields.Integer('Sum Currency', compute='_get_nbr_currency', store=True)
     line_ids = fields.One2many('test.line', 'test_id')
 
-    # @api.depends('user_id')
-    # def _get_company(self):
-    #     print('test _company', self)
-    #     for record in self:
-    #         record.company_id = record.user_id.company_id
-    #     print('  end test _company', self)
+    @api.depends('user_id')
+    def _get_company(self):
+        print('test _company', self)
+        for record in self:
+            record.company_id = record.user_id.company_id
+        print('  end test _company', self)
 
-    # @api.depends('company_id.currency_id')
-    # def _get_currency_id(self):
-    #     print('test _get_currency_id', self)
-    #     for record in self:
-    #         record.currency_id = record.company_id.currency_id
-    #     print('  end test _get_currency_id', self)
+    @api.depends('company_id.currency_id')
+    def _get_currency_id(self):
+        print('test _get_currency_id', self)
+        for record in self:
+            record.currency_id = record.company_id.currency_id
+        print('  end test _get_currency_id', self)
 
     @api.depends('line_ids.currency_id')
     def _get_nbr_currency(self):
@@ -36,22 +36,31 @@ class test(models.Model):
             total = 0
             for line in record.line_ids:
                 if line.currency_id:
-                    total +=1
+                    total += line.currency_id.id
             record.nbr_currency = total
         print('  end test _get_nbr_currency', self)
 
-    # @api.depends('source')
-    # def _get_dest(self):
-    #     print('test _get_dest', self)
-    #     for record in self:
-    #         if record.source!='no':
-    #             record.dest = record.source
-    #     print('  end test _get_dest', self)
+    @api.depends('source')
+    def _get_dest(self):
+        print('test _get_dest', self)
+        for record in self:
+            if record.source!='no':
+                record.dest = record.source
+        print('  end test _get_dest', self)
 
     def testme(self):
         import random
-
-        self.env['test.line'].create({'name': 'new lein', 'test_id': 173})
+        print('Writing', 'currency_id')
+        main_id = self.env['test.test'].create({
+            'name': 'BlaBal',
+            'currency_id': random.randint(1,20),
+            'line_ids': [
+                (0,0, {'name': 'abc'}),
+                (0,0, {'name': 'def'}),
+            ]
+        })
+        main_id.write({'currency_id': random.randint(1,20)})
+        self.env['test.line'].create({'name': 'extra line', 'test_id': main_id.id})
         self.recompute()
         return True
 
