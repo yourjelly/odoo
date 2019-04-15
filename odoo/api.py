@@ -738,11 +738,13 @@ def call_kw(model, name, args, kwargs):
     method = getattr(type(model), name)
     api = getattr(method, '_api', None)
     if api == 'model':
-        return _call_kw_model(method, model, args, kwargs)
+        result = _call_kw_model(method, model, args, kwargs)
     elif api == 'model_create':
-        return _call_kw_model_create(method, model, args, kwargs)
+        result = _call_kw_model_create(method, model, args, kwargs)
     else:
-        return _call_kw_multi(method, model, args, kwargs)
+        result = _call_kw_multi(method, model, args, kwargs)
+    model.recompute()
+    return result
 
 
 class Environment(Mapping):

@@ -49,19 +49,22 @@ class test(models.Model):
         print('  end test _get_dest', self)
 
     def testme(self):
-        import random
-        print('Writing', 'currency_id')
+        import time
+        n = time.time()
         main_id = self.env['test.test'].create({
             'name': 'BlaBal',
-            'currency_id': random.randint(1,20),
+            'currency_id': 13,
             'line_ids': [
                 (0,0, {'name': 'abc'}),
                 (0,0, {'name': 'def'}),
             ]
         })
-        main_id.write({'currency_id': random.randint(1,20)})
+        main_id.write({'currency_id': 11})
         self.env['test.line'].create({'name': 'extra line', 'test_id': main_id.id})
-        self.recompute()
+        print('Main', main_id.source, main_id.dest, main_id.user_id.name, main_id.company_id.name, main_id.currency_id.name, main_id.nbr_currency)
+        for line in main_id.line_ids:
+            print('  Line:', line.name, line.currency_id.name)
+        print('TIME', time.time()-n)
         return True
 
 

@@ -245,6 +245,7 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
             # need to commit any modification the module's installation or
             # update made to the schema or data so the tests can run
             # (separately in their own transaction)
+            module.recompute()
             cr.commit()
             if demo_loaded:
                 # launch tests only in demo mode, allowing tests to use demo data.
@@ -270,6 +271,7 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
             for kind in ('init', 'demo', 'update'):
                 if hasattr(package, kind):
                     delattr(package, kind)
+            module.recompute()
 
         if package.name is not None:
             registry._init_modules.add(package.name)

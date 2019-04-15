@@ -1049,14 +1049,18 @@ class Field(MetaField('DummyField', (object,), {})):
 
         else:
             # Write to database
-            print('      set', self.name, value)
             write_value = self.convert_to_write(self.convert_to_record(value, record), record)
             if (not env.cache.contains(record, self)) or (env.cache.get(record, self) != value):
                 if env.all.towrite is None:
                     record.write({self.name: write_value})
                 else:
-                    record.write({self.name: write_value})
-                    # env.all.towrite[self][write_value].add(record.id)
+                    # record.write({self.name: write_value})
+                    try:
+                        env.all.towrite[self][write_value].add(record.id)
+                    except TypeError:
+                        # FP TODO: can we improve that for speed improvements
+                        # catches unhashable values, like one2many: [(6, 0, ())]
+                        record.write({self.name: write_value})
 
                 # FP TODO: not sure to understand why? if it's a many2one, it's good to set it in the cache
                 # Update the cache unless value contains a new record
@@ -1099,6 +1103,7 @@ class Field(MetaField('DummyField', (object,), {})):
                         recs._write({field.name: value})
                     except MissingError:
                         recs.exists()._write({field.name: value})
+        if towrite is None:
             records.env.all.towrite = None
 
         for field in fields:

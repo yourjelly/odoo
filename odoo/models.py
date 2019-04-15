@@ -3460,7 +3460,7 @@ Fields:
         if parent_records:
             parent_records._parent_store_update()
 
-        self.recompute()
+        # self.recompute()
         return True
 
     @api.model_create_multi
@@ -3604,7 +3604,8 @@ Fields:
             data['record']._validate_fields(set(data['inversed']) - set(data['stored']))
 
         # recompute fields
-        self.recompute()
+        # if self._name=='account.invoice':
+        #     self.recompute()
 
         return records
 
@@ -4890,6 +4891,7 @@ Fields:
             recs = self
             for name in func.split('.'):
                 recs = recs._mapped_func(operator.itemgetter(name))
+                if not recs: break
             return recs
         else:
             return self._mapped_func(func)

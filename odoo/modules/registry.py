@@ -300,8 +300,6 @@ class Registry(Mapping):
             func = self._post_init_queue.popleft()
             func()
 
-        if models:
-            models[0].recompute()
 
         # make sure all tables are present
         self.check_tables_exist(cr)
