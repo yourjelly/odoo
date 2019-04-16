@@ -735,8 +735,7 @@
         <record id="tax_report_non_imp_non_ca3" model="account.tax.report.line">
             <field name="name">Base H.T. Non présent sur la CA3</field>
             <field name="country_id" ref="base.fr"/>
-            <field name="parent_line_id" ref="tax_report_non_imp"/>
-            <field name="sequence">4</field>
+            <field name="sequence">11</field>
         </record>
 
         <record id="tax_report_non_imp_achats_import" model="account.tax.report.line">
