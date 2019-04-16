@@ -18,6 +18,10 @@ class StockMove(SavepointCase):
             ('company_id', '=', cls.env.company.id),
             ('usage', '=', 'transit'),
         ], limit=1)
+        cls.scrap_location = cls.env['stock.location'].search([
+            ('company_id', '=', cls.env.company.id),
+            ('scrap_location', '=', True),
+        ], limit=1)
         cls.uom_unit = cls.env.ref('uom.product_uom_unit')
         cls.uom_dozen = cls.env.ref('uom.product_uom_dozen')
         cls.product = cls.env['product.product'].create({
@@ -3688,11 +3692,12 @@ class StockMove(SavepointCase):
             'scrap_qty': 1,
         })
         warning_message = scrap.action_validate()
-        self.assertEqual(warning_message.get('res_model', 'Wrong Model'), 'stock.warn.insufficient.qty.scrap')
-        insufficient_qty_wizard = self.env['stock.warn.insufficient.qty.scrap'].create({
+        self.assertEqual(warning_message.get('res_model', 'Wrong Model'), 'stock.scrap.wizard')
+        insufficient_qty_wizard = self.env['stock.scrap.wizard'].create({
             'product_id': self.product.id,
+            'product_uom_id': self.uom_dozen.id,
             'location_id': self.stock_location.id,
-            'scrap_id': scrap.id
+            'scrap_location_id': self.scrap_location.id,
         })
         insufficient_qty_wizard.action_done()
         self.assertEqual(self.env['stock.quant']._gather(self.product, self.stock_location).quantity, -11)
