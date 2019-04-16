@@ -1044,13 +1044,17 @@ class Cache(object):
         key = record.env.cache_key(field)
         return record.id in self._data[key].get(field, ())
 
+    def get_all_values(self, record, field):
+        """ Return the value of ``field`` for ``record``. """
+        key = record.env.cache_key(field)
+        return self._data[key].get(field, {}).values()
+
     def get(self, record, field):
         """ Return the value of ``field`` for ``record``. """
         key = record.env.cache_key(field)
         try:
             value = self._data[key][field][record._ids[0]]
         except KeyError:
-            print('To Check: computed field ', field.name, ' of ', record, ' did not returned a value!')
             raise CacheMiss(record, field)
 
         return value.get() if isinstance(value, SpecialValue) else value
@@ -1116,7 +1120,7 @@ class Cache(object):
         ids = list(self._data[key][field])
         return model.browse(ids)
 
-    def get_missing_ids(self, records, field, ids, limit):
+    def get_missing_ids(self, records, field, ids, limit=1000):
         """ Return the ids of ``records`` that have no value for ``field``. """
         key = records.env.cache_key(field)
         field_cache = self._data[key][field]

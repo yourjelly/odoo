@@ -1979,17 +1979,13 @@ class Reference(Selection):
 
     def convert_to_cache(self, value, record, validate=True):
         # cache format: (res_model, res_id) or False
-        def process(res_model, res_id):
-            record._prefetch[res_model].add(res_id)
-            return (res_model, res_id)
-
         if isinstance(value, BaseModel):
             if not validate or (value._name in self.get_values(record.env) and len(value) <= 1):
-                return process(value._name, value.id) if value else False
+                return (value._name, value.id) if value else False
         elif isinstance(value, str):
             res_model, res_id = value.split(',')
             if record.env[res_model].browse(int(res_id)).exists():
-                return process(res_model, int(res_id))
+                return (res_model, int(res_id))
             else:
                 return False
         elif not value:
@@ -2140,7 +2136,9 @@ class Many2one(_Relational):
     def convert_to_cache(self, value, record, validate=True):
         # cache format: tuple(ids)
         def process(ids):
-            return record._prefetch[self.comodel_name].update(ids) or ids
+            # FP TODO: remove this method
+            return ids
+            # return record._prefetch[self.comodel_name].update(ids) or ids
 
         if type(value) in IdType:
             return process((value,))
@@ -2158,7 +2156,11 @@ class Many2one(_Relational):
 
     def convert_to_record(self, value, record):
         # use registry to avoid creating a recordset for the model
-        return record.env.registry[self.comodel_name]._browse(value, record.env, record._prefetch)
+        prefetch = record.env.cache.get_all_values(record, self)
+        a = set()
+        for p in prefetch:
+            if p: a.add(p[0])
+        return record.env.registry[self.comodel_name]._browse(value, record.env, a)
 
     def convert_to_read(self, value, record, use_name_get=True):
         if use_name_get and value:
@@ -2243,7 +2245,9 @@ class _RelationalMulti(_Relational):
     def convert_to_cache(self, value, record, validate=True):
         # cache format: tuple(ids)
         def process(ids):
-            return record._prefetch[self.comodel_name].update(ids) or ids
+            return ids
+            # FP TOOD: remove this method
+            # return record._prefetch[self.comodel_name].update(ids) or ids
 
         if isinstance(value, BaseModel):
             if not validate or (value._name == self.comodel_name):
@@ -2284,7 +2288,12 @@ class _RelationalMulti(_Relational):
 
     def convert_to_record(self, value, record):
         # use registry to avoid creating a recordset for the model
-        return record.env.registry[self.comodel_name]._browse(value, record.env, record._prefetch)
+        prefetch = record.env.cache.get_all_values(record, self)
+        a = set()
+        for p in prefetch:
+            if p: a |= set(p)
+        return record.env.registry[self.comodel_name]._browse(value, record.env, a)
+        # return record.env.registry[self.comodel_name]._browse(value, record.env, record._prefetch)
 
     def convert_to_read(self, value, record, use_name_get=True):
         return value.ids
@@ -2475,12 +2484,12 @@ class One2many(_RelationalMulti):
                 comodel.create(to_create)
                 to_create.clear()
             if to_relink:
-                prefetch = comodel.browse(to_relink)._prefetch
                 comodel_sudo = comodel.sudo().with_context(prefetch_fields=False)
                 # group lines by record, and relink them in batch
                 groups = groupby(to_relink, to_relink.get)
                 for record_id, line_ids in groups:
-                    lines = comodel_sudo.browse(line_ids, prefetch).filtered(
+                    # FP TODO: add a prefetch here or not, test performances on invoice?
+                    lines = comodel_sudo.browse(line_ids).filtered(
                         lambda line: int(line[inverse]) != record_id
                     )
                     if lines:

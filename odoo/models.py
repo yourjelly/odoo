@@ -2808,14 +2808,14 @@ Fields:
 
         # retrieve results from records; this takes values from the cache and
         # computes remaining fields
-        self = self.with_prefetch(self._prefetch.copy())
+        self._prefetch = self._ids
+
         data = [(record, {'id': record._ids[0]}) for record in self]
         use_name_get = (load == '_classic_read')
         for name in fields:
             convert = self._fields[name].convert_to_read
             # restrict the prefetching of self's model to self; this avoids
             # computing fields on a larger recordset than self
-            self._prefetch[self._name] = set(self._ids)
             for record, vals in data:
                 # missing records have their vals empty
                 if not vals:
@@ -2846,6 +2846,7 @@ Fields:
                 # discard fields that must be recomputed
                 if not (f.compute and self.env.field_todo(f))
             )
+        self.check_access_rights('read')
         fields = self.check_field_access_rights('read', [f.name for f in fs])
         self._read(fields)
 
@@ -4117,7 +4118,10 @@ Fields:
             obj = self
             for fname in dom_part[0].split('.'):
                 if fname=='id': continue
-                field = obj._fields[fname]
+                try:
+                    field = obj._fields[fname]
+                except KeyError:
+                    raise ValueError("Invalid field %s on %s" % (fname, obj._name))
                 recs = self.env.field_todo(fname)
                 if not recs:
                     break
@@ -4692,10 +4696,7 @@ Fields:
         records = object.__new__(cls)
         records.env = env
         records._ids = ids
-        if prefetch is None:
-            prefetch = defaultdict(set)         # {model_name: set(ids)}
-        prefetch[cls._name].update(ids)
-        records._prefetch = prefetch
+        records._prefetch = prefetch or ids
         return records
 
     def browse(self, ids=None, prefetch=None):
@@ -5142,9 +5143,9 @@ Fields:
             # important: one must call the field's getter
             return self._fields[key].__get__(self, type(self))
         elif isinstance(key, slice):
-            return self._browse(self._ids[key], self.env)
+            return self._browse(self._ids[key], self.env, self._prefetch)
         else:
-            return self._browse((self._ids[key],), self.env)
+            return self._browse((self._ids[key],), self.env, self._prefetch)
 
     def __setitem__(self, key, value):
         """ Assign the field ``key`` to ``value`` in record ``self``. """
@@ -5168,7 +5169,7 @@ Fields:
         """
         if not self.id:
             return self
-        ids = self.env.cache.get_missing_ids(self, field, self._prefetch[self._name], limit)
+        ids = self.env.cache.get_missing_ids(self, field, self._prefetch, limit)
         if self.id not in ids:
             ids.append(self.id)
         return self.browse(ids)
@@ -5290,11 +5291,19 @@ Fields:
         return self.env.check_todo(field, self)
 
     @api.model
+    def recompute_fields(self, fields):
+        for fname in fields:
+            field = self._fields[fname]
+            recs = self.env.field_todo(field)
+            if not recs:
+                continue
+            field.compute_value(recs)
+
+    @api.model
     def recompute(self):
         """ Recompute stored function fields. The fields and records to
             recompute have been determined by method :meth:`modified`.
         """
-        print('RECOMPUTE')
         if not(self.env.recompute and self._context.get('recompute', True)):
             return False
 

@@ -48,6 +48,42 @@ class test(models.Model):
                 record.dest = record.source
         print('  end test _get_dest', self)
 
+    def testme3(self):
+        import time
+        n = time.time()
+        partners = self.env['res.partner'].search([])
+        for p in partners:
+            if p.state_id:
+                print(p.state_id.country_id.name)
+
+        print('TIME', time.time()-n)
+        return True
+
+    def testme2(self):
+        res_partner = self.env['res.partner']
+
+        # p1 = res_partner
+        # p2 = res_partner.with_context(default_active=True)
+
+        # f1 = p1._fields['display_name']
+        # f2 = p2._fields['display_name']
+        # print(f1, f2, f1==f2)
+
+
+
+        DATA = [
+            ('"A Raoul Grosbedon" <raoul@chirurgiens-dentistes.fr>', False),
+            ('B Raoul chirurgiens-dentistes.fr', True),
+            ("C Raoul O'hara  <!@historicalsociety.museum>", True),
+            ('ryu+giga-Sushi@aizubange.fukushima.jp', True),
+        ]
+        for name, active in DATA:
+            partner_id, dummy = res_partner.with_context(default_active=active).name_create(name)
+        partners = res_partner.name_search('Raoul')
+        if len(partners)!=2:
+            should_crash
+        return True
+ 
     def testme(self):
         import time
         n = time.time()

@@ -287,7 +287,7 @@ class TestAPI(common.TransactionCase):
         self.assertTrue(len(partners) > 1)
 
         # all the records in partners are ready for prefetching
-        self.assertItemsEqual(partners.ids, partners._prefetch['res.partner'])
+        self.assertItemsEqual(partners.ids, partners._prefetch)
 
         # reading ONE partner should fetch them ALL
         for partner in partners:
@@ -303,7 +303,7 @@ class TestAPI(common.TransactionCase):
                        for partner in partners
                        for sid in partner._cache['state_id']}
         self.assertTrue(len(state_ids) > 1)
-        self.assertItemsEqual(state_ids, partners._prefetch['res.country.state'])
+        self.assertItemsEqual(state_ids, partners[0].state_id._prefetch)
 
         # reading ONE partner country should fetch ALL partners' countries
         for partner in partners:
@@ -329,8 +329,8 @@ class TestAPI(common.TransactionCase):
         # the recordset operations below should create new prefetch objects
         diff_prefetch(partners, partners.browse())
         diff_prefetch(partners, partners.browse(partners.ids))
-        diff_prefetch(partners, partners[0])
-        diff_prefetch(partners, partners[:10])
+        same_prefetch(partners, partners[0])
+        same_prefetch(partners, partners[:10])
 
         # the recordset operations below should pass the prefetch object
         same_prefetch(partners, partners.sudo(self.env.ref('base.user_demo')))
@@ -357,15 +357,6 @@ class TestAPI(common.TransactionCase):
         partners = partners.create(vals0) + partners.create(vals1)
         for partner in partners:
             same_prefetch(partners, partner)
-            same_prefetch(partners, partner.country_id)
-            same_prefetch(partners, partner.bank_ids)
-            same_prefetch(partners, partner.category_id)
-
-        # same with empty recordsets
-        empty = partners.browse()
-        same_prefetch(empty, empty.country_id)
-        same_prefetch(empty, empty.bank_ids)
-        same_prefetch(empty, empty.category_id)
 
     @mute_logger('odoo.models')
     def test_60_prefetch_read(self):
