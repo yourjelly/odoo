@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="weekly_digest_forum_template" model="mail.template">
+        <field name="name">Weekly Digest Forum Template</field>
+        <field name="model_id" ref="digest.model_digest_digest"/>
+        <field name="auto_delete" eval="True" />
+        <field name="email_from">${user.email}</field>
+        <field name="lang">${user.lang}</field>
+        <field name="body_html"><![CDATA[    \todelete : ]]>
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tbody><tr><td align="center">
+    <h1>What's new on the forum :</h1>
+    <h4><br></h4>
+    <h4>Best contributors :&nbsp;</h4>
+    <p><br></p>
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <td><p>BEK</p></td>
+                <td><p>MAX</p></td>
+                <td><p>TFR</p></td>
+            </tr>
+            <tr>
+                <td><p>42 points</p></td>
+                <td><p>24 points</p></td>
+                <td><p>12 points</p></td>
+            </tr>
+            <tr>
+                <td><p>12 posts</p></td>
+                <td><p>6 posts</p></td>
+                <td><p>3 posts</p></td>
+            </tr>
+        </tbody>
+    </table>
+    <p><br></p>
+    <h4><br></h4>
+    <h4>Last questions :</h4>
+    <p><br></p>
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <td><p>Why is kgb gone ?</p></td>
+                <td><p>12 upvotes - 3 downvotes</p></td>
+                <td><p>01/01/2019</p></td>
+            </tr>
+            <tr>
+                <td><p>How do you create a field&nbsp;</p></td>
+                <td><p>12 upvotes - 3 downvotes<br></p></td>
+                <td><p>01/01/2019<br></p></td>
+            </tr>
+        </tbody>
+    </table>
+    <p><br></p>
+</td></tr>
+</tbody></table>
+        ]]></field>
+    </record>
+</odoo>
