@@ -4,11 +4,13 @@
     <record id="tax_report_base_imp" model="account.tax.report.line">
         <field name="name">Base Imponible</field>
         <field name="sequence" eval="1"/>
+        <field name="formula">base_ventas - base_compras</field>
         <field name="country_id" ref="base.ar"/>
     </record>
 
     <record id="tax_report_base_imp_ventas" model="account.tax.report.line">
         <field name="name">Base Imponible - Ventas</field>
+        <field name="code">base_ventas</field>
         <field name="parent_line_id" ref='tax_report_base_imp'/>
         <field name="sequence" eval="1"/>
         <field name="country_id" ref="base.ar"/>
@@ -40,6 +42,7 @@
 
     <record id="tax_report_base_imp_compras" model="account.tax.report.line">
         <field name="name">Base Imponible - Compras</field>
+        <field name="code">base_compras</field>
         <field name="parent_line_id" ref='tax_report_base_imp'/>
         <field name="sequence" eval="2"/>
         <field name="country_id" ref="base.ar"/>
@@ -71,12 +74,14 @@
 
     <record id="tax_report_impuesto_gen" model="account.tax.report.line">
         <field name="name">Impuesto General a las Ventas (IVA) Total a Pagar</field>
+        <field name="formula">impuesto_pagado - impuesto_cobrado</field>
         <field name="sequence" eval="2"/>
         <field name="country_id" ref="base.ar"/>
     </record>
 
     <record id="tax_report_impuesto_gen_pagado" model="account.tax.report.line">
         <field name="name">Impuesto Pagado</field>
+        <field name="code">impuesto_pagado</field>
         <field name="parent_line_id" ref="tax_report_impuesto_gen"/>
         <field name="sequence" eval="1"/>
         <field name="country_id" ref="base.ar"/>
@@ -108,6 +113,7 @@
 
     <record id="tax_report_impuesto_gen_cobrado" model="account.tax.report.line">
         <field name="name">Impuesto Cobrado</field>
+        <field name="code">impuesto_cobrado</field>
         <field name="parent_line_id" ref="tax_report_impuesto_gen"/>
         <field name="sequence" eval="2"/>
         <field name="country_id" ref="base.ar"/>
