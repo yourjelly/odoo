@@ -177,12 +177,14 @@ class IrRule(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         res = super(IrRule, self).create(vals_list)
+        self.recompute_fields(['global'])
         self.clear_caches()
         return res
 
     @api.multi
     def write(self, vals):
         res = super(IrRule, self).write(vals)
+        self.recompute_fields(['global'])
         self.clear_caches()
         return res
 
