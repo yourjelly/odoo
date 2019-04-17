@@ -3408,6 +3408,14 @@ Fields:
                 columns.append(('write_date', '%s', AsIs("(now() at time zone 'UTC')")))
                 updated.append('write_date')
 
+        # mark fields to recompute; do this before setting other fields, because
+        # the latter can require the value of computed fields, e.g., a one2many
+        # checking constraints on records
+        self.modified(vals, vals)
+        if self._log_access:
+            self.modified(['write_uid', 'write_date'],['write_uid', 'write_date'])
+
+
         # update columns
         if columns:
             self.check_access_rule('write')
@@ -3438,13 +3446,6 @@ Fields:
                     val = field.convert_to_column(vals[name], self, vals)
                     self.env['ir.translation']._set_ids(
                         tname, 'model', self.env.lang, self.ids, val, src_trans)
-
-        # mark fields to recompute; do this before setting other fields, because
-        # the latter can require the value of computed fields, e.g., a one2many
-        # checking constraints on records
-        self.modified(vals, vals)
-        if self._log_access:
-            self.modified(['write_uid', 'write_date'],['write_uid', 'write_date'])
 
         # set the value of non-column fields
         if other_fields:
