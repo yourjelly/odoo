@@ -2801,6 +2801,7 @@ Fields:
         # FP Note: should we move that to _read
         self.check_access_rights('read')
         fields = self.check_field_access_rights('read', fields)
+        self.recompute_fields(fields)
 
         # fetch stored fields from the database to the cache; this should feed
         # the prefetching of secondary records
@@ -3442,6 +3443,8 @@ Fields:
         # the latter can require the value of computed fields, e.g., a one2many
         # checking constraints on records
         self.modified(vals, vals)
+        if self._log_access:
+            self.modified(['write_uid', 'write_date'],['write_uid', 'write_date'])
 
         # set the value of non-column fields
         if other_fields:
@@ -5294,10 +5297,12 @@ Fields:
     def recompute_fields(self, fields):
         for fname in fields:
             field = self._fields[fname]
-            recs = self.env.field_todo(field)
-            if not recs:
-                continue
-            field.compute_value(recs)
+            while field:
+                recs = self.env.field_todo(field)
+                if not recs:
+                    break
+                field.compute_value(recs)
+                field = field.related_field
 
     @api.model
     def recompute(self):
