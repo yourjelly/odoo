@@ -6,50 +6,50 @@
         <field name="auto_delete" eval="True" />
         <field name="email_from">${user.email}</field>
         <field name="lang">${user.lang}</field>
-        <field name="body_html"><![CDATA[    \todelete : ]]>
+        <field name="body_html"><![CDATA[   
+
 <table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tbody><tr><td align="center">
-    <h1>What's new on the forum :</h1>
-    <h4><br></h4>
-    <h4>Best contributors :&nbsp;</h4>
-    <p><br></p>
-    <table class="table table-bordered">
-        <tbody>
-            <tr>
-                <td><p>BEK</p></td>
-                <td><p>MAX</p></td>
-                <td><p>TFR</p></td>
-            </tr>
-            <tr>
-                <td><p>42 points</p></td>
-                <td><p>24 points</p></td>
-                <td><p>12 points</p></td>
-            </tr>
-            <tr>
-                <td><p>12 posts</p></td>
-                <td><p>6 posts</p></td>
-                <td><p>3 posts</p></td>
-            </tr>
-        </tbody>
-    </table>
-    <p><br></p>
-    <h4><br></h4>
-    <h4>Last questions :</h4>
-    <p><br></p>
-    <table class="table table-bordered">
-        <tbody>
-            <tr>
-                <td><p>Why is kgb gone ?</p></td>
-                <td><p>12 upvotes - 3 downvotes</p></td>
-                <td><p>01/01/2019</p></td>
-            </tr>
-            <tr>
-                <td><p>How do you create a field&nbsp;</p></td>
-                <td><p>12 upvotes - 3 downvotes<br></p></td>
-                <td><p>01/01/2019<br></p></td>
-            </tr>
-        </tbody>
-    </table>
-    <p><br></p>
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: white; color: #454748; border-collapse:separate;">
+<tbody>
+    <tr>
+        <td align="center" style="min-width: 590px;">
+
+            <h1>What's new on the forum :</h1>
+            <h4><br/></h4>
+            <h4>Best contributors :&nbsp;</h4>
+            <p><br/></p>
+                <table class="table table-bordered">
+                    <tbody>
+                        % for contributor in user.env['ir.actions.server'].browse(197).run()
+                            <tr>
+                                <td><p>${contributor['user'].name}</p></td>
+                                <td><p>Score : ${contributor['score']}</p></td>
+                                <td><p>Number of posts : ${contributor['nb_posts']}</p></td>
+                            </tr>
+                        % endfor
+                    </tbody>
+                </table>
+            </t>
+            <p><br/></p>
+            <h4><br/></h4>
+            <h4>Last questions :</h4>
+            <p><br/></p>
+            <table class="table table-bordered">
+                <tbody>
+                    % for post in user.env['forum.post'].search([('parent_id', '=', False)])
+                        <tr>
+                            <td><p>${post.name}</p></td>
+                            <td><p>${post.vote_count}</p></td>
+                            <td><p>${post.create_date}</p></td>
+                        </tr>
+                    % endfor
+                </tbody>
+            </table>
+            <p><br/></p>
+        </td>
+    </tr>
+</tbody>
+</table>
 </td></tr>
 </tbody></table>
         ]]></field>

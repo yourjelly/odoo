@@ -5,15 +5,15 @@
     'category': 'Internal',
     'description': """
 Send Forum Digests periodically to employees
-=============================
 """,
     'version': '1.0',
     'depends': [
         'digest',
         'website_forum',
     ],
-    'data': [,
+    'data': [
         'data/digest_template_data.xml',
+        'data/server_actions.xml',
     ],
     'installable': True,
 }
