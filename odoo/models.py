@@ -3677,7 +3677,7 @@ Fields:
 
         # mark computed fields as todo
         if data_list:
-            records.modified(self._fields, data_list[0]['stored'], followlink=False)
+            records.modified(self._fields, data_list[0], followlink=False)
         # for d in data_list:
         #     d['record'].modified(self._fields, d['stored'], followlink=False)
 
