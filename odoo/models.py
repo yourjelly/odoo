@@ -3368,7 +3368,7 @@ Fields:
     @api.multi
     def _write(self, vals):
         # low-level implementation of write()
-        if (not self) or (not vals):
+        if not self:
             return True
         self.check_field_access_rights('write', list(vals))
 
@@ -5297,11 +5297,10 @@ Fields:
     def recompute_fields(self, fields):
         for fname in fields:
             field = self._fields[fname]
-            while field:
+            while field and field.compute:
                 recs = self.env.field_todo(field)
-                if not recs:
-                    break
-                field.compute_value(recs)
+                if recs:
+                    field.compute_value(recs)
                 field = field.related_field
 
     @api.model

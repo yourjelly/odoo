@@ -48,6 +48,37 @@ class test(models.Model):
                 record.dest = record.source
         print('  end test _get_dest', self)
 
+    def testme4(self):
+        p1 = self.env['res.partner'].create({'name': 'W'})
+        p2 = self.env['res.partner'].create({'name': 'Y'})
+        ref_id = self.env.ref('base.group_user').id
+
+        import pudb
+        pudb.set_trace()
+
+        user = self.env['res.users'].create({
+            'name': 'test user',
+            'login': 'test2',
+            'groups_id': [4, ref_id],
+        })
+
+        partner_model = self.env['ir.model'].search([('model','=','res.partner')])
+        self.env['ir.rule'].create({
+            'name': 'Y is invisible',
+            'domain_force': [('id', '!=', p1.id)],
+            'model_id': partner_model.id,
+        })
+        print('ID to Exclude', p1.id)
+
+        # search as unprivileged user
+        p_obj = self.env['res.partner'].sudo(user)
+        partners = p_obj.search([])
+
+        assert p1 not in partners, "not in"
+        assert p2 in partners, "in"
+        crah_here_is_ok
+        return True
+
     def testme3(self):
         import time
         n = time.time()
