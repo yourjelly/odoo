@@ -49,33 +49,64 @@ class test(models.Model):
         print('  end test _get_dest', self)
 
     def testme4(self):
-        p1 = self.env['res.partner'].create({'name': 'W'})
-        p2 = self.env['res.partner'].create({'name': 'Y'})
-        ref_id = self.env.ref('base.group_user').id
+        archf = '<form string="X">%s</form>'
+        terms_en = ('Bread and cheeze',)
+        terms_fr = ('Pain et fromage',)
+        terms_nl = ('Brood and kaas',)
 
+
+
+        self.env['ir.translation'].load_module_terms(['base'], ['fr_FR', 'nl_NL'])
+        def create_view(archf, terms, **kwargs):
+            view = self.env['ir.ui.view'].create({
+                'name': 'test', 
+                'model': 'res.partner',
+                'arch': archf % terms,
+            })  
+            for lang, trans_terms in kwargs.items():
+                for src, val in zip(terms, trans_terms):
+                    self.env['ir.translation'].create({
+                        'type': 'model_terms',
+                        'name': 'ir.ui.view,arch_db',
+                        'lang': lang,
+                        'res_id': view.id,
+                        'src': src,
+                        'value': val,
+                        'state': 'translated',
+                    })
+            return view
+        view = create_view(archf, terms_en, fr_FR=terms_fr, nl_NL=terms_nl)
+
+        env_en = self.env(context={})
+        env_fr = self.env(context={'lang': 'fr_FR'})
+        env_nl = self.env(context={'lang': 'nl_NL'})
+
+
+        print('en', view.with_env(env_en).arch_db)
+        print('en', view.with_env(env_fr).arch_db)
+        print('en', view.with_env(env_nl).arch_db)
+        print()
+
+        # modify source term in view (fixed type in 'cheeze')
         import pudb
         pudb.set_trace()
 
-        user = self.env['res.users'].create({
-            'name': 'test user',
-            'login': 'test2',
-            'groups_id': [4, ref_id],
-        })
+        # FP NOTE: why adding a clear works ?
+        # self.env.clear()
 
-        partner_model = self.env['ir.model'].search([('model','=','res.partner')])
-        self.env['ir.rule'].create({
-            'name': 'Y is invisible',
-            'domain_force': [('id', '!=', p1.id)],
-            'model_id': partner_model.id,
-        })
-        print('ID to Exclude', p1.id)
+        terms_en = ('Bread and cheese',)
+        view.write({'arch_db': archf % terms_en})
 
-        # search as unprivileged user
-        p_obj = self.env['res.partner'].sudo(user)
-        partners = p_obj.search([])
 
-        assert p1 not in partners, "not in"
-        assert p2 in partners, "in"
+        # check whether translations have been synchronized
+        print('en', view.with_env(env_en).arch_db)
+        print('fr', view.with_env(env_fr).arch_db)
+        print('nl', view.with_env(env_nl).arch_db)
+
+        assert view.with_env(env_en).arch_db == archf % terms_en
+        assert view.with_env(env_fr).arch_db == archf % terms_fr
+        assert view.with_env(env_nl).arch_db == archf % terms_nl
+
         crah_here_is_ok
         return True
 
