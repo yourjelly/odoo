@@ -1317,7 +1317,7 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_tag_ids': [ref('l10n_fr.tax_report_base_due_intra_8_5')],
+                'minus_tag_ids': [ref('l10n_fr.tax_report_base_due_intra_8_5')],
             }),
 
             (0,0, {

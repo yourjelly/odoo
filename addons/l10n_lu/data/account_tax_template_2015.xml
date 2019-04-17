@@ -32,7 +32,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_AB-EC-14" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_AB-EC-14" model="account.tax.template">
 		<field name="sequence">105</field>
         <field name="description">AB-EC-14</field>
         <field name="name">Purchase Goods 14% - Extra-Community</field>
@@ -81,7 +81,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_AB-EC-17" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_AB-EC-17" model="account.tax.template">
 		<field name="sequence">111</field>
         <field name="description">AB-EC-17</field>
         <field name="name">Purchase Goods 17% - Extra-Community</field>
@@ -130,7 +130,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_AB-EC-3" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2011_tax_AB-EC-3" model="account.tax.template">
 		<field name="sequence">114</field>
         <field name="description">AB-EC-3</field>
         <field name="name">Purchase Goods 3% - Extra-Community</field>
@@ -179,7 +179,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_AB-EC-8" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_AB-EC-8" model="account.tax.template">
 		<field name="sequence">120</field>
         <field name="description">AB-EC-8</field>
         <field name="name">Purchase Goods 8% - Extra-Community</field>
@@ -261,7 +261,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_AB-ECP-14" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_AB-ECP-14" model="account.tax.template">
 		<field name="sequence">127</field>
         <field name="description">AB-ECP-14</field>
         <field name="name">Purchase Goods 14% - Extra-Community fin privées</field>
@@ -310,7 +310,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_AB-ECP-17" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_AB-ECP-17" model="account.tax.template">
 		<field name="sequence">133</field>
         <field name="description">AB-ECP-17</field>
         <field name="name">Purchase Goods 17% - Extra-Community fin privées</field>
@@ -359,7 +359,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_AB-ECP-3" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_AB-ECP-3" model="account.tax.template">
 		<field name="sequence">136</field>
         <field name="description">AB-ECP-3</field>
         <field name="name">Purchase Goods 3% - Extra-Community fin privées</field>
@@ -408,7 +408,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_AB-ECP-8" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_AB-ECP-8" model="account.tax.template">
 		<field name="sequence">142</field>
         <field name="description">AB-ECP-8</field>
         <field name="name">Purchase Goods 8% - Extra-Community fin privées</field>
@@ -490,7 +490,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_AB-IC-14" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_AB-IC-14" model="account.tax.template">
 		<field name="sequence">149</field>
         <field name="description">AB-IC-14</field>
         <field name="name">Purchase Goods 14% - Intra-Community</field>
@@ -539,7 +539,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_AB-IC-17" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_AB-IC-17" model="account.tax.template">
 		<field name="sequence">155</field>
         <field name="description">AB-IC-17</field>
         <field name="name">Purchase Goods 17% - Intra-Community</field>
@@ -588,7 +588,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_AB-IC-3" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2011_tax_AB-IC-3" model="account.tax.template">
 		<field name="sequence">158</field>
         <field name="description">AB-IC-3</field>
         <field name="name">Purchase Goods 3% - Intra-Community</field>
@@ -637,7 +637,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_AB-IC-8" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_AB-IC-8" model="account.tax.template">
 		<field name="sequence">164</field>
         <field name="description">AB-IC-8</field>
         <field name="name">Purchase Goods 8% - Intra-Community</field>
@@ -901,7 +901,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_AP-EC-14" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_AP-EC-14" model="account.tax.template">
 		<field name="sequence">179</field>
         <field name="description">AP-EC-14</field>
         <field name="name">Purchase Services 14% - Extra-Community</field>
@@ -950,7 +950,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_AP-EC-17" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_AP-EC-17" model="account.tax.template">
 		<field name="sequence">185</field>
         <field name="description">AP-EC-17</field>
         <field name="name">Purchase Services 17% - Extra-Community</field>
@@ -999,7 +999,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_AP-EC-3" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2011_tax_AP-EC-3" model="account.tax.template">
 		<field name="sequence">188</field>
         <field name="description">AP-EC-3</field>
         <field name="name">Purchase Services 3% - Extra-Community</field>
@@ -1048,7 +1048,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_AP-EC-8" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_AP-EC-8" model="account.tax.template">
 		<field name="sequence">194</field>
         <field name="description">AP-EC-8</field>
         <field name="name">Purchase Services 8% - Extra-Community</field>
@@ -1130,7 +1130,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_AP-IC-14" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_AP-IC-14" model="account.tax.template">
 		<field name="sequence">201</field>
         <field name="description">AP-IC-14</field>
         <field name="name">Purchase Services 14% - Intra-Community</field>
@@ -1179,7 +1179,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_AP-IC-17" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_AP-IC-17" model="account.tax.template">
 		<field name="sequence">207</field>
         <field name="description">AP-IC-17</field>
         <field name="name">Purchase Services 17% - Intra-Community</field>
@@ -1228,7 +1228,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_AP-IC-3" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2011_tax_AP-IC-3" model="account.tax.template">
 		<field name="sequence">210</field>
         <field name="description">AP-IC-3</field>
         <field name="name">Purchase Services 3% - Intra-Community</field>
@@ -1277,7 +1277,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_AP-IC-8" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_AP-IC-8" model="account.tax.template">
 		<field name="sequence">216</field>
         <field name="description">AP-IC-8</field>
         <field name="name">Purchase Services 8% - Intra-Community</field>
@@ -1540,7 +1540,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_FB-EC-14" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_FB-EC-14" model="account.tax.template">
 		<field name="sequence">231</field>
         <field name="description">FB-EC-14</field>
         <field name="name">Expenses Goods 14% - Extra-Community</field>
@@ -1589,7 +1589,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_FB-EC-17" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_FB-EC-17" model="account.tax.template">
 		<field name="sequence">237</field>
         <field name="description">FB-EC-17</field>
         <field name="name">Expenses Goods 17% - Extra-Community</field>
@@ -1638,7 +1638,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_FB-EC-3" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2011_tax_FB-EC-3" model="account.tax.template">
 		<field name="sequence">240</field>
         <field name="description">FB-EC-3</field>
         <field name="name">Expenses Goods 3% - Extra-Community</field>
@@ -1687,7 +1687,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_FB-EC-8" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_FB-EC-8" model="account.tax.template">
 		<field name="sequence">246</field>
         <field name="description">FB-EC-8</field>
         <field name="name">Expenses Goods 8% - Extra-Community</field>
@@ -1769,7 +1769,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_FB-ECP-14" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_FB-ECP-14" model="account.tax.template">
 		<field name="sequence">253</field>
         <field name="description">FB-ECP-14</field>
         <field name="name">Expenses Goods 14% - Extra-Community fin privées</field>
@@ -1818,7 +1818,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_FB-ECP-17" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_FB-ECP-17" model="account.tax.template">
 		<field name="sequence">259</field>
         <field name="description">FB-ECP-17</field>
         <field name="name">Expenses Goods 17% - Extra-Community fin privées</field>
@@ -1867,7 +1867,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_FB-ECP-3" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_FB-ECP-3" model="account.tax.template">
 		<field name="sequence">262</field>
         <field name="description">FB-ECP-3</field>
         <field name="name">Expenses Goods 3% - Extra-Community fin privées</field>
@@ -1916,7 +1916,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_FB-ECP-8" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_FB-ECP-8" model="account.tax.template">
 		<field name="sequence">268</field>
         <field name="description">FB-ECP-8</field>
         <field name="name">Expenses Goods 8% - Extra-Community fin privées</field>
@@ -1998,7 +1998,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_FB-IC-14" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_FB-IC-14" model="account.tax.template">
 		<field name="sequence">275</field>
         <field name="description">FB-IC-14</field>
         <field name="name">Expenses Goods 14% - Intra-Community</field>
@@ -2047,7 +2047,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_FB-IC-17" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_FB-IC-17" model="account.tax.template">
 		<field name="sequence">281</field>
         <field name="description">FB-IC-17</field>
         <field name="name">Expenses Goods 17% - Intra-Community</field>
@@ -2096,7 +2096,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_FB-IC-3" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2011_tax_FB-IC-3" model="account.tax.template">
 		<field name="sequence">284</field>
         <field name="description">FB-IC-3</field>
         <field name="name">Expenses Goods 3% - Intra-Community</field>
@@ -2145,7 +2145,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_FB-IC-8" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_FB-IC-8" model="account.tax.template">
 		<field name="sequence">290</field>
         <field name="description">FB-IC-8</field>
         <field name="name">Expenses Goods 8% - Intra-Community</field>
@@ -2408,7 +2408,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_FP-EC-14" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_FP-EC-14" model="account.tax.template">
 		<field name="sequence">305</field>
         <field name="description">FP-EC-14</field>
         <field name="name">Expenses Services 14% - Extra-Community</field>
@@ -2457,7 +2457,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_FP-EC-17" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_FP-EC-17" model="account.tax.template">
 		<field name="sequence">311</field>
         <field name="description">FP-EC-17</field>
         <field name="name">Expenses Services 17% - Extra-Community</field>
@@ -2506,7 +2506,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_FP-EC-3" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2011_tax_FP-EC-3" model="account.tax.template">
 		<field name="sequence">314</field>
         <field name="description">FP-EC-3</field>
         <field name="name">Expenses Services 3% - Extra-Community</field>
@@ -2555,7 +2555,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_FP-EC-8" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_FP-EC-8" model="account.tax.template">
 		<field name="sequence">320</field>
         <field name="description">FP-EC-8</field>
         <field name="name">Expenses Services 8% - Extra-Community</field>
@@ -2637,7 +2637,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_FP-IC-14" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_FP-IC-14" model="account.tax.template">
 		<field name="sequence">327</field>
         <field name="description">FP-IC-14</field>
         <field name="name">Expenses Services 14% - Intra-Community</field>
@@ -2686,7 +2686,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_FP-IC-17" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_FP-IC-17" model="account.tax.template">
 		<field name="sequence">333</field>
         <field name="description">FP-IC-17</field>
         <field name="name">Expenses Services 17% - Intra-Community</field>
@@ -2735,7 +2735,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_FP-IC-3" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2011_tax_FP-IC-3" model="account.tax.template">
 		<field name="sequence">336</field>
         <field name="description">FP-IC-3</field>
         <field name="name">Expenses Services 3% - Intra-Community</field>
@@ -2784,7 +2784,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_FP-IC-8" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_FP-IC-8" model="account.tax.template">
 		<field name="sequence">342</field>
         <field name="description">FP-IC-8</field>
         <field name="name">Expenses Services 8% - Intra-Community</field>
@@ -3047,7 +3047,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_IB-EC-14" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_IB-EC-14" model="account.tax.template">
 		<field name="sequence">357</field>
         <field name="description">IB-EC-14</field>
         <field name="name">Investment Goods 14% - Extra-Community</field>
@@ -3096,7 +3096,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_IB-EC-17" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_IB-EC-17" model="account.tax.template">
 		<field name="sequence">363</field>
         <field name="description">IB-EC-17</field>
         <field name="name">Investment Goods 17% - Extra-Community</field>
@@ -3145,7 +3145,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_IB-EC-3" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2011_tax_IB-EC-3" model="account.tax.template">
 		<field name="sequence">366</field>
         <field name="description">IB-EC-3</field>
         <field name="name">Investment Goods 3% - Extra-Community</field>
@@ -3194,7 +3194,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_IB-EC-8" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_IB-EC-8" model="account.tax.template">
 		<field name="sequence">372</field>
         <field name="description">IB-EC-8</field>
         <field name="name">Investment Goods 8% - Extra-Community</field>
@@ -3276,7 +3276,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_IB-ECP-14" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_IB-ECP-14" model="account.tax.template">
 		<field name="sequence">379</field>
         <field name="description">IB-ECP-14</field>
         <field name="name">Investment Goods 14% - Extra-Community fin privées</field>
@@ -3325,7 +3325,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_IB-ECP-17" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_IB-ECP-17" model="account.tax.template">
 		<field name="sequence">385</field>
         <field name="description">IB-ECP-17</field>
         <field name="name">Investment Goods 17% - Extra-Community fin privées</field>
@@ -3374,7 +3374,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_IB-ECP-3" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_IB-ECP-3" model="account.tax.template">
 		<field name="sequence">388</field>
         <field name="description">IB-ECP-3</field>
         <field name="name">Investment Goods 3% - Extra-Community fin privées</field>
@@ -3423,7 +3423,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_IB-ECP-8" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_IB-ECP-8" model="account.tax.template">
 		<field name="sequence">394</field>
         <field name="description">IB-ECP-8</field>
         <field name="name">Investment Goods 8% - Extra-Community fin privées</field>
@@ -3505,7 +3505,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_IB-IC-14" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_IB-IC-14" model="account.tax.template">
 		<field name="sequence">401</field>
         <field name="description">IB-IC-14</field>
         <field name="name">Investment Goods 14% - Intra-Community</field>
@@ -3554,7 +3554,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_IB-IC-17" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_IB-IC-17" model="account.tax.template">
 		<field name="sequence">407</field>
         <field name="description">IB-IC-17</field>
         <field name="name">Investment Goods 17% - Intra-Community</field>
@@ -3603,7 +3603,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_IB-IC-3" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2011_tax_IB-IC-3" model="account.tax.template">
 		<field name="sequence">410</field>
         <field name="description">IB-IC-3</field>
         <field name="name">Investment Goods 3% - Intra-Community</field>
@@ -3652,7 +3652,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_IB-IC-8" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_IB-IC-8" model="account.tax.template">
 		<field name="sequence">416</field>
         <field name="description">IB-IC-8</field>
         <field name="name">Investment Goods 8% - Intra-Community</field>
@@ -3915,7 +3915,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_IP-EC-14" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_IP-EC-14" model="account.tax.template">
 		<field name="sequence">431</field>
         <field name="description">IP-EC-14</field>
         <field name="name">Investment Services 14% - Extra-Community</field>
@@ -3964,7 +3964,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_IP-EC-17" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_IP-EC-17" model="account.tax.template">
 		<field name="sequence">437</field>
         <field name="description">IP-EC-17</field>
         <field name="name">Investment Services 17% - Extra-Community</field>
@@ -4013,7 +4013,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_IP-EC-3" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2011_tax_IP-EC-3" model="account.tax.template">
 		<field name="sequence">440</field>
         <field name="description">IP-EC-3</field>
         <field name="name">Investment Services 3% - Extra-Community</field>
@@ -4062,7 +4062,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_IP-EC-8" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_IP-EC-8" model="account.tax.template">
 		<field name="sequence">446</field>
         <field name="description">IP-EC-8</field>
         <field name="name">Investment Services 8% - Extra-Community</field>
@@ -4144,7 +4144,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_IP-IC-14" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_IP-IC-14" model="account.tax.template">
 		<field name="sequence">453</field>
         <field name="description">IP-IC-14</field>
         <field name="name">Investment Services 14% - Intra-Community</field>
@@ -4193,7 +4193,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_IP-IC-17" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_IP-IC-17" model="account.tax.template">
 		<field name="sequence">459</field>
         <field name="description">IP-IC-17</field>
         <field name="name">Investment Services 17% - Intra-Community</field>
@@ -4242,7 +4242,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2011_tax_IP-IC-3" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2011_tax_IP-IC-3" model="account.tax.template">
 		<field name="sequence">462</field>
         <field name="description">IP-IC-3</field>
         <field name="name">Investment Services 3% - Intra-Community</field>
@@ -4291,7 +4291,7 @@
 		]"/>
 	</record>
 
-	<record id="lu_2015_tax_IP-IC-8" model="account.tax.template"> <!--TODO OCO merged group-->
+	<record id="lu_2015_tax_IP-IC-8" model="account.tax.template">
 		<field name="sequence">468</field>
         <field name="description">IP-IC-8</field>
         <field name="name">Investment Services 8% - Intra-Community</field>

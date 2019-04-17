@@ -1217,7 +1217,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V81-21-CC" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V81-21-CC" model="account.tax.template">
             <field name="sequence">410</field>
             <field name="description">TVA 21% Cocont.</field>
             <field name="name">21% Cocont. M.</field>
@@ -1269,7 +1269,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V81-12-CC" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V81-12-CC" model="account.tax.template">
             <field name="sequence">420</field>
             <field name="description">TVA 12% Cocont.</field>
             <field name="name">12% Cocont. M.</field>
@@ -1322,7 +1322,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V81-06-CC" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V81-06-CC" model="account.tax.template">
             <field name="sequence">430</field>
             <field name="description">TVA 6% Cocont.</field>
             <field name="name">6% Cocont. M.</field>
@@ -1415,7 +1415,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V82-21-CC" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V82-21-CC" model="account.tax.template">
             <field name="sequence">510</field>
             <field name="description">TVA 21% Cocont.</field>
             <field name="name">21% Cocont .S.</field>
@@ -1468,7 +1468,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V82-12-CC" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V82-12-CC" model="account.tax.template">
             <field name="sequence">520</field>
             <field name="description">TVA 12% Cocont.</field>
             <field name="name">12% Cocont. S.</field>
@@ -1521,7 +1521,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V82-06-CC" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V82-06-CC" model="account.tax.template">
             <field name="sequence">530</field>
             <field name="description">TVA 6% Cocont.</field>
             <field name="name">6% Cocont. S.</field>
@@ -1614,7 +1614,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V83-21-CC" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V83-21-CC" model="account.tax.template">
             <field name="sequence">610</field>
             <field name="description">TVA 21% Cocont.</field>
             <field name="name">21% Cocont. - Biens d'investissement</field>
@@ -1667,7 +1667,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V83-12-CC" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V83-12-CC" model="account.tax.template">
             <field name="sequence">620</field>
             <field name="description">TVA 12% Cocont.</field>
             <field name="name">12% Cocont. - Biens d'investissement</field>
@@ -1720,7 +1720,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V83-06-CC" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V83-06-CC" model="account.tax.template">
             <field name="sequence">630</field>
             <field name="description">TVA 6% Cocont.</field>
             <field name="name">6% Cocont. - Biens d'investissement</field>
@@ -1813,7 +1813,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V82-CAR-EXC" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V82-CAR-EXC" model="account.tax.template">
             <field name="sequence">720</field>
             <field name="description">TVA 50% Non Déductible - Frais de voiture (Prix Excl.)</field>
             <field name="name">50% Non Déductible - Frais de voiture (Prix Excl.)</field>
@@ -1869,7 +1869,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V81-21-EU" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V81-21-EU" model="account.tax.template">
             <field name="sequence">1110</field>
             <field name="description">TVA 21% EU</field>
             <field name="name">21% EU M.</field>
@@ -1921,7 +1921,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V81-12-EU" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V81-12-EU" model="account.tax.template">
             <field name="sequence">1120</field>
             <field name="description">TVA 12% EU</field>
             <field name="name">12% EU M.</field>
@@ -1974,7 +1974,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V81-06-EU" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V81-06-EU" model="account.tax.template">
             <field name="sequence">1130</field>
             <field name="description">TVA 6% EU</field>
             <field name="name">6% EU M.</field>
@@ -2067,7 +2067,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V82-21-EU-S" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V82-21-EU-S" model="account.tax.template">
             <field name="sequence">1210</field>
             <field name="description">TVA 21% EU</field>
             <field name="name">21% EU S.</field>
@@ -2120,7 +2120,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V82-21-EU-G" model="account.tax.template"> <!--TODO OCO merged-->
+        <record id="attn_VAT-IN-V82-21-EU-G" model="account.tax.template">
             <field name="sequence">1220</field>
             <field name="description">TVA 21% EU</field>
             <field name="name">21% EU - Biens divers</field>
@@ -2173,7 +2173,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V82-12-EU-S" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V82-12-EU-S" model="account.tax.template">
             <field name="sequence">1230</field>
             <field name="description">TVA 12% EU</field>
             <field name="name">12% EU S.</field>
@@ -2226,7 +2226,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V82-12-EU-G" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V82-12-EU-G" model="account.tax.template">
             <field name="sequence">1240</field>
             <field name="description">TVA 12% EU</field>
             <field name="name">12% EU - Biens divers</field>
@@ -2279,7 +2279,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V82-06-EU-S" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V82-06-EU-S" model="account.tax.template">
             <field name="sequence">1250</field>
             <field name="description">TVA 6% EU</field>
             <field name="name">6% EU S.</field>
@@ -2425,7 +2425,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V83-21-EU" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V83-21-EU" model="account.tax.template">
             <field name="sequence">1310</field>
             <field name="description">TVA 21% EU</field>
             <field name="name">21% EU - Biens d'investissement</field>
@@ -2518,7 +2518,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V83-12-EU" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V83-12-EU" model="account.tax.template">
             <field name="sequence">1320</field>
             <field name="description">TVA 12% EU</field>
             <field name="name">12% EU - Biens d'investissement</field>
@@ -2571,7 +2571,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V83-06-EU" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V83-06-EU" model="account.tax.template">
             <field name="sequence">1330</field>
             <field name="description">TVA 6% EU</field>
             <field name="name">6% EU - Biens d'investissement</field>
@@ -2664,7 +2664,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V81-21-ROW-CC" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V81-21-ROW-CC" model="account.tax.template">
             <field name="sequence">2110</field>
             <field name="description">TVA 21% Non EU</field>
             <field name="name">21% Non EU M.</field>
@@ -2716,7 +2716,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V81-12-ROW-CC" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V81-12-ROW-CC" model="account.tax.template">
             <field name="sequence">2120</field>
             <field name="description">TVA 12% Non EU</field>
             <field name="name">12% Non EU M.</field>
@@ -2769,7 +2769,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V81-06-ROW-CC" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V81-06-ROW-CC" model="account.tax.template">
             <field name="sequence">2130</field>
             <field name="description">TVA 6% Non EU</field>
             <field name="name">6% Non EU M.</field>
@@ -2862,7 +2862,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V82-21-ROW-CC" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V82-21-ROW-CC" model="account.tax.template">
             <field name="sequence">2210</field>
             <field name="description">TVA 21% Non EU</field>
             <field name="name">21% Non EU S.</field>
@@ -2915,7 +2915,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V82-12-ROW-CC" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V82-12-ROW-CC" model="account.tax.template">
             <field name="sequence">2220</field>
             <field name="description">TVA 12% Non EU</field>
             <field name="name">12% Non EU S.</field>
@@ -2968,7 +2968,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V82-06-ROW-CC" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V82-06-ROW-CC" model="account.tax.template">
             <field name="sequence">2230</field>
             <field name="description">TVA 6% Non EU</field>
             <field name="name">6% Non EU S.</field>
@@ -3061,7 +3061,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V83-21-ROW-CC" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V83-21-ROW-CC" model="account.tax.template">
             <field name="sequence">2310</field>
             <field name="description">TVA 21% Non EU</field>
             <field name="name">21% Non EU - Biens d'investissement</field>
@@ -3114,7 +3114,7 @@
             ]"/>
         </record>
 
-        <record id="attn_VAT-IN-V83-12-ROW-CC" model="account.tax.template"> <!--TODO OCO merged group-->
+        <record id="attn_VAT-IN-V83-12-ROW-CC" model="account.tax.template">
             <field name="sequence">2320</field>
             <field name="description">TVA 12% Non EU</field>
             <field name="name">12% Non EU - Biens d'investissement</field>

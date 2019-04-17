@@ -659,7 +659,7 @@ class AccountMoveLine(models.Model):
     analytic_line_ids = fields.One2many('account.analytic.line', 'move_id', string='Analytic lines', oldname="analytic_lines")
     tax_ids = fields.Many2many('account.tax', string='Taxes', domain=['|', ('active', '=', False), ('active', '=', True)])
     tax_line_id = fields.Many2one('account.tax', string='Originator tax', ondelete='restrict')
-    tax_repartition_line_id = fields.Many2one(comodel_name='account.tax.repartition.line', string="Originator Tax Repartition Line", ondelete='restrict', help="Tax repartition line that caused the creation of this move line, if any") #TODO OCO: tax_line_id pourrait être calculé depuis ceci (mais doit de toute façon être stored)
+    tax_repartition_line_id = fields.Many2one(comodel_name='account.tax.repartition.line', string="Originator Tax Repartition Line", ondelete='restrict', help="Tax repartition line that caused the creation of this move line, if any")
     analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', index=True)
     analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags')
     company_id = fields.Many2one('res.company', related='account_id.company_id', string='Company', store=True, readonly=True)

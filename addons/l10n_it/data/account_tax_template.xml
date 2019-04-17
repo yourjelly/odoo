@@ -273,7 +273,7 @@
         ]"/>
     </record>
 
-    <record id="10AO" model="account.tax.template"> <!--TODO OCO merged group-->
+    <record id="10AO" model="account.tax.template">
         <field name="description">10AO</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
         <field name="name">Iva al 10% indetraibile</field>
@@ -383,7 +383,7 @@
         ]"/>
     </record>
 
-    <record id="2010" model="account.tax.template"> <!--TODO OCO merged group-->
+    <record id="2010" model="account.tax.template">
         <field name="description">2010</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
         <field name="name">Iva al 20% detraibile 10%</field>
@@ -425,7 +425,7 @@
         ]"/>
     </record>
 
-    <record id="2015" model="account.tax.template"> <!--TODO OCO merged group-->
+    <record id="2015" model="account.tax.template">
         <field name="description">2015</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
         <field name="name">Iva al 20% detraibile 15%</field>
@@ -467,7 +467,7 @@
         ]"/>
     </record>
 
-    <record id="2040" model="account.tax.template"> <!--TODO OCO merged group-->
+    <record id="2040" model="account.tax.template">
         <field name="description">2040</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
         <field name="name">Iva al 20% detraibile 40%</field>
@@ -509,7 +509,7 @@
         ]"/>
     </record>
 
-    <record id="20AO" model="account.tax.template"> <!--TODO OCO merged group-->
+    <record id="20AO" model="account.tax.template">
         <field name="description">20AO</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
         <field name="name">Iva al 20% indetraibile</field>
@@ -551,7 +551,7 @@
         ]"/>
     </record>
 
-    <record id="20I5" model="account.tax.template"> <!--TODO OCO merged group-->
+    <record id="20I5" model="account.tax.template">
         <field name="description">20I5</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
         <field name="name">IVA al 20% detraibile al 50%</field>
@@ -729,7 +729,7 @@
         ]"/>
     </record>
 
-    <record id="4AO" model="account.tax.template"> <!--TODO OCO merged group-->
+    <record id="4AO" model="account.tax.template">
         <field name="description">4AO</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
         <field name="name">Iva al 4% indetraibile</field>
@@ -771,7 +771,7 @@
         ]"/>
     </record>
 
-    <record id="10I5" model="account.tax.template"> <!--TODO OCO merged group-->
+    <record id="10I5" model="account.tax.template">
         <field name="description">10I5</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
         <field name="name">IVA al 10% detraibile al 50%</field>
@@ -865,7 +865,7 @@
         ]"/>
     </record>
 
-    <record id="4I5" model="account.tax.template"> <!--TODO OCO merged group-->
+    <record id="4I5" model="account.tax.template">
         <field name="description">4I5</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
         <field name="name">IVA al 4% detraibile al 50%</field>
@@ -1315,7 +1315,7 @@
         ]"/>
     </record>
 
-    <record id="2110" model="account.tax.template"> <!--TODO OCO merged group-->
+    <record id="2110" model="account.tax.template">
         <field name="description">2110</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
         <field name="name">Iva al 21% detraibile 10%</field>
@@ -1357,7 +1357,7 @@
         ]"/>
     </record>
 
-    <record id="2115" model="account.tax.template"> <!--TODO OCO merged group-->
+    <record id="2115" model="account.tax.template">
         <field name="description">2115</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
         <field name="name">Iva al 21% detraibile 15%</field>
@@ -1399,7 +1399,7 @@
         ]"/>
     </record>
 
-    <record id="2140" model="account.tax.template"> <!--TODO OCO merged group-->
+    <record id="2140" model="account.tax.template">
         <field name="description">2140</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
         <field name="name">Iva al 21% detraibile 40%</field>
@@ -1441,7 +1441,7 @@
         ]"/>
     </record>
 
-    <record id="21AO" model="account.tax.template"> <!--TODO OCO merged group-->
+    <record id="21AO" model="account.tax.template">
         <field name="description">21AO</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
         <field name="name">Iva al 21% indetraibile</field>
@@ -1483,7 +1483,7 @@
         ]"/>
     </record>
 
-    <record id="21I5" model="account.tax.template"> <!--TODO OCO merged group-->
+    <record id="21I5" model="account.tax.template">
         <field name="description">21I5</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
         <field name="name">IVA al 21% detraibile al 50%</field>
@@ -1525,7 +1525,7 @@
         ]"/>
     </record>
 
-    <record id="2210" model="account.tax.template"> <!--TODO OCO merged group-->
+    <record id="2210" model="account.tax.template">
         <field name="description">2210</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
         <field name="name">Iva al 22% detraibile 10%</field>
@@ -1567,7 +1567,7 @@
         ]"/>
     </record>
 
-    <record id="2215" model="account.tax.template"> <!--TODO OCO merged group-->
+    <record id="2215" model="account.tax.template">
         <field name="description">2215</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
         <field name="name">Iva al 22% detraibile 15%</field>
@@ -1609,7 +1609,7 @@
         ]"/>
     </record>
 
-    <record id="2240" model="account.tax.template"> <!--TODO OCO merged group-->
+    <record id="2240" model="account.tax.template">
         <field name="description">2240</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
         <field name="name">Iva al 22% detraibile 40%</field>
@@ -1651,7 +1651,7 @@
         ]"/>
     </record>
 
-    <record id="22AO" model="account.tax.template"> <!--TODO OCO merged group-->
+    <record id="22AO" model="account.tax.template">
         <field name="description">22AO</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
         <field name="name">Iva al 22% indetraibile</field>
@@ -1693,7 +1693,7 @@
         ]"/>
     </record>
 
-    <record id="22I5" model="account.tax.template"> <!--TODO OCO merged group-->
+    <record id="22I5" model="account.tax.template">
         <field name="description">22I5</field>
         <field name="chart_template_id" ref="l10n_it_chart_template_generic"/>
         <field name="name">IVA al 22% detraibile al 50%</field>
