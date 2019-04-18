@@ -20,7 +20,7 @@
             <p><br/></p>
                 <table class="table table-bordered">
                     <tbody>
-                        % for contributor in user.env['ir.actions.server'].browse(197).run()
+                        % for contributor in user.env.ref('digest_forum.server_action_find_best_contributeur').run()
                             <tr>
                                 <td><p>${contributor['user'].name}</p></td>
                                 <td><p>Score : ${contributor['score']}</p></td>
@@ -32,15 +32,22 @@
             </t>
             <p><br/></p>
             <h4><br/></h4>
-            <h4>Last questions :</h4>
+            <h4>Last posts :</h4>
             <p><br/></p>
             <table class="table table-bordered">
                 <tbody>
-                    % for post in user.env['forum.post'].search([('parent_id', '=', False)])
+                    <tr>
+                        <th><p>Title</p></th>
+                        <th><p>Vote score</p></th>
+                        <th><p>Creation date</p></th>
+                        <th><p>Author</p></th>
+                    </tr>
+                    % for post in user.env['forum.post'].search([('parent_id', '=', False), ('create_date', '>', datetime.datetime.now() - datetime.timedelta(days=7)),('create_uid.groups_id', 'in', user.env.ref('base.group_user').id)])
                         <tr>
                             <td><p>${post.name}</p></td>
                             <td><p>${post.vote_count}</p></td>
-                            <td><p>${post.create_date}</p></td>
+                            <td><p>${post.create_date.date()}</p></td>
+                            <td><p>${post.create_uid.name}</p></td>
                         </tr>
                     % endfor
                 </tbody>
