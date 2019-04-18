@@ -134,7 +134,7 @@ QUnit.on('OdooAfterTestHook', function () {
                 if (!document.body.classList.contains('debug')) {
                     $(bodyChild).remove();
                 }
-                QUnit.pushFailure(`Body still contains undesirable elements`);
+                QUnit.pushFailure(`Body still contains undesirable elements:\n` + $('body').html());
             }
         }
     }
