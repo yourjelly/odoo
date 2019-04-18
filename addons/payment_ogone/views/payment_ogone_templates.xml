@@ -99,6 +99,7 @@
         </template>
         <template id="ogone_assets" inherit_id="" name="payment_page assets frontend">
             <t t-call="portal.assets_frontend" t-js="false"/>
+            <link rel="stylesheet" type="text/scss" href="/payment_ogone/static/src/scss/payment_page.scss"/>
         </template>
     </data>
 </odoo>
