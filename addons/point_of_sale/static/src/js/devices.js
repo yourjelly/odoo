@@ -444,19 +444,22 @@ var ProxyDevice  = core.Class.extend(core.mixins.PropertiesMixin,{
 
     print_sale_details: function() { 
         var self = this;
-        new Model('report.point_of_sale.report_saledetails').call('get_sale_details').then(function(result){
-            var env = {
-                widget: new PosBaseWidget(self),
-                company: self.pos.company,
-                pos: self.pos,
-                products: result.products,
-                payments: result.payments,
-                taxes: result.taxes,
-                total_paid: result.total_paid,
-                date: (new Date()).toLocaleString(),
-            };
-            var report = QWeb.render('SaleDetailsReport', env);
-            self.print_receipt(report);
+        var config_id = this.pos.config.id;
+        new Model('report.point_of_sale.report_saledetails')
+            .call('get_sale_details', [false, false, config_id])
+            .then(function(result){
+                var env = {
+                    widget: new PosBaseWidget(self),
+                    company: self.pos.company,
+                    pos: self.pos,
+                    products: result.products,
+                    payments: result.payments,
+                    taxes: result.taxes,
+                    total_paid: result.total_paid,
+                    date: (new Date()).toLocaleString(),
+                };
+                var report = QWeb.render('SaleDetailsReport', env);
+                self.print_receipt(report);
         })
     },
 
