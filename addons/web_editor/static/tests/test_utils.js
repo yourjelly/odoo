@@ -474,7 +474,7 @@ _.each(_.range(40, 127), function (keyCode) {
  * @param {function($editable, assert)} [keyboardTests.test.check]
  * @param {Number} addTests
  */
-var testKeyboard = function ($editable, assert, keyboardTests, addTests) {
+var testKeyboard = async function ($editable, assert, keyboardTests, addTests) {
     var tests = _.compact(_.pluck(keyboardTests, 'test'));
     var testNumber = _.compact(_.pluck(tests, 'start')).length +
         _.compact(_.pluck(tests, 'content')).length +
@@ -555,7 +555,7 @@ var testKeyboard = function ($editable, assert, keyboardTests, addTests) {
         var def = Promise.resolve();
         $editable.data('wysiwyg').setValue(test.content);
 
-        function poll(step) {
+        async function poll(step) {
             var def = testUtils.makeTestPromise();
             if (step.start) {
                 selectText(step.start, step.end);
@@ -566,10 +566,20 @@ var testKeyboard = function ($editable, assert, keyboardTests, addTests) {
                         'DOM: ' + $editable.html();
                 }
             }
-            setTimeout(function () {
-                if (step.keyCode || step.key) {
-                    var target = Wysiwyg.getRange($editable[0]).ec;
-                    if (window.location.search.indexOf('notrycatch') !== -1) {
+            testUtils.nextTick();
+            if (step.keyCode || step.key) {
+                var target = Wysiwyg.getRange($editable[0]).ec;
+                if (window.location.search.indexOf('notrycatch') !== -1) {
+                    keydown(target, {
+                        key: step.key,
+                        keyCode: step.keyCode,
+                        ctrlKey: !!step.ctrlKey,
+                        shiftKey: !!step.shiftKey,
+                        altKey: !!step.altKey,
+                        metaKey: !!step.metaKey,
+                    });
+                } else {
+                    try {
                         keydown(target, {
                             key: step.key,
                             keyCode: step.keyCode,
@@ -578,36 +588,25 @@ var testKeyboard = function ($editable, assert, keyboardTests, addTests) {
                             altKey: !!step.altKey,
                             metaKey: !!step.metaKey,
                         });
-                    } else {
-                        try {
-                            keydown(target, {
-                                key: step.key,
-                                keyCode: step.keyCode,
-                                ctrlKey: !!step.ctrlKey,
-                                shiftKey: !!step.shiftKey,
-                                altKey: !!step.altKey,
-                                metaKey: !!step.metaKey,
-                            });
-                        } catch (e) {
-                            assert.notOk(e.name + '\n\n' + e.stack, test.name);
-                        }
+                    } catch (e) {
+                        assert.notOk(e.name + '\n\n' + e.stack, test.name);
                     }
                 }
-                setTimeout(function () {
-                    if (step.keyCode || step.key) {
-                        var $target = $(target.tagName ? target : target.parentNode);
-                        $target.trigger($.Event('keyup', {
-                            key: step.key,
-                            keyCode: step.keyCode,
-                            ctrlKey: !!step.ctrlKey,
-                            shiftKey: !!step.shiftKey,
-                            altKey: !!step.altKey,
-                            metaKey: !!step.metaKey,
-                        }));
-                    }
-                    setTimeout(def.resolve.bind(def));
-                });
-            });
+            }
+            testUtils.nextTick();
+            if (step.keyCode || step.key) {
+                var $target = $(target.tagName ? target : target.parentNode);
+                $target.trigger($.Event('keyup', {
+                    key: step.key,
+                    keyCode: step.keyCode,
+                    ctrlKey: !!step.ctrlKey,
+                    shiftKey: !!step.shiftKey,
+                    altKey: !!step.altKey,
+                    metaKey: !!step.metaKey,
+                }));
+            }
+            testUtils.nextTick();
+            def.resolve();
             return def;
         }
         while (test.steps.length) {
