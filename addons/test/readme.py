@@ -110,12 +110,11 @@ line.create({...})
         cr.execute("INSERT INTO test.line (name, test_id) values ('ghi', 1)")
         self.cache[(line_name, 3)] = 'ghi'
         self.cache[(line_test_id, 3)] = 1
-        add_new_id_in_inverse__check_how_to_do
-        test_line.modified(['name', 'test_id'], ['name', 'test_id'])
+        ??? add to inverse                                                                      # as we wrote a value on test_id, we should update line_ids
+        test_line.modified(['name', 'test_id'])
             env.all.todo.add((field_intx2, test_line))
             for test in self.mapped('test_id'):                                                 # inverse field of line_sum's line_ids = test_id
                 env.all.todo.add((field_line_sum, test))
-        self.compute()
 
 line.search([('intx2', '=', 3)])
     for field in dom_args if field in env.all.todo: field.check_todo()
@@ -154,11 +153,12 @@ recompute()                                                                     
                         self.cache[(int1, 1)] = 20
                         env.towrite.append((intx2, 1), 20)
                         # self.modified(['intx2'])                                              # that is a waste of time, if we already modified recursively
-    while env.towrite()
-        # optimize to work in batches
-        self._write()
-            cr.execute("UPDATE test.test SET intx2=5, line_sum=10 WHERE id=1")
-            cr.execute("UPDATE test.line SET intx2 where id in (...)")
+    self.flush_write(fields = None)
+        while env.towrite():
+            # optimize to work in batches
+            self._write()
+                cr.execute("UPDATE test.test SET intx2=5, line_sum=10 WHERE id=1")
+                cr.execute("UPDATE test.line SET intx2 where id in (...)")
 
 
 # --------------------------------------- To discuss with RCOs ------------------------------------
@@ -175,7 +175,7 @@ recompute()                                                                     
 - recursive should not require a specific mechanism with this approach
 - what do we do when we have no inverse field? (I propose to create one implicitly, just for the cache)
 - towrite should be processed before an unlink (everything) or a select (some fields only)
-
-
+- what if the one2any / many2many inverse does not exists? (fault back to SQL triggers?)
+- rename todo into torecompute
 
 
