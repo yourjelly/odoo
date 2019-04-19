@@ -473,6 +473,10 @@
                         </div>
                         <group>
                             <field name="name"/>
+                            <field name="applicability"/>
+                            <field name="tax_negate" attrs="{'invisible': [('applicability', '!=', 'taxes')]}"/>
+                            <field name="country_id" attrs="{'invisible': [('applicability', '!=', 'taxes')]}"/>
+                            <field name="tax_report_line_ids" attrs="{'invisible': [('applicability', '!=', 'taxes')]}"/>
                         </group>
                     </sheet>
                 </form>
@@ -1078,6 +1082,7 @@
                     <field name="account_id" attrs="{'invisible': [('repartition_type', '=', 'base')]}" options="{'no_create': True}"/>
                     <field name="tag_ids" widget="many2many_tags" options="{'no_create': True}" domain="[('applicability', '=', 'taxes'), ('country_id', '=', country_id)]"/>
                     <field name="country_id" invisible="1"/>
+                    <field name="company_id" invisible="1"/>
                 </tree>
             </field>
         </record>
@@ -1175,11 +1180,12 @@
                     <notebook>
                         <page string="Definition">
                             <div attrs="{'invisible': [('amount_type', '=', 'group')]}">
+                                <field name="country_id" invisible="1"/>
                                 <group string="Repartition for Invoices">
-                                    <field name="invoice_repartition_line_ids" nolabel="1"/>
+                                    <field name="invoice_repartition_line_ids" nolabel="1" context="{'default_company_id': company_id}"/>
                                 </group>
                                 <group string="Repartition for Credit Notes">
-                                    <field name="refund_repartition_line_ids" nolabel="1"/>
+                                    <field name="refund_repartition_line_ids" nolabel="1" context="{'default_company_id': company_id}"/>
                                 </group>
                             </div>
                             <field name="children_tax_ids" attrs="{'invisible':['|', ('amount_type','!=','group'), ('type_tax_use','=','none')]}" domain="[('type_tax_use','in',('none',type_tax_use)), ('amount_type','!=','group')]">

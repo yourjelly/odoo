@@ -1031,6 +1031,7 @@ class AccountTax(models.Model):
         help='Account that will be set on lines created in cash basis journal entry and used to keep track of the tax base amount.')
     invoice_repartition_line_ids = fields.One2many(string="Repartition for Invoices", comodel_name="account.tax.repartition.line", inverse_name="invoice_tax_id", copy=True, help="Repartition when the tax is used on an invoice")
     refund_repartition_line_ids = fields.One2many(string="Repartition for Refund Invoices", comodel_name="account.tax.repartition.line", inverse_name="refund_tax_id", copy=True, help="Repartition when the tax is used on a refund")
+    country_id = fields.Many2one(string='Country', comodel_name='res.country', compute="_compute_country_id", help="Technical field used to restrict the domain of account tags for tax repartition lines created for this tax.")
 
     _sql_constraints = [
         ('name_company_uniq', 'unique(name, company_id, type_tax_use)', 'Tax names must be unique !'),
@@ -1039,17 +1040,17 @@ class AccountTax(models.Model):
     @api.model
     def default_get(self, vals):
         rslt = super(AccountTax, self).default_get(vals)
+
         if 'refund_repartition_line_ids' in vals:
-            new_record = self.env['account.tax.repartition.line'].new({ 'repartition_type': 'base', 'factor_percent': 100.0})
             rslt['refund_repartition_line_ids'] = [
-                (0, 0, { 'repartition_type': 'base', 'factor_percent': 100.0, 'tag_ids': []}),
-                (0, 0, { 'repartition_type': 'tax', 'factor_percent': 100.0, 'tag_ids': []}),
+                (0, 0, { 'repartition_type': 'base', 'factor_percent': 100.0, 'tag_ids': [], 'company_id': rslt.get('company_id')}),
+                (0, 0, { 'repartition_type': 'tax', 'factor_percent': 100.0, 'tag_ids': [], 'company_id': rslt.get('company_id')}),
             ]
 
         if 'invoice_repartition_line_ids' in vals:
             rslt['invoice_repartition_line_ids'] = [
-                (0, 0, { 'repartition_type': 'base', 'factor_percent': 100.0, 'tag_ids': []}),
-                (0, 0, { 'repartition_type': 'tax', 'factor_percent': 100.0, 'tag_ids': []}),
+                (0, 0, { 'repartition_type': 'base', 'factor_percent': 100.0, 'tag_ids': [], 'company_id': rslt.get('company_id')}),
+                (0, 0, { 'repartition_type': 'tax', 'factor_percent': 100.0, 'tag_ids': [], 'company_id': rslt.get('company_id')}),
             ]
 
         return rslt
@@ -1059,7 +1060,7 @@ class AccountTax(models.Model):
 
         base_line = lines.filtered(lambda x: x.repartition_type == 'base')
         if len(base_line) != 1:
-            raise ValidationError(_("Invoice and refund repartition should each contain exactly one line for the base."))
+            raise ValidationError(_("Invoice and credit note repartition should each contain exactly one line for the base."))
 
     @api.constrains('invoice_repartition_line_ids')
     def _validate_invoice_repartition(self):
@@ -1078,6 +1079,11 @@ class AccountTax(models.Model):
             raise ValidationError(_("Recursion found for tax '%s'.") % (self.name,))
         if not all(child.type_tax_use in ('none', self.type_tax_use) for child in self.children_tax_ids):
             raise ValidationError(_('The application scope of taxes in a group must be either the same as the group or left empty.'))
+
+    @api.depends('company_id')
+    def _compute_country_id(self):
+        for record in self:
+            record.country_id = record.company_id.country_id
 
     @api.multi
     @api.returns('self', lambda value: value.id)
@@ -1432,7 +1438,8 @@ class AccountTaxRepartitionLine(models.Model):
     invoice_tax_id = fields.Many2one(comodel_name='account.tax', help="The tax set to apply this repartition on invoices. Mutually exclusive with refund_tax_id")
     refund_tax_id = fields.Many2one(comodel_name='account.tax', help="The tax set to apply this repartition on refund invoices. Mutually exclusive with invoice_tax_id")
     template_id = fields.Many2one(string="Template", comodel_name='account.tax.repartition.line.template', help="Technical field containing the template used to generate this repartition line, if any.")
-    country_id = fields.Many2one(string="Country", comodel_name='res.country', compute="_compute_country_id")
+    country_id = fields.Many2one(string="Country", comodel_name='res.country', compute='_compute_country_id',  help="Technical field used to restrict tags domain in form view.")
+    company_id = fields.Many2one(string="Company", comodel_name='res.company', required=True, default=lambda x: x.env.user.company_id, help="The company this repartition line belongs to.")
 
     @api.constrains('invoice_tax_id', 'refund_tax_id')
     def validate_tax_template_link(self):
@@ -1440,10 +1447,10 @@ class AccountTaxRepartitionLine(models.Model):
             if record.invoice_tax_id and record.refund_tax_id:
                 raise ValidationError(_("Tax repartition lines should apply to either invoices or refunds, not both at the same time. invoice_tax_id and refund_tax_id should not be set together."))
 
-    @api.depends('invoice_tax_id.company_id.country_id', 'refund_tax_id.company_id.country_id')
+    @api.depends('company_id.country_id')
     def _compute_country_id(self):
         for record in self:
-            record.country_id = (record.invoice_tax_id or record.refund_tax_id).company_id.country_id
+            record.country_id = record.company_id.country_id
 
     @api.depends('factor_percent')
     def _compute_factor(self):
@@ -1451,6 +1458,7 @@ class AccountTaxRepartitionLine(models.Model):
             record.factor = record.factor_percent / 100.0
 
     @api.onchange('repartition_type')
-    def _onchange_factore_base(self):
+    def _onchange_repartition_type(self):
         if self.repartition_type == 'base':
             self.account_id = None
+
