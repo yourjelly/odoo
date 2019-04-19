@@ -22,15 +22,16 @@
                          <group name="uom_details">
                              <field name="name"/>
                              <field name="category_id"/>
-                             <field name="uom_type"/>
+                             <field name="international_unit" invisible="1"/>
+                             <field name="uom_type" attrs="{'readonly': [('international_unit', '!=', False)]}"/>
                              <field name="factor"
                                  digits="[42,5]"
                                  attrs="{'invisible':[('uom_type','!=','smaller')],
-                                         'readonly':[('uom_type','=','bigger')]}"/>
+                                         'readonly':['|', ('uom_type','=','bigger'), ('international_unit', '!=', False)]}"/>
                              <field name="factor_inv"
                                  digits="[42,5]"
                                  attrs="{'invisible':[('uom_type','!=','bigger')],
-                                         'readonly':[('uom_type','!=','bigger')]}"/>
+                                         'readonly':['|', ('uom_type','!=','bigger'), ('international_unit', '!=', False)]}"/>
                              <p attrs="{'invisible':[('uom_type','!=','smaller')]}" class="oe_grey" colspan="2">
                                  e.g: 1 * (reference unit) = ratio * (this unit)
                              </p>

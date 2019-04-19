@@ -3,6 +3,7 @@
 
 from odoo import api, fields, tools, models, _
 from odoo.exceptions import UserError, ValidationError
+from odoo.osv import expression
 
 
 class UoMCategory(models.Model):
@@ -56,11 +57,18 @@ class UoM(models.Model):
         ('smaller', 'Smaller than the reference Unit of Measure')], 'Type',
         default='reference', required=1)
     measure_type = fields.Selection(string="Type of measurement category", related='category_id.measure_type', store=True, readonly=True)
+    international_unit = fields.Selection([
+        ('kilometer', 'Kilometer'), ('meter', 'Meter'), ('centimeter', 'Centimeter'),  # length
+        ('tonne', 'Tonne'), ('kilogram', 'Kilogram'), ('gram', 'Gram'),  # mass
+        ('day', 'Day'), ('hour', 'Hour'), ('minute', 'Minute'), ('second', 'Second'),  # time
+        ('cubic_meter', 'Cubic Meter'), ('cubic_decimeter', 'Cubic Decimeter'), ('cubic_centimeter', 'Cubic Centimeter')  # volume
+    ], string="Unit in the International System", readonly=True, copy=False, help="Corresponding unit of measure recognized by the International System of Units (Derived included).")
 
     _sql_constraints = [
         ('factor_gt_zero', 'CHECK (factor!=0)', 'The conversion ratio for a unit of measure cannot be 0!'),
         ('rounding_gt_zero', 'CHECK (rounding>0)', 'The rounding precision must be strictly positive.'),
-        ('factor_reference_is_one', "CHECK((uom_type = 'reference' AND factor = 1.0) OR (uom_type != 'reference'))", "The reference unit must have a conversion factor equal to 1.")
+        ('factor_reference_is_one', "CHECK((uom_type = 'reference' AND factor = 1.0) OR (uom_type != 'reference'))", "The reference unit must have a conversion factor equal to 1."),
+        ('uniq_international_unit_per_categ', 'UNIQUE(category_id,international_unit)', 'Can not have 2 times the same international unit in the same category.'),
     ]
 
     @api.one
@@ -104,6 +112,11 @@ class UoM(models.Model):
 
     @api.multi
     def write(self, values):
+        # prevent factor modification of universal UoM
+        if any(fname in values for fname in ['uom_type', 'factor', 'factor_inv']) and any(uom.international_unit for uom in self):
+            international_uom_names = self.filtered(lambda uom: uom.international_unit).mapped('name')
+            raise UserError(_('You can not modify universal unit of measure factor. You are trying to update: %s') % (', '.join(international_uom_names)))
+
         if 'factor_inv' in values:
             factor_inv = values.pop('factor_inv')
             values['factor'] = factor_inv and (1.0 / factor_inv) or 0.0
@@ -111,8 +124,8 @@ class UoM(models.Model):
 
     @api.multi
     def unlink(self):
-        if self.filtered(lambda uom: uom.measure_type == 'working_time'):
-            raise UserError(_("You cannot delete this UoM as it is used by the system. You should rather archive it."))
+        if any(uom.international_unit for uom in self):
+            raise UserError(_("You cannot delete this international UoM as it is used by the system. You should rather archive it."))
         return super(UoM, self).unlink()
 
     @api.model
@@ -170,3 +183,11 @@ class UoM(models.Model):
         if to_unit:
             amount = amount / to_unit.factor
         return amount
+
+    @api.model
+    def get_uom(self, international_slug, measure_type=False):
+        """ Find the internation Unit Of Measure from its internation slug (technical name) """
+        domain = [('international_unit', '=', international_slug)]
+        if measure_type:
+            domain = expression.AND([domain, [('measure_type', '=', measure_type)]])
+        return self.search(domain, limit=1)

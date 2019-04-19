@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.tests.common import TransactionCase
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 
 
 class TestUom(TransactionCase):
@@ -95,3 +95,11 @@ class TestUom(TransactionCase):
                 'rounding': 1.0,
                 'category_id': category.id
             })
+
+    def test_50_international_uom(self):
+        # international uom's factor can not be modified
+        with self.assertRaises(UserError):
+            self.uom_kgm.write({'factor': 42})
+        # international uom's factor can not be deleted
+        with self.assertRaises(UserError):
+            self.uom_kgm.unlink()

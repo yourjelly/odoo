@@ -16,10 +16,6 @@
             <field name="name">Working Time</field>
             <field name="measure_type">working_time</field>
         </record>
-        <record id="uom_categ_time" model="uom.category">
-            <field name="name">Time</field>
-            <field name="measure_type">time</field>
-        </record>
         <record id="uom_categ_length" model="uom.category">
             <field name="name">Length / Distance</field>
             <field name="measure_type">length</field>
@@ -49,24 +45,28 @@
             <field name="name">kg</field>
             <field name="factor" eval="1"/>
             <field name="rounding" eval="0.001"/>
+            <field name="international_unit">kilogram</field>
         </record>
         <record id="product_uom_gram" model="uom.uom">
             <field name="category_id" ref="product_uom_categ_kgm"/>
             <field name="name">g</field>
             <field name="factor" eval="1000"/>
             <field name="uom_type">smaller</field>
+            <field name="international_unit">gram</field>
         </record>
 
         <record id="product_uom_day" model="uom.uom">
             <field name="name">Day(s)</field>
             <field eval="uom_categ_wtime" name="category_id"/>
             <field name="factor" eval="1.0"/>
+            <field name="international_unit">day</field>
         </record>
         <record id="product_uom_hour" model="uom.uom">
             <field name="name">Hour(s)</field>
             <field eval="uom_categ_wtime" name="category_id"/>
             <field name="factor" eval="8.0"/>
             <field name="uom_type">smaller</field>
+            <field name="international_unit">hour</field>
         </record>
         <record id="product_uom_ton" model="uom.uom">
             <field name="category_id" ref="product_uom_categ_kgm"/>
@@ -75,28 +75,33 @@
             <field name="name">t</field>
             <field name="factor_inv" eval="1000"/>
             <field name="uom_type">bigger</field>
+            <field name="international_unit">tonne</field>
         </record>
         <record id="product_uom_meter" model="uom.uom">
             <field name="category_id" ref="uom_categ_length"/>
             <field name="name">m</field>
             <field name="factor" eval="1.0"/>
+            <field name="international_unit">meter</field>
         </record>
         <record id="product_uom_km" model="uom.uom">
             <field name="category_id" ref="uom_categ_length"/>
             <field name="name">km</field>
             <field name="factor_inv" eval="1000"/>
             <field name="uom_type">bigger</field>
+            <field name="international_unit">kilometer</field>
         </record>
         <record id="product_uom_cm" model="uom.uom">
             <field name="category_id" ref="uom_categ_length"/>
             <field name="name">cm</field>
             <field name="factor" eval="100"/>
             <field name="uom_type">smaller</field>
+            <field name="international_unit">centimeter</field>
         </record>
         <record id="product_uom_litre" model="uom.uom">
             <field name="name">Liter(s)</field>
             <field name="category_id" ref="product_uom_categ_vol"/>
             <field name="factor">1.0</field>
+            <field name="international_unit">cubic_decimeter</field>
         </record>
 
         <!--Americanization of units of measure-->
