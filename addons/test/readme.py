@@ -65,32 +65,32 @@ when self.testme()
 # -------------------------------- Simplified Execution Trace --------------------------------
 
 main = test.create({...})
-    test._create()
+    test._create()                                                                              # stored fields only (not one2many, ...)
         cr.execute("INSERT INTO test (name, int1)")
-        self.env.cache.set(self, test_int1, 5)                                                  # put in cache created values
-        self.env.cache.set(self, test_name, 'bla')
-        self.env.cache.set(self, test_line_ids, [])                                             # empty one2many, many2many
-        # env.all.todo.add(['intx2', 'line_sum'])                                               # we could todo.add all non provided computed fields, if we want default methods to become computed fields
-        test.modified(['name', 'int1'])                                                         # one2many are not considered mdified (as no many2one points to them yet)
-            env.all.todo.add((field_intx2, test))
-            test.modified(['intx2'])                                                            # modified is recursive, until all impacted records are in todo (we loose the advantage of do not write if same value)
-                pass                                                                            # no record impacted as triggers just read inverse fields and line_ids=[]
-        field_line_ids.create()                                                                 # I don't understand why we have  create method? do we support another API in creation than edition? --> remove this line
-            field_line_ids._write()
-                test_line.create({'test_id': 1, 'name': 'abc'}, {'test_id': 1, 'name': 'def'})
-                    test_line._create()
-                        cr.execute("INSERT INTO test.line (name, test_id) values ('abc', 1)")
-                        cr.execute("INSERT INTO test.line (name, test_id) values ('def', 1)")
-                        self.cache[(line_name, 1)] = 'abc'
-                        self.cache[(line_test_id, 1)] = 1
-                        self.cache[(line_name, 2)] = 'def'
-                        self.cache[(line_test_id, 2)] = 1
-                        ??? add_to_inverse                                                      # add new ids to test.line_ids
-                        self.modified(['name', 'test_id'])
-                            env.all.todo.add((field_intx2, test_lines))
-                            self.modified(field_intx2)
-                                for test in self.mapped('test_id'):                             # inverse field of line_sum's line_ids = test_id --> no select as already in cache
-                                    env.all.todo.add((field_line_sum, test))
+    self.env.cache.set(self, test_int1, 5)                                                      # put in cache created values
+    self.env.cache.set(self, test_name, 'bla')
+    self.env.cache.set(self, test_line_ids, [])                                                 # empty one2many, many2many
+    # env.all.todo.add(['intx2', 'line_sum'])                                                   # we could todo.add all non provided computed fields, if we want default methods to become computed fields
+    field_line_ids.create()                                                                     # can we remove the create method on fields? the behavior of write/create is the same, no?
+        field_line_ids._write()
+            test_line.create({'test_id': 1, 'name': 'abc'}, {'test_id': 1, 'name': 'def'})
+                test_line._create()
+                    cr.execute("INSERT INTO test.line (name, test_id) values ('abc', 1)")
+                    cr.execute("INSERT INTO test.line (name, test_id) values ('def', 1)")
+                self.cache[(line_name, 1)] = 'abc'
+                self.cache[(line_test_id, 1)] = 1
+                self.cache[(line_name, 2)] = 'def'
+                self.cache[(line_test_id, 2)] = 1
+                ??? add_to_inverse                                                              # add new ids to test.line_ids
+                self.modified(['name', 'test_id'])
+                    env.all.todo.add((field_intx2, test_lines))
+                    self.modified(field_intx2)
+                        for test in self.mapped('test_id'):                                     # inverse field of line_sum's line_ids = test_id --> no select as already in cache
+                            env.all.todo.add((field_line_sum, test))
+    test.modified(['name', 'int1'])                                                             # all stored - one2many are not considered mdified (as no many2one points to them yet)
+        env.all.todo.add((field_intx2, test))
+        test.modified(['intx2'])                                                                # modified is recursive, until all impacted records are in todo (we loose the advantage of do not write if same value)
+            pass                                                                                # no record impacted as triggers just read inverse fields and line_ids=[]
 
 main.int1 = 5
     field_int1.__set__()
@@ -104,17 +104,18 @@ main.int1 = 5
                     for line in self.mapped('line_ids'):                                        # inverse field of line_intx2's line_ids = test_id
                         if env.all.todo.add.contains((field_intx2, test_lines)):                # modified are recursive...
                             pass                                                                # and stops if field is already marked as todo
+        env.all.todo.remove((self, record))                                                     # this replace the protected
 
 line.create({...})
     line._create()
         cr.execute("INSERT INTO test.line (name, test_id) values ('ghi', 1)")
-        self.cache[(line_name, 3)] = 'ghi'
-        self.cache[(line_test_id, 3)] = 1
-        ??? add to inverse                                                                      # as we wrote a value on test_id, we should update line_ids
-        test_line.modified(['name', 'test_id'])
-            env.all.todo.add((field_intx2, test_line))
-            for test in self.mapped('test_id'):                                                 # inverse field of line_sum's line_ids = test_id
-                env.all.todo.add((field_line_sum, test))
+    self.cache[(line_name, 3)] = 'ghi'
+    self.cache[(line_test_id, 3)] = 1
+    ??? add to inverse                                                                          # as we wrote a value on test_id, we should update line_ids
+    test_line.modified(['name', 'test_id'])
+        env.all.todo.add((field_intx2, test_line))
+        for test in self.mapped('test_id'):                                                     # inverse field of line_sum's line_ids = test_id
+            env.all.todo.add((field_line_sum, test))
 
 line.search([('intx2', '=', 3)])
     for field in dom_args if field in env.all.todo: field.check_todo()
@@ -163,19 +164,21 @@ recompute()                                                                     
 
 # --------------------------------------- To discuss with RCOs ------------------------------------
 
-- access rights --> check once at exposed method level?
-- do not update if value did not changed has limited impact now (as modified are recursive)
-- ok with compute that do not return a value? (onchange)
+- in draft is not required anymore? (if not record.id: don't add value in towrite)
+- why do we need protected? env.todo and don't update if not changed, ensure the same protection
+- why is sequence of fields used? looks like we can remove that concept
+- recursive modified: extra cost, that will limit the impact of "do not update if value did not changed"
+- behavior change: compute might not return a value (necessary for onchange)
+- default methods can be just a compute method without @depends(), to simplify the frameword
+- if I am not wrong, recursive should not require a specific mechanism with this approach
+- what do we do when we have no inverse field? (fault back to SQL triggers, or create an implicit one just for the cache)
+- towrite should be processed before an unlink (everything) or a select (some fields only)
+- related = computed fields
 - Cache by environements or not, or partial (improve context_dependent?)
     - should compute, non stored fields, be in the cache? (as their computation already rely on other's fields cache) --> slower, but remove context_dependant issues
     - one2many / many2many should not be context_dependent, but many2many yes
-- default methods are just a computed fields
-- self.modified recursive, but don't call modified when in recompute
-- related = computed fields
-- recursive should not require a specific mechanism with this approach
-- what do we do when we have no inverse field? (I propose to create one implicitly, just for the cache)
-- towrite should be processed before an unlink (everything) or a select (some fields only)
-- what if the one2any / many2many inverse does not exists? (fault back to SQL triggers?)
+- access rights --> check once at exposed method level? (I changed my mind, I agree with RCO/AL)
 - rename todo into torecompute
 
+# --------------------------------------- To discuss with RCOs ------------------------------------
 
