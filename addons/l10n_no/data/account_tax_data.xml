@@ -14,26 +14,26 @@
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'plus_tag_ids': [ref('account_tax_report_line_grunnlag_for_utgående_avgift_høy_sats')],
+                    'plus_tag_ids': [ref('account_tax_report_line_grunnlag_for_utgaende_avgift_hoy_sats')],
                 }),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('chart2701'),
-                    'plus_tag_ids': [ref('account_tax_report_line_beregnet_utgående_avgift_høy_sats')],
+                    'plus_tag_ids': [ref('account_tax_report_line_beregnet_utgaende_avgift_hoy_sats')],
                 }),
             ]"/>
             <field name="refund_repartition_line_ids" eval="[(5,0,0),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'minus_tag_ids': [ref('account_tax_report_line_grunnlag_for_utgående_avgift_høy_sats')],
+                    'minus_tag_ids': [ref('account_tax_report_line_grunnlag_for_utgaende_avgift_hoy_sats')],
                 }),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('chart2701'),
-                    'minus_tag_ids': [ref('account_tax_report_line_beregnet_utgående_avgift_høy_sats')],
+                    'minus_tag_ids': [ref('account_tax_report_line_beregnet_utgaende_avgift_hoy_sats')],
                 }),
             ]"/>
         </record>
@@ -50,26 +50,26 @@
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'plus_tag_ids': [ref('account_tax_report_line_grunnlag_for_utgående_avgift_mellom_sats')],
+                    'plus_tag_ids': [ref('account_tax_report_line_grunnlag_for_utgaende_avgift_mellom_sats')],
                 }),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('chart2703'),
-                    'plus_tag_ids': [ref('account_tax_report_line_beregnet_utgående_avgift_mellom_sats')],
+                    'plus_tag_ids': [ref('account_tax_report_line_beregnet_utgaende_avgift_mellom_sats')],
                 }),
             ]"/>
             <field name="refund_repartition_line_ids" eval="[(5,0,0),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'minus_tag_ids': [ref('account_tax_report_line_grunnlag_for_utgående_avgift_mellom_sats')],
+                    'minus_tag_ids': [ref('account_tax_report_line_grunnlag_for_utgaende_avgift_mellom_sats')],
                 }),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('chart2703'),
-                    'minus_tag_ids': [ref('account_tax_report_line_beregnet_utgående_avgift_mellom_sats')],
+                    'minus_tag_ids': [ref('account_tax_report_line_beregnet_utgaende_avgift_mellom_sats')],
                 }),
             ]"/>
         </record>
@@ -86,26 +86,26 @@
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'plus_tag_ids': [ref('account_tax_report_line_grunnlag_for_utgående_avgift_lav_sats')],
+                    'plus_tag_ids': [ref('account_tax_report_line_grunnlag_for_utgaende_avgift_lav_sats')],
                 }),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('chart2704'),
-                    'plus_tag_ids': [ref('account_tax_report_line_beregnet_utgående_avgift_lav_sats')],
+                    'plus_tag_ids': [ref('account_tax_report_line_beregnet_utgaende_avgift_lav_sats')],
                 }),
             ]"/>
             <field name="refund_repartition_line_ids" eval="[(5,0,0),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'minus_tag_ids': [ref('account_tax_report_line_grunnlag_for_utgående_avgift_lav_sats')],
+                    'minus_tag_ids': [ref('account_tax_report_line_grunnlag_for_utgaende_avgift_lav_sats')],
                 }),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('chart2704'),
-                    'minus_tag_ids': [ref('account_tax_report_line_beregnet_utgående_avgift_lav_sats')],
+                    'minus_tag_ids': [ref('account_tax_report_line_beregnet_utgaende_avgift_lav_sats')],
                 }),
             ]"/>
         </record>
@@ -122,26 +122,26 @@
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'plus_tag_ids': [ref('account_tax_report_line_grunnlag_for_utgående_avgift_lav_sats')],
+                    'plus_tag_ids': [ref('account_tax_report_line_grunnlag_for_utgaende_avgift_lav_sats')],
                 }),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('chart2704'),
-                    'plus_tag_ids': [ref('account_tax_report_line_beregnet_utgående_avgift_lav_sats')],
+                    'plus_tag_ids': [ref('account_tax_report_line_beregnet_utgaende_avgift_lav_sats')],
                 }),
             ]"/>
             <field name="refund_repartition_line_ids" eval="[(5,0,0),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'minus_tag_ids': [ref('account_tax_report_line_grunnlag_for_utgående_avgift_lav_sats')],
+                    'minus_tag_ids': [ref('account_tax_report_line_grunnlag_for_utgaende_avgift_lav_sats')],
                 }),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('chart2704'),
-                    'minus_tag_ids': [ref('account_tax_report_line_beregnet_utgående_avgift_lav_sats')],
+                    'minus_tag_ids': [ref('account_tax_report_line_beregnet_utgaende_avgift_lav_sats')],
                 }),
             ]"/>
         </record>
@@ -158,26 +158,26 @@
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'plus_tag_ids': [ref('account_tax_report_line_grunnlag_for_inngående_avgift_høy_sats')],
+                    'plus_tag_ids': [ref('account_tax_report_line_grunnlag_for_inngaende_avgift_hoy_sats')],
                 }),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('chart2711'),
-                    'plus_tag_ids': [ref('account_tax_report_line_beregnet_inngående_avgift_høy_sats')],
+                    'plus_tag_ids': [ref('account_tax_report_line_beregnet_inngaende_avgift_hoy_sats')],
                 }),
             ]"/>
             <field name="refund_repartition_line_ids" eval="[(5,0,0),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'minus_tag_ids': [ref('account_tax_report_line_grunnlag_for_inngående_avgift_høy_sats')],
+                    'minus_tag_ids': [ref('account_tax_report_line_grunnlag_for_inngaende_avgift_hoy_sats')],
                 }),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('chart2711'),
-                    'minus_tag_ids': [ref('account_tax_report_line_beregnet_inngående_avgift_høy_sats')],
+                    'minus_tag_ids': [ref('account_tax_report_line_beregnet_inngaende_avgift_hoy_sats')],
                 }),
             ]"/>
         </record>
@@ -194,26 +194,26 @@
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'plus_tag_ids': [ref('account_tax_report_line_grunnlag_for_inngående_avgift_mellom_sats')],
+                    'plus_tag_ids': [ref('account_tax_report_line_grunnlag_for_inngaende_avgift_mellom_sats')],
                 }),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('chart2713'),
-                    'plus_tag_ids': [ref('account_tax_report_line_beregnet_inngående_avgift_mellom_sats')],
+                    'plus_tag_ids': [ref('account_tax_report_line_beregnet_inngaende_avgift_mellom_sats')],
                 }),
             ]"/>
             <field name="refund_repartition_line_ids" eval="[(5,0,0),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'minus_tag_ids': [ref('account_tax_report_line_grunnlag_for_inngående_avgift_mellom_sats')],
+                    'minus_tag_ids': [ref('account_tax_report_line_grunnlag_for_inngaende_avgift_mellom_sats')],
                 }),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('chart2713'),
-                    'minus_tag_ids': [ref('account_tax_report_line_beregnet_inngående_avgift_mellom_sats')],
+                    'minus_tag_ids': [ref('account_tax_report_line_beregnet_inngaende_avgift_mellom_sats')],
                 }),
             ]"/>
         </record>
@@ -230,26 +230,26 @@
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'plus_tag_ids': [ref('account_tax_report_line_grunnlag_for_inngående_avgift_lav_sats')],
+                    'plus_tag_ids': [ref('account_tax_report_line_grunnlag_for_inngaende_avgift_lav_sats')],
                 }),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('chart2714'),
-                    'plus_tag_ids': [ref('account_tax_report_line_beregnet_inngående_avgift_lav_sats')],
+                    'plus_tag_ids': [ref('account_tax_report_line_beregnet_inngaende_avgift_lav_sats')],
                 }),
             ]"/>
             <field name="refund_repartition_line_ids" eval="[(5,0,0),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'minus_tag_ids': [ref('account_tax_report_line_grunnlag_for_inngående_avgift_lav_sats')],
+                    'minus_tag_ids': [ref('account_tax_report_line_grunnlag_for_inngaende_avgift_lav_sats')],
                 }),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('chart2714'),
-                    'minus_tag_ids': [ref('account_tax_report_line_beregnet_inngående_avgift_lav_sats')],
+                    'minus_tag_ids': [ref('account_tax_report_line_beregnet_inngaende_avgift_lav_sats')],
                 }),
             ]"/>
         </record>
@@ -266,26 +266,26 @@
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'plus_tag_ids': [ref('account_tax_report_line_grunnlag_for_inngående_avgift_lav_sats')],
+                    'plus_tag_ids': [ref('account_tax_report_line_grunnlag_for_inngaende_avgift_lav_sats')],
                 }),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('chart2714'),
-                    'plus_tag_ids': [ref('account_tax_report_line_beregnet_inngående_avgift_lav_sats')],
+                    'plus_tag_ids': [ref('account_tax_report_line_beregnet_inngaende_avgift_lav_sats')],
                 }),
             ]"/>
             <field name="refund_repartition_line_ids" eval="[(5,0,0),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'base',
-                    'minus_tag_ids': [ref('account_tax_report_line_grunnlag_for_inngående_avgift_lav_sats')],
+                    'minus_tag_ids': [ref('account_tax_report_line_grunnlag_for_inngaende_avgift_lav_sats')],
                 }),
                 (0,0, {
                     'factor_percent': 100,
                     'repartition_type': 'tax',
                     'account_id': ref('chart2714'),
-                    'minus_tag_ids': [ref('account_tax_report_line_beregnet_inngående_avgift_lav_sats')],
+                    'minus_tag_ids': [ref('account_tax_report_line_beregnet_inngaende_avgift_lav_sats')],
                 }),
             ]"/>
         </record>

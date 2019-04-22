@@ -54,7 +54,7 @@
         <field name="tag_name">Grunnlag for inngående avgift, høy sats</field>
         <field name="code">NOTAX_0104</field>
         <field name="sequence" eval="1"/>
-        <field name="parent_line_id" ref="account_tax_report_line_sum_innkjøp"/>
+        <field name="parent_line_id" ref="account_tax_report_line_sum_innkjop"/>
         <field name="country_id" ref="base.no"/>
     </record>
 
@@ -63,7 +63,7 @@
         <field name="tag_name">Grunnlag for inngående avgift, mellom sats</field>
         <field name="code">NOTAX_0105</field>
         <field name="sequence" eval="2"/>
-        <field name="parent_line_id" ref="account_tax_report_line_sum_innkjøp"/>
+        <field name="parent_line_id" ref="account_tax_report_line_sum_innkjop"/>
         <field name="country_id" ref="base.no"/>
     </record>
 
@@ -72,7 +72,7 @@
         <field name="tag_name">Grunnlag for inngående avgift, lav sats</field>
         <field name="code">NOTAX_0106</field>
         <field name="sequence" eval="3"/>
-        <field name="parent_line_id" ref="account_tax_report_line_sum_innkjøp"/>
+        <field name="parent_line_id" ref="account_tax_report_line_sum_innkjop"/>
         <field name="country_id" ref="base.no"/>
     </record>
 
@@ -103,7 +103,7 @@
 
     <record id="account_tax_report_line_beregnet_inngaende_avgift_mellom_sats" model="account.tax.report.line">
         <field name="name">Beregnet inngående avgift, mellom sats</field>
-        <field name="tag_name">Beregnet inngående avgift, mellom sats</field>11
+        <field name="tag_name">Beregnet inngående avgift, mellom sats</field>
         <field name="code">NOTAX_0203</field>
         <field name="sequence" eval="6"/>
         <field name="parent_line_id" ref="account_tax_report_line_netto_beregnet_avgift"/>
