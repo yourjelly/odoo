@@ -164,6 +164,21 @@ recompute()                                                                     
 
 # --------------------------------------- To discuss with RCOs ------------------------------------
 
+# Questions
+
+- What is a SpecialValue in cache?
+
+
+# Reading optimization
+
+- browse should call _read, not read()
+- remove prefetch concept: records.country_ids returns a recordset with all countries; id is just a position on this recordset ([0] and next() returns the same recordset with a different id)
+- access rights --> check once at exposed method level? (I changed my mind, I agree with RCO/AL). sudo() should not be a swith of user
+- shorten stacktrace()
+
+# Writing optimization
+
+- remove the prefetch concept: records.country_id should return a RecordSet with all countries of records (id is a cursor on the actual record)
 - in draft is not required anymore? (if not record.id: don't add value in towrite)
 - why do we need protected? env.todo and don't update if not changed, ensure the same protection
 - why is sequence of fields used? looks like we can remove that concept
@@ -177,8 +192,5 @@ recompute()                                                                     
 - Cache by environements or not, or partial (improve context_dependent?)
     - should compute, non stored fields, be in the cache? (as their computation already rely on other's fields cache) --> slower, but remove context_dependant issues
     - one2many / many2many should not be context_dependent, but many2many yes
-- access rights --> check once at exposed method level? (I changed my mind, I agree with RCO/AL)
 - rename todo into torecompute
-
-# --------------------------------------- To discuss with RCOs ------------------------------------
-
+- SpecialValue are exceptions; why not keeping cache empty instead?
