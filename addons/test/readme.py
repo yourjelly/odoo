@@ -54,13 +54,34 @@ class test_line(models.Model):
         for record in self:
             record.intx2 = record.test_id.intx2
 
-# -------------------------------------------- Status ----------------------------------------
+# ------------------------------------------ Status ----------------------------------------
 
 when self.testme()
 - master:              32 SQL
 - master-nochange-fp:  15 SQL
-- future:               7 SQL
+- future:               8 SQL
 
+
+for partner in self.env['res.partner'].search([]):
+    partner.country_id.name
+
+# -------------------------------- Simplified Execution Trace --------------------------------
+
+- ecriture    -> modified -> todo
+- compute     -> lecture / search / commit() / read_group (or is it search?)
+- consistency -> create() / new()
+- compute ->
+    1/ compute don't return
+    2/ don't overwrite what you receive
+- browse() should use _read() instead of read()
+- _prefetch() -> autrement
+- recursive   -> ???
+- protected   -> ???
+- in_draft    -> not record.id
+- modified    -> read inverse field
+- towrite     -> journal  --> optimization --> _read(), search()
+- mettre à jour la cache aux écritures
+- cache       -> sudo() / Exception()
 
 # -------------------------------- Simplified Execution Trace --------------------------------
 
@@ -70,7 +91,7 @@ main = test.create({...})
     self.env.cache.set(self, test_int1, 5)                                                      # put in cache created values
     self.env.cache.set(self, test_name, 'bla')
     self.env.cache.set(self, test_line_ids, [])                                                 # empty one2many, many2many
-    # env.all.todo.add(['intx2', 'line_sum'])                                                   # we could todo.add all non provided computed fields, if we want default methods to become computed fields
+    env.all.todo.add(['intx2', 'line_sum'])                                                     # we could todo.add all non provided computed fields, if we want default methods to become computed fields
     field_line_ids.create()                                                                     # can we remove the create method on fields? the behavior of write/create is the same, no?
         field_line_ids._write()
             test_line.create({'test_id': 1, 'name': 'abc'}, {'test_id': 1, 'name': 'def'})
@@ -81,7 +102,7 @@ main = test.create({...})
                 self.cache[(line_test_id, 1)] = 1
                 self.cache[(line_name, 2)] = 'def'
                 self.cache[(line_test_id, 2)] = 1
-                ??? add_to_inverse                                                              # add new ids to test.line_ids
+                ??? add_to_inverse (order not set)                                              # -- SOIT tant pis (spec change), SOIT SQL à la main
                 self.modified(['name', 'test_id'])
                     env.all.todo.add((field_intx2, test_lines))
                     self.modified(field_intx2)
@@ -140,8 +161,17 @@ line.search([('intx2', '=', 3)])
                     intx2.__set__()                                                             # write intx2 on lines
                         self.cache[(int1, 1)] = 10
                         env.towrite.append((intx2, 1), 10)                                      # or we use the cache for towrite?
-                        # self.modified(['intx2'])                                              # that is a waste of time, if we already modified recursively
+                        # self.modified(['intx2'])                                              # that is a waste of time, if we already modified recursively, unless it's 
+    self.flush_write()
+        while env.towrite():
+            # optimize to work in batches
+            self._write()
+                cr.execute("UPDATE test.test SET intx2=10, int1=5 WHERE id=1")
+            self._write()
+                cr.execute("UPDATE test.line SET intx2=10 where id in (...)")
+
     cr.execute('SELECT ...')
+
 
 recompute()                                                                                     # in api.py
     while env.has_todo():
@@ -154,43 +184,71 @@ recompute()                                                                     
                         self.cache[(int1, 1)] = 20
                         env.towrite.append((intx2, 1), 20)
                         # self.modified(['intx2'])                                              # that is a waste of time, if we already modified recursively
-    self.flush_write(fields = None)
+    self.flush_write()
         while env.towrite():
             # optimize to work in batches
             self._write()
-                cr.execute("UPDATE test.test SET intx2=5, line_sum=10 WHERE id=1")
-                cr.execute("UPDATE test.line SET intx2 where id in (...)")
+                cr.execute("UPDATE test.test SET line_sum=10 WHERE id=1")
+
+
+def __get__()
+    if todo:
+        compute()
+    if cache
+        return cache.get()
+    else:
+        _read()
+
 
 
 # --------------------------------------- To discuss with RCOs ------------------------------------
 
 # Questions
 
-- What is a SpecialValue in cache?
+- What is a SpecialValue in cache? (update inverse lazy)
+    AccessRights
+    MissingRecords
+    Exception in a compute
 
 
 # Reading optimization
 
 - browse should call _read, not read()
-- remove prefetch concept: records.country_ids returns a recordset with all countries; id is just a position on this recordset ([0] and next() returns the same recordset with a different id)
-- access rights --> check once at exposed method level? (I changed my mind, I agree with RCO/AL). sudo() should not be a swith of user
-- shorten stacktrace()
+    -> check help in ir.actions (overwrite of read())
+- replace prefetch by larger recordset with self._id: records.country_ids returns a recordset with all countries; id is just a position on this recordset ([0] and next() returns the same recordset with a different id)
+- access rights --> check once at exposed method level? still not sure
 
 # Writing optimization
 
-- remove the prefetch concept: records.country_id should return a RecordSet with all countries of records (id is a cursor on the actual record)
+- onchange use new(), and new() use default()  (new() and create() should be compatible) --> RCO's branch
+    - consistent
+- remove the prefetch concept: records.country_id should return a RecordSet with all countries of records (id is a cursor on the actual record) --> RCO's branch
 - in draft is not required anymore? (if not record.id: don't add value in towrite)
-- why do we need protected? env.todo and don't update if not changed, ensure the same protection
-- why is sequence of fields used? looks like we can remove that concept
+- why do we need protected? to evaluate
+- why is sequence of fields used? looks like we can remove that concept (min())
 - recursive modified: extra cost, that will limit the impact of "do not update if value did not changed"
 - behavior change: compute might not return a value (necessary for onchange)
-- default methods can be just a compute method without @depends(), to simplify the frameword
 - if I am not wrong, recursive should not require a specific mechanism with this approach
 - what do we do when we have no inverse field? (fault back to SQL triggers, or create an implicit one just for the cache)
-- towrite should be processed before an unlink (everything) or a select (some fields only)
+    - faultback
+- towrite should be processed before an unlink or a select
 - related = computed fields
-- Cache by environements or not, or partial (improve context_dependent?)
+- Cache by environments or not, or partial (improve context_dependent?)
     - should compute, non stored fields, be in the cache? (as their computation already rely on other's fields cache) --> slower, but remove context_dependant issues
     - one2many / many2many should not be context_dependent, but many2many yes
 - rename todo into torecompute
-- SpecialValue are exceptions; why not keeping cache empty instead?
+- do we really need SpecialValue in cache? yes
+- dirty: to remove
+
+
+# --------------------------------- DECIDE LATER ----------------------------
+
+- sudo() should not change the uid (but keep applying ir.rule or not, à tester)
+    - sudo(user=admin)
+- default methods can be just a compute method without @depends(), to simplify the framework and consistency
+- Syntax of new compute fields: 3 option
+    1/ related_onchange="partner_id.fp_id"
+    2/ explicit compute="" with method and @depends
+    3/ readonly=False, depends=['partner_id'], related="partner_id.fp_id"
+
+
