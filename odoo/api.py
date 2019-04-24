@@ -955,8 +955,11 @@ class Environment(Mapping):
                 return recs
 
     def add_todo(self, field, records):
-        """ Mark ``field`` to be recomputed on ``records``. """
+        """ Mark ``field`` to be recomputed on ``records``, return newly added records. """
+        if not records:
+            return records
         recs_list = self.all.todo.setdefault(field, [])
+        result = records
         for i, recs in enumerate(recs_list):
             if recs.env == records.env:
                 # only add records if not already in the recordset, much much
@@ -964,13 +967,15 @@ class Environment(Mapping):
                 # already present
                 try:
                     if not records <= recs:
-                        recs_list[i] |= records
+                        result -= recs_list[i]
+                        recs_list[i] |= result
                     break
                 except TypeError:
                     # same field of another object already exists
                     pass
         else:
             recs_list.append(records)
+        return result
 
     # FP NOTE: why is this so complex, rewrite it?
     def remove_todo(self, field, records):
@@ -1019,10 +1024,10 @@ class Environments(object):
     def __init__(self):
         self.envs = WeakSet()           # weak set of environments
         self.cache = Cache()            # cache for all records
-        self.todo = {}                  # recomputations {field: [records]}
+        self.todo = {}                  # recomputations {field: [records]}  FP NOTE: should be renamed to "tocompute"
         self.mode = False               # flag for draft/onchange
         self.recompute = True
-        self.towrite = None
+        self.towrite = defaultdict(lambda : defaultdict(set))
 
     def add(self, env):
         """ Add the environment ``env``. """

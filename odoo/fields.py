@@ -294,7 +294,6 @@ class Field(MetaField('DummyField', (object,), {})):
         'manual': False,                # whether the field is a custom field
         'copy': True,                   # whether the field is copied over by BaseModel.copy()
         'depends': None,                # collection of field dependencies
-        'recursive': False,             # whether self depends on itself
         'compute': None,                # compute(recs) computes field on recs
         'compute_sudo': False,          # whether field should be recomputed as admin
         'inverse': None,                # inverse(recs) inverses field on recs
@@ -708,7 +707,7 @@ class Field(MetaField('DummyField', (object,), {})):
                 field = model._fields[fname]
                 result.append((model, field, path))
                 model = model0.env.get(field.comodel_name)
-                path = None if path is None else path + [fname]
+                path = None if path is None else path + [field]
 
         # add self's model dependencies
         for mname, fnames in model0._depends.items():
@@ -728,7 +727,7 @@ class Field(MetaField('DummyField', (object,), {})):
             if field.type in ('one2many', 'many2many'):
                 for inv_field in model._field_inverses[field]:
                     inv_model = model0.env[inv_field.model_name]
-                    inv_path = None if path is None else path + [field.name]
+                    inv_path = None if path is None else path + [field]
                     result.append((inv_model, inv_field, inv_path))
             if not field.store and field not in seen:
                 result += field.resolve_deps(model, path, seen)
@@ -740,12 +739,7 @@ class Field(MetaField('DummyField', (object,), {})):
         for model, field, path in self.resolve_deps(model):
             if self.store and not field.store:
                 _logger.info("Field %s depends on non-stored field %s", self, field)
-            if field is not self:
-                path_str = None if path is None else ('.'.join(path) or 'id')
-                model._field_triggers.add(field, (self, path_str))
-            elif path:
-                self.recursive = True
-                model._field_triggers.add(field, (self, '.'.join(path)))
+            model._field_triggers.add(field, (self, path))
 
     ############################################################################
     #
@@ -990,6 +984,10 @@ class Field(MetaField('DummyField', (object,), {})):
             record.ensure_one()
             if env.check_todo(self, record):
                 recs = env.field_todo(self)
+                if self.name=='partner_id':
+                    import pudb
+                    pudb.set_trace()
+
                 self.compute_value(recs)
 
             if not env.cache.contains(record, self):
@@ -1019,56 +1017,28 @@ class Field(MetaField('DummyField', (object,), {})):
         record.ensure_one()
         env = record.env
 
-        # adapt value to the cache level
+
+        # if value did not change; do nothing
         value = self.convert_to_cache(value, record)
+        if env.cache.contains(record, self) and (env.cache.get(record, self) == value):
+            return
 
+        # for chane of relational fields, you have to check dependencies before and after the change
+        if self.relational:
+            record.modified([self.name])
 
-        # FP TO DO: what's the case of env.in_draft? --> should we remove the concept?
-        if (not record.id) or (not self.store):
-        # if env.in_draft or (not record.id) or (not self.store):
-            # determine dependent fields
-            spec = self.modified_draft(record)
+        env.cache.set(record, self, value)
+        env.remove_todo(self, record)
 
-            # set value in cache, inverse field, and mark record as dirty
-            env.cache.set(record, self, value)
-            env.remove_todo(self, record)
+        for invf in record._field_inverses[self]:
+            invf._update(record[self.name], record)
 
-            if env.in_onchange:
-                for invf in record._field_inverses[self]:
-                    invf._update(record[self.name], record)
-                env.dirty[record].add(self.name)
+        record.modified([self.name])
 
-            # determine more dependent fields, and invalidate them
-            if self.relational:
-                spec += self.modified_draft(record)
-
-            # env.cache.invalidate(spec)
-            # FP Check: does not install without that, but would be better to do this
-            for field,obj in spec:
-                env.add_todo(field, obj)
-
-        else:
-            # Write to database
+        if record.id and self.store:
             write_value = self.convert_to_write(self.convert_to_record(value, record), record)
-            if (not env.cache.contains(record, self)) or (env.cache.get(record, self) != value):
-                if env.all.towrite is None:
-                    record.write({self.name: write_value})
-                else:
-                    # record.write({self.name: write_value})
-                    try:
-                        env.all.towrite[self][write_value].add(record.id)
-                    except TypeError:
-                        # FP TODO: can we improve that for speed improvements
-                        # catches unhashable values, like one2many: [(6, 0, ())]
-                        record.write({self.name: write_value})
+            env.all.towrite[self][write_value].add(record.id)
 
-                # FP TODO: not sure to understand why? if it's a many2one, it's good to set it in the cache
-                # Update the cache unless value contains a new record
-                if not (self.relational and not all(value)):
-                    env.cache.set(record, self, value)
-
-            # Already done in the write
-            # env.remove_todo(self, record)
 
     ############################################################################
     #
@@ -1079,33 +1049,16 @@ class Field(MetaField('DummyField', (object,), {})):
         """ Invoke the compute method on ``records``; the results are in cache. """
         fields = records._field_computed[self]
 
-        # do not write at __set__, instead write in batch after
-        towrite = records.env.all.towrite
-        if towrite is None:
-            records.env.all.towrite = defaultdict(lambda : defaultdict(set))
-
-        for field in fields:
-            records.env.remove_todo(field, records)
+        # FP NOTE: we should remove this to support reccursive fields (within records, some depends on others)
+        # for field in fields:
+        #     records.env.remove_todo(field, records)
 
         if isinstance(self.compute, str):
             getattr(records, self.compute)()
         else:
             self.compute(records)
 
-        # FP TO CHECK: We could also optimize multi-column write, but I am not sure it's worth it
-        if (towrite is None) and records.env.all.towrite:
-            while records.env.all.towrite:
-                field = next(iter(records.env.all.towrite))
-                values = records.env.all.towrite.pop(field)
-                for value, ids in values.items():
-                    recs = records.env[field.model_name].browse(ids)
-                    try:
-                        recs._write({field.name: value})
-                    except MissingError:
-                        recs.exists()._write({field.name: value})
-        if towrite is None:
-            records.env.all.towrite = None
-
+        # even if __set__ already removed the todo, compute method might not set a value
         for field in fields:
             records.env.remove_todo(field, records)
 
@@ -1129,36 +1082,36 @@ class Field(MetaField('DummyField', (object,), {})):
     # Notification when fields are modified
     #
 
-    def modified_draft(self, records):
-        """ Same as :meth:`modified`, but in draft mode. """
-        env = records.env
+    # def modified_draft(self, records):
+    #     """ Same as :meth:`modified`, but in draft mode. """
+    #     env = records.env
 
-        # invalidate the fields on the records in cache that depend on
-        # ``records``, except fields currently being computed
-        spec = []
-        for field, path in records._field_triggers[self]:
-            if not field.compute:
-                # Note: do not invalidate non-computed fields. Such fields may
-                # require invalidation in general (like *2many fields with
-                # domains) but should not be invalidated in this case, because
-                # we would simply lose their values during an onchange!
-                continue
+    #     # invalidate the fields on the records in cache that depend on
+    #     # ``records``, except fields currently being computed
+    #     spec = []
+    #     for field, path in records._field_triggers[self]:
+    #         if not field.compute:
+    #             # Note: do not invalidate non-computed fields. Such fields may
+    #             # require invalidation in general (like *2many fields with
+    #             # domains) but should not be invalidated in this case, because
+    #             # we would simply lose their values during an onchange!
+    #             continue
 
-            target = env[field.model_name]
-            protected = env.protected(field)
-            if path == 'id' and field.model_name == records._name:
-                target = records - protected
-            elif path and env.in_onchange:
-                target = (env.cache.get_records(target, field) - protected).filtered(
-                    lambda rec: rec if path == 'id' else rec._mapped_cache(path) & records
-                )
-            else:
-                # FP TODO: remove protected
-                target = env.cache.get_records(target, field) - protected
+    #         target = env[field.model_name]
+    #         protected = env.protected(field)
+    #         if path == 'id' and field.model_name == records._name:
+    #             target = records - protected
+    #         elif path and env.in_onchange:
+    #             target = (env.cache.get_records(target, field) - protected).filtered(
+    #                 lambda rec: rec if path == 'id' else rec._mapped_cache(path) & records
+    #             )
+    #         else:
+    #             # FP TODO: remove protected
+    #             target = env.cache.get_records(target, field) - protected
 
-            if target:
-                spec.append((field, target))
-        return spec
+    #         if target:
+    #             spec.append((field, target))
+    #     return spec
 
 
 class Boolean(Field):
@@ -2157,6 +2110,7 @@ class Many2one(_Relational):
     def convert_to_record(self, value, record):
         # use registry to avoid creating a recordset for the model
         prefetch = record.env.cache.get_all_values(record, self)
+        # FP NOTE: would be good to avoid these 3 lines
         a = set()
         for p in prefetch:
             if p: a.add(p[0])

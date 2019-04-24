@@ -3111,11 +3111,10 @@ Fields:
             return True
 
         # for recomputing fields
-        self.modified(self._fields)
-
-        self._check_concurrency()
-
         self.check_access_rights('unlink')
+        self.modified(self._fields)
+        self._check_concurrency()
+        self.towrite_flush()
 
         # Check if the records are used as default properties.
         refs = ['%s,%s' % (self._name, i) for i in self.ids]
@@ -3506,7 +3505,6 @@ Fields:
             # the superuser can set log_access fields while loading registry
             if not(self.env.uid == SUPERUSER_ID and not self.pool.ready):
                 bad_names.update(LOG_ACCESS_COLUMNS)
-        unknown_names = set()
 
         # classify fields for each record
         data_list = []
@@ -3526,8 +3524,9 @@ Fields:
                 if key in bad_names:
                     continue
                 field = self._fields.get(key)
+                # FP Note: I would do an assert instead; there is no reason to accept a wrong field
                 if not field:
-                    unknown_names.add(key)
+                    _logger.warning("%s.create() with unknown fields: %s", self._name, key)
                     continue
                 if field.store:
                     stored[key] = val
@@ -3539,10 +3538,6 @@ Fields:
                     protected.update(self._field_computed.get(field, [field]))
 
             data_list.append(data)
-
-        if unknown_names:
-            _logger.warning("%s.create() with unknown fields: %s",
-                            self._name, ', '.join(sorted(unknown_names)))
 
         # create or update parent records
         for model_name, parent_name in self._inherits.items():
@@ -3565,52 +3560,42 @@ Fields:
         # create records with stored fields
         records = self._create(data_list)
 
-        # determine which fields to protect on which records
-        protected = [(data['protected'], data['record']) for data in data_list]
-        with self.env.protecting(protected):
-            # group fields by inverse method (to call it once), and order groups
-            # by dependence (in case they depend on each other)
-            field_groups = sorted(
-                (fields for _inv, fields in groupby(inversed_fields, attrgetter('inverse'))),
-                key=lambda fields: min(map(self.pool.field_sequence, fields)),
-            )
-            for fields in field_groups:
-                # determine which records to inverse for those fields
-                inv_names = {field.name for field in fields}
-                rec_vals = [
-                    (data['record'], {
-                        name: data['inversed'][name]
-                        for name in inv_names
-                        if name in data['inversed']
-                    })
-                    for data in data_list
-                    if not inv_names.isdisjoint(data['inversed'])
-                ]
+        # group fields by inverse method (to call it once), and order groups
+        # by dependence (in case they depend on each other)
+        field_groups = sorted(
+            (fields for _inv, fields in groupby(inversed_fields, attrgetter('inverse'))),
+            key=lambda fields: min(map(self.pool.field_sequence, fields)),
+        )
+        for fields in field_groups:
+            # determine which records to inverse for those fields
+            inv_names = {field.name for field in fields}
+            rec_vals = [
+                (data['record'], {
+                    name: data['inversed'][name]
+                    for name in inv_names
+                    if name in data['inversed']
+                })
+                for data in data_list
+                if not inv_names.isdisjoint(data['inversed'])
+            ]
 
-                # If a field is not stored, its inverse method will probably
-                # write on its dependencies, which will invalidate the field on
-                # all records. We therefore inverse the field record by record.
-                if all(field.store or field.company_dependent for field in fields):
-                    batches = [rec_vals]
-                else:
-                    batches = [[rec_data] for rec_data in rec_vals]
+            # If a field is not stored, its inverse method will probably
+            # write on its dependencies, which will invalidate the field on
+            # all records. We therefore inverse the field record by record.
+            if all(field.store or field.company_dependent for field in fields):
+                batches = [rec_vals]
+            else:
+                batches = [[rec_data] for rec_data in rec_vals]
 
-                for batch in batches:
-                    for record, vals in batch:
-                        record._cache.update(record._convert_to_cache(vals))
-                    batch_recs = self.concat(*(record for record, vals in batch))
-                    fields[0].determine_inverse(batch_recs)
-
-                # trick: no need to mark non-stored fields as modified, thanks
-                # to the transitive closure made over non-stored dependencies
+            for batch in batches:
+                for record, vals in batch:
+                    record._cache.update(record._convert_to_cache(vals))
+                batch_recs = self.concat(*(record for record, vals in batch))
+                fields[0].determine_inverse(batch_recs)
 
         # check Python constraints for non-stored inversed fields
         for data in data_list:
             data['record']._validate_fields(set(data['inversed']) - set(data['stored']))
-
-        # recompute fields
-        # if self._name=='account.invoice':
-        #     self.recompute()
 
         return records
 
@@ -3672,41 +3657,42 @@ Fields:
         for data, record in zip(data_list, records):
             data['record'] = record
 
+        # TODO: store in cache + add to inverse
+
+
+
+
+
+
+
+
+
+
+
 
         # update parent_path
         records._parent_store_create()
 
         # mark computed fields as todo
-        if data_list:
-            records.modified(self._fields, data_list[0], followlink=False)
-        # for d in data_list:
-        #     d['record'].modified(self._fields, d['stored'], followlink=False)
+        modfields = [fname for (fname, field) in self._fields.items() if field.type not in ('one2many', 'many2many')]
+        setfields = data_list[0]
+        records.modified(modfields, setfields)
 
-        protected = [(data['protected'], data['record']) for data in data_list]
-        with self.env.protecting(protected):
-            # mark fields to recompute; do this before setting other fields,
-            # because the latter can require the value of computed fields, e.g.,
-            # a one2many checking constraints on records
-
-            if other_fields:
-                # discard default values from context for other fields
-                others = records.with_context(clean_context(self._context))
-                for field in sorted(other_fields, key=attrgetter('_sequence')):
-                    field.create([
-                        (other, data['stored'][field.name])
-                        for other, data in zip(others, data_list)
-                        if field.name in data['stored']
-                    ])
-
-                # mark fields to recompute
-                # records.modified([field.name for field in other_fields])
+        if other_fields:
+            # discard default values from context for other fields
+            others = records.with_context(clean_context(self._context))
+            for field in sorted(other_fields, key=attrgetter('_sequence')):
+                field.create([
+                    (other, data['stored'][field.name])
+                    for other, data in zip(others, data_list)
+                    if field.name in data['stored']
+                ])
 
             for d in data_list:
-                d['record'].modified([x.name for x in other_fields], d['stored'])
+                d['record'].modified([x.name for x in other_fields], setfields)
 
-            # check Python constraints for stored fields
-            records._validate_fields(name for data in data_list for name in data['stored'])
-
+        # check Python constraints for stored fields
+        records._validate_fields(name for data in data_list for name in data['stored'])
         records.check_access_rule('create')
 
         # add translations
@@ -4114,23 +4100,21 @@ Fields:
         """
         self.sudo(access_rights_uid or self._uid).check_access_rights('read')
 
-        # FP TODO: optimize here to only compute fields in the domain
-        # self.recompute()
+        # recompute fields that are used in the domain
         for dom_part in args:
             if isinstance(dom_part, str): continue
             if not isinstance(dom_part[0], str): continue
             obj = self
             for fname in dom_part[0].split('.'):
-                if fname=='id': continue
-                try:
-                    field = obj._fields[fname]
-                except KeyError:
-                    raise ValueError("Invalid field %s on %s" % (fname, obj._name))
-                recs = self.env.field_todo(fname)
-                if not recs:
-                    break
-                field.compute_value(recs)
-                obj = self.env[field.comodel]
+                obj.recompute_fields([fname])
+                field = obj._fields[fname]
+                if field.comodel_name:
+                    obj = self.env[field.comodel_name]
+
+        # flush values to write to better read them
+        # FP NOTE: we should flush by fields, that will improve a lot the performance
+        self.towrite_flush()
+
 
         if expression.is_false(self, args):
             # optimization: no need to query, as no record satisfies the domain
@@ -4948,6 +4932,27 @@ Fields:
             for name, value in values.items():
                 record[name] = value
 
+
+    @api.model
+    def towrite_flush(self):
+        # write in chunks of similar ids / values; could be optimized (e.g. multi-column write?)
+        todo = {}
+        while self.env.all.towrite:
+            field, values = self.env.all.towrite.popitem()
+            for value, ids in values.items():
+                sids = tuple(sorted(ids))
+                todo.setdefault((field.model_name, sids), {})
+                todo[(field.model_name, sids)][field.name] = value
+
+        for (model, ids), data in todo.items():
+            recs = self.env[model].browse(ids)
+            try:
+                recs._write(data)
+            except MissingError:
+                recs.exists()._write(data)
+
+
+
     #
     # New records - represent records that do not exist in the database yet;
     # they are used to perform onchanges.
@@ -5208,7 +5213,7 @@ Fields:
         self.env.cache.invalidate(spec)
 
     @api.multi
-    def modified(self, fnames, overwrite=None, followlink=True):
+    def modified(self, fnames, overwrite=[]):
         """ Notify that fields have been modified on ``self``. This invalidates
             the cache, and prepares the recomputation of stored function fields
             (new-style fields only).
@@ -5219,74 +5224,106 @@ Fields:
                 for all
             :param followlink: set as False if you expect no record to link to this one (when create)
         """
-        # group triggers by (model, path) to minimize the calls to search()
 
-        invalids = []
-        triggers = defaultdict(set)
+        # sort according to path length, to share partial path's evaluation
+        # order_id.partner_id.name and order_id.name will share the "order_id" evaluation
+        tocheck = OrderedDict()
         for fname in fnames:
             mfield = self._fields[fname]
-            self.env.remove_todo(mfield, self)
-            invalids.append((mfield, self._ids))
-
-            for field in self._field_inverses[mfield]:
-                invalids.append((field, None))
-            # group triggers by model and path to reduce the number of search()
             for field, path in self._field_triggers[mfield]:
-                triggers[(field.model_name, path)].add(field)
+                tocheck[(len(path), field, tuple(path))] = self
 
-        # process triggers, mark fields to be invalidated/recomputed
-        for model_path, fields in triggers.items():
-            model_name, path = model_path
-            stored = {field for field in fields if field.compute and field.store}
-            # process stored fields
-            if path and stored:
-                if not followlink:
-                    obj = self.env[model_name]
-                    f = None
-                    for p in path.split('.'):
-                        if p=='id': continue
-                        f = obj._fields[p]
-                        obj = self.env[f.comodel_name]
-                    if f and (f.type=='many2one'):
-                        continue
+        result = []
+        while tocheck:
+            (pathlen, field, path), records = tocheck.popitem()
 
-                # determine records of model_name linked by path to self
-                if path == 'id':
-                    target0 = self
-                else:
-                    Model = self.env[model_name]
-                    f = Model._fields.get(path)
-                    if f and f.store and f.type not in ('one2many', 'many2many'):
-                        # path is direct (not dotted), stored, and inline -> optimise to raw sql
-                        self.env.cr.execute('SELECT id FROM "%s" WHERE "%s" in %%s' % (Model._table, path), [tuple(self.ids)])
-                        target0 = Model.browse(i for [i] in self.env.cr.fetchall())
-                    else:
-                        env = self.env(user=SUPERUSER_ID, context={'active_test': False})
-                        target0 = env[model_name].search([(path, 'in', self.ids)])
-                        target0 = target0.with_env(self.env)
-                # prepare recomputation for each field on linked records
-                for field in stored:
-                    # discard records to not recompute for field
-                    target = target0 - self.env.protected(field)
-                    if not target:
-                        continue
-                    # do not recompute if a value is provided (on_change and default optimization)
-                    if (target==self) and ((overwrite is None) or (field.name in overwrite)):
-                        continue
+            # final node of path, result should be marked as todo, then recursive modified
+            if pathlen==0:
+                if field.name in overwrite: continue
+                newtodo = records.env.add_todo(field, records)
+                if newtodo:
+                    newtodo.modified([field.name])
+                continue
 
-                    # invalids.append((field, target._ids))
-                    # self.env.add_todo(field, target)
 
-                    # mark field to be recomputed on target
-                    if field.compute_sudo:
-                        target = target.sudo()
-                    target.env.add_todo(field, target)
+            lastfield = path[-1]
+            model = self.env[lastfield.model_name]
 
-            # process non-stored fields
-            for field in (fields - stored):
-                invalids.append((field, None))
+            # FP TO CHECK are o2m with domains considered inverse?
+            if model._field_inverses.get(lastfield, False):
+                new_records = records.mapped(model._field_inverses[lastfield][0].name)
+            else:
+                new_records = model.search([(lastfield.name, 'in', records.ids)])
 
-        self.env.cache.invalidate(invalids)
+            # Group part of path together
+            key = (pathlen-1, field, path[:-1])
+            if key in tocheck:
+                tocheck[key] |= new_records
+            else:
+                tocheck[key] = new_records
+
+
+
+
+
+
+        # group triggers by (model, path) to minimize the calls to search()
+        # triggers = defaultdict(set)
+        # for fname in fnames:
+        #     mfield = self._fields[fname]
+        #     for field, path in self._field_triggers[mfield]:
+        #         triggers[(field.model_name, path)].add(field)
+
+        # # process triggers, mark fields to be invalidated/recomputed
+        # for model_path, fields in triggers.items():
+        #     model_name, path = model_path
+        #     stored = {field for field in fields if field.compute and field.store}
+        #     # process stored fields
+        #     if path and stored:
+        #         # Optimization: do not search for one2many/many2many when creating a record
+        #         if not followlink:
+        #             obj = self.env[model_name]
+        #             f = None
+        #             for p in path:
+        #                 if p=='id': continue
+        #                 f = obj._fields[p]
+        #                 obj = self.env[f.comodel_name]
+        #             if f and (f.type=='many2one'):
+        #                 continue
+
+        #         # determine records of model_name linked by path to self
+        #         if path == 'id':
+        #             target = self
+        #         else:
+        #             Model = self.env[model_name]
+        #             f = Model._fields.get(path)
+        #             if f and f.store and f.type not in ('one2many', 'many2many'):
+        #                 # path is direct (not dotted), stored, and inline -> optimise to raw sql
+        #                 self.env.cr.execute('SELECT id FROM "%s" WHERE "%s" in %%s' % (Model._table, path), [tuple(self.ids)])
+        #                 target = Model.browse(i for [i] in self.env.cr.fetchall())
+        #             else:
+        #                 env = self.env(user=SUPERUSER_ID, context={'active_test': False})
+        #                 target = env[model_name].search([(path, 'in', self.ids)])
+        #                 target = target.with_env(self.env)
+
+        #         # prepare recomputation for each field on linked records
+        #         for field in stored:
+        #             if not target:
+        #                 continue
+        #             # do not recompute if a value is provided (on_change and default optimization)
+        #             if (target==self) and ((overwrite is None) or (field.name in overwrite)):
+        #                 continue
+
+        #             # mark field to be recomputed on target
+        #             if field.compute_sudo:
+        #                 target = target.sudo()
+
+        #             # recursive call
+        #             todo = target.env.check_todo(field, record)
+        #             if todo:
+        #                 target.env.add_todo(field, todo)
+        #                 todo.modified(field)
+
 
     def _recompute_check(self, field):
         """ If ``field`` must be recomputed on some record in ``self``, return the
@@ -5294,9 +5331,11 @@ Fields:
         """
         return self.env.check_todo(field, self)
 
+    # FP TODO: merge this method, with recompute bellow
     @api.model
     def recompute_fields(self, fields):
         for fname in fields:
+            if fname=='id': continue
             field = self._fields[fname]
             while field and field.compute:
                 recs = self.env.field_todo(field)
@@ -5309,23 +5348,20 @@ Fields:
         """ Recompute stored function fields. The fields and records to
             recompute have been determined by method :meth:`modified`.
         """
-        if not(self.env.recompute and self._context.get('recompute', True)):
-            return False
-
         count = 0
         done = {}
         while self.env.has_todo():
             field = self.env.get_todo()
             recs = self.env.field_todo(field)
+
             field.compute_value(recs)
+            self.env.remove_todo(field, recs)
 
-            # recs._recompute(field)
-
-            count+= 1                      # Loop Detection in computed fields
+            # Useful for debug purpose of recursion loops
+            count+= 1
             if count > 100:
                 print('Cycling computed fields', recs, field)
 
-    # FP TODO: merge this method, with fields.py, compute value
     # @api.multi
     # def _recompute(self, field):
     #     # determine the fields to recompute
