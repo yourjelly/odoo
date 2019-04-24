@@ -43,6 +43,12 @@ class test(models.Model):
 
     def testme(self):
         t = time.time()
+        for partner in self.env['res.partner'].search([]):
+            partner.country_id.name
+        return time.time()-t
+
+    def testme2(self):
+        t = time.time()
         main_id = self.create({
             'name': 'bla',
             'line_ids': [
@@ -50,11 +56,22 @@ class test(models.Model):
                 (0,0, {'name': 'def'}),
             ]
         })
-        # main_id.int1 = 5
-        # self.env['test.line'].create(
-        #     {'name': 'ghi', 'test_id': main_id.id}
-        # )
-        # self.env['test.line'].search([('intx2', '=', 3)])
+        return time.time()-t
+
+    def testme3(self):
+        t = time.time()
+        main_id = self.create({
+            'name': 'bla',
+            'line_ids': [
+                (0,0, {'name': 'abc'}),
+                (0,0, {'name': 'def'}),
+            ]
+        })
+        main_id.int1 = 5
+        self.env['test.line'].create(
+            {'name': 'ghi', 'test_id': main_id.id}
+        )
+        self.env['test.line'].search([('intx2', '=', 3)])
         return time.time()-t
 
 
