@@ -1683,7 +1683,6 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             name
             for name, field in self._fields.items()
             if name not in values
-            if self._log_access and name not in MAGIC_COLUMNS
             if not (field.inherited and field.related_field.model_name in avoid_models)
         }
 
@@ -3308,6 +3307,15 @@ Fields:
                 # empty
                 self._write(store_vals)
 
+            # mark fields to recompute; do this before setting other fields, because
+            # the latter can require the value of computed fields, e.g., a one2many
+            # checking constraints on records
+            self.modified(vals, vals)
+            if self._log_access:
+                self.modified(['write_uid', 'write_date'],['write_uid', 'write_date'])
+
+
+
             # update parent records (after possibly updating parent fields)
             cr = self.env.cr
             for model_name, parent_vals in inherited_vals.items():
@@ -3407,14 +3415,6 @@ Fields:
                 columns.append(('write_date', '%s', AsIs("(now() at time zone 'UTC')")))
                 updated.append('write_date')
 
-        # mark fields to recompute; do this before setting other fields, because
-        # the latter can require the value of computed fields, e.g., a one2many
-        # checking constraints on records
-        self.modified(vals, vals)
-        if self._log_access:
-            self.modified(['write_uid', 'write_date'],['write_uid', 'write_date'])
-
-
         # update columns
         if columns:
             self.check_access_rule('write')
@@ -3453,9 +3453,6 @@ Fields:
 
             for field in sorted(other_fields, key=attrgetter('_sequence')):
                 field.write(other, vals[field.name])
-
-            # mark fields to recompute
-            self.modified(field.name for field in other_fields)
 
         # check Python constraints
         self._validate_fields(vals)
@@ -3513,6 +3510,7 @@ Fields:
         for vals in vals_list:
             # add missing defaults
             vals = self._add_missing_default_values(vals)
+            print('vals', vals)
 
             # distribute fields into sets for various purposes
             data = {}
@@ -3652,23 +3650,19 @@ Fields:
             cr.execute(query, params)
             ids.append(cr.fetchone()[0])
 
-        # the new records
+        # put the new records in cache, and update inverse fields, for many2one
         records = self.browse(ids)
         for data, record in zip(data_list, records):
             data['record'] = record
-
-        # TODO: store in cache + add to inverse
-
-
-
-
-
-
-
-
-
-
-
+            for fname,value in itertools.chain(data['stored'].items(), data['inherited'].items()):
+                field = self._fields[fname]
+                if field.type in ('one2many', 'many2many'):
+                    self.env.cache.set(record, field, ())
+                else:
+                    value = field.convert_to_cache(value, record)
+                    self.env.cache.set(record, field, value)
+                    for invf in record._field_inverses[field]:
+                        invf._update(record[field.name], record)
 
         # update parent_path
         records._parent_store_create()
@@ -5361,6 +5355,7 @@ Fields:
             count+= 1
             if count > 100:
                 print('Cycling computed fields', recs, field)
+        self.towrite_flush()
 
     # @api.multi
     # def _recompute(self, field):

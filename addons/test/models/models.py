@@ -5,14 +5,28 @@ import time
 
 class test(models.Model):
     _name = 'test'
+    _log_access = False
 
     name = fields.Char()
     line_ids = fields.One2many('test.line', 'test_id')
 
     int1 = fields.Integer('User', default=lambda x: 1)
-    intx2 = fields.Integer('User', compute="_line_x2", store=True)
+    intx2 = fields.Integer('User', compute="_get_intx2", store=True)
 
     line_sum = fields.Integer('Sum Currency', compute='_line_sum', store=True)
+
+    def pcache(self):
+        print('------ Cache ----')
+        for dd in self.env.cache._data.values():
+            for field, ids in dd.items():
+                for rid, value in ids.items():
+                    print(field.model_name, rid,':', field.name,'=', value)
+        print('')
+        print('----- Todo -----')
+        for field in self.env.all.todo:
+            print(field, self.env.all.todo[field])
+        print('')
+
 
     @api.depends('line_ids.intx2')
     def _line_sum(self):
@@ -22,10 +36,10 @@ class test(models.Model):
                 total += line.intx2
             record.line_sum = total
 
-    @api.depends('source')
+    @api.depends('int1')
     def _get_intx2(self):
         for record in self:
-            record.intx2 = int1 * 2
+            record.intx2 = record.int1 * 2
 
     def testme(self):
         t = time.time()
@@ -36,11 +50,11 @@ class test(models.Model):
                 (0,0, {'name': 'def'}),
             ]
         })
-        main_id.int1 = 5
-        self.env['test.line'].create(
-            {'name': 'ghi', 'test_id': main_id.id}
-        )
-        self.env['test.line'].search([('intx2', '=', 3)])
+        # main_id.int1 = 5
+        # self.env['test.line'].create(
+        #     {'name': 'ghi', 'test_id': main_id.id}
+        # )
+        # self.env['test.line'].search([('intx2', '=', 3)])
         return time.time()-t
 
 
