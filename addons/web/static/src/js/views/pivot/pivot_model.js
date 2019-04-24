@@ -385,7 +385,7 @@ var PivotModel = AbstractModel.extend({
             };
         };
 
-        this._sortTree(tree, sortFunction);
+        this._sortTree(sortFunction, tree);
 
         this.data.sortedColumn = sortedColumn;
     },
@@ -748,7 +748,7 @@ var PivotModel = AbstractModel.extend({
         }
         return value;
     },
-    _sortTree: function (tree, sortFunction) {
+    _sortTree: function (sortFunction, tree) {
         var self = this;
         tree.sortedKeys = _.sortBy(Object.keys(tree.directSubtrees), sortFunction(tree));
         _.values(tree.directSubtrees).forEach(function (subTree) {
