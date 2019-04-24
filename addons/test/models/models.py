@@ -56,6 +56,7 @@ class test(models.Model):
                 (0,0, {'name': 'def'}),
             ]
         })
+        self.recompute()
         return time.time()-t
 
     def testme3(self):
@@ -72,6 +73,7 @@ class test(models.Model):
             {'name': 'ghi', 'test_id': main_id.id}
         )
         self.env['test.line'].search([('intx2', '=', 3)])
+        self.recompute()
         return time.time()-t
 
 
