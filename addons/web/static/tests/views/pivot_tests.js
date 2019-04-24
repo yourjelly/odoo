@@ -23,7 +23,7 @@ QUnit.module('Views', {
                     other_product_id: {string: "Other Product", type: "many2one", relation: 'product', store: true},
                     non_stored_m2o: {string: "Non Stored M2O", type: "many2one", relation: 'product'},
                     customer: {string: "Customer", type: "many2one", relation: 'customer', store: true},
-                    computed_field: {string: "Computed and not stored", compute:true, group_operator: ''},
+                    computed_field: {string: "Computed and not stored", type: 'integer', compute: true, group_operator: 'sum'},
                 },
                 records: [
                     {
@@ -210,7 +210,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.skip('pivot view add computed fields explicitly defined as measure', async function (assert) {
+    QUnit.test('pivot view add computed fields explicitly defined as measure', async function (assert) {
         assert.expect(1);
 
         var pivot = await createView({

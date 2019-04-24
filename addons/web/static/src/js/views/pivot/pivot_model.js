@@ -483,7 +483,7 @@ var PivotModel = AbstractModel.extend({
     _getGroupDomain: function (group) {
         var self = this;
         function constructDomain (fieldName, val) {
-            var type  = self.fields[fieldName].type;
+            var type = self.fields[fieldName].type;
             if (_.contains(['date' , 'datetime'], type)) {
                 var intervalBounds = val.split('/');
                 return ['&', [fieldName, '>=', intervalBounds[0]], [fieldName, '<', intervalBounds[1]]];
