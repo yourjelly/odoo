@@ -1628,10 +1628,11 @@ QUnit.module('Views', {
 
         var unpatchDate = patchDate(2016, 11, 20, 1, 0, 0);
 
-        var results, i, length;
+        var results;
+        var i;
+        var length;
 
-
-        function checkCellValues (results) {
+        function checkCellValues(results) {
             length = results.length;
             for (i = 0; i < length; i++) {
                 assert.strictEqual($('.o_pivot .o_pivot_cell_value div').eq(i).text().trim(), results.shift());
@@ -1647,7 +1648,7 @@ QUnit.module('Views', {
                         '<field name="foo" type="measure"/>' +
                   '</pivot>',
                 'partner,false,search': '<search></search>',
-            }
+            },
         });
 
         await actionManager.doAction({
@@ -1657,10 +1658,9 @@ QUnit.module('Views', {
             flags: {
                 pivot: {
                     additionalMeasures: ['product_id'],
-                }
-            }
+                },
+            },
         });
-
 
         // with no data
 
@@ -1685,9 +1685,9 @@ QUnit.module('Views', {
         await testUtils.dom.click($('.o_pivot .o_pivot_header_cell_closed').eq(2));
         await testUtils.dom.click($('.o_pivot .o_field_selection a[data-field="product_id"]'));
         results = [
-            "13", "0", "100%", "0", "19", "-100%", "13", "19", "-31.58%" ,
-            "12", "0", "100%",                     "12", "0" , "100%"    ,
-            "1" , "0", "100%", "0", "19", "-100%", "1" , "19" , "-94.74%"
+            "13", "0", "100%", "0", "19", "-100%", "13", "19", "-31.58%",
+            "12", "0", "100%",                     "12", "0" , "100%",
+            "1" , "0", "100%", "0", "19", "-100%", "1" , "19", "-94.74%"
         ];
         checkCellValues(results);
 
@@ -1695,25 +1695,25 @@ QUnit.module('Views', {
         await testUtils.dom.click($('.o_control_panel div.o_pivot_measures_list a[data-field="foo"]'));
         await testUtils.dom.click($('.o_control_panel div.o_pivot_measures_list a[data-field="product_id"]'));
         results = [
-            "2", "0", "100%", "0", "1", "-100%", "2", "1", "100%" ,
-            "1", "0", "100%",                     "1", "0" , "100%"    ,
-            "1" , "0", "100%", "0", "1", "-100%", "1" , "1" , "100%"
+            "2", "0", "100%", "0", "1", "-100%", "2", "1", "100%",
+            "1", "0", "100%",                    "1", "0", "100%",
+            "1", "0", "100%", "0", "1", "-100%", "1", "1", "0%"
         ];
         checkCellValues(results);
 
         await testUtils.dom.click($('.o_control_panel div.o_pivot_measures_list a[data-field="__count"]'));
         await testUtils.dom.click($('.o_control_panel div.o_pivot_measures_list a[data-field="product_id"]'));
         results = [
-            "2", "0", "100%", "0", "2", "-100%", "2", "2", "0%" ,
-            "1", "0", "100%",                     "1", "0" , "100%"    ,
-            "1" , "0", "100%", "0", "2", "-100%", "1" , "2" , "-50%"
+            "2", "0", "100%", "0", "2", "-100%", "2", "2", "0%",
+            "1", "0", "100%",                    "1", "0", "100%",
+            "1", "0", "100%", "0", "2", "-100%", "1", "2", "-50%"
         ];
         checkCellValues(results);
 
         await testUtils.dom.clickFirst($('.o_pivot .o_pivot_header_cell_opened'));
         results = [
-            "2", "2", "0%"     ,
-            "1", "0", "100%"   ,
+            "2", "2", "0%",
+            "1", "0", "100%",
             "1", "2", "-50%"
         ];
         checkCellValues(results);
