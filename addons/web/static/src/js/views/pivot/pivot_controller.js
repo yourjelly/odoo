@@ -129,12 +129,13 @@ var PivotController = AbstractController.extend({
      * @private
      */
     _downloadTable: function () {
-        var table = this.model.exportData();
-        if(table.measure_row.length + 1 > 256) {
+        var colNumber = 1 + 0;
+        if(colNumber > 256) {
             crash_manager.show_message(_t("For Excel compatibility, data cannot be exported if there are more than 256 columns.\n\nTip: try to flip axis, filter further or reduce the number of measures."));
             framework.unblockUI();
             return;
         }
+        var data = this.model.get().pick();
         framework.blockUI();
         table.title = this.title;
         session.get_file({
@@ -153,7 +154,7 @@ var PivotController = AbstractController.extend({
      * @param {number} left left coordinate for the menu
      */
     _renderFieldSelection: function (top, left) {
-        var state = this.model.get({raw: true});
+        var state = this.model.get();
         var groupedFields = state.rowGroupBys
             .concat(state.colGroupBys)
             .map(function (f) { return f.split(':')[0];});
@@ -199,7 +200,7 @@ var PivotController = AbstractController.extend({
             return;
         }
         var self = this;
-        var state = this.model.get({raw: true});
+        var state = this.model.get();
         _.each(this.measures, function (measure, name) {
             var isSelected = _.contains(state.measures, name);
             self.$buttons.find('.dropdown-item[data-field="' + name + '"]')

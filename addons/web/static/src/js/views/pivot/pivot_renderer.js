@@ -35,29 +35,7 @@ var PivotRenderer = AbstractRenderer.extend({
     // Private
     //--------------------------------------------------------------------------
 
-    _getTreeDimension: function (tree) {
-        var height = 1;
-        var leafCount = 0;
-        this._traverseTree(tree, function (subTree) {
-            height = Math.max(height, subTree.root.value.length + 1);
-            if (_.isEmpty(subTree.directSubtrees)) {
-                leafCount++;
-            }
-        });
-        return {
-            height: height,
-            leafCount: leafCount
-        };
-    },
-    _getTreeLeafCount: function (tree) {
-        var leafCount = 0;
-        this._traverseTree(tree, function (subTree) {
-            if (_.isEmpty(subTree.directSubtrees)) {
-                leafCount++;
-            }
-        });
-        return leafCount;
-    },
+
     /**
      * Used to determine whether or not to display the no content helper.
      *
@@ -203,7 +181,7 @@ var PivotRenderer = AbstractRenderer.extend({
             var rowIndex = subTree.root.value.length;
             var groupId = [[], subTree.root.value];
             var key = JSON.stringify(groupId);
-            var isLeaf = _.isEmpty(subTree.directSubtrees);
+            var isLeaf = _.isEmpty(subTree.directSubTrees);
             var title = subTree.root.label[subTree.root.label.length - 1] || _t('Total');
             var colspan = self._getTreeLeafCount(subTree) * measureCount * (2 * originCount - 1);
             var rowspan = !isLeaf ? 1 : height - rowIndex;
@@ -283,7 +261,7 @@ var PivotRenderer = AbstractRenderer.extend({
             var title = root.label[root.label.length - 1] || _t('Total');
             var indent = root.label.length;
             var paddingLeft =  (5 +  indent * self.paddingLeftHeaderTabWidth) + 'px';
-            var isLeaf = _.isEmpty(subTree.directSubtrees);
+            var isLeaf = _.isEmpty(subTree.directSubTrees);
 
             var $header = $('<td>')
                 .text(title)
@@ -344,6 +322,8 @@ var PivotRenderer = AbstractRenderer.extend({
             $tbody.append($row);
         });
     },
+
+// to remove
     /**
      * @private @static
      * @param {any} root
@@ -357,12 +337,40 @@ var PivotRenderer = AbstractRenderer.extend({
         var self = this;
         f(tree, arg1, arg2, arg3);
 
-        var subTreeKeys = tree.sortedKeys || Object.keys(tree.directSubtrees);
+        var subTreeKeys = tree.sortedKeys || Object.keys(tree.directSubTrees);
 
         subTreeKeys.forEach(function (subTreeKey) {
-            var subTree = tree.directSubtrees[subTreeKey];
+            var subTree = tree.directSubTrees[subTreeKey];
             self._traverseTree(subTree, f, arg1, arg2, arg3);
         });
+    },
+    _getTreeDimension: function (tree) {
+        var height = 1;
+        var leafCount = 0;
+        this._traverseTree(tree, function (subTree) {
+            height = Math.max(height, subTree.root.value.length + 1);
+            if (_.isEmpty(subTree.directSubTrees)) {
+                leafCount++;
+            }
+        });
+        return {
+            height: height,
+            leafCount: leafCount
+        };
+    },
+    _getTreeHeight: function (tree) {
+        var subTreeHeights = _.values(tree.directSubTrees).map(this._getTreeHeight.bind(this));
+        return Math.max(0, Math.max.apply(null, subTreeHeights)) + 1;
+    },
+    // remove _traverseTree
+    _getTreeLeafCount: function (tree) {
+        var leafCount = 0;
+        this._traverseTree(tree, function (subTree) {
+            if (_.isEmpty(subTree.directSubTrees)) {
+                leafCount++;
+            }
+        });
+        return leafCount;
     },
 
     //--------------------------------------------------------------------------

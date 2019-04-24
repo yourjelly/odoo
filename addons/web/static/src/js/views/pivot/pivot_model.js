@@ -27,6 +27,8 @@ var cartesian = mathUtils.cartesian;
 var computeVariation = dataComparisonUtils.computeVariation;
 var sections = mathUtils.sections;
 
+var field_utils = require('web.field_utils');
+
 var _t = core._t;
 
 var PivotModel = AbstractModel.extend({
@@ -72,7 +74,7 @@ var PivotModel = AbstractModel.extend({
             tree = this.colGroupTree;
             group = this._findGroup(this.colGroupTree, groupId[1]);
         }
-        group.directSubtrees = {};
+        group.directSubTrees = {};
         group.sortedKeys = [];
         var newGroupBysLength = this._getTreeHeight(tree) - 1;
         groupBys.splice(newGroupBysLength);
@@ -82,113 +84,6 @@ var PivotModel = AbstractModel.extend({
      */
     expandAll: function () {
         return this._loadData();
-    },
-    /**
-     * Export the current pivot view in a simple JS object.
-     *
-     * @returns {Object}
-     */
-    exportData: function () {
-        var self = this;
-        var measureNbr = this.data.measures.length;
-        var headers = this._computeHeaders();
-        if (this.data.compare) {
-            _.each(headers, function (headerGroup) {
-                _.each(headerGroup, function (header) {
-                    header.width = header.width ? 3 * header.width : 3;
-                });
-            });
-        }
-        var measureRow = measureNbr >= 1 ? _.last(headers) : [];
-        var rows = this._computeRows();
-        var i, j, value, values, is_bold, additionalHeaders = [];
-        // remove the empty headers on left side
-        headers[0].splice(0,1);
-
-        function isBold (i, j) {
-            return (i === 0) ||
-                        ((self.data.main_col.width > 1) &&
-                        (j >= rows[i].values.length - measureNbr));
-        }
-
-        function makeValue (value, is_bold) {
-            return {
-                        is_bold: is_bold,
-                        value:  (value === undefined) ? "" : value,
-            };
-        }
-
-        function makeMeasure (name) {
-            return {
-                is_bold: false,
-                measure: name
-            };
-        }
-
-        // process measureRow
-        additionalHeaders = [];
-        for (i = 0; i < measureRow.length; i++) {
-            if (this.data.compare) {
-                measureRow[i].title = this.fields[measureRow[i].measure].string;
-                measureRow[i].height = 1;
-                measureRow[i].expanded = true;
-                additionalHeaders = additionalHeaders.concat(
-                        _.map(
-                            [
-                                this.data.timeRangeDescription.toString(),
-                                this.data.comparisonTimeRangeDescription.toString(),
-                                _t('Variation')
-                            ],
-                            makeMeasure
-                        )
-                    );
-            } else {
-                measureRow[i].measure = this.fields[measureRow[i].measure].string;
-            }
-        }
-        if (this.data.compare) {
-            for (i =0, j, value; i < rows.length; i++) {
-                values = [];
-                for (j = 0; j < rows[i].values.length; j++) {
-                    value = rows[i].values[j];
-                    is_bold = isBold(i, j);
-                    if (value instanceof Object) {
-                        for (var origin in value) {
-                            if (origin === 'variation') {
-                                values.push(makeValue(value[origin].magnitude * 100, is_bold));
-                            } else {
-                                values.push(makeValue(value[origin], is_bold));
-                            }
-                        }
-                    } else {
-                        for (var l = 0; l < 3; l++) {
-                            values.push(makeValue(undefined, isBold(i, j)));
-                        }
-                    }
-                }
-                rows[i].values = values;
-            }
-            headers.push(additionalHeaders);
-            return {
-                headers: _.initial(headers),
-                measure_row: additionalHeaders,
-                rows: rows,
-                nbr_measures: 3 * measureNbr,
-            };
-        } else {
-        // process all rows
-            for (i =0, j, value; i < rows.length; i++) {
-                for (j = 0; j < rows[i].values.length; j++) {
-                    rows[i].values[j] = makeValue(rows[i].values[j], isBold(i, j));
-                }
-            }
-            return {
-                headers: _.initial(headers),
-                measure_row: measureRow,
-                rows: rows,
-                nbr_measures: measureNbr,
-            };
-        }
     },
     /**
      * Swap the columns and the rows.  It is a synchronous operation.
@@ -210,7 +105,8 @@ var PivotModel = AbstractModel.extend({
      * @param {boolean} [options.raw=false]
      * @returns {Object}
      */
-    get: function () {
+    get: function (options) {
+        options = options || {};
         var state = {
             hasData: this.hasData,
             colGroupBys: this.data.colGroupBys,
@@ -218,12 +114,15 @@ var PivotModel = AbstractModel.extend({
             measures: this.data.measures,
         };
         if (this.hasData) {
+
             state = _.extend(state, {
                 domain: this.data.domain,
                 context: this.data.context,
                 fields: this.fields,
                 rowGroupTree: this.rowGroupTree,
                 colGroupTree: this.colGroupTree,
+                rows: options.raw || this._computeRows(),
+                headers: options.raw || this._computeColHeaders(),
                 measurements: this.measurements,
                 origins: this.data.origins,
                 sortedColumn: this.data.sortedColumn,
@@ -365,7 +264,7 @@ var PivotModel = AbstractModel.extend({
 
         var sortFunction = function (tree) {
             return function (subTreeKey) {
-                var subTree = tree.directSubtrees[subTreeKey];
+                var subTree = tree.directSubTrees[subTreeKey];
                 var groupIntersectionId = [subTree.root.value, colGroupId[1]];
                 var key = JSON.stringify(groupIntersectionId);
                 if (!self.measurements[key]) {
@@ -452,20 +351,169 @@ var PivotModel = AbstractModel.extend({
         var tree = groupTree;
         // we assume here that the group with value value.slice(value.length - 2) has already been added.
         value.slice(0, value.length - 1).forEach(function (key) {
-            tree = tree.directSubtrees[key];
+            tree = tree.directSubTrees[key];
         });
-        tree.directSubtrees[value[value.length - 1]] = {
+        tree.directSubTrees[value[value.length - 1]] = {
             root: {
                 label: label,
                 value: value,
             },
-            directSubtrees: {},
+            directSubTrees: {},
         };
+    },
+    _addColGroupHeaders: function (tree, measureCount, originCount) {
+        var self = this;
+
+        var group = tree.root;
+        var rowIndex = group.value.length;
+        var row  = self.data.headers[rowIndex];
+
+        var groupId = [[], group.value];
+        var key = JSON.stringify(groupId);
+
+        var isLeaf = _.isEmpty(tree.directSubTrees);
+        var title = group.label[group.label.length - 1] || _t('Total');
+        var width = tree.leafCount * measureCount * (2 * originCount - 1);
+        var height = !isLeaf ? 1 : self.colGroupTree.height - rowIndex;
+
+        var header = {
+            title: title,
+            width: width,
+            height: height,
+            groupId: key,
+            isLeaf: isLeaf,
+        };
+
+        row.push(header);
+
+        if (isLeaf) {
+            self.representedColGroupIds.push(groupId);
+            self._addMeasureHeaders(key);
+        }
+
+        _.values(tree.directSubTrees).forEach(function (subTree) {
+            self._addColGroupHeaders(subTree, measureCount, originCount);
+        });
+    },
+    _addMeasureHeaders: function (groupId) {
+        var self = this;
+        var originCount = this.data.origins.length;
+        var sortedColumn = this.data.sortedColumn || {};
+        var measureRowIndex = self.data.headers.length - 1 - (originCount > 1 ? 1 : 0);
+        var measureRow = self.data.headers[measureRowIndex];
+
+        self.data.measures.forEach(function (measure) {
+            var measureHeader = {
+                title: self.fields[measure].string,
+                measure: measure,
+                groupId: groupId,
+                width: 2 * originCount - 1,
+                height: 1,
+            };
+            if (sortedColumn.groupId === groupId &&
+                sortedColumn.measure === measure) {
+
+                measureHeader.order = sortedColumn.order;
+            }
+            measureRow.push(measureHeader);
+            if (originCount > 1) {
+                self._addOriginHeaders(groupId, measure);
+            }
+        });
+    },
+    _addOriginHeaders: function (groupId, measure) {
+        var self = this;
+        var sortedColumn = this.data.sortedColumn || {};
+        var originRowIndex = self.data.headers.length - 1;
+        var originRow = self.data.headers[originRowIndex];
+
+        this.data.origins.forEach(function (origin, originIndex) {
+            var originHeader = {
+                title: origin,
+                originIndexes: [originIndex],
+                groupId: groupId,
+                measure: measure,
+                width: 1,
+                height: 1
+            };
+            if (sortedColumn.measure === measure &&
+                sortedColumn.groupId === groupId &&
+                !sortedColumn.originIndexes[1] &&
+                sortedColumn.originIndexes[0] === originIndex) {
+
+                originHeader.order = sortedColumn.order;
+            }
+            originRow.push(originHeader);
+
+            if (originIndex > 1) {
+                var variationHeader = {
+                    title: _t('Variation'),
+                    originIndexes: [originIndex - 1, originIndex],
+                    groupId: groupId,
+                    measure: measure,
+                    width: 1,
+                    height: 1,
+                };
+                if (sortedColumn.groupId === groupId &&
+                    sortedColumn.measure === measure &&
+                    sortedColumn.originIndexes[1] &&
+                    sortedColumn.originIndexes[1] === originIndex) {
+
+                    variationHeader.order = sortedColumn.order;
+                }
+                originRow.push(variationHeader);
+            }
+        });
+    },
+    _computeColHeaders: function () {
+
+        this._computeTreeDimension(this.colGroupTree);
+
+        var height = this.colGroupTree.height;
+        var leafCount = this.colGroupTree.leafCount;
+        var measureCount = this.data.measures.length;
+        var originCount = this.data.origins.length;
+        var rowCount = height + 1 + (originCount > 1 ? 1 : 0);
+
+        // index heigth corresponds to the measures headers.
+        // index heigth + 1 corresponds to origins/variation headers.
+        this.data.headers = (new Array(rowCount)).fill(0).map(function () {
+            return [];
+        });
+
+        this.data.headers[0].push({
+            title: "",
+            width: 1,
+            height: rowCount,
+        });
+
+        this.representedColGroupIds = [];
+        this._addColGroupHeaders(this.colGroupTree, measureCount, originCount);
+
+        // We want to represent the group 'Total' if there is more that one leaf.
+        if (leafCount > 1) {
+            var key = JSON.stringify([[],[]]);
+
+            this.data.headers[0].push({
+                title: "",
+                groupId: key,
+                width: measureCount * (2 * originCount - 1),
+                height: height,
+            });
+
+            this.representedColGroupIds.push([[], []]);
+            this._addMeasureHeaders(key);
+        }
+
+        return this.data.headers;
+    },
+    _computeRows: function () {
+        return [];
     },
     _findGroup: function (groupTree, value) {
         var tree = groupTree;
         value.slice(0, value.length).forEach(function (key) {
-            tree = tree.directSubtrees[key];
+            tree = tree.directSubTrees[key];
         });
         return tree;
     },
@@ -591,10 +639,47 @@ var PivotModel = AbstractModel.extend({
         }
         return origins;
     },
+    _computeTreeDimension: function (tree) {
+        if (_.isEmpty(tree.directSubTrees)) {
+            tree.height = 1;
+            tree.leafCount = 1;
+            return;
+        }
+
+        var self = this;
+        var dimension = _.values(tree.directSubTrees).reduce(
+            function (acc, subTree) {
+                self._computeTreeDimension(subTree);
+                return {
+                    height: Math.max(acc.height, subTree.height),
+                    leafCount: acc.leafCount + subTree.leafCount,
+                };
+            },
+            {
+                height: 1,
+                leafCount: 0
+            }
+        );
+        tree.height = dimension.height + 1;
+        tree.leafCount = dimension.leafCount;
+    },
     _getTreeHeight: function (tree) {
-        var subTreeHeights = _.values(tree.directSubtrees).map(this._getTreeHeight.bind(this));
+        var subTreeHeights = _.values(tree.directSubTrees).map(this._getTreeHeight.bind(this));
         return Math.max(0, Math.max.apply(null, subTreeHeights)) + 1;
     },
+    // values computed during computeTreeDimensions
+    // _getTreeLeafCount: function (tree) {
+    //     if (_.isEmpty(tree.directSubTrees)) {
+    //         return 1;
+    //     }
+    //     var self = this;
+    //     return _.values(tree.directSubTrees).reduce(
+    //         function (acc, subTree) {
+    //             return acc + self._getTreeLeafCount(subTree);
+    //         },
+    //         0
+    //     );
+    // },
     _getValue: function (group, fields) {
         var self = this;
         return fields.map(function (field) {
@@ -604,8 +689,8 @@ var PivotModel = AbstractModel.extend({
     _loadData: function () {
         var self = this;
 
-        this.rowGroupTree = {root: {label: [], value: []}, directSubtrees: {}};
-        this.colGroupTree = {root: {label: [], value: []}, directSubtrees: {}};
+        this.rowGroupTree = {root: {label: [], value: []}, directSubTrees: {}};
+        this.colGroupTree = {root: {label: [], value: []}, directSubTrees: {}};
         this.measurements = {};
         this.counts = {};
 
@@ -709,18 +794,18 @@ var PivotModel = AbstractModel.extend({
      * @param {Object} oldTree
      */
     _pruneTree: function (tree, oldTree) {
-        if (_.isEmpty(oldTree.directSubtrees)) {
-            tree.directSubtrees = {};
+        if (_.isEmpty(oldTree.directSubTrees)) {
+            tree.directSubTrees = {};
             return;
         }
         var self = this;
-        Object.keys(tree.directSubtrees).forEach(function (subTreeKey) {
-            var index = Object.keys(oldTree.directSubtrees).indexOf(subTreeKey);
-            var subTree = tree.directSubtrees[subTreeKey];
+        Object.keys(tree.directSubTrees).forEach(function (subTreeKey) {
+            var index = Object.keys(oldTree.directSubTrees).indexOf(subTreeKey);
+            var subTree = tree.directSubTrees[subTreeKey];
             if (index === -1) {
-                subTree.directSubtrees = {};
+                subTree.directSubTrees = {};
             } else {
-                var oldSubTree = oldTree.directSubtrees[subTreeKey];
+                var oldSubTree = oldTree.directSubTrees[subTreeKey];
                 self._pruneTree(subTree, oldSubTree);
             }
         });
@@ -750,8 +835,8 @@ var PivotModel = AbstractModel.extend({
     },
     _sortTree: function (sortFunction, tree) {
         var self = this;
-        tree.sortedKeys = _.sortBy(Object.keys(tree.directSubtrees), sortFunction(tree));
-        _.values(tree.directSubtrees).forEach(function (subTree) {
+        tree.sortedKeys = _.sortBy(Object.keys(tree.directSubTrees), sortFunction(tree));
+        _.values(tree.directSubTrees).forEach(function (subTree) {
             self._sortTree(subTree, sortFunction);
         });
     },
