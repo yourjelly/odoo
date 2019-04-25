@@ -1801,7 +1801,6 @@ QUnit.module('Views', {
             session: {
                 get_file: function (args) {
                     var data = JSON.parse(args.data.data);
-                    debugger
                     _.each(data.col_group_headers, function (l) {
                         var titles = l.map(function (o) {return o.title;});
                         assert.step(JSON.stringify(titles));

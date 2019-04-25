@@ -21,8 +21,8 @@ var session = require('web.session');
 
 var _t = core._t;
 var cartesian = mathUtils.cartesian;
-var sections = mathUtils.sections;
 var QWeb = core.qweb;
+var sections = mathUtils.sections;
 
 var PivotController = AbstractController.extend({
     contentTemplate: 'PivotView',
@@ -268,10 +268,10 @@ var PivotController = AbstractController.extend({
             return key === 'group_by' || _.str.startsWith(key, 'search_default_');
         });
 
-        var groupId = JSON.parse($target.data('groupId'));
+        var groupId = $target.data('groupId');
         var originIndexes = $target.data('originIndexes');
 
-        var group = {rowValue: groupId[0], colValue: groupId[1], originIndex: originIndexes[0]}; // FIXME
+        var group = {rowValues: groupId[0], colValues: groupId[1], originIndex: originIndexes[0]}; // FIXME
 
         var domain = this.model._getGroupDomain(group);
 
@@ -299,18 +299,18 @@ var PivotController = AbstractController.extend({
     _onClosedHeaderClick: function (ev) {
         var $target = $(ev.target);
         this.groupSelectedType = $target.data('type');
-        var groupId = JSON.parse($target.data('groupId'));
+        var groupId = $target.data('groupId');
 
-        this.groupSelected = {rowValue: groupId[0], colValue: groupId[1]};
+        this.groupSelected = {rowValues: groupId[0], colValues: groupId[1]};
 
-        var groupValue = this.groupSelectedType === 'row' ? groupId[0] : groupId[1];
+        var groupValues = this.groupSelectedType === 'row' ? groupId[0] : groupId[1];
         var groupBys = this.groupSelectedType === 'row' ?
                         this.model.data.rowGroupBys :
                         this.model.data.colGroupBys;
 
-        if (groupValue.length < groupBys.length) {
-            var field = groupBys[groupValue.length];
-            var divisors = this._getDivisors(this.groupSelected, this.groupSelectedType, field);
+        if (groupValues.length < groupBys.length) {
+            var field = groupBys[groupValues.length];
+            var divisors = this._getDivisors(this.groupSelectedType, field);
             this.model
                 .subdivideGroup(this.groupSelected, divisors)
                 .then(this.update.bind(this, {}, {reload: false}));
@@ -322,7 +322,7 @@ var PivotController = AbstractController.extend({
             ev.stopPropagation();
         }
     },
-    _getDivisors: function (group, type, field) {
+    _getDivisors: function (type, field) {
         var leftDivisors;
         var rightDivisors;
         if (type === 'row') {
@@ -356,7 +356,7 @@ var PivotController = AbstractController.extend({
 
         this.model.addGroupBy(field, this.groupSelectedType);
 
-        var divisors = this._getDivisors(this.groupSelected, this.groupSelectedType, field);
+        var divisors = this._getDivisors(this.groupSelectedType, field);
 
         this.model
             .subdivideGroup(this.groupSelected, divisors)
@@ -410,7 +410,7 @@ var PivotController = AbstractController.extend({
         ev.stopImmediatePropagation();
 
         var $target = $(ev.target);
-        var groupId = JSON.parse($target.data('groupId'));
+        var groupId = $target.data('groupId');
         var type = $target.data('type');
 
         this.model.closeGroup(groupId, type);
