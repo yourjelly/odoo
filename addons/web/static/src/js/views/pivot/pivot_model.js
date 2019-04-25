@@ -556,6 +556,30 @@ var PivotModel = AbstractModel.extend({
         this.data.rows = [];
         this._addRowGroupRows(this.rowGroupTree);
     },
+    _computeTreeDimension: function (tree) {
+        if (_.isEmpty(tree.directSubTrees)) {
+            tree.height = 1;
+            tree.leafCount = 1;
+            return;
+        }
+
+        var self = this;
+        var dimension = _.values(tree.directSubTrees).reduce(
+            function (acc, subTree) {
+                self._computeTreeDimension(subTree);
+                return {
+                    height: Math.max(acc.height, subTree.height),
+                    leafCount: acc.leafCount + subTree.leafCount,
+                };
+            },
+            {
+                height: 1,
+                leafCount: 0
+            }
+        );
+        tree.height = dimension.height + 1;
+        tree.leafCount = dimension.leafCount;
+    },
     _findGroup: function (groupTree, value) {
         var tree = groupTree;
         value.slice(0, value.length).forEach(function (key) {
@@ -701,48 +725,11 @@ var PivotModel = AbstractModel.extend({
         }
         return origins;
     },
-    _computeTreeDimension: function (tree) {
-        if (_.isEmpty(tree.directSubTrees)) {
-            tree.height = 1;
-            tree.leafCount = 1;
-            return;
-        }
-
-        var self = this;
-        var dimension = _.values(tree.directSubTrees).reduce(
-            function (acc, subTree) {
-                self._computeTreeDimension(subTree);
-                return {
-                    height: Math.max(acc.height, subTree.height),
-                    leafCount: acc.leafCount + subTree.leafCount,
-                };
-            },
-            {
-                height: 1,
-                leafCount: 0
-            }
-        );
-        tree.height = dimension.height + 1;
-        tree.leafCount = dimension.leafCount;
-    },
     _getTreeHeight: function (tree) {
         var subTreeHeights = _.values(tree.directSubTrees).map(this._getTreeHeight.bind(this));
         return Math.max(0, Math.max.apply(null, subTreeHeights)) + 1;
     },
-    // values computed during computeTreeDimensions
-    // _getTreeLeafCount: function (tree) {
-    //     if (_.isEmpty(tree.directSubTrees)) {
-    //         return 1;
-    //     }
-    //     var self = this;
-    //     return _.values(tree.directSubTrees).reduce(
-    //         function (acc, subTree) {
-    //             return acc + self._getTreeLeafCount(subTree);
-    //         },
-    //         0
-    //     );
-    // },
-    _getValue: function (group, fields) {
+    _getGroupValue: function (group, fields) {
         var self = this;
         return fields.map(function (field) {
             return self._sanitizeValue(group[field],field);
@@ -792,10 +779,10 @@ var PivotModel = AbstractModel.extend({
         groupSubdivisions.forEach(function (groupSubdivision) {
             groupSubdivision.subGroups.forEach(function (subGroup) {
 
-                var rowValue = groupRowValue.concat(self._getValue(subGroup, groupSubdivision.rowGroupBy));
+                var rowValue = groupRowValue.concat(self._getGroupValue(subGroup, groupSubdivision.rowGroupBy));
                 var rowLabel = groupRowLabel.concat(self._getLabel(subGroup, groupSubdivision.rowGroupBy));
 
-                var colValue = groupColValue.concat(self._getValue(subGroup, groupSubdivision.colGroupBy));
+                var colValue = groupColValue.concat(self._getGroupValue(subGroup, groupSubdivision.colGroupBy));
                 var colLabel = groupColLabel.concat(self._getLabel(subGroup, groupSubdivision.colGroupBy));
 
                 if (!colValue.length && rowValue.length) {
