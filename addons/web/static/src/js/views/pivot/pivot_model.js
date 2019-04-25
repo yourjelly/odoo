@@ -837,7 +837,7 @@ var PivotModel = AbstractModel.extend({
         var self = this;
         tree.sortedKeys = _.sortBy(Object.keys(tree.directSubTrees), sortFunction(tree));
         _.values(tree.directSubTrees).forEach(function (subTree) {
-            self._sortTree(subTree, sortFunction);
+            self._sortTree(sortFunction, subTree);
         });
     },
 });

@@ -154,6 +154,11 @@ async function createView(params) {
             modelName: params.model || 'foo',
         });
     } else {
+        viewOptions.controlPanelFieldsView = testUtilsMock.fieldsViewGet(mockServer, {
+            arch: '<search></search>', // could be refined if necessary (with params.archs?)
+            fields: viewInfo.fields,
+            model: params.model,
+        });
         view = new params.View(viewInfo, viewOptions);
     }
 
