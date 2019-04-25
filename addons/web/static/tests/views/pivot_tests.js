@@ -440,9 +440,9 @@ QUnit.module('Views', {
         // click on closed header to open dropdown
         await testUtils.dom.click(pivot.$('tbody .o_pivot_header_cell_closed'));
 
-        assert.containsOnce(pivot, '.o_pivot_field_menu .dropdown-item[data-field="date"]:first',
-            "should have the date field as proposition");
-        assert.containsOnce(pivot, '.o_field_selection .dropdown-item[data-field="product_id"]:first',
+        assert.containsN(pivot, '.o_pivot_field_menu .dropdown-item[data-field="date"]', 5,
+            "should have the date field as proposition (day, week, month, quarter and year)");
+        assert.containsOnce(pivot, '.o_field_selection .dropdown-item[data-field="product_id"]',
             "should have the product_id field as proposition");
         assert.containsNone(pivot, '.o_field_selection .dropdown-item[data-field="non_stored_m2o"]:first',
             "should not have the non_stored_m2o field as proposition");
@@ -453,6 +453,7 @@ QUnit.module('Views', {
             "should have 4 rows: one for header, 3 for data");
         assert.strictEqual(rpcCount, 3,
             "should have done 3 rpcs (initial load) + open header with different groupbys");
+
         pivot.destroy();
     });
 
@@ -481,6 +482,34 @@ QUnit.module('Views', {
 
         assert.containsN(pivot, 'tbody tr', 7,
             "should have 7 rows (1 for total, 1 for xphone, 1 for xpad, 4 for data)");
+
+        pivot.destroy();
+    });
+
+    QUnit.test('fold and unfold header group', async function (assert) {
+        assert.expect(3);
+
+        var pivot = await createView({
+            View: PivotView,
+            model: "partner",
+            data: this.data,
+            arch: '<pivot>' +
+                        '<field name="product_id" type="col"/>' +
+                        '<field name="foo" type="measure"/>' +
+                '</pivot>',
+        });
+
+        assert.containsN(pivot, 'thead tr', 3);
+
+        // fold opened col group
+        await testUtils.dom.click(pivot.$('thead .o_pivot_header_cell_opened'));
+        assert.containsN(pivot, 'thead tr', 2);
+
+        // unfold it
+        await testUtils.dom.click(pivot.$('thead .o_pivot_header_cell_closed'));
+        await testUtils.dom.click(pivot.$('.o_pivot_field_menu .dropdown-item[data-field="product_id"]'));
+        assert.containsN(pivot, 'thead tr', 3);
+
         pivot.destroy();
     });
 
@@ -734,6 +763,7 @@ QUnit.module('Views', {
                         '<field name="product_id" type="row"/>' +
                 '</pivot>',
         });
+
         assert.strictEqual($('td.o_pivot_cell_value').text(), "321220",
             "should have proper values in cells (total, result 1, result 2");
 

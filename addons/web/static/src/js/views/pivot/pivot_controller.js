@@ -298,9 +298,8 @@ var PivotController = AbstractController.extend({
      */
     _onClosedHeaderClick: function (ev) {
         var $target = $(ev.target);
-        var id = $target.data('id');
         this.groupSelectedType = $target.data('type');
-        var groupId = JSON.parse(id);
+        var groupId = JSON.parse($target.data('groupId'));
 
         this.groupSelected = {rowValue: groupId[0], colValue: groupId[1]};
 
@@ -316,7 +315,6 @@ var PivotController = AbstractController.extend({
                 .subdivideGroup(this.groupSelected, divisors)
                 .then(this.update.bind(this, {}, {reload: false}));
         } else {
-            this.lastHeaderSelected = id;
             var position = $target.position();
             var top = position.top + $target.height();
             var left = position.left + ev.offsetX;
@@ -412,9 +410,8 @@ var PivotController = AbstractController.extend({
         ev.stopImmediatePropagation();
 
         var $target = $(ev.target);
-        var id = $target.data('id');
+        var groupId = JSON.parse($target.data('groupId'));
         var type = $target.data('type');
-        var groupId = JSON.parse(id);
 
         this.model.closeGroup(groupId, type);
         this.update({}, {reload: false});

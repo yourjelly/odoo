@@ -76,150 +76,40 @@ var PivotRenderer = AbstractRenderer.extend({
         this.$el.html($table.contents());
         return this._super.apply(this, arguments);
     },
-
+    /**
+     * @private
+     * @param {jQuery} $thead
+     */
     _renderHeaders: function ($thead) {
-        var self = this;
-        var $cell;
-        var $variation;
+        this.state.headers.forEach(function (row) {
+            var $tr = $('<tr>');
+            row.forEach(function (cell) {
+                var $cell = $('<th>').text(cell.title)
+                                     .attr('colspan', cell.width)
+                                     .attr('rowspan', cell.height)
+                                     .data('groupId', cell.groupId)
+                                     .data('type', 'col');
 
-        var groupbyLabels = _.map(this.state.colGroupBys, function (gb) {
-            return self.state.fields[gb.split(':')[0]].string;
-        });
-
-        var sortedColumn = this.state.sortedColumn || {};
-
-        var dimensions = this._getTreeDimension(this.state.colGroupTree);
-        var height = dimensions.height;
-        var leafCount = dimensions.leafCount;
-        var measureCount = this.state.measures.length;
-        var originCount = this.state.origins.length;
-        var rowCount = height + 1 + (originCount > 1 ? 1 : 0);
-
-        // index heigth corresponds to the row of measures.
-        // index heigth + 1 corresponds to origins/variation.
-        var rows = (new Array(rowCount)).fill(0).map(function () {
-            return $('<tr>');
-        });
-
-        this.representedColGroupIds = [];
-
-        function addOrder ($cell) {
-            $cell.addClass('o_pivot_sort_order_' + sortedColumn.order);
-            if (sortedColumn.order === 'asc') {
-                $cell.attr('aria-sorted', 'ascending');
-            } else {
-                $cell.attr('aria-sorted', 'descending');
-            }
-        }
-
-        function addOriginHeaders (groupId, measure) {
-            self.state.origins.forEach(function (origin, originIndex) {
-                $cell = $('<th>')
-                    .text(origin)
-                    .attr('colspan', 1)
-                    .attr('rowspan', 1)
-                    .data('originIndexes', [originIndex])
-                    .data('measure', measure)
-                    .data('groupId', groupId)
-                    .addClass('o_pivot_origin_row text-muted');
-                if (sortedColumn.measure === measure &&
-                    sortedColumn.groupId === groupId &&
-                    !sortedColumn.originIndexes[1] &&
-                    sortedColumn.originIndexes[0] === originIndex) {
-                    addOrder($cell);
-                }
-                rows[height + 1].append($cell);
-
-                if (originIndex > 0) {
-                    $variation = $('<th>')
-                        .text(_t('Variation'))
-                        .attr('colspan', 1)
-                        .attr('rowspan', 1)
-                        .data('originIndexes', [originIndex - 1, originIndex])
-                        .data('measure', measure)
-                        .data('groupId', groupId)
-                        .addClass('o_pivot_origin_row text-muted');
-                    if (sortedColumn.groupId === groupId &&
-                        sortedColumn.measure === measure &&
-                        sortedColumn.originIndexes[1] &&
-                        sortedColumn.originIndexes[1] === originIndex) {
-                        addOrder($variation);
+                var className;
+                if (cell.measure) {
+                    className = 'o_pivot_measure_row text-muted';
+                    if (cell.order) {
+                        className += ' o_pivot_sort_order_' + cell.order;
+                        if (cell.order === 'asc') {
+                            $cell.attr('aria-sorted', 'ascending');
+                        } else {
+                            $cell.attr('aria-sorted', 'descending');
+                        }
                     }
-                    rows[height + 1].append($variation);
+                    $cell.data('measure', cell.measure);
+                } else if (cell.title) {
+                    className = 'o_pivot_header_cell_' + (cell.isLeaf ? 'closed' : 'opened');
                 }
+                $cell.addClass(className);
+
+                $tr.append($cell);
             });
-        }
-
-        function addMeasureHeaders (groupId) {
-            self.state.measures.forEach(function (measure) {
-                $cell = $('<th>')
-                    .text(self.state.fields[measure].string)
-                    .attr('colspan', 2 * originCount - 1)
-                    .attr('rowspan', 1)
-                    .data('measure', measure)
-                    .data('groupId', groupId)
-                    .addClass('o_pivot_measure_row text-muted');
-                if (sortedColumn.groupId === groupId &&
-                    sortedColumn.measure === measure) {
-                    addOrder($cell);
-                }
-                rows[height].append($cell);
-
-                if (originCount > 1) {
-                    addOriginHeaders(groupId, measure);
-                }
-            });
-        }
-
-        $cell = $('<th>')
-                    .text("")
-                    .attr('colspan', 1)
-                    .attr('rowspan', rowCount);
-        rows[0].append($cell);
-
-        this._traverseTree(this.state.colGroupTree, function (subTree) {
-            var rowIndex = subTree.root.value.length;
-            var groupId = [[], subTree.root.value];
-            var key = JSON.stringify(groupId);
-            var isLeaf = _.isEmpty(subTree.directSubTrees);
-            var title = subTree.root.label[subTree.root.label.length - 1] || _t('Total');
-            var colspan = self._getTreeLeafCount(subTree) * measureCount * (2 * originCount - 1);
-            var rowspan = !isLeaf ? 1 : height - rowIndex;
-            $cell = $('<th>')
-                        .text(title)
-                        .attr('colspan', colspan)
-                        .attr('rowspan', rowspan)
-                        .data('id', key)
-                        .data('type', 'col')
-                        .addClass('o_pivot_header_cell_' +  (isLeaf ? 'closed': 'opened'));
-            if (rowIndex > 1) {
-                $cell.attr('title', groupbyLabels[rowIndex-1]);
-            }
-            if (rowspan > 1) {
-                $cell.css('padding', 0);
-            }
-            rows[rowIndex].append($cell);
-
-            if (isLeaf) {
-                self.representedColGroupIds.push(groupId);
-                addMeasureHeaders(key);
-            }
-        });
-
-        // We want to represent the group 'Total' if there is more that one leaf.
-        if (leafCount > 1) {
-            $cell = $('<th>')
-                        .text("")
-                        .attr('colspan', measureCount * (2 * originCount - 1))
-                        .attr('rowspan', height);
-            rows[0].append($cell);
-
-            this.representedColGroupIds.push([[], []]);
-            addMeasureHeaders(JSON.stringify([[], []]));
-        }
-
-        rows.forEach(function ($row) {
-            $thead.append($row);
+            $thead.append($tr);
         });
     },
     /**
@@ -274,8 +164,9 @@ var PivotRenderer = AbstractRenderer.extend({
             }
             $row.append($header);
 
-            self.representedColGroupIds.forEach(
-                function (colGroupId) {
+            self.state.headers[self.state.headers.length - 1].forEach(
+                function (row) {
+                    var colGroupId = JSON.parse(row.groupId);
                     self.state.measures.forEach(function (measure) {
                         self.state.origins.forEach(function (origin, originIndex) {
                             var groupIntersectionId  = [rowGroupId[0], colGroupId[1]];
@@ -343,34 +234,6 @@ var PivotRenderer = AbstractRenderer.extend({
             var subTree = tree.directSubTrees[subTreeKey];
             self._traverseTree(subTree, f, arg1, arg2, arg3);
         });
-    },
-    _getTreeDimension: function (tree) {
-        var height = 1;
-        var leafCount = 0;
-        this._traverseTree(tree, function (subTree) {
-            height = Math.max(height, subTree.root.value.length + 1);
-            if (_.isEmpty(subTree.directSubTrees)) {
-                leafCount++;
-            }
-        });
-        return {
-            height: height,
-            leafCount: leafCount
-        };
-    },
-    _getTreeHeight: function (tree) {
-        var subTreeHeights = _.values(tree.directSubTrees).map(this._getTreeHeight.bind(this));
-        return Math.max(0, Math.max.apply(null, subTreeHeights)) + 1;
-    },
-    // remove _traverseTree
-    _getTreeLeafCount: function (tree) {
-        var leafCount = 0;
-        this._traverseTree(tree, function (subTree) {
-            if (_.isEmpty(subTree.directSubTrees)) {
-                leafCount++;
-            }
-        });
-        return leafCount;
     },
 
     //--------------------------------------------------------------------------
