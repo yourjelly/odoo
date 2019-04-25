@@ -512,36 +512,6 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('pivot view can be flipped', async function (assert) {
-        assert.expect(3);
-
-        var rpcCount = 0;
-
-        var pivot = await createView({
-            View: PivotView,
-            model: "partner",
-            data: this.data,
-            arch: '<pivot>' +
-                        '<field name="product_id" type="row"/>' +
-                '</pivot>',
-            mockRPC: function () {
-                rpcCount++;
-                return this._super.apply(this, arguments);
-            },
-        });
-
-        assert.containsN(pivot, 'tbody tr', 3,
-            "should have 3 rows: 1 for the open header, and 2 for data");
-
-        rpcCount = 0;
-        await testUtils.dom.click(pivot.$buttons.find('.o_pivot_flip_button'));
-
-        assert.strictEqual(rpcCount, 0, "should not have done any rpc");
-        assert.containsOnce(pivot, 'tbody tr',
-            "should have 1 rows: 1 for the main header");
-        pivot.destroy();
-    });
-
     QUnit.test('can toggle extra measure', async function (assert) {
         assert.expect(8);
 
@@ -1647,8 +1617,46 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.skip('flip a pivot view should be possible', async function (assert) {
+    QUnit.test('pivot view can be flipped', async function (assert) {
+        assert.expect(5);
 
+        var rpcCount = 0;
+
+        var pivot = await createView({
+            View: PivotView,
+            model: "partner",
+            data: this.data,
+            arch: '<pivot>' +
+                        '<field name="product_id" type="row"/>' +
+                '</pivot>',
+            mockRPC: function () {
+                rpcCount++;
+                return this._super.apply(this, arguments);
+            },
+        });
+
+        assert.containsN(pivot, 'tbody tr', 3,
+            "should have 3 rows: 1 for the open header, and 2 for data");
+        var values = [
+            "4",
+            "1",
+            "3"
+        ];
+        assert.strictEqual(getCurrentValues(pivot), values.join());
+
+        rpcCount = 0;
+        await testUtils.dom.click(pivot.$buttons.find('.o_pivot_flip_button'));
+
+        assert.strictEqual(rpcCount, 0, "should not have done any rpc");
+        assert.containsOnce(pivot, 'tbody tr',
+            "should have 1 rows: 1 for the main header");
+
+        var values = [
+            "1", "3", "4"
+        ];
+        assert.strictEqual(getCurrentValues(pivot), values.join());
+
+        pivot.destroy();
     });
 
     QUnit.test('rendering of pivot view with comparison', async function (assert) {
@@ -2045,6 +2053,78 @@ QUnit.module('Views', {
             "12", "0",  "100%",                       "12", "0" , "100%",
                                    "1", "0", "100%",  "1" , "0",  "100%"
         ];
+        assert.strictEqual(getCurrentValues(pivot), values.join());
+
+        unpatchDate();
+        pivot.destroy();
+    });
+
+    QUnit.test('Cell values are kept when flippin a pivot view in comparison mode', async function (assert) {
+        assert.expect(2);
+
+        this.data.partner.fields.company_type = {
+            string: "Company Type",
+            type: "selection",
+            selection: [["company", "Company"], ["individual", "individual"]],
+            searchable: true,
+            sortable: true,
+            store: true,
+        };
+
+        this.data.partner.records[0].date = '2016-12-15';
+        this.data.partner.records[1].date = '2016-12-17';
+        this.data.partner.records[2].date = '2016-11-22';
+        this.data.partner.records[3].date = '2016-11-03';
+
+        this.data.partner.records[0].company_type = 'company';
+        this.data.partner.records[1].company_type = 'individual';
+        this.data.partner.records[2].company_type = 'company';
+        this.data.partner.records[3].company_type = 'individual';
+
+        var unpatchDate = patchDate(2016, 11, 20, 1, 0, 0);
+        var pivot = await createView({
+            View: PivotView,
+            model: 'partner',
+            data: this.data,
+            arch: '<pivot>' +
+                    '<field name="date" interval="day" type="row"/>' +
+                    '<field name="company_type" type="col"/>' +
+                    '<field name="foo" type="measure"/>' +
+                '</pivot>',
+            viewOptions: {
+                additionalMeasures: ['product_id'],
+            },
+        });
+
+        // enable comparison mode
+        var $cp = pivot.$('.o_control_panel');
+        // open time range menu
+        await testUtils.dom.click($cp.find('.o_time_range_menu_button'));
+        // select 'This month' as range
+        await testUtils.fields.editInput($cp.find('.o_time_range_selector'), 'this_month');
+        // check checkbox 'Compare To'
+        await testUtils.dom.click($cp.find('.o_time_range_menu .o_comparison_checkbox'));
+        // click on 'Apply' button
+        await testUtils.dom.click($cp.find('.o_time_range_menu .o_apply_range'));
+
+        // initial sanity check
+        var values = [
+            "12", "17", "-29.41%", "1", "2", "-50%" , "13", "19", "-31.58%",
+            "12", "0" , "100%",                       "12", "0" , "100%",
+                                   "1", "0", "100%" , "1" , "0" , "100%",
+            "0" , "17", "-100%",                      "0" , "17", "-100%",
+                                   "0", "2", "-100%", "0" , "2" , "-100%"
+        ];
+        assert.strictEqual(getCurrentValues(pivot), values.join());
+
+        // flip table
+        await testUtils.dom.click(pivot.$buttons.find('.o_pivot_flip_button'));
+
+        values = [
+            "12", "0",  "100%", "1",  "0",  "100%", "0",  "17", "-100%", "0",  "2",  "-100%", "13", "19", "-31.58%",
+            "12", "0",  "100%",                     "0",  "17", "-100%",                      "12", "17", "-29.41%",
+                                "1",  "0",  "100%" ,                      "0",  "2",  "-100%", "1",  "2",  "-50%"
+        ]
         assert.strictEqual(getCurrentValues(pivot), values.join());
 
         unpatchDate();

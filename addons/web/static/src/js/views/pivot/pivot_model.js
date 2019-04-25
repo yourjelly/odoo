@@ -166,6 +166,27 @@ var PivotModel = AbstractModel.extend({
         temp = this.data.rowGroupBys;
         this.data.rowGroupBys = this.data.colGroupBys;
         this.data.colGroupBys = temp;
+
+
+        var self = this;
+        function twistKey (key) {
+            return JSON.stringify(JSON.parse(key).reverse());
+        }
+
+        var measurements = {};
+        Object.keys(this.measurements).forEach(function (key) {
+            var value = self.measurements[key];
+            measurements[twistKey(key)] = value;
+        });
+        this.measurements = measurements;
+
+        var counts = {};
+        Object.keys(this.counts).forEach(function (key) {
+            var value = self.counts[key];
+            counts[twistKey(key)] = value;
+        });
+        this.counts = counts;
+
     },
     /**
      * @override
