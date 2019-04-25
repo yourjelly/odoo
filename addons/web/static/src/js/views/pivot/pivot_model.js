@@ -85,6 +85,74 @@ var PivotModel = AbstractModel.extend({
     expandAll: function () {
         return this._loadData();
     },
+    exportData: function () {
+        var measureCount = this.data.measures.length;
+        var originCount = this.data.origins.length;
+
+        var headers = this.data.headers;
+
+        // process headers
+        var colGroupHeaderRows;
+        var measureRow = [];
+        var originRow = [];
+
+        function processHeader (header) {
+            return _.pick(header, ['title', 'width', 'height', 'isLeaf']);
+        }
+
+        if (originCount > 1) {
+            colGroupHeaderRows = headers.slice(0, headers.length - 2);
+            measureRow = headers[headers.length - 2].map(processHeader);
+            originRow = headers[headers.length - 1].map(processHeader);
+        } else {
+            colGroupHeaderRows = headers.slice(0, headers.length - 1);
+            if (measureRow > 1) {
+                measureRow = headers[headers.length - 1].map(processHeader);
+            }
+        }
+
+        // remove the empty headers on left side
+        colGroupHeaderRows[0].splice(0,1);
+
+        colGroupHeaderRows = colGroupHeaderRows.map(function (headerRow) {
+            return headerRow.map(processHeader);
+        });
+
+        var rows = this.data.rows;
+
+        // process rows
+        var tableRows = rows.map(function (row) {
+            return {
+                title: row.title,
+                indent: row.indent,
+                values: row.subGroupMeasurements.map(function (measurement) {
+                    var value = measurement.value;
+                    if (value === undefined) {
+                        value = "";
+                    } else if (measurement.originIndexes.length > 1) {
+                        // in that case the value is a variation and a
+                        // number between 0 and 1
+                        value = value * 100;
+                    }
+                    return {
+                        is_bold: measurement.isBold,
+                        value: value,
+                    };
+                }),
+            };
+        });
+
+        return {
+            col_group_headers: colGroupHeaderRows,
+            measure_headers: measureRow,
+            origin_headers: originRow,
+            rows: tableRows,
+            measure_count: measureCount,
+            origin_count: originCount,
+            row_groupbys: this.data.rowGroupBys,
+            col_groupbys: this.data.colGroupBys,
+        };
+    },
     /**
      * Swap the columns and the rows.  It is a synchronous operation.
      */
@@ -276,7 +344,7 @@ var PivotModel = AbstractModel.extend({
                     groupIntersectionId,
                     sortedColumn.measure,
                     sortedColumn.originIndexes
-                );
+                ) || 0;
                 return sortedColumn.order === 'asc' ? value : -value;
             };
         };
@@ -369,7 +437,6 @@ var PivotModel = AbstractModel.extend({
         row.push(header);
 
         if (isLeaf) {
-            self.representedColGroupIds.push(groupId);
             self._addMeasureHeaders(key);
         }
 
@@ -442,7 +509,7 @@ var PivotModel = AbstractModel.extend({
             }
             originRow.push(originHeader);
 
-            if (originIndex > 1) {
+            if (originIndex > 0) {
                 var variationHeader = {
                     title: _t('Variation'),
                     originIndexes: [originIndex - 1, originIndex],
@@ -491,6 +558,7 @@ var PivotModel = AbstractModel.extend({
                 originIndexes: originIndexes,
                 measure: measure,
                 value: value,
+                isBold: !groupIntersectionId[0].length || !groupIntersectionId[1].length,
             };
             return measurement;
         });
@@ -532,7 +600,6 @@ var PivotModel = AbstractModel.extend({
             height: rowCount,
         });
 
-        this.representedColGroupIds = [];
         this._addColGroupHeaders(this.colGroupTree, measureCount, originCount);
 
         // We want to represent the group 'Total' if there is more that one leaf.
@@ -546,7 +613,6 @@ var PivotModel = AbstractModel.extend({
                 height: height,
             });
 
-            this.representedColGroupIds.push([[], []]);
             this._addMeasureHeaders(key);
         }
 
@@ -591,7 +657,7 @@ var PivotModel = AbstractModel.extend({
         var self = this;
         var key = JSON.stringify(groupId);
         if (!self.measurements[key]) {
-            return 0;
+            return;
         }
         var values = originIndexes.map(function (originIndex) {
             return self.measurements[key][originIndex][measure];

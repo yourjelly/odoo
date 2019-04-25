@@ -129,20 +129,23 @@ var PivotController = AbstractController.extend({
      * @private
      */
     _downloadTable: function () {
-        var colNumber = 1 + 0;
+        var colNumber = this.model.colGroupTree.leafCount + 2;
         if(colNumber > 256) {
             crash_manager.show_message(_t("For Excel compatibility, data cannot be exported if there are more than 256 columns.\n\nTip: try to flip axis, filter further or reduce the number of measures."));
             framework.unblockUI();
             return;
         }
-        var data = this.model.get().pick();
         framework.blockUI();
-        table.title = this.title;
-        session.get_file({
-            url: '/web/pivot/export_xls',
-            data: {data: JSON.stringify(table)},
-            complete: framework.unblockUI,
-            error: crash_manager.rpc_error.bind(crash_manager)
+        var self = this;
+        this._update().then(function () {
+            var table = self.model.exportData();
+            table.title = self.title;
+            session.get_file({
+                url: '/web/pivot/export_xls',
+                data: {data: JSON.stringify(table)},
+                complete: framework.unblockUI,
+                error: crash_manager.rpc_error.bind(crash_manager)
+            });
         });
     },
     /**
