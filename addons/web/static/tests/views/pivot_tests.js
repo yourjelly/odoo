@@ -734,7 +734,6 @@ QUnit.module('Views', {
                         '<field name="product_id" type="row"/>' +
                 '</pivot>',
         });
-        debugger
         assert.strictEqual($('td.o_pivot_cell_value').text(), "321220",
             "should have proper values in cells (total, result 1, result 2");
 
@@ -846,7 +845,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.skip('can download a file', async function (assert) {
+    QUnit.test('can download a file', async function (assert) {
         assert.expect(1);
 
         var pivot = await createView({
@@ -1741,8 +1740,8 @@ QUnit.module('Views', {
         actionManager.destroy();
     });
 
-    QUnit.skip('export data in excel with comparison', async function (assert) {
-        assert.expect(10);
+    QUnit.test('export data in excel with comparison', async function (assert) {
+        assert.expect(11);
 
         this.data.partner.records[0].date = '2016-12-15';
         this.data.partner.records[1].date = '2016-12-17';
@@ -1764,13 +1763,17 @@ QUnit.module('Views', {
             session: {
                 get_file: function (args) {
                     var data = JSON.parse(args.data.data);
-                    _.each(data.headers, function (l) {
+                    debugger
+                    _.each(data.col_group_headers, function (l) {
                         var titles = l.map(function (o) {return o.title;});
                         assert.step(JSON.stringify(titles));
                     });
-                    var measures = data.measure_row.map(function (o) {return o.measure;});
+                    var measures = data.measure_headers.map(function (o) {return o.title;});
                     assert.step(JSON.stringify(measures));
-                    assert.step(String(data.nbr_measures));
+                    var origins = data.origin_headers.map(function (o) {return o.title;});
+                    assert.step(JSON.stringify(origins));
+                    assert.step(String(data.measure_count));
+                    assert.step(String(data.origin_count));
                     var valuesLength = data.rows.map(function (o) {return o.values.length;});
                     assert.step(JSON.stringify(valuesLength));
                     assert.strictEqual(args.url, '/web/pivot/export_xls',
@@ -1815,14 +1818,18 @@ QUnit.module('Views', {
         await testUtils.dom.click($('.o_control_panel button.o_pivot_download'));
 
         assert.verifySteps([
-            // Headers
+            // col group headers
             '["Total",""]',
             '["December 2016","November 2016"]',
+            // measure headers
             '["Foo","Foo","Foo"]',
+            // origin headers
             '["This Month","Previous Period","Variation","This Month","Previous Period"' +
                 ',"Variation","This Month","Previous Period","Variation"]',
             // number of 'measures'
-            '3',
+            '1',
+            // number of 'origins'
+            '2',
             // rows values length
             '[9]',
         ]);
