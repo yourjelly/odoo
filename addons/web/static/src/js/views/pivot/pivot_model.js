@@ -72,7 +72,7 @@ var PivotModel = AbstractModel.extend({
             group = this._findGroup(this.colGroupTree, groupId[1]);
         }
         group.directSubTrees = {};
-        group.sortedKeys = [];
+        delete group.sortedKeys;
         var newGroupBysLength = this._getTreeHeight(tree) - 1;
         groupBys.splice(newGroupBysLength);
     },

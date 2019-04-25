@@ -439,9 +439,8 @@ QUnit.module('Views', {
 
         // click on closed header to open dropdown
         await testUtils.dom.click(pivot.$('tbody .o_pivot_header_cell_closed'));
-
-        assert.containsN(pivot, '.o_pivot_field_menu .dropdown-item[data-field="date"]', 5,
-            "should have the date field as proposition (day, week, month, quarter and year)");
+        assert.containsN(pivot, '.o_pivot_field_menu .dropdown-item[data-field="date"]', 6,
+            "should have the date field as proposition (Date, Day, Week, Month, Quarter and Year)");
         assert.containsOnce(pivot, '.o_field_selection .dropdown-item[data-field="product_id"]',
             "should have the product_id field as proposition");
         assert.containsNone(pivot, '.o_field_selection .dropdown-item[data-field="non_stored_m2o"]:first',
@@ -1653,7 +1652,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('rendering of pivot view with comparison', async function (assert) {
-        assert.expect(91);
+        assert.expect(92);
 
         this.data.partner.records[0].date = '2016-12-15';
         this.data.partner.records[1].date = '2016-12-17';

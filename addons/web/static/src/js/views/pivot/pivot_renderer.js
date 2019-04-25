@@ -81,6 +81,7 @@ var PivotRenderer = AbstractRenderer.extend({
      * @param {jQuery} $thead
      */
     _renderHeaders: function ($thead) {
+        // FIXME: missing title on non-total non-measure non-origin header rows
         this.state.headers.forEach(function (row) {
             var $tr = $('<tr>');
             row.forEach(function (cell) {
@@ -88,11 +89,17 @@ var PivotRenderer = AbstractRenderer.extend({
                                      .attr('colspan', cell.width)
                                      .attr('rowspan', cell.height)
                                      .data('groupId', cell.groupId)
+                                     .data('originIndexes', cell.originIndexes)
                                      .data('type', 'col');
 
                 var className;
                 if (cell.measure) {
-                    className = 'o_pivot_measure_row text-muted';
+                    if (cell.originIndexes) {
+                        className = 'o_pivot_origin_row';
+                    } else {
+                        className = 'o_pivot_measure_row';
+                    }
+                    className += ' text-muted';
                     if (cell.order) {
                         className += ' o_pivot_sort_order_' + cell.order;
                         if (cell.order === 'asc') {
@@ -123,17 +130,10 @@ var PivotRenderer = AbstractRenderer.extend({
     },
     _renderRows: function ($tbody) {
         var self = this;
-        var $row;
-        var $cell;
-        var $variation;
-        var previousValue;
-        var value;
-        var variation;
 
-        var groupbyLabels = _.map(this.state.rowGroupBys, function (gb) {
-            return self.state.fields[gb.split(':')[0]].string;
-        });
-
+        // measureTypes is a mapping from measure fields to their field type,
+        // with a special case for many2one fields which are mapped to the
+        // 'integer' type (as their group_operator is 'count_distinct')
         var measureTypes = this.state.measures.reduce(
             function (acc, measureName) {
                 var type = self.state.fields[measureName].type;
@@ -143,96 +143,57 @@ var PivotRenderer = AbstractRenderer.extend({
             {}
         );
 
-        this._traverseTree(this.state.rowGroupTree, function (subTree) {
-            $row = $('<tr>');
-
-            var root = subTree.root;
-            var rowGroupId = [root.value, []];
-            var title = root.label[root.label.length - 1] || _t('Total');
-            var indent = root.label.length;
-            var paddingLeft =  (5 +  indent * self.paddingLeftHeaderTabWidth) + 'px';
-            var isLeaf = _.isEmpty(subTree.directSubTrees);
-
-            var $header = $('<td>')
-                .text(title)
-                .data('id', JSON.stringify(rowGroupId))
-                .data('type', 'row')
-                .css('padding-left', paddingLeft)
-                .addClass('o_pivot_header_cell_' +  (isLeaf ? 'closed': 'opened'));
-            if (indent > 0) {
-                $header.attr('title', groupbyLabels[indent - 1]);
-            }
-            $row.append($header);
-
-            self.state.headers[self.state.headers.length - 1].forEach(
-                function (row) {
-                    var colGroupId = JSON.parse(row.groupId);
-                    self.state.measures.forEach(function (measure) {
-                        self.state.origins.forEach(function (origin, originIndex) {
-                            var groupIntersectionId  = [rowGroupId[0], colGroupId[1]];
-                            var key = JSON.stringify(groupIntersectionId);
-                            $cell = $('<td>')
-                                        .data('id', key)
-                                        .data('originIndex', originIndex)
-                                        .addClass('o_pivot_cell_value text-right');
-
-                            var groupIntersectionMeasurements = self.state.measurements[key];
-                            if (groupIntersectionMeasurements) {
-                                var formatter = field_utils.format[self.fieldWidgets[measure] || measureTypes[measure]];
-                                var measureField = self.state.fields[measure];
-                                value = groupIntersectionMeasurements[originIndex][measure];
-                                $cell.append($('<div>', {class: 'o_value'}).html(formatter(value, measureField)));
-                                if (!groupIntersectionId[0].length || !groupIntersectionId[1].length) {
-                                    $cell.css('font-weight', 'bold');
-                                }
-                            } else {
-                                $cell.toggleClass('o_empty');
-                            }
-                            $row.append($cell);
-
-                            if (originIndex > 0) {
-                                $variation = $('<td>')
-                                        .addClass('o_pivot_cell_value text-right');
-                                if (groupIntersectionMeasurements) {
-                                    variation = computeVariation(previousValue, value);
-                                    var $div = $('<div>')
-                                        .addClass('o_variation' + variation.signClass)
-                                        .html(field_utils.format.percentage(variation.magnitude, measure));
-                                    $variation.append($div);
-                                }
-                                else {
-                                    $variation.toggleClass('o_empty');
-                                }
-                                $row.append($variation);
-                            }
-                            previousValue = value;
-                        });
-                    });
-                }
-            );
-            $tbody.append($row);
+        // groupbyLabels is the list of row groupby fields label
+        var groupbyLabels = _.map(this.state.rowGroupBys, function (gb) {
+            return self.state.fields[gb.split(':')[0]].string;
         });
-    },
 
-// to remove
-    /**
-     * @private @static
-     * @param {any} root
-     * @param {any} f
-     * @param {any} arg1
-     * @param {any} arg2
-     * @param {any} arg3
-     * @returns
-     */
-    _traverseTree: function (tree, f, arg1, arg2, arg3) {
-        var self = this;
-        f(tree, arg1, arg2, arg3);
+        this.state.rows.forEach(function (row) {
+            var $tr = $('<tr>');
+            var paddingLeft = 5 + row.indent * self.paddingLeftHeaderTabWidth;
+            $tr.append($('<td>')
+                            .text(row.title)
+                            .attr('title', row.indent > 0 ? groupbyLabels[row.indent - 1] : null)
+                            .data('groupId', row.groupId)
+                            .data('type', 'row')
+                            .css('padding-left', paddingLeft + 'px')
+                            .addClass('o_pivot_header_cell_' + (row.isLeaf ? 'closed' : 'opened')));
+            row.subGroupMeasurements.forEach(function (measurement) {
+                var $cell = $('<td>')
+                                .data('groupId', measurement.groupId)
+                                .data('originIndexes', measurement.originIndexes)
+                                .addClass('o_pivot_cell_value text-right');
 
-        var subTreeKeys = tree.sortedKeys || Object.keys(tree.directSubTrees);
+                if (measurement.isBold) {
+                    $cell.css('font-weight', 'bold');
+                }
 
-        subTreeKeys.forEach(function (subTreeKey) {
-            var subTree = tree.directSubTrees[subTreeKey];
-            self._traverseTree(subTree, f, arg1, arg2, arg3);
+                if (measurement.value !== undefined) {
+                    var measure = measurement.measure;
+                    var measureField = self.state.fields[measure];
+                    var className;
+                    var value;
+                    if (measurement.originIndexes.length > 1) {
+                        className = 'o_variation';
+                        if (measurement.value > 0) {
+                            className += ' o_positive';
+                        } else if (measurement.value < 0) {
+                            className += ' o_negative';
+                        }
+                        value = field_utils.format.percentage(measurement.value, measureField);
+                    } else {
+                        className = 'o_value';
+                        var formatType = self.fieldWidgets[measure] || measureTypes[measure];
+                        value = field_utils.format[formatType](measurement.value, measureField);
+                    }
+                    $cell.append($('<div>', {class: className}).html(value));
+                } else {
+                    $cell.addClass('o_empty');
+                }
+
+                $tr.append($cell);
+            });
+            $tbody.append($tr);
         });
     },
 

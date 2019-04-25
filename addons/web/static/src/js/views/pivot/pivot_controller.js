@@ -268,10 +268,10 @@ var PivotController = AbstractController.extend({
             return key === 'group_by' || _.str.startsWith(key, 'search_default_');
         });
 
-        var groupId = JSON.parse($target.data('id'));
-        var originIndex = $target.data('originIndex');
+        var groupId = JSON.parse($target.data('groupId'));
+        var originIndexes = $target.data('originIndexes');
 
-        var group = {rowValue: groupId[0], colValue: groupId[1], originIndex: originIndex};
+        var group = {rowValue: groupId[0], colValue: groupId[1], originIndex: originIndexes[0]}; // FIXME
 
         var domain = this.model._getGroupDomain(group);
 
