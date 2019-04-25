@@ -47,18 +47,34 @@ publicWidget.registry.follow = publicWidget.Widget.extend({
         this.$target.removeClass('o_has_error').find('.form-control, .custom-select').removeClass('is-invalid');
 
         var email = $email.length ? $email.val() : false;
+        var object = this.$target.data('object');
+
         if (email || this.is_user) {
-            this._rpc({
-                route: '/website_mail/follow',
-                params: {
-                    'id': +this.$target.data('id'),
-                    'object': this.$target.data('object'),
-                    'message_is_follower': this.$target.attr("data-follow") || "off",
-                    'email': email,
-                },
-            }).then(function (follow) {
-                self.toggle_subscription(follow, email);
-            });
+            if(object != "res.users"){
+                this._rpc({
+                    route: '/website_mail/follow',
+                    params: {
+                        'id': +this.$target.data('id'),
+                        'object': object,
+                        'message_is_follower': this.$target.attr("data-follow") || "off",
+                        'email': email,
+                    },
+                }).then(function (follow) {
+                    self.toggle_subscription(follow, email);
+                });
+            }
+            else{
+                this._rpc({
+                    route: '/forum/user/follow',
+                    params: {
+                        'id': +this.$target.data('id'),
+                        'message_is_follower': this.$target.attr("data-follow") || "off",
+                        'email': email,
+                    },
+                }).then(function (follow) {
+                    self.toggle_subscription(follow, email);
+                });
+            }
         }
     },
     toggle_subscription: function (follow, email) {

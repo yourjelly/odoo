@@ -68,6 +68,13 @@
             <field name="parent_id" eval="ref('mt_question_new')"/>
             <field name="relation_field">forum_id</field>
         </record>
+        <!-- User subtypes, to follow user on forum -->
+        <record id="mt_user_activity_forum" model="mail.message.subtype">
+            <field name="name">Forum Activities</field>
+            <!-- <field name="res_model">res.users</field> -->
+            <field name="default" eval="False"/>
+            <field name="hidden" eval="False"/> <!-- to hide ? -->
+        </record>
 
         <record id="base.open_menu" model="ir.actions.todo">
             <field name="action_id" ref="action_open_forum"/>

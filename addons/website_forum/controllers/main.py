@@ -677,3 +677,32 @@ class WebsiteForum(WebsiteProfile):
         if not request.session.uid:
             return {'error': 'anonymous_user'}
         return post.unlink_comment(comment.id)[0]
+
+ # User follow
+    # --------------------------------------------------
+
+    @http.route(['/forum/user/follow'], type='json', auth="public", website=True)
+    def forum_user_subscribe(self, id=0, message_is_follower="on", email=False):
+        user_id = request.env['res.users'].browse(int(id))
+        is_follower = message_is_follower == 'on'
+
+        # search partner_id
+        if request.env.user != request.website.user_id:
+            partner_ids = request.env.user.partner_id.ids
+        else:
+            # mail_thread method
+            partner_ids = user_id.sudo()._find_partner_from_emails([email], check_followers=True)
+            if not partner_ids or not partner_ids[0]:
+                name = email.split('@')[0]
+                partner_ids = request.env['res.partner'].sudo().create({'name': name, 'email': email}).ids
+        # add or remove follower
+        if is_follower:
+            user_id.check_access_rule('read')
+            user_id.partner_id.sudo().message_unsubscribe(partner_ids)
+            return False
+        else:
+            user_id.check_access_rule('read')
+            # add partner to session
+            request.session['partner_id'] = partner_ids[0]
+            user_id.partner_id.sudo().message_subscribe(partner_ids, None, request.env.ref('website_forum.mt_user_activity_forum').ids)
+            return True

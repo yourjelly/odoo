@@ -482,24 +482,24 @@ class Post(models.Model):
     @api.multi
     def post_notification(self):
         for post in self:
-            tag_partners = post.tag_ids.mapped('message_partner_ids')
+            follower_partners = post.tag_ids.mapped('message_partner_ids') | post.create_uid.partner_id.mapped('message_partner_ids')
 
             if post.state == 'active' and post.parent_id:
                 post.parent_id.message_post_with_view(
                     'website_forum.forum_post_template_new_answer',
                     subject=_('Re: %s') % post.parent_id.name,
-                    partner_ids=[(4, p.id) for p in tag_partners],
+                    partner_ids=[(4, p.id) for p in follower_partners],
                     subtype_id=self.env['ir.model.data'].xmlid_to_res_id('website_forum.mt_answer_new'))
             elif post.state == 'active' and not post.parent_id:
                 post.message_post_with_view(
                     'website_forum.forum_post_template_new_question',
                     subject=post.name,
-                    partner_ids=[(4, p.id) for p in tag_partners],
+                    partner_ids=[(4, p.id) for p in follower_partners],
                     subtype_id=self.env['ir.model.data'].xmlid_to_res_id('website_forum.mt_question_new'))
             elif post.state == 'pending' and not post.parent_id:
                 # TDE FIXME: in master, you should probably use a subtype;
                 # however here we remove subtype but set partner_ids
-                partners = post.sudo().message_partner_ids | tag_partners
+                partners = post.sudo().message_partner_ids | follower_partners
                 partners = partners.filtered(lambda partner: partner.user_ids and any(user.karma >= post.forum_id.karma_moderate for user in partner.user_ids))
 
                 post.message_post_with_view(
