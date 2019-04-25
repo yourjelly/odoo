@@ -48,9 +48,8 @@ class TableExporter(http.Controller):
                     if cell['height'] > 1:
                         carry.append({'x': x, 'height': cell['height'] - 1})
                     x = x + measure_count * (2 * origin_count - 1)
-                style = header_plain if 'is_leaf' in header else header_bold
                 for i in range(header['width']):
-                    worksheet.write(y, x + i, header['title'] if i == 0 else '', style)
+                    worksheet.write(y, x + i, header['title'] if i == 0 else '', header_plain)
                 if header['height'] > 1:
                     carry.append({'x': x, 'height': header['height'] - 1})
                 x = x + header['width']
@@ -66,24 +65,26 @@ class TableExporter(http.Controller):
         # Step 2: writing measure headers
         measure_headers = jdata['measure_headers']
 
-        if measure_count > 1:
+        if measure_headers:
             worksheet.write(y, 0, '', header_plain)
             for measure in measure_headers:
                 style = header_bold if measure['is_bold'] else header_plain
-                worksheet.write(y, x, measure['measure'], style)
-                x = x + 1
-            y = y + 1
+                worksheet.write(y, x, measure['title'], style)
+                for i in range(1, 2 * origin_count - 1):
+                    worksheet.write(y, x+i, '', header_plain)
+                x = x + (2 * origin_count - 1)
+            x, y = 1, y + 1
 
         # # Step 3: writing origin headers
-        # origin_headers = jdata['origin_headers']
+        origin_headers = jdata['origin_headers']
 
-        # if origin_count > 1:
-        #     worksheet.write(y, 0, '', header_plain)
-        #     for origin in origin_headers:
-        #         style = header_bold if origin['is_bold'] else header_plain
-        #         worksheet.write(y, x, origin['measure'], style)
-        #         x = x + 1
-        #     y = y + 1
+        if origin_headers:
+            worksheet.write(y, 0, '', header_plain)
+            for origin in origin_headers:
+                style = header_bold if origin['is_bold'] else header_plain
+                worksheet.write(y, x, origin['title'], style)
+                x = x + 1
+            y = y + 1
 
         # Step 4: writing data
         x = 0

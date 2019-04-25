@@ -26,9 +26,6 @@ var mathUtils = require('web.mathUtils');
 var cartesian = mathUtils.cartesian;
 var computeVariation = dataComparisonUtils.computeVariation;
 var sections = mathUtils.sections;
-
-var field_utils = require('web.field_utils');
-
 var _t = core._t;
 
 var PivotModel = AbstractModel.extend({
@@ -97,7 +94,10 @@ var PivotModel = AbstractModel.extend({
         var originRow = [];
 
         function processHeader (header) {
-            return _.pick(header, ['title', 'width', 'height', 'isLeaf']);
+            var inTotalColumn = JSON.parse(header.groupId)[1].length === 0;
+            var simplifiedHeader = _.pick(header, ['title', 'width', 'height']);
+            simplifiedHeader.is_bold = !!header.measure && inTotalColumn;
+            return simplifiedHeader;
         }
 
         if (originCount > 1) {
@@ -106,7 +106,7 @@ var PivotModel = AbstractModel.extend({
             originRow = headers[headers.length - 1].map(processHeader);
         } else {
             colGroupHeaderRows = headers.slice(0, headers.length - 1);
-            if (measureRow > 1) {
+            if (measureCount > 1) {
                 measureRow = headers[headers.length - 1].map(processHeader);
             }
         }
