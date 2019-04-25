@@ -107,6 +107,7 @@ var PivotModel = AbstractModel.extend({
      */
     get: function (options) {
         options = options || {};
+        var raw = options.raw || false;
         var state = {
             hasData: this.hasData,
             colGroupBys: this.data.colGroupBys,
@@ -114,20 +115,25 @@ var PivotModel = AbstractModel.extend({
             measures: this.data.measures,
         };
         if (this.hasData) {
-
             state = _.extend(state, {
                 domain: this.data.domain,
                 context: this.data.context,
                 fields: this.fields,
                 rowGroupTree: this.rowGroupTree,
                 colGroupTree: this.colGroupTree,
-                rows: options.raw || this._computeRows(),
-                headers: options.raw || this._computeColHeaders(),
                 measurements: this.measurements,
                 origins: this.data.origins,
                 sortedColumn: this.data.sortedColumn,
             });
         }
+        if (!raw) {
+            this._computeColHeaders();
+            // need to be after _computeColHeaders
+            this._computeRows();
+            state.headers= this.data.headers;
+            state.rows = this.data.rows;
+        }
+
         return state;
     },
     /**
@@ -266,20 +272,11 @@ var PivotModel = AbstractModel.extend({
             return function (subTreeKey) {
                 var subTree = tree.directSubTrees[subTreeKey];
                 var groupIntersectionId = [subTree.root.value, colGroupId[1]];
-                var key = JSON.stringify(groupIntersectionId);
-                if (!self.measurements[key]) {
-                    return 0;
-                }
-                var values = sortedColumn.originIndexes.map(function (originIndex) {
-                    return self.measurements[key][originIndex][sortedColumn.measure];
-                });
-                var value;
-                if (sortedColumn.originIndexes.length > 1) {
-                    var variation =  computeVariation(values[0], values[1]);
-                    value =  variation.magnitude;
-                } else {
-                    value = values[0];
-                }
+                var value = self._getCellValue(
+                    groupIntersectionId,
+                    sortedColumn.measure,
+                    sortedColumn.originIndexes
+                );
                 return sortedColumn.order === 'asc' ? value : -value;
             };
         };
@@ -346,21 +343,6 @@ var PivotModel = AbstractModel.extend({
     // Private
     //--------------------------------------------------------------------------
 
-    _addGroup: function (groupTree, label, value) {
-        // this seems necessary. Else groupTree would be modified in the forEach!
-        var tree = groupTree;
-        // we assume here that the group with value value.slice(value.length - 2) has already been added.
-        value.slice(0, value.length - 1).forEach(function (key) {
-            tree = tree.directSubTrees[key];
-        });
-        tree.directSubTrees[value[value.length - 1]] = {
-            root: {
-                label: label,
-                value: value,
-            },
-            directSubTrees: {},
-        };
-    },
     _addColGroupHeaders: function (tree, measureCount, originCount) {
         var self = this;
 
@@ -394,6 +376,21 @@ var PivotModel = AbstractModel.extend({
         _.values(tree.directSubTrees).forEach(function (subTree) {
             self._addColGroupHeaders(subTree, measureCount, originCount);
         });
+    },
+    _addGroup: function (groupTree, label, value) {
+        // this seems necessary. Else groupTree would be modified in the forEach!
+        var tree = groupTree;
+        // we assume here that the group with value value.slice(value.length - 2) has already been added.
+        value.slice(0, value.length - 1).forEach(function (key) {
+            tree = tree.directSubTrees[key];
+        });
+        tree.directSubTrees[value[value.length - 1]] = {
+            root: {
+                label: label,
+                value: value,
+            },
+            directSubTrees: {},
+        };
     },
     _addMeasureHeaders: function (groupId) {
         var self = this;
@@ -465,6 +462,54 @@ var PivotModel = AbstractModel.extend({
             }
         });
     },
+    _addRowGroupRows: function (tree) {
+        var self = this;
+
+        var group = tree.root;
+
+        var rowGroupId = [group.value, []];
+        var title = group.label[group.label.length - 1] || _t('Total');
+        var indent = group.label.length;
+        var isLeaf = _.isEmpty(tree.directSubTrees);
+
+        var columnHeaders = this.data.headers[this.data.headers.length - 1];
+
+        var subGroupMeasurements = columnHeaders.map(function (header) {
+            var colGroupId = JSON.parse(header.groupId);
+            var groupIntersectionId  = [rowGroupId[0], colGroupId[1]];
+            var measure = header.measure;
+            var originIndexes = header.originIndexes || [0];
+
+            var value = self._getCellValue(
+                groupIntersectionId,
+                measure,
+                originIndexes
+            );
+
+            var measurement = {
+                groupId: JSON.stringify(groupIntersectionId),
+                originIndexes: originIndexes,
+                measure: measure,
+                value: value,
+            };
+            return measurement;
+        });
+
+        var header = {
+            title: title,
+            groupId: JSON.stringify(rowGroupId),
+            indent: indent,
+            isLeaf: isLeaf,
+            subGroupMeasurements: subGroupMeasurements
+        };
+        this.data.rows.push(header);
+
+        var subTreeKeys = tree.sortedKeys || Object.keys(tree.directSubTrees);
+        subTreeKeys.forEach(function (subTreeKey) {
+            var subTree = tree.directSubTrees[subTreeKey];
+            self._addRowGroupRows(subTree);
+        });
+    },
     _computeColHeaders: function () {
 
         this._computeTreeDimension(this.colGroupTree);
@@ -508,7 +553,8 @@ var PivotModel = AbstractModel.extend({
         return this.data.headers;
     },
     _computeRows: function () {
-        return [];
+        this.data.rows = [];
+        this._addRowGroupRows(this.rowGroupTree);
     },
     _findGroup: function (groupTree, value) {
         var tree = groupTree;
@@ -516,6 +562,22 @@ var PivotModel = AbstractModel.extend({
             tree = tree.directSubTrees[key];
         });
         return tree;
+    },
+    _getCellValue: function (groupId, measure, originIndexes) {
+        var self = this;
+        var key = JSON.stringify(groupId);
+        if (!self.measurements[key]) {
+            return 0;
+        }
+        var values = originIndexes.map(function (originIndex) {
+            return self.measurements[key][originIndex][measure];
+        });
+        if (originIndexes.length > 1) {
+            var variation =  computeVariation(values[0], values[1]);
+            return variation.magnitude;
+        } else {
+            return values[0];
+        }
     },
     /**
      * @private
