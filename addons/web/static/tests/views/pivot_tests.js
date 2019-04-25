@@ -1705,7 +1705,6 @@ QUnit.module('Views', {
         });
 
         // with no data
-
         await testUtils.dom.click($('.o_time_range_menu_button'));
         await testUtils.dom.click($('.o_time_range_menu .o_comparison_checkbox'));
         $('.o_time_range_selector').val('today');
@@ -1717,6 +1716,8 @@ QUnit.module('Views', {
         await testUtils.dom.click($('.o_time_range_menu_button'));
         $('.o_time_range_selector').val('this_month');
         await testUtils.dom.click($('.o_time_range_menu .o_apply_range'));
+        assert.containsN(actionManager, '.o_pivot thead tr:last th', 9,
+            "last header row should contains 9 cells (3*[This month, Previous Period, Variation]");
         results = [
             "13", "0", "100%", "0", "19", "-100%", "13", "19", "-31.58%"
         ];
