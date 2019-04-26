@@ -95,9 +95,12 @@ var PivotModel = AbstractModel.extend({
 
         function processHeader (header) {
             var inTotalColumn = header.groupId[1].length === 0;
-            var simplifiedHeader = _.pick(header, ['title', 'width', 'height']);
-            simplifiedHeader.is_bold = !!header.measure && inTotalColumn;
-            return simplifiedHeader;
+            return {
+                title: header.title,
+                width: header.width,
+                height: header.height,
+                is_bold: !!header.measure && inTotalColumn
+            };
         }
 
         if (originCount > 1) {
