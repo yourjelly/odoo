@@ -223,6 +223,25 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
+    QUnit.test('group headers should have a tooltip', async function (assert) {
+        assert.expect(2);
+
+        var pivot = await createView({
+            View: PivotView,
+            model: "partner",
+            data: this.data,
+            arch: '<pivot>' +
+                        '<field name="product_id" type="col"/>' +
+                        '<field name="date" type="row"/>' +
+                '</pivot>',
+        });
+
+        assert.strictEqual(pivot.$('tbody .o_pivot_header_cell_closed:first').attr('data-original-title'), 'Date');
+        assert.strictEqual(pivot.$('thead .o_pivot_header_cell_closed:first').attr('data-original-title'), 'Product');
+
+        pivot.destroy();
+    });
+
     QUnit.test('pivot view add computed fields explicitly defined as measure', async function (assert) {
         assert.expect(1);
 

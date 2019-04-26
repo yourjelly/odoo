@@ -7,8 +7,6 @@ var core = require('web.core');
 var dataComparisonUtils = require('web.dataComparisonUtils');
 var field_utils = require('web.field_utils');
 
-var _t = core._t;
-var computeVariation = dataComparisonUtils.computeVariation;
 var QWeb = core.qweb;
 
 var PivotRenderer = AbstractRenderer.extend({
@@ -35,7 +33,17 @@ var PivotRenderer = AbstractRenderer.extend({
     // Private
     //--------------------------------------------------------------------------
 
-
+    /**
+     * @private
+     * @param {string[]} groupBy list of 'fieldName[:period]'
+     * @returns {string[]} list of fields label
+     */
+    _getGroupByLabels: function (groupBy) {
+        var self = this;
+        return _.map(groupBy, function (gb) {
+            return self.state.fields[gb.split(':')[0]].string;
+        });
+    },
     /**
      * Used to determine whether or not to display the no content helper.
      *
@@ -81,8 +89,10 @@ var PivotRenderer = AbstractRenderer.extend({
      * @param {jQuery} $thead
      */
     _renderHeaders: function ($thead) {
-        // FIXME: missing title on non-total non-measure non-origin header rows
-        this.state.headers.forEach(function (row) {
+        // groupbyLabels is the list of col groupby fields label
+        var groupbyLabels = this._getGroupByLabels(this.state.colGroupBys);
+
+        this.state.headers.forEach(function (row, rowIndex) {
             var $tr = $('<tr>');
             row.forEach(function (cell) {
                 var $cell = $('<th>').text(cell.title)
@@ -110,6 +120,9 @@ var PivotRenderer = AbstractRenderer.extend({
                     }
                     $cell.data('measure', cell.measure);
                 } else if ('isLeaf' in cell) {
+                    if (rowIndex > 0) {
+                        $cell.attr('title', groupbyLabels[rowIndex - 1]);
+                    }
                     className = 'o_pivot_header_cell_' + (cell.isLeaf ? 'closed' : 'opened');
                 }
                 $cell.addClass(className);
@@ -144,9 +157,7 @@ var PivotRenderer = AbstractRenderer.extend({
         );
 
         // groupbyLabels is the list of row groupby fields label
-        var groupbyLabels = _.map(this.state.rowGroupBys, function (gb) {
-            return self.state.fields[gb.split(':')[0]].string;
-        });
+        var groupbyLabels = this._getGroupByLabels(this.state.rowGroupBys);
 
         this.state.rows.forEach(function (row) {
             var $tr = $('<tr>');
