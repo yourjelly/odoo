@@ -71,9 +71,9 @@
         <!-- User subtypes, to follow user on forum -->
         <record id="mt_user_activity_forum" model="mail.message.subtype">
             <field name="name">Forum Activities</field>
-            <!-- <field name="res_model">res.users</field> -->
+            <field name="res_model">res.partners</field>
             <field name="default" eval="False"/>
-            <field name="hidden" eval="False"/> <!-- to hide ? -->
+            <field name="hidden" eval="False"/>
         </record>
 
         <record id="base.open_menu" model="ir.actions.todo">
