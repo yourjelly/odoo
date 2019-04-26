@@ -89,12 +89,12 @@ var PivotRenderer = AbstractRenderer.extend({
                                      .attr('colspan', cell.width)
                                      .attr('rowspan', cell.height)
                                      .data('groupId', cell.groupId)
-                                     .data('originIndexes', cell.originIndexes)
                                      .data('type', 'col');
 
                 var className;
                 if (cell.measure) {
                     if (cell.originIndexes) {
+                        $cell.data('originIndexes', cell.originIndexes);
                         className = 'o_pivot_origin_row';
                     } else {
                         className = 'o_pivot_measure_row';
@@ -109,7 +109,7 @@ var PivotRenderer = AbstractRenderer.extend({
                         }
                     }
                     $cell.data('measure', cell.measure);
-                } else if (cell.title) {
+                } else if ('isLeaf' in cell) {
                     className = 'o_pivot_header_cell_' + (cell.isLeaf ? 'closed' : 'opened');
                 }
                 $cell.addClass(className);
