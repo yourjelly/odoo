@@ -384,11 +384,19 @@
         <div class="container">
             <h1 class="mb32">Our forums</h1>
             <div t-if="not forums" class="alert alert-info">No forum post yet.</div>
-            <div t-foreach="forums" t-as="forum" class="col-md-3 text-center mb32">
-                <a t-attf-href="/forum/#{ slug(forum) }">
-                    <div class="fa fa-5x fa-fcomment mb16" role="img" aria-label="Forum" title="Forum"/>
-                    <div t-field="forum.name"/>
-                </a>
+            <div class="row">
+                <div t-foreach="forums" t-as="forum" class="col-md-3 text-center mb32">
+                    <a t-attf-href="/forum/#{ slug(forum) }">
+                        <div class="fa fa-5x fa-comment mb16" role="img" aria-label="Forum" title="Forum"/>
+                        <div t-field="forum.name"/>
+                    </a>
+                    <div groups="base.group_user, base.group_portal">
+                        <t t-call="website_mail.follow">
+                            <t t-set="email" t-value="user_id.email"/>
+                            <t t-set="object" t-value="forum"/>
+                        </t>
+                    </div>
+                </div>
             </div>
         </div>
     </t>
