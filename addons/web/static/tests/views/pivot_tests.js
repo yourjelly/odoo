@@ -477,7 +477,7 @@ QUnit.module('Views', {
         await testUtils.dom.click(pivot.$('.o_pivot_field_menu .dropdown-item[data-field="date"][data-interval="day"]'));
 
         // open dropdown to zoom into second row
-        await testUtils.dom.clickLast(pivot.$('tbody td.o_pivot_header_cell_closed'));
+        await testUtils.dom.clickLast(pivot.$('tbody th.o_pivot_header_cell_closed'));
 
         assert.containsN(pivot, 'tbody tr', 7,
             "should have 7 rows (1 for total, 1 for xphone, 1 for xpad, 4 for data)");
@@ -1217,7 +1217,7 @@ QUnit.module('Views', {
         assert.strictEqual(pivot.$('tbody .o_pivot_header_cell_closed:contains(xpad)').length, 1,
             "row: should display one closed header with 'xpad'");
 
-        assert.strictEqual(pivot.$('tbody tr:first td:nth(3)').text(), '32',
+        assert.strictEqual(pivot.$('tbody tr:first td:nth(2)').text(), '32',
             "selected measure should be foo, with total 32");
 
         pivot.destroy();
@@ -1264,7 +1264,7 @@ QUnit.module('Views', {
         assert.strictEqual(pivot.$('tbody .o_pivot_header_cell_closed:contains(xpad)').length, 1,
             "row: should display one closed header with 'xpad'");
 
-        assert.strictEqual(pivot.$('tbody tr:first td:nth(3)').text(), '32',
+        assert.strictEqual(pivot.$('tbody tr:first td:nth(2)').text(), '32',
             "selected measure should be foo, with total 32");
 
         pivot.destroy();
@@ -1298,7 +1298,7 @@ QUnit.module('Views', {
         assert.strictEqual(pivot.$('tbody .o_pivot_header_cell_closed:contains(xpad)').length, 1,
             'row: should display one closed header with "xpad"');
 
-        assert.strictEqual(pivot.$('tbody tr:first td:nth(3)').text(), '32',
+        assert.strictEqual(pivot.$('tbody tr:first td:nth(2)').text(), '32',
             'selected measure should be foo, with total 32');
 
         pivot.destroy();
@@ -2130,7 +2130,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.only('Flip then compare, table col groupbys are kept', async function (assert) {
+    QUnit.test('Flip then compare, table col groupbys are kept', async function (assert) {
         assert.expect(6);
 
         this.data.partner.fields.company_type = {
