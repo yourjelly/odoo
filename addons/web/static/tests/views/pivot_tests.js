@@ -2129,5 +2129,120 @@ QUnit.module('Views', {
         unpatchDate();
         pivot.destroy();
     });
+
+    QUnit.only('Flip then compare, table col groupbys are kept', async function (assert) {
+        assert.expect(6);
+
+        this.data.partner.fields.company_type = {
+            string: "Company Type",
+            type: "selection",
+            selection: [["company", "Company"], ["individual", "individual"]],
+            searchable: true,
+            sortable: true,
+            store: true,
+        };
+
+        this.data.partner.records[0].date = '2016-12-15';
+        this.data.partner.records[1].date = '2016-12-17';
+        this.data.partner.records[2].date = '2016-11-22';
+        this.data.partner.records[3].date = '2016-11-03';
+
+        this.data.partner.records[0].company_type = 'company';
+        this.data.partner.records[1].company_type = 'individual';
+        this.data.partner.records[2].company_type = 'company';
+        this.data.partner.records[3].company_type = 'individual';
+
+        var unpatchDate = patchDate(2016, 11, 20, 1, 0, 0);
+        var pivot = await createView({
+            View: PivotView,
+            model: 'partner',
+            data: this.data,
+            arch: '<pivot>' +
+                    '<field name="date" interval="day" type="row"/>' +
+                    '<field name="company_type" type="col"/>' +
+                    '<field name="foo" type="measure"/>' +
+                '</pivot>',
+            viewOptions: {
+                additionalMeasures: ['product_id'],
+            },
+        });
+
+
+        assert.strictEqual(
+            pivot.$('th').slice(0, 5).text(),
+            [
+                '', 'Total',                 '',
+                    'Company', 'individual',
+            ].join(''),
+            "The col headers should be as expected"
+        );
+        assert.strictEqual(
+            pivot.$('th').slice(8).text(),
+            [
+                'Total',
+                    '2016-12-15',
+                    '2016-12-17',
+                    '2016-11-22',
+                    '2016-11-03'
+            ].join(''),
+            "The row headers should be as expected"
+        );
+
+        // flip
+        await testUtils.dom.click(pivot.$buttons.find('.o_pivot_flip_button'));
+
+        assert.strictEqual(
+            pivot.$('th').slice(0, 7).text(),
+            [
+                '', 'Total',                                                '',
+                    '2016-12-15', '2016-12-17', '2016-11-22', '2016-11-03',
+            ].join('')
+            ,
+            "The col headers should be as expected"
+        );
+        assert.strictEqual(
+            pivot.$('th').slice(12).text(),
+            [
+                'Total',
+                    'Company',
+                    'individual'
+
+            ].join(''),
+            "The row headers should be as expected"
+        );
+
+        // enable comparison mode
+        var $cp = pivot.$('.o_control_panel');
+        // open time range menu
+        await testUtils.dom.click($cp.find('.o_time_range_menu_button'));
+        // select 'This month' as range
+        await testUtils.fields.editInput($cp.find('.o_time_range_selector'), 'this_month');
+        // check checkbox 'Compare To'
+        await testUtils.dom.click($cp.find('.o_time_range_menu .o_comparison_checkbox'));
+        // click on 'Apply' button
+        await testUtils.dom.click($cp.find('.o_time_range_menu .o_apply_range'));
+
+        assert.strictEqual(
+            pivot.$('th').slice(0, 7).text(),
+            [
+                '', 'Total',                                                '',
+                    '2016-12-15', '2016-12-17', '2016-11-22', '2016-11-03',
+            ].join('')
+            ,
+            "The col headers should be as expected"
+        );
+        assert.strictEqual(
+            pivot.$('th').slice(27).text(),
+            [
+                'Total',
+                    'Company',
+                    'individual'
+
+            ].join(''),
+            "The row headers should be as expected"
+        );
+        unpatchDate();
+        pivot.destroy();
+    });
 });
 });

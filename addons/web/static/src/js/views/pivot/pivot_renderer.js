@@ -151,7 +151,7 @@ var PivotRenderer = AbstractRenderer.extend({
         this.state.rows.forEach(function (row) {
             var $tr = $('<tr>');
             var paddingLeft = 5 + row.indent * self.paddingLeftHeaderTabWidth;
-            $tr.append($('<td>')
+            $tr.append($('<th>')
                             .text(row.title)
                             .attr('title', row.indent > 0 ? groupbyLabels[row.indent - 1] : null)
                             .data('groupId', row.groupId)
