@@ -60,6 +60,8 @@ from .tools.safe_eval import safe_eval
 from .tools.translate import _
 from .tools import date_utils
 
+from .triple import Triple, Attributable
+
 _logger = logging.getLogger(__name__)
 _schema = logging.getLogger(__name__ + '.schema')
 _unlink = logging.getLogger(__name__ + '.unlink')
@@ -264,6 +266,10 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     _transient_max_hours = lazy_classproperty(lambda _: config.get('osv_memory_age_limit'))
 
     CONCURRENCY_CHECK_FIELD = '__last_update'
+
+    @property
+    def f(self):
+        return Attributable(self._fields, self.browse())
 
     @api.model
     def view_init(self, fields_list):
@@ -1558,6 +1564,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         :raise AccessError: * if user tries to bypass access rules for read on the requested object.
         """
+        if type(args) == Triple:
+            args = args.triple
         res = self._search(args, offset=offset, limit=limit, order=order, count=count)
         return res if count else self.browse(res)
 
