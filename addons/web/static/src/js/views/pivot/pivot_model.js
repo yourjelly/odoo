@@ -166,9 +166,10 @@ var PivotModel = AbstractModel.extend({
         this.colGroupTree = temp;
 
         // we need to update the record metadata: row and col groupBys
+        temp = this.data.rowGroupBys;
         this.data.groupedBy = this.data.colGroupBys;
-        this.data.colGroupBys = this.data.rowGroupBys;
-        this.data.rowGroupBys = this._computeRowGroupBys();
+        this.data.rowGroupBys = this.data.colGroupBys;
+        this.data.colGroupBys = temp;
 
         var self = this;
         function twistKey (key) {
