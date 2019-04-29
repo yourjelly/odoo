@@ -66,7 +66,6 @@ class Shell(Command):
             local_vars['__name__'] = '__main__'
             exec(sys.stdin.read(), local_vars)
         else:
-            import ipdb; ipdb.set_trace()
             if 'env' not in local_vars:
                 print('No environment set, use `%s shell -d dbname` to get one.' % sys.argv[0])
             for i in sorted(local_vars):
