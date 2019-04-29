@@ -21,6 +21,8 @@ class AccountAnalyticLine(models.Model):
     task_id = fields.Many2one('project.task', 'Task', index=True)
     project_id = fields.Many2one('project.project', 'Project', domain=[('allow_timesheets', '=', True)])
 
+    timesheet_pack_id = fields.Many2one('timesheet.pack', string="timesheet Pack", domain="[('analytic_account_id', '=', account_id)]")
+
     employee_id = fields.Many2one('hr.employee', "Employee")
     department_id = fields.Many2one('hr.department', "Department", compute='_compute_department_id', store=True, compute_sudo=True)
 

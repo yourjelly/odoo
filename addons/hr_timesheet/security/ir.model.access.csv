@@ -9,3 +9,4 @@ access_account_analytic_line_project,account.analytic.line project,analytic.mode
 access_uom_uom_hr_timesheet,uom.uom.timesheet.user,uom.model_uom_uom,hr_timesheet.group_hr_timesheet_user,1,0,0,0
 access_project_project,project.project.timesheet.user,model_project_project,hr_timesheet.group_hr_timesheet_user,1,0,0,0
 access_project_task,project.task.timesheet.user,model_project_task,hr_timesheet.group_hr_timesheet_user,1,1,0,0
+access_timesheet_pack,access_timesheet_pack,model_timesheet_pack,base.group_user,1,1,1,1
