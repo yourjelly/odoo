@@ -94,8 +94,10 @@ class Registry(Mapping):
 
                 # load_modules() above can replace the registry by calling
                 # indirectly new() again (when modules have to be uninstalled).
-                # Yeah, crazy.
+                # Yeah, crazy. But it works!
                 registry = cls.registries[db_name]
+
+
 
             registry._init = False
             registry.ready = True
