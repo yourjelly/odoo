@@ -5,11 +5,9 @@ var core = require('web.core');
 var PivotView = require('web.PivotView');
 var testUtils = require('web.test_utils');
 
-var createActionManager = testUtils.createActionManager;
-var patchDate = testUtils.mock.patchDate;
-
 var _t = core._t;
 var createView = testUtils.createView;
+var patchDate = testUtils.mock.patchDate;
 
 /**
  * Helper function that returns, given a pivot instance, the values of the
@@ -37,6 +35,11 @@ QUnit.module('Views', {
                     non_stored_m2o: {string: "Non Stored M2O", type: "many2one", relation: 'product'},
                     customer: {string: "Customer", type: "many2one", relation: 'customer', store: true},
                     computed_field: {string: "Computed and not stored", type: 'integer', compute: true, group_operator: 'sum'},
+                    company_type: {
+                        string: "Company Type", type: "selection",
+                        selection: [["company", "Company"], ["individual", "individual"]],
+                        searchable: true, sortable: true, store: true,
+                    },
                 },
                 records: [
                     {
@@ -47,6 +50,7 @@ QUnit.module('Views', {
                         product_id: 37,
                         customer: 1,
                         computed_field: 19,
+                        company_type: 'company',
                     }, {
                         id: 2,
                         foo: 1,
@@ -55,6 +59,7 @@ QUnit.module('Views', {
                         product_id: 41,
                         customer: 2,
                         computed_field: 23,
+                        company_type: 'individual',
                     }, {
                         id: 3,
                         foo: 17,
@@ -63,13 +68,16 @@ QUnit.module('Views', {
                         product_id: 41,
                         customer: 2,
                         computed_field: 26,
-                    }, {id: 4,
+                        company_type: 'company',
+                    }, {
+                        id: 4,
                         foo: 2,
                         bar: false,
                         date: '2016-04-11',
                         product_id: 41,
                         customer: 1,
                         computed_field: 19,
+                        company_type: 'individual',
                     },
                 ]
             },
@@ -119,7 +127,7 @@ QUnit.module('Views', {
             },
         });
 
-        assert.hasClass(pivot.$el,'o_enable_linking',
+        assert.hasClass(pivot.$el, 'o_enable_linking',
             "root node should have classname 'o_enable_linking'");
         assert.strictEqual(pivot.$('td.o_pivot_cell_value:contains(32)').length, 1,
                     "should contain a pivot cell with the sum of all records");
@@ -146,7 +154,7 @@ QUnit.module('Views', {
     QUnit.test('pivot rendering with string attribute on field', async function (assert) {
         assert.expect(1);
 
-        this.data.partner.fields.foo = {string: "Foo", type: "integer", store: true, group_operator:'sum'};
+        this.data.partner.fields.foo = {string: "Foo", type: "integer", store: true, group_operator: 'sum'};
 
         var pivot = await createView({
             View: PivotView,
@@ -165,7 +173,7 @@ QUnit.module('Views', {
     QUnit.test('pivot rendering with string attribute on non stored field', async function (assert) {
         assert.expect(1);
 
-        this.data.partner.fields.fubar = {string: "Fubar", type: "integer", store:false, group_operator: 'sum'};
+        this.data.partner.fields.fubar = {string: "Fubar", type: "integer", store: false, group_operator: 'sum'};
 
         var pivot = await createView({
             View: PivotView,
@@ -301,7 +309,7 @@ QUnit.module('Views', {
             }
         });
 
-        assert.hasClass(pivot.$el,'o_enable_linking',
+        assert.hasClass(pivot.$el, 'o_enable_linking',
             "root node should have classname 'o_enable_linking'");
         await testUtils.dom.click(pivot.$('.o_pivot_cell_value:contains(12)')); // should trigger a do_action
 
@@ -375,7 +383,7 @@ QUnit.module('Views', {
         });
 
         var $countMeasure = pivot.$buttons.find('.dropdown-item[data-field=__count]:first');
-        assert.hasClass($countMeasure,'selected', "The count measure should be activated");
+        assert.hasClass($countMeasure, 'selected', "The count measure should be activated");
         pivot.destroy();
     });
 
@@ -559,7 +567,7 @@ QUnit.module('Views', {
         await testUtils.pivot.toggleMeasuresDropdown(pivot);
         await testUtils.pivot.clickMeasure(pivot, '__count');
 
-        assert.hasClass(pivot.$buttons.find('.dropdown-item[data-field=__count]:first'),'selected',
+        assert.hasClass(pivot.$buttons.find('.dropdown-item[data-field=__count]:first'), 'selected',
             "the __count measure should be selected");
         assert.containsN(pivot, '.o_pivot_cell_value', 6,
             "should have 6 cells: 2 for the open header, and 4 for data");
@@ -1013,7 +1021,7 @@ QUnit.module('Views', {
         }, "context should be correct");
 
         await testUtils.dom.click(pivot.$('tbody .o_pivot_header_cell_closed'));
-        await testUtils.dom.click( pivot.$('.o_pivot_field_menu .dropdown-item[data-field="product_id"]:first'));
+        await testUtils.dom.click(pivot.$('.o_pivot_field_menu .dropdown-item[data-field="product_id"]:first'));
 
         assert.deepEqual(pivot.getOwnedQueryParams(), {
             context: {
@@ -1630,7 +1638,7 @@ QUnit.module('Views', {
                   '</pivot>',
         });
 
-        assert.hasClass(pivot.$('thead tr:last th:last'),'o_pivot_sort_order_asc',
+        assert.hasClass(pivot.$('thead tr:last th:last'), 'o_pivot_sort_order_asc',
                         "Last thead should be sorted in ascending order");
 
         pivot.destroy();
@@ -1670,7 +1678,7 @@ QUnit.module('Views', {
         assert.containsOnce(pivot, 'tbody tr',
             "should have 1 rows: 1 for the main header");
 
-        var values = [
+        values = [
             "1", "3", "4"
         ];
         assert.strictEqual(getCurrentValues(pivot), values.join());
@@ -1679,122 +1687,104 @@ QUnit.module('Views', {
     });
 
     QUnit.test('rendering of pivot view with comparison', async function (assert) {
-        assert.expect(92);
+        assert.expect(7);
 
         this.data.partner.records[0].date = '2016-12-15';
         this.data.partner.records[1].date = '2016-12-17';
         this.data.partner.records[2].date = '2016-11-22';
         this.data.partner.records[3].date = '2016-11-03';
 
-        this.data.partner.fields.company_type = {string: "Company Type", type: "selection", selection: [["company", "Company"], ["individual", "Individual"]], searchable: true, store: true, sortable: true};
-
-        this.data.partner.records[0].company_type = 'company';
-        this.data.partner.records[1].company_type = 'individual';
-        this.data.partner.records[2].company_type = 'company';
-        this.data.partner.records[3].company_type = 'individual';
-
 
         var unpatchDate = patchDate(2016, 11, 20, 1, 0, 0);
 
-        var results;
-        var i;
-        var length;
-
-        function checkCellValues(results) {
-            length = results.length;
-            for (i = 0; i < length; i++) {
-                assert.strictEqual($('.o_pivot .o_pivot_cell_value div').eq(i).text().trim(), results.shift());
-            }
-        }
-
-        // create an action manager to test the interactions with the search view
-        var actionManager = await createActionManager({
+        var pivot = await createView({
+            View: PivotView,
+            model: 'partner',
             data: this.data,
-            archs: {
-                'partner,false,pivot': '<pivot>' +
-                        '<field name="date" interval="month" type="col"/>' +
-                        '<field name="foo" type="measure"/>' +
-                  '</pivot>',
-                'partner,false,search': '<search></search>',
+            arch: '<pivot>' +
+                    '<field name="date" interval="month" type="col"/>' +
+                    '<field name="foo" type="measure"/>' +
+              '</pivot>',
+            viewOptions: {
+                additionalMeasures: ['product_id'],
             },
-        });
-
-        await actionManager.doAction({
-            res_model: 'partner',
-            type: 'ir.actions.act_window',
-            views: [[false, 'pivot']],
-            flags: {
-                pivot: {
-                    additionalMeasures: ['product_id'],
-                },
+            intercepts: {
+                create_filter: function (ev) {
+                    var data = ev.data;
+                    assert.deepEqual(data.filter.context.timeRangeMenuData, {
+                        timeRange: ["&", ["date", ">=", "2016-12-01"], ["date", "<", "2017-01-01"]],
+                        timeRangeDescription: 'This Month',
+                        comparisonTimeRange: ["&", ["date", ">=", "2016-11-01"], ["date", "<", "2016-12-01"]],
+                        comparisonTimeRangeDescription: 'Previous Period',
+                    });
+                }
             },
         });
 
         // with no data
-        await testUtils.dom.click($('.o_time_range_menu_button'));
-        await testUtils.dom.click($('.o_time_range_menu .o_comparison_checkbox'));
-        $('.o_time_range_selector').val('today');
-        await testUtils.dom.click($('.o_time_range_menu .o_apply_range'));
+        await testUtils.dom.click(pivot.$('.o_time_range_menu_button'));
+        await testUtils.dom.click(pivot.$('.o_time_range_menu .o_comparison_checkbox'));
+        pivot.$('.o_time_range_selector').val('today');
+        await testUtils.dom.click(pivot.$('.o_time_range_menu .o_apply_range'));
 
-        assert.strictEqual($('.o_pivot p.o_view_nocontent_empty_folder').length, 1);
+        assert.strictEqual(pivot.$('.o_pivot p.o_view_nocontent_empty_folder').length, 1);
 
         // with data, no row groupby
-        await testUtils.dom.click($('.o_time_range_menu_button'));
-        $('.o_time_range_selector').val('this_month');
-        await testUtils.dom.click($('.o_time_range_menu .o_apply_range'));
-        assert.containsN(actionManager, '.o_pivot thead tr:last th', 9,
+        await testUtils.dom.click(pivot.$('.o_time_range_menu_button'));
+        pivot.$('.o_time_range_selector').val('this_month');
+        await testUtils.dom.click(pivot.$('.o_time_range_menu .o_apply_range'));
+        assert.containsN(pivot, '.o_pivot thead tr:last th', 9,
             "last header row should contains 9 cells (3*[This month, Previous Period, Variation]");
-        results = [
+        var values = [
             "13", "0", "100%", "0", "19", "-100%", "13", "19", "-31.58%"
         ];
-        checkCellValues(results);
+        assert.strictEqual(getCurrentValues(pivot), values.join());
 
         // with data, with row groupby
-
-        await testUtils.dom.click($('.o_pivot .o_pivot_header_cell_closed').eq(2));
-        await testUtils.dom.click($('.o_pivot .o_field_selection a[data-field="product_id"]'));
-        results = [
+        await testUtils.dom.click(pivot.$('.o_pivot .o_pivot_header_cell_closed').eq(2));
+        await testUtils.dom.click(pivot.$('.o_pivot .o_field_selection a[data-field="product_id"]'));
+        values = [
             "13", "0", "100%", "0", "19", "-100%", "13", "19", "-31.58%",
             "12", "0", "100%",                     "12", "0" , "100%",
             "1" , "0", "100%", "0", "19", "-100%", "1" , "19", "-94.74%"
         ];
-        checkCellValues(results);
+        assert.strictEqual(getCurrentValues(pivot), values.join());
 
-        await testUtils.pivot.toggleMeasuresDropdown(actionManager.getCurrentController().widget);
-        await testUtils.dom.click($('.o_control_panel div.o_pivot_measures_list a[data-field="foo"]'));
-        await testUtils.dom.click($('.o_control_panel div.o_pivot_measures_list a[data-field="product_id"]'));
-        results = [
+        await testUtils.pivot.toggleMeasuresDropdown(pivot);
+        await testUtils.dom.click(pivot.$('.o_control_panel div.o_pivot_measures_list a[data-field="foo"]'));
+        await testUtils.dom.click(pivot.$('.o_control_panel div.o_pivot_measures_list a[data-field="product_id"]'));
+        values = [
             "2", "0", "100%", "0", "1", "-100%", "2", "1", "100%",
             "1", "0", "100%",                    "1", "0", "100%",
             "1", "0", "100%", "0", "1", "-100%", "1", "1", "0%"
         ];
-        checkCellValues(results);
+        assert.strictEqual(getCurrentValues(pivot), values.join());
 
-        await testUtils.dom.click($('.o_control_panel div.o_pivot_measures_list a[data-field="__count"]'));
-        await testUtils.dom.click($('.o_control_panel div.o_pivot_measures_list a[data-field="product_id"]'));
-        results = [
+        await testUtils.dom.click(pivot.$('.o_control_panel div.o_pivot_measures_list a[data-field="__count"]'));
+        await testUtils.dom.click(pivot.$('.o_control_panel div.o_pivot_measures_list a[data-field="product_id"]'));
+        values = [
             "2", "0", "100%", "0", "2", "-100%", "2", "2", "0%",
             "1", "0", "100%",                    "1", "0", "100%",
             "1", "0", "100%", "0", "2", "-100%", "1", "2", "-50%"
         ];
-        checkCellValues(results);
+        assert.strictEqual(getCurrentValues(pivot), values.join());
 
-        await testUtils.dom.clickFirst($('.o_pivot .o_pivot_header_cell_opened'));
-        results = [
+        await testUtils.dom.clickFirst(pivot.$('.o_pivot .o_pivot_header_cell_opened'));
+        values = [
             "2", "2", "0%",
             "1", "0", "100%",
             "1", "2", "-50%"
         ];
-        checkCellValues(results);
+        assert.strictEqual(getCurrentValues(pivot), values.join());
 
-        $('.o_search_options button:contains("Favorites")').click();
-        var $favorites = $('.dropdown-menu.o_favorites_menu');
+        pivot.$('.o_search_options button:contains("Favorites")').click();
+        var $favorites = pivot.$('.dropdown-menu.o_favorites_menu');
         $favorites.find('a.o_save_search').click();
         $favorites.find('.o_input').val('Fav').trigger('input');
         $favorites.find('button').click();
 
         unpatchDate();
-        actionManager.destroy();
+        pivot.destroy();
     });
 
     QUnit.test('export data in excel with comparison', async function (assert) {
@@ -1807,30 +1797,36 @@ QUnit.module('Views', {
 
         var unpatchDate = patchDate(2016, 11, 20, 1, 0, 0);
 
-        // create an action manager to test the interactions with the search view
-        var actionManager = await createActionManager({
+        var pivot = await createView({
+            View: PivotView,
+            model: 'partner',
             data: this.data,
-            archs: {
-                'partner,false,pivot': '<pivot>' +
-                        '<field name="date" interval="month" type="col"/>' +
-                        '<field name="foo" type="measure"/>' +
-                  '</pivot>',
-                'partner,false,search': '<search></search>',
-            },
+            arch: '<pivot>' +
+                    '<field name="date" interval="month" type="col"/>' +
+                    '<field name="foo" type="measure"/>' +
+              '</pivot>',
             session: {
                 get_file: function (args) {
                     var data = JSON.parse(args.data.data);
                     _.each(data.col_group_headers, function (l) {
-                        var titles = l.map(function (o) {return o.title;});
+                        var titles = l.map(function (o) {
+                            return o.title;
+                        });
                         assert.step(JSON.stringify(titles));
                     });
-                    var measures = data.measure_headers.map(function (o) {return o.title;});
+                    var measures = data.measure_headers.map(function (o) {
+                        return o.title;
+                    });
                     assert.step(JSON.stringify(measures));
-                    var origins = data.origin_headers.map(function (o) {return o.title;});
+                    var origins = data.origin_headers.map(function (o) {
+                        return o.title;
+                    });
                     assert.step(JSON.stringify(origins));
                     assert.step(String(data.measure_count));
                     assert.step(String(data.origin_count));
-                    var valuesLength = data.rows.map(function (o) {return o.values.length;});
+                    var valuesLength = data.rows.map(function (o) {
+                        return o.values.length;
+                    });
                     assert.step(JSON.stringify(valuesLength));
                     assert.strictEqual(args.url, '/web/pivot/export_xls',
                         "should call get_file with correct parameters");
@@ -1839,39 +1835,33 @@ QUnit.module('Views', {
             },
         });
 
-        await actionManager.doAction({
-            res_model: 'partner',
-            type: 'ir.actions.act_window',
-            views: [[false, 'pivot']],
-        });
-
         // open time range menu
-        await testUtils.dom.click($('.o_control_panel .o_time_range_menu_button'));
+        await testUtils.dom.click(pivot.$('.o_control_panel .o_time_range_menu_button'));
         // select 'Today' as range
-        $('.o_control_panel .o_time_range_selector').val('today');
+        pivot.$('.o_control_panel .o_time_range_selector').val('today');
         // check checkbox 'Compare To'
-        await testUtils.dom.click($('.o_control_panel .o_time_range_menu .o_comparison_checkbox'));
+        await testUtils.dom.click(pivot.$('.o_control_panel .o_time_range_menu .o_comparison_checkbox'));
         // Click on 'Apply' button
-        await testUtils.dom.click($('.o_control_panel .o_time_range_menu .o_apply_range'));
+        await testUtils.dom.click(pivot.$('.o_control_panel .o_time_range_menu .o_apply_range'));
 
         // the time range menu configuration is by now: Date, Today, checkbox checked, Previous Period
         // With the data above, the time ranges contain no record.
-        assert.strictEqual($('.o_pivot p.o_view_nocontent_empty_folder').length, 1, "there should be no data");
+        assert.strictEqual(pivot.$('.o_pivot p.o_view_nocontent_empty_folder').length, 1, "there should be no data");
         // export data should be impossible since the pivot buttons
         // are deactivated (exception: the 'Measures' button).
-        assert.ok($('.o_control_panel button.o_pivot_download').prop('disabled'));
+        assert.ok(pivot.$('.o_control_panel button.o_pivot_download').prop('disabled'));
 
         // open time range menu
-        await testUtils.dom.click($('.o_control_panel .o_time_range_menu_button'));
+        await testUtils.dom.click(pivot.$('.o_control_panel .o_time_range_menu_button'));
         // select 'This Month' as date range
-        $('.o_control_panel .o_time_range_selector').val('this_month');
+        pivot.$('.o_control_panel .o_time_range_selector').val('this_month');
 
         // Click on 'Apply' button
-        await testUtils.dom.click($('.o_control_panel .o_time_range_menu .o_apply_range'));
+        await testUtils.dom.click(pivot.$('.o_control_panel .o_time_range_menu .o_apply_range'));
         // the time range menu configuration is by now: Date, This Month, checkbox checked, Previous Period
         // With the data above, the time ranges contain some records.
         // export data. Should execute 'get_file'
-        await testUtils.dom.click($('.o_control_panel button.o_pivot_download'));
+        await testUtils.dom.click(pivot.$('.o_control_panel button.o_pivot_download'));
 
         assert.verifySteps([
             // col group headers
@@ -1891,11 +1881,11 @@ QUnit.module('Views', {
         ]);
 
         unpatchDate();
-        actionManager.destroy();
+        pivot.destroy();
     });
 
     QUnit.test('rendering of pivot view with comparison and count measure', async function (assert) {
-        assert.expect(10);
+        assert.expect(2);
 
         var mockMock = false;
         var nbReadGroup = 0;
@@ -1907,15 +1897,11 @@ QUnit.module('Views', {
 
         var unpatchDate = patchDate(2016, 11, 20, 1, 0, 0);
 
-        // create an action manager to test the interactions with the search view
-        var actionManager = await createActionManager({
+        var pivot = await createView({
+            View: PivotView,
+            model: 'partner',
             data: this.data,
-            archs: {
-                'partner,false,pivot': '<pivot>' +
-                        '<field name="customer" type="row"/>' +
-                  '</pivot>',
-                'partner,false,search': '<search></search>',
-            },
+            arch: '<pivot><field name="customer" type="row"/></pivot>',
             mockRPC: function (route, args) {
                 var result = this._super.apply(this, arguments);
                 if (args.method === 'read_group' && mockMock) {
@@ -1931,56 +1917,34 @@ QUnit.module('Views', {
             },
         });
 
-        await actionManager.doAction({
-            res_model: 'partner',
-            type: 'ir.actions.act_window',
-            views: [[false, 'pivot']],
-        });
-
         mockMock = true;
 
         // activate 'This Month' and 'Previous Period' in time range menu
-        await testUtils.dom.click($('.o_control_panel .o_time_range_menu_button'));
-        $('.o_control_panel .o_time_range_selector').val('this_month');
-        await testUtils.dom.click($('.o_control_panel .o_time_range_menu .o_comparison_checkbox'));
-        await testUtils.dom.click($('.o_control_panel .o_time_range_menu .o_apply_range'));
+        await testUtils.dom.click(pivot.$('.o_control_panel .o_time_range_menu_button'));
+        pivot.$('.o_control_panel .o_time_range_selector').val('this_month');
+        await testUtils.dom.click(pivot.$('.o_control_panel .o_time_range_menu .o_comparison_checkbox'));
+        await testUtils.dom.click(pivot.$('.o_control_panel .o_time_range_menu .o_apply_range'));
 
-        var results = [
+        var values = [
             "4", "0", "100%",
             "2", "0", "100%",
             "2", "0", "100%"
         ];
-
-        for (var i = 0; i < 9; i++) {
-            assert.strictEqual($('.o_pivot .o_pivot_cell_value div').eq(i).text().trim(), results.shift());
-        }
-        assert.strictEqual($('.o_pivot_header_cell_closed').length, 3, "there should be exactly three closed header ('Total','First', 'Second')");
+        assert.strictEqual(getCurrentValues(pivot), values.join(','));
+        assert.strictEqual(pivot.$('.o_pivot_header_cell_closed').length, 3,
+            "there should be exactly three closed header ('Total','First', 'Second')");
 
         unpatchDate();
-        actionManager.destroy();
+        pivot.destroy();
     });
 
     QUnit.test('can sort a pivot view with comparison by clicking on header', async function (assert) {
         assert.expect(6);
 
-        this.data.partner.fields.company_type = {
-            string: "Company Type",
-            type: "selection",
-            selection: [["company", "Company"], ["individual", "individual"]],
-            searchable: true,
-            sortable: true,
-            store: true,
-        };
-
         this.data.partner.records[0].date = '2016-12-15';
         this.data.partner.records[1].date = '2016-12-17';
         this.data.partner.records[2].date = '2016-11-22';
         this.data.partner.records[3].date = '2016-11-03';
-
-        this.data.partner.records[0].company_type = 'company';
-        this.data.partner.records[1].company_type = 'individual';
-        this.data.partner.records[2].company_type = 'company';
-        this.data.partner.records[3].company_type = 'individual';
 
         var unpatchDate = patchDate(2016, 11, 20, 1, 0, 0);
         var pivot = await createView({
@@ -2080,24 +2044,10 @@ QUnit.module('Views', {
     QUnit.test('Cell values are kept when flippin a pivot view in comparison mode', async function (assert) {
         assert.expect(2);
 
-        this.data.partner.fields.company_type = {
-            string: "Company Type",
-            type: "selection",
-            selection: [["company", "Company"], ["individual", "individual"]],
-            searchable: true,
-            sortable: true,
-            store: true,
-        };
-
         this.data.partner.records[0].date = '2016-12-15';
         this.data.partner.records[1].date = '2016-12-17';
         this.data.partner.records[2].date = '2016-11-22';
         this.data.partner.records[3].date = '2016-11-03';
-
-        this.data.partner.records[0].company_type = 'company';
-        this.data.partner.records[1].company_type = 'individual';
-        this.data.partner.records[2].company_type = 'company';
-        this.data.partner.records[3].company_type = 'individual';
 
         var unpatchDate = patchDate(2016, 11, 20, 1, 0, 0);
         var pivot = await createView({
@@ -2142,7 +2092,7 @@ QUnit.module('Views', {
             "12", "0",  "100%", "1",  "0",  "100%", "0",  "17", "-100%", "0",  "2",  "-100%", "13", "19", "-31.58%",
             "12", "0",  "100%",                     "0",  "17", "-100%",                      "12", "17", "-29.41%",
                                 "1",  "0",  "100%" ,                      "0",  "2",  "-100%", "1",  "2",  "-50%"
-        ]
+        ];
         assert.strictEqual(getCurrentValues(pivot), values.join());
 
         unpatchDate();
@@ -2152,24 +2102,10 @@ QUnit.module('Views', {
     QUnit.test('Flip then compare, table col groupbys are kept', async function (assert) {
         assert.expect(6);
 
-        this.data.partner.fields.company_type = {
-            string: "Company Type",
-            type: "selection",
-            selection: [["company", "Company"], ["individual", "individual"]],
-            searchable: true,
-            sortable: true,
-            store: true,
-        };
-
         this.data.partner.records[0].date = '2016-12-15';
         this.data.partner.records[1].date = '2016-12-17';
         this.data.partner.records[2].date = '2016-11-22';
         this.data.partner.records[3].date = '2016-11-03';
-
-        this.data.partner.records[0].company_type = 'company';
-        this.data.partner.records[1].company_type = 'individual';
-        this.data.partner.records[2].company_type = 'company';
-        this.data.partner.records[3].company_type = 'individual';
 
         var unpatchDate = patchDate(2016, 11, 20, 1, 0, 0);
         var pivot = await createView({
