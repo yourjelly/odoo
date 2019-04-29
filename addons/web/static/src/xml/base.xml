@@ -1649,4 +1649,10 @@
     </button>
 </t>
 
+<t t-name="FieldColor">
+    <div>
+        <span class="o_field_color"></span>
+    </div>
+</t>
+
 </templates>
