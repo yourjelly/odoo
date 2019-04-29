@@ -684,8 +684,7 @@ var PivotModel = AbstractModel.extend({
             return self.measurements[key][originIndex][measure];
         });
         if (originIndexes.length > 1) {
-            var variation =  computeVariation(values[0], values[1]);
-            return variation.magnitude;
+            return computeVariation(values[0], values[1]);
         } else {
             return values[0];
         }

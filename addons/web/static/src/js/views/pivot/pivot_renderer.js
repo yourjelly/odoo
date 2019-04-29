@@ -182,22 +182,17 @@ var PivotRenderer = AbstractRenderer.extend({
                 if (measurement.value !== undefined) {
                     var measure = measurement.measure;
                     var measureField = self.state.fields[measure];
-                    var className;
-                    var value;
+                    var $value;
                     if (measurement.originIndexes.length > 1) {
-                        className = 'o_variation';
-                        if (measurement.value > 0) {
-                            className += ' o_positive';
-                        } else if (measurement.value < 0) {
-                            className += ' o_negative';
-                        }
-                        value = field_utils.format.percentage(measurement.value, measureField);
+                        $value = dataComparisonUtils.renderVariation(measurement.value, measureField);
                     } else {
-                        className = 'o_value';
                         var formatType = self.fieldWidgets[measure] || measureTypes[measure];
-                        value = field_utils.format[formatType](measurement.value, measureField);
+                        var formatter = field_utils.format[formatType];
+                        $value = $('<div>')
+                                    .addClass('o_value')
+                                    .html(formatter(measurement.value, measureField));
                     }
-                    $cell.append($('<div>', {class: className}).html(value));
+                    $cell.append($value);
                 } else {
                     $cell.addClass('o_empty');
                 }

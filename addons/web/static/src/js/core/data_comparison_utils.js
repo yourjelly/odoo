@@ -70,33 +70,20 @@ var DateClasses = Class.extend({
  * @param {Number} comparisonValue
  * @returns {Object}
  */
-function computeVariation (value, comparisonValue) {
-    var magnitude;
-    var signClass;
-
-    if (!isNaN(value) && !isNaN(comparisonValue)) {
-        if (comparisonValue === 0) {
-            if (value === 0) {
-                magnitude = 0;
-            } else if (value > 0){
-                magnitude = 1;
-            } else {
-                magnitude = -1;
-            }
-        } else {
-            magnitude = (value - comparisonValue) / Math.abs(comparisonValue);
-        }
-        if (magnitude > 0) {
-            signClass = ' o_positive';
-        } else if (magnitude < 0) {
-            signClass = ' o_negative';
-        } else if (magnitude === 0) {
-            signClass = ' o_null';
-        }
-        return {magnitude: magnitude, signClass: signClass};
-    } else {
-        return {magnitude: NaN};
+function computeVariation(value, comparisonValue) {
+    if (isNaN(value) || isNaN(comparisonValue)) {
+        return NaN;
     }
+    if (comparisonValue === 0) {
+        if (value === 0) {
+            return 0;
+        } else if (value > 0) {
+            return 1;
+        } else {
+            return -1;
+        }
+    }
+    return (value - comparisonValue) / Math.abs(comparisonValue);
 }
 /**
  * @param {Object} variation
@@ -104,16 +91,22 @@ function computeVariation (value, comparisonValue) {
  * @param {Object} options
  * @returns {Object}
  */
-function renderVariation (variation, field, options) {
-    var $variation;
-    if (!isNaN(variation.magnitude)) {
-        $variation = $('<div>', {class: 'o_variation' + variation.signClass}).html(
-            fieldUtils.format.percentage(variation.magnitude, field, options
-        ));
+function renderVariation(variation, field, options) {
+    var className = 'o_variation';
+    var value;
+    if (!isNaN(variation)) {
+        if (variation > 0) {
+            className += ' o_positive';
+        } else if (variation < 0) {
+            className += ' o_negative';
+        } else {
+            className += ' o_null';
+        }
+        value = fieldUtils.format.percentage(variation, field, options);
     } else {
-        $variation = $('<div>', {class: 'o_variation'}).html('-');
+        value = '-';
     }
-    return $variation;
+    return $('<div>', {class: className}).html(value);
 }
 /**
  * @param {JQuery} $node
@@ -125,10 +118,10 @@ function renderVariation (variation, field, options) {
  * @param {Object} options
  * @returns {Object}
  */
-function renderComparison ($node, value, comparisonValue, variation, formatter, field, options) {
+function renderComparison($node, value, comparisonValue, variation, formatter, field, options) {
     var $variation = renderVariation(variation, field, options);
     $node.append($variation);
-    if (!isNaN(variation.magnitude)) {
+    if (!isNaN(variation)) {
         $node.append(
             $('<div>', {class: 'o_comparison'})
             .html(formatter(value, field, options) + ' <span>vs</span> ' + formatter(comparisonValue, field, options))
@@ -139,7 +132,8 @@ function renderComparison ($node, value, comparisonValue, variation, formatter, 
 return {
     computeVariation: computeVariation,
     DateClasses: DateClasses,
-    renderComparison: renderComparison
+    renderComparison: renderComparison,
+    renderVariation: renderVariation,
 };
 
 });
