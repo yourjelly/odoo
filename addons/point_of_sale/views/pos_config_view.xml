@@ -152,12 +152,24 @@
                             <div class="o_setting_right_pane">
                                 <label for="is_posbox" string="IoT Box"/>
                                 <div class="text-muted">
-                                    Connect devices to your PoS (ticket printer, barcode scanner, scale, etc.)
+                                    Connect devices to your PoS (receipt printer, barcode scanner, scale, etc.)
                                 </div>
                                 <div class="content-group" attrs="{'invisible' : [('is_posbox', '=', False)]}">
                                     <div class="row mt16">
                                         <label string="IP Address" for="proxy_ip" class="col-lg-3 o_light_label"/>
                                         <field name="proxy_ip"/>
+                                    </div>
+                                    <div class="row">
+                                        <label string="Receipt Printer" for="iface_print_via_proxy" class="col-lg-3 o_light_label"/>
+                                        <field name="iface_print_via_proxy"/>
+                                    </div>
+                                    <div class="row" attrs="{'invisible': [('iface_print_via_proxy', '=', False)]}">
+                                        <label string="Cashdrawer" for="iface_cashdrawer" class="col-lg-3 o_light_label"/>
+                                        <field name="iface_cashdrawer"/>
+                                    </div>
+                                    <div class="row">
+                                        <label string="Customer Display" for="iface_customer_facing_display" class="col-lg-3 o_light_label"/>
+                                        <field name="iface_customer_facing_display"/>
                                     </div>
                                     <div class="row">
                                         <label string="Barcode Scanner" for="iface_scan_via_proxy" class="col-lg-3 o_light_label"/>
@@ -166,18 +178,6 @@
                                     <div class="row">
                                         <label string="Electronic Scale" for="iface_electronic_scale" class="col-lg-3 o_light_label"/>
                                         <field name="iface_electronic_scale"/>
-                                    </div>
-                                    <div class="row">
-                                        <label string="Cashdrawer" for="iface_cashdrawer" class="col-lg-3 o_light_label"/>
-                                        <field name="iface_cashdrawer"/>
-                                    </div>
-                                    <div class="row">
-                                        <label string="Receipt Printer" for="iface_print_via_proxy" class="col-lg-3 o_light_label"/>
-                                        <field name="iface_print_via_proxy"/>
-                                    </div>
-                                    <div class="row">
-                                        <label string="Customer Display" for="iface_customer_facing_display" class="col-lg-3 o_light_label"/>
-                                        <field name="iface_customer_facing_display"/>
                                     </div>
                                     <field name="customer_facing_display_html" invisible="1"/>
                                     <div class="text-muted" attrs="{'invisible' : ['|', ('iface_customer_facing_display', '=', False), '&amp;', ('id', '!=', False), ('customer_facing_display_html', '!=', '')]}">Save this configuration to see and edit the customer display</div>
