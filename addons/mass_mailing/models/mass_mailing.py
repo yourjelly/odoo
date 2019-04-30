@@ -979,9 +979,7 @@ class MassMailing(models.Model):
             if not res_ids:
                 raise UserError(_('There is no recipients selected.'))
 
-            # Convert links in absolute URLs before the application of the shortener
-            mailing.body_html = self.env['mail.thread']._replace_local_links(mailing.body_html)
-            body_html = mailing.convert_links()[mailing.id]
+            body_html = mailing.body_html
             body = etree.HTML(body_html)
             table = body.xpath("//table[@class='o_mail_wrapper']")
             if table:
