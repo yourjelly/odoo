@@ -55,7 +55,7 @@
             <field name="model">ir.translation</field>
             <field name="arch" type="xml">
                 <tree string="Translations" editable="top">
-                    <field name="source"/>
+                    <field name="source" attrs="{'readonly':[('type', '!=', 'model')]}"/>
                     <field name="value"/>
                     <field name="name"/>
                     <field name="lang"/>
