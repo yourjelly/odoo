@@ -82,6 +82,23 @@ var PivotModel = AbstractModel.extend({
     expandAll: function () {
         return this._loadData();
     },
+    expandGroup: function (group, groupBy) {
+        var leftDivisors;
+        var rightDivisors;
+
+        if (group.type === 'row') {
+            leftDivisors = [[groupBy]];
+            rightDivisors = sections(this.data.colGroupBys);
+        } else {
+            leftDivisors = sections(this.data.rowGroupBys);
+            rightDivisors = [[groupBy]];
+        }
+        var divisors = cartesian(leftDivisors, rightDivisors);
+
+        delete group.type;
+        return this._subdivideGroup(group, divisors);
+
+    },
     exportData: function () {
         var measureCount = this.data.measures.length;
         var originCount = this.data.origins.length;
@@ -340,7 +357,7 @@ var PivotModel = AbstractModel.extend({
      *
      * @param {Object} sortedColumn
      */
-    sortTree: function (sortedColumn) {
+    sortRows: function (sortedColumn) {
         var self = this;
         var colGroupValues = sortedColumn.groupId[1];
         sortedColumn.originIndexes = sortedColumn.originIndexes || [0];
@@ -360,42 +377,6 @@ var PivotModel = AbstractModel.extend({
         };
 
         this._sortTree(sortFunction, this.rowGroupTree);
-    },
-    /**
-     * Expand (open up) a given group, be it a row or a column.
-     *
-     * @todo: add discussion on the number of read_group that it will generate,
-     * which is (r+1) or (c+1) I think
-     *
-     * @param {any} group
-     * @param {any} divisors
-     * @returns
-     */
-    subdivideGroup: function (group, divisors) {
-        var self = this;
-
-        var key = JSON.stringify([group.rowValues, group.colValues]);
-
-        var proms = this.data.origins.reduce(
-            function (acc, origin, originIndex) {
-                // if no information on group content is available, we fetch data.
-                // if group is known to be empty for the given origin,
-                // we don't need to fetch data fot that origin.
-                if (!self.counts[key] || self.counts[key][originIndex] > 0) {
-                    var subGroup = {rowValues: group.rowValues, colValues: group.colValues, originIndex: originIndex};
-                    divisors.forEach(function (divisor) {
-                        acc.push(self._getGroupSubdivision(subGroup, divisor[0], divisor[1]));
-                    });
-                }
-                return acc;
-            },
-            []
-        );
-        return this._loadDataDropPrevious.add(Promise.all(proms)).then(function (groupSubdivisions) {
-            if (groupSubdivisions.length) {
-                self._prepareData(group, groupSubdivisions);
-            }
-        });
     },
     /**
      * Toggle the active state for a given measure, then reload the data.
@@ -606,8 +587,8 @@ var PivotModel = AbstractModel.extend({
         var rightDivisors = sections(this.data.colGroupBys);
         var divisors = cartesian(leftDivisors, rightDivisors);
 
-        return this.subdivideGroup(group, divisors.slice(0, 1)).then(function () {
-            return self.subdivideGroup(group, divisors.slice(1)).then(function () {
+        return this._subdivideGroup(group, divisors.slice(0, 1)).then(function () {
+            return self._subdivideGroup(group, divisors.slice(1)).then(function () {
                 self.hasData = self.counts[JSON.stringify([[],[]])].some(function (count) {
                     return count > 0;
                 });
@@ -671,7 +652,7 @@ var PivotModel = AbstractModel.extend({
         });
 
         if (this.data.sortedColumn) {
-            this.sortTree(this.data.sortedColumn, rowSubTree);
+            this.sortRows(this.data.sortedColumn, rowSubTree);
         }
     },
     /**
@@ -743,6 +724,42 @@ var PivotModel = AbstractModel.extend({
             return value[0];
         }
         return value;
+    },
+    /**
+     * Expand (open up) a given group, be it a row or a column.
+     *
+     * @todo: add discussion on the number of read_group that it will generate,
+     * which is (r+1) or (c+1) I think
+     *
+     * @param {any} group
+     * @param {any} divisors
+     * @returns
+     */
+    _subdivideGroup: function (group, divisors) {
+        var self = this;
+
+        var key = JSON.stringify([group.rowValues, group.colValues]);
+
+        var proms = this.data.origins.reduce(
+            function (acc, origin, originIndex) {
+                // if no information on group content is available, we fetch data.
+                // if group is known to be empty for the given origin,
+                // we don't need to fetch data fot that origin.
+                if (!self.counts[key] || self.counts[key][originIndex] > 0) {
+                    var subGroup = {rowValues: group.rowValues, colValues: group.colValues, originIndex: originIndex};
+                    divisors.forEach(function (divisor) {
+                        acc.push(self._getGroupSubdivision(subGroup, divisor[0], divisor[1]));
+                    });
+                }
+                return acc;
+            },
+            []
+        );
+        return this._loadDataDropPrevious.add(Promise.all(proms)).then(function (groupSubdivisions) {
+            if (groupSubdivisions.length) {
+                self._prepareData(group, groupSubdivisions);
+            }
+        });
     },
     _sortTree: function (sortFunction, tree) {
         var self = this;
