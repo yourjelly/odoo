@@ -2199,5 +2199,30 @@ QUnit.module('Views', {
         unpatchDate();
         pivot.destroy();
     });
+    QUnit.test('correctly compute group domain when a date field has false value', async function (assert) {
+        assert.expect(1);
+
+        this.data.partner.records.forEach(r => r.date = false);
+
+        var unpatchDate = patchDate(2016, 11, 20, 1, 0, 0);
+        var pivot = await createView({
+            View: PivotView,
+            model: 'partner',
+            data: this.data,
+            arch: '<pivot o_enable_linking="1">' +
+                    '<field name="date" interval="day" type="row"/>' +
+                '</pivot>',
+            intercepts: {
+                do_action: function (ev) {
+                    assert.deepEqual(ev.data.action.domain, [['date', '=', false]]);
+                },
+            },
+        });
+
+        await testUtils.dom.click($('td').eq(1));
+
+        unpatchDate();
+        pivot.destroy();
+    });
 });
 });
