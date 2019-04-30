@@ -343,23 +343,18 @@ var PivotModel = AbstractModel.extend({
      * Sort the rows, depending on the values of a given column.  This is an
      * in-memory sort.
      *
-     * @param {any} col_id
-     * @param {any} measure
-     * @param {any} descending
-     * @param {'data'|'comparisonData'|'variation'} [dataType]
+     * @param {Object} sortedColumn
      */
-    sortTree: function (sortedColumn, tree) {
+    sortTree: function (sortedColumn) {
         var self = this;
-
-        tree = tree || this.rowGroupTree;
+        var colGroupValues = sortedColumn.groupId[1];
         sortedColumn.originIndexes = sortedColumn.originIndexes || [0];
-
-        var colGroupId = sortedColumn.groupId;
+        this.data.sortedColumn = sortedColumn;
 
         var sortFunction = function (tree) {
             return function (subTreeKey) {
                 var subTree = tree.directSubTrees[subTreeKey];
-                var groupIntersectionId = [subTree.root.values, colGroupId[1]];
+                var groupIntersectionId = [subTree.root.values, colGroupValues];
                 var value = self._getCellValue(
                     groupIntersectionId,
                     sortedColumn.measure,
@@ -369,9 +364,7 @@ var PivotModel = AbstractModel.extend({
             };
         };
 
-        this._sortTree(sortFunction, tree);
-
-        this.data.sortedColumn = sortedColumn;
+        this._sortTree(sortFunction, this.rowGroupTree);
     },
     /**
      * Expand (open up) a given group, be it a row or a column.

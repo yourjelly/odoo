@@ -31,9 +31,10 @@ var PivotController = AbstractController.extend({
         'click .o_pivot_header_cell_closed': '_onClosedHeaderClick',
         'click .o_pivot_field_menu a': '_onFieldMenuSelection',
         'click td.o_pivot_cell_value': '_onCellValueClick',
-        'click .o_pivot_measure_row': '_onMeasureRowClick',
-        'click .o_pivot_origin_row': '_onOriginsRowClick',
     },
+    custom_events: _.extend({}, AbstractController.prototype.custom_events,{
+        'sort_tree': '_onSortTree',
+    }),
     /**
      * @override
      * @param {Object} params
@@ -215,6 +216,8 @@ var PivotController = AbstractController.extend({
         this.$buttons.find('.o_pivot_download').prop('disabled', noDataDisplayed);
     },
 
+
+
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
@@ -263,7 +266,7 @@ var PivotController = AbstractController.extend({
         if ($target.hasClass('o_empty') || !this.enableLinking) {
             return;
         }
-        var state = this.model.get(this.handle);
+        var state = this.model.get(this.handle, {raw: true});
         var context = _.omit(state.context, function (val, key) {
             return key === 'group_by' || _.str.startsWith(key, 'search_default_');
         });
@@ -363,42 +366,6 @@ var PivotController = AbstractController.extend({
             .then(this.update.bind(this, {}, {reload: false}));
     },
     /**
-     * If the user clicks on a measure row, we can perform an in-memory sort
-     *
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onMeasureRowClick: function (ev) {
-        var $target = $(ev.target);
-        var groupId = $target.data('groupId');
-        var measure = $target.data('measure');
-        var isAscending = $target.hasClass('o_pivot_sort_order_asc');
-        var order = isAscending ? 'desc' : 'asc';
-        var sortedColumn = {
-            groupId: groupId,
-            measure: measure,
-            order: order,
-        };
-        this.model.sortTree(sortedColumn);
-        this.update({}, {reload: false});
-    },
-    _onOriginsRowClick: function (ev) {
-        var $target = $(ev.target);
-        var groupId = $target.data('groupId');
-        var measure = $target.data('measure');
-        var originIndexes = $target.data('originIndexes');
-        var isAscending = $target.hasClass('o_pivot_sort_order_asc');
-        var order = isAscending ? 'desc' : 'asc';
-        var sortedColumn = {
-            groupId: groupId,
-            measure: measure,
-            order: order,
-            originIndexes: originIndexes
-        };
-        this.model.sortTree(sortedColumn);
-        this.update({}, {reload: false});
-    },
-    /**
      * This method is called when someone clicks on an open header.  When that
      * happens, we want to close the header, then redisplay the view.
      *
@@ -416,6 +383,10 @@ var PivotController = AbstractController.extend({
         this.model.closeGroup(groupId, type);
         this.update({}, {reload: false});
     },
+    _onSortTree: function (ev) {
+        this.model.sortTree(ev.data.sortedColumn);
+        this.update({}, {reload: false});
+    }
 });
 
 return PivotController;

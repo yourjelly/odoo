@@ -14,6 +14,8 @@ var PivotRenderer = AbstractRenderer.extend({
     className: 'table-hover table-sm table-bordered',
     events: _.extend({}, AbstractRenderer.prototype.events, {
         'hover td': '_onTdHover',
+        'click .o_pivot_measure_row': '_onSpecialRowClick',
+        'click .o_pivot_origin_row': '_onSpecialRowClick',
     }),
 
     /**
@@ -206,6 +208,32 @@ var PivotRenderer = AbstractRenderer.extend({
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
+
+    /**
+     * If the user clicks on a measure row, we can perform an in-memory sort
+     *
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onSpecialRowClick: function (ev) {
+        var $target = $(ev.target);
+        var groupId = $target.data('groupId');
+        var measure = $target.data('measure');
+        var originIndexes = $target.data('originIndexes');
+        var isAscending = $target.hasClass('o_pivot_sort_order_asc');
+        var order = isAscending ? 'desc' : 'asc';
+        this.trigger_up(
+            'sort_tree',
+            {
+                sortedColumn: {
+                    groupId: groupId,
+                    measure: measure,
+                    order: order,
+                    originIndexes: originIndexes,
+                }
+            }
+        );
+    },
 
     // Did not work. We should make it work again!
     /**
