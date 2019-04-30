@@ -541,7 +541,7 @@ def decode_message_header(message, header, separator=' '):
     return separator.join(decode_smtp_header(h) for h in message.get_all(header, []) if h)
 
 
-def name_email_superuser(partner_id, env=None, res_model=None, res_id=None):
+def _name_email_superuser(partner_id, env=None, res_model=None, res_id=None):
     env = env or partner_id.env
     super_user = env['res.users'].browse(SUPERUSER_ID)
     if partner_id == super_user.partner_id:
@@ -554,9 +554,9 @@ def name_email_superuser(partner_id, env=None, res_model=None, res_id=None):
             # last resort fallback
             company = env.ref('base.main_company')
 
-        return format_name % (partner_id.name, company.name), (company.email or company.catchall)
-    return partner_id.name, partner_id.email
+        return format_name % (partner_id.name or u"False", company.name), (company.email or company.catchall or u"False")
+    return partner_id.name or u"False", partner_id.email or u"False"
 
 
 def format_address_superuser(partner_id, env=None, res_model=None, res_id=None):
-    return formataddr(name_email_superuser(partner_id, env, res_model, res_id))
+    return formataddr(_name_email_superuser(partner_id, env, res_model, res_id))
