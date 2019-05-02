@@ -68,7 +68,7 @@ var DateClasses = Class.extend({
 /**
  * @param {Number} value
  * @param {Number} comparisonValue
- * @returns {Object}
+ * @returns {Number}
  */
 function computeVariation(value, comparisonValue) {
     if (isNaN(value) || isNaN(comparisonValue)) {
@@ -86,7 +86,7 @@ function computeVariation(value, comparisonValue) {
     return (value - comparisonValue) / Math.abs(comparisonValue);
 }
 /**
- * @param {Object} variation
+ * @param {Number} variation
  * @param {Object} field
  * @param {Object} options
  * @returns {Object}
@@ -112,7 +112,7 @@ function renderVariation(variation, field, options) {
  * @param {JQuery} $node
  * @param {Number} value
  * @param {Number} comparisonValue
- * @param {Object} variation (with key 'magnitude' and 'signClass')
+ * @param {Number} variation
  * @param {function} formatter
  * @param {Object} field
  * @param {Object} options
