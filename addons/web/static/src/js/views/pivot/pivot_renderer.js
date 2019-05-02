@@ -94,7 +94,7 @@ var PivotRenderer = AbstractRenderer.extend({
         // groupbyLabels is the list of col groupby fields label
         var groupbyLabels = this._getGroupByLabels(this.state.colGroupBys);
 
-        this.state.headers.forEach(function (row, rowIndex) {
+        this.state.table.headers.forEach(function (row, rowIndex) {
             var $tr = $('<tr>');
             row.forEach(function (cell) {
                 var $cell = $('<th>').text(cell.title)
@@ -161,7 +161,7 @@ var PivotRenderer = AbstractRenderer.extend({
         // groupbyLabels is the list of row groupby fields label
         var groupbyLabels = this._getGroupByLabels(this.state.rowGroupBys);
 
-        this.state.rows.forEach(function (row) {
+        this.state.table.rows.forEach(function (row) {
             var $tr = $('<tr>');
             var paddingLeft = 5 + row.indent * self.paddingLeftHeaderTabWidth;
             $tr.append($('<th>')

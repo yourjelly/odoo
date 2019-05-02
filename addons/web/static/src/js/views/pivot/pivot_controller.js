@@ -158,14 +158,18 @@ var PivotController = AbstractController.extend({
      * @param {number} left left coordinate for the menu
      */
     _renderFieldSelection: function (top, left) {
-        var state = this.model.get();
+        var state = this.model.get({raw: true});
         var groupedFields = state.rowGroupBys
             .concat(state.colGroupBys)
-            .map(function (f) { return f.split(':')[0];});
+            .map(function (f) {
+                return f.split(':')[0];
+            });
 
         var fields = _.chain(this.groupableFields)
             .pairs()
-            .sortBy(function (f) { return f[1].string; })
+            .sortBy(function (f) {
+                return f[1].string;
+            })
             .map(function (f) {
                 return [f[0], f[1], _.contains(groupedFields, f[0])];
             })
@@ -204,7 +208,7 @@ var PivotController = AbstractController.extend({
             return;
         }
         var self = this;
-        var state = this.model.get();
+        var state = this.model.get({raw: true});
         _.each(this.measures, function (measure, name) {
             var isSelected = _.contains(state.measures, name);
             self.$buttons.find('.dropdown-item[data-field="' + name + '"]')

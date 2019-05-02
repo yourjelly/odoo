@@ -86,9 +86,10 @@ var PivotModel = AbstractModel.extend({
         var measureCount = this.data.measures.length;
         var originCount = this.data.origins.length;
 
-        var headers = this.data.headers;
+        var table = this._getTable();
 
         // process headers
+        var headers = table.headers;
         var colGroupHeaderRows;
         var measureRow = [];
         var originRow = [];
@@ -121,10 +122,8 @@ var PivotModel = AbstractModel.extend({
             return headerRow.map(processHeader);
         });
 
-        var rows = this.data.rows;
-
         // process rows
-        var tableRows = rows.map(function (row) {
+        var tableRows = table.rows.map(function (row) {
             return {
                 title: row.title,
                 indent: row.indent,
@@ -172,7 +171,7 @@ var PivotModel = AbstractModel.extend({
         this.data.colGroupBys = temp;
 
         var self = this;
-        function twistKey (key) {
+        function twistKey(key) {
             return JSON.stringify(JSON.parse(key).reverse());
         }
 
@@ -215,11 +214,7 @@ var PivotModel = AbstractModel.extend({
             });
         }
         if (!raw) {
-            this._computeColHeaders();
-            // need to be after _computeColHeaders
-            this._computeRows();
-            state.headers= this.data.headers;
-            state.rows = this.data.rows;
+            state.table = this._getTable();
         }
 
         return state;
@@ -318,7 +313,7 @@ var PivotModel = AbstractModel.extend({
 
         this.data.domains = this._getDomains();
         this.data.origins = this._getOrigins();
-        this.data.rowGroupBys =  !_.isEmpty(this.data.groupedBy) ? this.data.groupedBy : this.initialRowGroupBys;
+        this.data.rowGroupBys = !_.isEmpty(this.data.groupedBy) ? this.data.groupedBy : this.initialRowGroupBys;
 
         if (!this.data.hasData) {
             return this._loadData();
@@ -424,38 +419,6 @@ var PivotModel = AbstractModel.extend({
     // Private
     //--------------------------------------------------------------------------
 
-    _addColGroupHeaders: function (tree, measureCount, originCount) {
-        var self = this;
-
-        var group = tree.root;
-        var rowIndex = group.values.length;
-        var row  = self.data.headers[rowIndex];
-
-        var groupId = [[], group.values];
-
-        var isLeaf = _.isEmpty(tree.directSubTrees);
-        var title = group.labels[group.labels.length - 1] || _t('Total');
-        var width = tree.leafCount * measureCount * (2 * originCount - 1);
-        var height = !isLeaf ? 1 : self.colGroupTree.height - rowIndex;
-
-        var header = {
-            title: title,
-            width: width,
-            height: height,
-            groupId: groupId,
-            isLeaf: isLeaf,
-        };
-
-        row.push(header);
-
-        if (isLeaf) {
-            self._addMeasureHeaders(groupId);
-        }
-
-        _.values(tree.directSubTrees).forEach(function (subTree) {
-            self._addColGroupHeaders(subTree, measureCount, originCount);
-        });
-    },
     _addGroup: function (groupTree, labels, values) {
         // this seems necessary. Else groupTree would be modified in the forEach!
         var tree = groupTree;
@@ -471,195 +434,8 @@ var PivotModel = AbstractModel.extend({
             directSubTrees: {},
         };
     },
-    _addMeasureHeaders: function (groupId) {
-        var self = this;
-        var originCount = this.data.origins.length;
-        var sortedColumn = this.data.sortedColumn || {};
-        var measureRowIndex = self.data.headers.length - 1 - (originCount > 1 ? 1 : 0);
-        var measureRow = self.data.headers[measureRowIndex];
-
-        self.data.measures.forEach(function (measure) {
-            var measureHeader = {
-                title: self.fields[measure].string,
-                measure: measure,
-                groupId: groupId,
-                width: 2 * originCount - 1,
-                height: 1,
-            };
-            if (sortedColumn.measure === measure &&
-                _.isEqual(sortedColumn.groupId, groupId)) {
-
-                measureHeader.order = sortedColumn.order;
-            }
-            measureRow.push(measureHeader);
-            if (originCount > 1) {
-                self._addOriginHeaders(groupId, measure);
-            }
-        });
-    },
-    _addOriginHeaders: function (groupId, measure) {
-        var self = this;
-        var sortedColumn = this.data.sortedColumn || {};
-        var originRowIndex = self.data.headers.length - 1;
-        var originRow = self.data.headers[originRowIndex];
-
-        this.data.origins.forEach(function (origin, originIndex) {
-            var originHeader = {
-                title: origin,
-                originIndexes: [originIndex],
-                groupId: groupId,
-                measure: measure,
-                width: 1,
-                height: 1
-            };
-            if (sortedColumn.measure === measure &&
-                _.isEqual(sortedColumn.groupId, groupId) &&
-                !sortedColumn.originIndexes[1] &&
-                sortedColumn.originIndexes[0] === originIndex) {
-
-                originHeader.order = sortedColumn.order;
-            }
-            originRow.push(originHeader);
-
-            if (originIndex > 0) {
-                var variationHeader = {
-                    title: _t('Variation'),
-                    originIndexes: [originIndex - 1, originIndex],
-                    groupId: groupId,
-                    measure: measure,
-                    width: 1,
-                    height: 1,
-                };
-                if (sortedColumn.measure === measure &&
-                    _.isEqual(sortedColumn.groupId, groupId) &&
-                    sortedColumn.originIndexes[1] &&
-                    sortedColumn.originIndexes[1] === originIndex) {
-
-                    variationHeader.order = sortedColumn.order;
-                }
-                originRow.push(variationHeader);
-            }
-        });
-    },
-    _addRowGroupRows: function (tree) {
-        var self = this;
-
-        var group = tree.root;
-
-        var rowGroupId = [group.values, []];
-        var title = group.labels[group.labels.length - 1] || _t('Total');
-        var indent = group.labels.length;
-        var isLeaf = _.isEmpty(tree.directSubTrees);
-
-        var columnHeaders = this.data.headers[this.data.headers.length - 1];
-
-        var subGroupMeasurements = columnHeaders.map(function (header) {
-            var colGroupId = header.groupId;
-            var groupIntersectionId  = [rowGroupId[0], colGroupId[1]];
-            var measure = header.measure;
-            var originIndexes = header.originIndexes || [0];
-
-            var value = self._getCellValue(
-                groupIntersectionId,
-                measure,
-                originIndexes
-            );
-
-            var measurement = {
-                groupId: groupIntersectionId,
-                originIndexes: originIndexes,
-                measure: measure,
-                value: value,
-                isBold: !groupIntersectionId[0].length || !groupIntersectionId[1].length,
-            };
-            return measurement;
-        });
-
-        var header = {
-            title: title,
-            groupId: rowGroupId,
-            indent: indent,
-            isLeaf: isLeaf,
-            subGroupMeasurements: subGroupMeasurements
-        };
-        this.data.rows.push(header);
-
-        var subTreeKeys = tree.sortedKeys || Object.keys(tree.directSubTrees);
-        subTreeKeys.forEach(function (subTreeKey) {
-            var subTree = tree.directSubTrees[subTreeKey];
-            self._addRowGroupRows(subTree);
-        });
-    },
-    _computeColHeaders: function () {
-
-        this._computeTreeDimension(this.colGroupTree);
-
-        var height = this.colGroupTree.height;
-        var leafCount = this.colGroupTree.leafCount;
-        var measureCount = this.data.measures.length;
-        var originCount = this.data.origins.length;
-        var rowCount = height + 1 + (originCount > 1 ? 1 : 0);
-
-        // index heigth corresponds to the measures headers.
-        // index heigth + 1 corresponds to origins/variation headers.
-        this.data.headers = (new Array(rowCount)).fill(0).map(function () {
-            return [];
-        });
-
-        this.data.headers[0].push({
-            title: "",
-            width: 1,
-            height: rowCount,
-        });
-
-        this._addColGroupHeaders(this.colGroupTree, measureCount, originCount);
-
-        // We want to represent the group 'Total' if there is more that one leaf.
-        if (leafCount > 1) {
-            var groupId = [[],[]];
-
-            this.data.headers[0].push({
-                title: "",
-                groupId: groupId,
-                width: measureCount * (2 * originCount - 1),
-                height: height,
-            });
-
-            this._addMeasureHeaders(groupId);
-        }
-
-        return this.data.headers;
-    },
     _computeRowGroupBys: function () {
         return !_.isEmpty(this.data.groupedBy) ? this.data.groupedBy : this.initialRowGroupBys;
-    },
-    _computeRows: function () {
-        this.data.rows = [];
-        this._addRowGroupRows(this.rowGroupTree);
-    },
-    _computeTreeDimension: function (tree) {
-        if (_.isEmpty(tree.directSubTrees)) {
-            tree.height = 1;
-            tree.leafCount = 1;
-            return;
-        }
-
-        var self = this;
-        var dimension = _.values(tree.directSubTrees).reduce(
-            function (acc, subTree) {
-                self._computeTreeDimension(subTree);
-                return {
-                    height: Math.max(acc.height, subTree.height),
-                    leafCount: acc.leafCount + subTree.leafCount,
-                };
-            },
-            {
-                height: 1,
-                leafCount: 0
-            }
-        );
-        tree.height = dimension.height + 1;
-        tree.leafCount = dimension.leafCount;
     },
     _findGroup: function (groupTree, values) {
         var tree = groupTree;
@@ -974,6 +750,267 @@ var PivotModel = AbstractModel.extend({
         _.values(tree.directSubTrees).forEach(function (subTree) {
             self._sortTree(sortFunction, subTree);
         });
+    },
+
+
+    /**
+     * Returns a description of the pivot table.
+     *
+     * @private
+     * @returns {Object}
+     */
+    _getTable: function () {
+        var headers = this._getTableHeaders();
+        return {
+            headers: headers,
+            rows: this._getTableRows(this.rowGroupTree, headers[headers.length - 1]),
+        };
+    },
+    /**
+     * Returns the leaf counts of each group inside the given tree.
+     *
+     * @private
+     * @param {Object} tree
+     * @returns {Object} keys are group ids
+     */
+    _getLeafCounts: function (tree) {
+        var self = this;
+        var leafCounts = {};
+        var leafCount;
+        if (_.isEmpty(tree.directSubTrees)) {
+            leafCount = 1;
+        } else {
+            leafCount = _.values(tree.directSubTrees).reduce(
+                function (acc, subTree) {
+                    var subLeafCounts = self._getLeafCounts(subTree);
+                    _.extend(leafCounts, subLeafCounts);
+                    return acc + leafCounts[JSON.stringify(subTree.root.values)];
+                },
+                0
+            );
+        }
+
+        leafCounts[JSON.stringify(tree.root.values)] = leafCount;
+        return leafCounts;
+    },
+    /**
+     * Returns the list of header rows of the pivot table: the col group rows
+     * (depending on the col groupbys), the measures row and optionnaly the
+     * origins row (if there are more than one origins).
+     *
+     * @private
+     * @returns {Object[]}
+     */
+    _getTableHeaders: function () {
+        var self = this;
+        var height = this.data.colGroupBys.length + 1;
+        var measureCount = this.data.measures.length;
+        var originCount = this.data.origins.length;
+        var leafCounts = this._getLeafCounts(this.colGroupTree);
+        var headers = [];
+
+        // 1) generate col group rows (total row + one row for each col groupby)
+        var colGroupRows = (new Array(height)).fill(0).map(function () {
+            return [];
+        });
+        // blank top left cell
+        colGroupRows[0].push({
+            height: height + 1 + (originCount > 1 ? 1 : 0), // + measures rows [+ origins row]
+            title: "",
+            width: 1,
+        });
+        // col groupby cells with group values
+        /**
+         * Recursive function that generates the header cells corresponding to
+         * the groups of a given tree.
+         *
+         * @param {Object} tree
+         */
+        function generateTreeHeaders(tree) {
+            var group = tree.root;
+            var rowIndex = group.values.length;
+            var row = colGroupRows[rowIndex];
+            var groupId = [[], group.values];
+            var isLeaf = _.isEmpty(tree.directSubTrees);
+            var leafCount = leafCounts[JSON.stringify(tree.root.values)];
+
+            row.push({
+                groupId: groupId,
+                height: isLeaf ? (self.data.colGroupBys.length + 1 - rowIndex) : 1,
+                isLeaf: isLeaf,
+                title: group.labels[group.labels.length - 1] || _t('Total'),
+                width: leafCount * measureCount * (2 * originCount - 1),
+            });
+
+            _.values(tree.directSubTrees).forEach(function (subTree) {
+                generateTreeHeaders(subTree);
+            });
+        }
+        generateTreeHeaders(this.colGroupTree);
+        // blank top right cell for 'Total' group (if there is more that one leaf)
+        if (leafCounts[JSON.stringify(this.colGroupTree.root.values)] > 1) {
+            var groupId = [[], []];
+            colGroupRows[0].push({
+                groupId: groupId,
+                height: height,
+                title: "",
+                width: measureCount * (2 * originCount - 1),
+            });
+        }
+        headers = headers.concat(colGroupRows);
+
+        // 2) generate measures row
+        var columns = [];
+        if (colGroupRows.length === 1) {
+            columns = colGroupRows[0].slice(1);
+        } else {
+            columns = colGroupRows[colGroupRows.length - 1].concat(colGroupRows[0].slice(2));
+        }
+        var measuresRow = this._getMeasuresRow(columns);
+        headers.push(measuresRow);
+
+        // 3) generate origins row if more than one origin
+        if (originCount > 1) {
+            var originsRow = this._getOriginsRow(measuresRow);
+            headers.push(originsRow);
+        }
+
+        return headers;
+    },
+    /**
+     * Returns a description of the measures row of the pivot table
+     *
+     * @param {Object[]} columns for which measure cells must be generated
+     * @returns {Object[]}
+     */
+    _getMeasuresRow: function (columns) {
+        var self = this;
+        var sortedColumn = this.data.sortedColumn || {};
+        var measureRow = [];
+
+        columns.forEach(function (column) {
+            self.data.measures.forEach(function (measure) {
+                var measureCell = {
+                    groupId: column.groupId,
+                    height: 1,
+                    measure: measure,
+                    title: self.fields[measure].string,
+                    width: 2 * self.data.origins.length - 1,
+                };
+                if (sortedColumn.measure === measure &&
+                    _.isEqual(sortedColumn.groupId, column.groupId)) {
+                    measureCell.order = sortedColumn.order;
+                }
+                measureRow.push(measureCell);
+            });
+        });
+
+        return measureRow;
+    },
+    /**
+     * Returns a description of the origins row of the pivot table
+     *
+     * @param {Object[]} columns for which origin cells must be generated
+     * @returns {Object[]}
+     */
+    _getOriginsRow: function (columns) {
+        var self = this;
+        var sortedColumn = this.data.sortedColumn || {};
+        var originRow = [];
+
+        columns.forEach(function (column) {
+            var groupId = column.groupId;
+            var measure = column.measure;
+            var isSorted = sortedColumn.measure === measure &&
+                           _.isEqual(sortedColumn.groupId, groupId);
+            var isSortedByOrigin = isSorted && !sortedColumn.originIndexes[1];
+            var isSortedByVariation = isSorted && sortedColumn.originIndexes[1];
+
+            self.data.origins.forEach(function (origin, originIndex) {
+                var originCell = {
+                    groupId: groupId,
+                    height: 1,
+                    measure: measure,
+                    originIndexes: [originIndex],
+                    title: origin,
+                    width: 1,
+                };
+                if (isSortedByOrigin && sortedColumn.originIndexes[0] === originIndex) {
+                    originCell.order = sortedColumn.order;
+                }
+                originRow.push(originCell);
+
+                if (originIndex > 0) {
+                    var variationCell = {
+                        groupId: groupId,
+                        height: 1,
+                        measure: measure,
+                        originIndexes: [originIndex - 1, originIndex],
+                        title: _t('Variation'),
+                        width: 1,
+                    };
+                    if (isSortedByVariation && sortedColumn.originIndexes[1] === originIndex) {
+                        variationCell.order = sortedColumn.order;
+                    }
+                    originRow.push(variationCell);
+                }
+
+            });
+        });
+
+        return originRow;
+    },
+    /**
+     * Returns the list of body rows of the pivot table for a given tree.
+     *
+     * @private
+     * @param {Object} tree
+     * @param {Object[]} columns
+     * @returns {Object[]}
+     */
+    _getTableRows: function (tree, columns) {
+        var self = this;
+
+        var rows = [];
+        var group = tree.root;
+        var rowGroupId = [group.values, []];
+        var title = group.labels[group.labels.length - 1] || _t('Total');
+        var indent = group.labels.length;
+        var isLeaf = _.isEmpty(tree.directSubTrees);
+
+        var subGroupMeasurements = columns.map(function (column) {
+            var colGroupId = column.groupId;
+            var groupIntersectionId = [rowGroupId[0], colGroupId[1]];
+            var measure = column.measure;
+            var originIndexes = column.originIndexes || [0];
+
+            var value = self._getCellValue(groupIntersectionId, measure, originIndexes);
+
+            var measurement = {
+                groupId: groupIntersectionId,
+                originIndexes: originIndexes,
+                measure: measure,
+                value: value,
+                isBold: !groupIntersectionId[0].length || !groupIntersectionId[1].length,
+            };
+            return measurement;
+        });
+
+        rows.push({
+            title: title,
+            groupId: rowGroupId,
+            indent: indent,
+            isLeaf: isLeaf,
+            subGroupMeasurements: subGroupMeasurements
+        });
+
+        var subTreeKeys = tree.sortedKeys || Object.keys(tree.directSubTrees);
+        subTreeKeys.forEach(function (subTreeKey) {
+            var subTree = tree.directSubTrees[subTreeKey];
+            rows = rows.concat(self._getTableRows(subTree, columns));
+        });
+
+        return rows;
     },
 });
 
