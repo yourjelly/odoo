@@ -316,6 +316,45 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
+    QUnit.test('row and column are highlighted when hovering a cell', async function (assert) {
+        assert.expect(11);
+
+        var pivot = await createView({
+            View: PivotView,
+            model: "partner",
+            data: this.data,
+            arch: '<pivot string="Partners">' +
+                        '<field name="foo" type="col"/>' +
+                        '<field name="product_id" type="row"/>' +
+                '</pivot>',
+        });
+
+        // check row highlighting
+        assert.hasClass(pivot.$('table'), 'table-hover',
+            "with className 'table-hover', rows are highlighted (bootstrap)");
+
+        // check column highlighting
+        // hover third measure
+        await testUtils.dom.triggerEvents(pivot.$('th.o_pivot_measure_row:nth(2)'), 'mouseenter');
+        assert.containsN(pivot, '.o_cell_hover', 3);
+        for (var i = 0; i < 3; i++) {
+            assert.hasClass(pivot.$('tbody tr:nth(' + i + ') td:nth(2)'), 'o_cell_hover');
+        }
+        await testUtils.dom.triggerEvents(pivot.$('th.o_pivot_measure_row:nth(2)'), 'mouseleave');
+        assert.containsNone(pivot, '.o_cell_hover');
+
+        // hover second cell, second row
+        await testUtils.dom.triggerEvents(pivot.$('tbody tr:nth(1) td:nth(1)'), 'mouseenter');
+        assert.containsN(pivot, '.o_cell_hover', 3);
+        for (i = 0; i < 3; i++) {
+            assert.hasClass(pivot.$('tbody tr:nth(' + i + ') td:nth(1)'), 'o_cell_hover');
+        }
+        await testUtils.dom.triggerEvents(pivot.$('tbody tr:nth(1) td:nth(1)'), 'mouseleave');
+        assert.containsNone(pivot, '.o_cell_hover');
+
+        pivot.destroy();
+    });
+
     QUnit.test('pivot view with disable_linking="True"', async function (assert) {
         assert.expect(2);
 

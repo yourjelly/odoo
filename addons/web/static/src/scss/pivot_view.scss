@@ -80,6 +80,10 @@
             @include o-caret-down;
             margin-left: 5px;
         }
+
+        .o_pivot_cell_value.o_cell_hover {
+            background-color: $table-hover-bg;
+        }
     }
 
     .o_pivot_field_selection::after {

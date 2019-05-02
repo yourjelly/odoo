@@ -13,11 +13,14 @@ var PivotRenderer = AbstractRenderer.extend({
     tagName: 'table',
     className: 'table-hover table-sm table-bordered',
     events: _.extend({}, AbstractRenderer.prototype.events, {
-        'hover td': '_onTdHover',
         'click td.o_pivot_cell_value': '_onCellValueClicked',
         'click .o_pivot_header_cell_opened': '_onOpenHeaderClick',
         'click .o_pivot_measure_row': '_onSpecialRowClick',
         'click .o_pivot_origin_row': '_onSpecialRowClick',
+        'mouseenter thead tr:last th': '_onMouseenterCell',
+        'mouseenter tbody td': '_onMouseenterCell',
+        'mouseleave thead tr:last th': '_onMouseleaveCell',
+        'mouseleave tbody td': '_onMouseleaveCell',
     }),
 
     /**
@@ -45,6 +48,7 @@ var PivotRenderer = AbstractRenderer.extend({
      * @param {string[]} groupBy list of 'fieldName[:period]'
      * @returns {string[]} list of fields label
      */
+
     _getGroupByLabels: function (groupBy) {
         var self = this;
         return _.map(groupBy, function (gb) {
@@ -242,6 +246,23 @@ var PivotRenderer = AbstractRenderer.extend({
         });
     },
     /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onMouseenterCell: function (ev) {
+        var index = $(ev.currentTarget).index();
+        if ($(ev.currentTarget).is('th')) { // header cell
+            index += 1; // increment by 1 to compensate the top left empty cell
+        }
+        this.$("td").filter(":nth-child(" + (index + 1) + ")").addClass("o_cell_hover");
+    },
+    /**
+     * @private
+     */
+    _onMouseleaveCell: function () {
+        this.$('.o_cell_hover').removeClass('o_cell_hover');
+    },
+    /**
      * This method is called when someone clicks on an open header.  When that
      * happens, we want to close the header, then redisplay the view.
      *
@@ -260,7 +281,6 @@ var PivotRenderer = AbstractRenderer.extend({
             groupId: groupId,
             type: type,
         });
-
     },
     /**
      * If the user clicks on a measure or origin row, we perform an in-memory sort
@@ -287,15 +307,6 @@ var PivotRenderer = AbstractRenderer.extend({
                 originIndexes: originIndexes,
             }
         });
-    },
-    // Did not work. We should make it work again!
-    /**
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onTdHover: function (ev) {
-        var $td = $(event.target);
-        $td.closest('table').find('col:eq(' + $td.index()+')').toggleClass('hover');
     },
 });
 
