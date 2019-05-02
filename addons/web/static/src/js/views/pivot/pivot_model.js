@@ -832,6 +832,7 @@ var PivotModel = AbstractModel.extend({
         var originCount = this.data.origins.length;
         var leafCounts = this._getLeafCounts(this.colGroupTree);
         var headers = [];
+        var measureColumns = []; // used to generate the measure cells
 
         // 1) generate col group rows (total row + one row for each col groupby)
         var colGroupRows = (new Array(height)).fill(0).map(function () {
@@ -857,14 +858,17 @@ var PivotModel = AbstractModel.extend({
             var groupId = [[], group.values];
             var isLeaf = _.isEmpty(tree.directSubTrees);
             var leafCount = leafCounts[JSON.stringify(tree.root.values)];
-
-            row.push({
+            var cell = {
                 groupId: groupId,
                 height: isLeaf ? (self.data.colGroupBys.length + 1 - rowIndex) : 1,
                 isLeaf: isLeaf,
                 title: group.labels[group.labels.length - 1] || _t('Total'),
                 width: leafCount * measureCount * (2 * originCount - 1),
-            });
+            };
+            row.push(cell);
+            if (isLeaf) {
+                measureColumns.push(cell);
+            }
 
             _.values(tree.directSubTrees).forEach(function (subTree) {
                 generateTreeHeaders(subTree);
@@ -874,23 +878,19 @@ var PivotModel = AbstractModel.extend({
         // blank top right cell for 'Total' group (if there is more that one leaf)
         if (leafCounts[JSON.stringify(this.colGroupTree.root.values)] > 1) {
             var groupId = [[], []];
-            colGroupRows[0].push({
+            var totalTopRightCell = {
                 groupId: groupId,
                 height: height,
                 title: "",
                 width: measureCount * (2 * originCount - 1),
-            });
+            };
+            colGroupRows[0].push(totalTopRightCell);
+            measureColumns.push(totalTopRightCell);
         }
         headers = headers.concat(colGroupRows);
 
         // 2) generate measures row
-        var columns = [];
-        if (colGroupRows.length === 1) {
-            columns = colGroupRows[0].slice(1);
-        } else {
-            columns = colGroupRows[colGroupRows.length - 1].concat(colGroupRows[0].slice(2));
-        }
-        var measuresRow = this._getMeasuresRow(columns);
+        var measuresRow = this._getMeasuresRow(measureColumns);
         headers.push(measuresRow);
 
         // 3) generate origins row if more than one origin

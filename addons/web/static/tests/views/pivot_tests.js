@@ -578,6 +578,33 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
+    QUnit.test('unfold second header group', async function (assert) {
+        assert.expect(4);
+
+        var pivot = await createView({
+            View: PivotView,
+            model: "partner",
+            data: this.data,
+            arch: '<pivot>' +
+                        '<field name="product_id" type="col"/>' +
+                        '<field name="foo" type="measure"/>' +
+                '</pivot>',
+        });
+
+        assert.containsN(pivot, 'thead tr', 3);
+        var values = ['12', '20', '32'];
+        assert.strictEqual(getCurrentValues(pivot), values.join(','));
+
+        // unfold it
+        await testUtils.dom.click(pivot.$('thead .o_pivot_header_cell_closed:nth(1)'));
+        await testUtils.dom.click(pivot.$('.o_pivot_field_menu .dropdown-item[data-field="company_type"]'));
+        assert.containsN(pivot, 'thead tr', 4);
+        values = ['12', '3', '17', '32'];
+        assert.strictEqual(getCurrentValues(pivot), values.join(','));
+
+        pivot.destroy();
+    });
+
     QUnit.test('can toggle extra measure', async function (assert) {
         assert.expect(8);
 

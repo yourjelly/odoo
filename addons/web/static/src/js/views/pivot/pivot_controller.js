@@ -83,7 +83,7 @@ var PivotController = AbstractController.extend({
      * @returns {Object}
      */
     getOwnedQueryParams: function () {
-        var state = this.model.get();
+        var state = this.model.get({raw: true});
         return {
             context: {
                 pivot_measures: state.measures,
@@ -279,7 +279,7 @@ var PivotController = AbstractController.extend({
             type: type
         };
 
-        var state = this.model.get({}, {raw: true});
+        var state = this.model.get({raw: true});
 
         var groupValues = type === 'row' ? groupId[0] : groupId[1];
         var groupBys = type === 'row' ?
