@@ -194,7 +194,7 @@ var PivotModel = AbstractModel.extend({
         };
     },
     /**
-     * Swap the pivot columns and the rows.  It is a synchronous operation.
+     * Swap the pivot columns and the rows. It is a synchronous operation.
      */
     flip: function () {
         // swap the data: the main column and the main row
