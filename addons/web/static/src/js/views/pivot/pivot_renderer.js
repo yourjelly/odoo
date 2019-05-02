@@ -25,7 +25,6 @@ var PivotRenderer = AbstractRenderer.extend({
 
     /**
      * @overide
-     *
      * @param {Widget} parent
      * @param {Object} state
      * @param {Object} params
@@ -48,7 +47,6 @@ var PivotRenderer = AbstractRenderer.extend({
      * @param {string[]} groupBy list of 'fieldName[:period]'
      * @returns {string[]} list of fields label
      */
-
     _getGroupByLabels: function (groupBy) {
         var self = this;
         return _.map(groupBy, function (gb) {
@@ -56,44 +54,28 @@ var PivotRenderer = AbstractRenderer.extend({
         });
     },
     /**
-     * Used to determine whether or not to display the no content helper.
-     *
-     * @private
-     * @returns {boolean}
-     */
-    _hasContent: function () {
-        return this.state.hasData && this.state.measures.length;
-    },
-    /**
      * @override
      * @private
      * @returns {Promise}
      */
     _render: function () {
-        if (!this._hasContent()) {
+        var hasContent = this.state.hasData && this.state.measures.length;
+        if (!hasContent) {
             // display the nocontent helper
             this._replaceElement(QWeb.render('PivotView.nodata'));
             return this._super.apply(this, arguments);
         }
 
-        var $fragment = $(document.createDocumentFragment());
-        var $table = $('<table>').appendTo($fragment);
-        var $thead = $('<thead>').appendTo($table);
-        var $tbody = $('<tbody>').appendTo($table);
+        this.renderElement(); // in case we come from no content helper
+        this.$el.toggleClass('o_enable_linking', this.enableLinking);
 
+        var $thead = $('<thead>');
+        var $tbody = $('<tbody>');
         this._renderHeaders($thead);
         this._renderRows($tbody);
+        this.$el.empty().append($thead).append($tbody);
+        this.$('.o_pivot_header_cell_opened, .o_pivot_header_cell_closed').tooltip();
 
-        // todo: make sure the next line does something
-        $table.find('.o_pivot_header_cell_opened,.o_pivot_header_cell_closed').tooltip();
-
-        if (!this.$el.is('table')) {
-            // coming from the no content helper, so the root element has to be
-            // re-rendered before rendering and appending its content
-            this.renderElement();
-        }
-        this.$el.toggleClass('o_enable_linking', this.enableLinking);
-        this.$el.html($table.contents());
         return this._super.apply(this, arguments);
     },
     /**
@@ -144,6 +126,10 @@ var PivotRenderer = AbstractRenderer.extend({
             $thead.append($tr);
         });
     },
+    /**
+     * @private
+     * @param {jQuery} $tbody
+     */
     _renderRows: function ($tbody) {
         var self = this;
 
@@ -211,9 +197,9 @@ var PivotRenderer = AbstractRenderer.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * When the user clicks on a non empty cell, and the view is configured to allow
-     * 'linking' (with enableLinking), we want to open a list view with the
-     * corresponding record.
+     * When the user clicks on a non empty cell, and the view is configured to
+     * allow 'linking' (with enableLinking), we want to open a list view with
+     * the corresponding record.
      *
      * @private
      * @param {MouseEvent} ev
@@ -238,7 +224,7 @@ var PivotRenderer = AbstractRenderer.extend({
             rowValues: groupId[0],
             colValues: groupId[1],
             originIndex: originIndexes[0]
-        }; // FIXME
+        };
 
         this.trigger_up('open_view', {
             group: group,
@@ -246,6 +232,8 @@ var PivotRenderer = AbstractRenderer.extend({
         });
     },
     /**
+     * Highlight the column when hovering a cell.
+     *
      * @private
      * @param {MouseEvent} ev
      */
@@ -283,7 +271,7 @@ var PivotRenderer = AbstractRenderer.extend({
         });
     },
     /**
-     * If the user clicks on a measure or origin row, we perform an in-memory sort
+     * If the user clicks on a measure or origin row, we perform an in-memory sort.
      *
      * @private
      * @param {MouseEvent} ev

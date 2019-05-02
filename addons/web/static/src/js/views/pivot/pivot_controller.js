@@ -1,5 +1,6 @@
 odoo.define('web.PivotController', function (require) {
 "use strict";
+
 /**
  * Odoo Pivot Table Controller
  *
@@ -27,15 +28,15 @@ var PivotController = AbstractController.extend({
         'click .o_pivot_field_menu a': '_onGroupByMenuSelection',
         'click .o_pivot_header_cell_closed': '_onClosedHeaderClick',
     },
-    custom_events: _.extend({}, AbstractController.prototype.custom_events,{
-        'close_group': '_onCloseGroup',
-        'open_view': '_onOpenView',
-        'sort_rows': '_onSortRows',
+    custom_events: _.extend({}, AbstractController.prototype.custom_events, {
+        close_group: '_onCloseGroup',
+        open_view: '_onOpenView',
+        sort_rows: '_onSortRows',
     }),
     /**
      * @override
      * @param {Object} params
-     * @param {Object} params.groupableFields a map from field name to field
+     * @param {Object} params.groupableFields a map from field names to field
      *   props
      */
     init: function (parent, model, renderer, params) {
@@ -102,7 +103,11 @@ var PivotController = AbstractController.extend({
      */
     renderButtons: function ($node) {
         if ($node) {
-            var context = {measures: _.sortBy(_.pairs(_.omit(this.measures, '__count')), function (x) { return x[1].string.toLowerCase(); })};
+            var context = {
+                measures: _.sortBy(_.pairs(_.omit(this.measures, '__count')), function (x) {
+                    return x[1].string.toLowerCase();
+                }),
+            };
             this.$buttons = $(QWeb.render('PivotView.buttons', context));
             this.$buttons.click(this._onButtonClick.bind(this));
             this.$buttons.find('button').tooltip();
@@ -119,19 +124,18 @@ var PivotController = AbstractController.extend({
     /**
      * Export the current pivot table data in a xls file. For this, we have to
      * serialize the current state, then call the server /web/pivot/export_xls.
+     * Force a reload before exporting to ensure to export up-to-date data.
      *
      * @private
      */
     _downloadTable: function () {
-        var colNumber = this.model.colGroupTree.leafCount + 2;
-        if(colNumber > 256) {
-            crash_manager.show_message(_t("For Excel compatibility, data cannot be exported if there are more than 256 columns.\n\nTip: try to flip axis, filter further or reduce the number of measures."));
-            framework.unblockUI();
-            return;
-        }
-        framework.blockUI();
         var self = this;
+        framework.blockUI();
         this._update().then(function () {
+            if (self.model.getTableWidth() > 256) {
+                crash_manager.show_message(_t("For Excel compatibility, data cannot be exported if there are more than 256 columns.\n\nTip: try to flip axis, filter further or reduce the number of measures."));
+                return;
+            }
             var table = self.model.exportData();
             table.title = self.title;
             session.get_file({
@@ -151,7 +155,7 @@ var PivotController = AbstractController.extend({
      * @param {number} left left coordinate for the menu
      */
     _renderGroupBySelection: function (top, left) {
-        var state = this.model.get({}, {raw: true});
+        var state = this.model.get({raw: true});
         var groupedFields = state.rowGroupBys
             .concat(state.colGroupBys)
             .map(function (f) {
@@ -173,11 +177,9 @@ var PivotController = AbstractController.extend({
         }));
 
         var cssProps = {top: top};
-        cssProps[_t.database.parameters.direction === 'rtl' ? 'right' : 'left'] =
-            _t.database.parameters.direction === 'rtl' ? this.$el.width() - left : left;
-        this.$groupBySelection.find('.dropdown-menu').first()
-            .css(cssProps)
-            .addClass('show');
+        var isRTL = _t.database.parameters.direction === 'rtl';
+        cssProps[isRTL ? 'right' : 'left'] = isRTL ? this.$el.width() - left : left;
+        this.$groupBySelection.find('.dropdown-menu').first().css(cssProps).addClass('show');
     },
     /**
      * @override
@@ -187,6 +189,7 @@ var PivotController = AbstractController.extend({
         return this.renderer.appendTo(this.$('.o_pivot'));
     },
     /**
+     * @override
      * @private
      */
     _update: function () {
@@ -213,8 +216,6 @@ var PivotController = AbstractController.extend({
         this.$buttons.find('.o_pivot_download').prop('disabled', noDataDisplayed);
     },
 
-
-
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
@@ -234,17 +235,13 @@ var PivotController = AbstractController.extend({
             this.update({}, {reload: false});
         }
         if ($target.hasClass('o_pivot_expand_button')) {
-            this.model
-                    .expandAll()
-                    .then(this.update.bind(this, {}, {reload: false}));
+            this.model.expandAll().then(this.update.bind(this, {}, {reload: false}));
         }
         if ($target.parents('.o_pivot_measures_list').length) {
-            var field = $target.data('field');
             ev.preventDefault();
             ev.stopPropagation();
-            this.model
-                    .toggleMeasure(field)
-                    .then(this.update.bind(this, {}, {reload: false}));
+            var field = $target.data('field');
+            this.model.toggleMeasure(field).then(this.update.bind(this, {}, {reload: false}));
         }
         if ($target.hasClass('o_pivot_download')) {
             this._downloadTable();
@@ -301,10 +298,9 @@ var PivotController = AbstractController.extend({
             var left = position.left + ev.offsetX;
             this._renderGroupBySelection(top, left);
         }
-
     },
     /**
-     * This handler is called when the user selects a groupby in the dropdown menu
+     * This handler is called when the user selects a groupby in the dropdown menu.
      *
      * @private
      * @param {MouseEvent} ev

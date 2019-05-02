@@ -1029,6 +1029,19 @@ var PivotModel = AbstractModel.extend({
 
         return rows;
     },
+
+
+
+
+    /**
+     * Returns the total number of columns of the pivot table.
+     *
+     * @returns {integer}
+     */
+    getTableWidth: function () {
+        var leafCounts = this._getLeafCounts(this.colGroupTree);
+        return leafCounts[JSON.stringify(this.colGroupTree.root.values)] + 2;
+    },
 });
 
 return PivotModel;
