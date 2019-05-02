@@ -115,7 +115,6 @@ var PivotModel = AbstractModel.extend({
 
         delete group.type;
         return this._subdivideGroup(group, divisors);
-
     },
     /**
      * Export model data in a form suitable for an easy encoding of the pivot
@@ -135,7 +134,7 @@ var PivotModel = AbstractModel.extend({
         var measureRow = [];
         var originRow = [];
 
-        function processHeader (header) {
+        function processHeader(header) {
             var inTotalColumn = header.groupId[1].length === 0;
             return {
                 title: header.title,
@@ -157,7 +156,7 @@ var PivotModel = AbstractModel.extend({
         }
 
         // remove the empty headers on left side
-        colGroupHeaderRows[0].splice(0,1);
+        colGroupHeaderRows[0].splice(0, 1);
 
         colGroupHeaderRows = colGroupHeaderRows.map(function (headerRow) {
             return headerRow.map(processHeader);
@@ -246,7 +245,7 @@ var PivotModel = AbstractModel.extend({
             hasData: this.hasData,
             measures: this.data.measures,
             origins: this.data.origins,
-            rowGroupBys:  this.data.rowGroupBys,
+            rowGroupBys: this.data.rowGroupBys,
         };
         if (!raw && state.hasData) {
             state.table = this._getTable();
@@ -295,12 +294,12 @@ var PivotModel = AbstractModel.extend({
 
         this.data.domains = this._getDomains();
         this.data.origins = this._getOrigins();
-        this.data.rowGroupBys =  !_.isEmpty(this.data.groupedBy) ? this.data.groupedBy : this.initialRowGroupBys;
+        this.data.rowGroupBys = !_.isEmpty(this.data.groupedBy) ? this.data.groupedBy : this.initialRowGroupBys;
 
         var defaultOrder = params.default_order && params.default_order.split(' ');
         if (defaultOrder) {
             this.data.sortedColumn = {
-                groupId: [[],[]],
+                groupId: [[], []],
                 measure: defaultOrder[0],
                 order: defaultOrder[1] ? defaultOrder [1] : 'asc',
             };
@@ -531,15 +530,15 @@ var PivotModel = AbstractModel.extend({
      */
     _getGroupDomain: function (group) {
         var self = this;
-        function constructDomain (fieldName, value) {
+        function constructDomain(fieldName, value) {
             var type = self.fields[fieldName].type;
-            if (value && _.contains(['date' , 'datetime'], type)) {
+            if (value && _.contains(['date', 'datetime'], type)) {
                 var intervalBounds = value.split('/');
                 return ['&', [fieldName, '>=', intervalBounds[0]], [fieldName, '<', intervalBounds[1]]];
             }
             return [[fieldName, '=', value]];
         }
-        function domain (values, groupBys) {
+        function domain(values, groupBys) {
             return values.reduce(
                 function (acc, value, index) {
                     var fieldName = groupBys[index].split(':')[0];
@@ -583,7 +582,7 @@ var PivotModel = AbstractModel.extend({
         var self = this;
         var groupDomain = this._getGroupDomain(group);
         var measures = this.data.measures.reduce(
-            function(acc, measure) {
+            function (acc, measure) {
                 if (measure === '__count') {
                     acc.push(measure);
                     return acc;
@@ -895,8 +894,7 @@ var PivotModel = AbstractModel.extend({
 
         // 3) generate origins row if more than one origin
         if (originCount > 1) {
-            var originsRow = this._getOriginsRow(measuresRow);
-            headers.push(originsRow);
+            headers.push(this._getOriginsRow(measuresRow));
         }
 
         return headers;
@@ -954,6 +952,15 @@ var PivotModel = AbstractModel.extend({
         return rows;
     },
     /**
+     * Returns the total number of columns of the pivot table.
+     *
+     * @returns {integer}
+     */
+    getTableWidth: function () {
+        var leafCounts = this._getLeafCounts(this.colGroupTree);
+        return leafCounts[JSON.stringify(this.colGroupTree.root.values)] + 2;
+    },
+    /**
      * returns the height of a given groupTree
      *
      * @private
@@ -992,7 +999,7 @@ var PivotModel = AbstractModel.extend({
 
         return this._subdivideGroup(group, divisors.slice(0, 1)).then(function () {
             return self._subdivideGroup(group, divisors.slice(1)).then(function () {
-                self.hasData = self.counts[JSON.stringify([[],[]])].some(function (count) {
+                self.hasData = self.counts[JSON.stringify([[], []])].some(function (count) {
                     return count > 0;
                 });
             });
@@ -1209,19 +1216,6 @@ var PivotModel = AbstractModel.extend({
         _.values(tree.directSubTrees).forEach(function (subTree) {
             self._sortTree(sortFunction, subTree);
         });
-    },
-
-
-
-
-    /**
-     * Returns the total number of columns of the pivot table.
-     *
-     * @returns {integer}
-     */
-    getTableWidth: function () {
-        var leafCounts = this._getLeafCounts(this.colGroupTree);
-        return leafCounts[JSON.stringify(this.colGroupTree.root.values)] + 2;
     },
 });
 
