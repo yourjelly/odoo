@@ -16,32 +16,27 @@ var AbstractController = require('web.AbstractController');
 var core = require('web.core');
 var crash_manager = require('web.crash_manager');
 var framework = require('web.framework');
-var mathUtils = require('web.mathUtils');
 var session = require('web.session');
 
 var _t = core._t;
-var cartesian = mathUtils.cartesian;
 var QWeb = core.qweb;
-var sections = mathUtils.sections;
 
 var PivotController = AbstractController.extend({
     contentTemplate: 'PivotView',
     events: {
-        'click .o_pivot_header_cell_opened': '_onOpenHeaderClick',
+        'click .o_pivot_field_menu a': '_onGroupByMenuSelection',
         'click .o_pivot_header_cell_closed': '_onClosedHeaderClick',
-        'click .o_pivot_field_menu a': '_onFieldMenuSelection',
-        'click td.o_pivot_cell_value': '_onCellValueClick',
     },
     custom_events: _.extend({}, AbstractController.prototype.custom_events,{
-        'sort_tree': '_onSortTree',
+        'close_group': '_onCloseGroup',
+        'open_view': '_onOpenView',
+        'sort_rows': '_onSortRows',
     }),
     /**
      * @override
      * @param {Object} params
      * @param {Object} params.groupableFields a map from field name to field
      *   props
-     * @param {boolean} params.enableLinking configure the pivot view to allow
-     *   opening a list view by clicking on a cell with some data.
      */
     init: function (parent, model, renderer, params) {
         this._super.apply(this, arguments);
@@ -49,7 +44,6 @@ var PivotController = AbstractController.extend({
         this.measures = params.measures;
         this.groupableFields = params.groupableFields;
         this.title = params.title;
-        this.enableLinking = params.enableLinking;
         // views to use in the action triggered when a data cell is clicked
         this.views = params.views;
         this.groupSelected = null;
@@ -58,10 +52,9 @@ var PivotController = AbstractController.extend({
      * @override
      */
     start: function () {
-        this.$el.toggleClass('o_enable_linking', this.enableLinking);
-        this.$fieldSelection = this.$('.o_field_selection');
+        this.$groupBySelection = this.$('.o_field_selection');
         core.bus.on('click', this, function () {
-            this.$fieldSelection.empty();
+            this.$groupBySelection.empty();
         });
         return this._super();
     },
@@ -157,8 +150,8 @@ var PivotController = AbstractController.extend({
      * @param {number} top top coordinate where we have to render the menu
      * @param {number} left left coordinate for the menu
      */
-    _renderFieldSelection: function (top, left) {
-        var state = this.model.get({raw: true});
+    _renderGroupBySelection: function (top, left) {
+        var state = this.model.get({}, {raw: true});
         var groupedFields = state.rowGroupBys
             .concat(state.colGroupBys)
             .map(function (f) {
@@ -175,14 +168,14 @@ var PivotController = AbstractController.extend({
             })
             .value();
 
-        this.$fieldSelection.html(QWeb.render('PivotView.FieldSelection', {
+        this.$groupBySelection.html(QWeb.render('PivotView.GroupBySelection', {
             fields: fields
         }));
 
         var cssProps = {top: top};
         cssProps[_t.database.parameters.direction === 'rtl' ? 'right' : 'left'] =
             _t.database.parameters.direction === 'rtl' ? this.$el.width() - left : left;
-        this.$fieldSelection.find('.dropdown-menu').first()
+        this.$groupBySelection.find('.dropdown-menu').first()
             .css(cssProps)
             .addClass('show');
     },
@@ -258,28 +251,89 @@ var PivotController = AbstractController.extend({
         }
     },
     /**
-     * When the user clicks on a cell, and the view is configured to allow
-     * 'linking' (with enableLinking), we want to open a list view with the
-     * corresponding record.
+     *
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _onCloseGroup: function (ev) {
+        this.model.closeGroup(ev.data.groupId, ev.data.type);
+        this.update({}, {reload: false});
+    },
+    /**
+     * When we click on a closed row (col) header, we either want to open the
+     * dropdown menu to select a new field to add to rowGroupBys (resp. colGroupBys),
+     * or we want to open the clicked header, if rowGroupBys (resp. colGroupBys)
+     * has length strictly greater than header
      *
      * @private
      * @param {MouseEvent} ev
      */
-    _onCellValueClick: function (ev) {
-        var $target = $(ev.currentTarget);
-        if ($target.hasClass('o_empty') || !this.enableLinking) {
+    _onClosedHeaderClick: function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        var $target = $(ev.target);
+        var groupId = $target.data('groupId');
+        var type = $target.data('type');
+
+        var group = {
+            rowValues: groupId[0],
+            colValues: groupId[1],
+            type: type
+        };
+
+        var state = this.model.get({}, {raw: true});
+
+        var groupValues = type === 'row' ? groupId[0] : groupId[1];
+        var groupBys = type === 'row' ?
+                        state.rowGroupBys :
+                        state.colGroupBys;
+
+        this.selectedGroup = group;
+        if (groupValues.length < groupBys.length) {
+            var groupBy = groupBys[groupValues.length];
+            this.model
+                .expandGroup(this.selectedGroup, groupBy)
+                .then(this.update.bind(this, {}, {reload: false}));
+        } else {
+            var position = $target.position();
+            var top = position.top + $target.height();
+            var left = position.left + ev.offsetX;
+            this._renderGroupBySelection(top, left);
+        }
+
+    },
+    /**
+     * This handler is called when the user selects a groupby in the dropdown menu
+     *
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onGroupByMenuSelection: function (ev) {
+        ev.preventDefault();
+        var $target = $(ev.target);
+        if ($target.hasClass('disabled')) {
+            ev.stopPropagation();
             return;
         }
-        var state = this.model.get(this.handle, {raw: true});
-        var context = _.omit(state.context, function (val, key) {
-            return key === 'group_by' || _.str.startsWith(key, 'search_default_');
-        });
 
-        var groupId = $target.data('groupId');
-        var originIndexes = $target.data('originIndexes');
-
-        var group = {rowValues: groupId[0], colValues: groupId[1], originIndex: originIndexes[0]}; // FIXME
-
+        var groupBy = $target.data('field');
+        var interval = $target.data('interval');
+        if (interval) {
+            groupBy = groupBy + ':' + interval;
+        }
+        this.model.addGroupBy(groupBy, this.selectedGroup.type);
+        this.model
+            .expandGroup(this.selectedGroup, groupBy)
+            .then(this.update.bind(this, {}, {reload: false}));
+    },
+    /**
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _onOpenView: function (ev) {
+        var context = ev.data.context;
+        var group = ev.data.group;
         var domain = this.model._getGroupDomain(group);
 
         this.do_action({
@@ -295,100 +349,11 @@ var PivotController = AbstractController.extend({
         });
     },
     /**
-     * When we click on a closed row (col) header, we either want to open the
-     * dropdown menu to select a new field to add to rowGroupBys (resp. colGroupBys),
-     * or we want to open the clicked header, if rowGroupBys (resp. colGroupBys)
-     * has length strictly greater than header
-     *
      * @private
-     * @param {MouseEvent} ev
+     * @param {OdooEvent} ev
      */
-    _onClosedHeaderClick: function (ev) {
-        var $target = $(ev.target);
-        this.groupSelectedType = $target.data('type');
-        var groupId = $target.data('groupId');
-
-        this.groupSelected = {rowValues: groupId[0], colValues: groupId[1]};
-
-        var groupValues = this.groupSelectedType === 'row' ? groupId[0] : groupId[1];
-        var groupBys = this.groupSelectedType === 'row' ?
-                        this.model.data.rowGroupBys :
-                        this.model.data.colGroupBys;
-
-        if (groupValues.length < groupBys.length) {
-            var field = groupBys[groupValues.length];
-            var divisors = this._getDivisors(this.groupSelectedType, field);
-            this.model
-                .subdivideGroup(this.groupSelected, divisors)
-                .then(this.update.bind(this, {}, {reload: false}));
-        } else {
-            var position = $target.position();
-            var top = position.top + $target.height();
-            var left = position.left + ev.offsetX;
-            this._renderFieldSelection(top, left);
-            ev.stopPropagation();
-        }
-    },
-    _getDivisors: function (type, field) {
-        var leftDivisors;
-        var rightDivisors;
-        if (type === 'row') {
-            leftDivisors = [[field]];
-            rightDivisors = sections(this.model.data.colGroupBys);
-        } else {
-            leftDivisors = sections(this.model.data.rowGroupBys);
-            rightDivisors = [[field]];
-        }
-        var divisors = cartesian(leftDivisors, rightDivisors);
-        return divisors;
-    },
-    /**
-     * This handler is called when the user selects a field in the dropdown menu
-     *
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onFieldMenuSelection: function (ev) {
-        ev.preventDefault();
-        var $target = $(ev.target);
-        if ($target.hasClass('disabled')) {
-            ev.stopPropagation();
-            return;
-        }
-        var field = $target.data('field');
-        var interval = $target.data('interval');
-        if (interval) {
-            field = field + ':' + interval;
-        }
-
-        this.model.addGroupBy(field, this.groupSelectedType);
-
-        var divisors = this._getDivisors(this.groupSelectedType, field);
-
-        this.model
-            .subdivideGroup(this.groupSelected, divisors)
-            .then(this.update.bind(this, {}, {reload: false}));
-    },
-    /**
-     * This method is called when someone clicks on an open header.  When that
-     * happens, we want to close the header, then redisplay the view.
-     *
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onOpenHeaderClick: function (ev) {
-        ev.preventDefault();
-        ev.stopImmediatePropagation();
-
-        var $target = $(ev.target);
-        var groupId = $target.data('groupId');
-        var type = $target.data('type');
-
-        this.model.closeGroup(groupId, type);
-        this.update({}, {reload: false});
-    },
-    _onSortTree: function (ev) {
-        this.model.sortTree(ev.data.sortedColumn);
+    _onSortRows: function (ev) {
+        this.model.sortRows(ev.data.sortedColumn);
         this.update({}, {reload: false});
     }
 });

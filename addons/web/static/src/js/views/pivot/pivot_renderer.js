@@ -14,6 +14,8 @@ var PivotRenderer = AbstractRenderer.extend({
     className: 'table-hover table-sm table-bordered',
     events: _.extend({}, AbstractRenderer.prototype.events, {
         'hover td': '_onTdHover',
+        'click td.o_pivot_cell_value': '_onCellValueClicked',
+        'click .o_pivot_header_cell_opened': '_onOpenHeaderClick',
         'click .o_pivot_measure_row': '_onSpecialRowClick',
         'click .o_pivot_origin_row': '_onSpecialRowClick',
     }),
@@ -24,9 +26,12 @@ var PivotRenderer = AbstractRenderer.extend({
      * @param {Widget} parent
      * @param {Object} state
      * @param {Object} params
+     * @param {boolean} params.enableLinking configure the pivot view to allow
+     *   opening a list view by clicking on a cell with some data.
      */
     init: function (parent, state, params) {
         this._super.apply(this, arguments);
+        this.enableLinking = params.enableLinking;
         this.fieldWidgets = params.widgets || {};
         this.paddingLeftHeaderTabWidth = config.device.isMobile ? 5 : 30;
     },
@@ -83,6 +88,7 @@ var PivotRenderer = AbstractRenderer.extend({
             // re-rendered before rendering and appending its content
             this.renderElement();
         }
+        this.$el.toggleClass('o_enable_linking', this.enableLinking);
         this.$el.html($table.contents());
         return this._super.apply(this, arguments);
     },
@@ -133,15 +139,6 @@ var PivotRenderer = AbstractRenderer.extend({
             });
             $thead.append($tr);
         });
-    },
-    /**
-     * @private
-     * @param {jQueryElement} $thead
-     * @param {jQueryElement} headers
-     */
-    _renderHeadersOld: function ($thead, headers) {
-        // What is this class used for?
-        // $cell.toggleClass('d-none d-md-table-cell', (cell.expanded !== undefined) || (cell.measure !== undefined && j < headers[i].length - this.state.measures.length));
     },
     _renderRows: function ($tbody) {
         var self = this;
@@ -210,31 +207,87 @@ var PivotRenderer = AbstractRenderer.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * If the user clicks on a measure row, we can perform an in-memory sort
+     * When the user clicks on a non empty cell, and the view is configured to allow
+     * 'linking' (with enableLinking), we want to open a list view with the
+     * corresponding record.
+     *
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onCellValueClicked: function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        var $target = $(ev.currentTarget);
+        if ($target.hasClass('o_empty') || !this.enableLinking) {
+            return;
+        }
+
+        var context = _.omit(this.state.context, function (val, key) {
+            return key === 'group_by' || _.str.startsWith(key, 'search_default_');
+        });
+
+        var groupId = $target.data('groupId');
+        var originIndexes = $target.data('originIndexes');
+
+        var group = {
+            rowValues: groupId[0],
+            colValues: groupId[1],
+            originIndex: originIndexes[0]
+        }; // FIXME
+
+        this.trigger_up('open_view', {
+            group: group,
+            context: context,
+        });
+    },
+    /**
+     * This method is called when someone clicks on an open header.  When that
+     * happens, we want to close the header, then redisplay the view.
+     *
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onOpenHeaderClick: function (ev) {
+        ev.preventDefault();
+        ev.stopImmediatePropagation();
+
+        var $target = $(ev.target);
+        var groupId = $target.data('groupId');
+        var type = $target.data('type');
+
+        this.trigger_up('close_group', {
+            groupId: groupId,
+            type: type,
+        });
+
+    },
+    /**
+     * If the user clicks on a measure or origin row, we perform an in-memory sort
      *
      * @private
      * @param {MouseEvent} ev
      */
     _onSpecialRowClick: function (ev) {
+        ev.preventDefault();
+        ev.stopImmediatePropagation();
+
         var $target = $(ev.target);
         var groupId = $target.data('groupId');
         var measure = $target.data('measure');
         var originIndexes = $target.data('originIndexes');
         var isAscending = $target.hasClass('o_pivot_sort_order_asc');
         var order = isAscending ? 'desc' : 'asc';
-        this.trigger_up(
-            'sort_tree',
-            {
-                sortedColumn: {
-                    groupId: groupId,
-                    measure: measure,
-                    order: order,
-                    originIndexes: originIndexes,
-                }
-            }
-        );
-    },
 
+        this.trigger_up('sort_rows', {
+            sortedColumn: {
+                groupId: groupId,
+                measure: measure,
+                order: order,
+                originIndexes: originIndexes,
+            }
+        });
+    },
     // Did not work. We should make it work again!
     /**
      * @private

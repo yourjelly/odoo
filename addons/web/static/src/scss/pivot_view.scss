@@ -1,15 +1,6 @@
 .o_pivot {
     overflow: auto;
 
-    // Inform the user that he may click on a cell to be redirected to a list view of the
-    // items corresponding to the clicked cell
-    &.o_enable_linking {
-        .o_pivot_cell_value:hover {
-            color: $o-brand-primary;
-            cursor: pointer;
-
-        }
-    }
     .o_pivot_cell_value {
         font-size: 1em;
         .o_comparison {
@@ -28,6 +19,16 @@
     table {
         background-color: $o-view-background-color;
         width: auto;  // bootstrap override
+
+        // Inform the user that he may click on a cell to be redirected to a list view of the
+        // items corresponding to the clicked cell
+        &.o_enable_linking {
+            .o_pivot_cell_value:hover {
+                color: $o-brand-primary;
+                cursor: pointer;
+
+            }
+        }
 
         thead th:not(.o_pivot_header_cell_closed):not(.o_pivot_header_cell_opened) {
             text-align: center;

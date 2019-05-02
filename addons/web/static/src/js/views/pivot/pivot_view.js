@@ -107,9 +107,9 @@ var PivotView = AbstractView.extend({
         this.loadParams.default_order = params.default_order || this.arch.attrs.default_order;
 
         this.rendererParams.widgets = widgets;
+        this.rendererParams.enableLinking = !this.arch.attrs.disable_linking;
 
         this.controllerParams.title = params.title || this.arch.attrs.string || _t("Untitled");
-        this.controllerParams.enableLinking = !this.arch.attrs.disable_linking;
         this.controllerParams.measures = measures;
         this.controllerParams.groupableFields = groupableFields;
         // retrieve form and list view ids from the action to open those views
