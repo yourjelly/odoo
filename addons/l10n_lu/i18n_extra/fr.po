@@ -5127,6 +5127,51 @@ msgid "VAT - Other receivables"
 msgstr "TVA – Autres créances"
 
 #. module: l10n_lu
+#: model:account.tax.group,name:l10n_lu.tax_group_0
+msgid "VAT 0%"
+msgstr "TVA 0%"
+
+#. module: l10n_lu
+#: model:account.tax.group,name:l10n_lu.tax_group_10
+msgid "VAT 10%"
+msgstr "TVA 10%"
+
+#. module: l10n_lu
+#: model:account.tax.group,name:l10n_lu.tax_group_12
+msgid "VAT 12%"
+msgstr "TVA 12%"
+
+#. module: l10n_lu
+#: model:account.tax.group,name:l10n_lu.tax_group_14
+msgid "VAT 14%"
+msgstr "TVA 14%"
+
+#. module: l10n_lu
+#: model:account.tax.group,name:l10n_lu.tax_group_15
+msgid "VAT 15%"
+msgstr "TVA 15%"
+
+#. module: l10n_lu
+#: model:account.tax.group,name:l10n_lu.tax_group_17
+msgid "VAT 17%"
+msgstr "TVA 17%"
+
+#. module: l10n_lu
+#: model:account.tax.group,name:l10n_lu.tax_group_3
+msgid "VAT 3%"
+msgstr "TVA 3%"
+
+#. module: l10n_lu
+#: model:account.tax.group,name:l10n_lu.tax_group_6
+msgid "VAT 6%"
+msgstr "TVA 6%"
+
+#. module: l10n_lu
+#: model:account.tax.group,name:l10n_lu.tax_group_8
+msgid "VAT 8%"
+msgstr "TVA 8%"
+
+#. module: l10n_lu
 #: model:account.account.template,name:l10n_lu.lu_2011_account_461413
 msgid "VAT advanced payments received"
 msgstr "TVA acomptes reçus"
@@ -5323,25 +5368,21 @@ msgid "on sales"
 msgstr "sur ventes"
 
 #. module: l10n_lu
-#: model:account.fiscal.position,name:l10n_lu.1_account_fiscal_position_template_LU_EC
 #: model:account.fiscal.position.template,name:l10n_lu.account_fiscal_position_template_LU_EC
 msgid "Extra-Community Taxable Person"
 msgstr "Asujetti Extracommunautaire"
 
 #. module: l10n_lu
-#: model:account.fiscal.position,name:l10n_lu.1_account_fiscal_position_template_LU_IC
 #: model:account.fiscal.position.template,name:l10n_lu.account_fiscal_position_template_LU_IC
 msgid "Intra-Community Taxable Person"
 msgstr "Asujetti Intracommunautaire"
 
 #. module: l10n_lu
-#: model:account.fiscal.position,name:l10n_lu.1_account_fiscal_position_template_LU_LU
 #: model:account.fiscal.position.template,name:l10n_lu.account_fiscal_position_template_LU_LU
 msgid "Luxembourgish Taxable Person"
 msgstr "Asujetti Luxembourgeois"
 
 #. module: l10n_lu
-#: model:account.fiscal.position,name:l10n_lu.1_account_fiscal_position_template_LU_NO
 #: model:account.fiscal.position.template,name:l10n_lu.account_fiscal_position_template_LU_NO
 msgid "Not liable to VAT"
 msgstr "Non-assujetti"
