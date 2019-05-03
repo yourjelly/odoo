@@ -12,6 +12,7 @@ odoo.define('web.EditableListRenderer', function (require) {
  * view. It uses the same widgets, but the code is totally stand alone.
  */
 var core = require('web.core');
+var Dialog = require('web.Dialog');
 var dom = require('web.dom');
 var ListRenderer = require('web.ListRenderer');
 var utils = require('web.utils');
@@ -30,6 +31,7 @@ ListRenderer.include({
         'click tbody tr:not(.o_data_row)': '_onEmptyRowClick',
         'click tfoot': '_onFooterClick',
         'click tr .o_list_record_remove': '_onRemoveIconClick',
+        'paste input': '_onPaste',
     }),
     /**
      * @override
@@ -1208,6 +1210,44 @@ ListRenderer.include({
                     }
                 });
                 break;
+        }
+    },
+    /**
+     * Handles when user paste something
+     * @param {jQueryEvent} ev
+     */
+    _onPaste: function (ev) {
+        var self = this;
+        var clipboardData = (event.clipboardData || window.clipboardData).getData('text');
+        var lines = clipboardData.split('\n');
+        lines = _.without(lines, '');
+
+        if (lines.length > 1) {
+            ev.preventDefault();
+            var fieldName = ev.target.name;
+
+            var pasteOnMultilines = function () {
+                var recordsCount = self.state.count;
+                var limit = Math.min(lines.length, recordsCount);
+                var lineIndex = 0;
+                for (var i = self.currentRow; i < limit; i++) {
+                    var data = self.state.data[i].data;
+                    data[fieldName] = lines[lineIndex++];
+                }
+                self.updateState(self.state, {});
+            };
+            var pasteOnSingleLine = function () {
+                var data = self.state.data[self.currentRow].data;
+                data[fieldName] = clipboardData;
+                self.updateState(self.state, {});
+            };
+
+            var dialogText = _t("The data you want to paste seems contains text" +
+                " on multilines. Do you want paste them on different lines ?");
+            Dialog.confirm(self, dialogText, {
+                confirm_callback: pasteOnMultilines,
+                cancel_callback: pasteOnSingleLine,
+            });
         }
     },
     /**
