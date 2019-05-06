@@ -3771,7 +3771,7 @@ QUnit.module('Views', {
 
         // Drag and drop the fourth line in second position
         await testUtils.dom.pointerDragAndDrop(
-            list.$('.ui-sortable-handle')[3],
+            list.$('.o_sortable_handle')[3],
             list.$('tbody tr')[0],
             {position: 'bottom'}
         );
@@ -3852,7 +3852,7 @@ QUnit.module('Views', {
         assert.strictEqual(list.$('tbody tr td.o_list_number').text(), '1234',
             "default should be sorted by id");
         await testUtils.dom.pointerDragAndDrop(
-            list.$('.ui-sortable-handle')[3],
+            list.$('.o_sortable_handle')[3],
             list.$('tbody tr')[2],
             {position: 'top'}
         );
@@ -3860,7 +3860,7 @@ QUnit.module('Views', {
             "the int_field (sequence) should have been correctly updated");
 
         await testUtils.dom.pointerDragAndDrop(
-            list.$('.ui-sortable-handle')[2],
+            list.$('.o_sortable_handle')[2],
             list.$('tbody tr')[1],
             {position: 'top'}
         );
@@ -3868,7 +3868,7 @@ QUnit.module('Views', {
             "the int_field (sequence) should have been correctly updated");
 
         await testUtils.dom.pointerDragAndDrop(
-            list.$('.ui-sortable-handle')[1],
+            list.$('.o_sortable_handle')[1],
             list.$('tbody tr')[3],
             {position: 'top'}
         );
@@ -3876,7 +3876,7 @@ QUnit.module('Views', {
             "the int_field (sequence) should have been correctly updated");
 
         await testUtils.dom.pointerDragAndDrop(
-            list.$('.ui-sortable-handle')[2],
+            list.$('.o_sortable_handle')[2],
             list.$('tbody tr')[1],
             {position: 'top'}
         );
@@ -3926,7 +3926,7 @@ QUnit.module('Views', {
 
         // Drag and drop the fourth line in second position
         await testUtils.dom.pointerDragAndDrop(
-            list.$('.ui-sortable-handle')[3],
+            list.$('.o_sortable_handle')[3],
             list.$('tbody tr')[0],
             {position: 'bottom'}
         );
@@ -3974,7 +3974,7 @@ QUnit.module('Views', {
 
         // Drag and drop the fourth line in second position
         await testUtils.dom.pointerDragAndDrop(
-            list.$('.ui-sortable-handle')[3],
+            list.$('.o_sortable_handle')[3],
             list.$('tbody tr')[0],
             {position: 'bottom'}
         );
@@ -3991,7 +3991,7 @@ QUnit.module('Views', {
 
         // Drag and drop the fourth line in second position (not)
         await testUtils.dom.pointerDragAndDrop(
-            list.$('.ui-sortable-handle')[3],
+            list.$('.o_sortable_handle')[3],
             list.$('tbody tr')[0],
             {position: 'bottom'}
         );
@@ -4007,7 +4007,7 @@ QUnit.module('Views', {
 
         // Drag and drop the fourth line in second position
         await testUtils.dom.pointerDragAndDrop(
-            list.$('.ui-sortable-handle')[3],
+            list.$('.o_sortable_handle')[3],
             list.$('tbody tr')[0],
             {position: 'bottom'}
         );
@@ -4064,7 +4064,7 @@ QUnit.module('Views', {
 
         // drag and drop the fourth line in second position
         await testUtils.dom.pointerDragAndDrop(
-            list.$('.ui-sortable-handle')[3],
+            list.$('.o_sortable_handle')[3],
             list.$('tbody tr')[0],
             {position: 'bottom'}
         );
