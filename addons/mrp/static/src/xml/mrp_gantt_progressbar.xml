@@ -2,19 +2,19 @@
 <templates>
 
     <t t-extend="GanttView.Row">
-        <t t-jquery="p.text-truncate" t-operation="replace">
+        <t t-jquery="p.text-truncate" t-operation="replace" t-if="widget.getParent().HasPillDuration">
             <span class="text-truncate" t-esc="pill.display_name"/>
-            <div class="progress o_gant_mrp_progressbar">
-                <div class="progress-bar progress-bar-success" role="progressbar" t-attf-style="width: #{pill.duration_percent}%;">
-                  <t t-esc="pill.duration_percent"/>%
+            <div t-if="state == 'progress'" class="progress o_gant_mrp_progressbar">
+                <div t-if="pill.state == 'progress'" class="progress-bar progress-bar-success" role="progressbar" t-attf-style="width: #{pill.duration}%;">
+                  <t t-esc="pill.duration"/>%
                 </div>
             </div>
         </t>
     </t>
 
     <t t-extend="gantt-popover">
-        <t t-jquery="ul li:last-child" t-operation="after">
-            <li><strong>Complete Percentage:</strong> <t t-esc="duration_percent"/>%</li>
+        <t t-jquery="ul li:last-child" t-operation="after" t-if="DurationPopover">
+            <li><strong>Complete Percentage:</strong> <t t-esc="duration"/>%</li>
         </t>
     </t>
 
