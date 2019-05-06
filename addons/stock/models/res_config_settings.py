@@ -43,6 +43,7 @@ class ResConfigSettings(models.TransientModel):
     group_stock_multi_locations = fields.Boolean('Storage Locations', implied_group='stock.group_stock_multi_locations',
         help="Store products in specific locations of your warehouse (e.g. bins, racks) and to track inventory accordingly.")
     group_stock_multi_warehouses = fields.Boolean('Multi-Warehouses', implied_group='stock.group_stock_multi_warehouses')
+    group_stock_zero_quantity_count = fields.Boolean('Zero Quantity Count', implied_group='stock.group_stock_zero_quantity_count')
 
     @api.onchange('use_propagation_minimum_delta')
     def _onchange_use_propagation_minimum_delta(self):

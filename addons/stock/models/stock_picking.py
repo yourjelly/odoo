@@ -635,6 +635,8 @@ class Picking(models.Model):
                     #'qty_done': ops.qty_done})
         todo_moves._action_done(cancel_backorder=self.env.context.get('cancel_backorder'))
         self.write({'date_done': fields.Datetime.now()})
+        #self._zero_quantity_count(todo_moves)
+
         return True
 
     @api.depends('state', 'move_lines', 'move_lines.state', 'move_lines.package_level_id', 'move_lines.move_line_ids.package_level_id')
@@ -758,6 +760,9 @@ class Picking(models.Model):
                 'context': self.env.context,
             }
 
+        if self._check_zero_quantity_count():
+            return self.zero_quantity_count()
+
         if self._get_overprocessed_stock_moves() and not self._context.get('skip_overprocessed_check'):
             view = self.env.ref('stock.view_overprocessed_transfer')
             wiz = self.env['stock.overprocessed.transfer'].create({'picking_id': self.id})
@@ -788,6 +793,39 @@ class Picking(models.Model):
             'view_type': 'form',
             'view_mode': 'form',
             'res_model': 'stock.backorder.confirmation',
+            'views': [(view.id, 'form')],
+            'view_id': view.id,
+            'target': 'new',
+            'res_id': wiz.id,
+            'context': self.env.context,
+        }
+
+    def _get_lines_zero_quantity_count(self):
+        Quant = self.env['stock.quant']
+        lines_zero_quantity_count = []
+        for line in self.move_lines:
+            quant_line = Quant.search([['location_id.id', '=', line.location_id.id], ['product_id.id', '=', line.product_id.id]])
+            if quant_line.quantity - line.product_qty == 0:
+                lines_zero_quantity_count.append(line)
+        return lines_zero_quantity_count
+
+    def _check_zero_quantity_count(self):
+        lines_zero_quantity_count = self._get_lines_zero_quantity_count()
+        if lines_zero_quantity_count:
+            return True
+        return False
+
+    def zero_quantity_count(self):
+        #Zero quantity count
+        lines_zero_quantity_count = self._get_lines_zero_quantity_count()
+        view = self.env.ref('stock.view_stock_zero_quantity_count')
+        wiz = self.env['stock.zero.quantity.count'].create({'quant_line_ids': lines_zero_quantity_count})
+        return {
+            'name': _('Zero Quantity Count'),
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'stock.zero.quantity.count',
             'views': [(view.id, 'form')],
             'view_id': view.id,
             'target': 'new',
