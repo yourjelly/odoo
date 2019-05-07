@@ -166,7 +166,7 @@ var _getPlaceholder = function (sortable) {
 var _setPlaceholder = function (sortable, item, anchor, connectWith) {
     // Only update the placeholder if it would move it somewhere else
     if (!anchor || !anchor.classList.contains(placeholderClass)) {
-        var placeholder = _getPlaceholder(item);
+        var placeholder = _getPlaceholder(sortable);
         if (!placeholder) {
             // Generate a brand new placeholder
             var computedStyle = window.getComputedStyle(item);
@@ -238,8 +238,14 @@ var _sortable = function (el, options) {
     var connectWith = options.connectWith;
     var containment = options.containment;
     var handle = options.handle;
-    var itemsSelector = options.items;
+    var items = options.items;
     var tolerance = options.tolerance;
+
+    // TODO: comment
+    if (!el.id) {
+        el.id = _.uniqueId('o_sortable_');
+    }
+    var itemsSelector = '#' + el.id + ' ' + options.items;
 
     /**
      * Checks whether an element is a valid item for this droppable. It needs to
@@ -276,7 +282,7 @@ var _sortable = function (el, options) {
         }
 
         // Set droppable on all items in this sortable
-        if (itemsSelector && !el.dataset.sortableItemsActivated) {
+        if (items && !el.dataset.sortableItemsActivated) {
             el.dataset.sortableItemsActivated = true;
             // It is very important that we call interact on the itemsSelector
             // directly rather than each of the nodes matching this selector
@@ -293,7 +299,7 @@ var _sortable = function (el, options) {
             // the dropzone of the sortable parent on the node itself while we
             // set the dropzones of the items on the selector.
             var itemsInteractable = interact(itemsSelector).dropzone({
-                accept: itemsSelector,
+                accept: items,
                 checker: check,
                 overlap: tolerance || 'center',
                 ondropactivate: options.onitemdropactivate,
@@ -433,7 +439,7 @@ var _sortable = function (el, options) {
 
     // Make el interactjs droppable
     var interactable = interact(el).dropzone({
-        accept: itemsSelector,
+        accept: items,
         checker: check,
         overlap: tolerance || 'center',
         ondropactivate: ondropactivate,
@@ -450,7 +456,7 @@ var _sortable = function (el, options) {
     el.addEventListener('pointerdown', function (ev) {
         // Only allow to drag from the handle if it is defined
         // Any part of any item is valid for dragging otherwise
-        var item = ev.target.closest(itemsSelector);
+        var item = ev.target.closest(items);
         var itemHandle = handle ? ev.target.closest(handle): item;
         if (item && itemHandle) {
             if (!item.dataset.sortableItemDraggable) {
