@@ -1,7 +1,11 @@
 odoo.define('web.interact', function (require) {
 "use strict";
 
-var placeholderIdentifier = 'o_sortable_placeholder';
+//--------------------------------------------------------------------------
+// Draggable
+//--------------------------------------------------------------------------
+
+var currentlyDraggingClass = 'o_draggable_moving';
 
 /**
  * Store current values of CSS properties that will change while dragging
@@ -99,7 +103,7 @@ var _draggable = function (el, options) {
             }
             el.addEventListener('click', preventClick, { capture: true });
 
-            target.classList.add('o_currently_dragged');
+            target.classList.add(currentlyDraggingClass);
             if (options.onstart) {
                 options.onstart(ev);
             }
@@ -128,7 +132,7 @@ var _draggable = function (el, options) {
         // the same state as before dragging. These properties can be accessed
         // by the user in its own onend function if needed.
         onend: function (ev) {
-            ev.target.classList.remove('o_currently_dragged');
+            ev.target.classList.remove(currentlyDraggingClass);
 
             if (options.onend) {
                 options.onend(ev);
@@ -142,6 +146,14 @@ var _draggable = function (el, options) {
 
     return interact(el).draggable(interactOptions);
 };
+
+//--------------------------------------------------------------------------
+// Sortable
+//--------------------------------------------------------------------------
+
+var sortableClass = 'o_sortable';
+var sortableHandleClass = sortableClass + '_handle';
+var placeholderIdentifier = sortableClass + '_placeholder';
 
 /**
  * Returns the first placeholder found in an element or null if there is none.
@@ -177,7 +189,7 @@ var _setPlaceholder = function (sortable, item, anchor, connectWith) {
             placeholder = item.cloneNode(true); // deep cloning
             placeholder.id = placeholderIdentifier;
             placeholder.style.opacity = 0;
-            placeholder.classList.remove('o_currently_dragged');
+            placeholder.classList.remove(currentlyDraggingClass);
             _resetDraggableProperties(placeholder);
         }
 
@@ -243,7 +255,7 @@ var _sortable = function (el, options) {
 
     // TODO: comment
     if (!el.id) {
-        el.id = _.uniqueId('o_sortable_');
+        el.id = _.uniqueId(sortableClass + '_');
     }
     var itemsSelector = '#' + el.id + ' ' + options.items;
 
@@ -495,7 +507,7 @@ var _sortable = function (el, options) {
                 }
                 _draggable(item, itemsDraggableOptions);
                 item.dataset.sortableItemDraggable = true;
-                itemHandle.classList.add('o_sortable_handle');
+                itemHandle.classList.add(sortableHandleClass);
             } else {
                 // Dragging has already been setup but was disabled to prevent
                 // interactjs from displaying a move cursor. Re-enable it.
@@ -504,7 +516,7 @@ var _sortable = function (el, options) {
         }
     });
 
-    el.classList.add('o_sortable');
+    el.classList.add(sortableClass);
     return interactable;
 };
 
@@ -526,11 +538,20 @@ var _isSet = function (el) {
 var _unset = function (el) {
     var interactable = interact(el);
     if (interactable.options.drop.enabled) {
-        // Unset draggable items of sortable
+        // Unset draggable items of sortable and clean the nodes
         var itemsSelector = interactable.options.drop.accept;
         if (itemsSelector && el.dataset.sortableItemsActivated) {
             delete el.dataset.sortableItemsActivated;
             interact(itemsSelector).unset();
+            el.querySelectorAll(itemsSelector).forEach(function(item) {
+                delete item.dataset.sortableItemDraggable;
+                // Remove handle class
+                item.classList.remove(sortableHandleClass);
+                var handle = item.querySelector('.' + sortableHandleClass);
+                if (handle){
+                    handle.remove(sortableHandleClass);
+                }
+            })
         }
     }
     interactable.unset();
