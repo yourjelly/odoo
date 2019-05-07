@@ -59,7 +59,6 @@ var _draggable = function (el, options) {
         // On drag start, we prepare the element to be dragged around.
         onstart: function (ev) {
             var target = ev.target;
-            target.classList.add('o_currently_dragged');
             _storeDraggableProperties(target);
 
             // Freeze the dimensions of the element as it appears now, since
@@ -100,6 +99,7 @@ var _draggable = function (el, options) {
             }
             el.addEventListener('click', preventClick, { capture: true });
 
+            target.classList.add('o_currently_dragged');
             if (options.onstart) {
                 options.onstart(ev);
             }
