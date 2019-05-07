@@ -8,7 +8,7 @@ odoo.define('web.interact', function (require) {
 var currentlyDraggingClass = 'o_draggable_moving';
 
 /**
- * Store current values of CSS properties that will change while dragging
+ * Store current values of CSS properties that will change while dragging.
  *
  * @param {DOMElement} el
 */
@@ -23,7 +23,7 @@ var _storeDraggableProperties = function(el) {
 };
 
 /**
- * Reset CSS properties to what they were before dragging
+ * Reset CSS properties to what they were before dragging.
  *
  * @param {DOMElement} el
  * @param {integer} [delay] in ms for the reset animation
@@ -253,7 +253,9 @@ var _sortable = function (el, options) {
     var items = options.items;
     var tolerance = options.tolerance;
 
-    // TODO: comment
+    // We need this sortable to be uniquely targettable by a CSS selector. See
+    // the comment above the definition of the itemsInteractable variable for
+    // more information. To achieve this goal, we assign an ID to the sortable.
     if (!el.id) {
         el.id = _.uniqueId(sortableClass + '_');
     }
@@ -282,8 +284,16 @@ var _sortable = function (el, options) {
         return drop && (fromThisSortable || fromConnectedSortable);
     }
 
-    // When dragging starts, we need to create a first placeholder and make all
-    // items in this sortable droppable so they can react to the dragged item.
+    /**
+     * When dragging starts, creates the very first placeholder in the sortable
+     * containing the currenty dragged item and make all items in this sortable
+     * into a dropzone so they can react to the item being dragged over them.
+     *
+     * @param {InteractEvent} ev dropactivate event
+     * @param {DOMElement} ev.target dropzone element activating
+     * @param {DOMElement} ev.relatedTarget currently dragged element
+     *
+     */
     var ondropactivate = function (ev) {
         // Create the very first placeholder in the spot of the draggable item
         var sortable = ev.target;
@@ -296,6 +306,70 @@ var _sortable = function (el, options) {
         // Set droppable on all items in this sortable
         if (items && !el.dataset.sortableItemsActivated) {
             el.dataset.sortableItemsActivated = true;
+
+            /**
+             * When a draggable item is being dragged over other items of this
+             * sortable, check if the items need to make way for the placeholder
+             * then set the placeholder to its correct position.
+             *
+             * @param {InteractEvent} ev dropmove event
+             * @param {InteractEvent} ev.dragEvent related dragmove event
+             * @param {float} ev.dragEvent.dx pointer move x coordinates delta
+             * @param {float} ev.dragEvent.dy pointer move y coordinates delta
+             * @param {DOMElement} ev.target dropzone element activating
+             * @param {DOMElement} ev.relatedTarget currently dragged element
+             *
+             */
+            var ondropmove = function (ev) {
+                var drop = ev.target;
+                var drag = ev.relatedTarget;
+                var dy = ev.dragEvent.dy;
+                var dx = ev.dragEvent.dx;
+
+                var shouldMakeWay = true;
+                // We trust interactjs for overlap pointer, but overlap
+                // center only tests if the center of the draggable is
+                // currently inside the dropzone element, which is not
+                // enough for us. We want to only make way if the center of
+                // the draggable has crossed the center of the dropzone.
+                if (tolerance !== 'pointer') {
+                    var crossedY;
+                    var crossedX;
+                    var dropRect = drop.getBoundingClientRect();
+                    var dragRect = drag.getBoundingClientRect();
+                    if (!axis || axis === 'y') {
+                        var dropY = dropRect.top + dropRect.height / 2;
+                        var dragY = dragRect.top + dragRect.height / 2;
+                        crossedY = dy > 0 === dragY > dropY;
+                    }
+                    if (!axis || axis === 'x') {
+                        var dropX = dropRect.left + dropRect.width / 2;
+                        var dragX = dragRect.left + dragRect.width / 2;
+                        crossedX = dx > 0 === dragX > dropX;
+                    }
+                    if (!axis) {
+                        var moreVertical = Math.abs(dy) > Math.abs(dx);
+                        crossedY = crossedY && moreVertical;
+                        crossedX = crossedX && !moreVertical;
+                    }
+                    shouldMakeWay = crossedY || crossedX;
+                }
+
+                if (shouldMakeWay) {
+                    var anchor = ev.target;
+                    // If the pointer comes from above or directly left,
+                    // the placeholder must come after the item.
+                    if (dy > 0 || (dy === 0 && dx > 0)) {
+                        anchor = anchor.nextSibling;
+                    }
+                    _setPlaceholder(el, drag, anchor, connectWith);
+
+                    if (options.onsort) {
+                        options.onsort(ev);
+                    }
+                }
+            };
+
             // It is very important that we call interact on the itemsSelector
             // directly rather than each of the nodes matching this selector
             // separately. Calling interact with a selector matching a single
@@ -315,57 +389,10 @@ var _sortable = function (el, options) {
                 checker: check,
                 overlap: tolerance || 'center',
                 ondropactivate: options.onitemdropactivate,
-                ondropmove: function (ev) {
-                    var drop = ev.target;
-                    var drag = ev.relatedTarget;
-                    var dy = ev.dragEvent.dy;
-                    var dx = ev.dragEvent.dx;
-
-                    var shouldMakeWay = true;
-                    // We trust interactjs for overlap pointer, but overlap
-                    // center only tests if the center of the draggable is
-                    // currently inside the dropzone element, which is not
-                    // enough for us. We want to only make way if the center of
-                    // the draggable has crossed the center of the dropzone.
-                    if (tolerance !== 'pointer') {
-                        var crossedY;
-                        var crossedX;
-                        var dropRect = drop.getBoundingClientRect();
-                        var dragRect = drag.getBoundingClientRect();
-                        if (!axis || axis === 'y') {
-                            var dropY = dropRect.top + dropRect.height / 2;
-                            var dragY = dragRect.top + dragRect.height / 2;
-                            crossedY = dy > 0 === dragY > dropY;
-                        }
-                        if (!axis || axis === 'x') {
-                            var dropX = dropRect.left + dropRect.width / 2;
-                            var dragX = dragRect.left + dragRect.width / 2;
-                            crossedX = dx > 0 === dragX > dropX;
-                        }
-                        if (!axis) {
-                            var moreVertical = Math.abs(dy) > Math.abs(dx);
-                            crossedY = crossedY && moreVertical;
-                            crossedX = crossedX && !moreVertical;
-                        }
-                        shouldMakeWay = crossedY || crossedX;
-                    }
-
-                    if (shouldMakeWay) {
-                        var anchor = ev.target;
-                        // If the pointer comes from above or directly left,
-                        // the placeholder must come after the item.
-                        if (dy > 0 || (dy === 0 && dx > 0)) {
-                            anchor = anchor.nextSibling;
-                        }
-                        _setPlaceholder(el, drag, anchor, connectWith);
-
-                        if (options.onsort) {
-                            options.onsort(ev);
-                        }
-                    }
-                },
+                ondropmove: ondropmove,
                 ondropdeactivate: options.onitemdropdeactivate,
             });
+
             // When we enter here for the first time, ondropactivate
             // has already been fired, but it was not fired on the
             // children since they were not droppable yet, so we
@@ -385,9 +412,16 @@ var _sortable = function (el, options) {
         }
     };
 
-    // When a dragged item enters the sortable, we create a placeholder at the
-    // end of the sortable, no matter where the dragged item is entering the
-    // sortable from. This is similar to jQuery-ui behavior.
+    /**
+     * When a dragged item enters the sortable, create a placeholder at the
+     * end of the sortable, no matter where the dragged item is entering the
+     * sortable from. This is similar to jQuery-ui behavior.
+     *
+     * @param {InteractEvent} ev dragenter event
+     * @param {DOMElement} ev.target dropzone element activating
+     * @param {DOMElement} ev.relatedTarget currently dragged element
+     *
+     */
     var ondragenter = function (ev) {
         if (!_getPlaceholder(el)) {
             // We need to check for existing placeholders as hovering the
@@ -401,7 +435,17 @@ var _sortable = function (el, options) {
         }
     };
 
-    // When dragging stops, the droppable which last had the placeholder wins.
+    /**
+     * When dragging stops, move the item into the spot of the last placeholder,
+     * then remove the placeholder and reset the item draggable properties.
+     * The move is asynchronous if revert is defined for this sortable because
+     * it needs to wait for the end of the animation to avoid interrupting it.
+     *
+     * @param {InteractEvent} ev dragstop event
+     * @param {DOMElement} ev.target dropzone element activating
+     * @param {DOMElement} ev.relatedTarget currently dragged element
+     *
+     */
     var ondropdeactivate = function (ev) {
         var sortable = ev.target;
         var draggable = ev.relatedTarget;
@@ -418,6 +462,7 @@ var _sortable = function (el, options) {
             } else {
                 revert = options.revert;
             }
+
             var move = function () {
                 placeholder.parentNode.insertBefore(draggable, placeholder);
                 _cleanPlaceholder(sortable);
@@ -464,10 +509,10 @@ var _sortable = function (el, options) {
     interact.dynamicDrop(true);
 
     // Set draggable on items on first pointerdown as some items might not be in
-    // the dom yet so we can't just simply draggable on them now.
+    // the dom yet so we can't just simply set draggable on them now.
     el.addEventListener('pointerdown', function (ev) {
-        // Only allow to drag from the handle if it is defined
-        // Any part of any item is valid for dragging otherwise
+        // Only allow to drag from the handle if it is defined.
+        // Any part of any item is valid for dragging otherwise.
         var item = ev.target.closest(items);
         var itemHandle = handle ? ev.target.closest(handle): item;
         if (item && itemHandle) {
@@ -521,7 +566,7 @@ var _sortable = function (el, options) {
 };
 
 /**
- * Check whether an element has interactions bound to it
+ * Check whether an element has interactions bound to it.
  *
  * @param {DOMElement} el
  * @returns {boolean} true if any interact listeners bound to it false otherwise
@@ -531,7 +576,7 @@ var _isSet = function (el) {
 };
 
 /**
- * Unbind the interactions bound to an element by interactjs
+ * Unbind the interactions bound to an element by interactjs.
  *
  * @param {DOMElement} el
  */
@@ -558,7 +603,7 @@ var _unset = function (el) {
 };
 
 /**
- * Override target interactable options with given values
+ * Override target interactable options with given values.
  *
  * @param {DOMElement|string} target identifier for interactable
  * @param {Object} options parameter keys to override in interactable target
