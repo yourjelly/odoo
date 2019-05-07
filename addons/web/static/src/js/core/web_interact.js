@@ -1,7 +1,7 @@
 odoo.define('web.interact', function (require) {
 "use strict";
 
-var placeholderClass = 'o_sortable_placeholder';
+var placeholderIdentifier = 'o_sortable_placeholder';
 
 /**
  * Store current values of CSS properties that will change while dragging
@@ -144,13 +144,13 @@ var _draggable = function (el, options) {
 };
 
 /**
- * Returns the placeholder from a given sortable or null if none can be found.
+ * Returns the first placeholder found in an element or null if there is none.
  *
- * @param {DOMElement} sortable
+ * @param {DOMElement} el
  * @returns {DOMElement|null}
  */
-var _getPlaceholder = function (sortable) {
-    return sortable.querySelector('.' + placeholderClass);
+var _getPlaceholder = function (el) {
+    return el.querySelector('#' + placeholderIdentifier);
 };
 
 /**
@@ -165,20 +165,20 @@ var _getPlaceholder = function (sortable) {
  */
 var _setPlaceholder = function (sortable, item, anchor, connectWith) {
     // Only update the placeholder if it would move it somewhere else
-    if (!anchor || !anchor.classList.contains(placeholderClass)) {
-        var placeholder = _getPlaceholder(sortable);
+    if (!anchor || anchor.id != placeholderIdentifier) {
+        // The placeholder should be unique among all connectWith sortables
+        var placeholder = _getPlaceholder(connectWith ? document: sortable);
         if (!placeholder) {
-            // Generate a brand new placeholder
-            var computedStyle = window.getComputedStyle(item);
-            placeholder = document.createElement(item.tagName);
-            placeholder.classList.add(placeholderClass);
-            placeholder.style.margin = computedStyle.margin;
-
-            // Placeholder need content to have a size in some CSS situations
-            var placeholderContent = document.createElement('div');
-            placeholderContent.style.width = computedStyle.width;
-            placeholderContent.style.height = computedStyle.height;
-            placeholder.appendChild(placeholderContent);
+            // Generate a brand new placeholder by deep cloning the dragged
+            // item since we need its content so that it can have the same size.
+            // Just manually setting the size would not work as it would force
+            // the placeholder to have a size in contexts where the items
+            // themselves have no size. (e.g. records in folded column)
+            placeholder = item.cloneNode(true); // deep cloning
+            placeholder.id = placeholderIdentifier;
+            placeholder.style.opacity = 0;
+            placeholder.classList.remove('o_currently_dragged');
+            _resetDraggableProperties(placeholder);
         }
 
         // Clean previous placeholders
