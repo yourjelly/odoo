@@ -210,7 +210,7 @@ var KanbanRecord = Widget.extend({
      * @private
      */
     _openRecord: function () {
-        if (this.$el.hasClass('o_currently_dragged')) {
+        if (this.$el.hasClass('o_draggable_moving')) {
             // this record is currently being dragged and dropped, so we do not
             // want to open it.
             return;
