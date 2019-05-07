@@ -406,7 +406,7 @@ var _sortable = function (el, options) {
 
                 // The position in the DOM has been updated, we can undo the CSS
                 // trick that made them draggable like absolute positioning etc.
-                _resetDraggableProperties(draggable, revert);
+                _resetDraggableProperties(draggable);
                 // Interactjs draggable displays a 'move' cursor when hovering
                 // an element that has previously been set to draggable. As long
                 // as we do not set draggable on all sortable items directly, we
