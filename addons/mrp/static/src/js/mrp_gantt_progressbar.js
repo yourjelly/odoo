@@ -29,7 +29,7 @@ odoo.define('mrp.mrp_gantt_progressbar', function (require) {
                     return ['done', 'cancel'].indexOf(rec.state) == -1
                 });
             });
-            var rows = this._super.apply(this, arguments)
+            var rows = this._super.apply(this, arguments);
             return _.filter(rows, function (row) {
                 return row.pills.length;
             });

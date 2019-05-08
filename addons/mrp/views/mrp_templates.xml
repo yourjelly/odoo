@@ -18,6 +18,7 @@
     <template id="qunit_suite" inherit_id="web.qunit_suite">
         <xpath expr="//script[last()]" position="after">
             <script type="text/javascript" src="/mrp/static/tests/mrp_tests.js"/>
+            <script type="text/javascript" src="/mrp/static/tests/mrp_gantt_progressbar_tests.js"/>
         </xpath>
     </template>
 
