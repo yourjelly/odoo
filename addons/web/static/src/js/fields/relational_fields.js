@@ -300,7 +300,10 @@ var FieldMany2One = AbstractField.extend({
             open: function (event) {
                 self._onScroll = function (ev) {
                     if (ev.target !== self.$input.get(0) && self.$input.hasClass('ui-autocomplete-input')) {
+                        console.log('Scroll triggered an autocomplete close');
                         self.$input.autocomplete('close');
+                    } else {
+                        console.log('Unexpected scroll');
                     }
                 };
                 window.addEventListener('scroll', self._onScroll, true);
