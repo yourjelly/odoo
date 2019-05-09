@@ -176,11 +176,6 @@ class PortalChatter(http.Controller):
     @http.route('/portal/binary/upload_attachment', type='http', auth="public")
     def upload_attachment(self, callback, model, id, ufile, **kwargs):
         files = request.httprequest.files.getlist('ufile')
-        out = """<script language="javascript" type="text/javascript">
-                    var win = window.top.window;
-                    win.jQuery(win).trigger(%s, %s);
-                </script>"""
-
         access_token = kwargs.get('access_token')
         res_id = int(id)
 
@@ -192,7 +187,14 @@ class PortalChatter(http.Controller):
             raise Forbidden()
 
         args = request.env['ir.http']._process_uploaded_files(files, model, res_id)
-        return out % (json.dumps(callback), json.dumps(args))
+        result = {
+            'files': args,
+            'form': callback,
+        }
+        resp = json.dumps(result)
+        headers = [('Content-Type', 'application/json'),
+                   ('X-Content-Type-Options', 'nosniff')]
+        return request.make_response(resp, headers)
 
     @http.route('/portal/binary/unlink_attachment', type='json', auth="public")
     def unlink_attachment(self, attachment_id, attachment_token, res_model, res_id, document_token=None):

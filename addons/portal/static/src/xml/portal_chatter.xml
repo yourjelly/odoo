@@ -80,7 +80,6 @@
                 <input type="file" class="o_input_file" name="ufile" t-att="{'multiple': multi_upload ? 'multiple' : null}"/>
                 <t t-raw="0"/>
             </form>
-            <iframe t-att-id="fileuploadID" t-att-name="fileuploadID" style="display: none"/>
         </div>
     </t>
 

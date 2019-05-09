@@ -48,7 +48,6 @@ var PortalComposer = publicWidget.Widget.extend({
         //portal chatter
         this.$attachmentButton = this.$('.o_portal_chatter_attachment_btn');
         this.$composerSendButton = this.$(".o_portal_chatter_composer_btn");
-        $(window).on(this.fileuploadID, this._onAttachmentLoaded.bind(this));
         this.on("change:attachmentIDs", this, this._renderAttachments);
 
         return this._super.apply(this, arguments);
@@ -74,6 +73,7 @@ var PortalComposer = publicWidget.Widget.extend({
      * @private
      */
     _onAttachmentChange: function (ev) {
+        var self = this;
         var files = ev.target.files,
             attachments = this.get('attachmentIDs');
 
@@ -83,7 +83,24 @@ var PortalComposer = publicWidget.Widget.extend({
                 attachments = _.without(attachments, duplicateAttachment);
             }
         });
-        this.$('form.o_form_binary_form').submit();
+        var $form = this.$('form.o_form_binary_form');
+        var data = new FormData($form[0]);
+        _.each(files, function (file) {
+
+            data.delete("ufile");
+            data.append("ufile", file, file.name);
+            $.ajax({
+                url: $form.attr("action"),
+                type: "POST",
+                enctype: 'multipart/form-data',
+                processData: false,
+                contentType: false,
+                data: data,
+                success: function (result) {
+                    self._onAttachmentLoaded(result);
+                }
+            });
+        });
         this.$attachmentButton.prop('disabled', true);
         this.$composerSendButton.prop('disabled', true);
         var uploadAttachments = _.map(files, function (file) {
@@ -97,6 +114,7 @@ var PortalComposer = publicWidget.Widget.extend({
                 'access_token': file.access_token,
             };
         });
+
         attachments = attachments.concat(uploadAttachments);
         this.set('attachmentIDs', attachments);
         this.$('.o_portal_chatter_warning').remove();
@@ -137,10 +155,9 @@ var PortalComposer = publicWidget.Widget.extend({
      * @private
      */
     _onAttachmentLoaded: function (ev) {
-        var attachments = this.get('attachmentIDs'),
-            files = Array.prototype.slice.call(arguments, 1);
+        var attachments = this.get('attachmentIDs');
 
-        _.each(files, function (file) {
+        _.each(ev['files'], function (file) {
             if (file.error || !file.id) {
                 this.display_alert(file.error);
                 attachments = _.filter(attachments, function (attachment) { 
