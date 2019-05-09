@@ -1412,6 +1412,10 @@ class _String(Field):
         else:
             return value
 
+    def convert_to_display_name(self, value, record):
+        """ Convert ``value`` from the record format to a suitable display name. """
+        return ustr(value or "")
+
 
 class Char(_String):
     """ Basic string field, can be length-limited, usually displayed as a
