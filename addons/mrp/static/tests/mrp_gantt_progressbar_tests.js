@@ -1,6 +1,8 @@
 odoo.define('mrp_gantt_progressbar.tests', function (require) {
 "use strict";
 
+var GanttView = require('web_gantt.GanttView');
+var GanttRenderer = require('web_gantt.GanttRenderer');
 var MrpGanttView = require('mrp.mrp_gantt_progressbar');
 var testUtils = require("web.test_utils");
 

@@ -15,6 +15,7 @@
     <t t-extend="gantt-popover">
         <t t-jquery="ul li:last-child" t-operation="after" t-if="DurationPopover">
             <li><strong>Complete Percentage:</strong> <t t-esc="duration"/>%</li>
+            <li t-if="state == 'progress' &amp; duration &gt; 0 &amp; duration &lt; 100"><strong>Work Center:</strong> Unavailable</li>
         </t>
     </t>
 
