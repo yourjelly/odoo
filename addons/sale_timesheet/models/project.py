@@ -147,7 +147,10 @@ class ProjectTask(models.Model):
                 sale_line_id = project.sale_line_id.id
         return sale_line_id
 
-    sale_line_id = fields.Many2one('sale.order.line', 'Sales Order Item', default=_default_sale_line_id, domain="[('is_service', '=', True), ('order_partner_id', '=', partner_id), ('is_expense', '=', False), ('state', 'in', ['sale', 'done'])]",
+    def _default_domain_sale_line_id(self):
+        return "[('is_service', '=', True), ('order_partner_id', '=', partner_id), ('is_expense', '=', False), ('state', 'in', ['sale', 'done'])]"
+
+    sale_line_id = fields.Many2one('sale.order.line', 'Sales Order Item', default=_default_sale_line_id,
         help="Sales order item to which the task is linked. If an employee timesheets on a this task, "
         "and if this employee is not in the 'Employee/Sales Order Item Mapping' of the project, the "
         "timesheet entry will be linked to this sales order item.")
@@ -211,26 +214,12 @@ class ProjectTask(models.Model):
         return result
 
     @api.multi
-    @api.constrains('sale_line_id')
-    def _check_sale_line_type(self):
-        for task in self:
-            if task.sale_line_id:
-                if not task.sale_line_id.is_service or task.sale_line_id.is_expense:
-                    raise ValidationError(_('You cannot link the order item %s - %s to this task because it is a re-invoiced expense.' % (task.sale_line_id.order_id.id, task.sale_line_id.product_id.name)))
-
-    @api.multi
     def write(self, values):
         if values.get('project_id'):
             project_dest = self.env['project.project'].browse(values['project_id'])
             if project_dest.billable_type == 'employee_rate':
                 values['sale_line_id'] = False
         return super(ProjectTask, self).write(values)
-
-    @api.multi
-    def unlink(self):
-        if any(task.sale_line_id for task in self):
-            raise ValidationError(_('You have to unlink the task from the sale order item in order to delete it.'))
-        return super(ProjectTask, self).unlink()
 
     # ---------------------------------------------------
     # Subtasks
