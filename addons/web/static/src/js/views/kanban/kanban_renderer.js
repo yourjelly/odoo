@@ -459,6 +459,9 @@ var KanbanRenderer = BasicRenderer.extend({
                 if (self.opensFromM2O) {
                     self.$el.find('.o_m2o_hidden').addClass('o_active');
                 }
+                if (!self.opensFromM2O) {
+                    self.$el.find('.o_m2o_visible').addClass('o_active');
+                }
                 self._toggleNoContentHelper();
                 if (self._isInDom) {
                     _.invoke(self.widgets, 'on_attach_callback');
