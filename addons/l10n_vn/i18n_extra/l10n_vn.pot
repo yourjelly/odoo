@@ -22,18 +22,18 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart335
-#: model:account.account.tag,name:l10n_vn.account_tag_335
+#: model:account.group,name:l10n_vn.account_group_335
 #: model:account.account.template,name:l10n_vn.chart335
 msgid "Accured Expenses"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_141
+#: model:account.group,name:l10n_vn.account_group_141
 msgid "Advances"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_229
+#: model:account.group,name:l10n_vn.account_group_229
 msgid "Allowance for impairment of assets (credit balance)"
 msgstr ""
 
@@ -143,7 +143,7 @@ msgid "Bonds"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_353
+#: model:account.group,name:l10n_vn.account_group_353
 msgid "Bonus and welfare fund"
 msgstr ""
 
@@ -160,7 +160,7 @@ msgid "Borrowing loans"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_341
+#: model:account.group,name:l10n_vn.account_group_341
 msgid "Borrowings and finance lease liabilities"
 msgstr ""
 
@@ -187,7 +187,7 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart441
-#: model:account.account.tag,name:l10n_vn.account_tag_441
+#: model:account.group,name:l10n_vn.account_group_441
 #: model:account.account.template,name:l10n_vn.chart441
 msgid "Capital expenditure funds"
 msgstr ""
@@ -199,17 +199,17 @@ msgid "Capital surplus"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_111
+#: model:account.group,name:l10n_vn.account_group_111
 msgid "Cash"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_112
+#: model:account.group,name:l10n_vn.account_group_112
 msgid "Cash in banks"
 msgstr ""
 
 #. module: l10n_vn
-#: model:ir.model.fields,field_description:l10n_vn.field_account_account_tag__code
+#: model:ir.model.fields,field_descriptigroupfield_account_account_group__code
 msgid "Code"
 msgstr ""
 
@@ -226,7 +226,7 @@ msgid "Construction Contracts"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_241
+#: model:account.group,name:l10n_vn.account_group_241
 msgid "Construction in progress"
 msgstr ""
 
@@ -244,7 +244,7 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart4111
-#: model:account.account.tag,name:l10n_vn.account_tag_4111
+#: model:account.group,name:l10n_vn.account_group_4111
 #: model:account.account.template,name:l10n_vn.chart4111
 msgid "Contributed capital"
 msgstr ""
@@ -274,13 +274,13 @@ msgid "Corporate income tax"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_623
+#: model:account.group,name:l10n_vn.account_group_623
 msgid "Costs of construction machinery"
 msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart632
-#: model:account.account.tag,name:l10n_vn.account_tag_632
+#: model:account.group,name:l10n_vn.account_group_632
 #: model:account.account.template,name:l10n_vn.chart632
 msgid "Costs of goods sold"
 msgstr ""
@@ -328,7 +328,7 @@ msgid "Deductible Fixed Assets VAT 5%"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_133
+#: model:account.group,name:l10n_vn.account_group_133
 msgid "Deductible VAT"
 msgstr ""
 
@@ -358,21 +358,21 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart243
-#: model:account.account.tag,name:l10n_vn.account_tag_243
+#: model:account.group,name:l10n_vn.account_group_243
 #: model:account.account.template,name:l10n_vn.chart243
 msgid "Deferred tax assets"
 msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart347
-#: model:account.account.tag,name:l10n_vn.account_tag_347
+#: model:account.group,name:l10n_vn.account_group_347
 #: model:account.account.template,name:l10n_vn.chart347
 msgid "Deferred tax liabilities"
 msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart344
-#: model:account.account.tag,name:l10n_vn.account_tag_344
+#: model:account.group,name:l10n_vn.account_group_344
 #: model:account.account.template,name:l10n_vn.chart344
 msgid "Deposits received"
 msgstr ""
@@ -384,7 +384,7 @@ msgid "Deprecation of finance lease fixed assets"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_214
+#: model:account.group,name:l10n_vn.account_group_214
 msgid "Deprecation of fixed assets"
 msgstr ""
 
@@ -413,21 +413,21 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart412
-#: model:account.account.tag,name:l10n_vn.account_tag_412
+#: model:account.group,name:l10n_vn.account_group_412
 #: model:account.account.template,name:l10n_vn.chart412
 msgid "Differences upon asset revaluation"
 msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart622
-#: model:account.account.tag,name:l10n_vn.account_tag_622
+#: model:account.group,name:l10n_vn.account_group_622
 #: model:account.account.template,name:l10n_vn.chart622
 msgid "Direct labour costs"
 msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart621
-#: model:account.account.tag,name:l10n_vn.account_tag_621
+#: model:account.group,name:l10n_vn.account_group_621
 #: model:account.account.template,name:l10n_vn.chart621
 msgid "Direct raw material costs"
 msgstr ""
@@ -450,7 +450,7 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart417
-#: model:account.account.tag,name:l10n_vn.account_tag_417
+#: model:account.group,name:l10n_vn.account_group_417
 #: model:account.account.template,name:l10n_vn.chart417
 msgid "Enterprise reorganization assistance fund"
 msgstr ""
@@ -469,7 +469,7 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart3338
-#: model:account.account.tag,name:l10n_vn.account_tag_3338
+#: model:account.group,name:l10n_vn.account_group_3338
 #: model:account.account.template,name:l10n_vn.chart3338
 msgid "Environment protection tax and other taxes"
 msgstr ""
@@ -481,7 +481,7 @@ msgid "Equipment and spare parts for replacement"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_413
+#: model:account.group,name:l10n_vn.account_group_413
 msgid "Exchange rate differences"
 msgstr ""
 
@@ -511,7 +511,7 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart8111
-#: model:account.account.tag,name:l10n_vn.account_tag_8111
+#: model:account.group,name:l10n_vn.account_group_8111
 #: model:account.account.template,name:l10n_vn.chart8111
 msgid "Expense for asset liquidations"
 msgstr ""
@@ -544,7 +544,7 @@ msgid "Export tax 5%"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_627
+#: model:account.group,name:l10n_vn.account_group_627
 msgid "Factory overheads"
 msgstr ""
 
@@ -561,7 +561,7 @@ msgid "Fees, charges and other payables"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_212
+#: model:account.group,name:l10n_vn.account_group_212
 msgid "Finance lease fixed assets"
 msgstr ""
 
@@ -585,14 +585,14 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart515
-#: model:account.account.tag,name:l10n_vn.account_tag_515
+#: model:account.group,name:l10n_vn.account_group_515
 #: model:account.account.template,name:l10n_vn.chart515
 msgid "Financial income"
 msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart155
-#: model:account.account.tag,name:l10n_vn.account_tag_155
+#: model:account.group,name:l10n_vn.account_group_155
 #: model:account.account.template,name:l10n_vn.chart155
 msgid "Finished goods"
 msgstr ""
@@ -639,7 +639,7 @@ msgid "Foreign currencies"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_642
+#: model:account.group,name:l10n_vn.account_group_642
 msgid "General administration expenses"
 msgstr ""
 
@@ -650,21 +650,21 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart158
-#: model:account.account.tag,name:l10n_vn.account_tag_158
+#: model:account.group,name:l10n_vn.account_group_158
 #: model:account.account.template,name:l10n_vn.chart158
 msgid "Goods in bonded warehouse"
 msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart151
-#: model:account.account.tag,name:l10n_vn.account_tag_151
+#: model:account.group,name:l10n_vn.account_group_151
 #: model:account.account.template,name:l10n_vn.chart151
 msgid "Goods in transit"
 msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart171
-#: model:account.account.tag,name:l10n_vn.account_tag_171
+#: model:account.group,name:l10n_vn.account_group_171
 #: model:account.account.template,name:l10n_vn.chart171
 msgid "Government bonds purchased for resale"
 msgstr ""
@@ -711,7 +711,7 @@ msgid "Health insurance"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_128
+#: model:account.group,name:l10n_vn.account_group_128
 msgid "Held to maturity investments"
 msgstr ""
 
@@ -792,20 +792,20 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart911
-#: model:account.account.tag,name:l10n_vn.account_tag_911
+#: model:account.group,name:l10n_vn.account_group_911
 #: model:account.account.template,name:l10n_vn.chart911
 msgid "Income Summary"
 msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart7111
-#: model:account.account.tag,name:l10n_vn.account_tag_7111
+#: model:account.group,name:l10n_vn.account_group_7111
 #: model:account.account.template,name:l10n_vn.chart7111
 msgid "Income for asset liquidations"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_821
+#: model:account.group,name:l10n_vn.account_group_821
 msgid "Income tax expense (benefit)"
 msgstr ""
 
@@ -816,12 +816,12 @@ msgid "Instruments for renting"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_213
+#: model:account.group,name:l10n_vn.account_group_213
 msgid "Intangible fixed assets"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_336
+#: model:account.group,name:l10n_vn.account_group_336
 msgid "Intra-company payables"
 msgstr ""
 
@@ -844,7 +844,7 @@ msgid "Intra-company payables for operating capital received"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_136
+#: model:account.group,name:l10n_vn.account_group_136
 msgid "Intra-company receivables"
 msgstr ""
 
@@ -862,14 +862,14 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart414
-#: model:account.account.tag,name:l10n_vn.account_tag_414
+#: model:account.group,name:l10n_vn.account_group_414
 #: model:account.account.template,name:l10n_vn.chart414
 msgid "Investment and development fund"
 msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart217
-#: model:account.account.tag,name:l10n_vn.account_tag_217
+#: model:account.group,name:l10n_vn.account_group_217
 #: model:account.account.template,name:l10n_vn.chart217
 msgid "Investment properties"
 msgstr ""
@@ -882,20 +882,20 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart222
-#: model:account.account.tag,name:l10n_vn.account_tag_222
+#: model:account.group,name:l10n_vn.account_group_222
 #: model:account.account.template,name:l10n_vn.chart222
 msgid "Investments in joint ventures and associates"
 msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart221
-#: model:account.account.tag,name:l10n_vn.account_tag_221
+#: model:account.group,name:l10n_vn.account_group_221
 #: model:account.account.template,name:l10n_vn.chart221
 msgid "Investments in subsidiaries"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_343
+#: model:account.group,name:l10n_vn.account_group_343
 msgid "Issued bonds"
 msgstr ""
 
@@ -966,7 +966,7 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart6351
-#: model:account.account.tag,name:l10n_vn.account_tag_6351
+#: model:account.group,name:l10n_vn.account_group_6351
 #: model:account.account.template,name:l10n_vn.chart6351
 msgid "Loan interest"
 msgstr ""
@@ -1015,7 +1015,7 @@ msgid "Means of transportation and transmission"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_156
+#: model:account.group,name:l10n_vn.account_group_156
 msgid "Merchandise inventories"
 msgstr ""
 
@@ -1029,7 +1029,7 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart244
-#: model:account.account.tag,name:l10n_vn.account_tag_244
+#: model:account.group,name:l10n_vn.account_group_244
 #: model:account.account.template,name:l10n_vn.chart244
 msgid "Mortgage, collaterals and deposits"
 msgstr ""
@@ -1055,12 +1055,12 @@ msgid "Ninh Thuan"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_161
+#: model:account.group,name:l10n_vn.account_group_161
 msgid "Non-business expenditure out of funds received from the State"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_461
+#: model:account.group,name:l10n_vn.account_group_461
 msgid "Non-business funds"
 msgstr ""
 
@@ -1078,7 +1078,7 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart466
-#: model:account.account.tag,name:l10n_vn.account_tag_466
+#: model:account.group,name:l10n_vn.account_group_466
 #: model:account.account.template,name:l10n_vn.chart466
 msgid "Non-business funds used for fixed asset acquisitions"
 msgstr ""
@@ -1103,7 +1103,7 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart3431
-#: model:account.account.tag,name:l10n_vn.account_tag_3431
+#: model:account.group,name:l10n_vn.account_group_3431
 #: model:account.account.template,name:l10n_vn.chart3431
 msgid "Ordinary bonds"
 msgstr ""
@@ -1128,7 +1128,7 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart418
-#: model:account.account.tag,name:l10n_vn.account_tag_418
+#: model:account.group,name:l10n_vn.account_group_418
 #: model:account.account.template,name:l10n_vn.chart418
 msgid "Other equity funds"
 msgstr ""
@@ -1147,7 +1147,7 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart8112
-#: model:account.account.tag,name:l10n_vn.account_tag_8112
+#: model:account.group,name:l10n_vn.account_group_8112
 #: model:account.account.template,name:l10n_vn.chart8112
 msgid "Other expenses - others"
 msgstr ""
@@ -1166,7 +1166,7 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart7112
-#: model:account.account.tag,name:l10n_vn.account_tag_7112
+#: model:account.group,name:l10n_vn.account_group_7112
 #: model:account.account.template,name:l10n_vn.chart7112
 msgid "Other income - others"
 msgstr ""
@@ -1191,13 +1191,13 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart2288
-#: model:account.account.tag,name:l10n_vn.account_tag_228
+#: model:account.group,name:l10n_vn.account_group_228
 #: model:account.account.template,name:l10n_vn.chart2288
 msgid "Other investments"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_338
+#: model:account.group,name:l10n_vn.account_group_338
 msgid "Other payables"
 msgstr ""
 
@@ -1209,7 +1209,7 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart1388
-#: model:account.account.tag,name:l10n_vn.account_tag_138
+#: model:account.group,name:l10n_vn.account_group_138
 #: model:account.account.template,name:l10n_vn.chart1388
 msgid "Other receivables"
 msgstr ""
@@ -1276,13 +1276,13 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart157
-#: model:account.account.tag,name:l10n_vn.account_tag_157
+#: model:account.group,name:l10n_vn.account_group_157
 #: model:account.account.template,name:l10n_vn.chart157
 msgid "Outward goods on consignment"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_411
+#: model:account.group,name:l10n_vn.account_group_411
 msgid "Owner’s invested equity"
 msgstr ""
 
@@ -1305,7 +1305,7 @@ msgid "Payables on equitization"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_334
+#: model:account.group,name:l10n_vn.account_group_334
 msgid "Payables to employees"
 msgstr ""
 
@@ -1351,14 +1351,14 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart242
-#: model:account.account.tag,name:l10n_vn.account_tag_242
+#: model:account.group,name:l10n_vn.account_group_242
 #: model:account.account.template,name:l10n_vn.chart242
 msgid "Prepaid expenses"
 msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart357
-#: model:account.account.tag,name:l10n_vn.account_tag_357
+#: model:account.group,name:l10n_vn.account_group_357
 #: model:account.account.template,name:l10n_vn.chart357
 msgid "Price stabilization fund"
 msgstr ""
@@ -1377,14 +1377,14 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart631
-#: model:account.account.tag,name:l10n_vn.account_tag_631
+#: model:account.group,name:l10n_vn.account_group_631
 #: model:account.account.template,name:l10n_vn.chart631
 msgid "Production costs"
 msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart337
-#: model:account.account.tag,name:l10n_vn.account_tag_337
+#: model:account.group,name:l10n_vn.account_group_337
 #: model:account.account.template,name:l10n_vn.chart337
 msgid "Progress billing"
 msgstr ""
@@ -1402,7 +1402,7 @@ msgid "Provision expenses"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_352
+#: model:account.group,name:l10n_vn.account_group_352
 msgid "Provisions"
 msgstr ""
 
@@ -1445,7 +1445,7 @@ msgid "Purchase of Goods and Services"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_611
+#: model:account.group,name:l10n_vn.account_group_611
 msgid "Purchases (used for periodic inventory systems)"
 msgstr ""
 
@@ -1488,7 +1488,7 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart152
-#: model:account.account.tag,name:l10n_vn.account_tag_152
+#: model:account.group,name:l10n_vn.account_group_152
 #: model:account.account.template,name:l10n_vn.chart152
 msgid "Raw materials"
 msgstr ""
@@ -1506,7 +1506,7 @@ msgid "Reusable packaging materials"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_521
+#: model:account.group,name:l10n_vn.account_group_521
 msgid "Revenue deductions"
 msgstr ""
 
@@ -1541,7 +1541,7 @@ msgid "Revenue from services rendered"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_511
+#: model:account.group,name:l10n_vn.account_group_511
 msgid "Revenues"
 msgstr ""
 
@@ -1591,7 +1591,7 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart3561
-#: model:account.account.tag,name:l10n_vn.account_tag_356
+#: model:account.group,name:l10n_vn.account_group_356
 #: model:account.account.template,name:l10n_vn.chart3561
 msgid "Science and technology development fund"
 msgstr ""
@@ -1603,7 +1603,7 @@ msgid "Science and technology development fund used for fixed asset acquisition"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_641
+#: model:account.group,name:l10n_vn.account_group_641
 msgid "Selling expenses"
 msgstr ""
 
@@ -1676,7 +1676,7 @@ msgid "Surplus of assets awaitingresolution"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_211
+#: model:account.group,name:l10n_vn.account_group_211
 msgid "Tangible fixed assets"
 msgstr ""
 
@@ -1687,7 +1687,7 @@ msgid "Tax on use of natural resources"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_333
+#: model:account.group,name:l10n_vn.account_group_333
 msgid "Taxes and other payables to State Budget"
 msgstr ""
 
@@ -1729,7 +1729,7 @@ msgid "Thanh Hoa"
 msgstr ""
 
 #. module: l10n_vn
-#: model:ir.model.fields,help:l10n_vn.field_account_account_tag__code
+#: model:ir.model.fields,hegroupfield_account_account_group__code
 msgid "The unique code of the tag. For example, 111 for cash, 112 for cash in banks, etc."
 msgstr ""
 
@@ -1755,7 +1755,7 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart1531
-#: model:account.account.tag,name:l10n_vn.account_tag_153
+#: model:account.group,name:l10n_vn.account_group_153
 #: model:account.account.template,name:l10n_vn.chart1531
 msgid "Tools and supplies"
 msgstr ""
@@ -1773,14 +1773,14 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart331
-#: model:account.account.tag,name:l10n_vn.account_tag_331
+#: model:account.group,name:l10n_vn.account_group_331
 #: model:account.account.template,name:l10n_vn.chart331
 msgid "Trade payables"
 msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart131
-#: model:account.account.tag,name:l10n_vn.account_tag_131
+#: model:account.group,name:l10n_vn.account_group_131
 #: model:account.account.template,name:l10n_vn.chart131
 msgid "Trade receivables"
 msgstr ""
@@ -1792,13 +1792,13 @@ msgid "Trade union fees"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_121
+#: model:account.group,name:l10n_vn.account_group_121
 msgid "Trading Securities"
 msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart419
-#: model:account.account.tag,name:l10n_vn.account_tag_419
+#: model:account.group,name:l10n_vn.account_group_419
 #: model:account.account.template,name:l10n_vn.chart419
 msgid "Treasury shares"
 msgstr ""
@@ -1809,7 +1809,7 @@ msgid "Tuyen Quang"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_421
+#: model:account.group,name:l10n_vn.account_group_421
 msgid "Undistributed profit after tax"
 msgstr ""
 
@@ -1963,7 +1963,7 @@ msgid "VN - Chart of Accounts - C200"
 msgstr ""
 
 #. module: l10n_vn
-#: model:account.account.tag,name:l10n_vn.account_tag_3331
+#: model:account.group,name:l10n_vn.account_group_3331
 msgid "Value Added Tax"
 msgstr ""
 
@@ -2057,7 +2057,7 @@ msgstr ""
 
 #. module: l10n_vn
 #: model:account.account,name:l10n_vn.1_chart154
-#: model:account.account.tag,name:l10n_vn.account_tag_154
+#: model:account.group,name:l10n_vn.account_group_154
 #: model:account.account.template,name:l10n_vn.chart154
 msgid "Work in progress"
 msgstr ""
