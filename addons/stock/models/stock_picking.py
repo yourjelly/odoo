@@ -760,9 +760,6 @@ class Picking(models.Model):
                 'context': self.env.context,
             }
 
-        if self._check_zero_quantity_count():
-            return self.zero_quantity_count()
-
         if self._get_overprocessed_stock_moves() and not self._context.get('skip_overprocessed_check'):
             view = self.env.ref('stock.view_overprocessed_transfer')
             wiz = self.env['stock.overprocessed.transfer'].create({'picking_id': self.id})
@@ -782,6 +779,11 @@ class Picking(models.Model):
         if self._check_backorder():
             return self.action_generate_backorder_wizard()
         self.action_done()
+
+        lines_zero_quantity_count = self._get_lines_zero_quantity_count()
+        if lines_zero_quantity_count:
+            return self.zero_quantity_count(lines_zero_quantity_count)
+
         return
 
     def action_generate_backorder_wizard(self):
@@ -805,21 +807,26 @@ class Picking(models.Model):
         lines_zero_quantity_count = []
         for line in self.move_lines:
             quant_line = Quant.search([['location_id.id', '=', line.location_id.id], ['product_id.id', '=', line.product_id.id]])
-            if quant_line.quantity - line.product_qty == 0:
-                lines_zero_quantity_count.append(line)
+            if quant_line.quantity == 0:
+                lines_zero_quantity_count.append(quant_line)
         return lines_zero_quantity_count
 
-    def _check_zero_quantity_count(self):
-        lines_zero_quantity_count = self._get_lines_zero_quantity_count()
-        if lines_zero_quantity_count:
-            return True
-        return False
-
-    def zero_quantity_count(self):
+    def zero_quantity_count(self, lines_zero_quantity_count):
         #Zero quantity count
-        lines_zero_quantity_count = self._get_lines_zero_quantity_count()
+
+        inventory_lines = []
+        for line in lines_zero_quantity_count:
+            inventory_lines.append(self.env['stock.inventory.line'].create({
+                'product_id': line.product_id.id,
+                'product_uom_id': line.product_id.uom_id.id,
+                'product_uom_category_id': line.product_id.uom_id.category_id.id,
+                'location_id': line.location_id.id,
+                'theoretical_qty': 0,
+            }))
+
+        wiz = self.env['stock.zero.quantity.count'].create({'inventory_lines': [(4, line.id) for line in inventory_lines]})
         view = self.env.ref('stock.view_stock_zero_quantity_count')
-        wiz = self.env['stock.zero.quantity.count'].create({'quant_line_ids': lines_zero_quantity_count})
+
         return {
             'name': _('Zero Quantity Count'),
             'type': 'ir.actions.act_window',
@@ -830,7 +837,7 @@ class Picking(models.Model):
             'view_id': view.id,
             'target': 'new',
             'res_id': wiz.id,
-            'context': self.env.context,
+            'context': self.env.context
         }
 
     def action_toggle_is_locked(self):
