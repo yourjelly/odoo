@@ -193,24 +193,36 @@
                 <div class="oe_kanban_bottom_left" position="inside">
                    <t t-if="record.progress.raw_value &gt; 80 and record.progress.raw_value &lt; 100">
                        <div t-att-class="'oe_kanban_align badge badge-' + (record.progress.raw_value &gt;= 99 ? 'danger': 'warning')" title="Remaining hours">
-                            <field name="remaining_hours" widget="float_time" />
+                           <field name="remaining_hours" widget="float_time" />
                        </div>
                    </t>
                 </div>
-             </field>
-         </record>
+            </field>
+        </record>
 
-         <act_window id="project_task_action_view_timesheet"
+        <act_window id="project_task_action_view_timesheet"
             name="Timesheet Entries"
             src_model="project.task"
             res_model="account.analytic.line"
             view_mode="tree"
             view_id="hr_timesheet_line_tree"
             context="{
-                'search_default_task_id': [active_id],
-                'default_task_id': active_id,
+            'search_default_task_id': [active_id],
+            'default_task_id': active_id,
             }"
         />
+
+        <record id="view_edit_project_template_inherited" model="ir.ui.view">
+            <field name="name">project.project.template.form.inherited</field>
+            <field name="model">project.template</field>
+            <field name="inherit_id" ref="project.edit_project_template"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='extra_settings']" position="inside">
+                    <field name="allow_timesheets"/>
+                    <field name="analytic_account_id"/>
+                </xpath>
+            </field>
+        </record>
 
     </data>
 </odoo>

@@ -153,3 +153,18 @@ class Task(models.Model):
         result = super(Task, self)._fields_view_get(view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
         result['arch'] = self.env['account.analytic.line']._apply_timesheet_label(result['arch'])
         return result
+
+
+class ProjectTemplate(models.Model):
+    _inherit = "project.template"
+
+    allow_timesheets = fields.Boolean("Allow timesheets", default=True, help="Enable timesheeting on the project.")
+    analytic_account_id = fields.Many2one(
+        'account.analytic.account', string="Analytic Account", copy=False, ondelete='set null',
+        help="Analytic account to which this project is linked for financial management."
+        "Use an analytic account to record cost and revenue on your project.")
+
+    def _get_shared_fields(self):
+        fields = super(ProjectTemplate, self)._get_shared_fields()
+        fields.extend(['allow_timesheets', 'analytic_account_id'])
+        return fields

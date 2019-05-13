@@ -383,6 +383,24 @@ class Project(models.Model):
         action_context.pop('group_by', None)
         return dict(action, context=action_context)
 
+    def action_create_template(self):
+        template = self.env['project.template'].create(self._prepare_template_values())
+        template_form_view_id = self.env.ref('project.edit_project_template').id
+        return {
+            'res_id': template.id,
+            'type': 'ir.actions.act_window',
+            'views': [(template_form_view_id, 'form')],
+            'view_mode': 'form',
+            'name': _('Templates'),
+            'res_model': 'project.template',
+            }
+
+    def _prepare_template_values(self):
+        fields = self.env['project.template']._get_shared_fields()
+        values = {field: self[field].id if isinstance(self[field], models.Model) else self[field]
+                  for field in fields if self[field]}
+        return values
+
     # ---------------------------------------------------
     # Rating business
     # ---------------------------------------------------
