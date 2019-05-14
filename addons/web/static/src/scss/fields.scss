@@ -96,6 +96,8 @@
         }
 
         .badge {
+            display: flex;
+            max-width: 100%;
             flex: 0 0 auto;
             border: 0;
             font-size: 12px;
@@ -113,6 +115,7 @@
             }
 
             .o_delete {
+                padding-left: 10px;
                 color: inherit;
                 cursor: pointer;
             }
