@@ -117,8 +117,8 @@ td:not([align]) {
     }
 
     .separator {
-        height: 2px;
-        background-color: $o-mm-def-color-alpha;
+        border-top: 1px solid darken($o-mm-def-color-alpha, 2%);
+
     }
 
     .bg-beta {

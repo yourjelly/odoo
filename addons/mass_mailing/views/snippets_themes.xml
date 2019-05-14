@@ -247,7 +247,9 @@
                                     </tr>
                                     <tr>
                                         <td valign="top" class="o_mail_v_padding o_mail_col_mv bg-gray-lighter">
-                                            <div class="separator"></div>
+                                            <table style="width:100%;">
+                                                <tr class="separator"><td></td></tr>
+                                            </table>
                                         </td>
                                     </tr>
                                     <tr>
@@ -274,7 +276,9 @@
                                 <tfoot>
                                     <tr>
                                         <td valign="top" class="o_mail_v_padding o_mail_col_mv bg-gray-lighter">
-                                            <div class="separator"></div>
+                                            <table style="width:100%;">
+                                                <tr class="separator"><td></td></tr>
+                                            </table>
                                         </td>
                                     </tr>
                                     <tr>
@@ -303,7 +307,9 @@
                                     </tr>
                                     <tr>
                                         <td valign="top" class="o_mail_v_padding o_mail_col_mv bg-gray-lighter">
-                                            <div class="separator"></div>
+                                            <table style="width:100%;">
+                                                <tr class="separator"><td></td></tr>
+                                            </table>
                                         </td>
                                     </tr>
                                     <tr>
@@ -330,7 +336,9 @@
                                 <tfoot>
                                     <tr>
                                         <td valign="top" class="o_mail_v_padding o_mail_col_mv bg-gray-lighter">
-                                            <div class="separator"></div>
+                                            <table style="width:100%;">
+                                                <tr class="separator"><td></td></tr>
+                                            </table>
                                         </td>
                                     </tr>
                                     <tr>
@@ -519,7 +527,9 @@
                 <tbody>
                     <tr>
                         <td valign="top" style="width:100%;" class="o_mail_v_padding o_mail_no_colorpicker">
-                            <div style="width:100%;" class="separator"></div>
+                            <table style="width:100%;">
+                                <tr><td class="separator"></td></tr>
+                            </table>
                         </td>
                     </tr>
                 </tbody>

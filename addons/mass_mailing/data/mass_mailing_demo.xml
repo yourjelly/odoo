@@ -112,7 +112,9 @@
                                 <tbody>
                                     <tr>
                                         <td valign="top" style="padding:20px 0 20px 0;text-align:left;vertical-align:top;width:100%;" class="o_mail_v_padding o_mail_no_colorpicker">
-                                            <div style="background-color:rgb(245, 245, 245);height:2px;width:100%;" class="separator"></div>
+                                            <table style="width:100%;">
+                                                <tr><td style="background-color:rgb(245, 245, 245);height:2px;width:100%;" class="separator"></td></tr>
+                                            </table>
                                         </td>
                                     </tr>
                                 </tbody>
