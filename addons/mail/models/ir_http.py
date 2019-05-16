@@ -11,5 +11,5 @@ class IrHttp(models.AbstractModel):
     def session_info(self):
         user = request.env.user
         result = super(IrHttp, self).session_info()
-        result['out_of_office_message'] = user.out_of_office_message
+        result['out_of_office_message'] = bool(user.out_of_office_message)
         return result
