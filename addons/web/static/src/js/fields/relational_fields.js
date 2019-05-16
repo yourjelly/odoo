@@ -2764,6 +2764,18 @@ var FieldSelectionBadge = FieldSelection.extend({
     },
 });
 
+var FieldSelectionFont = FieldMany2One.extend({
+
+    init: function () {
+        this._super.apply(this, arguments);
+        this.can_create = false;
+    },
+
+    _render: function () {
+        this._super.apply(this, arguments);
+    },
+});
+
 /**
  * The FieldReference is a combination of a select (for the model) and
  * a FieldMany2one for its value.
@@ -2931,6 +2943,7 @@ return {
     FieldSelectionBadge: FieldSelectionBadge,
     FieldSelection: FieldSelection,
     FieldStatus: FieldStatus,
+    FieldSelectionFont: FieldSelectionFont,
 
     FieldReference: FieldReference,
 };
