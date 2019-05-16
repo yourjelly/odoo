@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import babel.dates
 import pytz
+from functools import partial
 
 from odoo import _, api, fields, models
 from odoo.osv.expression import AND
@@ -356,3 +357,33 @@ class Base(models.AbstractModel):
                 })
 
         return filter_values
+
+    @api.model
+    def read_group_raw_divisors(self, domains, fields, divisors, root_key, offset=0, limit=None, orderby=False, lazy=True):
+        """
+        domains: dict of list of domains, arbitrary length
+            key: int
+        fiels == measures
+        divisors: Cartesion product of RowGroupBy X ColGroupBy
+        root_key: string [rowValue, colValue]
+        """
+        part_read_group_raw = partial(self._read_group_raw, fields=fields, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+
+        results = []
+        for index, domain in domains.items():
+            for divisor in divisors:
+                all_group_by = divisor[0] + divisor[1]
+                res = {
+                    'domainIndex': index,
+                    'rootKey': root_key,
+                    'rowGroupBy': divisor[0],
+                    'colGroupBy': divisor[1],
+                    'subGroups': part_read_group_raw(domain=domain, groupby=all_group_by),
+                }
+                results.append(res)
+
+                if divisor == [[], []] and sum([sg['__count'] for sg in res['subGroups']]) == 0:
+                    # If the top root group is empty, don't bother for sub groups
+                    break
+
+        return results

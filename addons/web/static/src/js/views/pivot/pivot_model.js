@@ -538,6 +538,11 @@ var PivotModel = AbstractModel.extend({
      * @returns {Array[]}
      */
     _getGroupDomain: function (group) {
+        var groupByDomain = this._computeGroupByDomain(group);
+        var originDomain = this.data.domains[group.originIndex];
+        return [].concat(groupByDomain, originDomain);
+    },
+    _computeGroupByDomain: function (group) {
         var self = this;
         function constructDomain(fieldName, value) {
             var type = self.fields[fieldName].type;
@@ -559,8 +564,7 @@ var PivotModel = AbstractModel.extend({
         }
         var rowDomain = domain(group.rowValues, this.data.rowGroupBys);
         var colDomain = domain(group.colValues, this.data.colGroupBys);
-        var originDomain = this.data.domains[group.originIndex];
-        return [].concat(rowDomain, colDomain, originDomain);
+        return [].concat(rowDomain, colDomain);
     },
     /**
      * Returns the group sanitized labels.
@@ -587,9 +591,8 @@ var PivotModel = AbstractModel.extend({
      * @param  {string[]} colGroupBy
      * @returns {Promise}
      */
-    _getGroupSubdivision: function (group, rowGroupBy, colGroupBy) {
+    _getGroupSubdivision: function (group, divisors, domains) {
         var self = this;
-        var groupDomain = this._getGroupDomain(group);
         var measures = this.data.measures.reduce(
             function (acc, measure) {
                 if (measure === '__count') {
@@ -609,21 +612,18 @@ var PivotModel = AbstractModel.extend({
             },
             []
         );
-        var groupBy = rowGroupBy.concat(colGroupBy);
+
         return this._rpc({
             model: this.modelName,
-            method: 'read_group',
+            method: 'read_group_raw_divisors',
             context: this.data.context,
-            domain: groupDomain,
-            fields: measures,
-            groupBy: groupBy,
-            lazy: false,
-        }).then(function (subGroups) {
-            return {
-                group: group,
-                subGroups: subGroups,
-                rowGroupBy: rowGroupBy,
-                colGroupBy: colGroupBy};
+            kwargs: {
+                domains: domains,
+                fields: measures,
+                divisors: divisors,
+                root_key: JSON.stringify([group.rowValues, group.colValues]),
+                lazy: false,
+            }
         });
     },
     /**
@@ -997,11 +997,9 @@ var PivotModel = AbstractModel.extend({
         var rightDivisors = sections(this.data.colGroupBys);
         var divisors = cartesian(leftDivisors, rightDivisors);
 
-        return this._subdivideGroup(group, divisors.slice(0, 1)).then(function () {
-            return self._subdivideGroup(group, divisors.slice(1)).then(function () {
-                self.hasData = self.counts[JSON.stringify([[], []])].some(function (count) {
-                    return count > 0;
-                });
+        return this._subdivideGroup(group, divisors).then(function () {
+            self.hasData = self.counts[JSON.stringify([[], []])].some(function (count) {
+                return count > 0;
             });
         });
     },
@@ -1053,7 +1051,7 @@ var PivotModel = AbstractModel.extend({
                 }
 
                 var key = JSON.stringify([rowValues, colValues]);
-                var originIndex = groupSubdivision.group.originIndex;
+                var originIndex = groupSubdivision.domainIndex;
 
                 if (!(key in self.measurements)) {
                     self.measurements[key] = self.data.origins.map(function () {
@@ -1179,23 +1177,29 @@ var PivotModel = AbstractModel.extend({
         var self = this;
 
         var key = JSON.stringify([group.rowValues, group.colValues]);
+        var counts = this.counts[key];
 
-        var proms = this.data.origins.reduce(
-            function (acc, origin, originIndex) {
-                // if no information on group content is available, we fetch data.
-                // if group is known to be empty for the given origin,
-                // we don't need to fetch data fot that origin.
-                if (!self.counts[key] || self.counts[key][originIndex] > 0) {
-                    var subGroup = {rowValues: group.rowValues, colValues: group.colValues, originIndex: originIndex};
-                    divisors.forEach(function (divisor) {
-                        acc.push(self._getGroupSubdivision(subGroup, divisor[0], divisor[1]));
-                    });
-                }
-                return acc;
-            },
-            []
-        );
-        return this._loadDataDropPrevious.add(Promise.all(proms)).then(function (groupSubdivisions) {
+        // if no information on group content is available, we fetch data.
+        // if group is known to be empty for the given origin,
+        // we don't need to fetch data fot that origin.
+        var domainsDict = {};
+        var groupByDomain = this._computeGroupByDomain(group);
+        this.data.domains.forEach(function (domain, index) {
+            if (!counts || (counts && counts[index] !== 0)) {
+                // replace a domain by null to keep the indexes
+                // as in data.domains
+                domainsDict[index] = groupByDomain.concat(domain);
+            }
+        });
+
+        var prom;
+        if (Object.keys(domainsDict).length) {
+            prom = this._getGroupSubdivision(group, divisors, domainsDict);
+        } else {
+            prom = Promise.resolve([]);
+        }
+
+        return this._loadDataDropPrevious.add(prom).then(function (groupSubdivisions) {
             if (groupSubdivisions.length) {
                 self._prepareData(group, groupSubdivisions);
             }
