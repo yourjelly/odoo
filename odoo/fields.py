@@ -1333,6 +1333,11 @@ class Uom(Field):
             self.uom_field = self.related_field.uom_field
         self._setup_uom_field(model)
 
+    def write(self, records, value):
+        # Manage uom for multi records
+        for record in records:
+            super(Uom, self).write(record, value)
+
     def convert_to_column(self, value, record, values=None, validate=True):
         # retrieve uom from values or record
         if values and self.uom_field in values:
@@ -1351,8 +1356,9 @@ class Uom(Field):
 
     def convert_to_cache(self, value, record, validate=True):
         value = float(value or 0.0)
-        if validate and record[self.uom_field]:
-            value = float_round(value, precision_digits=record[self.uom_field].decimal_places)
+        uom = record.sudo()[self.uom_field]
+        if validate and uom:
+            value = float_round(value, precision_digits=uom.decimal_places)
         return value
 
     def convert_to_read(self, value, record, use_name_get=True):
