@@ -148,7 +148,7 @@ class ReportBomStructure(models.AbstractModel):
                 'prod_name': line.product_id.display_name,
                 'code': line.child_bom_id and line.child_bom_id.display_name or '',
                 'prod_qty': line_quantity,
-                'prod_uom': line.product_uom_id.name,
+                'prod_uom': line.product_uom_id,
                 'prod_cost': company.currency_id.round(price),
                 'parent_id': bom.id,
                 'line_id': line.id,

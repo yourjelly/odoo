@@ -73,20 +73,20 @@ class StockQuant(models.Model):
     owner_id = fields.Many2one(
         'res.partner', 'Owner',
         help='This is the owner of the quant', readonly=True, check_company=True)
-    quantity = fields.Float(
-        'Quantity',
+    quantity = fields.Uom(
+        'Quantity', uom_field='product_uom_id',
         help='Quantity of products in this quant, in the default unit of measure of the product',
         readonly=True)
-    inventory_quantity = fields.Float(
-        'Inventoried Quantity', compute='_compute_inventory_quantity',
+    inventory_quantity = fields.Uom(
+        'Inventoried Quantity', uom_field='product_uom_id', compute='_compute_inventory_quantity',
         inverse='_set_inventory_quantity', groups='stock.group_stock_manager')
-    reserved_quantity = fields.Float(
+    reserved_quantity = fields.Uom(
         'Reserved Quantity',
-        default=0.0,
+        default=0.0, uom_field='product_uom_id',
         help='Quantity of reserved products in this quant, in the default unit of measure of the product',
         readonly=True, required=True)
-    available_quantity = fields.Float(
-        'Available Quantity',
+    available_quantity = fields.Uom(
+        'Available Quantity', uom_field='product_uom_id',
         help="On hand quantity which hasn't been reserved on a transfer, in the default unit of measure of the product",
         compute='_compute_available_quantity')
     in_date = fields.Datetime('Incoming Date', readonly=True)

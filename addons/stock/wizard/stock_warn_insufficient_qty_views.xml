@@ -23,6 +23,8 @@
                     </field>
                 </div>
                 <div name="description">
+                    <field name="product_id" invisible="1"/>
+                    <field name="product_uom_id" invisible="1"/>
                 </div>
                 <footer>
                     <button name="cancel_button" string="Discard" class="btn-primary" special="cancel"/>

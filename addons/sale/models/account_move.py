@@ -69,8 +69,7 @@ class AccountMoveLine(models.Model):
             For Vendor Bill flow, if the product has a 'erinvoice policy' and is a cost, then we will find the SO on which reinvoice the AAL
         """
         self.ensure_one()
-        uom_precision_digits = self.env['decimal.precision'].precision_get('Product Unit of Measure')
-        return float_compare(self.credit or 0.0, self.debit or 0.0, precision_digits=uom_precision_digits) != 1 and self.product_id.expense_policy not in [False, 'no']
+        return float_compare(self.credit or 0.0, self.debit or 0.0, precision_digits=self.product_uom_id.decimal_places) != 1 and self.product_id.expense_policy not in [False, 'no']
 
     def _sale_create_reinvoice_sale_line(self):
 
@@ -206,8 +205,7 @@ class AccountMoveLine(models.Model):
                 uom=self.product_uom_id.id
             ).price
 
-        uom_precision_digits = self.env['decimal.precision'].precision_get('Product Unit of Measure')
-        if float_is_zero(unit_amount, precision_digits=uom_precision_digits):
+        if float_is_zero(unit_amount, precision_digits=self.product_uom_id.decimal_places):
             return 0.0
 
         # Prevent unnecessary currency conversion that could be impacted by exchange rate

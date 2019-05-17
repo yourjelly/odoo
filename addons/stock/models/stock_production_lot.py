@@ -22,7 +22,7 @@ class ProductionLot(models.Model):
         'uom.uom', 'Unit of Measure',
         related='product_id.uom_id', store=True, readonly=False)
     quant_ids = fields.One2many('stock.quant', 'lot_id', 'Quants', readonly=True)
-    product_qty = fields.Float('Quantity', compute='_product_qty')
+    product_qty = fields.Uom('Quantity', compute='_product_qty', uom_field='product_uom_id')
     note = fields.Html(string='Description')
     display_complete = fields.Boolean(compute='_compute_display_complete')
     company_id = fields.Many2one('res.company', 'Company', required=True, store=True, index=True)

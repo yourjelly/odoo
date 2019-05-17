@@ -324,9 +324,10 @@ class AdjustmentLines(models.Model):
         'stock.landed.cost.lines', 'Cost Line', readonly=True)
     move_id = fields.Many2one('stock.move', 'Stock Move', readonly=True)
     product_id = fields.Many2one('product.product', 'Product', required=True)
-    quantity = fields.Float(
+    uom_id = fields.Many2one('uom.uom', string='Unit of Measure', related='product_id.uom_id', readonly=True)
+    quantity = fields.Uom(
         'Quantity', default=1.0,
-        digits=0, required=True)
+        uom_field='uom_id', required=True)
     weight = fields.Float(
         'Weight', default=1.0,
         digits='Stock Weight')

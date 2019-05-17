@@ -21,8 +21,8 @@ class MrpUnbuild(models.Model):
         'res.company', 'Company',
         default=lambda s: s.env.company,
         required=True, index=True, states={'done': [('readonly', True)]})
-    product_qty = fields.Float(
-        'Quantity', default=1.0,
+    product_qty = fields.Uom(
+        'Quantity', default=1.0, uom_field='product_uom_id',
         required=True, states={'done': [('readonly', True)]})
     product_uom_id = fields.Many2one(
         'uom.uom', 'Unit of Measure',
@@ -274,10 +274,9 @@ class MrpUnbuild(models.Model):
 
     def action_validate(self):
         self.ensure_one()
-        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
         available_qty = self.env['stock.quant']._get_available_quantity(self.product_id, self.location_id, self.lot_id, strict=True)
         unbuild_qty = self.product_uom_id._compute_quantity(self.product_qty, self.product_id.uom_id)
-        if float_compare(available_qty, unbuild_qty, precision_digits=precision) >= 0:
+        if float_compare(available_qty, unbuild_qty, precision_digits=self.product_uom_id.decimal_places) >= 0:
             return self.action_unbuild()
         else:
             return {

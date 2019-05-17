@@ -86,7 +86,7 @@
                                         <span t-field="raw_line.product_id"/>
                                     </td>
                                     <td t-attf-class="{{ 'text-right' if not has_product_barcode else '' }}">
-                                        <span t-esc="raw_line.product_uom_qty"/>
+                                        <span t-field="raw_line.product_uom_qty"/>
                                         <span t-field="raw_line.product_uom" groups="uom.group_uom"/>
                                     </td>
                                     <td t-if="has_product_barcode" width="15%" class="text-center">
@@ -134,12 +134,12 @@
                                                 <br/>
                                                 <span>Quantity:</span>
                                                 <t t-if="move_line.product_uom_id.category_id == uom_categ_unit">
-                                                    <span>1.0</span>
+                                                    <span t-esc="1.0" t-options='{"widget": "uom", "display_uom": move_line.product_uom_id}'/>
                                                     <span t-field="move_line.product_uom_id" groups="uom.group_uom"/>
                                                 </t>
                                                 <t t-else="">
                                                     <span t-esc="move_line.product_uom_qty" t-if="move_line.state !='done'"/>
-                                                    <span t-esc="move_line.qty_done"  t-if="move_line.state =='done'"/>
+                                                    <span t-field="move_line.qty_done" t-if="move_line.state =='done'"/>
                                                     <span t-field="move_line.product_uom_id" groups="uom.group_uom"/>
                                                 </t>
                                             </th>

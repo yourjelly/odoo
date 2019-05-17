@@ -92,6 +92,7 @@
                                         <field name="product_id" readonly="1"/>
                                         <field name="weight" readonly="1" optional="hide"/>
                                         <field name="volume" readonly="1" optional="hide"/>
+                                        <field name="uom_id" invisible="1"/>
                                         <field name="quantity" readonly="1"/>
                                         <field name="currency_id" invisible="1"/>
                                         <field name="former_cost" readonly="1" widget="monetary"/>

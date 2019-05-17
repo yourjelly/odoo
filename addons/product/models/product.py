@@ -576,8 +576,7 @@ class ProductProduct(models.Model):
         self.ensure_one()
         if date is None:
             date = fields.Date.context_today(self)
-        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
-
+        precision = uom_id.decimal_places if uom_id else self.env.ref('uom.product_uom_unit').decimal_places
         res = self.env['product.supplierinfo']
         sellers = self._prepare_sellers(params)
         sellers = sellers.filtered(lambda s: not s.company_id or s.company_id.id == self.env.company.id)
@@ -692,7 +691,7 @@ class ProductPackaging(models.Model):
     name = fields.Char('Package Type', required=True)
     sequence = fields.Integer('Sequence', default=1, help="The first in the sequence is the default one.")
     product_id = fields.Many2one('product.product', string='Product', check_company=True)
-    qty = fields.Float('Contained Quantity', help="Quantity of products contained in the packaging.")
+    qty = fields.Uom('Contained Quantity', uom_field='product_uom_id', help="Quantity of products contained in the packaging.")
     barcode = fields.Char('Barcode', copy=False, help="Barcode used for packaging identification. Scan this packaging barcode from a transfer in the Barcode app to move all the contained units")
     product_uom_id = fields.Many2one('uom.uom', related='product_id.uom_id', readonly=True)
     company_id = fields.Many2one('res.company', 'Company', index=True)
@@ -719,8 +718,8 @@ class SupplierInfo(models.Model):
         'uom.uom', 'Unit of Measure',
         related='product_tmpl_id.uom_po_id',
         help="This comes from the product form.")
-    min_qty = fields.Float(
-        'Quantity', default=0.0, required=True,
+    min_qty = fields.Uom(
+        'Quantity', default=0.0, required=True, uom_field='product_uom',
         help="The quantity to purchase from this vendor to benefit from the price, expressed in the vendor Product Unit of Measure if not any, in the default unit of measure of the product otherwise.")
     price = fields.Float(
         'Price', default=0.0, digits='Product Price',

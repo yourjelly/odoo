@@ -11,7 +11,8 @@ class StockWarnInsufficientQty(models.AbstractModel):
     product_id = fields.Many2one('product.product', 'Product', required=True)
     location_id = fields.Many2one('stock.location', 'Location', domain="[('usage', '=', 'internal')]", required=True)
     quant_ids = fields.Many2many('stock.quant', compute='_compute_quant_ids')
-    quantity = fields.Float(string="Quantity", required=True)
+    product_uom_id = fields.Many2one('uom.uom', string='Product UoM', related='product_id.uom_id')
+    quantity = fields.Uom(string="Quantity", uom_field='product_uom_id', required=True)
     product_uom_name = fields.Char("Unit of Measure", required=True)
 
     def _get_reference_document_company_id(self):
