@@ -364,11 +364,11 @@ class TestCreatePicking(common.TestProductCommon):
         po.order_line.product_uom = uom_dozen.id
         po.button_confirm()
 
-        # the move should be 16.0 units
+        # the move should be 12.0 units
         move1 = po.picking_ids.move_lines[0]
-        self.assertEqual(move1.product_uom_qty, 16.0)
+        self.assertEqual(move1.product_uom_qty, 12.0)
         self.assertEqual(move1.product_uom.id, uom_unit.id)
-        self.assertEqual(move1.product_qty, 16.0)
+        self.assertEqual(move1.product_qty, 12.0)
 
         # force the propagation of the uom, buy 2.6 dozens, the move 2 should have 2 dozens
         self.env['ir.config_parameter'].sudo().set_param('stock.propagate_uom', '1')

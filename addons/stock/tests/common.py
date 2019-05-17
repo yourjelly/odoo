@@ -46,7 +46,7 @@ class TestStockCommon(common.SavepointCase):
         cls.uom_kg = cls.env['uom.uom'].search([('category_id', '=', cls.categ_kgm), ('uom_type', '=', 'reference')], limit=1)
         cls.uom_kg.write({
             'name': 'Test-KG',
-            'rounding': 0.000001})
+            'rounding': 0.0001})
         cls.uom_tone = cls.UomObj.create({
             'name': 'Test-Tone',
             'category_id': cls.categ_kgm,

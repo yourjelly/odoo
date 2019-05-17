@@ -1620,7 +1620,7 @@ class Form(object):
                     vals[k] = [(6, False, [])]
                 elif type_ == 'one2many':
                     vals[k] = []
-                elif type_ in ('integer', 'float'):
+                elif type_ in ('integer', 'float', 'uom'):
                     vals[k] = 0
 
         # on creation, every field is considered changed by the client
@@ -2289,7 +2289,7 @@ def _cleanup_from_default(type_, value):
             return [(6, False, [])]
         elif type_ == 'one2many':
             return []
-        elif type_ in ('integer', 'float'):
+        elif type_ in ('integer', 'float', 'uom'):
             return 0
         return value
 
