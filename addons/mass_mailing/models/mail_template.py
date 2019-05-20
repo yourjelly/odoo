@@ -17,6 +17,6 @@ class MailTemplate(models.Model):
             html = self.env['link.tracker'].convert_links(
                 html,
                 self.env.context['post_convert_links'],
-                blacklist=['/unsubscribe_from_list']
+                blacklist=['/unsubscribe_from_list', '/preview']
             )
         return html

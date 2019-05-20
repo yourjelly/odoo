@@ -52,6 +52,21 @@ class MailMail(models.Model):
         )
         return url
 
+    def _get_preview_url(self, email_to):
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        url = werkzeug.urls.url_join(
+            base_url, 'mail/mailing/%(mailing_id)s/preview?%(params)s' % {
+                'mailing_id': self.mailing_id.id,
+                'params': werkzeug.urls.url_encode({
+                    'res_id': self.res_id,
+                    'email': email_to,
+                    'token': self.mailing_id._preview_token(
+                        self.res_id, email_to),
+                }),
+            }
+        )
+        return url
+
     @api.multi
     def _send_prepare_body(self):
         """ Override to add the tracking URL to the body and to add
@@ -89,9 +104,13 @@ class MailMail(models.Model):
             emails = tools.email_split(res.get('email_to')[0])
             email_to = emails and emails[0] or False
             unsubscribe_url = self._get_unsubscribe_url(email_to)
+            preview_url = self._get_preview_url(email_to)
             link_to_replace = base_url + '/unsubscribe_from_list'
+            preview_url_replace = base_url + '/preview'
             if link_to_replace in res['body']:
                 res['body'] = res['body'].replace(link_to_replace, unsubscribe_url if unsubscribe_url else '#')
+            if preview_url_replace in res['body']:
+                res['body'] = res['body'].replace(preview_url_replace, preview_url if preview_url else '#')
         return res
 
     @api.multi

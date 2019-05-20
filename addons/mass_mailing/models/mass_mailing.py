@@ -10,6 +10,7 @@ import re
 import threading
 from ast import literal_eval
 from base64 import b64encode
+from lxml import etree
 
 from odoo import api, fields, models, tools, _, SUPERUSER_ID
 from odoo.exceptions import UserError
@@ -597,6 +598,9 @@ class MassMailing(models.Model):
         token = (self.env.cr.dbname, self.id, int(res_id), tools.ustr(email))
         return hmac.new(secret.encode('utf-8'), repr(token).encode('utf-8'), hashlib.sha512).hexdigest()
 
+    def _preview_token(self, res_id, email):
+        return self._unsubscribe_token(res_id, email)
+
     def _compute_next_departure(self):
         cron_next_call = self.env.ref('mass_mailing.ir_cron_mass_mailing_queue').sudo().nextcall
         str2dt = fields.Datetime.from_string
@@ -959,6 +963,24 @@ class MassMailing(models.Model):
         already_mailed_res_ids = [record['res_id'] for record in already_mailed]
         return list(set(res_ids) - set(already_mailed_res_ids))
 
+    def _append_preview_link(self, body_html):
+        preview_link_html = """
+                <tr>
+                    <td style="text-align:left;"></td>
+                    <td style="text-align: center;font-family: Roboto,RobotoDraft,Helvetica,Arial,sans-serif;font-size: 12px;padding: 10px;text-decoration: none;">
+                        <a target="_blank" href="/preview" style="text-decoration: none;color: #808080;">Not displaying correctly?</a>
+                    </td>
+                    <td style="text-align:left;"></td>
+                </tr>
+        """
+        preview_link_html = self.env['mail.thread']._replace_local_links(preview_link_html)
+        body = etree.HTML(body_html)
+        table = body.xpath("//table[@class='o_mail_wrapper']")
+        if table:
+            table[0].insert(0, etree.fromstring(preview_link_html))
+            body_html = etree.tostring(body)
+        return body_html
+
     def send_mail(self, res_ids=None):
         author_id = self.env.user.partner_id.id
 
@@ -967,11 +989,10 @@ class MassMailing(models.Model):
                 res_ids = mailing.get_remaining_recipients()
             if not res_ids:
                 raise UserError(_('There is no recipients selected.'))
-
             composer_values = {
                 'author_id': author_id,
                 'attachment_ids': [(4, attachment.id) for attachment in mailing.attachment_ids],
-                'body': mailing.body_html,
+                'body': mailing._append_preview_link(mailing.body_html),
                 'subject': mailing.subject,
                 'model': mailing.mailing_model_real,
                 'email_from': mailing.email_from,
