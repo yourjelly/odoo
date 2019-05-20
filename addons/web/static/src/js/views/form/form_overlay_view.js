@@ -9,17 +9,9 @@ odoo.define('web.form_overlay_view', function (require) {
 
 var core = require('web.core');
 var Widget = require('web.Widget');
-var QuickCreateFormView = require('web.QuickCreateFormView');
-var FormRenderer = require('web.FormRenderer');
+var FormView = require('web.FormView');
 
 var qweb = core.qweb;
-
-
-var QuickFormOverlayView = QuickCreateFormView.extend({
-    config: _.extend({}, QuickCreateFormView.prototype.config, {
-        Renderer: FormRenderer,
-    }),
-});
 
 
 var FormOverlayView = Widget.extend({
@@ -66,15 +58,17 @@ var FormOverlayView = Widget.extend({
             viewsLoaded = this.loadViews(this.model, context, views);
 
         viewsLoaded = viewsLoaded.then(function (fieldsViews) {
-            var formView = new QuickFormOverlayView(fieldsViews.form, {
+            var formOverlayView = new FormView(fieldsViews.form, {
                 context: self.context,
                 modelName: self.model,
                 ids: self.res_id ? [self.res_id] : [],
                 currentId: self.res_id || undefined,
                 userContext: self.getSession().user_context,
                 mode: 'edit',
+                default_buttons: false,
+                withControlPanel: false,
             });
-            return formView.getController(self).then(function (controller) {
+            return formOverlayView.getController(self).then(function (controller) {
                 self.controller = controller;
                 return self.controller.appendTo(document.createDocumentFragment());
             });
@@ -84,8 +78,7 @@ var FormOverlayView = Widget.extend({
     start: function () {
         this.$el.append('<div id="resizable" class="o_resizeble"></div>');
         this.$el.append(qweb.render('FormOverlayView.buttons'));
-        // TODO: check without load controller can trigger event
-        this.controller.$el.find('.o_cp_controller').hide();
+
         this.$el.append(this.controller.$el);
         // TODO: dynamic
         this.$el.height(this.context.form_overlay_heigh);
@@ -94,58 +87,53 @@ var FormOverlayView = Widget.extend({
         .on('mouseup', this._onMouseUpOverlay.bind(this));
         return this._super.apply(this, arguments);
     },
+    
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    _openFormView: function (name, params) {
+        params = $.extend({
+            mode: 'edit',
+            view_type: 'form',
+        }, params);
+        this.trigger_up(name, params);
+        this._onCancelClicked();
+    },
+
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
 
     _onSaveClicked: function () {
-        // trigger form view save method
         var self = this;
-        return this.controller.commitChanges().then(function () {
-            var canBeSaved = self.controller.canBeSaved();
-            if (canBeSaved) {
-                return self.controller.saveRecord().then(function () {
-                    self.trigger_up('reload');
-                    self._onCancelClicked();
-                });
-            }
+        this.controller.saveRecord().then(function () {
+            self._onCancelClicked();
         });
     },
     _onExpandClicked: function (ev) {
         // open form view in full screen
         var self = this;
+
         if (this.db_id) {
-            this.trigger_up('open_record', {
-                id: this.db_id,
-                mode: 'edit',
-            });
+            this._openFormView('open_record', {id: this.db_id});
         } else {
+            // first save then expand the form view in full screen, if there is dirty value in controller
             if (this.controller.isDirty()) {
-                // TODO: IF DIRTY VALUE INSIDE THE VIEW FIRST SAVE THEN EXPAND THE VIEW
-                this.controller.commitChanges().then(function () {
-                    var canBeSaved = self.controller.canBeSaved();
-                    if (canBeSaved) {
-                        return self.controller.saveRecord().then(function () {
-                            self.trigger_up('switch_view', {
-                                view_type: 'form',
-                                res_id: self.controller.renderer.state.res_id,
-                            });
-                            self.trigger_up('reload');
-                            self._onCancelClicked();
-                        });
-                    }
+                this.controller.saveRecord().then(function () {
+                    self._openFormView('switch_view', {
+                        res_id: self.controller.renderer.state.res_id,
+                    });
                 });
             } else {
-                // TODO: JUST EXPAND THE VIEW THERE IS NO DIRTY VALUE IN FORM VIEW
-                this.trigger_up('switch_view', {
-                    view_type: 'form',
-                    res_id: undefined
-                });
-                this._onCancelClicked();
+                // just expand the form view in full screen
+                this._openFormView('switch_view');
             }
         }
     },
     _onCancelClicked: function () {
+        // reload kanban view
+        this.trigger_up('reload');
         this.controller.trigger_up('discard_form_overlay_view');
         // TODO: for kanban and list
         $('.o_kanban_view').removeClass('o_kanban_overlay');

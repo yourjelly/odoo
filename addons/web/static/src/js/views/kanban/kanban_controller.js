@@ -56,7 +56,9 @@ var KanbanController = BasicController.extend({
         this.hasButtons = params.hasButtons;
         this.quickCreateEnabled = params.quickCreateEnabled;
         this.overlayFormViewEnabled = params.overlayFormViewEnabled;
-        this.overlayFormViewID = params.overlayFormViewID;
+
+        var formView = _.findWhere(params.actionViews, {type: 'form'});
+        this.overlayFormViewID = formView ? formView.fieldsView.view_id : null;
 
         // the following attributes are used when there is a searchPanel
         this._searchPanel = params.searchPanel;
