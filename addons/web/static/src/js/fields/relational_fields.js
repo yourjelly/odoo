@@ -856,6 +856,7 @@ var FieldX2Many = AbstractField.extend({
         toggle_column_order: '_onToggleColumnOrder',
         activate_next_widget: '_onActiveNextWidget',
         navigation_move: '_onNavigationMove',
+        paste: '_onPaste',
     }),
 
     // We need to trigger the reset on every changes to be aware of the parent changes
@@ -1353,6 +1354,17 @@ var FieldX2Many = AbstractField.extend({
      */
     _onOpenRecord: function () {
         // to implement
+    },
+    _onPaste: function (ev) {
+        var lines = ev.data.lines;
+        var fieldName = ev.data.fieldName;
+        var data = this.value.data;
+        debugger
+        var limit = Math.min(lines.length, data.length);
+        for (var i = 0; i < limit; i++) {
+                var fieldsData = data[i].data;
+                fieldsData[fieldName] = lines[i];
+        }
     },
     /**
      * Called when the renderer ask to save a line (the user tries to leave it)

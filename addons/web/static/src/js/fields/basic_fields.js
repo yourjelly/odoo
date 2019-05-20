@@ -412,6 +412,9 @@ var FieldChar = InputField.extend(TranslatableFieldMixin, {
     className: 'o_field_char',
     tagName: 'span',
     supportedFieldTypes: ['char'],
+    events: _.extend({}, InputField.prototype.events, {
+        'paste input': '_onPaste',
+    }),
 
     //--------------------------------------------------------------------------
     // Private
@@ -444,6 +447,9 @@ var FieldChar = InputField.extend(TranslatableFieldMixin, {
             value = value.trim();
         }
         return this._super(value, options);
+    },
+    _onPaste: function (ev) {
+        debugger
     },
 });
 

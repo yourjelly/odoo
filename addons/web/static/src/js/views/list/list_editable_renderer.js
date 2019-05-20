@@ -1225,29 +1225,36 @@ ListRenderer.include({
         if (lines.length > 1) {
             ev.preventDefault();
             var fieldName = ev.target.name;
-
-            var pasteOnMultilines = function () {
-                var recordsCount = self.state.count;
-                var limit = Math.min(lines.length, recordsCount);
-                var lineIndex = 0;
-                for (var i = self.currentRow; i < limit; i++) {
-                    var data = self.state.data[i].data;
-                    data[fieldName] = lines[lineIndex++];
-                }
-                self.updateState(self.state, {});
+            var data = {
+                fieldName: fieldName,
+                lines: lines,
             };
-            var pasteOnSingleLine = function () {
-                var data = self.state.data[self.currentRow].data;
-                data[fieldName] = clipboardData;
-                self.updateState(self.state, {});
-            };
+            this.trigger_up('paste', data);
+            this.updateState(this.state, {});
 
-            var dialogText = _t("The data you want to paste seems contains text" +
-                " on multilines. Do you want paste them on different lines ?");
-            Dialog.confirm(self, dialogText, {
-                confirm_callback: pasteOnMultilines,
-                cancel_callback: pasteOnSingleLine,
-            });
+            // var pasteOnMultilines = function () {
+            //     var recordsCount = self.state.count;
+            //     var limit = Math.min(lines.length, recordsCount);
+            //     var lineIndex = 0;
+            //     for (var i = self.currentRow; i < limit; i++) {
+            //         var data = self.state.data[i].data;
+            //         data[fieldName] = lines[lineIndex++];
+            //     }
+            //     self.updateState(self.state, {});
+            //     // self.$el.trigger('change');
+            // };
+            // var pasteOnSingleLine = function () {
+            //     var data = self.state.data[self.currentRow].data;
+            //     data[fieldName] = clipboardData;
+            //     self.updateState(self.state, {});
+            // };
+
+            // var dialogText = _t("The data you want to paste seems contains text" +
+            //     " on multilines. Do you want paste them on different lines ?");
+            // Dialog.confirm(self, dialogText, {
+            //     confirm_callback: pasteOnMultilines,
+            //     cancel_callback: pasteOnSingleLine,
+            // });
         }
     },
     /**
