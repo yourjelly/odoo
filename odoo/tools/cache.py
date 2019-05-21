@@ -76,7 +76,7 @@ class ormcache(object):
 
     def lru(self, model):
         counter = STAT[(model.pool.db_name, model._name, self.method)]
-        return model.pool.cache, (model._name, self.method), counter
+        return model.pool._Registry__cache, (model._name, self.method), counter
 
     def lookup(self, method, *args, **kwargs):
         d, key0, counter = self.lru(args[0])
