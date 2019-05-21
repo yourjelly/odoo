@@ -991,7 +991,7 @@ var ListRenderer = BasicRenderer.extend({
         if (!$(ev.target).prop('special_click')) {
             var id = $(ev.currentTarget).data('id');
             if (id) {
-                this.trigger_up('open_record', { id: id, target: ev.target });
+                this.trigger_up('open_form_overlay_view', { id: id, target: ev.target });
             }
         }
     },

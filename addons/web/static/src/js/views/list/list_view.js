@@ -68,6 +68,9 @@ var ListView = BasicView.extend({
         this.rendererParams.addCreateLine = false;
         this.rendererParams.addCreateLineInGroups = this.rendererParams.editable && this.controllerParams.activeActions.create;
 
+        this.rendererParams.overlayFormViewEnabled = this._isOverlayFormViewEnabled();
+        this.controllerParams.overlayFormViewEnabled = this.rendererParams.overlayFormViewEnabled;
+
         this.modelParams.groupbys = this.groupbys;
 
         this.loadParams.limit = this.loadParams.limit || 80;
@@ -81,6 +84,19 @@ var ListView = BasicView.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * @private
+     * @param {Object} viewInfo
+     * @returns {boolean} false if the open overlay form view feature is not explicitely
+     *   enable (with overlay_form_view="true" in the arch)
+     */
+    _isOverlayFormViewEnabled: function () {
+        debugger;
+        if (this.arch.attrs.overlay_form_view !== undefined) {
+            return !!JSON.parse(this.arch.attrs.overlay_form_view);
+        }
+        return false;
+    },
     /**
      * @private
      * @param {Object} node

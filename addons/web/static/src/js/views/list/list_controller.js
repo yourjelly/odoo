@@ -12,6 +12,7 @@ var BasicController = require('web.BasicController');
 var DataExport = require('web.DataExport');
 var Dialog = require('web.Dialog');
 var Sidebar = require('web.Sidebar');
+var view_registry = require('web.view_registry');
 
 var _t = core._t;
 var qweb = core.qweb;
@@ -30,6 +31,7 @@ var ListController = BasicController.extend({
         edit_line: '_onEditLine',
         save_line: '_onSaveLine',
         selection_changed: '_onSelectionChanged',
+        open_form_overlay_view: '_onOpenFormOverlayView',
         toggle_column_order: '_onToggleColumnOrder',
         toggle_group: '_onToggleGroup',
         navigation_move: '_onNavigationMove',
@@ -50,6 +52,10 @@ var ListController = BasicController.extend({
         this.editable = params.editable;
         this.noLeaf = params.noLeaf;
         this.selectedRecords = params.selectedRecords || [];
+
+        this.overlayFormViewEnabled = params.overlayFormViewEnabled;
+        var formView = _.findWhere(params.actionViews, {type: 'form'});
+        this.overlayFormViewID = formView ? formView.fieldsView.view_id : null;
     },
 
     //--------------------------------------------------------------------------
@@ -212,6 +218,23 @@ var ListController = BasicController.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    _onOpenFormOverlayView: function (ev) {
+        var data = ev.data,
+            context = data.context || this.renderer.state.context;
+
+        if (this.overlayFormViewEnabled) {
+            var FormOverlayView = view_registry.get('FormOverlayView');
+            this.formOverlayWidget = new FormOverlayView(this, {
+                context: context,
+                formViewID: this.overlayFormViewID,
+                model: this.modelName,
+                res_id: data && this.model.get(data.id, { raw: true }).res_id,
+                db_id: data && data.id,
+            });
+            return this.formOverlayWidget.insertAfter($('.o_action_manager .o_content .o_list_view'));
+        }
+        return this.trigger_up('open_record', {id: data && data.id});
+    },
     /**
      * @see BasicController._abandonRecord
      * If the given abandoned record is not the main one, notifies the renderer

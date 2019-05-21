@@ -10,6 +10,7 @@ odoo.define('web.form_overlay_view', function (require) {
 var core = require('web.core');
 var Widget = require('web.Widget');
 var FormView = require('web.FormView');
+var view_registry = require('web.view_registry');
 
 var qweb = core.qweb;
 
@@ -155,5 +156,6 @@ var FormOverlayView = Widget.extend({
         this.isResizing = false; 
     },
 });
+view_registry.add('FormOverlayView', FormOverlayView);
 return FormOverlayView;
 });
