@@ -1651,7 +1651,7 @@
 
 <t t-name="FieldColor">
     <div>
-        <span class="o_field_color"></span>
+        <span class="o_field_color"/>
     </div>
 </t>
 
