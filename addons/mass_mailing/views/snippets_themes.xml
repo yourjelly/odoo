@@ -248,7 +248,7 @@
                                     <tr>
                                         <td valign="top" class="o_mail_v_padding o_mail_col_mv bg-gray-lighter">
                                             <table style="width:100%;">
-                                                <tr class="separator"><td></td></tr>
+                                                <tr><td class="separator"></td></tr>
                                             </table>
                                         </td>
                                     </tr>
@@ -277,7 +277,7 @@
                                     <tr>
                                         <td valign="top" class="o_mail_v_padding o_mail_col_mv bg-gray-lighter">
                                             <table style="width:100%;">
-                                                <tr class="separator"><td></td></tr>
+                                                <tr><td class="separator"></td></tr>
                                             </table>
                                         </td>
                                     </tr>
@@ -308,7 +308,7 @@
                                     <tr>
                                         <td valign="top" class="o_mail_v_padding o_mail_col_mv bg-gray-lighter">
                                             <table style="width:100%;">
-                                                <tr class="separator"><td></td></tr>
+                                                <tr><td class="separator"></td></tr>
                                             </table>
                                         </td>
                                     </tr>
@@ -337,7 +337,7 @@
                                     <tr>
                                         <td valign="top" class="o_mail_v_padding o_mail_col_mv bg-gray-lighter">
                                             <table style="width:100%;">
-                                                <tr class="separator"><td></td></tr>
+                                                <tr><td class="separator"></td></tr>
                                             </table>
                                         </td>
                                     </tr>

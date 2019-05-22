@@ -119,6 +119,7 @@ td:not([align]) {
     .separator {
         border-top: 1px solid darken($o-mm-def-color-alpha, 2%);
         font-size: 0px; // To avoid extra padding
+        padding: 0px;
     }
 
     .bg-beta {
@@ -207,8 +208,8 @@ td:not([align]) {
 
 .o_mail_block_comparison_table {
     .separator {
-        height: 1px;
-        background-color: darken($o-mm-def-color-alpha, 15%);
+        border-top: 1px solid darken($o-mm-def-color-alpha, 15%);
+        font-size: 0px; // To avoid extra padding
     }
     table table {
         td, th {
