@@ -1217,7 +1217,6 @@ ListRenderer.include({
      * @param {jQueryEvent} ev
      */
     _onPaste: function (ev) {
-        var self = this;
         var clipboardData = (event.clipboardData || window.clipboardData).getData('text');
         var lines = clipboardData.split('\n');
         lines = _.without(lines, '');
@@ -1225,36 +1224,21 @@ ListRenderer.include({
         if (lines.length > 1) {
             ev.preventDefault();
             var fieldName = ev.target.name;
-            var data = {
-                fieldName: fieldName,
-                lines: lines,
-            };
-            this.trigger_up('paste', data);
-            this.updateState(this.state, {});
+            var commands = [];
 
-            // var pasteOnMultilines = function () {
-            //     var recordsCount = self.state.count;
-            //     var limit = Math.min(lines.length, recordsCount);
-            //     var lineIndex = 0;
-            //     for (var i = self.currentRow; i < limit; i++) {
-            //         var data = self.state.data[i].data;
-            //         data[fieldName] = lines[lineIndex++];
-            //     }
-            //     self.updateState(self.state, {});
-            //     // self.$el.trigger('change');
-            // };
-            // var pasteOnSingleLine = function () {
-            //     var data = self.state.data[self.currentRow].data;
-            //     data[fieldName] = clipboardData;
-            //     self.updateState(self.state, {});
-            // };
-
-            // var dialogText = _t("The data you want to paste seems contains text" +
-            //     " on multilines. Do you want paste them on different lines ?");
-            // Dialog.confirm(self, dialogText, {
-            //     confirm_callback: pasteOnMultilines,
-            //     cancel_callback: pasteOnSingleLine,
-            // });
+            var limit = Math.min(lines.length, this.state.count - this.currentRow);
+            for (var i = 0; i < limit; i++) {
+                var rowData = this.state.data[i + this.currentRow];
+                var data = {};
+                data[fieldName] = lines[i];
+                var command = {
+                    data: data,
+                    id: rowData.id,
+                    operation: 'UPDATE',
+                };
+                commands.push(command);
+            }
+            this.trigger_up('paste_multi', commands);
         }
     },
     /**
