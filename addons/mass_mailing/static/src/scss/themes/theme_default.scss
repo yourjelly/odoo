@@ -66,6 +66,10 @@ td:not([align]) {
         font-family: $o-mm-def-font;
     }
 
+    > table {
+        background-color: $o-mm-def-color-alpha;
+    }
+
     > .o_mail_wrapper {
         width: 100%;
         margin: 24px 0;
@@ -168,7 +172,7 @@ td:not([align]) {
     }
 }
 
-.o_mail_block_steps .o_mail_snippet_general{
+.o_mail_block_steps .o_mail_snippet_general > table {
     background-color: $o-mm-def-color-alpha;
 }
 
