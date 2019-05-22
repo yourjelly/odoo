@@ -658,18 +658,24 @@
                     <td style="width:25%;min-height: 150px;" class="text-center bg-delta o_mail_col_mv">
                         <img src="/mass_mailing/static/src/img/theme_basic/s_default_image_block_event.jpg" class="d-block mx-auto" alt="Your Picture" />
                     </td>
-                    <td class="o_mail_h_padding o_mail_v_padding o_mail_col_mv" style="min-height: 150px;">
-                        <div style="min-height: 111px">
-                            <h4>Cybersecurity</h4>
-                            <p class="o_mail_no_margin">
-                                Cyber-threats continue to increase.<br/>
-                                The discussion will examine how to develop new norms and integrate them into EU
-                            </p>
-                        </div>
-                        <div class="small mt16">
-                            <a role="button" href="#" class="btn btn-primary">Registration</a>
-                            <a role="button" href="#" class="btn btn-link" style="margin-left:10px">More Info</a>
-                        </div>
+                    <td class="o_mail_col_mv" style="min-height: 150px;">
+                        <table>
+                            <tr>
+                                <td class="o_mail_h_padding o_mail_v_padding">
+                                    <div style="min-height: 111px;">
+                                        <h4>Cybersecurity</h4>
+                                        <p class="o_mail_no_margin">
+                                            Cyber-threats continue to increase.<br/>
+                                            The discussion will examine how to develop new norms and integrate them into EU
+                                        </p>
+                                    </div>
+                                    <div class="small mt16">
+                                        <a role="button" href="#" class="btn btn-primary">Registration</a>
+                                        <a role="button" href="#" class="btn btn-link" style="margin-left:10px">More Info</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
                     </td>
                 </tr>
             </table>

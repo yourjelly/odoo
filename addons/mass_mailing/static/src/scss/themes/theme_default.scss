@@ -89,7 +89,6 @@ td:not([align]) {
     width: 100%;
     max-width: $o-mm-def-body-width; // should not be necessary thanks to mail wrapper
     margin: 0 auto;
-    background-color: $o-mm-def-body-bg;
 
     h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
         color: $o-mm-def-text-color;
@@ -205,6 +204,9 @@ td:not([align]) {
     margin-right: 20px;
     .o_mail_snippet_general{
         background: darken($o-mm-def-color-alpha, 2%);
+        td {
+            background-color: darken($o-mm-def-color-alpha, 2%);
+        }
     }
 }
 
