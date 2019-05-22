@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import base64
-
-from PIL import Image
 from odoo import api, fields, models, tools
-from odoo.tools.image import image_data_uri
+
 
 _logger = logging.getLogger(__name__)
 
@@ -46,6 +43,7 @@ def average_dominant_color(colors, margin):
 
     return final_avg, remaining
 
+
 class BaseDocumentLayout(models.TransientModel):
     """
         Customise the company document layout and display a live preview
@@ -57,7 +55,6 @@ class BaseDocumentLayout(models.TransientModel):
     company_id = fields.Many2one('res.company', required=True)
 
     logo = fields.Binary(related='company_id.logo', readonly=False)
-    preview_logo = fields.Binary(related='logo', string="Preview logo")
     report_header = fields.Text(related='company_id.report_header', readonly=False)
     report_footer = fields.Text(related='company_id.report_footer', readonly=False)
     paperformat_id = fields.Many2one(related='company_id.paperformat_id', readonly=False)
@@ -71,22 +68,45 @@ class BaseDocumentLayout(models.TransientModel):
 
     report_layout_id = fields.Many2one('report.layout', compute="_compute_report_layout_id", readonly=False)
     preview = fields.Html(compute='_compute_preview')
-    preview_header = fields.Text(compute="_compute_header")
-    preview_footer = fields.Text(compute="_compute_footer")
 
-    header_in_footer = fields.Boolean(compute="_compute_header_in_footer")
+    def _make_virtual_company(self, company_id=None, company_fields=None):
+        self.ensure_one()
+        values = {
+            fname: self[fname]
+            for fname in self._fields
+            if fname not in ('report_layout_id', 'custom_colors', 'preview', 'logo', 'company_id')
+        }
+        logo = self.logo
+        if not isinstance(logo, bytes):
+            if self.env.in_onchange:
+                logo = bytes(logo, 'UTF-8')
+            else:
+                logo = self.with_context(bin_size=False).logo
+        values['logo'] = logo
+
+        company_id = self.company_id if company_id is None else company_id
+        company_fields = ['name', 'partner_id'] if company_fields is None else company_fields
+
+        values.update({
+            fname: company_id[fname]
+            for fname in company_fields
+        })
+        return self.env['res.company'].new(values)
+
+    def _render_layout_preview(self):
+        self.ensure_one()
+        values = {
+            'doc': self,
+            'company': self._make_virtual_company(),
+        }
+        return self.env['ir.ui.view'].render_template('web.layout_preview', values)
 
     @api.depends('company_id')
     def _compute_report_layout_id(self):
         for wizard in self:
             wizard.report_layout_id = wizard.env["report.layout"].search([
-                ('view_id.key', '=', wizard.company_id.external_report_layout_id.key)
+                ('view_id.key', '=', wizard.external_report_layout_id.key)
             ])
-
-    @api.depends('report_layout_id')
-    def _compute_header_in_footer(self):
-        for wizard in self:
-            wizard.header_in_footer = (wizard.report_layout_id.name == 'Clean')
 
     @api.depends('primary_color', 'secondary_color')
     def _compute_custom_colors(self):
@@ -97,29 +117,17 @@ class BaseDocumentLayout(models.TransientModel):
     def _compute_preview(self):
         """ compute a qweb based preview to display on the wizard """
         for wizard in self:
-            ir_qweb = wizard.env['ir.qweb']
-            wizard.preview = ir_qweb.render('web.layout_preview', {
-                'company': wizard,
-            })
-    
-    @api.depends('report_header')
-    def _compute_header(self):
-        for wizard in self:
-            header = wizard.report_header
-            lines = [header[i:i+30] for i in range(0, len(header), 30)]
-            wizard.preview_header = '\n'.join(lines[:2])
-
-    @api.depends('report_footer')
-    def _compute_footer(self):
-        for wizard in self:
-            footer = wizard.report_footer
-            lines = [footer[i:i+30] for i in range(0, len(footer), 30)]
-            wizard.preview_footer = '\n'.join(lines[:3])
+            wizard.preview = wizard._render_layout_preview()
 
     @api.onchange('primary_color', 'secondary_color')
     def onchange_colors(self):
         for wizard in self:
-            wizard._compute_preview()
+            wizard.preview = wizard._render_layout_preview()
+
+    @api.onchange('report_header', 'report_footer')
+    def onchange_header_footer(self):
+        for wizard in self:
+            wizard.preview = wizard._render_layout_preview()
 
     @api.onchange('report_layout_id')
     def onchange_report_layout_id(self):
@@ -128,34 +136,35 @@ class BaseDocumentLayout(models.TransientModel):
                 wizard.primary_color = wizard.report_layout_id.primary_color
                 wizard.secondary_color = wizard.report_layout_id.secondary_color
             wizard.external_report_layout_id = wizard.report_layout_id.view_id
-            wizard._compute_preview()
+            wizard.preview = wizard._render_layout_preview()
 
     @api.onchange('logo')
     def onchange_logo(self):
         """ Identify dominant colors of the logo """
         for wizard in self:
-            margin = 50
-            white_threshold = 245
+            if wizard.logo:
+                margin = 50
+                white_threshold = 245
 
-            # Compute image
-            image = tools.base64_to_image(wizard.logo).resize((40, 40))
+                # Compute image
+                image = tools.base64_to_image(wizard.logo).resize((40, 40))
 
-            transparent = 'A' not in image.getbands()
+                transparent = 'A' not in image.getbands()
 
-            converted = image.convert('RGBA') if transparent else image
-            w, h = image.size
-            colors = []
-            for color in converted.getcolors(w * h):
-                if not(transparent and color[1][0] > white_threshold and
-                       color[1][1] > white_threshold and color[1][2] > white_threshold) and color[1][3] > 0:
-                    colors.append(color)
+                converted = image.convert('RGBA') if transparent else image
+                w, h = image.size
+                colors = []
+                for color in converted.getcolors(w * h):
+                    if not(transparent and color[1][0] > white_threshold and
+                           color[1][1] > white_threshold and color[1][2] > white_threshold) and color[1][3] > 0:
+                        colors.append(color)
 
-            primary, remaining = average_dominant_color(colors, margin)
-            secondary = average_dominant_color(remaining, margin)[
-                0] if len(remaining) > 0 else primary
+                primary, remaining = average_dominant_color(colors, margin)
+                secondary = average_dominant_color(remaining, margin)[
+                    0] if len(remaining) > 0 else primary
 
-            wizard.primary_color = rgb_to_hex(primary)
-            wizard.secondary_color = rgb_to_hex(secondary)
+                wizard.primary_color = rgb_to_hex(primary)
+                wizard.secondary_color = rgb_to_hex(secondary)
 
     @api.multi
     def reset_colors(self):
