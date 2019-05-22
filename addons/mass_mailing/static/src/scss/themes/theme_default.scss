@@ -118,7 +118,7 @@ td:not([align]) {
 
     .separator {
         border-top: 1px solid darken($o-mm-def-color-alpha, 2%);
-
+        font-size: 0px; // To avoid extra padding
     }
 
     .bg-beta {
