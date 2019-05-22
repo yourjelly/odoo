@@ -2539,8 +2539,8 @@ exports.Order = Backbone.Model.extend({
         }
     },
 
-    display_lot_popup: function() {
-        var order_line = this.get_selected_orderline();
+    display_lot_popup: function(order_line) {
+        order_line = order_line || this.get_selected_orderline();
         if (order_line){
             var pack_lot_lines =  order_line.compute_lot_lines();
             this.pos.gui.show_popup('packlotline', {

@@ -474,10 +474,16 @@ var ActionpadWidget = PosBaseWidget.extend({
         this._super();
         this.$('.pay').click(function(){
             var order = self.pos.get_order();
-            var has_valid_product_lot = _.every(order.orderlines.models, function(line){
-                return line.has_valid_product_lot();
+            var has_valid_product_serial = true;
+            var has_valid_product_lot = true;
+            _.every(order.orderlines.models, function(line){
+                has_valid_product_lot = line.has_valid_product_lot()
+                if (line.product.tracking == "serial" && line.quantity != 1) {
+                    has_valid_product_serial = order.display_lot_popup(line);
+                }
+                return has_valid_product_serial && has_valid_product_lot;
             });
-            if(!has_valid_product_lot){
+            if(!has_valid_product_lot && has_valid_product_serial){
                 self.gui.show_popup('confirm',{
                     'title': _t('Empty Serial/Lot Number'),
                     'body':  _t('One or more product(s) required serial/lot number.'),
@@ -485,7 +491,8 @@ var ActionpadWidget = PosBaseWidget.extend({
                         self.gui.show_screen('payment');
                     },
                 });
-            }else{
+            }
+            if (has_valid_product_lot && has_valid_product_serial) {
                 self.gui.show_screen('payment');
             }
         });
