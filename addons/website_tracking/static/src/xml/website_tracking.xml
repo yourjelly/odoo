@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+<!-- Recently Viewed Products Carousel -->
+<t t-name="website_tracking.productsRecentlyViewed">
+    <t t-foreach="products" t-as="product">
+        <div class="card o-product-card p-1 m-2">
+            <input type="hidden" name="product-id" t-att-data-product-id="product.id"/>
+            <a t-att-href="product.website_url">
+                <img class="o-product-card-img-top card-img-top" t-att-src="'/web/image/product.product/' + product.id + '/image_large'" alt="Product Image"/>
+            </a>
+            <div class="o-product-card-body card-body">
+                <a t-att-href="product.website_url">
+                    <h6 class="card-title text-truncate" t-raw="product.display_name"/>
+                </a>
+                <t t-if="product.has_discounted_price">
+                    <span class="text-danger text-nowrap" style="text-decoration: line-through;">
+                        <t t-raw="product.list_price"/>
+                    </span>
+                    <br/>
+                </t>
+                <b class="text-nowrap">
+                    <t t-raw="product.price"/>
+                </b>
+                <button class="btn btn-secondary ml-1 js_add_cart">
+                    <i class="fa fa-cart-plus"/> Add
+                </button>
+            </div>
+        </div>
+    </t>
+</t>
+
+</templates>

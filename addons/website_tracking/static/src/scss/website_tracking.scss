@@ -1,0 +1,24 @@
+.o-product-card {
+    flex: 0 0 auto;
+
+    .o-product-card-img-top {
+        object-fit: scale-down;
+        width: 12rem;
+        height: 12rem;
+    }
+
+    .o-product-card-body {
+        width: 12rem;
+    }
+}
+
+.slider:hover {
+    overflow-x: auto;
+}
+
+.slider{
+    display: inline-flex;
+    overflow-x: hidden;
+    width: 100%;
+    min-height: 20rem;
+}
