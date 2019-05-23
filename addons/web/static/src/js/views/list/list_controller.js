@@ -32,6 +32,7 @@ var ListController = BasicController.extend({
         save_line: '_onSaveLine',
         selection_changed: '_onSelectionChanged',
         open_form_overlay_view: '_onOpenFormOverlayView',
+        discard_form_overlay_view: '_onClickDiscard',
         toggle_column_order: '_onToggleColumnOrder',
         toggle_group: '_onToggleGroup',
         navigation_move: '_onNavigationMove',
@@ -219,8 +220,14 @@ var ListController = BasicController.extend({
     //--------------------------------------------------------------------------
 
     _onOpenFormOverlayView: function (ev) {
+        if (this.formOverlayWidget) {
+            this._onClickDiscard(ev);
+        }
         var data = ev.data,
             context = data.context || this.renderer.state.context;
+
+        var $content = $('.o_action_manager .o_content');
+        var $listview = $content.find('div.table-responsive');
 
         if (this.overlayFormViewEnabled) {
             var FormOverlayView = view_registry.get('FormOverlayView');
@@ -230,10 +237,17 @@ var ListController = BasicController.extend({
                 model: this.modelName,
                 res_id: data && this.model.get(data.id, { raw: true }).res_id,
                 db_id: data && data.id,
+                $parentView: $content,
             });
-            return this.formOverlayWidget.insertAfter($('.o_action_manager .o_content .o_list_view'));
+            $listview.addClass('o_form_overlay');
+            return this.formOverlayWidget.insertAfter($listview);
+
         }
         return this.trigger_up('open_record', {id: data && data.id});
+    },
+    _onClickDiscard: function (ev) {
+        this.formOverlayWidget.destroy();
+        this.formOverlayWidget = null;
     },
     /**
      * @see BasicController._abandonRecord

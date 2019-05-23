@@ -801,6 +801,7 @@ var ListRenderer = BasicRenderer.extend({
         var $table = $('<table>').addClass('o_list_view table table-sm table-hover table-striped');
         $table.toggleClass('o_list_view_grouped', this.isGrouped);
         $table.toggleClass('o_list_view_ungrouped', !this.isGrouped);
+        this.$el.toggleClass('o_list_overlay_view_grouped', this.isGrouped);
         var defs = [];
         this.defs = defs;
         if (this.isGrouped) {

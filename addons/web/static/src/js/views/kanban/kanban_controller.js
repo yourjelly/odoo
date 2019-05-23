@@ -517,16 +517,17 @@ var KanbanController = BasicController.extend({
         var data = ev.data,
             context = data.context || this.state.context;
 
-        var $kanbanView = $('.o_action_manager .o_content .o_kanban_view');
+        var $content = $('.o_action_manager .o_content');
+        var $kanbanView = $content.find('.o_kanban_view');
         this.formOverlayWidget = new RecordFormOverlay(this, {
             context: context,
             formViewID: this.overlayFormViewID,
             model: this.modelName,
             res_id: data && data.res_id,
             db_id:  data && data.db_id,
+            $parentView: $content,
         });
-        $kanbanView.addClass('o_kanban_overlay');
-        context['form_overlay_heigh'] = $kanbanView.height();
+        $kanbanView.addClass('o_form_overlay');
         return this.formOverlayWidget.insertAfter($kanbanView);
     },
     _onClickDiscard: function (ev) {

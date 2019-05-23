@@ -45,9 +45,11 @@ var FormOverlayView = Widget.extend({
         this.res_id = options.res_id; // to open form view, when click on record
         this.db_id = options.db_id; // related db for save record
         this.mode = options.mode;
+        // TODO: check it is needed
         this._disabled = false; // to prevent from creating multiple records (e.g. on double-clicks)
         this.isResizing = false; 
         this.lastDownX = 0;
+        this.$parentView = options.$parentView;
     },
     willStart: function () {
         var self = this;
@@ -82,7 +84,8 @@ var FormOverlayView = Widget.extend({
 
         this.$el.append(this.controller.$el);
         // TODO: dynamic
-        this.$el.height(this.context.form_overlay_heigh);
+        // this.$el.height(this.context.form_overlay_height);
+        this.$el.height(this.$parentView.height());
         // for resizing
         $(document).on('mousemove', this._onMouseMoveOverlay.bind(this))
         .on('mouseup', this._onMouseUpOverlay.bind(this));
@@ -137,18 +140,21 @@ var FormOverlayView = Widget.extend({
         this.trigger_up('reload');
         this.controller.trigger_up('discard_form_overlay_view');
         // TODO: for kanban and list
-        $('.o_kanban_view').removeClass('o_kanban_overlay');
+        // may be pass parent view in this widget to fix
+        this.$parentView.find('.o_form_overlay').removeClass('o_form_overlay');
+        // $('.o_kanban_view').removeClass('o_form_overlay');
+        // $('.o_list_view').removeClass('o_form_overlay');
     },
     _onMouseMoveOverlay: function (ev) {
         // handle resizable form overlay view
         if (!this.isResizing) 
             return;
 
-        var $content = this.$el.parents('div.o_content');
-        var offsetRight = $content.width() - (ev.clientX - $content.offset().left);
-        var offsetLeft = $content.width() - offsetRight;
+        // var $content = this.$el.parents('div.o_content');
+        var offsetRight = this.$parentView.width() - (ev.clientX - this.$parentView.offset().left);
+        var offsetLeft = this.$parentView.width() - offsetRight;
         // TODO: for kanban and list
-        $('.o_kanban_view').css('width', offsetLeft);
+        this.$parentView.find('.o_kanban_view, .o_list_view').css('width', offsetLeft);
         this.$el.css('width', offsetRight);
     },
     _onMouseUpOverlay: function (ev) {
