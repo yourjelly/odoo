@@ -224,7 +224,7 @@ class StockRule(models.Model):
 
         date_planned = self.env['purchase.order.line']._get_date_planned(seller, po=po)
 
-        return {
+        values = {
             'name': name,
             'product_qty': procurement_uom_po_qty,
             'product_id': product_id.id,
@@ -236,6 +236,12 @@ class StockRule(models.Model):
             'order_id': po.id,
             'move_dest_ids': [(4, x.id) for x in values.get('move_dest_ids', [])],
         }
+        if hasattr(self.env['purchase.order.line'], 'sale_line_id'):
+            values.update({
+                'name': values.get('sale_line_id', False) and values.get('sale_line_id').name or name,
+                'sale_line_id': values.get('sale_line_id', False) and values.get('sale_line_id').id,
+                })
+        return values
 
     def _prepare_purchase_order(self, company_id, origins, values):
         """ Create a purchase order for procuremets that share the same domain
