@@ -476,22 +476,27 @@ class Picking(models.Model):
                     'message': partner.picking_warn_msg
                 }}
 
-    @api.model
-    def create(self, vals):
-        # TDE FIXME: clean that brol
-        defaults = self.default_get(['name', 'picking_type_id'])
-        if vals.get('name', '/') == '/' and defaults.get('name', '/') == '/' and vals.get('picking_type_id', defaults.get('picking_type_id')):
-            vals['name'] = self.env['stock.picking.type'].browse(vals.get('picking_type_id', defaults.get('picking_type_id'))).sequence_id.next_by_id()
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            # TDE FIXME: clean that brol
+            defaults = self.default_get(['name', 'picking_type_id'])
+            if (vals.get('name', '/') == '/' and defaults.get('name', '/') == '/'
+                    and vals.get('picking_type_id', defaults.get('picking_type_id'))):
+                vals['name'] = self.env['stock.picking.type'].browse(
+                    vals.get('picking_type_id', defaults.get('picking_type_id'))
+                ).sequence_id.next_by_id()
 
-        # TDE FIXME: what ?
-        # As the on_change in one2many list is WIP, we will overwrite the locations on the stock moves here
-        # As it is a create the format will be a list of (0, 0, dict)
-        if vals.get('move_lines') and vals.get('location_id') and vals.get('location_dest_id'):
-            for move in vals['move_lines']:
-                if len(move) == 3 and move[0] == 0:
-                    move[2]['location_id'] = vals['location_id']
-                    move[2]['location_dest_id'] = vals['location_dest_id']
-        res = super(Picking, self).create(vals)
+            # TDE+ADT FIXME: what the FUCK?
+            # As the on_change in one2many list is WIP, we will overwrite the locations on the stock moves here
+            # As it is a create the format will be a list of (0, 0, dict)
+            if vals.get('move_lines') and vals.get('location_id') and vals.get('location_dest_id'):
+                for move in vals['move_lines']:
+                    if len(move) == 3 and move[0] == 0:
+                        move[2]['location_id'] = vals['location_id']
+                        move[2]['location_dest_id'] = vals['location_dest_id']
+
+        res = super(Picking, self).create(vals_list)
         res._autoconfirm_picking()
         return res
 

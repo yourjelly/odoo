@@ -5,13 +5,15 @@ from datetime import datetime
 from dateutil import relativedelta
 from itertools import groupby
 from operator import itemgetter
+from collections import OrderedDict
 
 from odoo import api, fields, models, _
 from odoo.addons import decimal_precision as dp
 from odoo.exceptions import UserError
 from odoo.osv import expression
-from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
+from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, pycompat
 from odoo.tools.float_utils import float_compare, float_round, float_is_zero
+from odoo.tools.misc import groupby
 
 PROCUREMENT_PRIORITIES = [('0', 'Not urgent'), ('1', 'Normal'), ('2', 'Urgent'), ('3', 'Very Urgent')]
 
@@ -680,40 +682,68 @@ class StockMove(models.Model):
                 ('state', 'in', ['draft', 'confirmed', 'waiting', 'partially_available', 'assigned'])], limit=1)
         return picking
 
+    @api.model
+    def _group_by_picking(self, move):
+        return (
+            move.group_id.id,
+            move.location_id.id,
+            move.location_dest_id.id,
+            move.picking_type_id.id
+        )
+
     def _assign_picking(self):
         """ Try to assign the moves to an existing picking that has not been
         reserved yet and has the same procurement group, locations and picking
         type (moves should already have them identical). Otherwise, create a new
         picking to assign them to. """
+
         Picking = self.env['stock.picking']
-        for move in self:
-            recompute = False
-            picking = move._search_picking_for_assignation()
-            if picking:
-                if picking.partner_id.id != move.partner_id.id or picking.origin != move.origin:
-                    # If a picking is found, we'll append `move` to its move list and thus its
-                    # `partner_id` and `ref` field will refer to multiple records. In this
-                    # case, we chose to  wipe them.
-                    picking.write({
-                        'partner_id': False,
-                        'origin': False,
-                    })
+        to_create = []
+        # moves to post-process for which the `new` argument is False
+        to_post_existing = self.browse()
+        # moves to post-process for which the `new` argument is True
+        to_post_new = self.browse()
+        # Group moves that share the same picking criteria
+        grouped_moves = OrderedDict(
+            {k: self.browse().union(*v) for k, v in groupby(self, self._group_by_picking)}
+        )
+
+        # Assign moves to already existing pickings
+        for k, moves in grouped_moves.items():
+            picking = moves[0]._search_picking_for_assignation()
+
+            if picking and moves.filtered(
+                lambda m: m.partner_id.id != picking.partner_id.id or m.origin != picking.origin):
+                # If a picking is found, we'll append `move` to its move list and thus its
+                # `partner_id` and `ref` field will refer to multiple records. In this
+                # case, we chose to  wipe them.
+                picking.write({
+                    'partner_id': False,
+                    'origin': False,
+                })
+                moves.write({'picking_id': picking.id})
+                to_post_existing |= moves
             else:
-                recompute = True
-                picking = Picking.create(move._get_new_picking_values())
-            move.write({'picking_id': picking.id})
-            move._assign_picking_post_process(new=recompute)
-            # If this method is called in batch by a write on a one2many and
-            # at some point had to create a picking, some next iterations could
-            # try to find back the created picking. As we look for it by searching
-            # on some computed fields, we have to force a recompute, else the
-            # record won't be found.
-            if recompute:
-                move.recompute()
+                to_create.append(k)
+
+        # Create pickings for moves that do not fit in any existing picking's criteria
+        pickings = Picking.create([grouped_moves[k][0]._get_new_picking_values() for k in to_create])
+        for picking, moves in pycompat.izip(pickings, grouped_moves.values()):
+            # And assign them
+            moves.write({'picking_id': picking.id})
+            to_post_new |= moves[0]
+            to_post_existing |= moves[1:]
+
+        to_post_new._assign_picking_post_process_batch(True)
+        to_post_existing._assign_picking_post_process_batch()
         return True
 
     def _assign_picking_post_process(self, new=False):
         pass
+
+    def _assign_picking_post_process_batch(self, new=False):
+        for record in self:
+            record._assign_picking_post_process(new=new)
 
     def _get_new_picking_values(self):
         """ Prepares a new picking for this move as it could not be assigned to
