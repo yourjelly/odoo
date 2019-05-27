@@ -98,7 +98,7 @@ var FormOverlayWidget = Widget.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * open form view
+     * Triggers up an event to open form overlay view
      *
      * @private
      * @param {string|null} name

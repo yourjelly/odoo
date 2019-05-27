@@ -169,7 +169,6 @@ var KanbanView = BasicView.extend({
     },
     /**
      * @private
-     * @param {Object} viewInfo
      * @returns {boolean} false if the open overlay form view feature is not explicitely
      *   enable (with overlay_form_view="true" in the arch)
      */
