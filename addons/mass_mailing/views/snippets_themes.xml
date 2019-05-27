@@ -556,8 +556,8 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            <div class="bg-beta">
+                        <td class="bg-beta">
+                            <div>
                                 &amp;nbsp;
                             </div>
                         </td>
