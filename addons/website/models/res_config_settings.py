@@ -109,8 +109,8 @@ class ResConfigSettings(models.TransientModel):
         # update the website_default_lang_id
         if not self.language_ids:
             self.website_default_lang_id = False
-        elif self.website_default_lang_id not in self.language_ids:
-            self.website_default_lang_id = self.language_ids[0]
+        elif self.website_default_lang_id not in self.language_ids._origin:
+            self.website_default_lang_id = self.language_ids._origin[0]
 
     @api.depends('language_ids')
     def _compute_language_count(self):
