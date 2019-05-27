@@ -517,8 +517,6 @@ var KanbanController = BasicController.extend({
         var data = ev.data,
             context = data.context || this.state.context;
 
-        var $content = $('.o_action_manager .o_content');
-        var $kanbanView = $content.find('.o_kanban_view');
         var FormOverlayWidget = viewRegistry.get('FormOverlayWidget');
         this.formOverlayWidget = new FormOverlayWidget(this, {
             context: context,
@@ -526,10 +524,8 @@ var KanbanController = BasicController.extend({
             model: this.modelName,
             res_id: data && data.res_id,
             db_id:  data && data.db_id,
-            $parentView: $content,
         });
-        $kanbanView.addClass('o_form_overlay');
-        return this.formOverlayWidget.insertAfter($kanbanView);
+        return this.formOverlayWidget.insertAfter(this.$el.find('.o_content .o_kanban_view'));
     },
     _onClickDiscard: function (ev) {
         this.formOverlayWidget.destroy();

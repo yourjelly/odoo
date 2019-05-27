@@ -31,14 +31,10 @@ var FormOverlayWidget = Widget.extend({
      * @override
      * @param {Widget} parent
      * @param {Object} options
-     * @param {Object} options.context
-     * @param {string|null} options.formViewRef
-     * @param {string|null} options.formViewID
-     * @param {string} options.model
      */
     init: function (parent, options) {
         this._super.apply(this, arguments);
-        this.$parentView = options.$parentView;
+        this.$parentView = parent.$el.find('.o_content');
         this.context = options.context;
         this.formViewID = options.formViewID;
         this.model = options.model;
@@ -50,6 +46,9 @@ var FormOverlayWidget = Widget.extend({
         this.isResizing = false; 
         this.lastDownX = 0;
     },
+    /**
+     * @override
+     */
     willStart: function () {
         var self = this;
         var superWillStart = this._super.apply(this, arguments);
@@ -77,11 +76,16 @@ var FormOverlayWidget = Widget.extend({
         });
         return Promise.all([superWillStart, viewsLoaded]);
     },
+    /**
+     * @override
+     */
     start: function () {
         this.$el.append('<div id="resizable" class="o_resizeble"></div>');
         this.$el.append(Qweb.render('FormOverlayView.buttons'));
 
         this.$el.append(this.controller.$el);
+        // for kanban and list view
+        this.$parentView.find('.o_kanban_view, div.table-responsive').addClass('o_form_overlay');
         this.$el.height(this.$parentView.height());
         // for resizing
         $(document).on('mousemove', this._onMouseMoveOverlay.bind(this))
@@ -93,6 +97,14 @@ var FormOverlayWidget = Widget.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * open form view
+     *
+     * @private
+     * @param {string|null} name
+     * @param {object} params
+     *
+     */
     _openFormView: function (name, params) {
         params = $.extend({
             mode: 'edit',
@@ -106,14 +118,27 @@ var FormOverlayWidget = Widget.extend({
     // Handlers
     //--------------------------------------------------------------------------
 
-    _onSaveRecord: function () {
+    /**
+     * save the changes on the form view
+     *
+     * @private
+     * @param {MouseEvent} ev Click event
+     *
+     */
+    _onSaveRecord: function (ev) {
         var self = this;
         this.controller.saveRecord().then(function () {
             self._onDiscard();
         });
     },
+    /**
+     * open form view in full screen
+     *
+     * @private
+     * @param {MouseEvent} ev Click event
+     *
+     */
     _onExpandRecord: function (ev) {
-        // open form view in full screen
         var self = this;
 
         if (this.db_id) {
@@ -132,13 +157,26 @@ var FormOverlayWidget = Widget.extend({
             }
         }
     },
+    /**
+     * discard the changes on form view.
+     *
+     * @private
+     * @param {MouseEvent} ev Click event
+     *
+     */
     _onDiscard: function () {
         this.trigger_up('reload');
         this.controller.trigger_up('discard_form_overlay_view');
         this.$parentView.find('.o_form_overlay').removeClass('o_form_overlay');
     },
+    /**
+     * to handle resizable event on form overlay view
+     *
+     * @private
+     * @param {MouseEvent} ev Click event
+     *
+     */
     _onMouseMoveOverlay: function (ev) {
-        // handle resizable form overlay view
         if (!this.isResizing) 
             return;
 
@@ -147,8 +185,14 @@ var FormOverlayWidget = Widget.extend({
         this.$parentView.find('.o_kanban_view, .o_list_view').css('width', offsetLeft);
         this.$el.css('width', offsetRight);
     },
+    /**
+     * to stop handle resizable event on form overlay view
+     *
+     * @private
+     * @param {MouseEvent} ev Click event
+     *
+     */
     _onMouseUpOverlay: function (ev) {
-        // stop resizing
         this.isResizing = false; 
     },
 });

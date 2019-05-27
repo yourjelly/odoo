@@ -226,9 +226,6 @@ var ListController = BasicController.extend({
         var data = ev.data,
             context = data.context || this.renderer.state.context;
 
-        var $content = $('.o_action_manager .o_content');
-        var $listview = $content.find('div.table-responsive');
-
         if (this.overlayFormViewEnabled) {
             var FormOverlayWidget = viewRegistry.get('FormOverlayWidget');
             this.formOverlayWidget = new FormOverlayWidget(this, {
@@ -237,10 +234,8 @@ var ListController = BasicController.extend({
                 model: this.modelName,
                 res_id: data && this.model.get(data.id, { raw: true }).res_id,
                 db_id: data && data.id,
-                $parentView: $content,
             });
-            $listview.addClass('o_form_overlay');
-            return this.formOverlayWidget.insertAfter($listview);
+            return this.formOverlayWidget.insertAfter(this.$el.find('.o_content div.table-responsive'));
 
         }
         return this.trigger_up('open_record', {id: data && data.id});
