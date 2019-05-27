@@ -12,7 +12,7 @@ var BasicController = require('web.BasicController');
 var DataExport = require('web.DataExport');
 var Dialog = require('web.Dialog');
 var Sidebar = require('web.Sidebar');
-var view_registry = require('web.view_registry');
+var viewRegistry = require('web.view_registry');
 
 var _t = core._t;
 var qweb = core.qweb;
@@ -230,8 +230,8 @@ var ListController = BasicController.extend({
         var $listview = $content.find('div.table-responsive');
 
         if (this.overlayFormViewEnabled) {
-            var FormOverlayView = view_registry.get('FormOverlayView');
-            this.formOverlayWidget = new FormOverlayView(this, {
+            var FormOverlayWidget = viewRegistry.get('FormOverlayWidget');
+            this.formOverlayWidget = new FormOverlayWidget(this, {
                 context: context,
                 formViewID: this.overlayFormViewID,
                 model: this.modelName,

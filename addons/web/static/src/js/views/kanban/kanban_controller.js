@@ -13,7 +13,7 @@ var core = require('web.core');
 var Domain = require('web.Domain');
 var view_dialogs = require('web.view_dialogs');
 var viewUtils = require('web.viewUtils');
-var RecordFormOverlay = require('web.form_overlay_view');
+var viewRegistry = require('web.view_registry');
 
 var _t = core._t;
 var qweb = core.qweb;
@@ -519,7 +519,8 @@ var KanbanController = BasicController.extend({
 
         var $content = $('.o_action_manager .o_content');
         var $kanbanView = $content.find('.o_kanban_view');
-        this.formOverlayWidget = new RecordFormOverlay(this, {
+        var FormOverlayWidget = viewRegistry.get('FormOverlayWidget');
+        this.formOverlayWidget = new FormOverlayWidget(this, {
             context: context,
             formViewID: this.overlayFormViewID,
             model: this.modelName,

@@ -2,25 +2,25 @@ odoo.define('web.form_overlay_view', function (require) {
 "use strict";
 
 /**
- * This file defines the OpenFormOverlayView widget for Kanban and list view. It allows to
- * create kanban/list records directly from the Kanban/list view.
- * handle resizing the form overlay view and calculate width of overlay view and kanban/list view
+ * This file defines the FormOverlay widget for Kanban and list view.
+ * It allows to create and open a records directly from the Kanban and list view.
+ * handle resizing the form overlay view and calculate width of overlay view for kanban and list view
  */
 
 var core = require('web.core');
 var Widget = require('web.Widget');
 var FormView = require('web.FormView');
-var view_registry = require('web.view_registry');
+var viewRegistry = require('web.view_registry');
 
-var qweb = core.qweb;
+var Qweb = core.qweb;
 
 
-var FormOverlayView = Widget.extend({
-    className: 'o_form_overlay_view',
+var FormOverlayWidget = Widget.extend({
+    className: 'o_form_overlay_widget',
     events: {
-        'click .o_form_overlay_button_save': '_onSaveClicked', // save open record and remove from overlay view in dome
-        'click .o_form_overlay_button_expand': '_onExpandClicked', // open form view in full screen
-        'click .o_form_overlay_button_cancel': '_onCancelClicked', // discard the form overlay view
+        'click .o_form_overlay_button_save': '_onSaveRecord', // save open record and remove from overlay view in dome
+        'click .o_form_overlay_button_expand': '_onExpandRecord', // open form view in full screen
+        'click .o_form_overlay_button_cancel': '_onDiscard', // discard the form overlay view
         'mousedown #resizable': function (ev) {
             this.isResizing = true;
             this.lastDownX = ev.clientX;
@@ -38,18 +38,17 @@ var FormOverlayView = Widget.extend({
      */
     init: function (parent, options) {
         this._super.apply(this, arguments);
+        this.$parentView = options.$parentView;
         this.context = options.context;
-        this.formViewRef = options.formViewRef; // for create a new record
         this.formViewID = options.formViewID;
         this.model = options.model;
         this.res_id = options.res_id; // to open form view, when click on record
-        this.db_id = options.db_id; // related db for save record
+        this.db_id = options.db_id; // related to id for save record
         this.mode = options.mode;
         // TODO: check it is needed
         this._disabled = false; // to prevent from creating multiple records (e.g. on double-clicks)
         this.isResizing = false; 
         this.lastDownX = 0;
-        this.$parentView = options.$parentView;
     },
     willStart: function () {
         var self = this;
@@ -61,7 +60,7 @@ var FormOverlayView = Widget.extend({
             viewsLoaded = this.loadViews(this.model, context, views);
 
         viewsLoaded = viewsLoaded.then(function (fieldsViews) {
-            var formOverlayView = new FormView(fieldsViews.form, {
+            var formOverlay = new FormView(fieldsViews.form, {
                 context: self.context,
                 modelName: self.model,
                 ids: self.res_id ? [self.res_id] : [],
@@ -71,7 +70,7 @@ var FormOverlayView = Widget.extend({
                 default_buttons: false,
                 withControlPanel: false,
             });
-            return formOverlayView.getController(self).then(function (controller) {
+            return formOverlay.getController(self).then(function (controller) {
                 self.controller = controller;
                 return self.controller.appendTo(document.createDocumentFragment());
             });
@@ -80,11 +79,9 @@ var FormOverlayView = Widget.extend({
     },
     start: function () {
         this.$el.append('<div id="resizable" class="o_resizeble"></div>');
-        this.$el.append(qweb.render('FormOverlayView.buttons'));
+        this.$el.append(Qweb.render('FormOverlayView.buttons'));
 
         this.$el.append(this.controller.$el);
-        // TODO: dynamic
-        // this.$el.height(this.context.form_overlay_height);
         this.$el.height(this.$parentView.height());
         // for resizing
         $(document).on('mousemove', this._onMouseMoveOverlay.bind(this))
@@ -102,20 +99,20 @@ var FormOverlayView = Widget.extend({
             view_type: 'form',
         }, params);
         this.trigger_up(name, params);
-        this._onCancelClicked();
+        this._onDiscard();
     },
 
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
 
-    _onSaveClicked: function () {
+    _onSaveRecord: function () {
         var self = this;
         this.controller.saveRecord().then(function () {
-            self._onCancelClicked();
+            self._onDiscard();
         });
     },
-    _onExpandClicked: function (ev) {
+    _onExpandRecord: function (ev) {
         // open form view in full screen
         var self = this;
 
@@ -135,25 +132,18 @@ var FormOverlayView = Widget.extend({
             }
         }
     },
-    _onCancelClicked: function () {
-        // reload kanban view
+    _onDiscard: function () {
         this.trigger_up('reload');
         this.controller.trigger_up('discard_form_overlay_view');
-        // TODO: for kanban and list
-        // may be pass parent view in this widget to fix
         this.$parentView.find('.o_form_overlay').removeClass('o_form_overlay');
-        // $('.o_kanban_view').removeClass('o_form_overlay');
-        // $('.o_list_view').removeClass('o_form_overlay');
     },
     _onMouseMoveOverlay: function (ev) {
         // handle resizable form overlay view
         if (!this.isResizing) 
             return;
 
-        // var $content = this.$el.parents('div.o_content');
         var offsetRight = this.$parentView.width() - (ev.clientX - this.$parentView.offset().left);
         var offsetLeft = this.$parentView.width() - offsetRight;
-        // TODO: for kanban and list
         this.$parentView.find('.o_kanban_view, .o_list_view').css('width', offsetLeft);
         this.$el.css('width', offsetRight);
     },
@@ -162,6 +152,6 @@ var FormOverlayView = Widget.extend({
         this.isResizing = false; 
     },
 });
-view_registry.add('FormOverlayView', FormOverlayView);
-return FormOverlayView;
+viewRegistry.add('FormOverlayWidget', FormOverlayWidget);
+return FormOverlayWidget;
 });
