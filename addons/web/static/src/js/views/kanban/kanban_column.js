@@ -26,7 +26,7 @@ var KanbanColumn = Widget.extend({
         'click .o_column_edit': '_onEditColumn',
         'click .o_column_delete': '_onDeleteColumn',
         'click .o_kanban_quick_add': '_onAddQuickCreate',
-        'click .o_kanban_overlay_form_view': '_onClickOpenFormOverlay',
+        'click .o_kanban_overlay_form_view': '_onAddQuickCreateFormOverlay',
         'click .o_kanban_load_more': '_onLoadMore',
         'click .o_kanban_toggle_fold': '_onToggleFold',
         'click .o_column_archive_records': '_onArchiveRecords',
@@ -291,9 +291,10 @@ var KanbanColumn = Widget.extend({
         this.addQuickCreate();
     },
     /**
+     * Triggers up an event to open form overlay view
      * @private
      */
-    _onClickOpenFormOverlay: function (ev) {
+    _onAddQuickCreateFormOverlay: function (ev) {
         // for default stage_id
         var context = this.data.getContext();
         context['default_' + this.groupedBy] = viewUtils.getGroupValue(this.data, this.groupedBy);

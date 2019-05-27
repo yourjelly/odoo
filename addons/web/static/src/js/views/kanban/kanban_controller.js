@@ -509,6 +509,12 @@ var KanbanController = BasicController.extend({
                 }).open().opened(onFailure);
             });
     },
+    /**
+     * crete form overlay widget and insert in dom for editable form view
+     *
+     * @private
+     * @param {OdooEvent} ev
+     */
     _onOpenFormOverlayView: function (ev) {
         if (this.formOverlayWidget) {
             this._onClickDiscard(ev);
@@ -527,6 +533,12 @@ var KanbanController = BasicController.extend({
         });
         return this.formOverlayWidget.insertAfter(this.$el.find('.o_content .o_kanban_view'));
     },
+    /**
+     * destroy form overlay widget
+     *
+     * @private
+     * @param {OdooEvent} ev
+     */
     _onClickDiscard: function (ev) {
         this.formOverlayWidget.destroy();
         this.formOverlayWidget = null;

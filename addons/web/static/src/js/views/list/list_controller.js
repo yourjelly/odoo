@@ -219,6 +219,12 @@ var ListController = BasicController.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * crete form overlay widget and insert in dom for editable form view
+     *
+     * @private
+     * @param {OdooEvent} ev
+     */
     _onOpenFormOverlayView: function (ev) {
         if (this.formOverlayWidget) {
             this._onClickDiscard(ev);
@@ -240,6 +246,12 @@ var ListController = BasicController.extend({
         }
         return this.trigger_up('open_record', {id: data && data.id});
     },
+    /**
+     * destroy form overlay widget
+     *
+     * @private
+     * @param {OdooEvent} ev
+     */
     _onClickDiscard: function (ev) {
         this.formOverlayWidget.destroy();
         this.formOverlayWidget = null;
