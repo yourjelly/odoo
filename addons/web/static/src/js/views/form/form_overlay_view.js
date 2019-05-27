@@ -85,7 +85,7 @@ var FormOverlayWidget = Widget.extend({
 
         this.$el.append(this.controller.$el);
         // for kanban and list view
-        this.$parentView.find('.o_kanban_view, div.table-responsive').addClass('o_form_overlay');
+        this.$parentView.children('.o_kanban_view, div.table-responsive').first().addClass('o_form_overlay');
         this.$el.height(this.$parentView.height());
         // for resizing
         $(document).on('mousemove', this._onMouseMoveOverlay.bind(this))
