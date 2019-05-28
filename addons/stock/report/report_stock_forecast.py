@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import re
+
 from odoo import api, fields, models, tools
+
+DATE_RE = re.compile(r"date\b")
 
 
 class ReportStockForecat(models.Model):
@@ -184,8 +188,12 @@ class ReportStockForecat(models.Model):
         in SQL. It's wanted since the customer could play with the domain in
         order to analyze different quantities in different situations.
         """
-        # Sort result by date_expected and id.
-        orderby = 'date, id' if not orderby else orderby
+        if not orderby:
+            if any(DATE_RE.match(name) for name in fields + groupby):
+                # Sort result by date_expected and id.
+                orderby = 'date, id'
+            else:
+                orderby = 'id'
         if 'cumulative_quantity' in fields and 'quantity' not in fields:
             fields.append('quantity')
         res = super(ReportStockForecat, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
