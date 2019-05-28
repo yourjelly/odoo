@@ -635,8 +635,6 @@ class Picking(models.Model):
                     #'qty_done': ops.qty_done})
         todo_moves._action_done(cancel_backorder=self.env.context.get('cancel_backorder'))
         self.write({'date_done': fields.Datetime.now()})
-        #self._zero_quantity_count(todo_moves)
-
         return True
 
     @api.depends('state', 'move_lines', 'move_lines.state', 'move_lines.package_level_id', 'move_lines.move_line_ids.package_level_id')
@@ -780,9 +778,10 @@ class Picking(models.Model):
             return self.action_generate_backorder_wizard()
         self.action_done()
 
-        lines_zero_quantity_count = self._get_lines_zero_quantity_count()
-        if lines_zero_quantity_count:
-            return self.zero_quantity_count(lines_zero_quantity_count)
+        if self.user_has_groups('stock.group_stock_zero_quantity_count'):
+            quant_lines_zero_quantity_count = self._get_quant_lines_zero_quantity_count()
+            if quant_lines_zero_quantity_count:
+                return self.zero_quantity_count(quant_lines_zero_quantity_count)
 
         return
 
@@ -802,26 +801,23 @@ class Picking(models.Model):
             'context': self.env.context,
         }
 
-    def _get_lines_zero_quantity_count(self):
-        Quant = self.env['stock.quant']
-        lines_zero_quantity_count = []
+    def _get_quant_lines_zero_quantity_count(self):
+        self.ensure_one()
+        quant_lines_zero_quantity_count = []
         for line in self.move_lines:
-            quant_line = Quant.search([['location_id.id', '=', line.location_id.id], ['product_id.id', '=', line.product_id.id]])
-            if quant_line.quantity == 0:
-                lines_zero_quantity_count.append(quant_line)
-        return lines_zero_quantity_count
+            quant_line = self.env['stock.quant'].search([['location_id.id', '=', line.location_id.id], ['product_id.id', '=', line.product_id.id]])
+            if float_is_zero(quant_line.quantity, precision_digits=self.env['decimal.precision'].precision_get('Product Unit of Measure')):
+                quant_lines_zero_quantity_count.append(quant_line)
+        return quant_lines_zero_quantity_count
 
-    def zero_quantity_count(self, lines_zero_quantity_count):
-        #Zero quantity count
-
+    def zero_quantity_count(self, quant_lines_zero_quantity_count):
         inventory_lines = []
-        for line in lines_zero_quantity_count:
+        for line in quant_lines_zero_quantity_count:
             inventory_lines.append(self.env['stock.inventory.line'].create({
                 'product_id': line.product_id.id,
                 'product_uom_id': line.product_id.uom_id.id,
                 'product_uom_category_id': line.product_id.uom_id.category_id.id,
-                'location_id': line.location_id.id,
-                'theoretical_qty': 0,
+                'location_id': line.location_id.id
             }))
 
         wiz = self.env['stock.zero.quantity.count'].create({'inventory_lines': [(4, line.id) for line in inventory_lines]})

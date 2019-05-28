@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+  <record id="view_stock_zero_quantity_count" model="ir.ui.view">
+    <field name="name">stock.zero.quantity.count.question.view.form</field>
+    <field name="model">stock.zero.quantity.count.question</field>
+    <field name="arch" type="xml">
+      <form string="Zero Quantity Count">
+        <group>
+          <p>Some products of the inventory reached quantity 0, would you like to do the inventory now?</p>
+        </group>
+        <footer>
+          <button name="action_zero_quantity_count_question" string="Yes" type="object" class="btn-primary"/>
+          <button string="No" special="cancel" class="btn-secondary"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+</odoo>
