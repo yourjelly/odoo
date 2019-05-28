@@ -458,12 +458,19 @@
                         <td style="width:270px;text-align:center;vertical-align:middle" class="o_mail_col_mv o_mail_img_container o_mail_h_padding o_mail_v_padding">
                             <img src="/mass_mailing/static/src/img/theme_basic/s_default_image_block_image_text.jpg" class="d-block mx-auto" alt="Your Picture" />
                         </td>
-                        <td style="width:270px;vertical-align:middle;text-align:center;" class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
-                            <h3>Omnichannel sales</h3>
-                            <p class="o_mail_no_margin" style="text-align:justify;">Get your inside sales (CRM) fully integrated with online sales (eCommerce), in-store sales (Point of Sale) and marketplaces like eBay and Amazon.</p>
-                            <div class="text-center" style="margin-top:15px;">
-                                <a role="button" href="#" class="btn btn-link">Read More...</a>
-                            </div>
+                        <td style="width:270px;vertical-align:middle;text-align:center;" class="o_mail_col_mv">
+                            <table cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td class="o_mail_h_padding o_mail_v_padding">
+                                        <h3>Omnichannel sales</h3>
+                                        <p class="o_mail_no_margin" style="text-align:justify;">Get your inside sales (CRM) fully integrated with online sales (eCommerce), in-store sales (Point of Sale) and marketplaces like eBay and Amazon.</p>
+                                        <div class="text-center" style="margin-top:15px;">
+                                            <a role="button" href="#" class="btn btn-link">Read More...</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+
                         </td>
                     </tr>
                 </tbody>
@@ -478,12 +485,18 @@
             <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles">
                 <tbody>
                     <tr>
-                        <td style="width:270px;vertical-align:middle;text-align:center;" class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
-                            <h3>A unique value</h3>
-                            <p class="o_mail_no_margin" style="text-align:justify;">The open source model of Odoo has allowed us to leverage thousands of developers and business experts to build hundreds of apps in just a few years.</p>
-                            <div class="text-center" style="margin-top:15px;">
-                                <a role="button" href="#" class="btn btn-link">Read More...</a>
-                            </div>
+                        <td style="width:270px;vertical-align:middle;text-align:center;" class="o_mail_col_mv">
+                            <table cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td class="o_mail_h_padding o_mail_v_padding">
+                                        <h3>A unique value</h3>
+                                        <p class="o_mail_no_margin" style="text-align:justify;">The open source model of Odoo has allowed us to leverage thousands of developers and business experts to build hundreds of apps in just a few years.</p>
+                                        <div class="text-center" style="margin-top:15px;">
+                                            <a role="button" href="#" class="btn btn-link">Read More...</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
                         </td>
                         <td style="width:270px;text-align:center;vertical-align:middle" class="o_mail_col_mv o_mail_img_container o_mail_h_padding o_mail_v_padding">
                             <img src="/mass_mailing/static/src/img/theme_basic/s_default_image_block_text_image.jpg" class="d-block mx-auto" alt="Your Picture" />
@@ -661,18 +674,24 @@
                     <td class="o_mail_col_mv" style="min-height: 150px;">
                         <table>
                             <tr>
-                                <td class="o_mail_h_padding o_mail_v_padding">
-                                    <div style="min-height: 111px;">
-                                        <h4>Cybersecurity</h4>
-                                        <p class="o_mail_no_margin">
-                                            Cyber-threats continue to increase.<br/>
-                                            The discussion will examine how to develop new norms and integrate them into EU
-                                        </p>
-                                    </div>
-                                    <div class="small mt16">
-                                        <a role="button" href="#" class="btn btn-primary">Registration</a>
-                                        <a role="button" href="#" class="btn btn-link" style="margin-left:10px">More Info</a>
-                                    </div>
+                                <td>
+                                    <table>
+                                        <tr>
+                                            <td class="o_mail_h_padding o_mail_v_padding">
+                                                <div style="min-height: 111px;">
+                                                    <h4>Cybersecurity</h4>
+                                                    <p class="o_mail_no_margin">
+                                                        Cyber-threats continue to increase.<br/>
+                                                        The discussion will examine how to develop new norms and integrate them into EU
+                                                    </p>
+                                                </div>
+                                                <div class="small mt16">
+                                                    <a role="button" href="#" class="btn btn-primary">Registration</a>
+                                                    <a role="button" href="#" class="btn btn-link" style="margin-left:10px">More Info</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
                                 </td>
                             </tr>
                         </table>
