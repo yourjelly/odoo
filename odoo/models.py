@@ -5062,6 +5062,8 @@ Fields:
                 any(item == record for record in self)
         """
         if isinstance(item, BaseModel) and self._name == item._name:
+            if self and item and any(item._ids) != any(self._ids):
+                _logger.warning("Comparing %s in %s", item, self, stack_info=True)
             return len(item) == 1 and item.id in self._ids
         elif isinstance(item, str):
             return item in self._fields
@@ -5122,15 +5124,17 @@ Fields:
         """ Test whether two recordsets are equivalent (up to reordering). """
         if not isinstance(other, BaseModel):
             if other:
-                filename, lineno = frame_codeinfo(currentframe(), 1)
-                _logger.warning("Comparing apples and oranges: %r == %r (%s:%s)",
-                                self, other, filename, lineno)
+                _logger.warning("Comparing %s and %r", self, other, stack_info=True)
             return NotImplemented
+        if self._ids and other._ids and any(self._ids) != any(other._ids):
+            _logger.warning("Comparing %s and %s", self, other, stack_info=True)
         return self._name == other._name and set(self._ids) == set(other._ids)
 
     def __lt__(self, other):
         if not isinstance(other, BaseModel) or self._name != other._name:
             return NotImplemented
+        if self._ids and other._ids and any(self._ids) != any(other._ids):
+            _logger.warning("Comparing %s and %s", self, other, stack_info=True)
         return set(self._ids) < set(other._ids)
 
     def __le__(self, other):
@@ -5141,11 +5145,15 @@ Fields:
         # recordset
         if not self or self in other:
             return True
+        if self._ids and other._ids and any(self._ids) != any(other._ids):
+            _logger.warning("Comparing %s and %s", self, other, stack_info=True)
         return set(self._ids) <= set(other._ids)
 
     def __gt__(self, other):
         if not isinstance(other, BaseModel) or self._name != other._name:
             return NotImplemented
+        if self._ids and other._ids and any(self._ids) != any(other._ids):
+            _logger.warning("Comparing %s and %s", self, other, stack_info=True)
         return set(self._ids) > set(other._ids)
 
     def __ge__(self, other):
@@ -5153,6 +5161,8 @@ Fields:
             return NotImplemented
         if not other or other in self:
             return True
+        if self._ids and other._ids and any(self._ids) != any(other._ids):
+            _logger.warning("Comparing %s and %s", self, other, stack_info=True)
         return set(self._ids) >= set(other._ids)
 
     def __int__(self):

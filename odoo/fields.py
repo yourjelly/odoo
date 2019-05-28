@@ -2362,7 +2362,7 @@ class _RelationalMulti(_Relational):
                 result.append((0, 0, values))
             else:
                 result[0][2].append(origin.id)
-                if record != origin:
+                if not record.id:
                     values = record._convert_to_write({
                         name: record[name]
                         for name in record._cache
