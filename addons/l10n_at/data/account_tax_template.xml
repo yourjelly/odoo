@@ -37,6 +37,7 @@
             <field
                 name="price_include"
                 eval="0" />
+          <field name="active" eval="False"/>
             <field
                 name="account_id"
                 ref="" />
@@ -95,6 +96,7 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
                 ref="" />
@@ -124,6 +126,7 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
                 ref="" />
@@ -182,6 +185,7 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
                 ref="" />
@@ -211,6 +215,7 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
                 ref="" />
@@ -240,6 +245,7 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
                 ref="" />
@@ -269,18 +275,19 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_020')])]" />
              <field name="tax_group_id" ref="tax_group_0"/>
         </record>
-        <!-- zu versteuernder Umsatz +022, +029, +025, +037, +052, +038 -->
+        <!-- zu versteuernder Umsatz +022, +029, +006, +037, +052, +007 -->
         <!-- Soll-Umsatzsteuern (=normale Umsatzsteuer) -->
         <record
             id="account_tax_template_sales_20_code022"
@@ -307,7 +314,7 @@
                 ref="chart_at_template_3500" />
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_022')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_022'), ref('tax_tag_kz_000')])]" />
              <field name="tax_group_id" ref="tax_group_20"/>
         </record>
         <record
@@ -335,7 +342,7 @@
                 ref="chart_at_template_3500" />
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_022')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_022'), ref('tax_tag_kz_000')])]" />
              <field name="tax_group_id" ref="tax_group_20"/>
         </record>
         <record
@@ -363,7 +370,7 @@
                 ref="chart_at_template_3501" />
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_029')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_029'), ref('tax_tag_kz_000')])]" />
              <field name="tax_group_id" ref="tax_group_10"/>
         </record>
         <record
@@ -391,36 +398,8 @@
                 ref="chart_at_template_3502" />
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_006')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_006'), ref('tax_tag_kz_000')])]" />
              <field name="tax_group_id" ref="tax_group_13"/>
-        </record>
-        <!-- 12% für Weinumsätze durch landwirtschaftliche Betriebe -->
-        <record
-            id="account_tax_template_sales_12_code025"
-            model="account.tax.template">
-            <field
-                name="chart_template_id"
-                ref="l10n_at_chart_template" />
-            <field name="sequence">30</field>
-            <field name="type_tax_use">sale</field>
-            <field name="name">UST_025 Weinumsätze 12%(LWB)</field>
-            <field name="description">USt. 12%</field>
-            <field
-                eval="12"
-                name="amount" />
-            <field name="amount_type">percent</field>
-            <field
-                name="price_include"
-                eval="0" />
-            <field
-                name="account_id"
-                ref="" />
-            <field
-                name="refund_account_id"
-                ref="" />
-            <field
-                name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_025')])]" />
         </record>
         <!-- 19% für Gemeinden Jungholz und Mittelberg -->
         <record
@@ -440,15 +419,16 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_037')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_037'), ref('tax_tag_kz_000')])]" />
         </record>
         <!-- 10% Zusatzsteuer für pauschalierte land- und forstwirtschaftliche Betriebe -->
         <record
@@ -468,45 +448,46 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_052')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_052'), ref('tax_tag_kz_000')])]" />
         </record>
-        <!-- 8% Zusatzsteuer für pauschalierte land- und forstwirtschaftliche Betriebe -->
         <record
-            id="account_tax_template_sales_add8_code038"
+            id="account_tax_template_sales_add7_code007"
             model="account.tax.template">
             <field
                 name="chart_template_id"
                 ref="l10n_at_chart_template" />
             <field name="sequence">300</field>
             <field name="type_tax_use">sale</field>
-            <field name="name">UST_038 Zusatzsteuersatz 8% (LWB/FWB)</field>
-            <field name="description">USt. 8%</field>
+            <field name="name">UST_007 Zusatzsteuersatz 7% (LWB/FWB)</field>
+            <field name="description">USt. 7%</field>
             <field
-                eval="8"
+                eval="7"
                 name="amount" />
             <field name="amount_type">percent</field>
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_038')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_007'), ref('tax_tag_kz_000')])]" />
         </record>
-        <!-- zu versteuernder Umsatz (Eigenverbrauch) +022, +029, +025, +037, +052, +038 -->
+        <!-- zu versteuernder Umsatz (Eigenverbrauch) +022, +029, +006, +037, +052, +007 -->
         <record
             id="account_tax_template_sales_self_20_code022"
             model="account.tax.template">
@@ -564,33 +545,6 @@
              <field name="tax_group_id" ref="tax_group_10"/>
         </record>
         <record
-            id="account_tax_template_sales_self_12_self_code025"
-            model="account.tax.template">
-            <field
-                name="chart_template_id"
-                ref="l10n_at_chart_template" />
-            <field name="sequence">70</field>
-            <field name="type_tax_use">sale</field>
-            <field name="name">UST_025 Weinumsätze 12%(LWB - Eigenverbrauch)</field>
-            <field name="description">USt. 12%</field>
-            <field
-                eval="12"
-                name="amount" />
-            <field name="amount_type">percent</field>
-            <field
-                name="price_include"
-                eval="0" />
-            <field
-                name="account_id"
-                ref="" />
-            <field
-                name="refund_account_id"
-                ref="" />
-            <field
-                name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_025'), ref('tax_tag_kz_001')])]" />
-        </record>
-        <record
             id="account_tax_template_sales_self_19_code037"
             model="account.tax.template">
             <field
@@ -607,12 +561,13 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_037'), ref('tax_tag_kz_001')])]" />
@@ -634,42 +589,44 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_052'), ref('tax_tag_kz_001')])]" />
         </record>
         <record
-            id="account_tax_template_sales_self_add8_code038"
+            id="account_tax_template_sales_self_add7_code007"
             model="account.tax.template">
             <field
                 name="chart_template_id"
                 ref="l10n_at_chart_template" />
             <field name="sequence">300</field>
             <field name="type_tax_use">sale</field>
-            <field name="name">UST_038 Zusatzsteuersatz 8% (LWB/FWB - Eigenverbrauch)</field>
-            <field name="description">USt. 8%</field>
+            <field name="name">UST_007 Zusatzsteuersatz 7% (LWB/FWB - Eigenverbrauch)</field>
+            <field name="description">USt. 7%</field>
             <field
-                eval="8"
+                eval="7"
                 name="amount" />
             <field name="amount_type">percent</field>
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_038'), ref('tax_tag_kz_001')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_007'), ref('tax_tag_kz_001')])]" />
         </record>
         <!-- Übergegangene Steuerschuld +056, +057, +048, +044, +032 -->
         <!-- Steuerschuld gemäß § 11 Abs. 12 und 14, § 16 Abs. 2 sowie gemäß Art. 7 Abs. 4 -->
@@ -690,12 +647,13 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_056')])]" />
@@ -843,6 +801,7 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
                 ref="" />
@@ -874,10 +833,10 @@
                 eval="0" />
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3511" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3511" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_065')])]" />
@@ -904,13 +863,43 @@
                 eval="0" />
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3512" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3512" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_065')])]" />
+        </record>
+        <record
+            id="account_tax_template_purchase_eu_13_code008"
+            model="account.tax.template">
+            <field
+                name="chart_template_id"
+                ref="l10n_at_chart_template" />
+            <field name="name">Erwerbssteuer für innergemeinschaftliche Erwerbe (13%)</field>
+            <field name="description">UST_008 IGE 13%</field>
+            <field
+                eval="-13"
+                name="amount" />
+            <field name="sequence">300</field>
+            <field
+                name="chart_template_id"
+                ref="l10n_at_chart_template" />
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">purchase</field>
+            <field
+                name="price_include"
+                eval="0" />
+            <field
+                name="account_id"
+                ref="chart_at_template_3513" />
+            <field
+                name="refund_account_id"
+                ref="chart_at_template_3513" />
+            <field
+                name="tag_ids"
+                eval="[(6,0,[ref('tax_tag_kz_008')])]" />
         </record>
         <record
             id="account_tax_template_purchase_eu_19_code088"
@@ -932,6 +921,7 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
                 ref="" />
@@ -959,6 +949,7 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
                 ref="" />
@@ -986,6 +977,7 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
                 ref="" />
@@ -1127,12 +1119,13 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_2505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_2505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_060')])]" />
@@ -1154,12 +1147,13 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_2505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_2505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_060')])]" />
@@ -1182,6 +1176,7 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
                 ref="" />
@@ -1451,12 +1446,13 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_2505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_2505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_063')])]" />
@@ -1479,12 +1475,13 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_2505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_2505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_067')])]" />
@@ -1507,12 +1504,13 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_2505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_2505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_090')])]" />
@@ -1536,12 +1534,13 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_2505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_2505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_027')])]" />
@@ -1564,12 +1563,13 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_2505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_2505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_028')])]" />
@@ -1592,12 +1592,13 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_2505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_2505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_071'), ref('tax_tag_kz_065')])]" />
@@ -1623,10 +1624,10 @@
                 eval="0" />
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_2511" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_2511" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_072'), ref('tax_tag_kz_065')])]" />
@@ -1674,10 +1675,10 @@
                 eval="0" />
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_2512" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_2512" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_065')])]" />
@@ -1705,6 +1706,56 @@
                 name="children_tax_ids"
                 eval="[(6, 0, [ref('account_tax_template_purchase_eu_10_code073'), ref('account_tax_template_purchase_eu_10_vst_073')])]" />
         </record>
+        <record
+            id="account_tax_template_purchase_eu_13_vst_008"
+            model="account.tax.template">
+            <field
+                name="chart_template_id"
+                ref="l10n_at_chart_template" />
+            <field name="sequence">300</field>
+            <field name="type_tax_use">purchase</field>
+            <field name="name">VST_008 IGE 13%</field>
+            <field name="description">VSt. 13%</field>
+            <field
+                eval="13"
+                name="amount" />
+            <field name="amount_type">percent</field>
+            <field
+                name="price_include"
+                eval="0" />
+            <field
+                name="account_id"
+                ref="chart_at_template_2513" />
+            <field
+                name="refund_account_id"
+                ref="chart_at_template_2513" />
+            <field
+                name="tag_ids"
+                eval="[(6,0,[ref('tax_tag_kz_008')])]" />
+        </record>
+        <record
+            id="account_tax_template_purchase_eu_13"
+            model="account.tax.template">
+            <field
+                name="chart_template_id"
+                ref="l10n_at_chart_template" />
+            <field name="sequence">50</field>
+            <field name="type_tax_use">purchase</field>
+            <field name="name">IGE 13%</field>
+            <field name="description">IGE 13%</field>
+            <field
+                name="price_include"
+                eval="0" />
+            <field name="amount">13</field>
+            <field name="amount_type">group</field>
+            <field
+                name="tag_ids"
+                eval="[(6,0,[ref('tax_tag_kz_008'), ref('tax_tag_kz_070')])]" />
+             <field name="tax_group_id" ref="tax_group_0"/>
+            <field
+                name="children_tax_ids"
+                eval="[(6, 0, [ref('account_tax_template_purchase_eu_13_code008'), ref('account_tax_template_purchase_eu_13_vst_008')])]" />
+        </record>
         <!-- Vorsteuerabzug für Jungholz und Mittelberg (19%) -->
         <record
             id="account_tax_template_purchase_eu_19_vst_088"
@@ -1723,6 +1774,7 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
                 ref="" />
@@ -1746,6 +1798,7 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field name="amount">19</field>
             <field name="amount_type">group</field>
             <field
@@ -1773,12 +1826,13 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_2505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_2505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_076')])]" />
@@ -1801,12 +1855,13 @@
             <field
                 name="price_include"
                 eval="0" />
+            <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_2505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_2505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_077')])]" />

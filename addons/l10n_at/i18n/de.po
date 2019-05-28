@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* tapoit_l10n_at_chart
+#	* l10n_at
 #
 msgid ""
 msgstr ""
@@ -15,8 +15,8 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
 
-#. module: tapoit_l10n_at_chart
-#: model:ir.actions.todo,note:tapoit_l10n_at_chart.config_call_account_template_at
+#. module: l10n_at
+#: model:ir.actions.todo,note:l10n_at.config_call_account_template_at
 msgid "Generate Chart of Accounts from a Chart Template. You will be asked to pass the name of the company, the chart template to follow, the no. of digits to generate the code for your accounts and Bank account, currency to create Journals. \n"
 "                Thus,the pure copy of chart Template is generated.\n"
 "                This is the same wizard that runs from Financial Management/Configuration/Financial Accounting/Financial Accounts/Generate Chart of Accounts from a Chart Template."

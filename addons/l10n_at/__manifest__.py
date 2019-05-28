@@ -19,7 +19,6 @@
     ],
     "demo": [],
     "data": [
-        'data/account_account_tags_accounts.xml',
         'data/account_account_tag.xml',
         'data/account_account_template.xml',
         'data/account_tax_group.xml',

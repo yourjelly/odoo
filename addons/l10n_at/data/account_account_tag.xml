@@ -91,7 +91,7 @@
         <!-- § 6 Abs. 1 Z 9 lit. a (Grundstücksumsätze) -->
         <!-- § 6 Abs. 1 Z 27 (Kleinunternehmer) -->
         <!-- § 6 Abs. 1 Z 1, 7-8, 10-26, 28 (übrige steuerfreie Umsätze ohne Vorsteuerabzug) -->
-        <!-- zu versteuernder Umsatz +022, +029, +006, +025, +037, +052, +038 -->
+        <!-- zu versteuernder Umsatz +022, +029, +006, +037, +052, +007 -->
         <record
             id="tax_tag_kz_022"
             model="account.account.tag">
@@ -114,13 +114,6 @@
             <field name="color" eval="2" />
         </record>
         <record
-            id="tax_tag_kz_025"
-            model="account.account.tag">
-            <field name="name">KZ 025</field>
-            <field name="applicability">taxes</field>
-            <field name="color" eval="2" />
-        </record>
-        <record
             id="tax_tag_kz_037"
             model="account.account.tag">
             <field name="name">KZ 037</field>
@@ -135,9 +128,9 @@
             <field name="color" eval="2" />
         </record>
         <record
-            id="tax_tag_kz_038"
+            id="tax_tag_kz_007"
             model="account.account.tag">
-            <field name="name">KZ 038</field>
+            <field name="name">KZ 007</field>
             <field name="applicability">taxes</field>
             <field name="color" eval="2" />
         </record>
@@ -214,6 +207,13 @@
             id="tax_tag_kz_073"
             model="account.account.tag">
             <field name="name">KZ 073</field>
+            <field name="applicability">taxes</field>
+            <field name="color" eval="2" />
+        </record>
+        <record
+            id="tax_tag_kz_008"
+            model="account.account.tag">
+            <field name="name">KZ 008</field>
             <field name="applicability">taxes</field>
             <field name="color" eval="2" />
         </record>
