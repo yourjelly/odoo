@@ -213,6 +213,7 @@ var KanbanView = BasicView.extend({
             }
             var fieldName = childNode.attrs.name;
             var type = childNode.attrs.select === 'multi' ? 'filter' : 'category';
+            var includeChild = childNode.attrs.include_child && !_.contains(["0", "false"], childNode.attrs.include_child);
 
             var sectionId = _.uniqueId('section_');
             var section = {
@@ -223,6 +224,7 @@ var KanbanView = BasicView.extend({
                 id: sectionId,
                 index: index,
                 type: type,
+                includeChild: includeChild,
             };
             if (section.type === 'category') {
                 section.icon = section.icon || 'fa-folder';

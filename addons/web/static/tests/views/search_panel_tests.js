@@ -610,6 +610,79 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
+    QUnit.test('category with parent_field and with included child record', async function (assert) {
+        assert.expect(16);
+
+        this.data.company.records.push({id: 40, name: 'child company 1', parent_id: 5});
+        this.data.company.records.push({id: 41, name: 'child company 2', parent_id: 5});
+        this.data.partner.records[0].company_id = 40;
+
+        var kanban = await createView({
+            View: KanbanView,
+            model: 'partner',
+            data: this.data,
+            mockRPC: function (route, args) {
+                if (route === '/web/dataset/search_read') {
+                    assert.step(JSON.stringify(args.domain));
+                    // 'child_of' domain is not evaluated by the domain.js so convert it to 'in' domain and only first level parent supported.
+                    var domain = args.domain && args.domain[0];
+                    if (domain && domain[1] === 'child_of') {
+                        var childs = [domain[2]];
+                        _.each(this.data['company'].records, function (ls) {
+                            if (ls.parent_id === domain[2]) {
+                                childs.push(ls.id);
+                            }
+                        });
+                        args.domain = [[domain[0], 'in', childs]];
+                    }
+                }
+                return this._super.apply(this, arguments);
+
+            },
+            services: this.services,
+            arch: '<kanban>' +
+                    '<templates><t t-name="kanban-box">' +
+                        '<div>' +
+                            '<field name="foo"/>' +
+                        '</div>' +
+                    '</t></templates>' +
+                    '<searchpanel>' +
+                        '<field name="company_id" include_child="1"/>' +
+                    '</searchpanel>' +
+                '</kanban>',
+        });
+
+        // 'All' is selected by default
+        assert.containsOnce(kanban, '.o_search_panel_category_value .active');
+        assert.containsOnce(kanban, '.o_search_panel_category_value:first .active');
+        assert.containsN(kanban, '.o_kanban_record:not(.o_kanban_ghost)', 4);
+        assert.containsN(kanban, '.o_search_panel_category_value', 3);
+        assert.containsOnce(kanban, '.o_search_panel_category_value .o_toggle_fold');
+
+        // unfold parent category
+        await testUtils.dom.click(kanban.$('.o_search_panel_category_value .o_toggle_fold'));
+
+        assert.containsOnce(kanban, '.o_search_panel_category_value .active');
+        assert.containsOnce(kanban, '.o_search_panel_category_value:first .active');
+        assert.containsN(kanban, '.o_kanban_record:not(.o_kanban_ghost)', 4);
+        assert.containsN(kanban, '.o_search_panel_category_value', 5);
+        assert.containsN(kanban, '.o_search_panel_category_value .o_search_panel_category_value', 2);
+
+        // click on parent company
+        await testUtils.dom.click(kanban.$('.o_search_panel_category_value:nth(2) > header'));
+
+        assert.containsOnce(kanban, '.o_search_panel_category_value .active');
+        assert.containsOnce(kanban, '.o_search_panel_category_value:nth(2) .active');
+        assert.containsN(kanban, '.o_kanban_record:not(.o_kanban_ghost)', 3);
+
+        assert.verifySteps([
+            '[]',
+            '[["company_id","child_of",5]]',
+        ]);
+
+        kanban.destroy();
+    });
+
     QUnit.test('can (un)fold parent category values', async function (assert) {
         assert.expect(7);
 

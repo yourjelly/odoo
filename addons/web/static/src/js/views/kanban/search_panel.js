@@ -307,7 +307,11 @@ var SearchPanel = Widget.extend({
         function categoryToDomain(domain, categoryId) {
             var category = self.categories[categoryId];
             if (category.activeValueId) {
-                domain.push([category.fieldName, '=', category.activeValueId]);
+                if (category.includeChild) {
+                    domain.push([category.fieldName, 'child_of', category.activeValueId]);
+                } else {
+                    domain.push([category.fieldName, '=', category.activeValueId]);
+                }
             }
             return domain;
         }
