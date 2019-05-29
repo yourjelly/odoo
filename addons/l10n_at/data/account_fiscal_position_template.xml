@@ -90,7 +90,7 @@
         <record id="fiscal_position_tax_template_eu_katalog022" model="account.fiscal.position.tax.template">
             <field name="position_id" ref="fiscal_position_template_eu" />
             <field name="tax_src_id" ref="account_tax_template_sales_20_katalog022" />
-            <field name="tax_dest_id" ref="account_tax_template_sales_rev_charge_0_code021" />
+            <field name="tax_dest_id" ref="account_tax_template_sales_eu_0_services" />
         </record>
         <record id="fiscal_position_tax_template_eu_code029" model="account.fiscal.position.tax.template">
             <field name="position_id" ref="fiscal_position_template_eu" />
@@ -134,7 +134,7 @@
         <record id="fiscal_position_tax_template_non_eu_code029" model="account.fiscal.position.tax.template">
             <field name="position_id" ref="fiscal_position_template_non_eu" />
             <field name="tax_src_id" ref="account_tax_template_sales_10_code029" />
-            <field name="tax_dest_id" ref="account_tax_template_sales_non_eu_0_code011" />
+            <field name="tax_dest_id" ref="account_tax_template_sales_non_eu_0_services" />
         </record>
         <record id="fiscal_position_tax_template_non_eu_code007" model="account.fiscal.position.tax.template">
             <field name="position_id" ref="fiscal_position_template_non_eu" />
