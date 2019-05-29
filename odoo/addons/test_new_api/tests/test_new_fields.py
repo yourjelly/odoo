@@ -928,6 +928,7 @@ class TestFields(common.TransactionCase):
         with self.assertRaises(AccessError):
             cat1.name
 
+    @mute_logger('odoo.models')
     def test_40_new_defaults(self):
         """ Test new records with defaults. """
         user = self.env.user
@@ -1051,6 +1052,7 @@ class TestFields(common.TransactionCase):
         self.assertEqual(new_email.message._origin, msg0)
         self.assertEqual(new_email.body, "XXX")
 
+    @mute_logger('odoo.models')
     def test_40_new_ref_origin(self):
         """ Test the behavior of new records with ref/origin. """
         Discussion = self.env['test_new_api.discussion']
