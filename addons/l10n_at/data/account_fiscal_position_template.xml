@@ -156,6 +156,11 @@
             <field name="account_src_id" ref="chart_at_template_2000" />
             <field name="account_dest_id" ref="chart_at_template_2000" />
         </record>
+        <record id="fiscal_position_account_template_national_3" model="account.fiscal.position.account.template">
+            <field name="position_id" ref="fiscal_position_template_national" />
+            <field name="account_src_id" ref="chart_at_template_5000" />
+            <field name="account_dest_id" ref="chart_at_template_5000" />
+        </record>
 
         <!-- Europäische Union (Binnenmarkt)) -->
 
@@ -174,6 +179,11 @@
             <field name="account_src_id" ref="chart_at_template_2000" />
             <field name="account_dest_id" ref="chart_at_template_2100" />
         </record>
+        <record id="fiscal_position_account_template_eu_3" model="account.fiscal.position.account.template">
+            <field name="position_id" ref="fiscal_position_template_eu" />
+            <field name="account_src_id" ref="chart_at_template_5000" />
+            <field name="account_dest_id" ref="chart_at_template_5050" />
+        </record>
 
         <!-- Drittstaaten -->
 
@@ -186,6 +196,11 @@
             <field name="position_id" ref="fiscal_position_template_non_eu" />
             <field name="account_src_id" ref="chart_at_template_2000" />
             <field name="account_dest_id" ref="chart_at_template_2150" />
+        </record>
+        <record id="fiscal_position_account_template_non_eu_3" model="account.fiscal.position.account.template">
+            <field name="position_id" ref="fiscal_position_template_non_eu" />
+            <field name="account_src_id" ref="chart_at_template_5000" />
+            <field name="account_dest_id" ref="chart_at_template_5090" />
         </record>
     </data>
 </odoo>

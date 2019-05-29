@@ -40,10 +40,10 @@
           <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_021')])]" />
@@ -69,10 +69,10 @@
                 eval="0" />
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_011')])]" />
@@ -99,10 +99,10 @@
             <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_012')])]" />
@@ -129,10 +129,10 @@
             <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_015')])]" />
@@ -158,10 +158,10 @@
                 eval="0" />
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_017')])]" />
@@ -188,10 +188,10 @@
             <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_018')])]" />
@@ -218,10 +218,10 @@
             <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_019')])]" />
@@ -248,10 +248,10 @@
             <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_016')])]" />
