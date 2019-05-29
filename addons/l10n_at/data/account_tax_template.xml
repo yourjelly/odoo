@@ -678,10 +678,10 @@
                 eval="0" />
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3510" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3510" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_048'), ref('tax_tag_kz_095')])]" />
@@ -706,10 +706,10 @@
                 eval="0" />
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3510" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3510" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_044'), ref('tax_tag_kz_095')])]" />
@@ -734,10 +734,10 @@
                 eval="0" />
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3510" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3510" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_057'), ref('tax_tag_kz_095')])]" />
@@ -762,10 +762,10 @@
                 eval="0" />
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3510" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3510" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_032'), ref('tax_tag_kz_095')])]" />
@@ -804,13 +804,13 @@
             <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_071')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_071'), ref('tax_tag_kz_070'), ref('tax_tag_kz_095')])]" />
         </record>
         <!-- Innergemeinschaftlicher Erwerb (Erwerbssteuer) 072, 073, 075(bis 06/2007), 088 (ab 07/2007), 076, 077 Negativer Betrag für Sofortabzug (in Rechnungen) und negative Umkehr (Steuerkonto), um 
             die Umsatzsteuer im Steuerplan abzubilden -->
@@ -839,7 +839,7 @@
                 ref="chart_at_template_3511" />
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_065')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_072'), ref('tax_tag_kz_070'), ref('tax_tag_kz_095')])]" />
         </record>
         <record
             id="account_tax_template_purchase_eu_10_code073"
@@ -869,7 +869,7 @@
                 ref="chart_at_template_3512" />
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_065')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_073'), ref('tax_tag_kz_070'), ref('tax_tag_kz_095')])]" />
         </record>
         <record
             id="account_tax_template_purchase_eu_13_code008"
@@ -899,7 +899,7 @@
                 ref="chart_at_template_3513" />
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_008')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_008'), ref('tax_tag_kz_070'), ref('tax_tag_kz_095')])]" />
         </record>
         <record
             id="account_tax_template_purchase_eu_19_code088"
@@ -924,13 +924,13 @@
             <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_065')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_088'), ref('tax_tag_kz_070'), ref('tax_tag_kz_095')])]" />
         </record>
         <record
             id="account_tax_template_purchase_eu_xx_code076"
@@ -952,13 +952,13 @@
             <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_065')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_076'), ref('tax_tag_kz_095')])]" />
         </record>
         <record
             id="account_tax_template_purchase_eu_xx_code077"
@@ -980,13 +980,13 @@
             <field name="active" eval="False"/>
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_3505" />
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_065')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_077'), ref('tax_tag_kz_095')])]" />
         </record>
         <!-- Vorlagen: Einkauf (Vorsteuer) -->
         <!-- Vorsteuern -060, -061, -083, -065(070), -066(057), -082, -087, -089, !-064, +062, -063, -067! -->
@@ -1224,7 +1224,7 @@
                 ref="l10n_at_chart_template" />
             <field name="sequence">300</field>
             <field name="type_tax_use">purchase</field>
-            <field name="name">VST_082 (§ 19 Abs. 1a - Bauleistungen)</field>
+            <field name="name">VST_082 Reverse Charge (§ 19 Abs. 1a - Bauleistungen)</field>
             <field name="description">VSt. 20%</field>
             <field
                 eval="20"
@@ -1235,10 +1235,10 @@
                 eval="0" />
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_2510" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_2510" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_082'), ref('tax_tag_kz_095')])]" />
@@ -1267,12 +1267,6 @@
             <field
                 name="price_include"
                 eval="0" />
-            <field
-                name="account_id"
-                ref="" />
-            <field
-                name="refund_account_id"
-                ref="" />
         </record>
         <!-- Vorsteuern betreffend die Steuerschuld gemäß § 19 Abs. 1b (Sicherungseigentum, Vorbehaltseigentum und Grundstücke im Zwangsversteigerungsverfahren) -->
         <record
@@ -1283,7 +1277,7 @@
                 ref="l10n_at_chart_template" />
             <field name="sequence">300</field>
             <field name="type_tax_use">purchase</field>
-            <field name="name">VST_087 (§ 19 Abs. 1b - Sicherungseigentum)</field>
+            <field name="name">VST_087 Reverse Charge (§ 19 Abs. 1b - Sicherungseigentum)</field>
             <field name="description">VSt. 20%</field>
             <field
                 eval="20"
@@ -1294,10 +1288,10 @@
                 eval="0" />
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_2510" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_2510" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_087')])]" />
@@ -1345,10 +1339,10 @@
                 eval="0" />
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_2510" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_2510" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_066'), ref('tax_tag_kz_095')])]" />
@@ -1385,7 +1379,7 @@
                 ref="l10n_at_chart_template" />
             <field name="sequence">300</field>
             <field name="type_tax_use">purchase</field>
-            <field name="name">VST_089 (§ 19 Abs. 1d - Schrott und Abfallstoffe)</field>
+            <field name="name">VST_089 Reverse Charge (§ 19 Abs. 1d - Schrott und Abfallstoffe)</field>
             <field name="description">VSt. 20%</field>
             <field
                 eval="20"
@@ -1396,10 +1390,10 @@
                 eval="0" />
             <field
                 name="account_id"
-                ref="" />
+                ref="chart_at_template_2510" />
             <field
                 name="refund_account_id"
-                ref="" />
+                ref="chart_at_template_2510" />
             <field
                 name="tag_ids"
                 eval="[(6,0,[ref('tax_tag_kz_089'), ref('tax_tag_kz_095')])]" />
@@ -1601,7 +1595,7 @@
                 ref="chart_at_template_2505" />
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_071'), ref('tax_tag_kz_065')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_065'), ref('tax_tag_kz_095')])]" />
         </record>
         <!-- Innergemeinschaftlicher Erwerb (Vorsteuerabzug) 072, 073, 075(bis 06/2007), 088 (ab 07/2007), 076, 077 -->
         <!-- Vorsteuerabzug für innergemeinschaftliche Erwerbe (20%) -->
@@ -1630,7 +1624,7 @@
                 ref="chart_at_template_2511" />
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_072'), ref('tax_tag_kz_065')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_065'), ref('tax_tag_kz_095')])]" />
         </record>
         <record
             id="account_tax_template_purchase_eu_20"
@@ -1649,7 +1643,7 @@
             <field name="amount_type">group</field>
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_072'), ref('tax_tag_kz_070')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_072'), ref('tax_tag_kz_070'), ref('tax_tag_kz_095')])]" />
              <field name="tax_group_id" ref="tax_group_0"/>
             <field
                 name="children_tax_ids"
@@ -1681,7 +1675,7 @@
                 ref="chart_at_template_2512" />
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_065')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_065'), ref('tax_tag_kz_095')])]" />
         </record>
         <record
             id="account_tax_template_purchase_eu_10"
@@ -1700,7 +1694,7 @@
             <field name="amount_type">group</field>
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_073'), ref('tax_tag_kz_070')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_073'), ref('tax_tag_kz_070'), ref('tax_tag_kz_095')])]" />
              <field name="tax_group_id" ref="tax_group_0"/>
             <field
                 name="children_tax_ids"
@@ -1731,7 +1725,7 @@
                 ref="chart_at_template_2513" />
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_008')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_065'), ref('tax_tag_kz_095')])]" />
         </record>
         <record
             id="account_tax_template_purchase_eu_13"
@@ -1750,7 +1744,7 @@
             <field name="amount_type">group</field>
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_008'), ref('tax_tag_kz_070')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_008'), ref('tax_tag_kz_070'), ref('tax_tag_kz_095')])]" />
              <field name="tax_group_id" ref="tax_group_0"/>
             <field
                 name="children_tax_ids"
@@ -1783,7 +1777,7 @@
                 ref="" />
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_065')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_065'), ref('tax_tag_kz_095')])]" />
         </record>
         <record
             id="account_tax_template_purchase_eu_19"
@@ -1803,7 +1797,7 @@
             <field name="amount_type">group</field>
             <field
                 name="tag_ids"
-                eval="[(6,0,[ref('tax_tag_kz_088'), ref('tax_tag_kz_070')])]" />
+                eval="[(6,0,[ref('tax_tag_kz_088'), ref('tax_tag_kz_070'), ref('tax_tag_kz_095')])]" />
             <field
                 name="children_tax_ids"
                 eval="[(6, 0, [ref('account_tax_template_purchase_eu_19_code088'), ref('account_tax_template_purchase_eu_19_vst_088')])]" />
