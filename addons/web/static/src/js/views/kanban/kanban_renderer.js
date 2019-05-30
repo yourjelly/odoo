@@ -159,6 +159,14 @@ var KanbanRenderer = BasicRenderer.extend({
         return this.widgets[0].addQuickCreate();
     },
     /**
+     * Displays the form overlay view for creating record
+     *
+     * @returns {Promise}
+     */
+    openFormOverlay: function () {
+        return this.widgets[0].openFormOverlay();
+    },
+    /**
      * Focuses the first kanban record
      */
     giveFocus: function () {

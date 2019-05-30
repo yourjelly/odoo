@@ -351,14 +351,18 @@ var KanbanController = BasicController.extend({
         var self = this;
         var state = this.model.get(this.handle, {raw: true});
         var quickCreateEnabled = this.quickCreateEnabled && viewUtils.isQuickCreateEnabled(state);
-        if (this.on_create === 'quick_create' && quickCreateEnabled && state.data.length) {
+        if (!this.overlayFormViewEnabled && this.on_create === 'quick_create' && quickCreateEnabled && state.data.length) {
             // activate the quick create in the first column when the mutex is
             // unlocked, to ensure that there is no pending re-rendering that
             // would remove it (e.g. if we are currently adding a new column)
             this.mutex.getUnlockedDef().then(function () {
                 self.renderer.addQuickCreate();
             });
-        } else if (this.on_create && this.on_create !== 'quick_create') {
+        } else if (this.overlayFormViewEnabled) {
+            this.mutex.getUnlockedDef().then(function () {
+                self.renderer.openFormOverlay();
+            });
+        } else if (!this.overlayFormViewEnabled && this.on_create && this.on_create !== 'quick_create') {
             // Execute the given action
             this.do_action(this.on_create, {
                 on_close: this.reload.bind(this, {}),

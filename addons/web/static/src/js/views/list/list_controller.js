@@ -229,7 +229,7 @@ var ListController = BasicController.extend({
         if (this.formOverlayWidget) {
             this._onClickDiscard(ev);
         }
-        var data = ev.data,
+        var data = ev.data || {},
             context = data.context || this.renderer.state.context;
 
         if (this.overlayFormViewEnabled) {
@@ -238,11 +238,10 @@ var ListController = BasicController.extend({
                 context: context,
                 formViewID: this.overlayFormViewID,
                 model: this.modelName,
-                res_id: data && this.model.get(data.id, { raw: true }).res_id,
-                db_id: data && data.id,
+                res_id: data.id && this.model.get(data.id, { raw: true }).res_id,
+                db_id: data.id,
             });
             return this.formOverlayWidget.insertAfter(this.$el.find('.o_content div.table-responsive'));
-
         }
         return this.trigger_up('open_record', {id: data && data.id});
     },
@@ -583,8 +582,10 @@ var ListController = BasicController.extend({
             ev.stopPropagation();
         }
         var state = this.model.get(this.handle, {raw: true});
-        if (this.editable && !state.groupedBy.length) {
+        if (!this.overlayFormViewEnabled && this.editable && !state.groupedBy.length) {
             this._addRecord(this.handle);
+        } else if (this.overlayFormViewEnabled) {
+            this.trigger_up('open_form_overlay_view');
         } else {
             this.trigger_up('switch_view', {view_type: 'form', res_id: undefined});
         }

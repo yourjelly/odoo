@@ -26,7 +26,7 @@ var KanbanColumn = Widget.extend({
         'click .o_column_edit': '_onEditColumn',
         'click .o_column_delete': '_onDeleteColumn',
         'click .o_kanban_quick_add': '_onAddQuickCreate',
-        'click .o_kanban_overlay_form_view': '_onAddQuickCreateFormOverlay',
+        'click .o_kanban_overlay_form_view': '_onQuickFormOverlay',
         'click .o_kanban_load_more': '_onLoadMore',
         'click .o_kanban_toggle_fold': '_onToggleFold',
         'click .o_column_archive_records': '_onArchiveRecords',
@@ -218,6 +218,16 @@ var KanbanColumn = Widget.extend({
         return this.quickCreateWidget.insertAfter(this.$header);
     },
     /**
+     * Open form overlay view for quick record creating with default value
+     * @returns {Promise}
+     */
+    openFormOverlay: function () {
+        // for default stage_id
+        var context = this.data.getContext();
+        context['default_' + this.groupedBy] = viewUtils.getGroupValue(this.data, this.groupedBy);
+        return this.trigger_up('open_form_overlay_view', {context: context});
+    },
+    /**
      * Closes the quick create widget if it isn't dirty.
      */
     cancelQuickCreate: function () {
@@ -294,11 +304,8 @@ var KanbanColumn = Widget.extend({
      * Triggers up an event to open form overlay view
      * @private
      */
-    _onAddQuickCreateFormOverlay: function (ev) {
-        // for default stage_id
-        var context = this.data.getContext();
-        context['default_' + this.groupedBy] = viewUtils.getGroupValue(this.data, this.groupedBy);
-        this.trigger_up('open_form_overlay_view', {context: context});
+    _onQuickFormOverlay: function (ev) {
+        this.openFormOverlay();
     },
     /**
      * @private
