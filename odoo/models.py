@@ -5475,11 +5475,13 @@ Fields:
 
         class Snapshot(dict):
             """ A dict with the values of a record, following a prefix tree. """
-            __slots__ = ()
+            __slots__ = ('record', 'tree')
 
             def __init__(self, record, tree):
                 # put record in dict to include it when comparing snapshots
-                super(Snapshot, self).__init__({'<record>': record, '<tree>': tree})
+                super(Snapshot, self).__init__()
+                self.record = record
+                self.tree = tree
                 for name, subnames in tree.items():
                     field = record._fields[name]
                     # x2many fields are serialized as a list of line snapshots
@@ -5488,13 +5490,18 @@ Fields:
                         if field.type in ('one2many', 'many2many') else record[name]
                     )
 
+            def __eq__(self, other):
+                this_record = self.record._origin or self.record
+                that_record = other.record._origin or other.record
+                return this_record.id == that_record.id and super().__eq__(other)
+
             def diff(self, other):
                 """ Return the values in ``self`` that differ from ``other``.
                     Requires record cache invalidation for correct output!
                 """
-                record = self['<record>']
+                record = self.record
                 result = {}
-                for name, subnames in self['<tree>'].items():
+                for name, subnames in self.tree.items():
                     if (name == 'id') or (other.get(name) == self[name]):
                         continue
                     field = record._fields[name]
@@ -5504,7 +5511,7 @@ Fields:
                         # x2many fields: serialize value as commands
                         result[name] = commands = [(5,)]
                         for line_snapshot in self[name]:
-                            line = line_snapshot['<record>']
+                            line = line_snapshot.record
                             line = line._origin or line
                             if not line.id:
                                 # new line: send diff from scratch
