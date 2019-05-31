@@ -38,7 +38,7 @@ class Category(models.Model):
             current = cat
             while current.parent:
                 current = current.parent
-            cat.root_categ = current
+            cat.root_categ = current._origin
 
     @api.one
     def _inverse_display_name(self):
