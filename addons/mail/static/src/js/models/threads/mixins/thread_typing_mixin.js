@@ -168,6 +168,7 @@ var ThreadTypingMixin = {
      *   currently typing something on the thread.
      */
     registerTyping: function (params) {
+        alert("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
         if (this._isTypingMyselfInfo(params)) {
             return;
         }
