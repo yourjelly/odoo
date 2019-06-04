@@ -718,7 +718,7 @@ class AccountJournal(models.Model):
             accounts = self.search([('bank_account_id', '=', bank_account.id)])
             if accounts <= self:
                 bank_accounts += bank_account
-        self.mapped('alias_id').unlink()
+        self.mapped('alias_id').sudo().unlink()
         ret = super(AccountJournal, self).unlink()
         bank_accounts.unlink()
         return ret

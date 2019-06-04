@@ -66,18 +66,15 @@ class MaintenanceEquipmentCategory(models.Model):
         if not vals.get('alias_name'):
             vals['alias_name'] = vals.get('name')
         category_id = super(MaintenanceEquipmentCategory, self).create(vals)
-        category_id.alias_id.write({'alias_parent_thread_id': category_id.id, 'alias_defaults': {'category_id': category_id.id}})
+        category_id.alias_id.sudo().write({'alias_parent_thread_id': category_id.id, 'alias_defaults': {'category_id': category_id.id}})
         return category_id
 
     @api.multi
     def unlink(self):
-        MailAlias = self.env['mail.alias']
         for category in self:
             if category.equipment_ids or category.maintenance_ids:
                 raise UserError(_("You cannot delete an equipment category containing equipments or maintenance requests."))
-            MailAlias += category.alias_id
         res = super(MaintenanceEquipmentCategory, self).unlink()
-        MailAlias.unlink()
         return res
 
     def get_alias_model_name(self, vals):

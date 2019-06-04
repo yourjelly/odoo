@@ -5,7 +5,7 @@ import logging
 import re
 
 from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import AccessError, ValidationError
 from odoo.tools import remove_accents
 from odoo.tools.safe_eval import safe_eval
 
@@ -188,6 +188,8 @@ class AliasMixin(models.AbstractModel):
     _inherits = {'mail.alias': 'alias_id'}
     _description = 'Email Aliases Mixin'
 
+     # user can write only some fields as it's technical model.
+    ALIAS_WRITEABLE_FIELDS = ['alias_name', 'alias_parent_thread_id', 'alias_force_thread_id', 'alias_defaults']
     alias_id = fields.Many2one('mail.alias', string='Alias', ondelete="restrict", required=True)
 
     def get_alias_model_name(self, vals):
@@ -205,6 +207,25 @@ class AliasMixin(models.AbstractModel):
         return {'alias_parent_thread_id': self.id}
 
     @api.model
+    def write(self, vals):
+        alias_field , other_field = {}, {}
+        for key in list(vals):
+            if key in self.ALIAS_WRITEABLE_FIELDS:
+                alias_field[key] = vals.get(key)
+            else:
+                other_field[key] = vals.get(key)
+        if alias_field:
+            try:
+                self.check_access_rights('write')
+            except AccessError:
+                pass
+            else:
+                record = super(AliasMixin, self.sudo()).write(alias_field)
+        if other_field:
+            record = super(AliasMixin, self).write(other_field)
+        return record
+
+    @api.model
     def create(self, vals):
         """ Create a record with ``vals``, and create a corresponding alias. """
         record = super(AliasMixin, self.with_context(
@@ -219,7 +240,7 @@ class AliasMixin(models.AbstractModel):
         """ Delete the given records, and cascade-delete their corresponding alias. """
         aliases = self.mapped('alias_id')
         res = super(AliasMixin, self).unlink()
-        aliases.unlink()
+        aliases.sudo().unlink()
         return res
 
     @api.model_cr_context
