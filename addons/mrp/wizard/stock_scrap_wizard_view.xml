@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="stock_scrap_wizard_form_view_inherit_mrp" model="ir.ui.view">
+        <field name="name">stock.scrap.wizard.form.inherit.mrp</field>
+        <field name="model">stock.scrap.wizard</field>
+        <field name="inherit_id" ref="stock.stock_scrap_wizard_form_view"/>
+        <field name="arch" type="xml">
+            <field name="owner_id" position="after">
+                <field name="workorder_id" invisible="1"/>
+                <field name="production_id" invisible="1"/>
+            </field>
+        </field>
+    </record>
+</odoo>
