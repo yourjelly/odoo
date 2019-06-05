@@ -1,0 +1,22 @@
+<odoo>
+    <record model="ir.ui.view" id="view_totp_field">
+        <field name="name">users preference: totp</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="hr.res_users_view_form_profile"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='preference_change_password']" position="after">
+                <field name="totp_enabled" invisible="1"/>
+                <button name="totp_enable_wizard" type="object"
+                        string="Enable secure login"
+                        class="btn btn-warning"
+                        attrs="{'invisible': [('totp_enabled', '!=', False)]}"
+                />
+                <button name="totp_disable" type="object"
+                        string="Disable secure login"
+                        class="btn btn-link "
+                        attrs="{'invisible': [('totp_enabled', '=', False)]}"
+                />
+            </xpath>
+        </field>
+    </record>
+</odoo>
