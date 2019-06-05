@@ -88,6 +88,13 @@ class Alias(models.Model):
             raise ValidationError(_('Invalid expression, it must be a literal python dictionary definition e.g. "{\'field\': \'value\'}"'))
 
     @api.model
+    def create_parent_record(self, model_name, vals):
+        if model_name == 'mail.alias':
+            return super(Alias, self).sudo().create_parent_record(model_name, vals)
+        else:
+            return super(Alias, self).create_parent_record(model_name, vals)
+
+    @api.model
     def create(self, vals):
         """ Creates an email.alias record according to the values provided in ``vals``,
             with 2 alterations: the ``alias_name`` value may be suffixed in order to
@@ -224,6 +231,13 @@ class AliasMixin(models.AbstractModel):
         if other_field:
             record = super(AliasMixin, self).write(other_field)
         return record
+
+    @api.model
+    def create_parent_record(self, model_name, vals):
+        if model_name == 'mail.alias':
+            return super(AliasMixin, self.sudo()).create_parent_record(model_name, vals)
+        else:
+            return super(AliasMixin, self).create_parent_record(model_name, vals)
 
     @api.model
     def create(self, vals):

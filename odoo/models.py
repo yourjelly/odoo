@@ -3519,6 +3519,12 @@ Fields:
 
         return True
 
+    def create_parent_record(self, model_name, parent_data_list):
+        return self.env[model_name].create([
+            data['inherited'][model_name]
+            for data in parent_data_list
+        ])
+
     @api.model_create_multi
     @api.returns('self', lambda value: value.id)
     def create(self, vals_list):
@@ -3606,10 +3612,7 @@ Fields:
                     parent.write(data['inherited'][model_name])
 
             if parent_data_list:
-                parents = self.env[model_name].create([
-                    data['inherited'][model_name]
-                    for data in parent_data_list
-                ])
+                parents = self.create_parent_record(model_name, parent_data_list)
                 for parent, data in zip(parents, parent_data_list):
                     data['stored'][parent_name] = parent.id
 
