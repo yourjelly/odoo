@@ -1,24 +1,146 @@
-.o-product-card {
-    flex: 0 0 auto;
+// @media (min-width: 768px) {
+//
+//
+//     /* show 3 items */
+//     .carousel-inner .active,
+//     .carousel-inner .active + .carousel-item,
+//     .carousel-inner .active + .carousel-item + .carousel-item,
+//     .carousel-inner .active + .carousel-item + .carousel-item + .carousel-item  {
+//         display: block;
+//         margin-right: 0;
+//     }
+//
+//     .carousel-inner .carousel-item.active:not(.carousel-item-right):not(.carousel-item-left),
+//     .carousel-inner .carousel-item.active:not(.carousel-item-right):not(.carousel-item-left) + .carousel-item,
+//     .carousel-inner .carousel-item.active:not(.carousel-item-right):not(.carousel-item-left) + .carousel-item + .carousel-item,
+//     .carousel-inner .carousel-item.active:not(.carousel-item-right):not(.carousel-item-left) + .carousel-item + .carousel-item + .carousel-item {
+//         transition: none;
+//     }
+//
+//     .carousel-inner .carousel-item-next,
+//     .carousel-inner .carousel-item-prev {
+//       position: relative;
+//       transform: translate3d(0, 0, 0);
+//     }
+//
+//     .carousel-inner .active.carousel-item + .carousel-item + .carousel-item + .carousel-item + .carousel-item {
+//         position: absolute;
+//         top: 0;
+//         right: -25%;
+//         z-index: -1;
+//         display: block;
+//         visibility: visible;
+//     }
+//
+//     /* left or forward direction */
+//     .active.carousel-item-left + .carousel-item-next.carousel-item-left,
+//     .carousel-item-next.carousel-item-left + .carousel-item,
+//     .carousel-item-next.carousel-item-left + .carousel-item + .carousel-item,
+//     .carousel-item-next.carousel-item-left + .carousel-item + .carousel-item + .carousel-item,
+//     .carousel-item-next.carousel-item-left + .carousel-item + .carousel-item + .carousel-item + .carousel-item {
+//         position: relative;
+//         transform: translate3d(-100%, 0, 0);
+//         visibility: visible;
+//     }
+//
+//     /* farthest right hidden item must be abso position for animations */
+//     .carousel-inner .carousel-item-prev.carousel-item-right {
+//         position: absolute;
+//         top: 0;
+//         left: 0;
+//         z-index: -1;
+//         display: block;
+//         visibility: visible;
+//     }
+//
+// }
 
-    .o-product-card-img-top {
-        object-fit: scale-down;
-        width: 12rem;
-        height: 12rem;
-    }
-
-    .o-product-card-body {
-        width: 12rem;
-    }
-}
-
-.slider:hover {
-    overflow-x: auto;
-}
-
-.slider{
-    display: inline-flex;
-    overflow-x: hidden;
+.items-01 .o_wt_product_image,
+.items-02 .o_wt_product_image,
+.items-05 .o_wt_product_image {
+    display: inline-block;
     width: 100%;
-    min-height: 20rem;
+    height: 100%;
+    text-align: center;
+    background-color: #fff;
+    border: 1px solid rgba(0,0,0,0);
+    img {
+        max-width: 100%;
+        height: 120px;
+
+    }
 }
+
+.items-01 {
+    .o_wt_product_image {
+        &:hover {
+            border-color: $primary;
+        }
+    }
+}
+
+.items-02 {
+    width: 20%;
+    button {
+        border: 0;
+    }
+}
+
+.items-03,
+.items-05 {
+    width: 20%;
+    .o_wt_product_image {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+
+
+        &:after {
+            content: '';
+            display: block;
+            padding-bottom: 100%;
+        }
+        img {
+            position: absolute;
+            max-width: 100%;
+            max-height: 150px;
+            padding: 15px;
+        }
+
+    }
+}
+
+.s_three_columns {
+    .col-xl {
+        max-width: 20%;
+    }
+    .o_wt_product_image {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        @include border-top-radius(calc(0.25rem - 1px));
+        img {
+            @include o-position-absolute($top: 0);
+        }
+    }
+}
+
+.o_pb_2-3,
+.o_pb_3-4 {
+    img { @include size(100%, auto); }
+}
+
+.o_pb_1-1,
+.o_pb_16-9,
+.o_pb_4-3 {
+    img { @include size(auto, 100%); }
+}
+
+.o_pb_2-3  { padding-bottom: 150%; }
+.o_pb_3-4  { padding-bottom: 133%; }
+.o_pb_1-1  { padding-bottom: 100%; }
+.o_pb_16-9 { padding-bottom: 56.25%; }
+.o_pb_4-3  { padding-bottom: 75%; }

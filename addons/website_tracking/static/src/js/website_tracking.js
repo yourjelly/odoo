@@ -60,7 +60,30 @@ publicWidget.registry.productsRecentlyViewedSnippet = publicWidget.Widget.extend
                 currency: res['currency'],
                 widget: this,
             }));
-            this.$('.slider').html($section);
+            this.$('.carousel-inner').html($section);
+            // var item = this.$(".o_wt_product");
+            // for(var i = 0; i < item.length; i+=6) {
+            //     item.slice(i, i+6).wrapAll('<div class="carousel-item" data-name="Slide"><div class="row"></div></div>');
+            // }
+            $(".carousel-item:first-child").addClass('active');
+            $('.s_carousel').on('slide.bs.carousel', function (e) {
+                var $e = $(e.relatedTarget);
+                var idx = $e.index();
+                var itemsPerSlide = 4;
+                var totalItems = $('.carousel-item').length;
+
+                if (idx >= totalItems-(itemsPerSlide-1)) {
+                    var it = itemsPerSlide - (totalItems - idx);
+                    for (var i=0; i<it; i++) {
+                        if (e.direction=="left") {
+                            $('.carousel-item').eq(i).appendTo('.carousel-inner');
+                        }
+                        else {
+                            $('.carousel-item').eq(0).appendTo('.carousel-inner');
+                        }
+                    }
+                }
+            });
         } else {
             this.$el.hide();
         }

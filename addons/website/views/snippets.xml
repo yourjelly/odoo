@@ -137,36 +137,74 @@
 <template id="s_three_columns" name="Three Columns">
     <section class="s_three_columns bg-200 pt32 pb32">
         <div class="container">
-            <div class="row d-flex align-items-stretch">
-                <div class="col-lg-4 s_col_no_bgcolor pt16 pb16">
+            <div class="row d-flex ">
+                <div class="col-sm-6 col-md-4 col-lg-3 col-xl s_col_no_bgcolor pt16 pb16">
                     <div class="card bg-white">
-                        <img class="card-img-top" src="/web/image/website.library_image_11" alt="Odoo - Sample 1 for three columns"/>
-                        <div class="card-body">
-                            <h3 class="card-title">Feature One</h3>
-                            <p class="card-text">Adapt these three columns to fit your design need. To duplicate, delete or move columns, select the column and use the top icons to perform your action.</p>
+                        <div class="o_wt_product_image o_pb_2-3 bg-500">
+                            <img src="/web/image/741/ruslan-bardash-351288-unsplash.jpg" alt=""/>
+                            <!-- <span class="position-absolute d-block">150%</span> -->
                         </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 s_col_no_bgcolor pt16 pb16">
-                    <div class="card bg-white">
-                        <img class="card-img-top" src="/web/image/website.library_image_13" alt="Odoo - Sample 2 for three columns"/>
                         <div class="card-body">
-                            <h3 class="card-title">Feature Two</h3>
-                            <p class="card-text">To add a fourth column, reduce the size of these three columns using the right icon of each block. Then, duplicate one of the columns to create a new one as a copy.</p>
+                            <h6 class="card-title text-truncate">Large meeting Table</h6>
+                            <!-- <p class="card-text">Adapt these three columns to fit your design need. To duplicate, delete or move columns, select the column and use the top icons to perform your action.</p> -->
                         </div>
                         <div class="card-footer">
                             <i class="fa fa-info-circle mr-1"/> <small>Additional information</small>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4 s_col_no_bgcolor pt16 pb16">
+                <div class="col-sm-6 col-md-4 col-lg-3 col-xl s_col_no_bgcolor pt16 pb16">
                     <div class="card bg-white">
-                        <img class="card-img-top" src="/web/image/website.library_image_07" alt="Odoo - Sample 3 for three columns"/>
+                        <div class="o_wt_product_image o_pb_3-4 bg-500">
+                            <img src="/web/image/742/adam-birkett-239153-unsplash.jpg" class="position-absolute" alt=""/>
+                        </div>
                         <div class="card-body">
-                            <h3 class="card-title">Feature Three</h3>
-                            <p class="card-text">Delete the above image or replace it with a picture that illustrates your message. Click on the picture to change its <em>rounded corner</em> style.</p>
+                            <h6 class="card-title text-truncate">Customizable Desk</h6>
+                            <!-- <p class="card-text">To add a fourth column, reduce the size of these three columns using the right icon of each block. Then, duplicate one of the columns to create a new one as a copy.</p> -->
+                        </div>
+                        <div class="card-footer">
+                            <i class="fa fa-info-circle mr-1"/> <small>Additional information</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-4 col-lg-3 col-xl s_col_no_bgcolor pt16 pb16">
+                    <div class="card bg-white">
+                        <div class="o_wt_product_image o_pb_1-1 bg-500">
+                            <img src="/website/static/src/img/snippets_demo/s_references_5.png" class="position-absolute" alt=""/>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-truncate">Desk Stand with Screen</h6>
+                            <!-- <p class="card-text">Delete the above image or replace it with a picture that illustrates your message. Click on the picture to change its <em>rounded corner</em> style.</p> -->
                             <div class="s_btn text-left pb0 pt16" data-name="Button">
-                                <a href="#" class="btn btn-primary btn-sm">Learn more</a>
+                                <a href="#" class="btn btn-primary btn-sm">Add to cart</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-4 col-lg-3 col-xl s_col_no_bgcolor pt16 pb16">
+                    <div class="card bg-white">
+                        <div class="o_wt_product_image o_pb_4-3 bg-500">
+                            <img src="/website/static/src/img/library/office.jpg" class="position-absolute" alt=""/>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-truncate">Feature Four</h6>
+                            <!-- <p class="card-text">Delete the above image or replace it with a picture that illustrates your message. Click on the picture to change its <em>rounded corner</em> style.</p> -->
+                            <div class="s_btn text-left pb0 pt16" data-name="Button">
+                                <a href="#" class="btn btn-primary btn-sm">Add to cart</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-4 col-lg-3 col-xl s_col_no_bgcolor pt16 pb16">
+                    <div class="card bg-white">
+                        <div class="o_wt_product_image o_pb_16-9 bg-500">
+                            <img src="/website/static/src/img/snippets_demo/s_image_text.jpg" class="position-absolute" alt=""/>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-truncate">Feature Three</h6>
+                            <!-- <p class="card-text">Delete the above image or replace it with a picture that illustrates your message. Click on the picture to change its <em>rounded corner</em> style.</p> -->
+                            <div class="s_btn text-left pb0 pt16" data-name="Button">
+                                <a href="#" class="btn btn-primary btn-sm">Add to cart</a>
                             </div>
                         </div>
                     </div>
