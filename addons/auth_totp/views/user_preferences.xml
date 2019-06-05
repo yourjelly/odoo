@@ -1,0 +1,82 @@
+<odoo>
+    <record model="ir.ui.view" id="view_totp_list">
+        <field name="name">users list: add totp status</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_tree"/>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="totp_enabled"/>
+            </tree>
+        </field>
+    </record>
+    <record model="ir.actions.server" id="action_disable_totp">
+        <field name="name">Disable TOTP on users</field>
+        <field name="model_id" ref="base.model_res_users"/>
+        <field name="binding_model_id" ref="base.model_res_users"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+            action = records.totp_disable()
+        </field>
+        <field name="groups_id" eval="[(4, ref('base.group_erp_manager'), 0)]"/>
+    </record>
+
+    <record model="ir.ui.view" id="view_totp_wizard">
+        <field name="name">auth_totp wizard</field>
+        <field name="model">auth_totp.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Enable TOTP">
+                <sheet>
+                    <div class="d-flex flex-column align-items-center">
+                        <p class="col-lg-6">
+                            Scan the image below using an authenticator
+                            application:
+                        </p>
+                        <field name="qrcode" readonly="True" widget="image"/>
+                        <p class="col-lg-6 small">
+If you can not scan the image, you might be able to
+<field name="url" widget="url" options="{'website_path': True}" text="open this link"/>
+instead. If the link does not open an authenticator application then you can
+use the application's <em>manual entry</em> with
+<details class="d-inline"><summary class="d-inline btn-sm btn-link btn-group">the key you will get by clicking here</summary>
+<code><field name="secret" readonly="True"/></code></details>.
+                        </p>
+                        <p class="col-lg-6">
+                            Enter the code shown by your authenticator
+                            application and click <code>enable</code> to
+                            confirm:
+                        </p>
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <field name="code" required="1"/>
+                        </div>
+                    </div>
+                </sheet>
+                <footer>
+                    <button type="object" name="enable" string="Enable" class="btn btn-primary"/>
+                    <button special="cancel" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="view_totp_field">
+        <field name="name">users preference: totp</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='preference_change_password']" position="after">
+                <field name="totp_enabled" invisible="1"/>
+                <button name="totp_enable_wizard" type="object"
+                        string="Enable secure login"
+                        class="btn btn-warning"
+                        attrs="{'invisible': [('totp_enabled', '!=', False)]}"
+                />
+                <button name="totp_disable" type="object"
+                        string="Disable secure login"
+                        class="btn btn-link"
+                        attrs="{'invisible': [('totp_enabled', '=', False)]}"
+                />
+            </xpath>
+        </field>
+    </record>
+</odoo>

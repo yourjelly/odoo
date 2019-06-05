@@ -1,0 +1,38 @@
+<odoo>
+    <template id="auth_totp_frontend" name="TOTP frontend (portal)" inherit_id="portal.assets_frontend">
+        <xpath expr="." position="inside">
+            <script type="application/javascript"
+                    src="/auth_totp_portal/static/src/js/totp_frontend.js"/>
+        </xpath>
+    </template>
+    <template id="assets_tests" inherit_id="web.assets_tests">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/auth_totp_portal/static/tests/totp_portal.js"></script>
+        </xpath>
+    </template>
+
+    <template id="totp_portal_hook" name="TOTP Portal hook" inherit_id="portal.portal_my_security">
+        <xpath expr="//div[hasclass('o_portal_security_body')]">
+            <!--
+                portal users don't have access to non-qweb views anymore, so
+                embed the target view as a *data island* of sorts, a JSON embed
+                of the fields_view_get could have been nice but at 14k it'd be a
+                bit ridiculous
+            -->
+            <div class="d-none" id="totp_wizard_view">
+                <t t-esc="env.ref('auth_totp.view_totp_wizard').sudo().read_combined(['arch'])['arch']"/>
+            </div>
+            <section>
+                <h4>Two-factor authentication</h4>
+                <button t-if="not user_id.totp_enabled" type="button"
+                        class="btn btn-warning" id="auth_totp_portal_enable">
+                    Enable secure login
+                </button>
+                <button t-if="user_id.totp_enabled" type="button"
+                        class="btn btn-link" id="auth_totp_portal_disable">
+                    Disable secure login
+                </button>
+            </section>
+        </xpath>
+    </template>
+</odoo>
