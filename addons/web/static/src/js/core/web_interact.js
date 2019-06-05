@@ -347,11 +347,6 @@ var _sortable = function (el, options) {
                         var dragX = dragRect.left + dragRect.width / 2;
                         crossedX = dx > 0 === dragX > dropX;
                     }
-                    if (!axis) {
-                        var moreVertical = Math.abs(dy) > Math.abs(dx);
-                        crossedY = crossedY && moreVertical;
-                        crossedX = crossedX && !moreVertical;
-                    }
                     shouldMakeWay = crossedY || crossedX;
                 }
 
