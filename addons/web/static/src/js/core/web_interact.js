@@ -253,9 +253,14 @@ var _sortable = function (el, options) {
     var items = options.items;
     var tolerance = options.tolerance;
 
-    // We need this sortable to be uniquely targettable by a CSS selector. See
-    // the comment above the definition of the itemsInteractable variable for
-    // more information. To achieve this goal, we assign an ID to the sortable.
+    // We need this sortable to be uniquely targettable because the selector we
+    // will be using for setting up the sortable items as dropzones need to
+    // target items of this sortable only and nothing else as its code depend
+    // on the value of el in this function, which is the sortable itself. If
+    // the selector was to match items from other sortables, all computation
+    // would occur multiple times for the same item, which would be useless, but
+    // it would actually be computed with a wrong value for el most of the time.
+    // To achieve this unique selector goal, we set an id on the sortable.
     if (!el.id) {
         el.id = _.uniqueId(sortableClass + '_');
     }
@@ -375,7 +380,7 @@ var _sortable = function (el, options) {
             // view itself, since columns themselves are sortable. In other
             // words, columns need to be a dropzone because we can drop records
             // in it, but it also needs to be a dropzone to react to other
-            // columns being dragged over it. However, that you can't setup two
+            // columns being dragged over it. However, you cannot setup two
             // different dropzones on the same interactable object, so we set
             // the dropzone of the sortable parent on the node itself while we
             // set the dropzones of the items on the selector.
