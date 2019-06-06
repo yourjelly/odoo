@@ -39,6 +39,8 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         wysiwyg_attachment: '_onAttachmentChange',
     },
 
+    DEBOUNCE: 100,
+
     /**
      * @override
      */
@@ -52,16 +54,13 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         }
 
         if (!assetsLoaded) { // avoid flickering when begin to edit
-            assetsLoaded = new Promise(function (resolve) {
-                var wysiwyg = new Wysiwyg(self, {});
-                wysiwyg.attachTo($('<textarea>')).then(function () {
-                    wysiwyg.destroy();
-                    resolve();
-                });
+            var wysiwyg = new Wysiwyg(self, {preload: true});
+            assetsLoaded = wysiwyg.attachTo($('<textarea>')).then(function () {
+                wysiwyg.destroy();
             });
         }
 
-        return Promise.all([this._super(), assetsLoaded, defAsset]);
+        return Promise.all([this._super(), defAsset, assetsLoaded]);
     },
     /**
      * @override
@@ -102,14 +101,14 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         var _super = this._super.bind(this);
         return this.wysiwyg.save().then(function (result) {
             self._isDirty = result.isDirty;
-            _super();
+            return self._setValue(result.value);
         });
     },
     /**
      * @override
      */
     isSet: function () {
-        return this.value && this.value !== "<p><br/></p>" && this.value.match(/\S/);
+        return !!(this.value !== "<p><br/></p>" && (this.value || '').match(/\S/));
     },
     /**
      * @override
@@ -147,7 +146,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @override
      */
     _getValue: function () {
-        var value = this.$target.val();
+        var value = this.wysiwyg.getValue();
         if (this.nodeOptions.wrapper) {
             return this._unWrap(value);
         }
@@ -186,10 +185,10 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
                 res_id: this.res_id,
             },
             noAttachment: this.nodeOptions['no-attachment'],
-            inIframe: !!this.nodeOptions.cssEdit,
             iframeCssAssets: this.nodeOptions.cssEdit,
             snippets: this.nodeOptions.snippets,
 
+            /* todo: uncomment after separation of field_html customization tests and we3 tests
             tabSize: 0,
             keyMap: {
                 pc: {
@@ -200,13 +199,10 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
                     'TAB': null,
                     'SHIFT+TAB': null,
                 },
-            },
-            generateOptions: function (options) {
-                var para = _.find(options.toolbar, function (item) {
-                    return item[0] === 'para';
-                });
-                para[1].splice(2, 0, 'checklist');
-                return options;
+            }, */
+            plugins: {
+                ConvertInline: !!this.nodeOptions['style-inline'],
+                Iframe: !!this.nodeOptions.cssEdit,
             },
         };
     },
@@ -407,7 +403,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
     _onChange: function (ev) {
         this._doDebouncedAction.apply(this, arguments);
 
-        var $lis = this.$content.find('.note-editable ul.o_checklist > li:not(:has(> ul.o_checklist))');
+        var $lis = this.$content.find('editable ul.o_checklist > li:not(:has(> ul.o_checklist))');
         if (!$lis.length) {
             return;
         }

@@ -1,7 +1,5 @@
-odoo.define('web_editor.convertInline', function (require) {
+(function () {
 'use strict';
-
-var FieldHtml = require('web_editor.field.html');
 
 /**
  * Returns the css rules which applies on an element, tweaked so that they are
@@ -387,25 +385,7 @@ function linkImgToAttachmentThumbnail($editable) {
 //--------------------------------------------------------------------------
 
 
-FieldHtml.include({
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
-    commitChanges: function () {
-        if (this.nodeOptions['style-inline'] && this.isRendered) {
-            this._toInline();
-        }
-        return this._super();
-    },
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
+var ConvertInlinePlugin = class extends we3.AbstractPlugin {
     /**
      * Converts CSS dependencies to CSS-independent HTML.
      * - CSS display for attachment link -> real image
@@ -414,57 +394,31 @@ FieldHtml.include({
      *
      * @private
      */
-    _toInline: function () {
-        var $editable = this.wysiwyg.getEditable();
-        var html = this.wysiwyg.getValue();
-        $editable.html(html);
-
+    saveEditor () {
+        var value = this.dependencies.Arch.getValue();
+        this.editable.innerHTML = value;
+        var $editable = $(this.editable);
         attachmentThumbnailToLinkImg($editable);
         fontToImg($editable);
         classToStyle($editable);
-        this.wysiwyg.setValue($editable.html(), {
-            notifyChange: false,
-        });
-    },
-    /**
-     * Revert _toInline changes.
-     *
-     * @private
-     */
-    _fromInline: function () {
-        var $editable = this.wysiwyg.getEditable();
-        var html = this.wysiwyg.getValue();
-        $editable.html(html);
-
+        var html = this.editable.innerHTML;
+        this.editable.innerHTML = value;
+        this.dependencies.Arch.setValue(html);
+    }
+    setEditorValue () {
+        var value = this.dependencies.Arch.getValue();
+        this.editable.innerHTML = value;
+        var $editable = $(this.editable);
         styleToClass($editable);
         imgToFont($editable);
         linkImgToAttachmentThumbnail($editable);
-        this.wysiwyg.setValue($editable.html(), {
-            notifyChange: false,
-        });
-    },
-
-    //--------------------------------------------------------------------------
-    // Handler
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
-    _onLoadWysiwyg: function () {
-        if (this.nodeOptions['style-inline']) {
-            this._fromInline();
-        }
-        this._super();
-    },
-});
-
-return {
-    fontToImg: fontToImg,
-    imgToFont: imgToFont,
-    classToStyle: classToStyle,
-    styleToClass: styleToClass,
-    attachmentThumbnailToLinkImg: attachmentThumbnailToLinkImg,
-    linkImgToAttachmentThumbnail: linkImgToAttachmentThumbnail,
+        var html = this.editable.innerHTML;
+        this.editable.innerHTML = value;
+        this.dependencies.Arch.setValue(html);
+    }
 };
-});
+
+we3.addPlugin('ConvertInline', ConvertInlinePlugin);
+
+return ConvertInlinePlugin;
+})();

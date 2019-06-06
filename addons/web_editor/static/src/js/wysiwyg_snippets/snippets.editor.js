@@ -67,7 +67,7 @@ var SnippetEditor = Widget.extend({
         defs.push(this._initializeOptions());
 
         // Initialize move/clone/remove buttons
-        if (!this.options.isEditableNode(this.$target[0])) {
+        if (!this.dependencies.Arch.isEditableNode(this.$target[0])) {
             this.$el.find('.oe_snippet_move, .oe_snippet_clone, .oe_snippet_remove').remove();
         } else {
             this.dropped = false;
@@ -678,8 +678,9 @@ var SnippetsMenu = Widget.extend({
             $(ev.target).selectContent();
         });
         this.$document.on('keyup.snippets_menu', function () {
-            var range = Wysiwyg.getRange(this);
-            $(range && range.sc).closest('.o_default_snippet_text').removeClass('o_default_snippet_text');
+            console.info('todo');
+            // var range = Wysiwyg.getRange(this);
+            // $(range && range.sc).closest('.o_default_snippet_text').removeClass('o_default_snippet_text');
         });
 
         return Promise.all(defs).then(function () {
