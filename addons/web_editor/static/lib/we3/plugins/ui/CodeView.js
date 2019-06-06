@@ -1,60 +1,209 @@
-odoo.define('web_editor.wysiwyg.plugin.codeview', function (require) {
+(function () {
 'use strict';
 
-var core = require('web.core');
-var Plugins = require('web_editor.wysiwyg.plugins');
-var registry = require('web_editor.wysiwyg.plugin.registry');
-
-var _t = core._t;
-
-
-var CodeviewPlugin = Plugins.codeview.extend({
+var CodeViewPlugin = class extends we3.AbstractPlugin {
     /**
      * @override
      */
-    activate: function () {
-        this._super();
-        if (this.$codable.height() === 0) {
-            this.$codable.height(180);
-        }
-        this.context.invoke('editor.hidePopover');
-        this.context.invoke('editor.clearTarget');
-    },
+    constructor (parent, params) {
+        super(...arguments);
+
+        this.templatesDependencies = ['/web_editor/static/src/xml/wysiwyg_codeview.xml'];
+        this.buttons = {
+            template: 'wysiwyg.buttons.codeview',
+            active: '_isActive',
+            enabled: '_enabled',
+        };
+
+        this.getValueOptions = {
+            keepVirtual: true,
+            architecturalSpace: true,
+        };
+        this.codeview = this._createCodable();
+        params.insertAfterContainer(this.codeview);
+    }
     /**
      * @override
      */
-    deactivate: function () {
-        if (
-            this.context.invoke('HelperPlugin.hasJinja', this.context.invoke('code')) &&
-            !this.isBeingDestroyed
-        ) {
-            var message = _t("Your code contains JINJA conditions.\nRemove them to return to WYSIWYG HTML edition.");
-            this.do_warn(_t("Cannot edit HTML"), message);
-            this.$codable.focus();
-            return;
-        }
-        this._super();
-        this.$editable.css('height', '');
-    },
+    start () {
+        this._deactivate();
+        return super.start();
+    }
     /**
      * @override
      */
-    destroy: function () {
+    destroy () {
         this.isBeingDestroyed = true;
-        this._super();
-    },
+        super.destroy();
+    }
     /**
-     * Force activation of the code view.
+     * @override
      */
-    forceActivate: function () {
-        if (!this.isActivated()) {
-            this.activate();
+    focusEditor () {
+        if (this._isActive()) {
+            this._resize();
         }
-    },
-});
+    }
+    /**
+     * @override
+     */
+    getEditorValue () {
+        if (this._isActive()) {
+            this.triggerUp('set_value', {
+                value: this.codeview.value.trim(),
+            });
+        }
+    }
 
-registry.add('codeview', CodeviewPlugin);
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
 
-return CodeviewPlugin;
+    /**
+     * Activate the codeview with the given value.
+     *
+     * @param {String} value
+     * @param {Object} [options]
+     */
+    active (value, options) {
+        var self = this;
+        if (!this._isActive()) {
+            if (value) {
+                this._setCodeViewValue(value);
+            } else {
+                this.triggerUp('get_value', {
+                    options: options,
+                    callback (value) {
+                        self._setCodeViewValue(value);
+                    },
+                });
+            }
+            this._activate();
+        }
+    }
+    /**
+     * Return to the wysiwyg view and set its value
+     * to `value` or the codeview's value.
+     *
+     * @param {String} [value]
+     */
+    deactivate (value) {
+        if (this._isActive()) {
+            this._deactivate();
+            this.triggerUp('set_value', {
+                value: value || this.codeview.value.trim(),
+            });
+        }
+    }
+    /**
+     * Toggle the code view.
+     */
+    toggle () {
+        if (this._isActive()) {
+            this.deactivate();
+        } else {
+            this.active(null, this.getValueOptions);
+        }
+    }
 
-});
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * Activate the code view and deactivate the wysiwyg view.
+     *
+     * @private
+     */
+    _activate () {
+        this.isActive = true;
+        this.codeview.style.display = '';
+        this.editable.style.display = 'none';
+        this._resize();
+        this._focus();
+        this.trigger('active');
+    }
+    /**
+     * Blur the code view and focus the wysiwyg view.
+     *
+     * @private
+     */
+    _blur() {
+        this.codeview.blur();
+        this.editable.focus();
+    }
+    /**
+     * Create the codable view.
+     *
+     * @private
+     * @returns {Node}
+     */
+    _createCodable () {
+        var codeview = document.createElement('textarea');
+        codeview.name = 'codeview';
+        codeview.oninput = this._resize.bind(this);
+        codeview.style.display = 'none';
+        return codeview;
+    }
+    /**
+     * Deactivate the code view and activate the wysiwyg view.
+     *
+     * @private
+     */
+    _deactivate () {
+        this.isActive = false;
+        this.codeview.style.display = 'none';
+        this.editable.style.display = '';
+        this._blur();
+        this.trigger('deactivate');
+    }
+    /**
+     * Return true if the codeview is active.
+     *
+     * @private
+     * @returns {Boolean}
+     */
+    _enabled () {
+        return true;
+    }
+    /**
+     * Focus the code view and blur the wysiwyg view.
+     *
+     * @private
+     */
+    _focus () {
+        this.editable.blur();
+        this.codeview.focus();
+    }
+    /**
+     * Return true if the codeview is active.
+     *
+     * @private
+     * @returns {Boolean}
+     */
+    _isActive () {
+        return this.isActive;
+    }
+    /**
+     * Resize the code view textarea to fit its contents.
+     *
+     * @private
+     */
+    _resize () {
+        this.codeview.style.height = '';
+        this.codeview.style.height = this.codeview.scrollHeight + "px";
+    }
+    /**
+     * Set the value of the code view.
+     *
+     * @private
+     * @param {String} value
+     */
+    _setCodeViewValue (value) {
+        this.codeview.value = value.trim();
+    }
+};
+
+we3.addPlugin('CodeView', CodeViewPlugin);
+
+})();
