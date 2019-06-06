@@ -9,10 +9,6 @@ from odoo.tools.float_utils import float_round
 import logging
 _logger = logging.getLogger(__name__)
 
-class AmlMapper(object):
-    def __init__(self, aml):
-        self.__dict__ = {'balance': aml.balance, 'debit': aml.debit, 'credit': aml.credit}
-
 
 class AccountTax(models.Model):
     _inherit = 'account.tax'
@@ -43,15 +39,29 @@ class AccountTax(models.Model):
         return invoice
 
     @api.model
-    def get_aml_domain(self, invoice, tax_report_line):
-        line_domain = safe_eval(tax_report_line.domain)
+    def get_aml_domain(self, invoice, domain):
+        line_domain = safe_eval(domain)
 
-        # To suport the search on tax_ids.tag_ids
+        # We need to use the backup table in order to know which tax corresponds to which tag
         for index, condition in enumerate(line_domain):
-            if condition[0].startswith('tax_ids.'):
-                new_condition = (condition[0].partition('.')[2], condition[1], condition[2])
-                taxes = self.env['account.tax'].with_context(active_test=False).search([new_condition])
-                line_domain[index] = ('tax_ids', 'in', taxes.ids)
+            if condition[0] in ('tax_ids.tag_ids', 'tax_line_id.tag_ids'):
+                new_condition = ('tag_ids', condition[1], condition[2])
+
+                if condition[1] not in ('=', '!=', 'in', 'not in'):
+                    raise UserError("Wrong operator in domain: %s" % condition[1])
+
+                tag_values = condition[2]
+                if isinstance(tag_values, list):
+                        tag_values = tuple(tag_values)
+
+                self.env.cr.execute("""
+                    select array_agg(account_tax_id)
+                    from account_tax_account_tag_v12_bckp
+                    where account_account_tag_id """ + condition[1] + """ %(values)s
+                """, {'values': tag_values})
+                target_taxes = self.env.cr.fetchall()[0][0]
+
+                line_domain[index] = (condition[0].partition('.')[0], 'in', target_taxes or [])
 
         return line_domain + [('move_id.state', '=', 'posted'), ('move_id', '=', invoice.move_id.id)]
 
@@ -70,29 +80,48 @@ class AccountTax(models.Model):
             filler_fun_to_call = getattr(self, '_fill_grids_mapping_for_' + company.country_id.code.lower()) # So, such a function needs to be defined for each country
             filler_fun_to_call(rslt)
 
-
         return rslt
 
     @api.model
     def _fill_grids_mapping_for_be(self, dict_to_fill):
         code_prefix = 'BETAX'
-        for report_line in self.env['account.financial.html.report.line'].search([('code', 'like', code_prefix + '%'), ('domain', '!=', None)]):
-            dict_to_fill[report_line.id] = report_line.code[len(code_prefix):]
+        self.env.cr.execute("""
+            select id, regexp_replace(code, '%(prefix)s', '')
+            from financial_report_lines_v12_bckp
+            where code like '%(prefix)s%%'
+            and domain is not null;
+        """ % {'prefix': code_prefix})
+
+        dict_to_fill.update(dict(self.env.cr.fetchall()))
+
+    @api.model
+    def backup_v12_tables(self): #TODO NSE: To be done in pre and cancelled in post by migration script
+        env.cr.execute("""
+            select *
+            into financial_report_lines_v12_bckp
+            from account_financial_html_report_line;
+
+            select *
+            into account_tax_account_tag_v12_bckp
+            from account_tax_account_tag;
+
+            select id, account_id, refund_account_id
+            into tax_accounts_v12_bckp
+            from account_tax;
+        """)
 
     @api.model
     def get_v13_migration_dicts(self):
-        #ATTENTION: THIS WILL CREATE NEW INVOICES IN DB; ONLY RUN THIS SCRIPT ON A DUPLICATE DB !!!
         """
         TO BE RETURNED
 
-        [{'tax': tax, 'inv_account_id': acc1, 'ref_account_id': acc2, 'invoice': {'base': {'+': [coucou], '-': [salut]}}, 'refund': {'tax': {'-': [dudu]}}}, ... other taxes ...]
-        ==> Where coucou, salut and dudu are tax grid names (with the sign)
+        [{'tax': tax, 'inv_account_id': acc1, 'ref_account_id': acc2, 'invoice': {'base': {'+': set<tag_names>, '-': set<tag_names>}}, 'refund': {'tax': {'-': set<tag_names>}}}, ... other taxes ...]
         """
 
-        #If a tax is type_tax_use 'none', we artifically switch it to its parent type temporarily, to check what grids to impact for it
-        self.env.cr.execute("select array_agg(id) from account_tax where type_tax_use='none';")
-        none_tax_ids = self.env.cr.fetchall()[0][0]
+        self.env.cr.execute("savepoint v13_migration_dict;")
 
+
+        #If a tax is type_tax_use 'none', we artifically switch it to its parent type temporarily, to check what grids to impact for it
         self.env.cr.execute("""
             update account_tax
             set type_tax_use = parent.type_tax_use
@@ -116,53 +145,79 @@ class AccountTax(models.Model):
 
         rslt = []
         treated_count = 0
-        taxes_to_treat = self.env['account.tax'].with_context(active_test=False).search([])
-        for tax in taxes_to_treat: # So, they can belong to different companies ==> not with the record rule, right ? ~~
+        self.env.cr.execute("""
+            select account_tax.id, case when count(account_account_tag_id) > 0 then array_agg(account_account_tag_id) else '{}' end
+            from account_tax
+            left join account_tax_account_tag_v12_bckp
+            on account_tax.id = account_tax_account_tag_v12_bckp.account_tax_id
+            group by account_tax.id
+        """)
+        taxes_data = self.env.cr.fetchall()
+        for tax_id, tax_tag_ids in taxes_data: # So, they can belong to different companies
+
+            tax = self.env['account.tax'].browse(tax_id)
             treated_count += 1
-            _logger.info("Treating tax %s of %s... (id %s)" % (treated_count, len(taxes_to_treat), tax.id))
+            _logger.info("Treating tax %s of %s... (id %s)" % (treated_count, len(taxes_data), tax.id))
+
+            # get account_id and refund_account_id in SQL, since they have been removed between 12.2 and 12.3
+            self.env.cr.execute("""
+                select account_id, refund_account_id
+                from tax_accounts_v12_bckp
+                where id=%(tax_id)s;
+            """, {'tax_id': tax_id})
+            tax_accounts_dict = self.env.cr.dictfetchall()[0]
+
             tax_rslt = {
                 'tax': tax.id,
-                'invoice': {'base': {'+': [], '-': []}, 'tax': {'+': [], '-': []}},
-                'refund': {'base': {'+': [], '-': []}, 'tax':{'+': [], '-': []}},
-                'inv_account_id': tax.account_id.id,
-                'ref_account_id': tax.refund_account_id.id,
+                'invoice': {'base': {'+': set(), '-': set()}, 'tax': {'+': set(), '-': set()}},
+                'refund': {'base': {'+': set(), '-': set()}, 'tax':{'+': set(), '-': set()}},
+                'inv_account_id': tax_accounts_dict['account_id'],
+                'ref_account_id': tax_accounts_dict['refund_account_id'],
             }
             rslt.append(tax_rslt)
 
             inv = self.create_invoice(partner, tax, type= tax.type_tax_use == 'sale' and 'out_invoice' or 'in_invoice')
             ref = self.create_invoice(partner, tax, type= tax.type_tax_use == 'sale' and 'out_refund' or 'in_refund')
 
-            for tag in tax.tag_ids:
+            for tag_id in tax_tag_ids:
                 # We want to see where v12 tags go, in order to prepare v13 tags assignation
-                tag_report_lines = self.env['account.financial.html.report.line'].search([('domain', 'like', '(%.tag_ids%' + str(tag.id) + '%')])
+                self.env.cr.execute("""
+                    select id, domain, formulas
+                    from financial_report_lines_v12_bckp
+                    where domain like '%%.tag\_ids%%%(tag_id)s%%'
+                """, {'tag_id': tag_id})
+                tag_report_lines_data = self.env.cr.fetchall()
 
-                if not tag_report_lines:
-                    _logger.warn("No financial report line found for tag %(tag_name)s (id %(tag_id)s). Is it normal?" % {'tag_name': tag.name, 'tag_id': tag.id})
+                if not tag_report_lines_data:
+                    _logger.warn("No financial report line found for tag with id %(tag_id)s. Is it normal?" % {'tag_id': tag_id})
 
-                for tax_report_line in tag_report_lines:
+                for tax_report_line_id, domain, formulas in tag_report_lines_data:
+
+                    if tax_id==137:
+                        _logger.warn(str(tax_report_line_id) + "   "+str(domain))
 
                     # aml considered by this report line for both invoice and refund
-                    inv_aml = self.env['account.move.line'].search(self.get_aml_domain(inv, tax_report_line))
-                    ref_aml = self.env['account.move.line'].search(self.get_aml_domain(ref, tax_report_line))
+                    inv_aml = self.env['account.move.line'].search(self.get_aml_domain(inv, domain))
+                    ref_aml = self.env['account.move.line'].search(self.get_aml_domain(ref, domain))
 
                     #Treat tax lines
                     inv_tax_line = inv_aml.filtered(tax_line_selector) #if len > 1, it's weird, so we let it crash later
                     ref_tax_line = ref_aml.filtered(tax_line_selector)
 
-                    split_formula = tax_report_line._split_formulas()
+                    split_formula = self._split_formulas_to_dict(formulas)
 
                     if tax.type_tax_use == 'adjustment' and (inv_tax_line or ref_tax_line): # We treat tax adjustment in a dedicated way, as they are not supposed to be used on invoices
-                        tax_rslt['invoice']['tax']['+'].append(financial_reports_grids_mapping[tax_report_line.id])
-                        tax_rslt['refund']['tax']['-'].append(financial_reports_grids_mapping[tax_report_line.id])
+                        tax_rslt['invoice']['tax']['+'].add(financial_reports_grids_mapping[tax_report_line_id])
+                        tax_rslt['refund']['tax']['-'].add(financial_reports_grids_mapping[tax_report_line_id])
                         continue
 
                     if inv_tax_line:
                         formula_inv_tax = safe_eval(split_formula['balance'], {'sum': inv_tax_line})
-                        tax_rslt['invoice']['tax'][formula_inv_tax < 0 and '-' or '+'].append(financial_reports_grids_mapping[tax_report_line.id])
+                        tax_rslt['invoice']['tax'][formula_inv_tax < 0 and '-' or '+'].add(financial_reports_grids_mapping[tax_report_line_id])
                     if ref_tax_line:
                         # We take add a negative sign to multiplier, since we are on a refund
                         formula_ref_tax = safe_eval(split_formula['balance'], {'sum': ref_tax_line})
-                        tax_rslt['refund']['tax'][formula_ref_tax < 0 and '-' or '+'].append(financial_reports_grids_mapping[tax_report_line.id])
+                        tax_rslt['refund']['tax'][formula_ref_tax < 0 and '-' or '+'].add(financial_reports_grids_mapping[tax_report_line_id])
 
                     #Treat base lines
                     inv_base_line = inv_aml.filtered(base_line_selector)
@@ -170,15 +225,24 @@ class AccountTax(models.Model):
 
                     if inv_base_line:
                         formula_inv_base = safe_eval(split_formula['balance'], {'sum': inv_base_line})
-                        tax_rslt['invoice']['base'][formula_inv_base < 0 and '-' or '+'].append(financial_reports_grids_mapping[tax_report_line.id])
+                        tax_rslt['invoice']['base'][formula_inv_base < 0 and '-' or '+'].add(financial_reports_grids_mapping[tax_report_line_id])
                     if ref_base_line:
                         formula_ref_base = safe_eval(split_formula['balance'], {'sum': ref_base_line})
-                        tax_rslt['refund']['base'][formula_ref_base < 0 and '-' or '+'].append(financial_reports_grids_mapping[tax_report_line.id])
+                        tax_rslt['refund']['base'][formula_ref_base < 0 and '-' or '+'].add(financial_reports_grids_mapping[tax_report_line_id])
 
-        if none_tax_ids:
-            self.env.cr.execute("update account_tax set type_tax_use='none' where id in %(tax_ids)s", {'tax_ids': tuple(none_tax_ids)})
+        self.env.cr.execute("rollback to savepoint v13_migration_dict;")
+        self.env.clear() # Reset the cache because of the rollback that just occured
 
         return rslt
+
+    @api.model
+    def _split_formulas_to_dict(self, formulas):
+        result = {}
+        for f in formulas.split(';'):
+            [column, formula] = f.split('=')
+            column = column.strip()
+            result.update({column: formula})
+        return result
 
     @api.model
     def _get_tax_group_percent(self, tax_group):
@@ -198,7 +262,9 @@ class AccountTax(models.Model):
                 affected_aml.tag_ids |= subseq_tax_aml.tag_ids
 
     @api.model
-    def migrate_taxes_to_v13(self, migration_dicts_list):
+    def migrate_taxes_to_v13(self):
+        # Abracadabra !
+
         #We consider the module was only updated. So, now, some tax_line_id are set while there is not tax_repartition_line_id
         #on the move lines. tax_line_id is supposed to be related on tax_repartition_line_id, so we have to fix this
         #inconsistency first
@@ -217,7 +283,10 @@ class AccountTax(models.Model):
             and tx_rep.repartition_type = 'tax';
         """)
 
-        # Assign tags to repartition lines
+        # We generate the migration dict, now that basic consistency of taxes is ensured
+        migration_dicts_list = self.get_v13_migration_dicts()
+
+        # Assign tags and accounts to repartition lines
         for migration_dict in migration_dicts_list:
             tax = self.env['account.tax'].browse(migration_dict['tax'])
 
@@ -291,7 +360,7 @@ class AccountTax(models.Model):
                     and tx_rep.id = case when invoice.type in ('in_refund', 'out_refund') then %(new_ref_rep_id)s else %(new_inv_rep_id)s end;
                 """, {'group_to_treat_id': group_to_treat.id, 'child_tax_id': child_tax.id, 'new_ref_rep_id': new_ref_rep.id, 'new_inv_rep_id': new_inv_rep.id})
 
-                # in case account.invoice.tax objetcs contain taxes to remove, we replace them by their parent
+                # in case account.invoice.tax objects contain taxes to remove, we replace them by their parent
                 self.env.cr.execute("""
                     update account_invoice_tax_account_tax_rel
                     set account_tax_id = %(group_to_treat_id)s
@@ -311,7 +380,7 @@ class AccountTax(models.Model):
             on rep_tags.account_tax_repartition_line_id = aml.tax_repartition_line_id;
         """)
 
-        #Base lines
+        # Base lines
         self.env.cr.execute("""
             insert into account_account_tag_account_move_line_rel
             select aml_tx.account_move_line_id as account_move_line_id, rep_tags.account_account_tag_id as account_account_tag_id
@@ -324,7 +393,8 @@ class AccountTax(models.Model):
             and aml_tx.account_tax_id = coalesce(tx_rep.invoice_tax_id, tx_rep.refund_tax_id)
             and rep_tags.account_tax_repartition_line_id  = tx_rep.id
             and ((invoice.type in ('in_refund', 'out_refund') and tx_rep.refund_tax_id is not null)
-                 or (tx_rep.invoice_tax_id is not null and invoice.type not in ('in_refund', 'out_refund')));
+                 or (tx_rep.invoice_tax_id is not null and invoice.type not in ('in_refund', 'out_refund')))
+            on conflict do nothing; -- for lines that are the base of multiple taxes sharing some tags
         """)
 
         #Basic consistency check for taxes associated with a template xmlid

@@ -2,28 +2,11 @@
 <odoo>
 
         <record model="ir.actions.server" id="v12_get_mig_dict">
-            <field name="name">(v12) Taxes: Get v13 migration data</field>
+            <field name="name">Abracadabra!</field>
             <field name="model_id" ref="base.model_ir_actions_server"/>
             <field name="state">code</field>
             <field name="code">
-def empty_rep(rep_dict):
-    return not rep_dict['base']['+'] \
-           and  not rep_dict['base']['-'] \
-           and not rep_dict['tax']['+'] \
-           and not rep_dict['tax']['-'] \
-
-mig_dicts = env['account.tax'].get_v13_migration_dicts()
-
-# We create the server actions that will need to be run in v13 to migrate everything
-env['ir.actions.server'].create({
-    'name': "(v13) Taxes: Migrate (hopefully)",
-    'model_id': env.ref('base.model_ir_actions_server').id,
-    'state': 'code',
-    'code': """
-mig_dicts =  %(mig_dicts)s
-env['account.tax'].migrate_taxes_to_v13(mig_dicts)
-    """ % {'mig_dicts': str(mig_dicts)}
-})
+env['account.tax'].migrate_taxes_to_v13()
             </field>
         </record>
 
