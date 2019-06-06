@@ -13,10 +13,8 @@
 <template id="assets_wysiwyg" name="Wysiwyg Editor Assets">
     <!-- lib -->
 
-    <link rel="stylesheet" type="text/css" href="/web_editor/static/lib/summernote/summernote.css"/>
     <link rel="stylesheet" type="text/css" href="/web_editor/static/lib/cropper/css/cropper.css"/>
 
-    <script type="text/javascript" src="/web_editor/static/lib/summernote/summernote.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/cropper/js/cropper.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/jQuery.transfo.js"/>
 
@@ -27,52 +25,124 @@
         <link rel="stylesheet" type="text/scss" href="/web_editor/static/src/scss/wysiwyg_variables.scss"/>
     </t>
 
-    <!-- integration -->
+    <!-- lib we3 -->
+
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/init.js"/>
+
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/tools/utils.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/tools/tags.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/tools/WrappedRange.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/tools/EventDispatcher.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/options.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/AbstractPlugin.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/PluginsManager.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/Editor.js"/>
+
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/ArchNode.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/is.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/rules.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/architectural.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/ArchNodeText.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/ArchNodeVirtualText.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/ArchNodeFragment.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/ArchNodeRoot.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/customArchNodes.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/ArchitecturalSpace.js"/> <!-- must be after customArchNodes -->
+
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Rules.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Arch.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Range.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Renderer.js"/>
+
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/we3.js"/>
+
+    <script type="text/javascript" src="/web_editor/static/lib/we3/options.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/Selector.js"/>
+
+    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/drop/Clipboard.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/drop/DropBlock.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/drop/DropBlockSelector.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Position.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Popover.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Toolbar.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/CodeView.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Iframe.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/FullScreen.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Modal.js"/>
+
+    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/insert/Media.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/insert/Upload.js"/>
+
+    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/misc/History.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/misc/Jinja.js"/>
+
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/Test.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/TestArchAndRules.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/TestRange.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboard.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardBackspace.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardChar.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardComplex.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardDelete.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardEnter.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardTab.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardUnbreakable.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/popover.js"/>
+
+    <!-- odoo -->
+
+    <script type="text/javascript" src="/web_editor/static/src/js/web_editor.js"/>
 
     <link rel="stylesheet" type="text/scss" href="/web_editor/static/src/scss/wysiwyg.scss"/>
     <link rel="stylesheet" type="text/scss" href="/web_editor/static/src/scss/wysiwyg_iframe.scss"/>
+    <link rel="stylesheet" type="text/scss" href="/web_editor/static/src/scss/wysiwyg_icons.css"/>
 
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/wysiwyg.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/wysiwyg_iframe.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin_registry.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/options.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/translation.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/fonts.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/tools/no-dependencies.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/tools/fonts.js"/>
 
-    <!-- widgets & plugins -->
+    <!-- widgets-->
 
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/image_optimize_dialog.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/media.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/dialog.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/alt_dialog.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/colorpicker_dialog.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/crop_dialog.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/link_dialog.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/media_dialog.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/widgets.js"/>
 
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/abstract.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/plugins.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/helper.js"/>
+    <!-- plugins insert -->
 
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/toolbar.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/dropzone.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/history.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/table.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/text.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/editor.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/media.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/buttons.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/link.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/font.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/font_buttons.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/keyboard.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/unbreakable.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/transform.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/hint.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/bullet.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/codeview.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/help_dialog.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/insert/link.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/insert/list.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/insert/table.js"/>
+    <!-- <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/insert/hint.js"/> -->
+
+    <!-- plugins text -->
+
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/text/format_text.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/text/keyboard.js"/>
+
+    <!-- plugins drop -->
+
+    <!-- <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/drop/dropzone.js"/> -->
+
+    <!-- plugins misc -->
+
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/misc/keymap.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/misc/transform.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/misc/customizeBlock.js"/>
+
+    <!-- Tests -->
+
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbar.js"/>
+    <!-- <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarBackgroundColor.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarFontSize.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarFontStyle.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarForeColor.js"/> -->
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarWand.js"/>
+
+    <!-- additional plugins -->
+
+    <script type="text/javascript" src="/web_editor/static/src/js/backend/convert_inline.js"/>
 </template>
 
 <template id="wysiwyg_snippets" inherit_id="web_editor.assets_wysiwyg" name="Wysiwyg Editor additional snippets">
@@ -82,9 +152,9 @@
 
         <script type="text/javascript" src="/web_editor/static/lib/nearest/jquery.nearest.js"/>
 
-        <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg_snippets/wysiwyg_snippets.js"/>
+        <!-- <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg_snippets/wysiwyg_snippets.js"/>
         <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg_snippets/snippets.editor.js"/>
-        <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg_snippets/snippets.options.js"/>
+        <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg_snippets/snippets.options.js"/> -->
     </xpath>
 </template>
 
@@ -104,7 +174,7 @@
     <xpath expr="script[last()]" position="after">
         <script type="text/javascript" src="/web_editor/static/lib/vkbeautify/vkbeautify.0.99.00.beta.js"/>
         <script type="text/javascript" src="/web_editor/static/src/js/common/ace.js"/>
-        <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/root.js"/>
+        <script type="text/javascript" src="/web_editor/static/src/js/root.js"/>
     </xpath>
 </template>
 
@@ -122,7 +192,6 @@
     </xpath>
     <xpath expr="script[last()]" position="after">
         <script type="text/javascript" src="/web_editor/static/src/js/backend/field_html.js" />
-        <script type="text/javascript" src="/web_editor/static/src/js/backend/convert_inline.js"/>
     </xpath>
 </template>
 
@@ -145,12 +214,11 @@
                 'use strict';
                 var WysiwygRoot = require('web_editor.wysiwyg.root');
                 WysiwygRoot.include({
-                    assetLibs: null // We need to add the asset because tests performed overwrites (Dialog, Unbreakable...)
+                    assetLibs: null // We need to add the asset because tests performed overwrites (Dialog...)
                 });
             });
         </script>
         <t t-call="web_editor.compiled_assets_wysiwyg"/>
-
         <script type="text/javascript" src="/web_editor/static/tests/test_utils.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/field_html_tests.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/wysiwyg_tests.js"/>

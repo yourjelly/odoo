@@ -31,7 +31,7 @@ var LinkDialog = Dialog.extend({
             title: _t("Link to"),
         }, this.options));
 
-        this.trigger_up('getRecordInfo', {
+        this.triggerUp('getRecordInfo', {
             recordInfo: this.options,
             callback: function (recordInfo) {
                 _.defaults(self.options, recordInfo);

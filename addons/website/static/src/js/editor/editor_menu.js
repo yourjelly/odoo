@@ -10,9 +10,9 @@ var _t = core._t;
 
 var WysiwygMultizone = Wysiwyg.extend({
     assetLibs: Wysiwyg.prototype.assetLibs.concat(['website.compiled_assets_wysiwyg']),
-    _getWysiwygContructor: function () {
-        return odoo.__DEBUG__.services['web_editor.wysiwyg.multizone'];
-    }
+    // _getWysiwygContructor: function () {
+    //     return odoo.__DEBUG__.services['web_editor.wysiwyg.multizone'];
+    // }
 });
 
 var EditorMenu = Widget.extend({
@@ -161,13 +161,34 @@ var EditorMenu = Widget.extend({
                 context = ctx;
             },
         });
-        return new WysiwygMultizone(this, {
-            snippets: 'website.snippets',
+        /*
             recordInfo: {
                 context: context,
                 data_res_model: 'website',
                 data_res_id: context.website_id,
             }
+        */
+        return new WysiwygMultizone(this, {
+            snippets: 'website.snippets',
+            dropblockStayOpen: true,
+            // isEditableNode: function (archNode) {
+            //     if (archNode.isText()) {
+            //         return;
+            //     }
+            //     if (archNode.className.contains('o_editable')) {
+            //         return true;
+            //     }
+            //     var isEditable = null;
+            //     archNode.nextUntil(function (archNode) {
+            //         if (!archNode.isText() && archNode.className.contains('o_editable')) {
+            //             isEditable = false;
+            //         }
+            //     }, {
+            //         doNotInsertVirtual: true,
+            //         doNotLeaveNode: true,
+            //     });
+            //     return isEditable;
+            // },
         });
     },
     /**

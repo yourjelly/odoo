@@ -37,7 +37,7 @@ var ColorpickerDialog = Dialog.extend({
             ],
         }, options));
 
-        this.trigger_up('getRecordInfo', {
+        this.triggerUp('getRecordInfo', {
             recordInfo: options,
             callback: function (recordInfo) {
                 _.defaults(options, recordInfo);
@@ -348,7 +348,7 @@ var ColorpickerDialog = Dialog.extend({
      * @private
      */
     _onFinalPick: function () {
-        this.trigger_up('colorpicker:saved', this.colorComponents);
+        this.triggerUp('colorpicker:saved', this.colorComponents);
     },
 });
 
