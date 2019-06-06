@@ -1,152 +1,723 @@
-odoo.define('web_editor.wysiwyg.plugin.text', function (require) {
+(function () {
 'use strict';
 
-var AbstractPlugin = require('web_editor.wysiwyg.plugin.abstract');
-var registry = require('web_editor.wysiwyg.plugin.registry');
+// var ColorpickerDialog = require('wysiwyg.widgets.ColorpickerDialog');
 
-var dom = $.summernote.dom;
-dom.isAnchor = function (node) {
-    return (node.tagName === 'A' || node.tagName === 'BUTTON' || $(node).hasClass('btn')) &&
-        !$(node).hasClass('fa') && !$(node).hasClass('o_image');
+var ArchNode = we3.ArchNode;
+
+//--------------------------------------------------------------------------
+// Font (colorpicker & font-size)
+//--------------------------------------------------------------------------
+
+var TextPlugin = class extends we3.AbstractPlugin {
+    constructor () {
+        super(...arguments);
+        this.dependencies = ['Arch', 'Range'];
+    }
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    get (archNode) {
+        return (archNode.isText() || archNode.isBR()) && archNode;
+    }
+    /**
+     * Applies the given styles (fore- or backcolor, font size) to the selection.
+     * If no text is selected, apply to the current text node, if any.
+     *
+     * @param {string} color (hexadecimal or class name)
+     * @param {string} bgcolor (hexadecimal or class name)
+     * @param {integer} size
+     * @param {WrappedRange} range
+     */
+    applyFont (color, bgcolor, size, archNode) {
+        if (archNode.isVoidoid()) {
+            if (color != null) {
+                archNode.style.add('color', color);
+            }
+            if (bgcolor != null) {
+                archNode.style.add('background-color', bgcolor);
+            }
+            if (size != null) {
+                archNode.style.add('font-size', size);
+            }
+            this.dependencies.Arch.importUpdate(archNode.toJSON());
+            return;
+        }
+        var range = this.dependencies.Range.getRange();
+        if (!range || !this.editable.contains(range.sc) || !this.editable.contains(range.ec)) {
+            return;
+        }
+        if (range.isCollapsed() && this.utils.isText(range.sc)) {
+            this._applyFontCollapsed(color, bgcolor, size, range);
+        } else {
+            this._applyFontToSelection(color, bgcolor, size, range);
+        }
+        this.dependencies.Arch.setRange(range);
+    }
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * Applies the given styles (fore- or backcolor, font size) at collapsed range.
+     *
+     * @private
+     * @param {String} [color]
+     * @param {String} [bgcolor]
+     * @param {Number} [size]
+     * @param {WrappedRange} range
+     */
+    _applyFontCollapsed (color, bgcolor, size, range) {
+        this._splitBeforeApplyFont(range);
+        var zwcNode = document.createTextNode(this.utils.char('zeroWidth'));
+        range.sc.parentNode.insertBefore(zwcNode, range.sc);
+        var font = this._applyStylesToNode(zwcNode, color, bgcolor, size);
+        range.replace({
+            sc: font,
+            so: 1,
+        });
+    }
+    /**
+     * Applies the given styles (fore- or backcolor, font size) to the selection.
+     *
+     * @private
+     * @param {String} [color]
+     * @param {String} [bgcolor]
+     * @param {Number} [size]
+     * @param {WrappedRange} range
+     */
+    _applyFontToSelection (color, bgcolor, size, range) {
+        var self = this;
+        this._splitBeforeApplyFont(range);
+        range.getSelectedNodes(function (node) {
+            return self.utils.isVisibleText(node) || self.dependencies.Arch.isVoidoid(node);
+        }).forEach(function (node) {
+            // Can we safely get rid of this ? Why was it there ?
+            //
+            // var reStartAndEndSpaceG = self.utils.getRegex('startAndEndSpace', 'g');
+            // var nbsp = self.utils.char('nbsp');
+            // node.textContent = node.textContent.replace(reStartAndEndSpaceG, nbsp); // TODO: MOVE!
+            this._applyStylesToNode(node, color, bgcolor, size);
+        }, this);
+        this._cleanRangeAfterStyle(range);
+    }
+    /**
+     * Applies the given styles (fore- or backcolor, font size)
+     * to a given <font> node.
+     *
+     * @private
+     * @param {Node} node
+     * @param {string} color (hexadecimal or class name)
+     * @param {string} bgcolor (hexadecimal or class name)
+     * @param {integer} size
+     * @returns {Node} the <font> node
+     */
+    _applyStylesToFontNode (node, color, bgcolor, size) {
+        var className = node.className.split(this.utils.getRegex('space'));
+        var k;
+        if (color) {
+            for (k = 0; k < className.length; k++) {
+                if (className[k].length && className[k].slice(0, 5) === "text-") {
+                    className.splice(k, 1);
+                    k--;
+                }
+            }
+            if (color === 'text-undefined') {
+                node.className = className.join(" ");
+                node.style.color = "inherit";
+            } else if (color.indexOf('text-') !== -1) {
+                node.className = className.join(" ") + " " + color;
+                node.style.color = "inherit";
+            } else {
+                node.className = className.join(" ");
+                node.style.color = color;
+            }
+        }
+        if (bgcolor) {
+            for (k = 0; k < className.length; k++) {
+                if (className[k].length && className[k].slice(0, 3) === "bg-") {
+                    className.splice(k, 1);
+                    k--;
+                }
+            }
+
+            if (bgcolor === 'bg-undefined') {
+                node.className = className.join(" ");
+                node.style.backgroundColor = "inherit";
+            } else if (bgcolor.indexOf('bg-') !== -1) {
+                node.className = className.join(" ") + " " + bgcolor;
+                node.style.backgroundColor = "inherit";
+            } else {
+                node.className = className.join(" ");
+                node.style.backgroundColor = bgcolor;
+            }
+        }
+        if (size) {
+            node.style.fontSize = "inherit";
+            if (!isNaN(size) && Math.abs(parseInt(this.window.getComputedStyle(node).fontSize, 10) - size) / size > 0.05) {
+                node.style.fontSize = size + "px";
+            }
+        }
+        return node;
+    }
+    /**
+     * Apply the given styles to a node's parent font node or wrap it in a new
+     * font node with the given styles. Return the font node.
+     *
+     * @private
+     * @param {Node} node
+     * @param {String} color
+     * @param {String} bgcolor 
+     * @param {Number} size
+     * @returns {Node}
+     */
+    _applyStylesToNode (node, color, bgcolor, size) {
+        var font = this._getFormattableAncestor(node) || this._wrapInFontNode(node);
+        this._applyStylesToFontNode(font, color, bgcolor, size);
+        this._removeEmptyStyles(font);
+        return font;
+    }
+    /**
+     * Remove node without attributes (move content), and merge the same nodes
+     *
+     * @private
+     * @param {WrappedRange} range
+     */
+    _cleanRangeAfterStyle (range) {
+        var self = this;
+        this._moveRangeToDeepUntil(range, function (n) {
+            return self.dependencies.Arch.isEditableNode(n) && !self.dependencies.Arch.isVoidoid(n);
+        });
+        range.getSelectedNodes(function (node) {
+            return self.utils.isVisibleText(node) || self.dependencies.Arch.isVoidoid(node);
+        }).forEach(function (node) {
+            self._cleanNodeAfterStyle(node, range);
+        });
+        range.normalize();
+    }
+    /**
+     * Clean a node after applying styles:
+     * - Remove it if it has no attributes
+     * - Merge adjacent nodes with the same tagName
+     * and adapt the range according to changes.
+     *
+     * @private
+     * @param {Node} node
+     * @param {WrappedRange} range
+     */
+    _cleanNodeAfterStyle (node, range) {
+        if (this.utils.isInvisibleText(node)) {
+            return;
+        }
+        node = this._getFormattableAncestor(node) || this.utils.ancestor(node, this.utils.isSpan);
+        return !node || this._moveNodeWithoutAttr(node, range) ||
+            this._mergeFontAncestorsIfSimilar(node, range);
+    }
+    /**
+     * Get the deepest start/end point at range until predicate hit.
+     *
+     * @private
+     * @param {WrappedRange} range
+     * @param {Function (Node) => Boolean} pred
+     * @param {Boolean} isEndPoint
+     * @returns {BoundaryPoint}
+     */
+    _getDeepPointUntil (range, pred, isEndPoint) {
+        pred = pred.bind(this);
+        var point = range[isEndPoint ? 'getEndPoint' : 'getStartPoint']().enter();
+        var isOnEdge = isEndPoint ? point.offset === this.utils.nodeLength(point.node) : !point.offset;
+        if (!this.utils.isText(point.node) && isOnEdge) {
+            point.node = this.utils.firstLeafUntil(point.node.childNodes[point.offset] || point.node, pred);
+            point.offset = isEndPoint ? this.utils.nodeLength(point.node) : 0;
+        }
+        return point;
+    }
+    /**
+     * Return the last ancestor that is a FONT node.
+     *
+     * @private
+     * @param {Node} node
+     * @returns {Node}
+     */
+    _getFormattableAncestor (node) {
+        var self = this;
+        return this.utils.lastAncestor(node, function (n) {
+            return n.tagName && self.utils.formatTags.indexOf(n.tagName.toLowerCase()) !== -1;
+        });
+    }
+    /**
+     * Get `node`'s previous sibling that is visible text or element, if any.
+     *
+     * @private
+     * @param {Node} node
+     * @returns {Node|undefined}
+     */
+    _getPreviousVisibleNode (node) {
+        var prev = node && node.previousSibling;
+        while (prev && this.utils.isInvisibleText(prev)) {
+            prev = prev.previousSibling;
+        }
+        return prev;
+    }
+    /**
+     * Merge `node`'s last <font> ancestor with its sibling
+     * if they have the same classes, styles and tagNames.
+     * Then adapt the range according to changes.
+     * Return true if the nodes were merged.
+     *
+     * @private
+     * @param {Node} node
+     * @param {WrappedRange} range
+     * @returns {Boolean}
+     */
+    _mergeFontAncestorsIfSimilar (node, range) {
+        var endPoint = range.getEndPoint();
+        var font = this._getFormattableAncestor(node);
+        var prev = this._getPreviousVisibleNode(font);
+        var className = this.utils.orderClass(node);
+        var style = this.utils.orderStyle(node);
+        if (!prev ||
+            font.tagName !== prev.tagName ||
+            className !== this.utils.orderClass(prev) ||
+            style !== this.utils.orderStyle(prev)) {
+            return false;
+        }
+        $(prev).append($(font).contents());
+        if (range.ec === font) {
+            endPoint.prevUntil(function (point) {
+                return point.node !== font;
+            });
+            range.ec = endPoint.node;
+            range.eo = endPoint.offset;
+        }
+        $(font).remove();
+        return true;
+    }
+    /**
+     * If `node` has no class or style, move its contents before itself,
+     * then remove the node. Adapt the range accord to changes.
+     * Return true if the node was indeed removed.
+     *
+     * @private
+     * @param {Node} node
+     * @param {WrappedRange} range
+     * @returns {Boolean}
+     */
+    _moveNodeWithoutAttr (node, range) {
+        var endPoint = range.getEndPoint();
+        var className = this.utils.orderClass(node);
+        var style = this.utils.orderStyle(node);
+        if (className || style) {
+            return false;
+        }
+        $(node).before($(node).contents());
+        if (range.ec === node) {
+            endPoint.prevUntil(function (point) {
+                return point.node !== node;
+            });
+            range.ec = endPoint.node;
+            range.eo = endPoint.offset;
+        }
+        $(node).remove();
+        return true;
+    }
+    /**
+     * Move the range to its deepest start/end points until predicate hit.
+     *
+     * @private
+     * @param {WrappedRange} range
+     * @param {Function (Node) => Boolean} pred
+     */
+    _moveRangeToDeepUntil (range, pred) {
+        var startPoint = this._getDeepPointUntil(range, pred);
+        var endPoint = this._getDeepPointUntil(range, pred, true);
+        range.replace({
+            sc: startPoint.node,
+            so: startPoint.offset,
+            ec: endPoint.node,
+            eo: endPoint.offset,
+        });
+    }
+    /**
+     * Remove a node's empty styles.
+     * Note: We have to remove the value in 2 steps (apply inherit then remove)
+     * because of behavior differences between browsers.
+     *
+     * @private
+     * @param {Node} node
+     */
+    _removeEmptyStyles (node) {
+        ['color', 'backgroundColor', 'fontSize'].forEach(function (styleName) {
+            if (node.style[styleName] === 'inherit') {
+                node.style[styleName] = '';
+            }
+        });
+        if (node.style.color === '' && node.style.backgroundColor === '' && node.style.fontSize === '') {
+            node.removeAttribute("style");
+        }
+        if (!node.className.length) {
+            node.removeAttribute("class");
+        }
+    }
+    /**
+     * Split the DOM tree if necessary in order to apply a font on a selection,
+     * then adapt the range.
+     *
+     * @private
+     * @param {WrappedRange} range
+     */
+    _splitBeforeApplyFont (range) {
+        var ancestor;
+        var node;
+        if (!range.isCollapsed()) {
+            if (range.eo !== this.utils.nodeLength(range.ec)) {
+                ancestor = this._getFormattableAncestor(range.ec) || range.ec;
+                this.dom.splitTree(ancestor, range.getEndPoint().enter());
+            }
+            if (range.so) {
+                ancestor = this._getFormattableAncestor(range.sc) || range.sc;
+                node = this.dom.splitTree(ancestor, range.getStartPoint().enter());
+                if (range.ec === range.sc) {
+                    range.ec = node;
+                    range.eo = this.utils.nodeLength(node);
+                }
+                range.sc = node;
+                range.so = 0;
+            }
+        } else {
+            ancestor = this._getFormattableAncestor(range.sc);
+            if (ancestor) {
+                node = this.dom.splitTree(ancestor, range.getStartPoint(), {
+                    isSkipPaddingBlankNode: this.dependencies.Arch.isVoidoid(ancestor),
+                });
+            } else {
+                node = range.sc.splitText(range.so);
+            }
+            range.replace({
+                sc: node,
+                so: 0,
+            });
+        }
+    }
+    /**
+     * Create a FONT node and wrap `node` in it, then return the font node.
+     *
+     * @private
+     * @param {Node} node
+     * @returns {Node}
+     */
+    _wrapInFontNode (node) {
+        var font = document.createElement('font');
+        node.parentNode.insertBefore(font, node);
+        font.appendChild(node);
+        return font;
+    }
 };
 
+var ForeColorPlugin = class extends we3.AbstractPlugin {
+    constructor () {
+        super(...arguments);
+        this.templatesDependencies = ['/web_editor/static/src/xml/wysiwyg_colorpicker.xml'];
+        this.dependencies = ['Text'];
+        this.buttons = {
+            template: 'wysiwyg.buttons.forecolor',
+            active: '_active',
+            enabled: '_enabled',
+        };
 
-var TextPlugin = AbstractPlugin.extend({
-    events: {
-        'summernote.paste': '_onPaste',
-    },
-
-    // See: https://dvcs.w3.org/hg/editing/raw-file/tip/editing.html#removeformat-candidate
-    formatTags: [
-        'abbr',
-        'acronym',
-        'b',
-        'bdi',
-        'bdo',
-        'big',
-        'blink',
-        'cite',
-        'code',
-        'dfn',
-        'em',
-        'font',
-        'i',
-        'ins',
-        'kbd',
-        'mark',
-        'nobr',
-        'q',
-        's',
-        'samp',
-        'small',
-        'span',
-        'strike',
-        'strong',
-        'sub',
-        'sup',
-        'tt',
-        'u',
-        'var',
-    ],
-    tab: '\u00A0\u00A0\u00A0\u00A0',
+        var self = this;
+        this._colors = this.options.colors;
+        if (this.options.getColor) {
+                console.log('COLOR to load');
+            this._initializePromise = this.options.getColors().then(function (colors) {
+                console.log('COLOR');
+                self._colors = colors;
+            });
+        }
+    }
+    /**
+     * @returns {Promise}
+     */
+    isInitialized () {
+        return $.when(super.isInitialized(), this._initializePromise);
+    }
 
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
 
     /**
-     * Insert a Horizontal Rule element (hr).
+     * Method called on custom color button click :
+     * opens the color picker dialog and saves the chosen color on save.
      */
-    insertHR: function () {
+    custom (value, range) {
         var self = this;
-        var hr = this.document.createElement('hr');
-        this.context.invoke('HelperPlugin.insertBlockNode', hr);
-        var point = this.context.invoke('HelperPlugin.makePoint', hr, 0);
-        point = dom.nextPointUntil(point, function (pt) {
-            return pt.node !== hr && !self.options.isUnbreakableNode(pt.node);
-        }) || point;
-        var range = $.summernote.range.create(point.node, point.offset);
-        range.select();
-    },
+        var $button = $(range.sc).next('button');
+        var colorPickerDialog = new ColorpickerDialog(this, {});
+
+        colorPickerDialog.on('colorpicker:saved', this, this._wrapCommand(function (ev) {
+            self.update(ev.data.cssColor);
+
+            $button = $button.clone().appendTo($button.parent());
+            $button.show();
+            $button.css('background-color', ev.data.cssColor);
+            $button.attr('data-value', ev.data.cssColor);
+            $button.data('value', ev.data.cssColor);
+            $button.attr('title', ev.data.cssColor);
+            $button.mousedown();
+        }));
+        colorPickerDialog.open();
+    }
     /**
-     * Insert a TAB (4 non-breakable spaces).
+     * Change the selection's fore color.
+     *
+     * @param {string} color (hexadecimal or class name)
      */
-    insertTab: function () {
-        this.context.invoke('HelperPlugin.insertTextInline', this.tab);
-    },
+    update (color, range) {
+        if (!color || color.startsWith('#')) {
+            color = color || '';
+            $(range.sc).css('color', color);
+        } else {
+            $(range.sc).addClass('text-' + color);
+        }
+        this.dependencies.Text.applyFont(color || 'text-undefined', null, null, range);
+    }
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
     /**
-     * Paste nodes or their text content into the editor.
+     * @param {String} buttonName
+     * @param {Node} focusNode
+     * @returns {Boolean} true if the given button should be active
+     */
+    _active (buttonName, focusNode) {
+        var colorName = buttonName.split('-')[1];
+        if (colorName[0] === '#') {
+            colorName = $('<div>').css('color', colorName).css('color'); // TODO: use a js converter xml => rgb
+            while (this.editable !== focusNode && document !== focusNode) {
+                if (focusNode.style && focusNode.style.color !== '') {
+                    break;
+                }
+                focusNode = focusNode.parentNode;
+            }
+            return document !== focusNode && colorName === $(focusNode).css('color');
+        } else {
+            return $(focusNode).closest('text-' + colorName).length;
+        }
+    }
+    /**
+     * @param {String} buttonName
+     * @param {Node} focusNode
+     * @returns {Boolean} true if the given button should be enabled
+     */
+    _enabled (buttonName, focusNode) {
+        return !!focusNode.ancestor('isFormatNode');
+    }
+};
+
+var BgColorPlugin = class extends ForeColorPlugin {
+    constructor () {
+        super(...arguments);
+        this.templatesDependencies = ['/web_editor/static/src/xml/wysiwyg_colorpicker.xml'];
+        this.dependencies = ['Text'];
+        this.buttons = {
+            template: 'wysiwyg.buttons.bgcolor',
+            active: '_active',
+            enabled: '_enabled',
+        };
+    }
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * Change the selection's background color.
+     *
+     * @param {String} color (hexadecimal or class name)
+     * @param {Node} [range]
+     */
+    update (color, range) {
+        if (!color || color.startsWith('#')) {
+            color = color || '';
+            $(range.sc).css('background-color', color);
+        } else {
+            $(range.sc).addClass('bg-' + color);
+        }
+        this.dependencies.Text.applyFont(null, color || 'bg-undefined', null, range);
+    }
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @param {String} buttonName
+     * @param {WrappedRange} range
+     * @returns {Boolean} true if the given button should be active
+     */
+    _active (buttonName, focusNode) {
+        var colorName = buttonName.split('-')[1];
+        if (colorName[0] === '#') {
+            colorName = $('<div>').css('color', colorName).css('color'); // TODO: use a js converter xml => rgb
+            while (this.editable !== focusNode && document !== focusNode) {
+                if (focusNode.style && focusNode.style.backgroundColor !== '') {
+                    break;
+                }
+                focusNode = focusNode.parentNode;
+            }
+            return document !== focusNode && colorName === $(focusNode).css('background-color');
+        } else {
+            return $(focusNode).closest('bg-' + colorName).length;
+        }
+    }
+    /**
+     * @param {String} buttonName
+     * @param {Node} focusNode
+     * @returns {Boolean} true if the given button should be enabled
+     */
+    _enabled (buttonName, focusNode) {
+        return !!focusNode.ancestor('isFormatNode');
+    }
+};
+
+var FontSizePlugin = class extends we3.AbstractPlugin {
+    constructor () {
+        super(...arguments);
+        this.dependencies = ['Text'];
+        this.templatesDependencies = ['/web_editor/static/src/xml/wysiwyg_format_text.xml'];
+        this.buttons = {
+            template: 'wysiwyg.buttons.fontsize',
+            active: '_active',
+            enabled: '_enabled',
+        };
+    }
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * Change the selection's font size.
+     *
+     * @param {integer} fontsize
+     */
+    update (fontsize, range) {
+        this.dependencies.Text.applyFont(null, null, fontsize || 'inherit', range);
+    }
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @param {String} buttonName
+     * @param {DOM} focusNode
+     * @returns {Boolean} true if the given button should be active
+     */
+    _active (buttonName, focusNode) {
+        if (focusNode.isText()) {
+            focusNode = focusNode.parent;
+        }
+        var cssSize = focusNode.style['font-size'];
+        var size = buttonName.split('-')[1];
+        return size === 'default' && (!cssSize || cssSize === 'inherit') ||
+            parseInt(size) === parseInt(cssSize);
+    }
+    /**
+     * @param {String} buttonName
+     * @param {Node} focusNode
+     * @returns {Boolean} true if the given button should be enabled
+     */
+    _enabled (buttonName, focusNode) {
+        return !!focusNode.ancestor('isFormatNode');
+    }
+};
+
+var FontStylePlugin = class extends we3.AbstractPlugin {
+    constructor () {
+        super(...arguments);
+        this.dependencies = ['Media', 'Text'];
+        this.templatesDependencies = ['/web_editor/static/src/xml/wysiwyg_format_text.xml'];
+        this.buttons = {
+            template: 'wysiwyg.buttons.fontstyle',
+            active: '_active',
+            enabled: '_enabled',
+        };
+    }
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * Get the "format" ancestors list of nodes.
+     * In this context, a "format" node is understood as
+     * an editable block or an editable element expecting text
+     * (eg.: p, h1, span).
      *
      * @param {Node[]} nodes
-     * @param {Boolean} textOnly true to allow only dropping plain text
-     */
-    pasteNodes: function (nodes, textOnly) {
-        if (!nodes.length) {
-            return;
-        }
-        nodes = textOnly ? this.document.createTextNode($(nodes).text()) : nodes;
-        nodes = textOnly ? nodes : this._mergeAdjacentULs(nodes);
-
-        var point = this._getPastePoint();
-        // Prevent pasting HTML within a link:
-        point = textOnly ? point : dom.nextPointUntil(point, this._isPointInAnchor.bind(this));
-
-        this._insertNodesAt(nodes, point);
-
-        var start = nodes[nodes.length - 1];
-        this.context.invoke('editor.setRange', start, dom.nodeLength(start)).normalize().select();
-    },
-    /**
-     * Prepare clipboard data for safe pasting into the editor.
-     *
-     * @see clipboardWhitelist
-     * @see clipboardBlacklist
-     *
-     * @param {DOMString} clipboardData
      * @returns {Node[]}
      */
-    prepareClipboardData: function (clipboardData) {
-        var $clipboardData = this._removeIllegalClipboardElements($(clipboardData));
-
-        var $all = $clipboardData.find('*').addBack();
-        $all.filter('table').addClass('table table-bordered');
-        this._wrapTDContents($all.filter('td'));
-        this._fillEmptyBlocks($all);
-        this._removeIllegalClipboardAttributes($all);
-        $all.filter('a').removeClass();
-        $all.filter('img').css('max-width', '100%');
-
-        return $clipboardData.toArray();
-    },
+    filterFormatAncestors (nodes) {
+        var self = this;
+        var selectedNodes = [];
+        _.each(this.utils.filterLeafChildren(nodes), function (node) {
+            var ancestor = self.utils.ancestor(node, function (node) {
+                return self.utils.isCell(node) || (
+                    !self.dependencies.Arch.isUnbreakableNode(node) &&
+                    (self.utils.isFormatNode(node, self.options.styleTags) || self.utils.isNodeBlockType(node))
+                ) && !self.utils.isEditable(node);
+            });
+            if (!ancestor) {
+                ancestor = node;
+            }
+            if (self.utils.isCell(ancestor)) {
+                ancestor = node;
+            }
+            if (ancestor && selectedNodes.indexOf(ancestor) === -1) {
+                selectedNodes.push(ancestor);
+            }
+        });
+        return selectedNodes;
+    }
     /**
      * Format a 'format' block: change its tagName (eg: p -> h1).
      *
      * @param {string} tagName
      *       P, H1, H2, H3, H4, H5, H6, BLOCKQUOTE, PRE
      */
-    formatBlock: function (tagName) {
+    formatBlock (tagName, range) {
         var self = this;
-        var r = this.context.invoke('editor.createRange');
         if (
-            !r ||
-            !this.$editable.has(r.sc).length ||
-            !this.$editable.has(r.ec).length ||
-            this.options.isUnbreakableNode(r.sc)
+            !range ||
+            !this.editable.contains(range.sc) ||
+            !this.editable.contains(range.ec) ||
+            this.dependencies.Arch.isUnbreakableNode(range.sc)
         ) {
             return;
         }
-        var nodes = this.context.invoke('HelperPlugin.getSelectedNodes');
-        nodes = this.context.invoke('HelperPlugin.filterFormatAncestors', nodes);
+        if (!range.isCollapsed()) {
+            range = range.replace(this.dom.splitTextAtSelection(range));
+        }
+        var nodes = range.getSelectedNodes(function (node) {
+            return self.utils.isVisibleText(node) || self.dependencies.Arch.isVoidoid(node);
+        });
+        nodes = this.filterFormatAncestors(nodes);
         if (!nodes.length) {
-            var node = this.context.invoke('editor.createRange').sc;
-            if (node.tagName === 'BR' || dom.isText(node)) {
+            var node = range.sc;
+            if (node.tagName === 'BR' || this.utils.isText(node)) {
                 node = node.parentNode;
             }
             nodes = [node];
         }
         var changedNodes = [];
         _.each(nodes, function (node) {
-            var newNode = self.document.createElement(tagName);
+            var newNode = document.createElement(tagName);
             $(newNode).append($(node).contents());
             var attributes = $(node).prop("attributes");
             _.each(attributes, function (attr) {
@@ -161,25 +732,539 @@ var TextPlugin = AbstractPlugin.extend({
             var lastNode = changedNodes[changedNodes.length - 1];
             var startNode = changedNodes[0].firstChild || changedNodes[0];
             var endNode = lastNode.lastChild || lastNode;
-            var range = this.context.invoke('editor.setRange', startNode, 0, endNode, dom.nodeLength(endNode));
-            range.select();
+            range = range.replace({
+                sc: startNode,
+                so: 0,
+                ec: endNode,
+                eo: this.utils.nodeLength(endNode),
+            });
+            this.dependencies.Arch.setRange(range);
         }
-    },
+    }
+    /**
+     * (Un-)format text: make it bold, italic, ...
+     *
+     * @param {string} tag
+     *       B, I, U, S, SUP, SUB
+     */
+    formatText (tag, range) {
+        if (!range || !this.editable.contains(range.sc) || !this.editable.contains(range.ec)) {
+            return;
+        }
+        if (range.isCollapsed()) {
+            if (range.scArch.isInTag(tag)) {
+                range = this._unformatTextCollapsed(range, tag);
+            } else {
+                range = this._formatTextCollapsed(range, tag);
+            }
+            range.collapse(); // Invisible character doesn't need to be selected
+        } else {
+            if (this._isAllSelectedInTag(range, tag)) {
+                range = this._splitEndsOfSelection(range);
+                range = this._unformatTextSelection(range, tag);
+            } else {
+                range = this._splitEndsOfSelection(range);
+                range = this._formatTextSelection(range, tag);
+            }
+        }
+
+        this.dependencies.Arch.setRange(range);
+    }
+    /**
+     * Remove format on the current range.
+     *
+     * @see _isParentRemoveFormatCandidate
+     */
+    removeFormat (value, range) {
+        var self = this;
+        var Common = this.dependencies.Common;
+        this._selectCurrentIfCollapsed(range);
+        if (!range.isCollapsed()) {
+            range.replace(this.dom.splitTextAtSelection(range));
+        }
+        var selectedText = range.getSelectedTextNodes(function (node) {
+            return Arch.isEditableNode(node) && (Arch.isVoidoid(node) || self.utils.isVisibleText(node));
+        });
+        var selectedVoids = range.getSelectedNodes(Arch.isVoidoid.bind(Common)) || [];
+        if (!selectedText.length && !selectedVoids.length) {
+            return;
+        }
+        var selection = this.utils.uniq(selectedText.concat(selectedVoids));
+        _.each(selection, function (node) {
+            self._removeFormatAncestors(node);
+            self._removeNodeStyles(node);
+        });
+        var startNode = selectedText[0];
+        var endNode = selectedText[selectedText.length - 1];
+        range = range.replace({
+            sc: startNode,
+            so: 0,
+            ec: endNode,
+            eo: this.utils.nodeLength(endNode),
+        });
+        this.dependencies.Arch.setRange(range);
+    }
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @param {String} buttonName
+     * @param {WrappedRange} range
+     * @returns {Boolean} true if the given button should be active
+     */
+    _active (buttonName, focusNode) {
+        var self = this;
+        var formatName = buttonName.split('-')[1].toLowerCase();
+        switch (buttonName.split('-', 1)[0]) {
+            case 'formatBlock':
+                var formatBlockAncestor = focusNode.ancestor(function (n) {
+                    return n.isFormatNode();
+                });
+                if (!formatBlockAncestor) {
+                    return buttonName === 'formatBlock-p';
+                }
+                return formatBlockAncestor.nodeName === formatName ||
+                    formatBlockAncestor.className.contains(formatName);
+            case 'formatText':
+                if (formatName === 'remove') {
+                    return false;
+                }
+                return !!focusNode.isInTag(formatName);
+        }
+        return false;
+    }
+    _ancestorWithTag (node, tag) {
+        return this.utils.ancestor(node, function (n) {
+            return n.tagName === tag;
+        });
+    }
+    _containsOnlySelectedText (node, texts) {
+        var self = this;
+        return _.all(node.childNodes, function (n) {
+            return _.any(texts, function (t) {
+                return n === t && !(self.utils.isText(n) && n.textContent === '');
+            }) && self._containsOnlySelectedText(n);
+        });
+    }
+    /**
+     * @param {String} buttonName
+     * @param {Node} focusNode
+     * @returns {Boolean} true if the given button should be enabled
+     */
+    _enabled (buttonName, focusNode) {
+        return !!focusNode.ancestor('isFormatNode');
+    }
+    /**
+     * Apply the given format (tag) to the nodes in range, then update the range.
+     *
+     * @private
+     * @param {String} tag eg: 'B', 'I', 'U'
+     */
+    _formatTextSelection (range, tag) {
+        var self = this;
+
+        var textNodesToFormat = this._nonFormattedTextNodes(range, tag);
+        var rest = [];
+        _.each(textNodesToFormat, function (textNode) {
+            self._formatTextNode(textNode, tag);
+            rest.push(self._mergeSimilarSiblingsByTag(textNode, tag, true));
+        });
+
+        return range.replace({
+            sc: rest[0],
+            so: 0,
+            ec: rest[rest.length - 1],
+            eo: this.utils.nodeLength(rest[rest.length - 1]),
+        });
+    }
+    /**
+     * Format the text at range position with given tag and make it ready for input
+     * by inserting a zero-width character and updating the range.
+     *
+     * @private
+     * @param {Boolean} tag eg: 'B', 'I', 'U'
+     */
+    _formatTextCollapsed (range, tag) {
+        range = this._insertFormatPlaceholder(range);
+        var formatNode = document.createElement(tag);
+        $(range.sc).wrap(formatNode);
+        return range.replace({
+            sc: range.sc,
+        });
+    }
+    /**
+     * Apply the given format (tag) on a given node.
+     *
+     * @private
+     * @param {Node} node
+     * @param {Boolean} tag eg: 'B', 'I', 'U'
+     */
+    _formatTextNode (node, tag) {
+        var tagNode = document.createElement(tag);
+        $(node).wrap(tagNode);
+    }
+    /**
+     * Insert a zero-width text node at range so as to be able to format it,
+     * then select its contents.
+     *
+     * @returns {WrappedRange}
+     */
+    _insertFormatPlaceholder (range) {
+        var br;
+        if (range.sc.tagName === 'BR') {
+            br = range.sc;
+        } else if (range.sc.firstChild && range.sc.firstChild.tagName === 'BR') {
+            br = range.sc.firstChild;
+        }
+        if (br || this.utils.isText(range.sc)) {
+            var emptyText = document.createTextNode(this.utils.char('zeroWidth'));
+            $(br || range.sc.splitText(range.so)).before(emptyText);
+            $(br).remove();
+            range = this.dependencies.Arch.setRange({
+                sc: emptyText,
+                so: 0,
+            });
+        } else {
+            range = this.dom.insertTextInline(this.utils.char('zeroWidth'), range);
+            range = this.dependencies.Arch.setRange(range).normalize();
+            this.dependencies.Arch.setRange(range);
+        }
+        return range;
+    }
+    /**
+     * Return true if all the text in range is contained in nodes with the given tag name.
+     *
+     * @private
+     * @param {String} tag eg: 'B', 'I', 'U'
+     * @returns {Boolean}
+     */
+    _isAllSelectedInTag (range, tag) {
+        var self = this;
+        var Common = this.dependencies.Common;
+        var textNodes = range.getSelectedTextNodes(function (node) {
+            return Arch.isEditableNode(node) && (Arch.isVoidoid(node) || self.utils.isVisibleText(node));
+        });
+        return _.all(textNodes, function (textNode) {
+            return self.utils.isInTag(textNode, tag);
+        });
+    }
+    /**
+     * Return true if the parent of the given node is a removeFormat candidate:
+     * - It is a removeFormat candidate as defined by W3C
+     * - It is contained within the editable area
+     * - It is not unbreakable
+     *
+     * @see utils.formatTags the list of removeFormat candidates as defined by W3C
+     *
+     * @private
+     * @param {Node} node
+     */
+    _isParentRemoveFormatCandidate (node) {
+        var parent = node.parentNode;
+        if (!parent) {
+            return false;
+        }
+        var isEditableOrAbove = parent && (parent === this.editable || $.contains(parent, this.editable));
+        var isUnbreakable = parent && this.dependencies.Arch.isUnbreakableNode(parent);
+        var isRemoveFormatCandidate = parent && parent.tagName && this.utils.formatTags.indexOf(parent.tagName.toLowerCase()) !== -1;
+        return parent && !isEditableOrAbove && !isUnbreakable && isRemoveFormatCandidate;
+    }
+    /**
+     * Remove the edge between the range's starting container and its previous sibling,
+     * and/or between the range's ending container and its next sibling, if they have the
+     * same tag name. Then update the range and normalize the DOM.
+     *
+     * eg: <b>hello</b><b> range </b><b>world</b> becomes <b>hello range world</b>
+     *
+     * @private
+     * @returns {WrappedRange}
+     */
+    _mergeSimilarSiblingsAtRange (range) {
+        var start = range.sc.tagName ? range.sc : range.sc.parentNode;
+        var end = range.ec.tagName ? range.ec : range.ec.parentNode;
+        var isSameAsPrevious = start.previousSibling && start.tagName === start.previousSibling.tagName;
+        if (this.utils.isInline(start) && isSameAsPrevious) {
+            range.so = this.utils.nodeLength(range.sc.previousSibling);
+            $(range.sc).before($(range.sc.previousSibling).contents());
+        }
+        var isSameAsNext = end.nextSibling && end.tagName === end.nextSibling.tagName;
+        if (this.utils.isInline(end) && isSameAsNext) {
+            range.eo = this.utils.nodeLength(range.eo.nextSibling);
+            $(range.ec).after($(range.ec.nextSibling).contents());
+        }
+        return range.replace(range.getPoints());
+    }
+    /**
+     * Remove the edge between a given node and its previous/next neighbor
+     * if they both have `tag` as tag name.
+     * eg: <b>hello</b><b> node </b><b> world </b> becomes <b>hello node world</b>
+     *
+     * @private
+     * @param {Node} node
+     * @param {Boolean} tag eg: 'B', 'I', 'U'
+     * @param {Boolean} isPrev true to delete BEFORE the carret
+     * @returns {Node}
+     */
+    _mergeSimilarSiblingsByTag (node, tag, isPrev) {
+        var rest = node;
+        var tagAncestor = this._ancestorWithTag(node, tag);
+        var nextElem = tagAncestor && tagAncestor[isPrev ? 'previousElementSibling' : 'nextElementSibling'];
+        if (nextElem && nextElem.tagName === tag) {
+            rest = this.dom.deleteEdge(tagAncestor, isPrev, {
+                isRemoveBlock: false,
+                isTryNonSim: false,
+            }).node;
+        }
+        return rest;
+    }
+    /**
+     * Return the list of selected text nodes that are not contained
+     * within a node of given tag name.
+     *
+     * @private
+     * @param {Boolean} tag eg: 'B', 'I', 'U'
+     * @returns {Node []}
+     */
+    _nonFormattedTextNodes (range, tag) {
+        var self = this;
+        var Common = this.dependencies.Common;
+        var textNodes = range.getSelectedTextNodes(function (node) {
+            return Arch.isEditableNode(node) && (Arch.isVoidoid(node) || self.utils.isVisibleText(node));
+        });
+        return _.filter(textNodes, function (textNode) {
+            return !self.utils.isInTag(textNode, tag);
+        });
+    }
+    /**
+     * Remove a node's blank siblings if any.
+     *
+     * @private
+     * @param {Node} node
+     */
+    _removeBlankSiblings (node) {
+        var self = this;
+        var toRemove = [];
+        var Common = this.dependencies.Common;
+        $(node).siblings().each(function () {
+            if (self.utils.isBlankNode(this, Arch.isVoidoid.bind(Common))) {
+                toRemove.push(this);
+            }
+        });
+        $(toRemove).remove();
+    }
+    /**
+     * Remove an icon's format (colors, font size).
+     *
+     * @private
+     * @param {Node} icon
+     */
+    _removeIconFormat (icon) {
+        $(icon).css({
+            color: '',
+            backgroundColor: '',
+            fontSize: '',
+        });
+        var reColorClasses = /(^|\s+)(bg|text)-\S*|/g;
+        icon.className = icon.className.replace(reColorClasses, '').trim();
+    }
+    /**
+     * Remove node's format: remove its format ancestors (b, i, u, ...).
+     *
+     * @see _isParentRemoveFormatCandidate (the format ancestors)
+     * @private
+     * @param {Node} textNode
+     */
+    _removeFormatAncestors (node) {
+        while (this._isParentRemoveFormatCandidate(node) &&
+            !this.dependencies.Arch.isVoidoid(node)) {
+            this.dom.splitAtNodeEnds(node);
+            $(node.parentNode).before(node).remove();
+        }
+    }
+    _removeNodeStyles (node) {
+        if (this.utils.isText(node)) {
+            return;
+        }
+        $(node).css({
+            color: '',
+            backgroundColor: '',
+            fontSize: '',
+        });
+        var reColorClasses = /(^|\s+)(bg|text)-\S*|/g;
+        node.className = node.className.replace(reColorClasses, '').trim();
+    }
+    /**
+     * Select the whole current node if the range is collapsed
+     *
+     * @private
+     */
+    _selectCurrentIfCollapsed (range) {
+        if (!range.isCollapsed()) {
+            return;
+        }
+        range = this.dependencies.Arch.setRange({
+            sc: range.sc,
+            so: 0,
+            ec: range.sc,
+            eo: this.utils.nodeLength(range.sc),
+        });
+        this.dependencies.Arch.setRange(range);
+    }
+    /**
+     * Split the text nodes at both ends of the range, then update the range.
+     *
+     * @private
+     * @returns {WrappedRange}
+     */
+    _splitEndsOfSelection (range) {
+        var sameNode = range.sc === range.ec;
+        if (this.utils.isText(range.ec)) {
+            range.ec = range.ec.splitText(range.eo).previousSibling;
+            range.eo = this.utils.nodeLength(range.ec);
+        }
+        if (this.utils.isText(range.sc)) {
+            range.sc = range.sc.splitText(range.so);
+            if (sameNode) {
+                range.ec = range.sc;
+                range.eo -= range.so;
+            }
+            range.so = 0;
+        }
+        return range.replace(range.getPoints());
+    }
+    /**
+     * Unformat the text in given nodes then update the range to
+     * the full selection of the given nodes.
+     *
+     * @private
+     * @param {Node []} nodes
+     * @param {String} tag eg: 'B', 'I', 'U'
+     * @returns {WrappedRange}
+     */
+    _unformatText (range, nodes, tag) {
+        var self = this;
+        _.each(nodes, function (node, index) {
+            var tagParent = self._ancestorWithTag(node, tag);
+            if (tagParent && self._containsOnlySelectedText(tagParent, nodes)) {
+                return self._unwrapContents(tagParent);
+            }
+            self._unformatTextNode(node, tag);
+        });
+        range.replace({
+            sc: nodes[0],
+            so: 0,
+            ec: nodes[nodes.length - 1],
+            eo: this.utils.nodeLength(nodes[nodes.length - 1]),
+        });
+        this._removeBlankSiblings(range.sc);
+        return this._mergeSimilarSiblingsAtRange(range);
+    }
+    /**
+     * Unformat the text at range position and make it ready for input
+     * by inserting a zero-width character and updating the range.
+     *
+     * @private
+     * @param {String} tag eg: 'B', 'I', 'U'
+     * @returns {WrappedRange}
+     */
+    _unformatTextCollapsed (range, tag) {
+        range = this._insertFormatPlaceholder(range);
+        range.sc = this.dom.splitAtNodeEnds(range.sc);
+        var blankText = range.sc;
+        return this._unformatText(range, [blankText], tag);
+    }
+    /**
+     * Remove the given format (tag) of the given node.
+     * This is achieved by splitting the tree around the given node up to
+     * its ancestor of given tag, then unwrapping the contents of said ancestor.
+     *
+     * @private
+     * @param {Node} node The node to unformat
+     * @param {String} tag eg: 'B', 'I', 'U'
+     */
+    _unformatTextNode (node, tag) {
+        var root = this._ancestorWithTag(node, tag);
+        if (!root) {
+            return;
+        }
+        var options = {
+            isSkipPaddingBlankNode: true,
+            isNotSplitEdgePoint: true,
+        };
+        var startPoint = this.utils.isText(node) ? this.getPoint(node, 0) : this.getPoint(node.parentNode, $(node).index());
+
+        this.dom.splitTree(root, startPoint, options);
+
+        root = this._ancestorWithTag(node, tag);
+        var endPoint = this.utils.isText(node) ? this.getPoint(node, this.utils.nodeLength(node)) : this.getPoint(node.parentNode, startPoint.offset + 1);
+        this.dom.splitTree(root, endPoint, options);
+
+        // todo: ensure the format placeholder is at the right place!
+        this._unwrapContents(root);
+    }
+    /**
+     * Unformat the text in range then update the range.
+     *
+     * @private
+     * @param {String} tag eg: 'B', 'I', 'U'
+     * @returns {WrappedRange}
+     */
+    _unformatTextSelection (range, tag) {
+        var self = this;
+        var Common = this.dependencies.Common;
+        var textNodes = range.getSelectedTextNodes(function (node) {
+            return Arch.isEditableNode(node) && (Arch.isVoidoid(node) || self.utils.isVisibleText(node));
+        });
+        return this._unformatText(range, textNodes, tag);
+    }
+    /**
+     * Unwrap the contents of a given node and return said contents.
+     *
+     * @private
+     * @param {Node} node
+     * @returns {jQuery}
+     */
+    _unwrapContents (node) {
+        var $contents = $(node).contents();
+        $(node).before($contents).remove();
+        return $contents;
+    }
+};
+
+var ParagraphPlugin = class extends we3.AbstractPlugin {
+    constructor () {
+        super(...arguments);
+        this.dependencies = ['FontStyle', 'List'];
+        this.templatesDependencies = ['/web_editor/static/src/xml/wysiwyg_format_text.xml'];
+        this.buttons = {
+            template: 'wysiwyg.buttons.paragraph',
+            active: '_active',
+        };
+    }
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
     /**
      * Change the paragraph alignment of a 'format' block.
      *
-     * @param {string} style
-     *       justifyLeft, justifyCenter, justifyRight, justifyFull
+     * @param {string} align
+     *       left, center, right, justify
      */
-    formatBlockStyle: function (style) {
+    align (align, range) {
         var self = this;
-        var nodes = this.context.invoke('HelperPlugin.getSelectedNodes');
-        nodes = this.context.invoke('HelperPlugin.filterFormatAncestors', nodes);
-        var align = style === 'justifyLeft' ? 'left' :
-            style === 'justifyCenter' ? 'center' :
-            style === 'justifyRight' ? 'right' : 'justify';
+        if (!range.isCollapsed()) {
+            range.replace(this.dom.splitTextAtSelection(range));
+        }
+        var nodes = range.getSelectedNodes(function (node) {
+            return self.utils.isVisibleText(node) || self.dependencies.Arch.isVoidoid(node);
+        });
+        nodes = this.dependencies.FontStyle.filterFormatAncestors(nodes);
         _.each(nodes, function (node) {
-            if (dom.isText(node)) {
+            if (self.utils.isText(node)) {
                 return;
             }
             var textAlign = self.window.getComputedStyle(node).textAlign;
@@ -192,611 +1277,285 @@ var TextPlugin = AbstractPlugin.extend({
             }
         });
         this.editable.normalize();
-    },
+    }
     /**
-     * (Un-)format text: make it bold, italic, ...
+     * Indent a node (list or format node).
      *
-     * @param {string} tagName
-     *       bold, italic, underline, strikethrough, superscript, subscript
+     * @returns {false|Node[]} contents of list/indented item
      */
-    formatText: function (tagName) {
-        var self = this;
-        var tag = {
-            bold: 'B',
-            italic: 'I',
-            underline: 'U',
-            strikethrough: 'S',
-            superscript: 'SUP',
-            subscript: 'SUB',
-        } [tagName];
-        if (!tag) {
-            throw new Error(tagName);
-        }
-
-        var range = this.context.invoke('editor.createRange');
-        if (!range || !this.$editable.has(range.sc).length || !this.$editable.has(range.ec).length) {
-            return;
-        }
-        if (range.isCollapsed()) {
-            var br;
-            if (range.sc.tagName === 'BR') {
-                br = range.sc;
-            } else if (range.sc.firstChild && range.sc.firstChild.tagName === 'BR') {
-                br = range.sc.firstChild;
-            }
-            if (br) {
-                var emptyText = this.document.createTextNode('\u200B');
-                $(br).before(emptyText).remove();
-                range = this.context.invoke('editor.setRange', emptyText, 0, emptyText, 1);
-            } else {
-                var offset = range.so;
-                this.context.invoke('HelperPlugin.insertTextInline', '\u200B');
-                range = this.context.invoke('editor.createRange');
-                range.so = offset;
-                range.eo = offset + 1;
-            }
-            range.select();
-        }
-
-        var nodes = this.context.invoke('HelperPlugin.getSelectedNodes');
-        var texts = this.context.invoke('HelperPlugin.filterLeafChildren', nodes);
-        var formatted = this.context.invoke('HelperPlugin.filterFormatAncestors', nodes);
-
-        var start = this.context.invoke('HelperPlugin.firstLeaf', nodes[0]);
-        var end = this.context.invoke('HelperPlugin.lastLeaf', nodes[nodes.length - 1]);
-
-        function containsOnlySelectedText(node) {
-            return _.all(node.childNodes, function (n) {
-                return _.any(texts, function (t) {
-                    return n === t && !(dom.isText(n) && n.textContent === '');
-                }) && containsOnlySelectedText(n);
-            });
-        }
-
-        function containsAllSelectedText(node) {
-            return _.all(texts, function (t) {
-                return _.any(node.childNodes, function (n) {
-                    return n === t && !(dom.isText(n) && n.textContent === '') || containsAllSelectedText(n);
-                });
-            });
-        }
-
-        var nodeAlreadyStyled = [];
-        var toStyled = [];
-        var notStyled = _.filter(texts, function (text, index) {
-            if (toStyled.indexOf(text) !== -1 || nodeAlreadyStyled.indexOf(text) !== -1) {
-                return;
-            }
-            nodeAlreadyStyled.push(text);
-
-            end = text;
-
-            var styled = dom.ancestor(text, function (node) {
-                return node.tagName === tag;
-            });
-            if (styled) {
-                if (
-                    !/^\u200B$/.test(text.textContent) &&
-                    containsAllSelectedText(styled) &&
-                    containsOnlySelectedText(styled)
-                ) {
-                    // Unwrap all contents
-                    nodes = $(styled).contents();
-                    $(styled).before(nodes).remove();
-                    nodeAlreadyStyled.push.apply(nodeAlreadyStyled, nodes);
-                    end = _.last(nodeAlreadyStyled);
-                } else {
-                    var options = {
-                        isSkipPaddingBlankHTML: true,
-                        isNotSplitEdgePoint: true,
-                    };
-
-                    if (
-                        nodeAlreadyStyled.indexOf(text.nextSibling) === -1 &&
-                        !dom.isRightEdgeOf(text, styled)
-                    ) {
-                        options.nextText = false;
-                        var point = self.context.invoke('HelperPlugin.makePoint', text, dom.nodeLength(text));
-                        if (dom.isMedia(text)) {
-                            point = dom.nextPoint(point);
-                        }
-                        var next = self.context.invoke('HelperPlugin.splitTree', styled, point, options);
-                        nodeAlreadyStyled.push(next);
-                    }
-                    if (
-                        nodeAlreadyStyled.indexOf(text.previousSibling) === -1 &&
-                        !dom.isLeftEdgeOf(text, styled)
-                    ) {
-                        options.nextText = true;
-                        var textPoint = self.context.invoke('HelperPlugin.makePoint', text, 0);
-                        text = self.context.invoke('HelperPlugin.splitTree', styled, textPoint, options);
-                        nodeAlreadyStyled.push(text);
-                        if (index === 0) {
-                            start = text;
-                        }
-                        end = text;
-                    }
-
-                    var toRemove = dom.ancestor(text, function (n) {
-                        return n.tagName === tag;
-                    });
-                    if (toRemove) {
-                        // Remove generated empty elements
-                        if (
-                            toRemove.nextSibling &&
-                            self.context.invoke('HelperPlugin.isBlankNode', toRemove.nextSibling)
-                        ) {
-                            $(toRemove.nextSibling).remove();
-                        }
-                        if (
-                            toRemove.previousSibling &&
-                            self.context.invoke('HelperPlugin.isBlankNode', toRemove.previousSibling)
-                        ) {
-                            $(toRemove.previousSibling).remove();
-                        }
-
-                        // Unwrap the element
-                        nodes = $(toRemove).contents();
-                        $(toRemove).before(nodes).remove();
-                        nodeAlreadyStyled.push.apply(nodeAlreadyStyled, nodes);
-                        end = _.last(nodeAlreadyStyled);
-                    }
-                }
-            }
-
-            if (dom.ancestor(text, function (node) {
-                    return toStyled.indexOf(node) !== -1;
-                })) {
-                return;
-            }
-
-            var node = text;
-            while (
-                node && node.parentNode &&
-                formatted.indexOf(node) === -1 &&
-                formatted.indexOf(node.parentNode) === -1
-            ) {
-                node = node.parentNode;
-            }
-            if (node !== text) {
-                if (containsAllSelectedText(node)) {
-                    toStyled.push.apply(toStyled, texts);
-                    node = text;
-                } else if (!containsOnlySelectedText(node)) {
-
-                    node = text;
-                }
-            }
-
-            if (toStyled.indexOf(node) === -1) {
-                toStyled.push(node);
-            }
-            return !styled;
-        });
-
-        toStyled = _.uniq(toStyled);
-
-        if (notStyled.length) {
-            nodes = [];
-            var toMerge = [];
-            _.each(toStyled, function (node) {
-                var next = true;
-                if (node.nextSibling && node.nextSibling.tagName === tag) {
-                    $(node.nextSibling).prepend(node);
-                    next = false;
-                }
-                if (node.previousSibling && node.previousSibling.tagName === tag) {
-                    $(node.previousSibling).append(node);
-                }
-                if (node.parentNode && node.parentNode.tagName !== tag) {
-                    var styled = self.document.createElement(tag);
-                    if (node.tagName) {
-                        $(styled).append(node.childNodes);
-                        $(node).append(styled);
-                    } else {
-                        $(node).before(styled);
-                        styled.appendChild(node);
-                    }
-                }
-                // Add adjacent nodes with same tagName to list of nodes to merge
-                if (
-                    node.parentNode && node.parentNode[next ? 'nextSibling' : 'previousSibling'] &&
-                    node.parentNode.tagName === node.parentNode[next ? 'nextSibling' : 'previousSibling'].tagName
-                ) {
-                    toMerge.push(next ? node.parentNode : node.parentNode.previousSibling);
-                }
-            });
-            // Merge what needs merging
-            while (toMerge.length) {
-                this.context.invoke('HelperPlugin.deleteEdge', toMerge.pop(), 'next');
-            }
-        }
-
-        range = this.context.invoke('editor.setRange', start, 0, end, dom.nodeLength(end));
-
-        if (range.sc === range.ec && range.sc.textContent === '\u200B') {
-            range.so = range.eo = 1;
-        }
-
-        range.select();
-        this.editable.normalize();
-    },
+    indent (value, range) {
+        return this.dependencies.Arch.indent();
+    }
     /**
-     * Remove format on the current range.
+     * Outdent a node (list or format node).
      *
-     * @see _isParentRemoveFormatCandidate
+     * @returns {false|Node[]} contents of list/outdented item
      */
-    removeFormat: function () {
-        this._selectCurrentIfCollapsed();
-        var selectedText = this.context.invoke('HelperPlugin.getSelectedText');
-        var selectedIcons = this.context.invoke('HelperPlugin.getSelectedNodes');
-        selectedIcons = _.filter(selectedIcons, dom.isIcon);
-        if (!selectedText.length && !selectedIcons.length) {
-            return;
-        }
-        _.each(selectedIcons, this._removeIconFormat.bind(this));
-        _.each(selectedText, this._removeTextFormat.bind(this));
-        var startNode = selectedText[0];
-        var endNode = selectedText[selectedText.length - 1];
-        this.context.invoke('editor.setRange', startNode, 0, endNode, dom.nodeLength(endNode)).select();
-        this.editable.normalize();
-        this.context.invoke('editor.saveRange');
-    },
+    outdent (value, range) {
+        return this.dependencies.Arch.outdent();
+    }
 
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
     /**
-     * Remove the non-whitelisted or blacklisted
-     * top level elements from clipboard data.
-     *
-     * @see clipboardWhitelist
-     * @see clipboardBlacklist
-     *
-     * @private
-     * @param {JQuery} $clipboardData
-     * @returns {Object} {$clipboardData: JQuery, didRemoveNodes: Boolean}
+     * @param {String} buttonName
+     * @param {WrappedRange} range
+     * @returns {Boolean} true if the given button should be active
      */
-    _cleanClipboardRoot: function ($clipboardData) {
-        var didRemoveNodes = false;
-        var whiteList = this._clipboardWhitelist();
-        var blackList = this._clipboardBlacklist();
-        var $fakeParent = $(this.document.createElement('div'));
-        _.each($clipboardData, function (node) {
-            var isWhitelisted = dom.isText(node) || $(node).filter(whiteList.join(',')).length;
-            var isBlacklisted = $(node).filter(blackList.join(',')).length;
-            if (!isWhitelisted || isBlacklisted) {
-                $fakeParent.append(node.childNodes);
-                didRemoveNodes = true;
-            } else {
-                $fakeParent.append(node);
-            }
-        });
-        return {
-            $clipboardData: $fakeParent.contents(),
-            didRemoveNodes: didRemoveNodes,
-        };
-    },
-    /**
-     * Return a list of jQuery selectors for prohibited nodes on paste.
-     *
-     * @private
-     * @returns {String[]}
-     */
-    _clipboardBlacklist: function () {
-        return ['.Apple-interchange-newline'];
-    },
-    /**
-     * Return a list of jQuery selectors for exclusively authorized nodes on paste.
-     *
-     * @private
-     * @returns {String[]}
-     */
-    _clipboardWhitelist: function () {
-        var listSels = ['ul', 'ol', 'li'];
-        var styleSels = ['i', 'b', 'u', 'em', 'strong'];
-        var tableSels = ['table', 'th', 'tbody', 'tr', 'td'];
-        var miscSels = ['img', 'br', 'a', '.fa'];
-        return this.options.styleTags.concat(listSels, styleSels, tableSels, miscSels);
-    },
-    /**
-     * Return a list of attribute names that are exclusively authorized on paste.
-     * 
-     * @private
-     * @returns {String[]}
-     */
-    _clipboardWhitelistAttr: function () {
-        return ['class', 'href', 'src'];
-    },
-    /**
-     * Fill up empty block elements with BR elements so the carret can enter them.
-     *
-     * @private
-     * @param {JQuery} $els
-     */
-    _fillEmptyBlocks: function ($els) {
-        var self = this;
-
-        $els.filter(function (i, n) {
-            return self.context.invoke('HelperPlugin.isNodeBlockType', n) && !n.childNodes;
-        }).append(this.document.createElement('br'));
-    },
-    /**
-     * Get all non-whitelisted or blacklisted elements from clipboard data.
-     *
-     * @private
-     * @param {JQuery} $clipboardData
-     * @returns {JQuery}
-     */
-    _filterIllegalClipboardElements: function ($clipboardData) {
-        return $clipboardData.find('*').addBack()
-                .not(this._clipboardWhitelist().join(','))
-                .addBack(this._clipboardBlacklist().join(','))
-                .filter(function () {
-                    return !dom.isText(this);
-                });
-    },
-    /**
-     * Get a legal point to paste at, from the current range's start point.
-     *
-     * @private
-     * @returns {Object} {node: Node, offset: Number}
-     */
-    _getPastePoint: function () {
-        var point = this.context.invoke('editor.createRange').getStartPoint();
-        var offsetChild = point.node.childNodes[point.offset];
-        point = offsetChild ? this.context.invoke('HelperPlugin.makePoint', offsetChild, 0) : point;
-        return dom.nextPointUntil(point, this._isPastePointLegal.bind(this));
-    },
-    /**
-     * Insert nodes at a point. Insert them inline if the first node is inline
-     * and pasting inline is legal at that point.
-     *
-     * @private
-     * @param {Node[]} nodes
-     * @param {Object} point {node: Node, offset: Number}
-     */
-    _insertNodesAt: function (nodes, point) {
-        var canInsertInline = dom.isText(point.node) || point.node.tagName === 'BR' || dom.isMedia(point.node);
-        var $fakeParent = $(this.document.createElement('div'));
-        $fakeParent.append(nodes);
-        if (dom.isInline(nodes[0]) && canInsertInline) {
-            point.node = point.node.tagName ? point.node : point.node.splitText(point.offset);
-            $(point.node).before($fakeParent.contents());
-        } else {
-            this.context.invoke('HelperPlugin.insertBlockNode', $fakeParent[0]);
+    _active (buttonName, focusNode) {
+        var alignName = buttonName.split('-')[1];
+        var alignedAncestor = focusNode.isText() ? focusNode.parent : focusNode;
+        var cssAlign = alignedAncestor.style.textAlign;
+        while (alignedAncestor && !alignedAncestor.isRoot() && !cssAlign) {
+            cssAlign = alignedAncestor.style['text-align'];
+            alignedAncestor = alignedAncestor.parent;
         }
-        $fakeParent.contents().unwrap();
-    },
-    /**
-     * Return true if the parent of the given node is a removeFormat candidate:
-     * - It is a removeFormat candidate as defined by W3C
-     * - It is contained within the editable area
-     * - It is not unbreakable
-     *
-     * @see formatTags the list of removeFormat candidates as defined by W3C
-     *
-     * @private
-     * @param {Node} node
-     */
-    _isParentRemoveFormatCandidate: function (node) {
-        var parent = node.parentNode;
-        if (!parent) {
-            return false;
+        if (alignName == 'left' && !cssAlign) {
+            return true;
         }
-        var isEditableOrAbove = parent && (parent === this.editable || $.contains(parent, this.editable));
-        var isUnbreakable = parent && this.options.isUnbreakableNode(parent);
-        var isRemoveFormatCandidate = parent && parent.tagName && this.formatTags.indexOf(parent.tagName.toLowerCase()) !== -1;
-        return parent && !isEditableOrAbove && !isUnbreakable && isRemoveFormatCandidate;
-    },
+        return alignName === cssAlign;
+    }
     /**
-     * Return true if it's legal to paste nodes at the given point:
-     * if the point is not within a void node and the point is not unbreakable.
+     * Indent or outdent a format node.
      *
-     * @private
-     * @param {Object} point {node: Node, offset: Number}
-     * @returns {Boolean}
+     * @param {bool} outdent true to outdent, false to indent
+     * @returns {false|[]Node} indented nodes
      */
-    _isPastePointLegal: function (point) {
-        var node = point.node;
-        var isWithinVoid = false;
-        if (node.parentNode) {
-            isWithinVoid = dom.isVoid(node.parentNode) || $(node.parentNode).filter('.fa').length;
-        }
-        return !isWithinVoid && !this.options.isUnbreakableNode(point.node);
-    },
-    /**
-     * @private
-     * @param {Object} point {node: Node, offset: Number}
-     * @returns {Boolean}
-     */
-    _isPointInAnchor: function (point) {
-        var ancestor = dom.ancestor(point.node, dom.isAnchor);
-        return !ancestor || ancestor === this.editable;
-    },
-    /**
-     * Check a list of nodes and merges all adjacent ULs together:
-     * [ul, ul, p, ul, ul] will return [ul, p, ul], with the li's of
-     * nodes[1] and nodes[4] appended to nodes[0] and nodes[3].
-     *
-     * @private
-     * @param {Node[]} nodes
-     * @return {Node[]} the remaining, merged nodes
-     */
-    _mergeAdjacentULs: function (nodes) {
-        var res = [];
-        var prevNode;
-        _.each(nodes, function (node) {
-            prevNode = res[res.length - 1];
-            if (prevNode && node.tagName === 'UL' && prevNode.tagName === 'UL') {
-                $(prevNode).append(node.childNodes);
-            } else {
-                res.push(node);
-            }
-        });
-        return res;
-    },
-    /**
-     * Remove an icon's format (colors, font size).
-     *
-     * @private
-     * @param {Node} icon
-     */
-    _removeIconFormat: function (icon) {
-        $(icon).css({
-            color: '',
-            backgroundColor: '',
-            fontSize: '',
-        });
-        var reColorClasses = /(^|\s+)(bg|text)-\S*|/g;
-        icon.className = icon.className.replace(reColorClasses, '').trim();
-    },
-    /**
-     * Remove non-whitelisted attributes from clipboard.
-     *
-     * @private
-     * @param {JQuery} $els
-     */
-    _removeIllegalClipboardAttributes: function ($els) {
-        var self = this;
-        $els.each(function () {
-            var $node = $(this);
-            _.each(_.pluck(this.attributes, 'name'), function (attribute) {
-                if (self._clipboardWhitelistAttr().indexOf(attribute) === -1) {
-                    $node.removeAttr(attribute);
-                }
-            });
-        }).removeClass('o_editable o_not_editable');
-    },
-    /**
-     * Remove non-whitelisted and blacklisted elements from clipboard data.
-     *
-     * @private
-     * @param {JQuery} $clipboardData
-     * @returns {JQuery}
-     */
-    _removeIllegalClipboardElements: function ($clipboardData) {
-        var root = true;
-        $clipboardData = $clipboardData.not('meta').not('style').not('script');
-        var $badNodes = this._filterIllegalClipboardElements($clipboardData);
-
-        do {
-            if (root) {
-                root = false;
-                var cleanData = this._cleanClipboardRoot($clipboardData);
-                $clipboardData = cleanData.$clipboardData;
-                root = cleanData.didRemoveNodes;
-            } else {
-                this._removeNodesPreserveContents($badNodes);
-            }
-
-            $badNodes = this._filterIllegalClipboardElements($clipboardData);
-        } while ($badNodes.length);
-        return $clipboardData;
-    },
-    /**
-     * Remove nodes from the DOM while preserving their contents if any.
-     *
-     * @private
-     * @param {JQuery} $nodes
-     */
-    _removeNodesPreserveContents: function ($nodes) {
-        var $contents = $nodes.contents();
-        if ($contents.length) {
-            $contents.unwrap();
-        } else {
-            $nodes.remove();
-        }
-    },
-    /**
-     * Remove a text node's format: remove its style parents (b, i, u, ...).
-     *
-     * @private
-     * @param {Node} textNode
-     */
-    _removeTextFormat: function (textNode) {
-        var node = textNode;
-        while (this._isParentRemoveFormatCandidate(node)) {
-            this.context.invoke('HelperPlugin.splitAtNodeEnds', node);
-            $(node.parentNode).before(node).remove();
-        }
-    },
-    /**
-     * Select the whole current node if the range is collapsed
-     *
-     * @private
-     */
-    _selectCurrentIfCollapsed: function () {
-        var range = this.context.invoke('editor.createRange');
-        if (!range.isCollapsed()) {
+    _indent (outdent, range) {
+        if (!range) {
             return;
         }
-        this.context.invoke('editor.setRange', range.sc, 0, range.sc, dom.nodeLength(range.sc)).select();
-        this.context.invoke('editor.saveRange');
-    },
-    /**
-     * Prevent inline nodes directly in TDs by wrapping them in P elements.
-     *
-     * @private
-     * @param {JQuery} $tds
-     */
-    _wrapTDContents: function ($tds) {
+
         var self = this;
-        var $inlinesInTD = $tds.contents().filter(function () {
-            return !self.context.invoke('HelperPlugin.isNodeBlockType', this);
-        });
-        var parentsOfInlinesInTD = [];
-        _.each($inlinesInTD, function (n) {
-            parentsOfInlinesInTD.push(self.context.invoke('HelperPlugin.firstBlockAncestor', n));
-        });
-        $($.unique(parentsOfInlinesInTD)).wrapInner(this.document.createElement('p'));
-    },
+        var nodes = [];
+        var isWithinElem;
+        var ancestor = range.commonAncestor();
+        var $dom = $(ancestor);
 
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    /**
-     * Handle paste events to permit cleaning/sorting of the data before pasting.
-     *
-     * @private
-     * @param {SummernoteEvent} se
-     * @param {jQueryEvent} e
-     */
-    _onPaste: function (se, e) {
-        se.preventDefault();
-        se.stopImmediatePropagation();
-        e.preventDefault();
-        e.stopImmediatePropagation();
-
-        this.context.invoke('editor.beforeCommand');
-
-        // Clean up
-        var clipboardData = e.originalEvent.clipboardData.getData('text/html');
-        if (clipboardData) {
-            clipboardData = this.prepareClipboardData(clipboardData);
-        } else {
-            clipboardData = e.originalEvent.clipboardData.getData('text/plain');
-            // get that text as an array of text nodes separated by <br> where needed
-            var allNewlines = /\n/g;
-            clipboardData = $('<p>' + clipboardData.replace(allNewlines, '<br>') + '</p>').contents().toArray();
+        if (!this.utils.isList(ancestor)) {
+            // to indent a selection, we indent the child nodes of the common
+            // ancestor that contains this selection
+            $dom = $(ancestor.tagName ? ancestor : ancestor.parentNode).children();
         }
 
-        // Delete selection
-        this.context.invoke('HelperPlugin.deleteSelection');
+        // if selection is inside indented contents and outdent is true, we can outdent this node
+        var indentedContent = outdent && this.utils.ancestor(ancestor, function (node) {
+            var style = self.utils.isCell(node) ? 'paddingLeft' : 'marginLeft';
+            return node.tagName && !!parseFloat(node.style[style] || 0);
+        });
 
-        // Insert the nodes
-        this.pasteNodes(clipboardData);
-        this.context.invoke('HelperPlugin.normalize');
-        this.context.invoke('editor.saveRange');
+        if (indentedContent) {
+            $dom = $(indentedContent);
+        } else {
+            // if selection is inside a list, we indent its list items
+            $dom = $(this.utils.ancestor(ancestor, this.utils.isList));
+            if (!$dom.length) {
+                // if the selection is contained in a single HTML node, we indent
+                // the first ancestor 'content block' (P, H1, PRE, ...) or TD
+                $dom = $(range.sc).closest(this.options.styleTags.join(',') + ',td');
+            }
+        }
 
-        this.context.invoke('editor.afterCommand');
-    },
-});
+        // if select tr, take the first td
+        $dom = $dom.map(function () {
+            return this.tagName === "TR" ? this.firstElementChild : this;
+        });
 
-registry.add('TextPlugin', TextPlugin);
+        var newNode;
+        $dom.each(function () {
+            if (isWithinElem || $.contains(this, range.sc)) {
+                if (self.utils.isList(this)) {
+                    if (outdent) {
+                        var type = this.tagName === 'OL' ? 'ol' : (this.className && this.className.contains('o_checklist') ? 'checklist' : 'ul');
+                        newNode = (self.dependencies.List.convertList(isWithinElem, nodes, range.getStartPoint(), range.getEndPoint(), type) || [])[0];
+                        isWithinElem = !!newNode;
+                    } else {
+                        isWithinElem = self._indentUL(isWithinElem, nodes, this, range.sc, range.ec);
+                    }
+                } else if (self.utils.isFormatNode(this, self.options.styleTags) || self.utils.ancestor(this, self.utils.isCell)) {
+                    isWithinElem = self._indentFormatNode(outdent, isWithinElem, nodes, this, range.sc, range.ec);
+                }
+            }
+        });
 
-return TextPlugin;
+        if (newNode) {
+            var firstLeaf = this.utils.firstLeaf(newNode);
+            range.replace({
+                sc: firstLeaf,
+                so: this.utils.isText(firstLeaf) ? range.so : 0,
+            });
+        }
 
-});
+        if ($dom.parent().length) {
+            var $parent = $dom.parent();
+
+            // remove text nodes between lists
+            var $ul = $parent.find('ul, ol');
+            if (!$ul.length) {
+                $ul = $(range.scArch.isList());
+            }
+            $ul.each(function () {
+                var notWhitespace = /\S/;
+                if (
+                    this.previousSibling &&
+                    this.previousSibling !== this.previousElementSibling &&
+                    !this.previousSibling.textContent.match(notWhitespace)
+                ) {
+                    this.parentNode.removeChild(this.previousSibling);
+                }
+                if (
+                    this.nextSibling &&
+                    this.nextSibling !== this.nextElementSibling &&
+                    !this.nextSibling.textContent.match(notWhitespace)
+                ) {
+                    this.parentNode.removeChild(this.nextSibling);
+                }
+            });
+
+            // merge same ul or ol
+            $ul.prev('ul, ol').each(function () {
+                self.dom.deleteEdge(this, false);
+            });
+
+        }
+
+        range = this.dependencies.Arch.setRange(range.getPoints()).normalize();
+        this.dependencies.Arch.setRange(range);
+
+        return !!nodes.length && nodes;
+    }
+    /**
+     * Indent several LIs in a list.
+     *
+     * @param {bool} isWithinElem true if selection already inside the LI
+     * @param {Node[]} nodes
+     * @param {Node} UL
+     * @param {Node} start
+     * @param {Node} end
+     * @returns {bool} isWithinElem
+     */
+    _indentUL (isWithinElem, nodes, UL, start, end) {
+        var next;
+        var tagName = UL.tagName;
+        var node = UL.firstChild;
+        var ul = document.createElement(tagName);
+        ul.className = UL.className;
+        var flag;
+
+        if (isWithinElem) {
+            flag = true;
+        }
+
+        // create and fill ul into a li
+        while (node) {
+            if (flag || node === start || $.contains(node, start)) {
+                isWithinElem = true;
+                node.parentNode.insertBefore(ul, node);
+            }
+            next = node.nextElementSibling;
+            if (isWithinElem) {
+                ul.appendChild(node);
+                nodes.push(node);
+            }
+            if (node === end || $.contains(node, end)) {
+                isWithinElem = false;
+                break;
+            }
+            node = next;
+        }
+
+        var temp;
+        var prev = ul.previousElementSibling;
+        if (
+            prev && prev.tagName === "LI" &&
+            (temp = prev.firstElementChild) && temp.tagName === tagName &&
+            ((prev.firstElementChild || prev.firstChild) !== ul)
+        ) {
+            $(prev.firstElementChild || prev.firstChild).append($(ul).contents());
+            $(ul).remove();
+            ul = prev;
+            ul.parentNode.removeChild(ul.nextElementSibling);
+        }
+        next = ul.nextElementSibling;
+        if (
+            next && next.tagName === "LI" &&
+            (temp = next.firstElementChild) && temp.tagName === tagName &&
+            (ul.firstElementChild !== next.firstElementChild)
+        ) {
+            $(ul.firstElementChild).append($(next.firstElementChild).contents());
+            $(next.firstElementChild).remove();
+            ul.parentNode.removeChild(ul.nextElementSibling);
+        }
+
+        // wrap in li
+        var li = document.createElement('li');
+        li.className = 'o_indent';
+        $(ul).before(li);
+        li.appendChild(ul);
+
+        return isWithinElem;
+    }
+    /**
+     * Outdent a container node.
+     *
+     * @param {Node} node
+     * @returns {float} margin
+     */
+    _outdentContainer (node) {
+        var style = this.utils.isCell(node) ? 'paddingLeft' : 'marginLeft';
+        var margin = parseFloat(node.style[style] || 0) - 1.5;
+        node.style[style] = margin > 0 ? margin + "em" : "";
+        return margin;
+    }
+    /**
+     * Indent a container node.
+     *
+     * @param {Node} node
+     * @returns {float} margin
+     */
+    _indentContainer (node) {
+        var style = this.utils.isCell(node) ? 'paddingLeft' : 'marginLeft';
+        var margin = parseFloat(node.style[style] || 0) + 1.5;
+        node.style[style] = margin + "em";
+        return margin;
+    }
+    /**
+     * Indent/outdent a format node.
+     *
+     * @param {bool} outdent true to outdent, false to indent
+     * @param {bool} isWithinElem true if selection already inside the element
+     * @param {DOM[]} nodes
+     * @param {DOM} p
+     * @param {DOM} start
+     * @param {DOM} end
+     * @returns {bool} isWithinElem
+     */
+    _indentFormatNode (outdent, isWithinElem, nodes, p, start, end) {
+        if (p === start || $.contains(p, start) || $.contains(start, p)) {
+            isWithinElem = true;
+        }
+        if (isWithinElem) {
+            nodes.push(p);
+            if (outdent) {
+                this._outdentContainer(p);
+            } else {
+                this._indentContainer(p);
+            }
+        }
+        if (p === end || $.contains(p, end) || $.contains(end, p)) {
+            isWithinElem = false;
+        }
+        return isWithinElem;
+    }
+};
+
+we3.addPlugin('Text', TextPlugin);
+we3.addPlugin('ForeColor', ForeColorPlugin);
+we3.addPlugin('BgColor', BgColorPlugin);
+we3.addPlugin('FontSize', FontSizePlugin);
+we3.addPlugin('FontStyle', FontStylePlugin);
+we3.addPlugin('Paragraph', ParagraphPlugin);
+
+})();

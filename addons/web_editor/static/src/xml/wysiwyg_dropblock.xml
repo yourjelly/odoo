@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <we3-group t-name="wysiwyg.buttons.dropblock">
+        <we3-button name="toggle" title="Toggle droppable blocks" data-method="toggle">Add blocks</we3-button>
+    </we3-group>
+
+    <t t-name="wysiwyg.dropblock.defaultblocks">
+        <we3-blocks>
+            <we3-title><i class="fa fa-th-large"></i> Structure</we3-title>
+            <we3-block data-content="&lt;section style=&quot;text-align: center;&quot;&gt;&lt;h1&gt;Your Site Title&lt;/h1&gt;&lt;/section&gt;">
+                <we3-dropblock-thumbnail>
+                    <we3-preview style="background-image: url(/web_editor/static/src/img/title.png);"/>
+                    <we3-title>Title</we3-title>
+                </we3-dropblock-thumbnail>
+            </we3-block>
+            <we3-block data-content="&lt;section style=&quot;text-align: center;&quot;&gt;
+                        &lt;figure class=&quot;figure&quot;&gt;
+                            &lt;img src=&quot;/web_editor/static/src/img/picture.png&quot; class=&quot;figure-img img-fluid rounded img-thumbnail padding-large&quot;/&gt;
+                            &lt;figcaption style=&quot;text-align: center;&quot; class=&quot;figure-caption&quot;&gt;&lt;i class=&quot;fa fa-1x fa-picture-o&quot;&gt;&lt;/i&gt;Add a caption to enhance the meaning of this image.&lt;/figcaption&gt;
+                        &lt;/figure&gt;
+                    &lt;/section&gt;">
+                <we3-dropblock-thumbnail>
+                    <we3-preview style="background-image: url(/web_editor/static/src/img/picture.png);"/>
+                    <we3-title>Picture</we3-title>
+                </we3-dropblock-thumbnail>
+            </we3-block>
+        </we3-blocks>
+        <we3-blocks>
+            <we3-title><i class="fa fa-th-large"></i> Structure bis</we3-title>
+            <we3-block data-content="&lt;section style=&quot;text-align: center;&quot;&gt;&lt;h1&gt;Your Site Title&lt;/h1&gt;&lt;/section&gt;">
+                <we3-dropblock-thumbnail>
+                    <we3-preview style="background-image: url(/web_editor/static/src/img/title.png);"/>
+                    <we3-title>Title</we3-title>
+                </we3-dropblock-thumbnail>
+            </we3-block>
+        </we3-blocks>
+    </t>
+
+</templates>

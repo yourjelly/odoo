@@ -1,28 +1,28 @@
 odoo.define('web_editor.wysiwyg', function (require) {
 'use strict';
 
-var Widget = require('web.Widget');
 var config = require('web.config');
+var ajax = require('web.ajax');
 var core = require('web.core');
 var session = require('web.session');
-var modulesRegistry = require('web_editor.wysiwyg.plugin.registry');
-var wysiwygOptions = require('web_editor.wysiwyg.options');
+var Widget = require('web.Widget');
+var Editor = window.we3;
 
 var _t = core._t;
+var QWeb = core.qweb;
+
 
 var Wysiwyg = Widget.extend({
-    xmlDependencies: [
+    templatesDependencies: [
         '/web_editor/static/src/xml/wysiwyg.xml',
     ],
     custom_events: {
         getRecordInfo: '_onGetRecordInfo',
-        wysiwyg_blur: '_onWysiwygBlur',
+        change: '_onChange',
+        // imageUpload : '_onImageUpload',
     },
     defaultOptions: {
         codeview: config.isDebug(),
-        recordInfo: {
-            context: {},
-        },
     },
 
     /**
@@ -49,7 +49,6 @@ var Wysiwyg = Widget.extend({
         this.hints = [];
         this.$el = null;
         this._dirty = false;
-        this.id = _.uniqueId('wysiwyg_');
     },
     /**
      * Load assets and color picker template then call summernote API
@@ -63,9 +62,15 @@ var Wysiwyg = Widget.extend({
         this.$el = null; // temporary null to avoid hidden error, setElement when start
         return this._super()
             .then(function () {
-                return modulesRegistry.start(self).then(function () {
-                    return self._loadInstance();
-                });
+                var defs = [self._getColors()];
+                if (self.options.snippets) {
+                    defs.push(self._loadDropBlocks());
+                }
+                return $.when.apply($, defs);
+            })
+            .then(function () {
+                self.editor = new Editor(self, self._editorOptions());
+                return $.when(self.editor.isInitialized());
             });
     },
     /**
@@ -73,32 +78,10 @@ var Wysiwyg = Widget.extend({
      * @override
      */
     start: function () {
-        var value = this._summernote.code();
-        this._value = value;
-        if (this._summernote.invoke('HelperPlugin.hasJinja', value)) {
-            this._summernote.invoke('codeview.forceActivate');
-        }
-        return Promise.resolve();
-    },
-    /**
-     * @override
-     */
-    destroy: function () {
-        if (this._summernote) {
-            // prevents the replacement of the target by the content of summernote
-            // (in order to be able to cancel)
-            var removeLayout = $.summernote.ui.removeLayout;
-            $.summernote.ui.removeLayout = function ($note, layoutInfo) {
-                layoutInfo.editor.remove();
-                $note.show();
-            };
-            this._summernote.destroy();
-            $.summernote.ui.removeLayout = removeLayout;
-        }
-        this.$target.removeAttr('data-wysiwyg-id');
-        this.$target.removeData('wysiwyg');
-        $(document).off('.' + this.id);
-        this._super();
+        var self = this;
+        return this.editor.start(this.$target[0]).then(function () {
+            self.setElement(self.editor.editor);
+        });
     },
 
     //--------------------------------------------------------------------------
@@ -106,146 +89,22 @@ var Wysiwyg = Widget.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * Add a step (undo) in editor.
-     */
-    addHistoryStep: function () {
-        var editor = this._summernote.modules.editor;
-        editor.createRange();
-        editor.history.recordUndo();
-    },
-    /**
-     * Return the editable area.
-     *
-     * @returns {jQuery}
-     */
-    getEditable: function () {
-        if (this._summernote.invoke('HelperPlugin.hasJinja', this._summernote.code())) {
-            return this._summernote.layoutInfo.codable;
-        } else if (this._summernote.invoke('codeview.isActivated')) {
-            this._summernote.invoke('codeview.deactivate');
-        }
-        return this._summernote.layoutInfo.editable;
-    },
-    /**
-     * Perform undo or redo in the editor.
-     *
-     * @param {integer} step
-     */
-    history: function (step) {
-        if (step < 0) {
-            while (step) {
-                this._summernote.modules.editor.history.rewind();
-                step++;
-            }
-        } else if (step > 0) {
-            while (step) {
-                this._summernote.modules.editor.history.redo();
-                step--;
-            }
-        }
-    },
-    /**
-     * Return true if the content has changed.
-     *
-     * @returns {Boolean}
-     */
-    isDirty: function () {
-        if (!this._dirty && this._value !== this._summernote.code()) {
-            console.warn("not dirty flag ? Please fix it.");
-        }
-        return this._value !== this._summernote.code();
-    },
-    /**
-     * Return true if the current node is unbreakable.
-     * An unbreakable node can be removed or added but can't by split into
-     * different nodes (for keypress and selection).
-     * An unbreakable node can contain nodes that can be edited.
-     *
-     * @param {Node} node
-     * @returns {Boolean}
-     */
-    isUnbreakableNode: function (node) {
-        return ["TD", "TR", "TBODY", "TFOOT", "THEAD", "TABLE"].indexOf(node.tagName) !== -1 || $(node).is(this.getEditable()) ||
-            !this.isEditableNode(node.parentNode) || !this.isEditableNode(node) || $.summernote.dom.isMedia(node);
-    },
-    /**
-     * Return true if the current node is editable (for keypress and selection).
-     *
-     * @param {Node} node
-     * @returns {Boolean}
-     */
-    isEditableNode: function (node) {
-        return $(node).is(':o_editable') && !$(node).is('table, thead, tbody, tfoot, tr');
-    },
-    /**
      * Set the focus on the element.
      */
     focus: function () {
-        this.$el.mousedown();
+        this.editor.focus();
     },
-    /**
-     * Get the value of the editable element.
-     *
-     * @param {object} [options]
-     * @param {Boolean} [options.keepPopover]
-     * @returns {String}
-     */
-    getValue: function (options) {
-        if (!options || !options.keepPopover) {
-            this._summernote.invoke('editor.hidePopover');
-        }
-        var $editable = this.getEditable().clone();
-        $editable.find('.o_wysiwyg_to_remove').remove();
-        $editable.find('[contenteditable]').removeAttr('contenteditable');
-        $editable.find('.o_fake_not_editable').removeClass('o_fake_not_editable');
-        $editable.find('.o_fake_editable').removeClass('o_fake_editable');
-        $editable.find('[class=""]').removeAttr('class');
-        $editable.find('[style=""]').removeAttr('style');
-        $editable.find('[title=""]').removeAttr('title');
-        $editable.find('[alt=""]').removeAttr('alt');
-        $editable.find('[data-original-title=""]').removeAttr('data-original-title');
-        $editable.find('a.o_image, span.fa, i.fa').html('');
-        $editable.find('[aria-describedby]').removeAttr('aria-describedby').removeAttr('data-original-title');
-
-        return $editable.html() || $editable.val();
-    },
-    /**
-     * Save the content in the target
-     *      - in init option beforeSave
-     *      - receive editable jQuery DOM as attribute
-     *      - called after deactivate codeview if needed
-     * @returns {Promise}
-     *      - resolve with true if the content was dirty
-     */
     save: function () {
-        var isDirty = this.isDirty();
-        var html = this.getValue();
-        if (this.$target.is('textarea')) {
-            this.$target.val(html);
-        } else {
-            this.$target.html(html);
-        }
-        return Promise.resolve({isDirty:isDirty, html:html});
+        return this.editor.save();
     },
-    /**
-     * @param {String} value
-     * @param {Object} options
-     * @param {Boolean} [options.notifyChange]
-     * @returns {String}
-     */
-    setValue: function (value, options) {
-        if (this._summernote.invoke('HelperPlugin.hasJinja', value)) {
-            this._summernote.invoke('codeview.forceActivate');
-        }
-        this._dirty = true;
-        this._summernote.invoke('HistoryPlugin.clear');
-        this._summernote.invoke('editor.hidePopover');
-        this._summernote.invoke('editor.clearTarget');
-        var $editable = this.getEditable().html(value + '');
-        this._summernote.invoke('UnbreakablePlugin.secureArea');
-        if (!options || options.notifyChange !== false) {
-            $editable.change();
-        }
+    setValue: function (value) {
+        return this.editor.value = value;
+    },
+    getValue: function () {
+        return this.editor.value;
+    },
+    isDirty: function () {
+        return this.editor.isDirty;
     },
 
     //--------------------------------------------------------------------------
@@ -257,113 +116,108 @@ var Wysiwyg = Widget.extend({
      * @returns {Object} the summernote configuration
      */
     _editorOptions: function () {
-        var self = this;
-        var allowAttachment = !this.options.noAttachment;
+        var options = Object.assign({}, this.options, {
+            lang : "odoo",
+            disableDragAndDrop : !!this.options.noAttachment,
+            styleTags: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'pre'],
+            colors: this._groupColors,
+            dropblocks: this._dropblocks,
+            blockSelector: this._blockSelector,
+            renderingAttributeBlacklist: ['data-oe-model', 'data-oe-id', 'data-oe-path', 'data-oe-type', 'data-oe-field', 'data-oe-many2one-id'],
+            renderTemplate: this._renderTemplate.bind(this),
+            loadTemplates: this._loadTemplates.bind(this),
+            translate: this._translate.bind(this),
+            getXHR: this._getXHR.bind(this),
+            upload: {
+                onUpload: this._onMediaUpload.bind(this),
+                onSelect: this._onMediaSelect.bind(this),
+                add: '/web_editor/attachment/add',
+                remove: '/web_editor/attachment/remove',
+                search: '/web/dataset/call_kw/ir.attachment/search_read',
+            },
+            xhr: {
+                csrf_token: odoo.csrf_token,
+                user_id: session.uid || session.user_id,
+                res_id: this.options.recordInfo && this.options.recordInfo.res_id,
+                res_model: this.options.recordInfo && this.options.recordInfo.res_model,
+            },
+        });
+        if (this.options.snippets) {
+            options.plugins = Object.assign({
+                DropBlockSelector: true,
+                customizeBlock: true,
+            }, options.plugins);
 
-        var options = JSON.parse(JSON.stringify(wysiwygOptions));
-
-        options.parent = this;
-        options.lang = "odoo";
-
-        options.focus = false;
-        options.disableDragAndDrop = !allowAttachment;
-        options.styleTags = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'pre'];
-        options.fontSizes = [_t('Default'), '8', '9', '10', '11', '12', '13', '14', '18', '24', '36', '48', '62'];
-        options.minHeight = 180;
-
-        options.keyMap.pc['CTRL+K'] = 'LinkPlugin.show';
-        options.keyMap.mac['CMD+K'] = 'LinkPlugin.show';
-        delete options.keyMap.pc['CTRL+LEFTBRACKET'];
-        delete options.keyMap.mac['CMD+LEFTBRACKET'];
-        delete options.keyMap.pc['CTRL+RIGHTBRACKET'];
-        delete options.keyMap.mac['CMD+RIGHTBRACKET'];
-
-        options.toolbar = [
-            ['style', ['style']],
-            ['font', ['bold', 'italic', 'underline', 'clear']],
-            ['fontsize', ['fontsize']],
-            ['color', ['colorpicker']],
-            ['para', ['ul', 'ol', 'paragraph']],
-            ['table', ['table']],
-            ['insert', allowAttachment ? ['linkPlugin', 'mediaPlugin'] : ['linkPlugin']],
-            ['history', ['undo', 'redo']],
-            ['view', this.options.codeview ? ['fullscreen', 'codeview', 'help'] : ['fullscreen', 'help']]
-        ];
-        options.popover = {
-            image: [
-                ['padding'],
-                ['imagesize', ['imageSizeAuto', 'imageSize100', 'imageSize50', 'imageSize25']],
-                ['float', ['alignLeft', 'alignCenter', 'alignRight', 'alignNone']],
-                ['imageShape'],
-                ['cropImage'],
-                ['media', ['mediaPlugin', 'removePluginMedia']],
-                ['alt']
-            ],
-            video: [
-                ['padding'],
-                ['imagesize', ['imageSize100', 'imageSize50', 'imageSize25']],
-                ['float', ['alignLeft', 'alignCenter', 'alignRight', 'alignNone']],
-                ['media', ['mediaPlugin', 'removePluginMedia']]
-            ],
-            icon: [
-                ['padding'],
-                ['faSize'],
-                ['float', ['alignLeft', 'alignCenter', 'alignRight', 'alignNone']],
-                ['faSpin'],
-                ['media', ['mediaPlugin', 'removePluginMedia']]
-            ],
-            document: [
-                ['float', ['alignLeft', 'alignCenter', 'alignRight', 'alignNone']],
-                ['media', ['mediaPlugin', 'removePluginMedia']]
-            ],
-            link: [
-                ['link', ['linkPlugin', 'unlink']]
-            ],
-            table: [
-                ['add', ['addRowDown', 'addRowUp', 'addColLeft', 'addColRight']],
-                ['delete', ['deleteRow', 'deleteCol', 'deleteTable']]
-            ],
-        };
-
-        options.callbacks = {
-            onBlur: this._onBlurEditable.bind(this),
-            onFocus: this._onFocusEditable.bind(this),
-            onChange: this._onChange.bind(this),
-            onImageUpload: this._onImageUpload.bind(this),
-            onFocusnode: this._onFocusnode.bind(this),
-        };
-
-        options.isUnbreakableNode = function (node) {
-            node = node && (node.tagName ? node : node.parentNode);
-            if (!node) {
-                return true;
-            }
-            return self.isUnbreakableNode(node);
-        };
-        options.isEditableNode = function (node) {
-            node = node && (node.tagName ? node : node.parentNode);
-            if (!node) {
-                return false;
-            }
-            return self.isEditableNode(node);
-        };
-        options.displayPopover = this._isDisplayingPopover.bind(this);
-        options.hasFocus = function () {
-            return self._isFocused;
-        };
+            options.toolbar = [
+                'DropBlock',
+                'FontStyle',
+                'FontSize',
+                // 'FontName',
+                'ForeColor', 'BgColor',
+                'List',
+                'Paragraph',
+                'TablePicker',
+                'LinkCreate',
+                'Media',
+                'History',
+                'CodeView',
+                'FullScreen',
+                'KeyMap',
+            ];
+        }
 
         if (this.options.generateOptions) {
             this.options.generateOptions(options);
         }
-
         return options;
     },
     /**
+     * Returns the domain for attachments used in media dialog.
+     * We look for attachments related to the current document. If there is a value for the model
+     * field, it is used to search attachments, and the attachments from the current document are
+     * filtered to display only user-created documents.
+     * In the case of a wizard such as mail, we have the documents uploaded and those of the model
+     *
      * @private
-     * @returns {Object} modules list to load
+     * @params {string} needle
+     * @returns {Array} "ir.attachment" odoo domain.
      */
-    _getPlugins: function () {
-        return _.extend({}, wysiwygOptions.modules, modulesRegistry.plugins());
+    _getAttachmentsDomain: function (needle, isDocument) {
+        var xhrOptions = this.editor.options.xhr;
+        var domain = this.options.attachmentIDs && this.options.attachmentIDs.length ? ['|', ['id', 'in', this.options.attachmentIDs]] : [];
+
+        var attachedDocumentDomain = [
+            '&',
+            ['res_model', '=', xhrOptions.res_model],
+            ['res_id', '=', xhrOptions.res_id|0]
+        ];
+        // if the document is not yet created, do not see the documents of other users
+        if (!xhrOptions.res_id) {
+            attachedDocumentDomain.unshift('&');
+            attachedDocumentDomain.push(['create_uid', '=', xhrOptions.user_id]);
+        }
+        if (xhrOptions.data_res_model) {
+            var relatedDomain = ['&',
+                ['res_model', '=', xhrOptions.data_res_model],
+                ['res_id', '=', xhrOptions.data_res_id|0]];
+            if (!xhrOptions.data_res_id) {
+                relatedDomain.unshift('&');
+                relatedDomain.push(['create_uid', '=', session.uid]);
+            }
+            domain = domain.concat(['|'], attachedDocumentDomain, relatedDomain);
+        } else {
+            domain = domain.concat(attachedDocumentDomain);
+        }
+        domain = ['|', ['public', '=', true]].concat(domain);
+
+        domain.push('|',
+            ['mimetype', '=', false],
+            ['mimetype', isDocument ? 'not in' : 'in', ['image/gif', 'image/jpe', 'image/jpeg', 'image/jpg', 'image/gif', 'image/png']]);
+        if (needle && needle.length) {
+            domain.push('|', ['datas_fname', 'ilike', needle], ['name', 'ilike', needle]);
+        }
+        domain.push('|', ['datas_fname', '=', false], '!', ['datas_fname', '=like', '%.crop'], '!', ['name', '=like', '%.crop']);
+        return domain;
     },
     /**
      * Return an object describing the linked record.
@@ -382,127 +236,244 @@ var Wysiwyg = Widget.extend({
         }
         return data;
     },
-    /**
-     * Return true if the editor is displaying the popover.
-     *
-     * @private
-     * @param {Node} node
-     * @returns {Boolean}
-     */
-    _isDisplayingPopover: function (node) {
-        return true;
-    },
-    /**
-     * Return true if the given node is in the editor.
-     * Note: a button in the MediaDialog returns true.
-     *
-     * @private
-     * @param {Node} node
-     * @returns {Boolean}
-     */
-    _isEditorContent: function (node) {
-        if (this.el === node) {
-            return true;
-        }
-        if ($.contains(this.el, node)) {
-            return true;
-        }
-
-        var children = this.getChildren();
-        var allChildren = [];
-        var child;
-        while ((child = children.pop())) {
-            allChildren.push(child);
-            children = children.concat(child.getChildren());
-        }
-
-        var childrenDom = _.filter(_.unique(_.flatten(_.map(allChildren, function (obj) {
-            return _.map(obj, function (value) {
-                return value instanceof $ ? value.get() : value;
+    _getColors: function () {
+        var self = this;
+        var def = $.when();
+        if (!('web_editor.colorpicker' in QWeb.templates)) {
+            var def = this._rpc({
+                model: 'ir.ui.view',
+                method: 'read_template',
+                args: ['web_editor.colorpicker'],
+            }).then(function (template) {
+                return QWeb.add_template('<templates>' + template + '</templates>');
             });
-        }))), function (node) {
-            return node && node.DOCUMENT_NODE && node.tagName && node.tagName !== 'BODY' && node.tagName !== 'HTML';
+        }
+
+        return def.then(function () {
+            var groupColors = [];
+            var $clpicker = $(QWeb.render('web_editor.colorpicker'));
+            $clpicker.children('.o_colorpicker_section').each(function () {
+                groupColors.push($(this).attr('data-display'));
+                var colors = [];
+                $(this.children).each(function () {
+                    if ($(this).hasClass('clearfix')) {
+                        groupColors.push(colors);
+                        colors = [];
+                    } else {
+                        colors.push($(this).attr('data-color') || '');
+                    }
+                });
+                groupColors.push(colors);
+            });
+
+            groupColors = groupColors.concat([
+                'Grey',
+                ['#000000', '#424242', '#636363', '#9C9C94', '#CEC6CE', '#EFEFEF', '#F7F7F7', '#FFFFFF'],
+                'Colors',
+                ['#FF0000', '#FF9C00', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#9C00FF', '#FF00FF'],
+                ['#F7C6CE', '#FFE7CE', '#FFEFC6', '#D6EFD6', '#CEDEE7', '#CEE7F7', '#D6D6E7', '#E7D6DE'],
+                ['#E79C9C', '#FFC69C', '#FFE79C', '#B5D6A5', '#A5C6CE', '#9CC6EF', '#B5A5D6', '#D6A5BD'],
+                ['#E76363', '#F7AD6B', '#FFD663', '#94BD7B', '#73A5AD', '#6BADDE', '#8C7BC6', '#C67BA5'],
+                ['#CE0000', '#E79439', '#EFC631', '#6BA54A', '#4A7B8C', '#3984C6', '#634AA5', '#A54A7B'],
+                ['#9C0000', '#B56308', '#BD9400', '#397B21', '#104A5A', '#085294', '#311873', '#731842'],
+                ['#630000', '#7B3900', '#846300', '#295218', '#083139', '#003163', '#21104A', '#4A1031']
+            ]);
+
+            self._groupColors = groupColors;
         });
-        return !!$(node).closest(childrenDom).length;
     },
-    /**
-     * Create an instance with the API lib.
-     *
-     * @private
-     * @returns {$.Promise}
-     */
-    _loadInstance: function () {
-        var defaultOptions = this._editorOptions();
-        var summernoteOptions = _.extend({
-            id: this.id,
-        }, defaultOptions, _.omit(this.options, 'isEditableNode', 'isUnbreakableNode'));
-
-        _.extend(summernoteOptions.callbacks, defaultOptions.callbacks, this.options.callbacks);
-        if (this.options.keyMap) {
-            _.defaults(summernoteOptions.keyMap.pc, defaultOptions.keyMap.pc);
-            _.each(summernoteOptions.keyMap.pc, function (v, k, o) {
-                if (!v) {
-                    delete o[k];
-                }
-            });
-            _.defaults(summernoteOptions.keyMap.mac, defaultOptions.keyMap.mac);
-            _.each(summernoteOptions.keyMap.mac, function (v, k, o) {
-                if (!v) {
-                    delete o[k];
-                }
+    _getXHR: function (pluginName, url, values, superGetXHR) {
+        var self = this;
+        if (url === '/web/dataset/call_kw/ir.attachment/search_read') {
+            return this._rpc({
+                model: 'ir.attachment',
+                method: 'search_read',
+                domain: this._getAttachmentsDomain(values.search, pluginName === 'UploadDocument'),
+                fields: ['name', 'datas_fname', 'mimetype', 'checksum', 'url', 'type', 'res_id', 'res_model', 'access_token'],
+                order: [{name: 'id', asc: false}],
+                limit: values.limit,
+                offset: values.offset,
+            }).then(function (records) {
+                return records.map(self._convertOdooRecordToMediaPlugin.bind(self, pluginName));
             });
         }
+        if (url === '/web_editor/attachment/remove') {
+            debugger;
+        }
+        throw new Error("XHR route missing");
+    },
+    /**
+     * Load snippets.
+     */
+    _loadDropBlocks: function () {
+        var self = this;
+        var def = $.when();
+        if (!('web_editor.dropBlockTemplate.custom' in QWeb.templates)) {
+            var def = this._rpc({
+                model: 'ir.ui.view',
+                method: 'render_template',
+                args: [this.options.snippets, {}],
+            }).then(function (template) {
+                var t = document.createElement('t');
+                t.setAttribute('t-name', 'web_editor.dropBlockTemplate.custom');
+                t.innerHTML = template;
+                var xml = new XMLSerializer().serializeToString(t).replace(/\s*xmlns="[^"]+"/, '');
+                QWeb.add_template('<templtes>' + xml + '</templtes>');
+            })
+        }
 
-        var plugins = _.extend(this._getPlugins(), this.options.plugins);
-        summernoteOptions.modules = _.omit(plugins, function (v) {
-            return !v;
+        return def.then(function () {
+            var dropblocks = [];
+            var blockSelector = [];
+            var blockCustomisation = [];
+
+            var $dropBlockTemplate = $(QWeb.render('web_editor.dropBlockTemplate.custom'));
+            $dropBlockTemplate.filter('#o_scroll').find('.o_panel').each(function () {
+                var blocks = [];
+                $(this).find('.o_panel_body').children().each(function () {
+                    blocks.push({
+                        title: (this.getAttribute('name') + '').trim(),
+                        thumbnail: this.dataset.oeThumbnail,
+                        content: this.innerHTML.trim(),
+                    });
+                });
+                dropblocks.push({
+                    title: $(this).find('.o_panel_header').html().trim(),
+                    blocks: blocks,
+                });
+            });
+
+            $dropBlockTemplate.filter('#snippet_options').children().each(function () {
+                var data = $(this).data();
+                blockSelector.push({
+                    selector: data.selector,
+                    exclude: data.exclude,
+                    dropIn: data.dropIn,
+                    dropNear: data.dropNear,
+                    customizeAllowNotEditable: data.noCheck,
+                    customizeType: data.js,
+                    customizeTargets: data.target,
+                });
+
+                //TODO QSM: => colorPrefix , paletteTitle, paletteDefault, paletteExclude
+
+
+                var menu = [];
+                $(this).children().each(function () {
+                    var $child = $(this);
+                    if ($child.hasClass('dropdown-submenu')) {
+                        // console.log(this);
+                        var submenu = [];
+                        $child.each(function () {
+
+                        });
+                    } else {
+
+                    }
+                });
+
+                data.menu = menu;
+                blockCustomisation.push(data);
+            });
+
+            // console.log('------------------');
+            // // console.log(dropblocks);
+            // console.log(blockSelector);
+            // console.log(blockCustomisation);
+            // console.log('------------------');
+
+            console.log(blockSelector);
+
+            self._dropblocks = dropblocks;
+            self._blockSelector = blockSelector;
+            self._blockCustomisation = blockCustomisation;
         });
-
-        if (this.$target.parent().length) {
-            summernoteOptions.container = this.$target.parent().css('position', 'relative')[0];
-        } else {
-            summernoteOptions.container = this.$target[0].ownerDocument.body;
+    },
+    _loadTemplates: function (xmlPaths) {
+        var promises = [];
+        var xmlPath;
+        while ((xmlPath = xmlPaths.shift())) {
+            xmlPath = xmlPath[0] === '/' ? xmlPath : we3.options.xhrPath + xmlPath;
+            promises.push(ajax.loadXML(xmlPath, QWeb));
+        }
+        return $.when.apply($, promises);
+    },
+    _onMediaSelect: function (pluginName, record, element) {
+        var self = this;
+        var promise = Promise.resolve();
+        if (record.id && !record.access_token) {
+            promise = new Promise(function (resolve) {
+                self._rpc({
+                    model: 'ir.attachment',
+                    method: 'generate_access_token',
+                    args: [[record.id]]
+                }).then(function (access_token) {
+                    record.access_token = access_token[0];
+                    resolve();
+                });
+            })
         }
 
-        this.$target.summernote(summernoteOptions);
+        var res_model = this.editor.options.xhr.res_model;
+        var isDocument = !(/gif|jpe|jpg|png/.test(record.mimetype) || /gif|jpe|jpg|png/.test(record.url.split('.').pop()));
 
-        this._summernote = this.$target.data('summernote');
-        this._summernote.layoutInfo.editable.data('wysiwyg', this);
-        this.$target.attr('data-wysiwyg-id', this.id).data('wysiwyg', this);
-        $('.note-editor, .note-popover').not('[data-wysiwyg-id]').attr('data-wysiwyg-id', this.id);
-
-        this.setElement(this._summernote.layoutInfo.editor);
-        $(document).on('mousedown.' + this.id, this._onMouseDown.bind(this));
-        $(document).on('mouseenter.' + this.id, '*', this._onMouseEnter.bind(this));
-        $(document).on('mouseleave.' + this.id, '*', this._onMouseLeave.bind(this));
-        $(document).on('mousemove.' + this.id, this._onMouseMove.bind(this));
-
-        this.$el.removeClass('card');
-
-        return Promise.resolve();
+        return promise.then(function () {
+            if (record.url.indexOf('access_token=') === -1 && record.access_token && res_model !== 'ir.ui.view') {
+                record.url += _.str.sprintf('?access_token=%s', record.access_token);
+            }
+            if (element.tagName === 'A') {
+                if (record.checksum) {
+                    if (record.url.indexOf('?') === -1) {
+                        record.url += '?';
+                    }
+                    record.url += 'unique=' + record.checksum + '&download=true';
+                    element.setAttribute('href', record.url);
+                }
+            } else {
+                element.setAttribute('src', record.url);
+                // Note: by default the images receive the bootstrap opt-in
+                // img-fluid class. We cannot make them all responsive
+                // by design because of libraries and client databases img.
+                element.classList.add('img-fluid');
+                element.classList.add('o_we_custom_image');
+            }
+            return element;
+        });
     },
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    /**
-     * trigger_up 'wysiwyg_focus'.
-     *
-     * @private
-     * @param {Object} [options]
-     */
-    _onFocus: function (options) {
-        this.trigger_up('wysiwyg_focus', options);
+    _onMediaUpload: function (pluginName, records) {
+        return records.map(this._convertOdooRecordToMediaPlugin.bind(this, pluginName));
     },
-    /**
-     * trigger_up 'wysiwyg_blur'.
-     *
-     * @private
-     * @param {Object} [options]
-     */
-    _onBlur: function (options) {
-        this.trigger_up('wysiwyg_blur', options);
+    _convertOdooRecordToMediaPlugin: function (pluginName, record) {
+        var url = record.url;
+        if (!url) {
+            url = '/web/' + (pluginName === 'UploadImage' ? 'image' : 'content') + '/' + record.id;
+            url += '/' + encodeURI(record.title || record.name); // Name is added for SEO purposes
+            if (record.access_token) {
+                url += _.str.sprintf('?access_token=%s', record.access_token);
+            }
+        }
+        record.url = url;
+        record.alt = record.datas_fname;
+        record.title = record.name || record.datas_fname;
+        return record;
+    },
+    _renderTemplate: function (pluginName, template, values) {
+        return QWeb.render(template, values);
+    },
+    _select: function (range) {
+        var nativeRange = range.toNativeRange();
+        var selection = range.getSelection();
+        if (selection.rangeCount > 0) {
+            selection.removeAllRanges();
+        }
+        selection.addRange(nativeRange);
+        var sc = nativeRange.startContainer;
+        $(sc.tagName ? sc : sc.parentNode).trigger('wysiwyg.range');
+        return range;
+    },
+    _translate: function (pluginName, string) {
+        string = string.replace(/\s\s+/g, ' ');
+        return _t(string);
     },
 
     //--------------------------------------------------------------------------
@@ -510,129 +481,25 @@ var Wysiwyg = Widget.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * @private
-     * @param {jQueryEvent} ev
-     */
-    _onMouseEnter: function (ev) {
-        if (this._isFocused && !this._mouseInEditor && this._isEditorContent(ev.target)) {
-            this._mouseInEditor = true;
-        }
-    },
-    /**
-     * @private
-     * @param {jQueryEvent} ev
-     */
-    _onMouseLeave: function (ev) {
-        if (this._isFocused && this._mouseInEditor) {
-            this._mouseInEditor = null;
-        }
-    },
-    /**
-     * @private
-     * @param {jQueryEvent} ev
-     */
-    _onMouseMove: function (ev) {
-        if (this._mouseInEditor === null) {
-            this._mouseInEditor = !!this._isEditorContent(ev.target);
-        }
-    },
-    /**
-     * @private
-     * @param {jQueryEvent} ev
-     */
-    _onMouseDown: function (ev) {
-        var self = this;
-        if (this._isEditorContent(ev.target)) {
-            setTimeout(function () {
-                if (!self._editableHasFocus && !self._isEditorContent(document.activeElement)) {
-                    self._summernote.layoutInfo.editable.focus();
-                }
-                if (!self._isFocused) {
-                    self._isFocused = true;
-                    self._onFocus();
-                }
-            });
-        } else if (this._isFocused) {
-            this._isFocused = false;
-            this._onBlur();
-        }
-    },
-    /**
-     * @private
-     * @param {jQueryEvent} ev
-     */
-    _onBlurEditable: function (ev) {
-        var self = this;
-        this._editableHasFocus = false;
-        if (!this._isFocused) {
-            return;
-        }
-        if (!this._justFocused && !this._mouseInEditor) {
-            if (this._isFocused) {
-                this._isFocused = false;
-                this._onBlur();
-            }
-        } else if (!this._forceEditableFocus) {
-            this._forceEditableFocus = true;
-            setTimeout(function () {
-                if (!self._isEditorContent(document.activeElement)) {
-                    self._summernote.layoutInfo.editable.focus();
-                }
-                self._forceEditableFocus = false; // prevent stack size exceeded.
-            });
-        } else {
-            this._mouseInEditor = null;
-        }
-    },
-    /**
-     * @private
-     * @param {OdooEvent} ev
-     */
-    _onWysiwygBlur: function (ev) {
-        if (ev.target === this) {
-            return;
-        }
-        ev.stopPropagation();
-        this._isFocused = false;
-        this._forceEditableFocus = false;
-        this._mouseInEditor = false;
-        this._summernote.disable();
-        this.$target.focus();
-        setTimeout(this._summernote.enable.bind(this._summernote));
-        this._onBlur(ev.data);
-    },
-    /**
-     * @private
-     * @param {jQueryEvent} ev
-     */
-    _onFocusEditable: function (ev) {
-        var self = this;
-        this._editableHasFocus = true;
-        this._justFocused = true;
-        setTimeout(function () {
-            self._justFocused = false;
-        });
-    },
-    /**
      * trigger_up 'wysiwyg_change'
      *
      * @private
+     * @param {OdooEvent} ev
      */
-    _onChange: function () {
-        var html = this._summernote.code();
-        if (this.hints.length) {
-            var hints = [];
-            _.each(this.hints, function (hint) {
-                if (html.indexOf('@' + hint.name) !== -1) {
-                    hints.push(hint);
-                }
-            });
-            this.hints = hints;
-        }
+    _onChange: function (ev) {
+        // if (this.hints.length) {
+        //     var hints = [];
+        //     _.each(this.hints, function (hint) {
+        //         if (html.indexOf('@' + hint.name) !== -1) {
+        //             hints.push(hint);
+        //         }
+        //     });
+        //     this.hints = hints;
+        // }
 
-        this._dirty = true;
+        ev.stopPropagation();
         this.trigger_up('wysiwyg_change', {
-            html: html,
+            html: this.getValue(),
             hints: this.hints,
             attachments: this.attachments,
         });
@@ -667,14 +534,6 @@ var Wysiwyg = Widget.extend({
         this.trigger_up.bind(this, 'wysiwyg_attachment', this.attachments);
     },
     /**
-     * Called when the carret focuses on another node (focus event, mouse event, or key arrow event)
-     * from Unbreakable
-     *
-     * @private
-     * @param {Node} node
-     */
-    _onFocusnode: function (node) {},
-    /**
      * Do not override.
      *
      * @see _getRecordInfo
@@ -697,62 +556,40 @@ var Wysiwyg = Widget.extend({
 //--------------------------------------------------------------------------
 
 /**
- * @param {Node} node (editable or node inside)
- * @returns {Object}
- * @returns {Node} sc - start container
- * @returns {Number} so - start offset
- * @returns {Node} ec - end container
- * @returns {Number} eo - end offset
+ * Load wysiwyg assets if needed.
+ *
+ * @see Wysiwyg.createReadyFunction
+ * @param {Widget} parent
+ * @returns {$.Promise}
  */
-Wysiwyg.getRange = function (node) {
-    var range = $.summernote.range.create();
-    return range && {
-        sc: range.sc,
-        so: range.so,
-        ec: range.ec,
-        eo: range.eo,
+Wysiwyg.prepare = (function () {
+    var assetsLoaded = false;
+    var def;
+    return function prepare(parent) {
+        if (assetsLoaded) {
+            return $.when();
+        }
+        if (def) {
+            return def;
+        }
+        def = $.Deferred();
+        var timeout = setTimeout(function () {
+            throw _t("Can't load assets of the wysiwyg editor");
+        }, 10000);
+        var wysiwyg = new Wysiwyg(parent, {
+            recordInfo: {
+                context: {},
+            }
+        });
+        wysiwyg.attachTo($('<textarea>')).then(function () {
+            assetsLoaded = true;
+            clearTimeout(timeout);
+            wysiwyg.destroy();
+            def.resolve();
+        });
+        return def;
     };
-};
-/**
- * @param {Node} startNode
- * @param {Number} startOffset
- * @param {Node} endNode
- * @param {Number} endOffset
- */
-Wysiwyg.setRange = function (startNode, startOffset, endNode, endOffset) {
-    $(startNode).focus();
-    if (endNode) {
-        $.summernote.range.create(startNode, startOffset, endNode, endOffset).select();
-    } else {
-        $.summernote.range.create(startNode, startOffset).select();
-    }
-    // trigger for Unbreakable
-    $(startNode.tagName ? startNode : startNode.parentNode).trigger('wysiwyg.range');
-};
-/**
- * @param {Node} node - dom node
- * @param {Object} [options]
- * @param {Boolean} options.begin move the range to the beginning of the first node.
- * @param {Boolean} options.end move the range to the end of the last node.
- */
-Wysiwyg.setRangeFromNode = function (node, options) {
-    var last = node;
-    while (last.lastChild) {
-        last = last.lastChild;
-    }
-    var first = node;
-    while (first.firstChild) {
-        first = first.firstChild;
-    }
-
-    if (options && options.begin && !options.end) {
-        Wysiwyg.setRange(first, 0);
-    } else if (options && !options.begin && options.end) {
-        Wysiwyg.setRange(last, last.textContent.length);
-    } else {
-        Wysiwyg.setRange(first, 0, last, last.tagName ? last.childNodes.length : last.textContent.length);
-    }
-};
+})();
 
 //--------------------------------------------------------------------------
 // jQuery extensions
@@ -762,20 +599,19 @@ $.extend($.expr[':'], {
     o_editable: function (node, i, m) {
         while (node) {
             if (node.attributes) {
-                var className = _.isString(node.className) && node.className || '';
                 if (
-                    className.indexOf('o_not_editable') !== -1 ||
+                    node.classList.contains('o_not_editable') ||
                     (node.attributes.contenteditable &&
                         node.attributes.contenteditable.value !== 'true' &&
-                        className.indexOf('o_fake_not_editable') === -1)
+                        !node.classList.contains('o_fake_not_editable'))
                 ) {
                     return false;
                 }
                 if (
-                    className.indexOf('o_editable') !== -1 ||
+                    node.classList.contains('o_editable') ||
                     (node.attributes.contenteditable &&
                         node.attributes.contenteditable.value === 'true' &&
-                        className.indexOf('o_fake_editable') === -1)
+                        !node.classList.contains('o_fake_editable'))
                 ) {
                     return true;
                 }
