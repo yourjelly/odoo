@@ -2,6 +2,7 @@ odoo.define('web_editor.test_utils', function (require) {
 "use strict";
 
 var ajax = require('web.ajax');
+var BoundaryPoint = require('wysiwyg.BoundaryPoint');
 var MockServer = require('web.MockServer');
 var testUtils = require('web.test_utils');
 var Widget = require('web.Widget');
@@ -22,7 +23,7 @@ MockServer.include({
     _performRpc: function (route, args) {
         if (args.model === "ir.ui.view") {
             if (args.method === 'read_template' && args.args[0] === "web_editor.colorpicker") {
-                var template = '<templates><t t-name="web_editor.colorpicker">' +
+                var template = '<t t-name="web_editor.colorpicker">' +
                         '<colorpicker>' +
                         '    <div class="o_colorpicker_section" data-name="theme" data-display="Theme Colors" data-icon-class="fa fa-flask">' +
                         '        <button data-color="alpha"></button>' +
@@ -42,7 +43,7 @@ MockServer.include({
                         '    </div>' +
                         '    <div class="o_colorpicker_section" data-name="common" data-display="Common Colors" data-icon-class="fa fa-paint-brush"></div>' +
                         '</colorpicker>' +
-                        '</t></templates>';
+                        '</t>';
                 return Promise.resolve(template);
             }
             if (args.method === 'render_template' && args.args[0] === "web_editor.snippets") {
@@ -147,10 +148,10 @@ var WysiwygTest = Wysiwyg.extend({
      * @override
      */
     destroy: function () {
-        unpatch();
         this._super();
         this.$target.remove();
-        this._parentToDestroyForTest.destroy();
+        // /!\ Creates an infinite loop because  widget.destroy destroys all children:
+        // this._parentToDestroyForTest.destroy();
     },
     /**
      * @override
@@ -412,6 +413,17 @@ function createWysiwyg(params) {
         useOnlyTestUnbreakable: params.useOnlyTestUnbreakable,
     });
 
+    wysiwygOptions.plugins = _.extend({
+        TestPlugin: {
+            dependencies: [],
+            start: function () {
+                wysiwyg.on('testResetRange', this, function () {
+                    this.dependencies.Arch.setRange();
+                });
+            },
+        }
+    }, wysiwygOptions.plugins);
+
     var wysiwyg = new WysiwygTest(parent, wysiwygOptions);
     wysiwyg._parentToDestroyForTest = parent;
 
@@ -440,7 +452,6 @@ function createWysiwyg(params) {
 /**
  * Char codes.
  */
-var dom = $.summernote.dom;
 var keyboardMap = {
     "8": "BACKSPACE",
     "9": "TAB",
@@ -465,7 +476,7 @@ var keyboardMap = {
     "91": "OS_KEY", // 'left command': Windows Key (Windows) or Command Key (Mac)
     "93": "CONTEXT_MENU", // 'right command'
 };
-_.each(_.range(40, 127), function (keyCode) {
+_.each(_._range(40, 127), function (keyCode) {
     if (!keyboardMap[keyCode]) {
         keyboardMap[keyCode] = String.fromCharCode(keyCode);
     }
@@ -477,7 +488,7 @@ _.each(_.range(40, 127), function (keyCode) {
  * @see wysiwyg_keyboard_tests.js
  * @see wysiwyg_tests.js
  *
- * @param {jQuery} $editable
+ * @param {Wysiwyg} wysiwyg
  * @param {object} assert
  * @param {object[]} keyboardTests
  * @param {string} keyboardTests.name
@@ -493,7 +504,8 @@ _.each(_.range(40, 127), function (keyCode) {
  * @param {function($editable, assert)} [keyboardTests.test.check]
  * @param {Number} addTests
  */
-var testKeyboard = function ($editable, assert, keyboardTests, addTests) {
+var testKeyboard = function (wysiwyg, assert, keyboardTests, addTests) {
+    var $editable = wysiwyg.$('editable');
     var tests = _.compact(_.pluck(keyboardTests, 'test'));
     var testNumber = _.compact(_.pluck(tests, 'start')).length +
         _.compact(_.pluck(tests, 'content')).length +
@@ -511,16 +523,17 @@ var testKeyboard = function ($editable, assert, keyboardTests, addTests) {
             keypress.key = keyboardMap[keypress.keyCode] || String.fromCharCode(keypress.keyCode);
         }
         keypress.keyCode = keypress.keyCode;
-        var event = $.Event("keydown", keypress);
-        $target.trigger(event);
-        if (!event.isDefaultPrevented()) {
-            if (keypress.key.length === 1) {
-                document.execCommand("insertText", 0, keypress.key);
-            } else {
-                console.warn('Native "' + keypress.key + '" is not supported in test');
+        testUtils.dom.triggerNativeEvents($target[0], 'keydown', keypress).then(function (events) {
+            var event = events[0]; // (only one event was triggered)
+            if (!event.defaultPrevented) {
+                if (keypress.key.length === 1) {
+                    document.execCommand("insertText", 0, keypress.key);
+                } else {
+                    console.warn('Native "' + keypress.key + '" is not supported in test');
+                }
             }
-        }
-        $target.trigger($.Event("keyup", keypress));
+        });
+        testUtils.dom.triggerNativeEvents($target[0], 'keyup', keypress);
         return $target;
     }
 
@@ -529,10 +542,10 @@ var testKeyboard = function ($editable, assert, keyboardTests, addTests) {
         var reDOMSelection = /^(.+?)(:contents(\(\)\[|\()([0-9]+)[\]|\)])?(->([0-9]+))?$/;
         var sel = selector.match(reDOMSelection);
         var $node = $editable.find(sel[1]);
-        var point = {
-            node: sel[3] ? $node.contents()[+sel[4]] : $node[0],
-            offset: sel[5] ? +sel[6] : 0,
-        };
+        var point = new BoundaryPoint(
+            sel[3] ? $node.contents()[+sel[4]] : $node[0],
+            sel[5] ? +sel[6] : 0
+        );
         if (!point.node || point.offset > (point.node.tagName ? point.node.childNodes : point.node.textContent).length) {
             assert.notOk("Node not found: '" + selector + "' " + (point.node ? "(container: '" + (point.node.outerHTML || point.node.textContent) + "')" : ""));
         }
@@ -545,25 +558,34 @@ var testKeyboard = function ($editable, assert, keyboardTests, addTests) {
         $(target.tagName ? target : target.parentNode).trigger("mousedown");
         if (end) {
             end = _select(end);
-            Wysiwyg.setRange(start.node, start.offset, end.node, end.offset);
+            Wysiwyg.setRange({
+                sc: start.node,
+                so: start.offset,
+                ec: end.node,
+                eo: end.offset,
+            });
         } else {
-            Wysiwyg.setRange(start.node, start.offset);
+            Wysiwyg.setRange({
+                sc: start.node,
+                so: start.offset,
+            });
         }
+        wysiwyg.trigger('testResetRange');
         target = end ? end.node : start.node;
         $(target.tagName ? target : target.parentNode).trigger('mouseup');
     }
 
     function endOfAreaBetweenTwoNodes(point) {
-        // move the position because some browser make the caret on the end of the previous area after normalize
+        // move the position because some browsers put the carret at the end of the previous area after normalize
         if (
             !point.node.tagName &&
             point.offset === point.node.textContent.length &&
             !/\S|\u00A0/.test(point.node.textContent)
         ) {
-            point = dom.nextPoint(dom.nextPoint(point));
-            while (point.node.tagName && point.node.textContent.length) {
-                point = dom.nextPoint(point);
-            }
+            var startNode = point.node;
+            point = _.clone(point).nextUntilNode(function (node) {
+                return node !== startNode && (!node.tagName || !node.textContent.length);
+            }) || point;
         }
         return point;
     }
@@ -572,7 +594,7 @@ var testKeyboard = function ($editable, assert, keyboardTests, addTests) {
 
     function pollTest(test) {
         var def = Promise.resolve();
-        $editable.data('wysiwyg').setValue(test.content);
+        wysiwyg.setValue(test.content);
 
         function poll(step) {
             var def = testUtils.makeTestPromise();
@@ -644,12 +666,12 @@ var testKeyboard = function ($editable, assert, keyboardTests, addTests) {
 
             // test content
             if (test.test.content) {
-                var value = $editable.data('wysiwyg').getValue({
+                var value = wysiwyg.getValue({
                     keepPopover: true,
                 });
-                var allInvisible = /\u200B/g;
-                value = value.replace(allInvisible, '&#8203;');
-                var result = test.test.content.replace(allInvisible, '&#8203;');
+                var allInvisible = /\uFEFF/g;
+                value = value.replace(allInvisible, '&#65279;');
+                var result = test.test.content.replace(allInvisible, '&#65279;');
                 assert.strictEqual(value, result, test.name);
 
                 if (test.test.start && value !== result) {
@@ -665,20 +687,14 @@ var testKeyboard = function ($editable, assert, keyboardTests, addTests) {
                 var start = _select(test.test.start);
                 var range = Wysiwyg.getRange($editable[0]);
                 if ((range.sc !== range.ec || range.so !== range.eo) && !test.test.end) {
-                    assert.ok(false, test.name + ": the carret is not colapsed and the 'end' selector in test is missing");
+                    assert.ok(false, test.name + ": the carret is not collapsed and the 'end' selector in test is missing");
                     return;
                 }
                 var end = test.test.end ? _select(test.test.end) : start;
                 if (start.node && end.node) {
                     range = Wysiwyg.getRange($editable[0]);
-                    var startPoint = endOfAreaBetweenTwoNodes({
-                        node: range.sc,
-                        offset: range.so,
-                    });
-                    var endPoint = endOfAreaBetweenTwoNodes({
-                        node: range.ec,
-                        offset: range.eo,
-                    });
+                    var startPoint = endOfAreaBetweenTwoNodes(range.getStartPoint());
+                    var endPoint = endOfAreaBetweenTwoNodes(range.getEndPoint());
                     var sameDOM = (startPoint.node.outerHTML || startPoint.node.textContent) === (start.node.outerHTML || start.node.textContent);
                     var stringify = function (obj) {
                         if (!sameDOM) {
@@ -728,10 +744,10 @@ var select = (function () {
     var __select = function (selector, $editable) {
         var sel = selector.match(/^(.+?)(:contents\(\)\[([0-9]+)\]|:contents\(([0-9]+)\))?(->([0-9]+))?$/);
         var $node = $editable.find(sel[1]);
-        return {
-            node: sel[2] ? $node.contents()[sel[3] ? +sel[3] : +sel[4]] : $node[0],
-            offset: sel[5] ? +sel[6] : 0,
-        };
+        return new BoundaryPoint(
+            sel[2] ? $node.contents()[sel[3] ? +sel[3] : +sel[4]] : $node[0],
+            sel[5] ? +sel[6] : 0
+        );
     };
     return function (startSelector, endSelector, $editable) {
         var start = __select(startSelector, $editable);
@@ -766,18 +782,16 @@ var keydown = function (key, $editable, options) {
     }
     var range = Wysiwyg.getRange($editable[0]);
     if (!range) {
-        console.error("Editor have not any range");
+        console.error("Editor has no range");
         return;
     }
     if (options && options.firstDeselect) {
         range.sc = range.ec;
         range.so = range.eo;
-        Wysiwyg.setRange(range.sc, range.so, range.ec, range.eo);
+        Wysiwyg.setRange(range.getPoints());
     }
-    var target = range.ec;
-    var $target = $(target.tagName ? target : target.parentNode);
-    var event = $.Event("keydown", keyPress);
-    $target.trigger(event);
+    var target = range.ec.tagName ? range.ec : range.ec.parentNode;
+    testUtils.dom.triggerNativeEvents(target, 'keydown', keyPress);
 };
 
 return {
