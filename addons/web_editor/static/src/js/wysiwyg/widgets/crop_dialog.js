@@ -27,11 +27,10 @@ var CropImageDialog = Dialog.extend({
     /**
      * @constructor
      */
-    init: function (parent, options, media) {
+    init: function (parent, options, archNode) {
         var self = this;
-        this.media = media;
-        this.$media = $(this.media);
-        var src = this.$media.attr('src').split('?')[0];
+        this.media = archNode;
+        var src = this.media.attributes.src.split('?')[0];
         this.aspectRatioList = [
             [_t("Free"), '0/0', 0],
             ["16:9", '16/9', 16 / 9],
@@ -41,9 +40,9 @@ var CropImageDialog = Dialog.extend({
         ];
         this.imageData = {
             imageSrc: src,
-            originalSrc: this.$media.data('crop:originalSrc') || src, // the original src for cropped DB images will be fetched later
-            mimetype: this.$media.data('crop:mimetype') || (_.str.endsWith(src, '.png') ? 'image/png' : 'image/jpeg'), // the mimetype for DB images will be fetched later
-            aspectRatio: this.$media.data('aspectRatio') || this.aspectRatioList[0][1],
+            originalSrc: this.media.attributes['data-crop:originalSrc'] || src, // the original src for cropped DB images will be fetched later
+            mimetype: this.media.attributes['data-crop:mimetype'] || (_.str.endsWith(src, '.png') ? 'image/png' : 'image/jpeg'), // the mimetype for DB images will be fetched later
+            aspectRatio: this.media.attributes['data-aspectRatio'] || this.aspectRatioList[0][1],
             isExternalImage: src.substr(0, 5) !== 'data:' && src[0] !== '/' && src.indexOf(window.location.host) < 0,
         };
         this.options = _.extend({
@@ -61,11 +60,7 @@ var CropImageDialog = Dialog.extend({
             }],
         }, options || {});
         this._super(parent, this.options);
-        this.trigger_up('getRecordInfo', _.extend(this.options, {
-            callback: function (recordInfo) {
-                _.defaults(self.options, recordInfo);
-            },
-        }));
+        _.defaults(self.options, this.media.params.options.recordInfo);
     },
     /**
      * @override
@@ -107,10 +102,9 @@ var CropImageDialog = Dialog.extend({
     start: function () {
         this.$cropperImage = this.$('.o_cropper_image');
         if (this.$cropperImage.length) {
-            var data = this.$media.data();
             var ratio = 0;
             for (var i = 0; i < this.aspectRatioList.length; i++) {
-                if (this.aspectRatioList[i][1] === data.aspectRatio) {
+                if (this.aspectRatioList[i][1] === this.media.attributes['data-aspectRatio']) {
                     ratio = this.aspectRatioList[i][2];
                     break;
                 }
@@ -119,7 +113,7 @@ var CropImageDialog = Dialog.extend({
                 viewMode: 1,
                 autoCropArea: 1,
                 aspectRatio: ratio,
-                data: _.pick(data, 'x', 'y', 'width', 'height', 'rotate', 'scaleX', 'scaleY')
+                data: _.pick(this.media.attributes, 'data-x', 'data-y', 'data-width', 'data-height', 'data-rotate', 'data-scaleX', 'data-scaleY')
             });
         }
         return this._super.apply(this, arguments);
@@ -145,24 +139,21 @@ var CropImageDialog = Dialog.extend({
         var cropperData = this.$cropperImage.cropper('getData');
 
         // Mark the media for later creation of required cropped attachments...
-        this.$media.addClass('o_cropped_img_to_save');
+        this.media.className.add('o_cropped_img_to_save');
 
         // ... and attach required data
-        this.$media.data('crop:resModel', this.options.res_model);
-        this.$media.data('crop:resID', this.options.res_id);
-        this.$media.data('crop:id', this.imageData.id);
-        this.$media.data('crop:mimetype', this.imageData.mimetype);
-        this.$media.data('crop:originalSrc', this.imageData.originalSrc);
+        this.media.attributes.set('data-crop:resModel', this.options.res_model);
+        this.media.attributes.set('data-crop:resID', this.options.res_id);
+        this.media.attributes.set('data-crop:id', this.imageData.id);
+        this.media.attributes.set('data-crop:mimetype', this.imageData.mimetype);
+        this.media.attributes.set('data-crop:originalSrc', this.imageData.originalSrc);
 
         // Mark the media with the cropping information which is required for
         // a future crop edition
-        this.$media
-            .attr('data-aspect-ratio', this.imageData.aspectRatio)
-            .data('aspectRatio', this.imageData.aspectRatio);
+        this.media.attributes.set('data-aspect-ratio', this.imageData.aspectRatio);
         _.each(cropperData, function (value, key) {
             key = _.str.dasherize(key);
-            self.$media.attr('data-' + key, value);
-            self.$media.data(key, value);
+            self.media.attributes.set('data-' + key, value);
         });
 
         // Update the media with base64 source for preview before saving
@@ -170,7 +161,7 @@ var CropImageDialog = Dialog.extend({
             width: cropperData.width,
             height: cropperData.height,
         });
-        this.$media.attr('src', canvas.toDataURL(this.imageData.mimetype));
+        this.media.attributes.set('src', canvas.toDataURL(this.imageData.mimetype));
 
         this.final_data = this.media;
         return this._super.apply(this, arguments);

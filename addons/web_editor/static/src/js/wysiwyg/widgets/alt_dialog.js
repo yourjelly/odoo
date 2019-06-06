@@ -24,7 +24,7 @@ var AltDialog = Dialog.extend({
             title: _t("Change media description and tooltip")
         }, options));
 
-        this.trigger_up('getRecordInfo', {
+        this.triggerUp('getRecordInfo', {
             recordInfo: options,
             callback: function (recordInfo) {
                 _.defaults(options, recordInfo);

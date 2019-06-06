@@ -1,17 +1,11 @@
-odoo.define('web_editor.wysiwyg.plugin.hint', function (require) {
+(function () {
 'use strict';
 
-var Plugins = require('web_editor.wysiwyg.plugins');
-var registry = require('web_editor.wysiwyg.plugin.registry');
-
-var dom = $.summernote.dom;
-
-
-var HintPlugin = Plugins.hintPopover.extend({
-    init: function (context) {
+var HintPlugin = class extends we3.AbstractPlugin {
+    constructor (context) {
+        super(...arguments)
         context.options.hint = (context.options.hint || []).concat(this._hints());
-        this._super.apply(this, arguments);
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Public summernote module API
@@ -20,33 +14,38 @@ var HintPlugin = Plugins.hintPopover.extend({
     /**
      * Replace the current hint.
      */
-    replace: function () {
+    replace () {
         var self = this;
         var $item = this.$content.find('.note-hint-item.active');
         if ($item.length) {
-            this.lastWordRange.select();
-            this.context.invoke('HelperPlugin.deleteSelection');
-            var range = this.context.invoke('editor.createRange');
+            var range = this.dependencies.Arch.setRange(this.lastWordRange);
+            var point = this.dom.deleteSelection(range, true);
+            range = this.dependencies.Arch.setRange({
+                sc: point.node,
+                so: point.offset,
+            });
+
+            range = this.dependencies.Range.getRange();
 
             this.nodeFromItem($item).each(function () {
                 $(range.sc).after(this);
-                range = self.context.invoke('editor.setRange', this, dom.nodeLength(this));
+                range.sc = this;
+                range.so = self.utils.nodeLength(this);
             });
-            range.select();
-            this.context.invoke('editor.saveRange');
+            this.dependencies.Arch.setRange(range);
             this.lastWordRange = null;
             this.hide();
             this.context.triggerEvent('change', this.$editable.html(), this.$editable[0]);
             this.context.invoke('editor.focus');
         }
-    },
+    }
     /**
      * @param {JQueryEvent} e
      */
-    handleKeyup: function (e) {
+    handleKeyup (e) {
         var self = this;
         if ([13, 38, 40].indexOf(e.keyCode) === -1) { // enter, up, down
-            var wordRange = this.context.invoke('editor.createRange');
+            var wordRange = this.dependencies.Range.getRange();
             var keyword_1 = wordRange.sc.textContent.slice(0, wordRange.so);
             if (this.hints.length && keyword_1) {
                 this.$content.empty();
@@ -84,7 +83,7 @@ var HintPlugin = Plugins.hintPopover.extend({
                 this.hide();
             }
         }
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -96,12 +95,12 @@ var HintPlugin = Plugins.hintPopover.extend({
      * @private
      * @returns {Object[]} hints
      */
-    _hints: function () {
+    _hints () {
         var self = this;
         return [{
                 className: 'o_hint_partner',
                 match: /\B@(\w+(\s\w*)?)$/,
-                search: function (keyword, callback) {
+                search (keyword, callback) {
                     self._rpc({
                         model: 'res.partner',
                         method: "search_read",
@@ -112,28 +111,26 @@ var HintPlugin = Plugins.hintPopover.extend({
                         limit: 10,
                     }).then(callback);
                 },
-                template: function (partner) {
+                template (partner) {
                     return partner.name + (partner.email ? ' <i style="color: #999;">(' + partner.email + ')</i>' : '');
                 },
-                content: function (item) {
-                    return $(self.document.createTextNode('@' + item.name + '\u00A0'));
+                content (item) {
+                    return $(self.document.createTextNode('@' + item.name + self.utils.char('nbsp')));
                 },
             },
             {
                 className: 'fa',
                 match: /:([\-+\w]+)$/,
-                search: function () {},
-                template: function () {
-                    return '<span class="fa fa-star">\u200B</span>';
+                search () {},
+                template () {
+                    return '<span class="fa fa-star">\uFEFF</span>';
                 },
-                content: function () {}
+                content () {}
             },
         ];
-    },
-});
+    }
+};
 
-registry.add('hintPopover', null);
+we3.addPlugin('Hint', HintPlugin);
 
-return HintPlugin;
-
-});
+})();
