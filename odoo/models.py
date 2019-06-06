@@ -5326,7 +5326,7 @@ Fields:
         """ Recompute stored function fields. The fields and records to
             recompute have been determined by method :meth:`modified`.
         """
-        env = self.env.sudo().with_context({})
+        env = self.sudo().with_context({}).env
         while env.has_todo():
             field, recs = env.get_todo()
             # determine the fields to recompute
