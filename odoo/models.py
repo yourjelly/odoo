@@ -5326,10 +5326,11 @@ Fields:
         """ Recompute stored function fields. The fields and records to
             recompute have been determined by method :meth:`modified`.
         """
-        while self.env.has_todo():
-            field, recs = self.env.get_todo()
+        env = self.env.sudo().with_context({})
+        while env.has_todo():
+            field, recs = env.get_todo()
             # determine the fields to recompute
-            fs = self.env[field.model_name]._field_computed[field]
+            fs = env[field.model_name]._field_computed[field]
             ns = [f.name for f in fs if f.store]
             # evaluate fields, and group record ids by update
             updates = defaultdict(set)
