@@ -105,6 +105,7 @@ var KanbanColumn = Widget.extend({
             items: '.o_kanban_record',
             connectWith: '.o_kanban_group',
             containment: !this.draggable ? 'parent' : false,
+            axis: config.device.isMobile && 'y',
             ondragenter: function (event) {
                 event.target.classList.add('o_kanban_hover');
             },
