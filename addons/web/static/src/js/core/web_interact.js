@@ -510,7 +510,7 @@ var _sortable = function (el, options) {
 
     // Set draggable on items on first pointerdown as some items might not be in
     // the dom yet so we can't just simply set draggable on them now.
-    el.addEventListener('pointerdown', function (ev) {
+    _bindCrossBrowserPointerEvent(el, 'pointerdown', function (ev) {
         // Only allow to drag from the handle if it is defined.
         // Any part of any item is valid for dragging otherwise.
         var item = ev.target.closest(items);
@@ -564,6 +564,78 @@ var _sortable = function (el, options) {
     el.classList.add(sortableClass);
     return interactable;
 };
+
+var lastTouchTime;
+var legacyEvents = {
+    pointerdown: {
+        mouse: 'mousedown',
+        touch: 'touchstart',
+    },
+    pointermove: {
+        mouse: 'mousemove',
+        touch: 'touchmove',
+    },
+    pointerup: {
+        mouse: 'mouseup',
+        touch: 'touchend',
+    },
+    pointercancel: {
+        touch: 'touchcancel',
+    },
+};
+var supportsPointerEvent = window.PointerEvent;
+var supportsTouch = 'ontouchstart' in window;
+/**
+ * Bind a handler to a pointer event or its corresponding touch and mouse
+ * equivalents if the browser does not support pointer events.
+ *
+ * @param {DomElement} el node on which the handler must be bound
+ * @param {string} eventName pointerdown|pointermove|pointerup|pointercancel
+ * @param {function} handler to bind on the pointer event
+ */
+var _bindCrossBrowserPointerEvent = function (el, eventName, handler) {
+
+    if (supportsPointerEvent) { // Most modern browsers except Safari
+        el.addEventListener(eventName, handler);
+
+    } else if (supportsTouch) { // iOS and some obscure lesser-known browsers
+        // Browsers may simulate mouse events after touch events, which would
+        // trigger the handler twice. A simple preventDefault should prevent it.
+        // Source: https://developer.mozilla.org/docs/Web/API/Touch_events
+        var guardedHandler = function (ev) {
+            ev.preventDefault();
+
+            // Some browsers do not respect the preventDefault trick. In such
+            // cases, we chose to use the same set of heuristics as interact.js
+            // to detect simulated mouse events. The first one is to check if
+            // the mouse event is fired suspiciously too close to the touch
+            // event to be legit. However, since this is pretty weak and will
+            // not always suffice, another heuristic is to look at the timestamp
+            // of the event, which is set to 0 by some browsers when simulated.
+            var simulatedEvent = false;
+            if (/touch/.test(event.type)) {
+                lastTouchTime = new Date().getTime();
+
+            } else if (/mouse/.test(event.type)) {
+                var suspicious = new Date().getTime() - lastTouchTime < 500;
+                var simulatedTimeStamp = event.timeStamp === 0;
+                simulatedEvent = suspicious || simulatedTimeStamp;
+            }
+
+            if (!simulatedEvent) {
+                handler(ev);
+            }
+        }
+
+        if (legacyEvents[eventName].mouse) {
+            el.addEventListener(legacyEvents[eventName].mouse, guardedHandler);
+        }
+        el.addEventListener(legacyEvents[eventName].touch, guardedHandler);
+
+    } else if (legacyEvents[eventName].mouse) { // Safari on MacOS
+        el.addEventListener(legacyEvents[eventName].mouse, handler);
+    }
+}
 
 /**
  * Check whether an element has interactions bound to it.
