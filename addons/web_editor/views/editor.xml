@@ -83,7 +83,9 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/Test.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/TestArchAndRules.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/TestRange.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/ui.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboard.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardArrow.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardBackspace.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardChar.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardComplex.js"/>
@@ -91,7 +93,14 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardEnter.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardTab.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardUnbreakable.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/renderer.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/popover.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbar.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarFontStyle.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarIndent.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarLink.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarList.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarWand.js"/>
 
     <!-- odoo -->
 
@@ -140,12 +149,9 @@
 
     <!-- Tests -->
 
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbar.js"/>
     <!-- <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarBackgroundColor.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarFontSize.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarFontStyle.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarForeColor.js"/> -->
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarWand.js"/>
 
     <!-- additional plugins -->
 
@@ -229,6 +235,7 @@
         </script>
         <t t-call="web_editor.compiled_assets_wysiwyg"/>
         <script type="text/javascript" src="/web_editor/static/tests/test_utils.js"/>
+        <script type="text/javascript" src="/web_editor/static/tests/we3_tests.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/field_html_tests.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/wysiwyg_tests.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/wysiwyg_keyboard_tests.js"/>

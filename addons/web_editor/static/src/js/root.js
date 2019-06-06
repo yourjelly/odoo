@@ -28,8 +28,10 @@ var WysiwygRoot = Widget.extend({
         var $target = this.$el;
         this.$el = null;
         var params = Object.assign({}, this._params);
-        if (!assetsLoaded) {
-            params.plugins = Object.assign({}, params.plugins, {Test: false});
+        if (!assetsLoaded || this._params.preload) {
+            params.test = {
+                auto: false,
+            };
         }
         this._params = null;
 

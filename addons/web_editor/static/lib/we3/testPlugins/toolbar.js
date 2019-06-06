@@ -37,34 +37,18 @@ var TestToolbar = class extends we3.AbstractPlugin {
      * @param {Boolean} [options.firstDeselect] (default: false) true to deselect before pressing
      */
     keydown (key, options) {
-        var keyPress = {};
-        if (typeof key === 'string') {
-            keyPress.key = key;
-            for (var keyCode in this.utils.keyboardMap) {
-                if (this.utils.keyboardMap[keyCode] === keyPress.key) {
-                    keyPress.keyCode = +keyCode;
-                    break;
-                }
-            }
-            keyPress.keyCode = +_.findKey(this.utils.keyboardMap, function (k) {
-                return k === key;
-            });
-        } else {
-            keyPress.key = this.utils.keyboardMap[key] || String.fromCharCode(key);
-            keyPress.keyCode = key;
-        }
         var range = this.dependencies.Range.getRange();
         if (!range) {
             console.error("Editor has no range");
             return;
         }
         if (options && options.firstDeselect) {
-            range.sc = range.ec;
-            range.so = range.eo;
-            this.dependencies.Range.setRange(range.getPoints());
+            range = range.collapse(false); // collapse on end point
+            this.dependencies.Range.setRange(range);
         }
         var target = range.ec.tagName ? range.ec : range.ec.parentNode;
-        this.dependencies.Test.triggerNativeEvents(target, 'keydown', keyPress);
+        var keydown = typeof key === 'string' ? {key: key} : {keyCode: key};
+        return this.dependencies.Test.keydown(target, keydown);
     }
 
     //--------------------------------------------------------------------------
@@ -126,28 +110,6 @@ var TestToolbar = class extends we3.AbstractPlugin {
             assert.notOk("Node not found: '" + selector + "' " + (point.node ? "(container: '" + (node.outerHTML || node.textContent) + "')" : ""), testName);
         }
         return point;
-    }
-    _selectText  (testName, assert, start, end) {
-        start = this._querySelectorAllWithContents(testName, assert, start);
-        var target = start.node;
-        target = target.tagName ? target : target.parentNode;
-        this.dependencies.Test.triggerNativeEvents(target, 'mousedown');
-        if (end) {
-            end = this._querySelectorAllWithContents(testName, assert, end);
-            this.dependencies.Arch.setRange({
-                sc: start.node,
-                so: start.offset,
-                ec: end.node,
-                eo: end.offset,
-            });
-        } else {
-            this.dependencies.Arch.setRange({
-                sc: start.node,
-                so: start.offset,
-            });
-        }
-        target = end ? end.node : start.node;
-        this.dependencies.Test.triggerNativeEvents(target, 'mouseup');
     }
     _endOfAreaBetweenTwoNodes  (point) {
         // move the position because some browsers put the carret at the end of the previous area after normalize
