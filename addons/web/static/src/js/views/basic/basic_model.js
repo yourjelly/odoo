@@ -271,7 +271,8 @@ var BasicModel = AbstractModel.extend({
                 field = record.fields[fieldName];
                 if (field.type === 'float' ||
                     field.type === 'integer' ||
-                    field.type === 'monetary') {
+                    field.type === 'monetary' ||
+                    field.type === 'uom') {
                     values[fieldName] = 0;
                 } else if (field.type === 'one2many' || field.type === 'many2many') {
                     values[fieldName] = [];
