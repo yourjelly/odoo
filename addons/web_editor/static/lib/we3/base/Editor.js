@@ -1,189 +1,711 @@
-odoo.define('web_editor.wysiwyg.plugin.editor', function (require) {
+(function () {
 'use strict';
 
-var Plugins = require('web_editor.wysiwyg.plugins');
-var registry = require('web_editor.wysiwyg.plugin.registry');
-var TablePlugin = require('web_editor.wysiwyg.plugin.table');
+var id = 0;
+var PluginsManager = we3.PluginsManager;
+var utils = we3.utils;
 
-
-var NewSummernoteEditor = Plugins.editor.extend({
-    //--------------------------------------------------------------------------
-    // Public summernote module API
-    //--------------------------------------------------------------------------
-
-    initialize: function () {
+we3.Editor = class extends we3.EventDispatcher {
+    constructor (parent, params) {
+        super(parent);
+        if (!params) {
+            params = parent;
+            parent = null;
+        }
         var self = this;
-        this.history = this.context.modules.HistoryPlugin;
-        this.dropzone = this.context.modules.DropzonePlugin;
+        this.editorEvents = {
+            'mousedown document': '_onMouseDown',
+            'mouseenter document': '_onMouseEnter',
+            'mouseleave document': '_onMouseLeave',
+            'mousemove document': '_onMouseMove',
+            'blur editable': '_onBlurEditable',
+            'focus editable': '_onFocusEditable',
+            'paste editable': '_onPaste',
+            'paste editable': '_onPaste',
+        };
+        this._templates = {};
+        this.id = 'wysiwyg-' + (++id);
 
-        this.insertTable = this.wrapCommand(this._insertTable.bind(this));
-        this.insertOrderedList = this.wrapCommand(this._insertOrderedList.bind(this));
-        this.insertUnorderedList = this.wrapCommand(this._insertUnorderedList.bind(this));
-        this.insertCheckList = this.wrapCommand(this._insertCheckList.bind(this));
-        this.indent = this.wrapCommand(this._indent.bind(this));
-        this.outdent = this.wrapCommand(this._outdent.bind(this));
-        this.table = new TablePlugin(this.context);
-        this.hasFocus = this._hasFocus.bind(this);
+        this.editor = document.createElement('we3-editor');
+        this.container = document.createElement('we3-editable-container');
+        this.editable = document.createElement('we3-editable');
+        this.editable.contentEditable = 'true';
 
-        this._makeTextCommand('formatBlock');
-        this._makeTextCommand('removeFormat');
-        _.each('bold,italic,underline,strikethrough,superscript,subscript'.split(','), function (sCmd) {
-            self._makeTextCommand('formatText', sCmd);
+        this._editableContainer = [];
+        this.beforeContainer = [];
+        this.afterContainer = [];
+        this.beforeEditable = [];
+        this.afterEditable = [];
+
+        this._saveEventMethods();
+        this._prepareOptions(params);
+
+        this._pluginsManager = new PluginsManager(this, {
+                id: this.id,
+                plugins: this.plugins,
+                editable: this.editable,
+                editor: this.editor,
+                addEditableContainer (node) {
+                    if (self._isInsertEditableInContainers) {
+                        throw new Error("Plugin content already inserted, you can't change the container");
+                    } else {
+                        self._editableContainer.push(node);
+                    }
+                },
+                insertBeforeContainer (node) {
+                    if (self._isInsertEditableContainers) {
+                        self.editor.insertBefore(node, self.editor.firstChild);
+                    } else {
+                        self.beforeContainer.push(node);
+                    }
+                },
+                insertAfterContainer (node) {
+                    if (self._isInsertEditableContainers) {
+                        self.editor.appendChild(node);
+                    } else {
+                        self.afterContainer.push(node);
+                    }
+                },
+                insertBeforeEditable (node) {
+                    if (self._isInsertEditableInContainers) {
+                        self.editable.parentNode.insertBefore(node, self.editable.parentNode.firstChild);
+                    } else {
+                        self.beforeEditable.push(node);
+                    }
+                },
+                insertAfterEditable (node) {
+                    if (self._isInsertEditableInContainers) {
+                        self.editable.parentNode.appendChild(node);
+                    } else {
+                        self.afterEditable.push(node);
+                    }
+                },
+            },
+            this.options);
+
+        this.on('change', this, this._onChange);
+    }
+    start (target) {
+        var self = this;
+        if (target.wysiwygEditor) {
+            target.wysiwygEditor.destroy();
+        }
+        this.target = target;
+        this.target.wysiwygEditor = this;
+        this.target.dataset.dataWysiwygId = this.id;
+
+        this.on('command', this, function () { throw new Error(); });
+        this.on('get_value', this, this._onGetValue);
+        this.on('set_value', this, this._onSetValue);
+
+        return this.isInitialized().then(function () {
+            if (self.isDestroyed()) {
+                return;
+            }
+            self._insertEditorContainers();
+            self._insertEditableInContainers();
+            return self._pluginsManager.start();
+        }).then(function () {
+            if (self.isDestroyed()) {
+                return;
+            }
+            self._afterStartAllPlugins();
+            if (self.target.tagName !== "TEXTAREA") {
+                self._targetID = self.target.id;
+                self._targetClassName = self.target.className;
+                self.target.removeAttribute('id');
+                self.editable.setAttribute('id', self._targetID);
+                self.editable.className = self._targetClassName;
+            }
         });
-        _.each('justifyLeft,justifyCenter,justifyRight,justifyFull'.split(','), function (sCmd) {
-            self._makeTextCommand('formatBlockStyle', sCmd);
-        });
-
-        this._super();
-    },
+    }
+    destroy () {
+        if (this.editor && this.editor.parentNode) {
+            this.editor.parentNode.removeChild(this.editor);
+        }
+        if (this.target) {
+            this.target.wysiwygEditor = null;
+            if (this.target.tagName !== "TEXTAREA") {
+                this.target.setAttribute('id', this._targetID);
+                this.target.style.display = '';
+            }
+        }
+        this._destroyEvents();
+        super.destroy();
+    }
 
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
 
     /**
-     * Hide all popovers.
+     * Cancel the edition and destroy the editor.
      */
-    hidePopover: function () {
-        this.context.invoke('MediaPlugin.hidePopovers');
-        this.context.invoke('LinkPopover.hide');
-    },
-    /*
-     * Focus the editor.
+    cancel () {
+        this._pluginsManager.cancelEditor();
+        this.destroy();
+    }
+    /**
+     * Set the focus on the element.
      */
-    focus: function () {
-        // [workaround] Screen will move when page is scolled in IE.
-        //  - do focus when not focused
-        if (!this.hasFocus()) {
-            var range = $.summernote.range.create();
-            if (range) {
-                $(range.sc).closest('[contenteditable]').focus();
-                range.select();
-            } else {
-                this.$editable.focus();
-            }
+    focus () {
+        this.editable.focus();
+    }
+    /**
+     * Get the value of the editable element.
+     *
+     * @param {object} [options]
+     * @param {boolean} [options.keepVirtual] true to include virtual text nodes
+     * @param {boolean} [options.architecturalSpace] true to include architectural space
+     * @param {boolean} [options.showIDs] true to show the arch node id's
+     * @returns {string}
+     */
+    getValue (options) {
+        return this._pluginsManager.getEditorValue(options);
+    }
+    /**
+     * Return true if the content has changed.
+     *
+     * @returns {Boolean}
+     */
+    isDirty () {
+        var isDirty = this._value !== this.getValue();
+        if (!this._dirty && isDirty) { // TODO remove, it's impossible...
+            console.warn("not dirty flag ? Please fix it.");
         }
-    },
+        return isDirty;
+    }
     /**
-     * Fix double-undo (CTRL-Z) issue with Odoo integration.
+     * Return a Promise resolved when the plugin is initialized and can be started
+     * This method can't start new call or perform calculations, must just return
+     * the deferreds created in the init method.
      *
-     * @override
+     * @returns {Promise}
      */
-    undo: function () {
-        this.createRange();
-        this._super();
-    },
+    isInitialized () {
+        return this._pluginsManager.isInitialized();
+    }
     /**
-     * Set the range at the given nodes and offsets.
-     * If no `ec` is specified, the range is collapsed on start.
-     * Note: Does NOT select the range.
+     * Reset the editor with the given value if any.
      *
-     * @param {Node} sc
-     * @param {Number} so
-     * @param {Node} [ec]
-     * @param {Number} [eo]
-     * @returns {Object} range
+     * @param {String} [value]
      */
-    setRange: function (sc, so, ec, eo) {
-        var range = this.createRange();
-        range.sc = sc;
-        range.so = so;
-        range.ec = ec || sc;
-        range.eo = eo || so;
-        return range;
-    },
+    reset (value) {
+        this._value = value || this._value;
+        this._pluginsManager.setEditorValue(this._value);
+        this._dirty = false;
+    }
     /**
-     * Remove a link and preserve its text contents.
+     * Save the content in the target
+     *      - in init option beforeSave
+     *      - receive editable jQuery DOM as attribute
+     *      - called after deactivate codeview if needed
+     * @returns {Promise}
+     *      - resolve with {isDirty, value, arch}
      */
-    unlink: function () {
-        this.beforeCommand();
-        this.context.invoke('LinkPlugin.unlink');
-        this.afterCommand();
-    },
+    save () {
+        var self = this;
+        var isDirty = this.isDirty();
+        return this._pluginsManager.saveEditor().then(function (arch) {
+            var html = arch.toString();
+            if (self.target.tagName === "TEXTAREA") {
+                self.target.value = html;
+            } else {
+                self.target.innerHTML = html;
+            }
+            return {
+                isDirty: isDirty,
+                value: html,
+                arch: arch,
+            };
+        });
+    }
+    /**
+     * Set the value of the editor.
+     *
+     * @param {String} value
+     */
+    setValue (value) {
+        this._pluginsManager.setEditorValue(value || '');
+        this.triggerUp('change');
+    }
 
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
     /**
-     * Returns true if editable area has focus.
+     * Method to call after completion of the `start` method.
      *
      * @private
+     */
+    _afterStartAllPlugins () {
+        this.target.style.display = 'none';
+        this.editor.style.display = '';
+        var value = this.target[this.target.tagName === "TEXTAREA" ? 'value' : 'innerHTML'];
+        this.reset(value);
+        this._bindEvents();
+    }
+    /**
+     * Bind the events defined in the editorEvents property.
+     *
+     * @private
+     */
+    _bindEvents () {
+        var self = this;
+        this.editorEvents.forEach(function (event) {
+            if (event.target === 'document') {
+                window.top.document.addEventListener(event.name, event.method, true);
+                self.editable.ownerDocument.addEventListener(event.name, event.method, false);
+            } else {
+                self[event.target].addEventListener(event.name, event.method, false);
+            }
+        });
+    }
+    /**
+     * Destroy all events defined in `editorEvents`.
+     *
+     * @private
+     */
+    _destroyEvents () {
+        var self = this;
+        this.editorEvents.forEach(function (event) {
+            if (event.target === 'document') {
+                window.top.document.removeEventListener(event.name, event.method, true);
+                self.editable.removeEventListener(event.name, event.method, false);
+            } else {
+                self[event.target].removeEventListener(event.name, event.method, false);
+            }
+        });
+    }
+    /**
+     * Return a list of the descendents of the current object.
+     *
+     * @private
+     */
+    _getDecendents () {
+        var children = this.getChildren();
+        var descendents = [];
+        var child;
+        while ((child = children.pop())) {
+            descendents.push(child);
+            children = children.concat(child.getChildren());
+        }
+        return descendents;
+    }
+    /**
+     * @private
+     * @param {string} pluginName
+     * @param {string} url
+     * @param {any} values
+     * @returns {Promise}
+     */
+    _getXHR (pluginName, url, values) {
+        url = url[0] === '/' ? url : this.options.xhrPath + url;
+        return new Promise(function (resolve) {
+            var oReq = new XMLHttpRequest();
+            oReq.addEventListener("load", function (html) {
+                resolve(this.responseText);
+            });
+            oReq.addEventListener("error", resolve);
+            var getValues = Object.keys(values || {}).map(function (key) {
+                return escape(key) + '=' + escape(values[key]);
+            });
+            oReq.open("GET", url + (getValues.length ? '?' + getValues.join('&') : ''));
+            oReq.send();
+        });
+    }
+    /**
+     * @private
+     */
+    _insertEditorContainers () {
+        this._isInsertEditableContainers = true;
+        this.editor.style.display = 'none';
+        this.editor.id = this.id;
+        if (this.target.nextSibling) {
+            this.target.parentNode.insertBefore(this.editor, this.target.nextSibling);
+        } else if (this.target.parentNode) {
+            this.target.parentNode.appendChild(this.editor);
+        } else {
+            console.info("Can't insert this editor on a node without any parent");
+        }
+        var node;
+        var editableContainer = this.editor;
+        while (node = this.beforeContainer.pop()) {
+            this.editor.appendChild(node);
+        }
+        while (node = this._editableContainer.shift()) {
+            editableContainer.appendChild(node);
+            editableContainer = node;
+        }
+
+        editableContainer.appendChild(this.container);
+
+        while (node = this.afterContainer.pop()) {
+            this.editor.appendChild(node);
+        }
+    }
+    /**
+     * @private
+     */
+    _insertEditableInContainers () {
+        this._isInsertEditableInContainers = true;
+        var node;
+        while (node = this.beforeEditable.pop()) {
+            this.container.appendChild(node);
+        }
+        this.container.appendChild(this.editable);
+        while (node = this.afterEditable.shift()) {
+            this.container.appendChild(node);
+        }
+    }
+    /**
+     * Return true if the given node is in the editor.
+     * Note: a button in the MediaDialog returns true.
+     *
+     * @private
+     * @param {Node} node
      * @returns {Boolean}
      */
-    _hasFocus: function () {
-        return this.$editable.is(':focus') || !!this.$editable.find('[contenteditable]:focus').length;
-    },
-    /**
-     * Indent a list or a format node.
-     *
-     * @private
-     * @returns {false|Node[]} contents of list/indented item
-     */
-    _indent: function () {
-        return this.context.invoke('BulletPlugin.indent');
-    },
-    /**
-     * Insert a checklist.
-     *
-     * @private
-     */
-    _insertCheckList: function () {
-        this.context.invoke('BulletPlugin.insertList', 'checklist');
-    },
-    /**
-     * Insert an ordered list.
-     *
-     * @private
-     */
-    _insertOrderedList: function () {
-        this.context.invoke('BulletPlugin.insertList', 'ol');
-    },
-    /**
-     * Insert table (respecting unbreakable node rules).
-     *
-     * @private
-     * @param {string} dim (eg: 3x3)
-     */
-    _insertTable: function (dim) {
-        this.context.invoke('TablePlugin.insertTable', dim);
-    },
-    /**
-     * Insert an ordered list.
-     *
-     * @private
-     */
-    _insertUnorderedList: function () {
-        this.context.invoke('BulletPlugin.insertList', 'ul');
-    },
-    /**
-     * Adds a TextPlugin command to the editor object.
-     * The command will exist in the editor object under the name
-     * arg if specified, or commandName otherwise.
-     *
-     * @param {String} commandName
-     * @param {String} arg
-     */
-    _makeTextCommand: function (commandName, arg) {
-        var self = this;
-        this[arg || commandName] = self.wrapCommand(function (value) {
-            self.context.invoke('TextPlugin.' + commandName, arg || value, value);
+    _isEditorContent (node) {
+        if (this.editor === node || this.editor.contains(node)) {
+            return true;
+        }
+
+        var descendents = this._getDecendents().map(function (obj) {
+            return Object.values(obj);
         });
-    },
+        descendents = utils.uniq(utils.flatten(descendents));
+        var childrenDom = descendents.filter(function (pluginNode) {
+            return pluginNode && pluginNode.DOCUMENT_NODE &&
+                pluginNode.tagName && pluginNode.tagName !== 'BODY' && pluginNode.tagName !== 'HTML' &&
+                pluginNode.contains(node);
+        });
+        return !!childrenDom.length;
+    }
     /**
-     * Outdent a list or a format node.
+     * @private
+     * @param {string[]} templatesDependencies
+     * @returns {Promise}
+     */
+    _loadTemplates (templatesDependencies) {
+        var xmlPath;
+        var promises = [];
+        var _onLoadTemplates = this._onLoadTemplates.bind(this);
+        while ((xmlPath = templatesDependencies.shift())) {
+            promises.push(null, this.options.getXHR(xmlPath).then(_onLoadTemplates));
+        }
+        return Promise.all(promises);
+    }
+    /**
+     * @private
+     */
+    _mouseEventFocus () {
+        this._onMouseDownTime = null;
+        if (!this._editableHasFocus && !this._isEditorContent(document.activeElement)) {
+            this.editable.focus();
+        }
+        if (!this._isFocused) {
+            this._isFocused = true;
+            this._onFocus();
+        }
+    }
+    /**
+     * @private
+     * @param {Object} params
+     */
+    _prepareOptions (params) {
+        var self = this;
+        params = utils.deepClone(params);
+        var defaults = (function def (defaults) {
+            defaults = defaults && defaults.slice ? defaults.slice() : Object.assign({}, defaults);
+            Object.keys(defaults).forEach(function (key) {
+                var val = defaults[key];
+                if (val && typeof val === 'object' && !('ignoreCase' in val && val.test) && (typeof val.style !== "object" || typeof val.ownerDocument !== "object")) {
+                    defaults[key] = def(val);
+                }
+            });
+            return defaults;
+        })(we3.options);
+        utils.defaults(params, defaults);
+        utils.defaults(params.env, defaults.env);
+        utils.defaults(params.plugins, defaults.plugins);
+        utils.defaults(params, {
+            loadTemplates: this._loadTemplates.bind(this),
+            renderTemplate: this._renderTemplate.bind(this),
+            translateTemplateNodes: this._translateTemplateNodes.bind(this),
+            translate: this._translateString.bind(this),
+        });
+
+        var superGetXHR = this._getXHR.bind(this);
+        var getXHR = params.getXHR || superGetXHR;
+        params.getXHR = function (pluginName, url, values) {
+            return getXHR(pluginName, url, values, superGetXHR);
+        };
+
+        var renderTemplate = params.renderTemplate;
+        params.renderTemplate = function (pluginName, template, values) {
+            var fragment = document.createElement('we3-fragment');
+            fragment.innerHTML = renderTemplate(pluginName, template, values);
+            self.options.translateTemplateNodes(pluginName, fragment);
+            return fragment.innerHTML;
+        },
+        params.hasFocus = function () {return self._isFocused;};
+
+        this.plugins = params.plugins;
+        delete params.plugins;
+        this.options = utils.deepFreeze(utils.deepClone(params));
+    }
+    /**
+     * @private
+     * @param {string} pluginName
+     * @param {string} template
+     * @param {any} values
+     * @returns {string}
+     */
+    _renderTemplate (pluginName, template, values) {
+        if (!(template in this._templates)) {
+            throw new Error('Template "' + template + '" not found.');
+        }
+        return this._templates[template];
+    }
+    /**
+     * Save all event methods defined in editorEvents for safe destruction.
      *
      * @private
-     * @returns {false|Node[]} contents of list/outdented item
      */
-    _outdent: function () {
-        return this.context.invoke('BulletPlugin.outdent');
-    },
-});
+    _saveEventMethods () {
+        var self = this;
+        var events = [];
+        Object.keys(this.editorEvents).forEach(function (key) {
+            var parts = key.split(' ');
+            events.push({
+                name: parts[0],
+                target: parts[1],
+                method: self[self.editorEvents[key]].bind(self),
+            });
+        });
+        this.editorEvents = events;
+    }
+    /**
+     * @private
+     * @param {string} pluginName
+     * @param {string} string
+     * @returns {string}
+     */
+    _translateString (pluginName, string) {
+        string = string.replace(/\s\s+/g, ' ');
+        if (this.options.lang && this.options.lang[string]) {
+            return this.options.lang[string];
+        }
+        console.warn("Missing translation: " + string);
+        return string;
+    }
+    /**
+     * @private
+     * @param {string} pluginName
+     * @param {element} node
+     * @returns {string}
+     */
+    _translateTemplateNodes (pluginName, node) {
+        var self = this;
+        var regExpText = /^([\s\n\r\t]*)(.*?)([\s\n\r\t]*)$/;
+        var attributesToTranslate = ['title', 'alt', 'help', 'placeholder', 'aria-label'];
+        (function translateNodes(elem) {
+            if (elem.attributes) {
+                Object.values(elem.attributes).forEach(function (attribute) {
+                    if (attributesToTranslate.indexOf(attribute.name) !== -1) {
+                        var text = attribute.value.match(regExpText);
+                        if (text && text[2].length) {
+                            var value = text[1] + self.options.translate(pluginName, text[2]) + text[3];
+                            value = self._pluginsManager.translatePluginString(pluginName, value, text[2], elem, attribute.name);
+                            attribute.value = value;
+                        }
+                    }
+                });
+            }
 
-// Override Summernote default editor
-registry.add('editor', NewSummernoteEditor);
+            var nodes = elem.childNodes;
+            var i = nodes.length;
+            while (i--) {
+                var node = nodes[i];
+                if (node.nodeType == 3) {
+                    var text = node.nodeValue.match(regExpText);
+                    if (text && text[2].length) {
+                        var value = text[1] + self.options.translate(pluginName, text[2]) + text[3];
+                        value = self._pluginsManager.translatePluginString(pluginName, value, text[2], node, 'nodeValue');
+                        node.nodeValue = value;
+                    }
+                } else if (node.nodeType == 1 || node.nodeType == 9 || node.nodeType == 11) {
+                    translateNodes(node);
+                }
+            }
+        })(node);
+    }
+    /**
+     * Return the last added, non-null element in an array.
+     *
+     * @private
+     * @param {any []} array
+     * @returns {any}
+     */
+    _unstack (array) {
+        var result = null;
+        for (var k = array.length - 1; k >= 0; k--) {
+            if (array[k] !== null) {
+                result = array[k];
+                break;
+            }
+        }
+        return result;
+    }
 
-return NewSummernoteEditor;
+    //--------------------------------------------------------------------------
+    // Handler
+    //--------------------------------------------------------------------------
 
-});
+    /**
+     * triggerUp 'blur'.
+     *
+     * @private
+     * @param {Object} [options]
+     */
+    _onBlur (options) {
+        this._pluginsManager.blurEditor();
+        this.triggerUp('blur', options);
+    }
+    /**
+     * @private
+     */
+    _onBlurEditable () {
+        var self = this;
+        this._editableHasFocus = false;
+        if (!this._isFocused) {
+            return;
+        }
+        if (!this._justFocused && !this._mouseInEditor) {
+            if (this._isFocused) {
+                this._isFocused = false;
+                this._onBlur();
+            }
+        } else if (!this._forceEditableFocus) {
+            this._forceEditableFocus = true;
+            setTimeout(function () {
+                if (!self._isEditorContent(document.activeElement)) {
+                    self.editable.focus();
+                }
+                self._forceEditableFocus = false; // prevent stack size exceeded.
+            });
+        } else {
+            this._mouseInEditor = null;
+        }
+    }
+    /**
+     * @private
+     */
+    _onChange () {
+        this._dirty = true;
+    }
+    /**
+     * triggerUp 'wysiwyg_focus'.
+     *
+     * @private
+     * @param {Object} [options]
+     */
+    _onFocus (options) {
+        this._pluginsManager.focusEditor();
+        this.triggerUp('focus', options);
+    }
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onFocusEditable () {
+        var self = this;
+        this._editableHasFocus = true;
+        this._justFocused = true;
+        setTimeout(function () {
+            self._justFocused = true;
+        });
+    }
+    /**
+     * @private
+     * @param {OdooEvent} ev
+     * @return {any}
+     */
+    _onGetValue (ev) {
+        ev.stopPropagation();
+        return ev.data.callback(this.getValue(ev.data.options || {}));
+    }
+    /**
+     * @private
+     * @param {string} html
+     */
+    _onLoadTemplates (html) {
+        var self = this;
+        var fragment = document.createElement('we3-fragment');
+        fragment.innerHTML = html;
+        fragment.querySelectorAll('[t-name]').forEach(function (template) {
+            var templateName = template.getAttribute('t-name');
+            template.removeAttribute('t-name');
+            self._templates[templateName] = template.tagName === 'T' ? template.innerHTML : template.outerHTML;
+        });
+    }
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onMouseDown (ev) {
+        if (this._isEditorContent(ev.target)) {
+            this._mouseEventFocus();
+            this._onMouseDownTime = setTimeout(this._mouseEventFocus.bind(this));
+        } else if (this._isFocused) {
+            this._isFocused = false;
+            this._onBlur();
+        }
+    }
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onMouseEnter (ev) {
+        if (this._isFocused && !this._mouseInEditor && this._isEditorContent(ev.target)) {
+            this._mouseInEditor = true;
+        }
+    }
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onMouseLeave () {
+        if (this._isFocused && this._mouseInEditor) {
+            this._mouseInEditor = null;
+        }
+    }
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onMouseMove (ev) {
+        if (this._mouseInEditor === null) {
+            this._mouseInEditor = !!this._isEditorContent(ev.target);
+        }
+    }
+    /**
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _onPaste (ev) {
+        ev.preventDefault();
+    }
+    /**
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _onSetValue (ev) {
+        ev.stopPropagation();
+        this.setValue(ev.data.value);
+    }
+};
+
+})();

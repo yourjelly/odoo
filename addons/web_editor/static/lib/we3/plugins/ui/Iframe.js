@@ -1,142 +1,85 @@
-odoo.define('web_editor.wysiwyg.iframe', function (require) {
+(function () {
 'use strict';
 
-var Wysiwyg = require('web_editor.wysiwyg');
-var ajax = require('web.ajax');
-var core = require('web.core');
+//var ajax = require('web.ajax');
+var cache = {};
 
-var qweb = core.qweb;
-
-var _fnSummernoteMaster = $.fn.summernote;
-var _summernoteMaster = $.summernote;
-$.fn.summernote = function () {
-    var summernote = this[0].ownerDocument.defaultView._fnSummenoteSlave || _fnSummernoteMaster;
-    return summernote.apply(this, arguments);
-};
-window._fnSummernoteMaster = $.fn.summernote;
-window._summernoteMaster = _summernoteMaster;
-
-/**
- * Add option (inIframe) to load Wysiwyg in an iframe.
- **/
-Wysiwyg.include({
+var IframePlugin = class extends we3.AbstractPlugin {
     /**
-     * Add options to load Wysiwyg in an iframe.
-     *
-     * @override
-     * @param {boolean} options.inIframe
-     **/
-    init: function (parent, options) {
-        this._super.apply(this, arguments);
-        if (this.options.inIframe) {
-            if (!this.options.iframeCssAssets) {
-                this.options.iframeCssAssets = 'web_editor.wysiwyg_iframe_css_assets';
-            }
-            this._onUpdateIframeId = 'onLoad_' + this.id;
-        }
-    },
-    /**
-     * Load assets to inject into iframe.
-     *
      * @override
      **/
-    willStart: function () {
-        if (!this.options.inIframe) {
-            return this._super();
-        }
-        if (this.options.iframeCssAssets) {
+    constructor () {
+        super(...arguments);
+        this.loaderKey = 'wysiwygPluginIframeOnLoad';
+        this.defaultCSS = 'body {background-color: transparent;}'+
+                'editable {width: 100%; display: block; min-height: 92%;}'+
+                'editable, editable:focus {outline: none;}';
+
+
+        if (typeof this.options.iframeCssAssets === 'string') {
             this.defAsset = ajax.loadAsset(this.options.iframeCssAssets);
         } else {
             this.defAsset = Promise.resolve({cssLibs: [], cssContents: []});
         }
-        this.$target = this.$el;
-        return this.defAsset
-            .then(this._loadIframe.bind(this))
-            .then(this._super.bind(this)).then(function () {
-                var _summernoteMaster = $.summernote;
-                var _summernoteSlave = this.$iframe[0].contentWindow._summernoteSlave;
-                _summernoteSlave.options = _.extend({}, _summernoteMaster.options, {modules: _summernoteSlave.options.modules});
-                this._enableBootstrapInIframe();
-            }.bind(this));
-    },
+
+        // TODO: check for master => this.$iframe.parents().removeClass('o_wysiwyg_no_transform');
+
+        if (this.options.iframeWillCached) {
+            this._initPreloadIframeCached();
+        } else {
+            this._initPreloadIframe();
+        }
+
+        this._loadIframePromise = this._createIframe();
+        this.params.insertAfterContainer(this.iframe);
+    }
+    isInitialized () {
+        return Promise.all([this.defAsset, this._preloadIframePromise]);
+    }
     /**
+     * At this step, the container of the preload iframe is inserted in the DOM. Every plugins have
+     * their content into this container.
+     *
+     * The iframe is allready inside the DOM (not in the container)
+     *
      * @override
-     */
-    destroy: function () {
-        if (!this.options.inIframe) {
-            return this._super();
+     **/
+    start () {
+        var promise = this._loadIframePromise.then(this._moveToIframeFromPreload.bind(this));
+        if (this.editable.ownerDocument.contains(this.iframe)) {
+            return promise;
+        } else {
+            return Promise.resolve({fakeLoading: 'target is not in the DOM'});
         }
-        $(document.body).off('.' + this.id);
-
-        this.$iframe.parents().removeClass('o_wysiwyg_no_transform');
-
-        this.$target.insertBefore(this.$iframe);
-
-        delete window.top[this._onUpdateIframeId];
-        if (this.$iframeTarget) {
-            this.$iframeTarget.remove();
+    }
+    destroy () {
+        if (this._preloadIframe && this._preloadIframe.parentNode) {
+            this._preloadIframe.parentNode.removeChild(this._preloadIframe);
         }
-        if (this.$iframe) {
-            this.$iframe.remove();
-        }
-        this._super();
-    },
+        delete window.top[this.loaderKey + this.editorId + '_start'];
+        delete window.top[this.loaderKey + this.editorId + '_load'];
+        super.destroy();
+    }
 
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
     /**
-     * Change fullsreen feature.
-     *
-     * @override
-     * @returns {Object} modules list to load
-     */
-    _getPlugins: function () {
-        var self = this;
-        var plugins = this._super();
-        plugins.fullscreen = plugins.fullscreen.extend({
-            toggle: function () {
-                if (!self.$iframe) {
-                    return this._super();
-                }
-                self.$iframe.toggleClass('o_fullscreen');
-                self.$iframe.contents().find('body').toggleClass('o_fullscreen');
-
-                // Hack to avoid a parent of the fullscreen iframe to have a
-                // transform (otherwise the position: fixed won't work)
-                self.$iframe.parents().toggleClass('o_wysiwyg_no_transform');
-            },
-            isFullscreen: function () {
-                if (!self.$iframe) {
-                    return this._super();
-                }
-                return self.$iframe.hasClass('o_fullscreen');
-            },
-        });
-        return plugins;
-    },
-    /**
-     * This method is called after the iframe is loaded with the editor. This is
-     * to activate the bootstrap features that out of the iframe would launch
-     * automatically when changing the dom.
+     * Create the iframe Node into `this.iframe`.
      *
      * @private
+     * @returns {Promise}
      */
-    _enableBootstrapInIframe: function () {
-        var body = this.$iframe[0].contentWindow.document.body;
-        var $toolbarButtons = this._summernote.layoutInfo.toolbar.find('[data-toggle="dropdown"]').dropdown({
-            boundary: body,
+    _createIframe () {
+        var self = this;
+        this.iframe = document.createElement('iframe');
+        var loadPromise = new Promise(function (resolve) {
+            self.iframe.addEventListener('load', resolve, false);
         });
 
-        function hideDrowpdown() {
-            var $expended = $toolbarButtons.filter('[aria-expanded="true"]').parent();
-            $expended.children().removeAttr('aria-expanded').removeClass('show');
-            $expended.removeClass('show');
-        }
-        $(body).on('mouseup.' + this.id, hideDrowpdown);
-        $(document.body).on('click.' + this.id, hideDrowpdown);
-    },
+        return loadPromise;
+    }
     /**
      * Create iframe, inject css and create a link with the content,
      * then inject the target inside.
@@ -144,91 +87,144 @@ Wysiwyg.include({
      * @private
      * @returns {Promise}
      */
-    _loadIframe: function () {
+    _createPreloadIframe () {
+        this._preloadIframe = document.createElement('iframe');
+        this._preloadIframe.style.display = 'none';
+        this._preloadIframe.style.position = 'absolute';
+        return this._createPromiseOnLoadIframe('preload', this._preloadIframe);
+    }
+    /**
+     * Return a promise that resolves to the iframe Node
+     * when the iframe is loaded.
+     *
+     * @private
+     * @param {String} step
+     * @param {Node} iframe
+     * @returns {Promise<Node>}
+     */
+    _createPromiseOnLoadIframe (step, iframe) {
         var self = this;
-        this.$iframe = $('<iframe class="wysiwyg_iframe">').css({
-            'min-height': '400px',
-            width: '100%'
-        });
-        var avoidDoubleLoad = 0; // this bug only appears on some configurations.
+        var key = this.loaderKey + '_' + this.editorId + '_' + step;
 
-        // resolve deferred on load
-        var def = new Promise(function (resolve) {
-            window.top[self._onUpdateIframeId] = function (_avoidDoubleLoad) {
-                if (_avoidDoubleLoad !== avoidDoubleLoad) {
-                    console.warn('Wysiwyg iframe double load detected');
-                    return;
-                }
-                delete window.top[self._onUpdateIframeId];
-                var $iframeTarget = self.$iframe.contents().find('#iframe_target');
-                $iframeTarget.append(self.$target);
-                resolve();
+        var loadPromise = new Promise(function (resolve) {
+            iframe.addEventListener('load', resolve, false);
+        });
+
+        Promise.all([this.defAsset, loadPromise]).then(function (defResults) {
+            self._insertAssetInIframe(step, iframe, defResults[0]);
+        });
+
+        return new Promise(function (resolve) {
+            // resolve deferred on load the body of this iframe
+            window.top[key] = function () {
+                delete window.top[key];
+                resolve(iframe);
             };
         });
-        this.$iframe.data('loadDef', def);  // for unit test
-
-        // inject content in iframe
-
-        this.$iframe.on('load', function onLoad (ev) {
-            var _avoidDoubleLoad = ++avoidDoubleLoad;
-            this.defAsset.then(function (asset) {
-                if (_avoidDoubleLoad !== avoidDoubleLoad) {
-                    console.warn('Wysiwyg immediate iframe double load detected');
-                    return;
-                }
-                var iframeContent = qweb.render('wysiwyg.iframeContent', {
-                    asset: asset,
-                    updateIframeId: this._onUpdateIframeId,
-                    avoidDoubleLoad: _avoidDoubleLoad
-                });
-                this.$iframe[0].contentWindow.document
-                    .open("text/html", "replace")
-                    .write(iframeContent);
-            }.bind(this));
-        }.bind(this));
-
-        this.$iframe.insertAfter(this.$target);
-
-        return def;
-    },
-});
-
-//--------------------------------------------------------------------------
-// Public helper
-//--------------------------------------------------------------------------
-
-/**
- * Get the current range from Summernote.
- *
- * @param {Node} [DOM]
- * @returns {Object}
-*/
-Wysiwyg.getRange = function (DOM) {
-    var summernote = (DOM.defaultView || DOM.ownerDocument.defaultView)._summernoteSlave || _summernoteMaster;
-    var range = summernote.range.create();
-    return range && {
-        sc: range.sc,
-        so: range.so,
-        ec: range.ec,
-        eo: range.eo,
-    };
-};
-/**
- * @param {Node} sc - start container
- * @param {Number} so - start offset
- * @param {Node} ec - end container
- * @param {Number} eo - end offset
-*/
-Wysiwyg.setRange = function (sc, so, ec, eo) {
-    var summernote = sc.ownerDocument.defaultView._summernoteSlave || _summernoteMaster;
-    $(sc).focus();
-    if (ec) {
-        summernote.range.create(sc, so, ec, eo).select();
-    } else {
-        summernote.range.create(sc, so).select();
     }
-    // trigger for Unbreakable
-    $(sc.tagName ? sc : sc.parentNode).trigger('wysiwyg.range');
+    /**
+     * Intialize and preload the iframe.
+     *
+     * @private
+     */
+    _initPreloadIframe () {
+        var self = this;
+        this._preloadIframePromise = this._createPreloadIframe();
+        document.body.appendChild(this._preloadIframe);
+
+        var cached = cache[this.options.iframeCssAssets+''] = {
+            promise: this._preloadIframePromise,
+        };
+
+        this._preloadIframePromise.then(function (iframe) {
+            var node = document.createElement('we3-editor');
+            self.params.addEditableContainer(node);
+
+            cached.node = self._preloadEditorContainer = node;
+            cached.style = self._preloadIframeStyle = [].slice.call(iframe.contentDocument.head.childNodes);
+        });
+    }
+    /**
+     * Initialize and preload the iframe, from cache if possible.
+     *
+     * @private
+     */
+    _initPreloadIframeCached () {
+        var self = this;
+        var cached = cache[this.options.iframeCssAssets+''];
+        if (cached) {
+            cached.promise.then(function () {
+                var node = document.createElement('we3-editor');
+                self.params.addEditableContainer(node);
+
+                self._preloadEditorContainer = node;
+                self._preloadIframeStyle = cached.style;
+            });
+            this._preloadIframePromise = cached.promise;
+        } else {
+            this._initPreloadIframe();
+        }
+    }
+    /**
+     * Insert `assets` into the `iframe`.
+     *
+     * @private
+     * @param {String} step
+     * @param {Node} iframe
+     * @param {Object} assets
+     */
+    _insertAssetInIframe (step, iframe, assets) {
+        var key = this.loaderKey + '_' + this.editorId + '_' + step;
+        iframe.name = key;
+        iframe.contentDocument
+            .open("text/html", "replace")
+            .write(
+                '<head>' +
+                    '<meta charset="utf-8">' +
+                    '<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>\n' +
+                    '<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>\n' +
+                    '<style type="text/css">' + this.defaultCSS + '</style>\n' +
+                    (assets.cssLibs || []).map(function (cssLib) {
+                        return '<link type="text/css" rel="stylesheet" href="' + cssLib + '"/>';
+                    }).join('\n') + '\n' +
+                    (assets.cssContents || []).map(function (cssContent) {
+                        return '<style type="text/css">' + cssContent + '</style>';
+                    }).join('\n') + '\n' +
+                '</head>\n' +
+                '<body></body>');
+
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.textContent = "window.top['" + key + "'] && window.top['" + key + "']();";
+        var head = iframe.contentDocument.firstElementChild.firstElementChild;
+        head.appendChild(script);
+    }
+    /**
+     * Move the iframe out of its temporary container after preload.
+     *
+     * @private
+     */
+    _moveToIframeFromPreload () {
+        var self = this;
+        var doc = this.iframe.contentDocument;
+        doc.body.innerHTML = '';
+        doc.body.appendChild(this._preloadEditorContainer);
+
+        this._preloadIframeStyle.forEach(function (node) {
+            var defaultView = node.ownerDocument.defaultView;
+            var parentIframe = defaultView && defaultView.frameElement;
+            if (parentIframe && parentIframe.parentNode && parentIframe !== self._preloadIframe) {
+                node = self.utils.clone(node);
+            }
+            doc.head.appendChild(node);
+        });
+
+        if (this._preloadIframe && this._preloadIframe.parentNode) {
+            this._preloadIframe.parentNode.removeChild(this._preloadIframe);
+        }
+    }
 };
 
-});
+we3.addPlugin('Iframe', IframePlugin);
+
+})();
