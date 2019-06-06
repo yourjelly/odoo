@@ -8,7 +8,7 @@ var assetsLoaded = false;
 var WysiwygRoot = Widget.extend({
     assetLibs: ['web_editor.compiled_assets_wysiwyg'],
 
-    publicMethods: ['isDirty', 'save', 'getValue', 'setValue', 'getEditable', 'on', 'trigger', 'focus'],
+    publicMethods: ['isDirty', 'save', 'getValue', 'setValue', 'on', 'trigger', 'focus'],
 
     /**
      *   @see 'web_editor.wysiwyg' module
@@ -25,22 +25,23 @@ var WysiwygRoot = Widget.extend({
      **/
     willStart: function () {
         var self = this;
-
         var $target = this.$el;
         this.$el = null;
+        var params = Object.assign({}, this._params);
+        if (!assetsLoaded || this._params.preload) {
+            params.test = {
+                auto: false,
+            };
+        }
+        this._params = null;
 
         return this._super().then(function () {
             if (!assetsLoaded) {
-                var Wysiwyg = odoo.__DEBUG__.services['web_editor.wysiwyg'];
-                _.each(['getRange', 'setRange', 'setRangeFromNode'], function (methodName) {
-                    WysiwygRoot[methodName] = Wysiwyg[methodName].bind(Wysiwyg);
-                });
                 assetsLoaded = true;
             }
 
             var Wysiwyg = self._getWysiwygContructor();
-            var instance = new Wysiwyg(self, self._params);
-            self._params = null;
+            var instance = new Wysiwyg(self, params);
 
             _.each(self.publicMethods, function (methodName) {
                 self[methodName] = instance[methodName].bind(instance);

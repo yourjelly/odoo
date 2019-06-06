@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates id="template" xml:space="preserve">
+    <we3-group class="wysiwyg-button-link" t-name="wysiwyg.buttons.link">
+        <we3-button name="link-add" title="Link" data-method="showLinkDialog">
+            <i class="fa fa-link"></i>
+        </we3-button>
+    </we3-group>
+
+    <we3-group class="wysiwyg-button-link" t-name="wysiwyg.popover.link">
+        <a target="_blank" href="#">#</a>
+        <we3-button name="link-add" title="Link" data-method="showLinkDialog">
+            <i class="fa fa-link"></i>
+        </we3-button>
+        <we3-button name="link-remove" title="Unlink" data-method="unlink">
+            <i class="fa fa-unlink"></i>
+        </we3-button>
+    </we3-group>
+</templates>

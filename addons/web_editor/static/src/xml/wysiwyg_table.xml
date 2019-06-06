@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates id="template" xml:space="preserve">
+    <we3-dropdown t-name="wysiwyg.buttons.tablepicker">
+        <we3-toggler title="Table">
+            <i class="fa fa-table"></i>
+        </we3-toggler>
+        <we3-tablepicker>
+            <div class="wysiwyg-dimension-picker">
+                <div class="wysiwyg-dimension-picker-mousecatcher">
+                    <we3-row t-foreach="plugin._tableMatrix" t-as="row">
+                        <t t-foreach="row" t-as="cell">
+                            <we3-button name="table-cellpicker" data-method="insertTable" t-attf-data-value="{{ cell }}"/>
+                        </t>
+                    </we3-row>
+                </div>
+            </div>
+            <div class="wysiwyg-dimension-display"/>
+        </we3-tablepicker>
+    </we3-dropdown>
+
+    <t t-name="wysiwyg.popover.table">
+        <we3-group>
+            <we3-button name="add-row-below" title="Add row below" data-method="addRow" data-value="below">
+                <i class="icon-row-below"></i>
+            </we3-button>
+            <we3-button name="add-row-above" title="Add row above" data-method="addRow" data-value="above">
+                <i class="icon-row-above"></i>
+            </we3-button>
+            <we3-button name="add-col-before" title="Add column left" data-method="addCol" data-value="left">
+                <i class="icon-col-before"></i>
+            </we3-button>
+            <we3-button name="add-col-after" title="Add column right" data-method="addCol" data-value="right">
+                <i class="icon-col-after"></i>
+            </we3-button>
+        </we3-group>
+        <we3-group>
+            <we3-button name="delete-row" title="Delete row" data-method="deleteRow">
+                <i class="icon-row-remove"></i>
+            </we3-button>
+            <we3-button name="delete-col" title="Delete column" data-method="deleteCol">
+                <i class="icon-col-remove"></i>
+            </we3-button>
+            <we3-button name="delete-table" title="Delete table" data-method="deleteTable">
+                <i class="fa fa-trash"></i>
+            </we3-button>
+        </we3-group>
+    </t>
+</templates>
