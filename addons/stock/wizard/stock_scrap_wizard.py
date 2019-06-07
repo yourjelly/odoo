@@ -23,6 +23,7 @@ class StockScrapWizard(models.TransientModel):
     package_id = fields.Many2one(
         'stock.quant.package', 'Package')
     owner_id = fields.Many2one('res.partner', 'Owner')
+    scrap_id = fields.Many2one('stock.scrap', 'Scrap')
     picking_id = fields.Many2one('stock.picking', 'Picking')
     company_id = fields.Many2one('res.company', string='Company')
     location_id = fields.Many2one(
@@ -54,7 +55,7 @@ class StockScrapWizard(models.TransientModel):
     @api.onchange('product_id')
     def onchange_product_id(self):
         if self.product_id:
-            self.product_uom_id = self.product_id.uom_id.id
+            self.product_uom_id = self.product_id.uom_id
             # Check if we can get a more precise location instead of
             # the default location (a location corresponding to where the
             # reserved product is stored)
@@ -79,8 +80,10 @@ class StockScrapWizard(models.TransientModel):
         }
 
     def button_scrap(self):
-        vals = self._prepare_scrap_values()
-        scrap = self.env['stock.scrap'].create(vals)
+        scrap = self.scrap_id
+        if not scrap:
+            vals = self._prepare_scrap_values()
+            scrap = self.env['stock.scrap'].create(vals)
         return scrap.do_scrap()
 
     def action_validate(self):

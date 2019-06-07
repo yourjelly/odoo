@@ -148,9 +148,13 @@ class StockScrap(models.Model):
             return {
                 'name': _('Insufficient Quantity'),
                 'view_mode': 'form',
-                'res_model': 'stock.scrap.wizard',
-                'view_id': self.env.ref('stock.stock_warn_insufficient_qty_form_view').id,
+                'res_model': 'stock.warn.insufficient.qty.scrap',
+                'view_id': self.env.ref('stock.stock_warn_insufficient_qty_scrap_form_view').id,
                 'type': 'ir.actions.act_window',
-                'res_id': self.id,
+                'context': {
+                    'default_product_id': self.product_id.id,
+                    'default_location_id': self.location_id.id,
+                    'default_scrap_id': self.id
+                },
                 'target': 'new'
             }

@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
+from odoo.tools import float_compare
 
 
 class StockWarnInsufficientQty(models.AbstractModel):
@@ -22,3 +23,14 @@ class StockWarnInsufficientQty(models.AbstractModel):
 
     def action_done(self):
         raise NotImplementedError()
+
+
+class StockWarnInsufficientQtyScrap(models.TransientModel):
+    _name = 'stock.warn.insufficient.qty.scrap'
+    _inherit = 'stock.warn.insufficient.qty'
+    _description = 'Warn Insufficient Scrap Quantity'
+
+    scrap_id = fields.Many2one('stock.scrap', 'Scrap')
+
+    def action_done(self):
+        return self.scrap_id.do_scrap()
