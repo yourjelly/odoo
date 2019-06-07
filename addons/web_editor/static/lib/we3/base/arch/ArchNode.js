@@ -47,7 +47,7 @@ we3.ArchNode = class {
      * @returns {ArchNode}
      */
     clone (options) {
-        var clone = new this.constructor(this.params, this.nodeName, this.attributes && this.attributes.toJSON(), this.nodeValue);
+        var clone = new this.constructor(this.params, this.nodeName, this.attributes, this.nodeValue);
         clone.isClone = True;
         clone.id = this.id;
 

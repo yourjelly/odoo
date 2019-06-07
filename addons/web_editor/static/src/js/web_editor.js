@@ -498,11 +498,7 @@ var Wysiwyg = Widget.extend({
         // }
 
         ev.stopPropagation();
-        this.trigger_up('wysiwyg_change', {
-            html: this.getValue(),
-            hints: this.hints,
-            attachments: this.attachments,
-        });
+        this.trigger_up('wysiwyg_change', ev.data);
     },
     /**
      * trigger_up 'wysiwyg_attachment' when add an image found in the view.

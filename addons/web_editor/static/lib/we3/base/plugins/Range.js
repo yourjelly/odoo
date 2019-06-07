@@ -689,7 +689,7 @@ var BaseRange = class extends we3.AbstractPlugin {
         if (!range || range.sc !== e.target && !e.target.contains(range.sc) && range.ec !== e.target && !e.target.contains(range.ec)) {
             var archNodeID = this.dependencies.Renderer.getID(e.target);
             var archNode = archNodeID && this.dependencies.Arch.getNode(archNodeID);
-            var voidoid = archNode.ancestor('isVoidoid', true);
+            var voidoid = archNode && archNode.ancestor('isVoidoid', true);
             if (voidoid) {
                 this.setRange({
                     scID: voidoid.id,

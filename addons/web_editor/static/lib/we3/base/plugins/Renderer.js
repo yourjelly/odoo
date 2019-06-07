@@ -112,6 +112,9 @@ var BaseRenderer = class extends we3.AbstractPlugin {
     _cleanElements () {
         var els = [];
         (function _getAll(el) {
+            if (el.tagName && el.tagName.indexOf('WE3-') === 0) {
+                return;
+            }
             els.push(el);
             el.childNodes.forEach(_getAll);
         })(this.editable);

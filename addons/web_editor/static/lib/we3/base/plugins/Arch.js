@@ -497,8 +497,12 @@ var BaseArch = class extends we3.AbstractPlugin {
 
         var range;
         var changes = [];
+        var removed = [];
         this._changes.forEach(function (c, i) {
             if (!c.archNode.id || !self.getArchNode(c.archNode.id)) {
+                if (c.archNode.id && removed.indexOf(c.archNode.id) === -1) {
+                    removed.push(c.archNode.id);
+                }
                 return;
             }
             var toAdd = true;
@@ -525,6 +529,7 @@ var BaseArch = class extends we3.AbstractPlugin {
 
         return {
             changes: changes,
+            removed: removed,
             range: range,
         };
     }
@@ -908,35 +913,60 @@ var BaseArch = class extends we3.AbstractPlugin {
      */
     _updateRendererFromChanges (range) {
         var self = this;
+        var BaseRenderer = this.dependencies.BaseRenderer;
+        var BaseRange = this.dependencies.BaseRange;
 
         var result = this._getChanges();
         if (!result.changes.length) {
             return;
         }
 
+        var removed = [];
+        result.removed.map(function (id) {
+            var el = BaseRenderer.getElement(id);
+            if (el) {
+                removed.push({
+                    id: id,
+                    element: el,
+                });
+            }
+        });
+
         var json = result.changes.map(function (change) {
             return self.getArchNode(change.id).toJSON({
                 keepVirtual: true,
             });
         });
-        this.dependencies.BaseRenderer.update(json);
+        BaseRenderer.update(json);
 
         this._archClone = this._arch.clone({keepVirtual: true});
 
         if (range) {
-            this.dependencies.BaseRange.setRange(range);
+            BaseRange.setRange(range);
         } else {
             range = result.range;
-            if (this.dependencies.BaseRenderer.getElement(range.id)) {
-                this.dependencies.BaseRange.setRange({
+            if (BaseRenderer.getElement(range.id)) {
+                BaseRange.setRange({
                     scID: range.id,
                     so: range.offset,
                 });
             }
+            delete result.range;
         }
 
         this.trigger('update', json);
-        this.triggerUp('change');
+
+        result.changes.forEach(function (c) {
+            c.element = BaseRenderer.getElement(c.id);
+        });
+        removed = removed.filter(function (c) {
+            return !BaseRenderer.getID(c.element); // element can be attach to an other node
+        });
+
+        this.triggerUp('change', {
+            changes: result.changes,
+            removed: removed,
+        });
     }
 };
 

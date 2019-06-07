@@ -375,7 +375,7 @@ we3.EventDispatcher = class extends we3.Parented {
             if (parent._triggerUp) {
                 parent._triggerUp(event);
             } else if (parent.trigger) {
-                this.trigger(event.name, event);
+                parent.trigger(event.name, event);
             }
         }
     }

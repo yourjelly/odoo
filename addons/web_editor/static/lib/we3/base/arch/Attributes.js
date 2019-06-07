@@ -10,7 +10,11 @@ var regSplitStyle = /\s*:\s*/;
 var ClassName = class {
     constructor (archNode, classNames) {
         this.archNode = archNode;
-        this.value = classNames.replace(regMultiSpace, ' ').split(' ');
+        if (classNames instanceof ClassName) {
+            this.value = classNames.value.slice();
+        } else {
+            this.value = classNames.replace(regMultiSpace, ' ').split(' ');
+        }
     }
     get length () {
         return this.toString().length;
@@ -110,14 +114,27 @@ var ClassName = class {
 
 //////////////////////////////////////////////////////////////
 
-we3.Attributes = class {
+var Attributes = we3.Attributes = class {
     constructor (archNode, attributes) {
         var self = this;
         this.archNode = archNode;
         this.__order__ = [];
-        attributes.forEach(function (attribute) {
-            self.add(attribute[0], attribute[1]);
-        });
+        if (attributes instanceof Attributes) {
+            this.__order__ = attributes.__order__.slice();
+            this.__order__.forEach(function (name) {
+                var value = attributes[name];
+                if (name === 'class') {
+                    value = new ClassName(self.archNode, value);
+                } else if (name === 'style') {
+                    value = new Style(self.archNode, value);
+                }
+                self[name] = value;
+            });
+        } else {
+            attributes.forEach(function (attribute) {
+                self.add(attribute[0], attribute[1]);
+            });
+        }
     }
     add (name, value) {
         if (!this.archNode.params.isBypassUpdateConstraintsActive()  && this.archNode.isInArch() && !this.archNode.isEditable()) {
@@ -128,7 +145,7 @@ we3.Attributes = class {
             this.__order__.push(name);
         }
         if (name === 'class') {
-            value = new ClassName(this.archNode, value + '');
+            value = new ClassName(self.archNode, value + '');
         } else if (name === 'style') {
             value = new Style(this.archNode, value + '');
         } else if (value === null || value === '') {
@@ -223,16 +240,20 @@ we3.Attributes = class {
 
 //////////////////////////////////////////////////////////////
 
-var Style = class extends we3.Attributes {
+var Style = class extends Attributes {
     constructor (archNode, style) {
-        super(archNode, []);
-        var self = this;
-        style.trim().split(regSplitStyles).forEach(function (style) {
-            var split = style.split(regSplitStyle);
-            if (split.length === 2) {
-                self.add(split[0], split[1]);
-            }
-        });
+        if (style instanceof Style) {
+            super(archNode, style);
+        } else {
+            super(archNode, []);
+            var self = this;
+            style.trim().split(regSplitStyles).forEach(function (style) {
+                var split = style.split(regSplitStyle);
+                if (split.length === 2) {
+                    self.add(split[0], split[1]);
+                }
+            });
+        }
     }
     add (name, value) {
         if (!this.archNode.params.isBypassUpdateConstraintsActive()  && this.archNode.isInArch() && !this.archNode.isEditable()) {
