@@ -3,7 +3,7 @@
 
 var pluginsRegistry = we3.pluginsRegistry = {};
 function whiteList (pluginName) {
-    return [ 'Arch', 'Range', 'Renderer', 'Rules', 'BaseArch', 'BaseRange', 'BaseRenderer', 'BaseRules'].indexOf(pluginName) !== -1;
+    return [ 'Arch', 'Range', 'Renderer', 'Rules', 'BaseArch', 'BaseRange', 'BaseRenderer', 'BaseRules', 'Selector'].indexOf(pluginName) !== -1;
 }
 function isBase (pluginName) {
     return ['BaseArch', 'BaseRange', 'BaseRenderer', 'BaseRules'].indexOf(pluginName) !== -1;

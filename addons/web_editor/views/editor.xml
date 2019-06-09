@@ -54,11 +54,11 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Arch.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Range.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Renderer.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Selector.js"/>
 
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/we3.js"/>
 
     <script type="text/javascript" src="/web_editor/static/lib/we3/options.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/Selector.js"/>
 
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/drop/Clipboard.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/drop/DropBlock.js"/>

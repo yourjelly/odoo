@@ -54,7 +54,7 @@ var booleans = "checked|selected|disabled|readonly|required",
 var Selector = class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
-        this.dependencies = ['Arch'];
+        this.dependencies = ['BaseArch'];
         this._cacheSearchToken = {};
 
         var tokenizeExpr = [];
@@ -83,17 +83,18 @@ var Selector = class extends we3.AbstractPlugin {
      **/
     search (archNode, string, options) {
         var self = this;
+        var BaseArch = this.dependencies.BaseArch;
         if (typeof archNode === 'string') {
             options = string;
             string = archNode;
-            archNode = this.dependencies.Arch.getNode(1);
+            archNode = BaseArch.getArchNode(1);
         }
         if (!archNode) {
-            archNode = this.dependencies.Arch.getNode(1);
+            archNode = BaseArch.getArchNode(1);
         }
 
         if (!(archNode instanceof we3.ArchNode)) {
-            archNode = this.dependencies.Arch.getNode(archNode) || this.dependencies.Arch.parse(archNode).firstChild();
+            archNode = BaseArch.getArchNode(archNode) || BaseArch.parse(archNode).firstChild();
         }
 
         options = options || {};
@@ -102,7 +103,7 @@ var Selector = class extends we3.AbstractPlugin {
         this._tokenize(string).token.forEach(function (token) {
             token = self._tokenizeForSearch(token);
             self._searchFromToken([archNode], token, options).forEach(function (archNode) {
-                var item = options.returnArchNodes ? archNode : archNode.id;
+                var item = options.returnArchNodes ? BaseArch.getClonedArchNode(archNode.id) : archNode.id;
                 if (item !== 1 && items.indexOf(item) === -1) {
                     items.push(item);
                 }
@@ -118,11 +119,12 @@ var Selector = class extends we3.AbstractPlugin {
      **/
     is (archNode, string, options) {
         var self = this;
+        var BaseArch = this.dependencies.BaseArch;
         var isParsed = false;
         if (typeof archNode === 'number') {
-            archNode = this.dependencies.Arch.getNode(archNode);
+            archNode = BaseArch.getArchNode(archNode);
         } else if (!(archNode instanceof we3.ArchNode)) {
-            archNode = this.dependencies.Arch.parse(archNode).firstChild();
+            archNode = BaseArch.parse(archNode).firstChild();
             isParsed = true;
         }
 
@@ -140,11 +142,13 @@ var Selector = class extends we3.AbstractPlugin {
             if (hasChild) {
                 var opt = options || {};
                 if (!opt.filterIds) {
-                    var filterIds = [1];
+                    var filterIds = [];
+                    filterIds[1] = true;
                     var node = archNode;
                     while (node) {
-                        var childIds = self._getChildren(node, false, {}).map(function (archNode) { return archNode.id; });
-                        filterIds.push.apply(filterIds, childIds);
+                        self._getChildren(node, false, {}).forEach(function (archNode) {
+                            filterIds[archNode.id] = true;
+                        });
                         node = node.parent;
                     }
                     opt = Object.assign({filterIds: filterIds}, opt);
@@ -152,7 +156,7 @@ var Selector = class extends we3.AbstractPlugin {
 
                 token = self._tokenizeForSearch(token);
 
-                var arch = self.dependencies.Arch.getNode(1);
+                var arch = BaseArch.getArchNode(1);
                 if (isParsed) {
                     arch.childNodes.push(archNode);
                     archNode.parent = arch;
@@ -304,47 +308,38 @@ var Selector = class extends we3.AbstractPlugin {
     }
 
 
-    _getChildren (archNode, loop, options) {
-        var self = this;
-        var nodes = [];
+    _getChildren (archNode, loop, options, _nodes) {
+        var nodes = _nodes || [];
         if (archNode.childNodes) {
-            archNode.childNodes.forEach(function (archNode) {
-                if (options && options.filterIds && options.filterIds.indexOf(archNode.id) === -1) {
-                    return;
+            var filterIds = options && options.filterIds;
+            var childNodes = archNode.childNodes;
+            for (var k = 0, len = childNodes.length; k < len; k++) {
+                var archNode = childNodes[k];
+                if (filterIds && !filterIds[archNode.id]) {
+                    continue;
                 }
-                if (!archNode.isVirtual() || !archNode.isText()) {
-                    nodes.push(archNode);
-                }
-                if (loop) {
-                    nodes = nodes.concat(self._getChildren(archNode, loop, options));
-                }
-            });
-        }
-        return nodes;
-    }
-    _searchFromTokenLoop (archNodes, callback) {
-        var nodes = [];
-        archNodes.forEach(function (archNode) {
-            if (callback(archNode)) {
                 nodes.push(archNode);
-            }
-        })
+                if (loop) {
+                    this._getChildren(archNode, loop, options, nodes);
+                }
+            };
+        }
         return nodes;
     }
 
 
     _searchFromToken_ID (archNodes, identifier) {
-        return this._searchFromTokenLoop(archNodes, function (archNode) {
+        return archNodes.filter(function (archNode) {
             return archNode.attributes && archNode.attributes.id && archNode.attributes.id.toLowerCase() === identifier;
         });
     }
     _searchFromToken_CLASS (archNodes, identifier) {
-        return this._searchFromTokenLoop(archNodes, function (archNode) {
+        return archNodes.filter(function (archNode) {
             return archNode.attributes && archNode.attributes.class.contains(identifier);
         });
     }
     _searchFromToken_ATTR (archNodes, identifier, value) {
-        return this._searchFromTokenLoop(archNodes, function (archNode) {
+        return archNodes.filter(function (archNode) {
             var val = archNode.attributes && archNode.attributes[identifier];
             if (!val) {
                 return false;
@@ -360,7 +355,7 @@ var Selector = class extends we3.AbstractPlugin {
         if (identifier === '*') {
             return archNodes;
         }
-        return this._searchFromTokenLoop(archNodes, function (archNode) {
+        return archNodes.filter(function (archNode) {
             return archNode.nodeName === identifier;
         });
     }
@@ -405,23 +400,23 @@ var Selector = class extends we3.AbstractPlugin {
 
 
     _searchFromToken_PSEUDO_lang (archNodes, value) {
-        return this._searchFromTokenLoop(archNodes, function (archNode) {
+        return archNodes.filter(function (archNode) {
             return archNode.attributes.lang === value;
         });
     }
     _searchFromToken_PSEUDO_enabled (archNodes) {
         var self = this;
-        return this._searchFromTokenLoop(archNodes, function (archNode) {
+        return archNodes.filter(function (archNode) {
             return !self._searchFromToken_PSEUDO_disabled([archNode])[0];
         });
     }
     _searchFromToken_PSEUDO_disabled (archNodes) {
-        return this._searchFromTokenLoop(archNodes, function (archNode) {
+        return archNodes.filter(function (archNode) {
             return archNode.attributes.disabled !== 'false' && !!archNode.attributes.disabled;
         });
     }
     _searchFromToken_PSEUDO_checked (archNodes) {
-        return this._searchFromTokenLoop(archNodes, function (archNode) {
+        return archNodes.filter(function (archNode) {
             return archNode.attributes.checked !== 'false' && !!archNode.attributes.checked;
         });
     }
@@ -510,13 +505,13 @@ var Selector = class extends we3.AbstractPlugin {
     }
     '_searchFromToken_PSEUDO_only-child' (archNodes) {
         var self = this;
-        return this._searchFromTokenLoop(archNodes, function (archNode) {
+        return archNodes.filter(function (archNode) {
             return self._getChildren(archNode).length === 1;
         });
     }
     '_searchFromToken_PSEUDO_only-of-type' (archNodes) {
         var self = this;
-        return this._searchFromTokenLoop(archNodes, function (archNode) {
+        return archNodes.filter(function (archNode) {
             return self._getSiblingsType(archNode)[archNode.nodeName].length === 1;
         });
     }
@@ -525,41 +520,40 @@ var Selector = class extends we3.AbstractPlugin {
         return archNodes.slice(+value, 1);
     }
     _searchFromToken_PSEUDO_empty (archNodes) {
-        return this._searchFromTokenLoop(archNodes, function (archNode) {
+        return archNodes.filter(function (archNode) {
             return archNode.isEmpty();
         });
     }
     _searchFromToken_PSEUDO_is (archNodes, value) {
         var self = this;
-        return this._searchFromTokenLoop(archNodes, function (archNode) {
+        return archNodes.filter(function (archNode) {
             return self.is(archNode, value);
         });
     }
     _searchFromToken_PSEUDO_not (archNodes, value) {
         var self = this;
-        return this._searchFromTokenLoop(archNodes, function (archNode) {
+        return archNodes.filter(function (archNode) {
             return !self._searchFromToken_PSEUDO_is([archNode], value)[0];
         });
     }
     _searchFromToken_PSEUDO_has (archNodes, value) {
         var self = this;
-        return this._searchFromTokenLoop(archNodes, function (archNode) {
+        return archNodes.filter(function (archNode) {
             return !!self.search(archNode, value).length;
         });
     }
     _searchFromToken_PSEUDO_val (archNodes, value) {
-        return this._searchFromTokenLoop(archNodes, function (archNode) {
+        return archNodes.filter(function (archNode) {
             return archNode.attributes.value === value;
         });
     }
     _searchFromToken_PSEUDO_contains (archNodes, value) {
-        return this._searchFromTokenLoop(archNodes, function (archNode) {
+        return archNodes.filter(function (archNode) {
             return archNode.attributes.textContent().indexOf(value) !== -1;
         });
     }
 };
 
-we3.addPlugin('Selector', Selector);
-
+we3.pluginsRegistry.Selector = Selector;
 
 })();
