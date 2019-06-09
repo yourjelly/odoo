@@ -120,12 +120,12 @@ var Selector = class extends we3.AbstractPlugin {
     is (archNode, string, options) {
         var self = this;
         var BaseArch = this.dependencies.BaseArch;
-        var isParsed = false;
+        var isFragment = !archNode.id;
         if (typeof archNode === 'number') {
             archNode = BaseArch.getArchNode(archNode);
         } else if (!(archNode instanceof we3.ArchNode)) {
             archNode = BaseArch.parse(archNode).firstChild();
-            isParsed = true;
+            isFragment = true;
         }
 
         var is = false;
@@ -157,12 +157,12 @@ var Selector = class extends we3.AbstractPlugin {
                 token = self._tokenizeForSearch(token);
 
                 var arch = BaseArch.getArchNode(1);
-                if (isParsed) {
+                if (isFragment) {
                     arch.childNodes.push(archNode);
                     archNode.parent = arch;
                 }
                 var archNodes = self._searchFromToken([arch], token, opt);
-                if (isParsed) {
+                if (isFragment) {
                     arch.childNodes.pop();
                     delete archNode.parent;
                 }

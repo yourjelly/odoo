@@ -14,7 +14,7 @@ var dropBlockSelector = class extends we3.AbstractPlugin {
      **/
     constructor (parent, params) {
         super(...arguments);
-        this.dependencies = ['DropBlock', 'Selector'];
+        this.dependencies = ['Arch', 'DropBlock', 'Selector'];
         if (!this.options.blockSelector) {
             console.error("'DropblockSelector' plugin should use 'blockSelector' options");
         }
@@ -46,10 +46,13 @@ var dropBlockSelector = class extends we3.AbstractPlugin {
 
         var data = items.splice(0);
         data.forEach(function (item) {
+            if (!item.arch) {
+                item.arch = Arch.parse(item.target).firstChild();
+            }
             var dropIn = [];
             var dropNear = [];
             blockSelector.forEach(function (zone) {
-                if ((zone.dropIn || zone.dropNear) && Selector.is(item.target, zone.selector) && (!zone.exclude || !Selector.is(item.target, zone.exclude))) {
+                if ((zone.dropIn || zone.dropNear) && Selector.is(item.arch, zone.selector) && (!zone.exclude || !Selector.is(item.arch, zone.exclude))) {
                     if (zone.dropIn) {
                         dropIn.push(zone.dropIn);
                     }
@@ -60,6 +63,7 @@ var dropBlockSelector = class extends we3.AbstractPlugin {
             });
             if (dropIn.length || dropNear.length) {
                 items.push({
+                    arch: item.arch,
                     target: item.target,
                     dropIn: makeDrop(dropIn),
                     dropNear: makeDrop(dropNear),
