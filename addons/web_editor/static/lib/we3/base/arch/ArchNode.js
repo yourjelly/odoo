@@ -4,6 +4,50 @@
 function True () { return true; };
 
 var Attributes = we3.Attributes;
+function getClonedClass (ClassToClone) {
+    if (!ClassToClone.ClonedClass) {
+        var ClonedClass = class extends ClassToClone {
+            constructor (params, nodeName, attributes, nodeValue, clonedArchNode) {
+                if (!clonedArchNode.id) {
+                    throw new Error("Should not clone an archNode out of the arch");
+                }
+                super(...arguments);
+                this.id = clonedArchNode.id;
+                this._clonedArchNode = clonedArchNode;
+                this._clonedParentUnknown = true;
+                this._clonedChildNodesUnknown = true;
+            }
+            isClone () {
+                return true;
+            }
+            get parent () {
+                if (this._clonedParentUnknown) {
+                    this.parent = this._clonedArchNode.parent && this.params.getClonedArchNode(this._clonedArchNode.parent.id);
+                }
+                return this._parent;
+            }
+            set parent (parent) {
+                this._clonedParentUnknown = false;
+                this._parent = parent;
+            }
+            get childNodes () {
+                if (this._clonedChildNodesUnknown) {
+                    this._clonedChildNodesUnknown = false;
+                    this._childNodes = this._clonedArchNode.childNodes.map((archNode) => this.params.getClonedArchNode(archNode.id));
+                }
+                return this._childNodes;
+            }
+            set childNodes (childNodes) {
+                return this._childNodes = childNodes;
+            }
+            _triggerChange () {
+                return;
+            }
+        };
+        ClassToClone.ClonedClass = ClonedClass;
+    }
+    return ClassToClone.ClonedClass;
+}
 
 we3.ArchNode = class {
     constructor (params, nodeName, attributes, nodeValue) {
@@ -42,25 +86,11 @@ we3.ArchNode = class {
     /**
      * Get a clone of the ArchNode.
      *
-     * @param {Object} [options]
-     * @param {boolean} [options.keepVirtual] true to include virtual text children
      * @returns {ArchNode}
      */
-    clone (options) {
-        var clone = new this.constructor(this.params, this.nodeName, this.attributes, this.nodeValue);
-        clone.isClone = True;
-        clone.id = this.id;
-
-        if (this.childNodes) {
-            this.childNodes.forEach(function (child) {
-                if (!child.isArchitecturalSpace() && (!child.isVirtual() || options && options.keepVirtual)) {
-                    var clonedChild = child.clone(options);
-                    clonedChild.parent = clone;
-                    clone.childNodes.push(clonedChild);
-                }
-            });
-        }
-        return clone;
+    clone () {
+        var Constructor = getClonedClass(this.constructor);
+        return new Constructor(this.params, this.nodeName, this.attributes, this.nodeValue, this);
     }
     /**
      * Get a JSON representation of the ArchNode and its children.

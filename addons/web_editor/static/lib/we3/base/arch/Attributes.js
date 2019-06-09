@@ -120,15 +120,15 @@ var Attributes = we3.Attributes = class {
         this.archNode = archNode;
         this.__order__ = [];
         if (attributes instanceof Attributes) {
-            this.__order__ = attributes.__order__.slice();
-            this.__order__.forEach(function (name) {
+            this.__order__ = attributes.__order__.map(function (name) {
                 var value = attributes[name];
                 if (name === 'class') {
-                    value = new ClassName(self.archNode, value);
+                    value = new ClassName(archNode, value);
                 } else if (name === 'style') {
-                    value = new Style(self.archNode, value);
+                    value = new Style(archNode, value);
                 }
                 self[name] = value;
+                return name;
             });
         } else {
             attributes.forEach(function (attribute) {

@@ -52,6 +52,7 @@ var BaseArch = class extends we3.AbstractPlugin {
             change: this._changeArch.bind(this),
             remove: this._removeFromArch.bind(this),
             import: this._importJSON.bind(this),
+            getClonedArchNode: this.getClonedArchNode.bind(this),
         });
         this._reset();
 
@@ -152,7 +153,10 @@ var BaseArch = class extends we3.AbstractPlugin {
      */
     getClonedArchNode (idOrElement) {
         var archNodeId = typeof idOrElement === 'number' ? idOrElement : this.dependencies.BaseRenderer.getID(idOrElement);
-        return this._archClone.getNode(archNodeId);
+        if (!this._cloneArchNodeList[archNodeId]) {
+            this._cloneArchNodeList[archNodeId] = this._archNodeList[archNodeId] && this._archNodeList[archNodeId].clone();
+        }
+        return this._cloneArchNodeList[archNodeId];
     }
     /**
      * Get a JSON representation of the ArchNode corresponding to the given ID
@@ -869,9 +873,10 @@ var BaseArch = class extends we3.AbstractPlugin {
     _reset (value) {
         this._id = 1;
         this._arch.id = 1;
-        this._arch.parent = null;
         this._archNodeList = {'1':  this._arch};
-        this._arch.childNodes = [];
+        this._cloneArchNodeList = {};
+        this._arch._parent = null;
+        this._arch._childNodes = [];
 
         if (value) {
             this._insert(value, 1, 0);
@@ -881,8 +886,6 @@ var BaseArch = class extends we3.AbstractPlugin {
         this.dependencies.BaseRenderer.reset(this._arch.toJSON({keepVirtual: true}));
 
         this._changes = [];
-
-        this._archClone = this._arch.clone({keepVirtual: true});
     }
     /**
      * Reset the list of changes.
@@ -939,7 +942,7 @@ var BaseArch = class extends we3.AbstractPlugin {
         });
         BaseRenderer.update(json);
 
-        this._archClone = this._arch.clone({keepVirtual: true});
+        this._cloneArchNodeList = {};
 
         if (range) {
             BaseRange.setRange(range);

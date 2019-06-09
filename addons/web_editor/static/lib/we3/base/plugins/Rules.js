@@ -346,9 +346,8 @@ var BaseRules = class extends we3.AbstractPlugin {
      * @returns {Boolean}
      */
     isEditableNode (archNode) {
-        var clone = archNode.id && this.dependencies.BaseArch.getClonedArchNode(archNode.id) || archNode;
         for (var i = 0; i < this._isEditableNodeList.length; i++) {
-            var res = this._isEditableNodeList[i](clone, this.options);
+            var res = this._isEditableNodeList[i](archNode, this.options);
             if (res) {
                 return true;
             }
@@ -368,9 +367,8 @@ var BaseRules = class extends we3.AbstractPlugin {
      * @returns {Boolean}
      */
     isUnbreakableNode (archNode) {
-        var clone = archNode.id && this.dependencies.BaseArch.getClonedArchNode(archNode.id) || archNode;
         for (var i = 0; i < this._isUnbreakableNodeList.length; i++) {
-            var res = this._isUnbreakableNodeList[i](clone, this.options);
+            var res = this._isUnbreakableNodeList[i](archNode, this.options);
             if (res) {
                 return true;
             }
@@ -390,9 +388,8 @@ var BaseRules = class extends we3.AbstractPlugin {
      * @returns {Boolean}
      */
     isVoidoid (archNode) {
-        var clone = archNode.id && this.dependencies.BaseArch.getClonedArchNode(archNode.id) || archNode;
         for (var i = 0; i < this._isVoidoidList.length; i++) {
-            if (this._isVoidoidList[i](clone, this.options)) {
+            if (this._isVoidoidList[i](archNode, this.options)) {
                 return true;
             }
         }
