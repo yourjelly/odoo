@@ -1116,6 +1116,8 @@ class Binary(http.Controller):
     @serialize_exception
     def upload_attachment(self, callback, model, id, ufile,file_sizes):
         files = request.httprequest.files.getlist('ufile')
+        max_file_size = 250000
+        chunk_size = 90000
         print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
         print(id)
         print(callback)
@@ -1132,7 +1134,7 @@ class Binary(http.Controller):
         large_files = []
         for ufile in files:
             filename = ufile.filename
-            if file_sizes.get(filename) and file_sizes.get(filename) <= 25000000 : 
+            if file_sizes.get(filename) and file_sizes.get(filename) <= max_file_size : 
                 if request.httprequest.user_agent.browser == 'safari':
                     # Safari sends NFD UTF-8 (where é is composed by 'e' and [accent])
                     # we need to send it the same stuff, otherwise it'll fail
@@ -1158,14 +1160,13 @@ class Binary(http.Controller):
                         'size': attachment.file_size
                     })
             else:
-                large_files.append(ufile)
-        if large_files:
-            self.handle_large_file(large_files)
-        return out % (json.dumps(callback), json.dumps(args))
-
-    def handle_large_file(self,large_files):
-        print(large_files)
-
+                large_files.append(ufile.filename)
+        response = {
+            'out':out % (json.dumps(callback), json.dumps(args)),
+            'large_files':json.dumps(large_files),
+            'chunk_size': chunk_size
+            }
+        return json.dumps(response)
 
     @http.route([
         '/web/binary/company_logo',
