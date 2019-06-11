@@ -47,7 +47,11 @@ var dropBlockSelector = class extends we3.AbstractPlugin {
         var data = items.splice(0);
         data.forEach(function (item) {
             if (!item.arch) {
-                item.arch = Arch.parse(item.target).firstChild();
+                if (typeof item.target === 'number') {
+                    item.arch = Arch.getNode(item.target);
+                } else {
+                    item.arch = Arch.parse(item.target).firstChild();
+                }
             }
             var dropIn = [];
             var dropNear = [];

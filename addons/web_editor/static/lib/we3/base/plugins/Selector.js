@@ -92,9 +92,8 @@ var Selector = class extends we3.AbstractPlugin {
         if (!archNode) {
             archNode = BaseArch.getArchNode(1);
         }
-
-        if (!(archNode instanceof we3.ArchNode)) {
-            archNode = BaseArch.getArchNode(archNode) || BaseArch.parse(archNode).firstChild();
+        if (typeof archNode === 'number') {
+            archNode = BaseArch.getArchNode(archNode);
         }
 
         options = options || {};
@@ -120,13 +119,10 @@ var Selector = class extends we3.AbstractPlugin {
     is (archNode, string, options) {
         var self = this;
         var BaseArch = this.dependencies.BaseArch;
-        var isFragment = !archNode.id;
         if (typeof archNode === 'number') {
             archNode = BaseArch.getArchNode(archNode);
-        } else if (!(archNode instanceof we3.ArchNode)) {
-            archNode = BaseArch.parse(archNode).firstChild();
-            isFragment = true;
         }
+        var isFragment = archNode.isNotInRoot();
 
         var is = false;
         this._tokenize(string.trim()).token.forEach(function (token) {
