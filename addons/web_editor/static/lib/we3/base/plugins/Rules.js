@@ -343,7 +343,7 @@ var BaseRules = class extends we3.AbstractPlugin {
      * Return true if the current node is editable (for keypress and selection).
      *
      * @param {ArchNode} archNode
-     * @returns {Boolean}
+     * @returns {Boolean|undefined}
      */
     isEditableNode (archNode) {
         for (var i = 0; i < this._isEditableNodeList.length; i++) {
@@ -355,7 +355,7 @@ var BaseRules = class extends we3.AbstractPlugin {
                 return false;
             }
         }
-        return false;
+        return undefined;
     }
     /**
      * Return true if the given ArchNode is unbreakable.

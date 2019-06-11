@@ -15,8 +15,8 @@ we3.ArchNodeRoot = class extends we3.ArchNode {
     /**
      * @override
      */
-    isContentEditable () {
-        return this.params.isEditableNode(this) !== false;
+    isEditable () {
+        return this.isContentEditable(this) !== false;
     }
     /**
      * @override

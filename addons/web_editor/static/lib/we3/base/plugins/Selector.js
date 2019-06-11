@@ -331,7 +331,7 @@ var Selector = class extends we3.AbstractPlugin {
     }
     _searchFromToken_CLASS (archNodes, identifier) {
         return archNodes.filter(function (archNode) {
-            return archNode.attributes && archNode.attributes.class.contains(identifier);
+            return archNode.className && archNode.className.contains(identifier);
         });
     }
     _searchFromToken_ATTR (archNodes, identifier, value) {

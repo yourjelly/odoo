@@ -173,24 +173,23 @@ var EditorMenu = Widget.extend({
         return new WysiwygMultizone(this, {
             snippets: 'website.snippets',
             dropblockStayOpen: true,
-            // isEditableNode: function (archNode) {
-            //     if (archNode.isText()) {
-            //         return;
-            //     }
-            //     if (archNode.className.contains('o_editable')) {
-            //         return true;
-            //     }
-            //     var isEditable = null;
-            //     archNode.nextUntil(function (archNode) {
-            //         if (!archNode.isText() && archNode.className.contains('o_editable')) {
-            //             isEditable = false;
-            //         }
-            //     }, {
-            //         doNotInsertVirtual: true,
-            //         doNotLeaveNode: true,
-            //     });
-            //     return isEditable;
-            // },
+            isEditableNode: function (archNode) {
+                if (archNode.isRoot()) {
+                    return false;
+                }
+                if (archNode.className.contains('o_not_editable')) {
+                    return false;
+                }
+                if (archNode.className.contains('o_editable')) {
+                    return true;
+                }
+                if (archNode.attributes['data-oe-model']) {
+                    if (archNode.attributes['data-oe-readonly']) {
+                        return false;
+                    }
+                    return true;
+                }
+            },
         });
     },
     /**

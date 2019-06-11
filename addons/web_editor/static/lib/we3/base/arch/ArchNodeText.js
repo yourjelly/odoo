@@ -59,6 +59,14 @@ we3.ArchNodeText = class extends we3.ArchNode {
         return false;
     }
     /**
+     * Return true if the node is editable.
+     *
+     * @returns {Boolean}
+     */
+    isEditable () {
+        return !this.parent || this.parent.isEditable();
+    }
+    /**
      * @override
      */
     isElement () {

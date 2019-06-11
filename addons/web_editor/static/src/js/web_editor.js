@@ -123,7 +123,9 @@ var Wysiwyg = Widget.extend({
             colors: this._groupColors,
             dropblocks: this._dropblocks,
             blockSelector: this._blockSelector,
-            renderingAttributeBlacklist: ['data-oe-model', 'data-oe-id', 'data-oe-path', 'data-oe-type', 'data-oe-field', 'data-oe-many2one-id'],
+            renderingAttributeBlacklist: [
+                //'data-oe-model', 'data-oe-id', 'data-oe-path', 'data-oe-type', 'data-oe-field', 'data-oe-many2one-id', 'data-oe-xpath',
+            ],
             renderTemplate: this._renderTemplate.bind(this),
             loadTemplates: this._loadTemplates.bind(this),
             translate: this._translate.bind(this),

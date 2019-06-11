@@ -711,8 +711,8 @@ we3.ArchNode = class {
      * @param {int} offset
      */
     insert (archNode, offset) {
-        if (!this.isEditable()) {
-            console.warn("can not split a not editable node");
+        if (!this.isAllowUpdate()) {
+            console.warn("can not insert a item in a not editable node");
             return;
         }
         if (this.isVoid()) {

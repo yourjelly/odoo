@@ -539,7 +539,7 @@ var isEditable = {
      * @returns {Boolean}
      */
     isContentEditable: function () {
-        return this.attributes && this.attributes.contentEditable === 'true' || this.params.isEditableNode(this);
+        return this.params.isEditableNode(this);
     },
     /**
      * Return true if the node is editable.
@@ -550,11 +550,11 @@ var isEditable = {
         if (!this.parent) { // the node is out of the Arch
             return true;
         }
-        if (this.attributes && this.attributes.contentEditable === 'false') {
-            return false;
-        }
-        if (this.isContentEditable()) {
+        var isContentEditable = this.isContentEditable();
+        if (isContentEditable) {
             return true;
+        } else if (isContentEditable === false) {
+            return false;
         }
         return this.parent.isEditable();
     },
