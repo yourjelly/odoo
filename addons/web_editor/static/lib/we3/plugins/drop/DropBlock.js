@@ -444,7 +444,7 @@ var DropBlock = class extends we3.AbstractPlugin {
             child = node;
             parent = node.parentNode;
         }
-        var css = this.window.getComputedStyle(child);
+        var css = this.window.getComputedStyle(child.tagName ? child : parent);
         var parentCss = this.window.getComputedStyle(node.parentNode);
         var float = css.float || css.cssFloat;
         var parentDisplay = parentCss.display;

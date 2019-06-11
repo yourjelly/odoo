@@ -124,7 +124,7 @@ var Wysiwyg = Widget.extend({
             dropblocks: this._dropblocks,
             blockSelector: this._blockSelector,
             renderingAttributeBlacklist: [
-                //'data-oe-model', 'data-oe-id', 'data-oe-path', 'data-oe-type', 'data-oe-field', 'data-oe-many2one-id', 'data-oe-xpath',
+                'data-oe-model', 'data-oe-id', 'data-oe-path', 'data-oe-type', 'data-oe-field', 'data-oe-many2one-id', 'data-oe-xpath',
             ],
             renderTemplate: this._renderTemplate.bind(this),
             loadTemplates: this._loadTemplates.bind(this),
@@ -142,8 +142,10 @@ var Wysiwyg = Widget.extend({
                 user_id: session.uid || session.user_id,
                 res_id: this.options.recordInfo && this.options.recordInfo.res_id,
                 res_model: this.options.recordInfo && this.options.recordInfo.res_model,
+                data_res_id: this.options.recordInfo && this.options.recordInfo.data_res_id,
+                data_res_model: this.options.recordInfo && this.options.recordInfo.data_res_model,
             },
-        });
+        }, this.options);
         if (this.options.snippets) {
             options.plugins = Object.assign({
                 DropBlockSelector: true,

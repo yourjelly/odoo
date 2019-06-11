@@ -42,9 +42,9 @@ var PopoverPlugin = class extends we3.AbstractPlugin {
         this._createPopoverCheckMethod();
         this._createPopoverButtons();
         this._toggleDropDownEnabled();
-        this.dependencies.Position.on('scroll', this, this._onScroll.bind(this));
-        this.dependencies.Range.on('focus', this, this._onFocusNode.bind(this));
-        this.dependencies.Range.on('range', this, this._onRange.bind(this));
+        this.dependencies.Position.on('scroll', this, this._onScroll);
+        this.dependencies.Range.on('focus', this, this._onFocusNode);
+        this.dependencies.Range.on('range', this, this._onRange);
         return super.start();
     }
 

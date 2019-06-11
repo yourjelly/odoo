@@ -26,7 +26,7 @@ var customizeBlock = class extends we3.AbstractPlugin {
     //--------------------------------------------------------------------------
 
     start () {
-        this.dependencies.Range.on('focus', this, this._onFocusNode.bind(this));
+        this.dependencies.Range.on('focus', this, this._onFocusNode);
         return super.start();
     }
 

@@ -1,53 +1,5 @@
-// odoo.define('web_editor.wysiwyg.multizone', function (require) {
-// 'use strict';
-
-
-// var EDITABLE = class extends we3.ArchNode {
-//     //--------------------------------------------------------------------------
-//     // static
-//     //--------------------------------------------------------------------------
-
-//     static parse (archNode) {
-//         if (archNode.attributes && archNode.attributes['data-oe-model']) {
-//             var editable = archNode.params.create(archNode.nodeName, archNode.attributes, null, 'WEBSITE-EDITABLE');
-//             editable.append(archNode.childNodes);
-//             console.log(archNode.attributes.toJSON());
-//             return editable;
-//         }
-//     }
-
-//     //--------------------------------------------------------------------------
-//     // public
-//     //--------------------------------------------------------------------------
-
-//     getFieldType () {
-//         return this.attributes['data-oe-type'] || 'html';
-//         // TOTO: use for paste text only in not html field
-//         // TODO: drop image only in image or html field
-//         // TODO: can choose only image in media
-//         // ===> var type = achNode.ancestor('getFieldType').getFieldType();
-//     }
-//     isEditable () {
-//         return !this.isReadOnly();
-//     }
-//     isReadOnly () {
-//         // TODO use for display readonly tooltip
-//         return this.attributes['data-oe-readonly'] || this.className.contains('o_not_editable');
-//     }
-//     get type () {
-//         return 'WEBSITE-EDITABLE';
-//     }
-// };
-// we3.addArchNode('WEBSITE-EDITABLE', EDITABLE);
-
-
-// });
-
-
-odoo.define('web_editor.wysiwyg.multizone------', function (require) {
+odoo.define('web_editor.wysiwyg.multizone', function (require) {
 'use strict';
-
-
 
 var concurrency = require('web.concurrency');
 var core = require('web.core');
@@ -157,7 +109,6 @@ var WysiwygMultizone = Wysiwyg.extend({
         },
     }),
     custom_events: _.extend({}, Wysiwyg.prototype.custom_events, {
-        activate_snippet:  '_onActivateSnippet',
         drop_images: '_onDropImages',
     }),
     /**
@@ -531,16 +482,6 @@ var WysiwygMultizone = Wysiwyg.extend({
     // Handler
     //--------------------------------------------------------------------------
 
-    /**
-     * @override
-     * @param {OdooEvent} ev
-     */
-    _onActivateSnippet: function (ev) {
-        if (!$.contains(ev.data[0], this._focusedNode)) {
-            this._focusedNode = ev.data[0];
-        }
-        ev.data.closest('.oe_structure > *:not(.o_fake_editable)').addClass('o_fake_editable').attr('contenteditable', true);
-    },
     /**
      * @override
      */

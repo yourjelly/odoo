@@ -2,6 +2,7 @@ odoo.define('website.editor.menu', function (require) {
 'use strict';
 
 var Dialog = require('web.Dialog');
+var session = require('web.session');
 var Widget = require('web.Widget');
 var core = require('web.core');
 var Wysiwyg = require('web_editor.wysiwyg.root');
@@ -34,11 +35,8 @@ var EditorMenu = Widget.extend({
         this.$el = null; // temporary null to avoid hidden error (@see start)
         return this._super()
             .then(function () {
-                var $wrapwrap = $('#wrapwrap');
-                $wrapwrap.removeClass('o_editable'); // clean the dom before edition
-                self.editable($wrapwrap).addClass('o_editable');
                 self.wysiwyg = self._wysiwygInstance();
-                return self.wysiwyg.attachTo($wrapwrap);
+                return self.wysiwyg.attachTo($('#wrapwrap'));
             });
     },
     /**
@@ -90,8 +88,6 @@ var EditorMenu = Widget.extend({
 
         return def.then(function () {
             self.trigger_up('edition_will_stopped');
-            var $wrapwrap = $('#wrapwrap');
-            self.editable($wrapwrap).removeClass('o_editable');
             if (reload !== false) {
                 self.wysiwyg.destroy();
                 return self._reload();
@@ -115,8 +111,6 @@ var EditorMenu = Widget.extend({
         var self = this;
         this.trigger_up('edition_will_stopped');
         return this.wysiwyg.save().then(function (result) {
-            var $wrapwrap = $('#wrapwrap');
-            self.editable($wrapwrap).removeClass('o_editable');
             if (result.isDirty && reload !== false) {
                 // remove top padding because the connected bar is not visible
                 $('body').removeClass('o_connected_user');
@@ -127,26 +121,6 @@ var EditorMenu = Widget.extend({
                 self.destroy();
             }
         });
-    },
-    /**
-     * Returns the editable areas on the page.
-     *
-     * @param {DOM} $wrapwrap
-     * @returns {jQuery}
-     */
-    editable: function ($wrapwrap) {
-        return $wrapwrap.find('[data-oe-model]')
-            .not('.o_not_editable')
-            .filter(function () {
-                var $parent = $(this).closest('.o_editable, .o_not_editable');
-                return !$parent.length || $parent.hasClass('o_editable');
-            })
-            .not('link, script')
-            .not('[data-oe-readonly]')
-            .not('img[data-oe-field="arch"], br[data-oe-field="arch"], input[data-oe-field="arch"]')
-            .not('.oe_snippet_editor')
-            .not('hr, br, input, textarea')
-            .add('.o_editable');
     },
 
     //--------------------------------------------------------------------------
@@ -163,30 +137,52 @@ var EditorMenu = Widget.extend({
                 context = ctx;
             },
         });
-        /*
-            recordInfo: {
-                context: context,
+
+        var res_id;
+        var res_model;
+        var xpath;
+
+        return new WysiwygMultizone(this, {
+            plugins: {
+                OdooWebsite: true,
+            },
+            xhr: {
+                csrf_token: odoo.csrf_token,
+                user_id: session.uid || session.user_id,
                 data_res_model: 'website',
                 data_res_id: context.website_id,
-            }
-        */
-        return new WysiwygMultizone(this, {
+                get res_id () {
+                    return res_id;
+                },
+                set res_id (id) {
+                    return res_id = id;
+                },
+                get res_model () {
+                    return res_model;
+                },
+                set res_model (model) {
+                    return res_model = model;
+                },
+                get xpath () {
+                    return xpath;
+                },
+                set xpath (x) {
+                    return xpath = x;
+                },
+            },
             snippets: 'website.snippets',
             dropblockStayOpen: true,
             isEditableNode: function (archNode) {
                 if (archNode.isRoot()) {
                     return false;
                 }
+                if (!archNode.className) {
+                    return undefined;
+                }
                 if (archNode.className.contains('o_not_editable')) {
                     return false;
                 }
                 if (archNode.className.contains('o_editable')) {
-                    return true;
-                }
-                if (archNode.attributes['data-oe-model']) {
-                    if (archNode.attributes['data-oe-readonly']) {
-                        return false;
-                    }
                     return true;
                 }
             },
