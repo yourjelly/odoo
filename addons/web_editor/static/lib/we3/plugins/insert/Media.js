@@ -453,42 +453,6 @@ we3.addPlugin('ImageUrl', class extends we3.AbstractPlugin {
         this._addDocuments(form, records);
     }
 });
-we3.addPlugin('CropImage', class extends we3.AbstractPlugin {
-    constructor () {
-        super(...arguments);
-        this.templatesDependencies = ['xml/media.xml'];
-        this.dependencies = [];
-        this.buttons = {
-            template: 'we3.buttons.image.crop',
-        };
-        this.pluginEvents = {
-            'save': '_onSaveCroppedImages',
-        };
-    }
-
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    crop (value, range) {
-        console.warn('TODO', value, range);
-
-        this.trigger('save', false);
-    }
-
-    //--------------------------------------------------------------------------
-    // Handle
-    //--------------------------------------------------------------------------
-
-    /**
-     * Save cropped images.
-     *
-     * @private
-     * @returns {Promise}
-     */
-    _onSaveCroppedImages () {
-    }
-});
 
 we3.addArchNode('img', class extends Media {
     isImg () {
