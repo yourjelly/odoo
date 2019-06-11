@@ -336,6 +336,16 @@ var TestPlugin = class extends we3.AbstractPlugin {
         return target;
     }
     /**
+     * Set the range in the editor and make sure to focus the editor.
+     *
+     * @param {Object} range
+     */
+    setRange (range) {
+        this.dependencies.Range.setRange(range);
+        var newRange = this.dependencies.Range.getRange();
+        this.triggerNativeEvents(newRange.sc, ['focus']);
+    }
+    /**
      * Set the editor's value.
      *
      * @param {string} value
@@ -400,7 +410,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
             };
         }
 
-        this.dependencies.Range.setRange(range);
+        this.setRange(range);
     }
     /**
      * Test autoinstall.
@@ -428,6 +438,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
      * @returns {Promise <Event []>}
      */
     triggerNativeEvents (el, events, options) {
+        el = el.tagName ? el : el.parentNode;
         options = _.defaults(options || {}, {
             view: window,
             bubbles: true,

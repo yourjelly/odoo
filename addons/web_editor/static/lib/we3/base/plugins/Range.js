@@ -89,6 +89,49 @@ var BaseRange = class extends we3.AbstractPlugin {
         });
     }
     /**
+     * Returns a list of all selected nodes in the range.
+     *
+     * @param {function} [pred]
+     * @returns {ArchNode []}
+     */
+    getSelectedNodes (pred) {
+        var self = this;
+        var range = this.getRange();
+        var selection = [];
+        if (!pred || pred.call(range.scArch, range.scArch)) {
+            selection.push(range.scArch);
+        }
+        if (!range.isCollapsed()) {
+            range.scArch.nextUntil(function (next) {
+                if (!pred || pred.call(next, next)) {
+                    selection.push(next);
+                }
+                return next === self.ecArch;
+            });
+        }
+        return selection;
+    }
+    /**
+     * Get the text contents of the current selection
+     * from the DOM.
+     *
+     * @returns {String}
+     */
+    getSelectedText () {
+        return this.getRange().getSelection().toString();
+    }
+    /**
+     * Returns a list of all selected text nodes in the range.
+     * If a predicate function is included, only nodes meeting its
+     * conditions will be returned.
+     *
+     * @param {(Node) => Boolean} [pred]
+     * @returns {Node []}
+     */
+    getSelectedTextNodes (pred) {
+        throw new Error('TODO');
+    }
+    /**
      * Restore the range to its last saved value.
      */
     restore () {
@@ -731,6 +774,35 @@ var Range = class extends we3.AbstractPlugin {
      */
     getRange () {
         return this.dependencies.BaseRange.getRange();
+    }
+    /**
+     * Returns a list of all selected nodes in the range.
+     *
+     * @param {function} [pred]
+     * @returns {ArchNode []}
+     */
+    getSelectedNodes (pred) {
+        return this.dependencies.BaseRange.getSelectedNodes(pred);
+    }
+    /**
+     * Get the text contents of the current selection
+     * from the DOM.
+     *
+     * @returns {String}
+     */
+    getSelectedText () {
+        return this.dependencies.BaseRange.getSelectedText();
+    }
+    /**
+     * Returns a list of all selected text nodes in the range.
+     * If a predicate function is included, only nodes meeting its
+     * conditions will be returned.
+     *
+     * @param {(Node) => Boolean} [pred]
+     * @returns {Node []}
+     */
+    getSelectedTextNodes (pred) {
+        return this.dependencies.BaseRange.getSelectedTextNodes(pred);
     }
     /**
      * Restore the range to its last saved value.

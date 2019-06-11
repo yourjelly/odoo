@@ -170,34 +170,6 @@ we3.WrappedRange = class we3 {
         return this.document.getSelection();
     }
     /**
-     * Returns a list of all selected nodes in the range.
-     *
-     * @returns {Node []}
-     */
-    getSelectedNodes (pred) {
-        throw new Error('TODO');
-    }
-    /**
-     * Get the text contents of the current selection
-     * from the DOM.
-     *
-     * @returns {String}
-     */
-    getSelectedText () {
-        return this.getSelection().toString();
-    }
-    /**
-     * Returns a list of all selected text nodes in the range.
-     * If a predicate function is included, only nodes meeting its
-     * conditions will be returned.
-     *
-     * @param {(Node) => Boolean} [pred]
-     * @returns {Node []}
-     */
-    getSelectedTextNodes (pred) {
-        throw new Error('TODO');
-    }
-    /**
      * Return true if the current range is collapsed
      * (its start and end offsets/nodes are the same).
      *

@@ -432,15 +432,24 @@ var BaseArch = class extends we3.AbstractPlugin {
         this._updateRendererFromChanges(range);
     }
     /**
-     * Wrap the node corresponding to the given ID inside
-     * a new ArchNode with the given nodeName.
+     * Wrap the node(s) corresponding to the given ID(s) inside
+     * (a) new ArchNode(s) with the given nodeName.
      *
      * @todo
-     * @param {Number} id
+     * @param {Number|Number []} id
      * @param {String} nodeName
      */
-    wrap (id, nodeName) {
-        console.warn('todo');
+    wrap (id, wrapperName) {
+        var self = this;
+        var ids = Array.isArray(id) ? id : [id];
+        var newParents = [];
+        ids.forEach((id) => newParents.push(self.getArchNode(id).wrap(wrapperName)));
+        this._updateRendererFromChanges({
+            scID: newParents[0].id,
+            so: 0,
+            ecID: newParents[newParents.length - 1].id,
+            eo: newParents[newParents.length - 1].length(),
+        });
     }
 
     //--------------------------------------------------------------------------
@@ -1138,11 +1147,11 @@ var Arch = class extends we3.AbstractPlugin {
      * a new ArchNode with the given nodeName.
      *
      * @todo
-     * @param {Number} id
+     * @param {Number|Number []} id
      * @param {String} nodeName
      */
-    wrap (id, nodeName) {
-        return this.dependencies.BaseArch.wrap(id, nodeName);
+    wrap (id, wrapperName) {
+        return this.dependencies.BaseArch.wrap(id, wrapperName);
     }
 };
 

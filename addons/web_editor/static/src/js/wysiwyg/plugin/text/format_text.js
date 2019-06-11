@@ -3,8 +3,6 @@
 
 // var ColorpickerDialog = require('wysiwyg.widgets.ColorpickerDialog');
 
-var ArchNode = we3.ArchNode;
-
 //--------------------------------------------------------------------------
 // Font (colorpicker & font-size)
 //--------------------------------------------------------------------------
@@ -641,7 +639,7 @@ var FontSizePlugin = class extends we3.AbstractPlugin {
 var FontStylePlugin = class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
-        this.dependencies = ['Media', 'Text'];
+        this.dependencies = ['Arch', 'Media', 'Range', 'Text'];
         this.templatesDependencies = ['/web_editor/static/src/xml/wysiwyg_format_text.xml'];
         this.buttons = {
             template: 'wysiwyg.buttons.fontstyle',
@@ -691,55 +689,13 @@ var FontStylePlugin = class extends we3.AbstractPlugin {
      * @param {string} tagName
      *       P, H1, H2, H3, H4, H5, H6, BLOCKQUOTE, PRE
      */
-    formatBlock (tagName, range) {
+    formatBlock (tagName) {
         var self = this;
-        if (
-            !range ||
-            !this.editable.contains(range.sc) ||
-            !this.editable.contains(range.ec) ||
-            this.dependencies.Arch.isUnbreakableNode(range.sc)
-        ) {
-            return;
-        }
-        if (!range.isCollapsed()) {
-            range = range.replace(this.dom.splitTextAtSelection(range));
-        }
-        var nodes = range.getSelectedNodes(function (node) {
-            return self.utils.isVisibleText(node) || self.dependencies.Arch.isVoidoid(node);
-        });
-        nodes = this.filterFormatAncestors(nodes);
-        if (!nodes.length) {
-            var node = range.sc;
-            if (node.tagName === 'BR' || this.utils.isText(node)) {
-                node = node.parentNode;
-            }
-            nodes = [node];
-        }
-        var changedNodes = [];
-        _.each(nodes, function (node) {
-            var newNode = document.createElement(tagName);
-            $(newNode).append($(node).contents());
-            var attributes = $(node).prop("attributes");
-            _.each(attributes, function (attr) {
-                $(newNode).attr(attr.name, attr.value);
-            });
-            $(node).replaceWith(newNode);
-            changedNodes.push(newNode);
-        });
-
-        // Select all formatted nodes
-        if (changedNodes.length) {
-            var lastNode = changedNodes[changedNodes.length - 1];
-            var startNode = changedNodes[0].firstChild || changedNodes[0];
-            var endNode = lastNode.lastChild || lastNode;
-            range = range.replace({
-                sc: startNode,
-                so: 0,
-                ec: endNode,
-                eo: this.utils.nodeLength(endNode),
-            });
-            this.dependencies.Arch.setRange(range);
-        }
+        var selection = this.dependencies.Range.getSelectedNodes();
+        var styleAncestors = this.utils.uniq(selection.map(function (node) {
+            return node.ancestor((a) => self.options.styleTags.indexOf(a.nodeName) !== -1).id;
+        }));
+        this.dependencies.Arch.wrap(styleAncestors, tagName);
     }
     /**
      * (Un-)format text: make it bold, italic, ...

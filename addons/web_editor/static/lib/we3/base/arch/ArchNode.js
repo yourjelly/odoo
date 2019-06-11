@@ -875,6 +875,7 @@ we3.ArchNode = class {
         var wrapper = this.params.create(nodeName);
         this.before(wrapper);
         wrapper.append(this);
+        this.params.change(this, 0);
         return wrapper;
     }
 

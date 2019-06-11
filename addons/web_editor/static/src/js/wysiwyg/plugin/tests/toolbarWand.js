@@ -7,6 +7,7 @@ var TestToolbarWand = class extends we3.AbstractPlugin {
     }
     constructor () {
         super(...arguments);
+        var self = this;
         this.dependencies = ['Test', 'TestToolbar'];
 
         // range collapsed: ◆
@@ -17,45 +18,64 @@ var TestToolbarWand = class extends we3.AbstractPlugin {
                 name: "Click H1: p -> h1",
                 content: '<p>dom not to edit</p><p>d◆om to edit</p>',
                 do: async function () {
-                    await this.dependencies.Test.triggerNativeEvents(this.styleToggler, ['mousedown', 'click']);
-                    await this.dependencies.Test.triggerNativeEvents(this.styleDropdown.querySelector('we3-button[name="formatBlock-h1"]'), ['mousedown', 'click']);
+                    await self.dependencies.Test.triggerNativeEvents(self.styleToggler, ['mousedown', 'click']);
+                    await self.dependencies.Test.triggerNativeEvents(self.styleDropdown.querySelector('we3-button[name="formatBlock-h1"]'), ['mousedown', 'click']);
                 },
-                test: {
-                    content: '<p>dom not to edit</p><h1>▶dom to edit◀</h1>',
-                },
+                test: '<p>dom not to edit</p><h1>▶dom to edit◀</h1>',
             },
             {
                 name: "Click CODE: h1 -> pre",
                 content: '<p>dom not to edit</p><h1>d◆om to edit</h1>',
                 do: async function () {
-                    await this.dependencies.Test.triggerNativeEvents(this.styleToggler, ['mousedown', 'click']);
-                    await this.dependencies.Test.triggerNativeEvents(this.styleDropdown.querySelector('we3-button[name="formatBlock-pre"]'), ['mousedown', 'click']);
+                    await self.dependencies.Test.triggerNativeEvents(self.styleToggler, ['mousedown', 'click']);
+                    await self.dependencies.Test.triggerNativeEvents(self.styleDropdown.querySelector('we3-button[name="formatBlock-pre"]'), ['mousedown', 'click']);
                 },
-                test: {
-                    content: '<p>dom not to edit</p><pre>▶dom to edit◀</pre>',
-                },
+                test: '<p>dom not to edit</p><pre>▶dom to edit◀</pre>',
             },
             {
                 name: "Click NORMAL: pre -> p",
                 content: '<p>dom not to edit</p><pre>d◆om to edit</pre>',
                 do: async function () {
-                    await this.dependencies.Test.triggerNativeEvents(this.styleToggler, ['mousedown', 'click']);
-                    await this.dependencies.Test.triggerNativeEvents(this.styleDropdown.querySelector('we3-button[name="formatBlock-p"]'), ['mousedown', 'click']);
+                    await self.dependencies.Test.triggerNativeEvents(self.styleToggler, ['mousedown', 'click']);
+                    await self.dependencies.Test.triggerNativeEvents(self.styleDropdown.querySelector('we3-button[name="formatBlock-p"]'), ['mousedown', 'click']);
                 },
-                test: {
-                    content: '<p>dom not to edit</p><p>▶dom to edit◀</p>',
-                },
+                test: '<p>dom not to edit</p><p>▶dom to edit◀</p>',
             },
             {
                 name: "Click H1 in empty p: empty p -> empty h1",
                 content: '<p><br>◆</p>',
                 do: async function () {
-                    await this.dependencies.Test.triggerNativeEvents(this.styleToggler, ['mousedown', 'click']);
-                    await this.dependencies.Test.triggerNativeEvents(this.styleDropdown.querySelector('we3-button[name="formatBlock-h1"]'), ['mousedown', 'click']);
+                    await self.dependencies.Test.triggerNativeEvents(self.styleToggler, ['mousedown', 'click']);
+                    await self.dependencies.Test.triggerNativeEvents(self.styleDropdown.querySelector('we3-button[name="formatBlock-h1"]'), ['mousedown', 'click']);
                 },
-                test: {
-                    content: '<h1><br>◆</h1>',
+                test: '<h1><br/>◆</h1>',
+            },
+            {
+                name: "Click H1 in selection containing multiple blocks (1)",
+                content: '<p>d▶om</p><h1>to</h1><blockquote>edi◀t</blockquote>',
+                do: async function () {
+                    await self.dependencies.Test.triggerNativeEvents(self.styleToggler, ['mousedown', 'click']);
+                    await self.dependencies.Test.triggerNativeEvents(self.styleDropdown.querySelector('we3-button[name="formatBlock-h1"]'), ['mousedown', 'click']);
                 },
+                test: '<h1>▶dom</h1><h1>to</h1><h1>edit◀</h1>',
+            },
+            {
+                name: "Click H1 in selection containing multiple blocks (2)",
+                content: '<div><p>d▶om</p><h1>to</h1><blockquote>edi◀t</blockquote></div>',
+                do: async function () {
+                    await self.dependencies.Test.triggerNativeEvents(self.styleToggler, ['mousedown', 'click']);
+                    await self.dependencies.Test.triggerNativeEvents(self.styleDropdown.querySelector('we3-button[name="formatBlock-h1"]'), ['mousedown', 'click']);
+                },
+                test: '<div><h1>▶dom</h1><h1>to</h1><h1>edit◀</h1></div>',
+            },
+            {
+                name: "Click H1 in selection containing multiple blocks (3)",
+                content: '<div><p>nope</p><div><p>d▶om</p><h1>to</h1><blockquote>ed</blockquote></div><p>i◀t</p></div>',
+                do: async function () {
+                    await self.dependencies.Test.triggerNativeEvents(self.styleToggler, ['mousedown', 'click']);
+                    await self.dependencies.Test.triggerNativeEvents(self.styleDropdown.querySelector('we3-button[name="formatBlock-h1"]'), ['mousedown', 'click']);
+                },
+                test: '<div><p>nope</p><div><h1>▶dom</h1><h1>to</h1><h1>ed</h1></div><h1>it◀</h1></div>',
             },
         ];
     }
