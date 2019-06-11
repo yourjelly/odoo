@@ -60,7 +60,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             });
         }
 
-        return Promise.all([this._super(), defAsset]);
+        return Promise.all([this._super(), defAsset, assetsLoaded]);
     },
     /**
      * @override
