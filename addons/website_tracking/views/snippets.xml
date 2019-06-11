@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="s_products_recently_viewed" name="Products Recently Viewed">
-
-        <section class="s_wtracking_products_recently_viewed bg-200 pt24 pb24">
+    <template id="s_recently_viewed_products" name="Recently Viewed Products">
+        <section class="s_recently_viewed_products bg-100 pt32 pb32">
             <div class="container">
                 <div class="row s_nb_column_fixed">
-                    <div class="col-lg-12 s_title pt16 pb8" style="text-align: center;">
+                    <div class="col-lg-12 s_title">
                         <h3 class="s_title_default">Recently viewed Products</h3>
                     </div>
                 </div>
             </div>
-            <div id="myCarousel" class="s_carousel s_carousel_default pb-5" data-interval="0">
+            <div id="myCarousel" class="s_carousel s_carousel_default carousel slide" data-interval="0">
                 <div class="container">
-                    <div class="carousel-inner row w-100 mx-auto flex-nowrap py-3"/>
+                    <div class="carousel-inner row py-3"/>
                 </div>
                 <div class="carousel-control-prev" data-target="#myCarousel" data-slide="prev" role="img" aria-label="Previous" title="Previous">
                     <span class="carousel-control-prev-icon"/>
@@ -28,11 +27,11 @@
 
     <template id="snippets" inherit_id="website.snippets" name="tracking snippets">
         <xpath expr="//div[@id='snippet_feature']//t[@t-snippet][last()]" position="after">
-            <t t-snippet="website_tracking.s_products_recently_viewed" t-thumbnail="/website/static/src/img/snippets_thumbs/s_products_recently_viewed.png"/>
+            <t t-snippet="website_tracking.s_recently_viewed_products" t-thumbnail="/website_tracking/static/src/img/snippets_thumbs/s_recently_viewed_products.png"/>
         </xpath>
     </template>
 
     <template id="remove_external_snippets" inherit_id="website.external_snippets">
-        <xpath expr="//t[@t-install='website_tracking'][@id='s_products_recently_viewed']" position="replace"/>
+        <xpath expr="//t[@t-install='website_tracking'][@id='s_recently_viewed_products']" position="replace"/>
     </template>
 </odoo>

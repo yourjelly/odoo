@@ -2,46 +2,36 @@
 <templates id="template" xml:space="preserve">
 
 <!-- Recently Viewed Products Carousel -->
-<t t-name="website_tracking.productsRecentlyViewed">
+<t t-name="website_tracking.recently_viewed_products">
         <div t-foreach="products" t-as="product" class="carousel-item col-sm-6 col-md-4 col-lg-3 col-xl">
             <div class="card">
                 <input type="hidden" name="product-id" t-att-data-product-id="product.id"/>
-                <a t-att-href="product.website_url" class="o_wt_product_image p-3">
-                    <img t-att-src="'/web/image/product.product/' + product.id + '/image_large'" class="img-fluid" alt="Product Image"/>
+                <a t-att-href="product.website_url" class="s_product_image s_pb_4-3">
+                    <img t-att-src="'/web/image/product.product/' + product.id + '/image_large'" class="" alt="Product Image"/>
                 </a>
-                <div class="card-body">
-
-                    <div class="o_website_rating_static">
+                <div class="card-body border-top">
+                    <a t-att-href="product.website_url" class="text-decoration-none">
+                        <h6 class="card-title mb-0 text-truncate" t-raw="product.display_name"/>
+                    </a>
+                    <div class="o_website_rating_static small">
                         <i class="fa fa-star"/>
                         <i class="fa fa-star"/>
                         <i class="fa fa-star"/>
                         <i class="fa fa-star"/>
                         <i class="fa fa-star text-black-25"/>
                     </div>
-                    <!-- <div class="small text-800 mb-2">
-                        <i class="fa fa-star"/>
-                        <i class="fa fa-star"/>
-                        <i class="fa fa-star"/>
-                        <i class="fa fa-star-half-o"/>
-                        <i class="fa fa-star-o"/>
-                    </div> -->
-                    <a t-att-href="product.website_url" class="text-decoration-none">
-                        <h6 class="card-title mb-0 text-truncate" t-raw="product.display_name"/>
-                    </a>
-                    <!-- <t t-if="product.has_discounted_price">
-                        <span class="text-danger text-nowrap" style="text-decoration: line-through;">
-                            <t t-raw="product.list_price"/>
-                        </span>
-                        <br/>
-                    </t> -->
+
                 </div>
-                <div class="card-footer d-flex justify-content-center">
-                    <span class="d-block small font-weight-bold mb-2" t-raw="product.price"/>
-                    <button class="btn btn-sm js_add_cart ml-auto">
+                <div class="card-footer d-flex align-items-center">
+                    <span class="d-block small font-weight-bold" t-raw="product.price"/>
+                    <button type="button" role="button" class="btn btn-sm btn-link js_add_cart ml-auto">
                         <i class="fa fa-fw fa-shopping-cart"/>
                     </button>
-                    <button class="btn btn-sm js_add_wishlist">
+                    <button type="button" role="button" class="btn btn-sm btn-link">
                         <i class="fa fa-fw fa-heart"/>
+                    </button>
+                    <button type="button" role="button" class="btn btn-sm btn-link o_add_compare">
+                        <i class="fa fa-fw fa-exchange"/>
                     </button>
                 </div>
             </div>

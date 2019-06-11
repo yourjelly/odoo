@@ -9,7 +9,7 @@ var utils = require('web.utils');
 var qweb = core.qweb;
 
 publicWidget.registry.productsRecentlyViewedSnippet = publicWidget.Widget.extend({
-    selector: '.s_wtracking_products_recently_viewed',
+    selector: '.s_recently_viewed_products',
     xmlDependencies: ['/website_tracking/static/src/xml/website_tracking.xml'],
     events: {
         'click .js_add_cart': '_onAddToCart',
@@ -55,21 +55,17 @@ publicWidget.registry.productsRecentlyViewedSnippet = publicWidget.Widget.extend
     _render: function (res) {
         var products = res['products'];
         if (products.length) {
-            var $section = $(qweb.render('website_tracking.productsRecentlyViewed', {
+            var $section = $(qweb.render('website_tracking.recently_viewed_products', {
                 products: products,
                 currency: res['currency'],
                 widget: this,
             }));
             this.$('.carousel-inner').html($section);
-            // var item = this.$(".o_wt_product");
-            // for(var i = 0; i < item.length; i+=6) {
-            //     item.slice(i, i+6).wrapAll('<div class="carousel-item" data-name="Slide"><div class="row"></div></div>');
-            // }
             $(".carousel-item:first-child").addClass('active');
             $('.s_carousel').on('slide.bs.carousel', function (e) {
                 var $e = $(e.relatedTarget);
                 var idx = $e.index();
-                var itemsPerSlide = 4;
+                var itemsPerSlide = 5;
                 var totalItems = $('.carousel-item').length;
 
                 if (idx >= totalItems-(itemsPerSlide-1)) {
