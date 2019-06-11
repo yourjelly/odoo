@@ -875,8 +875,8 @@ var BaseArch = class extends we3.AbstractPlugin {
         this._arch.id = 1;
         this._archNodeList = {'1':  this._arch};
         this._cloneArchNodeList = {};
-        this._arch._parent = null;
-        this._arch._childNodes = [];
+        this._arch.parent = null;
+        this._arch.childNodes = [];
 
         if (value) {
             this._insert(value, 1, 0);

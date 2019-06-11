@@ -35,8 +35,13 @@ function getClonedClass (ClassToClone) {
             }
             get childNodes () {
                 if (this._clonedChildNodesUnknown) {
+                    var self = this;
                     this._clonedChildNodesUnknown = false;
-                    this._childNodes = this._clonedArchNode.childNodes.map((archNode) => this.params.getClonedArchNode(archNode.id));
+                    this._childNodes = self._clonedArchNode.childNodes.map(function (archNode) {
+                        var clone = self.params.getClonedArchNode(archNode.id);
+                        clone.parent = self;
+                        return clone;
+                    });
                 }
                 return this._childNodes;
             }
