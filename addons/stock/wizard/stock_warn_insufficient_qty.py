@@ -2,7 +2,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
-from odoo.tools import float_compare
 
 
 class StockWarnInsufficientQty(models.AbstractModel):
@@ -31,10 +30,21 @@ class StockWarnInsufficientQtyScrap(models.TransientModel):
     _description = 'Warn Insufficient Scrap Quantity'
 
     scrap_id = fields.Many2one('stock.scrap', 'Scrap')
+    product_uom_id = fields.Many2one('uom.uom', 'Unit of Measure', domain="[('category_id', '=', product_uom_category_id)]")
+    lot_id = fields.Many2one('stock.production.lot', 'Lot', domain="[('product_id', '=', product_id)]")
+    package_id = fields.Many2one('stock.quant.package', 'Package')
+    owner_id = fields.Many2one('res.partner', 'Owner')
 
     def action_done(self):
-        return self.scrap_id.do_scrap()
-
-    def action_cancel(self):
-        # FIXME in master: we should not have created the scrap in a first place
-        return self.scrap_id.sudo().unlink()
+        if self.scrap_id:
+            return self.scrap_id.do_scrap()
+        values = {
+            'product_id': self.product_id.id,
+            'product_uom_id': self.product_uom_id.id,
+            'location_id': self.location_id.id,
+            'lot_id': self.lot_id.id,
+            'package_id': self.package_id.id,
+            'owner_id': self.owner_id.id,
+        }
+        scrap = self.env['stock.scrap'].create(values)
+        return scrap.do_scrap()

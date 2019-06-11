@@ -41,11 +41,9 @@
         <field name="inherit_id" ref="stock.stock_warn_insufficient_qty_form_view"/>
          <field name="mode">primary</field>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='product_id']" position="after">
-                <field name="scrap_id" invisible="1"/>
-            </xpath>
+            <field name="quantity"/>
             <xpath expr="//button[@name='cancel_button']" position="replace">
-                <button string="Discard" name="action_cancel" type="object" class="btn-primary"/>
+                <button string="Discard" type="object" class="btn-primary" special="cancel"/>
             </xpath>
         </field>
     </record>

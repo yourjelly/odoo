@@ -25,6 +25,18 @@ class StockScrap(models.Model):
         if self.production_id:
             self.location_id = self.production_id.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel')) and self.production_id.location_src_id.id or self.production_id.location_dest_id.id
 
+    def action_warn_insufficient_qty(self, vals):
+        action = super(StockScrap, self).action_warn_insufficient_qty(vals)
+        ctx = action.get('context')
+        ctx.update({
+            'default_production_id': vals.get('production_id'),
+            'default_workorder_id': vals.get('workorder_id'),
+        })
+        action.update({
+            'context': ctx,
+        })
+        return action
+
     def _prepare_move_values(self):
         vals = super(StockScrap, self)._prepare_move_values()
         if self.production_id:

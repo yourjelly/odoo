@@ -73,6 +73,60 @@ class StockScrap(models.Model):
                         self.location_id = move_line.location_id
                         break
 
+    def action_warn_insufficient_qty(self, vals):
+        view_id = self.env.ref('stock.stock_warn_insufficient_qty_scrap_form_view').id
+        return {
+            'name': _('Insufficient Quantity'),
+            'view_type': 'form',
+            'view_mode': 'form',
+            'views': [(view_id, 'form')],
+            'res_model': 'stock.warn.insufficient.qty.scrap',
+            'view_id': view_id,
+            'type': 'ir.actions.act_window',
+            'context': {
+                'default_product_id': vals.get('product_id'),
+                'default_location_id': vals.get('location_id'),
+                'default_lot_id': vals.get('lot_id'),
+                'default_package_id': vals.get('package_id'),
+                'default_owner_id': vals.get('owner_id'),
+                'default_product_uom_id': vals.get('product_uom_id'),
+                'default_scrap_location_id': vals.get('scrap_location_id'),
+                'default_scrap_qty': vals.get('scrap_qty')
+            },
+            'target': 'new'
+        }
+
+    @api.model
+    def inventory_data(self, vals):
+        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+        if not vals.get('product_id'):
+            return {
+                'type': 'ir.actions.act_window_close'
+            }
+
+        product = self.env['product.product'].browse(vals.get('product_id'))
+        location = self.env['stock.location'].browse(vals.get('location_id'))
+        scrap_location = self.env['stock.location'].browse(vals.get('scrap_location_id'))
+        lot = self.env['stock.production.lot'].browse(vals.get('lot_id'))
+        package = self.env['stock.quant.package'].browse(vals.get('package_id'))
+        owner = self.env['res.partner'].browse(vals.get('owner_id'))
+        available_qty = sum(self.env['stock.quant']._gather(product,
+                            location,
+                            lot,
+                            package,
+                            owner,
+                            strict=True).mapped('quantity'))
+        product_uom = self.env['uom.uom'].browse(vals.get('product_uom_id'))
+        scrap_qty = product_uom._compute_quantity(vals.get('scrap_qty'), product.uom_id)
+        if float_compare(available_qty, scrap_qty, precision_digits=precision) >= 0:
+            scrap = self.create(vals)
+            scrap.do_scrap()
+            return {
+                'type': 'ir.actions.act_window_close'
+            }
+        else:
+            return self.action_warn_insufficient_qty(vals)
+
     @api.model
     def create(self, vals):
         if 'name' not in vals or vals['name'] == _('New'):
