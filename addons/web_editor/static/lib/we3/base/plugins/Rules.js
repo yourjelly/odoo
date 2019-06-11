@@ -761,8 +761,10 @@ var BaseRules = class extends we3.AbstractPlugin {
             var parent = targetArchNode.parent;
             var newAncestor = this.dependencies.BaseArch.createArchNode(candidate);
             newAncestor.__applyRulesCheckParentsFlag = this.currentRuleID;
-            parent.insertBefore(newAncestor, targetArchNode);
-            newAncestor.append(targetArchNode);
+            this.dependencies.BaseArch.bypassUpdateConstraints(function () {
+                parent.insertBefore(newAncestor, targetArchNode);
+                newAncestor.append(targetArchNode);
+            });
             this.__preventChangeForGeneratedParentTesting = false;
 
             if (this._getParentGenerationPathRecursive(newAncestor, newPath, res)) {
@@ -770,8 +772,10 @@ var BaseRules = class extends we3.AbstractPlugin {
             }
 
             this.__preventChangeForGeneratedParentTesting = true;
-            parent.insertBefore(targetArchNode, newAncestor);
-            newAncestor.remove();
+            this.dependencies.BaseArch.bypassUpdateConstraints(function () {
+                parent.insertBefore(targetArchNode, newAncestor);
+                newAncestor.remove();
+            });
             this.__preventChangeForGeneratedParentTesting = false;
         }
 

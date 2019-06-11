@@ -81,6 +81,8 @@ we3.Editor = class extends we3.EventDispatcher {
                 },
             },
             this.options);
+
+        this.on('change', this, this._onChange);
     }
     start (target) {
         var self = this;
@@ -168,7 +170,7 @@ we3.Editor = class extends we3.EventDispatcher {
      */
     isDirty () {
         var isDirty = this._value !== this.getValue();
-        if (!this._dirty && isDirty) {
+        if (!this._dirty && isDirty) { // TODO remove, it's impossible...
             console.warn("not dirty flag ? Please fix it.");
         }
         return isDirty;
@@ -581,7 +583,6 @@ we3.Editor = class extends we3.EventDispatcher {
     }
     /**
      * @private
-     * @param {Event} ev
      */
     _onBlurEditable () {
         var self = this;
@@ -605,6 +606,12 @@ we3.Editor = class extends we3.EventDispatcher {
         } else {
             this._mouseInEditor = null;
         }
+    }
+    /**
+     * @private
+     */
+    _onChange () {
+        this._dirty = true;
     }
     /**
      * @private

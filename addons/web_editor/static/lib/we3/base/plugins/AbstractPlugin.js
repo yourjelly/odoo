@@ -85,8 +85,10 @@ we3.AbstractPlugin = class extends we3.EventDispatcher {
     }
     /**
      * @see Manager.changeEditorValue
+     *
+     * @param {Object[]} changes
      */
-    changeEditorValue () {}
+    changeEditorValue (changes) {}
     /**
      * @see Manager.focusEditor
      */

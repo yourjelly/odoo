@@ -80,7 +80,7 @@ we3.ArchNode = class {
         return this.attributes && this.attributes.class;
     }
     set className (className) {
-        return this.attributes.add('class', className || '');
+        return this.attributes.add('class', className);
     }
     get style () {
         return this.attributes && this.attributes.style;

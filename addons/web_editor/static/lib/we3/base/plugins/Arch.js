@@ -243,7 +243,7 @@ var BaseArch = class extends we3.AbstractPlugin {
 
         range = range && Object.assign({}, range);
 
-        if (changes && !('length' in changes)) {
+        if (changes && !Array.isArray(changes)) {
             changes = [changes];
         }
         if (!changes.length && range) {

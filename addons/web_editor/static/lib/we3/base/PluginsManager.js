@@ -29,6 +29,7 @@ we3.PluginsManager = class extends we3.EventDispatcher {
         params.plugins.Range = true;
         params.plugins.Rules = true;
         this._promiseLoadPlugins = this._loadPlugins(params, options);
+        this.on('change', this, this.changeEditorValue);
     }
     /**
      * Return a Promise resolved when the plugin is initialized and can be started
@@ -92,9 +93,13 @@ we3.PluginsManager = class extends we3.EventDispatcher {
     }
     /**
      * Inform all plugins of a change in the editor's value.
+     *
+     * @param {we3.Event} ev
+     * @param {Object} ev.data
+     * @param {Object[]} ev.data.changes
      */
-    changeEditorValue () {
-        this._each('changeEditorValue');
+    changeEditorValue (ev) {
+        this._each('changeEditorValue', ev.data.changes);
     }
     /**
      * Inform all plugins that the editor was focused.
@@ -395,8 +400,8 @@ we3.PluginsManager = class extends we3.EventDispatcher {
         for (var i = 0; i < pluginNames.length; i++) {
             delete pluginInstances[pluginNames[i]]._deepestPluginsDependent;
         }
-        pluginNames.splice(pluginNames.indexOf('Arch'), 1);
-        pluginNames.unshift('Arch');
+        pluginNames.splice(pluginNames.indexOf('BaseArch'), 1);
+        pluginNames.unshift('BaseArch');
         return pluginNames;
     }
     /**

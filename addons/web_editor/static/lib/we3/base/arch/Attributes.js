@@ -145,9 +145,15 @@ var Attributes = we3.Attributes = class {
             this.__order__.push(name);
         }
         if (name === 'class') {
-            value = new ClassName(self.archNode, value + '');
+            if (this.class && this.class.toString() === value + '') {
+                return;
+            }
+            value = new ClassName(this.archNode, value);
         } else if (name === 'style') {
-            value = new Style(this.archNode, value + '');
+            if (this.style && this.style.toString() === value + '') {
+                return;
+            }
+            value = new Style(this.archNode, value);
         } else if (value === null || value === '') {
             return this.remove(name);
         }
