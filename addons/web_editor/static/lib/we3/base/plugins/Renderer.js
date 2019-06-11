@@ -26,18 +26,23 @@ var BaseRenderer = class extends we3.AbstractPlugin {
     }
     /**
      * Render the changes.
+     *
+     * @param {Object} [options]
+     * @param {Boolean} [options.showIDs]
      */
-    redraw () {
-        this._redraw({
+    redraw (options) {
+        this._redraw(Object.assing({}, options, {
             forceDirty: true,
-        });
+        }));
     }
     /**
      * Reset the DOM, with a starting DOM if `json` is passed.
      *
      * @param {JSON} [json]
+     * @param {Object} [options]
+     * @param {Boolean} [options.showIDs]
      */
-    reset (json) {
+    reset (json, options) {
         this.changes = {};
         this.jsonById = [null, {
             id: 1,
@@ -46,22 +51,25 @@ var BaseRenderer = class extends we3.AbstractPlugin {
         this.elements = [null, this.editable];
 
         if (json) {
-            this.update(json);
+            this.update(json, options);
         }
     }
     /**
      * Update the DOM with the changes specified in `newJSON`.
      *
      * @param {JSON} newJSON
+     * @param {Object} [options]
+     * @param {Boolean} [options.forceDirty]
+     * @param {Boolean} [options.showIDs]
      */
-    update (newJSON) {
+    update (newJSON, options) {
         if (newJSON.forEach) {
             newJSON.forEach(this._makeDiff.bind(this));
         } else {
             this._makeDiff(newJSON);
         }
         this._clean();
-        this._redraw();
+        this._redraw(options);
         this._cleanElements();
     }
 
@@ -265,6 +273,7 @@ var BaseRenderer = class extends we3.AbstractPlugin {
      * @private
      * @param {Object} [options]
      * @param {Boolean} [options.forceDirty]
+     * @param {Boolean} [options.showIDs]
      */
     _redraw (options) {
         var self = this;
@@ -289,6 +298,7 @@ var BaseRenderer = class extends we3.AbstractPlugin {
      * @param {JSON} json
      * @param {JSON} changes
      * @param {Object} [options]
+     * @param {Boolean} [options.showIDs]
      * @returns {Node}
      */
     _redrawOne (json, changes, options) {
@@ -310,8 +320,8 @@ var BaseRenderer = class extends we3.AbstractPlugin {
                 });
             }
 
-            if (options.displayId) {
-                node.setAttribute('data-archnode-id', json.id);
+            if (options.showIDs && node.tagName) {
+                node.setAttribute('archID', json.id);
             }
         }
 
@@ -363,9 +373,12 @@ var Renderer = class extends we3.AbstractPlugin {
     }
     /**
      * Render the changes.
+     *
+     * @param {Object} [options]
+     * @param {Boolean} [options.showIDs]
      */
-    redraw () {
-        return this.dependencies.BaseRenderer.redraw();
+    redraw (options) {
+        return this.dependencies.BaseRenderer.redraw(options);
     }
 };
 
