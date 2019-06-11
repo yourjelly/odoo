@@ -189,6 +189,9 @@ we3.AbstractPlugin = class extends we3.EventDispatcher {
         Object.keys(events || {}).forEach(function (key) {
             var value = events[key];
             if (typeof value === 'string') {
+                if (!self[value]) {
+                    throw new Error("Unknown method '" + name + "' to bind on the plugin '" + self.pluginName + '"');
+                }
                 value = self[value].bind(self);
             }
             self.on(key, self, value);

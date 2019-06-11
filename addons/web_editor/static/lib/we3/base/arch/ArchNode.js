@@ -4,8 +4,11 @@
 function True () { return true; };
 
 var Attributes = we3.Attributes;
+var Classes = [];
+var ClonedClasses = [];
 function getClonedClass (ClassToClone) {
-    if (!ClassToClone.ClonedClass) {
+    var index = Classes.indexOf(ClassToClone);
+    if (index === -1) {
         var ClonedClass = class extends ClassToClone {
             constructor (params, nodeName, attributes, nodeValue, clonedArchNode) {
                 if (!clonedArchNode.id) {
@@ -44,9 +47,11 @@ function getClonedClass (ClassToClone) {
                 return;
             }
         };
-        ClassToClone.ClonedClass = ClonedClass;
+        Classes.push(ClassToClone);
+        ClonedClasses.push(ClonedClass);
+        return ClonedClass;
     }
-    return ClassToClone.ClonedClass;
+    return ClonedClasses[index];
 }
 
 we3.ArchNode = class {
