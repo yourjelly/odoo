@@ -212,7 +212,7 @@ we3.ArchNode = class {
         var match;
         var parent = this;
         while (parent) {
-            if (typeof fn === 'string' ? parent[fn] && parent[fn](parent) : fn(parent)) {
+            if (typeof fn === 'string' ? parent[fn] && parent[fn].call(parent, parent) : fn.call(parent, parent)) {
                 match = parent;
                 if (!findGreatest) {
                     break;
