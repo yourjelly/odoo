@@ -35,6 +35,7 @@ class PaymentAcquirerStripe(models.Model):
         help="A relative or absolute URL pointing to a square image of your "
              "brand or product. As defined in your Stripe profile. See: "
              "https://stripe.com/docs/checkout")
+    stripe_connect_status_msg = fields.Boolean(groups='base.group_user')
 
     @api.multi
     def stripe_form_generate_values(self, tx_values):
@@ -56,6 +57,10 @@ class PaymentAcquirerStripe(models.Model):
 
         stripe_tx_values.update(temp_stripe_tx_values)
         return stripe_tx_values
+
+    @api.multi
+    def action_close_status_msg(self):
+        self.stripe_connect_status_msg = False
 
     @api.model
     def _get_stripe_api_url(self):
@@ -99,6 +104,15 @@ class PaymentAcquirerStripe(models.Model):
         res['tokenize'].append('stripe')
         return res
 
+    @api.multi
+    def create_account(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_url',
+            'url': '/payment/stripe/create_account/%s' % self.id,
+            'target': 'self',
+            'res_id': self.id,
+        }
 
 class PaymentTransactionStripe(models.Model):
     _inherit = 'payment.transaction'
