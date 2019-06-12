@@ -160,11 +160,17 @@ var TestPlugin = class extends we3.AbstractPlugin {
         super(...arguments)
         var self = this;
         this.dependencies = ['Arch', 'Range', 'Rules'];
+
+        this.templatesDependencies = ['xml/test.xml'];
+        this.buttons = {
+            template: 'we3.buttons.test',
+        };
+
         this._plugins = [this];
         this._allPluginsAreReady = false;
         this._complete = false;
 
-        this.assert = {
+        var assert = this.assert = {
             ok (value, testName) {
                 if (self.options.testAssertObject) {
                     self.options.testAssertObject.ok(value, testName);
@@ -202,6 +208,22 @@ var TestPlugin = class extends we3.AbstractPlugin {
                 }
             },
         };
+        // this.options.testAssertObject
+
+        this.mockAssert = {
+            nTests: 0,
+            nOKTests: 0,
+        };
+        Object.keys(assert).forEach(function (key) {
+            self.mockAssert[key] = function () {
+                self.mockAssert.nTests++;
+                var didPass = assert[key](...arguments);
+                if (didPass) {
+                    self.mockAssert.nOKTests++;
+                }
+                return didPass;
+            };
+        });
     }
     start () {
         var promise = super.start();
@@ -216,15 +238,29 @@ var TestPlugin = class extends we3.AbstractPlugin {
         return promise;
     }
     setEditorValue () {
-        super.setEditorValue()
-        if (!this._allPluginsAreReady) {
-            this._allPluginsAreReady = true;
+        if (this._allPluginsAreReady) {
+            return;
+        }
+        this._allPluginsAreReady = true;
+
+        if (this.buttons.elements) {
+            var dropdown = this.buttons.elements[0].querySelector("we3-vertical-items");
+            this._plugins.forEach(function (plugin) {
+                var button = document.createElement('we3-button');
+                button.setAttribute('data-method', 'loadTest');
+                button.setAttribute('data-value', plugin.pluginName);
+                button.innerHTML = plugin.pluginName + '&nbsp;';
+                button.appendChild(document.createElement('small'));
+                dropdown.appendChild(button);
+            });
+        }
+
+        if (this.options.autoStartTests) {
             setTimeout(this._loadTests.bind(this));
         }
     }
     destroy () {
-        this._isDestroyed = true;
-        if (!this._complete) {
+        if (!this._complete && this.options.autoStartTests) {
             var assert = this.options.testAssertObject || this.assert;
             assert.notOk(true, "The editor are destroyed before all tests are complete");
             this._terminate();
@@ -265,20 +301,9 @@ var TestPlugin = class extends we3.AbstractPlugin {
      */
     execTests (assert, tests) {
         var self = this;
-        var nTests = tests.length;
-        var nOKTests = 0;
         var defPollTest = Promise.resolve();
-        // tests = JSON.parse(JSON.stringify(tests || [])); // why?
-
-        while (tests.length) {
-            defPollTest = defPollTest.then(this._pollTest.bind(this, assert, tests.shift())).then(function (success) {
-                nOKTests += success ? 1 : 0;
-            });
-        }
-
-        return defPollTest.then(function () {
-            return self._logFinalResult(nTests, nOKTests);
-        });
+        tests.forEach((test) => defPollTest = defPollTest.then(this._pollTest.bind(this, this.mockAssert, test)));
+        return defPollTest;
     }
     getValue () {
         var params = this.dependencies.Arch.getNode(1).params; // TODO: Remove hardcoded 1 (=> apply customRules on parsing !, and after changes)
@@ -333,6 +358,26 @@ var TestPlugin = class extends we3.AbstractPlugin {
         });
         this.triggerNativeEvents(target, 'keyup', keyPress);
         return target;
+    }
+    /**
+     * Load a test.
+     *
+     * @private
+     * @param {Plugin} plugin
+     * @returns {Promise}
+     */
+    loadTest (pluginName) {
+        if (this.isDestroyed()) {
+            return Promise.resolve();
+        }
+        if (pluginName) {
+            var plugin = this._plugins.find(function (plugin) {
+                return plugin.pluginName === pluginName;
+            });
+            setTimeout(this._loadTest.bind(this, pluginName));
+        } else {
+            setTimeout(this._loadTests.bind(this));
+        }
     }
     /**
      * Set the range in the editor and make sure to focus the editor.
@@ -429,8 +474,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
         return Promise.resolve();
     }
     /**
-     * Trigger events natively (as opposed to the jQuery way)
-     * on the specified target.
+     * Trigger events natively on the specified target.
      *
      * @param {node} el
      * @param {string []} events
@@ -522,18 +566,29 @@ var TestPlugin = class extends we3.AbstractPlugin {
      * @returns {Promise}
      */
     _loadTest (plugin) {
-        if (this._isDestroyed) {
+        if (this.isDestroyed()) {
             return Promise.resolve();
         }
-        var assert = this.options.testAssertObject || this.assert;
+        if (typeof plugin === 'string') {
+            plugin = this._plugins.find(function (p) {
+                return p.pluginName === plugin;
+            });
+        }
+
+        this._testPluginActive = plugin;
         this.triggerUp('set_value', {value: ''});
-        assert.ok(true, '<' + plugin.pluginName + '>');
+        this.mockAssert.ok(true, '<' + plugin.pluginName + '>');
+
+        this.mockAssert.nTests = 0;
+        this.mockAssert.nOKTests = 0;
+
         try {
-            return plugin.test(assert);
+            var promise = Promise.all([plugin.test(this.mockAssert)]);
         } catch (e) {
-            assert.notOk(e, 'ERROR');
-            return Promise.resolve();
+            this.mockAssert.notOk(e, 'ERROR');
+            var promise = Promise.resolve();
         }
+        return promise.then(this._logFinalResult.bind(this));
     }
     /**
      * Load all tests.
@@ -543,9 +598,10 @@ var TestPlugin = class extends we3.AbstractPlugin {
     _loadTests () {
         var self = this;
         var reRun = window.location.search.match(/we3-test=([^&]+)/);
+        reRun = reRun && reRun[1];
         var promise = Promise.resolve();
         this._plugins.forEach(function (plugin) {
-            if (reRun && plugin.pluginName !== reRun[1]) {
+            if (reRun && plugin.pluginName !== reRun) {
                 return;
             }
             promise = promise.then(self._loadTest.bind(self, plugin));
@@ -556,15 +612,30 @@ var TestPlugin = class extends we3.AbstractPlugin {
      * Log the final result of a series of tests.
      *
      * @private
-     * @param {int} nTests
-     * @param {int} nOKTests
      */
-    _logFinalResult (nTests, nOKTests) {
+    _logFinalResult () {
+        var nTests = this.mockAssert.nTests;
+        var nOKTests = this.mockAssert.nOKTests;
+        var button;
+        if (this.buttons.elements) {
+            button = this.buttons.elements[0].querySelector('we3-button[data-value="' + this._testPluginActive.pluginName + '"]');
+        }
+
         if (nTests - nOKTests === 0) {
             var css = 'background-color: green; color: white;';
             console.info('%cAll ' + nTests + ' tests OK.', css);
+
+            if (button) {
+                button.style.backgroundColor = '#ccffcc';
+                button.lastChild.innerHTML = '(' + nTests + ')';
+            }
         } else {
             console.warn('Result: ' + nOKTests + '/' + nTests + ' passed. ' + (nTests - nOKTests) + ' to go.');
+
+            if (button) {
+                button.style.backgroundColor = '#ffcccc';
+                button.lastChild.innerHTML = '(' + nOKTests + '/' + nTests + ')';
+            }
         }
     }
     /**
