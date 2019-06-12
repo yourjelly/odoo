@@ -83,6 +83,14 @@ var Wysiwyg = Widget.extend({
             self.setElement(self.editor.editor);
         });
     },
+    /**
+     *
+     * @override
+     */
+    destroy: function () {
+        this.editor.destroy();
+        this._super();
+    },
 
     //--------------------------------------------------------------------------
     // Public

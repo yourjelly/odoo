@@ -279,6 +279,31 @@ we3.ArchNode = class {
         return !!parent;
     }
     /**
+     * Find all descendent that matches the given predicate function.
+     *
+     * @param {function(ArchNode)} fn
+     * @param {boolean} [searchInsideMatchedArchNode] true to search inside the already
+     *   matched archNodes
+     * @returns {ArchNode[]}
+     */
+    descendent (fn, searchInsideMatchedArchNode) {
+        var nodes = [];
+        if (this.childNodes) {
+            for (var k = 0, len = this.childNodes.length; k < len; k++) {
+                var child = this.childNodes[k];
+                if (typeof fn === 'string' ? child[fn] && child[fn](child) : fn(child)) {
+                    nodes.push(child);
+                    if (searchInsideMatchedArchNode) {
+                        nodes = nodes.concat(child.descendent(fn, searchInsideMatchedArchNode));
+                    }
+                } else {
+                    nodes = nodes.concat(child.descendent(fn, searchInsideMatchedArchNode));
+                }
+            }
+        }
+        return nodes;
+    }
+    /**
      * Return the ArchNode's first child or its first descendent to match the
      * predicate function if any, or null if none was found.
      *

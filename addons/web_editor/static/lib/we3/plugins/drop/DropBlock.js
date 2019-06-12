@@ -88,11 +88,10 @@ var DropBlock = class extends we3.AbstractPlugin {
      **/
     saveEditor () {
     }
-    setEditorValue (value) {
+    setEditorValue () {
         if (this._blockDropable) {
             this._markDragableBlocks();
         }
-        return value;
     }
     blurEditor () {
         this._dragAndDropEnd();

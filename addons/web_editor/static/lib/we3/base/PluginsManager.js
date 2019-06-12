@@ -110,27 +110,30 @@ we3.PluginsManager = class extends we3.EventDispatcher {
     /**
      * Note: This method must be idempotent.
      *
-     * @param {string} value
      * @param {object} [options]
      * @param {boolean} [options.keepVirtual] true to include virtual text nodes
      * @param {boolean} [options.architecturalSpace] true to include architectural space
      * @param {boolean} [options.showIDs] true to show the arch node id's
      * @returns {string}
      */
-    getEditorValue (value, options) {
-        this._each('getEditorValue');
-        return this._plugins.Arch.getValue(options);
+    getEditorValue (options) {
+        this._each('getEditorValue', null, ['BaseArch']);
+        return this._plugins.BaseArch.getEditorValue(options);
     }
     /**
      * Note: Please only change the string value without using the DOM.
-     * The value is received from getEditorValue.
+     * The value is received from Arch getEditorValue.
      *
-     * @returns {Promise<string>}
+     * @returns {Promise<ArchNode>}
      */
     saveEditor () {
+        var self = this;
         var Arch = this._plugins.Arch;
+        this._each('getEditorValue', null, ['BaseArch']);
         return this._eachAsync('saveEditor').then(function () {
-            return Arch.getValue();
+            var arch = Arch.getNode(1);
+            arch.nextUntil(function () {}); // force to clone all this
+            return arch;
         });
     }
     /**
@@ -139,7 +142,8 @@ we3.PluginsManager = class extends we3.EventDispatcher {
      * @param {string} value
      */
     setEditorValue (value) {
-        this._each('setEditorValue', value, ['Arch']); // Arch call BaseArch, double useless call
+        this._plugins.BaseArch.setEditorValue(value);
+        this._each('setEditorValue', null, ['BaseArch']); // avoid double BaseArch call
     }
     /**
      * Translate a string within a plugin.

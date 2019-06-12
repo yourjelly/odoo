@@ -394,27 +394,27 @@ var ConvertInlinePlugin = class extends we3.AbstractPlugin {
      *
      * @private
      */
-    saveEditor (value) {
-        var html = this.editable.innerHTML;
+    saveEditor () {
+        var value = this.dependencies.Arch.getValue();
         this.editable.innerHTML = value;
         var $editable = $(this.editable);
         attachmentThumbnailToLinkImg($editable);
         fontToImg($editable);
         classToStyle($editable);
-        value = this.editable.innerHTML;
-        this.editable.innerHTML = html;
-        return value;
-    }
-    setEditorValue (value) {
         var html = this.editable.innerHTML;
+        this.editable.innerHTML = value;
+        this.dependencies.Arch.setValue(html);
+    }
+    setEditorValue () {
+        var value = this.dependencies.Arch.getValue();
         this.editable.innerHTML = value;
         var $editable = $(this.editable);
         styleToClass($editable);
         imgToFont($editable);
         linkImgToAttachmentThumbnail($editable);
-        value = this.editable.innerHTML;
-        this.editable.innerHTML = html;
-        return value;
+        var html = this.editable.innerHTML;
+        this.editable.innerHTML = value;
+        this.dependencies.Arch.setValue(html);
     }
 };
 

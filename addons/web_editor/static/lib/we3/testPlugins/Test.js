@@ -297,7 +297,6 @@ var TestPlugin = class extends we3.AbstractPlugin {
             .replace(regExpRangeToCollapsed, rangeCollapsed)
             .replace(regSpace, '&nbsp;')
             .replace(regInvisible, '&#65279;');
-        this.dependencies.Arch.getValue('◆◆◆◆◆');
         return result;
     }
     /**
@@ -352,7 +351,8 @@ var TestPlugin = class extends we3.AbstractPlugin {
      */
     setValue (value) {
         var self = this;
-        this.dependencies.Arch.setEditorValue(value);
+        this.triggerUp('set_value', {value: value});
+
         var clone = this.dependencies.Arch.getNode(1);
         var options = {
             doCrossUnbreakables: true,
@@ -360,7 +360,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
         var start = clone.nextUntil(function (a) { return a.type === 'TEST'; }, options);
         var end = start ? start.nextUntil(function (a) { return a.type === 'TEST'; }, options) : null;
 
-        this.dependencies.Arch.setEditorValue(value.replace(regExpRange, ''));
+        this.triggerUp('set_value', {value: value.replace(regExpRange, '')});
 
         var range;
         if (!start) {

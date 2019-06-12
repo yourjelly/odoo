@@ -29,9 +29,8 @@ var HistoryPlugin = class extends we3.AbstractPlugin {
             enabled: '_enabled',
         };
     }
-    setEditorValue (value) {
+    setEditorValue () {
         this.clear();
-        return value;
     }
     start () {
         this.dependencies.Arch.on('update', this, this._onArchUpdate.bind(this));

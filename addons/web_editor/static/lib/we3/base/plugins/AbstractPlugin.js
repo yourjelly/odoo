@@ -111,8 +111,7 @@ we3.AbstractPlugin = class extends we3.EventDispatcher {
     /**
      * @see Manager.setEditorValue
      */
-    setEditorValue (value) {
-        return value;
+    setEditorValue () {
     }
     /**
      * @see Manager.translatePluginString

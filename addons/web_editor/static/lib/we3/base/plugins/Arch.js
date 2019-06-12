@@ -16,7 +16,17 @@ var BaseArch = class extends we3.AbstractPlugin {
         super(...arguments);
         this.dependencies = ['BaseRules', 'BaseRenderer', 'BaseRange'];
     }
-
+    /**
+     * @param {null} value
+     * @param {object} [options]
+     * @param {boolean} [options.keepVirtual] true to include virtual text nodes
+     * @param {boolean} [options.architecturalSpace] true to include architectural space
+     * @param {boolean} [options.showIDs] true to show the arch node id's
+     * @returns {string}
+     **/
+    getEditorValue (options) {
+        return this._arch.toString(options || {});
+    }
     setEditorValue (value) {
         var self = this;
         return this.bypassUpdateConstraints(function () {
@@ -76,17 +86,6 @@ var BaseArch = class extends we3.AbstractPlugin {
         var res = callback();
         this.bypassUpdateConstraintsActive = false;
         return res;
-    }
-    /**
-     * @param {object} [options]
-     * @param {boolean} [options.keepVirtual] true to include virtual text nodes
-     * @param {boolean} [options.architecturalSpace] true to include architectural space
-     * @param {boolean} [options.showIDs] true to show the arch node id's
-     * @returns {string}
-     **/
-    getValue (options) {
-        var value = this._arch.toString(options || {}).trim();
-        return value
     }
     /**
      * @param {string|number|ArchNode|JSON} DOM
@@ -260,6 +259,9 @@ var BaseArch = class extends we3.AbstractPlugin {
             var archNode = self.getArchNode(change.id);
             if (archNode) {
                 if (change.attributes) {
+                    if (!Array.isArray(change.attributes)) {
+                        change.attributes = change.attributes.toJSON();
+                    }
                     archNode.attributes.forEach(function (attribute) {
                         for (var k = 0, len = change.attributes.length; k < len; k++) {
                             if (change.attributes[k] === attribute[0]) {
@@ -987,9 +989,6 @@ var Arch = class extends we3.AbstractPlugin {
         super(...arguments);
         this.dependencies = ['BaseArch'];
     }
-    setEditorValue (value) {
-        return this.dependencies.BaseArch.setEditorValue(value);
-    }
 
     //--------------------------------------------------------------------------
     // Public
@@ -1014,7 +1013,7 @@ var Arch = class extends we3.AbstractPlugin {
      * @returns {string}
      **/
     getValue (options) {
-        return this.dependencies.BaseArch.getValue(options);
+        return this.dependencies.BaseArch.getEditorValue(options);
     }
     /**
      * @param {string|number|ArchNode|JSON} DOM
@@ -1022,6 +1021,9 @@ var Arch = class extends we3.AbstractPlugin {
      **/
     parse (DOM) {
         return this.dependencies.BaseArch.parse(DOM);
+    }
+    setValue (value) {
+        return this.dependencies.BaseArch.setEditorValue(value);
     }
 
     //--------------------------------------------------------------------------

@@ -110,17 +110,22 @@ var EditorMenu = Widget.extend({
     save: function (reload) {
         var self = this;
         this.trigger_up('edition_will_stopped');
-        return this.wysiwyg.save().then(function (result) {
-            if (result.isDirty && reload !== false) {
-                // remove top padding because the connected bar is not visible
-                $('body').removeClass('o_connected_user');
-                return self._reload();
-            } else {
-                self.wysiwyg.destroy();
-                self.trigger_up('edition_was_stopped');
-                self.destroy();
-            }
-        });
+        return this.wysiwyg.save()
+            .then(function (result) {
+                return self._saveElements(result.arch).then(function () {
+                    self.wysiwyg.destroy();
+                    $('#wrapwrap').html(result.arch.toString());
+
+                    if (result.isDirty && reload !== false) {
+                        // remove top padding because the connected bar is not visible
+                        $('body').removeClass('o_connected_user');
+                        return self._reload();
+                    } else {
+                        self.trigger_up('edition_was_stopped');
+                        self.destroy();
+                    }
+                });
+            });
     },
 
     //--------------------------------------------------------------------------
@@ -128,13 +133,65 @@ var EditorMenu = Widget.extend({
     //--------------------------------------------------------------------------
 
     /**
+     * Reloads the page in non-editable mode, with the right scrolling.
+     *
+     * @private
+     * @returns {Deferred} (never resolved, the page is reloading anyway)
+     */
+    _reload: function () {
+        $('body').addClass('o_wait_reload');
+        this.wysiwyg.destroy();
+        this.$el.hide();
+        window.location.hash = 'scrollTop=' + window.document.body.scrollTop;
+        window.location.reload(true);
+        return new Promise(function () {});
+    },
+    /**
+     * Select 'WEBSITE-EDITABLE' archNode and save value
+     *
+     * @private
+     * @param {ArchNode} archNode
+     * @returns {Promise}
+     */
+    _saveElements: function (archNode) {
+        return Promise.all(archNode.descendent('isWebsiteEditable')
+            .map(this._saveElement.bind(this)));
+    },
+    /**
+     * Saves the element of the page.
+     *
+     * @private
+     * @param {string} outerHTML
+     * @param {Object} recordInfo
+     * @returns {Promise}
+     */
+    _saveElement: function (archNode) {
+        var isDirty = archNode.className.contains('o_dirty');
+        archNode.className.remove('o_dirty o_editable');
+        if (!isDirty) {
+            return;
+        }
+        return this._rpc({
+            model: 'ir.ui.view',
+            method: 'save',
+            args: [
+                +archNode.attributes['data-oe-id'],
+                archNode.toString(),
+                archNode.attributes['data-oe-xpath'],
+            ],
+            kwargs: {
+                context: self.context,
+            },
+        });
+    },
+    /**
      * @private
      */
     _wysiwygInstance: function () {
-        var context;
+        var self = this;
         this.trigger_up('context_get', {
             callback: function (ctx) {
-                context = ctx;
+                self.context = ctx;
             },
         });
 
@@ -142,34 +199,35 @@ var EditorMenu = Widget.extend({
         var res_model;
         var xpath;
 
+        var recordInfo = {
+            context: self.context,
+            data_res_model: 'website',
+            data_res_id: self.context.website_id,
+            get res_id () {
+                return res_id;
+            },
+            set res_id (id) {
+                return res_id = id;
+            },
+            get res_model () {
+                return res_model;
+            },
+            set res_model (model) {
+                return res_model = model;
+            },
+            get xpath () {
+                return xpath;
+            },
+            set xpath (x) {
+                return xpath = x;
+            },
+        };
+
         return new WysiwygMultizone(this, {
             plugins: {
                 OdooWebsite: true,
             },
-            xhr: {
-                csrf_token: odoo.csrf_token,
-                user_id: session.uid || session.user_id,
-                data_res_model: 'website',
-                data_res_id: context.website_id,
-                get res_id () {
-                    return res_id;
-                },
-                set res_id (id) {
-                    return res_id = id;
-                },
-                get res_model () {
-                    return res_model;
-                },
-                set res_model (model) {
-                    return res_model = model;
-                },
-                get xpath () {
-                    return xpath;
-                },
-                set xpath (x) {
-                    return xpath = x;
-                },
-            },
+            recordInfo: recordInfo,
             snippets: 'website.snippets',
             dropblockStayOpen: true,
             isEditableNode: function (archNode) {
@@ -187,20 +245,6 @@ var EditorMenu = Widget.extend({
                 }
             },
         });
-    },
-    /**
-     * Reloads the page in non-editable mode, with the right scrolling.
-     *
-     * @private
-     * @returns {Deferred} (never resolved, the page is reloading anyway)
-     */
-    _reload: function () {
-        $('body').addClass('o_wait_reload');
-        this.wysiwyg.destroy();
-        this.$el.hide();
-        window.location.hash = 'scrollTop=' + window.document.body.scrollTop;
-        window.location.reload(true);
-        return new Promise(function () {});
     },
 
     //--------------------------------------------------------------------------

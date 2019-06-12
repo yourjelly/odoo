@@ -91,17 +91,17 @@ we3.addArchNode('JINJA', JINJA);
 var JinjaPlugin = class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
-        this.dependencies = ['CodeView'];
+        this.dependencies = ['Arch', 'CodeView'];
     }
 
     /**
      * @overwrite
      */
-    setEditorValue (value) {
+    setEditorValue () {
+        var value = this.dependencies.Arch.getValue();
         if (jinjaExp.test(value)) {
             this.dependencies.CodeView.active(value);
         }
-        return value;
     }
 };
 

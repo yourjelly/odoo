@@ -284,18 +284,18 @@ var TestArchAndRules = class extends we3.AbstractPlugin {
     test (assert) {
         var self = this;
         this.doms.forEach(function (test) {
-            self.dependencies.Arch.setEditorValue(test.content);
+            self.triggerUp('set_value', {value: test.content});
             var value = self.dependencies.Arch.getValue();
             assert.strictEqual(value, test.test, test.name);
-            self.dependencies.Arch.setEditorValue(value);
+            self.triggerUp('set_value', {value: value});
             var newValue = self.dependencies.Arch.getValue();
             assert.strictEqual(newValue, value, test.name + ' (idempotent)');
         });
         this.domsArchitecturalSpace.forEach(function (test) {
-            self.dependencies.Arch.setEditorValue(test.content);
+            self.triggerUp('set_value', {value: test.content});
             var value = self.dependencies.Arch.getValue({architecturalSpace: true});
             assert.strictEqual(value, test.test, test.name);
-            self.dependencies.Arch.setEditorValue(value);
+            self.triggerUp('set_value', {value: value});
             var newValue = self.dependencies.Arch.getValue({architecturalSpace: true});
             assert.strictEqual(newValue, value, test.name + ' (idempotent)');
         });

@@ -157,7 +157,7 @@ var Attributes = we3.Attributes = class {
         } else if (value === null || value === '') {
             return this.remove(name);
         }
-        if (this[name] !== value) {
+        if (this[name] + '' !== value + '') {
             this[name] = value;
             this.archNode._triggerChange();
         }

@@ -47,11 +47,12 @@ var CodeViewPlugin = class extends we3.AbstractPlugin {
     /**
      * @override
      */
-    getEditorValue (value) {
+    getEditorValue () {
         if (this._isActive()) {
-            return this.codeview.value.trim();
+            this.triggerUp('set_value', {
+                value: this.codeview.value.trim(),
+            });
         }
-        return value;
     }
 
     //--------------------------------------------------------------------------

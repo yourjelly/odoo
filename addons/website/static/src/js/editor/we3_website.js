@@ -5,7 +5,12 @@ var core = require('web.core');
 var _t = core._t;
 
 
-var EDITABLE = class extends we3.ArchNode {
+we3.addArchNode('WEBSITE-EDITABLE', class extends we3.ArchNode {
+    constructor () {
+        super(...arguments);
+        this.className.add('o_editable');
+    }
+
     //--------------------------------------------------------------------------
     // static
     //--------------------------------------------------------------------------
@@ -27,7 +32,7 @@ var EDITABLE = class extends we3.ArchNode {
         // TOTO: use for paste text only in not html field
         // TODO: drop image only in image or html field
         // TODO: can choose only image in media
-        // ===> var type = achNode.ancestor('getFieldType').getFieldType();
+        // ===> var type = achNode.ancestor('isWebsiteEditable').getFieldType();
     }
     isDirty () {
         return this.className.contains('o_dirty');
@@ -39,11 +44,13 @@ var EDITABLE = class extends we3.ArchNode {
         // TODO use for display readonly tooltip
         return this.attributes['data-oe-readonly'] || this.className.contains('o_not_editable');
     }
+    isWebsiteEditable () {
+        return true;
+    }
     get type () {
         return 'WEBSITE-EDITABLE';
     }
-};
-we3.addArchNode('WEBSITE-EDITABLE', EDITABLE);
+});
 
 
 var OdooWebsite = class extends we3.AbstractPlugin {
@@ -72,8 +79,14 @@ var OdooWebsite = class extends we3.AbstractPlugin {
     changeEditorValue (changes) {
         var Renderer = this.dependencies.Renderer;
         var focused = this.dependencies.Range.getFocusedNode();
-        var editable = focused.ancestor('getFieldType');
-        $(editable && Renderer.getElement(editable.id)).addClass('o_dirty');
+        var editable = focused.ancestor('isWebsiteEditable');
+        if (editable && !editable.className.contains('o_dirty')) {
+            editable.className.add('o_dirty');
+            this.dependencies.Arch.importUpdate([{
+                id: editable.id,
+                attributes: editable.attributes,
+            }], this.dependencies.Range.getRange());
+        }
     }
 
     //--------------------------------------------------------------------------
@@ -93,7 +106,6 @@ var OdooWebsite = class extends we3.AbstractPlugin {
     }
     setEditorValue () {
         var ids = this.getBrandingNodeIds();
-        this._postRenderingEditable(ids);
         this._postRenderingReadOnly(ids);
     }
 
@@ -103,7 +115,7 @@ var OdooWebsite = class extends we3.AbstractPlugin {
 
     _onFocusNode (focused) {
         var focused = this.dependencies.Range.getFocusedNode();
-        var editable = focused.ancestor('getFieldType');
+        var editable = focused.ancestor('isWebsiteEditable');
         var res_model = editable && editable.attributes['data-oe-model'];
         var res_id = editable && +editable.attributes['data-oe-id'];
         var xpath = editable && editable.attributes['data-oe-xpath'];
@@ -137,17 +149,6 @@ var OdooWebsite = class extends we3.AbstractPlugin {
             $(this).off('keydown.bs.carousel');
             return res;
         };
-    }
-    _postRenderingEditable (ids) {
-        var Arch = this.dependencies.Arch;
-        var Renderer = this.dependencies.Renderer;
-        var editables = ids.filter(function (id) {
-            return Arch.getNode(id).isEditable();
-        });
-        var $editables = $(editables.map(function (id) {
-            return Renderer.getElement(id);
-        }))
-        $editables.addClass('o_editable'); // TODO: remove, it's use only for placeholer/css
     }
     _postRenderingReadOnly (ids) {
         var Arch = this.dependencies.Arch;

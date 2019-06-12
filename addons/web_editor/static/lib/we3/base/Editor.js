@@ -99,14 +99,14 @@ we3.Editor = class extends we3.EventDispatcher {
         this.on('set_value', this, this._onSetValue.bind(this));
 
         return this.isInitialized().then(function () {
-            if (self._isDestroyed) {
+            if (self.isDestroyed()) {
                 return;
             }
             self._insertEditorContainers();
             self._insertEditableInContainers();
             return self._pluginsManager.start();
         }).then(function () {
-            if (self._isDestroyed) {
+            if (self.isDestroyed()) {
                 return;
             }
             self._afterStartAllPlugins();
@@ -114,23 +114,23 @@ we3.Editor = class extends we3.EventDispatcher {
                 self._targetID = self.target.id;
                 self._targetClassName = self.target.className;
                 self.target.removeAttribute('id');
-                self.editable.id = self._targetID;
+                self.editable.setAttribute('id', self._targetID);
                 self.editable.className = self._targetClassName;
             }
         });
     }
     destroy () {
-        this._isDestroyed = true;
         if (this.editor && this.editor.parentNode) {
             this.editor.parentNode.removeChild(this.editor);
-            this._destroyEvents();
         }
         if (this.target) {
             this.target.wysiwygEditor = null;
-            this.target.id = this._targetID;
-            this.target.className = this._targetClassName;
-            this.target.style.display = '';
+            if (this.target.tagName !== "TEXTAREA") {
+                this.target.setAttribute('id', this._targetID);
+                this.target.style.display = '';
+            }
         }
+        this._destroyEvents();
         super.destroy();
     }
 
@@ -161,7 +161,7 @@ we3.Editor = class extends we3.EventDispatcher {
      * @returns {string}
      */
     getValue (options) {
-        return this._pluginsManager.getEditorValue(null, options);
+        return this._pluginsManager.getEditorValue(options);
     }
     /**
      * Return true if the content has changed.
@@ -201,17 +201,22 @@ we3.Editor = class extends we3.EventDispatcher {
      *      - receive editable jQuery DOM as attribute
      *      - called after deactivate codeview if needed
      * @returns {Promise}
-     *      - resolve with true if the content was dirty
+     *      - resolve with {isDirty, value, arch}
      */
     save () {
         var self = this;
         var isDirty = this.isDirty();
-        return this._pluginsManager.saveEditor().then(function (html) {
-            self.target.innerText = html;
-            self.target.innerHTML = html;
+        return this._pluginsManager.saveEditor().then(function (arch) {
+            var html = arch.toString();
+            if (self.target.tagName === "TEXTAREA") {
+                self.target.value = html;
+            } else {
+                self.target.innerHTML = html;
+            }
             return {
                 isDirty: isDirty,
                 value: html,
+                arch: arch,
             };
         });
     }

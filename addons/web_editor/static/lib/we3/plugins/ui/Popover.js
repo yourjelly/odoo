@@ -29,9 +29,8 @@ var PopoverPlugin = class extends we3.AbstractPlugin {
     focusEditor () {
         this._onFocusNode(this.dependencies.Range.getFocusedNode());
     }
-    setEditorValue (value) {
+    setEditorValue () {
         this._updatePopovers();
-        return value;
     }
 
     //--------------------------------------------------------------------------
