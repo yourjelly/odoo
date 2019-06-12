@@ -1,7 +1,7 @@
-(function () {
-'use strict';
+odoo.define('web_editor.we3.plugin.link', function (require) {
+    'use strict';
 
-// var LinkDialog = require('wysiwyg.widgets.LinkDialog');
+var LinkDialog = require('wysiwyg.widgets.LinkDialog');
 
 //--------------------------------------------------------------------------
 // link
@@ -15,76 +15,32 @@ var LinkCreate = class extends we3.AbstractPlugin {
             template: 'wysiwyg.buttons.link',
         };
         this.blankContent = "Label";
+        this.dependencies = ['Arch', 'Range'];
     }
 
-    showLinkDialog (value, range) {
+    showLinkDialog (value, node) {
         var self = this;
+        // var range = this.dependencies.Range.getRange();
+        // var selectedNodes = this.dependencies.Range.getSelectedNodes(node.isText);
         return new Promise(function (resolve) {
-            var linkDialog = new LinkDialog(self, {}, self._getLinkInfo(range));
+            var linkDialog = new LinkDialog(self, {}, self._getLinkInfo(node));
             linkDialog.on('save', self, self._onSaveDialog.bind(self));
             linkDialog.on('closed', self, resolve);
             linkDialog.open();
         });
     }
-    _getLinkInfo (range) {
-        var nodes = this._getNodesToLinkify(range);
-        var ancestor = range.commonAncestor();
-        var anchorAncestor = ancestor.ancestor('isAnchor');
-        var text = this._getTextToLinkify(range, nodes);
-
-        var linkInfo = {
-            isAnchor: !!anchorAncestor,
-            anchor: anchorAncestor,
-            text: text,
-            url: anchorAncestor ? anchorAncestor.attributes.href : '',
+    _getLinkInfo (node) {
+        var anchor = node.isAnchor() ? node : node.ancestor(node.isAnchor);
+        return {
+            isAnchor: !!anchor,
+            anchor: anchor,
+            node: node,
+            text: anchor ? node.toString() : this.dependencies.Range.getSelectedText(),
+            url: anchor ? anchor.attributes.href : '',
             needLabel: true, // TODO: see what was done before: !text or option ?
-            className: anchorAncestor ? anchorAncestor.className.toString() : '',
+            className: anchor ? anchor.className.toString() : '',
         };
-
-        return linkInfo;
     }
-    _getNodesToLinkify (range) {
-        var ancestor = range.commonAncestor();
-        var anchorAncestor = ancestor.ancestor('isAnchor');
-        if (anchorAncestor) {
-            return anchorAncestor.childNodes;
-        }
-        var nodes = [range.scArch];
-        if (range.scArch !== range.ecArch) {
-            range.scArch.nextUntil(function (next) {
-                nodes.push(next);
-                return next === range.ecArch;
-            });
-        }
-        return nodes;
-    }
-    _getTextToLinkify (range, nodes) {
-        if (nodes.length <= 0) {
-            return;
-        }
-
-        var anchorAncestor = nodes[0].ancestor('isAnchor');
-        var text = "";
-        for (var i = 0; i < nodes.length; i++) {
-            var node = nodes[i];
-            if (node.ancestor('isVoidoid')) {
-                text += node.ancestor('isVoidoid').toString();
-            } else if (!anchorAncestor && nodes[i].nodeType === 1) {
-                // just use text nodes from listBetween
-            } else {
-                var content = nodes[i].toString({onlyText: true});
-                if (!anchorAncestor && i === nodes.length - 1 && node === range.ecArch && node.isText()) {
-                    content = content.slice(0, range.eo);
-                }
-                if (!anchorAncestor && i === 0 && node === range.scArch && node.isText()) {
-                    content = content.slice(range.so);
-                }
-                text += content;
-            }
-        }
-        return text.replace(this.utils.getRegex('space', 'g'), ' ');
-    }
-
     /**
      * @param {Object} linkInfo
      * @param {String} linkInfo.url
@@ -97,13 +53,21 @@ var LinkCreate = class extends we3.AbstractPlugin {
         var anchor;
         if (linkInfo.isAnchor) {
             anchor = linkInfo.anchor;
-            this.dependencies.Arch.setRange({scID: anchor.id});
+            this.dependencies.Range.setRange({scID: anchor.id});
             anchor.empty();
         } else {
             anchor = this.dependencies.Arch.parse('<a></a>').firstChild();
         }
 
-        anchor.insert(this.dependencies.Arch.parse(linkInfo.text));
+        var linkContent;
+        if (linkInfo.node.isVoidoid()) {
+            linkContent = linkInfo.node.toString();
+        } else if (linkInfo.text && linkInfo.text.length) {
+            linkContent = linkInfo.text;
+        } else {
+            linkContent = linkInfo.url;
+        }
+        anchor.insert(this.dependencies.Arch.parse(linkContent));
         anchor.attributes.add('href', linkInfo.url);
         anchor.attributes.add('class', linkInfo.className);
         if (linkInfo.isNewWindow) {
@@ -183,4 +147,4 @@ var Link = class extends we3.AbstractPlugin {
 we3.addPlugin('Link', Link);
 we3.addPlugin('LinkCreate', LinkCreate);
 
-})();
+});

@@ -31,15 +31,11 @@ var LinkDialog = Dialog.extend({
             title: _t("Link to"),
         }, this.options));
 
-        this.triggerUp('getRecordInfo', {
-            recordInfo: this.options,
-            callback: function (recordInfo) {
-                _.defaults(self.options, recordInfo);
-            },
-        });
+        _.defaults(self.options, linkInfo.node.params.options.recordInfo);
 
         this.data = linkInfo || {};
         this.needLabel = linkInfo.needLabel;
+        this.node = linkInfo.node;
         this.data.iniClassName = linkInfo.className || '';
         var allBtnClassSuffixes = /(^|\s+)btn(-[a-z0-9_-]*)?/gi;
         var allBtnShapes = /\s*(rounded-circle|flat)\s*/gi;
@@ -103,7 +99,7 @@ var LinkDialog = Dialog.extend({
      * @override
      */
     save: function () {
-        var data = this._getData();
+        var data = this._getLinkData();
         if (data === null) {
             var $url = this.$('input[name="url"]');
             $url.closest('.form-group').addClass('o_has_error').find('.form-control, .custom-select').addClass('is-invalid');
@@ -138,16 +134,24 @@ var LinkDialog = Dialog.extend({
      */
     _adaptPreview: function () {
         var $preview = this.$("#link-preview");
-        var data = this._getData();
+        var data = this._getLinkData();
         if (data === null) {
             return;
         }
         var floatClass = /float-\w+/;
+        var linkContent;
+        if (this.node.isVoidoid()) {
+            linkContent = this.node.toString();
+        } else if (data.label && data.label.length) {
+            linkContent = data.label;
+        } else {
+            linkContent = data.url;
+        }
         $preview.attr({
             target: data.isNewWindow ? '_blank' : '',
             href: data.url && data.url.length ? data.url : '#',
             class: data.classes.replace(floatClass, '') + ' o_btn_preview',
-        }).html((data.label && data.label.length) ? data.label : data.url);
+        }).html(linkContent);
     },
     /**
      * Get the link's data (url, label and styles).
@@ -155,7 +159,7 @@ var LinkDialog = Dialog.extend({
      * @private
      * @returns {Object} {label: String, url: String, classes: String, isNewWindow: Boolean}
      */
-    _getData: function () {
+    _getLinkData: function () {
         var $url = this.$('input[name="url"]');
         var url = $url.val();
         var label = this.$('input[name="label"]').val() || url;
