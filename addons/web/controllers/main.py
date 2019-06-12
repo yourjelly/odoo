@@ -1114,41 +1114,53 @@ class Binary(http.Controller):
 
     @http.route('/web/binary/upload_attachment', type='http', auth="user")
     @serialize_exception
-    def upload_attachment(self, callback, model, id, ufile):
+    def upload_attachment(self, callback, model, id, ufile,file_sizes):
         files = request.httprequest.files.getlist('ufile')
+        max_file_size = 25000000
+        chunk_size = 9000000
+        file_sizes = json.loads(file_sizes)
         Model = request.env['ir.attachment']
         out = """<script language="javascript" type="text/javascript">
                     var win = window.top.window;
                     win.jQuery(win).trigger(%s, %s);
                 </script>"""
         args = []
+        large_files = []
         for ufile in files:
-
             filename = ufile.filename
-            if request.httprequest.user_agent.browser == 'safari':
-                # Safari sends NFD UTF-8 (where é is composed by 'e' and [accent])
-                # we need to send it the same stuff, otherwise it'll fail
-                filename = unicodedata.normalize('NFD', ufile.filename)
+            if file_sizes.get(filename) and file_sizes.get(filename) <= max_file_size : 
+                if request.httprequest.user_agent.browser == 'safari':
+                    # Safari sends NFD UTF-8 (where é is composed by 'e' and [accent])
+                    # we need to send it the same stuff, otherwise it'll fail
+                    filename = unicodedata.normalize('NFD', ufile.filename)
 
-            try:
-                attachment = Model.create({
-                    'name': filename,
-                    'datas': base64.encodestring(ufile.read()),
-                    'res_model': model,
-                    'res_id': int(id)
-                })
-                attachment._post_add_create()
-            except Exception:
-                args.append({'error': _("Something horrible happened")})
-                _logger.exception("Fail to upload attachment %s" % ufile.filename)
+                try:
+                    attachment = Model.create({
+                        'name': filename,
+                        'datas': base64.encodestring(ufile.read()),
+                        'datas_fname': filename,
+                        'res_model': model,
+                        'res_id': int(id)
+                    })
+                    attachment._post_add_create()
+                except Exception:
+                    args.append({'error': _("Something horrible happened")})
+                    _logger.exception("Fail to upload attachment %s" % ufile.filename)
+                else:
+                    args.append({
+                        'filename': filename,
+                        'mimetype': ufile.content_type,
+                        'id': attachment.id,
+                        'size': attachment.file_size
+                    })
             else:
-                args.append({
-                    'filename': filename,
-                    'mimetype': ufile.content_type,
-                    'id': attachment.id,
-                    'size': attachment.file_size
-                })
-        return out % (json.dumps(callback), json.dumps(args))
+                large_files.append(ufile.filename)
+        response = {
+            'out':out % (json.dumps(callback), json.dumps(args)),
+            'large_files':json.dumps(large_files),
+            'chunk_size': chunk_size
+            }
+        return json.dumps(response)
 
     @http.route([
         '/web/binary/company_logo',
