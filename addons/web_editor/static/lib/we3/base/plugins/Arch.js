@@ -25,7 +25,7 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @returns {string}
      **/
     getEditorValue (options) {
-        return this._arch.toString(options || {});
+        return this._arch.toString(options || {}).trim();
     }
     setEditorValue (value) {
         var self = this;
