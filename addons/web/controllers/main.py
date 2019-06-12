@@ -1116,15 +1116,9 @@ class Binary(http.Controller):
     @serialize_exception
     def upload_attachment(self, callback, model, id, ufile,file_sizes):
         files = request.httprequest.files.getlist('ufile')
-        max_file_size = 250000
-        chunk_size = 90000
-        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-        print(id)
-        print(callback)
-        print(model)
-        print(json.loads(file_sizes))
+        max_file_size = 25000000
+        chunk_size = 9000000
         file_sizes = json.loads(file_sizes)
-        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
         Model = request.env['ir.attachment']
         out = """<script language="javascript" type="text/javascript">
                     var win = window.top.window;
