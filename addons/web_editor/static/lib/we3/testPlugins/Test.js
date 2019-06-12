@@ -422,26 +422,36 @@ var TestPlugin = class extends we3.AbstractPlugin {
 
                 // Correct path and offset for insertion of range symbol
                 var prev = o.previousSibling();
-                if (prev && prev.isText() && (!isEnd || prev.id !== start.id)) {
+                if (prev && prev.isText()) {
                     // account for splitting of text node to insert range symbol
-                    path[path.length - 1]--;
-                    offset += prev.length();
+                    var prevPrev = prev && prev.previousSibling();
+                    if (!prev.isTestNode) {
+                        path[path.length - 1]--;
+                        offset += prev.length();
+                    } else if (prev.isTestNode && prev.isTestNode() && prevPrev && prevPrev.isText()) {
+                        path[path.length - 1]--;
+                        offset += prevPrev.length();
+                    }
+                    var prevPrevPrev = prevPrev && prevPrev.previousSibling();
+                    if (prevPrev && prevPrev.isTestNode && prevPrevPrev && prevPrevPrev.isText()) {
+                        offset += prevPrevPrev.length();
+                    }
                 }
-                if (isEnd && o.commonAncestor(start).id === o.parent.id) {
+                if (isEnd && start.parent.id === o.parent.id) {
                     // account for splitting of text node to insert start range symbol,
                     // and for range symbol itself
                     path[path.length - 1]--;
                     var startPrev = start.previousSibling();
                     var startNext = start.nextSibling();
-                    if (startPrev && startPrev.isText() && startNext && startNext.isText()) {
+                    if (startPrev && startPrev.isText() && startNext && startNext.isText() && startNext.id !== o.id) {
                         path[path.length - 1]--;
                     }
                 }
 
                 var arch = archNode.applyPath(path.slice());
                 if (!arch) {
-                    offset = path.pop();
-                    arch = archNode.applyPath(path.slice());
+                    offset = path[path.length - 1];
+                    arch = archNode.applyPath(path.slice(0, -1));
                 }
                 return {
                     node: arch,
@@ -458,7 +468,6 @@ var TestPlugin = class extends we3.AbstractPlugin {
                 eo: e.offset,
             };
         }
-
         this.setRange(range);
     }
     /**

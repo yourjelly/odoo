@@ -105,9 +105,12 @@ var TestKeyboard = class extends we3.AbstractPlugin {
         keyboardTests.forEach(function (test, i) {
             keyboardTests[i].do = keyboardTests[i].do || function () {
                 var def = Promise.resolve();
-                while (test.steps && test.steps.length) {
-                    def = def.then(self._execStep.bind(self, assert, test.steps.shift(), test.name));
+                if (!test.steps) {
+                    return def;
                 }
+                test.steps.forEach(function (step) {
+                    def = def.then(self._execStep.bind(self, assert, step, test.name));
+                });
                 return def;
             }
         });
