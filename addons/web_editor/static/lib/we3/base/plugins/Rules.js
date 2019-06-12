@@ -317,8 +317,6 @@ var BaseRules = class extends we3.AbstractPlugin {
             this._applyRulesOnArchNode(this._curentTargetArchNode);
         }
 
-        console.log('rules applied to archNodes:', nb);
-
         this._nodesUpdatedToApplyRules = null;
     }
     /**

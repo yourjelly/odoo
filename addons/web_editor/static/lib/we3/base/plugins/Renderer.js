@@ -121,6 +121,9 @@ var BaseRenderer = class extends we3.AbstractPlugin {
         var els = [];
         (function _getAll(el) {
             if (el.tagName && el.tagName.indexOf('WE3-') === 0) {
+                if (el.tagName === "WE3-EDITABLE") {
+                    el.childNodes.forEach(_getAll);
+                }
                 return;
             }
             els.push(el);
