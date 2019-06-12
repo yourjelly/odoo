@@ -395,7 +395,6 @@ var TestPlugin = class extends we3.AbstractPlugin {
      * @param {string} value
      */
     setValue (value) {
-        var self = this;
         this.triggerUp('set_value', {value: value});
 
         var clone = this.dependencies.Arch.getNode(1);
@@ -417,41 +416,46 @@ var TestPlugin = class extends we3.AbstractPlugin {
             };
         } else {
             var archNode = this.dependencies.Arch.getNode(1);
-            function getRange (o) {
+            function __getPoint(o, isEnd) {
                 var offset = 0;
                 var path = o.path();
+
+                // Correct path and offset for insertion of range symbol
                 var prev = o.previousSibling();
-                if (prev && prev.isText()) {
+                if (prev && prev.isText() && (!isEnd || prev.id !== start.id)) {
+                    // account for splitting of text node to insert range symbol
                     path[path.length - 1]--;
                     offset += prev.length();
                 }
-                // if range selection on the same text node
-                prev = prev && prev.isText() && prev.previousSibling();
-                if (prev && prev.isText()) {
+                if (isEnd && o.commonAncestor(start).id === o.parent.id) {
+                    // account for splitting of text node to insert start range symbol,
+                    // and for range symbol itself
                     path[path.length - 1]--;
-                    offset += prev.length();
+                    var startPrev = start.previousSibling();
+                    var startNext = start.nextSibling();
+                    if (startPrev && startPrev.isText() && startNext && startNext.isText()) {
+                        path[path.length - 1]--;
+                    }
                 }
+
                 var arch = archNode.applyPath(path.slice());
                 if (!arch) {
                     offset = path.pop();
                     arch = archNode.applyPath(path.slice());
                 }
-                var value = {
-                    arch: arch,
-                    so: offset,
+                return {
+                    node: arch,
+                    offset: offset,
                 };
-                if (value.arch.id && !o.isRoot()) {
-                    self.dependencies.Arch.bypassUpdateConstraints(o.remove.bind(o));
-                }
-                return value;
             }
-            var s = getRange(start);
-            var e = getRange(end);
+            var s = __getPoint(start, false);
+            var e = __getPoint(end, true);
+
             range = {
-                scID: s.arch.id,
-                so: s.so,
-                ecID: e.arch.id,
-                eo: e.so,
+                scID: s.node.id,
+                so: s.offset,
+                ecID: e.node.id,
+                eo: e.offset,
             };
         }
 
