@@ -207,7 +207,7 @@ var PopoverPlugin = class extends we3.AbstractPlugin {
             var focus = this.dependencies.Renderer.getElement(focusNode.id);
             target = popover.targetArchNode ? this.dependencies.Renderer.getElement(popover.targetArchNode.id) : target;
             if (focus !== target && target.contains(focus)) {
-                top += focus.offsetHeight;
+                top += focus.offsetHeight || focus.parentNode.offsetHeight;
             }
             position = this.dependencies.Position.getPosition(target, offset);
         }

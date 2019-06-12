@@ -43,42 +43,42 @@ var TestPopover = class extends we3.AbstractPlugin {
         // Video popover
         // 'Video.getArchNode': plugins
         {
-            name: 'Click on video shoud select video display the video popover',
-            content: '<p>◆aaa video bbb</p>',
-            click: 'we3-editable p',
-            test: '<p>aaa ▶video◀ bbb</p>',
+            name: 'Click on video shoud display the video popover',
+            content: '<p>◆aaa </p><div class="media_iframe_video"><iframe src="about:blank"/></div><p> bbb</p>',
+            click: 'we3-editable iframe',
+            test: '<p>aaa</p>▶<div class="media_iframe_video"><iframe src="about:blank"/></div>◀<p>bbb</p>',
             activePopovers: ['Video'],
+        },
+
+        // Text popover
+        // 'Text.get': plugins for air mode
+        {
+            name: 'Click on video shoud display the text popover (need "Text.get" popover for air mode)',
+            content: '<p>Bonjour,<br/><i>comment va-</i><b><i>tu</i></b><i> ?</i></p>',
+            click: 'we3-editable i',
+            test: '<p>Bonjour,<br/><i>◆comment va-</i><b><i>tu</i></b><i> ?</i></p>',
+            activePopovers: this.options.popover['Text.get'] ? ['Text'] : [],
         },
 
         // Link popover
         // 'Link.get': plugins
         {
-            name: 'Click on link shoud select video display the link popover and the text popover',
+            name: 'Click on link shoud display the link popover and the text popover (for air mode)',
             content: '<p>◆aaa <a href="https://www.odoo.com">Odoo</a> bbb</p>',
             click: 'we3-editable a',
             test: '<p>aaa <a href="https://www.odoo.com">◆Odoo</a> bbb</p>',
-            activePopovers: ['Link', 'Text'],
+            activePopovers: this.options.popover['Text.get'] ? ['Link', 'Text'] : ['Link'],
         },
 
         // Table popover + Text popover
         // 'Table.get': plugins
         // 'Text.get': plugins for air mode
         {
-            name: 'Click on table cell shoud display the cell popover and the text popover',
-            content: '<table><tbody><tr><td>wrong TD</td></tr><tr><td>free text in table</td></tr></tbody></table>',
-            click: 'we3-editable td',
-            test: '<table><tbody><tr><td>◆wrong TD</td></tr><tr><td>free text in table</td></tr></tbody></table>',
-            activePopovers: ['Table', 'Text'],
-        },
-
-        // Text popover
-        // 'Text.get': plugins for air mode
-        {
-            name: 'Click on video shoud display the text popover',
-            content: '<p>Bonjour,<br/><i>comment va-</i><b><i>tu</i></b><i> ?</i></p>',
-            click: 'we3-editable i',
-            test: '<p>Bonjour,<br/><i>◆comment va-</i><b><i>tu</i></b><i> ?</i></p>',
-            activePopovers: ['Text'],
+            name: 'Click on link in table cell shoud display the cell popover and the link popover',
+            content: '<table><tbody><tr><td>wrong TD</td></tr><tr><td>free text in table <a href="https://www.odoo.com">◆Odoo</a></td></tr></tbody></table>',
+            click: 'we3-editable a',
+            test: '<table><tbody><tr><td>wrong TD</td></tr><tr><td>free text in table <a href="https://www.odoo.com">◆Odoo</a></td></tr></tbody></table>',
+            activePopovers: this.options.popover['Text.get'] ? ['Table', 'Link', 'Text'] : ['Table', 'Link'],
         },];
     }
 
@@ -104,10 +104,6 @@ var TestPopover = class extends we3.AbstractPlugin {
                     test.activePopovers.sort();
                     activePopovers.sort();
                     assert.strictEqual(activePopovers.join(','), test.activePopovers.join(','), test.name + ' (popovers)');
-
-                    var testValue = test.test;
-                    delete test.test;
-                    assert.strictEqual(self.dependencies.Test.getValue(), testValue, test.name + ' (value)');
                 });
             }
         });
