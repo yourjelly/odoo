@@ -67,6 +67,8 @@ BUNDLE_MAXAGE = 60 * 60 * 24 * 7
 CONTENT_MAXAGE = 60 * 60 * 24 * 356
 
 DBNAME_PATTERN = '^[a-zA-Z0-9][a-zA-Z0-9_.-]+$'
+MAX_FILE_SIZE = 25000000 
+MAX_CHUNK_SIZE = 5000000
 
 #----------------------------------------------------------
 # Odoo Web helpers
@@ -1114,11 +1116,11 @@ class Binary(http.Controller):
 
     @http.route('/web/binary/upload_attachment', type='http', auth="user")
     @serialize_exception
-    def upload_attachment(self, callback, model, id, ufile,file_sizes=None):
+    def upload_attachment(self, callback, model, id, ufile,filesizes=None):
         files = request.httprequest.files.getlist('ufile')
-        max_file_size = 25000000
-        chunk_size = 9000000
-        file_sizes = json.loads(file_sizes)
+        file_sizes = {}
+        if filesizes:
+            file_sizes = json.loads(filesizes)
         Model = request.env['ir.attachment']
         out = """<script language="javascript" type="text/javascript">
                     var win = window.top.window;
@@ -1128,7 +1130,7 @@ class Binary(http.Controller):
         large_files = []
         for ufile in files:
             filename = ufile.filename
-            if file_sizes.get(filename) and file_sizes.get(filename) <= max_file_size : 
+            if file_sizes.get(filename) and file_sizes.get(filename) <= MAX_FILE_SIZE : 
                 if request.httprequest.user_agent.browser == 'safari':
                     # Safari sends NFD UTF-8 (where é is composed by 'e' and [accent])
                     # we need to send it the same stuff, otherwise it'll fail
@@ -1158,7 +1160,7 @@ class Binary(http.Controller):
         response = {
             'out':out % (json.dumps(callback), json.dumps(args)),
             'large_files':json.dumps(large_files),
-            'chunk_size': chunk_size
+            'chunk_size': MAX_CHUNK_SIZE
             }
         return json.dumps(response)
 
