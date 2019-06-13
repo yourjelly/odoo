@@ -1114,7 +1114,7 @@ class Binary(http.Controller):
 
     @http.route('/web/binary/upload_attachment', type='http', auth="user")
     @serialize_exception
-    def upload_attachment(self, callback, model, id, ufile,file_sizes):
+    def upload_attachment(self, callback, model, id, ufile,file_sizes=None):
         files = request.httprequest.files.getlist('ufile')
         max_file_size = 25000000
         chunk_size = 9000000
