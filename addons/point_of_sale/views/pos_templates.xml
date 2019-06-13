@@ -63,6 +63,81 @@
 </html>
 </template>
 
+<template id="assets_owl" name="point_of_sale assets OWL">
+    <link rel="stylesheet" type="text/scss" href="/web/static/src/scss/fonts.scss"/>
+    <link rel="stylesheet" href="/web/static/lib/fontawesome/css/font-awesome.css"/>
+    <link rel="stylesheet" href="/point_of_sale/static/src/css/pos.css" id="pos-stylesheet"/>
+    <link rel="stylesheet" href="/point_of_sale/static/src/css/keyboard.css"/>
+
+    <link rel="stylesheet" type="text/less" href="/web/static/src/scss/fontawesome_overridden.scss"/>
+
+    <script type="text/javascript" src="/web/static/src/js/services/session.js"/>
+    <script type="text/javascript" src="/web/static/src/js/fields/field_utils.js"/>
+    <script type="text/javascript" src="/barcodes/static/src/js/barcode_parser.js"/>
+
+    <script type="text/javascript" src="/point_of_sale/static/lib/backbone/backbone.js"/>
+    <script type="text/javascript" src="/point_of_sale/static/lib/waitfont.js"/>
+    <script type="text/javascript" src="/point_of_sale/static/lib/owl.js"/>
+    <script type="text/javascript" src="/point_of_sale/static/src/js/db.js"/>
+    <script type="text/javascript" src="/point_of_sale/static/src/js/devices.js"/>
+    <script type="text/javascript" src="/point_of_sale/static/src/js/printers.js"/>
+    <script type="text/javascript" src="/point_of_sale/static/src/js/barcode_reader.js"/>
+    <script type="text/javascript" src="/point_of_sale/static/src/js/models.js"/>
+
+    <script type="text/javascript" src="/point_of_sale/static/src2/js/components/chrome.js"/>
+    <script type="text/javascript" src="/point_of_sale/static/src2/js/components/username_widget.js"/>
+    <script type="text/javascript" src="/point_of_sale/static/src2/js/components/product_screen_widget.js"/>
+    <script type="text/javascript" src="/point_of_sale/static/src2/js/components/product.js"/>
+    <script type="text/javascript" src="/point_of_sale/static/src2/js/components/product_list_widget.js"/>
+    <script type="text/javascript" src="/point_of_sale/static/src2/js/components/product_categories_widget.js"/>
+    <script type="text/javascript" src="/point_of_sale/static/src2/js/components/orderline.js"/>
+    <script type="text/javascript" src="/point_of_sale/static/src2/js/components/order_widget.js"/>
+    <script type="text/javascript" src="/point_of_sale/static/src2/js/components/actionpad_widget.js"/>
+    <script type="text/javascript" src="/point_of_sale/static/src2/js/components/numpad_widget.js"/>
+    <script type="text/javascript" src="/point_of_sale/static/src2/js/components/order_selector_widget.js"/>
+    <script type="text/javascript" src="/point_of_sale/static/src2/js/backbone_store.js"/>
+    <script type="text/javascript" src="/point_of_sale/static/src2/js/formatters.js"/>
+    <script type="text/javascript" src="/point_of_sale/static/src2/js/init.js"/>
+</template>
+
+<template id="index_owl" name="POS Index OWL">&lt;!DOCTYPE html&gt;
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>Odoo POS</title>
+
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+        <meta name="viewport" content=" width=1024, user-scalable=no"/>
+        <meta name="apple-mobile-web-app-capable" content="yes"/>
+        <meta name="mobile-web-app-capable" content="yes"/>
+
+        <link rel="shortcut icon"    sizes="196x196" href="/point_of_sale/static/src/img/touch-icon-196.png"/>
+        <link rel="shortcut icon"    sizes="128x128" href="/point_of_sale/static/src/img/touch-icon-128.png"/>
+        <link rel="apple-touch-icon"                 href="/point_of_sale/static/src/img/touch-icon-iphone.png"/>
+        <link rel="apple-touch-icon" sizes="76x76"   href="/point_of_sale/static/src/img/touch-icon-ipad.png"/>
+        <link rel="apple-touch-icon" sizes="120x120" href="/point_of_sale/static/src/img/touch-icon-iphone-retina.png"/>
+        <link rel="apple-touch-icon" sizes="152x152" href="/point_of_sale/static/src/img/touch-icon-ipad-retina.png"/>
+
+        <style> body { background: #222; } </style>
+
+        <link rel="shortcut icon" href="/web/static/src/img/favicon.ico" type="image/x-icon"/>
+
+        <script type="text/javascript">
+            var odoo = <t t-raw="json.dumps({
+                'csrf_token': request.csrf_token(None),
+                'session_info': session_info,
+                'debug': debug,
+            })"/>;
+        </script>
+
+        <t t-call-assets="web.assets_common" t-css="false"/>
+        <t t-call-assets="point_of_sale.assets_owl"/>
+        <t t-call="web.conditional_assets_tests"/>
+    </head>
+    <body/>
+</html>
+</template>
+
 <!-- This is a duplicate of Qweb template JS side CustomerFacingDisplayHead. We could have told models.js to do an extra rpc call for this-->
 <template id="extra_head">
     <link href="/point_of_sale/static/src/css/customer_facing_display.css" rel="stylesheet"/>
