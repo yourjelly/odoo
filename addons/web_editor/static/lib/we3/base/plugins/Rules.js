@@ -165,7 +165,7 @@ var parentedRules = [
  * Eg: if ['i', 'b'], a 'b' node can be in an 'i' node but not otherwise
  */
 var orderRules = [
-    ['span', 'font'].concat(tags.format.filter((tag) => tag !== 'span' && tag !== 'font')),
+    ['font'].concat(tags.format.filter((tag) => tag !== 'span' && tag !== 'font')),
 ];
 
 
@@ -602,6 +602,7 @@ var BaseRules = class extends we3.AbstractPlugin {
     /**
      * Apply the order rules on the given ArchNode.
      *
+     * @see orderRulesList
      * @private
      * @param {ArchNode} targetArchNode
      */
@@ -612,15 +613,20 @@ var BaseRules = class extends we3.AbstractPlugin {
             return;
         }
         var disorderedAncestors = [];
+        var toUnwrap = [];
         var node = targetArchNode;
         while (node && node.parent && !node.isRoot()) {
             var parentPos = rules.indexOf(node.parent.nodeName);
+            if (node.parent.nodeName === targetArchNode.nodeName) {
+                toUnwrap.push(node);
+            }
             if (parentPos > pos && node.parent.isEditable() && !node.parent.isUnbreakable()) {
                 disorderedAncestors.push(node);
             }
             node = node.parent;
         }
         disorderedAncestors.forEach((ancestor) => this._swapWithParent(ancestor));
+        toUnwrap.forEach((node) => node.unwrap());
     }
     /**
      * Apply the parented rules regarding forbidden ancestry on the given ArchNode.
