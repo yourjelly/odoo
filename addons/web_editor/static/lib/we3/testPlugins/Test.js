@@ -300,7 +300,6 @@ var TestPlugin = class extends we3.AbstractPlugin {
      * @returns {Promise}
      */
     execTests (assert, tests) {
-        var self = this;
         var defPollTest = Promise.resolve();
         tests.forEach((test) => defPollTest = defPollTest.then(this._pollTest.bind(this, this.mockAssert, test)));
         return defPollTest;
@@ -331,7 +330,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
      * @param {Object} keyPress
      * @returns {Node} target
      */
-    keydown (target, keyPress) {
+    async keydown (target, keyPress) {
         var self = this;
         target = target.tagName ? target : target.parentNode;
         if (!keyPress.keyCode) {
@@ -345,7 +344,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
             keyPress.key = this.utils.keyboardMap[keyPress.keyCode] || String.fromCharCode(keyPress.keyCode);
         }
         keyPress.keyCode = keyPress.keyCode;
-        this.triggerNativeEvents(target, 'keydown', keyPress).then(function (ev) {
+        await this.triggerNativeEvents(target, 'keydown', keyPress).then(function (ev) {
             ev = ev[0] || ev; // (only one event was triggered)
             if (!ev.defaultPrevented) {
                 if (keyPress.key.length === 1) {
@@ -356,7 +355,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
                 }
             }
         });
-        this.triggerNativeEvents(target, 'keyup', keyPress);
+        await this.triggerNativeEvents(target, 'keyup', keyPress);
         return target;
     }
     /**

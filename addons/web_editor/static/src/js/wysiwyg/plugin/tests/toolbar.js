@@ -37,34 +37,17 @@ var TestToolbar = class extends we3.AbstractPlugin {
      * @param {Boolean} [options.firstDeselect] (default: false) true to deselect before pressing
      */
     keydown (key, options) {
-        var keyPress = {};
-        if (typeof key === 'string') {
-            keyPress.key = key;
-            for (var keyCode in this.utils.keyboardMap) {
-                if (this.utils.keyboardMap[keyCode] === keyPress.key) {
-                    keyPress.keyCode = +keyCode;
-                    break;
-                }
-            }
-            keyPress.keyCode = +_.findKey(this.utils.keyboardMap, function (k) {
-                return k === key;
-            });
-        } else {
-            keyPress.key = this.utils.keyboardMap[key] || String.fromCharCode(key);
-            keyPress.keyCode = key;
-        }
         var range = this.dependencies.Range.getRange();
         if (!range) {
             console.error("Editor has no range");
             return;
         }
         if (options && options.firstDeselect) {
-            range.sc = range.ec;
-            range.so = range.eo;
-            this.dependencies.Range.setRange(range.getPoints());
+            range = range.collapse(false); // collapse on end point
+            this.dependencies.Range.setRange(range);
         }
         var target = range.ec.tagName ? range.ec : range.ec.parentNode;
-        this.dependencies.Test.triggerNativeEvents(target, 'keydown', keyPress);
+        return this.dependencies.Test.keydown(target, {key: key});
     }
 
     //--------------------------------------------------------------------------
