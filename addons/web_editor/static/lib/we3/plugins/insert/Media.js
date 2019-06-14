@@ -937,7 +937,7 @@ var PICTOGRAM = class extends Media {
         return true;
     }
     get type () {
-        return 'FA';
+        return 'PICTOGRAM';
     }
 };
 we3.addArchNode('PICTOGRAM', PICTOGRAM);

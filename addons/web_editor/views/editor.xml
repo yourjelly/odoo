@@ -139,11 +139,11 @@
     <!-- Tests -->
 
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbar.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarFontStyle.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarWand.js"/>
     <!-- <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarBackgroundColor.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarFontSize.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarFontStyle.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarForeColor.js"/> -->
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarWand.js"/>
 
     <!-- additional plugins -->
 

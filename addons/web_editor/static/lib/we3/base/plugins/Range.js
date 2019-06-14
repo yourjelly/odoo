@@ -90,46 +90,43 @@ var BaseRange = class extends we3.AbstractPlugin {
     }
     /**
      * Returns a list of all selected nodes in the range.
+     * If a predicate function is included, only nodes meeting its
+     * conditions will be returned.
      *
      * @param {function} [pred]
      * @returns {ArchNode []}
      */
     getSelectedNodes (pred) {
-        var self = this;
         var range = this.getRange();
+        var start = range.scArch;
+        var end = range.ecArch;;
+        if (!range.isCollapsed() && range.so === range.scArch.length()) {
+            start = range.scArch.nextSibling() || range.scArch;
+        }
+        if (!range.isCollapsed() && range.eo === 0) {
+            end = range.scArch.previousSibling() || range.ecArch;
+        }
         var selection = [];
-        if (!pred || pred.call(range.scArch, range.scArch)) {
-            selection.push(range.scArch);
+        if (!pred || pred.call(start, start)) {
+            selection.push(start);
         }
         if (!range.isCollapsed()) {
-            range.scArch.nextUntil(function (next) {
+            start.nextUntil(function (next) {
                 if (!pred || pred.call(next, next)) {
                     selection.push(next);
                 }
-                return next === self.ecArch;
+                return next === end;
             });
         }
         return selection;
     }
     /**
-     * Get the text contents of the current selection
-     * from the DOM.
+     * Return true if the start range is the same point as the end range.
      *
-     * @returns {String}
+     * @returns {Boolean}
      */
-    getSelectedText () {
-        return this.getRange().getSelection().toString();
-    }
-    /**
-     * Returns a list of all selected text nodes in the range.
-     * If a predicate function is included, only nodes meeting its
-     * conditions will be returned.
-     *
-     * @param {(Node) => Boolean} [pred]
-     * @returns {Node []}
-     */
-    getSelectedTextNodes (pred) {
-        throw new Error('TODO');
+    isCollapsed () {
+        return this.getRange().isCollapsed();
     }
     /**
      * Restore the range to its last saved value.
@@ -288,8 +285,9 @@ var BaseRange = class extends we3.AbstractPlugin {
         return new WrappedRange(this.dependencies.Arch, this.dependencies.Renderer, {});
     }
     /**
-     * Return true if the range is collapsed.
+     * Return true if the saved range is collapsed.
      *
+     * @todo check if public isCollapsed would suffice
      * @private
      * @returns {Boolean}
      */
@@ -785,24 +783,12 @@ var Range = class extends we3.AbstractPlugin {
         return this.dependencies.BaseRange.getSelectedNodes(pred);
     }
     /**
-     * Get the text contents of the current selection
-     * from the DOM.
+     * Return true if the start range is the same point as the end range.
      *
-     * @returns {String}
+     * @returns {Boolean}
      */
-    getSelectedText () {
-        return this.dependencies.BaseRange.getSelectedText();
-    }
-    /**
-     * Returns a list of all selected text nodes in the range.
-     * If a predicate function is included, only nodes meeting its
-     * conditions will be returned.
-     *
-     * @param {(Node) => Boolean} [pred]
-     * @returns {Node []}
-     */
-    getSelectedTextNodes (pred) {
-        return this.dependencies.BaseRange.getSelectedTextNodes(pred);
+    isCollapsed () {
+        return this.dependencies.BaseRange.isCollapsed();
     }
     /**
      * Restore the range to its last saved value.

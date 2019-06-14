@@ -129,6 +129,9 @@ we3.tags = {
         'video',
         'wbr'
     ],
+    /**
+     * @see https://dvcs.w3.org/hg/editing/raw-file/tip/editing.html#the-removeformat-command
+     */
     format: [
         'abbr',
         'acronym',

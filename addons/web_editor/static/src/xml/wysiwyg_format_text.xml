@@ -24,13 +24,13 @@
             </we3-vertical-items>
         </we3-dropdown>
         <we3-group>
-            <we3-button name="formatText-b" data-method="formatText" data-value="B" title="Bold">
+            <we3-button name="formatText-b" data-method="formatText" data-value="b" title="Bold">
                 <i class="fa fa-bold"></i>
             </we3-button>
-            <we3-button name="formatText-i" data-method="formatText" data-value="I" title="Italic">
+            <we3-button name="formatText-i" data-method="formatText" data-value="i" title="Italic">
                 <i class="fa fa-italic"></i>
             </we3-button>
-            <we3-button name="formatText-u" data-method="formatText" data-value="U" title="Underline">
+            <we3-button name="formatText-u" data-method="formatText" data-value="u" title="Underline">
                 <i class="fa fa-underline"></i>
             </we3-button>
             <we3-button name="formatText-remove" data-method="removeFormat" title="Remove Font Style">

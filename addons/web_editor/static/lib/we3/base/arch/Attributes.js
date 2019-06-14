@@ -277,6 +277,9 @@ var Style = class extends Attributes {
             this.archNode._triggerChange();
         }
     }
+    get length () {
+        return this.__order__.length;
+    }
     update (style) {
         var self = this;
         Object.keys(style).forEach (function (key) {

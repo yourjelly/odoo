@@ -383,18 +383,22 @@ var isBrowse = {
     /**
      * Return true if the node is empty.
      *
+     * @param {Boolean} keepVirtual true not to consider virtual nodes as blank
      * @returns {Boolean}
      */
-    isEmpty: function () {
+    isEmpty: function (keepVirtual) {
+        if (this.isVoidoid()) {
+            return false;
+        }
         if (this.childNodes.length === 0) {
             return true;
         }
         var child = this.childNodes[0];
-        if (this.childNodes.length === 1 && (child.isBR() || child.isText() && child.isEmpty())) {
+        if (this.childNodes.length === 1 && (child.isBR() || !keepVirtual && child.isText() && child.isEmpty())) {
             return true;
         }
-        if (this.isFilledWithOnlyBlank()) {
-            return true;
+        if (this.isFilledWithOnlyBlank(keepVirtual)) {
+            return !keepVirtual || this.childNodes.every((child) => !child.isVirtual());
         }
         return false;
     },
