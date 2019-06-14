@@ -5082,9 +5082,10 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 names = dotname.split('.', 1)
                 name = names.pop(0)
                 suffixes[name].extend(names)
-            # fill in prefix tree in fields order
+            # fill in prefix tree in fields dependency order
             tree = OrderedDict()
-            for name, field in model._fields.items():
+            for field in sorted(model._fields.values(), key=self.pool.field_sequence):
+                name = field.name
                 if name in suffixes:
                     tree[name] = subtree = PrefixTree(model[name], suffixes[name])
                     if subtree and field.type == 'one2many':
