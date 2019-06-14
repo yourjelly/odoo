@@ -380,3 +380,30 @@ class ComputeRecursive(models.Model):
                 rec.display_name = rec.parent.display_name + " / " + rec.name
             else:
                 rec.display_name = rec.name
+
+
+class Order(models.Model):
+    _name = 'test_new_api.order'
+
+    price = fields.Integer()
+    total = fields.Integer(compute='_compute_total')
+    line_ids = fields.One2many('test_new_api.order.line', 'order_id')
+
+    @api.depends('line_ids.subtotal')
+    def _compute_total(self):
+        for order in self:
+            order.total = sum(line.subtotal for line in order.line_ids)
+
+
+class OrderLine(models.Model):
+    _name = 'test_new_api.order.line'
+
+    order_id = fields.Many2one('test_new_api.order', required=True)
+    price = fields.Integer(related='order_id.price', related_sudo=False)
+    quantity = fields.Integer()
+    subtotal = fields.Integer(compute='_compute_subtotal')
+
+    @api.depends('price', 'quantity')
+    def _compute_subtotal(self):
+        for line in self:
+            line.subtotal = line.price * line.quantity

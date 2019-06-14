@@ -523,3 +523,25 @@ class TestOnChange(common.TransactionCase):
             self.Message.onchange(values, 'discussion', field_onchange)
 
         self.assertFalse(called[0], "discussion.messages has been read")
+
+    def test_onchange_fields_order(self):
+        """ Check recomputation when fields are defined upside down. """
+        Model = self.env['test_new_api.order']
+        field_onchange = {
+            'price': '1',
+            'line_ids': '1',
+            'line_ids.price': '1',
+            'line_ids.quantity': '1',
+            'line_ids.subtotal': '1',
+            'total': '',
+        }
+        values = {
+            'price': 6,
+            'line_ids': [(0, 0, {'price': 1, 'quantity': 7, 'subtotal': 7})],
+            'total': 7,
+        }
+        result = Model.onchange(values, 'line_ids', field_onchange)
+        self.assertEqual(result, {'value': {
+            'line_ids': [(5,), (0, 0, {'price': 6, 'quantity': 7, 'subtotal': 42})],
+            'total': 42,
+        }})
