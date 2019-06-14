@@ -568,7 +568,8 @@ var isEditable = {
             this.isVoidoid() ||
             this.isContentEditable() ||
             this.params.isUnbreakableNode(this) ||
-            !this.isAllowUpdate();
+            !this.isAllowUpdate() ||
+            !this.parent.isAllowUpdate();
     },
 }
 Object.assign(we3.ArchNode.prototype, isEditable);
