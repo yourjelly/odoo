@@ -475,7 +475,6 @@ we3.addPlugin('UploadCropImage', class extends we3.AbstractPlugin {
                         res_model: resModel,
                         res_id: resID,
                         name: name,
-                        datas_fname: name,
                         datas: datas,
                         mimetype: mimetype,
                         url: originalSrc, // To save the original image that was cropped

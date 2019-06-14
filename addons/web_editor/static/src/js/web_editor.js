@@ -226,9 +226,9 @@ var Wysiwyg = Widget.extend({
             ['mimetype', '=', false],
             ['mimetype', isDocument ? 'not in' : 'in', ['image/gif', 'image/jpe', 'image/jpeg', 'image/jpg', 'image/gif', 'image/png']]);
         if (needle && needle.length) {
-            domain.push('|', ['datas_fname', 'ilike', needle], ['name', 'ilike', needle]);
+            domain.push(['name', 'ilike', needle]);
         }
-        domain.push('|', ['datas_fname', '=', false], '!', ['datas_fname', '=like', '%.crop'], '!', ['name', '=like', '%.crop']);
+        domain.push('!', ['name', '=like', '%.crop']);
         return domain;
     },
     /**
@@ -301,7 +301,7 @@ var Wysiwyg = Widget.extend({
                 model: 'ir.attachment',
                 method: 'search_read',
                 domain: this._getAttachmentsDomain(values.search, pluginName === 'UploadDocument'),
-                fields: ['name', 'datas_fname', 'mimetype', 'checksum', 'url', 'type', 'res_id', 'res_model', 'access_token'],
+                fields: ['name', 'mimetype', 'checksum', 'url', 'type', 'res_id', 'res_model', 'access_token'],
                 order: [{name: 'id', asc: false}],
                 limit: values.limit,
                 offset: values.offset,
@@ -465,8 +465,8 @@ var Wysiwyg = Widget.extend({
             }
         }
         record.url = url;
-        record.alt = record.datas_fname;
-        record.title = record.name || record.datas_fname;
+        record.alt = record.name;
+        record.title = record.name;
         return record;
     },
     _renderTemplate: function (pluginName, template, values) {
