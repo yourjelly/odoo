@@ -222,7 +222,13 @@ class Lang(models.Model):
     def write(self, vals):
         lang_codes = self.mapped('code')
         if 'code' in vals and any(code != vals['code'] for code in lang_codes):
-            raise UserError(_("Language code cannot be modified."))
+            if not self.pool._init:  # allow to change code during updates
+                raise UserError(_("Language code cannot be modified."))
+            else:
+                self.ensure_one()
+                models = ['ir.translation', 'res.partner'] #, 'base.language.export', 'base.language.install', 'base.update.translations'
+                for model in models:
+                    self.env[model].search([('lang', '=', self.code)]).write({'lang': vals['code']})
         if vals.get('active') == False:
             if self.env['res.users'].search([('lang', 'in', lang_codes)]):
                 raise UserError(_("Cannot deactivate a language that is currently used by users."))
