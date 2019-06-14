@@ -447,15 +447,23 @@ var TestPlugin = class extends we3.AbstractPlugin {
                         offset += prevPrevPrev.length();
                     }
                 }
-                if (isEnd && start.parent.id === o.parent.id) {
-                    // account for splitting of text node to insert start range symbol,
-                    // and for range symbol itself
-                    path[path.length - 1]--;
-                    var startPrev = start.previousSibling();
-                    var startNext = start.nextSibling();
-                    if (startPrev && startPrev.isText() && startNext && startNext.isText() && startNext.id !== o.id) {
-                        path[path.length - 1]--;
-                    }
+                // account for splitting of text node to insert start range symbol,
+                // and for range symbol itself
+                if (isEnd) {
+                    var i = 0;
+                    o.ancestor(function (a) {
+                        i++;
+                        if (!a.parent || a.parent.id !== start.parent.id) {
+                            return;
+                        }
+                        path[path.length - i]--;
+                        var startPrev = start.previousSibling();
+                        var startNext = start.nextSibling();
+                        if (startPrev && startPrev.isText() && startNext && startNext.isText() && startNext.id !== o.id) {
+                            path[path.length - i]--;
+                        }
+                        return true;
+                    })
                 }
 
                 var arch = archNode.applyPath(path.slice());
