@@ -53,27 +53,19 @@ QUnit.module('we3', {
             },
         });
 
+        var self = this;
         testUtils.mock.patch(Wysiwyg, {
             init: function () {
                 this._super(...arguments);
 
-                var assert;
-                var resolve;
-                this.trigger_up('assert_get', {
-                    callback: function (a, r) {
-                        assert = a;
-                        resolve = r;
-                    },
-                });
-
                 this.options = {
-                    plugins: Object.assign({}, this.options.plugins, {
+                    plugins: Object.assign({}, this.options.plugins, self.testOptions.plugins, {
                         Test: true,
                     }),
                     test: Object.assign({
-                        callback: resolve,
+                        callback: self.testOptions.resolve,
                         auto: true,
-                        assert: assert,
+                        assert: self.testOptions.assert,
                     }, this.options.test),
                 };
             }
@@ -90,17 +82,19 @@ QUnit.module('we3', {
     QUnit.test('simple rendering with only auto-install plugins', async function (assert) {
         assert.expect(372);
 
-        var promise;
+        this.testOptions = {
+            assert: assert,
+            plugins: {
+
+            },
+        };
+        var promise = new Promise((resolve) => this.testOptions.resolve = resolve);
+
         var form = await testUtils.createView({
             View: FormView,
             model: 'note.note',
             data: this.data,
             arch: '<form><field name="body" widget="html" style="height: 100px"/></form>',
-            interceptsPropagate: {
-                assert_get: function (ev) {
-                    promise = new Promise((resolve) => ev.data.callback(assert, resolve));
-                }
-            },
         });
         assert.strictEqual(form.$('we3-editor').length, 1, "Editor should be started");
         await promise;

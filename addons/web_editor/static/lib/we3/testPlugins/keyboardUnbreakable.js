@@ -16,6 +16,9 @@ var NOTEDITABLE = class extends we3.ArchNode {
     isEditable () {
         return false;
     }
+    isTestEditable () {
+        return true;
+    }
 };
 we3.addArchNode('NOTEDITABLE', NOTEDITABLE);
 
@@ -32,6 +35,9 @@ var EDITABLE = class extends we3.ArchNode {
         return true;
     }
     isEditable () {
+        return true;
+    }
+    isTestEditable () {
         return true;
     }
 };
@@ -531,6 +537,15 @@ var TestKeyboardUnbreakable = class extends we3.AbstractPlugin {
 
     start () {
         this.dependencies.Test.add(this);
+
+        this.dependencies.Rules.addStructureRule({
+            nodes: {
+                nodeNames: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'pre'],
+            },
+            permittedParents: {
+                methods: ['isTestEditable'],
+            },
+        });
         this.dependencies.Rules.addUnbreakableNodeCheck(function (ArchNode) {
             return ArchNode.className && ArchNode.className.contains('unbreakable') || undefined;
         });
