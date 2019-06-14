@@ -372,9 +372,14 @@ var TestPlugin = class extends we3.AbstractPlugin {
             return;
         }
         if (pluginName) {
-            var plugin = pluginName && this._plugins.find(function (plugin) {
-                return plugin.pluginName === pluginName;
-            });
+            var plugin;
+            if (pluginName === 'Test') {
+                plugin = this;
+            } else {
+                plugin = this._plugins.find(function (plugin) {
+                    return plugin.pluginName === pluginName;
+                });
+            }
             await this._loadTest(plugin);
         } else {
             await this._loadTests();
@@ -585,13 +590,14 @@ var TestPlugin = class extends we3.AbstractPlugin {
      */
     async _loadTest (plugin) {
         if (this.isDestroyed()) {
-            return Promise.resolve();
+            return;
         }
         if (typeof plugin === 'string') {
             plugin = this._plugins.find(function (p) {
                 return p.pluginName === plugin;
             });
         }
+        var value = this.dependencies.Arch.getValue();
 
         this._testPluginActive = plugin;
         this.triggerUp('set_value', {value: ''});
@@ -601,12 +607,12 @@ var TestPlugin = class extends we3.AbstractPlugin {
         this.nOKTests = 0;
 
         try {
-            var promise = Promise.all([plugin.test(this.assert)]);
+            await Promise.all([plugin.test(this.assert)]);
         } catch (e) {
             this.assert.notOk(e, 'ERROR');
-            var promise = Promise.resolve();
         }
-        return promise.then(this._logFinalResult.bind(this));
+        this._logFinalResult();
+        this.triggerUp('set_value', {value: value});
     }
     /**
      * Load all tests.

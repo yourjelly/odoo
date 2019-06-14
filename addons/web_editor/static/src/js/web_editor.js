@@ -178,6 +178,10 @@ var Wysiwyg = Widget.extend({
                 'FullScreen',
                 'KeyMap',
             ];
+
+            if (config.isDebug()) {
+                options.toolbar.push(['Test']);
+            }
         }
 
         if (this.options.generateOptions) {
