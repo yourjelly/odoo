@@ -31,11 +31,12 @@ var LinkCreate = class extends we3.AbstractPlugin {
     }
     _getLinkInfo (node) {
         var anchor = node.isAnchor() ? node : node.ancestor(node.isAnchor);
+        var range = this.dependencies.Range.getRange();
         return {
             isAnchor: !!anchor,
             anchor: anchor,
             node: node,
-            text: anchor ? node.toString() : this.dependencies.Range.getSelectedText(),
+            text: anchor ? anchor.next().toString() : range.getSelection().toString(),
             url: anchor ? anchor.attributes.href : '',
             needLabel: true, // TODO: see what was done before: !text or option ?
             className: anchor ? anchor.className.toString() : '',
@@ -53,21 +54,21 @@ var LinkCreate = class extends we3.AbstractPlugin {
         var anchor;
         if (linkInfo.isAnchor) {
             anchor = linkInfo.anchor;
-            this.dependencies.Range.setRange({scID: anchor.id});
-            anchor.empty();
         } else {
-            anchor = this.dependencies.Arch.parse('<a></a>').firstChild();
+            anchor = this.dependencies.Arch.wrapRange('A')[0];
         }
 
-        var linkContent;
-        if (linkInfo.node.isVoidoid()) {
-            linkContent = linkInfo.node.toString();
-        } else if (linkInfo.text && linkInfo.text.length) {
-            linkContent = linkInfo.text;
-        } else {
-            linkContent = linkInfo.url;
+        if (!linkInfo.node.isVoidoid()) {
+            anchor.empty();
+            var linkContent;
+            if (linkInfo.text && linkInfo.text.length) {
+                linkContent = linkInfo.text;
+            } else {
+                linkContent = linkInfo.url;
+            }
+            anchor.insert(this.dependencies.Arch.parse(linkContent));
         }
-        anchor.insert(this.dependencies.Arch.parse(linkContent));
+
         anchor.attributes.add('href', linkInfo.url);
         anchor.attributes.add('class', linkInfo.className);
         if (linkInfo.isNewWindow) {
@@ -79,10 +80,16 @@ var LinkCreate = class extends we3.AbstractPlugin {
             anchor.attributes.style.update(linkInfo.style);
         }
 
-        if (linkInfo.isAnchor) {
-            this.dependencies.Arch.importUpdate([anchor.toJSON()]);
+        this.dependencies.Arch.importUpdate([anchor.toJSON()]);
+
+        var nextSibling = anchor.lastChild().next();
+        if (!nextSibling.id) {
+            this.dependencies.Arch.insertAfter(nextSibling, anchor.id);
         } else {
-            this.dependencies.Arch.insert(anchor);
+            this.dependencies.Range.setRange({
+                scID: nextSibling.id,
+                so: 0
+            });
         }
     }
 };
@@ -91,7 +98,7 @@ var Link = class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
         this.templatesDependencies = ['/web_editor/static/src/xml/wysiwyg_link.xml'];
-        this.dependencies = ['LinkCreate'];
+        this.dependencies = ['Arch', 'LinkCreate'];
         this.buttons = {
             template: 'wysiwyg.popover.link',
             events: {
@@ -124,12 +131,8 @@ var Link = class extends we3.AbstractPlugin {
     /**
      * Remove the current link, keep its contents.
      */
-    unlink (value, range) {
-        var ancestor = range.commonAncestor();
-        var anchorAncestor = ancestor.ancestor('isAnchor');
-        if (anchorAncestor) {
-            this.dependencies.Arch.unwrap(anchorAncestor.id);
-        }
+    unlink (value, node) {
+        this.dependencies.Arch.unwrap(node.childNodes.map(node => node.id));
     }
 
     //--------------------------------------------------------------------------

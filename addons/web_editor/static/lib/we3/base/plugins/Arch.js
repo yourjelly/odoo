@@ -551,6 +551,7 @@ var BaseArch = class extends we3.AbstractPlugin {
         var ecArch = newParents[newParents.length - 1].lastLeaf();
         var range = this.dependencies.BaseRange.rangeOn(scArch, ecArch);
         this._updateRendererFromChanges(range);
+        return newParents;
     }
     /**
      * Wrap every node in range into a new node with the given nodeName (`wrapperName`).
@@ -575,7 +576,7 @@ var BaseArch = class extends we3.AbstractPlugin {
             this.insert(virtual);
             toWrap = [virtual];
         }
-        this.wrap(toWrap.map((node) => node.id), wrapperName);
+        return this.wrap(toWrap.map((node) => node.id), wrapperName);
     }
 
     //--------------------------------------------------------------------------

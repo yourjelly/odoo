@@ -143,10 +143,10 @@ var parentedRules = [
     },
     {
         nodes: {
-            nodeNames: tags.format.concat(['a']),
+            nodeNames: ['a'],
         },
         permittedParents: {
-            nodeNames: tags.style.concat(tags.format).concat(['a']),
+            nodeNames: tags.style.concat(tags.format),
         },
     },
     {

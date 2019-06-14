@@ -157,9 +157,9 @@ var BaseRange = class extends we3.AbstractPlugin {
      * Pass only `points.scID` and `points.so` to collapse the range on the start.
      *
      * @param {Object} points
-     * @param {Node} points.scID
-     * @param {Number} [points.so]
-     * @param {Node} [points.ecID]
+     * @param {Node} points.scID start arch node id
+     * @param {Number} [points.so] start offset
+     * @param {Node} [points.ecID] end arch node id
      * @param {Number} [points.eo] must be given if ecID is given
      * @param {Boolean} [points.ltr] true if the selection was made from left to right (from sc to ec)
      */

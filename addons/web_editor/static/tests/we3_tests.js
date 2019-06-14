@@ -82,6 +82,7 @@ QUnit.module('web_editor', {
         TestArchAndRules: false,
         TestToolbarWand: false,
         TestToolbarFontStyle: false,
+        TestToolbarLink: false,
         TestKeyboardUnbreakable: false,
         TestKeyboardTab: false,
         TestKeyboardEnter: false,
@@ -126,6 +127,14 @@ QUnit.module('web_editor', {
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, testPlugins, {TestArchAndRules: true}),
+        };
+        await createFormAndTest(this);
+    });
+    QUnit.test('toolbar link', async function (assert) {
+        assert.expect(17);
+        this.testOptions = {
+            assert: assert,
+            plugins: Object.assign({}, testPlugins, { TestToolbarLink: true }),
         };
         await createFormAndTest(this);
     });

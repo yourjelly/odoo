@@ -784,6 +784,9 @@ we3.ArchNode = class {
      * @param {ArchNode} ref
      */
     insertAfter (archNode, ref) {
+        if (!ref) {
+            ref = this;
+        }
         this._changeParent(archNode, ref.index() + 1);
     }
     /**
@@ -878,7 +881,7 @@ we3.ArchNode = class {
         if (this.childNodes) {
             var childNodes = this.childNodes.slice(offset);
             while (childNodes.length) {
-                archNode.prepend(childNodes.pop());            
+                archNode.prepend(childNodes.pop());
             }
         }
 
