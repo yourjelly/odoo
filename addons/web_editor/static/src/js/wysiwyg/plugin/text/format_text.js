@@ -692,10 +692,14 @@ var FontStylePlugin = class extends we3.AbstractPlugin {
     formatBlock (tagName) {
         var self = this;
         var selection = this.dependencies.Range.getSelectedNodes();
-        var styleAncestors = this.utils.uniq(selection.map(function (node) {
-            return node.ancestor((a) => self.options.styleTags.indexOf(a.nodeName) !== -1).id;
-        }));
-        this.dependencies.Arch.wrap(styleAncestors, tagName);
+        var styleAncestors = [];
+        selection.map(function (node) {
+            var ancestor = node.ancestor((a) => self.options.styleTags.indexOf(a.nodeName) !== -1);
+            if (ancestor) {
+                styleAncestors.push(ancestor.id);
+            }
+        });
+        this.dependencies.Arch.wrap(this.utils.uniq(styleAncestors), tagName);
     }
     /**
      * (Un-)format text: make it bold, italic, ...

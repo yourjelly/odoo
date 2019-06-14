@@ -54,7 +54,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         }
 
         if (!assetsLoaded) { // avoid flickering when begin to edit
-            var wysiwyg = new Wysiwyg(self, {});
+            var wysiwyg = new Wysiwyg(self, {preload: true});
             assetsLoaded = wysiwyg.attachTo($('<textarea>')).then(function () {
                 wysiwyg.destroy();
             });

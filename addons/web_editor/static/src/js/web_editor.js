@@ -19,6 +19,8 @@ var Wysiwyg = Widget.extend({
     custom_events: {
         getRecordInfo: '_onGetRecordInfo',
         change: '_onChange',
+        blur: '_onBlur',
+        focus: '_onFocus',
         // imageUpload : '_onImageUpload',
     },
     defaultOptions: {
@@ -493,6 +495,16 @@ var Wysiwyg = Widget.extend({
     //--------------------------------------------------------------------------
 
     /**
+     * trigger_up 'wysiwyg_blur'
+     *
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _onBlur: function (ev) {
+        ev.stopPropagation();
+        this.trigger_up('wysiwyg_blur');
+    },
+    /**
      * trigger_up 'wysiwyg_change'
      *
      * @private
@@ -511,6 +523,16 @@ var Wysiwyg = Widget.extend({
 
         ev.stopPropagation();
         this.trigger_up('wysiwyg_change', ev.data);
+    },
+    /**
+     * trigger_up 'wysiwyg_focus'
+     *
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _onFocus: function (ev) {
+        ev.stopPropagation();
+        this.trigger_up('wysiwyg_focus');
     },
     /**
      * trigger_up 'wysiwyg_attachment' when add an image found in the view.
@@ -558,46 +580,6 @@ var Wysiwyg = Widget.extend({
         ev.data.callback(data);
     },
 });
-
-//--------------------------------------------------------------------------
-// Public helper
-//--------------------------------------------------------------------------
-
-/**
- * Load wysiwyg assets if needed.
- *
- * @see Wysiwyg.createReadyFunction
- * @param {Widget} parent
- * @returns {$.Promise}
- */
-Wysiwyg.prepare = (function () {
-    var assetsLoaded = false;
-    var def;
-    return function prepare(parent) {
-        if (assetsLoaded) {
-            return $.when();
-        }
-        if (def) {
-            return def;
-        }
-        def = $.Deferred();
-        var timeout = setTimeout(function () {
-            throw _t("Can't load assets of the wysiwyg editor");
-        }, 10000);
-        var wysiwyg = new Wysiwyg(parent, {
-            recordInfo: {
-                context: {},
-            }
-        });
-        wysiwyg.attachTo($('<textarea>')).then(function () {
-            assetsLoaded = true;
-            clearTimeout(timeout);
-            wysiwyg.destroy();
-            def.resolve();
-        });
-        return def;
-    };
-})();
 
 //--------------------------------------------------------------------------
 // jQuery extensions

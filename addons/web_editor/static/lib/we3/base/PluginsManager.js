@@ -290,7 +290,7 @@ we3.PluginsManager = class extends we3.EventDispatcher {
 
             for (var k = 0; k < pluginInstance.dependencies.length; k++) {
                 var pName = pluginInstance.dependencies[k];
-                if (pluginNames.indexOf(pName) === -1 && !pluginInstances[pluginName]) {
+                if (pluginNames.indexOf(pName) === -1 && !pluginInstances[pName]) {
                     pluginNames.push(pName);
                 }
             }

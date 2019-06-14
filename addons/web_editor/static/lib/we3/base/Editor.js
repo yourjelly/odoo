@@ -21,6 +21,7 @@ we3.Editor = class extends we3.EventDispatcher {
             'blur editable': '_onBlurEditable',
             'focus editable': '_onFocusEditable',
             'paste editable': '_onPaste',
+            'paste editable': '_onPaste',
         };
         this._templates = {};
         this.id = 'wysiwyg-' + (++id);
@@ -93,10 +94,9 @@ we3.Editor = class extends we3.EventDispatcher {
         this.target.wysiwygEditor = this;
         this.target.dataset.dataWysiwygId = this.id;
 
-        this.on('wysiwyg_blur', this, this._onBlurCustom.bind(this));
         this.on('command', this, function () { throw new Error(); });
-        this.on('get_value', this, this._onGetValue.bind(this));
-        this.on('set_value', this, this._onSetValue.bind(this));
+        this.on('get_value', this, this._onGetValue);
+        this.on('set_value', this, this._onSetValue);
 
         return this.isInitialized().then(function () {
             if (self.isDestroyed()) {
@@ -619,32 +619,6 @@ we3.Editor = class extends we3.EventDispatcher {
         this._dirty = true;
     }
     /**
-     * @private
-     * @param {OdooEvent} ev
-     */
-    _onCommand (ev) {
-        var self = this;
-        ev.stopPropagation();
-        // if (ev.data.disableRange) {
-        //     this._pluginsManager.call('Range', 'clear');
-        // } else {
-        //     this._pluginsManager.call('Range', 'save');
-        // }
-        Promise.all([ev.data.method.apply(null, ev.data.args)]).then(function (result) {
-            // if (!ev.data.disableRange) {
-            //     self._pluginsManager.call('Range', 'restore');
-            // }
-            if (result && result.noChange) {
-                return;
-            }
-            self._pluginsManager.changeEditorValue();
-            self.triggerUp('change');
-            if (ev.data.callback) {
-                ev.data.callback(result);
-            }
-        });
-    }
-    /**
      * triggerUp 'wysiwyg_focus'.
      *
      * @private
@@ -672,6 +646,7 @@ we3.Editor = class extends we3.EventDispatcher {
      * @return {any}
      */
     _onGetValue (ev) {
+        ev.stopPropagation();
         return ev.data.callback(this.getValue(ev.data.options || {}));
     }
     /**
@@ -740,6 +715,7 @@ we3.Editor = class extends we3.EventDispatcher {
      * @param {OdooEvent} ev
      */
     _onSetValue (ev) {
+        ev.stopPropagation();
         this.setValue(ev.data.value);
     }
 };

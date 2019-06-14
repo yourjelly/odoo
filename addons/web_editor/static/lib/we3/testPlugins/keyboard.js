@@ -1,42 +1,6 @@
 (function () {
 'use strict';
 
-var NOTEDITABLE = class extends we3.ArchNode {
-    static parse (archNode) {
-        if (archNode.nodeName === 'noteditable') {
-            return new NOTEDITABLE(archNode.params, archNode.nodeName, archNode.attributes.toJSON());
-        }
-    }
-    get type () {
-        return 'NOTEDITABLE';
-    }
-    isBlock () {
-        return true;
-    }
-    isEditable () {
-        return false;
-    }
-};
-we3.addArchNode('NOTEDITABLE', NOTEDITABLE);
-
-var EDITABLE = class extends we3.ArchNode {
-    static parse (archNode) {
-        if (archNode.nodeName === 'editable') {
-            return new EDITABLE(archNode.params, archNode.nodeName, archNode.attributes.toJSON());
-        }
-    }
-    get type () {
-        return 'EDITABLE';
-    }
-    isBlock () {
-        return true;
-    }
-    isEditable () {
-        return true;
-    }
-};
-we3.addArchNode('EDITABLE', EDITABLE);
-
 /**
  * Char codes.
  */
@@ -152,7 +116,7 @@ var TestKeyboard = class extends we3.AbstractPlugin {
      * @param {string} testName
      * @returns {Promise}
      */
-    _execStep (assert, step, testName) {
+    async _execStep (assert, step, testName) {
         var self = this;
         return new Promise(function (resolve) {
             if (step.start) {

@@ -2,7 +2,7 @@ odoo.define('web_editor.test_utils', function (require) {
 "use strict";
 
 var ajax = require('web.ajax');
-var BoundaryPoint = require('wysiwyg.BoundaryPoint');
+// var BoundaryPoint = require('wysiwyg.BoundaryPoint');
 var MockServer = require('web.MockServer');
 var testUtils = require('web.test_utils');
 var Widget = require('web.Widget');
@@ -103,6 +103,9 @@ MockServer.include({
                         '</div>';
                 return Promise.resolve(template);
             }
+        }
+        if (route === "/web_editor/static/lib/we3/img/mimetypes/image.svg") {
+            return Promise.resolve(null);
         }
         return this._super.apply(this, arguments);
     },
@@ -471,11 +474,11 @@ var keyboardMap = {
     "91": "OS_KEY", // 'left command': Windows Key (Windows) or Command Key (Mac)
     "93": "CONTEXT_MENU", // 'right command'
 };
-_.each(_._range(40, 127), function (keyCode) {
+for (var keyCode = 40; keyCode <= 127; keyCode++) {
     if (!keyboardMap[keyCode]) {
         keyboardMap[keyCode] = String.fromCharCode(keyCode);
     }
-});
+};
 
 /**
  * Perform a series of tests (`keyboardTests`) for using keyboard inputs.
@@ -537,10 +540,10 @@ var testKeyboard = function (wysiwyg, assert, keyboardTests, addTests) {
         var reDOMSelection = /^(.+?)(:contents(\(\)\[|\()([0-9]+)[\]|\)])?(->([0-9]+))?$/;
         var sel = selector.match(reDOMSelection);
         var $node = $editable.find(sel[1]);
-        var point = new BoundaryPoint(
+        var point = null; /*new BoundaryPoint(
             sel[3] ? $node.contents()[+sel[4]] : $node[0],
             sel[5] ? +sel[6] : 0
-        );
+        );*/
         if (!point.node || point.offset > (point.node.tagName ? point.node.childNodes : point.node.textContent).length) {
             assert.notOk("Node not found: '" + selector + "' " + (point.node ? "(container: '" + (point.node.outerHTML || point.node.textContent) + "')" : ""));
         }
@@ -739,10 +742,10 @@ var select = (function () {
     var __select = function (selector, $editable) {
         var sel = selector.match(/^(.+?)(:contents\(\)\[([0-9]+)\]|:contents\(([0-9]+)\))?(->([0-9]+))?$/);
         var $node = $editable.find(sel[1]);
-        return new BoundaryPoint(
+        return null; /*new BoundaryPoint(
             sel[2] ? $node.contents()[sel[3] ? +sel[3] : +sel[4]] : $node[0],
             sel[5] ? +sel[6] : 0
-        );
+        );*/
     };
     return function (startSelector, endSelector, $editable) {
         var start = __select(startSelector, $editable);

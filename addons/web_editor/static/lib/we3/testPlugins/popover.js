@@ -87,27 +87,24 @@ var TestPopover = class extends we3.AbstractPlugin {
         return super.start();
     }
 
-    test (assert) {
-        var self = this;
-        this.tests.forEach(function (test, i) {
-            self.tests[i].do = self.tests[i].do || function () {
-                self.dependencies.Test.setValue(test.content);
-                var target = self.editor.querySelector(test.click);
-                return self.dependencies.Test.click(target).then(function () {
-                    var activePopovers = [];
-                    self.editor.querySelectorAll('we3-popover').forEach(function (popover) {
-                        if (popover.style.display !== '') {
-                            activePopovers.push(popover.getAttribute('name'));
-                        }
-                    });
-                    var popoverNames = test.activePopovers.slice();
-                    test.activePopovers.sort();
-                    activePopovers.sort();
-                    assert.strictEqual(activePopovers.join(','), test.activePopovers.join(','), test.name + ' (popovers)');
-                });
+    async test (assert) {
+        this.tests.forEach((test) => test.do = test.do || this._functionDo.bind(this, assert, test));
+        return this.dependencies.Test.execTests(assert, this.tests);
+    }
+
+    async _functionDo (assert, test) {
+        var target = this.editor.querySelector(test.click);
+        await this.dependencies.Test.click(target);
+        var activePopovers = [];
+        this.editor.querySelectorAll('we3-popover').forEach(function (popover) {
+            if (popover.style.display !== '') {
+                activePopovers.push(popover.getAttribute('name'));
             }
         });
-        return this.dependencies.Test.execTests(assert, this.tests);
+        var popoverNames = test.activePopovers.slice();
+        test.activePopovers.sort();
+        activePopovers.sort();
+        assert.strictEqual(activePopovers.join(','), test.activePopovers.join(','), test.name + ' (popovers)');
     }
 };
 
