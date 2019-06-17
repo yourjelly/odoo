@@ -89,6 +89,9 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardTab.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardUnbreakable.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/popover.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbar.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarFontStyle.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarWand.js"/>
 
     <!-- odoo -->
 
@@ -138,9 +141,6 @@
 
     <!-- Tests -->
 
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbar.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarFontStyle.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarWand.js"/>
     <!-- <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarBackgroundColor.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarFontSize.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarForeColor.js"/> -->
