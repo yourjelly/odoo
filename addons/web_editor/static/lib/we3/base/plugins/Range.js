@@ -90,46 +90,60 @@ var BaseRange = class extends we3.AbstractPlugin {
     }
     /**
      * Returns a list of all selected nodes in the range.
+     * If a predicate function is included, only nodes meeting its
+     * conditions will be returned.
      *
      * @param {function} [pred]
      * @returns {ArchNode []}
      */
     getSelectedNodes (pred) {
-        var self = this;
         var range = this.getRange();
+        var start = range.scArch;
+        var end = range.ecArch;;
+        if (!range.isCollapsed() && range.so === range.scArch.length()) {
+            start = range.scArch.nextSibling() || range.scArch;
+        }
+        if (!range.isCollapsed() && range.eo === 0) {
+            end = range.scArch.previousSibling() || range.ecArch;
+        }
         var selection = [];
-        if (!pred || pred.call(range.scArch, range.scArch)) {
-            selection.push(range.scArch);
+        if (!pred || pred.call(start, start)) {
+            selection.push(start);
         }
         if (!range.isCollapsed()) {
-            range.scArch.nextUntil(function (next) {
+            start.nextUntil(function (next) {
                 if (!pred || pred.call(next, next)) {
                     selection.push(next);
                 }
-                return next === self.ecArch;
+                return next === end;
             });
         }
         return selection;
     }
     /**
-     * Get the text contents of the current selection
-     * from the DOM.
+     * Return true if the start range is the same point as the end range.
      *
-     * @returns {String}
+     * @returns {Boolean}
      */
-    getSelectedText () {
-        return this.getRange().getSelection().toString();
+    isCollapsed () {
+        return this.getRange().isCollapsed();
     }
     /**
-     * Returns a list of all selected text nodes in the range.
-     * If a predicate function is included, only nodes meeting its
-     * conditions will be returned.
+     * Return range points from the from `startID` to `endID`.
      *
-     * @param {(Node) => Boolean} [pred]
-     * @returns {Node []}
+     * @param {ArchNode|number} start the ArchNode or its ID
+     * @param {ArchNode|number} end the ArchNode or its ID
+     * @returns {object} {scID: {Number}, so: {Number}, ecID: {Number}, eo: {Number}}
      */
-    getSelectedTextNodes (pred) {
-        throw new Error('TODO');
+    rangeOn (start, end) {
+        var scArch = typeof start === 'number' ? this.dependencies.Arch.getNode(start) : start;
+        var ecArch = typeof end === 'number' ? this.dependencies.Arch.getNode(end) : end;
+        return {
+            scID: scArch.id,
+            so: scArch.isVirtual() ? 1 : 0, // if virtual, move after it
+            ecID: ecArch.id,
+            eo: ecArch.isVirtual() ? 1 : ecArch.length(), // if virtual, move after it
+        };
     }
     /**
      * Restore the range to its last saved value.
@@ -288,8 +302,9 @@ var BaseRange = class extends we3.AbstractPlugin {
         return new WrappedRange(this.dependencies.Arch, this.dependencies.Renderer, {});
     }
     /**
-     * Return true if the range is collapsed.
+     * Return true if the saved range is collapsed.
      *
+     * @todo check if public isCollapsed would suffice
      * @private
      * @returns {Boolean}
      */
@@ -785,24 +800,22 @@ var Range = class extends we3.AbstractPlugin {
         return this.dependencies.BaseRange.getSelectedNodes(pred);
     }
     /**
-     * Get the text contents of the current selection
-     * from the DOM.
+     * Return true if the start range is the same point as the end range.
      *
-     * @returns {String}
+     * @returns {Boolean}
      */
-    getSelectedText () {
-        return this.dependencies.BaseRange.getSelectedText();
+    isCollapsed () {
+        return this.dependencies.BaseRange.isCollapsed();
     }
     /**
-     * Returns a list of all selected text nodes in the range.
-     * If a predicate function is included, only nodes meeting its
-     * conditions will be returned.
+     * Return range points from the from `startID` to `endID`.
      *
-     * @param {(Node) => Boolean} [pred]
-     * @returns {Node []}
+     * @param {Number} startID
+     * @param {Number} endID
+     * @returns {Object} {scID: {Number}, so: {Number}, ecID: {Number}, eo: {Number}}
      */
-    getSelectedTextNodes (pred) {
-        return this.dependencies.BaseRange.getSelectedTextNodes(pred);
+    rangeOn (startID, endID) {
+        return this.dependencies.BaseRange.rangeOn(startID, endID);
     }
     /**
      * Restore the range to its last saved value.

@@ -80,7 +80,7 @@ QUnit.module('we3', {
     QUnit.module('basic');
 
     QUnit.test('simple rendering with only auto-install plugins', async function (assert) {
-        assert.expect(372);
+        assert.expect(396);
 
         this.testOptions = {
             assert: assert,

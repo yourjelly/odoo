@@ -40,7 +40,7 @@ we3.ArchNodeVirtualText = class extends we3.ArchNodeText {
             parent.insert(node, index);
             return;
         }
-        if (prev) {
+        if (prev && prev.isText()) {
             prev.insert(node, prev.length());
         } else {
             this.parent.insert(node, this.index());

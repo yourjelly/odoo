@@ -686,10 +686,10 @@ var FontStylePlugin = class extends we3.AbstractPlugin {
     /**
      * Format a 'format' block: change its tagName (eg: p -> h1).
      *
-     * @param {string} tagName
+     * @param {string} nodeName
      *       P, H1, H2, H3, H4, H5, H6, BLOCKQUOTE, PRE
      */
-    formatBlock (tagName) {
+    formatBlock (nodeName) {
         var self = this;
         var selection = this.dependencies.Range.getSelectedNodes();
         var styleAncestors = [];
@@ -699,70 +699,59 @@ var FontStylePlugin = class extends we3.AbstractPlugin {
                 styleAncestors.push(ancestor.id);
             }
         });
-        this.dependencies.Arch.wrap(this.utils.uniq(styleAncestors), tagName);
+        this.dependencies.Arch.wrap(this.utils.uniq(styleAncestors), nodeName);
     }
     /**
      * (Un-)format text: make it bold, italic, ...
      *
-     * @param {string} tag
+     * @param {string} nodeName
      *       B, I, U, S, SUP, SUB
      */
-    formatText (tag, range) {
-        if (!range || !this.editable.contains(range.sc) || !this.editable.contains(range.ec)) {
-            return;
-        }
-        if (range.isCollapsed()) {
-            if (range.scArch.isInTag(tag)) {
-                range = this._unformatTextCollapsed(range, tag);
-            } else {
-                range = this._formatTextCollapsed(range, tag);
-            }
-            range.collapse(); // Invisible character doesn't need to be selected
+    formatText (nodeName) {
+        var range = this.dependencies.Range.getRange();
+        var selectedTextNodes = this.dependencies.Range.getSelectedNodes((node) => node.isText() || node.isVoidoid());
+        if (selectedTextNodes.length && selectedTextNodes.every((node) => node.ancestor((a) => a.nodeName === nodeName))) {
+            this.dependencies.Arch.unwrapRangeFrom(nodeName);
         } else {
-            if (this._isAllSelectedInTag(range, tag)) {
-                range = this._splitEndsOfSelection(range);
-                range = this._unformatTextSelection(range, tag);
-            } else {
-                range = this._splitEndsOfSelection(range);
-                range = this._formatTextSelection(range, tag);
-            }
+            this.dependencies.Arch.wrapRange(nodeName);
         }
-
-        this.dependencies.Arch.setRange(range);
+        if (range.scID !== range.ecID) {
+            this.dependencies.Range.setRange(range);
+        }
     }
     /**
-     * Remove format on the current range.
+     * Remove format on the current range. If the range is collapsed, remove
+     * the format of the current node (`focusNode`).
      *
-     * @see _isParentRemoveFormatCandidate
+     * @see utils.formatTags the list of removeFormat candidates as defined by W3C
+     * @param {ClonedClass} focusNode
      */
-    removeFormat (value, range) {
-        var self = this;
-        var Common = this.dependencies.Common;
-        this._selectCurrentIfCollapsed(range);
-        if (!range.isCollapsed()) {
-            range.replace(this.dom.splitTextAtSelection(range));
+    removeFormat (focusNode) {
+        var range = this.dependencies.Range.getRange();
+        // Unwrap everything at range from the removeFormat candidates
+        if (this.dependencies.Range.isCollapsed()) {
+            this.dependencies.Arch.unwrapFrom(focusNode.id, we3.tags.format);
+        } else {
+            this.dependencies.Arch.unwrapRangeFrom(we3.tags.format);
         }
-        var selectedText = range.getSelectedTextNodes(function (node) {
-            return Arch.isEditableNode(node) && (Arch.isVoidoid(node) || self.utils.isVisibleText(node));
-        });
-        var selectedVoids = range.getSelectedNodes(Arch.isVoidoid.bind(Common)) || [];
-        if (!selectedText.length && !selectedVoids.length) {
-            return;
+        // Reset the range if it was one a single node (otherwise let Arch handle it)
+        if (range.scID !== range.ecID) {
+            this.dependencies.Range.setRange(range);
         }
-        var selection = this.utils.uniq(selectedText.concat(selectedVoids));
-        _.each(selection, function (node) {
-            self._removeFormatAncestors(node);
-            self._removeNodeStyles(node);
-        });
-        var startNode = selectedText[0];
-        var endNode = selectedText[selectedText.length - 1];
-        range = range.replace({
-            sc: startNode,
-            so: 0,
-            ec: endNode,
-            eo: this.utils.nodeLength(endNode),
-        });
-        this.dependencies.Arch.setRange(range);
+        // Remove the styles of everything at range
+        var unstyledNodes = [];
+        if (this.dependencies.Range.isCollapsed()) {
+            unstyledNodes = this._unstyle(this.dependencies.Range.scArch);
+        } else {
+            unstyledNodes = this._unstyle(this.dependencies.Range.getSelectedNodes());
+        }
+        // Render anew if anything changed
+        if (unstyledNodes.length) {
+            var parentsOfUnstyledNodes = we3.utils.uniq(unstyledNodes.map(node => node.parent));
+            var json = parentsOfUnstyledNodes.map(node => node.toJSON());
+            this.dependencies.Arch.importUpdate(json);
+            this.dependencies.Range.setRange(range);
+        }
     }
 
     //--------------------------------------------------------------------------
@@ -770,12 +759,12 @@ var FontStylePlugin = class extends we3.AbstractPlugin {
     //--------------------------------------------------------------------------
 
     /**
+     * @private
      * @param {String} buttonName
      * @param {WrappedRange} range
      * @returns {Boolean} true if the given button should be active
      */
     _active (buttonName, focusNode) {
-        var self = this;
         var formatName = buttonName.split('-')[1].toLowerCase();
         switch (buttonName.split('-', 1)[0]) {
             case 'formatBlock':
@@ -795,20 +784,8 @@ var FontStylePlugin = class extends we3.AbstractPlugin {
         }
         return false;
     }
-    _ancestorWithTag (node, tag) {
-        return this.utils.ancestor(node, function (n) {
-            return n.tagName === tag;
-        });
-    }
-    _containsOnlySelectedText (node, texts) {
-        var self = this;
-        return _.all(node.childNodes, function (n) {
-            return _.any(texts, function (t) {
-                return n === t && !(self.utils.isText(n) && n.textContent === '');
-            }) && self._containsOnlySelectedText(n);
-        });
-    }
     /**
+     * @private
      * @param {String} buttonName
      * @param {Node} focusNode
      * @returns {Boolean} true if the given button should be enabled
@@ -817,379 +794,21 @@ var FontStylePlugin = class extends we3.AbstractPlugin {
         return !!focusNode.ancestor('isFormatNode');
     }
     /**
-     * Apply the given format (tag) to the nodes in range, then update the range.
+     * Remove the styles of a node or an array of nodes and
+     * return the nodes that were effectively unstyled.
      *
      * @private
-     * @param {String} tag eg: 'B', 'I', 'U'
+     * @param {ArchNode|ArchNode []} node
+     * @returns {ArchNode []}
      */
-    _formatTextSelection (range, tag) {
-        var self = this;
-
-        var textNodesToFormat = this._nonFormattedTextNodes(range, tag);
-        var rest = [];
-        _.each(textNodesToFormat, function (textNode) {
-            self._formatTextNode(textNode, tag);
-            rest.push(self._mergeSimilarSiblingsByTag(textNode, tag, true));
-        });
-
-        return range.replace({
-            sc: rest[0],
-            so: 0,
-            ec: rest[rest.length - 1],
-            eo: this.utils.nodeLength(rest[rest.length - 1]),
-        });
-    }
-    /**
-     * Format the text at range position with given tag and make it ready for input
-     * by inserting a zero-width character and updating the range.
-     *
-     * @private
-     * @param {Boolean} tag eg: 'B', 'I', 'U'
-     */
-    _formatTextCollapsed (range, tag) {
-        range = this._insertFormatPlaceholder(range);
-        var formatNode = document.createElement(tag);
-        $(range.sc).wrap(formatNode);
-        return range.replace({
-            sc: range.sc,
-        });
-    }
-    /**
-     * Apply the given format (tag) on a given node.
-     *
-     * @private
-     * @param {Node} node
-     * @param {Boolean} tag eg: 'B', 'I', 'U'
-     */
-    _formatTextNode (node, tag) {
-        var tagNode = document.createElement(tag);
-        $(node).wrap(tagNode);
-    }
-    /**
-     * Insert a zero-width text node at range so as to be able to format it,
-     * then select its contents.
-     *
-     * @returns {WrappedRange}
-     */
-    _insertFormatPlaceholder (range) {
-        var br;
-        if (range.sc.tagName === 'BR') {
-            br = range.sc;
-        } else if (range.sc.firstChild && range.sc.firstChild.tagName === 'BR') {
-            br = range.sc.firstChild;
-        }
-        if (br || this.utils.isText(range.sc)) {
-            var emptyText = document.createTextNode(this.utils.char('zeroWidth'));
-            $(br || range.sc.splitText(range.so)).before(emptyText);
-            $(br).remove();
-            range = this.dependencies.Arch.setRange({
-                sc: emptyText,
-                so: 0,
-            });
-        } else {
-            range = this.dom.insertTextInline(this.utils.char('zeroWidth'), range);
-            range = this.dependencies.Arch.setRange(range).normalize();
-            this.dependencies.Arch.setRange(range);
-        }
-        return range;
-    }
-    /**
-     * Return true if all the text in range is contained in nodes with the given tag name.
-     *
-     * @private
-     * @param {String} tag eg: 'B', 'I', 'U'
-     * @returns {Boolean}
-     */
-    _isAllSelectedInTag (range, tag) {
-        var self = this;
-        var Common = this.dependencies.Common;
-        var textNodes = range.getSelectedTextNodes(function (node) {
-            return Arch.isEditableNode(node) && (Arch.isVoidoid(node) || self.utils.isVisibleText(node));
-        });
-        return _.all(textNodes, function (textNode) {
-            return self.utils.isInTag(textNode, tag);
-        });
-    }
-    /**
-     * Return true if the parent of the given node is a removeFormat candidate:
-     * - It is a removeFormat candidate as defined by W3C
-     * - It is contained within the editable area
-     * - It is not unbreakable
-     *
-     * @see utils.formatTags the list of removeFormat candidates as defined by W3C
-     *
-     * @private
-     * @param {Node} node
-     */
-    _isParentRemoveFormatCandidate (node) {
-        var parent = node.parentNode;
-        if (!parent) {
-            return false;
-        }
-        var isEditableOrAbove = parent && (parent === this.editable || $.contains(parent, this.editable));
-        var isUnbreakable = parent && this.dependencies.Arch.isUnbreakableNode(parent);
-        var isRemoveFormatCandidate = parent && parent.tagName && this.utils.formatTags.indexOf(parent.tagName.toLowerCase()) !== -1;
-        return parent && !isEditableOrAbove && !isUnbreakable && isRemoveFormatCandidate;
-    }
-    /**
-     * Remove the edge between the range's starting container and its previous sibling,
-     * and/or between the range's ending container and its next sibling, if they have the
-     * same tag name. Then update the range and normalize the DOM.
-     *
-     * eg: <b>hello</b><b> range </b><b>world</b> becomes <b>hello range world</b>
-     *
-     * @private
-     * @returns {WrappedRange}
-     */
-    _mergeSimilarSiblingsAtRange (range) {
-        var start = range.sc.tagName ? range.sc : range.sc.parentNode;
-        var end = range.ec.tagName ? range.ec : range.ec.parentNode;
-        var isSameAsPrevious = start.previousSibling && start.tagName === start.previousSibling.tagName;
-        if (this.utils.isInline(start) && isSameAsPrevious) {
-            range.so = this.utils.nodeLength(range.sc.previousSibling);
-            $(range.sc).before($(range.sc.previousSibling).contents());
-        }
-        var isSameAsNext = end.nextSibling && end.tagName === end.nextSibling.tagName;
-        if (this.utils.isInline(end) && isSameAsNext) {
-            range.eo = this.utils.nodeLength(range.eo.nextSibling);
-            $(range.ec).after($(range.ec.nextSibling).contents());
-        }
-        return range.replace(range.getPoints());
-    }
-    /**
-     * Remove the edge between a given node and its previous/next neighbor
-     * if they both have `tag` as tag name.
-     * eg: <b>hello</b><b> node </b><b> world </b> becomes <b>hello node world</b>
-     *
-     * @private
-     * @param {Node} node
-     * @param {Boolean} tag eg: 'B', 'I', 'U'
-     * @param {Boolean} isPrev true to delete BEFORE the carret
-     * @returns {Node}
-     */
-    _mergeSimilarSiblingsByTag (node, tag, isPrev) {
-        var rest = node;
-        var tagAncestor = this._ancestorWithTag(node, tag);
-        var nextElem = tagAncestor && tagAncestor[isPrev ? 'previousElementSibling' : 'nextElementSibling'];
-        if (nextElem && nextElem.tagName === tag) {
-            rest = this.dom.deleteEdge(tagAncestor, isPrev, {
-                isRemoveBlock: false,
-                isTryNonSim: false,
-            }).node;
-        }
-        return rest;
-    }
-    /**
-     * Return the list of selected text nodes that are not contained
-     * within a node of given tag name.
-     *
-     * @private
-     * @param {Boolean} tag eg: 'B', 'I', 'U'
-     * @returns {Node []}
-     */
-    _nonFormattedTextNodes (range, tag) {
-        var self = this;
-        var Common = this.dependencies.Common;
-        var textNodes = range.getSelectedTextNodes(function (node) {
-            return Arch.isEditableNode(node) && (Arch.isVoidoid(node) || self.utils.isVisibleText(node));
-        });
-        return _.filter(textNodes, function (textNode) {
-            return !self.utils.isInTag(textNode, tag);
-        });
-    }
-    /**
-     * Remove a node's blank siblings if any.
-     *
-     * @private
-     * @param {Node} node
-     */
-    _removeBlankSiblings (node) {
-        var self = this;
-        var toRemove = [];
-        var Common = this.dependencies.Common;
-        $(node).siblings().each(function () {
-            if (self.utils.isBlankNode(this, Arch.isVoidoid.bind(Common))) {
-                toRemove.push(this);
+    _unstyle (node) {
+        var nodes = Array.isArray(node) ? node : [node];
+        return nodes.filter(function (node) {
+            if (node.style && node.style.length) {
+                node.style.clear();
+                return true;
             }
         });
-        $(toRemove).remove();
-    }
-    /**
-     * Remove an icon's format (colors, font size).
-     *
-     * @private
-     * @param {Node} icon
-     */
-    _removeIconFormat (icon) {
-        $(icon).css({
-            color: '',
-            backgroundColor: '',
-            fontSize: '',
-        });
-        var reColorClasses = /(^|\s+)(bg|text)-\S*|/g;
-        icon.className = icon.className.replace(reColorClasses, '').trim();
-    }
-    /**
-     * Remove node's format: remove its format ancestors (b, i, u, ...).
-     *
-     * @see _isParentRemoveFormatCandidate (the format ancestors)
-     * @private
-     * @param {Node} textNode
-     */
-    _removeFormatAncestors (node) {
-        while (this._isParentRemoveFormatCandidate(node) &&
-            !this.dependencies.Arch.isVoidoid(node)) {
-            this.dom.splitAtNodeEnds(node);
-            $(node.parentNode).before(node).remove();
-        }
-    }
-    _removeNodeStyles (node) {
-        if (this.utils.isText(node)) {
-            return;
-        }
-        $(node).css({
-            color: '',
-            backgroundColor: '',
-            fontSize: '',
-        });
-        var reColorClasses = /(^|\s+)(bg|text)-\S*|/g;
-        node.className = node.className.replace(reColorClasses, '').trim();
-    }
-    /**
-     * Select the whole current node if the range is collapsed
-     *
-     * @private
-     */
-    _selectCurrentIfCollapsed (range) {
-        if (!range.isCollapsed()) {
-            return;
-        }
-        range = this.dependencies.Arch.setRange({
-            sc: range.sc,
-            so: 0,
-            ec: range.sc,
-            eo: this.utils.nodeLength(range.sc),
-        });
-        this.dependencies.Arch.setRange(range);
-    }
-    /**
-     * Split the text nodes at both ends of the range, then update the range.
-     *
-     * @private
-     * @returns {WrappedRange}
-     */
-    _splitEndsOfSelection (range) {
-        var sameNode = range.sc === range.ec;
-        if (this.utils.isText(range.ec)) {
-            range.ec = range.ec.splitText(range.eo).previousSibling;
-            range.eo = this.utils.nodeLength(range.ec);
-        }
-        if (this.utils.isText(range.sc)) {
-            range.sc = range.sc.splitText(range.so);
-            if (sameNode) {
-                range.ec = range.sc;
-                range.eo -= range.so;
-            }
-            range.so = 0;
-        }
-        return range.replace(range.getPoints());
-    }
-    /**
-     * Unformat the text in given nodes then update the range to
-     * the full selection of the given nodes.
-     *
-     * @private
-     * @param {Node []} nodes
-     * @param {String} tag eg: 'B', 'I', 'U'
-     * @returns {WrappedRange}
-     */
-    _unformatText (range, nodes, tag) {
-        var self = this;
-        _.each(nodes, function (node, index) {
-            var tagParent = self._ancestorWithTag(node, tag);
-            if (tagParent && self._containsOnlySelectedText(tagParent, nodes)) {
-                return self._unwrapContents(tagParent);
-            }
-            self._unformatTextNode(node, tag);
-        });
-        range.replace({
-            sc: nodes[0],
-            so: 0,
-            ec: nodes[nodes.length - 1],
-            eo: this.utils.nodeLength(nodes[nodes.length - 1]),
-        });
-        this._removeBlankSiblings(range.sc);
-        return this._mergeSimilarSiblingsAtRange(range);
-    }
-    /**
-     * Unformat the text at range position and make it ready for input
-     * by inserting a zero-width character and updating the range.
-     *
-     * @private
-     * @param {String} tag eg: 'B', 'I', 'U'
-     * @returns {WrappedRange}
-     */
-    _unformatTextCollapsed (range, tag) {
-        range = this._insertFormatPlaceholder(range);
-        range.sc = this.dom.splitAtNodeEnds(range.sc);
-        var blankText = range.sc;
-        return this._unformatText(range, [blankText], tag);
-    }
-    /**
-     * Remove the given format (tag) of the given node.
-     * This is achieved by splitting the tree around the given node up to
-     * its ancestor of given tag, then unwrapping the contents of said ancestor.
-     *
-     * @private
-     * @param {Node} node The node to unformat
-     * @param {String} tag eg: 'B', 'I', 'U'
-     */
-    _unformatTextNode (node, tag) {
-        var root = this._ancestorWithTag(node, tag);
-        if (!root) {
-            return;
-        }
-        var options = {
-            isSkipPaddingBlankNode: true,
-            isNotSplitEdgePoint: true,
-        };
-        var startPoint = this.utils.isText(node) ? this.getPoint(node, 0) : this.getPoint(node.parentNode, $(node).index());
-
-        this.dom.splitTree(root, startPoint, options);
-
-        root = this._ancestorWithTag(node, tag);
-        var endPoint = this.utils.isText(node) ? this.getPoint(node, this.utils.nodeLength(node)) : this.getPoint(node.parentNode, startPoint.offset + 1);
-        this.dom.splitTree(root, endPoint, options);
-
-        // todo: ensure the format placeholder is at the right place!
-        this._unwrapContents(root);
-    }
-    /**
-     * Unformat the text in range then update the range.
-     *
-     * @private
-     * @param {String} tag eg: 'B', 'I', 'U'
-     * @returns {WrappedRange}
-     */
-    _unformatTextSelection (range, tag) {
-        var self = this;
-        var Common = this.dependencies.Common;
-        var textNodes = range.getSelectedTextNodes(function (node) {
-            return Arch.isEditableNode(node) && (Arch.isVoidoid(node) || self.utils.isVisibleText(node));
-        });
-        return this._unformatText(range, textNodes, tag);
-    }
-    /**
-     * Unwrap the contents of a given node and return said contents.
-     *
-     * @private
-     * @param {Node} node
-     * @returns {jQuery}
-     */
-    _unwrapContents (node) {
-        var $contents = $(node).contents();
-        $(node).before($contents).remove();
-        return $contents;
     }
 };
 

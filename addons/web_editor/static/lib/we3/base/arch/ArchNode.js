@@ -680,7 +680,7 @@ we3.ArchNode = class {
             }
             if (!options.doNotRemoveEmpty && node.isDeepEmpty() && !node.isVoid()) {
                 if (next.isVoid() || next.isText()) {
-                    node.unwrap();
+                    node.unwrap(); // todo: check
                     return;
                 }
                 var goes = isLeft || options.keepRight ? node : next;
@@ -811,9 +811,11 @@ we3.ArchNode = class {
     }
     /**
      * Remove this ArchNode if it has no children.
+     *
+     * @param {Boolean} keepVirtual true not to consider virtual nodes as blank
      */
-    removeIfEmpty () {
-        if (this.isEmpty()) {
+    removeIfEmpty (keepVirtual) {
+        if (this.isEmpty(keepVirtual)) {
             this.remove();
         }
     }
@@ -840,9 +842,10 @@ we3.ArchNode = class {
      * Return the ArchNode on the right hand side of the split.
      *
      * @param {int} offset
+     * @param {boolean} [removeEmpty] true to remove generated empty nodes
      * @returns {ArchNode|undefined}
      */
-    split (offset) {
+    split (offset, removeEmpty) {
         if (this.isUnbreakable()) {
             console.warn("cannot split an unbreakable node");
             return;
@@ -865,6 +868,9 @@ we3.ArchNode = class {
         }
 
         this.after(archNode);
+        if (removeEmpty && !this.isText()) {
+            this._removeEmptySiblings();
+        }
         return archNode;
     }
     /**
@@ -886,8 +892,18 @@ we3.ArchNode = class {
      * Unwrap this ArchNode from its parent.
      */
     unwrap () {
-        this.before(this.childNodes);
-        this.remove();
+        if (this.parent.isRoot()) {
+            console.warn('cannot unwrap from root node');
+            return;
+        }
+        var start = this.parent.split(this.index() + 1);
+        this.parent.split(this.index());
+        var parent = this.parent;
+        parent.before(this);
+        parent.remove();
+        // Remove generated empty nodes
+        start.removeIfEmpty()
+        this._cleanAfterUnwrap();
     }
     /**
      * Wrap the node corresponding to the given ID inside
@@ -895,12 +911,18 @@ we3.ArchNode = class {
      *
      * @param {Number} id
      * @param {String} nodeName
+     * @returns {ArchNode}
      */
     wrap (nodeName) {
         var wrapper = this.params.create(nodeName);
         this.before(wrapper);
         wrapper.append(this);
         this.params.change(this, 0);
+        wrapper._deleteEdges({
+            doNotBreakBlocks: true,
+            doNotRemoveEmpty: true,
+            mergeOnlyIfSameType: true,
+        });
         return wrapper;
     }
 
@@ -970,6 +992,51 @@ we3.ArchNode = class {
         this.params.add(archNode);
 
         this._triggerChange(index);
+    }
+    /**
+     * Clean the Arch after performing an unwrap:
+     * - Remove generated empty nodes
+     * - Delete new edges
+     *
+     * @private
+     */
+    _cleanAfterUnwrap() {
+        var prev = this.previousSibling();
+        if (prev) {
+            prev.removeIfEmpty();
+        }
+        /* Delete new edges if needed
+        eg: <b>1<i>2</i>3</b> => unwrap 2 from i
+            => <b>1</b><b>2</b><b>3</b>
+            => <b>123</b> */
+        var deleteEdgeOptions = {
+            doNotBreakBlocks: true,
+            mergeOnlyIfSameType: true,
+            doNotRemoveEmpty: true,
+        };
+        var last = this.lastLeaf();
+        this.firstLeaf().deleteEdge(true, deleteEdgeOptions);
+        last.deleteEdge(false, deleteEdgeOptions);
+    }
+    /**
+     * Delete this ArchNode's left and right edges.
+     *
+     * @see deleteEdge
+     * @param {object} [options]
+     * @param {Boolean} [options.doNotBreakBlocks] true to prevent the merging of block-type nodes
+     * @param {Boolean} [options.doNotRemoveEmpty] true to prevent the removal of empty nodes
+     * @param {Boolean} [options.keepRight] true to always merge an empty node into its next node and not the other way around
+     * @param {Boolean} [options.mergeOnlyIfSameType] true to prevent the merging of nodes of different types (eg p & h1)
+     */
+    _deleteEdges (options) {
+        var prev = this.previousSibling();
+        if (prev) {
+            prev.deleteEdge(false, options);
+        }
+        var next = this.nextSibling();
+        if (next) {
+            next.deleteEdge(true, options);
+        }
     }
     /**
      * Return true if this ArchNode can be merged with `node`.
@@ -1129,6 +1196,21 @@ we3.ArchNode = class {
             next.remove();
         }
         return virtualText.deleteEdge(isLeft);
+    }
+    /**
+     * Remove this node's empty siblings.
+     * 
+     * @private
+     */
+    _removeEmptySiblings () {
+        var prev = this.previousSibling();
+        if (prev && prev.isEmpty()) {
+            prev.remove();
+        }
+        var next = this.nextSibling();
+        if (next && next.isEmpty()) {
+            next.remove();
+        }
     }
     /**
      * Remove to the side of the ArchNode, at given offset.

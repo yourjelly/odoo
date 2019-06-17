@@ -165,7 +165,7 @@ var parentedRules = [
  * Eg: if ['i', 'b'], a 'b' node can be in an 'i' node but not otherwise
  */
 var orderRules = [
-    ['font'].concat(tags.format.filter((tag) => tag !== 'span' && tag !== 'font')),
+    ['span', 'font'].concat(tags.format.filter((tag) => tag !== 'span' && tag !== 'font')),
 ];
 
 
@@ -638,7 +638,7 @@ var BaseRules = class extends we3.AbstractPlugin {
     _applyRulesToRemoveForbiddenNodes (targetArchNode) {
         var parentedRules = this._applyRulesFilterRules(targetArchNode, this.parentedRulesList);
         if (this._hasForbiddenParentNode(targetArchNode, parentedRules)) {
-            targetArchNode.unwrap();
+            targetArchNode.childNodes.forEach((node) => node.unwrap());
             return true;
         }
         return false;
@@ -904,9 +904,9 @@ var BaseRules = class extends we3.AbstractPlugin {
         next.before(targetArchNode);
         next.append(targetArchNode.childNodes);
         targetArchNode.append(next);
-        parent.removeIfEmpty();
-        next.removeIfEmpty();
-        nextNext.removeIfEmpty();
+        parent.removeIfEmpty(true);
+        next.removeIfEmpty(true);
+        nextNext.removeIfEmpty(true);
     }
 };
 

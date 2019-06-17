@@ -407,51 +407,123 @@ var BaseArch = class extends we3.AbstractPlugin {
         this._removeSide(false);
     }
     /**
-     * Unwrap the node corresponding to the given ID from its parent.
+     * Unwrap the node(s) corresponding to the given ID(s)
+     * from its (their) parent.
      *
-     * @param {Number} id
+     * @param {Number|Number []} id
      */
     unwrap (id) {
-        var archNode = this.getArchNode(id);
-        var parent = archNode.parent;
-        var offset = archNode.index();
-        var scArch = archNode.firstChild();
-        var ecArch = archNode.lastChild();
-        var range;
-        if (scArch) {
-            range = {
-                scID: scArch.id,
-                so: 0,
-                ecID: ecArch.id,
-                eo: ecArch.length(),
-            };
-        }
+        var self = this;
         this._resetChange();
-        archNode.childNodes.slice().forEach(function (archNode) {
-            parent.insert(archNode, offset);
+        var ids = Array.isArray(id) ? id : [id];
+        // unwrap
+        ids.forEach(function (id) {
+            self.getArchNode(id).unwrap();
         });
-        archNode.remove();
+        // select all unwrapped
+        var range = ids.length ? this.dependencies.BaseRange.rangeOn(ids[0], ids[ids.length - 1]) : {};
         this._updateRendererFromChanges(range);
+    }
+    /**
+     * Unwrap the node(s) corresponding to the given ID(s)
+     * from its (their) first ancestor with the given
+     * nodeName(s) (`wrapperName`).
+     *
+     * @param {Number|Number []} id
+     * @param {string|string []} wrapperName
+     */
+    unwrapFrom (id, wrapperName) {
+        var self = this;
+        var ids = Array.isArray(id) ? id : [id];
+        var wrapperNames = Array.isArray(wrapperName) ? wrapperName : [wrapperName];
+        var toUnwrap = this._getNodesToUnwrap(ids, wrapperNames);
+        toUnwrap.forEach(function (unwrapInfo) {
+            if (!unwrapInfo.node || !unwrapInfo.node.isInArch()) {
+                return;
+            }
+            /* Split to isolate the node to unwrap (that is, the node
+            whose parent needs to go) */
+            var ancestorToUnwrap = unwrapInfo.node.ancestor(function (a) {
+                a.parent.split(a.index(), true);
+                a.parent.split(a.index() + 1, true);
+                return a.parent.nodeName === unwrapInfo.wrapperName;
+            });
+            self.unwrap(ancestorToUnwrap.id);
+        });
+    }
+    /**
+     * Unwrap every node in range from their first ancestor
+     * with the given nodeName(s) (`wrapperName`).
+     * If the range is collapsed, insert a virtual text node and unwrap it.
+     * This effectively creates a focusable zone that is not wrapped by the ancestor.
+     * Eg: `<p><b>te◆xt</b></p> => <p><b>te</b>◆<b>xt</b></p>`
+     *
+     * @param {string|string []} wrapperName
+     */
+    unwrapRangeFrom (wrapperName) {
+        var range = this.dependencies.BaseRange.getRange();
+        var start, end;
+        if (range.isCollapsed()) {
+            start = end = this.createArchNode();
+            this.insert(start);
+        } else {
+            var ecArch = this.getArchNode(range.ecID);
+            end = ecArch.split(range.eo) || ecArch;
+            var scArch = this.getArchNode(range.scID)
+            start = scArch.split(range.so) || scArch;
+        }
+        var selectedNodes = this._getNodesBetween(start, end, {
+            includeStart: true,
+        });
+        this.unwrapFrom(selectedNodes.map((node) => node.id), wrapperName);
     }
     /**
      * Wrap the node(s) corresponding to the given ID(s) inside
      * (a) new ArchNode(s) with the given nodeName.
+     * If no ID is passed or `id` is an empty Array, insert a virtual
+     * at range and wrap it.
      *
-     * @todo
-     * @param {Number|Number []} id
-     * @param {String} nodeName
+     * @param {Number|Number []} [id]
+     * @param {String} wrapperName
      */
     wrap (id, wrapperName) {
         var self = this;
+        this._resetChange();
         var ids = Array.isArray(id) ? id : [id];
+        // wrap
         var newParents = [];
         ids.forEach((id) => newParents.push(self.getArchNode(id).wrap(wrapperName)));
-        this._updateRendererFromChanges({
-            scID: newParents[0].id,
-            so: 0,
-            ecID: newParents[newParents.length - 1].id,
-            eo: newParents[newParents.length - 1].length(),
+        newParents = newParents.filter((parent) => parent.isInArch());
+        // select every wrapped node
+        var scArch = newParents[0].firstLeaf();
+        var ecArch = newParents[newParents.length - 1].lastLeaf();
+        var range = this.dependencies.BaseRange.rangeOn(scArch, ecArch);
+        this._updateRendererFromChanges(range);
+    }
+    /**
+     * Wrap every node in range into a new node with the given nodeName (`wrapperName`).
+     * If the range is collapsed, insert a virtual text node and wrap it.
+     * This effectively creates a focusable zone that is wrapped.
+     * Eg: `<p>te◆xt</p> => <p>te<b>◆</b>xt</p>`
+     *
+     * @param {string} wrapperName
+     */
+    wrapRange (wrapperName) {
+        var range = this.dependencies.BaseRange.getRange();
+        var ecArch = this.getArchNode(range.ecID);
+        var end = ecArch.split(range.eo) || ecArch;
+        var scArch = this.getArchNode(range.scID)
+        var start = scArch.split(range.so) || scArch;
+
+        var toWrap = this._getNodesBetween(start, end, {
+            includeStart: true,
         });
+        if (!toWrap.length) {
+            var virtual = this.createArchNode();
+            this.insert(virtual);
+            toWrap = [virtual];
+        }
+        this.wrap(toWrap.map((node) => node.id), wrapperName);
     }
 
     //--------------------------------------------------------------------------
@@ -549,6 +621,79 @@ var BaseArch = class extends we3.AbstractPlugin {
         };
     }
     /**
+     * Return an array with all the nodes between `start` and `end`, not included.
+     *
+     * @private
+     * @param {ArchNode} start
+     * @param {ArchNode} end
+     * @param {object} [options]
+     * @param {object} [options.includeStart] true to include `start`
+     * @param {object} [options.includeEnd] true to include `end`
+     * @returns {ArchNode []}
+     */
+    _getNodesBetween (start, end, options) {
+        var options = options || {};
+        var nodes = [];
+        if (options.includeStart && start.isInArch()) {
+            nodes.push(start);
+        }
+        if (start.id === end.id)  {
+            if (options.includeEnd && !options.includeStart && end.isInArch()) {
+                nodes.push(end);
+            }
+            return nodes;
+        }
+        var nextOptions = {
+            doNotInsertVirtual: true,
+            leafToLeaf: true,
+        };
+        start.nextUntil(function (node) {
+            if (node.id === end.id) {
+                if (options.includeEnd && end.isInArch()) {
+                    nodes.push(end);
+                }
+                return true;
+            }
+            if (node.isInArch()) {
+                nodes.push(node);
+            }
+        }, nextOptions);
+        return nodes;
+    }
+    /**
+     * Return an array of objects containing information on the nodes to unwrap,
+     * given the ids of nodes to inspect and the nodeNames from which to unwrap.
+     *
+     * @private
+     * @param {number []} ids
+     * @param {string []} wrapperNames
+     * @returns {object []} {node: {ArchNode} the node to unwrap
+     *                       wrapperName: {string} the nodeName to unwrap it from}
+     */
+    _getNodesToUnwrap (ids, wrapperNames) {
+        var self = this;
+        var nodes = ids.map((id) => self.getArchNode(id));
+        var toUnwrap = [];
+        nodes.forEach(function (node) {
+            var descendentsToUnwrap = [];
+            node.ancestor(function (a) {
+                var isToUnwrapFromParent = a.parent && wrapperNames.indexOf(a.parent.nodeName) !== -1;
+                if (isToUnwrapFromParent) {
+                    descendentsToUnwrap.push({
+                        node: node,
+                        wrapperName: a.parent.nodeName,
+                    });
+                }
+            });
+            /* Reverse to get the higher ancestor first. This way we ensure
+            unwrapping from ancestor down to descendent (otherwise we might
+            try to unwrap a node that was already removed) */
+            descendentsToUnwrap.reverse();
+            toUnwrap = toUnwrap.concat(descendentsToUnwrap);
+        });
+        return toUnwrap;
+    }
+    /**
      * Create an ArchNode and its children from a JSON representation.
      *
      * @private
@@ -556,9 +701,17 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @returns {ArchNode}
      */
     _importJSON (json) {
-        return this.dependencies.BaseRules.parse(this._importRecurentJSON(json));
+        return this.dependencies.BaseRules.parse(this._importRecursiveJSON(json));
     }
-    _importRecurentJSON (json) {
+    /**
+     * Create an ArchNode and its children from a JSON representation (no parsing).
+     *
+     * @see _importJSON
+     * @private
+     * @param {JSON} json
+     * @returns {ArchNode}
+     */
+    _importRecursiveJSON (json) {
         var self = this;
         var archNode = this.createArchNode(json.nodeName, json.attributes, json.nodeValue, json.type);
         if (json.childNodes) {
@@ -1137,23 +1290,59 @@ var Arch = class extends we3.AbstractPlugin {
         return this.dependencies.BaseArch.removeRight();
     }
     /**
-     * Unwrap the node corresponding to the given ID from its parent.
+     * Unwrap the node(s) corresponding to the given ID(s)
+     * from its (their) parent.
      *
-     * @param {Number} id
+     * @param {Number|Number []} id
      */
     unwrap (id) {
         return this.dependencies.BaseArch.unwrap(id);
     }
     /**
-     * Wrap the node corresponding to the given ID inside
-     * a new ArchNode with the given nodeName.
+     * Unwrap the node(s) corresponding to the given ID(s)
+     * from its (their) first ancestor with the given
+     * nodeName(s) (`wrapperName`).
      *
-     * @todo
      * @param {Number|Number []} id
-     * @param {String} nodeName
+     * @param {string|string []} wrapperName
+     */
+    unwrapFrom (id, wrapperName) {
+        return this.dependencies.BaseArch.unwrapFrom(id, wrapperName);
+    }
+    /**
+     * Unwrap every node in range from their first ancestor
+     * with the given nodeName(s) (`wrapperName`).
+     * If the range is collapsed, insert a virtual text node and unwrap it.
+     * This effectively creates a focusable zone that is not wrapped by the ancestor.
+     * Eg: `<p><b>te◆xt</b></p> => <p><b>te</b>◆<b>xt</b></p>`
+     *
+     * @param {string|string []} wrapperName
+     */
+    unwrapRangeFrom (wrapperName) {
+        return this.dependencies.BaseArch.unwrapRangeFrom(wrapperName);
+    }
+    /**
+     * Wrap the node(s) corresponding to the given ID(s) inside
+     * (a) new ArchNode(s) with the given nodeName.
+     * If no ID is passed or `id` is an empty Array, insert a virtual
+     * at range and wrap it.
+     *
+     * @param {Number|Number []} [id]
+     * @param {String} wrapperName
      */
     wrap (id, wrapperName) {
         return this.dependencies.BaseArch.wrap(id, wrapperName);
+    }
+    /**
+     * Wrap every node in range into a new node with the given nodeName (`wrapperName`).
+     * If the range is collapsed, insert a virtual text node and wrap it.
+     * This effectively creates a focusable zone that is wrapped.
+     * Eg: `<p>te◆xt</p> => <p>te<b>◆</b>xt</p>`
+     *
+     * @param {string} wrapperName
+     */
+    wrapRange (wrapperName) {
+        return this.dependencies.BaseArch.wrapRange(wrapperName);
     }
 };
 

@@ -55,6 +55,7 @@ var we3 = window.we3 = class we3 extends we3Classes.EventDispatcher {
 };
 
 we3.options = we3Classes.options;
+we3.tags = we3Classes.tags;
 we3.utils = we3Classes.utils;
 we3.addPlugin = we3Classes.addPlugin;
 we3.getPlugin = we3Classes.getPlugin;
