@@ -33,6 +33,7 @@ var ListController = BasicController.extend({
         toggle_column_order: '_onToggleColumnOrder',
         toggle_group: '_onToggleGroup',
         navigation_move: '_onNavigationMove',
+        paste_multi: '_onPasteMultilines',
     }),
     /**
      * @constructor
@@ -628,6 +629,107 @@ var ListController = BasicController.extend({
             };
         }
         this._super.apply(this, arguments);
+    },
+    /**
+     * Triggers when user paste multiple lines.
+     * @param {OdooEvent} ev
+     */
+    _onPasteMultilines: function (ev) {
+        // var changes = {};
+        // // changes[this.attrs.name] = {
+        // changes['product_qty'] = {
+        //     operation: 'MULTI',
+        //     commands: ev.data,
+        // };
+        // this.trigger_up('field_changed', {
+        //     dataPointID: this.initialState.id,
+        //     changes: changes,
+        // });
+        var self = this;
+        var fieldName = $('td>input').attr('name');
+        var defs = [];
+
+        var node;
+        for (var i in this.renderer.columns) {
+            var cNode = this.renderer.columns[i];
+            if (cNode.attrs.name === fieldName) {
+                node = cNode;
+                break;
+            }
+        }
+
+        var values = [];
+        var records = [];
+        var recordIds = [];
+        var changes = [];
+        var res_ids = [];
+        for (var j in ev.data) {
+            var record = ev.data[j];
+            recordIds.push(record.id);
+            values.push(ev.data[j].data[fieldName]);
+
+            records.push(this.model.localData[record.id]);
+            var res_id = this.model.localData[record.id].res_id;
+            res_ids.push(res_id);
+            var change = {};
+            change[fieldName] = ev.data[j].data[fieldName];
+            changes.push([1, res_id, change]);
+        }
+        var validRecordIds = recordIds.reduce(function (result, recordId) {
+            var record = self.model.get(recordId);
+            var modifiers = self.renderer._registerModifiers(node, record);
+            if (!modifiers.readonly && (!modifiers.required || value)) {
+                result.push(recordId);
+            }
+            return result;
+        }, []);
+        var list = this.model.localData[records[0].parentID];
+
+        for (var k in changes) {
+            defs.push(
+                this.model._rpc({
+                    model: this.modelName,
+                    method: 'write',
+                    args: [changes[k][1], changes[k][2]],
+                })
+            );
+        }
+
+        // return this.model._rpc({
+        //     model: this.modelName,
+        //     method: 'write',
+        //     args: [res_ids, changes],
+        // });
+
+        return Promise.all(defs).then(function () {
+            return self._rpc({
+                model: self.modelName,
+                method: 'read',
+                args: [res_ids, [fieldName]],
+            }).then(function (results) {
+                results.forEach(function (data) {
+                    var record = _.findWhere(records, {res_id: data.id});
+                    record.data = _.extend({}, record.data, data);
+                    record._changes = {};
+                    record._isDirty = false;
+                    self.model._parseServerData([fieldName], record, record.data);
+                });
+            }).then(function () {
+                return Promise.all([
+                    self.model._fetchX2ManysBatched(list),
+                    self.model._fetchReferencesBatched(list)
+                ]);
+            });
+        }).then(function () {
+            self._updateButtons('readonly');
+            var state = self.model.get(self.handle);
+            self.renderer.updateState(state, {});
+        });
+        // .then(function () {
+        //     self._updateButtons('readonly');
+        //     var state = self.model.get(self.handle);
+        //     self.renderer.updateState(state, {});
+        // });
     },
     /**
      * Called when the renderer displays an editable row and the user tries to
