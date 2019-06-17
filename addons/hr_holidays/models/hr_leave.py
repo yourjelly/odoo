@@ -105,7 +105,7 @@ class HolidaysRequest(models.Model):
         ('refuse', 'Refused'),
         ('validate1', 'Second Approval'),
         ('validate', 'Approved')
-        ], string='Status', readonly=True, tracking=True, copy=False, default='confirm',
+        ], string='Status', readonly=True, tracking=True, copy=False, default='draft',
         help="The status is set to 'To Submit', when a time off request is created." +
         "\nThe status is 'To Approve', when time off request is confirmed by user." +
         "\nThe status is 'Refused', when time off request is refused by manager." +
@@ -317,6 +317,7 @@ class HolidaysRequest(models.Model):
 
     @api.onchange('holiday_status_id')
     def _onchange_holiday_status_id(self):
+        self.state = "confirm" if self.validation_type != "no_validation" else "draft"
         self.request_unit_half = False
 
     @api.onchange('request_unit_half')
@@ -709,9 +710,11 @@ class HolidaysRequest(models.Model):
 
     @api.multi
     def action_confirm(self):
-        if self.filtered(lambda holiday: holiday.state != 'draft'):
+        if self.filtered(lambda holiday: holiday.state != 'draft' and holiday.validation_type != 'no_validation'):
             raise UserError(_('Time off request must be in Draft state ("To Submit") in order to confirm it.'))
-        self.write({'state': 'confirm'})
+        for holiday in self:
+            state = 'validate' if holiday.validation_type == 'no_validation' else 'confirm'
+            holiday.write({'state': state})
         self.activity_update()
         return True
 
