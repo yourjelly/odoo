@@ -164,6 +164,7 @@ customArchNodes.br = class extends we3.ArchNode {
         (prev || next || parent).deleteEdge(!prev, {
             doNotBreakBlocks: true,
         });
+        this.params.change(nextRange.node, nextRange.offset); // retrigger in case edges were deleted
         var nextToCheck = isLeft ? prev : next;
         if (nextToCheck && !nextToCheck.__removed && nextToCheck.isInvisibleBR()) {
             nextToCheck.remove();
