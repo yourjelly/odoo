@@ -66,14 +66,17 @@ var keyMapPlugin = class extends we3.AbstractPlugin {
         });
 
         var defaults = JSON.parse(JSON.stringify(we3.options.keyMap));
-        var keyMap = Object.assign(defaults, this.options.keyMap);
-        var help = Object.assign({}, defaults.help, keyMap.help);
-        var keyboard = this.options.env.isMac ? 'mac' : 'pc';
-        keyMap = Object.assign({}, defaults[keyboard], keyMap[keyboard]);
+        var mac = Object.assign({}, defaults.mac, this.options.keyMap && this.options.keyMap.mac);
+        var pc = Object.assign({}, defaults.pc, this.options.keyMap && this.options.keyMap.pc);
+        var help = Object.assign({}, defaults.help, this.options.keyMap && this.options.keyMap.help);
+        var keyMap = this.options.env.isMac ? mac : pc;
 
         this.keyMap = {};
         Object.keys(keyMap).forEach(function (shortcut) {
             var command = keyMap[shortcut];
+            if (!command) {
+                return;
+            }
             var pluginMethod = command.split('.');
             var pluginName = pluginMethod[0];
             var method = pluginMethod[1].split(':');

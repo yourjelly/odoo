@@ -32,7 +32,7 @@ Object.assign(we3.options, {
         'History',
         'CodeView',
         'FullScreen',
-        // 'KeyMap',
+        'KeyMap',
         'Test',
     ],
     popover: {

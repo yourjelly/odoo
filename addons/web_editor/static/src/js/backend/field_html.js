@@ -188,6 +188,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             iframeCssAssets: this.nodeOptions.cssEdit,
             snippets: this.nodeOptions.snippets,
 
+            /* todo: uncomment after separation of field_html customization tests and we3 tests
             tabSize: 0,
             keyMap: {
                 pc: {
@@ -198,7 +199,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
                     'TAB': null,
                     'SHIFT+TAB': null,
                 },
-            },
+            }, */
             plugins: {
                 ConvertInline: !!this.nodeOptions['style-inline'],
                 Iframe: !!this.nodeOptions.cssEdit,
