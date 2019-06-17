@@ -469,7 +469,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             }, {
                 key: 'BACKSPACE',
             }],
-            test: "<p><span><b>dom<br/>◆&nbsp;to edit</b></span></p>",
+            test: "<p><span><b>dom<br/>◆ to edit</b></span></p>",
         },
         {
             name: "in p (hr before): BACKSPACE",
