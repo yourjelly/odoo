@@ -2,6 +2,7 @@
 
 from odoo import models, fields, api
 import time
+import random
 
 class test_mix(models.Model):
     """
@@ -59,17 +60,18 @@ class test(models.Model):
         t = time.time()
         main_id = self.create({
             'name': 'bla',
+            'int1': random.randint(0,20),
             'line_ids': [
                 (0,0, {'name': 'abc'}),
                 (0,0, {'name': 'def'}),
             ]
         })
-        self.flush()
+        if hasattr(self, 'flush'): self.flush()
         return time.time()-t
 
     def testme3(self):
         t = time.time()
-        print('* Create with two lines')
+        print('* Create with two lines, & inherits')
         main = self.create({
             'name': 'bla',
             'line_ids': [
@@ -77,18 +79,18 @@ class test(models.Model):
                 (0,0, {'name': 'def'}),
             ]
         })
-        print('* main.int1 = 5')
+        print('* main.int1 = 5  -> recompute sum.intx2, lines.intx2, self.sum')
         main.int1 = 5
-        print('* main.intx2 = 8')
+        print('* main.intx2 = 8  -> compute inverse main.int1 = 4')
         main.intx2 = 8
-        print('* create_line')
+        print('* create_an extra line')
         self.env['test.line'].create(
             {'name': 'ghi', 'test_id': main.id}
         )
-        print('* search intx2 line')
+        print('* search intx2 on line')
         self.env['test.line'].search([('intx2', '=', 3)])
-        print('* end')
-        self.flush()
+        print('* end flush')
+        if hasattr(self, 'flush'): self.flush()
         return time.time()-t
 
     def testme4(self):
@@ -96,7 +98,7 @@ class test(models.Model):
         main_id = self.env['test.main'].create({
             'name': 'bla',
         })
-        self.flush()
+        if hasattr(self, 'flush'): self.flush()
         return time.time()-t
 
 

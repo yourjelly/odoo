@@ -1019,6 +1019,17 @@ class Environment(Mapping):
     def recompute(self):
         return self.all.recompute
 
+    def issudo(self):
+        return self.all.sudo
+
+    def sudo(self):
+        tmp = self.all.sudo
+        self.all.sudo = True
+        try:
+            yield
+        finally:
+            self.all.studo = tmp
+
     @contextmanager
     def norecompute(self):
         tmp = self.all.recompute
@@ -1047,6 +1058,7 @@ class Environments(object):
         self.todo = {}                  # recomputations {field: [records]}  FP NOTE: should be renamed to "tocompute"
         self.recompute = True
         self.towrite = defaultdict(lambda : defaultdict(dict))  # {model: {id: {field: value}}}
+        self.sudo = False
 
     def add(self, env):
         """ Add the environment ``env``. """

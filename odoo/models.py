@@ -2740,7 +2740,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         fields (as is if the fields is not falsy, or the readable/writable
         fields if fields is falsy).
         """
-        if self._uid == SUPERUSER_ID:
+        if (self._uid == SUPERUSER_ID) or self.env.issudo():
             return fields or list(self._fields)
 
         def valid(fname):
@@ -3056,6 +3056,8 @@ Fields:
         """ Verifies that the operation given by ``operation`` is allowed for
             the current user according to the access rights.
         """
+        if self.env.issudo():
+            return True
         return self.env['ir.model.access'].check(self._name, operation, raise_exception)
 
     @api.multi
@@ -3067,10 +3069,12 @@ Fields:
            :raise UserError: * if current ir.rules do not permit this operation.
            :return: None if the operation is allowed
         """
-        if self._uid == SUPERUSER_ID:
+        if (self._uid == SUPERUSER_ID) or self.env.issudo():
             return
 
-        invalid = self - self._filter_access_rules(operation)
+        dom = self.env['ir.rule']._compute_domain(self._name, operation)
+        match = self.filtered_domain(dom)
+        invalid = self - match
         if not invalid:
             return
 
@@ -3093,7 +3097,7 @@ Fields:
 
     def _filter_access_rules(self, operation):
         """ Return the subset of ``self`` for which ``operation`` is allowed. """
-        if self._uid == SUPERUSER_ID:
+        if (self._uid == SUPERUSER_ID) or self.env.issudo():
             return self
 
         if not self._ids:
@@ -3302,6 +3306,7 @@ Fields:
 
         self.check_access_rights('write')
         self.check_field_access_rights('write', vals.keys())
+        self.check_access_rule('write')
         env = self.env
 
         bad_names = {'id', 'parent_path'}
@@ -3516,7 +3521,6 @@ Fields:
 
         # update columns
         if columns:
-            self.check_access_rule('write')
             query = 'UPDATE "%s" SET %s WHERE id IN %%s' % (
                 self._table, ','.join('"%s"=%s' % (column[0], column[1]) for column in columns),
             )
@@ -5025,6 +5029,46 @@ Fields:
             else:
                 recs = field.convert_to_record(null, recs)
         return recs
+
+    # FP Note: implementation to complete
+    def filtered_domain(self, domain):
+        if not domain: return self
+        result = []
+        for d in reversed(domain):
+            if d=='&':
+                result.append(result.pop() & result.pop())
+            elif d=='|':
+                result.append(result.pop() | result.pop())
+            elif d=='!':
+                result.append(self - result.pop())
+            else:
+                (key, comparator, value) = d
+                newids = []
+                for rec in self:
+                    data = rec.mapped(key)
+                    if isinstance(data, BaseModel):
+                        data = data.ids
+                    if comparator == '=':
+                        ok = value in data
+                    elif comparator == '<':
+                        ok = any(map(lambda x: x < value, data))
+                    elif comparator == '>':
+                        ok = any(map(lambda x: x > value, data))
+                    elif comparator == 'in':
+                        ok = any(map(lambda x: x in data, value))
+                    elif comparator == '!=':
+                        ok = value not in data
+                    elif comparator == 'not in':
+                        ok = all(map(lambda x: x not in data, value))
+                    else:
+                        raise NotImplemented
+                    if ok: newids.append(rec.id)
+                result.append(self.browse(newids))
+        while len(result)>1:
+            result.append(result.pop() & result.pop())
+        return result[0]
+
+
 
     def filtered(self, func):
         """ Select the records in ``self`` such that ``func(rec)`` is true, and
