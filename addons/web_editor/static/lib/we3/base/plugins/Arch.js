@@ -411,8 +411,9 @@ var BaseArch = class extends we3.AbstractPlugin {
      * from its (their) parent.
      *
      * @param {Number|Number []} id
+     * @param {boolean} [doNotRender] true to skip rendering
      */
-    unwrap (id) {
+    unwrap (id, doNotRender) {
         var self = this;
         this._resetChange();
         var ids = Array.isArray(id) ? id : [id];
@@ -420,9 +421,11 @@ var BaseArch = class extends we3.AbstractPlugin {
         ids.forEach(function (id) {
             self.getArchNode(id).unwrap();
         });
-        // select all unwrapped
-        var range = ids.length ? this.dependencies.BaseRange.rangeOn(ids[0], ids[ids.length - 1]) : {};
-        this._updateRendererFromChanges(range);
+        if (!doNotRender) {
+            // render and select all unwrapped
+            var range = ids.length ? this.dependencies.BaseRange.rangeOn(ids[0], ids[ids.length - 1]) : {};
+            this._updateRendererFromChanges(range);
+        }
     }
     /**
      * Unwrap the node(s) corresponding to the given ID(s)
@@ -431,8 +434,9 @@ var BaseArch = class extends we3.AbstractPlugin {
      *
      * @param {Number|Number []} id
      * @param {string|string []} wrapperName
+     * @param {boolean} [doNotRender] true to skip rendering
      */
-    unwrapFrom (id, wrapperName) {
+    unwrapFrom (id, wrapperName, doNotRender) {
         var self = this;
         var ids = Array.isArray(id) ? id : [id];
         var wrapperNames = Array.isArray(wrapperName) ? wrapperName : [wrapperName];
@@ -448,7 +452,7 @@ var BaseArch = class extends we3.AbstractPlugin {
                 a.parent.split(a.index() + 1, true);
                 return a.parent.nodeName === unwrapInfo.wrapperName;
             });
-            self.unwrap(ancestorToUnwrap.id);
+            self.unwrap(ancestorToUnwrap.id, doNotRender);
         });
     }
     /**
@@ -459,8 +463,9 @@ var BaseArch = class extends we3.AbstractPlugin {
      * Eg: `<p><b>te◆xt</b></p> => <p><b>te</b>◆<b>xt</b></p>`
      *
      * @param {string|string []} wrapperName
+     * @param {boolean} [doNotRender] true to skip rendering
      */
-    unwrapRangeFrom (wrapperName) {
+    unwrapRangeFrom (wrapperName, doNotRender) {
         var range = this.dependencies.BaseRange.getRange();
         var start, end;
         if (range.isCollapsed()) {
@@ -475,7 +480,7 @@ var BaseArch = class extends we3.AbstractPlugin {
         var selectedNodes = this._getNodesBetween(start, end, {
             includeStart: true,
         });
-        this.unwrapFrom(selectedNodes.map((node) => node.id), wrapperName);
+        this.unwrapFrom(selectedNodes.map((node) => node.id), wrapperName, doNotRender);
     }
     /**
      * Wrap the node(s) corresponding to the given ID(s) inside
@@ -485,8 +490,9 @@ var BaseArch = class extends we3.AbstractPlugin {
      *
      * @param {Number|Number []} [id]
      * @param {String} wrapperName
+     * @param {boolean} [doNotRender] true to skip rendering
      */
-    wrap (id, wrapperName) {
+    wrap (id, wrapperName, doNotRender) {
         var self = this;
         this._resetChange();
         var ids = Array.isArray(id) ? id : [id];
@@ -494,11 +500,13 @@ var BaseArch = class extends we3.AbstractPlugin {
         var newParents = [];
         ids.forEach((id) => newParents.push(self.getArchNode(id).wrap(wrapperName)));
         newParents = newParents.filter((parent) => parent.isInArch());
-        // select every wrapped node
-        var scArch = newParents[0].firstLeaf();
-        var ecArch = newParents[newParents.length - 1].lastLeaf();
-        var range = this.dependencies.BaseRange.rangeOn(scArch, ecArch);
-        this._updateRendererFromChanges(range);
+        if (!doNotRender) {
+            // render and select every wrapped node
+            var scArch = newParents[0].firstLeaf();
+            var ecArch = newParents[newParents.length - 1].lastLeaf();
+            var range = this.dependencies.BaseRange.rangeOn(scArch, ecArch);
+            this._updateRendererFromChanges(range);
+        }
     }
     /**
      * Wrap every node in range into a new node with the given nodeName (`wrapperName`).
@@ -507,8 +515,9 @@ var BaseArch = class extends we3.AbstractPlugin {
      * Eg: `<p>te◆xt</p> => <p>te<b>◆</b>xt</p>`
      *
      * @param {string} wrapperName
+     * @param {boolean} [doNotRender] true to skip rendering
      */
-    wrapRange (wrapperName) {
+    wrapRange (wrapperName, doNotRender) {
         var range = this.dependencies.BaseRange.getRange();
         var ecArch = this.getArchNode(range.ecID);
         var end = ecArch.split(range.eo) || ecArch;
@@ -523,7 +532,7 @@ var BaseArch = class extends we3.AbstractPlugin {
             this.insert(virtual);
             toWrap = [virtual];
         }
-        this.wrap(toWrap.map((node) => node.id), wrapperName);
+        this.wrap(toWrap.map((node) => node.id), wrapperName, doNotRender);
     }
 
     //--------------------------------------------------------------------------
@@ -1294,9 +1303,10 @@ var Arch = class extends we3.AbstractPlugin {
      * from its (their) parent.
      *
      * @param {Number|Number []} id
+     * @param {boolean} [doNotRender] true to skip rendering
      */
-    unwrap (id) {
-        return this.dependencies.BaseArch.unwrap(id);
+    unwrap (id, doNotRender) {
+        return this.dependencies.BaseArch.unwrap(id, doNotRender);
     }
     /**
      * Unwrap the node(s) corresponding to the given ID(s)
@@ -1305,9 +1315,10 @@ var Arch = class extends we3.AbstractPlugin {
      *
      * @param {Number|Number []} id
      * @param {string|string []} wrapperName
+     * @param {boolean} [doNotRender] true to skip rendering
      */
-    unwrapFrom (id, wrapperName) {
-        return this.dependencies.BaseArch.unwrapFrom(id, wrapperName);
+    unwrapFrom (id, wrapperName, doNotRender) {
+        return this.dependencies.BaseArch.unwrapFrom(id, wrapperName, doNotRender);
     }
     /**
      * Unwrap every node in range from their first ancestor
@@ -1317,9 +1328,10 @@ var Arch = class extends we3.AbstractPlugin {
      * Eg: `<p><b>te◆xt</b></p> => <p><b>te</b>◆<b>xt</b></p>`
      *
      * @param {string|string []} wrapperName
+     * @param {boolean} [doNotRender] true to skip rendering
      */
-    unwrapRangeFrom (wrapperName) {
-        return this.dependencies.BaseArch.unwrapRangeFrom(wrapperName);
+    unwrapRangeFrom (wrapperName, doNotRender) {
+        return this.dependencies.BaseArch.unwrapRangeFrom(wrapperName, doNotRender);
     }
     /**
      * Wrap the node(s) corresponding to the given ID(s) inside
@@ -1329,9 +1341,10 @@ var Arch = class extends we3.AbstractPlugin {
      *
      * @param {Number|Number []} [id]
      * @param {String} wrapperName
+     * @param {boolean} [doNotRender] true to skip rendering
      */
-    wrap (id, wrapperName) {
-        return this.dependencies.BaseArch.wrap(id, wrapperName);
+    wrap (id, wrapperName, doNotRender) {
+        return this.dependencies.BaseArch.wrap(id, wrapperName, doNotRender);
     }
     /**
      * Wrap every node in range into a new node with the given nodeName (`wrapperName`).
@@ -1340,9 +1353,10 @@ var Arch = class extends we3.AbstractPlugin {
      * Eg: `<p>te◆xt</p> => <p>te<b>◆</b>xt</p>`
      *
      * @param {string} wrapperName
+     * @param {boolean} [doNotRender] true to skip rendering
      */
-    wrapRange (wrapperName) {
-        return this.dependencies.BaseArch.wrapRange(wrapperName);
+    wrapRange (wrapperName, doNotRender) {
+        return this.dependencies.BaseArch.wrapRange(wrapperName, doNotRender);
     }
 };
 

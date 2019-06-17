@@ -7,7 +7,7 @@ we3.options.keyMap.mac['CMD+SHIFT+NUM9'] = 'List.insertList:checklist';
 var ListPlugin = class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
-        this.dependencies = ['Arch', 'FontStyle'];
+        this.dependencies = ['Arch', 'FontStyle', 'Range'];
         this.templatesDependencies = ['/web_editor/static/src/xml/wysiwyg_list.xml'];
         this.buttons = {
             template: 'wysiwyg.buttons.list',
@@ -161,38 +161,35 @@ var ListPlugin = class extends we3.AbstractPlugin {
      * @param {string('ol'|'ul'|'checklist')} type the type of list to insert
      * @returns {false|Node[]} contents of the ul/ol or content of the converted/removed list
      */
-    insertList (type) {
+    insertList (type, focusNode) {
         var self = this;
-        var range = this.dependencies.Range.getRange();
-        if (!range) {
-            return false;
-        }
-        var res;
-        var start = range.getStartPoint();
-        var end = range.getEndPoint();
-
-        if (this.utils.isInList(range.sc)) {
-            res = this.convertList(false, [], start, end, type);
+        var rangeToPreserve = this.dependencies.Range.getRange();
+        var selectedTextNodes = this.dependencies.Range.getSelectedNodes((node) => node.isText() || node.isVoidoid());
+        var nodeName = type === 'checklist' ? 'ul' : type;
+        if (selectedTextNodes.length && selectedTextNodes.every((node) => node.isInList())) {
+            var toUnwrap = selectedTextNodes.map(node => node.id);
+            this.dependencies.Arch.unwrapFrom(toUnwrap, ['li'], true);
+            this.dependencies.Arch.unwrapFrom(toUnwrap, ['ol', 'ul'], false);
         } else {
-            var ul = this._createList(type);
-            res = [].slice.call(ul.children);
+            var toWrap = selectedTextNodes.map(node => node.ancestor(node.isBlock))
+            toWrap = we3.utils.uniq(toWrap.filter(node => node).map(node => node.id));
+            this.dependencies.Arch.wrap(toWrap, nodeName);
+            var listAncestors = this.dependencies.Range.getSelectedNodes().filter(node => node.isList());
+            var edges = listAncestors.map(function (listAncestor) {
+                var prev = listAncestor.previousSibling();
+                if (prev && prev.nodeName === nodeName) {
+                    listAncestor.deleteEdge(true, {
+                        mergeOnlySameType: true,
+                    });
+                    return prev;
+                }
+            }).filter(node => node && node.isInArch());
+            if (edges.length) {
+                var json = edges.map(node => node.parent.toJSON());
+                this.dependencies.Arch.importUpdate(json);
+            }
         }
-
-        var startLeaf = this.utils.firstLeafUntil(start.node, function (n) {
-            return !self.dependencies.Arch.isVoidoid(n) && self.dependencies.Arch.isEditableNode(n);
-        });
-        var endLeaf = this.utils.firstLeafUntil(end.node, function (n) {
-            return !self.dependencies.Arch.isVoidoid(n) && self.dependencies.Arch.isEditableNode(n);
-        });
-        range = this.dependencies.Arch.setRange({
-            sc: startLeaf,
-            so: this.utils.isText(startLeaf) ? start.offset : 0,
-            ec: endLeaf,
-            eo: this.utils.isText(endLeaf) ? end.offset : this.utils.nodeLength(endLeaf),
-        });
-        this.dependencies.Arch.setRange(range);
-
-        return res;
+        this.dependencies.Range.setRange(rangeToPreserve);
     }
 
     //--------------------------------------------------------------------------
