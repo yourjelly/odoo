@@ -147,6 +147,7 @@ var Wysiwyg = Widget.extend({
                 remove: '/web_editor/attachment/remove',
                 search: '/web/dataset/call_kw/ir.attachment/search_read',
             },
+            xhrPath: '/web_editor/static/lib/we3/',
             xhr: {
                 csrf_token: odoo.csrf_token,
                 user_id: session.uid || session.user_id,
@@ -411,7 +412,6 @@ var Wysiwyg = Widget.extend({
         var promises = [];
         var xmlPath;
         while ((xmlPath = xmlPaths.shift())) {
-            xmlPath = xmlPath[0] === '/' ? xmlPath : we3.options.xhrPath + xmlPath;
             promises.push(ajax.loadXML(xmlPath, QWeb));
         }
         return $.when.apply($, promises);

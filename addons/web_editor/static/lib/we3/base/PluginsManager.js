@@ -461,6 +461,7 @@ we3.PluginsManager = class extends we3.EventDispatcher {
             var pluginInstance = pluginInstances[pluginNames[i]];
             for (var k = 0; k < pluginInstance.templatesDependencies.length; k++) {
                 var src = pluginInstance.templatesDependencies[k];
+                src = src[0] === '/' ? src : this.options.xhrPath + src;
                 if (templatesDependencies.indexOf(src) === -1) {
                     templatesDependencies.push(src);
                 }
