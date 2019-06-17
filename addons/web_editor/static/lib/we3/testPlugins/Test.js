@@ -251,7 +251,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
         }
 
         if (this.options.test && this.options.test.auto) {
-            setTimeout(this._loadTests.bind(this));
+            setTimeout(this.loadTest.bind(this, null));
         }
     }
     destroy () {
@@ -306,7 +306,8 @@ var TestPlugin = class extends we3.AbstractPlugin {
         tests.forEach((test) => defPollTest = defPollTest.then(this._pollTest.bind(this, this.assert, test)));
         return defPollTest;
     }
-    getValue () {
+    getValue (archNodeId) {
+        var cleanedValue = this.dependencies.Arch.getValue();
         var params = this.dependencies.Arch.getNode(1).params; // TODO: Remove hardcoded 1 (=> apply customRules on parsing !, and after changes)
         var range = this.dependencies.Range.getRange();
         var archNode;
@@ -319,11 +320,16 @@ var TestPlugin = class extends we3.AbstractPlugin {
             archNode = new TEST(params, null, null, rangeStart);
             this.dependencies.Arch.insert(archNode, range.sc, range.so);
         }
-        var result = this.dependencies.Arch.getValue()
+        var result;
+        if (archNodeId) {
+            result = this.dependencies.Arch.getNode(archNodeId).toString().replace(/^<[^>]+>/, '').replace(/<\/[^>]+>$/, '');
+        } else {
+            result = this.dependencies.Arch.getValue();
+        }
+        return result
             .replace(regExpRangeToCollapsed, rangeCollapsed)
             .replace(regSpace, '&nbsp;')
             .replace(regInvisible, '&#65279;');
-        return result;
     }
     /**
      * Trigger a keydown event on the target.
@@ -371,6 +377,11 @@ var TestPlugin = class extends we3.AbstractPlugin {
         if (this.isDestroyed()) {
             return;
         }
+        var value = this.dependencies.Arch.getValue();
+        var range = this.dependencies.Range.getRange();
+        var sp = range.scArch.path();
+        var ep = range.ecArch.path();
+
         if (pluginName) {
             var plugin;
             if (pluginName === 'Test') {
@@ -380,10 +391,21 @@ var TestPlugin = class extends we3.AbstractPlugin {
                     return plugin.pluginName === pluginName;
                 });
             }
+            var value = this.dependencies.Arch.getValue();
             await this._loadTest(plugin);
         } else {
             await this._loadTests();
         }
+
+        this.triggerUp('set_value', {value: value});
+        var s = this.dependencies.Arch.getNode(1).applyPath(sp);
+        var e = this.dependencies.Arch.getNode(1).applyPath(ep);
+        this.dependencies.Range.setRange({
+            scID: s.id,
+            so: range.so,
+            ecID: e.id,
+            eo: range.eo,
+        });
     }
     /**
      * Set the range in the editor and make sure to focus the editor.
@@ -393,28 +415,51 @@ var TestPlugin = class extends we3.AbstractPlugin {
     setRange (range) {
         this.dependencies.Range.setRange(range);
         var newRange = this.dependencies.Range.getRange();
-        this.triggerNativeEvents(newRange.sc, ['focus']);
+        this.triggerNativeEvents(newRange.sc, ['mousedown', 'focus', 'click', 'mouseup']);
     }
     /**
      * Set the editor's value.
      *
      * @param {string} value
      */
-    setValue (value) {
+    setValue (value, archNodeId) {
         if (this.isDestroyed()) {
             return;
         }
         var self = this;
-        this.triggerUp('set_value', {value: value});
+        var Arch = this.dependencies.Arch;
+        if (archNodeId) {
+            var archNode = Arch.getNode(archNodeId);
+            var nodeValue = Arch.parse(value);
+            archNode.empty();
+            archNode.append(nodeValue);
+            archNode.params.bypassUpdateConstraints(function () {
+                Arch.importUpdate(archNode);
+            });
+        } else {
+            this.triggerUp('set_value', {value: value});
+        }
 
-        var clone = this.dependencies.Arch.getNode(1);
+        var clone = Arch.getNode(1);
         var options = {
             doCrossUnbreakables: true,
         };
         var start = clone.nextUntil(function (a) { return a.type === 'TEST'; }, options);
         var end = start ? start.nextUntil(function (a) { return a.type === 'TEST'; }, options) : null;
 
-        this.triggerUp('set_value', {value: value.replace(regExpRange, '')});
+        var cleanedValue = value.replace(regExpRange, '');
+
+        if (archNodeId) {
+            var archNode = Arch.getNode(archNodeId, true);
+            var nodeValue = Arch.parse(cleanedValue);
+            archNode.empty();
+            archNode.append(nodeValue);
+            archNode.params.bypassUpdateConstraints(function () {
+                Arch.importUpdate(archNode);
+            });
+        } else {
+            this.triggerUp('set_value', {value: cleanedValue});
+        }
 
         var range;
         if (!start) {
@@ -605,10 +650,8 @@ var TestPlugin = class extends we3.AbstractPlugin {
                 return p.pluginName === plugin;
             });
         }
-        var value = this.dependencies.Arch.getValue();
 
         this._testPluginActive = plugin;
-        this.triggerUp('set_value', {value: ''});
         this.assert.ok(true, '<' + plugin.pluginName + '>');
 
         this.nTests = 0;
@@ -620,7 +663,6 @@ var TestPlugin = class extends we3.AbstractPlugin {
             this.assert.notOk(e, 'ERROR');
         }
         this._logFinalResult();
-        this.triggerUp('set_value', {value: value});
     }
     /**
      * Load all tests.

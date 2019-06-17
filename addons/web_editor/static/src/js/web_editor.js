@@ -181,7 +181,7 @@ var Wysiwyg = Widget.extend({
             ];
 
             if (config.isDebug()) {
-                options.toolbar.push(['Test']);
+                options.toolbar.push('Test');
             }
         }
 

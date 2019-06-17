@@ -148,9 +148,13 @@ var BaseArch = class extends we3.AbstractPlugin {
      * Get a clone of an ArchNode from its ID or its corresponding node in the DOM.
      *
      * @param {Number|Node} idOrElement
+     * @param {boolean} generateNewClone
      * @returns {ArchNode}
      */
-    getClonedArchNode (idOrElement) {
+    getClonedArchNode (idOrElement, generateNewClone) {
+        if (generateNewClone) {
+            this._cloneArchNodeList = {};
+        }
         var archNodeId = typeof idOrElement === 'number' ? idOrElement : this.dependencies.BaseRenderer.getID(idOrElement);
         if (!this._cloneArchNodeList[archNodeId]) {
             this._cloneArchNodeList[archNodeId] = this._archNodeList[archNodeId] && this._archNodeList[archNodeId].clone();
@@ -1187,10 +1191,11 @@ var Arch = class extends we3.AbstractPlugin {
      * Get a clone of an ArchNode from its ID or its corresponding node in the DOM.
      *
      * @param {Number|Node} idOrElement
+     * @param {boolean} generateNewClone
      * @returns {ArchNode}
      */
-    getNode (idOrElement) {
-        return this.dependencies.BaseArch.getClonedArchNode(idOrElement);
+    getNode (idOrElement, generateNewClone) {
+        return this.dependencies.BaseArch.getClonedArchNode(idOrElement, generateNewClone);
     }
     /**
      * Get a JSON representation of the ArchNode corresponding to the given ID
