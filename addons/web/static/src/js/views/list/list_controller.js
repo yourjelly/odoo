@@ -26,6 +26,7 @@ var ListController = BasicController.extend({
         activate_next_widget: '_onActivateNextWidget',
         add_record: '_onAddRecord',
         button_clicked: '_onButtonClicked',
+        change_mode: '_onChangeMode',
         group_edit_button_clicked: '_onEditGroupClicked',
         edit_line: '_onEditLine',
         save_line: '_onSaveLine',
@@ -371,6 +372,9 @@ var ListController = BasicController.extend({
         var value = Object.values(changes)[0];
         var recordIds = _.union([recordId], this.selectedRecords);
         var validRecordIds = recordIds.reduce(function (result, recordId) {
+            // if (self.canBeSaved(recordId)) {
+            //     result.push(recordId);
+            // }
             var record = self.model.get(recordId);
             var modifiers = self.renderer._registerModifiers(node, record);
             if (!modifiers.readonly && (!modifiers.required || value)) {
@@ -378,23 +382,41 @@ var ListController = BasicController.extend({
             }
             return result;
         }, []);
-        var message = _.str.sprintf(
-            _t('Do you want to set the value on the %d valid selected records?'),
-            validRecordIds.length);
-        if (recordIds.length !== validRecordIds.length) {
-            var nbInvalid = recordIds.length - validRecordIds.length;
-            message += ' ' + _.str.sprintf(_t('(%d invalid)'), nbInvalid);
+        var nbInvalid = recordIds.length - validRecordIds.length;
+        var message = '';
+        if (validRecordIds.length > 0) {
+            if (nbInvalid === 0) {
+                message = _.str.sprintf(
+                    _t('Do you want to set the value on the %d selected records?'),
+                    validRecordIds.length
+                );
+            } else {
+                message = _.str.sprintf(
+                    _t('Do you want to set the value on the %d valid selected records? (%d invalid)'),
+                    validRecordIds.length,
+                    nbInvalid
+                );
+            }
+
+            Dialog.confirm(this, message, {
+                confirm_callback: function () {
+                    self.model.saveRecords(recordId, validRecordIds)
+                        .then(function () {
+                            self._updateButtons('readonly');
+                            var state = self.model.get(self.handle);
+                            self.renderer.updateState(state, {});
+                        });
+                },
+                cancel_callback: function () {
+                    self.model.discardChanges(recordId);
+                    self._confirmSave(recordId);
+                },
+            });
+        } else {
+            this.do_warn(
+                _t('Cannot save selected record(s)'),
+                _t('This field is required.'))
         }
-        Dialog.confirm(this, message, {
-            confirm_callback: function () {
-                self.model.saveRecords(recordId, validRecordIds)
-                    .then(function () {
-                        self._updateButtons('readonly');
-                        var state = self.model.get(self.handle);
-                        self.renderer.updateState(state, {});
-                    });
-            },
-        });
     },
     /**
      * Overridden to deal with edition of multiple line.
@@ -522,6 +544,10 @@ var ListController = BasicController.extend({
     _onButtonClicked: function (ev) {
         ev.stopPropagation();
         this._callButtonAction(ev.data.attrs, ev.data.record);
+    },
+    _onChangeMode: function (ev) {
+        ev.stopPropagation();
+        this.mode = ev.data.mode;
     },
     /**
      * When the user clicks on the 'create' button, two things can happen. We
