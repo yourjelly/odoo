@@ -619,7 +619,7 @@ class TestHeavyMailPerformance(TransactionCase):
         self.assertEqual(len(rec.message_ids), 3)
 
 
-@tagged('mail_performance')
+@tagged('mail_performance', 'performance_post')
 class TestMailPerformancePost(TransactionCase):
 
     def setUp(self):
