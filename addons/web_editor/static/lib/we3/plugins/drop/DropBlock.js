@@ -28,7 +28,7 @@ var DropBlock = class extends we3.AbstractPlugin {
             active: '_isActive',
             enabled: '_enabled',
         };
-        this.dependencies = ['Arch', 'Renderer'];
+        this.dependencies = ['Arch', 'Renderer', 'Rules'];
 
         this.sidebarEvents = {
             'mousedown': '_onMouseDownBlock',
@@ -76,6 +76,10 @@ var DropBlock = class extends we3.AbstractPlugin {
         if (this.options.dropblockStayOpen || this.options.dropblockOpenDefault) {
             this.open();
         }
+        var Arch = this.dependencies.Arch;
+        this.dependencies.Rules.addUnbreakableNodeCheck(function (a) {
+            return Arch.getTechnicalData(a.id, 'dropblock');
+        });
         return promise
             .then(this._bindEvents.bind(this))
             .then(this._createBlockDropable.bind(this))
@@ -92,6 +96,7 @@ var DropBlock = class extends we3.AbstractPlugin {
         if (this._blockDropable) {
             this._markDragableBlocks();
         }
+        this._createMoveAndDropButtons();
     }
     blurEditor () {
         this._dragAndDropEnd();
@@ -511,12 +516,18 @@ var DropBlock = class extends we3.AbstractPlugin {
     }
     _createMoveAndDropButtons () {
         var self = this;
+        var Arch = this.dependencies.Arch;
         var Renderer = this.dependencies.Renderer;
         var items = [];
         this.trigger('dropzone', items);
 
         this._moveAndDropButtons = [];
         items.forEach(function (item) {
+            Arch.setTechnicalData(item.target, 'dropblock', {
+                dropIn: item.dropIn,
+                dropNear: item.dropNear,
+            });
+
             var target = Renderer.getElement(item.target);
             var buttons = document.createElement('we3-dropblock-buttons');
             var button = document.createElement('we3-button');

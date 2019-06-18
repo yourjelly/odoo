@@ -162,6 +162,16 @@ var BaseArch = class extends we3.AbstractPlugin {
         return this._cloneArchNodeList[archNodeId];
     }
     /**
+     * Get a technical data on an ArchNode.
+     *
+     * @param {integer} id
+     * @param {string} name
+     */
+    getTechnicalData (id, name, value) {
+        var archNode = this.getArchNode(id);
+        return archNode && archNode._technicalData && archNode._technicalData[name];
+    }
+    /**
      * Get a JSON representation of the ArchNode corresponding to the given ID
      * or of the whole Arch if no ID was given.
      *
@@ -409,6 +419,21 @@ var BaseArch = class extends we3.AbstractPlugin {
      */
     removeRight () {
         this._removeSide(false);
+    }
+    /**
+     * Set a technical data on an ArchNode. The technical data are never
+     * redered or exported.
+     *
+     * @param {integer} id
+     * @param {string} name
+     * @param {any} value
+     */
+    setTechnicalData (id, name, value) {
+        var archNode = this.getArchNode(id);
+        if (!archNode._technicalData) {
+            archNode._technicalData = {};
+        }
+        archNode._technicalData[name] = value;
     }
     /**
      * Unwrap the node(s) corresponding to the given ID(s)
@@ -1197,6 +1222,9 @@ var Arch = class extends we3.AbstractPlugin {
     getNode (idOrElement, generateNewClone) {
         return this.dependencies.BaseArch.getClonedArchNode(idOrElement, generateNewClone);
     }
+    getTechnicalData (id, name) {
+        return this.dependencies.BaseArch.getTechnicalData(id, name);
+    }
     /**
      * Get a JSON representation of the ArchNode corresponding to the given ID
      * or of the whole Arch if no ID was given.
@@ -1293,6 +1321,17 @@ var Arch = class extends we3.AbstractPlugin {
      */
     removeRight () {
         return this.dependencies.BaseArch.removeRight();
+    }
+    /**
+     * Set a technical data on an ArchNode. The technical data are never
+     * redered or exported.
+     *
+     * @param {integer} id
+     * @param {string} name
+     * @param {any} value
+     */
+    setTechnicalData (id, name, value) {
+        return this.dependencies.BaseArch.setTechnicalData(id, name, value);
     }
     /**
      * Unwrap the node(s) corresponding to the given ID(s)
