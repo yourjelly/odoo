@@ -736,6 +736,7 @@ var ListRenderer = BasicRenderer.extend({
             $tr.prepend(this._renderSelector('td', !record.res_id));
         }
         this._setDecorationClasses(record, $tr);
+        $tr.append($('<td>').attr('colspan', '0'));
         return $tr;
     },
     /**
