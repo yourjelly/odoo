@@ -436,6 +436,7 @@ class SavepointCase(SingleTransactionCase):
 
     def tearDown(self):
         self.cr.execute('ROLLBACK TO SAVEPOINT test_%d' % self._savepoint_id)
+        self.cr.execute('RELEASE SAVEPOINT test_%d' % self._savepoint_id)
         self.env.clear()
         self.registry.clear_caches()
         super(SavepointCase, self).tearDown()
