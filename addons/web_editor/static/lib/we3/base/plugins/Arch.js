@@ -28,11 +28,8 @@ var BaseArch = class extends we3.AbstractPlugin {
         return this._arch.toString(options || {}).trim();
     }
     setEditorValue (value) {
-        var self = this;
-        return this.bypassUpdateConstraints(function () {
-            self._reset(value || '');
-            return self._arch.toString({});
-        });
+        this.setValue(value);
+        return this._arch.toString({});
     }
     start () {
         var self = this;
@@ -48,7 +45,7 @@ var BaseArch = class extends we3.AbstractPlugin {
             isUnbreakableNode: Rules.isUnbreakableNode.bind(Rules),
             bypassUpdateConstraints: this.bypassUpdateConstraints.bind(this),
             isBypassUpdateConstraintsActive: function () {
-                return self.bypassUpdateConstraintsActive;
+                return self._bypassUpdateConstraintsActive;
             },
             add: this._addToArch.bind(this),
             create: function (nodeName, attributes, nodeValue, type) {
@@ -82,9 +79,21 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @returns {any}
      */
     bypassUpdateConstraints (callback) {
-        this.bypassUpdateConstraintsActive = true;
+        this._bypassUpdateConstraintsActive = true;
         var res = callback();
-        this.bypassUpdateConstraintsActive = false;
+        this._bypassUpdateConstraintsActive = false;
+        return res;
+    }
+    /**
+     * Apply a function call without triggers (keep constraints).
+     *
+     * @param {Function} callback
+     * @returns {any}
+     */
+    bypassChangeTrigger (callback) {
+        this._bypassChangeTriggerActive = true;
+        var res = callback();
+        this._bypassChangeTriggerActive = false;
         return res;
     }
     /**
@@ -276,13 +285,13 @@ var BaseArch = class extends we3.AbstractPlugin {
                     if (!Array.isArray(change.attributes)) {
                         change.attributes = change.attributes.toJSON();
                     }
-                    archNode.attributes.forEach(function (attribute) {
+                    archNode.attributes.forEach(function (attributeName) {
                         for (var k = 0, len = change.attributes.length; k < len; k++) {
-                            if (change.attributes[k] === attribute[0]) {
+                            if (change.attributes[k] === attributeName) {
                                 return;
                             }
                         }
-                        change.attributes.push([attribute[0], null]);
+                        change.attributes.push([attributeName, null]);
                     });
                     change.attributes.forEach(function (attribute) {
                         archNode.attributes.add(attribute[0], attribute[1]);
@@ -300,10 +309,9 @@ var BaseArch = class extends we3.AbstractPlugin {
                     });
                 }
             } else {
-                var archNode = self._importJSON(change);
+                archNode = self._importJSON(change);
             }
             nodes[archNode.id] = archNode;
-
             self._changeArch(archNode, 0);
         });
 
@@ -314,7 +322,7 @@ var BaseArch = class extends we3.AbstractPlugin {
             var archNode = self.getArchNode(change.id);
             archNode.empty();
             change.childNodes.forEach(function (id) {
-                if (nodes[id]) {
+                if (typeof id === 'number' && nodes[id]) {
                     archNode.append(nodes[id]);
                 } else if (typeof id === 'object') {
                     archNode.append(self._importJSON(id));
@@ -434,6 +442,12 @@ var BaseArch = class extends we3.AbstractPlugin {
             archNode._technicalData = {};
         }
         archNode._technicalData[name] = value;
+    }
+    setValue (value, id) {
+        var self = this;
+        return this.bypassUpdateConstraints(function () {
+            self._reset(value || '', id);
+        });
     }
     /**
      * Unwrap the node(s) corresponding to the given ID(s)
@@ -1062,17 +1076,31 @@ var BaseArch = class extends we3.AbstractPlugin {
      *
      * @private
      * @param {String} [value]
+     * @param {ArchNode} [target]
      */
-    _reset (value) {
-        this._id = 1;
-        this._arch.id = 1;
-        this._archNodeList = {'1':  this._arch};
+    _reset (value, id) {
+        this._changes = [];
+
+        if (!id) {
+            id = 1;
+            this._id = 1;
+            this._arch.id = 1;
+            this._archNodeList = {'1':  this._arch};
+            this._arch.parent = null;
+            this._arch.childNodes = [];
+        } else {
+            this.getArchNode(id).empty();
+        }
+
         this._cloneArchNodeList = {};
-        this._arch.parent = null;
-        this._arch.childNodes = [];
 
         if (value) {
-            this._insert(value, 1, 0);
+            if (typeof value === 'object' && value.id === id) {
+                value.type = 'FRAGMENT';
+                value.id = null;
+                value.attributes = null;
+            }
+            this._insert(value, id, 0);
             this.dependencies.BaseRules.applyRules(this._changes.map(function (c) {return c.archNode}));
         }
 
@@ -1150,7 +1178,9 @@ var BaseArch = class extends we3.AbstractPlugin {
             delete result.range;
         }
 
-        this.trigger('update', json);
+        if (!this._bypassChangeTriggerActive) {
+            this.trigger('update', json);
+        }
 
         result.changes.forEach(function (c) {
             c.element = BaseRenderer.getElement(c.id);
@@ -1159,10 +1189,12 @@ var BaseArch = class extends we3.AbstractPlugin {
             return !BaseRenderer.getID(c.element); // element can be attach to an other node
         });
 
-        this.triggerUp('change', {
-            changes: result.changes,
-            removed: removed,
-        });
+        if (!this._bypassChangeTriggerActive) {
+            this.triggerUp('change', {
+                changes: result.changes,
+                removed: removed,
+            });
+        }
     }
 };
 
@@ -1188,6 +1220,15 @@ var Arch = class extends we3.AbstractPlugin {
         return this.dependencies.BaseArch.bypassUpdateConstraints(callback);
     }
     /**
+     * Apply a function call without triggerUp change (keep constraints).
+     *
+     * @param {Function} callback
+     * @returns {any}
+     */
+    bypassChangeTrigger (callback) {
+        return this.dependencies.BaseArch.bypassChangeTrigger(callback);
+    }
+    /**
      * @param {object} [options]
      * @param {boolean} [options.keepVirtual] true to include virtual text nodes
      * @param {boolean} [options.architecturalSpace] true to include architectural space
@@ -1204,8 +1245,8 @@ var Arch = class extends we3.AbstractPlugin {
     parse (DOM) {
         return this.dependencies.BaseArch.parse(DOM);
     }
-    setValue (value) {
-        return this.dependencies.BaseArch.setEditorValue(value);
+    setValue (value, id) {
+        return this.dependencies.BaseArch.setValue(value, id);
     }
 
     //--------------------------------------------------------------------------

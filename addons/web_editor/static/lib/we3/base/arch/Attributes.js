@@ -10,6 +10,9 @@ var regSplitStyle = /\s*:\s*/;
 var ClassName = class {
     constructor (archNode, classNames) {
         this.archNode = archNode;
+        if (!classNames) {
+            classNames = '';
+        }
         if (classNames instanceof ClassName) {
             this.value = classNames.value.slice();
         } else {
@@ -248,6 +251,9 @@ var Attributes = we3.Attributes = class {
 
 var Style = class extends Attributes {
     constructor (archNode, style) {
+        if (!style) {
+            style = '';
+        }
         if (style instanceof Style) {
             super(archNode, style);
         } else {

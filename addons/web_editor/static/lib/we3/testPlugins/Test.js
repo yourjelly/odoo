@@ -307,19 +307,21 @@ var TestPlugin = class extends we3.AbstractPlugin {
         return defPollTest;
     }
     getValue (archNodeId) {
-        var cleanedValue = this.dependencies.Arch.getValue();
-        var params = this.dependencies.Arch.getNode(1).params; // TODO: Remove hardcoded 1 (=> apply customRules on parsing !, and after changes)
+        var Arch = this.dependencies.Arch;
+        var params = Arch.getNode(1).params;
         var range = this.dependencies.Range.getRange();
-        var archNode;
-        if (range.isCollapsed()) {
-            archNode = new TEST(params, null, null, rangeCollapsed);
-            this.dependencies.Arch.insert(archNode);
-        } else {
-            archNode = new TEST(params, null, null, rangeEnd);
-            this.dependencies.Arch.insert(archNode, range.ec, range.eo);
-            archNode = new TEST(params, null, null, rangeStart);
-            this.dependencies.Arch.insert(archNode, range.sc, range.so);
-        }
+
+        Arch.bypassUpdateConstraints(function () {
+            Arch.bypassChangeTrigger(function () {
+                if (range.isCollapsed()) {
+                    Arch.insert(new TEST(params, null, null, rangeCollapsed));
+                } else {
+                    Arch.insert(new TEST(params, null, null, rangeEnd), range.ec, range.eo);
+                    Arch.insert(new TEST(params, null, null, rangeStart), range.sc, range.so);
+                }
+            });
+        });
+
         var result;
         if (archNodeId) {
             result = this.dependencies.Arch.getNode(archNodeId).toString().replace(/^<[^>]+>/, '').replace(/<\/[^>]+>$/, '');
@@ -391,13 +393,12 @@ var TestPlugin = class extends we3.AbstractPlugin {
                     return plugin.pluginName === pluginName;
                 });
             }
-            var value = this.dependencies.Arch.getValue();
             await this._loadTest(plugin);
+            this.triggerUp('set_value', {value: value});
         } else {
-            await this._loadTests();
+            await this._loadTests(value);
         }
 
-        this.triggerUp('set_value', {value: value});
         var s = this.dependencies.Arch.getNode(1).applyPath(sp);
         var e = this.dependencies.Arch.getNode(1).applyPath(ep);
         this.dependencies.Range.setRange({
@@ -415,7 +416,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
     setRange (range) {
         this.dependencies.Range.setRange(range);
         var newRange = this.dependencies.Range.getRange();
-        this.triggerNativeEvents(newRange.sc, ['mousedown', 'focus', 'click', 'mouseup']);
+        this.triggerNativeEvents(newRange.sc, ['focus']);
     }
     /**
      * Set the editor's value.
@@ -428,38 +429,17 @@ var TestPlugin = class extends we3.AbstractPlugin {
         }
         var self = this;
         var Arch = this.dependencies.Arch;
-        if (archNodeId) {
-            var archNode = Arch.getNode(archNodeId);
-            var nodeValue = Arch.parse(value);
-            archNode.empty();
-            archNode.append(nodeValue);
-            archNode.params.bypassUpdateConstraints(function () {
-                Arch.importUpdate(archNode);
-            });
-        } else {
-            this.triggerUp('set_value', {value: value});
-        }
+        var container = Arch.getNode(archNodeId || 1);
 
-        var clone = Arch.getNode(1);
-        var options = {
-            doCrossUnbreakables: true,
-        };
-        var start = clone.nextUntil(function (a) { return a.type === 'TEST'; }, options);
-        var end = start ? start.nextUntil(function (a) { return a.type === 'TEST'; }, options) : null;
+        Arch.setValue(value, container.id);
 
-        var cleanedValue = value.replace(regExpRange, '');
+        var start = Arch.getNode(1).nextUntil(function (a) { return a.type === 'TEST'; });
+        var end = start ? start.nextUntil(function (a) { return a.type === 'TEST'; }, {doCrossUnbreakables: true}) : null;
 
-        if (archNodeId) {
-            var archNode = Arch.getNode(archNodeId, true);
-            var nodeValue = Arch.parse(cleanedValue);
-            archNode.empty();
-            archNode.append(nodeValue);
-            archNode.params.bypassUpdateConstraints(function () {
-                Arch.importUpdate(archNode);
-            });
-        } else {
-            this.triggerUp('set_value', {value: cleanedValue});
-        }
+        var archNode = Arch.getNode(container.id, true);
+
+        Arch.setValue(value.replace(regExpRange, ''), container.id);
+        this._parentedParent._each('setEditorValue', null, ['BaseArch']);
 
         var range;
         if (!start) {
@@ -470,7 +450,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
                 eo: 0,
             };
         } else {
-            var archNode = this.dependencies.Arch.getNode(1);
+            var archNode = Arch.getNode(1);
             function __getPoint(o, isEnd) {
                 var offset = 0;
                 var path = o.path();
@@ -669,9 +649,10 @@ var TestPlugin = class extends we3.AbstractPlugin {
      *
      * @private
      */
-    async _loadTests () {
+    async _loadTests (resetValue) {
         for (var k = 0; k < this._plugins.length; k++) {
             await this._loadTest(this._plugins[k]);
+            this.triggerUp('set_value', {value: resetValue});
         }
         return this._terminate();
     }

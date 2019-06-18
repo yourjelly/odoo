@@ -224,7 +224,7 @@ var BaseRules = class extends we3.AbstractPlugin {
      */
     addEditableNodeCheck (fn) {
         if (this._isEditableNodeList.indexOf(fn) === -1) {
-            this._isEditableNodeList.push(fn);
+            this._isEditableNodeList.unshift(fn);
         }
     }
     /**

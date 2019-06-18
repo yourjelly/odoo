@@ -89,6 +89,9 @@ var BaseRenderer = class extends we3.AbstractPlugin {
     _allIds (id, ids) {
         var json = this.jsonById[id];
         ids = ids || [];
+        if (ids[id]) {
+            throw new Error('Some nodes appear several times in the arch');
+        }
         ids[id] = id;
         if (json.childNodes) {
             for (var k = 0; k < json.childNodes.length; k++) {
