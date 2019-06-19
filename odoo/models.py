@@ -2946,7 +2946,7 @@ Fields:
             cr.execute(query_str, params)
             result += cr.fetchall()
 
-        empty = self.browse()
+        empty = fetched = self.browse()
         if result:
             cols = zip(*result)
             ids = next(cols)
