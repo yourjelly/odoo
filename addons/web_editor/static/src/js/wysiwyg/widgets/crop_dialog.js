@@ -142,18 +142,18 @@ var CropImageDialog = Dialog.extend({
         this.media.className.add('o_cropped_img_to_save');
 
         // ... and attach required data
-        this.media.attributes['data-crop:resModel'] = this.options.res_model;
-        this.media.attributes['data-crop:resID'] = this.options.res_id;
-        this.media.attributes['data-crop:id'] = this.imageData.id;
-        this.media.attributes['data-crop:mimetype'] = this.imageData.mimetype;
-        this.media.attributes['data-crop:originalSrc'] = this.imageData.originalSrc;
+        this.media.attributes.set('data-crop:resModel', this.options.res_model);
+        this.media.attributes.set('data-crop:resID', this.options.res_id);
+        this.media.attributes.set('data-crop:id', this.imageData.id);
+        this.media.attributes.set('data-crop:mimetype', this.imageData.mimetype);
+        this.media.attributes.set('data-crop:originalSrc', this.imageData.originalSrc);
 
         // Mark the media with the cropping information which is required for
         // a future crop edition
-        this.media.attributes['data-aspect-ratio'] = this.imageData.aspectRatio;
+        this.media.attributes.set('data-aspect-ratio', this.imageData.aspectRatio);
         _.each(cropperData, function (value, key) {
             key = _.str.dasherize(key);
-            self.media.attributes['data-' + key] = value;
+            self.media.attributes.set('data-' + key, value);
         });
 
         // Update the media with base64 source for preview before saving
@@ -161,7 +161,7 @@ var CropImageDialog = Dialog.extend({
             width: cropperData.width,
             height: cropperData.height,
         });
-        this.media.attributes.src = canvas.toDataURL(this.imageData.mimetype);
+        this.media.attributes.set('src', canvas.toDataURL(this.imageData.mimetype));
 
         this.final_data = this.media;
         return this._super.apply(this, arguments);

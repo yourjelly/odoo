@@ -219,6 +219,9 @@ var Attributes = we3.Attributes = class {
         }
         delete this[name];
     }
+    set (name, value) {
+        this.add(name, value);
+    }
     toJSON () {
         var self = this;
         var attributes = [];

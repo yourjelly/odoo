@@ -303,7 +303,8 @@ var Wysiwyg = Widget.extend({
     },
     _getXHR: function (pluginName, url, values, superGetXHR) {
         var self = this;
-        if (url === '/web/dataset/call_kw/ir.attachment/search_read') {
+        var editorOptions = this._editorOptions();
+        if (url === editorOptions.upload.search) {
             return this._rpc({
                 model: 'ir.attachment',
                 method: 'search_read',
@@ -316,8 +317,29 @@ var Wysiwyg = Widget.extend({
                 return records.map(self._convertOdooRecordToMediaPlugin.bind(self, pluginName));
             });
         }
-        if (url === '/web_editor/attachment/remove') {
+        if (url === editorOptions.upload.remove) {
             debugger;
+        }
+        if (url === editorOptions.upload.add) {
+            return this._rpc({
+                model: 'ir.attachment',
+                method: 'create',
+                args: [values],
+            })
+        }
+        if (url === '/web/dataset/call_kw/ir.attachment/generate_access_token') {
+            return this._rpc({
+                model: 'ir.attachment',
+                method: 'generate_access_token',
+                args: [values],
+            })
+        }
+        if (url === '/web/dataset/call_kw/ir.attachment/write') {
+            return self._rpc({
+                model: 'ir.attachment',
+                method: 'write',
+                args: [[values.cropID], { datas: values.datas }],
+            });
         }
         throw new Error("XHR route missing");
     },
