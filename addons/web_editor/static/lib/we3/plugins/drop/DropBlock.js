@@ -78,7 +78,7 @@ var DropBlock = class extends we3.AbstractPlugin {
         }
         var Arch = this.dependencies.Arch;
         this.dependencies.Rules.addUnbreakableNodeCheck(function (a) {
-            return Arch.getTechnicalData(a.id, 'dropblock');
+            return Arch.getTechnicalData(a.id, 'dropblock') || a.nodeName === 'section';
         });
         return promise
             .then(this._bindEvents.bind(this))

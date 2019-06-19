@@ -8,10 +8,7 @@ var weTestUtils = require('web_editor.test_utils');
 var Wysiwyg = require('web_editor.wysiwyg');
 
 
-QUnit.module('web_editor', {}, function () {
-
-
-QUnit.module('we3', {
+QUnit.module('web_editor', {
     beforeEach: function () {
         this.data = weTestUtils.wysiwygData({
             'note.note': {
@@ -273,5 +270,4 @@ QUnit.module('we3', {
 
 });
 
-});
 });

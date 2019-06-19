@@ -287,7 +287,7 @@ var BaseArch = class extends we3.AbstractPlugin {
                     }
                     archNode.attributes.forEach(function (attributeName) {
                         for (var k = 0, len = change.attributes.length; k < len; k++) {
-                            if (change.attributes[k] === attributeName) {
+                            if (change.attributes[k][0] === attributeName) {
                                 return;
                             }
                         }

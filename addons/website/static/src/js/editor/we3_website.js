@@ -92,15 +92,18 @@ var OdooWebsite = class extends we3.AbstractPlugin {
      * @overwrite
      */
     changeEditorValue (changes) {
-        var Renderer = this.dependencies.Renderer;
-        var focused = this.dependencies.Range.getFocusedNode();
+        var Range = this.dependencies.Range;
+        var focused = Range.getFocusedNode();
         var editable = focused.ancestor('isWebsiteEditable');
         if (editable && !editable.className.contains('o_dirty')) {
             editable.className.add('o_dirty');
-            this.dependencies.Arch.importUpdate([{
-                id: editable.id,
-                attributes: editable.attributes,
-            }], this.dependencies.Range.getRange());
+            var Arch = this.dependencies.Arch;
+            Arch.bypassChangeTrigger(function () {
+                Arch.importUpdate([{
+                    id: editable.id,
+                    attributes: editable.attributes,
+                }], Range.getRange());
+            });
         }
     }
 

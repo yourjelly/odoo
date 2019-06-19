@@ -603,6 +603,9 @@ we3.ArchNode = class {
         if (!this.childNodes.length) {
             this.insert(this.params.create('br'), offset);
         }
+        if (!next) {
+            return;
+        }
         if (!next.childNodes.length) {
             next.insert(this.params.create('br'), offset);
         }
