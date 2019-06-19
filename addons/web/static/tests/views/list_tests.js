@@ -4357,6 +4357,55 @@ QUnit.module('Views', {
         list.destroy();
     });
 
+    QUnit.only('can reedit field if error from server', async function (assert) {
+        assert.expect(19);
+
+        var list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree editable="bottom">' +
+                        '<field name="foo"/>' +
+                    '</tree>',
+            debug: true,
+            mockRPC: function (route, args) {
+                if (args.method === 'write') {
+                    return Promise.reject();
+                }
+                return this._super.apply(this, arguments);
+            },
+        });
+
+        // select two records
+        await testUtils.dom.click(list.$('.o_data_row:eq(0) .o_list_record_selector input'));
+        await testUtils.dom.click(list.$('.o_data_row:eq(1) .o_list_record_selector input'));
+
+        // edit a line
+        await testUtils.dom.click(list.$('.o_data_row:eq(0) .o_data_cell:eq(0)'));
+        await testUtils.fields.editInput(list.$('.o_selected_row .o_field_widget[name=foo]'), 'abc');
+
+        // click ok on modal
+        await testUtils.dom.click($('.modal .btn-primary'));
+
+        // error from server...
+        // if there was a crash manager, there would be an open error at this point...
+
+        // click on first cell
+        const $input1 = list.$('.o_data_row:eq(0) .o_data_cell:eq(0) input');
+        await testUtils.dom.click($input1);
+        assert.strictEqual($input1.val(), "abc");
+
+        const $input2 = list.$('.o_data_row:eq(1) .o_data_cell:eq(0)');
+        await testUtils.dom.click($input2);
+
+        assert.containsNone(list, '.o_data_row:eq(0) .o_data_cell:eq(0) input')
+        // we check that it contains initial value
+        assert.containsOnce(list, '.o_data_row:eq(0) .o_data_cell:contains(yop)')
+
+        // list.destroy();
+    });
+
+
     QUnit.test('display a warning if no record can be edited', async function (assert) {
         assert.expect(2);
 
