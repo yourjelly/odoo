@@ -160,7 +160,7 @@ var Wysiwyg = Widget.extend({
         if (this.options.snippets) {
             options.plugins = Object.assign({
                 DropBlockSelector: true,
-                customizeBlock: true,
+                CustomizeBlock: true,
             }, options.plugins);
 
             options.toolbar = [

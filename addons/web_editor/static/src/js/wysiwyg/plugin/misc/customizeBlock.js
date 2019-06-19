@@ -83,6 +83,6 @@ var customizeBlock = class extends we3.AbstractPlugin {
     }
 };
 
-we3.addPlugin('customizeBlock', customizeBlock);
+we3.addPlugin('CustomizeBlock', customizeBlock);
 
 })();

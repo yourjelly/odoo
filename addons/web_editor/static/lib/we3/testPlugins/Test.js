@@ -416,7 +416,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
     setRange (range) {
         this.dependencies.Range.setRange(range);
         var newRange = this.dependencies.Range.getRange();
-        this.triggerNativeEvents(newRange.sc, ['focus']);
+        this.triggerNativeEvents(newRange.sc, ['mousedown', 'focus', 'click', 'mouseup']);
     }
     /**
      * Set the editor's value.
