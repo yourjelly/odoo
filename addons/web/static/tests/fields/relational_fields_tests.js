@@ -719,6 +719,66 @@ QUnit.module('relational_fields', {
         form.destroy();
     });
 
+    QUnit.only('Paste lines in editable list', async function (assert) {
+        assert.expect(12);
+
+        var data = this.data;
+        data.partner.records[0].turtles.push(1, 3)
+
+        var form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: data,
+            arch: '<form string="Partner">' +
+                    '<field name="turtles">' +
+                        '<tree editable="bottom">' +
+                            '<field name="display_name"/>' +
+                            '<field name="turtle_foo"/>' +
+                            '<field name="turtle_int"/>' +
+                            '<field name="turtle_description"/>' +
+                        '</tree>' +
+                    '</field>' +
+                '</form>',
+            res_id: 1,
+            debug: 1,
+        });
+        // Checks values are correctly set.
+        var verificationValues = ['blip', 'yop', 'kawa'];
+        _.forEach(form.$('td.o_data_cell:nth-child(2)'), function (el) {
+            assert.strictEqual(el.innerText, verificationValues.shift());
+        });
+        // Goes on edit mode and paste texts...
+        await testUtils.form.clickEdit(form);
+        await testUtils.dom.click(form.$('tr:eq(1) td:eq(1)'));
+        var copiedValues = ['Where', 'is', 'Mickey ?'];
+        await testUtils.dom.paste('.o_selected_row input[name=turtle_foo]', copiedValues);
+        // Checks values were correctly pasted.
+        _.forEach(form.$('td.o_data_cell:nth-child(2)'), function (el) {
+            assert.strictEqual(el.innerText, copiedValues.shift());
+        });
+
+        // Discard and then checks pasted values were really discarded.
+        await testUtils.form.clickDiscard(form);
+        await testUtils.modal.clickButton('Ok');
+        verificationValues = ['blip', 'yop', 'kawa'];
+        _.forEach(form.$('td.o_data_cell:nth-child(2)'), function (el) {
+            assert.strictEqual(el.innerText, verificationValues.shift());
+        });
+
+        // Goes on edit mode and paste texts...
+        await testUtils.form.clickEdit(form);
+        await testUtils.dom.click(form.$('tr:eq(1) td:eq(1)'));
+        copiedValues = ['Mickey', 'is at', 'the pizzeria !'];
+        await testUtils.dom.paste('.o_selected_row input[name=turtle_foo]', copiedValues);
+        // ... then saves and checks pasted values are still in the list.
+        await testUtils.form.clickSave(form);
+        _.forEach(form.$('td.o_data_cell:nth-child(2)'), function (el) {
+            assert.strictEqual(el.innerText, copiedValues.shift());
+        });
+
+        form.destroy();
+    });
+
     QUnit.module('FieldStatus');
 
     QUnit.test('static statusbar widget on many2one field', async function (assert) {

@@ -105,6 +105,22 @@ class Base(models.AbstractModel):
         return groups
 
     @api.model
+    def web_write(self, ids, changes):
+        """ Writes on multiple records.
+        `ids` and `changes` must correspond each with the other (same amount of
+        `ids`/`changes`, same order: first change applies to first id, etc...)
+
+        :param list ids
+        :param list changes: list of dict: {'field_name': value}
+        """
+        if len(ids) != len(changes):
+            raise UserError(_("`web_write` takes the same amount of ids and write operations"))
+        self = self.browse(ids)
+        for record in self:
+            record.write(changes.pop(0))
+        return True
+
+    @api.model
     def read_progress_bar(self, domain, group_by, progress_bar):
         """
         Gets the data needed for all the kanban column progressbars.

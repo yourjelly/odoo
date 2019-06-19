@@ -1217,7 +1217,7 @@ ListRenderer.include({
      * @param {jQueryEvent} ev
      */
     _onPaste: function (ev) {
-        var clipboardData = (event.clipboardData || window.clipboardData).getData('text');
+        var clipboardData = ((event && event.clipboardData) || window.clipboardData).getData('text');
         var lines = clipboardData.split('\n');
         lines = _.without(lines, '');
 
@@ -1230,13 +1230,21 @@ ListRenderer.include({
             for (var i = 0; i < limit; i++) {
                 var rowData = this.state.data[i + this.currentRow];
                 var data = {};
+                ////////- to delete -///////
+                var lineNumber = Number(lines[i]);
+                if (!isNaN(lineNumber)) {
+                    lines[i] = lineNumber;
+                }
+                ///////////////////////////
                 data[fieldName] = lines[i];
-                var command = {
-                    data: data,
-                    id: rowData.id,
-                    operation: 'UPDATE',
-                };
-                commands.push(command);
+                if (rowData) {
+                    var command = {
+                        data: data,
+                        id: rowData.id,
+                        operation: 'UPDATE',
+                    };
+                    commands.push(command);
+                }
             }
             this.trigger_up('paste_multi', commands);
         }

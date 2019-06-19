@@ -134,6 +134,7 @@ return Promise.all([
             click: testUtilsDom.click,
             clickFirst: testUtilsDom.clickFirst,
             clickLast: testUtilsDom.clickLast,
+            paste: testUtilsDom.paste,
             triggerEvents: testUtilsDom.triggerEvents,
         },
         form: {

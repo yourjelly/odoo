@@ -5670,6 +5670,142 @@ QUnit.module('Views', {
         list.destroy();
     });
 
+    QUnit.test('Paste some values in list editable view', async function (assert) {
+        assert.expect(9);
+
+        var data = this.data;
+        var list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: data,
+            arch: '<tree editable="bottom"><field name="foo"/></tree>',
+        });
+        var copiedValues = ['Bibidi', 'Babidi', 'Boo'];
+
+        // Checks data cell have its default value.
+        assert.strictEqual(list.$('td.o_data_cell:eq(0)').text(), 'yop');
+        assert.strictEqual(list.$('td.o_data_cell:eq(1)').text(), 'blip');
+        assert.strictEqual(list.$('td.o_data_cell:eq(2)').text(), 'gnap');
+        assert.strictEqual(list.$('td.o_data_cell:eq(3)').text(), 'blip');
+
+        // Selects the first lines and pastes values
+        await testUtils.dom.click(list.$('.o_data_row:nth(0) .o_data_cell'));
+        assert.hasClass(list.$('tr.o_data_row:eq(0)'), 'o_selected_row');
+        await testUtils.dom.paste('.o_selected_row .o_field_char', copiedValues);
+
+        // Checks data cell have copied values (except the fourth as we copied only 3 values)
+        assert.strictEqual(list.$('td.o_data_cell:eq(0)').text(), 'Bibidi');
+        assert.strictEqual(list.$('td.o_data_cell:eq(1)').text(), 'Babidi');
+        assert.strictEqual(list.$('td.o_data_cell:eq(2)').text(), 'Boo');
+        assert.strictEqual(list.$('td.o_data_cell:eq(3)').text(), 'blip');
+
+        list.destroy();
+    });
+
+    'Paste more values than lines in list editable view',     QUnit.test('Paste more values than lines in list editable view', async function (assert) {
+        assert.expect(11);
+
+        var data = this.data;
+        var list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: data,
+            arch: '<tree editable="bottom"><field name="foo"/></tree>',
+        });
+        var copiedValues = [
+            'Kiwis et bananes',
+            'Carottes et céleris',
+            'Tartes à la pacane',
+            'Nappes et confetti',
+            'Ballons et croustilles',
+            'Boissons qui pétillent',
+        ];
+
+        // Checks data cell have its default value.
+        assert.strictEqual(list.$('td.o_data_cell:eq(0)').text(), 'yop');
+        assert.strictEqual(list.$('td.o_data_cell:eq(1)').text(), 'blip');
+        assert.strictEqual(list.$('td.o_data_cell:eq(2)').text(), 'gnap');
+        assert.strictEqual(list.$('td.o_data_cell:eq(3)').text(), 'blip');
+        assert.strictEqual(list.$('td.o_data_cell').length, 4,
+            "The list has four records.");
+
+        // Selects the first lines and pastes values
+        await testUtils.dom.click(list.$('.o_data_row:nth(0) .o_data_cell'));
+        assert.hasClass(list.$('tr.o_data_row:eq(0)'), 'o_selected_row');
+        await testUtils.dom.paste('.o_selected_row .o_field_char', copiedValues);
+
+        // Checks data cell have copied values and we have still only 4 records.
+        assert.strictEqual(list.$('td.o_data_cell:eq(0)').text(), 'Kiwis et bananes');
+        assert.strictEqual(list.$('td.o_data_cell:eq(1)').text(), 'Carottes et céleris');
+        assert.strictEqual(list.$('td.o_data_cell:eq(2)').text(), 'Tartes à la pacane');
+        assert.strictEqual(list.$('td.o_data_cell:eq(3)').text(), 'Nappes et confetti');
+        assert.strictEqual(list.$('td.o_data_cell').length, 4,
+            "The list has still only four records after the paste.");
+
+        list.destroy();
+    });
+
+    QUnit.test('Paste values in different fields in list editable view', async function (assert) {
+        assert.expect(26);
+
+        var data = this.data;
+        var list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: data,
+            arch: '<tree editable="bottom">' +
+                    '<field name="foo"/>' +
+                    '<field name="int_field"/>' +
+                '</tree>',
+        });
+        var copiedValues = ['Force', 'Houblons'];
+
+        // Checks data cell have its default value.
+        assert.strictEqual(list.$('tr.o_data_row:eq(0) td.o_data_cell:eq(0)').text(), 'yop');
+        assert.strictEqual(list.$('tr.o_data_row:eq(1) td.o_data_cell:eq(0)').text(), 'blip');
+        assert.strictEqual(list.$('tr.o_data_row:eq(2) td.o_data_cell:eq(0)').text(), 'gnap');
+        assert.strictEqual(list.$('tr.o_data_row:eq(3) td.o_data_cell:eq(0)').text(), 'blip');
+        assert.strictEqual(list.$('tr.o_data_row:eq(0) .o_list_number').text(), '10');
+        assert.strictEqual(list.$('tr.o_data_row:eq(1) .o_list_number').text(), '9');
+        assert.strictEqual(list.$('tr.o_data_row:eq(2) .o_list_number').text(), '17');
+        assert.strictEqual(list.$('tr.o_data_row:eq(3) .o_list_number').text(), '-4');
+
+        // Selects the second line and pastes values
+        await testUtils.dom.click(list.$('tr.o_data_row:eq(1) td.o_data_cell:eq(0)'));
+        assert.hasClass(list.$('tr.o_data_row:eq(1)'), 'o_selected_row');
+        await testUtils.dom.paste('.o_selected_row .o_field_char', copiedValues);
+
+        // Checks data cell have copied values and we have still only 4 records.
+        assert.strictEqual(list.$('tr.o_data_row:eq(0) td.o_data_cell:eq(0)').text(), 'yop');
+        assert.strictEqual(list.$('tr.o_data_row:eq(1) td.o_data_cell:eq(0)').text(), 'Force');
+        assert.strictEqual(list.$('tr.o_data_row:eq(2) td.o_data_cell:eq(0)').text(), 'Houblons');
+        assert.strictEqual(list.$('tr.o_data_row:eq(3) td.o_data_cell:eq(0)').text(), 'blip');
+        assert.strictEqual(list.$('tr.o_data_row:eq(0) .o_list_number').text(), '10');
+        assert.strictEqual(list.$('tr.o_data_row:eq(1) .o_list_number').text(), '9');
+        assert.strictEqual(list.$('tr.o_data_row:eq(2) .o_list_number').text(), '17');
+        assert.strictEqual(list.$('tr.o_data_row:eq(3) .o_list_number').text(), '-4');
+
+        // Copies other values (numbers this time)
+        copiedValues = ['80085', '420'];
+
+        // Selects the second line and pastes values
+        await testUtils.dom.click(list.$('tr.o_data_row:eq(1) .o_list_number'));
+        assert.hasClass(list.$('tr.o_data_row:eq(1)'), 'o_selected_row');
+        await testUtils.dom.paste('.o_selected_row .o_field_number', copiedValues);
+
+        // Checks data cell have copied values and we have still only 4 records.
+        assert.strictEqual(list.$('tr.o_data_row:eq(0) td.o_data_cell:eq(0)').text(), 'yop');
+        assert.strictEqual(list.$('tr.o_data_row:eq(1) td.o_data_cell:eq(0)').text(), 'Force');
+        assert.strictEqual(list.$('tr.o_data_row:eq(2) td.o_data_cell:eq(0)').text(), 'Houblons');
+        assert.strictEqual(list.$('tr.o_data_row:eq(3) td.o_data_cell:eq(0)').text(), 'blip');
+        assert.strictEqual(list.$('tr.o_data_row:eq(0) .o_list_number').text(), '10');
+        assert.strictEqual(list.$('tr.o_data_row:eq(1) .o_list_number').text(), '80085');
+        assert.strictEqual(list.$('tr.o_data_row:eq(2) .o_list_number').text(), '420');
+        assert.strictEqual(list.$('tr.o_data_row:eq(3) .o_list_number').text(), '-4');
+
+        list.destroy();
+    });
+
     QUnit.test('cell-level keyboard navigation in non-editable list', async function (assert) {
         assert.expect(16);
 

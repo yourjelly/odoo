@@ -632,21 +632,13 @@ var ListController = BasicController.extend({
     },
     /**
      * Triggers when user paste multiple lines.
+     *
      * @param {OdooEvent} ev
+     * @returns {Promise}
      */
     _onPasteMultilines: function (ev) {
-        // var changes = {};
-        // // changes[this.attrs.name] = {
-        // changes['product_qty'] = {
-        //     operation: 'MULTI',
-        //     commands: ev.data,
-        // };
-        // this.trigger_up('field_changed', {
-        //     dataPointID: this.initialState.id,
-        //     changes: changes,
-        // });
         var self = this;
-        var fieldName = $('td>input').attr('name');
+        var fieldName = Object.keys(ev.data[0].data)[0];
         var defs = [];
 
         var node;
@@ -664,16 +656,15 @@ var ListController = BasicController.extend({
         var changes = [];
         var res_ids = [];
         for (var j in ev.data) {
-            var record = ev.data[j];
-            recordIds.push(record.id);
-            values.push(ev.data[j].data[fieldName]);
-
-            records.push(this.model.localData[record.id]);
-            var res_id = this.model.localData[record.id].res_id;
-            res_ids.push(res_id);
+            var data = ev.data[j];
+            var record = this.model.localData[data.id];
+            recordIds.push(data.id);
+            values.push(data.data[fieldName]);
+            records.push(record);
+            res_ids.push(record.res_id);
             var change = {};
-            change[fieldName] = ev.data[j].data[fieldName];
-            changes.push([1, res_id, change]);
+            change[fieldName] = data.data[fieldName];
+            changes.push([1, record.res_id, change]);
         }
         var validRecordIds = recordIds.reduce(function (result, recordId) {
             var record = self.model.get(recordId);
@@ -685,21 +676,26 @@ var ListController = BasicController.extend({
         }, []);
         var list = this.model.localData[records[0].parentID];
 
-        for (var k in changes) {
-            defs.push(
-                this.model._rpc({
-                    model: this.modelName,
-                    method: 'write',
-                    args: [changes[k][1], changes[k][2]],
-                })
-            );
+        // for (var k in changes) {
+        //     defs.push(
+        //         this.model._rpc({
+        //             model: this.modelName,
+        //             method: 'write',
+        //             args: [changes[k][1], changes[k][2]],
+        //         })
+        //     );
+        // }
+        var web_write_args = [];
+        for (var resIdIndex in res_ids) {
+            web_write_args.push(changes[resIdIndex][2]);
         }
-
-        // return this.model._rpc({
-        //     model: this.modelName,
-        //     method: 'write',
-        //     args: [res_ids, changes],
-        // });
+        defs.push(
+            this.model._rpc({
+                model: this.modelName,
+                method: 'web_write',
+                args: [res_ids, web_write_args],
+            })
+        );
 
         return Promise.all(defs).then(function () {
             return self._rpc({
@@ -725,11 +721,6 @@ var ListController = BasicController.extend({
             var state = self.model.get(self.handle);
             self.renderer.updateState(state, {});
         });
-        // .then(function () {
-        //     self._updateButtons('readonly');
-        //     var state = self.model.get(self.handle);
-        //     self.renderer.updateState(state, {});
-        // });
     },
     /**
      * Called when the renderer displays an editable row and the user tries to

@@ -247,6 +247,27 @@ function clickLast(el, options) {
     return click(el, _.extend({}, options, {last: true}));
 }
 
+/**
+ * Simulates a copy/paste on an input.
+ * As we can't manually trigger a real ClipboardEvent with paste value, this
+ * function will actually set the input value and then trigger a jQuery paste
+ * event (who'll be handle if corresponding event listener exists).
+ *
+ * @param {string|jQuery} el if string, will be used like a jQuery selector.
+ * @param {array|string} value if array, will be joined into a string.
+ */
+function paste(el, value) {
+    el = typeof el === 'string' ? $(el) : el;
+    value = value instanceof Array ? value.join('\n') : value;
+    // This `window.clipboardData` is a workaround as we can't manually set the
+    // text data of the native event.
+    window.clipboardData = {
+        getData: () => value,
+    };
+    el.val(value).trigger($.Event('paste'));
+    return concurrency.delay(0);
+}
+
 
 /**
  * trigger events on the specified target
@@ -287,6 +308,7 @@ return {
     click: click,
     clickFirst: clickFirst,
     clickLast: clickLast,
+    paste: paste,
     triggerEvents: triggerEvents,
 };
 

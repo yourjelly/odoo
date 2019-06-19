@@ -1241,6 +1241,25 @@ var MockServer = Class.extend({
         };
     },
     /**
+     * Simulate a 'web_write' operation (loop of 'write')
+     *
+     * @private
+     * @param {string} model
+     * @param {Array} args
+     * @returns {boolean}
+     */
+    _mockWebWrite: function (model, args) {
+        var ids = args[0];
+        var changes = args[1];
+        for (var i in ids) {
+            this._mockWrite(model, [
+                [ids[i]],
+                changes[i],
+            ]);
+        }
+        return true;
+    },
+    /**
      * Simulate a 'write' operation
      *
      * @private
@@ -1333,6 +1352,9 @@ var MockServer = Class.extend({
 
             case 'unlink':
                 return Promise.resolve(this._mockUnlink(args.model, args.args));
+
+            case 'web_write':
+                return Promise.resolve(this._mockWebWrite(args.model, args.args));
 
             case 'write':
                 return Promise.resolve(this._mockWrite(args.model, args.args));
