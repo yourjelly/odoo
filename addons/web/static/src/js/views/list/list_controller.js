@@ -405,11 +405,15 @@ var ListController = BasicController.extend({
                             self._updateButtons('readonly');
                             var state = self.model.get(self.handle);
                             self.renderer.updateState(state, {});
+                            self.__secretPromiseResolve();
+                        }).guardedCatch(function () {
+                            self.__secretPromiseReject();
                         });
                 },
                 cancel_callback: function () {
-                    self.model.discardChanges(recordId);
-                    self._confirmSave(recordId);
+                    self.__secretPromiseReject();
+                    // self.model.discardChanges(recordId);
+                    // self._confirmSave(recordId);
                 },
             });
         } else {
@@ -428,8 +432,11 @@ var ListController = BasicController.extend({
         var record = this.model.get(recordId, { raw: true });
         if (record.isDirty() && this._inMultipleRecordEdition(recordId)) {
             // do not save the record (see _saveMultipleRecords)
-            return Promise.resolve();
-
+            var self = this;
+            return new Promise(function(resolve, reject) {
+                self.__secretPromiseResolve = resolve;
+                self.__secretPromiseReject = reject;
+            });
         }
         return this._super.apply(this, arguments);
     },
