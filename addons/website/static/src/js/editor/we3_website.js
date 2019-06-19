@@ -56,7 +56,7 @@ we3.addArchNode('WEBSITE-EDITABLE', class extends we3.ArchNode {
 var OdooWebsite = class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
-        this.dependencies = ['Range', 'Arch', 'Renderer'];
+        this.dependencies = ['Range', 'Arch', 'Renderer', 'Rules'];
     }
 
     //--------------------------------------------------------------------------
@@ -67,6 +67,21 @@ var OdooWebsite = class extends we3.AbstractPlugin {
         super.start();
         this._overwriteBootstrap();
         this.dependencies.Range.on('focus', this, this._onFocusNode);
+
+        this.dependencies.Rules.addEditableNodeCheck(function (archNode) {
+            if (archNode.isRoot()) {
+                return false;
+            }
+            if (!archNode.className) {
+                return undefined;
+            }
+            if (archNode.className.contains('o_not_editable')) {
+                return false;
+            }
+            if (archNode.className.contains('o_editable')) {
+                return true;
+            }
+        });
     }
     destroy () {
         super.destroy();

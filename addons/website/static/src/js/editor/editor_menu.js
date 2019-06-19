@@ -230,20 +230,6 @@ var EditorMenu = Widget.extend({
             recordInfo: recordInfo,
             snippets: 'website.snippets',
             dropblockStayOpen: true,
-            isEditableNode: function (archNode) {
-                if (archNode.isRoot()) {
-                    return false;
-                }
-                if (!archNode.className) {
-                    return undefined;
-                }
-                if (archNode.className.contains('o_not_editable')) {
-                    return false;
-                }
-                if (archNode.className.contains('o_editable')) {
-                    return true;
-                }
-            },
         });
     },
 
