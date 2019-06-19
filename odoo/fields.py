@@ -760,6 +760,7 @@ class Field(MetaField('DummyField', (object,), {})):
     _description_change_default = property(attrgetter('change_default'))
     _description_deprecated = property(attrgetter('deprecated'))
     _description_group_operator = property(attrgetter('group_operator'))
+    _convert_to_cache_read = False
 
     @property
     def _description_searchable(self):
@@ -1122,6 +1123,7 @@ class Integer(Field):
     _slots = {
         'group_operator': 'sum',
     }
+    _convert_to_cache_read = True
 
     def convert_to_column(self, value, record, values=None, validate=True):
         return int(value or 0)
@@ -1163,6 +1165,7 @@ class Float(Field):
         '_digits': None,                # digits argument passed to class initializer
         'group_operator': 'sum',
     }
+    _convert_to_cache_read = True
 
     def __init__(self, string=Default, digits=Default, **kwargs):
         super(Float, self).__init__(string=string, _digits=digits, **kwargs)
@@ -1224,6 +1227,7 @@ class Monetary(Field):
         'currency_field': None,
         'group_operator': 'sum',
     }
+    _convert_to_cache_read = True
 
     def __init__(self, string=Default, currency_field=Default, **kwargs):
         super(Monetary, self).__init__(string=string, currency_field=currency_field, **kwargs)
@@ -1447,6 +1451,7 @@ class Html(_String):
     _description_sanitize_style = property(attrgetter('sanitize_style'))
     _description_strip_style = property(attrgetter('strip_style'))
     _description_strip_classes = property(attrgetter('strip_classes'))
+    _convert_to_cache_read = True
 
     def convert_to_column(self, value, record, values=None, validate=True):
         if value is None or value is False:
@@ -1697,6 +1702,7 @@ class Binary(Field):
         'context_dependent': True,      # depends on context (content or size)
         'attachment': True,             # whether value is stored in attachment
     }
+    _convert_to_cache_read = True
 
     @property
     def column_type(self):
@@ -1945,6 +1951,7 @@ class Selection(Field):
 
 class Reference(Selection):
     type = 'reference'
+    _convert_to_cache_read = True
 
     @property
     def column_type(self):
@@ -2064,6 +2071,7 @@ class Many2one(_Relational):
         'auto_join': False,             # whether joins are generated upon search
         'delegate': False,              # whether self implements delegation
     }
+    _convert_to_cache_read = True
 
     def __init__(self, comodel_name=Default, string=Default, **kwargs):
         super(Many2one, self).__init__(comodel_name=comodel_name, string=string, **kwargs)
@@ -2189,6 +2197,7 @@ class _RelationalMulti(_Relational):
         # See test test_70_archive_internal_partners
         'context_dependent': False,      # depends on context (active_test)
     }
+    _convert_to_cache_read = True
     def _update(self, records, value):
         """ Update the cached value of ``self`` for ``records`` with ``value``, return True if everything is in cache. """
         if not isinstance(records, BaseModel):
@@ -2378,6 +2387,7 @@ class One2many(_RelationalMulti):
         'limit': None,                  # optional limit to use upon read
         'copy': False,                  # o2m are not copied by default
     }
+    _convert_to_cache_read = True
 
     def __init__(self, comodel_name=Default, inverse_name=Default, string=Default, **kwargs):
         super(One2many, self).__init__(
@@ -2549,6 +2559,7 @@ class Many2many(_RelationalMulti):
         'auto_join': False,             # whether joins are generated upon search
         'limit': None,                  # optional limit to use upon read
     }
+    _convert_to_cache_read = True
 
     def __init__(self, comodel_name=Default, relation=Default, column1=Default,
                  column2=Default, string=Default, **kwargs):
