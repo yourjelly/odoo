@@ -740,9 +740,11 @@ var TestPlugin = class extends we3.AbstractPlugin {
     _logFinalResult () {
         var nTests = this.nTests;
         var nOKTests = this.nOKTests;
+        var buttonList;
         var button;
         if (this.buttons.elements) {
-            button = this.buttons.elements[0].querySelector('we3-button[data-value="' + this._testPluginActive.pluginName + '"]');
+            buttonList = this.buttons.elements[0];
+            button = buttonList.querySelector('we3-button[data-value="' + this._testPluginActive.pluginName + '"]');
         }
 
         if (nTests - nOKTests === 0) {
@@ -751,6 +753,8 @@ var TestPlugin = class extends we3.AbstractPlugin {
 
             if (button) {
                 button.style.backgroundColor = '#ccffcc';
+                button.classList.add('good');
+                button.classList.remove('fail');
                 button.lastChild.innerHTML = '(' + nTests + ')';
             }
         } else {
@@ -758,8 +762,18 @@ var TestPlugin = class extends we3.AbstractPlugin {
 
             if (button) {
                 button.style.backgroundColor = '#ffcccc';
+                button.classList.remove('good');
+                button.classList.add('fail');
                 button.lastChild.innerHTML = '(' + nOKTests + '/' + nTests + ')';
             }
+        }
+
+        if (button) {
+            var total = buttonList.lastElementChild.children.length;
+            var good = buttonList.lastElementChild.querySelectorAll('.good').length;
+            var fail = buttonList.lastElementChild.querySelectorAll('.fail').length;
+            buttonList.firstElementChild.style.backgroundColor = fail ? '#ffcccc' : '#ccffcc';
+            buttonList.firstElementChild.textContent = 'Test (' + good + '/' + total + ')';
         }
     }
     /**
