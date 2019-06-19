@@ -1254,6 +1254,32 @@ var Arch = class extends we3.AbstractPlugin {
     //--------------------------------------------------------------------------
 
     /**
+     * Find the first archNode that matches the given predicate function.
+     *
+     * @param {string|function(ArchNode)} fn
+     * @returns {ArchNode|undefined}
+     */
+    find (fn) {
+        return this.dependencies.BaseArch.getClonedArchNode(1).nextUntil(function (a) {
+            return a.id !== 1 && (typeof fn === 'string' ? a[fn] && a[fn].call(a, a) : fn.call(a, a));
+        });
+    }
+    /**
+     * Find all archNodes that matches the given predicate function.
+     *
+     * @param {string|function(ArchNode)} fn
+     * @returns {ArchNode[]}
+     */
+    findAll (fn) {
+        var archNodes = [];
+        this.dependencies.BaseArch.getClonedArchNode(1).nextUntil(function (a) {
+            if(a.id !== 1 && (typeof fn === 'string' ? a[fn] && a[fn].call(a, a) : fn.call(a, a))) {
+                archNodes.push(a);
+            }
+        });
+        return archNodes;
+    }
+    /**
      * Get a clone of an ArchNode from its ID or its corresponding node in the DOM.
      *
      * @param {Number|Node} idOrElement

@@ -53,10 +53,18 @@ var parentedRules = [
     },
     {
         nodes: {
+            nodeNames: ['div', 'ul', 'ol', 'table'].concat(tags.style.filter((tag) => tag !== 'td' && tag !== 'th')),
+        },
+        permittedParents: {
+            methods: ['isRoot'],
+        },
+    },
+    {
+        nodes: {
             nodeNames: ['div'],
         },
         permittedParents: {
-            nodeNames: ['EDITABLE', 'div'],
+            nodeNames: ['div'],
         },
     },
     {
@@ -107,13 +115,12 @@ var parentedRules = [
             nodeNames: ['li'],
         },
     },
-    // editable > p
     {
         nodes: {
-            nodeNames: ['ul', 'ol'],
+            nodeNames: ['ul', 'ol', 'table'],
         },
         permittedParents: {
-            nodeNames: ['EDITABLE', 'div', 'td', 'th', 'li'],
+            nodeNames: ['div', 'td', 'th', 'li'],
         },
     },
     {
@@ -121,7 +128,7 @@ var parentedRules = [
             nodeNames: tags.style.filter((tag) => tag !== 'td' && tag !== 'th'),
         },
         permittedParents: {
-            nodeNames: ['EDITABLE', 'div', 'td', 'th', 'li'],
+            nodeNames: ['div', 'td', 'th', 'li'],
         },
     },
     // H1 > i

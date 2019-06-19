@@ -85,6 +85,48 @@ we3.addArchNode('TEST', TEST);
 
 /////////////////////////////////////////////////////////////////
 
+var TEST_CONTAINER = class extends we3.ArchNode {
+    //--------------------------------------------------------------------------
+    // public
+    //--------------------------------------------------------------------------
+
+    isBlock () {
+        return true;
+    }
+    isContentEditable () {
+        return true;
+    }
+    isEditable () {
+        return true;
+    }
+    isRoot () {
+        return true;
+    }
+    isTestNode () {
+        return true;
+    }
+    isUnbreakable () {
+        return true;
+    }
+    split (offset) {
+        var virtualText = this.params.create();
+        this.childNodes[offset].after(virtualText);
+        return virtualText;
+    }
+    get type () {
+        return 'TEST_CONTAINER';
+    }
+
+    //--------------------------------------------------------------------------
+    // private
+    //--------------------------------------------------------------------------
+
+    _applyRulesArchNode () {}
+};
+we3.addArchNode('TEST_CONTAINER', TEST_CONTAINER);
+
+/////////////////////////////////////////////////////////////////
+
 function deepEqual (v1, v2) {
     if (v1 === v2) {
         return true;
@@ -322,13 +364,18 @@ var TestPlugin = class extends we3.AbstractPlugin {
             });
         });
 
-        var result;
-        if (archNodeId) {
-            result = this.dependencies.Arch.getNode(archNodeId).toString().replace(/^<[^>]+>/, '').replace(/<\/[^>]+>$/, '');
-        } else {
-            result = this.dependencies.Arch.getValue();
+        if (!archNodeId) {
+            var containers = Arch.findAll('isRoot');
+            if (containers.length !== 1) {
+                throw new Error("Multiple test containers found");
+            }
+            archNodeId = containers[0].id;
         }
+
+        var result = this.dependencies.Arch.getNode(archNodeId).toString();
+
         return result
+            .replace(/^<[^>]+>/, '').replace(/<\/[^>]+>$/, '') // remove container
             .replace(regExpRangeToCollapsed, rangeCollapsed)
             .replace(regSpace, '&nbsp;')
             .replace(regInvisible, '&#65279;');
@@ -429,7 +476,32 @@ var TestPlugin = class extends we3.AbstractPlugin {
         }
         var self = this;
         var Arch = this.dependencies.Arch;
-        var container = Arch.getNode(archNodeId || 1);
+        var container;
+
+        if (archNodeId) {
+            container = Arch.getNode(archNodeId);
+        } else {
+            var containers = Arch.findAll('isRoot');
+            Arch.bypassUpdateConstraints(function () {
+                Arch.bypassChangeTrigger(function () {
+                    containers.forEach(function (a) {
+                        Arch.remove(a.id);
+                    });
+                });
+
+                var root = Arch.getNode(1);
+                container = new TEST_CONTAINER(root.params, 'test-container');
+                Arch.bypassUpdateConstraints(function () {
+                    Arch.bypassChangeTrigger(function () {
+                        if (root.childNodes.length) {
+                            Arch.insertBefore(container, root.childNodes[0].id);
+                        } else {
+                            Arch.insert(container, root.id, 0);
+                        }
+                    });
+                });
+            });
+        }
 
         Arch.setValue(value, container.id);
 
@@ -565,14 +637,18 @@ var TestPlugin = class extends we3.AbstractPlugin {
                     break;
             }
 
-            var onerror = window.onerror;
-            window.onerror = function (e) {
-                window.onerror = onerror;
-                console.error(e);
-                self.assert.notOk(e, 'ERROR Event: ' + eventName);
+            if (!self.options.test.assert) {
+                var onerror = window.onerror
+                window.onerror = function (e) {
+                    window.onerror = onerror;
+                    console.error(e);
+                    self.assert.notOk(e, 'ERROR Event: ' + eventName);
+                }
             }
             el.dispatchEvent(event);
-            window.onerror = onerror;
+            if (!self.options.test.assert) {
+                window.onerror = onerror;
+            }
 
             triggeredEvents.push(event);
         });

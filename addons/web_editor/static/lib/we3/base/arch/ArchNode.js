@@ -204,7 +204,7 @@ we3.ArchNode = class {
      * Find the first ancestor (last if `findGreatest` is true)
      * that matches the given predicate function.
      *
-     * @param {function(ArchNode)} fn
+     * @param {string|function(ArchNode)} fn
      * @param {boolean} findGreatest
      * @returns {ArchNode|undefined}
      */
@@ -905,7 +905,9 @@ we3.ArchNode = class {
         parent.before(this);
         parent.remove();
         // Remove generated empty nodes
-        start.removeIfEmpty()
+        if (start) {
+            start.removeIfEmpty();
+        }
         this._cleanAfterUnwrap();
     }
     /**
