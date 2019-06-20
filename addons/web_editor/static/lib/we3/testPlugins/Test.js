@@ -146,13 +146,13 @@ function deepEqual (v1, v2) {
         return true;
     }
 }
-function log (result, testName, value) {
+function log (result, testName, value, expectedValue) {
     if (testName.startsWith('<')) {
         console.info('%cTEST: ' + testName, 'background-color: grey; color: black; padding: 2px;');
     } else if (result === true) {
         console.info('%cTEST: ' + testName, 'color: green;');
     } else if (result === false) {
-        console.error('TEST: ', testName, '=>', value);
+        console.error('TEST: ', testName, '\nExpected:\n', expectedValue, '\nResult:\n' + value);
     }
 }
 /**
@@ -218,7 +218,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
                 if (self.options.test && self.options.test.assert) {
                     self.options.test.assert.ok(value, testName);
                 } else {
-                    log(didPass, testName, value);
+                    log(didPass, testName, value, true);
                 }
                 if (didPass) {
                     self.nOKTests++;
@@ -230,7 +230,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
                 if (self.options.test && self.options.test.assert) {
                     self.options.test.assert.notOk(value, testName);
                 } else {
-                    log(didPass, testName, value);
+                    log(didPass, testName, value, false);
                 }
                 if (didPass) {
                     self.nOKTests++;
@@ -242,7 +242,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
                 if (self.options.test && self.options.test.assert) {
                     self.options.test.assert.strictEqual(value, expectedValue, testName);
                 } else {
-                    log(didPass, testName, value);
+                    log(didPass, testName, value, expectedValue);
                 }
                 if (didPass) {
                     self.nOKTests++;
@@ -254,7 +254,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
                 if (self.options.test && self.options.test.assert) {
                     self.options.test.assert.deepEqual(value, expectedValue, testName);
                 } else {
-                    log(didPass, testName, value);
+                    log(didPass, testName, value, expectedValue);
                 }
                 if (didPass) {
                     self.nOKTests++;

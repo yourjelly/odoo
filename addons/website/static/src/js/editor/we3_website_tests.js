@@ -104,7 +104,7 @@ QUnit.module('website', {
     QUnit.module('home page edition');
 
     QUnit.test('we3', async function (assert) {
-        assert.expect(39);
+        assert.expect(78);
 
         var $website = $(`<div id="wrapwrap" class="homepage">
                 <header id="top" data-anchor="true" class=" o_affix_enabled">
@@ -254,7 +254,7 @@ QUnit.module('website', {
 
         await wysiwyg.editor._editor._pluginsManager.call('Test', 'loadTest', ['TestOdooWebsite']);
         await wysiwyg.editor._editor._pluginsManager.call('Test', 'loadTest', ['TestKeyboardChar']);
-        // await wysiwyg.editor._editor._pluginsManager.call('Test', 'loadTest', ['TestToolbarWand']);
+        await wysiwyg.editor._editor._pluginsManager.call('Test', 'loadTest', ['TestArchAndRules']);
 
         var target = $('we3-editable #wrap h2 b:first')[0].firstChild;
         var id = wysiwyg.editor._editor._pluginsManager.call('Renderer', 'getID', [target]);
