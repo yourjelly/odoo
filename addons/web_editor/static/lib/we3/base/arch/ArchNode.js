@@ -899,6 +899,10 @@ we3.ArchNode = class {
             console.warn('cannot unwrap from root node');
             return;
         }
+        if (this.parent.parent && !this.parent.parent.isAllowUpdate()) {
+            console.warn("cannot unwrap a node in a non editable node");
+            return;
+        }
         var start = this.parent.split(this.index() + 1);
         this.parent.split(this.index());
         var parent = this.parent;
@@ -916,9 +920,13 @@ we3.ArchNode = class {
      *
      * @param {Number} id
      * @param {String} nodeName
-     * @returns {ArchNode}
+     * @returns {ArchNode|null}
      */
     wrap (nodeName) {
+        if (!this.parent.isAllowUpdate()) {
+            console.warn("cannot wrap a node in a non editable node");
+            return;
+        }
         var wrapper = this.params.create(nodeName);
         this.before(wrapper);
         wrapper.append(this);

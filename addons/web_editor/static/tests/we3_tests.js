@@ -130,7 +130,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('toolbar wand', async function (assert) {
-        assert.expect(12);
+        assert.expect(18);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, testPlugins, {TestToolbarWand: true}),

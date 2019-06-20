@@ -695,7 +695,7 @@ var FontStylePlugin = class extends we3.AbstractPlugin {
         var styleAncestors = [];
         selection.map(function (node) {
             var ancestor = node.ancestor((a) => self.options.styleTags.indexOf(a.nodeName) !== -1);
-            if (ancestor) {
+            if (ancestor && ancestor.isEditable()) {
                 styleAncestors.push(ancestor.id);
             }
         });

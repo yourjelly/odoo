@@ -536,7 +536,7 @@ var BaseArch = class extends we3.AbstractPlugin {
         // wrap
         var newParents = [];
         ids.forEach((id) => newParents.push(self.getArchNode(id).wrap(wrapperName)));
-        newParents = newParents.filter((parent) => parent.isInArch());
+        newParents = newParents.filter((parent) => parent && parent.isInArch());
         // select every wrapped node
         var scArch = newParents[0].firstLeaf();
         var ecArch = newParents[newParents.length - 1].lastLeaf();
