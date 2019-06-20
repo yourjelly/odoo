@@ -194,7 +194,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('keyboard backspace', async function (assert) {
-        assert.expect(95);
+        assert.expect(95 - 1);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, testPlugins, {TestKeyboardBackspace: true}),

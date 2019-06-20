@@ -363,22 +363,25 @@ var TestPlugin = class extends we3.AbstractPlugin {
     }
     getValue (archNodeId) {
         var Arch = this.dependencies.Arch;
-        var params = Arch.getNode(1).params;
+        var root = Arch.getNode(1, true);
+
+        var params = root.params;
         var range = this.dependencies.Range.getRange();
 
-        Arch.bypassUpdateConstraints(function () {
-            Arch.bypassChangeTrigger(function () {
-                if (range.isCollapsed()) {
-                    Arch.insert(new TEST(params, null, null, rangeCollapsed));
-                } else {
-                    Arch.insert(new TEST(params, null, null, rangeEnd), range.ec, range.eo);
-                    Arch.insert(new TEST(params, null, null, rangeStart), range.sc, range.so);
-                }
-            });
-        });
+        if (range.isCollapsed()) {
+            range.scArch.insert(new TEST(params, null, null, rangeCollapsed), range.so);
+        } else {
+            range.ecArch.insert(new TEST(params, null, null, rangeEnd), range.eo);
+            range.scArch.insert(new TEST(params, null, null, rangeStart), range.so);
+        }
 
         if (!archNodeId) {
-            var containers = Arch.findAll('isRoot');
+            var containers = [];
+            root.nextUntil(function (a) {
+                if (a.id !== -1 && a.isRoot()) {
+                    containers.push(a);
+                }
+            });
             if (containers.length !== 1) {
                 throw new Error("Multiple test containers found");
             }
@@ -386,6 +389,8 @@ var TestPlugin = class extends we3.AbstractPlugin {
         }
 
         var result = this.dependencies.Arch.getNode(archNodeId).toString();
+
+        Arch.getNode(1, true); // trash the previous clone
 
         return result
             .replace(/^<[^>]+>/, '').replace(/<\/[^>]+>$/, '') // remove container

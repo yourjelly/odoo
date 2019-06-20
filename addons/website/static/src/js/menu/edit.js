@@ -179,7 +179,6 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         });
     },
     _onEditorChange: function (ev) {
-        console.log(ev.data);
         // this.trigger_up('widgets_stop_request', {
         //     editableMode: true,
         //     $target: $(_.pluck(ev.data.removed, 'element')),

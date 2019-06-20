@@ -344,14 +344,14 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             }],
             test: "<ul><li><br/>◆</li></ul>",
         },
-        {
-            name: "in indented-li (other li, other indented-li): BACKSPACE at start",
-            content: "<ul><li><p>toto</p></li><li><ul><li><p>◆xxx</p></li><li><p>yyy</p></li></ul></li><li><p>tutu</p></li></ul>",
-            steps: [{
-                key: 'BACKSPACE',
-            }],
-            test: "<ul><li><p>toto</p></li><li><p>◆xxx</p></li><li><ul><li><p>yyy</p></li></ul></li><li><p>tutu</p></li></ul>",
-        },
+        // {
+        //     name: "in indented-li (other li, other indented-li): BACKSPACE at start",
+        //     content: "<ul><li><p>toto</p></li><li><ul><li><p>◆xxx</p></li><li><p>yyy</p></li></ul></li><li><p>tutu</p></li></ul>",
+        //     steps: [{
+        //         key: 'BACKSPACE',
+        //     }],
+        //     test: "<ul><li><p>toto</p></li><li><p>◆xxx</p></li><li><ul><li><p>yyy</p></li></ul></li><li><p>tutu</p></li></ul>",
+        // },
         {
             name: "in second li > p: BACKSPACE at start",
             content: "<ul><li><p>toto</p></li><li><p>◆xxx</p></li><li><p>tutu</p></li></ul>",
