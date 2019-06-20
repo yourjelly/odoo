@@ -546,19 +546,6 @@ var TestKeyboardUnbreakable = class extends we3.AbstractPlugin {
                 methods: ['isTestEditable'],
             },
         });
-        this.dependencies.Rules.addUnbreakableNodeCheck(function (ArchNode) {
-            return ArchNode.className && ArchNode.className.contains('unbreakable') || undefined;
-        });
-        this.dependencies.Rules.addEditableNodeCheck(function (ArchNode) {
-            if (ArchNode.className) {
-                if (ArchNode.className.contains('editable')) {
-                    return true;
-                }
-                if (ArchNode.className.contains('noteditable')) {
-                    return false;
-                }
-            }
-        });
         return super.start();
     }
 

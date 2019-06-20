@@ -272,6 +272,19 @@ var TestPlugin = class extends we3.AbstractPlugin {
                 methods: ['isTrue'],
             },
         });
+        this.dependencies.Rules.addUnbreakableNodeCheck(function (ArchNode) {
+            return ArchNode.className && ArchNode.className.contains('unbreakable') || undefined;
+        });
+        this.dependencies.Rules.addEditableNodeCheck(function (ArchNode) {
+            if (ArchNode.className) {
+                if (ArchNode.className.contains('editable')) {
+                    return true;
+                }
+                if (ArchNode.className.contains('noteditable')) {
+                    return false;
+                }
+            }
+        });
         return promise;
     }
     setEditorValue () {
