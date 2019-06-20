@@ -769,7 +769,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
         }
 
         if (button) {
-            var total = buttonList.lastElementChild.children.length;
+            var total = buttonList.lastElementChild.children.length - 1;
             var good = buttonList.lastElementChild.querySelectorAll('.good').length;
             var fail = buttonList.lastElementChild.querySelectorAll('.fail').length;
             buttonList.firstElementChild.style.backgroundColor = fail ? '#ffcccc' : '#ccffcc';

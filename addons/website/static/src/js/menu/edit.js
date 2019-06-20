@@ -186,7 +186,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         // });
         this.trigger_up('widgets_start_request', {
             editableMode: true,
-            $target: $(_.pluck(ev.data.changes, 'element')),
+            $target: $(_.uniq(_.compact(_.pluck(ev.data.changes, 'element')))),
         });
     },
     /**
