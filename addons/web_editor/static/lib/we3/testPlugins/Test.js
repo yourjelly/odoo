@@ -196,7 +196,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
     constructor (parent, params, options) {
         super(...arguments)
         var self = this;
-        this.dependencies = ['Arch', 'Range', 'Rules'];
+        this.dependencies = ['Arch', 'Range', 'Rules', 'Renderer'];
 
         this.templatesDependencies = ['xml/test.xml'];
         this.buttons = {
@@ -461,12 +461,15 @@ var TestPlugin = class extends we3.AbstractPlugin {
 
         var s = this.dependencies.Arch.getNode(1).applyPath(sp);
         var e = this.dependencies.Arch.getNode(1).applyPath(ep);
-        this.dependencies.Range.setRange({
-            scID: s.id,
-            so: range.so,
-            ecID: e.id,
-            eo: range.eo,
-        });
+        var el = this.dependencies.Renderer.getElement(s.id);
+        if (el && this.document.body.contains(el)) {
+            this.dependencies.Range.setRange({
+                scID: s.id,
+                so: range.so,
+                ecID: e.id,
+                eo: range.eo,
+            });
+        }
     }
     /**
      * Set the range in the editor and make sure to focus the editor.

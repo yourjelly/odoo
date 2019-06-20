@@ -572,6 +572,10 @@ var BaseRange = class extends we3.AbstractPlugin {
         if (selection.rangeCount > 0) {
             selection.removeAllRanges();
         }
+        if (!this.document.body.contains(sc)) {
+            console.warn("The given range isn't in document.");
+            return;
+        }
         selection.addRange(nativeRange);
     }
     /**
