@@ -657,7 +657,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
                     break;
             }
 
-            if (!self.options.test.assert) {
+            if (!self.options.test || !self.options.test.assert) {
                 var onerror = window.onerror
                 window.onerror = function (e) {
                     window.onerror = onerror;
@@ -666,7 +666,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
                 }
             }
             el.dispatchEvent(event);
-            if (!self.options.test.assert) {
+            if (!self.options.test || !self.options.test.assert) {
                 window.onerror = onerror;
             }
 
