@@ -273,7 +273,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
             },
         });
         this.dependencies.Rules.addUnbreakableNodeCheck(function (ArchNode) {
-            return ArchNode.className && ArchNode.className.contains('unbreakable') || undefined;
+            return ArchNode.className && ArchNode.className.contains('unbreakable');
         });
         this.dependencies.Rules.addEditableNodeCheck(function (ArchNode) {
             if (ArchNode.className) {

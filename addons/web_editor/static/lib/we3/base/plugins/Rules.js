@@ -377,9 +377,6 @@ var BaseRules = class extends we3.AbstractPlugin {
             if (res) {
                 return true;
             }
-            if (res === false) {
-                return false;
-            }
         }
         return false;
     }
