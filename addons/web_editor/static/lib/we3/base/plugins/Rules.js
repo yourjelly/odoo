@@ -210,9 +210,14 @@ var BaseRules = class extends we3.AbstractPlugin {
     }
     start () {
         var self = this;
-        Object.values(customArchNodes).forEach(function (Constructor) {
+        this._constructors = [];
+        this._names = Object.keys(customArchNodes);
+        this._names.forEach(function (name) {
+            var Constructor = customArchNodes[name];
+            self._constructors.push(Constructor);
             if (Constructor.parse !== ArchNode.parse) {
                 Constructor.parse.__Constructor__ = Constructor;
+                Constructor.parse.__type__ = name;
                 self.parserRuleList.push(Constructor.parse);
             }
         });
@@ -408,14 +413,26 @@ var BaseRules = class extends we3.AbstractPlugin {
         var BaseArch = this.dependencies.BaseArch;
         for (var k = 0, len = this.parserRuleList.length; k < len ; k++) {
             var ruleMethod = this.parserRuleList[k];
-            if (ruleMethod.__Constructor__ === archNode.constructor) {
+            if (ruleMethod.__Constructor__ && (ruleMethod.__Constructor__ === archNode.constructor || ruleMethod.__type__ === archNode.type)) {
                 continue;
             }
             var newNode = ruleMethod(archNode, self.options);
             if (newNode) {
-                if (!(newNode instanceof ArchNode)) {
-                    newNode = BaseArch.parse(json);
+                var __ruleParser__ = archNode.__ruleParser__ || [];
+                var type = this._names[this._constructors.indexOf(newNode.constructor)] || newNode.type;
+
+                if (__ruleParser__.indexOf(type) !== -1) {
+                    console.warn("Can't choose the type of ArchNode", __ruleParser__);
+                    return archNode;
                 }
+
+                if (!(newNode instanceof ArchNode)) {
+                    newNode = BaseArch.parse(newNode);
+                }
+
+                __ruleParser__.push(type);
+                newNode.__ruleParser__ = __ruleParser__;
+
                 if (archNode.parent) {
                     archNode.before(newNode);
                     archNode.remove();

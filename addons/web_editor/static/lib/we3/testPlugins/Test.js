@@ -15,8 +15,7 @@ var regInvisible = /\uFEFF/g;
 
 /////////////////////////////////////////////////////////////////
 
-var VIRTUAL = we3.getArchNode('TEXT-VIRTUAL');
-var TEST = class extends VIRTUAL {
+var TEST = class extends  we3.ArchNodeVirtualText {
     //--------------------------------------------------------------------------
     // static
     //--------------------------------------------------------------------------

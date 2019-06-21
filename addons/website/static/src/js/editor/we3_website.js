@@ -4,55 +4,6 @@ odoo.define('website.editor.we3', function (require) {
 var core = require('web.core');
 var _t = core._t;
 
-
-we3.addArchNode('WEBSITE-EDITABLE', class extends we3.ArchNode {
-    constructor () {
-        super(...arguments);
-        this.className.add('o_editable');
-    }
-
-    //--------------------------------------------------------------------------
-    // static
-    //--------------------------------------------------------------------------
-
-    static parse (archNode) {
-        if (archNode.attributes && archNode.attributes['data-oe-model']) {
-            var editable = archNode.params.create(archNode.nodeName, archNode.attributes, null, 'WEBSITE-EDITABLE');
-            editable.append(archNode.childNodes);
-            return editable;
-        }
-    }
-
-    //--------------------------------------------------------------------------
-    // public
-    //--------------------------------------------------------------------------
-
-    getFieldType () {
-        return this.attributes['data-oe-type'] || 'html';
-        // TOTO: use for paste text only in not html field
-        // TODO: drop image only in image or html field
-        // TODO: can choose only image in media
-        // ===> var type = achNode.ancestor('isWebsiteEditable').getFieldType();
-    }
-    isDirty () {
-        return this.className.contains('o_dirty');
-    }
-    isEditable () {
-        return !this.isReadOnly();
-    }
-    isReadOnly () {
-        // TODO use for display readonly tooltip
-        return this.attributes['data-oe-readonly'] || this.className.contains('o_not_editable');
-    }
-    isWebsiteEditable () {
-        return true;
-    }
-    get type () {
-        return 'WEBSITE-EDITABLE';
-    }
-});
-
-
 var OdooWebsite = class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
@@ -64,6 +15,7 @@ var OdooWebsite = class extends we3.AbstractPlugin {
     //--------------------------------------------------------------------------
 
     start () {
+        var self = this;
         super.start();
         this._overwriteBootstrap();
         this.dependencies.Range.on('focus', this, this._onFocusNode);
@@ -81,6 +33,16 @@ var OdooWebsite = class extends we3.AbstractPlugin {
             if (archNode.className.contains('o_editable')) {
                 return true;
             }
+        });
+
+        this.dependencies.Rules.addParserRule(function (archNode) {
+            if (!archNode.attributes || !archNode.attributes['data-oe-model']) {
+                return;
+            }
+            if (archNode.isWebsiteEditable) {
+                return;
+            }
+            self._configureEditableArchNode(archNode);
         });
     }
     destroy () {
@@ -116,7 +78,7 @@ var OdooWebsite = class extends we3.AbstractPlugin {
         var Arch = this.dependencies.Arch;
         var Renderer = this.dependencies.Renderer;
         Arch.getNode(1).nextUntil(function (next) {
-            if (next.type === 'WEBSITE-EDITABLE') {
+            if (next.isWebsiteEditable && next.isWebsiteEditable()) {
                 ids.push(next.id);
             }
         });
@@ -131,6 +93,29 @@ var OdooWebsite = class extends we3.AbstractPlugin {
     // Private
     //--------------------------------------------------------------------------
 
+    _configureEditableArchNode (archNode) {
+        archNode.className.add('o_editable');
+        archNode.getFieldType = function () {
+            return this.attributes['data-oe-type'] || 'html';
+            // TOTO: use for paste text only in not html field
+            // TODO: drop image only in image or html field
+            // TODO: can choose only image in media
+            // ===> var type = achNode.ancestor('isWebsiteEditable').getFieldType();
+        };
+        archNode.isDirty = function () {
+            return this.className.contains('o_dirty');
+        };
+        archNode.isEditable = function () {
+            return !this.isReadOnly();
+        };
+        archNode.isReadOnly = function () {
+            // TODO use for display readonly tooltip
+            return this.attributes['data-oe-readonly'] || this.className.contains('o_not_editable');
+        };
+        archNode.isWebsiteEditable = function () {
+            return true;
+        };
+    }
     _onFocusNode (focused) {
         var focused = this.dependencies.Range.getFocusedNode();
         var editable = focused.ancestor('isWebsiteEditable');

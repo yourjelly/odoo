@@ -19,6 +19,14 @@ function getClonedClass (ClassToClone) {
                 this._clonedArchNode = clonedArchNode;
                 this._clonedParentUnknown = true;
                 this._clonedChildNodesUnknown = true;
+
+                var self = this;
+                var forbidden = Object.getOwnPropertyNames(ClonedClass.prototype);
+                Object.getOwnPropertyNames(clonedArchNode).forEach(function (name) {
+                    if (typeof clonedArchNode[name] === 'function' || forbidden.indexOf(name) === -1) {
+                        self[name] = clonedArchNode[name];
+                    }
+                });
             }
             isClone () {
                 return true;

@@ -147,7 +147,7 @@ var EditorMenu = Widget.extend({
         return new Promise(function () {});
     },
     /**
-     * Select 'WEBSITE-EDITABLE' archNode and save value
+     * Select 'isWebsiteEditable' archNode and save value
      *
      * @private
      * @param {ArchNode} archNode
