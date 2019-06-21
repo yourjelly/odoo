@@ -53,15 +53,16 @@ class AccountInvoice(models.Model):
             qty = line.product_qty - line.qty_invoiced
         else:
             qty = line.qty_received - line.qty_invoiced
-        if float_compare(qty, 0.0, precision_rounding=line.product_uom.rounding) <= 0:
+        if line.product_id and float_compare(qty, 0.0, precision_rounding=line.product_uom.rounding) <= 0:
             qty = 0.0
         taxes = line.taxes_id
         invoice_line_tax_ids = line.order_id.fiscal_position_id.map_tax(taxes, line.product_id, line.order_id.partner_id)
         invoice_line = self.env['account.invoice.line']
         date = self.date or self.date_invoice
+        name = line.display_type and line.name or '%s:%s' % (line.order_id.name, line.name)
         data = {
             'purchase_line_id': line.id,
-            'name': line.order_id.name + ': ' + line.name,
+            'name': name,
             'origin': line.order_id.origin,
             'uom_id': line.product_uom.id,
             'product_id': line.product_id.id,
@@ -72,7 +73,8 @@ class AccountInvoice(models.Model):
             'discount': 0.0,
             'account_analytic_id': line.account_analytic_id.id,
             'analytic_tag_ids': line.analytic_tag_ids.ids,
-            'invoice_line_tax_ids': invoice_line_tax_ids.ids
+            'invoice_line_tax_ids': invoice_line_tax_ids.ids,
+            'display_type': line.display_type
         }
         account = invoice_line.get_invoice_line_account('in_invoice', line.product_id, line.order_id.fiscal_position_id, self.env.company)
         if account:
