@@ -130,6 +130,7 @@
 
     <script type="text/javascript" src="/website/static/src/js/tours/banner.js"/>
     <script type="text/javascript" src="/website/static/src/js/tours/customize.js"/>
+    <script type="text/javascript" src="/website/static/tests/tours/editor_unit_tests.js"></script>
 
     <script type="text/javascript" src="/website/static/src/js/widgets/ace.js"/>
     <script type="text/javascript" src="/website/static/src/js/widgets/theme.js"/>

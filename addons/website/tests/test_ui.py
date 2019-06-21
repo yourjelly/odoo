@@ -63,3 +63,6 @@ class TestUi(odoo.tests.HttpCase):
         #         ])]
         # })
         # self.start_tour("/", 'restricted_editor', login='restricted')
+
+    def test_04_admin_editor_unit_tests(self):
+        self.start_tour("/", 'editor_unit_tests', login='admin')
