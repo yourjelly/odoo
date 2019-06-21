@@ -63,10 +63,13 @@ var JINJA = class extends we3.ArchNodeText {
             return;
         }
 
-        this.before(this.params.create('ArchitecturalSpace'));
-        if (this.isRightEdge()) {
-            this.after(this.params.create('ArchitecturalSpace'));
-        }
+        var self = this;
+        this.params.bypassUpdateConstraints(function () {
+            self.before(self.params.create('ArchitecturalSpace'));
+            if (self.isRightEdge()) {
+                self.after(self.params.create('ArchitecturalSpace'));
+            }
+        });
         this._hasArchitecturalSpace = true;
     }
     _applyRulesArchNode () {

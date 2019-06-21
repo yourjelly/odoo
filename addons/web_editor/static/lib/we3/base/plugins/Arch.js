@@ -8,6 +8,7 @@ var RootNode = we3.ArchNodeRoot;
 var ArchNodeText = we3.ArchNodeText;
 var VirtualText = we3.ArchNodeVirtualText;
 var tags = we3.tags;
+var utils = we3.utils;
 var reEscaped = /(&[a-z0-9]+;)/gi;
 var technicalSpan = document.createElement('span');
 
@@ -79,9 +80,10 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @returns {any}
      */
     bypassUpdateConstraints (callback) {
+        var bypass = this._bypassUpdateConstraintsActive;
         this._bypassUpdateConstraintsActive = true;
         var res = callback();
-        this._bypassUpdateConstraintsActive = false;
+        this._bypassUpdateConstraintsActive = bypass;
         return res;
     }
     /**
@@ -443,6 +445,13 @@ var BaseArch = class extends we3.AbstractPlugin {
         }
         archNode._technicalData[name] = value;
     }
+    /**
+     * Set a value on the editor or an ArchNode. The value is parsed and
+     * automatically apply the rules.
+     *
+     * @param {any} value
+     * @param {integer} [id]
+     */
     setValue (value, id) {
         var self = this;
         return this.bypassUpdateConstraints(function () {

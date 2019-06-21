@@ -1,7 +1,7 @@
 (function () {
 'use strict';
 
-we3.addArchNode('ArchitecturalSpace', class extends we3.ArchNodeText {
+var ArchitecturalSpace = class extends we3.ArchNodeText {
     get type () {
         return 'TEXT-ARCH';
     }
@@ -41,7 +41,7 @@ we3.addArchNode('ArchitecturalSpace', class extends we3.ArchNodeText {
                 node = node.parent;
             }
 
-            level -= (this.nextSibling() ? 0 : 1);
+            level -= (this.nextSibling(null, true) ? 0 : 1);
 
             if (level > 0) {
                 space += (new Array(level * indent + 1).join(' '));
@@ -110,19 +110,6 @@ we3.addArchNode('ArchitecturalSpace', class extends we3.ArchNodeText {
     /**
      * @override
      */
-    _applyRulesCheckParents () {}
-    /**
-     * @override
-     */
-    _addArchitecturalSpaceNode () {
-        var prev = this.previousSibling();
-        if (prev && prev.isArchitecturalSpace()) {
-            this.remove();
-        }
-    }
-    /**
-     * @override
-     */
     _addArchitecturalSpaceNodes () {}
     /**
      * @override
@@ -136,6 +123,7 @@ we3.addArchNode('ArchitecturalSpace', class extends we3.ArchNodeText {
     _previousSibling (fn) {
         return this.previousSibling(fn);
     }
-});
+};
+we3.addArchNode('ArchitecturalSpace', ArchitecturalSpace);
 
 })();

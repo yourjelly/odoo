@@ -61,25 +61,6 @@ we3.ArchNodeRoot = class extends we3.ArchNode {
         this.childNodes[offset].after(virtualText);
         return virtualText;
     }
-    /**
-     * @override
-     */
-    toString (options) {
-        var string = '';
-        var visibleChildren = this.visibleChildren();
-        if (visibleChildren) {
-            if (options && options.architecturalSpace && !this._hasArchitecturalSpace) {
-                visibleChildren.forEach(function (child) {
-                    child._addArchitecturalSpaceNodes();
-                });
-                options.noInsert = true;
-            }
-            this.childNodes.forEach(function (child) {
-                string += child.toString(options);
-            });
-        }
-        return string;
-    }
 };
 
 })();

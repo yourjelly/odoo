@@ -37,7 +37,7 @@ var ClassName = class {
      * @param {string} classNames
      */
     add (classNames) {
-        if (!this.archNode.params.isBypassUpdateConstraintsActive() && this.archNode.isInArch() && !this.archNode.isEditable()) {
+        if (!this.archNode.isAllowUpdate()) {
             console.warn("cannot update class of a non editable node");
             return;
         }
@@ -88,7 +88,7 @@ var ClassName = class {
      * @param {string} classNames
      */
     remove (classNames) {
-        if (!this.archNode.params.isBypassUpdateConstraintsActive() && this.archNode.isInArch() && !this.archNode.isEditable()) {
+        if (!this.archNode.isAllowUpdate()) {
             console.warn("cannot update class of a non editable node");
             return;
         }
@@ -140,7 +140,7 @@ var Attributes = we3.Attributes = class {
         }
     }
     add (name, value) {
-        if ((name !== 'class' && name !== 'style' || value !== '') && !this.archNode.params.isBypassUpdateConstraintsActive() && this.archNode.isInArch() && !this.archNode.isEditable()) {
+        if ((name !== 'class' && name !== 'style' || value !== '') && !this.archNode.isAllowUpdate()) {
             console.warn("cannot update style of a non editable node");
             return;
         }
@@ -166,7 +166,7 @@ var Attributes = we3.Attributes = class {
         }
     }
     clear () {
-        if (!this.archNode.params.isBypassUpdateConstraintsActive() && this.archNode.isInArch() && !this.archNode.isEditable()) {
+        if (!this.archNode.isAllowUpdate()) {
             console.warn("cannot update attribute of a non editable node");
             return;
         }
@@ -208,7 +208,7 @@ var Attributes = we3.Attributes = class {
         this.__order__.forEach(fn.bind(this));
     }
     remove (name) {
-        if (!this.archNode.params.isBypassUpdateConstraintsActive() && this.archNode.isInArch() && !this.archNode.isEditable()) {
+        if (!this.archNode.isAllowUpdate()) {
             console.warn("cannot update attribute of a non editable node");
             return;
         }
@@ -268,7 +268,7 @@ var Style = class extends Attributes {
         }
     }
     add (name, value) {
-        if (!this.archNode.params.isBypassUpdateConstraintsActive() && this.archNode.isInArch() && !this.archNode.isEditable()) {
+        if (!this.archNode.isAllowUpdate()) {
             console.warn("cannot update style of a non editable node");
             return;
         }

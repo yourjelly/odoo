@@ -584,7 +584,7 @@ we3.ArchNode = class {
             return;
         }
 
-        if (!this.isEditable()) {
+        if (!this.isAllowUpdate()) {
             console.warn("can not split a not editable node");
             return;
         }
@@ -956,22 +956,17 @@ we3.ArchNode = class {
         if (this.isVoid()) {
             throw new Error("You can't add a node into a void node");
         }
-
         if (!this.childNodes) {
             throw new Error("You can't add a child into this node");
         }
-
-        if (!this.params.bypassUpdateConstraints) {
-            if (this.isInArch() && !this.isEditable()) { // id is set only if the node is contains in the root
-                console.warn("cannot add a node into a non editable node");
-                return;
-            }
-            if (archNode.parent && archNode.parent.isInArch() && !archNode.parent.isEditable()) {
-                console.warn("cannot remove a node from a non editable node");
-                return;
-            }
+        if (!this.isAllowUpdate()) {
+            console.warn("cannot add a node into a non editable node");
+            return;
         }
-
+        if (archNode.parent && !archNode.parent.isAllowUpdate()) {
+            console.warn("cannot remove a node from a non editable node");
+            return;
+        }
         if (this.ancestor(function (node) { return node === archNode;})) {
             console.warn("cannot add a node into itself");
             return;
@@ -1129,7 +1124,7 @@ we3.ArchNode = class {
      */
     _nextSibling (fn, doNotSkipNotEditables) {
         // todo: check the use of isEditable here
-        if ((doNotSkipNotEditables || this.isEditable()) && (!fn || fn(this))) {
+        if ((doNotSkipNotEditables || this.isAllowUpdate()) && (!fn || fn(this))) {
             return this;
         } else {
             return this.nextSibling(fn);
@@ -1146,7 +1141,7 @@ we3.ArchNode = class {
      * @returns {ArchNode|null}
      */
     _previousSibling (fn, doNotSkipNotEditables) {
-        if ((doNotSkipNotEditables || this.isEditable()) && (!fn || fn(this))) {
+        if ((doNotSkipNotEditables || this.isAllowUpdate()) && (!fn || fn(this))) {
             return this;
         } else {
             return this.previousSibling(fn);
@@ -1175,7 +1170,7 @@ we3.ArchNode = class {
         options = options || {};
         var next = this.walk(isPrev);
         if (!next || !options.doCrossUnbreakables && !unbreakableContainer.contains(next)) {
-            if (!options.doNotInsertVirtual && this.isEditable() && !this.isRoot() && !this.isClone()) {
+            if (!options.doNotInsertVirtual && this.isAllowUpdate() && !this.isRoot() && !this.isClone()) {
                 var virtualText = this.params.create();
                 this[isPrev ? 'before' : 'after'](virtualText);
                 return virtualText;

@@ -112,10 +112,6 @@ we3.ArchNodeVirtualText = class extends we3.ArchNodeText {
         }
     }
     /**
-     * @override
-     */
-    _applyRulesCheckParents () {}
-    /**
      * Mutate the VirtualText from VirtualText to `nodeName`.
      *
      * @param {string} nodeName

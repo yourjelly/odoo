@@ -616,7 +616,7 @@ var BaseRules = class extends we3.AbstractPlugin {
     _applyRulesOrder (targetArchNode) {
         var rules = this.orderRulesList.flat();
         var pos = rules.indexOf(targetArchNode.nodeName);
-        if (pos === -1 || !targetArchNode.isEditable() || targetArchNode.isUnbreakable()) {
+        if (pos === -1 || !targetArchNode.isAllowUpdate() || targetArchNode.isUnbreakable()) {
             return;
         }
         var disorderedAncestors = [];
@@ -627,7 +627,7 @@ var BaseRules = class extends we3.AbstractPlugin {
             if (node.parent.nodeName === targetArchNode.nodeName) {
                 toUnwrap.push(node);
             }
-            if (parentPos > pos && node.parent.isEditable() && !node.parent.isUnbreakable()) {
+            if (parentPos > pos && node.parent.isAllowUpdate() && !node.parent.isUnbreakable()) {
                 disorderedAncestors.push(node);
             }
             node = node.parent;
