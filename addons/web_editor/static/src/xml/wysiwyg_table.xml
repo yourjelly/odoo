@@ -7,11 +7,11 @@
         <we3-tablepicker>
             <div class="wysiwyg-dimension-picker">
                 <div class="wysiwyg-dimension-picker-mousecatcher">
-                    <row t-foreach="plugin._tableMatrix" t-as="row">
+                    <we3-row t-foreach="plugin._tableMatrix" t-as="row">
                         <t t-foreach="row" t-as="cell">
                             <we3-button name="table-cellpicker" data-method="insertTable" t-attf-data-value="{{ cell }}"/>
                         </t>
-                    </row>
+                    </we3-row>
                 </div>
             </div>
             <div class="wysiwyg-dimension-display"/>

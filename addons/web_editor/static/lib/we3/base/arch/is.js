@@ -570,12 +570,12 @@ var isEditable = {
      * @returns {Boolean}
      */
     isUnbreakable: function () {
-        return ["td", "tr", "tbody", "tfoot", "thead", "table"].indexOf(this.nodeName) !== -1 ||
+        return this.isInArch() && (["td", "tr", "tbody", "tfoot", "thead", "table"].indexOf(this.nodeName) !== -1 ||
             this.isVoidoid() ||
             this.isContentEditable() ||
             this.params.isUnbreakableNode(this) ||
             !this.isAllowUpdate() ||
-            !this.parent.isAllowUpdate();
+            !this.parent.isAllowUpdate());
     },
 }
 Object.assign(we3.ArchNode.prototype, isEditable);

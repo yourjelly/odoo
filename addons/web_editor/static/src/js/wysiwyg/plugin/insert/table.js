@@ -5,12 +5,12 @@ var TablePicker = class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
         this.templatesDependencies = ['/web_editor/static/src/xml/wysiwyg_table.xml'];
-        this.dependencies = [];
+        this.dependencies = ['Arch'];
         this.buttons = {
             template: 'wysiwyg.buttons.tablepicker',
             events: {
                 'click': '_updatePicker',
-                'mouseover row button': '_updatePicker',
+                'mouseover we3-row we3-button': '_updatePicker',
             },
         };
         this.tableClassName = 'table table-bordered';
@@ -54,21 +54,16 @@ var TablePicker = class extends we3.AbstractPlugin {
      * @returns {Node} table
      */
     createTable (rowCount, colCount) {
-        var table = document.createElement('table');
-        table.className = this.tableClassName;
-        var tbody = document.createElement('tbody');
-        table.appendChild(tbody);
+        var table = this.dependencies.Arch.createArchNode('table', [['class', this.tableClassName]]);
         for (var i = 0; i < rowCount; i++) {
-            var tr = document.createElement('tr');
-            tbody.appendChild(tr);
+            var tr = this.dependencies.Arch.createArchNode('tr');
             for (var j = 0; j < colCount; j++) {
-                var td = document.createElement('td');
-                var p = document.createElement('p');
-                var br = document.createElement('br');
-                p.appendChild(br);
-                td.appendChild(p);
-                tr.appendChild(td);
+                var td = this.dependencies.Arch.createArchNode('td');
+                var br = this.dependencies.Arch.createArchNode('br');
+                td.append(br);
+                tr.append(td);
             }
+            table.append(tr);
         }
         return table;
     }
@@ -79,37 +74,10 @@ var TablePicker = class extends we3.AbstractPlugin {
      *
      * @param {String} dim dimension of table (ex : "5x5")
      */
-    insertTable (dim, range) {
+    insertTable (dim) {
         var dimension = dim.split('x');
         var table = this.createTable(dimension[0], dimension[1], this.options);
-        if (range.getStartPoint().isRightEdge() && !range.getStartPoint().isLeftEdge()) {
-            var parentBlock = this.utils.firstBlockAncestor(range.sc);
-            range.replace({
-                sc: parentBlock,
-                so: this.utils.nodeLength(parentBlock),
-            });
-        }
-        this.dom.insertBlockNode(table, range);
-        var p;
-        if (!table.previousElementSibling) {
-            p = document.createElement('p');
-            p.appendChild(document.createElement('br'));
-            table.parentNode.insertBefore(p, table);
-        }
-        if (!table.nextElementSibling) {
-            p = document.createElement('p');
-            p.appendChild(document.createElement('br'));
-            if (p.nextSibling) {
-                table.parentNode.appendChild(p);
-            } else {
-                table.parentNode.insertBefore(p, table.nextSibling);
-            }
-        }
-        var range = range.replace({
-            sc: table.querySelector('td'),
-            so: 0,
-        });
-        this.dependencies.Arch.setRange(range);
+        this.dependencies.Arch.insert(table);
     }
 
     //--------------------------------------------------------------------------
@@ -172,7 +140,7 @@ var TablePicker = class extends we3.AbstractPlugin {
      */
     _highlightPicker (group) {
         var self = this;
-        var buttons = group.querySelectorAll('.wysiwyg-dimension-picker-mousecatcher button');
+        var buttons = group.querySelectorAll('.wysiwyg-dimension-picker-mousecatcher we3-button');
 
         buttons.forEach(function (button) {
             button.classList.remove('wysiwyg-tablepicker-highlighted');
@@ -279,7 +247,7 @@ var Table = class extends we3.AbstractPlugin {
         var cell = range.sc;
         var parentRow = this._currentRow(cell);
         var nCols = parentRow.querySelectorAll('td').length;
-        var tr = document.createElement('tr');
+        var tr = this.dependencies.Arch.createArchNode('tr');
         for (var i = 0; i < nCols; i++) {
             tr.append(this._createCell());
         }
@@ -288,7 +256,7 @@ var Table = class extends we3.AbstractPlugin {
         } else if (parentRow.nextSibling) {
             parentRow.parentNode.insertBefore(tr, parentRow.nextSibling);
         } else {
-            parentRow.parentNode.appendChild(tr);
+            parentRow.parentNode.append(tr);
         }
     }
     /**
@@ -400,10 +368,9 @@ var Table = class extends we3.AbstractPlugin {
     //--------------------------------------------------------------------------
 
     _createCell () {
-        var td = document.createElement('td');
-        var p = document.createElement('p');
-        p.appendChild(document.createElement('br'));
-        td.appendChild(p);
+        var td = this.dependencies.Arch.createArchNode('td');
+        var br = this.dependencies.Arch.createArchNode('br');
+        td.append(br);
         return td;
     }
     /**
@@ -413,11 +380,11 @@ var Table = class extends we3.AbstractPlugin {
      * @returns {Node []}
      */
     _currentCol (cell) {
-        var colIndex = [].indexOf.call(cell.parentNode.children, cell);
-        var rows = this._currentTable(cell).querySelectorAll('tr');
+        var colIndex = cell.ancestor(node => node.nodeName === 'td').index();
+        var rows = this._currentTable(cell).descendents(node => node.nodeName === 'tr', true);
         var cells = [];
         rows.forEach(function (row) {
-            cells.push(row.children[colIndex]);
+            cells.push(row.nthChild(colIndex));
         });
         return cells;
     }
@@ -428,9 +395,7 @@ var Table = class extends we3.AbstractPlugin {
      * @returns {Node}
      */
     _currentRow (cell) {
-        return this.utils.ancestor(this.utils.firstLeaf(cell), function (node) {
-            return node.tagName === 'TR';
-        });
+        return cell.firstLeaf().ancestor(node => node.nodeName === 'tr');
     }
     /**
      * Get the current table.
@@ -439,9 +404,7 @@ var Table = class extends we3.AbstractPlugin {
      * @returns {Node}
      */
     _currentTable (cell) {
-        return this.utils.ancestor(cell, function (n) {
-            return n.tagName === 'TABLE';
-        });
+        return cell.ancestor(node => node.isTable());
     }
 };
 

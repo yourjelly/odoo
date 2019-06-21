@@ -765,6 +765,10 @@ we3.ArchNode = class {
             this.parent.insert(archNode, this.index());
             return;
         }
+        if (this.isFormatNode() && archNode.isBlock()) {
+            this.before(archNode);
+            return;
+        }
         archNode._triggerChange(archNode.length());
         var ref = this.childNodes[offset];
         if (ref) {

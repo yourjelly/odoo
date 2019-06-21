@@ -1327,6 +1327,18 @@ var Arch = class extends we3.AbstractPlugin {
         return this.dependencies.BaseArch.addLine();
     }
     /**
+     * Create an ArchNode. If no argument is passed, create a VirtualText.
+     *
+     * @param {String} [nodeName]
+     * @param {Object []} [attributes]
+     * @param {String} [nodeValue]
+     * @param {String} [type]
+     * @returns {ArchNode}
+     */
+    createArchNode (nodeName, attributes, nodeValue, type) {
+        return this.dependencies.BaseArch.createArchNode(nodeName, attributes, nodeValue, type);
+    }
+    /**
      * Import changes and apply/render them.
      * Useful for changes made on clones (like in a plugin).
      *
