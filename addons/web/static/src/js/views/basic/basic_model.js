@@ -1,6 +1,16 @@
 odoo.define('web.BasicModel', function (require) {
 "use strict";
 
+var BASIC = 1;
+var INTER = 5;
+var FULL = 10;
+var printMode = INTER;
+function debuglog(string, mode) {
+    if (printMode >= mode) {
+        console.log(string);
+    }
+}
+
 /**
  * Basic Model
  *
@@ -157,6 +167,8 @@ var BasicModel = AbstractModel.extend({
 
         this.localData = Object.create(null);
         this._super.apply(this, arguments);
+
+        window.basicModel = this;
     },
 
     //--------------------------------------------------------------------------
@@ -524,6 +536,7 @@ var BasicModel = AbstractModel.extend({
         var element = this.localData[id];
 
         if (options.env) {
+           debuglog(`get(${id}, {env: true}})`, FULL);
             var env = {
                 ids: element.res_ids ? element.res_ids.slice(0) : [],
             };
@@ -533,6 +546,7 @@ var BasicModel = AbstractModel.extend({
             return env;
         }
 
+       debuglog(`get(${id}${options.raw ? ', {raw: true}' : ''})`, FULL);
         if (element.type === 'record') {
             var data = _.extend({}, element.data, element._changes);
             var relDataPoint;
@@ -739,6 +753,11 @@ var BasicModel = AbstractModel.extend({
      * @returns {Promise<string>} resolves to a local id, or handle
      */
     load: function (params) {
+        if (params.type === 'record') {
+           debuglog(`load({res_id: ${params.res_id}})`, BASIC);
+        } else {
+           debuglog(`load({domain: ${params.domain}, groupedBy: ${params.groupedBy})`, BASIC);
+        }
         params.type = params.type || (params.res_id !== undefined ? 'record' : 'list');
         // FIXME: the following seems only to be used by the basic_model_tests
         // so it should probably be removed and the tests should be adapted
@@ -877,6 +896,7 @@ var BasicModel = AbstractModel.extend({
      * @returns {Promise<string[]>} list of changed fields
      */
     notifyChanges: function (record_id, changes, options) {
+        debuglog(`notifyChanges(${record_id}, ${JSON.stringify(changes)})`, BASIC);
         return this.mutex.exec(this._applyChange.bind(this, record_id, changes, options));
     },
     /**
@@ -890,6 +910,12 @@ var BasicModel = AbstractModel.extend({
      * @returns {Promise<string>} resolves to the id of the resource
      */
     reload: function (id, options) {
+        if (this.localData[id].type === 'record') {
+           debuglog(`reload(${id})`, BASIC);
+        } else {
+            options = options || {};
+           debuglog(`reload(${id}, {domain: ${options.domain}, groupBy: ${options.groupBy}}`, BASIC);
+        }
         return this.mutex.exec(this._reload.bind(this, id, options));
     },
     /**
@@ -1025,6 +1051,11 @@ var BasicModel = AbstractModel.extend({
      *   Resolved with the list of field names (whose value has been modified)
      */
     save: function (recordID, options) {
+        if (options && options.savePoint) {
+            debuglog(`save(${recordID}, savePoint: true)`, BASIC);
+        } else {
+            debuglog(`save(${recordID})`, BASIC);
+        }
         var self = this;
         return this.mutex.exec(function () {
             options = options || {};
@@ -1340,6 +1371,7 @@ var BasicModel = AbstractModel.extend({
      * @returns {Promise} list of changed fields
      */
     _applyChange: function (recordID, changes, options) {
+        debuglog(`_applyChange(${recordID}, ${JSON.stringify(changes)})`, BASIC);
         var self = this;
         var record = this.localData[recordID];
         var field;
@@ -1487,6 +1519,7 @@ var BasicModel = AbstractModel.extend({
      * @returns {Promise}
      */
     _applyOnChange: function (values, record, viewType) {
+        debuglog(`_applyOnChange(${JSON.stringify(values)}, ${record.id})`, BASIC);
         var self = this;
         var defs = [];
         var rec;
@@ -1697,6 +1730,7 @@ var BasicModel = AbstractModel.extend({
      * @returns {Promise}
      */
     _applyX2ManyChange: function (record, fieldName, command, options) {
+        debuglog(`_applyX2ManyChange(${record.id}, ${fieldName}, ${JSON.stringify(command)}`, BASIC);
         if (command.operation === 'TRIGGER_ONCHANGE') {
             // the purpose of this operation is to trigger an onchange RPC, so
             // there is no need to apply any change on the record (the changes
@@ -2239,6 +2273,7 @@ var BasicModel = AbstractModel.extend({
      *   case no id given were valid ids
      */
     _fetchRecord: function (record, options) {
+       debuglog(`_fetchRecord(${record.id})`, BASIC);
         var self = this;
         options = options || {};
         var fieldNames = options.fieldNames || record.getFieldNames(options);
@@ -2857,6 +2892,7 @@ var BasicModel = AbstractModel.extend({
      * @returns {Promise}
      */
     _fetchX2Manys: function (record, options) {
+        debuglog(`_fetchX2Manys(${record.id})`, BASIC);
         var self = this;
         var defs = [];
         options = options || {};
@@ -2979,6 +3015,7 @@ var BasicModel = AbstractModel.extend({
      * @returns {Object} a map from changed fields to their new value
      */
     _generateChanges: function (record, options) {
+        debuglog(`_generateChanges(${record.id})`, BASIC);
         options = options || {};
         var viewType = options.viewType || record.viewType;
         var changes;
@@ -3085,6 +3122,7 @@ var BasicModel = AbstractModel.extend({
      * @returns {Object} a map from some field names to commands
      */
     _generateX2ManyCommands: function (record, options) {
+        debuglog(`_generateX2ManyCommands(${record.id})`, BASIC);
         var self = this;
         options = options || {};
         var fields = record.fields;
@@ -3660,6 +3698,7 @@ var BasicModel = AbstractModel.extend({
      * @returns {Promise}
      */
     _load: function (dataPoint, options) {
+        debuglog(`_load(${dataPoint.id})  (type: ${dataPoint.type}, groupBy: ${JSON.stringify(dataPoint.groupedBy)}, static: ${dataPoint.static})`, BASIC);
         if (options && options.onlyGroups &&
           !(dataPoint.type === 'list' && dataPoint.groupedBy.length)) {
             return Promise.resolve(dataPoint);
@@ -3789,6 +3828,8 @@ var BasicModel = AbstractModel.extend({
 
         this.localData[dataPoint.id] = dataPoint;
 
+        debuglog(`_makeDataPoint({type: ${type}})  ->  ${dataPoint.id}`, INTER);
+
         return dataPoint;
     },
     /**
@@ -3816,6 +3857,7 @@ var BasicModel = AbstractModel.extend({
      * @returns {Promise<string>} resolves to the id for the created resource
      */
     _makeDefaultRecord: function (modelName, params) {
+        debuglog(`_makeDefaultRecord(${modelName})`, BASIC);
         var self = this;
 
         var targetView = params.viewType;
@@ -3951,6 +3993,7 @@ var BasicModel = AbstractModel.extend({
      * @returns {Promise}
      */
     _performOnChange: function (record, fields, viewType) {
+        debuglog(`_performOnChange(${record.id}, ${JSON.stringify(fields)})`, BASIC);
         var self = this;
         var onchangeSpec = this._buildOnchangeSpecs(record, viewType);
         if (!onchangeSpec) {
@@ -4187,7 +4230,7 @@ var BasicModel = AbstractModel.extend({
      */
     _readMissingFields: function (list, resIDs, fieldNames) {
         var self = this;
-
+        debuglog(`_readMissingFields(${list.id}, ${JSON.stringify(resIDs)})`, INTER);
         var missingIDs = [];
         for (var i = 0, len = resIDs.length; i < len; i++) {
             var resId = resIDs[i];
@@ -4261,6 +4304,7 @@ var BasicModel = AbstractModel.extend({
      * @returns {Promise<Object>} resolves to the fetched group object
      */
     _readGroup: function (list, options) {
+        debuglog(`_readGroup(${list.id})`, BASIC);
         var self = this;
         options = options || {};
         var groupByField = list.groupedBy[0];
@@ -4414,6 +4458,7 @@ var BasicModel = AbstractModel.extend({
      * @returns {Promise<Object>} resolves to the fetched list object
      */
     _readUngroupedList: function (list) {
+        debuglog(`_readUngroupedList(${list.id})`, BASIC);
         var self = this;
         var def = Promise.resolve();
 
@@ -4575,6 +4620,7 @@ var BasicModel = AbstractModel.extend({
      * @returns {Promise}
      */
     _searchReadUngroupedList: function (list) {
+        debuglog(`_searchReadUngroupedList(${list.id})`, BASIC);
         var self = this;
         var fieldNames = list.getFieldNames();
         var prom;
