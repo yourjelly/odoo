@@ -2,6 +2,21 @@
 'use strict';
 
 we3.ArchNodeVirtualText = class extends we3.ArchNodeText {
+    static parse (archNode, options) {
+        if (archNode.isText() && archNode.nodeValue && archNode.nodeValue.indexOf('\uFEFF') !== -1) {
+            var fragment = new we3.ArchNodeFragment(archNode.params);
+            archNode.nodeValue.split('\uFEFF').forEach(function (text, i) {
+                if (i) {
+                    fragment.childNodes.push(new we3.ArchNodeVirtualText(archNode.params));
+                }
+                if (text.length) {
+                    fragment.childNodes.push(new we3.ArchNodeText(archNode.params, null, null, text));
+                }
+            });
+            return fragment;
+        }
+    }
+
     constructor () {
         super(...arguments);
         this.nodeValue = '\uFEFF';

@@ -424,6 +424,29 @@ var TestPlugin = class extends we3.AbstractPlugin {
                 if (keyPress.key.length === 1) {
                     self._textInput(target, keyPress.key);
                     document.execCommand("insertText", 0, keyPress.key);
+                } else if (keyPress.key === 'LEFT') {
+                    var range = self.dependencies.Range.getRange();
+                    if (!range.isCollapsed()) {
+                        self._selectRange(range.sc, range.so);
+                    } else if (range.so > 1) {
+                        self._selectRange(range.sc, range.so - 1);
+                    } else if (range.sc.previousSibling) {
+                        var prev = range.sc.previousSibling;
+                        self._selectRange(prev, 'length' in prev ? prev.length : prev.childNodes.length);
+                    } else {
+                        console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
+                    }
+                } else if (keyPress.key === 'RIGHT') {
+                    var range = self.dependencies.Range.getRange();
+                    if (!range.isCollapsed()) {
+                        self._selectRange(range.ec, range.eo);
+                    } else if (range.so < ('length' in range.sc ? range.sc.length : range.sc.childNodes.length)) {
+                        self._selectRange(range.sc, range.so + 1);
+                    } else if (range.sc.nextSibling) {
+                        self._selectRange(range.sc.nextSibling, 0);
+                    } else {
+                        console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
+                    }
                 } else {
                     console.debug('Native "' + keyPress.key + '" is not supported in test');
                 }
@@ -464,6 +487,9 @@ var TestPlugin = class extends we3.AbstractPlugin {
         }
 
         var s = this.dependencies.Arch.getNode(1).applyPath(sp);
+        if (!s) {
+            return;
+        }
         var e = this.dependencies.Arch.getNode(1).applyPath(ep);
         var el = this.dependencies.Renderer.getElement(s.id);
         if (el && this.document.body.contains(el)) {
@@ -818,10 +844,10 @@ var TestPlugin = class extends we3.AbstractPlugin {
      * @param {Node} sc
      * @param {offset} so
      */
-    _selectRange (sc, so) {
+    _selectRange (sc, so, ec, eo) {
         var nativeRange = sc.ownerDocument.createRange();
         nativeRange.setStart(sc, so);
-        nativeRange.setEnd(sc, so);
+        nativeRange.setEnd(ec || sc, eo == null ? so : eo);
         var selection = sc.ownerDocument.getSelection();
         if (selection.rangeCount > 0) {
             selection.removeAllRanges();

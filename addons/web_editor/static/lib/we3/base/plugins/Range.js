@@ -200,6 +200,9 @@ var BaseRange = class extends we3.AbstractPlugin {
         var ltr = typeof points.ltr === 'undefined' ? true : points.ltr;
         options = options || {};
         points = this._deducePoints(points);
+        if (options.moveLeft || options.moveRight) {
+            points = this._jumpOverVirtualText(points, options);
+        }
         points = this._moveOutOfNotEditable(points);
         points = this._moveOutOfUnbreakable(points, ltr);
         points = this._moveToDeepest(points);
@@ -211,7 +214,7 @@ var BaseRange = class extends we3.AbstractPlugin {
         this._didRangeChange = this._willRangeChange(points) || this._didRangeChange;
         var focusedNodeID = this._getFutureFocusNode(points);
 
-        if ((options.moveLeft || options.moveRight) && this.dependencies.Arch.getNode(focusedNodeID).isVoidoid()) {
+        if ((options.moveLeft || options.moveRight) && this.dependencies.BaseArch.getArchNode(focusedNodeID).isVoidoid()) {
             if (options.moveLeft) {
                 points.ecID = points.scID;
                 points.eo = points.so;
@@ -310,6 +313,31 @@ var BaseRange = class extends we3.AbstractPlugin {
      */
     _isCollapsed () {
         return this._range.scID === this._range.ecID && this._range.so === this._range.eo;
+    }
+    _jumpOverVirtualText (points, options) {
+        var start = this.dependencies.BaseArch.getArchNode(points.scID);
+        var end = this.dependencies.BaseArch.getArchNode(points.ecID);
+        var isCollapsed = points.scID === points.ecID && points.so === points.eo;
+        if (options.moveLeft && start.type === 'TEXT-VIRTUAL') {
+            var prev = start.prevUntil(a => a.type !== 'TEXT-VIRTUAL', {doCrossUnbreakables: true});
+            points.scID = prev.id;
+            points.so = prev.length();
+        }
+        if (options.moveRight && end.type === 'TEXT-VIRTUAL') {
+            var next = end.nextUntil(a => a.type !== 'TEXT-VIRTUAL', {doCrossUnbreakables: true});
+            points.ecID = next.id;
+            points.eo = next.isText() ? 1 : 0;
+        }
+        if (isCollapsed) {
+            if (options.moveLeft) {
+                points.ecID = points.scID;
+                points.eo = points.so;
+            } else if (options.moveRight) {
+                points.scID = points.ecID;
+                points.so = points.eo;
+            }
+        }
+        return points;
     }
     /**
      * Move the points out of not-editable nodes.
@@ -695,7 +723,7 @@ var BaseRange = class extends we3.AbstractPlugin {
      * @param {KeyEvent} e
      */
     _onKeydown (e) {
-        if (e.keyCode !== 38 && e.keyCode !== 40) {
+        if (e.keyCode !== 38 && e.keyCode !== 40) { // up and down arrow
             return;
         }
         var self = this;

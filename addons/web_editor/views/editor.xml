@@ -81,6 +81,7 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/TestArchAndRules.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/TestRange.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboard.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardArrow.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardBackspace.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardChar.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardComplex.js"/>

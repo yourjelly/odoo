@@ -77,7 +77,11 @@ var ToolbarPlugin = class extends PopoverPlugin {
      * @override
      */
     _onFocusNode (focusNode) {
+        if (this._focusNode && focusNode.isText() && this._focusNode.isText() && focusNode.parent.id === this._focusNode.parent.id) {
+            return;
+        }
         this._updatePopoverButtons(focusNode);
+        this._focusNode = focusNode;
     }
 };
 

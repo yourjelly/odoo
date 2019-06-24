@@ -367,4 +367,11 @@ we3.utils = {
     },
 };
 
+new Array(128 - 40).forEach(function (keyCode) {
+    keyCode += 40;
+    if (!we3.utils.keyboardMap[keyCode]) {
+        we3.utils.keyboardMap[keyCode] = String.fromCharCode(keyCode);
+    }
+});
+
 })();

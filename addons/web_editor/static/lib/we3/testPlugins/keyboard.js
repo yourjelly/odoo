@@ -1,40 +1,6 @@
 (function () {
 'use strict';
 
-/**
- * Char codes.
- */
-var keyboardMap = {
-    "8": "BACKSPACE",
-    "9": "TAB",
-    "13": "ENTER",
-    "16": "SHIFT",
-    "17": "CONTROL",
-    "18": "ALT",
-    "19": "PAUSE",
-    "20": "CAPS_LOCK",
-    "27": "ESCAPE",
-    "32": "SPACE",
-    "33": "PAGE_UP",
-    "34": "PAGE_DOWN",
-    "35": "END",
-    "36": "HOME",
-    "37": "LEFT",
-    "38": "UP",
-    "39": "RIGHT",
-    "40": "DOWN",
-    "45": "INSERT",
-    "46": "DELETE",
-    "91": "OS_KEY", // 'left command': Windows Key (Windows) or Command Key (Mac)
-    "93": "CONTEXT_MENU", // 'right command'
-};
-new Array(128 - 40).forEach(function (keyCode) {
-    keyCode += 40;
-    if (!keyboardMap[keyCode]) {
-        keyboardMap[keyCode] = String.fromCharCode(keyCode);
-    }
-});
-
 var reDOMSelection = /^(.+?)(:contents(\(\)\[|\()([0-9]+)[\]|\)])?(->([0-9]+))?$/;
 
 

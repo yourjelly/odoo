@@ -90,6 +90,7 @@ QUnit.module('web_editor', {
         TestKeyboardComplex: false,
         TestKeyboardChar: false,
         TestKeyboardBackspace: false,
+        TestKeyboardArrow: false,
     };
 
     async function createFormAndTest (self) {
@@ -119,6 +120,14 @@ QUnit.module('web_editor', {
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, testPlugins, {TestRange: true}),
+        };
+        await createFormAndTest(this);
+    });
+    QUnit.test('change range with arrow', async function (assert) {
+        assert.expect(16);
+        this.testOptions = {
+            assert: assert,
+            plugins: Object.assign({}, testPlugins, {TestKeyboardArrow: true}),
         };
         await createFormAndTest(this);
     });

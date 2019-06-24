@@ -618,6 +618,7 @@ var BaseArch = class extends we3.AbstractPlugin {
             return;
         }
         this._changes.push({
+            id: archNode.id,
             archNode: archNode,
             offset: offset || 0,
         });
@@ -639,15 +640,15 @@ var BaseArch = class extends we3.AbstractPlugin {
         var changes = [];
         var removed = [];
         this._changes.forEach(function (c, i) {
-            if (!c.archNode.id || !self.getArchNode(c.archNode.id)) {
-                if (c.archNode.id && removed.indexOf(c.archNode.id) === -1) {
+            if (!c.archNode.id && !c.id || !self.getArchNode(c.archNode.id || c.id)) {
+                if ((c.archNode.id || c.id) && removed.indexOf(c.archNode.id || c.id) === -1) {
                     removed.push(c.archNode.id);
                 }
                 return;
             }
             var toAdd = true;
             changes.forEach(function (change) {
-                if (change.id === c.archNode.id) {
+                if (change.id === c.archNode.id || change.id && change.id === c.id) {
                     toAdd = false;
                     change.offset = c.offset;
                     if (c.isRange) {
@@ -657,7 +658,7 @@ var BaseArch = class extends we3.AbstractPlugin {
             });
             if (toAdd) {
                 var change = {
-                    id: c.archNode.id,
+                    id: c.archNode.id || c.id,
                     offset: c.offset,
                 };
                 changes.push(change);
