@@ -28,12 +28,11 @@ class AccountMove(models.Model):
     @api.model
     def _get_default_journal(self):
         ''' Get the default journal.
-        - The default journal could be passed through the context using the 'default_journal_id' key containing its id.
-        - The default journal is determined by the default type found in the context or 'entry'.
+        It could either be passed through the context using the 'default_journal_id' key containing its id,
+        either be determined by the default type.
         '''
         move_type = self._context.get('default_type', 'entry')
         journal_type = 'general'
-        company_id = self._context.get('default_company_id', self.env.company.id)
         if move_type in ('out_invoice', 'out_refund', 'out_receipt'):
             journal_type = 'sale'
         elif move_type in ('in_invoice', 'in_refund', 'in_receipt'):
@@ -45,16 +44,22 @@ class AccountMove(models.Model):
             if move_type != 'entry' and journal.type != journal_type:
                 raise UserError(_("Cannot create an invoice of type %s with a journal having %s as type.") % (move_type, journal_type))
         else:
+            company_id = self._context.get('default_company_id', self.env.company.id)
             domain = [('company_id', '=', company_id), ('type', '=', journal_type)]
             journal = self.env['account.journal'].search(domain, limit=1)
 
             if not journal:
-                raise UserError(_('Please define an accounting %s journal in your company.') % journal_type)
+                error_msg = _('Please define an accounting miscellaneous journal in your company')
+                if journal_type == 'sale':
+                    error_msg = _('Please define an accounting sale journal in your company')
+                elif journal_type == 'purchase':
+                    error_msg = _('Please define an accounting purchase journal in your company')
+                raise UserError(error_msg)
         return journal
 
     @api.model
     def _get_default_currency(self):
-        ''' Get the default currency from either the journal or either the company. '''
+        ''' Get the default currency from either the journal, either the default journal's company. '''
         journal = self._get_default_journal()
         return journal.currency_id or journal.company_id.currency_id
 
