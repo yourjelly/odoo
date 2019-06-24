@@ -101,14 +101,6 @@ var parentedRules = [
     },
     {
         nodes: {
-            nodeNames: ['li'],
-        },
-        permittedParents: {
-            nodeNames: ['ul', 'ol'],
-        },
-    },
-    {
-        nodes: {
             nodeNames: ['ul', 'ol'],
         },
         availableChildNodes: {

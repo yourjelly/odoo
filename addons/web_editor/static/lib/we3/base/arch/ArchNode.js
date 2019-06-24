@@ -213,7 +213,7 @@ we3.ArchNode = class {
      * that matches the given predicate function.
      *
      * @param {string|function(ArchNode)} fn
-     * @param {boolean} findGreatest
+     * @param {boolean} [findGreatest]
      * @returns {ArchNode|undefined}
      */
     ancestor (fn, findGreatest) {
@@ -229,6 +229,24 @@ we3.ArchNode = class {
             parent = parent.parent;
         }
         return match;
+    }
+    /**
+     * Find all ancestors that match the given predicate function.
+     *
+     * @param {function(ArchNode)} fn
+     * @returns {ArchNode []}
+     */
+    ancestors (fn) {
+        var res = [];
+        var ancestor = this;
+        while (ancestor) {
+            ancestor = ancestor.ancestor(fn);
+            if (ancestor) {
+                res.push(ancestor);
+                ancestor = ancestor.parent;
+            }
+        }
+        return res;
     }
     /**
      * Find an ArchNode; following a path from this ArchNode,
@@ -294,7 +312,7 @@ we3.ArchNode = class {
      *   matched archNodes
      * @returns {ArchNode[]}
      */
-    descendent (fn, searchInsideMatchedArchNode) {
+    descendents (fn, searchInsideMatchedArchNode) {
         var nodes = [];
         if (this.childNodes) {
             for (var k = 0, len = this.childNodes.length; k < len; k++) {
@@ -302,10 +320,10 @@ we3.ArchNode = class {
                 if (typeof fn === 'string' ? child[fn] && child[fn](child) : fn(child)) {
                     nodes.push(child);
                     if (searchInsideMatchedArchNode) {
-                        nodes = nodes.concat(child.descendent(fn, searchInsideMatchedArchNode));
+                        nodes = nodes.concat(child.descendents(fn, searchInsideMatchedArchNode));
                     }
                 } else {
-                    nodes = nodes.concat(child.descendent(fn, searchInsideMatchedArchNode));
+                    nodes = nodes.concat(child.descendents(fn, searchInsideMatchedArchNode));
                 }
             }
         }
@@ -896,6 +914,7 @@ we3.ArchNode = class {
      * Keep splitting the parents until the given ancestor was split.
      * Return the ArchNode on the right hand side of the split.
      *
+     * @param {ArchNode|function} ancestor
      * @param {int} offset
      * @returns {ArchNode|undefined}
      */
@@ -1007,10 +1026,8 @@ we3.ArchNode = class {
 
         archNode.parent = this;
         this.childNodes.splice(index, 0, archNode);
-        if (archNode.__removed) {
-            archNode._triggerChange(0);
-            archNode.__removed = false;
-        }
+        archNode._triggerChange(null);
+        archNode.__removed = false;
 
         this.params.add(archNode);
 
@@ -1185,7 +1202,7 @@ we3.ArchNode = class {
         options = options || {};
         var next = this.walk(isPrev);
         if (!next || !options.doCrossUnbreakables && !unbreakableContainer.contains(next)) {
-            if (!options.doNotInsertVirtual && this.isAllowUpdate() && !this.isRoot() && !this.isClone()) {
+            if (!options.doNotInsertVirtual && this.isAllowUpdate() && !this.isRoot()) {
                 var virtualText = this.params.create();
                 this[isPrev ? 'before' : 'after'](virtualText);
                 return virtualText;

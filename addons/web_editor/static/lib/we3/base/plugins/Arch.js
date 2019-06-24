@@ -8,7 +8,6 @@ var RootNode = we3.ArchNodeRoot;
 var ArchNodeText = we3.ArchNodeText;
 var VirtualText = we3.ArchNodeVirtualText;
 var tags = we3.tags;
-var utils = we3.utils;
 var reEscaped = /(&[a-z0-9]+;)/gi;
 var technicalSpan = document.createElement('span');
 
@@ -620,7 +619,7 @@ var BaseArch = class extends we3.AbstractPlugin {
         this._changes.push({
             id: archNode.id,
             archNode: archNode,
-            offset: offset || 0,
+            offset: offset,
         });
     }
     /**
@@ -650,7 +649,9 @@ var BaseArch = class extends we3.AbstractPlugin {
             changes.forEach(function (change) {
                 if (change.id === c.archNode.id || change.id && change.id === c.id) {
                     toAdd = false;
-                    change.offset = c.offset;
+                    if (c.offset != null || change.offset == null) {
+                        change.offset = c.offset;
+                    }
                     if (c.isRange) {
                         range = change;
                     }
@@ -789,6 +790,7 @@ var BaseArch = class extends we3.AbstractPlugin {
         if (!archNode.isAllowUpdate()) {
             return;
         }
+        archNode._triggerChange(range.so);
         if (archNode.isInList()) {
             this[outdent ? '_outdentList' : '_indentList'](archNode, range.so);
         } else {
@@ -1451,9 +1453,11 @@ var Arch = class extends we3.AbstractPlugin {
      * Eg: `<p><b>te◆xt</b></p> => <p><b>te</b>◆<b>xt</b></p>`
      *
      * @param {string|string []} wrapperName
+     * @param {object} [options]
+     * @param {boolean} [options.doNotSplit] true to unwrap the full nodes without splitting them
      */
-    unwrapRangeFrom (wrapperName) {
-        return this.dependencies.BaseArch.unwrapRangeFrom(wrapperName);
+    unwrapRangeFrom (wrapperName, options) {
+        return this.dependencies.BaseArch.unwrapRangeFrom(wrapperName, options);
     }
     /**
      * Wrap the node(s) corresponding to the given ID(s) inside

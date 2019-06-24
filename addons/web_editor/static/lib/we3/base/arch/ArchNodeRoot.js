@@ -40,7 +40,7 @@ we3.ArchNodeRoot = class extends we3.ArchNode {
      * @override
      */
     remove () {
-        throw new Error("Can not remove the root");
+        console.warn("Cannot remove the root");
     }
     /**
      * @override

@@ -28,7 +28,7 @@ var ClassName = class {
      * @returns {string}
      */
     toString () {
-        return this.value.sort().join(' ');
+        return this.value.sort().join(' ').trim();
     }
 
     /**
@@ -46,7 +46,7 @@ var ClassName = class {
             var index = self.value.indexOf(className);
             if (index === -1) {
                 self.value.push(className);
-                self.archNode._triggerChange();
+                self.archNode._triggerChange(null);
             }
         });
     }
@@ -97,7 +97,7 @@ var ClassName = class {
             var index = self.value.indexOf(className);
             if (index !== -1) {
                 self.value.splice(index, 1);
-                self.archNode._triggerChange();
+                self.archNode._triggerChange(null);
             }
         });
     }
@@ -162,7 +162,7 @@ var Attributes = we3.Attributes = class {
         }
         if (this[name] + '' !== value + '') {
             this[name] = value;
-            this.archNode._triggerChange();
+            this.archNode._triggerChange(null);
         }
     }
     clear () {
@@ -215,7 +215,7 @@ var Attributes = we3.Attributes = class {
         var index = this.__order__.indexOf(name);
         if (index !== -1) {
             this.__order__.splice(index, 1);
-            this.archNode._triggerChange();
+            this.archNode._triggerChange(null);
         }
         delete this[name];
     }
@@ -283,7 +283,7 @@ var Style = class extends Attributes {
         }
         if (this[name] !== value) {
             this[name] = value;
-            this.archNode._triggerChange();
+            this.archNode._triggerChange(null);
         }
     }
     get length () {

@@ -734,7 +734,7 @@ var FontStylePlugin = class extends we3.AbstractPlugin {
         } else {
             this.dependencies.Arch.unwrapRangeFrom(we3.tags.format);
         }
-        // Reset the range if it was one a single node (otherwise let Arch handle it)
+        // Reset the range if it was across several node (otherwise let Arch handle it)
         if (range.scID !== range.ecID) {
             this.dependencies.Range.setRange(range);
         }

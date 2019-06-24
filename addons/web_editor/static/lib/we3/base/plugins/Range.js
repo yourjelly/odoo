@@ -89,6 +89,14 @@ var BaseRange = class extends we3.AbstractPlugin {
         });
     }
     /**
+     * Returns a list of all selected leaves in the range.
+     *
+     * @returns {ArchNode []}
+     */
+    getSelectedLeaves () {
+        return this.getSelectedNodes(node => !node.childNodes || !node.childNodes.length);
+    }
+    /**
      * Returns a list of all selected nodes in the range.
      * If a predicate function is included, only nodes meeting its
      * conditions will be returned.
@@ -98,19 +106,19 @@ var BaseRange = class extends we3.AbstractPlugin {
      */
     getSelectedNodes (pred) {
         var range = this.getRange();
-        var start = range.scArch;
-        var end = range.ecArch;;
-        if (!range.isCollapsed() && range.so === range.scArch.length()) {
+        var start = range.scArch.firstLeaf();
+        var end = range.ecArch.lastLeaf();
+        if (range.scID !== range.ecID && range.so === range.scArch.length()) {
             start = range.scArch.nextSibling() || range.scArch;
         }
-        if (!range.isCollapsed() && range.eo === 0) {
+        if (range.scID !== range.ecID && range.eo === 0) {
             end = range.scArch.previousSibling() || range.ecArch;
         }
         var selection = [];
         if (!pred || pred.call(start, start)) {
             selection.push(start);
         }
-        if (!range.isCollapsed()) {
+        if (range.scID !== range.ecID) {
             start.nextUntil(function (next) {
                 if (!pred || pred.call(next, next)) {
                     selection.push(next);
@@ -203,6 +211,7 @@ var BaseRange = class extends we3.AbstractPlugin {
         if (options.moveLeft || options.moveRight) {
             points = this._jumpOverVirtualText(points, options);
         }
+        points = this._moveToDeepest(points);
         points = this._moveOutOfNotEditable(points);
         points = this._moveOutOfUnbreakable(points, ltr);
         points = this._moveToDeepest(points);
@@ -458,7 +467,7 @@ var BaseRange = class extends we3.AbstractPlugin {
             });
             points = this._moveToDeepest(points);
         }
-        return points
+        return points;
     }
     /**
      * Move the points to their deepest children.
@@ -825,6 +834,14 @@ var Range = class extends we3.AbstractPlugin {
      */
     getRange () {
         return this.dependencies.BaseRange.getRange();
+    }
+    /**
+     * Returns a list of all selected leaves in the range.
+     *
+     * @returns {ArchNode []}
+     */
+    getSelectedLeaves () {
+        return this.dependencies.BaseRange.getSelectedLeaves();
     }
     /**
      * Returns a list of all selected nodes in the range.
