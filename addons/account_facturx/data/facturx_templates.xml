@@ -173,7 +173,7 @@
                     <!-- Delivery. Don't make a dependency with sale only for one field. -->
                     <ram:ApplicableHeaderTradeDelivery>
                         <ram:ShipToTradeParty
-                            t-if="'partner_shipping_id' in record._fields and record.partner_shipping_id">
+                            t-if="'sale_partner_shipping_id' in record._fields and record.sale_partner_shipping_id">
                             <t t-call="account_facturx.account_invoice_partner_facturx_export">
                                 <t t-set="partner" t-value="record.sale_partner_shipping_id"/>
                             </t>

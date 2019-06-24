@@ -3,7 +3,7 @@
 from odoo import api, models, fields, tools, _
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT, float_repr
 from odoo.tests.common import Form
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, except_orm
 
 from datetime import datetime
 from lxml import etree
@@ -57,14 +57,39 @@ class AccountMove(models.Model):
         amount_total_import = None
 
         if self._context.get('default_journal_id'):
-            journal = self.env['account.journal'].browse(self._context['default_journal_id'])
-            self_ctx = self.with_context(default_type='in_invoice' if journal.type == 'purchase' else 'out_invoice')
+            journal = self.env['account.journal'].browse(self.env.context['default_journal_id'])
+            default_type = 'out_invoice' if journal.type == 'sale' else 'in_invoice'
+        elif self._context.get('default_type'):
+            default_type = self._context['default_type']
         else:
-            self_ctx = self
+            raise UserError(_("No information about the journal or the type of invoice is passed"))
+
+        # Total amount.
+        elements = tree.xpath('//ram:GrandTotalAmount', namespaces=tree.nsmap)
+        total_amount = elements and float(elements[0].text) or 0.0
+
+        # Refund type.
+        # There is two modes to handle refund in Factur-X:
+        # a) type_code == 380 for invoice, type_code == 381 for refund, all positive amounts.
+        # b) type_code == 380, negative amounts in case of refund.
+        # To handle both, we consider the 'a' mode and switch to 'b' if a negative amount is encountered.
+        elements = tree.xpath('//rsm:ExchangedDocument/ram:TypeCode', namespaces=tree.nsmap)
+        type_code = elements[0].text
+
+        if type_code == '381':
+            default_type = 'out_refund' if default_type == 'out_invoice' else 'in_refund'
+            refund_sign = -1
+        else:
+            # Handle 'b' refund mode.
+            if total_amount < 0:
+                default_type = 'out_refund' if default_type == 'out_invoice' else 'in_refund'
+            refund_sign = -1 if 'refund' in default_type else 1
+
+        # Write the type as the journal entry is already created.
+        self.type = default_type
 
         # self could be a single record (editing) or be empty (new).
-        with Form(self_ctx) as invoice_form:
-
+        with Form(self.with_context(default_type=default_type)) as invoice_form:
             # Partner (first step to avoid warning 'Warning! You must first select a partner.').
             partner_type = invoice_form.journal_id.type == 'purchase' and 'SellerTradeParty' or 'BuyerTradeParty'
             elements = tree.xpath('//ram:'+partner_type+'/ram:SpecifiedTaxRegistration/ram:ID', namespaces=tree.nsmap)
@@ -94,23 +119,9 @@ class AccountMove(models.Model):
             if elements:
                 invoice_form.narration = elements[0].text
 
-            # Refund type.
-            # There is two modes to handle refund in Factur-X:
-            # a) type_code == 380 for invoice, type_code == 381 for refund, all positive amounts.
-            # b) type_code == 380, negative amounts in case of refund.
-            # To handle both, we consider the 'a' mode and switch to 'b' if a negative amount is encountered.
-            elements = tree.xpath('//rsm:ExchangedDocument/ram:TypeCode', namespaces=tree.nsmap)
-            type_code = elements[0].text
-            refund_sign = type_code == '380' and 1 or -1
-
             # Total amount.
             elements = tree.xpath('//ram:GrandTotalAmount', namespaces=tree.nsmap)
             if elements:
-                total_amount = float(elements[0].text)
-
-                # Handle 'b' refund mode.
-                if total_amount < 0 and type_code == '380':
-                    refund_sign = -1
 
                 # Currency.
                 if elements[0].attrib.get('currencyID'):
@@ -204,12 +215,6 @@ class AccountMove(models.Model):
                     invoice_line_form.quantity = 1
                     invoice_line_form.price_unit = amount_total_import
 
-            # Refund.
-            if journal.type == 'purchase':
-                invoice_form.type = 'in_refund' if refund_sign == -1 else 'in_invoice'
-            else:
-                invoice_form.type = 'out_refund' if refund_sign == -1 else 'out_invoice'
-
         return invoice_form.save()
 
     @api.multi
@@ -276,7 +281,8 @@ class AccountMove(models.Model):
 
                             self._import_facturx_invoice(tree)
                             buffer.close()
-
+            except except_orm as e:
+                raise e
             except Exception as e:
                 # Malformed pdf
                 _logger.exception(e)
