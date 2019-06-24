@@ -471,7 +471,7 @@ var BaseArch = class extends we3.AbstractPlugin {
         ids.forEach(function (id) {
             self.getArchNode(id).unwrap();
         });
-        // select all unwrapped
+        // render and select all unwrapped
         var range = ids.length ? this.dependencies.BaseRange.rangeOn(ids[0], ids[ids.length - 1]) : {};
         this._updateRendererFromChanges(range);
     }
@@ -499,8 +499,20 @@ var BaseArch = class extends we3.AbstractPlugin {
                 a.parent.split(a.index() + 1, true);
                 return a.parent.nodeName === unwrapInfo.wrapperName;
             });
-            self.unwrap(ancestorToUnwrap.id);
+            ancestorToUnwrap.unwrap();
         });
+        var unwrapped = we3.utils.uniq(
+            toUnwrap.map(unwrapInfo => unwrapInfo.node)
+                .filter(node => node && node.isInArch())
+        );
+        unwrapped = we3.utils.uniq(unwrapped);
+        var range;
+        if (unwrapped.length) {
+            var scArch = unwrapped[0];
+            var ecArch = unwrapped[unwrapped.length - 1];
+            range = this.dependencies.BaseRange.rangeOn(scArch, ecArch);
+        }
+        this._updateRendererFromChanges(range);
     }
     /**
      * Unwrap every node in range from their first ancestor
@@ -510,8 +522,11 @@ var BaseArch = class extends we3.AbstractPlugin {
      * Eg: `<p><b>te◆xt</b></p> => <p><b>te</b>◆<b>xt</b></p>`
      *
      * @param {string|string []} wrapperName
+     * @param {object} [options]
+     * @param {boolean} [options.doNotSplit] true to unwrap the full nodes without splitting them
      */
-    unwrapRangeFrom (wrapperName) {
+    unwrapRangeFrom (wrapperName, options) {
+        options = options || {};
         var range = this.dependencies.BaseRange.getRange();
         var start, end;
         if (range.isCollapsed()) {
@@ -519,12 +534,13 @@ var BaseArch = class extends we3.AbstractPlugin {
             this.insert(start);
         } else {
             var ecArch = this.getArchNode(range.ecID);
-            end = ecArch.split(range.eo) || ecArch;
+            end = options.doNotSplit ? ecArch : ecArch.split(range.eo) || ecArch;
             var scArch = this.getArchNode(range.scID)
-            start = scArch.split(range.so) || scArch;
+            start = options.doNotSplit ? scArch : scArch.split(range.so) || scArch;
         }
         var selectedNodes = this._getNodesBetween(start, end, {
             includeStart: true,
+            includeEnd: !!options.doNotSplit,
         });
         this.unwrapFrom(selectedNodes.map((node) => node.id), wrapperName);
     }
@@ -542,15 +558,14 @@ var BaseArch = class extends we3.AbstractPlugin {
         this._resetChange();
         var ids = Array.isArray(id) ? id : [id];
         // wrap
-        var newParents = [];
-        ids.forEach((id) => newParents.push(self.getArchNode(id).wrap(wrapperName)));
-        newParents = newParents.filter((parent) => parent && parent.isInArch());
-        // select every wrapped node
+        var newParents = ids.map(id => self.getArchNode(id).wrap(wrapperName));
+        newParents = newParents.filter(parent => parent.isInArch());
+        // render and select every wrapped node
         var scArch = newParents[0].firstLeaf();
         var ecArch = newParents[newParents.length - 1].lastLeaf();
         var range = this.dependencies.BaseRange.rangeOn(scArch, ecArch);
         this._updateRendererFromChanges(range);
-        return newParents;
+        return newParents.map(node => node.id);
     }
     /**
      * Wrap every node in range into a new node with the given nodeName (`wrapperName`).
@@ -559,23 +574,34 @@ var BaseArch = class extends we3.AbstractPlugin {
      * Eg: `<p>te◆xt</p> => <p>te<b>◆</b>xt</p>`
      *
      * @param {string} wrapperName
+     * @param {object} [options]
+     * @param {function} [options.wrapAncestorPred] if specified, wrap the selected node's first ancestors that match the predicate
+     * @param {boolean} [options.doNotSplit] true to wrap the full nodes without splitting them
+     * @returns {number []} ids of the genereated wrappers
      */
-    wrapRange (wrapperName) {
+    wrapRange (wrapperName, options) {
+        options = options || {};
         var range = this.dependencies.BaseRange.getRange();
         var ecArch = this.getArchNode(range.ecID);
-        var end = ecArch.split(range.eo) || ecArch;
+        var end = options.doNotSplit ? ecArch : ecArch.split(range.eo) || ecArch;
         var scArch = this.getArchNode(range.scID)
-        var start = scArch.split(range.so) || scArch;
+        var start = options.doNotSplit ? scArch : scArch.split(range.so) || scArch;
 
         var toWrap = this._getNodesBetween(start, end, {
             includeStart: true,
+            includeEnd: !!options.doNotSplit,
         });
+        if (options.wrapAncestorPred) {
+            toWrap = toWrap.map(node => node.ancestor(ancestor => options.wrapAncestorPred(ancestor)))
+                           .filter(node => node && node.isInArch());
+            toWrap = we3.utils.uniq(toWrap);
+        }
         if (!toWrap.length) {
             var virtual = this.createArchNode();
             this.insert(virtual);
             toWrap = [virtual];
         }
-        return this.wrap(toWrap.map((node) => node.id), wrapperName);
+        return this.wrap(toWrap.map(node => node.id), wrapperName);
     }
 
     //--------------------------------------------------------------------------
@@ -687,7 +713,9 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @returns {ArchNode []}
      */
     _getNodesBetween (start, end, options) {
-        var options = options || {};
+        options = options || {};
+        start = start.firstLeaf();
+        end = end.lastLeaf();
         var nodes = [];
         if (options.includeStart && start.isInArch()) {
             nodes.push(start);
@@ -735,7 +763,7 @@ var BaseArch = class extends we3.AbstractPlugin {
                 var isToUnwrapFromParent = a.parent && wrapperNames.indexOf(a.parent.nodeName) !== -1;
                 if (isToUnwrapFromParent) {
                     descendentsToUnwrap.push({
-                        node: node,
+                        id: node.id,
                         wrapperName: a.parent.nodeName,
                     });
                 }
@@ -746,7 +774,16 @@ var BaseArch = class extends we3.AbstractPlugin {
             descendentsToUnwrap.reverse();
             toUnwrap = toUnwrap.concat(descendentsToUnwrap);
         });
-        return toUnwrap;
+        // We want a single ID only once with the same wrapper name
+        // but we want to return the nodes, not the IDs.
+        return we3.utils.uniq(toUnwrap, {
+            deepCompare: true,
+        }).map(function (unwrapInfo) {
+            return {
+                node: self.getArchNode(unwrapInfo.id),
+                wrapperName: unwrapInfo.wrapperName,
+            }
+        });
     }
     /**
      * Create an ArchNode and its children from a JSON representation.
@@ -1467,6 +1504,7 @@ var Arch = class extends we3.AbstractPlugin {
      *
      * @param {Number|Number []} [id]
      * @param {String} wrapperName
+     * @returns {number []} ids of the genereated wrappers
      */
     wrap (id, wrapperName) {
         return this.dependencies.BaseArch.wrap(id, wrapperName);
@@ -1478,9 +1516,13 @@ var Arch = class extends we3.AbstractPlugin {
      * Eg: `<p>te◆xt</p> => <p>te<b>◆</b>xt</p>`
      *
      * @param {string} wrapperName
+     * @param {object} [options]
+     * @param {function} [options.wrapAncestorPred] if specified, wrap the selected node's first ancestors that match the predicate
+     * @param {boolean} [options.doNotSplit] true to wrap the full nodes without splitting them
+     * @returns {number []} ids of the genereated wrappers
      */
-    wrapRange (wrapperName) {
-        return this.dependencies.BaseArch.wrapRange(wrapperName);
+    wrapRange (wrapperName, options) {
+        return this.dependencies.BaseArch.wrapRange(wrapperName, options);
     }
 };
 

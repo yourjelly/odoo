@@ -55,7 +55,8 @@ var LinkCreate = class extends we3.AbstractPlugin {
         if (linkInfo.isAnchor) {
             anchor = linkInfo.anchor;
         } else {
-            anchor = this.dependencies.Arch.wrapRange('A')[0];
+            var anchorID = this.dependencies.Arch.wrapRange('A')[0];
+            anchor = this.dependencies.Arch.getNode(anchorID);
         }
 
         if (!linkInfo.node.isVoidoid()) {
@@ -82,6 +83,7 @@ var LinkCreate = class extends we3.AbstractPlugin {
 
         this.dependencies.Arch.importUpdate([anchor.toJSON()]);
 
+        anchor = this.dependencies.Arch.getNode(anchor.id);
         var nextSibling = anchor.lastChild().next();
         if (!nextSibling.id) {
             this.dependencies.Arch.insertAfter(nextSibling, anchor.id);
