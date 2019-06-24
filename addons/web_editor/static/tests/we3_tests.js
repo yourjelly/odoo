@@ -79,6 +79,7 @@ QUnit.module('web_editor', {
     var testPlugins = {
         TestPopover: false,
         TestRange: false,
+        TestRenderer: false,
         TestArchAndRules: false,
         TestToolbarWand: false,
         TestToolbarFontStyle: false,
@@ -123,8 +124,16 @@ QUnit.module('web_editor', {
         };
         await createFormAndTest(this);
     });
+    QUnit.test('renderer', async function (assert) {
+        assert.expect(10);
+        this.testOptions = {
+            assert: assert,
+            plugins: Object.assign({}, testPlugins, {TestRenderer: true}),
+        };
+        await createFormAndTest(this);
+    });
     QUnit.test('change range with arrow', async function (assert) {
-        assert.expect(16);
+        assert.expect(17);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, testPlugins, {TestKeyboardArrow: true}),

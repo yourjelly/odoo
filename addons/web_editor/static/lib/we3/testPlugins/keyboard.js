@@ -84,6 +84,9 @@ var TestKeyboard = class extends we3.AbstractPlugin {
      */
     async _execStep (assert, step, testName) {
         var self = this;
+        if (step.do) {
+            return step.do();
+        }
         return new Promise(function (resolve) {
             if (step.start) {
                 self._testSelect(assert, step, testName)

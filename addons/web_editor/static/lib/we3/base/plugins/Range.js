@@ -319,14 +319,18 @@ var BaseRange = class extends we3.AbstractPlugin {
         var end = this.dependencies.BaseArch.getArchNode(points.ecID);
         var isCollapsed = points.scID === points.ecID && points.so === points.eo;
         if (options.moveLeft && start.type === 'TEXT-VIRTUAL') {
-            var prev = start.prevUntil(a => a.type !== 'TEXT-VIRTUAL', {doCrossUnbreakables: true});
-            points.scID = prev.id;
-            points.so = prev.length();
+            var prev = start.prevUntil(a => a.type !== 'TEXT-VIRTUAL', {doCrossUnbreakables: true, doNotInsertVirtual: true});
+            if (prev) {
+                points.scID = prev.id;
+                points.so = prev.length();
+            }
         }
         if (options.moveRight && end.type === 'TEXT-VIRTUAL') {
-            var next = end.nextUntil(a => a.type !== 'TEXT-VIRTUAL', {doCrossUnbreakables: true});
-            points.ecID = next.id;
-            points.eo = next.isText() ? 1 : 0;
+            var next = end.nextUntil(a => a.type !== 'TEXT-VIRTUAL', {doCrossUnbreakables: true, doNotInsertVirtual: true});
+            if (next) {
+                points.ecID = next.id;
+                points.eo = next.isText() ? 1 : 0;
+            }
         }
         if (isCollapsed) {
             if (options.moveLeft) {

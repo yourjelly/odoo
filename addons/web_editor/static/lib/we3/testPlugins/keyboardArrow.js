@@ -31,6 +31,14 @@ var TestKeyboardArrow = class extends we3.AbstractPlugin {
                 test: "<p>dom to◆ edit</p>",
             },
             {
+                name: "RIGHT at end",
+                content: "<p>dom to edit◆</p>",
+                steps: [{
+                    key: 'RIGHT',
+                }],
+                test: "<p>dom to edit◆</p>",
+            },
+            {
                 name: "LEFT with on virtual text node",
                 content: "<p>dom t\uFEFF◆o edit</p>",
                 steps: [{

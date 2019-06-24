@@ -374,28 +374,13 @@ var TestPlugin = class extends we3.AbstractPlugin {
             range.scArch.insert(new TEST(params, null, null, rangeStart), range.so);
         }
 
-        if (!archNodeId) {
-            var containers = [];
-            root.nextUntil(function (a) {
-                if (a.id !== -1 && a.isRoot()) {
-                    containers.push(a);
-                }
-            });
-            if (containers.length !== 1) {
-                throw new Error("Multiple test containers found");
-            }
-            archNodeId = containers[0].id;
-        }
-
-        var result = this.dependencies.Arch.getNode(archNodeId).toString();
+        var result = this.dependencies.Arch.getNode(this._getTestContainer(archNodeId)).toString();
 
         Arch.getNode(1, true); // trash the previous clone
 
         return result
             .replace(/^<[^>]+>/, '').replace(/<\/[^>]+>$/, '') // remove container
-            .replace(regExpRangeToCollapsed, rangeCollapsed)
-            .replace(regSpace, '&nbsp;')
-            .replace(regInvisible, '&#65279;');
+            .replace(regExpRangeToCollapsed, rangeCollapsed);
     }
     /**
      * Trigger a keydown event on the target.
@@ -510,6 +495,15 @@ var TestPlugin = class extends we3.AbstractPlugin {
         this.dependencies.Range.setRange(range);
         var newRange = this.dependencies.Range.getRange();
         this.triggerNativeEvents(newRange.sc, ['mousedown', 'focus', 'click', 'mouseup']);
+    }
+    /**
+     * Set the range in the editor and make sure to focus the editor.
+     *
+     * @param {Object} range
+     */
+    async setRangeFromDOM (sc, so, ec, eo) {
+        this._selectRange(sc, so, sc, eo == null ? so : eo);
+        await this.triggerNativeEvents(sc, ['mousedown', 'focus', 'click', 'mouseup']);
     }
     /**
      * Set the editor's value.
@@ -710,6 +704,18 @@ var TestPlugin = class extends we3.AbstractPlugin {
     //--------------------------------------------------------------------------
 
     /**
+     * clean the value for testing, display space, virtual...
+     *
+     * @private
+     * @param {archNodeId|null} json
+     * @returns {archNodeId}
+     */
+    _cleanValue (value) {
+        return value
+            .replace(regSpace, '&nbsp;')
+            .replace(regInvisible, '&#65279;');
+    }
+    /**
      * Exec a test's value test.
      *
      * @private
@@ -718,13 +724,42 @@ var TestPlugin = class extends we3.AbstractPlugin {
      * @returns {Boolean}
      */
     _execAssert (assert, test) {
+        var ok = false;
         if (test.test) {
             var value = this.getValue();
-            if (assert.strictEqual(value, test.test, test.name)) {
-                return true;
+            if (assert.strictEqual(this._cleanValue(value), this._cleanValue(test.test), test.name)) {
+                ok = true;
             }
         }
-        return false;
+        if (test.testDOM) {
+            var el = this.dependencies.Renderer.getElement(this._getTestContainer());
+            if (assert.strictEqual(this._cleanValue(el.innerHTML), this._cleanValue(test.testDOM), test.name)) {
+                ok = true;
+            }
+        }
+        return ok;
+    }
+    /**
+     * Return the test container id
+     *
+     * @private
+     * @param {archNodeId|null} json
+     * @returns {archNodeId}
+     */
+    _getTestContainer (archNodeId) {
+        if (!archNodeId) {
+            var containers = [];
+            this.dependencies.Arch.getNode(1).nextUntil(function (a) {
+                if (a.id !== -1 && a.isRoot()) {
+                    containers.push(a);
+                }
+            });
+            if (containers.length !== 1) {
+                throw new Error("Multiple test containers found");
+            }
+            archNodeId = containers[0].id;
+        }
+        return archNodeId;
     }
     /**
      * Return true if the node being tested is virtual.
@@ -762,6 +797,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
         try {
             await Promise.all([plugin.test(this.assert)]);
         } catch (e) {
+            console.debug(e.stack);
             this.assert.notOk(e, 'ERROR');
         }
         this._logFinalResult();
