@@ -500,7 +500,7 @@ var PopoverPlugin = class extends we3.AbstractPlugin {
      * @private
      */
     _onFocusNode (focusNode) {
-        if (this._focusNode && focusNode.isText() && this._focusNode.isText() && focusNode.parent.id === this._focusNode.parent.id) {
+        if (this._focusNode && this._focusNode.parent && focusNode.parent && focusNode.isText() && this._focusNode.isText() && focusNode.parent.id === this._focusNode.parent.id) {
             return;
         }
         this._updatePopovers(focusNode);
