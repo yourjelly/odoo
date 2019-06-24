@@ -39,15 +39,13 @@ var TestRenderer = class extends we3.AbstractPlugin {
                         var p = self.editable.querySelector('test-container p');
                         var bold = self.editor.querySelector('we3-button[data-method="formatText"][data-value="b"]');
                         await self.dependencies.Test.triggerNativeEvents(bold, ['mousedown', 'click', 'mouseup']);
-                        self.dependencies.Test.setRangeFromDOM(p.lastChild, 0);
+                        self.dependencies.Test.setRangeFromDOM(p.lastChild, 1);
                     }
-                }, {
-                    key: 'RIGHT',
                 }, {
                     key: 'ENTER',
                 }],
                 test: '<p><b>dom to edit</b></p><p><br/>◆</p><p>other content</p>',
-                // testDOM: '<p><b>dom to edit</b></p><p><br></p><p>other content</p>', fail
+                testDOM: '<p>\uFEFF<b>dom to edit</b></p><p><br></p><p>other content</p>', // todo: remove useless virtual
             },
         ];
     }

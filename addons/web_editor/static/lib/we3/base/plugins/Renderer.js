@@ -167,7 +167,7 @@ var BaseRenderer = class extends we3.AbstractPlugin {
                 el = document.createElement(json.nodeName);
             }
         } else { // virtual node can mutate or try to use a free element
-            var isText = 'nodeValue' in json;
+            var isText = 'nodeValue' in json && !json.nodeName;
             if (el.tagName && isText) {
                 if (el.parentNode) {
                     el.parentNode.removeChild(el);

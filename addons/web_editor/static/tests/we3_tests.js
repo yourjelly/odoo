@@ -125,7 +125,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('renderer', async function (assert) {
-        assert.expect(10);
+        assert.expect(11);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, testPlugins, {TestRenderer: true}),
