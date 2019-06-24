@@ -88,6 +88,7 @@ QUnit.module('web_editor', {
         TestToolbarIndent: false,
         TestToolbarLink: false,
         TestToolbarList: false,
+        TestToolbarMedia: false,
         TestToolbarParagraph: false,
         TestKeyboardUnbreakable: false,
         TestKeyboardTab: false,
@@ -108,6 +109,33 @@ QUnit.module('web_editor', {
             model: 'note.note',
             data: self.data,
             arch: '<form><field name="body" widget="html" style="height: 100px"/></form>',
+            mockRPC: function (route, args) {
+                if (route.indexOf('data:image/png;base64') === 0) {
+                    return Promise.resolve();
+                }
+                if (route.indexOf('youtube') !== -1) {
+                    return Promise.resolve();
+                }
+                if (route.indexOf('/web_editor/static/src/img/') === 0) {
+                    return Promise.resolve();
+                }
+                if (route === '/web_editor/attachment/add_url') {
+                    return Promise.resolve({
+                        id: 1,
+                        public: true,
+                        name: 'image',
+                        mimetype: 'image/png',
+                        checksum: false,
+                        url: '/web_editor/static/src/img/transparent.png',
+                        image_src: '/web_editor/static/src/img/transparent.png',
+                        type: 'url',
+                        res_id: 0,
+                        res_model: false,
+                        access_token: false,
+                    });
+                }
+                return this._super(route, args);
+            },
         });
         await promise;
         form.destroy();
@@ -345,6 +373,17 @@ QUnit.module('web_editor', {
                 TestKeyboardChar: true,
             }),
             toolbar: toolbarDropBlock,
+        };
+        await createFormAndTest(this);
+    });
+
+    QUnit.module('Media');
+
+    QUnit.test('Image', async function (assert) {
+        assert.expect(17);
+        this.testOptions = {
+            assert: assert,
+            plugins: Object.assign({}, testPlugins, { TestToolbarMedia: true }),
         };
         await createFormAndTest(this);
     });
