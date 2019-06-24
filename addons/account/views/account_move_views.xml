@@ -455,8 +455,8 @@
                         <button name="%(action_view_account_move_reversal)d" string="Reverse Entry"
                                 type="action" groups="account.group_account_invoice"
                                 attrs="{'invisible': ['|', ('type', '!=', 'entry'), ('state', '!=', 'posted')]}"/>
-                        <button name="%(action_view_account_move_reversal)d" string='Add Credit Note'
-                                type='action' groups="account.group_account_invoice"
+                        <button name="action_reverse" string='Add Credit Note'
+                                type='object' groups="account.group_account_invoice"
                                 attrs="{'invisible': ['|', ('type', 'not in', ('out_invoice', 'in_invoice')), ('state', '!=', 'posted')]}"/>
                         <!-- Cancel -->
                         <field name="state" widget="statusbar" statusbar_visible="draft,posted"/>
@@ -715,7 +715,7 @@
                                                domain="[('type_tax_use', '=?', parent.invoice_filter_type_domain)]"
                                                context="{'append_type_to_tax_name': not parent.invoice_filter_type_domain}"
                                                options="{'no_create': True}"
-                                               attrs="{'invisible': [
+                                               attrs="{'readonly': [
                                                     '|', '|',
                                                     ('display_type', 'in', ('line_section', 'line_note')),
                                                     ('tax_line_id', '!=', False),

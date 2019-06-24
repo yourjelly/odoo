@@ -1108,11 +1108,12 @@ class AccountMove(models.Model):
         for move in self:
             move.invoice_outstanding_credits_debits_widget = json.dumps(False)
 
-            if move.state != 'posted' or move.type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'):
+            if move.state != 'posted' or move.invoice_payment_state != 'not_paid' or not move._is_invoice():
                 continue
             pay_term_line_ids = move.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
 
             domain = [('account_id', 'in', pay_term_line_ids.mapped('account_id').ids),
+                      ('state', '=', 'posted'),
                       ('partner_id', '=', move.commercial_partner_id.id),
                       ('reconciled', '=', False), '|', ('amount_residual', '!=', 0.0),
                       ('amount_residual_currency', '!=', 0.0)]
@@ -1897,6 +1898,15 @@ class AccountMove(models.Model):
                 # to have to reconcile all the older payments -made before
                 # installing Accounting- with bank statements)
                 move.company_id.account_bank_reconciliation_start = move.date
+
+    @api.multi
+    def action_reverse(self):
+        action = self.env.ref('account.action_view_account_move_reversal').read()[0]
+
+        if self.type in ('out_invoice', 'out_receipt', 'in_invoice', 'in_receipt'):
+            action['name'] = _('Credit Note')
+
+        return action
 
     @api.multi
     def action_post(self):
