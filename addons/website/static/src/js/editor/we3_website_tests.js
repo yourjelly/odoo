@@ -262,7 +262,7 @@ QUnit.module('website', {
         await wysiwyg.editor._editor._pluginsManager.call('Test', 'keydown', [target, {keyCode: 13}]);
 
         await wysiwyg.save().then(function (result) {
-            var area = result.arch.descendent('isWebsiteEditable');
+            var area = result.arch.descendents('isWebsiteEditable');
             assert.strictEqual(area.length, 10, "Should have some edition area");
             var dirty = area.filter(function (a) { return a.className.contains('o_dirty'); });
             assert.strictEqual(dirty.length, 1, "Should have only one dirty area");
