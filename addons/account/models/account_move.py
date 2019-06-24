@@ -133,7 +133,7 @@ class AccountMove(models.Model):
         inverse='_inverse_amount_total')
     amount_residual = fields.Monetary(string='Amount Due', store=True,
         compute='_compute_amount')
-    amount_untaxed_signed = fields.Monetary(string='Untaxed Amount Signed', store=True, readonly=True, tracking=True,
+    amount_untaxed_signed = fields.Monetary(string='Untaxed Amount Signed', store=True, readonly=True,
         compute='_compute_amount')
     amount_tax_signed = fields.Monetary(string='Tax Signed', store=True, readonly=True,
         compute='_compute_amount')
@@ -1360,6 +1360,9 @@ class AccountMove(models.Model):
 
     @api.multi
     def _move_autocomplete_invoice_lines_values(self):
+        ''' This method recomputes dynamic lines on the current journal entry that include taxes, cash rounding
+        and payment terms lines.
+        '''
         self.ensure_one()
 
         line_currency = self.currency_id if self.currency_id != self.company_id.currency_id else False
@@ -1435,6 +1438,14 @@ class AccountMove(models.Model):
 
     @api.multi
     def _move_autocomplete_invoice_lines_write(self, vals):
+        ''' During the write of an account.move with only 'invoice_line_ids' set and not 'line_ids', this method is called
+        to auto compute accounting lines of the invoice. In that case, accounts will be retrieved and taxes, cash rounding
+        and payment terms will be computed. At the end, the values will contains all accounting lines in 'line_ids'
+        and the moves should be balanced.
+
+        :param vals_list:   A python dict representing the values to write.
+        :return:            True if the auto-completion did something, False otherwise.
+        '''
         enable_autocomplete = 'invoice_line_ids' in vals and 'line_ids' not in vals and True or False
 
         if not enable_autocomplete:
@@ -1456,7 +1467,7 @@ class AccountMove(models.Model):
 
         moves = super(AccountMove, self).create(vals_list)
 
-        # Trigger 'action_invoice_paid'.
+        # Trigger 'action_invoice_paid' when the invoice is directly paid at its creation.
         moves.filtered(lambda move: move.type in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')
                                     and move.invoice_payment_state in ('paid', 'in_payment')).action_invoice_paid()
 
@@ -1478,7 +1489,7 @@ class AccountMove(models.Model):
             # 'check_move_validity' is needed as the write will be done line per line.
             self._check_move_consistency()
 
-        # Trigger 'action_invoice_paid'.
+        # Trigger 'action_invoice_paid' when the invoice becomes paid after a write.
         not_paid_invoices.filtered(lambda move: move.invoice_payment_state in ('paid', 'in_payment')).action_invoice_paid()
 
         return res
@@ -1515,14 +1526,14 @@ class AccountMove(models.Model):
         # OVERRIDE to add custom subtype depending of the state.
         self.ensure_one()
 
-        if self.type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'):
+        if self.type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'):
             return super(AccountMove, self)._track_subtype(init_values)
 
         if 'invoice_payment_state' in init_values and self.invoice_payment_state == 'paid':
             return self.env.ref('account.mt_invoice_paid')
-        elif 'state' in init_values and self.state == 'posted' and self.type in ('out_invoice', 'out_refund'):
+        elif 'state' in init_values and self.state == 'posted' and self.type in ('out_invoice', 'out_refund', 'out_receipt'):
             return self.env.ref('account.mt_invoice_validated')
-        elif 'state' in init_values and self.state == 'draft' and self.type in ('out_invoice', 'out_refund'):
+        elif 'state' in init_values and self.state == 'draft' and self.type in ('out_invoice', 'out_refund', 'out_receipt'):
             return self.env.ref('account.mt_invoice_created')
         return super(AccountMove, self)._track_subtype(init_values)
 
@@ -1602,6 +1613,9 @@ class AccountMove(models.Model):
 
     @api.multi
     def _get_sequence(self):
+        ''' Return the sequence to be used during the post of the current move.
+        :return: An ir.sequence record or False.
+        '''
         self.ensure_one()
 
         journal = self.journal_id
@@ -1613,7 +1627,10 @@ class AccountMove(models.Model):
 
     @api.multi
     def _get_invoice_display_name(self, show_ref=False):
-        ''' Helper to get the display name of an invoice depending of its type. '''
+        ''' Helper to get the display name of an invoice depending of its type.
+        :param show_ref:    A flag indicating of the display name must include or not the journal entry reference.
+        :return:            A string representing the invoice.
+        '''
         self.ensure_one()
         if self.state == 'draft':
             return {
@@ -1629,13 +1646,17 @@ class AccountMove(models.Model):
 
     @api.multi
     def _get_invoice_delivery_partner_id(self):
-        ''' Hook allowing to retrieve the right delivery address depending of installed modules. '''
+        ''' Hook allowing to retrieve the right delivery address depending of installed modules.
+        :return: A res.partner record's id representing the delivery address.
+        '''
         self.ensure_one()
         return self.partner_id.address_get(['delivery'])['delivery']
 
     @api.multi
     def _get_invoice_intrastat_country_id(self):
-        ''' Hook allowing to retrieve the intrastat country depending of installed modules. '''
+        ''' Hook allowing to retrieve the intrastat country depending of installed modules.
+        :return: A res.country record's id.
+        '''
         self.ensure_one()
         return self.partner_id.country_id.id
 
