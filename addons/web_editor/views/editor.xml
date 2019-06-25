@@ -71,6 +71,7 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/FullScreen.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Modal.js"/>
 
+    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/insert/List.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/insert/Media.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/insert/Upload.js"/>
 
@@ -123,7 +124,6 @@
     <!-- plugins insert -->
 
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/insert/link.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/insert/list.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/insert/media.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/insert/table.js"/>
     <!-- <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/insert/hint.js"/> -->
