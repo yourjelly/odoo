@@ -440,14 +440,7 @@ var isBrowse = {
      * @returns {Boolean}
      */
     isLeftEdgeOf: function (ancestor, ignoreVirtual) {
-        var node = this;
-        while (node && node !== ancestor) {
-            if (!node.isLeftEdge(ignoreVirtual)) {
-                return false;
-            }
-            node = node.parent;
-        }
-        return true;
+        return this.isLeftEdgeOfPred(node => node === ancestor, ignoreVirtual);
     },
     /**
      * Return true if the node is the left-most node of a block.
@@ -456,8 +449,18 @@ var isBrowse = {
      * @returns {Boolean}
      */
     isLeftEdgeOfBlock: function (ignoreVirtual) {
+        return this.isLeftEdgeOfPred(node => node.isBlock(), ignoreVirtual);
+    },
+    /**
+     * Return true if the node is the left-most node of a node matching the predicate function.
+     *
+     * @param {Function} pred
+     * @param {Boolean} [ignoreVirtual] true to ignore virtual text nodes
+     * @returns {Boolean}
+     */
+    isLeftEdgeOfPred: function (pred, ignoreVirtual) {
         var node = this;
-        while (node && !node.isBlock()) {
+        while (node && !pred(node)) {
             if (!node.isLeftEdge(ignoreVirtual)) {
                 return false;
             }
@@ -471,7 +474,7 @@ var isBrowse = {
      * @returns {Boolean}
      */
     isParentOfIndentedList: function () {
-        return this.isLi() && this.firstChild().isList();
+        return this.isLi() && this.firstChild() && this.firstChild().isList();
     },
     /**
      * Return true if the node is on a right edge (ignoring invisible text).
@@ -499,14 +502,7 @@ var isBrowse = {
      * @returns {Boolean}
      */
     isRightEdgeOf: function (ancestor, ignoreVirtual) {
-        var node = this;
-        while (node && node !== ancestor) {
-            if (!node.isRightEdge(ignoreVirtual)) {
-                return false;
-            }
-            node = node.parent;
-        }
-        return true;
+        return this.isRightEdgeOfPred(node => node === ancestor, ignoreVirtual);
     },
     /**
      * Return true if the node is the right-most node of a block.
@@ -515,8 +511,18 @@ var isBrowse = {
      * @returns {Boolean}
      */
     isRightEdgeOfBlock: function (ignoreVirtual) {
+        return this.isRightEdgeOfPred(node => node.isBlock(), ignoreVirtual);
+    },
+    /**
+     * Return true if the node is the right-most node of a node matching the predicate function.
+     *
+     * @param {Function} pred
+     * @param {Boolean} [ignoreVirtual] true to ignore virtual text nodes
+     * @returns {Boolean}
+     */
+    isRightEdgeOfPred: function (pred, ignoreVirtual) {
         var node = this;
-        while (node && !node.isBlock()) {
+        while (node && !pred(node)) {
             if (!node.isRightEdge(ignoreVirtual)) {
                 return false;
             }

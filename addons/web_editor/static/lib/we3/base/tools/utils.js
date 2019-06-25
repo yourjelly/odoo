@@ -166,6 +166,42 @@ we3.utils = {
         }
     },
     /**
+     * Return true if two objects are deep equal.
+     * Do not traverse ArchNodes: compare stringified JSON representations.
+     *
+     * @private
+     * @param {object} obj1
+     * @param {object} obj2
+     * @returns {boolean}
+     */
+    deepCompare: function (obj1, obj2) {
+        var self = this;
+        var isEqual = Object.keys(obj1).every(function (key) {
+            if (obj1.hasOwnProperty(key) !== obj2.hasOwnProperty(key)) {
+                return typeof obj1[key] === 'undefined';
+            }
+            if (obj1[key] instanceof we3.ArchNode) {
+                var json1 = obj1[key].toJSON();
+                var isObj2ArchNode = obj2[key] instanceof we3.ArchNode;
+                var json2 = isObj2ArchNode && obj2[key].toJSON();
+                return  isObj2ArchNode && JSON.stringify(json1) === JSON.stringify(json2);
+            }
+            switch (typeof obj1[key]) {
+                case 'object':
+                    if (obj1[key] === null) {
+                        return obj2[key] === null;
+                    }
+                    return self.deepCompare(obj1[key], obj2[key]);
+                case 'function':
+                    return typeof obj2[key] !== 'undefined' && obj1[key].toString() === obj2[key].toString();
+                default:
+                    return obj1[key] === obj2[key];
+            }
+        });
+        // Check `obj2` for extra properties
+        return isEqual && Object.keys(obj2).every(key => typeof obj1[key] !== 'undefined' || typeof obj2[key] === 'undefined');
+    },
+    /**
      * Freeze an object and all its properties and return the frozen object.
      *
      * @private
@@ -354,15 +390,28 @@ we3.utils = {
         };
     },
     /**
-     * Produces a duplicate-free version of the array, using === to test object equality.
+     * Produces a duplicate-free version of the array, using `===` to test object equality.
      * In particular only the first occurrence of each value is kept.
      *
      * @param {any []} array
+     * @param {object} [options]
+     * @param {boolean} [options.deepCompare] true to check objects for deep equality
      * @returns {any []}
      */
-    uniq: function (array) {
-        return array.filter(function (value, index, self) {
-            return self.indexOf(value) === index;
+    uniq: function (array, options) {
+        var self = this;
+        options = options || {};
+        return array.filter(function (value, index) {
+            var indexOfValue;
+            if (typeof value !== 'object' || !options.deepCompare) {
+                indexOfValue = array.indexOf(value)
+            } else {
+                indexOfValue = array.map(function (val, i) {
+                    return self.deepCompare(value, val) && i;
+                }).filter(val => val || val === 0);
+                indexOfValue = indexOfValue.length ? indexOfValue[0] : -1;
+            }
+            return indexOfValue === index;
         });
     },
 };

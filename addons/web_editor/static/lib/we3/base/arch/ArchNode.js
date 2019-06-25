@@ -724,7 +724,7 @@ we3.ArchNode = class {
                     isLeft = !isLeft;
                 }
                 next = next[isLeft ? 'lastChild' : 'firstChild'](function (descendent) {
-                    return descendent.parent.isLi();
+                    return descendent.parent.isLi() && !descendent.isList();
                 });
                 next = next.isText() ? next.wrap('p') : next;
                 if (isLeft) {
@@ -923,7 +923,8 @@ we3.ArchNode = class {
             return this;
         }
         var right = this.split(offset) || this;
-        return this === ancestor ? this : right.parent.splitUntil(ancestor, right.index());
+        var done = typeof ancestor === 'function' ? ancestor(this) : this === ancestor;
+        return done ? this : right.parent.splitUntil(ancestor, right.index());
     }
     /**
      * Unwrap this ArchNode from its parent.
