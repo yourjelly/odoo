@@ -552,14 +552,26 @@ var BaseArch = class extends we3.AbstractPlugin {
      *
      * @param {Number|Number []} [id]
      * @param {String} wrapperName
+     * @param {object} [options]
+     * @param {boolean} [options.asOne] true to wrap the nodes together as one instead of individually
+     * @returns {number []} ids of the genereated wrappers
      */
-    wrap (id, wrapperName) {
+    wrap (id, wrapperName, options) {
         var self = this;
+        options = options || {};
         this._resetChange();
         var ids = Array.isArray(id) ? id : [id];
         // wrap
-        var newParents = ids.map(id => self.getArchNode(id).wrap(wrapperName));
-        newParents = newParents.filter(parent => parent.isInArch());
+        var newParents = [];
+        if (options.asOne) {
+            var wrapper = this.createArchNode(wrapperName);
+            this.getArchNode(ids[0]).before(wrapper);
+            ids.forEach(id => wrapper.append(self.getArchNode(id)));
+            newParents.push(wrapper);
+        } else {
+            newParents = ids.map(id => self.getArchNode(id).wrap(wrapperName));
+            newParents = newParents.filter(parent => parent.isInArch());
+        }
         // render and select every wrapped node
         var scArch = newParents[0].firstLeaf();
         var ecArch = newParents[newParents.length - 1].lastLeaf();
@@ -577,6 +589,7 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @param {object} [options]
      * @param {function} [options.wrapAncestorPred] if specified, wrap the selected node's first ancestors that match the predicate
      * @param {boolean} [options.doNotSplit] true to wrap the full nodes without splitting them
+     * @param {boolean} [options.asOne] true to wrap the nodes together as one instead of individually
      * @returns {number []} ids of the genereated wrappers
      */
     wrapRange (wrapperName, options) {
@@ -601,7 +614,7 @@ var BaseArch = class extends we3.AbstractPlugin {
             this.insert(virtual);
             toWrap = [virtual];
         }
-        return this.wrap(toWrap.map(node => node.id), wrapperName);
+        return this.wrap(toWrap.map(node => node.id), wrapperName, options);
     }
 
     //--------------------------------------------------------------------------
@@ -1504,10 +1517,12 @@ var Arch = class extends we3.AbstractPlugin {
      *
      * @param {Number|Number []} [id]
      * @param {String} wrapperName
+     * @param {object} [options]
+     * @param {boolean} [options.asOne] true to wrap the nodes together as one instead of individually
      * @returns {number []} ids of the genereated wrappers
      */
-    wrap (id, wrapperName) {
-        return this.dependencies.BaseArch.wrap(id, wrapperName);
+    wrap (id, wrapperName, options) {
+        return this.dependencies.BaseArch.wrap(id, wrapperName, options);
     }
     /**
      * Wrap every node in range into a new node with the given nodeName (`wrapperName`).
@@ -1519,6 +1534,7 @@ var Arch = class extends we3.AbstractPlugin {
      * @param {object} [options]
      * @param {function} [options.wrapAncestorPred] if specified, wrap the selected node's first ancestors that match the predicate
      * @param {boolean} [options.doNotSplit] true to wrap the full nodes without splitting them
+     * @param {boolean} [options.asOne] true to wrap the nodes together as one instead of individually
      * @returns {number []} ids of the genereated wrappers
      */
     wrapRange (wrapperName, options) {
