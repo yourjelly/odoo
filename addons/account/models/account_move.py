@@ -750,7 +750,7 @@ class AccountMove(models.Model):
             else:
                 create_method = in_draft_mode and self.env['account.move.line'].new or self.env['account.move.line'].create
                 candidate = create_method({
-                    'name': self.invoice_payment_ref or '/',
+                    'name': self.invoice_payment_ref,
                     'debit': balance < 0.0 and -balance or 0.0,
                     'credit': balance > 0.0 and balance or 0.0,
                     'quantity': 1.0,
@@ -772,7 +772,7 @@ class AccountMove(models.Model):
         terms_lines = terms_lines_to_keep
 
         # Update invoice_payment_ref.
-        self.invoice_payment_ref = terms_lines and terms_lines[0].name or '/'
+        self.invoice_payment_ref = terms_lines and terms_lines[0].name
 
         # Update the date_maturity.
         self.invoice_date_due = max_date_maturity
@@ -1113,7 +1113,7 @@ class AccountMove(models.Model):
             pay_term_line_ids = move.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
 
             domain = [('account_id', 'in', pay_term_line_ids.mapped('account_id').ids),
-                      ('state', '=', 'posted'),
+                      ('move_id.state', '=', 'posted'),
                       ('partner_id', '=', move.commercial_partner_id.id),
                       ('reconciled', '=', False), '|', ('amount_residual', '!=', 0.0),
                       ('amount_residual_currency', '!=', 0.0)]
