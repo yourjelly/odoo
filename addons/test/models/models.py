@@ -58,62 +58,52 @@ class test(models.Model):
 
     def testme2(self):
         t = time.time()
-        main_id = self.create({
+        d = {
             'name': 'bla',
             'line_ids': [
                 (0,0, {'name': 'abc'}),
                 (0,0, {'name': 'def'}),
             ]
-        })
+        }
+        main_id = self.create(d)
         if hasattr(self, 'flush'):
             self.flush()
         return time.time()-t
 
     def testme3(self):
         t = time.time()
-        print('* Create with two lines')
-        main = self.create({
-            'name': 'bla',
-            'line_ids': [
-                (0,0, {'name': 'abc'}),
-                (0,0, {'name': 'def'}),
-            ]
-        })
-        print('* main.int1 = 5')
-        main.int1 = 5
-        print('* main.intx2 = 8')
-        main.intx2 = 8
-        print('* create_line')
-        self.env['test.line'].create(
-            {'name': 'ghi', 'test_id': main.id}
-        )
-        print('* search intx2 line')
-        self.env['test.line'].search([('intx2', '=', 3)])
-        print('* end')
+        for i in range(100):
+            main = self.create({
+                'name': 'bla',
+                'line_ids': [
+                    (0,0, {'name': 'abc'}),
+                    (0,0, {'name': 'def'}),
+                ]
+            })
+            main.int1 = 5
+            main.intx2 = 8
+            self.env['test.line'].create(
+                {'name': 'ghi', 'test_id': main.id}
+            )
+            self.env['test.line'].search([('intx2', '=', 3)])
         if hasattr(self, 'flush'):
             self.flush()
         return time.time()-t
 
     def testme4(self):
         t = time.time()
-        main_id = self.env['test.main'].create({
-            'name': 'bla',
-        })
+        for i in range(1000):
+            self.testme3()
         if hasattr(self, 'flush'):
             self.flush()
         return time.time()-t
 
 
-    def test(self):
-        main = self.create({
-            'name': 'main',
-        })
-        second = self.create({
-            'name': 'second',
-        })
-
-        self.recompute()
-        crash_here_to_rollback          # noqa
+    def p(self):
+        for record in self:
+            print('test (',record.id,': ', record.name, record.int1, record.intx2, record.line_sum)
+            for line in record.line_ids:
+                print('      (',line.id,') ', line.name, line.name2, line.intx2)
 
 
 class test_line(models.Model):

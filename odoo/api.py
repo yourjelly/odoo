@@ -1079,6 +1079,8 @@ class Cache(object):
 
     def set(self, record, field, value):
         """ Set the value of ``field`` for ``record``. """
+        if field.type in ('one2many', 'many2many'):
+            assert value is not None
         if field.depends_context:
             key = self._get_context_key(record.env, field)
             self._data[field].setdefault(record._ids[0], {})[key] = value
@@ -1087,6 +1089,8 @@ class Cache(object):
 
     def update(self, records, field, values):
         """ Set the values of ``field`` for several ``records``. """
+        if field.type in ('one2many', 'many2many'):
+            assert all([value is not None for value in values.values()])
         if field.depends_context:
             key = self._get_context_key(records.env, field)
             self._data[field].update(zip(records._ids, map(lambda e: {key: e}, values)))
@@ -1176,7 +1180,7 @@ class Cache(object):
         """ Return the ids of ``records`` that have no value for ``field``. """
         field_cache = self._data[field]
         for record_id in records._ids:
-            if record_id not in field_cache:
+            if (record_id != field_cache) and (record_id not in field_cache):
                 yield record_id
 
     def copy(self, records, env):

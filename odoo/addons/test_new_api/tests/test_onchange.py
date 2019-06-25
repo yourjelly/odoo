@@ -244,11 +244,11 @@ class TestOnChange(common.TransactionCase):
             'lines.tags.name': None,
         })
 
-        values = multi._convert_to_write({key: multi[key] for key in ('name', 'partner', 'lines')})
+        values = {key: multi[key] for key in ('name', 'partner', 'lines')}
         self.assertEqual(values, {
             'name': partner1.name,
             'partner': partner1.id,
-            'lines': [(6, 0, [line1.id])],
+            'lines': [line1.id],
         })
 
         # modify 'partner'
