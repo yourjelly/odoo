@@ -2,15 +2,15 @@
 <templates>
     <we3-group t-name="wysiwyg.buttons.list">
         <we3-button name="list-ul" title="Unordered list"
-            data-method="insertList" data-value="ul">
+            data-method="toggleList" data-value="ul">
             <i class="fa fa-list-ul"></i>
         </we3-button>
         <we3-button name="list-ol" title="Ordered list"
-            data-method="insertList" data-value="ol">
+            data-method="toggleList" data-value="ol">
             <i class="fa fa-list-ol"></i>
         </we3-button>
         <we3-button name="list-checklist" title="Checklist"
-            data-method="insertList" data-value="checklist">
+            data-method="toggleList" data-value="checklist">
             <i class="fa fa-check-square"></i>
         </we3-button>
     </we3-group>

@@ -484,7 +484,6 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @param {string|string []} wrapperName
      */
     unwrapFrom (id, wrapperName) {
-        var self = this;
         var ids = Array.isArray(id) ? id : [id];
         var wrapperNames = Array.isArray(wrapperName) ? wrapperName : [wrapperName];
         var toUnwrap = this._getNodesToUnwrap(ids, wrapperNames);
@@ -834,18 +833,24 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @param {boolean} outdent true to outdent, false to indent
      */
     _indent (outdent) {
+        var self = this;
         this._resetChange();
         var range = this.dependencies.BaseRange.getRange();
-        var archNode = this.getArchNode(range.scID);
-        if (!archNode.isAllowUpdate()) {
-            return;
-        }
-        archNode._triggerChange(range.so);
-        if (archNode.isInList()) {
-            this[outdent ? '_outdentList' : '_indentList'](archNode, range.so);
-        } else {
-            this._indentText(archNode, outdent);
-        }
+        var selectedLeaves = this.dependencies.BaseRange.getSelectedLeaves();
+        var selectedLeavesIDs = we3.utils.uniq(selectedLeaves.map(clone => clone.id));
+        selectedLeavesIDs.forEach(function (id) {
+            var archNode = self.getArchNode(id);
+            if (!archNode.isAllowUpdate()) {
+                return;
+            }
+            var offset = range.scID === archNode.id ? range.so : 0;
+            archNode._triggerChange(offset);
+            if (archNode.isInList()) {
+                self[outdent ? '_outdentList' : '_indentList'](archNode);
+            } else {
+                self._indentText(archNode, outdent);
+            }
+        });
         this._updateRendererFromChanges();
     }
     /**
@@ -855,9 +860,7 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @param {ArchNode} archNode
      */
     _indentList (archNode) {
-        var listType = archNode.ancestor('isList').nodeName;
-        var liAncestor = archNode.ancestor('isLi') || archNode;
-        liAncestor.wrap(listType);
+        archNode.ancestor('isLi').indent();
     }
     /**
      * Indent a text.
@@ -910,40 +913,9 @@ var BaseArch = class extends we3.AbstractPlugin {
      *
      * @private
      * @param {ArchNode} archNode
-     * @param {Number} offset
      */
-    _outdentList (archNode, offset) {
-        var listAncestor = archNode.ancestor('isList');
-        listAncestor = listAncestor.parent.isLi() ? listAncestor.parent : listAncestor;
-        var liAncestor = archNode.ancestor('isLi') || archNode;
-        var lastChild = liAncestor.lastChild();
-        if (archNode.length()) {
-            archNode.params.change(archNode, offset);
-        } else if (lastChild && !lastChild.isDeepEmpty()) {
-            lastChild.params.change(lastChild, lastChild.length());
-        } else {
-            if (lastChild) {
-                liAncestor.empty();
-            }
-            liAncestor.insert(this.createArchNode());
-        }
-        var next;
-        var hasOneChild = liAncestor.childNodes.length === 1;
-        if (hasOneChild) {
-            next = liAncestor.firstChild();
-        } else {
-            next = this.createArchNode('TEMP', []);
-            next.append(liAncestor.childNodes);
-        }
-        listAncestor[liAncestor.index() ? 'after' : 'before'](next);
-        next.nodeName = hasOneChild ? next.nodeName : (next.isInList() ? 'li' : 'p');
-        var toRemove = !liAncestor.previousSibling() && !liAncestor.nextSibling() ? listAncestor : liAncestor;
-        toRemove.remove();
-        if (!next.isEmpty() && next.nodeName !== 'li') {
-            next.deleteEdge(true, {
-                doNotBreakBlocks: true,
-            });
-        }
+    _outdentList (archNode) {
+        archNode.ancestor('isLi').outdent();
     }
     /**
      * Parse HTML/XML and build the Arch from it.

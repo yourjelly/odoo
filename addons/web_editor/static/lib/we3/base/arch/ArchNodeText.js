@@ -286,6 +286,14 @@ we3.ArchNodeText = class extends we3.ArchNode {
         if (nextBlock && nextBlock.isVoid()) {
             return nextBlock.remove();
         }
+        // handle edge of between list items of same or different indentations
+        // by outdenting the next list item until it's on ground level
+        if (nextBlock && nextBlock.isLi() && virtualText.isInList()) {
+            var liAncestor = virtualText.ancestor('isLi');
+            while (nextBlock && nextBlock.isLi() && nextBlock !== liAncestor && nextBlock.outdent) {
+                nextBlock = nextBlock.outdent();
+            }
+        }
         return virtualText.deleteEdge(isLeft);
     }
     /**
@@ -297,9 +305,9 @@ we3.ArchNodeText = class extends we3.ArchNode {
      */
     _removeSideOnEdge (isLeft) {
         var next = this[isLeft ? 'prev' : 'next']({
-            doNotInsertVirtual: function () { return true; },
-            leafToLeaf: function () { return true; },
-            stopAtBlock: function () { return true; },
+            doNotInsertVirtual: true,
+            leafToLeaf: true,
+            stopAtBlock: true,
         });
         if (!next || next.id === this.id) {
             return;

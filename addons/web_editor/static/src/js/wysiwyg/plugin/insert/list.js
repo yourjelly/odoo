@@ -1,13 +1,494 @@
 (function () {
 'use strict';
 
-we3.options.keyMap.pc['CTRL+SHIFT+NUM9'] = 'List.insertList:checklist';
-we3.options.keyMap.mac['CMD+SHIFT+NUM9'] = 'List.insertList:checklist';
+we3.options.keyMap.pc['CTRL+SHIFT+NUM9'] = 'List.toggleList:checklist';
+we3.options.keyMap.mac['CMD+SHIFT+NUM9'] = 'List.toggleList:checklist';
 
+// Custom node representing a list (ul, ol, checklist)
+var LIST = class extends we3.ArchNode {
+    /**
+     * @override
+     */
+    static parse (archNode) {
+        if (!archNode.isChecklist && (archNode.nodeName === 'ul' || archNode.nodeName === 'ol')) {
+            var list = new LIST(archNode.params, archNode.nodeName, archNode.attributes.toJSON());
+            list.append(archNode.childNodes);
+            return list;
+        }
+    }
+    /**
+     * Return true if the list is in a checklist or if it is a checklist
+     *
+     * @returns {boolean}
+     */
+    isInChecklist () {
+        return !!this.ancestor('isChecklist');
+    }
+    /**
+     * Return true if the list is indented
+     *
+     * @returns {boolean}
+     */
+    isIndented () {
+        return !!this.ancestor('isLi');
+    }
+    /**
+     * @returns {boolean}
+     */
+    isList = () => true;
+    /**
+     * Return true if the list is ordered
+     *
+     * @returns {boolean}
+     */
+    isOl () {
+        return this.nodeName === 'ol';
+    }
+    /**
+     * Return true if the list is unordered (note: checklists are undordered)
+     *
+     * @returns {boolean}
+     */
+    isUl () {
+        return this.nodeName === 'ul';
+    }
+    /**
+     * Get the list's type (ol, ul, checklist)
+     *
+     * @returns {string}
+     */
+    get listType () {
+        return this.nodeName;
+    }
+    /**
+     * @override
+     */
+    get type () {
+        return 'LIST';
+    }
+}
+we3.addArchNode('LIST', LIST);
+
+// Custom node representing a list item (li)
+var li = class extends we3.ArchNode {
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * Indent this list item
+     */
+    indent () {
+        var indentedList = this.wrap(this.listType);
+        indentedList.wrap('li');
+    }
+    /**
+     * Return true if the list is in a checklist or if it is a checklist
+     *
+     * @returns {boolean}
+     */
+    isInChecklist () {
+        return !!this.ancestor('isChecklist');
+    }
+    /**
+     * Return true if the list item is indented
+     *
+     * @returns {boolean}
+     */
+    isIndented () {
+        return !!this.ancestor('isParentOfIndented');
+    }
+    /**
+     * @returns {boolean}
+     */
+    isLi = () => true;
+    /**
+     * Return true if the list item is the parent of an indented list
+     *
+     * @returns {boolean}
+     */
+    isParentOfIndented () {
+        return this.childNodes.length === 1 && this.firstChild().isList();
+    }
+    /**
+     * Get the list's type (ol, ul, checklist)
+     *
+     * @returns {string}
+     */
+    get listType () {
+        return this.ancestor('isList').listType;
+    }
+    /**
+     * Indent this list item
+     */
+    outdent () {
+        if (this.isParentOfIndented()) {
+            this.descendents(node => node.isLi() && !node.isParentOfIndented(), true).forEach(node => node.outdent());
+            return;
+        }
+        if (this.isIndented()) {
+            this.unwrap();
+            this.unwrap();
+        } else {
+            // isolate the li
+            this.parent.split(this.index() + 1, true);
+            var next = this.parent.split(this.index(), true);
+            var prev = this.parent.previousSibling();
+            if (prev) {
+                prev.removeIfEmpty();
+            }
+            var li = next.descendents(node => node.isLi())[0];
+            var contents = li.childNodes.slice();
+            var listAncestor = next.ancestor('isList');
+            var beforeList = listAncestor.previousSibling();
+            if (beforeList && beforeList.isList()) {
+                // do not move stuff after a trailing BR
+                var lastLeaf = beforeList.lastLeaf();
+                if (lastLeaf.isBR()) {
+                    lastLeaf.remove();
+                }
+                // do not move a trailing BR to the previous node
+                if (contents[contents.length - 1].isBR()) {
+                    contents.pop();
+                }
+                // move the li's contents to the previous li if any
+                var lis = beforeList.descendents(node => node.isLi(), true);
+                var lastLi = lis[lis.length - 1];
+                contents.slice().forEach(function (node) {
+                    lastLi.append(node);
+                });
+                if (contents.length) {
+                    contents[0].deleteEdge(true, {
+                        doNotRemoveEmpty: true,
+                    });
+                }
+                var newNext = listAncestor.previousSibling();
+                listAncestor.remove();
+                if (newNext) {
+                    newNext.deleteEdge(false, {
+                        doNotRemoveEmpty: true,
+                    });
+                }
+                return lastLi;
+            }
+            // if there is nothing before the list or it's not another list,
+            // just insert the new content before the list
+            contents.slice().forEach(node => listAncestor.before(node));
+            listAncestor.remove();
+        }
+    }
+    /**
+     * @override
+     */
+    get type () {
+        return 'li';
+    }
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _applyRulesArchNode () {
+        var indentClass = this.params.options.list && this.params.options.list.indentClass;
+        if (this.isParentOfIndented() && indentClass) {
+            this.className.add(indentClass);
+        }
+        super._applyRulesArchNode();
+    }
+}
+we3.addArchNode('li', li);
+
+// Custom node representing a checklist (default: ul.o_checklist)
+var CHECKLIST = class extends LIST {
+    /**
+     * @override
+     */
+    static parse (archNode) {
+        var checklistInfo = archNode.params.options.list && archNode.params.options.list.checklist;
+        var checklistClass = checklistInfo && checklistInfo.className;
+        var hasChecklistClass = checklistClass && archNode.className && archNode.className.contains(checklistClass);
+        if (archNode.nodeName === 'checklist' || hasChecklistClass || archNode.isList() && archNode.isInChecklist && archNode.isInChecklist()) {
+            if (checklistClass && !hasChecklistClass) {
+                archNode.className.add(checklistClass);
+            }
+            var checklist = new CHECKLIST(archNode.params, 'ul', archNode.attributes.toJSON());
+            checklist.append(archNode.childNodes);
+            return checklist;
+        }
+    }
+    /**
+     * @returns {boolean}
+     */
+    isChecklist = () => true;
+    /**
+     * Get the list's type (checklist)
+     *
+     * @returns {string}
+     */
+    get listType () {
+        return 'checklist';
+    }
+    /**
+     * @override
+     */
+    get type () {
+        return 'CHECKLIST';
+    }
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * Get the class to apply to checklists from the options, if any
+     *
+     * @private
+     * @returns {string|undefined}
+     */
+    get _checklistClass () {
+        var checklistInfo = this.params.options.list && !this.params.options.list.checklist;
+        return checklistInfo && checklistInfo.className;
+    }
+}
+we3.addArchNode('CHECKLIST', CHECKLIST);
+
+// Custom node representing a checklist item (default: ul.o_checklist > li)
+var CHECKLIST_ITEM = class extends li {
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    static parse (archNode) {
+        if (archNode.isLi() && archNode.isInChecklist && archNode.isInChecklist() &&
+            (!archNode.isParentOfIndented || !archNode.isParentOfIndented())) {
+            var checklistItem = new CHECKLIST_ITEM(archNode.params, archNode.nodeName, archNode.attributes.toJSON());
+            checklistItem.append(archNode.childNodes);
+            return checklistItem;
+        }
+    }
+    /**
+     * Check the checklist item and all its lower level checklist items.
+     * If all its siblings are checked, also check its higher level checklist item.
+     *
+     * @see higherLevelChecklistItem
+     * @see lowerLevelChecklistItems
+     */
+    check () {
+        this.markAsChecked();
+        this._checkHigherIfComplete();
+        this._checkLower();
+    }
+    /**
+     * Return the next higher level checklist item, if any,
+     * considering this structure:
+     * [ ] higher level
+     *      [ ] this checklist item
+     * which is equivalent to:
+     *  <ul>
+     *      <li>higher level</li>
+     *      <li>
+     *          <ul>
+     *              <li>this checklist item</li>
+     *          </ul>
+     *      </li>
+     *  </ul>
+     *
+     * @returns {ArchNode|undefined}
+     */
+    higherLevelChecklistItem () {
+        var parentOfIndented = this.parent.ancestor(node => node.isParentOfIndented && node.isParentOfIndented());
+        var higherLevel = parentOfIndented && parentOfIndented.previousSibling();
+        if (higherLevel && higherLevel.isChecklistItem && higherLevel.isChecklistItem()) {
+            return higherLevel;
+        }
+    }
+    /**
+     * Return true if the checklist item is checked
+     *
+     * @returns {boolean}
+     */
+    isChecked () {
+        if (this._checkedClass) {
+            this._isChecked = this.className.contains(this._checkedClass);
+        }
+        return this._isChecked || false;
+    }
+    isChecklistItem = () => true;
+    isInChecklist = () => true;
+    /**
+     * Return true if all of this checklist item's lower level checklist items are checked
+     *
+     * @see lowerLevelChecklistItems
+     * @returns {boolean}
+     */
+    isLowerLevelComplete () {
+        return this.lowerLevelChecklistItems().every(node => node.isChecked());
+    }
+    /**
+     * Return all of this checklist item's direct lower level checklist items,
+     * considering this structure:
+     * [ ] this checklist item
+     *      [ ] direct lower level
+     *          [ ] indirect lower level
+     * which is equivalent to:
+     *  <ul>
+     *      <li>this checklist item</li>
+     *      <li>
+     *          <ul>
+     *              <li>direct lower level</li>
+     *              <li>
+     *                  <ul>
+     *                      <li>indirect lower level</li>
+     *                  </ul>
+     *              </li>
+     *          </ul>
+     *      </li>
+     *  </ul>
+     *
+     * @returns {ArchNode []}
+     */
+    lowerLevelChecklistItems () {
+        var next = this.nextSibling();
+        return next && next.descendents(node => node.isChecklistItem && node.isChecklistItem()) || [];
+    }
+    /**
+     * Mark this checklist item as checked
+     */
+    markAsChecked () {
+        this._isChecked = true;
+        if (this._checkedClass && !this.className.contains(this._checkedClass)) {
+            this.className.add(this._checkedClass);
+        }
+    }
+    /**
+     * Mark this checklist item as unchecked.
+     */
+    markAsUnchecked () {
+        this._isChecked = false;
+        if (this._checkedClass && this.className.contains(this._checkedClass)) {
+            this.className.remove(this._checkedClass);
+        }
+    }
+    /**
+     * Toggle this checklist item's `checked` quality, and update that of its
+     * higher and lower levels
+     *
+     * @see check
+     * @see uncheck
+     * @see higherLevelChecklistItem
+     * @see lowerLevelChecklistItems
+     */
+    toggleChecked () {
+        if (this.isChecked()) {
+            this.uncheck();
+        } else {
+            this.check();
+        }
+    }
+    /**
+     * @override
+     */
+    get type () {
+        return 'CHECKLIST_ITEM';
+    }
+    /**
+     * Uncheck the checklist item and all its lower and higher level checklist items.
+     *
+     * @see higherLevelChecklistItem
+     * @see lowerLevelChecklistItems
+     */
+    uncheck () {
+        this.markAsUnchecked();
+        this._uncheckHigher();
+        this._uncheckLower();
+    }
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * Get the class to apply to checked checklist items from the options, if any
+     *
+     * @private
+     * @returns {string|undefined}
+     */
+    get _checkedClass () {
+        var checklistInfo = this.params.options.list && this.params.options.list.checklist;
+        return checklistInfo && checklistInfo.checkedClass;
+    }
+    /**
+     * Check the higher level checklist element if there is one and all its lower level
+     * checklist elements are checked.
+     *
+     * @private
+     * @see check
+     * @see higherLevelChecklistItem
+     */
+    _checkHigherIfComplete () {
+        var higherLevel = this.higherLevelChecklistItem();
+        if (higherLevel && !higherLevel.isChecked() && higherLevel.isLowerLevelComplete()) {
+            higherLevel.check();
+        }
+    }
+    /**
+     * Check all of this checklist item's lower level checklist items
+     *
+     * @private
+     * @see check
+     * @see lowerLevelChecklistItems
+     */
+    _checkLower () {
+        this.lowerLevelChecklistItems().forEach(function (node) {
+            if (!node.isChecked()) {
+                node.check();
+            }
+        });
+    }
+    /**
+     * Uncheck this checklist item's higher level checklist items
+     *
+     * @private
+     * @see markAsUnchecked
+     * @see higherLevelChecklistItem
+     */
+    _uncheckHigher () {
+        var higherLevel = this.higherLevelChecklistItem();
+        while (higherLevel) {
+            higherLevel.markAsUnchecked();
+            higherLevel = higherLevel.higherLevelChecklistItem();
+        }
+    }
+    /**
+     * Uncheck all of this checklist item's lower level checklist items
+     *
+     * @private
+     * @see uncheck
+     * @see lowerLevelChecklistItems
+     */
+    _uncheckLower () {
+        this.lowerLevelChecklistItems().forEach(function (node) {
+            if (node.isChecked()) {
+                node.uncheck();
+            }
+        });
+    }
+}
+we3.addArchNode('CHECKLIST_ITEM', CHECKLIST_ITEM);
+
+// Plugin to handle lists
 var ListPlugin = class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
-        this.dependencies = ['Arch', 'FontStyle'];
+        this.dependencies = ['Arch', 'FontStyle', 'Range'];
         this.templatesDependencies = ['/web_editor/static/src/xml/wysiwyg_list.xml'];
         this.buttons = {
             template: 'wysiwyg.buttons.list',
@@ -15,6 +496,14 @@ var ListPlugin = class extends we3.AbstractPlugin {
         };
         this.editableDomEvents = {
             'mousedown': '_onMouseDown',
+            'keydown': '_onKeyDown',
+        };
+        this.options.list = this.options.list || {
+            checklist: {
+                className: 'o_checklist',
+                checkedClass: 'o_checked',
+            },
+            indentClass: 'o_indent',
         };
     }
 
@@ -23,176 +512,40 @@ var ListPlugin = class extends we3.AbstractPlugin {
     //--------------------------------------------------------------------------
 
     /**
-     * Convert ul<->ol or remove ul/ol.
-     *
-     * @param {boolean} isWithinElem true if selection already inside the LI
-     * @param {DOM[]} nodes selected nodes
-     * @param {Object} startPoint
-     * @param {Object} endPoint
-     * @param {boolean} sorted
-     * @returns {Node []}
+     * Indent the list
      */
-    convertList (isWithinElem, nodes, startPoint, endPoint, sorted) {
-        var self = this;
-        var ol = this.utils.ancestor(startPoint.node, this.utils.isList);
-        var parent = ol.parentNode;
-
-        // get selected lis
-
-        var lis = [];
-        var lisBefore = [];
-        var lisAfter = [];
-        _.each(ol.children, function (li) {
-            if (!isWithinElem && (li === startPoint.node || $.contains(li, startPoint.node))) {
-                isWithinElem = true;
-            }
-            if (isWithinElem) {
-                lis.push(li);
-            } else if (lis.length) {
-                lisAfter.push(li);
-            } else {
-                lisBefore.push(li);
-            }
-            if (isWithinElem && (li === endPoint.node || $.contains(li, endPoint.node))) {
-                isWithinElem = false;
-            }
-        });
-
-        var res = lis;
-
-        if (lisBefore.length) {
-            var ulBefore = document.createElement(ol.tagName);
-            ulBefore.className = ol.className;
-
-            if (this.utils.isLi(ol.parentNode)) {
-                var li = document.createElement('li');
-                li.className = ol.parentNode.className;
-                $(li).insertBefore(ol.parentNode);
-                li.appendChild(ulBefore);
-            } else {
-                $(ulBefore).insertBefore(ol);
-            }
-
-            $(ulBefore).append(lisBefore);
-        }
-        if (lisAfter.length) {
-            var ulAfter = document.createElement(ol.tagName);
-            ulAfter.className = ol.className;
-
-            if (this.utils.isLi(ol.parentNode)) {
-                var li = document.createElement('li');
-                li.className = ol.parentNode.className;
-                $(li).insertAfter(ol.parentNode);
-                li.appendChild(ulAfter);
-            } else {
-                $(ulAfter).insertAfter(ol);
-            }
-
-            $(ulAfter).append(lisAfter);
-        }
-
-        // convert ul<->ol or remove list
-        var current = ol.tagName === 'UL' && ol.className.contains('o_checklist') ? 'checklist' : ol.tagName.toLowerCase();
-        if (current !== sorted) {
-            // convert ul <-> ol
-
-            var ul;
-            $(ol).removeClass('o_checklist');
-            if (sorted === 'checklist' && current === "ul") {
-                ul = ol;
-            } else if (sorted === 'ul' && current === 'checklist') {
-                ul = ol;
-            } else {
-                $(ol).removeClass('o_checklist');
-                ul = document.createElement(sorted === "ol" ? "ol" : "ul");
-                ul.className = ol.className;
-                $(ul).insertBefore(ol).append(lis);
-                parent.removeChild(ol);
-            }
-            if (sorted === 'checklist') {
-                $(ul).addClass('o_checklist');
-            }
-
-            var options = {
-                isTryNonSim: false,
-            };
-            this.dom.deleteEdge(ul, false, options);
-            this.dom.deleteEdge(ul, true, options);
-
-        } else {
-            // remove ol/ul
-
-            if (this.utils.isLi(parent) || this.utils.isList(parent)) {
-                if (this.utils.isLi(parent)) {
-                    ol = parent;
-                    parent = ol.parentNode;
-                }
-                $(lis).insertBefore(ol);
-            } else {
-                res = [];
-                _.each(lis, function (li) {
-                    res.push.apply(res, li.childNodes);
-                    $(li.childNodes).insertBefore(ol);
-                });
-
-                // wrap in p
-
-                var hasNode = _.find(res, function (node) {
-                    return node.tagName && node.tagName !== "BR" && !self.dependencies.Arch.isVoidoid(node);
-                });
-                if (!hasNode) {
-                    var p = document.createElement('p');
-                    $(p).insertBefore(ol).append(res);
-                    res = [p];
-                }
-            }
-            parent.removeChild(ol);
-
-        }
-
-        nodes.push.apply(nodes, res);
-
-        return nodes;
+    indentList () {
+        var rangeToPreserve = this.dependencies.Range.getRange();
+        this.dependencies.Arch.indent();
+        this.dependencies.Range.setRange(rangeToPreserve);
+    }
+    /**
+     * Outdent the list
+     */
+    outdentList () {
+        var rangeToPreserve = this.dependencies.Range.getRange();
+        this.dependencies.Arch.outdent();
+        this.dependencies.Range.setRange(rangeToPreserve);
     }
     /**
      * Insert an ordered list, an unordered list or a checklist.
      * If already in list, remove the list or convert it to the given type.
      *
      * @param {string('ol'|'ul'|'checklist')} type the type of list to insert
-     * @returns {false|Node[]} contents of the ul/ol or content of the converted/removed list
      */
-    insertList (type) {
-        var self = this;
-        var range = this.dependencies.Range.getRange();
-        if (!range) {
-            return false;
-        }
-        var res;
-        var start = range.getStartPoint();
-        var end = range.getEndPoint();
-
-        if (this.utils.isInList(range.sc)) {
-            res = this.convertList(false, [], start, end, type);
+    toggleList (type) {
+        var rangeToPreserve = this.dependencies.Range.getRange();
+        var selectedLeaves = this.dependencies.Range.getSelectedLeaves();
+        if (this._isAllInList(selectedLeaves)) {
+            if (this._isAllInListType(selectedLeaves, type)) {
+                this._removeList();
+            } else {
+                this._convertList(type);
+            }
         } else {
-            var ul = this._createList(type);
-            res = [].slice.call(ul.children);
+            this._insertList(type);
         }
-
-        var startLeaf = this.utils.firstLeafUntil(start.node, function (n) {
-            return !self.dependencies.Arch.isVoidoid(n) && self.dependencies.Arch.isEditableNode(n);
-        });
-        var endLeaf = this.utils.firstLeafUntil(end.node, function (n) {
-            return !self.dependencies.Arch.isVoidoid(n) && self.dependencies.Arch.isEditableNode(n);
-        });
-        range = this.dependencies.Arch.setRange({
-            sc: startLeaf,
-            so: this.utils.isText(startLeaf) ? start.offset : 0,
-            ec: endLeaf,
-            eo: this.utils.isText(endLeaf) ? end.offset : this.utils.nodeLength(endLeaf),
-        });
-        this.dependencies.Arch.setRange(range);
-
-        return res;
+        this.dependencies.Range.setRange(rangeToPreserve);
     }
 
     //--------------------------------------------------------------------------
@@ -200,112 +553,217 @@ var ListPlugin = class extends we3.AbstractPlugin {
     //--------------------------------------------------------------------------
 
     /**
+     * @private
      * @param {String} buttonName
-     * @param {WrappedRange} range
+     * @param {ArchNode} focusNode
      * @returns {Boolean} true if the given button should be active
      */
     _active (buttonName, focusNode) {
-        var listAncestor = focusNode.ancestor('isList');
-        if (!listAncestor) {
+        if (!focusNode.isInList()) {
             return false;
         }
         var listType = buttonName.split('-')[1];
-        if (listType === 'checklist') {
-            return listAncestor.className.contains('o_checklist');
-        }
-        return listAncestor.tagName === listType.toUpperCase();
+        var method = 'is' + listType.slice(0,1).toUpperCase() + listType.slice(1);
+        return !!focusNode.ancestor(node => node[method] && node[method]());
     }
     /**
-     * Create a list if allowed.
+     * Convert ul<->ol, ul<->checklist, ol<->checklist.
      *
+     * @private
      * @param {string('ol'|'ul'|'checklist')} type the type of list to insert
-     * @returns {false|Node} the list, if any
      */
-    _createList (type) {
+    _convertList (type) {
+        this._removeList();
+        this._insertList(type);
+    }
+    /**
+     * Delete the new edges after list insertion/removal.
+     *
+     * @private
+     */
+    _deleteNewEdges () {
         var self = this;
-        var range = this.dependencies.Range.getRange();
-        if (!range.isCollapsed()) {
-            range.replace(this.dom.splitTextAtSelection(range));
+        this._mergeIndentedLists();
+
+        // merge the list siblings together
+        var edges = [];
+        this._selectedLists().forEach(listAncestor => edges = edges.concat(self._mergeSiblingLists(listAncestor)));
+        edges = we3.utils.uniq(edges.filter(node => node && node.isInArch()));
+
+        // render if something changed
+        if (edges.length) {
+            var json = edges.map(node => node.parent.toJSON());
+            this.dependencies.Arch.importUpdate(json);
         }
-        var nodes = range.getSelectedNodes(function (node) {
-            return self.utils.isVisibleText(node) || self.dependencies.Arch.isVoidoid(node);
-        });
-        var formatNodes = this._filterEditableFormatNodes(nodes);
-        if (!formatNodes.length) {
+    }
+    /**
+     * Insert a list at range.
+     *
+     * @private
+     * @param {string('ol'|'ul'|'checklist')} nodeName the type of list to insert
+     */
+    _insertList (nodeName) {
+        var options = {
+            wrapAncestorPred: node => node.parent && node.parent.nodeName === 'td' || node.isBlock(),
+            doNotSplit: true,
+        };
+        /* wrap each lowest level block at range into a list of type `nodeName`
+        note: `wrapAncestorPred` ensures we wrap the block parent or the child of a `td` */
+        var wrapperIDs = this.dependencies.Arch.wrapRange(nodeName, options);
+        this._mergeGeneratedLists(wrapperIDs);
+        this._deleteNewEdges();
+    }
+    /**
+     * Return true if every node in the given array is in a list.
+     * Note: return false if the array is empty.
+     *
+     * @private
+     * @param {ArchNode []} nodes
+     * @returns {boolean}
+     */
+    _isAllInList (nodes) {
+        return !!nodes.length && nodes.every(node => node.isInList());
+    }
+    /**
+     * Return true if every node in the given array is in a list of type `type`.
+     * Note: return false if the array is empty.
+     *
+     * @private
+     * @param {ArchNode []} nodes
+     * @param {string} type
+     * @returns {boolean}
+     */
+    _isAllInListType (nodes, type) {
+        if (!this._isAllInList(nodes)) {
+            return false;
+        }
+        var method;
+        if (type === 'ul') {
+            method = node => node.isUl && node.isUl() && (!node.isChecklist || !node.isChecklist());
+        } else {
+            var methodName = 'is' + type.slice(0,1).toUpperCase() + type.slice(1);
+            method = node => node[methodName] && node[methodName]();
+        }
+        var firstListAncestors = nodes.map(node => node.ancestor('isList'));
+        return !!firstListAncestors.length && firstListAncestors.every(method);
+    }
+    /**
+     * Merge the generated lists together
+     *
+     * @private
+     * @param {number []} ids the generated wrappers' ids
+     */
+    _mergeGeneratedLists (ids) {
+        var self = this;
+        if (ids.length <= 1) {
             return;
         }
-
-        var ul = this._createListElement(type);
-        $(formatNodes[0][0] || formatNodes[0]).before(ul);
-        this._fillListElementWith(ul, formatNodes);
-        this._deleteListElementEdges(ul);
-
-        return ul;
-    }
-    /**
-     * Create a list element of the given type and return it.
-     *
-     * @param {string('ol'|'ul'|'checklist')} type the type of list to insert
-     * @returns {Node}
-     */
-    _createListElement (type) {
-        var ul = document.createElement(type === "ol" ? "ol" : "ul");
-        if (type === 'checklist') {
-            ul.className = 'o_checklist';
-        }
-        return ul;
-    }
-    /**
-     * Delete a list element's edges if necessary.
-     *
-     * @param {Node} ul
-     */
-    _deleteListElementEdges (ul) {
-        var options = {
-            isTryNonSim: false,
+        // merging among nodes in the `ids` array so the antepenulvian one
+        // merges with the last one, meaning we don't need to apply
+        // `deleteEdge` on the last one
+        ids.pop();
+        var mergeOptions = {
+            doNotRemoveEmpty: true,
+            mergeOnlySameType: true,
         };
-        this.dom.deleteEdge(ul, false, options);
-        this.dom.deleteEdge(ul, true, options);
-        this.editable.normalize();
-    }
-    /**
-     * Fill a list element with the nodes passed, wrapped in LIs.
-     *
-     * @param {Node} ul
-     * @param {Node[]} nodes
-     */
-    _fillListElementWith (ul, nodes) {
-        _.each(nodes, function (node) {
-            var li = document.createElement('li');
-            $(li).append(node);
-            ul.appendChild(li);
-        });
-    }
-    /**
-     * Filter the editable format ancestors of the given nodes
-     * and fill or wrap them if needed for range selection.
-     *
-     * @param {Node[]} nodes
-     * @returns {Node[]}
-     */
-    _filterEditableFormatNodes (nodes) {
-        var self = this;
-        var formatNodes = this.dependencies.FontStyle.filterFormatAncestors(nodes);
-        formatNodes = _.compact(_.map(formatNodes, function (node) {
-            var ancestor = (!node.tagName || node.tagName === 'BR') && self.utils.ancestor(node, self.utils.isCell);
-            if (ancestor && self.dependencies.Arch.isEditableNode(ancestor)) {
-                if (!ancestor.childNodes.length) {
-                    var br = document.createElement('br');
-                    ancestor.appendChild(br);
-                }
-                var p = document.createElement('p');
-                $(p).append(ancestor.childNodes);
-                ancestor.appendChild(p);
-                return p;
+        var json = ids.map(function (id) {
+            var node = self.dependencies.Arch.getNode(id);
+            var ultimateList = node.ancestor('isList', true); // will be useful for rendering
+            if (node.isIndented()) {
+                // merge parents of indented lists together
+                node.ancestor('isParentOfIndented').deleteEdge(false, mergeOptions);
             }
-            return self.dependencies.Arch.isEditableNode(node) && node || null;
-        }));
-        return formatNodes;
+            node.deleteEdge(false, mergeOptions);
+            return ultimateList.toJSON();
+        });
+        // render the changes on the greatest lists involved
+        this.dependencies.Arch.importUpdate(json);
+    }
+    /**
+     * Merge all indented lists at range
+     *
+     * @private
+     */
+    _mergeIndentedLists () {
+        var selectedLeaves = this.dependencies.Range.getSelectedLeaves();
+        var greatestListAncestor = selectedLeaves.length && selectedLeaves[0].ancestor('isList', true);
+        var parentsOfIndented = selectedLeaves.map(node => node.ancestor('isParentOfIndented'))
+            .filter(node => node);
+        // merging among nodes in the `parentsOfIndented` array so the antepenulvian one
+        // merges with the last one, meaning we don't need to apply `deleteEdge` on the last one
+        parentsOfIndented.pop();
+        var mergeOptions = {
+            mergeOnlySameType: true,
+        };
+        parentsOfIndented.forEach(parentOfIndented => parentOfIndented.deleteEdge(false, mergeOptions));
+        if (greatestListAncestor) {
+            this.dependencies.Arch.importUpdate(greatestListAncestor.toJSON());
+        }
+    }
+    /**
+     * Merge a list with its next and previous list if any,
+     * and return a list of the remaining edges
+     *
+     * @private
+     * @param {ArchNode} list
+     * @returns {ArchNode []}
+     */
+    _mergeSiblingLists (list) {
+        function __mergeNextList (list, isPrev) {
+            var nextList = list[isPrev ? 'previousSibling' : 'nextSibling']();
+            if (nextList && nextList.isList()) {
+                var nextEdge = isPrev ? list : nextList;
+                nextEdge.deleteEdge(true, {
+                    mergeOnlySameType: true,
+                });
+                return isPrev ? nextList : list;
+            }
+        }
+        var edges = [__mergeNextList(list, false)];
+        edges.push(__mergeNextList(list, true));
+        return edges;
+    }
+    /**
+     * Remove a list at range
+     *
+     * @private
+     */
+    _removeList () {
+        var nodeNamesToRemove = ['li', 'ol', 'ul'];
+        var liAncestors = this._selectedListItems();
+        if (liAncestors.length && liAncestors.every(li => li.isIndented())) {
+            this.outdentList();
+        } else if (this.dependencies.Range.isCollapsed()) {
+            var focusNode = this.dependencies.Range.getFocusedNode();
+            this.dependencies.Arch.unwrapFrom(focusNode.id, nodeNamesToRemove);
+            this._deleteNewEdges();
+        } else {
+            this.dependencies.Arch.unwrapRangeFrom(nodeNamesToRemove, {
+                doNotSplit: true,
+            });
+            this._deleteNewEdges();
+        }
+    }
+    /**
+     * Return a list of list items (`li`) at range
+     *
+     * @private
+     * @returns {ArchNode []}
+     */
+    _selectedListItems () {
+        var selectedLeaves = this.dependencies.Range.getSelectedLeaves();
+        return selectedLeaves.map(node => node.ancestor('isLi')).filter(node => node);
+    }
+    /**
+     * Return a list of lists (`ul`, `ol`, `checklist`) at range
+     *
+     * @private
+     * @returns {ArchNode []}
+     */
+    _selectedLists () {
+        var selectedLeaves = this.dependencies.Range.getSelectedLeaves();
+        var listAncestors = selectedLeaves.map(node => node.ancestor('isList'));
+        return we3.utils.uniq(listAncestors.filter(node => node));
     }
 
     //--------------------------------------------------------------------------
@@ -313,31 +771,55 @@ var ListPlugin = class extends we3.AbstractPlugin {
     //--------------------------------------------------------------------------
 
     /**
-     * @param {jQueryEvent} e
+     * Handle special list behavior of `BACKSPACE` and `TAB` key presses
+     *
+     * @private
+     * @param {KeyboardEvent} e
+     */
+    _onKeyDown (e) {
+        var range = this.dependencies.Range.getRange();
+        var isLeftEdgeOfLi = range.scArch.isLeftEdgeOfPred(node => node.isLi()) && range.so === 0;
+        if (!range.isCollapsed() || !isLeftEdgeOfLi) {
+            return;
+        }
+        switch (e.keyCode) {
+            case 8: // BACKSPACE
+                e.preventDefault();
+                e.stopPropagation();
+                this.outdentList();
+                break;
+            case 9: // TAB
+                e.preventDefault();
+                e.stopPropagation();
+                if (e.shiftKey) {
+                    this.outdentList();
+                } else {
+                    this.indentList();
+                }
+                break;
+        }
+    }
+    /**
+     * Handle the clicking of a checklist item
+     *
+     * @private
+     * @param {MouseEvent} e
      */
     _onMouseDown (e) {
         var archNode = this.dependencies.Arch.getNode(e.target);
-        if (!archNode || !archNode.isLi() || !archNode.parent.className.contains('o_checklist') || e.offsetX > 0) {
+        var isChecklistItem = archNode && archNode.isChecklistItem && archNode.isChecklistItem();
+        var isClickInCheckbox = isChecklistItem && e.offsetX <= 0;
+        if (!isClickInCheckbox) {
             return;
         }
         e.preventDefault();
-        var checked = $(e.target).hasClass('o_checked');
-        $(e.target).toggleClass('o_checked', !checked);
-        var $sublevel = $(e.target).next('ul.o_checklist, li:has(> ul.o_checklist)').find('> li, ul.o_checklist > li');
-        var $parents = $(e.target).parents('ul.o_checklist').map(function () {
-            return this.parentNode.tagName === 'LI' ? this.parentNode : this;
+        archNode.toggleChecked();
+        var highestChecklist = archNode.ancestor(node => node.isChecklist && node.isChecklist(), true);
+        this.dependencies.Arch.importUpdate(highestChecklist.toJSON());
+        this.dependencies.Range.setRange({
+            scID: archNode.id,
+            so: 0,
         });
-        if (checked) {
-            $sublevel.removeClass('o_checked');
-            $parents.prev('ul.o_checklist li').removeClass('o_checked');
-        } else {
-            $sublevel.addClass('o_checked');
-            var $lis;
-            do {
-                $lis = $parents.not(':has(li:not(.o_checked))').prev('ul.o_checklist li:not(.o_checked)');
-                $lis.addClass('o_checked');
-            } while ($lis.length);
-        }
     }
 };
 

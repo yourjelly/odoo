@@ -27,10 +27,15 @@ we3.addPlugin('Keyboard', class extends we3.AbstractPlugin {
      */
     handleTab (untab) {
         var range = this.dependencies.Range.getRange();
+        var isHandledByList = untab && range.scArch.isInList() ||
+            range.scArch.isLeftEdgeOfPred(node => node.isLi()) && range.so === 0;
+        if (isHandledByList) {
+            return; // todo: remove when indent text handled by paragraph
+        }
         if (range.scArch.isInCell()) {
             this._handleTabInCell(range.scArch, untab);
         } else if (range.scArch.isLeftEdgeOfBlock() && this._isOffsetLeftEdge(range)) {
-            this.dependencies.Arch[untab ? 'outdent' : 'indent']();
+            this.dependencies.Arch[untab ? 'outdent' : 'indent'](); // todo: handle via paragraph and list
         } else if (!untab) {
             this._insertTab();
         }
@@ -182,6 +187,9 @@ we3.addPlugin('Keyboard', class extends we3.AbstractPlugin {
      * @returns {Boolean} true if case handled
      */
     _onKeydown (e) {
+        if (e.defaultPrevented) {
+            return;
+        }
         var handled = false;
 
         if (e.ctrlKey && e.key === 'a') {
@@ -246,11 +254,13 @@ we3.addPlugin('Keyboard', class extends we3.AbstractPlugin {
      */
     _onBackspace (e) {
         var range = this.dependencies.Range.getRange();
+        var isHandledByList = range.isCollapsed() && range.scArch.isLeftEdgeOfPred(node => node.isLi()) && range.so === 0;
+        if (isHandledByList) {
+            return; // todo: remove when indent text handled by paragraph
+        }
         var paraAncestor = range.scArch.ancestor('isPara');
         var isInIndentedPara = paraAncestor && !!paraAncestor.attributes.style['margin-left'];
-        var listAncestor = range.scArch.ancestor('isList');
-        var isInIndentedList = listAncestor && listAncestor.ancestor('isList');
-        if (isInIndentedPara && this._isOnLeftEdgeOf(paraAncestor, range) || isInIndentedList && this._isOnLeftEdgeOf(listAncestor, range)) {
+        if (isInIndentedPara && this._isOnLeftEdgeOf(paraAncestor, range)) {
             this.dependencies.Arch.outdent(); // Outdent if on left edge of an indented para
         } else if (!this._isOnLeftEdgeOf('isCell', range)) { // Do nothing if on left edge of a table cell
             this._handleDeletion(true)
