@@ -26,7 +26,7 @@ var TestArchAndRules = class extends we3.AbstractPlugin {
             {
                 name: "Auto wrap ul in a ul",
                 content: "<ul><ul>text</ul></ul>",
-                test: "<ul><li><ul><li>text</li></ul></li></ul>",
+                test: '<ul><li class="o_indent"><ul><li>text</li></ul></li></ul>',
             },
             {
                 name: "Keep attribute",

@@ -232,7 +232,7 @@ var TestKeyboardDelete = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'DELETE',
             }],
-            test: "<ul><li><ul><li>dom to edit◆</li></ul></li></ul>",
+            test: '<ul><li class="o_indent"><ul><li>dom to edit◆</li></ul></li></ul>',
         },
         {
             name: "in indented-ul > li: DELETE at end -> 'a' at end (must write)",
@@ -242,7 +242,7 @@ var TestKeyboardDelete = class extends we3.AbstractPlugin {
             }, {
                 key: 'a',
             }],
-            test: "<ul><li><ul><li>dom to edita◆</li></ul></li></ul>",
+            test: '<ul><li class="o_indent"><ul><li>dom to edita◆</li></ul></li></ul>',
         },
         {
             name: "in indented-ul > li (non-indented-li after): DELETE at end",
@@ -250,7 +250,7 @@ var TestKeyboardDelete = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'DELETE',
             }],
-            test: "<ul><li><ul><li>dom to edit◆dom to edit</li></ul></li></ul>",
+            test: '<ul><li class="o_indent"><ul><li>dom to edit◆dom to edit</li></ul></li></ul>',
         },
         {
             name: "in ul > li (indented-li after): DELETE at end",

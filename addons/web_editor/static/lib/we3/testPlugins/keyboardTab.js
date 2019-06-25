@@ -19,7 +19,7 @@ var TestKeyboardTab = class extends we3.AbstractPlugin {
                 steps: [{
                     key: 'TAB',
                 }],
-                test: "<ul><li><ul><li>◆dom to edit</li></ul></li></ul>",
+                test: '<ul><li class="o_indent"><ul><li>◆dom to edit</li></ul></li></ul>',
             },
             {
                 name: "in indented-li: SHIFT+TAB at start",

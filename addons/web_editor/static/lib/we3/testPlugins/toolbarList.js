@@ -801,7 +801,7 @@ var TestToolbarList = class extends we3.AbstractPlugin {
                 do: async function () {
                     await self.dependencies.Test.triggerNativeEvents(self.btnUl, ['mousedown', 'click']);
                 },
-                test: '<p>dom not to edit</p><ul><li><p>xxx</p></li><ul><li><p>d▶om t◀o edit</p></li></ul></ul>',
+                test: '<p>dom not to edit</p><ul><li><p>xxx</p></li><li class="o_indent"><ul><li><p>d▶om t◀o edit</p></li></ul></li></ul>',
             },
             {
                 name: "Click UL: ul ul.o_checklist -> ul ul (across several indented li)",
@@ -809,7 +809,7 @@ var TestToolbarList = class extends we3.AbstractPlugin {
                 do: async function () {
                     await self.dependencies.Test.triggerNativeEvents(self.btnUl, ['mousedown', 'click']);
                 },
-                test: '<p>dom not to edit</p><ul><li><p>xxx</p></li><ul><li><p>d▶om to edit 1</p></li><li><p>dom t◀o edit 2</p></li></ul></ul>',
+                test: '<p>dom not to edit</p><ul><li><p>xxx</p></li><li class="o_indent"><ul><li><p>d▶om to edit 1</p></li><li><p>dom t◀o edit 2</p></li></ul></li></ul>',
             },
             {
                 name: "Click UL: ul ul.o_checklist -> ul ul (from second indented li)",
@@ -817,7 +817,7 @@ var TestToolbarList = class extends we3.AbstractPlugin {
                 do: async function () {
                     await self.dependencies.Test.triggerNativeEvents(self.btnUl, ['mousedown', 'click']);
                 },
-                test: '<p>dom not to edit</p><ul><li><p>xxx</p></li><ul class="o_checklist"><li><p>dom not to edit</p></li></ul><ul><li><p>d▶om t◀o edit</p></li></ul><ul class="o_checklist"><li><p>dom not to edit</p></li></ul></ul>',
+                test: '<p>dom not to edit</p><ul><li><p>xxx</p></li><li class="o_indent"><ul class="o_checklist"><li><p>dom not to edit</p></li></ul></li><li class="o_indent"><ul><li><p>d▶om t◀o edit</p></li></ul></li><li class="o_indent"><ul class="o_checklist"><li><p>dom not to edit</p></li></ul></li></ul>',
             },
             // UL -> OL
             {

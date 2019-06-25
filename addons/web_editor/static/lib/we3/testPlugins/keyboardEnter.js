@@ -215,7 +215,7 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                 }, {
                     key: 'ENTER',
                 }],
-                test: "<ul><li><p>dom to edit</p></li></ul><p><br/>◆</p>",
+                test: "<ul><li><p>dom to edit◆</p></li></ul>",
             },
             // {
             //     name: "in ul.list-group > li: ENTER at end",
@@ -236,7 +236,7 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                 }, {
                     key: 'ENTER',
                 }],
-                test: "<ul><li><p>aaa</p></li><li><ul><li><p>dom to edit</p></li></ul></li><li><br/>◆</li><li><p>bbb</p></li></ul>",
+                test: '<ul><li><p>aaa</p></li><li class="o_indent"><ul><li><p>dom to edit</p></li></ul></li><li><br/>◆</li><li><p>bbb</p></li></ul>',
             },
             {
                 name: "in indented-li with font: 2x ENTER at end",
@@ -246,7 +246,7 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                 }, {
                     key: 'ENTER',
                 }],
-                test: '<ul><li><p>aaa</p></li><li><ul><li><p><font style="color:red">dom to edit</font></p></li></ul></li><li><br/>◆</li><li><p>bbb</p></li></ul>',
+                test: '<ul><li><p>aaa</p></li><li class="o_indent"><ul><li><p><font style="color:red">dom to edit</font></p></li></ul></li><li><br/>◆</li><li><p>bbb</p></li></ul>',
             },
             {
                 name: "in li > empty-p: ENTER",
@@ -262,7 +262,7 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                 steps: [{
                     key: 'ENTER',
                 }],
-                test: "<p><br/>◆</p>",
+                test: "<p><b><br/>◆</b></p>",
             },
 
             // end list UL / OL

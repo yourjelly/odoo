@@ -47,7 +47,8 @@ var TestToolbar = class extends we3.AbstractPlugin {
             this.dependencies.Range.setRange(range);
         }
         var target = range.ec.tagName ? range.ec : range.ec.parentNode;
-        return this.dependencies.Test.keydown(target, {key: key});
+        var keydown = typeof key === 'string' ? {key: key} : {keyCode: key};
+        return this.dependencies.Test.keydown(target, keydown);
     }
 
     //--------------------------------------------------------------------------

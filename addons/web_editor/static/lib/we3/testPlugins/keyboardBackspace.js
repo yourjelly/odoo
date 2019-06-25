@@ -302,7 +302,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             }, {
                 key: 'a',
             }],
-            test: "<p><br/></p><p>a◆</p>",
+            test: "<p>a◆</p>",
         },
         {
             name: "in empty-li (no other li - p before): BACKSPACE",
@@ -334,7 +334,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'BACKSPACE',
             }],
-            test: "<ul><li><p>toto</p></li><li><br/>◆</li><li><ul><li><br/></li></ul></li><li><p>tutu</p></li></ul>",
+            test: '<ul><li><p>toto</p></li><li><br/>◆</li><li class="o_indent"><ul><li><br/></li></ul></li><li><p>tutu</p></li></ul>',
         },
         {
             name: "in empty-indented-li (no other li, no other indented-li): BACKSPACE",
@@ -344,14 +344,14 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             }],
             test: "<ul><li><br/>◆</li></ul>",
         },
-        // {
-        //     name: "in indented-li (other li, other indented-li): BACKSPACE at start",
-        //     content: "<ul><li><p>toto</p></li><li><ul><li><p>◆xxx</p></li><li><p>yyy</p></li></ul></li><li><p>tutu</p></li></ul>",
-        //     steps: [{
-        //         key: 'BACKSPACE',
-        //     }],
-        //     test: "<ul><li><p>toto</p></li><li><p>◆xxx</p></li><li><ul><li><p>yyy</p></li></ul></li><li><p>tutu</p></li></ul>",
-        // },
+        {
+            name: "in indented-li (other li, other indented-li): BACKSPACE at start",
+            content: "<ul><li><p>toto</p></li><li><ul><li><p>◆xxx</p></li><li><p>yyy</p></li></ul></li><li><p>tutu</p></li></ul>",
+            steps: [{
+                key: 'BACKSPACE',
+            }],
+            test: '<ul><li><p>toto</p></li><li><p>◆xxx</p></li><li class="o_indent"><ul><li><p>yyy</p></li></ul></li><li><p>tutu</p></li></ul>',
+        },
         {
             name: "in second li > p: BACKSPACE at start",
             content: "<ul><li><p>toto</p></li><li><p>◆xxx</p></li><li><p>tutu</p></li></ul>",
