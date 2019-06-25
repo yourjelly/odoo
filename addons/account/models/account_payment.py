@@ -43,7 +43,7 @@ class account_payment(models.Model):
                                    help="""Technical field containing the invoice for which the payment has been generated.
                                    This does not especially correspond to the invoices reconciled with the payment,
                                    as it can have been generated first, and reconciled later""")
-    reconciled_invoice_ids = fields.Many2many('account.move', string='Reconciled Invoices', compute='_compute_reconciled_invoice_ids', help="Invoices whose journal items have been reconciled with this payment's.")
+    reconciled_invoice_ids = fields.Many2many('account.move', string='Reconciled Invoices', compute='_compute_reconciled_invoice_ids', help="Invoices whose journal items have been reconciled with these payments.")
     has_invoices = fields.Boolean(compute="_compute_reconciled_invoice_ids", help="Technical field used for usability purposes")
 
     move_line_ids = fields.One2many('account.move.line', 'payment_id', readonly=True, copy=False, ondelete='restrict')
@@ -284,9 +284,11 @@ class account_payment(models.Model):
     def _compute_payment_amount(self, invoices, currency, journal, date):
         '''Compute the total amount for the payment wizard.
 
-        :param invoices: If not specified, pick all the invoices.
-        :param currency: If not specified, search a default currency on wizard/journal.
-        :return: The total amount to pay the invoices.
+        :param invoices:    Invoices on which compute the total as an account.invoice recordset.
+        :param currency:    The payment's currency as a res.currency record.
+        :param journal:     The payment's journal as an account.journal record.
+        :param date:        The payment's date as a datetime.date object.
+        :return:            The total amount to pay the invoices.
         '''
         company = journal.company_id
         currency = currency or journal.currency_id or company.currency_id
@@ -687,7 +689,7 @@ class account_payment(models.Model):
             if rec.payment_type in ('inbound', 'outbound'):
                 # ==== 'inbound' / 'outbound' ====
                 if rec.invoice_ids:
-                    (moves[0] + rec.invoice_ids).mapped('line_ids')\
+                    (moves[0] + rec.invoice_ids).line_ids \
                         .filtered(lambda line: not line.reconciled and line.account_id == rec.destination_account_id)\
                         .reconcile()
             elif rec.payment_type == 'transfer':

@@ -458,6 +458,9 @@
                         <button name="action_reverse" string='Add Credit Note'
                                 type='object' groups="account.group_account_invoice"
                                 attrs="{'invisible': ['|', ('type', 'not in', ('out_invoice', 'in_invoice')), ('state', '!=', 'posted')]}"/>
+                        <!-- Duplicate -->
+                        <button name="action_duplicate" string="Duplicate" type="object" groups="account.group_account_invoice"
+                                attrs="{'invisible': [('type', '!=', 'entry')]}"/>
                         <!-- Cancel -->
                         <field name="state" widget="statusbar" statusbar_visible="draft,posted"/>
                     </header>

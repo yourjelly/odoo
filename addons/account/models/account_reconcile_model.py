@@ -449,6 +449,7 @@ class AccountReconcileModel(models.Model):
             LEFT JOIN account_account account       ON account.id = aml.account_id
             WHERE st_line.id IN %s
                 AND aml.company_id = st_line.company_id
+                AND move.state = 'posted'
                 AND (
                         -- the field match_partner of the rule might enforce the second part of
                         -- the OR condition, later in _apply_conditions()
