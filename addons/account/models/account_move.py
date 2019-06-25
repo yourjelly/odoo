@@ -102,15 +102,13 @@ class AccountMove(models.Model):
         default=_get_default_journal)
     company_id = fields.Many2one(string='Company', store=True, readonly=True,
         related='journal_id.company_id')
-    company_partner_id = fields.Many2one(string='Company Partner', readonly=True,
-        related='company_id.partner_id')
     company_currency_id = fields.Many2one(string='Company Currency', readonly=True,
         related='journal_id.company_id.currency_id')
     currency_id = fields.Many2one('res.currency', store=True, readonly=True, tracking=True, required=True,
         states={'draft': [('readonly', False)]},
         string='Currency',
         default=_get_default_currency)
-    foreign_currency_id = fields.Many2one('res.currency', string='Foreign Currency', # do it in _default_currency_id of account.move.line
+    foreign_currency_id = fields.Many2one('res.currency', string='Foreign Currency',
         compute='_compute_foreign_currency_id',
         help="Technical field used to set the default currency on journal items as their must have a currency_id set only when dealing with foreign currencies.")
     line_ids = fields.One2many('account.move.line', 'move_id', string='Journal Items', copy=True, readonly=True,
@@ -141,11 +139,11 @@ class AccountMove(models.Model):
         compute='_compute_amount')
     amount_residual_signed = fields.Monetary(string='Amount Due Signed', store=True,
         compute='_compute_amount')
-    to_check = fields.Boolean(string='To Check', default=False,
-        help='If this checkbox is ticked, it means that the user was not sure of all the related informations at the time of the creation of the move and that the move needs to be checked again.')
     amount_by_group = fields.Binary(string="Tax amount by group",
         compute='_compute_invoice_taxes_by_group',
         help="type: [(name, amount, base, formated amount, formated base)]")
+    to_check = fields.Boolean(string='To Check', default=False,
+        help='If this checkbox is ticked, it means that the user was not sure of all the related informations at the time of the creation of the move and that the move needs to be checked again.')
 
     # ==== Cash basis feature fields ====
     tax_cash_basis_rec_id = fields.Many2one(
@@ -238,7 +236,9 @@ class AccountMove(models.Model):
 
     # ==== Display purpose fields ====
     invoice_filter_type_domain = fields.Char(compute='_compute_invoice_filter_type_domain',
-        help="Technical field used to have a dynamic domain on the form view.")
+        help="Technical field used to have a dynamic domain on journal / taxes in the form view.")
+    company_partner_id = fields.Many2one(string='Company Partner', readonly=True, related='company_id.partner_id',
+        help="The partner representing the current company owning this invoice.")
 
     # -------------------------------------------------------------------------
     # ONCHANGE METHODS
@@ -364,16 +364,17 @@ class AccountMove(models.Model):
         ]
 
     @api.model
-    def _get_tax_line_values_from_base_lines(self, base_lines):
+    def _get_tax_line_values_from_base_lines(self, tax, base_lines):
         ''' Hook used to set custom values at the creation of a tax line computed based on base lines.
         /!\ The result must be consistent with the grouping key (see '_build_tax_line_groupby_key').
 
+        :param tax:         An account.tax record for which the line is created.
         :param base_lines:  A recorset of account.move.line representing the lines on which this tax is computed.
         :return:            A dictionary of additional values computed from base lines to create a new tax line.
         '''
         return {
-            'analytic_account_id': base_lines[0].analytic_account_id.id,
-            'analytic_tag_ids': [(6, 0, base_lines[0].analytic_tag_ids.ids)],
+            'analytic_account_id': tax.analytic and base_lines[0].analytic_account_id.id or False,
+            'analytic_tag_ids': [(6, 0, tax.analytic and base_lines[0].analytic_tag_ids.ids or [])],
         }
 
     @api.multi
@@ -524,7 +525,7 @@ class AccountMove(models.Model):
                     'tax_repartition_line_id': tax_repartition_line.id,
                     'tax_ids': values['tax_ids'],
                     'tag_ids': [(6, 0, values['tag_ids'])],
-                    **self._get_tax_line_values_from_base_lines(values['base_lines']),
+                    **self._get_tax_line_values_from_base_lines(tax, values['base_lines']),
                 })
                 lines_map['tax_lines'] += tax_line
 
@@ -3551,6 +3552,18 @@ class AccountMoveLine(models.Model):
 
             tables, where_clause, where_clause_params = query.get_sql()
         return tables, where_clause, where_clause_params
+
+    # FIXME: Clarify me and change me in master
+    @api.multi
+    def action_duplicate(self):
+        self.ensure_one()
+        action = self.env.ref('account.action_move_journal_line').read()[0]
+        action['target'] = 'inline'
+        action['context'] = dict(self.env.context)
+        action['context']['view_no_maturity'] = False
+        action['views'] = [(self.env.ref('account.view_move_form').id, 'form')]
+        action['res_id'] = self.copy().id
+        return action
 
     @api.multi
     def open_reconcile_view(self):

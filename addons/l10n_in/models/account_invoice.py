@@ -37,9 +37,9 @@ class AccountMove(models.Model):
         return res
 
     @api.model
-    def _get_tax_line_values_from_base_lines(self, base_lines):
+    def _get_tax_line_values_from_base_lines(self, tax, base_lines):
         # OVERRIDE to copy the product from the base line to the tax line.
-        res = super(AccountMove, self)._get_tax_line_values_from_base_lines(base_lines)
+        res = super(AccountMove, self)._get_tax_line_values_from_base_lines(tax, base_lines)
         res['product_id'] = base_lines[0].product_id.id
         res['product_uom_id'] = base_lines[0].product_id.id
         res['quantity'] = base_lines[0].product_id.id
