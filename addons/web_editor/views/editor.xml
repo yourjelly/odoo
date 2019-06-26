@@ -253,10 +253,10 @@
         <t t-call="web_editor.compiled_assets_wysiwyg"/>
         <script type="text/javascript" src="/web_editor/static/tests/test_utils.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/we3_tests.js"/>
-        <script type="text/javascript" src="/web_editor/static/tests/field_html_tests.js"/>
+        <!-- <script type="text/javascript" src="/web_editor/static/tests/field_html_tests.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/wysiwyg_tests.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/wysiwyg_keyboard_tests.js"/>
-        <script type="text/javascript" src="/web_editor/static/tests/wysiwyg_snippets_tests.js"/>
+        <script type="text/javascript" src="/web_editor/static/tests/wysiwyg_snippets_tests.js"/> -->
     </xpath>
 </template>
 
