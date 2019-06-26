@@ -103,7 +103,7 @@ var VariantMixin = {
         var $variantContainer;
         var $customInput = false;
         if ($target.is('input[type=radio]') && $target.is(':checked')) {
-            $variantContainer = $target.closest('ul').closest('li');
+            $variantContainer = $target.closest('.form-group-att').closest('.form-group');
             $customInput = $target;
         } else if ($target.is('select')){
             $variantContainer = $target.closest('li');
@@ -134,7 +134,7 @@ var VariantMixin = {
 
                     if (isRadioInput && $customInput.data('is_single_and_custom') !== 'True') {
                         $input.addClass('custom_value_radio');
-                        $target.closest('div').after($input);
+                        $target.closest('custom-control-label').after($input);
                     } else {
                         $input.attr('placeholder', attributeValueName);
                         $input.addClass('custom_value_own_line');

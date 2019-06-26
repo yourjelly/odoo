@@ -410,7 +410,7 @@
                                     <strong t-field="a.name" />
                                 </div>
                                 <t t-if="a.type == 'select'">
-                                    <select class="form-control" name="attrib">
+                                    <select class="custom-select" name="attrib">
                                         <option value="" />
                                         <t t-foreach="a.value_ids" t-as="v">
                                             <option t-att-value="'%s-%s' % (a.id,v.id)" t-esc="v.name" t-att-selected="v.id in attrib_set" />
@@ -496,8 +496,9 @@
                             <t t-call="website_sale.shop_product_carousel"/>
                         </div>
                         <div class="col-md-6 col-xl-4" id="product_details">
-                            <h1 itemprop="name" t-field="product.name">Product Name</h1>
+                            <h1 itemprop="name" t-field="product.name" class="mb-0">Product Name</h1>
                             <span itemprop="url" style="display:none;" t-esc="'%sshop/product/%s' % (request.httprequest.url_root, slug(product))"/>
+                            <t t-call="website_sale.product_price"/>
                             <form t-if="product._is_add_to_cart_possible()" action="/shop/cart/update" method="POST">
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
                                 <div class="js_product js_main_product">
@@ -512,7 +513,7 @@
                                             <ul class="d-none js_add_cart_variants" t-att-data-attribute_exclusions="{'exclusions: []'}"/>
                                         </t>
                                     </t>
-                                    <t t-call="website_sale.product_price" />
+
                                     <p t-if="True" class="css_not_available_msg alert alert-warning">This combination does not exist.</p>
                                     <a role="button" id="add_to_cart" class="btn btn-primary btn-lg mt16 js_check_product a-submit d-block d-sm-inline-block" href="#"><i class="fa fa-shopping-cart"/> Add to Cart</a>
                                     <div id="product_option_block"/>
@@ -630,7 +631,7 @@
     </template>
 
     <template id="product_price">
-      <div itemprop="offers" itemscope="itemscope" itemtype="http://schema.org/Offer" class="product_price mt16">
+      <div itemprop="offers" itemscope="itemscope" itemtype="http://schema.org/Offer" class="product_price">
           <h4 class="oe_price_h4 css_editable_mode_hidden">
               <span t-attf-class="text-danger oe_default_price {{'' if combination_info['has_discounted_price'] else 'd-none'}}" style="text-decoration: line-through; white-space: nowrap;"
                   t-esc="combination_info['list_price']" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"
