@@ -121,38 +121,40 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
             var $form = $textarea.closest('form');
             var hasFullEdit = parseInt($("#karma").val()) >= editorKarma;
             var toolbar = [
-                ['style', ['style']],
-                ['font', ['bold', 'italic', 'underline', 'clear']],
-                ['para', ['ul', 'ol', 'paragraph']],
-                ['table', ['table']],
+                'FontStyle',
+                'FontSize',
+                'ForeColor', 'BgColor',
+                'List',
+                'Paragraph',
+                'Indent',
+                'TablePicker',
+                'LinkCreate',
+                'Media',
+                'History',
             ];
             if (hasFullEdit) {
-                toolbar.push(['insert', ['linkPlugin', 'mediaPlugin']]);
+                toolbar.push('LinkCreate', 'Media');
             }
-            toolbar.push(['history', ['undo', 'redo']]);
+            toolbar.push('History');
 
             var options = {
+                plugins: {
+                    KeyMap: true,
+                },
                 height: 150,
                 toolbar: toolbar,
-                styleWithSpan: false,
                 recordInfo: {
                     context: self._getContext(),
                     res_model: 'forum.post',
                     res_id: +window.location.pathname.split('-').pop(),
                 },
             };
-            if (!hasFullEdit) {
-                options.plugins = {
-                    LinkPlugin: false,
-                    MediaPlugin: false,
-                };
-            }
             var wysiwyg = new Wysiwyg(self, options);
             wysiwyg.attachTo($textarea).then(function () {
                 // float-left class messes up the post layout OPW 769721
-                $form.find('.note-editable').find('img.float-left').removeClass('float-left');
+                $form.find('we3-editable').find('img.float-left').removeClass('float-left');
                 $form.on('click', 'button, .a-submit', function () {
-                    $form.find('textarea').data('wysiwyg').save();
+                    wysiwyg.save();
                 });
             });
         });
