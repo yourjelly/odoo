@@ -1149,9 +1149,9 @@ var TestToolbarList = class extends we3.AbstractPlugin {
         this.btnOl = listGroup.querySelector('we3-button[name="list-ol"]');
         this.btnChecklist = listGroup.querySelector('[name="list-checklist"]');
 
-        var paraGroup = wysiwyg.querySelector('we3-group[data-plugin="Indent"]');
-        this.btnIndent = paraGroup.querySelector('we3-button[name="indent-in"]');
-        this.btnOutdent = paraGroup.querySelector('we3-button[name="indent-out"]');
+        var indentGroup = wysiwyg.querySelector('we3-group[data-plugin="Indent"]');
+        this.btnIndent = indentGroup.querySelector('we3-button[name="indent-in"]');
+        this.btnOutdent = indentGroup.querySelector('we3-button[name="indent-out"]');
         return this.dependencies.TestToolbar.test(assert, this.toolbarTests);
     }
 };

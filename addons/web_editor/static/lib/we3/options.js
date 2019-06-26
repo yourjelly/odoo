@@ -24,9 +24,9 @@ Object.assign(we3.options, {
         'FontSize',
         // 'FontName',
         'ForeColor', 'BgColor',
-        'Indent',
         'List',
         'Paragraph',
+        'Indent',
         'TablePicker',
         'LinkCreate',
         'Media',
@@ -43,7 +43,7 @@ Object.assign(we3.options, {
         'Video.getArchNode': ['Padding', 'MediaSize', 'Float', 'Media'],
         'Link.get': ['Link'],
         'Table.get':  ['Table'],
-        // 'Text.get': ['FontStyle', 'FontSize', 'ForeColor', 'BgColor'], // eg for air mode
+        // 'Text.get': ['FontStyle', 'FontSize', 'ForeColor', 'BgColor', 'Paragraph'], // eg for air mode
     },
 
     // SETUP //

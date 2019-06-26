@@ -78,9 +78,9 @@ var TestToolbarIndent = class extends we3.AbstractPlugin {
 
     test (assert) {
         var wysiwyg = document.getElementsByTagName('we3-editor')[0];
-        var paraGroup = wysiwyg.querySelector('we3-group[data-plugin="Indent"]');
-        this.btnIndent = paraGroup.querySelector('we3-button[name="indent-in"]');
-        this.btnOutdent = paraGroup.querySelector('we3-button[name="indent-out"]');
+        var indentGroup = wysiwyg.querySelector('we3-group[data-plugin="Indent"]');
+        this.btnIndent = indentGroup.querySelector('we3-button[name="indent-in"]');
+        this.btnOutdent = indentGroup.querySelector('we3-button[name="indent-out"]');
         return this.dependencies.TestToolbar.test(assert, this.toolbarTests);
     }
 };

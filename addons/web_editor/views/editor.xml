@@ -76,6 +76,7 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/insert/Upload.js"/>
 
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/text/Indent.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/text/Paragraph.js"/>
 
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/misc/History.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/misc/Jinja.js"/>
@@ -100,6 +101,7 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarIndent.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarLink.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarList.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarParagraph.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarWand.js"/>
 
     <!-- odoo -->

@@ -91,6 +91,16 @@ var isType = {
     isCell: function () {
         return this.nodeName === 'td' || this.nodeName === 'th';
     },
+    /**
+     * Return true if the node's text is aligned to the center.
+     *
+     * @returns {Boolean}
+     */
+    isCenterAlign: function () {
+        var alignedAncestor = this.ancestor(node => node.style && node.style['text-align']);
+        var align = alignedAncestor && alignedAncestor.style['text-align'];
+        return align && align === 'center';
+    },
     isClone: False,
     /**
      * Return true if the node is a data element (DATA).
@@ -183,6 +193,31 @@ var isType = {
      */
     isInvisibleBR: False,
     /**
+     * Return true if the node's text's alignment is justified.
+     *
+     * @returns {Boolean}
+     */
+    isJustifyAlign: function () {
+        var alignedAncestor = this.ancestor(node => node.style && node.style['text-align']);
+        var align = alignedAncestor && alignedAncestor.style['text-align'];
+        return align && align === 'justify';
+    },
+    /**
+     * Return true if the node's text is aligned to the left. Default: true.
+     *
+     * @returns {Boolean}
+     */
+    isLeftAlign: function () {
+        var align = this.style && this.style['text-align'];
+        if (!align || align !== 'left') {
+            var alignedAncestor = this.ancestor(node => node.style && node.style['text-align']);
+            if (alignedAncestor && alignedAncestor.style['text-align'] !== 'left') {
+                return false;
+            }
+        }
+        return true;
+    },
+    /**
      * Return true if the node is a list item element (LI).
      *
      * @returns {Boolean}
@@ -233,6 +268,16 @@ var isType = {
      */
     isPre: function () {
         return this.nodeName === 'pre';
+    },
+    /**
+     * Return true if the node's text is aligned to the right.
+     *
+     * @returns {Boolean}
+     */
+    isRightAlign: function () {
+        var alignedAncestor = this.ancestor(node => node.style && node.style['text-align']);
+        var align = alignedAncestor && alignedAncestor.style['text-align'];
+        return align && align === 'right';
     },
     /**
      * Return true if the current node is the root node.

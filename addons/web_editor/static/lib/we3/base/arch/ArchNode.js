@@ -307,7 +307,7 @@ we3.ArchNode = class {
     /**
      * Find all descendent that matches the given predicate function.
      *
-     * @param {function(ArchNode)} fn
+     * @param {function(ArchNode)|string} fn
      * @param {boolean} [searchInsideMatchedArchNode] true to search inside the already
      *   matched archNodes
      * @returns {ArchNode[]}
