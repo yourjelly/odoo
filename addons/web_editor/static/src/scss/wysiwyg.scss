@@ -319,17 +319,19 @@ we3-dropdown[data-plugin="TablePicker"] we3-tablepicker {
 }
 we3-dropdown[data-plugin="ForeColor"],
 we3-dropdown[data-plugin="BgColor"] {
-    we3-palette {
+    we3-items {
         display: block;
         padding: 4px 4px 10px 4px;
-        > we3-button {
+        we3-button {
+            display: block;
             width: 100%;
             margin: 4px 0;
         }
-        we3-row {
+        we3-palette we3-row{
             display: block;
             white-space: nowrap;
             we3-button {
+                display: inline-block;
                 width: 20px;
                 height: 20px;
                 padding: 0;
