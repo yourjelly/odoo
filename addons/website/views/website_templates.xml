@@ -87,6 +87,7 @@
 <template id="website.web_editor_assets_wysiwyg" inherit_id="web_editor.assets_wysiwyg" name="Website Editor Assets Wysiwyg">
     <xpath expr="//script[last()]" position="after">
         <script type="text/javascript" src="/website/static/src/js/editor/we3_website.js"/>
+        <script type="text/javascript" src="/website/static/src/js/editor/we3_website_tests.js"/>
     </xpath>
 </template>
 
@@ -127,6 +128,7 @@
 
     <script type="text/javascript" src="/website/static/src/js/tours/banner.js"/>
     <script type="text/javascript" src="/website/static/src/js/tours/customize.js"/>
+    <script type="text/javascript" src="/website/static/tests/tours/editor_unit_tests.js"></script>
 
     <script type="text/javascript" src="/website/static/src/js/widgets/ace.js"/>
     <script type="text/javascript" src="/website/static/src/js/widgets/theme.js"/>

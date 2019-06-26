@@ -48,9 +48,9 @@ var TranslatorInfoDialog = Dialog.extend({
 
 var WysiwygTranslate = Wysiwyg.extend({
     assetLibs: Wysiwyg.prototype.assetLibs.concat(['website.compiled_assets_wysiwyg']),
-    _getWysiwygContructor: function () {
-        return odoo.__DEBUG__.services['web_editor.wysiwyg.multizone.translate'];
-    }
+    // _getWysiwygContructor: function () {
+    //     return odoo.__DEBUG__.services['web_editor.wysiwyg.multizone.translate'];
+    // }
 });
 
 var TranslatorMenu = EditorMenu.extend({

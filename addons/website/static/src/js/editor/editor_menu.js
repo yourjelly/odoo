@@ -2,6 +2,7 @@ odoo.define('website.editor.menu', function (require) {
 'use strict';
 
 var Dialog = require('web.Dialog');
+var session = require('web.session');
 var Widget = require('web.Widget');
 var core = require('web.core');
 var Wysiwyg = require('web_editor.wysiwyg.root');
@@ -10,9 +11,9 @@ var _t = core._t;
 
 var WysiwygMultizone = Wysiwyg.extend({
     assetLibs: Wysiwyg.prototype.assetLibs.concat(['website.compiled_assets_wysiwyg']),
-    _getWysiwygContructor: function () {
-        return odoo.__DEBUG__.services['web_editor.wysiwyg.multizone'];
-    }
+    // _getWysiwygContructor: function () {
+    //     return odoo.__DEBUG__.services['web_editor.wysiwyg.multizone'];
+    // }
 });
 
 var EditorMenu = Widget.extend({
@@ -35,11 +36,8 @@ var EditorMenu = Widget.extend({
         this.$el = null; // temporary null to avoid hidden error (@see start)
         return this._super()
             .then(function () {
-                var $wrapwrap = $('#wrapwrap');
-                $wrapwrap.removeClass('o_editable'); // clean the dom before edition
-                self.editable($wrapwrap).addClass('o_editable');
                 self.wysiwyg = self._wysiwygInstance();
-                return self.wysiwyg.attachTo($wrapwrap);
+                return self.wysiwyg.attachTo($('#wrapwrap'));
             });
     },
     /**
@@ -50,6 +48,7 @@ var EditorMenu = Widget.extend({
         this.$el.css({width: '100%'});
         return this._super().then(function () {
             self.trigger_up('edit_mode');
+            $('body').addClass('editor_enable');
             self.$el.css({width: ''});
         });
     },
@@ -57,6 +56,7 @@ var EditorMenu = Widget.extend({
      * @override
      */
     destroy: function () {
+        $('body').removeClass('editor_enable');
         this.trigger_up('readonly_mode');
         this._super.apply(this, arguments);
     },
@@ -89,8 +89,6 @@ var EditorMenu = Widget.extend({
 
         return def.then(function () {
             self.trigger_up('edition_will_stopped');
-            var $wrapwrap = $('#wrapwrap');
-            self.editable($wrapwrap).removeClass('o_editable');
             if (reload !== false) {
                 self.wysiwyg.destroy();
                 return self._reload();
@@ -113,64 +111,28 @@ var EditorMenu = Widget.extend({
     save: function (reload) {
         var self = this;
         this.trigger_up('edition_will_stopped');
-        return this.wysiwyg.save().then(function (result) {
-            var $wrapwrap = $('#wrapwrap');
-            self.editable($wrapwrap).removeClass('o_editable');
-            if (result.isDirty && reload !== false) {
-                // remove top padding because the connected bar is not visible
-                $('body').removeClass('o_connected_user');
-                return self._reload();
-            } else {
-                self.wysiwyg.destroy();
-                self.trigger_up('edition_was_stopped');
-                self.destroy();
-            }
-        });
-    },
-    /**
-     * Returns the editable areas on the page.
-     *
-     * @param {DOM} $wrapwrap
-     * @returns {jQuery}
-     */
-    editable: function ($wrapwrap) {
-        return $wrapwrap.find('[data-oe-model]')
-            .not('.o_not_editable')
-            .filter(function () {
-                var $parent = $(this).closest('.o_editable, .o_not_editable');
-                return !$parent.length || $parent.hasClass('o_editable');
-            })
-            .not('link, script')
-            .not('[data-oe-readonly]')
-            .not('img[data-oe-field="arch"], br[data-oe-field="arch"], input[data-oe-field="arch"]')
-            .not('.oe_snippet_editor')
-            .not('hr, br, input, textarea')
-            .add('.o_editable');
+        return this.wysiwyg.save()
+            .then(function (result) {
+                return self._saveElements(result.arch).then(function () {
+                    self.wysiwyg.destroy();
+                    $('#wrapwrap').html(result.arch.toString());
+
+                    if (result.isDirty && reload !== false) {
+                        // remove top padding because the connected bar is not visible
+                        $('body').removeClass('o_connected_user');
+                        return self._reload();
+                    } else {
+                        self.trigger_up('edition_was_stopped');
+                        self.destroy();
+                    }
+                });
+            });
     },
 
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
-    /**
-     * @private
-     */
-    _wysiwygInstance: function () {
-        var context;
-        this.trigger_up('context_get', {
-            callback: function (ctx) {
-                context = ctx;
-            },
-        });
-        return new WysiwygMultizone(this, {
-            snippets: 'website.snippets',
-            recordInfo: {
-                context: context,
-                data_res_model: 'website',
-                data_res_id: context.website_id,
-            }
-        });
-    },
     /**
      * Reloads the page in non-editable mode, with the right scrolling.
      *
@@ -184,6 +146,92 @@ var EditorMenu = Widget.extend({
         window.location.hash = 'scrollTop=' + window.document.body.scrollTop;
         window.location.reload(true);
         return new Promise(function () {});
+    },
+    /**
+     * Select 'isWebsiteEditable' archNode and save value
+     *
+     * @private
+     * @param {ArchNode} archNode
+     * @returns {Promise}
+     */
+    _saveElements: function (archNode) {
+        return Promise.all(archNode.descendent('isWebsiteEditable')
+            .map(this._saveElement.bind(this)));
+    },
+    /**
+     * Saves the element of the page.
+     *
+     * @private
+     * @param {string} outerHTML
+     * @param {Object} recordInfo
+     * @returns {Promise}
+     */
+    _saveElement: function (archNode) {
+        var isDirty = archNode.className.contains('o_dirty');
+        archNode.className.remove('o_dirty o_editable');
+        if (!isDirty) {
+            return;
+        }
+        return this._rpc({
+            model: 'ir.ui.view',
+            method: 'save',
+            args: [
+                +archNode.attributes['data-oe-id'],
+                archNode.toString(),
+                archNode.attributes['data-oe-xpath'],
+            ],
+            kwargs: {
+                context: self.context,
+            },
+        });
+    },
+    /**
+     * @private
+     */
+    _wysiwygInstance: function () {
+        var self = this;
+        this.trigger_up('context_get', {
+            callback: function (ctx) {
+                self.context = ctx;
+            },
+        });
+
+        var res_id;
+        var res_model;
+        var xpath;
+
+        var recordInfo = {
+            context: self.context,
+            data_res_model: 'website',
+            data_res_id: self.context.website_id,
+            get res_id () {
+                return res_id;
+            },
+            set res_id (id) {
+                return res_id = id;
+            },
+            get res_model () {
+                return res_model;
+            },
+            set res_model (model) {
+                return res_model = model;
+            },
+            get xpath () {
+                return xpath;
+            },
+            set xpath (x) {
+                return xpath = x;
+            },
+        };
+
+        return new WysiwygMultizone(this, {
+            plugins: {
+                OdooWebsite: true,
+            },
+            recordInfo: recordInfo,
+            snippets: 'website.snippets',
+            dropblockStayOpen: true,
+        });
     },
 
     //--------------------------------------------------------------------------
