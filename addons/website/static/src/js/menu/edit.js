@@ -25,6 +25,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         snippet_dropped: '_onSnippetDropped',
         edition_will_stopped: '_onEditionWillStop',
         edition_was_stopped: '_onEditionWasStopped',
+        wysiwyg_change: '_onEditorChange',
     }),
 
     /**
@@ -175,6 +176,16 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         this.trigger_up('widgets_start_request', {
             editableMode: true,
             $target: ev.data.$target,
+        });
+    },
+    _onEditorChange: function (ev) {
+        // this.trigger_up('widgets_stop_request', {
+        //     editableMode: true,
+        //     $target: $(_.pluck(ev.data.removed, 'element')),
+        // });
+        this.trigger_up('widgets_start_request', {
+            editableMode: true,
+            $target: $(_.uniq(_.compact(_.pluck(ev.data.changes, 'element')))),
         });
     },
     /**

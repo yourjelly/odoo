@@ -1,6 +1,9 @@
 odoo.define('web_editor.wysiwyg.snippets', function (require) {
 'use strict';
 
+        // TODO: remove this file !
+
+
 var Wysiwyg = require('web_editor.wysiwyg');
 var snippetsEditor = require('web_editor.snippet.editor');
 
@@ -22,6 +25,7 @@ Wysiwyg.include({
 
     init: function (parent, options) {
         this._super.apply(this, arguments);
+        return;
 
         options = _.clone(this.options);
         if (!options.snippets) {

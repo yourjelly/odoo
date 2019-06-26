@@ -38,6 +38,11 @@ class TestUiTranslate(odoo.tests.HttpCase):
         self.start_tour("/", 'rte_translator', login='admin', timeout=120)
 
 
+class TestUiWe3(odoo.tests.HttpCase):
+    def test_admin_tour_editor_unit_tests(self):
+        self.start_tour("/", 'editor_unit_tests', login='admin', timeout=120)
+
+
 @odoo.tests.common.tagged('post_install', '-at_install')
 class TestUi(odoo.tests.HttpCase):
 
