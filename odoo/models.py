@@ -3290,7 +3290,7 @@ Fields:
             field = self._fields[fname]
             if field.inverse:
                 determine_inverses.setdefault(field.inverse, []).append(field)
-                records_to_inverse[field] = self - env.protected(field)
+                records_to_inverse[field] = self
             protected.update(self._field_computed.get(field, [field]))
 
         # protect fields being written against recomputation
