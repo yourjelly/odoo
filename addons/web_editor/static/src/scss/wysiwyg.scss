@@ -2,6 +2,10 @@
 
 we3-editor {
     position: relative;
+    display: flex;
+    flex-flow: column nowrap;
+    width: 100%;
+    height: 100%;
     min-height: 200px;
 
     > textarea[name="codeview"] {
@@ -18,24 +22,25 @@ we3-editor {
         top: 0;
         left: 0;
         z-index: 1050;
-        width: 100%;
         background-color: white;
     }
 }
 
-we3-editable {
-    position: relative;
-    flex: 1;
-    outline: none;
-    overflow: auto;
-    display: block;
-    padding: 10px 0;
-    min-height: 170px;
+we3-editable-container {
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
+we3-editable {
+    position: relative;
+    display: block;
+    max-height: 100%;
+    min-height: 170px;
+    overflow: auto;
+    outline: none;
+}
 
 // style for dropdown & buttons (in popover & toolbar)
-
 
 we3-button, we3-toggler {
     cursor: pointer;
@@ -238,6 +243,7 @@ we3-popover {
 }
 
 we3-toolbar {
+    flex: 0 0 auto;
     display: flex;
     z-index: 1;
     background-color: #fff;
@@ -286,7 +292,6 @@ we3-toolbar we3-button[data-method="removeMedia"] {
 ///
 /// Plugins Table, Color, Media, Upload...
 ///
-
 
 we3-dropdown[data-plugin="TablePicker"] we3-tablepicker {
     display: block;
@@ -438,11 +443,9 @@ form.we3-upload[data-plugin="UploadImage"] we3-group[name="url"] {
     }
 }
 
-
 ///
 /// Colors
 ///
-
 
 we3-button.we3-primary {
     background-color: #7C7BAD;

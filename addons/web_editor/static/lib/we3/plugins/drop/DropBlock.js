@@ -106,15 +106,17 @@ var DropBlock = class extends we3.AbstractPlugin {
     // Public
     //--------------------------------------------------------------------------
 
-    close () {
+    close() {
         if (!this.options.dropblockStayOpen) {
             this.isOpen = false;
             this._blockContainer.style.display = 'none';
+            this._blockContainer.parentNode.classList.remove('we3-dropblock-enabled');
         }
     }
-    open () {
+    open() {
         this.isOpen = true;
         this._blockContainer.style.display = 'block';
+        this._blockContainer.parentNode.classList.add('we3-dropblock-enabled');
     }
     /**
      * Toggle the code view

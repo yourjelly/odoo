@@ -6,8 +6,6 @@ body.editor_enable {
     padding-top: 0 !important;
 
     #wrapwrap {
-        height: calc(100vh - #{$o-navbar-height});
-        padding-top: 0px;
 
         .btn {
             -webkit-user-select: none;
