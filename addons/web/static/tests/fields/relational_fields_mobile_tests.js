@@ -170,8 +170,8 @@ QUnit.module('relational_fields', {
         form.destroy();
     });
 
-    QUnit.test("o_m2o_hidden hide element if used in kanban view in a mobile environment", async function (assert) {
-        assert.expect(4);
+    QUnit.test("hide/show element using m2o_mode in kanban view in a mobile environment", async function (assert) {
+        assert.expect(5);
 
         var form = await createView({
             View: FormView,
@@ -187,8 +187,11 @@ QUnit.module('relational_fields', {
                         '<div class="oe_kanban_global_click">' +
                             '<field name="display_name"/>' +
                         '</div>' +
-                        '<div class="o_sibling_tags o_m2o_hidden">' +
+                        '<div class="o_sibling_tags" t-if="!m2o_mode">' +
                             '<field name="sibling_ids"/>' +
+                        '</div>' +
+                        '<div class="o_foo" t-if="m2o_mode">' +
+                            '<field name="foo"/>' +
                         '</div>' +
                     '</t></templates>' +
                 '</kanban>',
@@ -211,8 +214,10 @@ QUnit.module('relational_fields', {
         assert.equal($modal.length, 1, 'there should be one modal opened in full screen');
         assert.containsOnce($modal, '.o_kanban_view',
             'kanban view should be open in SelectCreateDialog');
-        assert.isNotVisible($modal.find('.o_kanban_view .o_sibling_tags:first'),
-            'o_sibling_tags div should be hidden');
+        assert.containsNone($modal, '.o_kanban_view .o_sibling_tags',
+            'o_sibling_tags div should not be available as div have condition on m2o_mode');
+        assert.containsN($modal, '.o_kanban_view .o_foo', 3,
+            'o_foo div should be available as div have condition on m2o_mode');
 
         form.destroy();
     });

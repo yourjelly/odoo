@@ -127,7 +127,7 @@ var KanbanRenderer = BasicRenderer.extend({
             var handleField = _.findWhere(this.state.fieldsInfo.kanban, {widget: 'handle'});
             this.handleField = handleField && handleField.name;
         }
-        this.opensFromM2O = params.opensFromM2O;
+        this.m2oMode = params.m2oMode;
         this._setState(state);
     },
     /**
@@ -456,12 +456,6 @@ var KanbanRenderer = BasicRenderer.extend({
                 self.$el.toggleClass('o_kanban_grouped', isGrouped);
                 self.$el.toggleClass('o_kanban_ungrouped', !isGrouped);
                 self.$el.append(fragment);
-                if (self.opensFromM2O) {
-                    self.$el.find('.o_m2o_hidden').addClass('o_active');
-                }
-                if (!self.opensFromM2O) {
-                    self.$el.find('.o_m2o_visible').addClass('o_active');
-                }
                 self._toggleNoContentHelper();
                 if (self._isInDom) {
                     _.invoke(self.widgets, 'on_attach_callback');
