@@ -100,18 +100,19 @@
 </template>
 
 <template id="assets_wysiwyg" name="Wysiwyg Editor Assets">
+    <!-- odoo utils -->
+
+    <t t-call="web._assets_helpers">
+        <link rel="stylesheet" type="text/scss" href="/web_editor/static/src/scss/bootstrap_overridden.scss"/>
+    </t>
+
     <!-- lib -->
 
     <link rel="stylesheet" type="text/css" href="/web_editor/static/lib/cropper/css/cropper.css"/>
 
     <script type="text/javascript" src="/web_editor/static/lib/cropper/js/cropper.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/jQuery.transfo.js"/>
-
-    <!-- odoo utils -->
-
-    <t t-call="web._assets_helpers">
-        <link rel="stylesheet" type="text/scss" href="/web_editor/static/src/scss/bootstrap_overridden.scss"/>
-    </t>
+    <script type="text/javascript" src="/web_editor/static/lib/nearest/jquery.nearest.js"/>
 
     <!-- lib we3 -->
 
@@ -121,14 +122,20 @@
 
     <!-- odoo -->
 
-    <script type="text/javascript" src="/web_editor/static/src/js/web_editor.js"/>
-
     <link rel="stylesheet" type="text/scss" href="/web_editor/static/src/scss/wysiwyg.scss"/>
     <link rel="stylesheet" type="text/scss" href="/web_editor/static/src/scss/wysiwyg_iframe.scss"/>
     <link rel="stylesheet" type="text/scss" href="/web_editor/static/src/scss/wysiwyg_icons.css"/>
+    <link rel="stylesheet" type="text/scss" href="/web_editor/static/src/scss/wysiwyg_snippets.scss"/>
 
+    <script type="text/javascript" src="/web_editor/static/src/js/web_editor.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/tools/no-dependencies.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/tools/fonts.js"/>
+
+    <!-- Snippets behaviors -->
+
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg_snippets/wysiwyg_snippets.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg_snippets/snippets.editor.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg_snippets/snippets.options.js"/>
 
     <!-- widgets-->
 
@@ -173,19 +180,6 @@
     <!-- additional plugins -->
 
     <script type="text/javascript" src="/web_editor/static/src/js/backend/convert_inline.js"/>
-</template>
-
-<template id="wysiwyg_snippets" inherit_id="web_editor.assets_wysiwyg" name="Wysiwyg Editor additional snippets">
-    <xpath expr="." position="inside">
-        <link rel="stylesheet" type="text/scss" href="/web_editor/static/src/scss/wysiwyg_variables.scss"/>
-        <link rel="stylesheet" type="text/scss" href="/web_editor/static/src/scss/wysiwyg_snippets.scss"/>
-
-        <script type="text/javascript" src="/web_editor/static/lib/nearest/jquery.nearest.js"/>
-
-        <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg_snippets/wysiwyg_snippets.js"/>
-        <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg_snippets/snippets.editor.js"/>
-        <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg_snippets/snippets.options.js"/>
-    </xpath>
 </template>
 
 <template id="_assets_primary_variables" inherit_id="web._assets_primary_variables">
