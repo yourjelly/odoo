@@ -1097,6 +1097,10 @@ Possible children of the view element are:
     self-explanatory
   ``read_only_mode``
     self-explanatory
+  ``m2o_mode``
+    set to true when kanban view is opened in mobile environment from m2o field,
+
+    .. note:: clicking on m2o field in mobile environment opens kanban view
 
 
     .. rubric:: buttons and fields
@@ -1128,17 +1132,6 @@ Possible children of the view element are:
         opens the card's record in the form view in editable mode
       ``delete``
         deletes the card's record and removes the card
-
-    * kanban-specific CSS
-
-      * CSS Class
-
-        ``o_m2o_hidden``
-          define this class on element which needed to be hidden in kanban view
-          opened via m2o search more records option in mobile device
-        ``o_m2o_visible``
-          define this class on element which needed to be visible only in kanban
-          view opened view m2o search more records option in mobile device
 
     .. todo::
 
