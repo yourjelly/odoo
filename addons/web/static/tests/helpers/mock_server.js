@@ -1294,7 +1294,7 @@ var MockServer = Class.extend({
             case '/web/dataset/resequence':
                 return Promise.resolve(this._mockResequence(args));
         }
-        if (route.indexOf('/web/image') >= 0 || _.contains(['.png', '.jpg'], route.substr(route.length - 4))) {
+        if (route.indexOf('/web/image') >= 0 || _.contains(['.png', '.jpg'], route.substr(route.length - 4)) || route.indexOf('data:') >= 0) {
             return Promise.resolve();
         }
         switch (args.method) {
