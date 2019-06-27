@@ -4,190 +4,166 @@
     }
 }
 
+we3-group[data-plugin="DropBlock"] {
+    width: $o-wysiwyg-sidebar-width;
+}
 
-we3-editor {
-    we3-group[data-plugin="DropBlock"] {
-        width: 210px;
-    }
-    we3-dropblock {
-        display: none;
-        z-index: 1;
-        position: relative;
-        float: left;
-        overflow: auto;
-        width: 210px;
-        min-height: inherit;
-        max-height: inherit;
-        margin: 0 0.2rem;
-        background-image: linear-gradient(180deg, #e6e5e5, #fafafa);
+.we3-dropblock-enabled {
+    padding-left: $o-wysiwyg-sidebar-width;
+}
 
-        we3-blocks {
-            display: block;
-            float: clear;
+we3-dropblock {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: $o-wysiwyg-sidebar-width;
+    height: 100%;
+    overflow: auto;
+    background-image: linear-gradient(180deg, #e6e5e5, #fafafa);
+}
 
-            > we3-title {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 3%;
-                color: #212629;
-                margin-bottom: 3%;
-            }
-            we3-title * {
-                margin-right: 5px;
-            }
-        }
+we3-blocks {
+    display: block;
 
-        we3-block {
-            user-select: none;
-        }
-    }
-
-    we3-dropblock-thumbnail {
-        display: block;
-        float: left;
-        width: 45.5%;
-        margin: 0 0 6% 3%;
-        cursor: pointer;
-        cursor: copy;
-        cursor: grab;
-
-        we3-preview {
-            display: block;
-            width: 100%;
-            padding-bottom: 75%;
-            border: 1px solid #a9a9a9;
-            background-size: cover;
-            background-position: center center;
-            opacity: 0.8;
-        }
-    }
-    we3-block.we3-disabled we3-dropblock-thumbnail {
-        background-color: red;
-    }
-
-    we3-dropblock-dropzone-origin we3-dropblock-thumbnail {
-        position: relative;
-        opacity: 0.7;
-    }
-
-    we3-dropblock-dropzone {
-        background-color: rgba(124, 123, 173, 0.05);
-        animation: dropZoneInsert 1s linear 0s infinite alternate;
-        border: 2px dashed #a9a9a9;
-        border-top: none;
-        border-bottom: none;
-
-        display: block;
-        position: relative;
-        width: 100%;
-        height: 40px;
-        margin: -20px 0;
-
-        &:after {
-            content: "";
-            display: block;
-            width: 100%;
-            height: 50%;
-            border-bottom: 2px dashed #a9a9a9;
-            box-sizing: content-box;
-        }
-
-        &[orientation="vertical"] {
-            border: 2px dashed #a9a9a9;
-            border-left: none;
-            border-right: none;
-
-            width: 40px;
-            float: left;
-            margin: 0 -20px;
-
-            &:after {
-                width: 50%;
-                height: 100%;
-                border-bottom: none;
-                border-right: 2px dashed #a9a9a9;
-            }
-        }
-    }
-
-    we3-dropblock-dropzone-origin {
-        position: absolute;
-    }
-
-    we3-dropblock-buttons {
-        position: absolute;
+    > we3-title {
         display: flex;
-        we3-button {
-            position: relative;
-            top: -6px;
-            &:before {
-                content: "\2701";
-                font-weight: bold;
-            }
-        }
+        align-items: center;
+        justify-content: center;
+        padding: 3%;
+        color: #212629;
+        margin-bottom: 3%;
     }
-
-    .we3-dropblock-dropable {
-        &:hover {
-            box-shadow: inset 0px 0px 5px 1px rgba(255,0,0,1);
-            position: relative;
-        }
-        /*&:hover:before {
-            cursor: pointer;
-            display: inline-block;
-            padding: 0px 4px;
-            margin: 0;
-            line-height: 1.5;
-            border-radius: 0.2rem;
-            font-weight: 500;
-            color: #666666;
-            text-align: center;
-            vertical-align: middle;
-            background-color: #fff;
-            border: 1px solid #dee2e6;
-            line-height: 1.5;
-            user-select: none;
-
-            position: absolute;
-            left: -10px;
-            top: -10px;
-            content: "\2701";
-            font-weight: bold;
-        }*/
+    we3-title > i {
+        margin-right: 5px;
     }
 }
 
+we3-block {
+    user-select: none;
+}
 
+we3-dropblock-thumbnail {
+    display: block;
+    float: left;
+    width: 45.5%;
+    margin: 0 0 6% 3%;
+    cursor: pointer;
+    cursor: copy;
+    cursor: grab;
 
+    we3-preview {
+        display: block;
+        width: 100%;
+        padding-bottom: 75%;
+        border: 1px solid #a9a9a9;
+        background-size: cover;
+        background-position: center center;
+        opacity: 0.8;
+    }
+}
 
+.we3-disabled we3-dropblock-thumbnail {
+    background-color: red;
+}
 
+we3-dropblock-dropzone-origin we3-dropblock-thumbnail {
+    position: relative;
+    opacity: 0.7;
+}
 
+we3-dropblock-dropzone {
+    background-color: rgba(124, 123, 173, 0.05);
+    animation: dropZoneInsert 1s linear 0s infinite alternate;
+    border: 2px dashed #a9a9a9;
+    border-top: none;
+    border-bottom: none;
 
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 40px;
+    margin: -20px 0;
 
+    &:after {
+        content: "";
+        display: block;
+        width: 100%;
+        height: 50%;
+        border-bottom: 2px dashed #a9a9a9;
+        box-sizing: content-box;
+    }
 
+    &[orientation="vertical"] {
+        border: 2px dashed #a9a9a9;
+        border-left: none;
+        border-right: none;
 
+        width: 40px;
+        float: left;
+        margin: 0 -20px;
 
-///
-/// This file contains all variables and mixins that are specific to the editor.
-///
+        &:after {
+            width: 50%;
+            height: 100%;
+            border-bottom: none;
+            border-right: 2px dashed #a9a9a9;
+        }
+    }
+}
 
-$o-wysiwyg-handles-accent-color: #00e2ff !default;
-$o-wysiwyg-handle-edge-size: 1px !default;
-$o-wysiwyg-dropzone-size: 40px !default;
-$o-wysiwyg-sidebar-width: 210px !default;
-$o-wysiwyg-sidebar-height: 36px !default;
-$o-wysiwyg-overlay-option-size: 25px !default;
-$o-wysiwyg-handles-btn-size: 18px !default;
-$o-wysiwyg-handle-border-width: 1px !default;
+we3-dropblock-dropzone-origin {
+    position: absolute;
+}
 
-$o-wysiwyg-handles-offset-to-hide: 10000px !default;
+we3-dropblock-buttons {
+    position: absolute;
+    display: flex;
 
+    we3-button {
+        position: relative;
+        top: -6px;
+
+        &:before {
+            content: "\2701";
+            font-weight: bold;
+        }
+    }
+}
+
+.we3-dropblock-dropable {
+    &:hover {
+        box-shadow: inset 0px 0px 5px 1px rgba(255,0,0,1);
+        position: relative;
+    }
+    /*&:hover:before {
+        cursor: pointer;
+        display: inline-block;
+        padding: 0px 4px;
+        margin: 0;
+        line-height: 1.5;
+        border-radius: 0.2rem;
+        font-weight: 500;
+        color: #666666;
+        text-align: center;
+        vertical-align: middle;
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        line-height: 1.5;
+        user-select: none;
+
+        position: absolute;
+        left: -10px;
+        top: -10px;
+        content: "\2701";
+        font-weight: bold;
+    }*/
+}
 
 // NOTE EDITOR
 .note-editor.o_snippets_loaded {
     transition: padding-left 400ms $o-wysiwyg-md-ease 0s;
-    padding-left: 210px !important;
+    padding-left: $o-wysiwyg-sidebar-width !important;
 }
 
 .note-editor.note-frame .note-editing-area .o_wrap_editable_snippets {
