@@ -61,7 +61,7 @@ we3.Parented = class {
      * @returns {Object}
      */
     _getParent () {
-        return this.__parentedParent;
+        return this._parentedParent;
     }
     /**
      * Set the parent of the current object. When calling this method, the

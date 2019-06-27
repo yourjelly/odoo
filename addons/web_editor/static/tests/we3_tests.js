@@ -96,6 +96,7 @@ QUnit.module('web_editor', {
         TestKeyboardChar: false,
         TestKeyboardBackspace: false,
         TestKeyboardArrow: false,
+        TestHistory: false,
     };
 
     async function createFormAndTest (self) {
@@ -261,6 +262,14 @@ QUnit.module('web_editor', {
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, testPlugins, {TestKeyboardBackspace: true}),
+        };
+        await createFormAndTest(this);
+    });
+    QUnit.test('history', async function (assert) {
+        assert.expect(28);
+        this.testOptions = {
+            assert: assert,
+            plugins: Object.assign({}, testPlugins, {TestHistory: true}),
         };
         await createFormAndTest(this);
     });

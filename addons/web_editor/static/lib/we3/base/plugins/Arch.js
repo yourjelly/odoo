@@ -1205,14 +1205,19 @@ var BaseArch = class extends we3.AbstractPlugin {
 
         this._cloneArchNodeList = {};
 
+        var rangeRes;
         if (range) {
-            BaseRange.setRange(range);
+            rangeRes = BaseRange.setRange(range, {
+                muteTrigger: true,
+            });
         } else {
             range = result.range;
             if (BaseRenderer.getElement(range.id)) {
-                BaseRange.setRange({
+                rangeRes = BaseRange.setRange({
                     scID: range.id,
                     so: range.offset,
+                }, {
+                    muteTrigger: true,
                 });
             }
             delete result.range;
@@ -1220,6 +1225,13 @@ var BaseArch = class extends we3.AbstractPlugin {
 
         if (!this._bypassChangeTriggerActive) {
             this.trigger('update', json);
+        }
+
+        if (rangeRes && rangeRes.range) {
+            BaseRange.trigger('range', rangeRes.range);
+        }
+        if (rangeRes && rangeRes.focus) {
+            BaseRange.trigger('focus', rangeRes.focus);
         }
 
         result.changes.forEach(function (c) {
@@ -1242,6 +1254,10 @@ var Arch = class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
         this.dependencies = ['BaseArch'];
+    }
+    on () {
+        var BaseArch = this.dependencies.BaseArch;
+        BaseArch.on.apply(BaseArch, arguments);
     }
 
     //--------------------------------------------------------------------------

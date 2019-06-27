@@ -22,7 +22,7 @@ var HistoryPlugin = class extends we3.AbstractPlugin {
         this._eachNodeHistory = [[]];
         this._range = [];
 
-        this.templatesDependencies = ['/web_editor/static/src/xml/wysiwyg.xml'];
+        this.templatesDependencies = ['xml/history.xml'];
         this.dependencies = ['Arch', 'Range'];
         this.buttons = {
             template: 'wysiwyg.buttons.history',
@@ -66,14 +66,6 @@ var HistoryPlugin = class extends we3.AbstractPlugin {
         this._onArchUpdate(changes);
     }
     /**
-     * @todo remove when keyboard is done.
-     */
-    getHistoryStep () {}
-    /**
-     * @todo remove when keyboard is done.
-     */
-    recordUndo () {}
-    /**
      * Redo the last undone history step.
      */
     redo () {
@@ -112,9 +104,12 @@ var HistoryPlugin = class extends we3.AbstractPlugin {
      * @returns {Boolean} true if the given button should be enabled
      */
     _enabled (buttonName) {
-        switch (buttonName) {
-            case 'undo': return this.stackOffset >= 1;
-            case 'redo': return this.stackOffset + 1 < this._range.length;
+        if (buttonName === 'undo') {
+            var steps = this._eachNodeHistory[0].slice(0, this.stackOffset + 1);
+            var nb = steps.length ? steps.reduce(function (a, b) {return a + b;}) : 0;
+            return nb > 1;
+        } else if (buttonName === 'redo') {
+            return this.stackOffset + 1 < this._range.length;
         }
     }
     /**
@@ -226,7 +221,7 @@ var HistoryPlugin = class extends we3.AbstractPlugin {
         var old = this._getStep(this.stackOffset);
 
         var concatTextHistory = false;
-        if (diffToNew.length === 1 && diffToNew[0].nodeName === 'TEXT') {
+        if (diffToNew.length === 1 && diffToNew[0].type === 'TEXT') {
             var nodeHistory = this._eachNodeHistory[diffToNew[0].id];
             var step = nodeHistory && nodeHistory[this.stackOffset];
             if (step) {
@@ -249,7 +244,8 @@ var HistoryPlugin = class extends we3.AbstractPlugin {
             this._range = this._range.slice(0, this.stackOffset);
         }
 
-        this._eachNodeHistory[0][self.stackOffset] = true;
+        console.log(diffToNew, this.stackOffset);
+        this._eachNodeHistory[0][this.stackOffset] = true;
 
         diffToNew.forEach(function (json) {
             var nodeHistory = self._eachNodeHistory[json.id];

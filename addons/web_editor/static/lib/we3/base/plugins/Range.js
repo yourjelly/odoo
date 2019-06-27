@@ -170,10 +170,14 @@ var BaseRange = class extends we3.AbstractPlugin {
      * @param {Node} [points.ecID] end arch node id
      * @param {Number} [points.eo] must be given if ecID is given
      * @param {Boolean} [points.ltr] true if the selection was made from left to right (from sc to ec)
+     * @param {Object} [options]
+     * @param {Boolean} [options.moveLeft] true if a movement is initiated from right to left
+     * @param {Boolean} [options.moveRight] true if a movement is initiated from left to right
+     * @param {Boolean} [options.muteTrigger]
      */
     setRange (points, options) {
         this._computeSetRange(points, options);
-        this.restore();
+        return this._setRange(this._getRange(), options);
     }
     /**
      * Return a deep copy of the range values.
@@ -630,8 +634,10 @@ var BaseRange = class extends we3.AbstractPlugin {
      * @param {Node} [range.ec]
      * @param {Number} [range.ecID]
      * @param {Number} [range.eo]
+     * @param {Object} [options]
+     * @param {Boolean} [options.muteTrigger]
      */
-    _setRange (range) {
+    _setRange (range, options) {
         if (!this._editorFocused) {
             return;
         }
@@ -650,12 +656,20 @@ var BaseRange = class extends we3.AbstractPlugin {
         this._didRangeChange = false;
         this._didChangeFocusNode = false;
 
+        var res = {};
         if (didRangeChange) {
-            this.trigger('range', this.toJSON());
+            res.range = this.toJSON();
+            if (!options || !options.muteTrigger) {
+                this.trigger('range', res.range);
+            }
         }
         if (isChangeFocusNode) {
-            this.trigger('focus', this.getFocusedNode());
+            res.focus = this.getFocusedNode();
+            if (!options || !options.muteTrigger) {
+                this.trigger('focus', res.focus);
+            }
         }
+        return res;
     }
     /**
      * Set the range from the selection in the DOM.

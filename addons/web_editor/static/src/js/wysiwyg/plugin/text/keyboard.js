@@ -35,7 +35,7 @@ we3.addPlugin('Keyboard', class extends we3.AbstractPlugin {
         clearTimeout(this.lastCharIsVisibleTime);
 
         var stopChars = [' ', ',', ';', ':', '?', '.', '!'];
-        var history = this.dependencies.History.getHistoryStep();
+        var history = null; //this.dependencies.History.getHistoryStep();
 
         var isStopChar = stopChars.indexOf(key) !== -1;
         var isTopOfHistoryStack = !history || history.stack.length ||
@@ -49,7 +49,7 @@ we3.addPlugin('Keyboard', class extends we3.AbstractPlugin {
         }, 500);
         if (!this.lastCharIsVisible) {
             this.lastCharIsVisible = true;
-            this.dependencies.History.recordUndo();
+            // this.dependencies.History.recordUndo();
         }
     }
     /**

@@ -125,7 +125,7 @@ var FontStylePlugin = class extends we3.AbstractPlugin {
      * @returns {Boolean} true if the given button should be enabled
      */
     _enabled (buttonName, focusNode) {
-        return !!focusNode.ancestor('isFormatNode');
+        return !!this.dependencies.Range.getRange().scArch.ancestor('isFormatNode');
     }
     /**
      * Remove the styles of a node or an array of nodes and

@@ -415,7 +415,7 @@ var TextPlugin = class extends we3.AbstractPlugin {
 var FontSizePlugin = class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
-        this.dependencies = ['Text'];
+        this.dependencies = ['Text', 'Range'];
         this.templatesDependencies = ['/web_editor/static/src/xml/wysiwyg_format_text.xml'];
         this.buttons = {
             template: 'wysiwyg.buttons.fontsize',
@@ -461,7 +461,7 @@ var FontSizePlugin = class extends we3.AbstractPlugin {
      * @returns {Boolean} true if the given button should be enabled
      */
     _enabled (buttonName, focusNode) {
-        return !!focusNode.ancestor('isFormatNode');
+        return !!this.dependencies.Range.getRange().scArch.ancestor('isFormatNode');
     }
 };
 

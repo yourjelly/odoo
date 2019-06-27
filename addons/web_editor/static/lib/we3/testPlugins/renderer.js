@@ -3,12 +3,12 @@
 
 var TestRenderer = class extends we3.AbstractPlugin {
     static get autoInstall () {
-        return ['Renderer', 'TestKeyboard'];
+        return ['Renderer', 'FontStyle', 'TestKeyboard'];
     }
     constructor () {
         super(...arguments);
         var self = this;
-        this.dependencies = ['Test', 'Renderer', 'TestKeyboard'];
+        this.dependencies = ['Test', 'TestKeyboard'];
 
         // range collapsed: ◆
         // range start: ▶

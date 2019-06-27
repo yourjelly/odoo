@@ -30,6 +30,7 @@ we3.PluginsManager = class extends we3.EventDispatcher {
         params.plugins.Rules = true;
         this._promiseLoadPlugins = this._loadPlugins(params, options);
         this.on('change', this, this.changeEditorValue);
+        this.on('callPluginMethod', this, this._onCallPluginMethod);
     }
     /**
      * Return a Promise resolved when the plugin is initialized and can be started
@@ -468,6 +469,17 @@ we3.PluginsManager = class extends we3.EventDispatcher {
             }
         }
         return options.loadTemplates(templatesDependencies);
+    }
+
+    //--------------------------------------------------------------------------
+    // Handler
+    //--------------------------------------------------------------------------
+
+    _onCallPluginMethod (ev) {
+        var res = this.call(ev.data.pluginName, ev.data.methodName, ev.data.args);
+        if (ev.data.callback) {
+            ev.data.callback(res);
+        }
     }
 };
 

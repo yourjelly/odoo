@@ -22,6 +22,8 @@ var PopoverPlugin = class extends we3.AbstractPlugin {
         this.POPOVER_MARGIN_TOP = 5;
         this._setOptionalDependencies(params);
         this._createPopover(params.insertBeforeContainer);
+        this._buttonsEnableOnChange = [];
+        this._buttonsActiveOnChange = [];
     }
     blurEditor () {
         this._updatePopovers();
@@ -31,6 +33,22 @@ var PopoverPlugin = class extends we3.AbstractPlugin {
     }
     setEditorValue () {
         this._updatePopovers();
+    }
+    changeEditorValue () {
+        if (!this._focusNode) {
+            return;
+        }
+        var self = this;
+        this._buttonsEnableOnChange.forEach(function (button) {
+            var pluginName = button.getAttribute('data-plugin');
+            var plugin = self.dependencies[pluginName];
+            self._updatePluginButton(plugin, self._focusNode, button);
+        });
+        this._buttonsActiveOnChange.forEach(function (button) {
+            var pluginName = button.getAttribute('data-plugin');
+            var plugin = self.dependencies[pluginName];
+            self._updatePluginButton(plugin, self._focusNode, button);
+        });
     }
 
     //--------------------------------------------------------------------------
@@ -105,7 +123,7 @@ var PopoverPlugin = class extends we3.AbstractPlugin {
     }
     _renderButtons (pluginName) {
         var self = this;
-        var plugin = self.dependencies[pluginName];
+        var plugin = this.dependencies[pluginName];
         if (!plugin.buttons || !plugin.buttons.template) {
             throw new Error('Button template of "' + pluginName + '" plugin is missing.');
         }
@@ -285,17 +303,16 @@ var PopoverPlugin = class extends we3.AbstractPlugin {
             } else {
                 active = !!enabledMedthodName.call(plugin, buttonName, focusNode);
             }
-            if (active) {
-                return true;
-            }
+            return active;
         }
         return focusNode ? null : false;
     }
     _updatePluginButton (plugin, focusNode, button) {
-        var enabled = this._togglePluginButtonToggle(plugin, focusNode, button.getAttribute('name'), 'enabled');
+        var name = button.getAttribute('name');
+        var enabled = this._togglePluginButtonToggle(plugin, focusNode, name, 'enabled');
         if (enabled || enabled === null) {
             button.classList.remove('disabled');
-            var active = this._togglePluginButtonToggle(plugin, focusNode, button.getAttribute('name'), 'active');
+            var active = this._togglePluginButtonToggle(plugin, focusNode, name, 'active');
             if (active) {
                 button.classList.add('active');
             } else {
@@ -354,6 +371,8 @@ var PopoverPlugin = class extends we3.AbstractPlugin {
     }
     _updatePopoverButtons (focusNode) {
         var self = this;
+        this._buttonsEnableOnChange = [];
+        this._buttonsActiveOnChange = [];
         this.popovers.forEach(function (popover) {
             if (!popover.display) {
                 return;
@@ -368,7 +387,18 @@ var PopoverPlugin = class extends we3.AbstractPlugin {
                 if (!button.getAttribute('name')) {
                     return;
                 }
-                self._updatePluginButton(self.dependencies[button.getAttribute('data-plugin')], focusNode, button);
+                var checkOnChange = button.getAttribute('data-check-on-change');
+                if (checkOnChange) {
+                    if (checkOnChange.indexOf('enabled') !== -1) {
+                        self._buttonsEnableOnChange.push(button);
+                    }
+                    if (checkOnChange.indexOf('active') !== -1) {
+                        self._buttonsActiveOnChange.push(button);
+                    }
+                }
+                var pluginName = button.getAttribute('data-plugin');
+                var plugin = self.dependencies[pluginName] || self._getParent()._plugins[pluginName];
+                self._updatePluginButton(plugin, focusNode, button);
             });
         });
         this._toggleDropDownEnabled();
@@ -468,6 +498,7 @@ var PopoverPlugin = class extends we3.AbstractPlugin {
             return;
         }
 
+        // var pluginName = button.getAttribute('data-plugin');
         var method = button.getAttribute('data-method');
         var value = button.getAttribute('data-value');
         var popover;
@@ -488,6 +519,7 @@ var PopoverPlugin = class extends we3.AbstractPlugin {
         if (button.getAttribute('options')) {
             buttonOptions = JSON.parse(button.getAttribute('options'));
         }
+
         plugin[method](value, focusNode);
         if (this.dependencies.Range.getFocusedNode().id === focusNode.id) {
             this._updatePopovers(focusNode);
