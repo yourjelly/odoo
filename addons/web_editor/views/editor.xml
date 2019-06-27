@@ -90,6 +90,7 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/renderer.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/popover.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbar.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarColor.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarFontStyle.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarIndent.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarList.js"/>
