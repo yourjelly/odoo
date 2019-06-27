@@ -10,21 +10,8 @@
     <t t-call-assets="web_editor.assets_wysiwyg"/>
 </template>
 
-<template id="assets_wysiwyg" name="Wysiwyg Editor Assets">
-    <!-- lib -->
-
-    <link rel="stylesheet" type="text/css" href="/web_editor/static/lib/cropper/css/cropper.css"/>
-
-    <script type="text/javascript" src="/web_editor/static/lib/cropper/js/cropper.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/jQuery.transfo.js"/>
-
-    <!-- odoo utils -->
-
-    <t t-call="web._assets_helpers">
-        <link rel="stylesheet" type="text/scss" href="/web_editor/static/src/scss/bootstrap_overridden.scss"/>
-    </t>
-
-    <!-- lib we3 -->
+<template id="we3" name="we3 library Assets">
+    <!-- Base -->
 
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/init.js"/>
 
@@ -47,7 +34,7 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/ArchNodeFragment.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/ArchNodeRoot.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/customArchNodes.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/ArchitecturalSpace.js"/> <!-- must be after customArchNodes -->
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/ArchitecturalSpace.js"/>
 
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Rules.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Arch.js"/>
@@ -56,6 +43,8 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Selector.js"/>
 
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/we3.js"/>
+
+    <!-- Plugins -->
 
     <script type="text/javascript" src="/web_editor/static/lib/we3/options.js"/>
 
@@ -83,6 +72,8 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/misc/History.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/misc/Jinja.js"/>
 
+    <!-- Tests -->
+
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/Test.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/TestArchAndRules.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/TestRange.js"/>
@@ -101,10 +92,30 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbar.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarFontStyle.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarIndent.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarLink.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarList.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarParagraph.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarWand.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/history.js"/>
+</template>
+
+<template id="assets_wysiwyg" name="Wysiwyg Editor Assets">
+    <!-- lib -->
+
+    <link rel="stylesheet" type="text/css" href="/web_editor/static/lib/cropper/css/cropper.css"/>
+
+    <script type="text/javascript" src="/web_editor/static/lib/cropper/js/cropper.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/jQuery.transfo.js"/>
+
+    <!-- odoo utils -->
+
+    <t t-call="web._assets_helpers">
+        <link rel="stylesheet" type="text/scss" href="/web_editor/static/src/scss/bootstrap_overridden.scss"/>
+    </t>
+
+    <!-- lib we3 -->
+
+    <t t-call="web_editor.we3"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarLink.js"/>
 
     <!-- odoo -->
 
