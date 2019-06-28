@@ -1,6 +1,7 @@
 odoo.define('mail.component.Discuss', function (require) {
 'use strict';
 
+const Composer = require('mail.component.Composer');
 const MobileMailboxSelection = require('mail.component.DiscussMobileMailboxSelection');
 const MobileNavbar = require('mail.component.DiscussMobileNavbar');
 const Sidebar = require('mail.component.DiscussSidebar');
@@ -17,6 +18,7 @@ class Discuss extends Component {
         super(...args);
         this.DEBUG = true;
         this.components = {
+            Composer,
             MobileMailboxSelection,
             MobileNavbar,
             Sidebar,
@@ -25,6 +27,9 @@ class Discuss extends Component {
         };
         this.state = {
             mobileNavbarTab: 'mailbox',
+            replyComposerToggled: false,
+            replyMessageLocalId: null,
+            replyThreadLocalId: null,
             threadCachesInfo: {},
         };
         this.template = 'mail.component.Discuss';
@@ -51,6 +56,30 @@ class Discuss extends Component {
             threadLocalId: this.env.discuss.initThreadLocalId,
         });
         this._wasMobile = this.props.isMobile;
+    }
+
+    /**
+     * @param {Object} nextProps
+     * @param {Object} [nextProps.thread]
+     */
+    willUpdateProps(nextProps) {
+        const thread = this.props.thread;
+        if (!thread) {
+            return;
+        }
+        const nextThread = nextProps.thread;
+        if (!nextThread) {
+            return;
+        }
+        if (thread.localId !== nextThread.localId) {
+            return;
+        }
+        if (thread.localId !== 'mail.box_inbox') {
+            return;
+        }
+        if (nextProps.threadCounter === 0 && this.props.threadCounter > 0) {
+            this.trigger('show_rainbow_man');
+        }
     }
 
     patched() {
@@ -100,6 +129,15 @@ class Discuss extends Component {
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     */
+    _onComposerDiscarded() {
+        this.state.replyComposerToggled = false;
+        this.state.replyMessageLocalId = null;
+        this.state.replyThreadLocalId = null;
+    }
 
     /**
      * @private
@@ -203,6 +241,18 @@ class Discuss extends Component {
     /**
      * @private
      * @param {CustomEvent} ev
+     * @param {Object} ev.detail
+     * @param {string} ev.detail.messageLocalId
+     */
+    _onReplyMessage(ev) {
+        const { messageLocalId } = ev.detail;
+        this.state.replyComposerToggled = true;
+        this.state.replyMessageLocalId = messageLocalId;
+        this.state.replyThreadLocalId = this.env.store.state.messages[messageLocalId].originThreadLocalId;
+    }
+    /**
+     * @private
+     * @param {CustomEvent} ev
      */
     _onThreadRendered(ev) {
         this.trigger('update_control_panel');
@@ -245,6 +295,9 @@ return connect(
             thread,
             threadCache,
             threadCacheLocalId,
+            // intentionally keep unsynchronize value of old thread counter
+            // useful in willUpdateProps to detect change of counter
+            threadCounter: thread && thread.counter,
         };
     },
     { deep: false }

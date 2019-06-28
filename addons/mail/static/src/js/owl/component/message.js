@@ -3,10 +3,16 @@ odoo.define('mail.component.Message', function (require) {
 
 const mailUtils = require('mail.utils');
 const AttachmentList = require('mail.component.AttachmentList');
+const UserStatus = require('mail.component.UserStatus');
 
+const core = require('web.core');
 const time = require('web.time');
 
 const { Component, connect } = owl;
+
+const _lt = core._lt;
+const READ_MORE = _lt("read more");
+const READ_LESS = _lt("read less");
 
 class Message extends Component {
 
@@ -15,14 +21,22 @@ class Message extends Component {
      */
     constructor(...args) {
         super(...args);
-        this.components = { AttachmentList };
+        this.components = { AttachmentList, UserStatus };
         this.id = `message_${this.props.messageLocalId}`;
         this.state = {
             timeElapsed: mailUtils.timeFromNow(this.props.message.dateMoment),
-            toggledClick: false
+            toggledClick: false,
         };
         this.template = 'mail.component.Message';
         this._intervalId = undefined;
+    }
+
+    mounted() {
+        this._insertReadMoreLess($(this.refs.content));
+    }
+
+    patched() {
+        this._insertReadMoreLess($(this.refs.content));
     }
 
     willUnmount() {
@@ -75,7 +89,7 @@ class Message extends Component {
      */
     get displayedAuthorName() {
         if (this.props.author) {
-            return this.props.author.displayName;
+            return this.props.author.display_name;
         }
         return this.props.message.email_from || this.env._t("Anonymous");
     }
@@ -145,6 +159,54 @@ class Message extends Component {
         return this.state.timeElapsed;
     }
 
+    /**
+     * @return {Object}
+     */
+    get trackingValues() {
+        if (!this.props.tracking_value_ids) {
+            // might happen in tests
+            return [];
+        }
+        return this.props.message.tracking_value_ids.map(trackingValue => {
+            let value = {
+                changed_field: trackingValue.changed_field,
+                old_value: trackingValue.old_value,
+                new_value: trackingValue.new_value,
+                field_type: trackingValue.field_type,
+            };
+            if (value.field_type === 'datetime') {
+                if (value.old_value) {
+                    value.old_value =
+                        moment
+                            .utc(value.old_value)
+                            .local()
+                            .format('LLL');
+                }
+                if (value.new_value) {
+                    value.new_value =
+                        moment
+                            .utc(value.new_value)
+                            .local()
+                            .format('LLL');
+                }
+            } else if (value.field_type === 'date') {
+                if (value.old_value) {
+                    value.old_value =
+                        moment(value.old_value)
+                            .local()
+                            .format('LL');
+                }
+                if (value.new_value) {
+                    value.new_value =
+                        moment(value.new_value)
+                            .local()
+                            .format('LL');
+                }
+            }
+            return value;
+        });
+    }
+
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
@@ -171,6 +233,89 @@ class Message extends Component {
     // Private
     //--------------------------------------------------------------------------
 
+
+    /**
+     * Modifies the message to add the 'read more/read less' functionality
+     * All element nodes with 'data-o-mail-quote' attribute are concerned.
+     * All text nodes after a ``#stopSpelling`` element are concerned.
+     * Those text nodes need to be wrapped in a span (toggle functionality).
+     * All consecutive elements are joined in one 'read more/read less'.
+     *
+     * @private
+     * @param {jQuery} $element
+     */
+    _insertReadMoreLess($element) {
+        var self = this;
+
+        var groups = [];
+        var readMoreNodes;
+
+        // nodeType 1: element_node
+        // nodeType 3: text_node
+        var $children = $element.contents()
+            .filter(function () {
+                return this.nodeType === 1 ||
+                    this.nodeType === 3 &&
+                    this.nodeValue.trim();
+            });
+
+        _.each($children, function (child) {
+            var $child = $(child);
+
+            // Hide Text nodes if "stopSpelling"
+            if (
+                child.nodeType === 3 &&
+                $child.prevAll('[id*="stopSpelling"]').length > 0
+            ) {
+                // Convert Text nodes to Element nodes
+                $child = $('<span>', {
+                    text: child.textContent,
+                    'data-o-mail-quote': '1',
+                });
+                child.parentNode.replaceChild($child[0], child);
+            }
+
+            // Create array for each 'read more' with nodes to toggle
+            if (
+                $child.attr('data-o-mail-quote') ||
+                (
+                    $child.get(0).nodeName === 'BR' &&
+                    $child.prev('[data-o-mail-quote="1"]').length > 0
+                )
+            ) {
+                if (!readMoreNodes) {
+                    readMoreNodes = [];
+                    groups.push(readMoreNodes);
+                }
+                $child.hide();
+                readMoreNodes.push($child);
+            } else {
+                readMoreNodes = undefined;
+                self._insertReadMoreLess($child);
+            }
+        });
+
+        _.each(groups, function (group) {
+            // Insert link just before the first node
+            var $readMore = $('<a>', { // rename to readMoreLess
+                class: 'o_Message_readMore',
+                href: '#',
+                text: READ_MORE,
+            }).insertBefore(group[0]);
+
+            // Toggle All next nodes
+            var isReadMore = true;
+            $readMore.click(function (e) {
+                e.preventDefault();
+                isReadMore = !isReadMore;
+                _.each(group, function ($child) {
+                    $child.hide();
+                    $child.toggle(!isReadMore);
+                });
+                $readMore.text(isReadMore ? READ_MORE : READ_LESS);
+            });
+        });
+    }
     /**
      * @private
      * @param {Object} param0
@@ -244,6 +389,23 @@ class Message extends Component {
     _onClickStar(ev) {
         return this.env.store.dispatch('toggleStarMessage', this.props.messageLocalId);
     }
+
+    /**
+     * @private
+     */
+    _onClickMarkAsRead() {
+        return this.env.store.dispatch('markMessagesAsRead', [this.props.messageLocalId]);
+    }
+
+    /**
+     * @private
+     */
+    _onClickReply() {
+        this.trigger('reply-message', {
+            messageLocalId: this.props.messageLocalId,
+        });
+    }
+
 }
 
 /**
@@ -251,6 +413,7 @@ class Message extends Component {
  */
 Message.props = {
     author: { type: Object, /* {mail.store.model.Partner} */ optional: true },
+    displayReplyIcon: Boolean,
     message: Object, // {mail.store.model.Message}
     messageLocalId: String,
     originThread: { type: Object, /* {mail.store.model.Thread} */ optional: true },

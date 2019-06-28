@@ -26,6 +26,7 @@
         </div>
         <MessageList
             class="o_Thread_messageList"
+            displayReplyIcons="props.displayReplyIcons"
             domain="props.domain"
             order="props.order"
             redirectAuthor="props.redirectAuthor"

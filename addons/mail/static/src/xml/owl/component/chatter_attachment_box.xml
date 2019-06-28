@@ -33,17 +33,22 @@
                 layoutBasicImageSize="'medium'"
                 t-if="props.nonImageAttachmentLocalIds.length > 0"
             />
-            <div class="o_chatter_attachment_form">
-                <!-- TODO: use owl component for fileupload -->
-                <!-- <t t-call="HiddenInputFile">
-                    <t t-set="fileupload_id" t-value="widget.fileuploadId"/>
-                    <t t-set="fileupload_action" t-translation="off">/web/binary/upload_attachment</t>
-                    <t t-set="multi_upload" t-value="true"/>
-                    <input type="hidden" name="model" t-att-value="props.currentResModel"/>
-                    <input type="hidden" name="id" t-att-value="props.currentResId"/>
-                    <center><span class="btn btn-link o_upload_attachments_button"><span class="fa fa-plus-square"/> Add Attachments</span></center>
-                </t> -->
-                <center><span class="btn btn-link o_upload_attachments_button"><span class="fa fa-plus-square"/> Add Attachments</span></center>
+            <div>
+                <input
+                    class="
+                        d-none
+                        o_ChatterAttachmentBox_fileInput"
+                    multiple="true"
+                    type="file"
+                    t-on-change="_onChangeAttachment"
+                    t-ref="fileInput"/>
+                <center>
+                    <span
+                        class="btn btn-link o_ChatterAttachmentBox_uploadButton"
+                        t-on-click="_onClickAddAttachment">
+                        <span class="fa fa-plus-square"/> Add Attachments
+                    </span>
+                </center>
             </div>
         </div>
     </div>

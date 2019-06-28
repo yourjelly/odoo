@@ -90,6 +90,7 @@
         'static/src/xml/owl/component/thread_icon.xml',
         'static/src/xml/owl/component/thread_preview.xml',
         'static/src/xml/owl/component/thread_preview_list.xml',
+        'static/src/xml/owl/component/user_status.xml',
         'static/src/xml/owl/widget/common.xml',
         'static/src/xml/owl/widget/discuss.xml',
         'static/src/xml/owl/widget/discuss_invite_partner_dialog.xml',

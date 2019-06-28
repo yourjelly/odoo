@@ -95,6 +95,7 @@
                         composerAvatar="!props.isMobile"
                         composerSendButton="!props.isMobile"
                         domain="props.domain"
+                        displayReplyIcons="props.thread._model === 'mail.box'"
                         redirectAuthor="props.thread.channel_type !== 'chat'"
                         scrollTop="state.threadCachesInfo[props.threadCacheLocalId]
                             ? state.threadCachesInfo[props.threadCacheLocalId].scrollTop
@@ -103,10 +104,20 @@
                         squashCloseMessages="props.thread._model !== 'mail.box'"
                         threadLocalId="props.threadLocalId"
                         t-key="props.threadLocalId"
+                        t-on-reply-message.stop="_onReplyMessage"
                         t-on-redirect="_onRedirect"
                         t-on-rendered="_onThreadRendered"
                         t-ref="thread"/>
                 </t>
+                <Composer
+                    discardButton="true"
+                    inlineActions="false"
+                    showThreadName="true"
+                    threadLocalId="state.replyThreadLocalId"
+                    t-if="state.replyComposerToggled"
+                    t-key="message-composer"
+                    t-on-discarded.stop="_onComposerDiscarded"
+                />
             </div>
         </t>
     </div>

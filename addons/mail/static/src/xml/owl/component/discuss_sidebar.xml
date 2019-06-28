@@ -113,6 +113,7 @@
                     t-if="state.isAddingChat"
                     t-key="'add_item_chat'">
                     <AutocompleteInput
+                       class="o_DiscussSidebar_itemNewInput"
                        focusOnMount="true"
                        select="_onChatAutocompleteSelect"
                        source="_onChatAutocompleteSource"

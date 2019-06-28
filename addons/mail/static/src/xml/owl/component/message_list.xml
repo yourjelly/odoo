@@ -61,6 +61,7 @@
             </t>
             <Message
                class="o_MessageList_message"
+               displayReplyIcon="props.displayReplyIcons"
                messageLocalId="message.localId"
                redirectAuthor="props.redirectAuthor"
                squashed="squashed"

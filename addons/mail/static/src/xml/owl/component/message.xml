@@ -20,19 +20,23 @@
             t-att-class="{
                 o_squashed: props.squashed,
             }">
-            <img
-                alt=""
-                class="
-                    o_Message_authorAvatar
-                    o_Message_sidebarItem
-                    rounded-circle"
-                t-att-class="{
-                    o_Message_authorRedirect: redirectAuthor,
-                    o_redirect: redirectAuthor,
-                }"
-                t-att-src="avatar"
-                t-if="!props.squashed"
-                t-on-click="_onClickAuthor"/>
+            <t t-if="!props.squashed">
+                <img
+                    alt=""
+                    class="
+                        o_Message_authorAvatar
+                        o_Message_sidebarItem
+                        rounded-circle"
+                    t-att-class="{
+                        o_Message_authorRedirect: redirectAuthor,
+                        o_redirect: redirectAuthor,
+                    }"
+                    t-att-src="avatar"
+                    t-on-click="_onClickAuthor"/>
+                <UserStatus
+                    authorLocalId="props.author.localId"
+                    class="o_Message_userStatus"/>
+            </t>
             <t t-else="">
                 <div
                     class="
@@ -63,7 +67,7 @@
         </div>
         <div class="o_Message_core">
             <div
-                class="o_Message_header"
+                class="o_Message_header text-muted"
                 t-if="!props.squashed">
                 <div
                     class="o_Message_authorName"
@@ -99,7 +103,8 @@
                     class="
                         o_Message_commands
                         o_Message_headerCommands">
-                    <div
+                    <span
+                        aria-label="Mark as Todo"
                         class="
                             fa
                             o_Message_command
@@ -109,12 +114,50 @@
                             'fa-star': starred,
                             'fa-star-o': !starred,
                         }"
+                        title="Mark as Todo"
                         t-if="props.message.message_type !== 'notification'"
                         t-on-click="_onClickStar"/>
+                    <!-- omit 'thread', keep simply 'reply' -->
+                    <span
+                        aria-label="Reply"
+                        class="
+                            fa
+                            fa-reply
+                            o_Message_command
+                            o_Message_commandReply"
+                        title="Reply"
+                        t-if="props.displayReplyIcon"
+                        t-on-click="_onClickReply"/>
+                    <span
+                        aria-label="Mark as Read"
+                        class="
+                            fa
+                            fa-check
+                            o_Message_command
+                            o_Message_commandMarkAsRead"
+                        title="Mark as Read"
+                        t-if="props.message.message_type !== 'notification'"
+                        t-on-click="_onClickMarkAsRead"/>
                 </div>
             </div>
-            <div class="o_Message_content">
+            <div class="o_Message_content" t-ref="'content'">
                 <t t-raw="props.message.bodyWithLinks"/>
+                <ul class="o_mail_thread_message_tracking">
+                    <t t-foreach='trackingValues' t-as='value'>
+                        <li>
+                            <t t-esc="value.changed_field"/>:
+                            <t t-if="value.old_value">
+                                <span> <t t-esc="value.old_value || ((value.field_type !== 'boolean') and '')"/> </span>
+                                <span t-if="value.old_value !== value.new_value" class="fa fa-long-arrow-right" role="img" aria-label="Changed" title="Changed"/>
+                            </t>
+                            <span t-if="value.old_value !== value.new_value">
+                                <t t-esc="value.new_value || ((value.field_type !== 'boolean') and '')"/>
+                            </span>
+                        </li>
+                    </t>
+                </ul>
+
+
             </div>
             <div
                 class="o_Message_footer"

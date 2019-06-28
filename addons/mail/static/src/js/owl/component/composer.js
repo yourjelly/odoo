@@ -245,6 +245,14 @@ class Composer extends Component {
      * @private
      * @param {MouseEvent} ev
      */
+    _onClickDiscard(ev) {
+        this.trigger('discarded');
+    }
+
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
     _onClickSend(ev) {
         if (!this.refs.textInput.getValue()) {
             return;
@@ -294,10 +302,14 @@ Composer.props = {
     attachmentLayout: { type: String, optional: true },
     attachmentLayoutCardLabel: { type: Boolean, optional: true },
     avatar: Boolean,
-    chatter: Boolean,
+    expandable: Boolean,
+    discardButton: Boolean,
+    inlineActions: Boolean,
     isLog: Boolean,
     recordName: { type: String, optional: true },
     sendButton: Boolean,
+    showFollowers: Boolean,
+    showThreadName: Boolean,
     suggestedRecipients: {
         type: Array,
         element: {
@@ -310,14 +322,19 @@ Composer.props = {
         },
         optional: true,
     },
+    thread: { type: Object, /* {mail.store.model.Thread} */ optional: true },
     threadLocalId: { type: String, optional: true },
 };
 
 Composer.defaultProps = {
     avatar: true,
-    chatter: false,
+    discardButton: false,
+    expandable: false,
+    inlineActions: true,
     isLog: false,
     sendButton: true,
+    showFollowers: false,
+    showThreadName: false,
     suggestedRecipients: [],
 };
 
@@ -327,8 +344,9 @@ return connect(
      * @param {Object} state
      * @param {Object} ownProps
      * @param {Object[]} [ownProps.suggestedRecipients=[]]
+     * @param {string} [ownProps.threadLocalId]
      */
-    (state, { suggestedRecipients=[] }) => {
+    (state, { suggestedRecipients=[], threadLocalId }) => {
         return {
             fullSuggestedRecipients: suggestedRecipients.map(recipient => {
                 return {
@@ -336,6 +354,7 @@ return connect(
                     partner: state.partners[recipient.partnerLocalId],
                 };
             }),
+            thread: state.threads[threadLocalId],
         };
     },
 );

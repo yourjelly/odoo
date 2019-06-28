@@ -49,6 +49,18 @@ function _generateEmojisOnHtml(htmlString) {
 /**
  * @private
  * @param {string} content html content
+ * @return {String|undefined} command, if any in the content
+ */
+function _getCommand(content) {
+    const parser = new window.DOMParser();
+    const node = parser.parseFromString(content, 'text/html');
+    const command = node.querySelector('.o_command');
+    return command && command.textContent.substring(1);  // remove first char /
+}
+
+/**
+ * @private
+ * @param {string} content html content
  * @return {integer[]} list of mentioned partner Ids (not duplicate)
  */
 function _getMentionedPartnerIds(content) {
@@ -485,7 +497,6 @@ const actions = {
      * @param {string[]} data.attachmentLocalIds
      * @param {*[]} data.canned_response_ids
      * @param {integer[]} data.channel_ids
-     * @param {*} data.command
      * @param {string} data.content
      * @param {string} data.message_type
      * @param {string} data.subject
@@ -503,7 +514,6 @@ const actions = {
             attachmentLocalIds,
             canned_response_ids,
             channel_ids=[],
-            command,
             content,
             context,
             message_type,
@@ -518,12 +528,12 @@ const actions = {
         } = {},
     ) {
         const thread = state.threads[threadLocalId];
+
         if (thread._model === 'mail.box') {
             return dispatch('postMessageOnThread', `${res_model}_${res_id}`, {
                 attachmentLocalIds,
                 canned_response_ids,
                 channel_ids,
-                command,
                 content,
                 context,
                 message_type,
@@ -551,7 +561,9 @@ const actions = {
             partner_ids: _getMentionedPartnerIds(body),
         };
         if (thread._model === 'mail.channel') {
+            const command = _getCommand(body);
             Object.assign(postData, {
+                command,
                 message_type: 'comment',
                 subtype: 'mail.mt_comment'
             });
@@ -637,10 +649,11 @@ const actions = {
             _.str.escapeRegExp(utils.unaccent(keyword)),
             'i'
         );
+        const currentPartner = state.partners[state.currentPartnerLocalId];
         for (const partner of Object.values(state.partners)) {
             if (partners.length < limit) {
                 if (
-                    partner.id !== state.currentParnerId &&
+                    partner.id !== currentPartner.id &&
                     searchRegexp.test(partner.name)
                 ) {
                     partners.push(partner);
@@ -768,7 +781,7 @@ const actions = {
     async _handleNotificationChannelMessage(
         { commit, dispatch, state },
         {
-            author_id, author_id: [authorId]=[],
+            author_id, author_id: [authorPartnerId]=[],
             channelId,
             channel_ids,
             ...kwargs
@@ -782,7 +795,8 @@ const actions = {
             channel_ids,
             ...kwargs
         });
-        if (authorId === state.currentParnerId) {
+        const currentPartner = state.partners[state.currentPartnerLocalId];
+        if (authorPartnerId === currentPartner.id) {
             return;
         }
         const threadLocalId = `mail.channel_${channelId}`;
@@ -805,7 +819,9 @@ const actions = {
         { commit, state },
         { channelId, last_message_id, partner_id }
     ) {
-        if (state.currentParnerId !== partner_id) {
+
+        const currentPartner = state.partners[state.currentPartnerLocalId];
+        if (currentPartner.id !== partner_id) {
             return;
         }
         commit('updateThread', `mail.channel_${channelId}`, {
@@ -1027,7 +1043,7 @@ const actions = {
         commit('handleThreadLoaded', threadLocalId, {
             messagesData,
         });
-        // await dispatch('_markMessageAsRead', messageLocalIds);
+        // await dispatch('markMessagesAsRead', messageLocalIds);
     },
     /**
      * @private
@@ -1037,13 +1053,14 @@ const actions = {
      * @param {Object} param1
      * @param {string[]} param1.messageLocalIds
      */
-    async _markMessageAsRead({ env, state }, messageLocalIds) {
+    async markMessagesAsRead({ env, state }, messageLocalIds) {
+        const currentPartner = state.partners[state.currentPartnerLocalId];
         const ids = messageLocalIds
             .filter(localId => {
                 const message = state.messages[localId];
                 // If too many messages, not all are fetched,
                 // and some might not be found
-                return !message || message.needaction_partner_ids.includes(state.currentParnerId);
+                return !message || message.needaction_partner_ids.includes(currentPartner.id);
             })
             .map(localId => state.messages[localId].id);
         if (!ids.length) {

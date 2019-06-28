@@ -21,6 +21,10 @@
     font-size: 1.3rem;
 }
 
+.o_Message_Composer {
+    flex: 1 1 auto;
+}
+
 .o_Message_commands {
     display: flex;
     align-items: center;
@@ -64,7 +68,12 @@
     font-size: 0.9rem;
 }
 
+.o_Message_readMore {
+    display: block;
+}
+
 .o_Message_sidebar {
+    position: relative;
     flex: 0 0 50px;
     max-width: 50px;
     display: flex;
@@ -84,6 +93,10 @@
     &.o_squashed {
         display: flex;
     }
+}
+
+.o_Message_userStatus {
+    @include o-position-absolute($top: 25px, $right: 0);
 }
 
 // ------------------------------------------------------------------

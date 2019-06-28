@@ -120,6 +120,7 @@ Thread.props = {
     composerAttachmentLayoutCardLabel: { type: Boolean, optional: true },
     composerAvatar: { type: Boolean, optional: true },
     composerSendButton: { type: Boolean, optional: true },
+    displayReplyIcons: { type: Boolean, optional: true },
     domain: Array,
     order: String, // ['asc', 'desc']
     redirectAuthor: Boolean,

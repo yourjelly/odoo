@@ -127,6 +127,7 @@
                 <script type="text/javascript" src="/mail/static/src/js/owl/component/thread_icon.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/owl/component/thread_preview.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/owl/component/thread_preview_list.js"></script>
+                <script type="text/javascript" src="/mail/static/src/js/owl/component/user_status.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/owl/service/chat_window_service.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/owl/service/dialog_service.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/owl/service/env_service.js"></script>
@@ -150,6 +151,7 @@
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/owl/component/chat_window_header.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/owl/component/chat_window_hidden_menu.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/owl/component/chat_window_manager.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/owl/component/chatter.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/owl/component/composer.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/owl/component/composer_text_input.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/owl/component/dialog.scss"/>

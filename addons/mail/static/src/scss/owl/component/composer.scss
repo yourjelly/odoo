@@ -27,7 +27,7 @@
     height: 36px;
 }
 
-.o_Composer_commands {
+.o_Composer_buttons {
     display: flex;
     align-items: stretch;
     flex: 0 0 auto;
@@ -58,6 +58,7 @@
 
 .o_Composer_main {
     display: flex;
+    flex-wrap: wrap;
     align-items: flex-start;
     flex: 1 1 auto;
     width: 100%;
@@ -74,6 +75,31 @@
     align-self: stretch;
 }
 
+// use flat instead of hierarchical
+
+// Chatter composer has a different layout
+.o_Composer.o_chatter_composer {
+    // use flat style. Maybe easier after spliting chatter options into several options
+    .o_Composer_buttons {
+        // split layout and style rules
+        flex-basis: 100%;
+        border-top: 1px solid gray('300');
+        background-color: white;
+    }
+    .o_Composer_buttonFullComposer {
+        margin-left: auto;
+    }
+    &.o_with_avatar {
+        .o_Composer_textInput > .note-editor {
+            border-radius: 0;
+
+            > .note-editing-area {
+                border-radius: 0;
+            }
+        }
+    }
+}
+
 // ------------------------------------------------------------------
 // Style
 // ------------------------------------------------------------------
@@ -85,7 +111,7 @@
     &.o_with_avatar {
         border: 1px solid gray('300');
 
-        .o_Composer_command:last-child {
+        .o_Composer_buttons > *:last-child {
             border-radius: 0 5px 5px 0;
         }
 
@@ -103,7 +129,7 @@
     }
 }
 
-.o_Composer_command {
+.o_Composer_button {
 
     &:focus {
         box-shadow: none;

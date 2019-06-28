@@ -607,7 +607,7 @@ const mutations = {
         { messagesData, searchDomain=[] }
     ) {
         const stringifiedDomain = JSON.stringify(searchDomain);
-        commit('_insertThreadCache', {
+        const threadCacheLocalId = commit('_insertThreadCache', {
             allHistoryLoaded: messagesData.length < state.MESSAGE_FETCH_LIMIT,
             loaded: true,
             loading: false,
@@ -616,8 +616,11 @@ const mutations = {
             threadLocalId,
         });
         for (const data of messagesData) {
-            // message auto-linked to thread cache on insert
-            commit('insertMessage', data);
+            const messageLocalId = commit('insertMessage', data);
+            commit('_linkMessageToThreadCache', {
+                messageLocalId,
+                threadCacheLocalId,
+            });
         }
     },
     /**
@@ -1793,7 +1796,7 @@ const mutations = {
      * @param {Object} changes
      */
     _updateAttachment({ commit, state }, attachmentLocalId, changes) {
-        const attachment = state.threads[attachmentLocalId];
+        const attachment = state.attachments[attachmentLocalId];
         Object.assign(attachment, changes);
         commit('_computeAttachment', attachment);
     },

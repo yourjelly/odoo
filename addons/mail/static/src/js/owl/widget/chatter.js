@@ -53,12 +53,8 @@ const ChatterWidget = Widget.extend(EnvMixin, {
      * @param {Object} props
      */
     update(props) {
-        const {
-            record: {
-                oldModel,
-                oldResId,
-            },
-        } = this.props;
+        const oldModel = this.props.record.model;
+        const oldResId = this.props.record.res_id;
         this.props = props;
         if (
             oldModel === this.props.record.model &&

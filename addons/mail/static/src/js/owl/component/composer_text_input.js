@@ -2,6 +2,7 @@ odoo.define('mail.component.ComposerTextInput', function (require) {
 'use strict';
 
 const ajax = require('web.ajax');
+const utils = require('web.utils');
 
 const { Component } = owl;
 
@@ -175,6 +176,8 @@ class ComposerInput extends Component {
             collection: [
                 this._configTributeCollectionItemChannel(),
                 this._configTributeCollectionItemPartner(),
+                this._configTributeCollectionItemCannedResponse(),
+                this._configTributeCollectionItemCommand(),
             ],
         });
 
@@ -267,33 +270,95 @@ class ComposerInput extends Component {
 
     /**
      * @private
-     * @param {string} keyword
-     * @param {function} callback
-     * @return {Promise<mail.store.model.Thread[]>}
+     * @return {Object}
      */
-    async _searchChannelMentionSuggestions(keyword, callback) {
-        // const suggestions = await this.env.rpc({
-        //     model: 'res.partner',
-        //     method: 'get_mention_suggestions',
-        //     kwargs: {
-        //         limit: 10,
-        //         search: keyword,
-        //     },
-        // });
-        const suggestions = [
-            { name: 'General', id: 1 },
-            { name: 'Sales', id: 2 },
-            { name: 'Project & Task', id: 3 },
-            { name: 'RD Belgium', id: 4 },
-        ];
-        callback(suggestions);
+    _configTributeCollectionItemCannedResponse() {
+        const self = this;
+        const collectionItem = {
+            lookup: 'source',
+            menuItemTemplate(item) {
+                return `<div class="o_ComposerTextInput_mention" title="${item.original.source}">
+                    ${
+                        item.original.source
+                    }${
+                        ` <span class="o_extra">${item.original.substitution}</span>`
+                    }</div>`;
+            },
+            selectTemplate(item) {
+                return item ? item.original.substitution : null;
+            },
+            trigger: ':',
+            values(keyword, callback) {
+                const cannedResponses = self._searchCannedResponseSuggestions(keyword);
+                callback(cannedResponses);
+            },
+        };
+        return collectionItem;
+    }
+
+    /**
+     * @private
+     * @return {Object}
+     */
+    _configTributeCollectionItemCommand() {
+        const self = this;
+        const collectionItem = {
+            lookup: 'name',
+            menuItemTemplate(item) {
+                return `<div class="o_ComposerTextInput_mention" title="${item.original.name}">
+                    ${
+                    item.original.name
+                    }${
+                    ` <span class="o_extra">${item.original.help}</span>`
+                    }</div>`;
+            },
+            selectTemplate(item) {
+                return `<span class="o_command"
+                              contenteditable="false">/${item.original.name}</span>`;
+            },
+            trigger: '/',
+            values(keyword, callback) {
+                const commands = self._searchCommandSuggestions(keyword);
+                callback(commands);
+            },
+        };
+        return collectionItem;
     }
 
     /**
      * @private
      * @param {string} keyword
      * @param {function} callback
-     * @return {Promise<mail.store.model.Partner[]>}
+     */
+    async _searchChannelMentionSuggestions(keyword, callback) {
+        const suggestions = await this.env.rpc({
+            model: 'mail.channel',
+            method: 'get_mention_suggestions',
+            kwargs: {
+                limit: 10,
+                search: keyword,
+            },
+        });
+        callback(suggestions);
+    }
+
+    /**
+     * @private
+     * @param {string} keyword
+     * @return {Object[]}
+     */
+    _searchCommandSuggestions(keyword) {
+        const commandList = Object.values(this.env.store.state.commands);
+        var matches = fuzzy.filter(
+            utils.unaccent(keyword),
+            commandList.map(command => command.name));
+        return matches.slice(0, 10).map(match => commandList[match.index]);
+    }
+
+    /**
+     * @private
+     * @param {string} keyword
+     * @param {function} callback
      */
     async _searchPartnerMentionSuggestions(keyword, callback) {
         this.env.store.dispatch('searchPartners', {
@@ -301,6 +366,19 @@ class ComposerInput extends Component {
             keyword,
             limit: 10,
         });
+    }
+
+    /**
+     * @private
+     * @param {string} keyword
+     * @returns {Object[]}
+     */
+    _searchCannedResponseSuggestions(keyword) {
+        const cannedResponseList = Object.values(this.env.store.state.cannedResponses);
+        var matches = fuzzy.filter(
+            utils.unaccent(keyword),
+            cannedResponseList.map(cannedResponse => cannedResponse.source));
+        return matches.slice(0, 10).map(match => cannedResponseList[match.index]);
     }
 
     //--------------------------------------------------------------------------
@@ -331,8 +409,6 @@ class ComposerInput extends Component {
                 break;
         }
     }
-
-
 
     /**
      * Force deleting contenteditable = 'false' inside editable.

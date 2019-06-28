@@ -328,6 +328,7 @@ class MessageList extends Component {
  * Props validationn
  */
 MessageList.props = {
+    displayReplyIcons: Boolean,
     domain: Array,
     messageLocalIds: { type: Array, element: String },
     messages: { type: Array, element: Object /* {mail.store.model.Message} */ },

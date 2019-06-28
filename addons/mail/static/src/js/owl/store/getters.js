@@ -160,6 +160,15 @@ const getters = {
         return Object
             .values(mailChannels)
             .sort((mailChannel1, mailChannel2) => {
+                if (mailChannel1.message_unread_counter && !mailChannel2.message_unread_counter) { return -1; }
+                if (mailChannel2.message_unread_counter && !mailChannel1.message_unread_counter) { return 1; }
+                if (
+                    mailChannel1.message_unread_counter &&
+                    mailChannel2.message_unread_counter &&
+                    mailChannel1.message_unread_counter !== mailChannel2.message_unread_counter
+                )  {
+                    return mailChannel1.message_unread_counter > mailChannel2.message_unread_counter ? -1 : 1;
+                }
                 const mailChannel1Name = getters.threadName(mailChannel1.localId);
                 const mailChannel2Name = getters.threadName(mailChannel2.localId);
                 mailChannel1Name < mailChannel2Name ? -1 : 1;

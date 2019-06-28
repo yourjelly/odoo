@@ -23,7 +23,7 @@
         <div
             class="o_Composer_core">
             <!-- New message composer -->
-            <t t-if="props.chatter and !props.isLog">
+            <t t-if="props.showFollowers and !props.isLog">
                 <!-- Text for followers -->
                 <small
                     class="o_Composer_followers">
@@ -79,17 +79,22 @@
                 </div>
             </t>
             <div
+                class="o_Composer_threadName"
+                t-if="props.showThreadName and props.thread">
+                <span t-esc="env.store.getters.threadName(props.threadLocalId)"/>
+            </div>
+            <div
                 class="o_Composer_main">
                 <Input
                     class="o_Composer_textInput"
                     t-on-post-message.stop="_onPostMessageTextInput"
                     t-ref="textInput"/>
                 <div
-                    class="o_Composer_commands">
+                    class="o_Composer_buttons">
                     <EmojisButton
                         class="
-                            o_Composer_command
-                            o_Composer_commandEmojis"
+                            o_Composer_button
+                            o_Composer_buttonEmojis"
                         t-on-emoji-selection.stop="_onEmojiSelection"/>
                     <button
                         aria-label="Add attachment"
@@ -98,8 +103,8 @@
                             btn-secondary
                             fa
                             fa-paperclip
-                            o_Composer_command
-                            o_Composer_commandAttachment"
+                            o_Composer_button
+                            o_Composer_buttonAttachment"
                         title="Add attachment"
                         type="button"
                         t-on-click="_onClickAddAttachment"/>
@@ -110,22 +115,60 @@
                             btn-secondary
                             fa
                             fa-expand
-                            o_mail_component_Composer__command
-                            o_mail_component_Composer__commandAttachment"
+                            o_Composer_button
+                            o_Composer_buttonFullComposer"
                         title="Full composer"
                         type="button"
-                        t-if="props.chatter"
+                        t-if="props.expandable"
                         t-on-click="_onClickFullComposer"/>
                     <button
                         class="
                             btn
                             btn-primary
-                            o_Composer_command
-                            o_Composer_commandSend"
+                            o_Composer_action
+                            o_Composer_button
+                            o_Composer_buttonSend"
                         type="button"
-                        t-if="props.sendButton"
+                        t-if="props.sendButton and props.inlineActions"
                         t-on-click="_onClickSend">
                         <t t-if="props.isLog">Log</t><t t-else="">Send</t>
+                    </button>
+                    <button
+                        class="
+                            btn
+                            btn-secondary
+                            o_Composer_action
+                            o_Composer_button
+                            o_Composer_buttonDiscard"
+                        type="button"
+                        t-if="props.discardButton and props.inlineActions"
+                        t-on-click="_onClickDiscard">
+                        Discard
+                    </button>
+                </div>
+                <div class="mt16">
+                    <button
+                        class="
+                            btn
+                            btn-primary
+                            o_Composer_action
+                            o_Composer_buttonSend"
+                        type="button"
+                        t-if="props.sendButton and !props.inlineActions"
+                        t-on-click="_onClickSend">
+                        <t t-if="props.isLog">Log</t><t t-else="">Send</t>
+                    </button>
+                    <button
+                        class="
+                            btn
+                            btn-secondary
+                            o_Composer_action
+                            o_Composer_button
+                            o_Composer_buttonDiscard"
+                        type="button"
+                        t-if="props.discardButton and !props.inlineActions"
+                        t-on-click="_onClickDiscard">
+                        Discard
                     </button>
                 </div>
             </div>

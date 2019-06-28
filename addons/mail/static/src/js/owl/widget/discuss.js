@@ -112,11 +112,17 @@ const Discuss = AbstractAction.extend(EnvMixin, {
             ev.stopPropagation();
             this._pushStateActionManager(ev.detail.threadLocalId);
         };
+        this._showRainbowManEventListener = ev => {
+            ev.stopPropagation();
+            this._showRainbowMan();
+        };
         this._updateControlPanelEventListener = ev => {
             ev.stopPropagation();
             this._updateControlPanel();
         };
+
         this.el.addEventListener('push_state_action_manager', this._pushStateActionManagerEventListener);
+        this.el.addEventListener('show_rainbow_man', this._showRainbowManEventListener);
         this.el.addEventListener('update_control_panel', this._updateControlPanelEventListener);
     },
     /**
@@ -129,6 +135,7 @@ const Discuss = AbstractAction.extend(EnvMixin, {
         }
         this.component = undefined;
         this.el.removeEventListener('push_state_action_manager', this._pushStateActionManagerEventListener);
+        this.el.removeEventListener('show_rainbow_man', this._showRainbowManEventListener);
         this.el.removeEventListener('update_control_panel', this._updateControlPanelEventListener);
     },
 
@@ -144,6 +151,15 @@ const Discuss = AbstractAction.extend(EnvMixin, {
         this.actionManager.do_push_state({
             action: this.action.id,
             active_id: threadLocalId,
+        });
+    },
+    /**
+     * @private
+     */
+    _showRainbowMan() {
+        this.trigger_up('show_effect', {
+            message: _t("Congratulations, your inbox is empty!"),
+            type: 'rainbow_man',
         });
     },
     /**

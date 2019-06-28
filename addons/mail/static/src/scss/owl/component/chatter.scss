@@ -1,0 +1,7 @@
+
+.o_Chatter_topbarButton.o_active {
+    color: $o-brand-odoo;
+    background-color: theme-color('light');
+    border: $nav-tabs-border-width solid gray('300');
+    border-bottom-color: transparent;
+}

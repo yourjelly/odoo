@@ -79,6 +79,20 @@ FormRenderer.include({
             // class needed to avoid wrapping in sheet, see @_updateView
 
             if (!this.chatterOwl) {
+                this.chatterOwl = new ChatterOwl(this, {
+                    fieldOptions: {
+                        isEditable: this.activeActions.edit,
+                        viewType: 'form',
+                    },
+                    mailFields: this.mailFields,
+                    parent: this,
+                    record: this.state,
+                });
+                var $temporaryParentDivOwl = $('<div>');
+                this.defs.push(this.chatterOwl.appendTo($temporaryParentDivOwl).then(function () {
+                    self.chatterOwl.$el.unwrap();
+                    self._handleAttributes(self.chatterOwl.$el, node);
+                }));
                 if (this.DISPLAY_OLD_CHATTER) {
                     this.chatter = new Chatter(this, this.state, this.mailFields, {
                         isEditable: this.activeActions.edit,
@@ -89,22 +103,10 @@ FormRenderer.include({
                         self.chatter.$el.unwrap();
                         self._handleAttributes(self.chatter.$el, node);
                     }));
+                    return $temporaryParentDiv.add($temporaryParentDivOwl);
+                } else {
+                    return $temporaryParentDivOwl;
                 }
-                this.chatterOwl = new ChatterOwl(this, {
-                    fieldOptions: {
-                        isEditable: this.activeActions.edit,
-                        viewType: 'form',
-                    },
-                    mailFields: this.mailFields,
-                    parent: this,
-                    record: this.state,
-                });
-                var $temporaryParentDiv2 = $('<div>');
-                this.defs.push(this.chatterOwl.appendTo($temporaryParentDiv2).then(function () {
-                    self.chatterOwl.$el.unwrap();
-                    self._handleAttributes(self.chatterOwl.$el, node);
-                }));
-                return $temporaryParentDiv.add($temporaryParentDiv2);
             } else {
                 this.chatterOwl.update({
                     fieldOptions: {

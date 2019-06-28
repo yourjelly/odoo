@@ -17,7 +17,8 @@
                     btn
                     btn-link
                     o_chatter_button_new_message
-                    o_Chatter_buttonNewMessage"
+                    o_Chatter_buttonNewMessage
+                    o_Chatter_topbarButton"
                 title="Send a message"
                 type="button"
                 t-att-class="{
@@ -32,7 +33,8 @@
                 class="
                     btn
                     btn-link
-                    o_Chatter_buttonLogNote"
+                    o_Chatter_buttonLogNote
+                    o_Chatter_topbarButton"
                 title="Log a note. Followers will not be notified."
                 t-att-class="{
                     o_active: state.showComposer and state.isComposerLog,
@@ -46,7 +48,8 @@
                     btn
                     btn-link
                     o_chatter_button_schedule_activity
-                    o_Chatter_buttonScheduleActivity"
+                    o_Chatter_buttonScheduleActivity
+                    o_Chatter_topbarButton"
                 title="Log or schedule an activity"
                 t-att-disabled="props.record.res_id ? '' : 'disabled'"
                 t-if="props.mailFields.mail_activity"
@@ -70,6 +73,7 @@
                         btn
                         btn-link
                         o_chatter_button_attachment"
+                    t-att-disabled="props.record.res_id ? '' : 'disabled'"
                     t-attf-class="{
                         o_active_attach: state.isAttachmentBoxOpen,
                     }"
@@ -91,9 +95,11 @@
         />
         <Composer
             class="o_Chatter_composer"
-            chatter="true"
+            expandable="true"
+            inlineActions="false"
             isLog="state.isComposerLog"
             recordName="props.record.data.display_name"
+            showFollowers="true"
             suggestedRecipients="props.suggestedRecipients"
             threadLocalId="props.threadLocalId"
             t-if="state.showComposer"
