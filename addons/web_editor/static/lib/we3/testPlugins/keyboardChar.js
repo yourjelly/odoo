@@ -21,6 +21,22 @@ var TestKeyboardChar = class extends we3.AbstractPlugin {
                 test: "<p>dom▶ to◀ edit</p>",
             },
             {
+                name: "visible char in selected text",
+                content: "<p>a▶a◀a</p>",
+                steps: [{
+                    key: 'w',
+                }],
+                test: "<p>aw◆a</p>",
+            },
+            {
+                name: "visible char in selected text with two line",
+                content: "<p>a▶a◀a</p><p>bbb</p>",
+                steps: [{
+                    key: 'w',
+                }],
+                test: "<p>aw◆a</p><p>bbb</p>",
+            },
+            {
                 name: "visible char in empty p tag",
                 content: "<p><br>◆</p>",
                 steps: [{

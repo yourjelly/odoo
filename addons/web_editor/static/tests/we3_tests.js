@@ -218,7 +218,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('keyboard char', async function (assert) {
-        assert.expect(34);
+        assert.expect(36);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, testPlugins, {TestKeyboardChar: true}),
@@ -294,7 +294,7 @@ QUnit.module('web_editor', {
     ];
 
     QUnit.test('range + popover + rules + char + DropBlock', async function (assert) {
-        assert.expect(92);
+        assert.expect(94);
 
         this.testOptions = {
             assert: assert,
@@ -310,7 +310,7 @@ QUnit.module('web_editor', {
     });
 
     QUnit.test('DropBlock & DropBlockSelector', async function (assert) {
-        assert.expect(34);
+        assert.expect(36);
 
         this.testOptions = {
             assert: assert,
@@ -325,7 +325,7 @@ QUnit.module('web_editor', {
     });
 
     QUnit.test('DropBlock & CustomizeBlock', async function (assert) {
-        assert.expect(49);
+        assert.expect(51);
 
         this.testOptions = {
             assert: assert,

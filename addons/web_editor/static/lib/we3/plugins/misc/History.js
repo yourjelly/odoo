@@ -244,7 +244,6 @@ var HistoryPlugin = class extends we3.AbstractPlugin {
             this._range = this._range.slice(0, this.stackOffset);
         }
 
-        console.log(diffToNew, this.stackOffset);
         this._eachNodeHistory[0][this.stackOffset] = true;
 
         diffToNew.forEach(function (json) {

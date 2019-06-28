@@ -903,9 +903,10 @@ var BaseArch = class extends we3.AbstractPlugin {
             targetArchNode = this._arch;
             offset = 0;
         }
-        var fragment = this.parse(DOM);
 
-        this._resetChange();
+        var changes = this._changes.slice();
+        var fragment = this.parse(DOM);
+        this._changes = changes;
 
         offset = offset || 0;
         var childNodes = fragment.childNodes.slice();
@@ -1079,7 +1080,9 @@ var BaseArch = class extends we3.AbstractPlugin {
         });
 
         options.keepRight = true;
-        virtualTextNodeBegin.parent.deleteEdge(false, options);
+        if (range.ecID !== range.scID && virtualTextNodeBegin.parent.id !== commonAncestor.id) {
+            virtualTextNodeBegin.parent.deleteEdge(false, options);
+        }
 
         this._removeAllVirtualText([virtualTextNodeBegin.id]);
 
