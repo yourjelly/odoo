@@ -458,6 +458,55 @@ var BaseArch = class extends we3.AbstractPlugin {
         });
     }
     /**
+     * Split the start node at start offset and the end node at end offset.
+     *
+     * @see ArchNode.split
+     * @param {object} [options]
+     * @param {boolean} [options.doNotBreakBlocks]
+     */
+    splitRange (options) {
+        options = options || {};
+        var range = this.dependencies.BaseRange.getRange();
+        var scArch = this.getArchNode(range.scID);
+        var ecArch = this.getArchNode(range.ecID);
+        var afterEnd = options.doNotBreakBlocks && ecArch.isBlock() ? null : ecArch.split(range.eo);
+        var start = options.doNotBreakBlocks && scArch.isBlock() ? scArch : scArch.split(range.so);
+        var end = afterEnd && afterEnd.prev() || ecArch;
+        this._updateRendererFromChanges({
+            scID: start && start.id || scArch.id,
+            so: 0,
+            ecID: end.id,
+            eo: end.length(),
+        });
+    }
+    /**
+     * Split the start node at start offset and the end node at end offset.
+     * Keep splitting the parents until the given ancestor was split.
+     * If the ancestor cannot be found, just split once.
+     * Return the ArchNode on the right hand side of the split.
+     *
+     * @see ArchNode.splitUntil
+     * @param {ArchNode|function} ancestor
+     * @param {object} [options]
+     * @param {boolean} [options.doNotBreakBlocks]
+     * @returns {ArchNode}
+     */
+    splitRangeUntil (ancestor, options) {
+        options = options || {};
+        var range = this.dependencies.BaseRange.getRange();
+        var __hasMatch = node => typeof ancestor !== 'function' || node.ancestor(ancestor);
+        var ecArch = this.getArchNode(range.ecID);
+        var end = __hasMatch(ecArch) ? ecArch.splitUntil(ancestor, range.eo) : ecArch.split(range.eo).prev();
+        var scArch = this.getArchNode(range.scID);
+        var start = __hasMatch(scArch) ? scArch.splitUntil(ancestor, range.so) || scArch : scArch.split(range.so);
+        this._updateRendererFromChanges({
+            scID: start.id,
+            so: 0,
+            ecID: end.id,
+            eo: end.length(),
+        });
+    }
+    /**
      * Unwrap the node(s) corresponding to the given ID(s)
      * from its (their) parent.
      *
@@ -1451,6 +1500,29 @@ var Arch = class extends we3.AbstractPlugin {
      */
     setTechnicalData (id, name, value) {
         return this.dependencies.BaseArch.setTechnicalData(id, name, value);
+    }
+    /**
+     * Split the start node at start offset and the end node at end offset.
+     *
+     * @see ArchNode.split
+     * @param {object} [options]
+     * @param {boolean} [options.doNotBreakBlocks]
+     */
+    splitRange (options) {
+        return this.dependencies.BaseArch.splitRange(options);
+    }
+    /**
+     * Split the start node at start offset and the end node at end offset.
+     * Keep splitting the parents until the given ancestor was split.
+     * If the ancestor cannot be found, just split once.
+     *
+     * @see ArchNode.splitUntil
+     * @param {ArchNode|function} ancestor
+     * @param {object} [options]
+     * @param {boolean} [options.doNotBreakBlocks]
+     */
+    splitRangeUntil (ancestor, options) {
+        return this.dependencies.BaseArch.splitRangeUntil(ancestor, options);
     }
     /**
      * Unwrap the node(s) corresponding to the given ID(s)
