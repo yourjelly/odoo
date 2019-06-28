@@ -655,7 +655,7 @@ var DropBlock = class extends we3.AbstractPlugin {
         function dropIn () { return 1; }
         if (!items.length) {
             items = [].slice.call(this.editable.children).map(function (el) {
-                var archNode = Arch.getNode(el);
+                var archNode = Arch.getClonedArchNode(el);
                 if (archNode) {
                     return {
                         target: archNode.id,

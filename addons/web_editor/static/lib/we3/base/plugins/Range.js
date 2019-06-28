@@ -68,22 +68,22 @@ var BaseRange = class extends we3.AbstractPlugin {
         if (!sc || !ec) {
             return new WrappedRange(Arch, Renderer, {
                 sc: this.editable,
-                scArch: Arch.getNode(1),
+                scArch: Arch.getClonedArchNode(1),
                 scID: 1,
                 so: 0,
                 ec: this.editable,
-                ecArch: Arch.getNode(1),
+                ecArch: Arch.getClonedArchNode(1),
                 ecID: 1,
                 eo: 0,
             });
         }
         return new WrappedRange(Arch, Renderer, {
             sc: sc,
-            scArch: Arch.getNode(this._range.scID),
+            scArch: Arch.getClonedArchNode(this._range.scID),
             scID: this._range.scID,
             so: this._range.so,
             ec: ec,
-            ecArch: Arch.getNode(this._range.ecID),
+            ecArch: Arch.getClonedArchNode(this._range.ecID),
             ecID: this._range.ecID,
             eo: this._range.eo,
         });
@@ -144,8 +144,8 @@ var BaseRange = class extends we3.AbstractPlugin {
      * @returns {object} {scID: {Number}, so: {Number}, ecID: {Number}, eo: {Number}}
      */
     rangeOn (start, end) {
-        var scArch = typeof start === 'number' ? this.dependencies.Arch.getNode(start) : start;
-        var ecArch = typeof end === 'number' ? this.dependencies.Arch.getNode(end) : end;
+        var scArch = typeof start === 'number' ? this.dependencies.Arch.getClonedArchNode(start) : start;
+        var ecArch = typeof end === 'number' ? this.dependencies.Arch.getClonedArchNode(end) : end;
         return {
             scID: scArch.id,
             so: scArch.isVirtual() ? 1 : 0, // if virtual, move after it
@@ -755,7 +755,7 @@ var BaseRange = class extends we3.AbstractPlugin {
         }
         var self = this;
         this._keydownNavigationKey = [];
-        this.dependencies.Arch.getNode(1).nextUntil(function (next) {
+        this.dependencies.Arch.getClonedArchNode(1).nextUntil(function (next) {
             if (next.isVoidoid() && !next.isVoid() && !next.isText()) {
                 var el = self.dependencies.Renderer.getElement(next.id);
                 if (el) {
@@ -805,7 +805,7 @@ var BaseRange = class extends we3.AbstractPlugin {
         var range = this._getRange();
         if (!range || range.sc !== e.target && !e.target.contains(range.sc) && range.ec !== e.target && !e.target.contains(range.ec)) {
             var archNodeID = this.dependencies.Renderer.getID(e.target);
-            var archNode = archNodeID && this.dependencies.Arch.getNode(archNodeID);
+            var archNode = archNodeID && this.dependencies.Arch.getClonedArchNode(archNodeID);
             var voidoid = archNode && archNode.ancestor('isVoidoid', true);
             if (voidoid) {
                 this.setRange({

@@ -305,7 +305,7 @@ we3.addPlugin('Media', class extends we3.AbstractPlugin {
     }
     _onDblclick (ev) {
         var id = this.dependencies.Renderer.getID(ev.target);
-        var mediaArchNode = id && this.dependencies.Arch.getNode(id).ancestor('isMedia', true);
+        var mediaArchNode = id && this.dependencies.Arch.getClonedArchNode(id).ancestor('isMedia', true);
         if (mediaArchNode) {
             ev.preventDefault();
             ev.stopPropagation();

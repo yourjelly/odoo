@@ -132,7 +132,7 @@ we3.PluginsManager = class extends we3.EventDispatcher {
         var Arch = this._plugins.Arch;
         this._each('getEditorValue', null, ['BaseArch']);
         return this._eachAsync('saveEditor').then(function () {
-            var arch = Arch.getNode(1);
+            var arch = Arch.getClonedArchNode(1);
             arch.nextUntil(function () {}); // force to clone all this
             return arch;
         });

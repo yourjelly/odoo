@@ -744,7 +744,7 @@ var ListPlugin = class extends we3.AbstractPlugin {
             mergeOnlySameType: true,
         };
         var json = ids.map(function (id) {
-            var node = self.dependencies.Arch.getNode(id);
+            var node = self.dependencies.Arch.getClonedArchNode(id);
             var ultimateList = node.ancestor('isList', true); // will be useful for rendering
             if (node.isIndented()) {
                 // merge parents of indented lists together
@@ -886,7 +886,7 @@ var ListPlugin = class extends we3.AbstractPlugin {
      * @param {MouseEvent} e
      */
     _onMouseDown (e) {
-        var archNode = this.dependencies.Arch.getNode(e.target);
+        var archNode = this.dependencies.Arch.getClonedArchNode(e.target);
         var isChecklistItem = archNode && archNode.isChecklistItem && archNode.isChecklistItem();
         var isClickInCheckbox = isChecklistItem && e.offsetX <= 0;
         if (!isClickInCheckbox) {

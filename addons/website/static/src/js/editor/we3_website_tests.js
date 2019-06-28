@@ -68,7 +68,7 @@ var TestOdooWebsite = class extends we3.AbstractPlugin {
         var self = this;
         var Arch = this.dependencies.Arch;
         var Test = this.dependencies.Test;
-        var wrapArchNode = Arch.getNode(1).nextUntil(function (archNode) {
+        var wrapArchNode = Arch.getClonedArchNode(1).nextUntil(function (archNode) {
             return archNode.isWebsiteEditable && archNode.isWebsiteEditable() && archNode.attributes.id === 'wrap';
         });
         this.tests.forEach(function (test) {

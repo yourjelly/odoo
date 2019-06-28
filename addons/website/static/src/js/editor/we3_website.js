@@ -77,7 +77,7 @@ var OdooWebsite = class extends we3.AbstractPlugin {
         var ids = [];
         var Arch = this.dependencies.Arch;
         var Renderer = this.dependencies.Renderer;
-        Arch.getNode(1).nextUntil(function (next) {
+        Arch.getClonedArchNode(1).nextUntil(function (next) {
             if (next.isWebsiteEditable && next.isWebsiteEditable()) {
                 ids.push(next.id);
             }
@@ -159,7 +159,7 @@ var OdooWebsite = class extends we3.AbstractPlugin {
         var Arch = this.dependencies.Arch;
         var Renderer = this.dependencies.Renderer;
         var readonly = ids.filter(function (id) {
-            return Arch.getNode(id).isReadOnly();
+            return Arch.getClonedArchNode(id).isReadOnly();
         });
         var $readonly = $(readonly.map(function (id) {
             return Renderer.getElement(id);

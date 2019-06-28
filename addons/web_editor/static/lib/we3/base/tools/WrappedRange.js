@@ -120,7 +120,7 @@ we3.WrappedRange = class we3 {
             id = node;
             arch = null;
             node = null;
-            len = this.ArchPlugin.getNode(id).length();
+            len = this.ArchPlugin.getClonedArchNode(id).length();
         } else {
             if (node.nodeType === 3) {
                 len = node.nodeValue.length;
@@ -213,7 +213,7 @@ we3.WrappedRange = class we3 {
         }
         this.scArch = this.scArch;
         if (!this.scArch && this.scID) {
-            this.scArch = this.ArchPlugin.getNode(this.scID);
+            this.scArch = this.ArchPlugin.getClonedArchNode(this.scID);
         }
         this.sc = this.RendererPlugin.getElement(this.scID);
 
@@ -230,7 +230,7 @@ we3.WrappedRange = class we3 {
             this.ecID = this.scID;
         }
         if (!this.ecArch && this.ecID) {
-            this.ecArch = this.ArchPlugin.getNode(this.ecID);
+            this.ecArch = this.ArchPlugin.getClonedArchNode(this.ecID);
         }
         this.ec = this.RendererPlugin.getElement(this.ecID);
 

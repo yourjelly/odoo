@@ -98,6 +98,26 @@ var BaseArch = class extends we3.AbstractPlugin {
         return res;
     }
     /**
+     * @param {Function(getArchNode)} fn
+     *      The function can return a range if want to apply it instead of the
+     *      default range (apply on the first changed node)
+     */
+    async do (callback) {
+        var self = this;
+        this._resetChange();
+        var _concatChanges = this._concatChanges;
+        this._concatChanges = true;
+        var getArchNode = function (id) {
+            if (!self._concatChanges) {
+                throw new Error("It is forbidden to take this function into your plugin.\n You're trying to move to the dark side!");
+            }
+            return self.getArchNode(id);
+        }
+        var range = await callback(getArchNode);
+        this._concatChanges = _concatChanges;
+        this._updateRendererFromChanges(range);
+    }
+    /**
      * @param {string|number|ArchNode|JSON} DOM
      * @returns {ArchNode}
      **/
@@ -1157,6 +1177,9 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @private
      */
     _resetChange () {
+        if (this._concatChanges) {
+            return;
+        }
         this._changes = [];
     }
     /**
@@ -1179,6 +1202,9 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @param {Object} [range]
      */
     _updateRendererFromChanges (range) {
+        if (this._concatChanges) {
+            return;
+        }
         var self = this;
         var BaseRenderer = this.dependencies.BaseRenderer;
         var BaseRange = this.dependencies.BaseRange;
@@ -1307,6 +1333,9 @@ var Arch = class extends we3.AbstractPlugin {
     setValue (value, id) {
         return this.dependencies.BaseArch.setValue(value, id);
     }
+    async do (fn) {
+        return this.dependencies.BaseArch.do(fn);
+    }
 
     //--------------------------------------------------------------------------
     // Public GETTER
@@ -1345,7 +1374,7 @@ var Arch = class extends we3.AbstractPlugin {
      * @param {boolean} generateNewClone
      * @returns {ArchNode}
      */
-    getNode (idOrElement, generateNewClone) {
+    getClonedArchNode (idOrElement, generateNewClone) {
         return this.dependencies.BaseArch.getClonedArchNode(idOrElement, generateNewClone);
     }
     getTechnicalData (id, name) {

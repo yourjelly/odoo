@@ -34,7 +34,7 @@ we3.addPlugin('CropImage', class extends we3.AbstractPlugin {
     saveEditor () {
         var self = this;
         var defs = [];
-        this.dependencies.Arch.getNode(1).nextUntil(function (node) {
+        this.dependencies.Arch.getClonedArchNode(1).nextUntil(function (node) {
             if (!node.isMedia || !node.isMedia() || !node.className.contains('o_cropped_img_to_save')) {
                 return;
             }

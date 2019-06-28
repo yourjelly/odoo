@@ -362,7 +362,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
     }
     getValue (archNodeId) {
         var Arch = this.dependencies.Arch;
-        var root = Arch.getNode(1, true);
+        var root = Arch.getClonedArchNode(1, true);
 
         var params = root.params;
         var range = this.dependencies.Range.getRange();
@@ -374,9 +374,9 @@ var TestPlugin = class extends we3.AbstractPlugin {
             range.scArch.insert(new TEST(params, null, null, rangeStart), range.so);
         }
 
-        var result = this.dependencies.Arch.getNode(this._getTestContainer(archNodeId)).toString();
+        var result = this.dependencies.Arch.getClonedArchNode(this._getTestContainer(archNodeId)).toString();
 
-        Arch.getNode(1, true); // trash the previous clone
+        Arch.getClonedArchNode(1, true); // trash the previous clone
 
         return result
             .replace(/^<[^>]+>/, '').replace(/<\/[^>]+>$/, '') // remove container
@@ -471,11 +471,11 @@ var TestPlugin = class extends we3.AbstractPlugin {
             await this._loadTests(value);
         }
 
-        var s = this.dependencies.Arch.getNode(1).applyPath(sp);
+        var s = this.dependencies.Arch.getClonedArchNode(1).applyPath(sp);
         if (!s) {
             return;
         }
-        var e = this.dependencies.Arch.getNode(1).applyPath(ep);
+        var e = this.dependencies.Arch.getClonedArchNode(1).applyPath(ep);
         var el = this.dependencies.Renderer.getElement(s.id);
         if (el && this.document.body.contains(el)) {
             this.dependencies.Range.setRange({
@@ -519,7 +519,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
         var container;
 
         if (archNodeId) {
-            container = Arch.getNode(archNodeId);
+            container = Arch.getClonedArchNode(archNodeId);
         } else {
             var containers = Arch.findAll('isRoot');
             Arch.bypassUpdateConstraints(function () {
@@ -529,7 +529,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
                     });
                 });
 
-                var root = Arch.getNode(1);
+                var root = Arch.getClonedArchNode(1);
                 container = new TEST_CONTAINER(root.params, 'test-container');
                 Arch.bypassUpdateConstraints(function () {
                     Arch.bypassChangeTrigger(function () {
@@ -545,10 +545,10 @@ var TestPlugin = class extends we3.AbstractPlugin {
 
         Arch.setValue(value, container.id);
 
-        var start = Arch.getNode(1).nextUntil(function (a) { return a.type === 'TEST'; });
+        var start = Arch.getClonedArchNode(1).nextUntil(function (a) { return a.type === 'TEST'; });
         var end = start ? start.nextUntil(function (a) { return a.type === 'TEST'; }, {doCrossUnbreakables: true}) : null;
 
-        var archNode = Arch.getNode(container.id, true);
+        var archNode = Arch.getClonedArchNode(container.id, true);
 
         Arch.setValue(value.replace(regExpRange, ''), container.id);
         this._parentedParent._each('setEditorValue', null, ['BaseArch']);
@@ -562,7 +562,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
                 eo: 0,
             };
         } else {
-            var archNode = Arch.getNode(1);
+            var archNode = Arch.getClonedArchNode(1);
             function __getPoint(o, isEnd) {
                 var offset = 0;
                 var path = o.path();
@@ -749,7 +749,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
     _getTestContainer (archNodeId) {
         if (!archNodeId) {
             var containers = [];
-            this.dependencies.Arch.getNode(1).nextUntil(function (a) {
+            this.dependencies.Arch.getClonedArchNode(1).nextUntil(function (a) {
                 if (a.id !== -1 && a.isRoot()) {
                     containers.push(a);
                 }
