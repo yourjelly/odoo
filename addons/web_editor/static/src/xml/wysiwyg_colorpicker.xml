@@ -7,7 +7,7 @@
             <i class="fa fa-font"></i>
         </we3-toggler>
         <we3-items t-name="wysiwyg.buttons.palette">
-            <we3-button name="color-reset" data-method="update">Reset to default</we3-button>
+            <we3-button name="color-reset" data-method="reset">Reset to default</we3-button>
             <we3-palettes>
                 <we3-button data-method="custom">Custom color</we3-button>
                 <we3-palette name="Custom colors" class="wysiwyg-palette-custom"></we3-palette>
@@ -21,7 +21,7 @@
             <i class="fa fa-paint-brush"></i>
         </we3-toggler>
         <we3-items t-name="wysiwyg.buttons.palette">
-            <we3-button name="color-reset" data-method="update">Reset to default</we3-button>
+            <we3-button name="color-reset" data-method="reset">Reset to default</we3-button>
             <we3-palettes>
                 <we3-button data-method="custom">Custom color</we3-button>
                 <we3-palette name="Custom colors" class="wysiwyg-palette-custom"></we3-palette>

@@ -241,12 +241,14 @@ we3.ArchNodeText = class extends we3.ArchNode {
             .replace(tabs, ' ')
             .replace(newlines, ' ')
             .replace(consecutiveSpace, ' ');
-        var prev = this.ancestor((ancestor) => ancestor.parent && ancestor.parent.isBlock()).previousSibling();
+        var childOfBlockAncestor = this.ancestor((ancestor) => ancestor.parent && ancestor.parent.isBlock());
+        var prev = childOfBlockAncestor && childOfBlockAncestor.previousSibling();
         if (prev && prev.isBlock() || this.isLeftEdgeOfBlock()) {
             var startSpace = /^ */g;
             text = text.replace(startSpace, '');
         }
-        var next = this.ancestor((ancestor) => ancestor.parent && ancestor.parent.isBlock()).nextSibling();
+        childOfBlockAncestor = this.ancestor((ancestor) => ancestor.parent && ancestor.parent.isBlock())
+        var next = childOfBlockAncestor && childOfBlockAncestor.nextSibling();
         if (next && next.isBlock() || this.isRightEdgeOfBlock()) {
             var endSpace = / *$/g;
             text = text.replace(endSpace, '');

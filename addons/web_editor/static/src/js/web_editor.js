@@ -130,7 +130,13 @@ var Wysiwyg = Widget.extend({
             lang : "odoo",
             disableDragAndDrop : !!this.options.noAttachment,
             styleTags: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'pre'],
-            colors: this._groupColors,
+            color: {
+                classPrefix: {
+                    text: 'text-',
+                    background: 'bg-',
+                },
+                colors: this._groupColors,
+            },
             dropblocks: this._dropblocks,
             blockSelector: this._blockSelector,
             renderingAttributeBlacklist: [

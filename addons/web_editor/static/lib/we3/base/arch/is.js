@@ -140,6 +140,9 @@ var isType = {
     isFlowBlock: function () {
         return this.isBlock() && !this.isVoidoid() && this.isFlowContent();
     },
+    isFont: function () {
+        return this.nodeName === 'font';
+    },
     /**
      * Returns true if the node is a "format" node.
      * In this context, a "format" node is understood as
