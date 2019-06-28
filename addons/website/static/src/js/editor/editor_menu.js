@@ -155,7 +155,7 @@ var EditorMenu = Widget.extend({
      * @returns {Promise}
      */
     _saveElements: function (archNode) {
-        return Promise.all(archNode.descendent('isWebsiteEditable')
+        return Promise.all(archNode.descendents('isWebsiteEditable')
             .map(this._saveElement.bind(this)));
     },
     /**
