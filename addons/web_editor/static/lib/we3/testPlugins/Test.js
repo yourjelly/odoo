@@ -368,9 +368,18 @@ var TestPlugin = class extends we3.AbstractPlugin {
         var range = this.dependencies.Range.getRange();
 
         if (range.isCollapsed()) {
-            range.scArch.insert(new TEST(params, null, null, rangeCollapsed), range.so);
+            if (range.scArch.isVoidoid()) {
+                range.ecArch.after(new TEST(params, null, null, rangeEnd));
+                range.scArch.before(new TEST(params, null, null, rangeStart));
+            } else {
+                range.scArch.insert(new TEST(params, null, null, rangeCollapsed), range.so);
+            }
         } else {
-            range.ecArch.insert(new TEST(params, null, null, rangeEnd), range.eo);
+            if (range.scArch.isVoidoid()) {
+                range.ecArch.after(new TEST(params, null, null, rangeEnd));
+            } else {
+                range.ecArch.insert(new TEST(params, null, null, rangeEnd), range.eo);
+            }
             range.scArch.insert(new TEST(params, null, null, rangeStart), range.so);
         }
 

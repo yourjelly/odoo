@@ -226,15 +226,9 @@ var BaseRange = class extends we3.AbstractPlugin {
 
         this._didRangeChange = this._willRangeChange(points) || this._didRangeChange;
         var focusedNodeID = this._getFutureFocusNode(points);
-
-        if ((options.moveLeft || options.moveRight) && this.dependencies.BaseArch.getArchNode(focusedNodeID).isVoidoid()) {
-            if (options.moveLeft) {
-                points.ecID = points.scID;
-                points.eo = points.so;
-            } else {
-                points.scID = points.ecID;
-                points.so = points.eo;
-            }
+        var focusedNode = this.dependencies.BaseArch.getArchNode(focusedNodeID);
+        if ((options.moveLeft || options.moveRight) && focusedNode.isVoidoid()) {
+            points = this._moveToSideOfVoidoid(points, !!options.moveLeft);
             focusedNodeID = points.scID;
         }
 
@@ -552,6 +546,25 @@ var BaseRange = class extends we3.AbstractPlugin {
         return points;
     }
     /**
+     * Move the points from in a voidoid to the specified side of it.
+     *
+     * @param {object} points
+     * @param {boolean} moveLeft true to move to the left
+     * @returns {object}
+     */
+    _moveToSideOfVoidoid (points, moveLeft) {
+        var scArch = this.dependencies.BaseArch.getArchNode(points.scID);
+        var node = scArch[moveLeft ? 'previousSibling' : 'nextSibling']();
+        if (node) {
+            points.so = points.eo = node.length();
+        } else {
+            node = scArch.parent;
+            points.so = points.eo = moveLeft ? 0 : node.length();
+        }
+        points.scID = points.ecID = node.id;
+        return points;
+    }
+    /**
      * Move the points from WITHIN a voidoid to select the whole voidoid instead if needed.
      *
      * @private
@@ -564,17 +577,17 @@ var BaseRange = class extends we3.AbstractPlugin {
      */
     _moveUpToVoidoid (points) {
         var self = this;
-        var startPoint = __moveUpToVoidoid(points.scID, points.so, true);
-        var endPoint = __moveUpToVoidoid(points.ecID, points.eo, false);
-        function __moveUpToVoidoid(id, offset, isStart) {
+        var startPoint = __moveUpToVoidoid(points.scID, points.so);
+        var endPoint = __moveUpToVoidoid(points.ecID, points.eo);
+        function __moveUpToVoidoid(id, offset) {
             var archNode = self.dependencies.BaseArch.getArchNode(id);
             if (!archNode) {
                 return;
             }
             var voidoidAncestor = archNode.ancestor('isVoidoid', true);
             if (voidoidAncestor) {
-                id = voidoidAncestor.parent.id;
-                offset = isStart ? voidoidAncestor.index() : voidoidAncestor.index() + 1;
+                id = voidoidAncestor.id;
+                offset = 0;
             }
             return {
                 id: id,
@@ -627,28 +640,30 @@ var BaseRange = class extends we3.AbstractPlugin {
      * Set the range in the DOM.
      *
      * @private
-     * @param {Object} [range]
-     * @param {Node} [range.sc]
-     * @param {Number} [range.scID]
-     * @param {Number} [range.so]
-     * @param {Node} [range.ec]
-     * @param {Number} [range.ecID]
-     * @param {Number} [range.eo]
+     * @param {Object} [oldRange]
+     * @param {Node} [oldRange.sc]
+     * @param {Number} [oldRange.scID]
+     * @param {Number} [oldRange.so]
+     * @param {Node} [oldRange.ec]
+     * @param {Number} [oldRange.ecID]
+     * @param {Number} [oldRange.eo]
      * @param {Object} [options]
      * @param {Boolean} [options.muteTrigger]
      */
-    _setRange (range, options) {
+    _setRange (oldRange, options) {
         if (!this._editorFocused) {
             return;
         }
 
-        var wrappedRange = this.getRange();
-        if (!range || range.scID === 1 ||
-            range.sc !== wrappedRange.sc || range.so !== wrappedRange.so ||
-            range.ec !== wrappedRange.ec || range.eo !== wrappedRange.eo) {
+        var newRange = this.getRange();
+        var nativeReadyNewRange = this._voidoidSelectToNative(newRange);
+
+        if (!oldRange || oldRange.scID === 1 ||
+            oldRange.sc !== nativeReadyNewRange.sc || oldRange.so !== nativeReadyNewRange.so ||
+            oldRange.ec !== nativeReadyNewRange.ec || oldRange.eo !== nativeReadyNewRange.eo) {
             // only if the native range change, after the redraw
             // the renderer can associate existing note to the arch (to prevent error on mobile)
-            this._select(wrappedRange.sc, wrappedRange.so, wrappedRange.ec, wrappedRange.eo);
+            this._select(nativeReadyNewRange.sc, nativeReadyNewRange.so, nativeReadyNewRange.ec, nativeReadyNewRange.eo);
         }
 
         var didRangeChange = this._didRangeChange;
@@ -681,6 +696,7 @@ var BaseRange = class extends we3.AbstractPlugin {
      */
     _setRangeFromDOM (options) {
         var range = this._getRange();
+        range = this._voidoidSelectToWE3(range);
         this._computeSetRange(range, options);
         this._setRange(range);
     }
@@ -694,7 +710,7 @@ var BaseRange = class extends we3.AbstractPlugin {
      */
     _targetedNode (id, offset) {
         var archNode = this.dependencies.BaseArch.getArchNode(id);
-        if (archNode && archNode.childNodes && archNode.childNodes[offset]) {
+        if (archNode && !archNode.isVoidoid() && archNode.childNodes && archNode.childNodes[offset]) {
             archNode = archNode.childNodes[offset];
         }
         return archNode;
@@ -714,6 +730,66 @@ var BaseRange = class extends we3.AbstractPlugin {
         nativeRange.setStart(sc, so);
         nativeRange.setEnd(ec, eo);
         return nativeRange;
+    }
+    /**
+     * Convert a range to ensure compatibility with native range,
+     * with regards to voidoid selection.
+     * In we3, a selected voidoid is within the voidoid.
+     * For a native range, we need to select the voidoid from within its parent.
+     *
+     * @private
+     * @see _voidoidSelectToWE3
+     * @param {object} range
+     * @param {Node} range.sc
+     * @param {number} range.so
+     * @param {Node} range.ec
+     * @param {number} range.eo
+     * @returns {object} {sc, so, ec, eo}
+     */
+    _voidoidSelectToNative (range) {
+        var sc = range.sc;
+        var so = range.so;
+        if (range.scArch.isVoidoid()) {
+            so = [].indexOf.call(sc.parentNode.childNodes, sc);
+            sc = sc.parentNode;
+        }
+        var ec = range.ec;
+        var eo = range.eo;
+        if (range.ecArch.isVoidoid()) {
+            eo = [].indexOf.call(ec.parentNode.childNodes, ec);
+            ec = ec.parentNode;
+        }
+        return {
+            sc: sc,
+            so: so,
+            ec: ec,
+            eo: eo,
+        };
+    }
+    /**
+     * Convert a native voidoid selection to ensure deepest selection.
+     * For a native range, we need to select the voidoid from within its parent.
+     * In we3, a selected voidoid is within the voidoid.
+     *
+     * @private
+     * @see _voidoidSelectToNative
+     * @param {object} range
+     * @param {ArchNode} range.scArch
+     * @param {number} range.so
+     * @param {ArchNode} range.ecArch
+     * @param {number} range.eo
+     * @returns {object} {scID, so, ecID, eo}
+     */
+    _voidoidSelectToWE3 (range) {
+        if (!range.isCollapsed() && range.scArch.isText() && range.so === range.scArch.length() && range.scArch.nextSibling() && range.scArch.nextSibling().isVoidoid()) {
+            range.scID = range.scArch.nextSibling().id;
+            range.so = 0;
+        }
+        if (!range.isCollapsed() && range.ecArch.isText() && range.eo === 0 && range.ecArch.previousSibling() && range.ecArch.previousSibling().isVoidoid()) {
+            range.ecID = range.ecArch.previousSibling().id;
+            range.eo = 0;
+        }
+        return range;
     }
     /**
      * Return true if the range will change once set to the given points.
