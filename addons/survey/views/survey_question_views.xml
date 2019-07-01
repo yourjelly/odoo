@@ -157,6 +157,18 @@
                                 <field name='comment_count_as_answer' attrs="{'invisible': ['|', ('comments_allowed', '=', False), ('question_type', 'in', ['matrix'])]}" />
                             </group>
                         </page>
+                        <page string="Question Logic">
+                            <group>
+                                <group string="Dependency">
+                                    <field name="is_enable_question_dependency"/>
+                                </group>
+                                <group string="Dependency Rule" attrs="{'invisible':[('is_enable_question_dependency', '=', False)]}" >
+                                    <field name="question_depend_id" options="{'no_create': True}"/>
+                                    <field name="operater"/>
+                                    <field name="value"/>
+                                </group>
+                            </group>
+                        </page>
                     </notebook>
                 </sheet>
             </form>

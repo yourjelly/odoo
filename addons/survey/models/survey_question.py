@@ -124,6 +124,10 @@ class SurveyQuestion(models.Model):
     user_input_line_ids = fields.One2many(
         'survey.user_input_line', 'question_id', string='Answers',
         domain=[('skipped', '=', False)], groups='survey.group_survey_user')
+    is_enable_question_dependency = fields.Boolean('Is Enable Question Dependency')
+    question_depend_id = fields.Many2one('survey.question', string="Question")
+    operater = fields.Char(string='Operater', default="=")
+    value = fields.Char()
 
     _sql_constraints = [
         ('positive_len_min', 'CHECK (validation_length_min >= 0)', 'A length must be positive!'),
