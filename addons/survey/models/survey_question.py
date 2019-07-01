@@ -126,7 +126,7 @@ class SurveyQuestion(models.Model):
         domain=[('skipped', '=', False)], groups='survey.group_survey_user')
     is_enable_question_dependency = fields.Boolean('Is Enable Question Dependency')
     question_depend_id = fields.Many2one('survey.question', string="Question")
-    operater = fields.Char(string='Operater', default="=")
+    operator = fields.Char(string='Operator', default="=")
     value = fields.Char()
 
     _sql_constraints = [

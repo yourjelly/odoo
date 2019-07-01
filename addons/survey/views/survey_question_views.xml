@@ -164,7 +164,7 @@
                                 </group>
                                 <group string="Dependency Rule" attrs="{'invisible':[('is_enable_question_dependency', '=', False)]}" >
                                     <field name="question_depend_id" options="{'no_create': True}"/>
-                                    <field name="operater"/>
+                                    <field name="operator"/>
                                     <field name="value"/>
                                 </group>
                             </group>
