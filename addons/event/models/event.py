@@ -2,6 +2,7 @@
 
 import logging
 import pytz
+from datetime import datetime
 
 from odoo import _, api, fields, models
 from odoo.addons.mail.models.mail_template import format_tz
@@ -181,6 +182,12 @@ class EventEvent(models.Model):
     badge_innerleft = fields.Html(string='Badge Inner Left')
     badge_innerright = fields.Html(string='Badge Inner Right')
     event_logo = fields.Html(string='Event Logo')
+    tz_offset = fields.Char(compute='_compute_tz_offset', string='Timezone offset')
+
+    @api.depends('date_tz')
+    def _compute_tz_offset(self):
+        for event in self:
+            event.tz_offset = datetime.now(pytz.timezone(event.date_tz or 'GMT')).strftime('%z')
 
     @api.multi
     @api.depends('seats_max', 'registration_ids.state')

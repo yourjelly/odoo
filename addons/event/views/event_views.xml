@@ -237,8 +237,9 @@
                                 <field name="auto_confirm" groups="base.group_no_one"/>
                             </group>
                             <group>
-                                <field name="date_begin"/>
-                                <field name="date_end"/>
+                                <field name="tz_offset" invisible="1"/>
+                                <field name="date_begin" widget="event_tz_offset" options="{'tz_offset_field': 'tz_offset'}"/>
+                                <field name="date_end" widget="event_tz_offset" options="{'tz_offset_field': 'tz_offset'}"/>
                                 <field name="date_tz"/>
                             </group>
                             <group>
@@ -284,8 +285,10 @@
                 <tree string="Events" decoration-bf="message_needaction==True" decoration-danger="(seats_min and seats_min&gt;seats_reserved) or (seats_max and seats_max&lt;seats_reserved)" decoration-muted="state=='cancel'">
                     <field name="name"/>
                     <field name="event_type_id"/>
-                    <field name="date_begin"/>
-                    <field name="date_end"/>
+                    <field name="tz_offset" invisible="1"/>
+                                <field name="date_begin" widget="event_tz_offset" options="{'tz_offset_field': 'tz_offset'}"/>
+                                <field name="date_end" widget="event_tz_offset" options="{'tz_offset_field': 'tz_offset'}"/>
+                                <field name="date_tz" invisible="1"/>
                     <field name="seats_reserved"/>
                     <field name="seats_min"/>
                     <field name="seats_max" invisible="1"/>
@@ -306,11 +309,14 @@
                     <field name="country_id"/>
                     <field name="date_begin"/>
                     <field name="date_end"/>
+                    <field name="date_tz"/>
+                    <field name="tz_offset"/>
                     <field name="seats_unconfirmed"/>
                     <field name="seats_reserved"/>
                     <field name="seats_used"/>
                     <field name="seats_expected"/>
                     <field name="color"/>
+                    <field name="tz_offset" invisible="1"/>
                     <templates>
                         <t t-name="kanban-box">
                             <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click">
@@ -329,17 +335,17 @@
                                 <div class="o_event_left">
                                     <div class="o_day"><t t-esc="record.date_begin.raw_value.getDate()"/></div>
                                     <div>
-                                        <t t-esc="moment(record.date_begin.raw_value).format('MMM')"/>
-                                        <t t-esc="record.date_begin.raw_value.getFullYear()"/>
+                                        <t t-esc="moment(record.date_begin.raw_value).utcOffset(record.tz_offset.raw_value).format('MMM')"/>
+                                        <t t-esc="moment(record.date_begin.raw_value).utcOffset(record.tz_offset.raw_value).format('YYYY')"/>
                                     </div>
-                                    <div><t t-esc="moment(record.date_begin.raw_value).format('LT')"/></div>
+                                    <div><t t-esc="moment(record.date_begin.raw_value).utcOffset(record.tz_offset.raw_value).format('LT')"/></div>
                                 </div>
                                 <div class="o_event_right">
                                     <h4 class="o_kanban_record_title"><field name="name"/></h4>
                                     <div>
                                         <t t-if="record.country_id.raw_value"> <b class="o_kanban_record_subtitle"> <field name="country_id"/> </b> <br/> </t>
                                         <b><i class="fa fa-clock-o"/>
-                                        To</b> <t t-esc="moment(record.date_end.raw_value).format('lll')"/>
+                                        To</b> <t t-esc="moment(record.date_end.raw_value).utcOffset(record.tz_offset.raw_value).format('lll')"/>
                                     </div>
                                     <h4>
                                         <a name="%(act_event_registration_from_event)d" type="action">
