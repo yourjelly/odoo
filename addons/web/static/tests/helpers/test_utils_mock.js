@@ -60,10 +60,18 @@ function removeSrcAttribute(el, widget) {
     while (node = nodes.pop()) {
         var src = node.attributes.src && node.attributes.src.value;
         if (src && src !== 'about:blank') {
-            node.setAttribute('data-src', src);
             if (node.nodeName === 'IMG') {
-                node.attributes.removeNamedItem('src');
+                if (src.indexOf('data:') >= 0) { // if data: url
+                    node.attributes.removeNamedItem('src');
+                    if (!node.getAttribute('data-src')) {
+                        node.setAttribute('data-src', src);
+                    }
+                } else { // if real url
+                    node.setAttribute('data-src', src);
+                    node.setAttribute('src', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==');
+                }
             } else {
+                node.setAttribute('data-src', src);
                 node.setAttribute('src', 'about:blank');
             }
             if (widget) {

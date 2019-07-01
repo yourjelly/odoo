@@ -288,7 +288,7 @@ QUnit.test('receive messages in the Support channel', async function (assert) {
         data: this.data,
         enableSupportPoll: true,
         mockRPC: function (route, args) {
-            if (!_.string.endsWith(route, '.png')) { // ignore images
+            if (!_.string.endsWith(route, '.png') && !_.string.startsWith(route, 'data:')) { // ignore images
                 assert.step(args.method || route);
             }
             return this._super.apply(this, arguments);
