@@ -192,7 +192,7 @@ class StockQuant(SavepointCase):
         """
         quant = self.env['stock.quant'].search([('location_id', '=', self.stock_location.id)], limit=1)
         product = quant.product_id
-        available_quantity = self.env['stock.quant']._get_available_quantity(product, self.stock_location)
+        available_quantity = self.env['stock.quant']._get_available_quantity(product, self.stock_location, allow_negative=True)
         # opens a new cursor and SELECT FOR UPDATE the quant, to simulate another concurrent reserved
         # quantity increase
         with closing(self.registry.cursor()) as cr:
@@ -201,7 +201,7 @@ class StockQuant(SavepointCase):
             cr.execute("SELECT 1 FROM stock_quant WHERE id=%s FOR UPDATE", quant_id)
             self.env['stock.quant']._update_available_quantity(product, self.stock_location, 1.0)
 
-        self.assertEqual(self.env['stock.quant']._get_available_quantity(product, self.stock_location), available_quantity + 1)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product, self.stock_location, allow_negative=True), available_quantity + 1)
         self.assertEqual(len(self.gather_relevant(product, self.stock_location, strict=True)), 2)
 
     def test_increase_available_quantity_4(self):
@@ -278,7 +278,7 @@ class StockQuant(SavepointCase):
         """
         quant = self.env['stock.quant'].search([('location_id', '=', self.stock_location.id)], limit=1)
         product = quant.product_id
-        available_quantity = self.env['stock.quant']._get_available_quantity(product, self.stock_location)
+        available_quantity = self.env['stock.quant']._get_available_quantity(product, self.stock_location, allow_negative=True)
 
         # opens a new cursor and SELECT FOR UPDATE the quant, to simulate another concurrent reserved
         # quantity increase
@@ -286,7 +286,7 @@ class StockQuant(SavepointCase):
             cr.execute("SELECT 1 FROM stock_quant WHERE id = %s FOR UPDATE", quant.ids)
             self.env['stock.quant']._update_available_quantity(product, self.stock_location, -1.0)
 
-        self.assertEqual(self.env['stock.quant']._get_available_quantity(product, self.stock_location), available_quantity - 1)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product, self.stock_location, allow_negative=True), available_quantity - 1)
         self.assertEqual(len(self.gather_relevant(product, self.stock_location, strict=True)), 2)
 
     def test_decrease_available_quantity_4(self):
