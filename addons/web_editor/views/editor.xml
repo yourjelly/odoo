@@ -71,6 +71,32 @@
 
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/misc/History.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/misc/Jinja.js"/>
+
+    <!-- Tests -->
+
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/Test.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/TestArchAndRules.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/TestRange.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/ui.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboard.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardArrow.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardBackspace.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardChar.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardComplex.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardDelete.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardEnter.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardTab.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardUnbreakable.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/renderer.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/popover.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbar.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarColor.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarFontStyle.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarIndent.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarList.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarParagraph.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarWand.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/history.js"/>
 </template>
 
 <template id="assets_wysiwyg" name="Wysiwyg Editor Assets">
@@ -90,6 +116,8 @@
     <!-- lib we3 -->
 
     <t t-call="web_editor.we3"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarLink.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarMedia.js"/>
 
     <!-- odoo -->
 
@@ -135,6 +163,12 @@
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/misc/keymap.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/misc/transform.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/misc/customizeBlock.js"/>
+
+    <!-- Tests -->
+
+    <!-- <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarBackgroundColor.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarFontSize.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarForeColor.js"/> -->
 
     <!-- additional plugins -->
 
@@ -212,12 +246,13 @@
                 'use strict';
                 var WysiwygRoot = require('web_editor.wysiwyg.root');
                 WysiwygRoot.include({
-                    assetLibs: null // We need to add the asset because tests performed overwrites (Dialog, Unbreakable...)
+                    assetLibs: null // We need to add the asset because tests performed overwrites (Dialog...)
                 });
             });
         </script>
         <t t-call="web_editor.compiled_assets_wysiwyg"/>
         <script type="text/javascript" src="/web_editor/static/tests/test_utils.js"/>
+        <script type="text/javascript" src="/web_editor/static/tests/we3_tests.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/field_html_tests.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/wysiwyg_tests.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/wysiwyg_keyboard_tests.js"/>
