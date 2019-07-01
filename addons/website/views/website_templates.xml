@@ -20,8 +20,8 @@
 <template id="assets_tests" name="Website Assets Tests" inherit_id="web.assets_tests">
     <xpath expr="." position="inside">
         <script type="text/javascript" src="/website/static/tests/tours/reset_password.js"></script>
-        <script type="text/javascript" src="/website/static/tests/tours/rte.js"/>
-        <script type="text/javascript" src="/website/static/tests/tours/html_editor.js"/>
+        <!-- <script type="text/javascript" src="/website/static/tests/tours/rte.js"/>
+        <script type="text/javascript" src="/website/static/tests/tours/html_editor.js"/> -->
         <script type="text/javascript" src="/website/static/tests/tours/restricted_editor.js"/>
     </xpath>
 </template>
@@ -81,6 +81,12 @@
 <template id="assets_frontend_compatibility_for_12_0" inherit_id="website.assets_frontend" active="False">
     <xpath expr="//link[last()]" position="after">
         <link rel="stylesheet" type="text/scss" href="/website/static/src/scss/compatibility/bs3_for_12_0.scss"/>
+    </xpath>
+</template>
+
+<template id="website.web_editor_assets_wysiwyg" inherit_id="web_editor.assets_wysiwyg" name="Website Editor Assets Wysiwyg">
+    <xpath expr="//script[last()]" position="after">
+        <script type="text/javascript" src="/website/static/src/js/editor/we3_website.js"/>
     </xpath>
 </template>
 
