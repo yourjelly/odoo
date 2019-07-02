@@ -16,7 +16,7 @@ var ClassName = class {
         if (classNames instanceof ClassName) {
             this.value = classNames.value.slice();
         } else {
-            this.value = classNames.replace(regMultiSpace, ' ').split(' ');
+            this.value = classNames.trim().length ? classNames.replace(regMultiSpace, ' ').split(' ') : [];
         }
     }
     get length () {
@@ -28,7 +28,7 @@ var ClassName = class {
      * @returns {string}
      */
     toString () {
-        return this.value.sort().join(' ').trim();
+        return this.value.sort().join(' ');
     }
 
     /**

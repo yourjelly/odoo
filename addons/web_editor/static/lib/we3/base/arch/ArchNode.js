@@ -375,6 +375,36 @@ we3.ArchNode = class {
         }
     }
     /**
+     * Return an array with the ids of all the nodes between this and `end`, not included.
+     *
+     * @private
+     * @param {ArchNode} end
+     * @param {object} [options]
+     * @param {object} [options.includeStart] true to include this
+     * @param {object} [options.includeEnd] true to include `end`
+     * @returns {number []}
+     */
+    getNodesUntil (end, options) {
+        options = options || {};
+        var start = this.firstLeaf();
+        end = end.lastLeaf();
+        var nodes = options.includeStart && start.isInArch() ? [start.id] : [];
+        var nextOptions = {
+            doNotInsertVirtual: true,
+            leafToLeaf: true,
+        };
+        if (start.id === end.id) {
+            return options.includeEnd && !options.includeStart ? nodes.concat(end.id) : nodes;
+        }
+        start.nextUntil(function (node) {
+            if (node.isInArch() && (node.id !== end.id || options.includeEnd && end.isInArch())) {
+                nodes.push(node.id);
+            }
+            return node.id === end.id;
+        }, nextOptions);
+        return we3.utils.uniq(nodes);
+    }
+    /**
      * Get the index of this ArchNode with regards to its parent.
      *
      * @returns {int}

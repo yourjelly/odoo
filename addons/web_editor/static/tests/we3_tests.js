@@ -191,7 +191,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('toolbar color', async function (assert) {
-        assert.expect(16);
+        assert.expect(21);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, testPlugins, { TestToolbarColor: true }),

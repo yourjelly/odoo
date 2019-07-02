@@ -43,6 +43,33 @@ var TestToolbarColor = class extends we3.AbstractPlugin {
                 test: '<p>dom not to edit</p><p>d<font style="color:#0000FF">▶om t◀</font><font class="text-black-25">o </font>edit</p>',
             },
             {
+                name: "Click COMMON COLORS - BLUE #0000FF: bg-black-25 & default -> bg-black-25 & text blue #0000FF",
+                content: '<p>dom not to edit</p><p>d▶o<font class="bg-black-25">m t◀o </font>edit</p>',
+                do: async function () {
+                    await self.dependencies.Test.triggerNativeEvents(self.foreColorToggler, ['mousedown', 'click']);
+                    await self.dependencies.Test.triggerNativeEvents(self.foreColorDropdown.querySelector('we3-button[name="color-#0000FF"]'), ['mousedown', 'click']);
+                },
+                test: '<p>dom not to edit</p><p>d<font style="color:#0000FF">▶o</font><font class="bg-black-25" style="color:#0000FF">m t◀</font><font class="bg-black-25">o </font>edit</p>',
+            },
+            {
+                name: "Click COMMON COLORS - BLUE #0000FF: bg blue #0000FF & default -> bg blue #0000FF & text blue #0000FF",
+                content: '<p>dom not to edit</p><p>d▶o<font style="background-color:#0000FF">m t◀o </font>edit</p>',
+                do: async function () {
+                    await self.dependencies.Test.triggerNativeEvents(self.foreColorToggler, ['mousedown', 'click']);
+                    await self.dependencies.Test.triggerNativeEvents(self.foreColorDropdown.querySelector('we3-button[name="color-#0000FF"]'), ['mousedown', 'click']);
+                },
+                test: '<p>dom not to edit</p><p>d<font style="color:#0000FF">▶o</font><font style="background-color:#0000FF; color:#0000FF">m t◀</font><font style="background-color:#0000FF">o </font>edit</p>',
+            },
+            {
+                name: "Click COMMON COLORS - BLUE #0000FF: text blue #0000FF & default -> text blue #0000FF",
+                content: '<p>dom not to edit</p><p>d▶o<font style="color:#0000FF">m t◀o </font>edit</p>',
+                do: async function () {
+                    await self.dependencies.Test.triggerNativeEvents(self.foreColorToggler, ['mousedown', 'click']);
+                    await self.dependencies.Test.triggerNativeEvents(self.foreColorDropdown.querySelector('we3-button[name="color-#0000FF"]'), ['mousedown', 'click']);
+                },
+                test: '<p>dom not to edit</p><p>d<font style="color:#0000FF">▶om t◀o </font>edit</p>',
+            },
+            {
                 name: "Click RESET TO DEFAULT: black 25 & default -> default",
                 content: '<p>dom not to edit</p><p>d▶o<font class="text-black-25">m t◀o </font>edit</p>',
                 do: async function () {
@@ -281,6 +308,24 @@ var TestToolbarColor = class extends we3.AbstractPlugin {
                     await self.dependencies.Test.triggerNativeEvents(self.bgColorDropdown.querySelector('we3-button[name="color-#0000FF"]'), ['mousedown', 'click']);
                 },
                 test: '<p>dom not to edit</p><p>d<font style="background-color:#0000FF">▶om t◀</font><font class="bg-black-25">o </font>edit</p>',
+            },
+            {
+                name: "Click COMMON COLORS - BLUE #0000FF: text-black-25 & default -> text-black-25 & bg blue #0000FF",
+                content: '<p>dom not to edit</p><p>d▶o<font class="text-black-25">m t◀o </font>edit</p>',
+                do: async function () {
+                    await self.dependencies.Test.triggerNativeEvents(self.bgColorToggler, ['mousedown', 'click']);
+                    await self.dependencies.Test.triggerNativeEvents(self.bgColorDropdown.querySelector('we3-button[name="color-#0000FF"]'), ['mousedown', 'click']);
+                },
+                test: '<p>dom not to edit</p><p>d<font style="background-color:#0000FF">▶o</font><font class="text-black-25" style="background-color:#0000FF">m t◀</font><font class="text-black-25">o </font>edit</p>',
+            },
+            {
+                name: "Click COMMON COLORS - BLUE #0000FF: text blue #0000FF & default -> text blue #0000FF & bg blue #0000FF",
+                content: '<p>dom not to edit</p><p>d▶o<font style="color:#0000FF">m t◀o </font>edit</p>',
+                do: async function () {
+                    await self.dependencies.Test.triggerNativeEvents(self.bgColorToggler, ['mousedown', 'click']);
+                    await self.dependencies.Test.triggerNativeEvents(self.bgColorDropdown.querySelector('we3-button[name="color-#0000FF"]'), ['mousedown', 'click']);
+                },
+                test: '<p>dom not to edit</p><p>d<font style="background-color:#0000FF">▶o</font><font style="color:#0000FF; background-color:#0000FF">m t◀</font><font style="color:#0000FF">o </font>edit</p>',
             },
             {
                 name: "Click RESET TO DEFAULT: black 25 & default -> default",
