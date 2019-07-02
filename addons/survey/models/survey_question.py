@@ -125,9 +125,10 @@ class SurveyQuestion(models.Model):
         'survey.user_input_line', 'question_id', string='Answers',
         domain=[('skipped', '=', False)], groups='survey.group_survey_user')
     is_enable_question_dependency = fields.Boolean('Is Enable Question Dependency')
-    question_depend_id = fields.Many2one('survey.question', string="Question")
-    operator = fields.Char(string='Operator', default="=")
+    question_depend_id = fields.Many2one('survey.question', string='Question', domain="[('survey_id', '=', survey_id)]")
+    operator = fields.Char(string='Operator', default='=')
     value = fields.Char()
+    action = fields.Selection([('show', 'Show'), ('hide', 'Hide')], string='Action', default='show')
 
     _sql_constraints = [
         ('positive_len_min', 'CHECK (validation_length_min >= 0)', 'A length must be positive!'),

@@ -163,9 +163,10 @@
                                     <field name="is_enable_question_dependency"/>
                                 </group>
                                 <group string="Dependency Rule" attrs="{'invisible':[('is_enable_question_dependency', '=', False)]}" >
-                                    <field name="question_depend_id" options="{'no_create': True}"/>
+                                    <field name="question_depend_id" options="{'no_create': True}" domain="[('page_id', '=', context.get('page_id'))]"/>
                                     <field name="operator"/>
                                     <field name="value"/>
+                                    <field name="action"/>
                                 </group>
                             </group>
                         </page>
