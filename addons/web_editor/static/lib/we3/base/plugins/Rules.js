@@ -131,7 +131,7 @@ var parentedRules = [
             nodeNames: ['a'],
         },
         permittedParents: {
-            nodeNames: tags.style.concat(tags.format),
+            nodeNames: tags.style.concat(tags.format).concat('li'),
         },
     },
     {

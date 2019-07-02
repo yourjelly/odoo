@@ -81,6 +81,11 @@ var TestArchAndRules = class extends we3.AbstractPlugin {
                 test: '<p><a href="#a"><b>a</b></a><i><a href="#b">b</a></i><u>c</u><a href="#d">d</a></p>'
             },
             {
+                name: 'Allow wrapped and unwrapped links in list items',
+                content: '<ul><li><a href="#link">link</a></li><li><p><a href="#p">p</a></p></li></ul>',
+                test: '<ul><li><a href="#link">link</a></li><li><p><a href="#p">p</a></p></li></ul>'
+            },
+            {
                 name: "FIX with JINJA dom",
                 content: `<section>
                         <div>
