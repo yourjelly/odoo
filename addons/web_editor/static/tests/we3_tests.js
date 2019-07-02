@@ -183,7 +183,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('rules', async function (assert) {
-        assert.expect(43);
+        assert.expect(45);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, testPlugins, {TestArchAndRules: true}),
@@ -331,7 +331,7 @@ QUnit.module('web_editor', {
     ];
 
     QUnit.test('range + popover + rules + char + DropBlock', async function (assert) {
-        assert.expect(94);
+        assert.expect(96);
 
         this.testOptions = {
             assert: assert,
