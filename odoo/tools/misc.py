@@ -1238,6 +1238,24 @@ def format_datetime(env, value, tz=False, dt_format='medium', lang_code=False):
     return babel.dates.format_datetime(localized_datetime, dt_format, locale=locale)
 
 
+def format_time(env, value, time_format='medium', lang_code=False):
+    """ Format the given time (hour, minute and second) with the current user preference (language, format, ...)
+        :param value: the time to format
+        :type value: `datetime.time` instance
+        :param format: one of “full”, “long”, “medium”, or “short”, or a custom date/time pattern
+        :param lang_code: ISO
+        :rtype str
+    """
+    if not value:
+        return ''
+    lang = env['res.lang']._lang_get(lang_code or env.context.get('lang') or 'en_US')
+    locale = babel.Locale.parse(lang.code)
+    if not time_format:
+        time_format = posix_to_ldml(lang.time_format, locale=locale)
+
+    return babel.dates.format_date(value, format=time_format, locale=locale)
+
+
 def format_amount(env, amount, currency, lang_code=False):
     fmt = "%.{0}f".format(currency.decimal_places)
     lang = env['res.lang']._lang_get(lang_code or env.context.get('lang') or 'en_US')
