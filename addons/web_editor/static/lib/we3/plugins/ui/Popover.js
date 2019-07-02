@@ -559,7 +559,7 @@ var PopoverPlugin = class extends we3.AbstractPlugin {
      * @private
      */
     _onScroll () {
-        this._updatePositions(this._getFocusNodeRange());
+        this._updatePositions(this.dependencies.Range.getFocusedNode());
     }
 };
 
