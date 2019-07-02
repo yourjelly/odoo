@@ -158,6 +158,7 @@
 
     <!-- plugins text -->
 
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/text/ColorPicker.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/text/format_text.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/text/keyboard.js"/>
 

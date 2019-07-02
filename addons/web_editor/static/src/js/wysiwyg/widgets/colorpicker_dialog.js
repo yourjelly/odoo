@@ -37,12 +37,16 @@ var ColorpickerDialog = Dialog.extend({
             ],
         }, options));
 
-        this.triggerUp('getRecordInfo', {
-            recordInfo: options,
-            callback: function (recordInfo) {
-                _.defaults(options, recordInfo);
-            },
-        });
+        if (options.archNode) {
+            _.defaults(options, options.archNode.params.options.recordInfo);
+        } else {
+            this.triggerUp('getRecordInfo', {
+                recordInfo: options,
+                callback: function (recordInfo) {
+                    _.defaults(options, recordInfo);
+                },
+            });
+        }
 
         this.pickerFlag = false;
         this.sliderFlag = false;
@@ -348,7 +352,11 @@ var ColorpickerDialog = Dialog.extend({
      * @private
      */
     _onFinalPick: function () {
-        this.triggerUp('colorpicker:saved', this.colorComponents);
+        if (this.triggerUp) {
+            this.triggerUp('colorpicker:saved', this.colorComponents);
+        } else {
+            this.trigger('save', this.colorComponents);
+        }
     },
 });
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates>
-    
-    <we3-dropdown t-name="wysiwyg.buttons.forecolor" name="Color">
+
+    <we3-dropdown t-name="wysiwyg.buttons.forecolor" name="Color" data-plugin="ForeColor">
         <we3-toggler title="Color">
             <we3-placeholder/>
             <i class="fa fa-font"></i>
@@ -10,12 +10,12 @@
             <we3-button name="color-reset" data-method="reset">Reset to default</we3-button>
             <we3-palettes>
                 <we3-button data-method="custom">Custom color</we3-button>
-                <we3-palette name="Custom colors" class="wysiwyg-palette-custom"></we3-palette>
+                <we3-palette name="Custom colors" class="wysiwyg-palette-custom"><we3-row/></we3-palette>
             </we3-palettes>
         </we3-items>
     </we3-dropdown>
 
-    <we3-dropdown t-name="wysiwyg.buttons.bgcolor" name="Background color">
+    <we3-dropdown t-name="wysiwyg.buttons.bgcolor" name="Background color" data-plugin="BgColor">
         <we3-toggler title="Background color">
             <we3-placeholder/>
             <i class="fa fa-paint-brush"></i>
@@ -24,7 +24,7 @@
             <we3-button name="color-reset" data-method="reset">Reset to default</we3-button>
             <we3-palettes>
                 <we3-button data-method="custom">Custom color</we3-button>
-                <we3-palette name="Custom colors" class="wysiwyg-palette-custom"></we3-palette>
+                <we3-palette name="Custom colors" class="wysiwyg-palette-custom"><we3-row/></we3-palette>
             </we3-palettes>
         </we3-items>
     </we3-dropdown>

@@ -1,8 +1,6 @@
 (function () {
 'use strict';
 
-// var ColorpickerDialog = require('wysiwyg.widgets.ColorpickerDialog');
-
 var ColorPlugin = class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
@@ -97,7 +95,7 @@ var ColorPlugin = class extends we3.AbstractPlugin {
      */
     _applyColor (node, color) {
         node = node.isText() ? node.parent : node;
-        if (!color || color.startsWith('#')) {
+        if (!color || color.startsWith('#') || color.startsWith('rgba')) {
             this._applyColorStyle(node, color || '');
         } else {
             this._applyColorClass(node, color);
@@ -161,7 +159,7 @@ var ColorPlugin = class extends we3.AbstractPlugin {
     }
     /**
      * Create a color grid.
-     * 
+     *
      * @private
      * @param {(String []|string) []} rows
      * @returns {DocumentFragment}
@@ -323,35 +321,6 @@ var ForeColorPlugin = class extends ColorPlugin {
         };
         this._classPrefix = this._classPrefixes && this._classPrefixes.text || 'color-';
         this._styleName = 'color';
-    }
-
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    /**
-     * Method called on custom color button click :
-     * opens the color picker dialog and saves the chosen color on save.
-     *
-     * @todo
-     */
-    custom (value, range) {
-        var self = this;
-        var $button = $(range.sc).next('button');
-        var colorPickerDialog = new ColorpickerDialog(this, {});
-
-        colorPickerDialog.on('colorpicker:saved', this, this._wrapCommand(function (ev) {
-            self.update(ev.data.cssColor);
-
-            $button = $button.clone().appendTo($button.parent());
-            $button.show();
-            $button.css('background-color', ev.data.cssColor);
-            $button.attr('data-value', ev.data.cssColor);
-            $button.data('value', ev.data.cssColor);
-            $button.attr('title', ev.data.cssColor);
-            $button.mousedown();
-        }));
-        colorPickerDialog.open();
     }
 };
 
