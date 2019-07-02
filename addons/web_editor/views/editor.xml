@@ -173,9 +173,7 @@
 
     <!-- Tests -->
 
-    <!-- <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarBackgroundColor.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarFontSize.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarForeColor.js"/> -->
+    <!-- <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarFontSize.js"/> -->
 
     <!-- additional plugins -->
 
