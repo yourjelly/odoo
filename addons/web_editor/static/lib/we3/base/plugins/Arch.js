@@ -610,11 +610,11 @@ var BaseArch = class extends we3.AbstractPlugin {
             var scArch = this.getArchNode(range.scID)
             start = options.doNotSplit ? scArch : scArch.split(range.so) || scArch;
         }
-        var selectedNodes = this._getNodesBetween(start, end, {
+        var selectedNodes = start.getNodesUntil(end, {
             includeStart: true,
             includeEnd: !!options.doNotSplit,
         });
-        this.unwrapFrom(selectedNodes.map((node) => node.id), wrapperName);
+        this.unwrapFrom(selectedNodes, wrapperName);
     }
     /**
      * Wrap the node(s) corresponding to the given ID(s) inside
@@ -654,10 +654,10 @@ var BaseArch = class extends we3.AbstractPlugin {
         var scArch = this.getArchNode(range.scID)
         var start = options.doNotSplit ? scArch : scArch.split(range.so) || scArch;
 
-        var toWrap = this._getNodesBetween(start, end, {
+        var toWrap = start.getNodesUntil(end, {
             includeStart: true,
             includeEnd: !!options.doNotSplit,
-        });
+        }).map(id => this.getArchNode(id));
         if (options.wrapAncestorPred) {
             toWrap = toWrap.map(node => node.ancestor(ancestor => options.wrapAncestorPred(ancestor)))
                            .filter(node => node && node.isInArch());
@@ -767,48 +767,6 @@ var BaseArch = class extends we3.AbstractPlugin {
             removed: removed,
             range: range,
         };
-    }
-    /**
-     * Return an array with all the nodes between `start` and `end`, not included.
-     *
-     * @private
-     * @param {ArchNode} start
-     * @param {ArchNode} end
-     * @param {object} [options]
-     * @param {object} [options.includeStart] true to include `start`
-     * @param {object} [options.includeEnd] true to include `end`
-     * @returns {ArchNode []}
-     */
-    _getNodesBetween (start, end, options) {
-        options = options || {};
-        start = start.firstLeaf();
-        end = end.lastLeaf();
-        var nodes = [];
-        if (options.includeStart && start.isInArch()) {
-            nodes.push(start);
-        }
-        if (start.id === end.id)  {
-            if (options.includeEnd && !options.includeStart && end.isInArch()) {
-                nodes.push(end);
-            }
-            return nodes;
-        }
-        var nextOptions = {
-            doNotInsertVirtual: true,
-            leafToLeaf: true,
-        };
-        start.nextUntil(function (node) {
-            if (node.id === end.id) {
-                if (options.includeEnd && end.isInArch()) {
-                    nodes.push(end);
-                }
-                return true;
-            }
-            if (node.isInArch()) {
-                nodes.push(node);
-            }
-        }, nextOptions);
-        return nodes;
     }
     /**
      * Return an array of objects containing information on the nodes to unwrap,

@@ -64,21 +64,7 @@ var ColorPlugin = class extends we3.AbstractPlugin {
      * @param {string} color (hexadecimal or class name)
      */
     update (color) {
-        var self = this;
-        var json = [];
-        var range = this.dependencies.Range.getRange();
-        var wrapperIDs = this.dependencies.Arch.wrapRange('font');
-        var wrappers = wrapperIDs.map(id => self.dependencies.Arch.getClonedArchNode(id))
-            .filter(node => node);
-        wrappers.forEach(function (node) {
-            self._applyColor(node, color);
-            json.push(node.parent.toJSON({keepVirtual: true}));
-        });
-        this.dependencies.Arch.importUpdate(json);
-        if (wrappers.length === 1) {
-            range = {scID: wrappers[0].id};
-        }
-        this.dependencies.Range.setRange(range);
+        this.dependencies.Arch.do(getArchNode => this._update(color, getArchNode));
     }
 
     //--------------------------------------------------------------------------
@@ -209,7 +195,28 @@ var ColorPlugin = class extends we3.AbstractPlugin {
      * @override
      */
     _enabled (buttonName, focusNode) {
-        return !!focusNode.ancestor('isFormatNode');
+        return !!focusNode.ancestor('isFormatNode') || focusNode.childNodes && focusNode.childNodes.every(child => child.isFormatNode());
+    }
+    /**
+     * After splitting the nodes (until their font ancestor if any), return the ids of
+     * the nodes to color, between `start` at `startFffset`, and `end` at `endOffset`.
+     *
+     * @param {ArchNode} start
+     * @param {number} startOffset
+     * @param {ArchNode} end
+     * @param {number} endOffset
+     * @returns {number []}
+     */
+    _getNodesToColor (start, startOffset, end, endOffset) {
+        var endFont = end.ancestor('isFont');
+        end = endFont ? end.splitUntil(endFont, endOffset).lastLeaf() : end.split(endOffset) || end;
+        var startFont = start.ancestor('isFont');
+        start = startFont ? start.splitUntil(startFont, startOffset).firstLeaf() : start.split(startOffset) || start;
+
+        return start.getNodesUntil(end, {
+            includeStart: true,
+            includeEnd: !!endFont, // splitUntil returns the font node so include end only in that case
+        });
     }
     /**
      * Insert the colors grid declared in the editor options into the colors dropdown.
@@ -273,6 +280,36 @@ var ColorPlugin = class extends we3.AbstractPlugin {
         } else {
             node.remove();
         }
+    }
+    /**
+     * Change the selection's fore color.
+     *
+     * @param {string} color (hexadecimal or class name)
+     * @param {function} getArchNode
+     */
+    _update (color, getArchNode) {
+        var __applyColor = this._applyColor.bind(this);
+        var range = this.dependencies.Range.getRange();
+        var scArch = getArchNode(range.scID);
+        var ecArch = getArchNode(range.ecID);
+        var toColor = this._getNodesToColor(scArch, range.so, ecArch, range.eo)
+            .map(id => getArchNode(id));
+
+        toColor.forEach(function (node) {
+            var fontNode = node.ancestor('isFont') || node.wrap('font');
+            __applyColor(fontNode, color);
+            fontNode._deleteEdges({
+                doNotBreakBlocks: true,
+                mergeOnlyIfSameType: true,
+            });
+        });
+        // keep the original selection
+        return {
+            scID: toColor[0].id,
+            so: 0,
+            ecID: toColor[toColor.length - 1].id,
+            eo: toColor[toColor.length - 1].length(),
+        };
     }
 };
 
