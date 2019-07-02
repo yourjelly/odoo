@@ -76,6 +76,11 @@ var TestArchAndRules = class extends we3.AbstractPlugin {
                 test: '<p>aaa <a href="/"><i>link</i></a> bbb</p>'
             },
             {
+                name: 'Wrap multiple inlines into one p',
+                content: '<a href="#a"><b>a</b></a><i><a href="#b">b</a></i><u>c</u><a href="#d">d</a>',
+                test: '<p><a href="#a"><b>a</b></a><i><a href="#b">b</a></i><u>c</u><a href="#d">d</a></p>'
+            },
+            {
                 name: "FIX with JINJA dom",
                 content: `<section>
                         <div>
