@@ -12,7 +12,10 @@ we3-group[data-plugin="DropBlock"] {
     padding-left: $o-wysiwyg-sidebar-width;
 }
 
+// SNIPPET PANEL
 we3-dropblock {
+    @include o-w-preserve-btn;
+
     display: none;
     position: absolute;
     top: 0;
@@ -20,11 +23,19 @@ we3-dropblock {
     width: $o-wysiwyg-sidebar-width;
     height: 100%;
     overflow: auto;
-    background-image: linear-gradient(180deg, #e6e5e5, #fafafa);
+    background-image: linear-gradient(45deg, $o-wysiwyg-bg-color, darken($o-wysiwyg-bg-color, 10%));
+    font-family: Roboto, $font-family-sans-serif;
+    transition: left 400ms $o-wysiwyg-md-ease 0s;
 }
 
 we3-blocks {
     display: block;
+
+    &:after {
+        content: " ";
+        display: table;
+        clear: both;
+    }
 
     > we3-title {
         display: flex;
@@ -40,31 +51,86 @@ we3-blocks {
 }
 
 we3-block {
+    // No root because can be drag and drop (and the helper is in the body)
+    position: relative;
+    float: left;
+    display: block;
+    width: 45.5%;
+    margin: 0 0 6% 3%;
+    background-color: $o-wysiwyg-bg-color;
+    box-shadow: none;
+    z-index: $o-wysiwyg-zindex;
     user-select: none;
+
+    > :not(we3-dropblock-thumbnail) {
+        display: none !important;
+    }
+
+    &.o_snippet_install {
+        we3-dropblock-thumbnail > we3-preview {
+            opacity: 0.5;
+        }
+
+        .btn.o_install_btn {
+            display: none;
+            @include o-position-absolute(16px, 4px, auto, 4px);
+        }
+
+        &:hover .btn.o_install_btn {
+            display: block;
+        }
+    }
+
+    &:nth-child(2n) {
+        clear: left;
+    }
 }
 
 we3-dropblock-thumbnail {
     display: block;
-    float: left;
-    width: 45.5%;
-    margin: 0 0 6% 3%;
     cursor: pointer;
     cursor: copy;
     cursor: grab;
 
-    we3-preview {
+    > we3-preview {
         display: block;
         width: 100%;
+        height: 0;
         padding-bottom: 75%;
-        border: 1px solid #a9a9a9;
+        border: 1px solid $o-wysiwyg-border-color;
         background-size: cover;
         background-position: center center;
-        opacity: 0.8;
+        text-align: center;
+        overflow: hidden;
+    }
+
+    > we3-title {
+        display: block;
+        border: none;
+        padding: 5px 0;
+        font-size: 12px;
+        font-weight: 300;
+        text-shadow: none;
+        color: $o-wysiwyg-color;
+    }
+
+    &:hover {
+        > we3-preview {
+            transition: transform 200ms ease 0s;
+            transform: scale(1.05);
+        }
+        > we3-title {
+            color: $o-wysiwyg-color-light;
+        }
     }
 }
 
 .we3-disabled we3-dropblock-thumbnail {
-    background-color: red;
+    background-color: rgba(255, 0, 0, 0.75);
+
+    > we3-preview {
+        opacity: 0.8;
+    }
 }
 
 we3-dropblock-dropzone-origin we3-dropblock-thumbnail {
@@ -176,173 +242,6 @@ we3-dropblock-buttons {
 
 .o_in_iframe .note-editor.o_snippets_loaded .note-editable {
     padding-top: 30px;
-}
-
-// SNIPPET PANEL
-#oe_snippets {
-    @include o-w-preserve-btn;
-
-    display: flex;
-    flex-flow: column nowrap;
-    @include o-position-absolute(0, auto, 0, -$o-wysiwyg-sidebar-width);
-    position: absolute;
-    width: $o-wysiwyg-sidebar-width;
-    z-index: $o-wysiwyg-zindex - 1;
-
-    font-family: Roboto, $font-family-sans-serif;
-    border-right: 1px solid #aaa;
-    transition: left 400ms $o-wysiwyg-md-ease 0s;
-    background-image: linear-gradient(45deg, $o-wysiwyg-bg-color, darken($o-wysiwyg-bg-color, 10%));
-    box-shadow: 0px 10px 10px -10px black inset;
-    border: 1px solid $o-wysiwyg-border-color;
-
-    #snippets_menu {
-        flex: 0 0 auto;
-        height: $o-wysiwyg-sidebar-height;
-        line-height: $o-wysiwyg-sidebar-height;
-        margin: 0;
-        padding: 0;
-        background: $o-wysiwyg-bg-color;
-        text-align: center;
-        font-weight: normal;
-        font-size: 17px;
-        color: $o-wysiwyg-color;
-        font-family: $o-wysiwyg-font-family;
-    }
-
-    #o_scroll {
-        height: 100%;
-        overflow: auto;
-
-        .o_panel_header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 3%;
-            color: $o-wysiwyg-color;
-            margin-bottom: 3%;
-
-            i {
-                margin-right: 5px;
-            }
-        }
-
-        .o_panel_body {
-            &:after {
-                content: " ";
-                display: table;
-                clear: both;
-            }
-
-            .oe_snippet {
-                float: left;
-                width: 45.5%;
-                margin: 0 0 6% 3%;
-                box-shadow: none;
-                background-color: transparent;
-                user-select: none;
-
-                cursor: pointer;
-                cursor: copy;
-                cursor: grab;
-
-                .oe_snippet_thumbnail {
-                    .oe_snippet_thumbnail_img {
-                        border: none;
-                    }
-
-                    .oe_snippet_thumbnail_title {
-                        border: none;
-                        padding: 5px 0;
-                    }
-
-                    &:hover .oe_snippet_thumbnail_img {
-                        transition: transform 200ms ease 0s;
-                        transform: scale(1.05);
-                    }
-                }
-
-                &.o_disabled {
-                    .oe_snippet_thumbnail {
-                        background-color: rgba(255, 0, 0, 0.75);
-                    }
-
-                    .oe_snippet_thumbnail_img {
-                        opacity: 0.8;
-                    }
-                }
-
-                &.o_snippet_install {
-                    .oe_snippet_thumbnail_img {
-                        opacity: 0.5;
-                    }
-
-                    .btn.o_install_btn {
-                        display: none;
-                        @include o-position-absolute(16px, 4px, auto, 4px);
-                    }
-
-                    &:hover .btn.o_install_btn {
-                        display: block;
-                    }
-                }
-
-                &:nth-child(2n+1) {
-                    clear: left;
-                }
-            }
-        }
-    }
-
-    &.o_loaded {
-        left: 0 !important;
-    }
-}
-
-.oe_snippet {
-    // No root because can be drag and drop (and the helper is in the body)
-    position: relative;
-    width: 100px;
-    background-color: $o-wysiwyg-bg-color;
-    z-index: $o-wysiwyg-zindex;
-
-    > :not(.oe_snippet_thumbnail) {
-        display: none !important;
-    }
-
-    .oe_snippet_thumbnail {
-        width: 100%;
-
-        .oe_snippet_thumbnail_img {
-            width: 100%;
-            height: 0;
-            border: 1px solid $o-wysiwyg-border-color;
-            padding-bottom: 75%;
-            background-size: cover;
-            background-position: center center;
-            text-align: center;
-            overflow: hidden;
-        }
-
-        img.oe_snippet_thumbnail_img {
-            height: auto;
-            padding-bottom: 0;
-        }
-
-        .oe_snippet_thumbnail_title {
-            display: block;
-            border: 1px solid $o-wysiwyg-bg-color;
-            padding: 5px;
-            font-size: 12px;
-            font-weight: 300;
-            text-shadow: none;
-            color: $o-wysiwyg-color;
-        }
-
-        &:hover .oe_snippet_thumbnail_title {
-            color: $o-wysiwyg-color-light;
-        }
-    }
 }
 
 // SNIPPET OPTIONS
