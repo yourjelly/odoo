@@ -207,23 +207,21 @@
                 },
                 test: '<p>◆</p>',
             },
-            // NOT IMPLEMENTED YET
-            // Describe picture
-            // {
-            //     name: "Click DESCRIPTION in popover after adding image in empty p",
-            //     async: true,
-            //     content: '<p>◆</p>',
-            //     do: async function () {
-            //         await _clickMedia(async function () {
-            //             await _uploadAndInsertImg('https://www.odoo.com/logo.png');
-            //             await self.dependencies.Test.triggerNativeEvents($('we3-popover[name="Image"] we3-button[data-method="alt"]')[0], ['mousedown', 'click']);
-            //             $('we3-modal input#alt').val('Description');
-            //             $('we3-modal input#title').val('Title');
-            //             await self.dependencies.Test.triggerNativeEvents($('we3-modal we3-footer we3-button.we3-primary')[0], ['mousedown', 'click']);
-            //         });
-            //     },
-            //     test: '<p>▶<img title="Title" alt="Description" src="https://www.odoo.com/logo.png" class="img-fluid o_we_custom_image">◀</p>',
-            // },
+            {
+                name: "Click DESCRIPTION in popover after adding image in empty p",
+                async: true,
+                content: '<p>◆</p>',
+                do: async function () {
+                    await _clickMedia(async function () {
+                        await _uploadAndInsertImg('https://www.odoo.com/logo.png');
+                        await self.dependencies.Test.triggerNativeEvents($('we3-popover[name="Image"] we3-button[data-method="alt"]')[0], ['mousedown', 'click']);
+                        $('we3-modal input#alt').val('Description');
+                        $('we3-modal input#title').val('Title');
+                        await self.dependencies.Test.triggerNativeEvents($('we3-modal we3-footer we3-button.we3-primary')[0], ['mousedown', 'click']);
+                    });
+                },
+                test: '<p>▶<img title="Title" alt="Description" src="https://www.odoo.com/logo.png" class="img-fluid o_image o_we_custom_image"/>◀</p>',
+            },
             ];
         }
 
