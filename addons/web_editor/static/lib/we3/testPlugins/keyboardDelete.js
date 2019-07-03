@@ -319,7 +319,7 @@ var TestKeyboardDelete = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'DELETE',
             }],
-            test: '<p><span class="a">dom to◆</span></p><div><p><span class="a">edit</span></p></div>',
+            test: '<p><span class="a">dom to◆</span></p><div><span class="a">edit</span></div>',
         },
         {
             name: "in p: DELETE on partial selection",

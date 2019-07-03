@@ -86,7 +86,7 @@ var TestArchAndRules = class extends we3.AbstractPlugin {
                 test: '<ul><li><a href="#link">link</a></li><li><p><a href="#p">p</a></p></li></ul>'
             },
             {
-                name: "FIX with JINJA dom",
+                name: "FIX dom with JINJA",
                 content: `<section>
                         <div>
                             % if toto:
@@ -96,7 +96,7 @@ var TestArchAndRules = class extends we3.AbstractPlugin {
                     </section>`,
                 test: `<section><div>
 % if toto:
-<p>TOTO</p>
+TOTO
 %end
 </div></section>`,
             },
@@ -153,7 +153,7 @@ var TestArchAndRules = class extends we3.AbstractPlugin {
                       '<i>comment va-</i><b><i>tu</i></b><i> ?</i></p>' + 
                       '<table><tbody><tr><td>wrong TD</td></tr><tr><td>free text in table</td></tr></tbody></table>' +
                       '<p><font color="red"><i>comment</i></font><i> </i><font color="blue"><i>va-</i><b><i>tu</i></b></font><i> ?</i></p>' +
-                      "<div><p>text dans div ? if (div) { console.log('div'); }</p></div>" +
+                      "<div>text dans div ? if (div) { console.log('div'); }</div>" +
                       `<pre> 
                         if (tata) {
                             console.log('tutu');
@@ -162,14 +162,14 @@ var TestArchAndRules = class extends we3.AbstractPlugin {
                         <span>OKI</span>
                     </pre><section><div>
 % if toto:
-<p>TOTO</p>
+TOTO
 %end
 </div></section><p><i>iiii</i> <iframe data-src="/test"/> <b>bbb</b></p>`,
             },
         ];
         this.domsArchitecturalSpace = [
             {
-                name: "FIX with JINJA dom and add the architectural space",
+                name: "FIX dom with JINJA and add the architectural space",
                 content: `<section>
                         <div>
                             % if toto:
@@ -179,11 +179,10 @@ var TestArchAndRules = class extends we3.AbstractPlugin {
                     </section>`,
                 test: `<section>
     <div>
-        % if toto:
-        <p>TOTO</p>
+        % if toto:TOTO
         %end
     </div>
-</section>`,
+</section>`, // todo: check if no newline after %if is ok
             },
             {
                 name: 'Fix forbidden dom and add the architectural space',
@@ -264,9 +263,7 @@ var TestArchAndRules = class extends we3.AbstractPlugin {
     </tbody>
 </table>
 <p><font color="red"><i>comment</i></font><i> </i><font color="blue"><i>va-</i><b><i>tu</i></b></font><i> ?</i></p>
-<div>
-    <p>text dans div ? if (div) { console.log('div'); }</p>
-</div>
+<div>text dans div ? if (div) { console.log('div'); }</div>
 <pre> 
                         if (tata) {
                             console.log('tutu');
@@ -276,12 +273,11 @@ var TestArchAndRules = class extends we3.AbstractPlugin {
                     </pre>
 <section>
     <div>
-        % if toto:
-        <p>TOTO</p>
+        % if toto:TOTO
         %end
     </div>
 </section>
-<p><i>iiii</i> <iframe data-src="/test"/> <b>bbb</b></p>`,
+<p><i>iiii</i> <iframe data-src="/test"/> <b>bbb</b></p>`, // todo: check if no newline after %if is ok
             },
         ];
     }
