@@ -3,12 +3,10 @@
 
 var DropBlock = class extends we3.AbstractPlugin {
     /**
-     *
-     * @override
+     * @constructor
      *
      * @param {Object} parent
      * @param {Object} params
-     *
      * @param {Object} params.dropblocks
      * @param {string} params.dropblocks.title
      * @param {Object[]} params.dropblocks.blocks
@@ -19,7 +17,7 @@ var DropBlock = class extends we3.AbstractPlugin {
      * @param {Object} params.dropblockStayOpen
      * @param {Object} params.autoCloseDropblock
      **/
-    constructor (parent, params) {
+    constructor(parent, params) {
         super(...arguments);
 
         this.templatesDependencies = ['/web_editor/static/src/xml/wysiwyg_dropblock.xml'];
@@ -67,11 +65,20 @@ var DropBlock = class extends we3.AbstractPlugin {
 
         this._moveAndDropButtons = [];
     }
-    start () {
+    /**
+     * @override
+     */
+    start() {
         var self = this;
-        var promise = super.start();
+        var promise = super.start(...arguments);
         if (!this.options.dropblocks) {
-            promise = promise.then(this._loadTemplateBlocks.bind(this, this.options.dropBlockTemplate || 'wysiwyg.dropblock.defaultblocks'));
+            promise = promise.then(function () {
+                // Note: the template must have the same structure created by
+                // the '_createBlocks' method
+                var dropBlockTemplate = self.options.dropBlockTemplate || 'wysiwyg.dropblock.defaultblocks';
+                self._blockContainer.innerHTML = self.options.renderTemplate('DropBlock', dropBlockTemplate);
+                self._blockNodes = self._blockContainer.querySelectorAll('we3-block');
+            });
         }
 
         var Arch = this.dependencies.Arch;
@@ -79,30 +86,50 @@ var DropBlock = class extends we3.AbstractPlugin {
             return Arch.getTechnicalData(a.id, 'dropblock') || a.nodeName === 'section';
         });
         return promise
-            .then(this._bindEvents.bind(this))
-            .then(this._createBlockDropable.bind(this))
+            .then(function () {
+                self._blockDropable = [];
+                self._blockNodes.forEach(function (block, index) {
+                    var items = [{
+                        target: block.getAttribute('data-content'),
+                    }];
+                    self.trigger('dropzone', items);
+                    var emptyArrayFunc = function () {
+                        return [];
+                    };
+                    self._blockDropable.push({
+                        dropIn: items.length && items[0].dropIn || emptyArrayFunc,
+                        dropNear: items.length && items[0].dropNear || emptyArrayFunc,
+                    });
+                });
+            })
             .then(this._markDragableBlocks.bind(this))
             .then(function () {
+                self._bindDOMEvents(self._blockContainer, self.sidebarEvents);
+
                 if (self.options.dropblockStayOpen || self.options.dropblockOpenDefault) {
                     self.open();
                 }
                 self._blockContainer.classList.add('we3-snippets-loaded');
             });
     }
+
+    //--------------------------------------------------------------------------
+    // Editor methods
+    //--------------------------------------------------------------------------
+
     /**
-     * Prepares the page so that it may be saved:
-     * - Asks the snippet editors to clean their associated snippet
-     * - Remove the 'contentEditable' attributes
-     **/
-    saveEditor () {
-    }
-    setEditorValue () {
+     * @override
+     */
+    setEditorValue() {
         if (this._blockDropable) {
             this._markDragableBlocks();
         }
         this._createMoveAndDropButtons();
     }
-    blurEditor () {
+    /**
+     * @override
+     */
+    blurEditor() {
         this._dragAndDropEnd();
     }
 
@@ -110,26 +137,34 @@ var DropBlock = class extends we3.AbstractPlugin {
     // Public
     //--------------------------------------------------------------------------
 
+    /**
+     * Closes the blocks menu.
+     */
     close() {
-        if (!this.options.dropblockStayOpen) {
-            this.isOpen = false;
-            this._blockContainer.style.display = 'none';
-            this._blockContainer.parentNode.classList.remove('we3-dropblock-enabled');
-        }
-    }
-    open() {
-        this.isOpen = true;
-        this._blockContainer.style.display = 'block';
-        this._blockContainer.parentNode.classList.add('we3-dropblock-enabled');
+        this.toggle(false);
     }
     /**
-     * Toggle the code view
-     **/
-    toggle () {
+     * Opens the blocks menu.
+     */
+    open() {
+        this.toggle(true);
+    }
+    /**
+     * Opens/closes the blocks menu.
+     *
+     * @param {boolean} [open]
+     */
+    toggle(open) {
+        this.isOpen = open !== undefined ? open : !this.isOpen;
+        if (this.options.dropblockStayOpen) {
+            this.isOpen = true;
+        }
+
+        this._blockContainer.style.display = this.isOpen ? 'block' : 'none';
         if (this.isOpen) {
-            this.close();
+            this._blockContainer.parentNode.classList.add('we3-dropblock-enabled');
         } else {
-            this.open();
+            this._blockContainer.parentNode.classList.remove('we3-dropblock-enabled');
         }
     }
 
@@ -138,22 +173,15 @@ var DropBlock = class extends we3.AbstractPlugin {
     //--------------------------------------------------------------------------
 
     /**
-     *
      * @private
-     **/
-    _bindEvents () {
-        this._bindDOMEvents(this._blockContainer, this.sidebarEvents);
-    }
-    /**
-     * 
-     * @params {object[]}   dropblocks
-     * @params {string}     dropblocks[0].title
-     * @params {object[]}   dropblocks[0].blocks
-     * @params {string}     dropblocks[0].blocks.title
-     * @params {string}     dropblocks[0].blocks.thumbnail
-     * @params {string}     dropblocks[0].blocks.content
-     **/
-    _createBlocks (dropblocks) {
+     * @param {object[]} dropblocks
+     * @param {string} dropblocks[0].title
+     * @param {object[]} dropblocks[0].blocks
+     * @param {string} dropblocks[0].blocks.title
+     * @param {string} dropblocks[0].blocks.thumbnail
+     * @param {string} dropblocks[0].blocks.content
+     */
+    _createBlocks(dropblocks) {
         var self = this;
         var blocks = [];
         var blockContainer = this._blockContainer;
@@ -177,21 +205,10 @@ var DropBlock = class extends we3.AbstractPlugin {
         });
         this._blockNodes = blocks;
     }
-    _createBlockDropable () {
-        var self = this;
-        this._blockDropable = [];
-        this._blockNodes.forEach(function (block, index) {
-            var items = [{
-                target: block.getAttribute('data-content'),
-            }];
-            self.trigger('dropzone', items);
-            self._blockDropable.push({
-                dropIn: items.length && items[0].dropIn || function () { return []; },
-                dropNear: items.length && items[0].dropNear || function () { return []; },
-            });
-        });
-    }
-    _createBlockThumbnail (thumbnailParams) {
+    /**
+     * @private
+     */
+    _createBlockThumbnail(thumbnailParams) {
         var thumbnail = document.createElement('we3-dropblock-thumbnail');
         var preview = document.createElement('we3-preview');
         preview.style.backgroundImage = 'url(' + thumbnailParams.thumbnail + ')';
@@ -202,77 +219,38 @@ var DropBlock = class extends we3.AbstractPlugin {
         return thumbnail;
     }
     /**
-     * Return true if the codeview is active
-     *
+     * @private
      * @returns {Boolean}
-     **/
-    _enabled () {
+     */
+    _enabled() {
         return true;
     }
     /**
-     * Return true if the container is open
+     * Returns true if the menu is opened.
      *
+     * @private
      * @returns {Boolean}
-     **/
-    _isActive () {
+     */
+    _isActive() {
         return this.isOpen;
     }
     /**
-     * The template must have the same structure created by '_createBlocks'
-     * method
-     * 
-     * @params {string} dropBlockTemplate
-     **/
-    _loadTemplateBlocks (dropBlockTemplate) {
-        this._blockContainer.innerHTML = this.options.renderTemplate('DropBlock', dropBlockTemplate);
-        this._blockNodes = this._blockContainer.querySelectorAll('we3-block');
-    }
-    _dragAndDropStartCloneSidebarElements (block) {
-        var thumbnail = block.querySelector('we3-dropblock-thumbnail');
-        var box = thumbnail.getBoundingClientRect();
-        var content = block.getAttribute('data-content');
-        var el = document.createElement('we3-content');
-        el.innerHTML = content;
-        var childNodes = el.childNodes;
-        var index = this._blockNodes.indexOf(block);
-
-        this._dragAndDrop = {
-            left: box.left,
-            top: box.top,
-            width: box.width,
-            height: box.height,
-            thumbnail: thumbnail.cloneNode(true),
-            elements: [].slice.call(childNodes),
-            content: content,
-            dropIn: this._blockDropable[index].dropIn,
-            dropNear: this._blockDropable[index].dropNear,
-        };
-    }
-    _dragAndDropStartCloneEditableElements (block, id, button) {
-        var box = button.parentNode.getBoundingClientRect();
-        var content = document.createElement('we3-content');
-        content.innerHTML = block.outerHTML;
-        var buttons = content.querySelector('we3-dropblock-buttons');
-        buttons.parentNode.removeChild(buttons);
-        var childNodes = content.childNodes;
-
-        this._dragAndDrop = {
-            width: box.width,
-            height: box.height,
-            thumbnail: button.parentNode,
-            elements: [].slice.call(childNodes),
-            content: block.outerHTML,
-            id: id,
-            dropIn: button.we3DropableDropIn,
-            dropNear: button.we3DropableDropNear,
-        };
-    }
-    _dragAndDropStart (clientX, clientY) {
+     * @private
+     */
+    _dragAndDropStart(clientX, clientY) {
         this._origin.appendChild(this._dragAndDrop.thumbnail);
         this._dragAndDrop.thumbnail.style.width = this._dragAndDrop.width + 'px';
         this._dragAndDrop.thumbnail.style.height = this._dragAndDrop.height + 'px';
         this._enabledDropZones = [];
-        this._createDropZoneOriginPosition();
+
+        // Create dropzone origin position
+        if (this.editable.firstChild) {
+            this.editable.insertBefore(this._origin, this.editable.firstChild);
+        } else {
+            this.editable.appendChild(this._origin);
+        }
+        this._originBox = this._origin.getBoundingClientRect();
+
         this._dragAndDropMove(clientX, clientY);
         this.trigger('drag', Object.assign({}, this._dragAndDrop), {
             dropIn: this._dragAndDrop.dropIn && this._dragAndDrop.dropIn(),
@@ -280,21 +258,27 @@ var DropBlock = class extends we3.AbstractPlugin {
         });
         this.editable.setAttribute('contentEditable', 'false');
     }
-    _dragAndDropMove (clientX, clientY) {
+    /**
+     * @private
+     */
+    _dragAndDropMove(clientX, clientY) {
         if (!this._dragAndDrop) {
             return;
         }
-        var originBox = this._origin.getBoundingClientRect()
+        var originBox = this._origin.getBoundingClientRect();
         this._dragAndDrop.dx = clientX - originBox.left;
         this._dragAndDrop.dy = clientY - originBox.top;
 
         var handlePosition = this.editable.getBoundingClientRect();
-        var left = this._dragAndDrop.left = clientX - handlePosition.left - this._dragAndDrop.width/2;
-        var top = this._dragAndDrop.top = clientY - handlePosition.top - this._dragAndDrop.height/2;
+        var left = this._dragAndDrop.left = clientX - handlePosition.left - this._dragAndDrop.width / 2;
+        var top = this._dragAndDrop.top = clientY - handlePosition.top - this._dragAndDrop.height / 2;
         this._dragAndDrop.thumbnail.style.left = (left >= 0 ? '+' : '') + left + 'px';
         this._dragAndDrop.thumbnail.style.top = (top >= 0 ? '+' : '') + top + 'px';
     }
-    _dragAndDropMoveSearch () {
+    /**
+     * @private
+     */
+    _dragAndDropMoveSearch() {
         if (!this._dragAndDrop) {
             return;
         }
@@ -308,8 +292,8 @@ var DropBlock = class extends we3.AbstractPlugin {
             var dleft = dropzone.left - 5;
             var dright = dropzone.left + dropzone.width + 5;
             if (!dropzone.vertical) {
-                dtop -= dropzone.height/2;
-                dbottom -= dropzone.height/2;
+                dtop -= dropzone.height / 2;
+                dbottom -= dropzone.height / 2;
             }
             if (top >= dtop && top <= dbottom &&
                 left >= dleft && left <= dright) {
@@ -331,7 +315,10 @@ var DropBlock = class extends we3.AbstractPlugin {
             this._selectedDragAndDrop = null;
         }
     }
-    _dragAndDropEnd (ev) {
+    /**
+     * @private
+     */
+    _dragAndDropEnd(ev) {
         this.editable.setAttribute('contentEditable', 'true');
 
         if (!this._dragAndDrop) {
@@ -356,16 +343,24 @@ var DropBlock = class extends we3.AbstractPlugin {
             this._selectedDragAndDrop = null;
         }
 
-        this._removeDropZoneOriginPosition();
+        // Remove dropzone origin position
+        this._origin.parentNode && this._origin.parentNode.removeChild(this._origin);
 
         var dragAndDrop = this._dragAndDrop;
         this._dragAndDrop = null;
 
-        this._removeDropZones();
+        // Remove drop zones
+        this._enabledDropZones.forEach(function (zone) {
+            zone.node.parentNode && zone.node.parentNode.removeChild(zone.node);
+        });
+        this._enabledDropZones = [];
 
         this.trigger('drop', dragAndDrop, id, position);
     }
-    _markDragableBlocks () {
+    /**
+     * @private
+     */
+    _markDragableBlocks() {
         var self = this;
         this._blockNodes.forEach(function (block, index) {
             var select = self._blockDropable[index];
@@ -376,23 +371,12 @@ var DropBlock = class extends we3.AbstractPlugin {
             }
         });
     }
-    _removeDropZones () {
-        this._enabledDropZones.forEach(function (zone) {
-            zone.node.parentNode && zone.node.parentNode.removeChild(zone.node);
-        });
-        this._enabledDropZones = [];
-    }
-    _removeDropZoneOriginPosition () {
-        this._origin.parentNode && this._origin.parentNode.removeChild(this._origin);
-    }
     /**
-     *
-     * @params {enum<before|after|append|prepend>} position
-     * @params {Node} node
-     * @params {boolean} [vertical]
-     * @returns {Node}
+     * @private
+     * @param {enum<before|after|append|prepend>} position
+     * @param {Node} node
      **/
-    _createDropZone (position, node) {
+    _createDropZone(position, node) {
         var id = this.dependencies.Renderer.getID(node);
         if (!id) {
             return;
@@ -442,10 +426,6 @@ var DropBlock = class extends we3.AbstractPlugin {
                 break;
         }
 
-        this._createDropZoneCss(dropzone, position, node);
-        this._getDropZoneBoundingClientRect(dropzone);
-    }
-    _createDropZoneCss (dropzone, position, node) {
         var parent, child;
         if (position === 'append' || position === 'prepend') {
             child = node.nextSibling || node.previousSibling || node;
@@ -460,7 +440,7 @@ var DropBlock = class extends we3.AbstractPlugin {
         var parentDisplay = parentCss.display;
         var parentFlex = parentCss.flexDirection;
         var vertical = false;
-        if (!!(child && ((!child.tagName && child.textContent.match(/\S/)) || child.tagName === 'BR'))) {
+        if (child && ((!child.tagName && child.textContent.match(/\S/)) || child.tagName === 'BR')) {
             vertical = true;
         } else if (float === 'left' || float === 'right' || (parentDisplay === 'flex' && parentFlex === 'row')) {
             if (parent.clientWidth !== child.clientWidth) {
@@ -473,9 +453,7 @@ var DropBlock = class extends we3.AbstractPlugin {
             dropzone.setAttribute('orientation', 'vertical');
             dropzone.style.display = 'inline-block';
         }
-    }
-    _getDropZoneBoundingClientRect (dropzone) {
-        var vertical = dropzone.getAttribute('orientation') === 'vertical';
+
         var box = dropzone.getBoundingClientRect();
         this._enabledDropZones.push({
             node: dropzone,
@@ -486,7 +464,10 @@ var DropBlock = class extends we3.AbstractPlugin {
             height: box.height,
         });
     }
-    _createDropZones (dropZones) {
+    /**
+     * @private
+     */
+    _createDropZones(dropZones) {
         var self = this;
         var Renderer = this.dependencies.Renderer;
         if (dropZones.dropIn) {
@@ -512,15 +493,10 @@ var DropBlock = class extends we3.AbstractPlugin {
             });
         }
     }
-    _createDropZoneOriginPosition () {
-        if (this.editable.firstChild) {
-            this.editable.insertBefore(this._origin, this.editable.firstChild);
-        } else {
-            this.editable.appendChild(this._origin);
-        }
-        this._originBox = this._origin.getBoundingClientRect();
-    }
-    _createMoveAndDropButtons () {
+    /**
+     * @private
+     */
+    _createMoveAndDropButtons() {
         var self = this;
         var Arch = this.dependencies.Arch;
         var Renderer = this.dependencies.Renderer;
@@ -549,18 +525,8 @@ var DropBlock = class extends we3.AbstractPlugin {
             self._moveAndDropButtons.push(buttons);
         });
         this._hasMoveAndDropButtons = true;
-        this._markDragableItems(items);
-    }
-    _removeMoveAndDropButtons () {
-        this._hasMoveAndDropButtons = false;
-        this._moveAndDropButtons.forEach(function (el) {
-            el.parentNode && el.parentNode.removeChild(el);
-        });
-        this._moveAndDropButtons = [];
-        this._unmarkDragableItems();
-    }
-    _markDragableItems (items) {
-        var Renderer = this.dependencies.Renderer;
+
+        // mark dragable items
         items.forEach(function (item) {
             var target = Renderer.getElement(item.target);
             target.classList.add('we3-dropblock-dropable');
@@ -568,14 +534,27 @@ var DropBlock = class extends we3.AbstractPlugin {
             target.we3DropableDropNear = item.dropNear;
         });
     }
-    _unmarkDragableItems () {
+    /**
+     * @private
+     */
+    _removeMoveAndDropButtons() {
+        this._hasMoveAndDropButtons = false;
+        this._moveAndDropButtons.forEach(function (el) {
+            el.parentNode && el.parentNode.removeChild(el);
+        });
+        this._moveAndDropButtons = [];
+
+        // Unmark dragable items
         this.editable.querySelectorAll('.we3-dropblock-dropable').forEach(function (el) {
             el.classList.remove('we3-dropblock-dropable');
             delete el.we3DropableDropIn;
             delete el.we3DropableDropNear;
         });
     }
-    _eventStartNewBlock (target) {
+    /**
+     * @private
+     */
+    _eventStartNewBlock(target) {
         this._dragAndDropEnd();
         var block;
         this._blockNodes.forEach(function (blockNode) {
@@ -584,24 +563,62 @@ var DropBlock = class extends we3.AbstractPlugin {
             }
         });
         if (block) {
-            this._dragAndDropStartCloneSidebarElements(block);
+            var thumbnail = block.querySelector('we3-dropblock-thumbnail');
+            var box = thumbnail.getBoundingClientRect();
+            var content = block.getAttribute('data-content');
+            var el = document.createElement('we3-content');
+            el.innerHTML = content;
+            var childNodes = el.childNodes;
+            var index = this._blockNodes.indexOf(block);
+
+            this._dragAndDrop = {
+                left: box.left,
+                top: box.top,
+                width: box.width,
+                height: box.height,
+                thumbnail: thumbnail.cloneNode(true),
+                elements: [].slice.call(childNodes),
+                content: content,
+                dropIn: this._blockDropable[index].dropIn,
+                dropNear: this._blockDropable[index].dropNear,
+            };
             return true;
         }
     }
-    _eventStartMoveBlock (button) {
+    /**
+     * @private
+     */
+    _eventStartMoveBlock(button) {
         var block = button.parentNode.parentNode;
         var id = this.dependencies.Renderer.getID(block);
         if (!id || id === 1) {
             return;
         }
-        this._dragAndDropStartCloneEditableElements(block, id, button);
+
+        var box = button.parentNode.getBoundingClientRect();
+        var content = document.createElement('we3-content');
+        content.innerHTML = block.outerHTML;
+        var buttons = content.querySelector('we3-dropblock-buttons');
+        buttons.parentNode.removeChild(buttons);
+        var childNodes = content.childNodes;
+
+        this._dragAndDrop = {
+            width: box.width,
+            height: box.height,
+            thumbnail: button.parentNode,
+            elements: [].slice.call(childNodes),
+            content: block.outerHTML,
+            id: id,
+            dropIn: button.we3DropableDropIn,
+            dropNear: button.we3DropableDropNear,
+        };
 
         this._removeMoveAndDropButtons();
 
         var nextSibling = block.nextSibling;
         var parent = block.parentNode;
         parent.removeChild(block);
-        this._dragAndDropMoveBlock = function reset () {
+        this._dragAndDropMoveBlock = function reset() {
             if (nextSibling) {
                 parent.insertBefore(block, nextSibling);
             } else {
@@ -615,7 +632,10 @@ var DropBlock = class extends we3.AbstractPlugin {
     // Handle pluginEvents
     //--------------------------------------------------------------------------
 
-    _onDragAndDropEnd (dragAndDrop, id, position) {
+    /**
+     * @private
+     */
+    _onDragAndDropEnd(dragAndDrop, id, position) {
         if (!id) {
             if (dragAndDrop.id) {
                 this.dependencies.Arch.remove(dragAndDrop.id);
@@ -639,7 +659,10 @@ var DropBlock = class extends we3.AbstractPlugin {
         this._createMoveAndDropButtons();
         this._markDragableBlocks();
     }
-    _onDragAndDropMove (dragAndDrop, dropzone, previousDropzone) {
+    /**
+     * @private
+     */
+    _onDragAndDropMove(dragAndDrop, dropzone, previousDropzone) {
         if (previousDropzone) {
             previousDropzone.style.display = '';
         }
@@ -655,23 +678,29 @@ var DropBlock = class extends we3.AbstractPlugin {
             });
         }
     }
-    _onDragAndDropNeedDropZone (items) {
-        var self = this;
+    /**
+     * @private
+     */
+    _onDragAndDropNeedDropZone(items) {
         var Arch = this.dependencies.Arch;
-        function dropIn () { return 1; }
         if (!items.length) {
             items = [].slice.call(this.editable.children).map(function (el) {
                 var archNode = Arch.getClonedArchNode(el);
                 if (archNode) {
                     return {
                         target: archNode.id,
-                        dropIn: dropIn,
-                    }
+                        dropIn: function dropIn() {
+                            return 1;
+                        },
+                    };
                 }
             });
         }
     }
-    _onDragAndDropStart (dragAndDrop, dropZones) {
+    /**
+     * @private
+     */
+    _onDragAndDropStart(dragAndDrop, dropZones) {
         this._createDropZones(dropZones);
     }
 
@@ -679,7 +708,10 @@ var DropBlock = class extends we3.AbstractPlugin {
     // Handle MouseEvent
     //--------------------------------------------------------------------------
 
-    _onMouseDownBlock (ev) {
+    /**
+     * @private
+     */
+    _onMouseDownBlock(ev) {
         if (this.options.autoCloseDropblock) {
             this.close();
         }
@@ -689,7 +721,10 @@ var DropBlock = class extends we3.AbstractPlugin {
             this._dragAndDropStart(ev.clientX, ev.clientY);
         }
     }
-    _onMouseDownHandleButton (ev) {
+    /**
+     * @private
+     */
+    _onMouseDownHandleButton(ev) {
         if (this.options.autoCloseDropblock) {
             this.close();
         }
@@ -699,21 +734,33 @@ var DropBlock = class extends we3.AbstractPlugin {
             this._dragAndDropStart(ev.clientX, ev.clientY);
         }
     }
-    _onMouseEnter () {
+    /**
+     * @private
+     */
+    _onMouseEnter() {
         if (!this._dragAndDrop && !this._hasMoveAndDropButtons) {
             this._createMoveAndDropButtons();
         }
     }
-    _onMouseLeave (ev) {
+    /**
+     * @private
+     */
+    _onMouseLeave(ev) {
         if (ev.target === this.editable && this._hasMoveAndDropButtons) {
             this._removeMoveAndDropButtons();
         }
     }
-    _onMouseMove (ev) {
+    /**
+     * @private
+     */
+    _onMouseMove(ev) {
         this._dragAndDropMove(ev.clientX, ev.clientY);
         this._dragAndDropMoveSearch();
     }
-    _onMouseUp (ev) {
+    /**
+     * @private
+     */
+    _onMouseUp(ev) {
         this._dragAndDropEnd();
     }
 
@@ -721,24 +768,36 @@ var DropBlock = class extends we3.AbstractPlugin {
     // Handle TouchEvent
     //--------------------------------------------------------------------------
 
-    _onTouchEnd (ev) {
+    /**
+     * @private
+     */
+    _onTouchEnd(ev) {
         if (!this._selectedDragAndDrop && ev.path[0].tagName === "WE3-DROPBLOCK-DROPZONE") {
             this._selectedDragAndDrop = ev.path[0];
         }
         this._dragAndDropEnd();
     }
-    _onTouchMove (ev) {
+    /**
+     * @private
+     */
+    _onTouchMove(ev) {
         this._dragAndDropMove(ev.touches[0].clientX, ev.touches[0].clientY);
         this._dragAndDropMoveSearch();
     }
-    _onTouchStart (ev) {
+    /**
+     * @private
+     */
+    _onTouchStart(ev) {
         if (!this._dragAndDrop && !this._hasMoveAndDropButtons && this.editable.contains(ev.target)) {
             this._createMoveAndDropButtons();
         } else if (this._hasMoveAndDropButtons && !this.editable.contains(ev.target)) {
             this._removeMoveAndDropButtons();
         }
     }
-    _onTouchStartBlock (ev) {
+    /**
+     * @private
+     */
+    _onTouchStartBlock(ev) {
         this.close();
         if (this._eventStartNewBlock(ev.target)) {
             ev.preventDefault();
@@ -746,7 +805,10 @@ var DropBlock = class extends we3.AbstractPlugin {
             this._dragAndDropStart(ev.touches[0].clientX, ev.touches[0].clientY);
         }
     }
-    _onTouchStartHandleButton (ev) {
+    /**
+     * @private
+     */
+    _onTouchStartHandleButton(ev) {
         ev.preventDefault();
         ev.stopPropagation();
         this.close();
