@@ -5,9 +5,6 @@ var core = require('web.core');
 var _t = core._t;
 
 var OdooWebsite = class extends we3.AbstractPlugin {
-    static get conflicts () {
-        return ['TestToolbarMedia'];
-    }
     constructor () {
         super(...arguments);
         this.dependencies = ['Range', 'Arch', 'Renderer', 'Rules'];
