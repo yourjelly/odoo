@@ -603,7 +603,7 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                         key: 'a',
                     }
                 ],
-                test: "<p><br/><br/><br/>a◆</p><div><p><a href=\"#\">dom to edit</a></p></div>",
+                test: "<p><br/><br/><br/>a◆</p><div><a href=\"#\">dom to edit</a></div>",
             },
             {
                 name: "in p: 2x SHIFT+ENTER on selection",
