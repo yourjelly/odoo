@@ -119,6 +119,7 @@
     <t t-call="web_editor.we3"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarLink.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarMedia.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarCrop.js"/>
 
     <!-- odoo -->
 
@@ -246,6 +247,7 @@
         <t t-call="web_editor.compiled_assets_wysiwyg"/>
         <script type="text/javascript" src="/web_editor/static/tests/test_utils.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/we3_tests.js"/>
+        <script type="text/javascript" src="/web_editor/static/tests/media_crop_tests.js"/>
         <!-- <script type="text/javascript" src="/web_editor/static/tests/field_html_tests.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/wysiwyg_tests.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/wysiwyg_keyboard_tests.js"/>

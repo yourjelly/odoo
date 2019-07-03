@@ -380,7 +380,7 @@ QUnit.module('web_editor', {
     QUnit.module('Media');
 
     QUnit.test('Image', async function (assert) {
-        assert.expect(17);
+        assert.expect(14);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, testPlugins, { TestToolbarMedia: true }),
