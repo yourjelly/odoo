@@ -1033,9 +1033,6 @@
                 </div>
             </div>
         </form>
-        <t t-if="request.params.get('code_not_available')" name="code_not_available">
-            <div class="alert alert-danger text-left" role="alert">This promo code is not available.</div>
-        </t>
     </template>
 
     <template id="checkout">
