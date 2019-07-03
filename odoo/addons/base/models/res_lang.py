@@ -47,6 +47,10 @@ class Lang(models.Model):
              "Provided ',' as the thousand separator in each case.")
     decimal_point = fields.Char(string='Decimal Separator', required=True, default='.', trim=False)
     thousands_sep = fields.Char(string='Thousands Separator', default=',', trim=False)
+    currency_position = fields.Selection([
+        ('after', 'After Amount'),
+        ('before', 'Before Amount')], default='before', required=True,
+        string='Currency Symbol Position', help="Determines where the currency symbol should be placed after or before the amount.")
 
     _sql_constraints = [
         ('name_uniq', 'unique(name)', 'The name of the language must be unique !'),
@@ -148,6 +152,7 @@ class Lang(models.Model):
             'decimal_point' : fix_xa0(str(conv['decimal_point'])),
             'thousands_sep' : fix_xa0(str(conv['thousands_sep'])),
             'grouping' : str(conv.get('grouping', [])),
+            'currency_position': 'before' if conv.get('p_cs_precedes') == 1 else 'after'
         }
         try:
             return self.create(lang_info).id

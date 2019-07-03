@@ -116,8 +116,10 @@ class TestCurrencyExport(TestExport):
     def test_currency_post(self):
         currency = self.create(self.Currency, name="Test", symbol=u"test")
         obj = self.create(self.Model, value=-0.12)
-
-        converted = self.convert(obj, dest=currency)
+        # activate lang with currency symbol position 'after'
+        lang_fr = self.env['res.lang'].with_context(active_test=False).search([('code', '=', 'fr_BE')])
+        lang_fr.active = True;
+        converted = self.convert(obj, dest=currency.with_context({'lang': 'fr_BE'}))
 
         self.assertEqual(
             converted, u'<span class="oe_currency_value">-\N{ZERO WIDTH NO-BREAK SPACE}0.12</span>'
@@ -128,7 +130,7 @@ class TestCurrencyExport(TestExport):
 
     def test_currency_pre(self):
         currency = self.create(
-            self.Currency, name="Test", symbol=u"test", position='before')
+            self.Currency, name="Test", symbol=u"test")
         obj = self.create(self.Model, value=0.12)
 
         converted = self.convert(obj, dest=currency)
@@ -151,8 +153,8 @@ class TestCurrencyExport(TestExport):
 
         self.assertEqual(
             converted,
-                      u'<span class="oe_currency_value">0.12</span>'
-                      u'\N{NO-BREAK SPACE}{symbol}'.format(
+                      u'{symbol}\N{NO-BREAK SPACE}'
+                      u'<span class="oe_currency_value">0.12</span>'.format(
                 obj=obj,
                 symbol=currency.symbol
             ),)

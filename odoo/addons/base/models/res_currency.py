@@ -34,8 +34,10 @@ class Currency(models.Model):
     rounding = fields.Float(string='Rounding Factor', digits=(12, 6), default=0.01)
     decimal_places = fields.Integer(compute='_compute_decimal_places', store=True)
     active = fields.Boolean(default=True)
-    position = fields.Selection([('after', 'After Amount'), ('before', 'Before Amount')], default='after',
-        string='Symbol Position', help="Determines where the currency symbol should be placed after or before the amount.")
+    position = fields.Selection(compute='_compute_currency_position', selection=[
+        ('after', 'After Amount'),
+        ('before', 'Before Amount')], string="Currency Position",
+        help="Currency position define by language. you can change it from langauge configration")
     date = fields.Date(compute='_compute_date')
     currency_unit_label = fields.Char(string="Currency Unit", help="Currency Unit Name")
     currency_subunit_label = fields.Char(string="Currency Subunit", help="Currency Subunit Name")
@@ -67,6 +69,13 @@ class Currency(models.Model):
         currency_rates = self._get_rates(company, date)
         for currency in self:
             currency.rate = currency_rates.get(currency.id) or 1.0
+
+    @api.multi
+    def _compute_currency_position(self):
+        lang_code = self.env.context.get('lang') or self.env.user.lang or 'en_US'
+        language = self.env['res.lang'].search([('code', '=', lang_code)])
+        for currency in self:
+            currency.position = language.currency_position
 
     @api.multi
     @api.depends('rounding')

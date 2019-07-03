@@ -48,6 +48,9 @@
                                 <field name="time_format"/>
                                 <field name="week_start"/>
                             </group>
+                            <group>
+                                <field name="currency_position"/>
+                            </group>
                         </group>
                         <group string="Legends for supported Date and Time Formats">
                             <div>%%a - Abbreviated weekday name.</div>
