@@ -1,4 +1,4 @@
-odoo.define('web_editor.media_crop_tests', function (require) {
+odoo.define('web_editor.color_picker_tests', function (require) {
 "use strict";
 
 var ajax = require('web.ajax');
@@ -80,7 +80,6 @@ QUnit.module('web_editor', {
         TestRenderer: false,
         TestArchAndRules: false,
         TestToolbarColor: false,
-        TestToolbarColorPicker: false,
         TestToolbarWand: false,
         TestToolbarFontStyle: false,
         TestToolbarIndent: false,
@@ -107,46 +106,19 @@ QUnit.module('web_editor', {
             model: 'note.note',
             data: self.data,
             arch: '<form><field name="body" widget="html" style="height: 100px"/></form>',
-            mockRPC: function (route, args) {
-                if (route.indexOf('data:image/png;base64') === 0) {
-                    return Promise.resolve();
-                }
-                if (route.indexOf('youtube') !== -1) {
-                    return Promise.resolve();
-                }
-                if (route.indexOf('/web_editor/static/src/img/') === 0) {
-                    return Promise.resolve();
-                }
-                if (route === '/web_editor/attachment/add_url') {
-                    return Promise.resolve({
-                        id: 1,
-                        public: true,
-                        name: 'image',
-                        mimetype: 'image/png',
-                        checksum: false,
-                        url: '/web_editor/static/src/img/transparent.png',
-                        image_src: '/web_editor/static/src/img/transparent.png',
-                        type: 'url',
-                        res_id: 0,
-                        res_model: false,
-                        access_token: false,
-                    });
-                }
-                return this._super(route, args);
-            },
         });
         await promise;
         form.destroy();
         return promise;
     }
 
-    QUnit.module('media crop');
+    QUnit.module('Custom Color');
 
-    QUnit.test('Image Crop', async function (assert) {
-        assert.expect(8);
+    QUnit.test('Custom Color Picker', async function (assert) {
+        assert.expect(25);
         this.testOptions = {
             assert: assert,
-            plugins: Object.assign({}, testPlugins, { TestToolbarCrop: true }),
+            plugins: Object.assign({}, testPlugins, { TestToolbarColorPicker: true }),
         };
         await createFormAndTest(this);
     });
