@@ -205,11 +205,11 @@ we3.AbstractPlugin = class extends we3.EventDispatcher {
      * @param {String} template
      * @returns {Fragment}
      */
-    _renderTemplate (template) {
+    _renderTemplate (template, values) {
         var self = this;
         var fragment = document.createDocumentFragment();
         var temp = document.createElement('TEMP');
-        temp.innerHTML = this.options.renderTemplate(this.pluginName, template);
+        temp.innerHTML = this.options.renderTemplate(this.pluginName, template, values);
 
         temp.querySelectorAll('[data-method]').forEach(function (node) {
             var methodName = node.getAttribute('data-method');
