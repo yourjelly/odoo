@@ -75,7 +75,6 @@ Wysiwyg.include({
                 $editable.before($wrap);
                 $wrap.append($editable);
                 setTimeout(function () { // add a set timeout for the transition
-                    self.snippets.$el.addClass('o_loaded');
                     self.$el.addClass('o_snippets_loaded');
                     self.trigger_up('snippets_loaded', self.snippets.$el);
                 });

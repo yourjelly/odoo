@@ -73,9 +73,7 @@ var DropBlock = class extends we3.AbstractPlugin {
         if (!this.options.dropblocks) {
             promise = promise.then(this._loadTemplateBlocks.bind(this, this.options.dropBlockTemplate || 'wysiwyg.dropblock.defaultblocks'));
         }
-        if (this.options.dropblockStayOpen || this.options.dropblockOpenDefault) {
-            this.open();
-        }
+
         var Arch = this.dependencies.Arch;
         this.dependencies.Rules.addUnbreakableNodeCheck(function (a) {
             return Arch.getTechnicalData(a.id, 'dropblock') || a.nodeName === 'section';
@@ -83,7 +81,13 @@ var DropBlock = class extends we3.AbstractPlugin {
         return promise
             .then(this._bindEvents.bind(this))
             .then(this._createBlockDropable.bind(this))
-            .then(this._markDragableBlocks.bind(this));
+            .then(this._markDragableBlocks.bind(this))
+            .then(function () {
+                if (self.options.dropblockStayOpen || self.options.dropblockOpenDefault) {
+                    self.open();
+                }
+                self._blockContainer.classList.add('we3-snippets-loaded');
+            });
     }
     /**
      * Prepares the page so that it may be saved:
