@@ -82,7 +82,7 @@ var TestKeyboardChar = class extends we3.AbstractPlugin {
                 steps: [{
                     key: 'a',
                 }],
-                test: '<div><p><a href="#">a◆</a></p></div>',
+                test: '<div><a href="#">a◆</a></div>',
             },
             {
                 name: "'a' on a selection of most contents of a complex dom",

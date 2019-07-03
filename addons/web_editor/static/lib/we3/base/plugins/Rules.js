@@ -123,7 +123,7 @@ var parentedRules = [
             nodeNames: tags.format.concat(['TEXT', 'img']),
         },
         permittedParents: {
-            nodeNames: tags.style.concat(tags.format).concat(['a', 'li']),
+            nodeNames: tags.style.concat(tags.format).concat(['a', 'div', 'li']),
         },
     },
     {
@@ -131,7 +131,7 @@ var parentedRules = [
             nodeNames: ['a'],
         },
         permittedParents: {
-            nodeNames: tags.style.concat(tags.format).concat('li'),
+            nodeNames: tags.style.concat(tags.format).concat(['div', 'li']),
         },
     },
     {
