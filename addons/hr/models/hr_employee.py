@@ -135,6 +135,16 @@ class HrEmployeePrivate(models.Model):
         return self.env['hr.employee.public'].browse(self.ids).name_get()
 
     @api.multi
+    def _read(self, fields):
+        if self.check_access_rights('read', raise_exception=False):
+            return super(HrEmployeePrivate, self)._read(fields)
+
+        res = self.env['hr.employee.public'].browse(self.ids).read(fields)
+        for r in res:
+            record = self.browse(r['id'])
+            record._update_cache({k:v for k,v in r.items() if k in fields}, validate=False)
+
+    @api.multi
     def read(self, fields, load='_classic_read'):
         if self.check_access_rights('read', raise_exception=False):
             return super(HrEmployeePrivate, self).read(fields, load=load)

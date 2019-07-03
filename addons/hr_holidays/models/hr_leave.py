@@ -592,11 +592,11 @@ class HolidaysRequest(models.Model):
                 holiday.activity_update()
         return holiday
 
-    def _read_from_database(self, field_names, inherited_field_names=[]):
-        if 'name' in field_names and 'employee_id' not in field_names:
-            field_names.append('employee_id')
-        super(HolidaysRequest, self)._read_from_database(field_names, inherited_field_names)
-        if 'name' in field_names:
+    def _read(self, fields):
+        if 'name' in fields and 'employee_id' not in fields:
+            fields.append('employee_id')
+        super(HolidaysRequest, self)._read(fields)
+        if 'name' in fields:
             if self.user_has_groups('hr_holidays.group_hr_holidays_user'):
                 return
             current_employee = self.env['hr.employee'].sudo().search([('user_id', '=', self.env.uid)], limit=1)
@@ -621,7 +621,7 @@ class HolidaysRequest(models.Model):
             self._check_approval_update(values['state'])
         result = super(HolidaysRequest, self).write(values)
         if not self.env.context.get('leave_fast_create'):
-            for holiday in self:
+            for holiday in self.filtered('id'):
                 if employee_id:
                     holiday.add_follower(employee_id)
                     self._sync_employee_details()
