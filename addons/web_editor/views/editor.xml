@@ -93,6 +93,7 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarColor.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarFontStyle.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarIndent.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarKeymap.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarList.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarParagraph.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarWand.js"/>

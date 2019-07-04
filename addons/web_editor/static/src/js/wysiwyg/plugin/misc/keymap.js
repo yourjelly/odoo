@@ -57,7 +57,7 @@ var keyMapPlugin = class extends we3.AbstractPlugin {
             'BACKSLASH': 220,
             'RIGHTBRACKET': 221
         };
-        this.dependencies = ['Range'];
+        this.dependencies = ['Range', 'Modal'];
 
         var self = this;
         this.nameFromCode = {};
@@ -124,15 +124,10 @@ var keyMapPlugin = class extends we3.AbstractPlugin {
             var fragment = self.options.renderTemplate('KeyMap', 'wysiwyg.help_dialog', {
                 keyMap: Object.values(self.keyMap),
             });
-            var helpDialog = new Dialog(self, {
-                title: self.options.translate('KeyMap', 'Help'),
-                size: 'medium',
-                $content: $(fragment),
+            var title = self.options.translate('KeyMap', 'Help');
+            self.dependencies.Modal.add(self.pluginName, title, fragment, [], function onClose() {
+                resolve({ noChange: true });
             });
-            helpDialog.on('closed', self, function () {
-                resolve({noChange: true});
-            });
-            helpDialog.open();
         });
     }
 

@@ -87,6 +87,7 @@ QUnit.module('web_editor', {
         TestToolbarWand: false,
         TestToolbarFontStyle: false,
         TestToolbarIndent: false,
+        TestToolbarKeymap: false,
         TestToolbarLink: false,
         TestToolbarList: false,
         TestToolbarMedia: false,
@@ -204,6 +205,14 @@ QUnit.module('web_editor', {
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, testPlugins, { TestToolbarIndent: true }),
+        };
+        await createFormAndTest(this);
+    });
+    QUnit.test('toolbar keymap', async function (assert) {
+        assert.expect(13);
+        this.testOptions = {
+            assert: assert,
+            plugins: Object.assign({}, testPlugins, { TestToolbarKeymap: true }),
         };
         await createFormAndTest(this);
     });
