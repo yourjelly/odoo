@@ -124,10 +124,15 @@ class SurveyQuestion(models.Model):
     user_input_line_ids = fields.One2many(
         'survey.user_input_line', 'question_id', string='Answers',
         domain=[('skipped', '=', False)], groups='survey.group_survey_user')
+    # show/hide the question depending on the other question.
     is_enable_question_dependency = fields.Boolean('Is Enable Question Dependency')
     question_depend_id = fields.Many2one('survey.question', string='Question', domain="[('survey_id', '=', survey_id)]")
+    depend_question_type = fields.Selection(related="question_depend_id.question_type")
     operator = fields.Char(string='Operator', default='=')
-    value = fields.Char()
+    value_text = fields.Char()
+    value_date = fields.Date()
+    value_datetime = fields.Datetime()
+    value_number = fields.Float()
     action = fields.Selection([('show', 'Show'), ('hide', 'Hide')], string='Action', default='show')
 
     _sql_constraints = [

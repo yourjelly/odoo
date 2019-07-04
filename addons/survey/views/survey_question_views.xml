@@ -164,8 +164,12 @@
                                 </group>
                                 <group string="Dependency Rule" attrs="{'invisible':[('is_enable_question_dependency', '=', False)]}" >
                                     <field name="question_depend_id" options="{'no_create': True}" domain="[('page_id', '=', context.get('page_id'))]"/>
+                                    <field name="depend_question_type" invisible="1"/>
                                     <field name="operator"/>
-                                    <field name="value"/>
+                                    <field name="value_text" attrs="{'invisible':[('depend_question_type', 'not in', ['free_text', 'textbox'])]}"/>
+                                    <field name="value_date" attrs="{'invisible':[('depend_question_type', '!=', 'date')]}"/>
+                                    <field name="value_datetime" attrs="{'invisible':[('depend_question_type', '!=', 'datetime')]}"/>
+                                    <field name="value_number" attrs="{'invisible':[('depend_question_type', '!=', 'numerical_box')]}"/>
                                     <field name="action"/>
                                 </group>
                             </group>

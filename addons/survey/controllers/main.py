@@ -83,6 +83,20 @@ class Survey(http.Controller):
 
         return True
 
+    def _check_dependency_rule(self, answer_sudo, question):
+        """ show/hide the question based on dependency rule """
+        answer = answer_sudo.user_input_line_ids.filtered(lambda answer: answer.question_id == question.question_depend_id)
+        if answer.answer_type != 'suggestion' and not answer.skipped:
+            answer_type = 'value_%s' % answer.answer_type
+            value = getattr(question, answer_type)
+            result = request.env['survey.user_input_line'].search([
+                (answer_type, question.operator, value),
+                ('id', '=', answer.id)
+            ])
+            if result and question.action == 'show':
+                return True
+        return False
+
     def _get_access_data(self, survey_token, answer_token, ensure_token=True):
         """ Get back data related to survey and user input, given the ID and access
         token provided by the route.
@@ -410,28 +424,24 @@ class Survey(http.Controller):
                 go_back = post['button_submit'] == 'previous'
                 next_page, last = request.env['survey.survey'].next_page_or_question(answer_sudo, page_or_question_id, go_back=go_back)
 
-                def check_dependency(next_page, check_next=False):
-                    if next_page.is_enable_question_dependency:
-                        depend_question = next_page.question_depend_id
-                        user_input_line = request.env['survey.user_input'].search([('token', '=', answer_token)]).user_input_line_ids.filtered(lambda user_line: user_line.question_id.id == depend_question.id)
-                        # TODO: check for all question type
-                        if getattr(user_input_line, 'value_%s' % user_input_line.answer_type) == int(next_page.value):
-                            values = {'last_displayed_page_id': page_or_question_id}
-                        else:
-                            values = {'last_displayed_page_id': next_page.id}
-                            next_page, last = request.env['survey.survey'].next_page_or_question(answer_sudo, next_page.id, go_back=go_back)
-                            if next_page.is_enable_question_dependency:
-                                check_next = True
+                def check_dependency(page, check_next=False, last_displayed_page_id=False):
+                    if page and page.is_enable_question_dependency and not self._check_dependency_rule(answer_sudo, page):
+                        values = {'last_displayed_page_id': page.id}
+                        last_displayed_page_id = page.id
+                        page, last = request.env['survey.survey'].next_page_or_question(answer_sudo, page.id, go_back=go_back)
+                        if page.is_enable_question_dependency:
+                            check_next = True
                     else:
-                        values = {'last_displayed_page_id': page_or_question_id}
+                        values = {'last_displayed_page_id': last_displayed_page_id or page_or_question_id}
 
-                    if next_page is None and not go_back:
+                    if page is None and not go_back:
                         answer_sudo._mark_done()
                     else:
                         values.update({'state': 'skip'})
                     answer_sudo.write(values)
+
                     if check_next:
-                        check_dependency(next_page)
+                        check_dependency(page, last_displayed_page_id=last_displayed_page_id)
 
                 check_dependency(next_page)
 
