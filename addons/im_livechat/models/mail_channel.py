@@ -46,6 +46,8 @@ class MailChannel(models.Model):
         for record in self:
             if record.channel_type == 'livechat':
                 record.is_chat = True
+            else:
+                record.is_chat = False
 
     @api.multi
     def _channel_message_notifications(self, message, message_format=False):
