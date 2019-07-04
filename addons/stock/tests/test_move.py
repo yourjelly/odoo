@@ -1968,9 +1968,7 @@ class StockMove(SavepointCase):
             'location_dest_id': backorder.location_dest_id.id,
             'picking_id': backorder.id,
         })]})
-        overprocessed_wizard_dict = backorder.button_validate()
-        overprocessed_wizard = self.env[overprocessed_wizard_dict['res_model']].browse(overprocessed_wizard_dict['res_id'])
-        overprocessed_wizard.action_confirm()
+        backorder.button_validate()
         backorder_move = backorder.move_lines
         self.assertEqual(backorder_move.state, 'done')
         self.assertEqual(backorder_move.quantity_done, 12.0)
@@ -2134,9 +2132,7 @@ class StockMove(SavepointCase):
             'move_id': backordered_move.id,
         })]})
 
-        overprocessed_wizard = backorder.button_validate()
-        overprocessed_wizard = self.env['stock.overprocessed.transfer'].browse(overprocessed_wizard['res_id'])
-        overprocessed_wizard.action_confirm()
+        backorder.button_validate()
 
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product_serial, self.customer_location), 3)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product_serial, self.pack_location), 0)
@@ -3551,11 +3547,6 @@ class StockMove(SavepointCase):
 
         self.assertTrue(isinstance(action, dict), 'Should open backorder wizard')
         self.assertEqual(action.get('res_model'), 'stock.backorder.confirmation')
-
-        product3_move.move_line_ids[0].qty_done = 2
-        action = picking.button_validate()  # should request confirmation
-        self.assertTrue(isinstance(action, dict), 'Should open overprocessing wizard')
-        self.assertEqual(action.get('res_model'), 'stock.overprocessed.transfer')
 
     def test_immediate_validate_7(self):
         """ In a picking with a single unavailable move, clicking on validate without filling any
