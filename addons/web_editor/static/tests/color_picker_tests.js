@@ -83,6 +83,7 @@ QUnit.module('web_editor', {
         TestToolbarWand: false,
         TestToolbarFontStyle: false,
         TestToolbarIndent: false,
+        TestToolbarKeymap: false,
         TestToolbarLink: false,
         TestToolbarList: false,
         TestToolbarMedia: false,
