@@ -85,17 +85,25 @@ class Survey(http.Controller):
 
     def _check_dependency_rule(self, answer_sudo, question):
         """ show/hide the question based on dependency rule """
-        answer = answer_sudo.user_input_line_ids.filtered(lambda answer: answer.question_id == question.question_depend_id)
-        if answer.answer_type != 'suggestion' and not answer.skipped:
-            answer_type = 'value_%s' % answer.answer_type
-            value = getattr(question, answer_type)
-            result = request.env['survey.user_input_line'].search([
-                (answer_type, question.operator, value),
-                ('id', '=', answer.id)
-            ])
-            if result and question.action == 'show':
-                return True
-        return False
+        def check_multilevel_dependency(answer_sudo, question):
+            answer = answer_sudo.user_input_line_ids.filtered(lambda answer: answer.question_id == question.question_depend_id)
+            if answer.answer_type != 'suggestion' and not answer.skipped:
+                answer_type = 'value_%s' % answer.answer_type
+                value = getattr(question, answer_type)
+                result = request.env['survey.user_input_line'].search([
+                    (answer_type, question.operator, value),
+                    ('id', '=', answer.id)
+                ])
+                if result and question.action == 'show':
+                    if question.question_depend_id.is_enable_question_dependency:
+                        return check_multilevel_dependency(answer_sudo, question.question_depend_id)
+                    else:
+                        return True
+                else:
+                    return False
+            else:
+                return False
+        return check_multilevel_dependency(answer_sudo, question)
 
     def _get_access_data(self, survey_token, answer_token, ensure_token=True):
         """ Get back data related to survey and user input, given the ID and access
