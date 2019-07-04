@@ -236,7 +236,7 @@ we3.AbstractPlugin = class extends we3.EventDispatcher {
                     ev.preventDefault();
                     ev.stopPropagation();
                     if (!ev.target.getAttribute('disabled')) {
-                        self[methodName](this.getAttribute('data-value'), ev);
+                        self[methodName](this.hasAttribute('data-value') ? this.getAttribute('data-value') : undefined, ev);
                     }
                 }, false);
             }

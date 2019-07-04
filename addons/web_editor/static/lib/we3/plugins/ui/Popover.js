@@ -500,7 +500,7 @@ var PopoverPlugin = class extends we3.AbstractPlugin {
 
         // var pluginName = button.getAttribute('data-plugin');
         var method = button.getAttribute('data-method');
-        var value = button.getAttribute('data-value');
+        var value = button.hasAttribute('data-value') ? button.getAttribute('data-value') : undefined;
         var popover;
         this.popovers.forEach(function (p) {
             if (p.buttons.indexOf(button) !== -1) {
