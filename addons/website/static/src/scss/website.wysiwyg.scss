@@ -112,51 +112,29 @@ html[lang] > body.editor_enable [data-oe-translation-state] {
     }
 }
 
-// NOTE EDITOR
-
 // SNIPPET PANEL
-#oe_snippets {
+we3-dropblock {
     @include o-w-preserve-btn;
-    @include o-position-absolute(0, auto, 0, -$o-we-sidebar-width);
-    width: $o-we-sidebar-width;
 
+    margin: 0;
     border-right: 1px solid $o-we-color-divider;
-    transition: left 400ms $o-we-md-ease 0s;
     background-image: linear-gradient(45deg, $o-we-color-normal, darken($o-we-color-normal, 10%));
 
-    #snippets_menu {
+    we3-title {
         color: #999999;
-        background: $o-we-color-dark;
-        font-family: $o-we-font-family;
-        height: $o-navbar-height;
-        line-height: $o-navbar-height;
-    }
-
-    #o_scroll {
-        .o_panel_header {
-            color: #999999;
-        }
     }
 }
 
-.oe_snippet {
-    background-color: $o-we-color-normal;
+we3-dropblock-thumbnail {
 
-    .oe_snippet_thumbnail {
-        .oe_snippet_thumbnail_img {
-            border: 1px solid $o-we-color-normal;
-        }
-
-        img.oe_snippet_thumbnail_img {}
-
-        .oe_snippet_thumbnail_title {
-            border: 1px solid $o-we-color-dark;
-            color: $o-we-color-text-light;
-        }
-
-        &:hover .oe_snippet_thumbnail_title {
-            color: $o-we-color-text-lighter;
-        }
+    > we3-preview {
+        border: 1px solid $o-we-color-normal;
+    }
+    > we3-title {
+        color: $o-we-color-text-light;
+    }
+    &:hover > we3-title {
+        color: $o-we-color-text-lighter;
     }
 }
 
@@ -175,8 +153,7 @@ html[lang] > body.editor_enable [data-oe-translation-state] {
             clear: both;
         }
 
-        >button {
-
+        > button {
             &:hover,
             &.selected {
                 box-shadow: 0px 0px 2px 2px $o-we-color-light;
@@ -235,10 +212,10 @@ html[lang] > body.editor_enable [data-oe-translation-state] {
     .oe_overlay {
 
         // OVERLAY OPTIONS
-        >.oe_overlay_options {
+        > .oe_overlay_options {
             font-family: $o-we-font-family;
 
-            >.btn-group {
+            > .btn-group {
                 .btn {
                     height: $o-we-overlay-option-size;
                     border: 1px solid $o-we-color-dark;
@@ -260,13 +237,13 @@ html[lang] > body.editor_enable [data-oe-translation-state] {
                         }
                     }
 
-                    >.fa {
+                    > .fa {
                         color: $o-we-color-text-light;
                     }
                 }
 
                 // CUSTOMIZE MENU BUTTON
-                >.oe_options {
+                > .oe_options {
                     .btn {
                         background-color: $o-we-color-dark;
                         color: $o-we-color-text-light;
@@ -324,7 +301,7 @@ html[lang] > body.editor_enable [data-oe-translation-state] {
             }
         }
 
-        &.o_top_cover>.oe_overlay_options {
+        &.o_top_cover > .oe_overlay_options {
             top: $o-we-handle-border-width;
             right: $o-we-handle-border-width;
         }
@@ -532,115 +509,71 @@ body .modal {
     }
 }
 
-.wysiwyg_multizone.note-editor {
-    &>.note-toolbar-wrapper .note-toolbar {
-        height: $o-navbar-height;
+// EDITOR TOOLBAR
+we3-toolbar {
+    height: $o-navbar-height;
+}
+we3-toolbar, we3-popover {
+    background-color: $o-we-color-dark;
+}
+we3-button, we3-toggler {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background-color: $o-we-color-dark;
+    color: $o-we-color-text-normal;
+    border: none;
 
-        .btn {
-            height: $o-navbar-height !important; // force this because of themes
+    > .fa {
+        color: $o-we-color-text-normal;
+    }
+
+    &:hover {
+        color: $o-we-color-text-light;
+
+        > .fa {
+            color: $o-we-color-text-light;
         }
     }
 
-    &>.note-statusbar {
-        display: none;
-    }
+    &.active {
+        background-color: $o-we-color-dark;
+        color: $o-we-color-text-light;
 
-    &>.note-editing-area {
-        overflow: visible;
-    }
-}
-
-.wysiwyg_multizone.note-popover.popover {
-    border-width: 0 1px;
-
-    .popover-content .btn {
-        height: $o-navbar-height;
+        > .fa {
+            color: $o-we-color-text-light;
+        }
     }
 }
+w3-toggler.active {
+    border-top: 2px solid white;
+    background-color: $o-we-color-darker;
+    color: white;
+    box-shadow: none;
 
-.wysiwyg_multizone.note-popover,
-.wysiwyg_multizone.note-editor>.note-toolbar-wrapper .note-toolbar {
-    // force this because of themes
-    background-color: $o-we-color-dark !important;
+    > .fa {
+        color: white;
+    }
+}
+we3-dropdown > :nth-child(2) {
+    background-color: $o-we-color-darker;
 
-    .btn {
-        background-color: $o-we-color-dark !important;
-        color: $o-we-color-text-normal !important;
-        border: none !important;
-        padding: 0.0625rem 0.3125rem !important;
+    > * {
+        width: 100%;
+        color: $o-we-color-text-light;
 
-        >.fa {
-            color: $o-we-color-text-normal !important;
+        > .fa {
+            color: $o-we-color-text-light;
         }
 
         &:hover {
-            color: $o-we-color-text-light !important;
+            background-color: $o-we-tab-active-bg;
+            color: white;
 
-            >.fa {
-                color: $o-we-color-text-light !important;
+            > .fa {
+                color: white;
             }
         }
-
-        &.active {
-            background-color: $o-we-color-dark !important;
-            color: $o-we-color-text-light !important;
-
-            >.fa {
-                color: $o-we-color-text-light !important;
-            }
-        }
-    }
-
-    >.btn-group {
-        margin-top: 0 !important;
-
-        &.show,
-        .btn-group.show {
-            .dropdown-toggle {
-                border-top: 2px solid white !important;
-                background-color: $o-we-color-darker !important;
-                color: white !important;
-                box-shadow: none !important;
-
-                >.fa,
-                >span {
-                    color: white !important;
-                }
-            }
-        }
-    }
-
-    .dropdown-menu {
-        margin: 0 !important;
-        border-radius: 0 !important;
-        background-color: $o-we-color-darker !important;
-        color: $o-we-color-text-normal !important;
-        white-space: normal !important;
-
-        .dropdown-item {
-            width: 100% !important;
-            color: $o-we-color-text-light !important;
-
-            >.fa {
-                color: $o-we-color-text-light !important;
-            }
-
-            &:hover {
-                background-color: $o-we-tab-active-bg !important;
-                color: white !important;
-
-                >.fa {
-                    color: white !important;
-                }
-            }
-        }
-    }
-
-    .note-para .dropdown-menu {
-        min-width: 147px !important;
-    }
-
-    .note-style .dropdown-item * {
-        color: $o-we-color-text-light !important;
     }
 }
