@@ -199,15 +199,17 @@ var PopoverPlugin = class extends we3.AbstractPlugin {
                     dropdownContents.style.display = 'none';
                     document.removeEventListener('click', mousedownCloseDropdown);
                 }
-            }
+            };
 
             dropdown.addEventListener('click', function () {
-                var open = dropdownContents.style.display !== 'none';
-                if (!toggler.classList.contains('disabled')) {
-                    dropdownContents.style.display = open ? 'none' : '';
+                var open = !toggler.classList.contains('disabled')
+                    && dropdownContents.style.display === 'none';
+                dropdownContents.style.display = open ? '' : 'none';
+                if (open) {
+                    toggler.classList.add('active');
                     document.addEventListener('click', mousedownCloseDropdown, false);
-                } else if (open) {
-                    dropdownContents.style.display = 'none';
+                } else {
+                    toggler.classList.remove('active');
                 }
             }, false);
         });
