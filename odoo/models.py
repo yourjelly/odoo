@@ -3092,8 +3092,7 @@ Fields:
 
         # SQL Alternative if computing in-memory is too slow for large dataset
         # invalid = self - self._filter_access_rules(operation)
-        dom = self.env['ir.rule']._compute_domain(self._name, operation)
-        invalid = self - self.filtered_domain(dom or [])
+        invalid = self - self._filter_access_rules_python(operation)
         if not invalid:
             return
 
@@ -3158,6 +3157,10 @@ Fields:
             for it in self._ids
             if not (it or it.origin) or (it or it.origin) in valid_ids
         ])
+
+    def _filter_access_rules_python(self, operation):
+        dom = self.env['ir.rule']._compute_domain(self._name, operation)
+        return self.filtered_domain(dom or [])
 
     @api.multi
     def unlink(self):
