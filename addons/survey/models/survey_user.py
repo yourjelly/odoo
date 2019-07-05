@@ -218,6 +218,31 @@ class SurveyUserInputLine(models.Model):
     value_suggested_row = fields.Many2one('survey.label', string="Row answer")
     answer_score = fields.Float('Score given for this choice')
 
+    @api.model
+    def compute_is_displayed(self, answer_sudo, question):
+        """ show/hide the question based on dependency rule """
+        def check_multilevel_dependency(answer_sudo, question):
+            answer = answer_sudo.user_input_line_ids.filtered(lambda answer: answer.question_id == question.question_depend_id)
+            if answer and answer.answer_type != 'suggestion' and not answer.skipped:
+                answer_type = 'value_%s' % answer.answer_type
+                if hasattr(question, answer_type):
+                    # import pdb; pdb.set_trace()
+                    uli = self.env['survey.user_input_line'].sudo().search([
+                        (answer_type, question.operator, getattr(question, answer_type)),
+                        ('question_id', '=', answer.question_id.id)
+                    ])
+                    if uli and question.action == 'show':
+                        if question.question_depend_id.is_enable_question_dependency:
+                            return check_multilevel_dependency(answer_sudo, question.question_depend_id)
+                        else:
+                            return True
+                    else:
+                        return False
+            else:
+                return False
+        return check_multilevel_dependency(answer_sudo, question)
+
+
     @api.constrains('skipped', 'answer_type')
     def _answered_or_skipped(self):
         for uil in self:

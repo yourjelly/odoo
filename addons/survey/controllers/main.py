@@ -432,7 +432,7 @@ class Survey(http.Controller):
                 go_back = post['button_submit'] == 'previous'
                 next_page, last = request.env['survey.survey'].next_page_or_question(answer_sudo, page_or_question_id, go_back=go_back)
 
-                def check_dependency(page, check_next=False, last_displayed_page_id=False):
+                def check_dependency(page, last_displayed_page_id=False, check_next=False):
                     if page and page.is_enable_question_dependency and not self._check_dependency_rule(answer_sudo, page):
                         values = {'last_displayed_page_id': page.id}
                         last_displayed_page_id = page.id
@@ -449,7 +449,7 @@ class Survey(http.Controller):
                     answer_sudo.write(values)
 
                     if check_next:
-                        check_dependency(page, last_displayed_page_id=last_displayed_page_id)
+                        check_dependency(page, last_displayed_page_id)
 
                 check_dependency(next_page)
 
