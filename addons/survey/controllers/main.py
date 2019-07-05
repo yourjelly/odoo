@@ -89,18 +89,18 @@ class Survey(http.Controller):
             answer = answer_sudo.user_input_line_ids.filtered(lambda answer: answer.question_id == question.question_depend_id)
             if answer.answer_type != 'suggestion' and not answer.skipped:
                 answer_type = 'value_%s' % answer.answer_type
-                value = getattr(question, answer_type)
-                result = request.env['survey.user_input_line'].search([
-                    (answer_type, question.operator, value),
-                    ('id', '=', answer.id)
-                ])
-                if result and question.action == 'show':
-                    if question.question_depend_id.is_enable_question_dependency:
-                        return check_multilevel_dependency(answer_sudo, question.question_depend_id)
+                if hasattr(question, answer_type):
+                    result = request.env['survey.user_input_line'].sudo().search([
+                        (answer_type, question.operator, getattr(question, answer_type)),
+                        ('id', '=', answer.id)
+                    ])
+                    if result and question.action == 'show':
+                        if question.question_depend_id.is_enable_question_dependency:
+                            return check_multilevel_dependency(answer_sudo, question.question_depend_id)
+                        else:
+                            return True
                     else:
-                        return True
-                else:
-                    return False
+                        return False
             else:
                 return False
         return check_multilevel_dependency(answer_sudo, question)
