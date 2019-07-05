@@ -455,6 +455,7 @@ var KanbanRenderer = BasicRenderer.extend({
                 self.$el.empty();
                 self.$el.toggleClass('o_kanban_grouped', isGrouped);
                 self.$el.toggleClass('o_kanban_ungrouped', !isGrouped);
+                self.$el.toggleClass('o_m2o_mode', self.m2oMode);
                 self.$el.append(fragment);
                 self._toggleNoContentHelper();
                 if (self._isInDom) {

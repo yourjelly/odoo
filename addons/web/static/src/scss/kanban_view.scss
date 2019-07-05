@@ -566,6 +566,10 @@
         }
     }
 
+    &.o_m2o_mode .oe_kanban_card {
+        min-height: 50px;
+    }
+
     &.o_kanban_mobile .o_kanban_record {
         div.label {
             @include o-text-overflow;
