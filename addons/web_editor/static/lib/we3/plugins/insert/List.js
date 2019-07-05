@@ -813,7 +813,9 @@ var ListPlugin = class extends we3.AbstractPlugin {
             this.outdent();
         } else if (this.dependencies.Range.isCollapsed()) {
             var focusNode = this.dependencies.Range.getFocusedNode();
-            this.dependencies.Arch.unwrapFrom(focusNode.id, nodeNamesToRemove);
+            var liAncestor = focusNode.ancestor('isLi');
+            var childrenOfLiIDs = liAncestor.childNodes.map(node => node.id);
+            this.dependencies.Arch.unwrapFrom(childrenOfLiIDs, nodeNamesToRemove);
             this._deleteNewEdges();
         } else {
             this.dependencies.Arch.unwrapRangeFrom(nodeNamesToRemove, {

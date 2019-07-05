@@ -77,14 +77,22 @@ QUnit.module('web_editor', {
     QUnit.module('default rendering & options');
 
     var testPlugins = {
+        TestArchAndRules: false,
+        TestComplex: false,
+        TestHistory: false,
+        TestKeyboardArrow: false,
+        TestKeyboardBackspace: false,
+        TestKeyboardChar: false,
+        TestKeyboardComplex: false,
+        TestKeyboardDelete: false,
+        TestKeyboardEnter: false,
+        TestKeyboardTab: false,
+        TestKeyboardUnbreakable: false,
         TestPopover: false,
         TestRange: false,
-        TestUI: false,
         TestRenderer: false,
-        TestArchAndRules: false,
         TestToolbarColor: false,
         TestToolbarColorPicker: false,
-        TestToolbarWand: false,
         TestToolbarFontStyle: false,
         TestToolbarIndent: false,
         TestToolbarKeymap: false,
@@ -92,15 +100,8 @@ QUnit.module('web_editor', {
         TestToolbarList: false,
         TestToolbarMedia: false,
         TestToolbarParagraph: false,
-        TestKeyboardUnbreakable: false,
-        TestKeyboardTab: false,
-        TestKeyboardEnter: false,
-        TestKeyboardDelete: false,
-        TestKeyboardComplex: false,
-        TestKeyboardChar: false,
-        TestKeyboardBackspace: false,
-        TestKeyboardArrow: false,
-        TestHistory: false,
+        TestToolbarWand: false,
+        TestUI: false,
     };
 
     async function createFormAndTest (self) {
@@ -173,6 +174,14 @@ QUnit.module('web_editor', {
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, testPlugins, {TestRenderer: true}),
+        };
+        await createFormAndTest(this);
+    });
+    QUnit.test('complex default config (integration)', async function (assert) {
+        assert.expect(6);
+        this.testOptions = {
+            assert: assert,
+            plugins: Object.assign({}, testPlugins, {TestComplex: true}),
         };
         await createFormAndTest(this);
     });
