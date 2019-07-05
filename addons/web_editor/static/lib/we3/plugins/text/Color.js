@@ -62,7 +62,12 @@ var ColorPlugin = class extends we3.AbstractPlugin {
      * @param {string} color (hexadecimal or class name)
      */
     update (color) {
-        this.dependencies.Arch.do(getArchNode => this._update(color, getArchNode));
+        var _update = getArchNode => this._update(color, getArchNode);
+        this.dependencies.Arch.do(_update, {
+            // If range is collapsed we need a virtual text node to style and on
+            // which to put the carret. Otherwise they can all go.
+            removeAllVirtualText: !this.dependencies.Range.isCollapsed(),
+        });
     }
 
     //--------------------------------------------------------------------------
@@ -207,13 +212,23 @@ var ColorPlugin = class extends we3.AbstractPlugin {
      */
     _getNodesToColor (start, startOffset, end, endOffset) {
         var endFont = end.ancestor('isFont');
-        end = endFont ? end.splitUntil(endFont, endOffset).lastLeaf() : end.split(endOffset) || end;
+        if (endFont) {
+            end = end.splitUntil(endFont, endOffset);
+            end = end.lastLeaf().next({ leafToLeaf: true });
+        } else {
+            end = end.split(endOffset) || end;
+        }
         var startFont = start.ancestor('isFont');
-        start = startFont ? start.splitUntil(startFont, startOffset).firstLeaf() : start.split(startOffset) || start;
+        if (startFont) {
+            start = start.splitUntil(startFont, startOffset);
+            start = start.firstLeaf().next({ leafToLeaf: true });
+        } else {
+            start = start.split(startOffset) || start;
+        }
 
         return start.getNodesUntil(end, {
             includeStart: true,
-            includeEnd: !!endFont, // splitUntil returns the font node so include end only in that case
+            includeEnd: false,
         });
     }
     /**
@@ -286,7 +301,7 @@ var ColorPlugin = class extends we3.AbstractPlugin {
      * @param {function} getArchNode
      */
     _update (color, getArchNode) {
-        var __applyColor = this._applyColor.bind(this);
+        var self = this;
         var range = this.dependencies.Range.getRange();
         var scArch = getArchNode(range.scID);
         var ecArch = getArchNode(range.ecID);
@@ -295,7 +310,7 @@ var ColorPlugin = class extends we3.AbstractPlugin {
 
         toColor.forEach(function (node) {
             var fontNode = node.ancestor('isFont') || node.wrap('font');
-            __applyColor(fontNode, color);
+            self._applyColor(fontNode, color);
             fontNode._deleteEdges({
                 doNotBreakBlocks: true,
                 mergeOnlyIfSameType: true,
