@@ -146,6 +146,15 @@ var TestToolbarColor = class extends we3.AbstractPlugin {
                 test: '<p>dom not to edit</p><p>d<font class="bg-black-25">▶om t◀</font><font class="bg-alpha">o </font>edit</p>',
             },
             {
+                name: "Click THEME COLORS - BLACK 25: alpha theme color -> black 25 (partial selection)",
+                content: '<p><font class="bg-alpha">d▶om t◀o edit</font></p>',
+                do: async function () {
+                    await self.dependencies.Test.triggerNativeEvents(self.bgColorToggler, ['mousedown', 'click']);
+                    await self.dependencies.Test.triggerNativeEvents(self.bgColorDropdown.querySelector('we3-button[name="color-black-25"]'), ['mousedown', 'click']);
+                },
+                test: '<p><font class="bg-alpha">d</font><font class="bg-black-25">▶om t◀</font><font class="bg-alpha">o edit</font></p>',
+            },
+            {
                 name: "Click COMMON COLORS - BLUE #0000FF: black 25 & default -> blue #0000FF",
                 content: '<p>dom not to edit</p><p>d▶o<font class="bg-black-25">m t◀o </font>edit</p>',
                 do: async function () {
@@ -171,6 +180,15 @@ var TestToolbarColor = class extends we3.AbstractPlugin {
                     await self.dependencies.Test.triggerNativeEvents(self.bgColorDropdown.querySelector('we3-button[name="color-#0000FF"]'), ['mousedown', 'click']);
                 },
                 test: '<p>dom not to edit</p><p>d<font style="background-color:#0000FF">▶o</font><font style="color:#0000FF; background-color:#0000FF">m t◀</font><font style="color:#0000FF">o </font>edit</p>',
+            },
+            {
+                name: "Click COMMON COLORS - BLACK #FFFFFF: bg multiple -> bg black #FFFFFF",
+                content: '<p>one<font style="background-color:#FFFF00">▶two</font><font class="bg-alpha">three◀</font>four</p>',
+                do: async function () {
+                    await self.dependencies.Test.triggerNativeEvents(self.bgColorToggler, ['mousedown', 'click']);
+                    await self.dependencies.Test.triggerNativeEvents(self.bgColorDropdown.querySelector('we3-button[name="color-#FFFFFF"]'), ['mousedown', 'click']);
+                },
+                test: '<p>one<font style="background-color:#FFFFFF">▶twothree◀</font>four</p>',
             },
             {
                 name: "Click RESET TO DEFAULT: black 25 & default -> default",

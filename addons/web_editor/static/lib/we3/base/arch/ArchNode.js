@@ -891,6 +891,7 @@ we3.ArchNode = class {
      * Keep splitting the parents until the given ancestor was split.
      * Return the ArchNode on the right hand side of the split.
      *
+     * @todo harmonize return with split (more consistency)
      * @param {ArchNode|function} ancestor
      * @param {int} offset
      * @returns {ArchNode|undefined}
@@ -1138,7 +1139,7 @@ we3.ArchNode = class {
     _deleteEdges (options) {
         var prev = this.previousSibling();
         if (prev) {
-            prev.deleteEdge(false, options);
+            prev.deleteEdge(false, Object.assign({}, options, { keepRight: true }));
         }
         var next = this.nextSibling();
         if (next) {

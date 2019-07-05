@@ -101,8 +101,10 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @param {Function(getArchNode)} fn
      *      The function can return a range if want to apply it instead of the
      *      default range (apply on the first changed node)
+     * @param {object} [options]
+     * @param {boolean} [options.removeAllVirtualText] true to remove all virtual text before rendering
      */
-    async do (callback) {
+    async do (callback, options) {
         var self = this;
         this._resetChange();
         var _concatChanges = this._concatChanges;
@@ -115,6 +117,9 @@ var BaseArch = class extends we3.AbstractPlugin {
         }
         var range = await callback(getArchNode);
         this._concatChanges = _concatChanges;
+        if (options && options.removeAllVirtualText) {
+            this._removeAllVirtualText();
+        }
         this._updateRendererFromChanges(range);
     }
     /**
@@ -1355,8 +1360,8 @@ var Arch = class extends we3.AbstractPlugin {
     setValue (value, id) {
         return this.dependencies.BaseArch.setValue(value, id);
     }
-    async do (fn) {
-        return this.dependencies.BaseArch.do(fn);
+    async do (fn, options) {
+        return this.dependencies.BaseArch.do(fn, options);
     }
 
     //--------------------------------------------------------------------------
