@@ -700,7 +700,7 @@ action = action_values
                     <field name="count_picking_backorders"/>
                     <templates>
                         <t t-name="kanban-box">
-                            <div t-if="['incoming', 'outgoing', 'internal'].indexOf(record.code.raw_value) > -1" t-attf-class="#{kanban_color(record.color.raw_value)}" name="stock_picking">
+                            <div t-if="['incoming', 'outgoing', 'internal'].indexOf(record.code.raw_value) > -1" t-attf-class="#{!m2o_mode ? kanban_color(record.color.raw_value) : ''}" name="stock_picking">
                                 <div>
                                     <div t-attf-class="o_kanban_card_header">
                                         <div class="o_kanban_card_header_title">

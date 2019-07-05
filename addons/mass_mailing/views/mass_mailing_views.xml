@@ -680,7 +680,7 @@
                     <field name='active'/>
                     <templates>
                         <t t-name="kanban-box">
-                            <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click oe_kanban_mass_mailing">
+                            <div t-attf-class="{{!m2o_mode ? 'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) : ''}} oe_kanban_card oe_kanban_global_click oe_kanban_mass_mailing">
                                 <div class="o_dropdown_kanban dropdown" t-if="!m2o_mode">
                                     <a role="button" class="dropdown-toggle o-no-caret btn" data-toggle="dropdown" href="#" aria-label="Dropdown menu" title="Dropdown menu">
                                         <span class="fa fa-ellipsis-v"/>
@@ -1029,7 +1029,7 @@
                     <field name="stage_id"/>
                     <templates>
                         <t t-name="kanban-box">
-                            <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click oe_kanban_mass_mailing_campaign">
+                            <div t-attf-class="{{!m2o_mode ? 'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) : ''}} oe_kanban_card oe_kanban_global_click oe_kanban_mass_mailing_campaign">
                                 <div class="o_dropdown_kanban dropdown" t-if="!m2o_mode">
 
                                     <a role="button" class="dropdown-toggle o-no-caret btn" data-toggle="dropdown" href="#" aria-label="Dropdown menu" title="Dropdown menu">

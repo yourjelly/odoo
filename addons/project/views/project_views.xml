@@ -304,7 +304,7 @@
                     <field name="analytic_account_id"/>
                     <templates>
                         <t t-name="kanban-box">
-                            <div t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click o_has_icon">
+                            <div t-attf-class="#{!m2o_mode ? kanban_color(record.color.raw_value) : ''} oe_kanban_global_click o_has_icon">
                                 <div class="o_project_kanban_main">
                                     <div class="o_kanban_card_content">
                                         <div class="o_kanban_primary_left">
@@ -558,7 +558,7 @@
                     <progressbar field="kanban_state" colors='{"done": "success", "blocked": "danger"}'/>
                     <templates>
                     <t t-name="kanban-box">
-                        <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click">
+                        <div t-attf-class="{{!m2o_mode ? 'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) : ''}} oe_kanban_card oe_kanban_global_click">
                             <div class="oe_kanban_content">
                                 <div class="o_kanban_record_top">
                                     <div class="o_kanban_record_headings">

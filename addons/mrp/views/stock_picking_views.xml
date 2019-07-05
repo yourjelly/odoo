@@ -12,7 +12,7 @@
             </field>
 
             <xpath expr='//div[@name="stock_picking"]' position="after">
-                <div t-if="record.code.raw_value == 'mrp_operation'" t-attf-class="#{kanban_color(record.color.raw_value)}">
+                <div t-if="record.code.raw_value == 'mrp_operation'" t-attf-class="#{!m2o_mode ? kanban_color(record.color.raw_value) : ''}">
                     <div>
                         <div t-attf-class="o_kanban_card_header">
                             <div class="o_kanban_card_header_title">
