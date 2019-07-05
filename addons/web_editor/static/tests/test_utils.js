@@ -481,6 +481,28 @@ for (var keyCode = 40; keyCode <= 127; keyCode++) {
 };
 
 /**
+ * Return an object with the test plugins passed into `testPlugins` and whether
+ * they are to be enabled or not. If `testPlugins` has the property
+ * `disableAllTests` set to true, default all plugins in `testsList` to false.
+ *
+ * @param {object} testPlugins {pluginName: {boolean}}
+ * @param {string []} testsList
+ * @returns {object} {pluginName: {boolean}} (default: `testPlugins`)
+ */
+var getTestPlugins = function (testPlugins, testsList) {
+    if (!testPlugins.disableAllTests) {
+        return testPlugins;
+    }
+    const allTestsDisabled = testsList.reduce(function (result, item) {
+        result[item] = false;
+        return result;
+    }, {});
+    var newTests = Object.assign({}, allTestsDisabled, testPlugins);
+    delete newTests.disableAllTests;
+    return newTests;
+}
+
+/**
  * Perform a series of tests (`keyboardTests`) for using keyboard inputs.
  *
  * @see wysiwyg_keyboard_tests.js
@@ -795,6 +817,7 @@ var keydown = function (key, $editable, options) {
 return {
     wysiwygData: wysiwygData,
     createWysiwyg: createWysiwyg,
+    getTestPlugins: getTestPlugins,
     testKeyboard: testKeyboard,
     select: select,
     keydown: keydown,
