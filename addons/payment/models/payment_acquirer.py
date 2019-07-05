@@ -195,22 +195,24 @@ class PaymentAcquirer(models.Model):
             acquirer.authorize_implemented = acquirer.provider in feature_support['authorize']
             acquirer.token_implemented = acquirer.provider in feature_support['tokenize']
 
-    @api.multi
-    def _check_required_if_provider(self):
+    def _check_required_if_provider(self, vals=None):
         """ If the field has 'required_if_provider="<provider>"' attribute, then it
         required if record.provider is <provider>. """
         empty_field = []
-        for acquirer in self:
-            for k, f in acquirer._fields.items():
+        for k, f in self._fields.items():
+            if vals is not None:
+                if getattr(f, 'required_if_provider', None) == vals.get('provider') and not vals.get(k):
+                    empty_field.append(self.env['ir.model.fields'].search([
+                        ('name', '=', k), ('model', '=', self._name),
+                    ]).field_description)
+                    break
+            for acquirer in self:
                 if getattr(f, 'required_if_provider', None) == acquirer.provider and not acquirer[k]:
-                    empty_field.append(self.env['ir.model.fields'].search([('name', '=', k), ('model', '=', acquirer._name)]).field_description)
+                    empty_field.append(self.env['ir.model.fields'].search([
+                        ('name', '=', k), ('model', '=', acquirer._name),
+                    ]).field_description)
         if empty_field:
             raise ValidationError((', ').join(empty_field))
-        return True
-
-    _constraints = [
-        (_check_required_if_provider, 'Required fields not filled', []),
-    ]
 
     def _get_feature_support(self):
         """Get advanced feature support by provider.
@@ -279,11 +281,13 @@ class PaymentAcquirer(models.Model):
 
     @api.model
     def create(self, vals):
+        self._check_required_if_provider()
         image_resize_images(vals)
         return super(PaymentAcquirer, self).create(vals)
 
     @api.multi
     def write(self, vals):
+        self._check_required_if_provider()
         image_resize_images(vals)
         return super(PaymentAcquirer, self).write(vals)
 
