@@ -53,9 +53,10 @@ QUnit.module('web_editor', {
         testUtils.mock.patch(Wysiwyg, {
             init: function () {
                 this._super(...arguments);
-
+                var testsList = this._editorOptions().tests;
+                var testPlugins = weTestUtils.getTestPlugins(self.testOptions.plugins, testsList);
                 this.options = Object.assign({}, this.options, {
-                    plugins: Object.assign({}, this.options.plugins, self.testOptions.plugins, {
+                    plugins: Object.assign({}, this.options.plugins, testPlugins, {
                         Test: true,
                     }),
                     test: Object.assign({
@@ -73,33 +74,6 @@ QUnit.module('web_editor', {
     },
 }, function () {
 
-    var testPlugins = {
-        TestArchAndRules: false,
-        TestComplex: false,
-        TestHistory: false,
-        TestKeyboardArrow: false,
-        TestKeyboardBackspace: false,
-        TestKeyboardChar: false,
-        TestKeyboardComplex: false,
-        TestKeyboardDelete: false,
-        TestKeyboardEnter: false,
-        TestKeyboardTab: false,
-        TestKeyboardUnbreakable: false,
-        TestPopover: false,
-        TestRange: false,
-        TestRenderer: false,
-        TestToolbarColor: false,
-        TestToolbarColorPicker: false,
-        TestToolbarFontStyle: false,
-        TestToolbarIndent: false,
-        TestToolbarKeymap: false,
-        TestToolbarLink: false,
-        TestToolbarList: false,
-        TestToolbarMedia: false,
-        TestToolbarParagraph: false,
-        TestToolbarWand: false,
-        TestUI: false,
-    };
 
     async function createFormAndTest(self) {
         var promise = new Promise((resolve) => self.testOptions.resolve = resolve);
@@ -148,7 +122,7 @@ QUnit.module('web_editor', {
         assert.expect(8);
         this.testOptions = {
             assert: assert,
-            plugins: Object.assign({}, testPlugins, { TestToolbarCrop: true }),
+            plugins: Object.assign({}, { disableAllTests: true }, { TestToolbarCrop: true }),
         };
         await createFormAndTest(this);
     });
