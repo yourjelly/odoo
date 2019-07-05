@@ -74,13 +74,21 @@ QUnit.module('web_editor', {
 }, function () {
 
     var testPlugins = {
+        TestArchAndRules: false,
+        TestComplex: false,
+        TestHistory: false,
+        TestKeyboardArrow: false,
+        TestKeyboardBackspace: false,
+        TestKeyboardChar: false,
+        TestKeyboardComplex: false,
+        TestKeyboardDelete: false,
+        TestKeyboardEnter: false,
+        TestKeyboardTab: false,
+        TestKeyboardUnbreakable: false,
         TestPopover: false,
         TestRange: false,
-        TestUI: false,
         TestRenderer: false,
-        TestArchAndRules: false,
         TestToolbarColor: false,
-        TestToolbarWand: false,
         TestToolbarFontStyle: false,
         TestToolbarIndent: false,
         TestToolbarKeymap: false,
@@ -88,15 +96,8 @@ QUnit.module('web_editor', {
         TestToolbarList: false,
         TestToolbarMedia: false,
         TestToolbarParagraph: false,
-        TestKeyboardUnbreakable: false,
-        TestKeyboardTab: false,
-        TestKeyboardEnter: false,
-        TestKeyboardDelete: false,
-        TestKeyboardComplex: false,
-        TestKeyboardChar: false,
-        TestKeyboardBackspace: false,
-        TestKeyboardArrow: false,
-        TestHistory: false,
+        TestToolbarWand: false,
+        TestUI: false,
     };
 
     async function createFormAndTest(self) {
