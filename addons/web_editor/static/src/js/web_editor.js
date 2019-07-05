@@ -201,6 +201,7 @@ var Wysiwyg = Widget.extend({
                 data_res_model: this.options.recordInfo && this.options.recordInfo.data_res_model,
             },
         }, this.options);
+
         if (this.options.snippets) {
             options.plugins = Object.assign({
                 DropBlockSelector: true,

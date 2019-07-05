@@ -162,6 +162,7 @@
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/insert/link.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/insert/media.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/insert/table.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/insert/checklist.js"/>
     <!-- <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/insert/hint.js"/> -->
 
     <!-- plugins text -->

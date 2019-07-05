@@ -237,6 +237,7 @@ QUnit.module('website', {
             plugins: {
                 Test: true,
                 OdooWebsite: true,
+                Checklist: false,
             },
             test: {
                 assert: assert,

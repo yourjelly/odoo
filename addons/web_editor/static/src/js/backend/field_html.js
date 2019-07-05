@@ -35,7 +35,6 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
     custom_events: {
         wysiwyg_focus: '_onWysiwygFocus',
         wysiwyg_blur: '_onWysiwygBlur',
-        wysiwyg_change: '_onChange',
         wysiwyg_attachment: '_onAttachmentChange',
     },
 
@@ -396,36 +395,6 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
     // Handler
     //--------------------------------------------------------------------------
 
-    /**
-     * Method called when wysiwyg triggers a change.
-     *
-     * @private
-     * @param {OdooEvent} ev
-     */
-    _onChange: function (ev) {
-        this._doDebouncedAction.apply(this, arguments);
-
-        var $lis = this.$content.find('editable ul.o_checklist > li:not(:has(> ul.o_checklist))');
-        if (!$lis.length) {
-            return;
-        }
-        var max = 0;
-        var ids = [];
-        $lis.map(function () {
-            var checklistId = parseInt(($(this).attr('id') || '0').replace(/^checklist-id-/, ''));
-            if (ids.indexOf(checklistId) === -1) {
-                if (checklistId > max) {
-                    max = checklistId;
-                }
-                ids.push(checklistId);
-            } else {
-                $(this).removeAttr('id');
-            }
-        });
-        $lis.not('[id]').each(function () {
-            $(this).attr('id', 'checklist-id-' + (++max));
-        });
-    },
     /**
      * Method called when wysiwyg triggers a change.
      *
