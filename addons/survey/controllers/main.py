@@ -83,28 +83,6 @@ class Survey(http.Controller):
 
         return True
 
-    def _check_dependency_rule(self, answer_sudo, question):
-        """ show/hide the question based on dependency rule """
-        def check_multilevel_dependency(answer_sudo, question):
-            answer = answer_sudo.user_input_line_ids.filtered(lambda answer: answer.question_id == question.question_depend_id)
-            if answer.answer_type != 'suggestion' and not answer.skipped:
-                answer_type = 'value_%s' % answer.answer_type
-                if hasattr(question, answer_type):
-                    result = request.env['survey.user_input_line'].sudo().search([
-                        (answer_type, question.operator, getattr(question, answer_type)),
-                        ('id', '=', answer.id)
-                    ])
-                    if result and question.action == 'show':
-                        if question.question_depend_id.is_enable_question_dependency:
-                            return check_multilevel_dependency(answer_sudo, question.question_depend_id)
-                        else:
-                            return True
-                    else:
-                        return False
-            else:
-                return False
-        return check_multilevel_dependency(answer_sudo, question)
-
     def _get_access_data(self, survey_token, answer_token, ensure_token=True):
         """ Get back data related to survey and user input, given the ID and access
         token provided by the route.
@@ -431,9 +409,9 @@ class Survey(http.Controller):
             else:
                 go_back = post['button_submit'] == 'previous'
                 next_page, last = request.env['survey.survey'].next_page_or_question(answer_sudo, page_or_question_id, go_back=go_back)
-
+                user_input_line = request.env['survey.user_input_line'].sudo()
                 def check_dependency(page, last_displayed_page_id=False, check_next=False):
-                    if page and page.is_enable_question_dependency and not self._check_dependency_rule(answer_sudo, page):
+                    if page and page.is_enable_question_dependency and not user_input_line.compute_is_displayed(answer_sudo, page):
                         values = {'last_displayed_page_id': page.id}
                         last_displayed_page_id = page.id
                         page, last = request.env['survey.survey'].next_page_or_question(answer_sudo, page.id, go_back=go_back)
