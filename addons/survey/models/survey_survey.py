@@ -598,7 +598,7 @@ class Survey(models.Model):
                 questions |= page.question_ids
             else:
                 if page.random_questions_count > 0 and len(page.question_ids) > page.random_questions_count:
-                    questions = questions.concat(*random.sample(page.question_ids, page.random_questions_count))
+                    questions = questions.concat(*random.sample(page.question_ids.filtered(lambda q: not q.is_enable_question_dependency), page.random_questions_count))
                 else:
                     questions |= page.question_ids
 
