@@ -209,7 +209,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('toolbar list', async function (assert) {
-        assert.expect(70);
+        assert.expect(72);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, { TestToolbarList: true }),
@@ -273,7 +273,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('keyboard delete', async function (assert) {
-        assert.expect(78);
+        assert.expect(82);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, {TestKeyboardDelete: true}),
@@ -289,7 +289,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('keyboard backspace', async function (assert) {
-        assert.expect(97);
+        assert.expect(101);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, {TestKeyboardBackspace: true}),

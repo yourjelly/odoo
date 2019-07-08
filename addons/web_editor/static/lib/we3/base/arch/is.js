@@ -319,6 +319,14 @@ var isType = {
         return this.nodeName === 'textarea';
     },
     /**
+     * Return true if the node is a table data cell element (TD).
+     *
+     * @returns {Boolean}
+     */
+    isTd: function () {
+        return this.nodeName === 'td';
+    },
+    /**
      * Return true.
      *
      * @returns {Boolean}

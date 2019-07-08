@@ -302,6 +302,38 @@ var TestKeyboardDelete = class extends we3.AbstractPlugin {
             }],
             test: "<ul><li>a</li><li><p>b◆c</p></li></ul>",
         },
+        {
+            name: "in ol > li (ul > li after): DELETE at end",
+            content: "<ol><li>a◆</li></ol><ul><li>b</li></ul>",
+            steps: [{
+                key: 'DELETE',
+            }],
+            test: "<ol><li>a◆b</li></ol>",
+        },
+        {
+            name: "in ol > li (ul > li > p after): DELETE at end",
+            content: "<ol><li>a◆</li></ol><ul><li><p>b</p></li></ul>",
+            steps: [{
+                key: 'DELETE',
+            }],
+            test: "<ol><li>a◆b</li></ol>",
+        },
+        {
+            name: "in ol > li > p (ul > li after): DELETE at end",
+            content: "<ol><li><p>a◆</p></li></ol><ul><li>b</li></ul>",
+            steps: [{
+                key: 'DELETE',
+            }],
+            test: "<ol><li><p>a◆b</p></li></ol>",
+        },
+        {
+            name: "in ol > li > p (ul > li > p after): DELETE at end",
+            content: "<ol><li><p>a◆</p></li></ol><ul><li><p>b</p></li></ul>",
+            steps: [{
+                key: 'DELETE',
+            }],
+            test: "<ol><li><p>a◆b</p></li></ol>",
+        },
 
         // end list UL / OL
 

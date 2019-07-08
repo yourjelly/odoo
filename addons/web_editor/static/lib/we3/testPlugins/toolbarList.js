@@ -894,6 +894,22 @@ var TestToolbarList = class extends we3.AbstractPlugin {
                     '<li><p>e</p></li>' +
                     '</ul>',
             },
+            {
+                name: "Click OL: ul -> ol (from second (empty) li)",
+                content: '<p>dom not to edit</p><ul><li><p>a</p></li><li>◆</li></ul>',
+                do: async function () {
+                    await self.dependencies.Test.triggerNativeEvents(self.btnOl, ['mousedown', 'click']);
+                },
+                test: '<p>dom not to edit</p><ul><li><p>a</p></li></ul><ol><li><br/>◆</li></ol>',
+            },
+            {
+                name: "Click OL: ul -> ol (from second li > br)",
+                content: '<p>dom not to edit</p><ul><li><p>a</p></li><li><br/>◆</li></ul>',
+                do: async function () {
+                    await self.dependencies.Test.triggerNativeEvents(self.btnOl, ['mousedown', 'click']);
+                },
+                test: '<p>dom not to edit</p><ul><li><p>a</p></li></ul><ol><li><br/>◆</li></ol>',
+            },
             // Checklist -> OL
             {
                 name: "Click OL: ul.o_checklist -> ol",

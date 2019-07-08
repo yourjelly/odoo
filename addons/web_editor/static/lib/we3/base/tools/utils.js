@@ -269,6 +269,17 @@ we3.utils = {
         }, []);
     },
     /**
+     * Map each element of an array using a mapping function, then flatten the
+     * result into a new array.
+     *
+     * @param {any []} array
+     * @param {function} fn
+     * @returns {any []}
+     */
+    flatMap: function (array, fn) {
+        return Array.prototype.concat.apply([], array.map(fn));
+    },
+    /**
      * Returns (and creates if necessary) a regular expression.
      * If a regular expression with the given name exists, simply returns it.
      * Otherwise, creates a new one with the given name, exp and flag.
