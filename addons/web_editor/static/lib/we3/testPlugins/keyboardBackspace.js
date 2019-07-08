@@ -424,6 +424,38 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             }],
             test: "<ul><li><br/></li><li>◆kl</li></ul>",
         },
+        {
+            name: "in ul > li (ol > li before): BACKSPACE at end",
+            content: "<ol><li>a</li></ol><ul><li>◆b</li></ul>",
+            steps: [{
+                key: 'BACKSPACE',
+            }],
+            test: "<ol><li>a◆b</li></ol>",
+        },
+        {
+            name: "in ul > li > p (ol > li before): BACKSPACE at end",
+            content: "<ol><li>a</li></ol><ul><li><p>◆b</p></li></ul>",
+            steps: [{
+                key: 'BACKSPACE',
+            }],
+            test: "<ol><li>a◆b</li></ol>",
+        },
+        {
+            name: "in ul > li (ol > li > p before): BACKSPACE at end",
+            content: "<ol><li><p>a</p></li></ol><ul><li>◆b</li></ul>",
+            steps: [{
+                key: 'BACKSPACE',
+            }],
+            test: "<ol><li><p>a◆b</p></li></ol>",
+        },
+        {
+            name: "in ul > li > p (ol > li > p before): BACKSPACE at end",
+            content: "<ol><li><p>a</p></li></ol><ul><li><p>◆b</p></li></ul>",
+            steps: [{
+                key: 'BACKSPACE',
+            }],
+            test: "<ol><li><p>a◆b</p></li></ol>",
+        },
 
         // end list UL / OL
 

@@ -887,6 +887,19 @@ we3.ArchNode = class {
         return archNode;
     }
     /**
+     * Split the current node's parent at both edges of this node.
+     */
+    splitAround () {
+        // split at start if not on left edge
+        if (this.index()) {
+            this.parent.split(this.index(), true);
+        }
+        // split at end if not on right edge
+        if (this.index() + 1 < this.parent.length()) {
+            this.parent.split(this.index() + 1, true);
+        }
+    }
+    /**
      * Split this ArchNode at given offset, if possible.
      * Keep splitting the parents until the given ancestor was split.
      * Return the ArchNode on the right hand side of the split.
@@ -1019,7 +1032,7 @@ we3.ArchNode = class {
      *
      * @private
      */
-    _cleanAfterUnwrap() {
+    _cleanAfterUnwrap () {
         var prev = this.previousSibling();
         if (prev) {
             prev.removeIfEmpty();
@@ -1190,7 +1203,9 @@ we3.ArchNode = class {
      * @returns {boolean}
      */
     _isMergeableDifferentTypes (node, next) {
-        return !this._isMergeForbidden(node, next) && node.isBlock() && next.isFormatNode();
+        var isBlockVSFormat = node.isBlock() && next.isFormatNode();
+        var areBothLists = node.isList() && next.isList();
+        return !this._isMergeForbidden(node, next) && (isBlockVSFormat || areBothLists);
     }
     /**
      * Return true if this ArchNode can be merged with `node`.
@@ -1244,6 +1259,9 @@ we3.ArchNode = class {
         var childNodes = this.childNodes.slice();
         next[isLeft ? 'append' : 'prepend'](isLeft ? childNodes : childNodes.reverse());
         this.remove();
+        if (next.isLi() && next.cleanTextVSFormat) {
+            next.cleanTextVSFormat(isLeft);
+        }
     }
     /**
      * Merge an indented list with a non-indented list item if needed.

@@ -568,10 +568,7 @@ var BaseArch = class extends we3.AbstractPlugin {
             /* Split to isolate the node to unwrap (that is, the node
             whose parent needs to go) */
             var ancestorToUnwrap = unwrapInfo.node.ancestor(function (a) {
-                if (a.__removed || a.parent.__removed) return;
-                a.parent.split(a.index(), true);
-                if (a.__removed || a.parent.__removed) return;
-                a.parent.split(a.index() + 1, true);
+                a.splitAround();
                 return a.parent.nodeName === unwrapInfo.wrapperName;
             });
             if (ancestorToUnwrap) {
