@@ -230,13 +230,13 @@ class ComposerInput extends Component {
             menuItemTemplate(item) {
                 return `<div class="o_ComposerTextInput_mention"
                              title="${
-                                 item.original.displayNname
+                                 item.original.name
                              }${
                                  item.original.email
                                     ? `<${item.original.email}>`
                                     : ''
                              }">${
-                    item.original.displayName
+                    item.original.name
                 }${
                     item.original.email
                         ? ` <span class="o_extra">${_.str.escapeHTML(`<${item.original.email}>`)}</span>`
@@ -255,7 +255,7 @@ class ComposerInput extends Component {
                 return `<span class="o_mention"
                               contenteditable="false"
                               data-oe-id="${item.original.id}"
-                              data-oe-model="res.partner">@${item.original.displayName}</span>`;
+                              data-oe-model="res.partner">@${item.original.name}</span>`;
             },
             trigger: '@',
             values(keyword, callback) {
@@ -361,11 +361,15 @@ class ComposerInput extends Component {
      * @param {function} callback
      */
     async _searchPartnerMentionSuggestions(keyword, callback) {
-        this.env.store.dispatch('searchPartners', {
-            callback,
-            keyword,
-            limit: 10,
+        const suggestions = await this.env.rpc({
+            model: 'res.partner',
+            method: 'get_mention_suggestions',
+            kwargs: {
+                limit: 10,
+                search: keyword,
+            },
         });
+        callback(suggestions);
     }
 
     /**

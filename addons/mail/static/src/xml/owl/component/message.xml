@@ -6,8 +6,9 @@
         owl="1"
         t-att-data-message-local-id="props.messageLocalId"
         t-att-class="{
-            o_discussion: props.message.is_discussion or props.message.is_notification,
-            o_notification: props.message.message_type === 'notification',
+            o_discussion: props.message.is_discussion,
+            o_note: props.message.is_note,
+            o_notification: props.message.is_notification,
             o_squashed: props.squashed,
             o_comment: props.message.message_type === 'comment',
             o_starred: starred,

@@ -129,6 +129,7 @@
                             o_Composer_button
                             o_Composer_buttonSend"
                         type="button"
+                        t-att-disabled="state.isSending ? 'disabled' : ''"
                         t-if="props.sendButton and props.inlineActions"
                         t-on-click="_onClickSend">
                         <t t-if="props.isLog">Log</t><t t-else="">Send</t>
@@ -154,6 +155,7 @@
                             o_Composer_action
                             o_Composer_buttonSend"
                         type="button"
+                        t-att-disabled="state.isSending ? 'disabled' : ''"
                         t-if="props.sendButton and !props.inlineActions"
                         t-on-click="_onClickSend">
                         <t t-if="props.isLog">Log</t><t t-else="">Send</t>

@@ -21,6 +21,7 @@ class Composer extends Component {
         this.id = _.uniqueId('o_Composer');
         this.state = {
             attachmentLocalIds: [],
+            isSending: false,
             showAllSuggestedRecipients: false,
         };
         this.template = 'mail.component.Composer';
@@ -83,17 +84,23 @@ class Composer extends Component {
      * @private
      */
     _postMessage() {
+        const self = this;
+
+        this.state.isSending = true;
+
         // TODO: take suggested recipients into account
         this.env.store.dispatch('postMessageOnThread', this.props.threadLocalId, {
             attachmentLocalIds: this.state.attachmentLocalIds,
             content: this.refs.textInput.getValue(),
+            subtype: this.props.isLog ? 'mail.mt_note': 'mail.mt_comment',
+        }).then(function () {
+            self.state.isSending = false;
+            self.refs.textInput.resetValue();
+            self.state.attachmentLocalIds = [];
+            self.trigger('message-posted');
+        }).guardedCatch(function () {
+            self.state.isSending = false;
         });
-        this.refs.textInput.resetValue();
-        this.state.attachmentLocalIds = [];
-
-        // TODO: we might need to remove trigger and use the store to wait for
-        // the post rpc to be done
-        this.trigger('message-posted');
     }
 
     //--------------------------------------------------------------------------

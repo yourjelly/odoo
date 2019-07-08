@@ -138,6 +138,10 @@
     }
 
     &.o_comment {
+        // background-color: gray('200');
+        // border-bottom: 1px solid gray('400');
+    }
+    &.o_note {
         background-color: gray('200');
         border-bottom: 1px solid gray('400');
     }
