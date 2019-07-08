@@ -219,7 +219,7 @@ class SurveyUserInputLine(models.Model):
     answer_score = fields.Float('Score given for this choice')
 
     @api.model
-    def compute_is_displayed(self, answer_sudo, question):
+    def check_dependency_rule(self, answer_sudo, question):
         """ show/hide the question based on dependency rule """
         def check_multilevel_dependency(answer_sudo, question):
             answer = answer_sudo.user_input_line_ids.filtered(lambda answer: answer.question_id.id == question.question_depend_id.id)

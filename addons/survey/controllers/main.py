@@ -411,7 +411,7 @@ class Survey(http.Controller):
                 next_page, last = request.env['survey.survey'].next_page_or_question(answer_sudo, page_or_question_id, go_back=go_back)
                 user_input_line = request.env['survey.user_input_line'].sudo()
                 def check_dependency(page, last_displayed_page_id=False, check_next=False):
-                    if page and page.is_enable_question_dependency and not user_input_line.compute_is_displayed(answer_sudo, page):
+                    if page and page.is_enable_question_dependency and not user_input_line.check_dependency_rule(answer_sudo, page):
                         values = {'last_displayed_page_id': page.id}
                         last_displayed_page_id = page.id
                         page, last = request.env['survey.survey'].next_page_or_question(answer_sudo, page.id, go_back=go_back)
