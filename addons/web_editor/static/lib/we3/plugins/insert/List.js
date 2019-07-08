@@ -101,17 +101,14 @@ var LIST = class extends we3.ArchNode {
      * @param {ArchNode []} contents
      */
     _cleanEdgesAfterUnlistMerge (contents) {
-        var mergeOptions = {
-            doNotRemoveEmpty: true,
-        };
         // merge two p's in a li, not two li's
         if (contents.length && !(contents[0].isText() && contents[0].parent.isLi())) {
-            contents[0].deleteEdge(true, mergeOptions);
+            contents[0].deleteEdge(true, { doNotRemoveEmpty: true });
         }
         var prev = this.previousSibling();
         this.remove();
         if (prev) {
-            prev.deleteEdge(false, mergeOptions);
+            prev.deleteEdge(false, { doNotRemoveEmpty: true });
         }
     }
     /**
@@ -132,6 +129,7 @@ var LIST = class extends we3.ArchNode {
 
         var previousLi = beforeList.items(true).pop();
         contents.slice().forEach(node => previousLi.append(node));
+        previousLi.cleanTextVSFormat(false);
         this._cleanEdgesAfterUnlistMerge(contents);
 
         return previousLi;
@@ -179,6 +177,31 @@ var li = class extends we3.ArchNode {
     // Public
     //--------------------------------------------------------------------------
 
+    /**
+     * In merging two list elements, we might end up with a list element
+     * containing format node alongside plain text nodes. This merges them.
+     */
+    cleanTextVSFormat (isLeft) {
+        var nodes = isLeft ? this.childNodes.reverse() : this.childNodes;
+        var hasText = nodes.some(node => node.isText());
+        var hasFormat = nodes.some(node => node.isFormatNode());
+        if (!hasText || !hasFormat) {
+            return;
+        }
+        var prev;
+        nodes.slice().forEach(function (node) {
+            if (prev && node.isFormatNode() && prev.isText()) {
+                var last = node.lastChild();
+                prev.after(node.childNodes);
+                node.remove();
+                prev = last;
+            } else if (prev && node.isText() && prev.isFormatNode()) {
+                prev.append(node);
+            } else {
+                prev = node;
+            }
+        });
+    }
     /**
      * Indent this list item
      */
@@ -593,17 +616,13 @@ var ListPlugin = class extends we3.AbstractPlugin {
      * Indent the list
      */
     indent () {
-        var rangeToPreserve = this.dependencies.Range.getRange();
-        this.dependencies.Arch.indent();
-        this.dependencies.Range.setRange(rangeToPreserve);
+        this.dependencies.Arch.do(() => this.dependencies.Arch.indent());
     }
     /**
      * Outdent the list
      */
     outdent () {
-        var rangeToPreserve = this.dependencies.Range.getRange();
-        this.dependencies.Arch.outdent();
-        this.dependencies.Range.setRange(rangeToPreserve);
+        this.dependencies.Arch.do(() => this.dependencies.Arch.outdent());
     }
     /**
      * Insert an ordered list, an unordered list or a checklist.
@@ -612,18 +631,7 @@ var ListPlugin = class extends we3.AbstractPlugin {
      * @param {string('ol'|'ul'|'checklist')} type the type of list to insert
      */
     toggle (type) {
-        var rangeToPreserve = this.dependencies.Range.getRange();
-        var selectedLeaves = this.dependencies.Range.getSelectedLeaves();
-        if (this._isAllInList(selectedLeaves)) {
-            if (this._isAllInListType(selectedLeaves, type)) {
-                this._removeList();
-            } else {
-                this._convertList(type);
-            }
-        } else {
-            this._insertList(type);
-        }
-        this.dependencies.Range.setRange(rangeToPreserve);
+        this.dependencies.Arch.do(getArchNode => this._toggle(type, getArchNode));
     }
 
     //--------------------------------------------------------------------------
@@ -649,47 +657,41 @@ var ListPlugin = class extends we3.AbstractPlugin {
      *
      * @private
      * @param {string('ol'|'ul'|'checklist')} type the type of list to insert
+     * @param {function} getArchNode
+     * @returns {ArchNode []} list of created lists
      */
-    _convertList (type) {
-        this._removeList();
-        this._insertList(type);
+    _convertList (type, getArchNode) {
+        var idsToWrap = this._removeList(getArchNode);
+        return this._insertList(type, getArchNode, idsToWrap);
     }
     /**
-     * Delete the new edges after list insertion/removal.
-     *
-     * @private
-     */
-    _deleteNewEdges () {
-        var self = this;
-        this._mergeIndentedLists();
-
-        // merge the list siblings together
-        var edges = [];
-        this._selectedLists().forEach(listAncestor => edges = edges.concat(self._mergeSiblingLists(listAncestor)));
-        edges = we3.utils.uniq(edges.filter(node => node && node.isInArch()));
-
-        // render if something changed
-        if (edges.length) {
-            var json = edges.map(node => node.parent.toJSON());
-            this.dependencies.Arch.importUpdate(json);
-        }
-    }
-    /**
-     * Insert a list at range.
+     * Insert a list at range or turn `nodeToWrap` into a list.
      *
      * @private
      * @param {string('ol'|'ul'|'checklist')} nodeName the type of list to insert
+     * @param {function} getArchNode
+     * @param {ArchNode|number []} [nodesToWrap] the node to wrap or its id
+     * @returns {ArchNode []} list of created lists
      */
-    _insertList (nodeName) {
-        var options = {
-            wrapAncestorPred: node => node.parent && node.parent.nodeName === 'td' || node.isBlock(),
-            doNotSplit: true,
-        };
-        /* wrap each lowest level block at range into a list of type `nodeName`
-        note: `wrapAncestorPred` ensures we wrap the block parent or the child of a `td` */
-        var wrapperIDs = this.dependencies.Arch.wrapRange(nodeName, options);
-        this._mergeGeneratedLists(wrapperIDs);
-        this._deleteNewEdges();
+    _insertList (nodeName, getArchNode, nodesToWrap) {
+        var idsToWrap = (nodesToWrap || []).map(function (nodeOrID) {
+            return typeof nodeOrID === 'number' ? nodeOrID : nodeOrID.id;
+        });
+        var liIDs = [];
+        // wrap each lowest level block at range into a li
+        if (idsToWrap.length) {
+            liIDs = this.dependencies.Arch.wrap(idsToWrap, 'li');
+        } else {
+            /* `wrapAncestorPred` ensures we wrap either the block parent or the
+            child of a `td` */
+            liIDs = this.dependencies.Arch.wrapRange('li', {
+                doNotSplit: true,
+                wrapAncestorPred: n => n.parent && n.parent.isTd() || n.isBlock(),
+            });
+        }
+        // wrap the generated list items into a list of type `nodeName`
+        return this.dependencies.Arch.wrap(liIDs, nodeName)
+            .map(getArchNode).filter(node => node && node.isList());
     }
     /**
      * Return true if every node in the given array is in a list.
@@ -726,113 +728,67 @@ var ListPlugin = class extends we3.AbstractPlugin {
         return !!firstListAncestors.length && firstListAncestors.every(method);
     }
     /**
-     * Merge the generated lists together
-     *
-     * @private
-     * @param {number []} ids the generated wrappers' ids
-     */
-    _mergeGeneratedLists (ids) {
-        var self = this;
-        if (ids.length <= 1) {
-            return;
-        }
-        // merging among nodes in the `ids` array so the antepenulvian one
-        // merges with the last one, meaning we don't need to apply
-        // `deleteEdge` on the last one
-        ids.pop();
-        var mergeOptions = {
-            doNotRemoveEmpty: true,
-            mergeOnlySameType: true,
-        };
-        var json = ids.map(function (id) {
-            var node = self.dependencies.Arch.getClonedArchNode(id);
-            var ultimateList = node.ancestor('isList', true); // will be useful for rendering
-            if (node.isIndented()) {
-                // merge parents of indented lists together
-                node.ancestor('isParentOfIndented').deleteEdge(false, mergeOptions);
-            }
-            node.deleteEdge(false, mergeOptions);
-            return ultimateList.toJSON();
-        });
-        // render the changes on the greatest lists involved
-        this.dependencies.Arch.importUpdate(json);
-    }
-    /**
-     * Merge all indented lists at range
-     *
-     * @private
-     */
-    _mergeIndentedLists () {
-        var selectedLeaves = this.dependencies.Range.getSelectedLeaves();
-        var greatestListAncestor = selectedLeaves.length && selectedLeaves[0].ancestor('isList', true);
-        var parentsOfIndented = selectedLeaves.map(node => node.ancestor('isParentOfIndented'))
-            .filter(node => node);
-        // merging among nodes in the `parentsOfIndented` array so the antepenulvian one
-        // merges with the last one, meaning we don't need to apply `deleteEdge` on the last one
-        parentsOfIndented.pop();
-        var mergeOptions = {
-            mergeOnlySameType: true,
-        };
-        parentsOfIndented.forEach(parentOfIndented => parentOfIndented.deleteEdge(false, mergeOptions));
-        if (greatestListAncestor) {
-            this.dependencies.Arch.importUpdate(greatestListAncestor.toJSON());
-        }
-    }
-    /**
      * Merge a list with its next and previous list if any,
      * and return a list of the remaining edges
      *
      * @private
      * @param {ArchNode} list
-     * @returns {ArchNode []}
      */
     _mergeSiblingLists (list) {
         function __mergeNextList (list, isPrev) {
             var nextList = list[isPrev ? 'previousSibling' : 'nextSibling']();
-            if (nextList && nextList.isList()) {
+            if (nextList && nextList.listType === list.listType) {
                 var nextEdge = isPrev ? list : nextList;
-                nextEdge.deleteEdge(true, {
-                    mergeOnlySameType: true,
-                });
-                return isPrev ? nextList : list;
+                nextEdge.deleteEdge(true, { mergeOnlyIfSameType: true });
             }
         }
-        var edges = [__mergeNextList(list, false)];
-        edges.push(__mergeNextList(list, true));
-        return edges;
+        __mergeNextList(list, false);
+        __mergeNextList(list, true);
+        var parentOfIndented = list.ancestor('isParentOfIndented');
+        if (parentOfIndented) {
+            parentOfIndented.deleteEdge(false, { mergeOnlyIfSameType: true });
+        }
     }
     /**
      * Remove a list at range
      *
      * @private
+     * @param {function} getArchNode
+     * @returns {number []} the ids of the unwrapped contents
      */
-    _removeList () {
+    _removeList (getArchNode) {
         var nodeNamesToRemove = ['li', 'ol', 'ul'];
-        var liAncestors = this._selectedListItems();
+        var liAncestors = this._selectedListItems().map(getArchNode);
+        var contentIDs = we3.utils.flatMap(liAncestors, li => li.childNodes)
+            .map(node => node.id);
         if (liAncestors.length && liAncestors.every(li => li.isIndented())) {
-            this.outdent();
+            this.dependencies.Arch.outdent();
         } else if (this.dependencies.Range.isCollapsed()) {
-            var focusNode = this.dependencies.Range.getFocusedNode();
-            var liAncestor = focusNode.ancestor('isLi');
-            var childrenOfLiIDs = liAncestor.childNodes.map(node => node.id);
-            this.dependencies.Arch.unwrapFrom(childrenOfLiIDs, nodeNamesToRemove);
-            this._deleteNewEdges();
+            if (!contentIDs.length) { // li has no children => append a virtual
+                var virtual = liAncestors[0].params.create();
+                liAncestors[0].append(virtual);
+                contentIDs.push(virtual.id);
+            }
+            this.dependencies.Arch.unwrapFrom(contentIDs, nodeNamesToRemove);
         } else {
             this.dependencies.Arch.unwrapRangeFrom(nodeNamesToRemove, {
                 doNotSplit: true,
             });
-            this._deleteNewEdges();
         }
+        return contentIDs;
     }
     /**
-     * Return a list of list items (`li`) at range
+     * Return a list of ids of list items (`li`) at range
      *
      * @private
-     * @returns {ArchNode []}
+     * @returns {number []}
      */
     _selectedListItems () {
         var selectedLeaves = this.dependencies.Range.getSelectedLeaves();
-        return selectedLeaves.map(node => node.ancestor('isLi')).filter(node => node);
+        return selectedLeaves.map(function (node) {
+            var liAncestor = node.ancestor('isLi');
+            return liAncestor && liAncestor.id;
+        }).filter(id => id);
     }
     /**
      * Return a list of lists (`ul`, `ol`, `checklist`) at range
@@ -844,6 +800,39 @@ var ListPlugin = class extends we3.AbstractPlugin {
         var selectedLeaves = this.dependencies.Range.getSelectedLeaves();
         var listAncestors = selectedLeaves.map(node => node.ancestor('isList'));
         return we3.utils.uniq(listAncestors.filter(node => node));
+    }
+    /**
+     * Insert an ordered list, an unordered list or a checklist.
+     * If already in list, remove the list or convert it to the given type.
+     *
+     * @private
+     * @param {string('ol'|'ul'|'checklist')} type the type of list to insert
+     * @param {function} getArchNode
+     */
+    _toggle (type, getArchNode) {
+        var range = this.dependencies.Range.getRange();
+        var selectedLeaves = this.dependencies.Range.getSelectedLeaves();
+        var newLists = [];
+        if (this._isAllInList(selectedLeaves)) {
+            if (this._isAllInListType(selectedLeaves, type)) {
+                this._removeList(getArchNode); // [ REMOVE ]
+            } else {
+                newLists = this._convertList(type, getArchNode); // [ CONVERT ]
+            }
+        } else {
+            newLists = this._insertList(type, getArchNode); // [ INSERT ]
+        }
+        newLists.slice().forEach(this._mergeSiblingLists); // Clean edges
+        var start = getArchNode(selectedLeaves[0].id); // Restore range
+        var end = getArchNode(selectedLeaves[selectedLeaves.length - 1].id);
+        if (start && end) {
+            return {
+                scID: start.id,
+                so: range.so,
+                ecID: end.id,
+                eo: range.eo,
+            };
+        }
     }
 
     //--------------------------------------------------------------------------
