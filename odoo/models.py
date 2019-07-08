@@ -442,6 +442,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         #   class A2(Model):
         #       _inherit = 'a'
 
+        if getattr(cls, '_constraints', False):
+            _logger.warn("Manually defining the _constraints attribute is no longer supported, "
+                         "please use @api.constrains instead")
         # Keep links to non-inherited constraints in cls; this is useful for
         # instance when exporting translations
         cls._local_constraints = cls.__dict__.get('_constraints', [])
