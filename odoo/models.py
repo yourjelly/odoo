@@ -2037,7 +2037,7 @@ class BaseModel(object):
         if many2onefields:
             data_ids = [r['id'] for r in fetched_data]
             many2onefields = list(set(many2onefields))
-            data_dict = {d['id']: d for d in self.browse(data_ids).read(many2onefields)}
+            data_dict = {d['id']: {f: (getattr(d, f).sudo().id, getattr(d, f).sudo().display_name) if getattr(d, f) else False for f in many2onefields} for d in self.browse(data_ids)}
             for d in fetched_data:
                 d.update(data_dict[d['id']])
 
