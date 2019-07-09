@@ -2,7 +2,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import tools
-from odoo import api, fields, models
+from odoo import api, fields, http, models
+from odoo.http import request
 
 
 class SaleReport(models.Model):
@@ -130,6 +131,34 @@ class SaleReport(models.Model):
         """ % (groupby)
 
         return '%s (SELECT %s FROM %s WHERE l.product_id IS NOT NULL GROUP BY %s)' % (with_, select_, from_, groupby_)
+
+    @api.model
+    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+        fields.extend(['amounts:array_agg(price_total)', 'subtotal:array_agg(price_subtotal)', 'pls:array_agg(pricelist_id)', 'date_order:array_agg(date)'])
+        pl_groups = super(SaleReport, self).read_group(domain, fields, groupby=groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+
+        if len(pl_groups) and pl_groups[0]['amounts']:
+            currency = self.env.user.currency_id
+
+            for group in pl_groups:
+                total = 0.0
+                subtotal = 0.0
+
+                if group['amounts']:
+                    for index, amount in enumerate(group['amounts']):
+                        pl_currency = self.env['product.pricelist'].browse(group['pls'][index]).currency_id
+
+                        if pl_currency.id == currency.id:
+                            total += float(amount)
+                            subtotal += float(group['subtotal'][index])
+                        else:
+                            total += pl_currency._convert(float(amount), currency, request.env.user.company_id, group['date_order'][index])
+                            subtotal += pl_currency._convert(float(group['subtotal'][index]), currency, request.env.user.company_id, group['date_order'][index])
+
+                group['price_subtotal_all_orders'] = group['price_total'] = total
+                group['price_subtotal_confirmed_orders'] = group['price_subtotal'] = subtotal
+
+        return pl_groups
 
     @api.model_cr
     def init(self):
