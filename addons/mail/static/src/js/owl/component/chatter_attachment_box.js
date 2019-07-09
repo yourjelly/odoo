@@ -17,10 +17,11 @@ class AttachmentBox extends Component {
         this.components = { AttachmentList };
 
         this.fileuploadId = _.uniqueId('o_ChatterAttachmentBox_fileInput');
+        this._attachmentUploadedListener = ev => this._onAttachmentUploaded(ev);
     }
 
     mounted() {
-        window.addEventListener(this.fileuploadId, this._onAttachmentUploaded.bind(this));
+        window.addEventListener(this.fileuploadId, this._attachmentUploadedListener);
 
         this.env.store.dispatch('fetchDocumentAttachments', {
             resId: this.props.resId,
@@ -29,7 +30,7 @@ class AttachmentBox extends Component {
     }
 
     willUnmount() {
-        window.removeEventListener(this.fileuploadId);
+        window.removeEventListener(this.fileuploadId, this._attachmentUploadedListener);
     }
 
     //--------------------------------------------------------------------------

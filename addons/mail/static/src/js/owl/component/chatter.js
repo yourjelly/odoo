@@ -100,8 +100,11 @@ class Chatter extends Component {
      * @private
      */
     _resetComposerState() {
-        this.state.showComposer = false;
-        this.state.composerMode = 'send';
+        var self = this;
+        // setTimeout(function () {
+            self.state.showComposer = false;
+            self.state.composerMode = 'send';
+        // }, 0);
     }
 
     //--------------------------------------------------------------------------
