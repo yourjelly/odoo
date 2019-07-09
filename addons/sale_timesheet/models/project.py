@@ -83,6 +83,10 @@ class Project(models.Model):
             if project.billable_type == 'employee_rate' and not project.sale_line_employee_ids:
                 raise ValidationError(_('A project billed at employee rate must have at least one employee rate defined.'))
 
+    # ---------------------------------------------------
+    # Actions
+    # ---------------------------------------------------
+
     @api.multi
     def action_view_timesheet(self):
         self.ensure_one()
@@ -138,11 +142,31 @@ class Project(models.Model):
             },
         }
 
+    # ---------------------------------------------------
+    # Business Methods
+    # ---------------------------------------------------
+
     @api.model
     def _map_tasks_default_valeus(self, task):
         defaults = super(Project, self)._map_tasks_default_valeus(task)
         defaults['sale_line_id'] = False
         return defaults
+
+    def _create_sale_order_prepare_values(self):
+        return {
+            'project_id': self.id,
+            'partner_id': self.partner_id.id,
+            'analytic_account_id': self.analytic_account_id.id,
+            'client_order_ref': self.name,
+            'company_id': self.company_id.id,
+        }
+
+    def _create_sale_order(self):
+        values = self._create_sale_order_prepare_values()
+        sale_order = self.env['sale.order'].create(values)
+        sale_order.onchange_partner_id()
+        sale_order.onchange_partner_shipping_id()
+        return sale_order
 
 
 class ProjectTask(models.Model):
@@ -218,6 +242,8 @@ class ProjectTask(models.Model):
         # deduce default sales order line value
         if self.billable_type in ['task_rate', 'project_rate']:
             self.sale_line_id = self.project_id.sale_line_id
+        else:
+            self.sale_line_id = False
         # deduce partner from the SO / SOL according to billable type
         if not self.partner_id:
             if self.billable_type in ['project_rate', 'employee_rate']:

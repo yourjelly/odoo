@@ -4,6 +4,8 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 
+from odoo.tools.safe_eval import safe_eval
+
 
 class ProjectCreateSalesOrder(models.TransientModel):
     _name = 'project.create.sale.order'
@@ -36,7 +38,11 @@ class ProjectCreateSalesOrder(models.TransientModel):
         ('task_rate', 'At Task Rate'),
         ('project_rate', 'At Project Rate'),
         ('employee_rate', 'At Employee Rate'),
-    ], string="Billing Type", default='project_rate', required=True, help="* At Project Rate: All timesheets on the project will be billed at the same rate\n* At Employee Rate: Timesheets will be billed at a rate defined at employee level")
+    ], string="Billing Type", default='task_rate', required=True, help="""
+        * At Task Rate: All timesheets on the project will be billed at the rate defined on the task with its Sales Order Item.
+        * At Project Rate: All timesheets on the project will be billed at the same rate.
+        * At Employee Rate: Timesheets will be billed at a rate defined at employee level.
+    """)
 
     line_ids = fields.One2many('project.create.sale.order.line', 'wizard_id', string='Lines')
 
@@ -47,42 +53,26 @@ class ProjectCreateSalesOrder(models.TransientModel):
 
     @api.onchange('billable_type', 'product_id')
     def _onchange_product_id(self):
-        if self.billable_type == 'project_rate':
+        if self.billable_type == 'task_rate':
+            self.line_ids = False
+            self.partner_id = False
+        elif self.billable_type == 'project_rate':
             if self.product_id:
                 self.price_unit = self.product_id.lst_price
-        else:
+            self.line_ids = False
+        elif self.billable_type == 'employee_rate':
             self.price_unit = 0.0
 
-    @api.multi
-    def action_create_sale_order(self):
+    def action_make_billable(self):
         # check inputs
         self._check_user_inputs()
-        # create SO
-        sale_order = self.env['sale.order'].create({
-            'project_id': self.project_id.id,
-            'partner_id': self.partner_id.id,
-            'analytic_account_id': self.project_id.analytic_account_id.id,
-            'client_order_ref': self.project_id.name,
-            'company_id': self.project_id.company_id.id,
-        })
-        sale_order.onchange_partner_id()
-        sale_order.onchange_partner_shipping_id()
-
         # create the sale lines, the map (optional), and assign existing timesheet to sale lines
-        self._make_billable(sale_order)
-
-        # confirm SO
-        sale_order.action_confirm()
-
-        view_form_id = self.env.ref('sale.view_order_form').id
-        action = self.env.ref('sale.action_orders').read()[0]
-        action.update({
-            'views': [(view_form_id, 'form')],
-            'view_mode': 'form',
-            'name': sale_order.name,
-            'res_id': sale_order.id,
-        })
-        return action
+        if self.billable_type == 'task_rate':
+            return self._make_billable_at_task_rate()
+        if self.billable_type == 'project_rate':
+            return self._make_billable_at_project_rate()
+        elif self.billable_type == 'employee_rate':
+            return self._make_billable_at_employee_rate()
 
     def _check_user_inputs(self):
         """ This method check is the asked user action is possible with the introduced data. This raises Error to
@@ -112,14 +102,28 @@ class ProjectCreateSalesOrder(models.TransientModel):
 
         return True
 
-    def _make_billable(self, sale_order):
-        # create the sale lines, the map (optional), and assign existing timesheet to sale lines
-        if self.billable_type == 'project_rate':
-            self._make_billable_at_project_rate(sale_order)
-        elif self.billable_type == 'employee_rate':
-            self._make_billable_at_employee_rate(sale_order)
+    def _make_billable_at_task_rate(self):
+        # update billable type of project
+        self.project_id.write({
+            'billable_type': 'task_rate',
+        })
+        # redirect to tasks of the project
+        action = self.env.ref('project.act_project_project_2_project_task_all').read()[0]
+        if action.get('context'):
+            eval_context = self.env['ir.actions.actions']._get_eval_context()
+            eval_context.update({'active_id': self.project_id.id})
+            action['context'] = safe_eval(action['context'], eval_context)
+        return action
 
-    def _make_billable_at_project_rate(self, sale_order):
+    def _make_billable_at_project_rate(self):
+        # update project before creating SO (partner required on SO)
+        self.project_id.write({
+            'partner_id': self.partner_id.id,
+        })
+
+        # create sales order
+        sale_order = self.project_id._create_sale_order()
+
         # trying to simulate the SO line created a task, according to the product configuration
         # To avoid, generating a task when confirming the SO
         task_id = False
@@ -140,7 +144,6 @@ class ProjectCreateSalesOrder(models.TransientModel):
         self.project_id.write({
             'sale_order_id': sale_order.id,
             'sale_line_id': sale_order_line.id,
-            'partner_id': self.partner_id.id,
             'billable_type': 'project_rate',
         })
         self.project_id.tasks.filtered(lambda task: task.billable_type == 'no').write({
@@ -154,9 +157,17 @@ class ProjectCreateSalesOrder(models.TransientModel):
             'so_line': sale_order_line.id
         })
 
-        return sale_order_line
+        return self._confirm_and_redirect_to_sale_order(sale_order)
 
-    def _make_billable_at_employee_rate(self, sale_order):
+    def _make_billable_at_employee_rate(self):
+        # update project before creating SO (partner required on SO)
+        self.project_id.write({
+            'partner_id': self.partner_id.id,
+        })
+
+        # create sales order
+        sale_order = self.project_id._create_sale_order()
+
         # trying to simulate the SO line created a task, according to the product configuration
         # To avoid, generating a task when confirming the SO
         task_id = self.env['project.task'].search([('project_id', '=', self.project_id.id)], order='create_date DESC', limit=1).id
@@ -211,23 +222,25 @@ class ProjectCreateSalesOrder(models.TransientModel):
                 'so_line': map_entry.sale_line_id.id
             })
 
-        return map_entries
+        return self._confirm_and_redirect_to_sale_order(sale_order)
 
     # --------------------------------------
     #  Helpers
     # --------------------------------------
 
-    def _project_create_sale_order(self):
-        sale_order = self.env['sale.order'].create({
-            'project_id': self.project_id.id,
-            'partner_id': self.partner_id.id,
-            'analytic_account_id': self.project_id.analytic_account_id.id,
-            'client_order_ref': self.project_id.name,
-            'company_id': self.project_id.company_id.id,
+    def _confirm_and_redirect_to_sale_order(self, sale_order):
+        # confirm SO
+        sale_order.action_confirm()
+
+        view_form_id = self.env.ref('sale.view_order_form').id
+        action = self.env.ref('sale.action_orders').read()[0]
+        action.update({
+            'views': [(view_form_id, 'form')],
+            'view_mode': 'form',
+            'name': sale_order.name,
+            'res_id': sale_order.id,
         })
-        sale_order.onchange_partner_id()
-        sale_order.onchange_partner_shipping_id()
-        return sale_order
+        return action
 
 
 class ProjectCreateSalesOrderLine(models.TransientModel):
