@@ -2357,10 +2357,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             value = field.convert_to_column(value, self)
         else:
             value = None
-        # Write value if non-NULL, except for booleans for which False means
-        # the same as NULL - this saves us an expensive query on large tables.
-        necessary = (value is not None) if field.type != 'boolean' else value
-        if necessary:
+        if value is not None:
             _logger.debug("Table '%s': setting default value of new column %s to %r",
                           self._table, column_name, value)
             query = 'UPDATE "%s" SET "%s"=%s WHERE "%s" IS NULL' % (

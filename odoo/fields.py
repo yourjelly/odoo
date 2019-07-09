@@ -1208,6 +1208,10 @@ class Field(MetaField('DummyField', (object,), {})):
 class Boolean(Field):
     type = 'boolean'
     column_type = ('bool', 'bool')
+    _slots = {
+        'required': True,
+        'default': False,
+    }
 
     def convert_to_column(self, value, record, values=None, validate=True):
         return bool(value)
