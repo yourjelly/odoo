@@ -27,17 +27,23 @@ class ProjectCreateSalesOrder(models.TransientModel):
         return result
 
     project_id = fields.Many2one('project.project', "Project", domain=[('sale_line_id', '=', False)], help="Project for which we are creating a sales order", required=True)
-    partner_id = fields.Many2one('res.partner', string="Customer", domain=[('customer', '=', True)], required=True, help="Customer of the sales order")
+    partner_id = fields.Many2one('res.partner', string="Customer", domain=[('customer', '=', True)], help="Customer of the sales order")
     product_id = fields.Many2one('product.product', domain=[('type', '=', 'service'), ('invoice_policy', '=', 'delivery'), ('service_type', '=', 'timesheet')], string="Service", help="Product of the sales order item. Must be a service invoiced based on timesheets on tasks.")
     price_unit = fields.Float("Unit Price", help="Unit price of the sales order item.")
     currency_id = fields.Many2one('res.currency', string="Currency", related='product_id.currency_id', readonly=False)
 
     billable_type = fields.Selection([
+        ('task_rate', 'At Task Rate'),
         ('project_rate', 'At Project Rate'),
         ('employee_rate', 'At Employee Rate'),
     ], string="Billing Type", default='project_rate', required=True, help="* At Project Rate: All timesheets on the project will be billed at the same rate\n* At Employee Rate: Timesheets will be billed at a rate defined at employee level")
 
     line_ids = fields.One2many('project.create.sale.order.line', 'wizard_id', string='Lines')
+
+    _sql_constraints = [
+        ('partner_required_if_employee_rate', "CHECK((billable_type = 'employee_rate' AND partner_id IS NOT NULL) OR (billable_type != 'employee_rate'))", 'To create the sales order to bill the project at employee rate, a customer is needed.'),
+        ('partner_required_if_project_rate', "CHECK((billable_type = 'project_rate' AND partner_id IS NOT NULL) OR (billable_type != 'project_rate'))", 'To create the sales order to bill the project at project rate, a customer is needed.'),
+    ]
 
     @api.onchange('billable_type', 'product_id')
     def _onchange_product_id(self):
@@ -49,6 +55,40 @@ class ProjectCreateSalesOrder(models.TransientModel):
 
     @api.multi
     def action_create_sale_order(self):
+        # check inputs
+        self._check_user_inputs()
+        # create SO
+        sale_order = self.env['sale.order'].create({
+            'project_id': self.project_id.id,
+            'partner_id': self.partner_id.id,
+            'analytic_account_id': self.project_id.analytic_account_id.id,
+            'client_order_ref': self.project_id.name,
+            'company_id': self.project_id.company_id.id,
+        })
+        sale_order.onchange_partner_id()
+        sale_order.onchange_partner_shipping_id()
+
+        # create the sale lines, the map (optional), and assign existing timesheet to sale lines
+        self._make_billable(sale_order)
+
+        # confirm SO
+        sale_order.action_confirm()
+
+        view_form_id = self.env.ref('sale.view_order_form').id
+        action = self.env.ref('sale.action_orders').read()[0]
+        action.update({
+            'views': [(view_form_id, 'form')],
+            'view_mode': 'form',
+            'name': sale_order.name,
+            'res_id': sale_order.id,
+        })
+        return action
+
+    def _check_user_inputs(self):
+        """ This method check is the asked user action is possible with the introduced data. This raises Error to
+            explain why it is not possible. Return True otherwise.
+            :raises UserError
+        """
         # if project linked to SO line or at least on tasks with SO line, then we consider project as billable.
         if self.project_id.sale_line_id:
             raise UserError(_("The project is already linked to a sales order item."))
@@ -70,35 +110,14 @@ class ProjectCreateSalesOrder(models.TransientModel):
         if timesheet_with_so_line:
             raise UserError(_('The sales order cannot be created because some timesheets of this project are already linked to another sales order.'))
 
-        # create SO
-        sale_order = self.env['sale.order'].create({
-            'project_id': self.project_id.id,
-            'partner_id': self.partner_id.id,
-            'analytic_account_id': self.project_id.analytic_account_id.id,
-            'client_order_ref': self.project_id.name,
-            'company_id': self.project_id.company_id.id,
-        })
-        sale_order.onchange_partner_id()
-        sale_order.onchange_partner_shipping_id()
+        return True
 
+    def _make_billable(self, sale_order):
         # create the sale lines, the map (optional), and assign existing timesheet to sale lines
         if self.billable_type == 'project_rate':
             self._make_billable_at_project_rate(sale_order)
-        else:
+        elif self.billable_type == 'employee_rate':
             self._make_billable_at_employee_rate(sale_order)
-
-        # confirm SO
-        sale_order.action_confirm()
-
-        view_form_id = self.env.ref('sale.view_order_form').id
-        action = self.env.ref('sale.action_orders').read()[0]
-        action.update({
-            'views': [(view_form_id, 'form')],
-            'view_mode': 'form',
-            'name': sale_order.name,
-            'res_id': sale_order.id,
-        })
-        return action
 
     def _make_billable_at_project_rate(self, sale_order):
         # trying to simulate the SO line created a task, according to the product configuration
@@ -122,6 +141,7 @@ class ProjectCreateSalesOrder(models.TransientModel):
             'sale_order_id': sale_order.id,
             'sale_line_id': sale_order_line.id,
             'partner_id': self.partner_id.id,
+            'billable_type': 'project_rate',
         })
         self.project_id.tasks.filtered(lambda task: task.billable_type == 'no').write({
             'sale_line_id': sale_order_line.id,
@@ -177,6 +197,7 @@ class ProjectCreateSalesOrder(models.TransientModel):
             'sale_order_id': sale_order.id,
             'sale_line_id': sale_order.order_line[0].id,
             'partner_id': self.partner_id.id,
+            'billable_type': 'employee_rate',
         })
         non_billable_tasks.write({
             'sale_line_id': sale_order.order_line[0].id,
@@ -191,6 +212,22 @@ class ProjectCreateSalesOrder(models.TransientModel):
             })
 
         return map_entries
+
+    # --------------------------------------
+    #  Helpers
+    # --------------------------------------
+
+    def _project_create_sale_order(self):
+        sale_order = self.env['sale.order'].create({
+            'project_id': self.project_id.id,
+            'partner_id': self.partner_id.id,
+            'analytic_account_id': self.project_id.analytic_account_id.id,
+            'client_order_ref': self.project_id.name,
+            'company_id': self.project_id.company_id.id,
+        })
+        sale_order.onchange_partner_id()
+        sale_order.onchange_partner_shipping_id()
+        return sale_order
 
 
 class ProjectCreateSalesOrderLine(models.TransientModel):

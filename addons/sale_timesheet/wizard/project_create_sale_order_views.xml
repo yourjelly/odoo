@@ -5,17 +5,17 @@
         <field name="name">project.create.sale.order.wizard.form</field>
         <field name="model">project.create.sale.order</field>
         <field name="arch" type="xml">
-            <form string="Create a Sales Order">
+            <form string="Bill a Project">
                 <group>
                     <group>
                         <field name="project_id" readonly="1"/>
-                        <field name="partner_id"/>
+                        <field name="partner_id" attrs="{'invisible': [('billable_type', '=', 'task_rate')], 'required': [('billable_type', 'in', ['project_rate', 'employee_rate'])]}"/>
                     </group>
                     <group>
                         <field name="billable_type" widget="radio"/>
                     </group>
                 </group>
-                <group attrs="{'invisible': [('billable_type', '=', 'employee_rate')]}">
+                <group attrs="{'invisible': [('billable_type', '!=', 'project_rate')]}">
                     <group>
                         <field name="product_id" options="{'no_create_edit': True, 'no_create': True}" attrs="{'required': [('billable_type', '=', 'project_rate')]}"/>
                     </group>
@@ -24,7 +24,7 @@
                         <field name="currency_id" invisible="1"/>
                     </group>
                 </group>
-                <group attrs="{'invisible': [('billable_type', '=', 'project_rate')]}">
+                <group attrs="{'invisible': [('billable_type', '!=', 'employee_rate')]}">
                     <field name="line_ids" nolabel="1" attrs="{'required': [('billable_type', '=', 'employee_rate')]}">
                         <tree editable="bottom">
                             <field name="employee_id" options="{'no_create_edit': True, 'no_create': True}"/>
@@ -34,8 +34,13 @@
                         </tree>
                     </field>
                 </group>
+                <group attrs="{'invisible': [('billable_type', '!=', 'task_rate')]}">
+                    <div class="alert alert-info" role="status">
+                        <p>When confirming, you will be able to link each task to a Sales Order Items or to create or Sale Order directly from the task.</p>
+                    </div>
+                </group>
                 <footer>
-                    <button string="Create Sales Order" type="object" name="action_create_sale_order" class="oe_highlight"/>
+                    <button string="Confirm" type="object" name="action_create_sale_order" class="oe_highlight"/>
                     <button string="Cancel" special="cancel" type="object" class="btn btn-secondary oe_inline"/>
                 </footer>
             </form>
