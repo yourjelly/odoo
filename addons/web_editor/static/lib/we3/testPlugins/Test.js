@@ -29,7 +29,6 @@ var TEST = class extends  we3.ArchNodeVirtualText {
         if (archNode.type === 'TEST') {
             return;
         }
-        var childNodes = [];
         var matches = archNode.nodeValue.match(regExpRangeCollapsed) || archNode.nodeValue.match(regExpRangeNotCollapsed);
         if (matches) {
             var fragment = new we3.ArchNodeFragment(archNode.params);
@@ -210,7 +209,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
         this.nTests = 0;
         this.nOKTests = 0;
 
-        var assert = this.assert = {
+        this.assert = {
             ok (value, testName) {
                 self.nTests++;
                 var didPass = !!value;
@@ -355,7 +354,6 @@ var TestPlugin = class extends we3.AbstractPlugin {
      * @returns {Promise}
      */
     async execTests (assert, tests) {
-        var self = this;
         var defPollTest = Promise.resolve();
         tests.forEach((test) => defPollTest = defPollTest.then(this._pollTest.bind(this, this.assert, test)));
         return defPollTest;
@@ -383,7 +381,9 @@ var TestPlugin = class extends we3.AbstractPlugin {
             range.scArch.insert(new TEST(params, null, null, rangeStart), range.so);
         }
 
-        var result = this.dependencies.Arch.getClonedArchNode(this._getTestContainer(archNodeId)).toString();
+        var testContainer = this._getTestContainer(archNodeId);
+        var archNode = this.dependencies.Arch.getClonedArchNode(testContainer);
+        var result = archNode.toString({ keepVirtual: true });
 
         Arch.getClonedArchNode(1, true); // trash the previous clone
 

@@ -3,12 +3,12 @@
 
 var TestToolbarColor = class extends we3.AbstractPlugin {
     static get autoInstall () {
-        return ['Test', 'TestToolbar', 'Paragraph'];
+        return ['Test', 'TestToolbar', 'Color'];
     }
     constructor () {
         super(...arguments);
         var self = this;
-        this.dependencies = ['Test', 'TestToolbar'];
+        this.dependencies = ['Test', 'TestToolbar', 'Color'];
 
         // range collapsed: ◆
         // range start: ▶

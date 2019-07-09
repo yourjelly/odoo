@@ -44,7 +44,7 @@ var TestKeyboardArrow = class extends we3.AbstractPlugin {
                 steps: [{
                     key: 'LEFT',
                 }],
-                test: "<p>dom ◆to edit</p>",
+                test: "<p>dom ◆t&#65279;o edit</p>",
             },
             {
                 name: "2 x LEFT with on virtual text node",
@@ -54,7 +54,7 @@ var TestKeyboardArrow = class extends we3.AbstractPlugin {
                 }, {
                     key: 'LEFT',
                 }],
-                test: "<p>dom ◆to edit</p>",
+                test: "<p>dom ◆t&#65279;o edit</p>",
             },
             {
                 name: "2 x LEFT with 3 virtual text node",
@@ -64,7 +64,7 @@ var TestKeyboardArrow = class extends we3.AbstractPlugin {
                 }, {
                     key: 'LEFT',
                 }],
-                test: "<p>dom ◆to edit</p>",
+                test: "<p>dom ◆t&#65279;&#65279;&#65279;o edit</p>",
             },
             {
                 name: "RIGHT with on virtual text node",
@@ -72,7 +72,7 @@ var TestKeyboardArrow = class extends we3.AbstractPlugin {
                 steps: [{
                     key: 'RIGHT',
                 }],
-                test: "<p>dom to◆ edit</p>",
+                test: "<p>dom t&#65279;o◆ edit</p>",
             },
             {
                 name: "2 x RIGHT with on virtual text node",
@@ -82,7 +82,7 @@ var TestKeyboardArrow = class extends we3.AbstractPlugin {
                 }, {
                     key: 'RIGHT',
                 }],
-                test: "<p>dom to◆ edit</p>",
+                test: "<p>dom t&#65279;o◆ edit</p>",
             },
             {
                 name: "2 x RIGHT with 3 virtual text node",
@@ -92,7 +92,7 @@ var TestKeyboardArrow = class extends we3.AbstractPlugin {
                 }, {
                     key: 'RIGHT',
                 }],
-                test: "<p>dom to◆ edit</p>",
+                test: "<p>dom t&#65279;&#65279;&#65279;o◆ edit</p>",
             },
             {
                 name: "LEFT move before voidoid",
