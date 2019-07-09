@@ -1,6 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <record id="project_project_view_form_simplified" model="ir.ui.view">
+        <field name="name">project.project.form.inherit</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.project_project_view_form_simplified"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='basic_infos']/.." position="after">
+                <group name="billing_infos" attrs="{'invisible': [('allow_timesheets', '=', False)]}">
+                    <group>
+                        <field name="billable_type" attrs="{'readonly': [('id', '!=', False)]}"/>
+                        <field name="partner_id" attrs="{'invisible': [('billable_type', 'in', ['no', 'task_rate'])], 'required': [('billable_type', 'in', ['project_rate', 'employee_rate'])]}"/>
+                        <field name="sale_order_id" attrs="{'invisible': ['|', ('billable_type', 'in', ['no', 'task_rate']), ('partner_id', '=', False)], 'required': [('billable_type', 'in', ['project_rate', 'employee_rate'])]}" options="{'no_create': True}"/>
+                        <field name="sale_line_id" attrs="{'invisible': ['|', ('billable_type', 'in', ['no', 'task_rate']), ('partner_id', '=', False)], 'required': [('billable_type', 'in', ['project_rate', 'employee_rate'])]}" options="{'no_create': True}" context="{'create': False, 'edit': False, 'delete': False}"/>
+                    </group>
+                </group>
+                <group>
+                    <field name="sale_line_employee_ids" attrs="{'invisible': ['|', ('billable_type', '!=', 'employee_rate'), ('sale_order_id', '=', False)]}" nolabel="1">
+                        <tree editable="top">
+                            <field name="employee_id" options="{'no_create': True}"/>
+                            <field name="sale_line_id" options="{'no_create': True}" domain="[('order_id','=',parent.sale_order_id), ('is_service', '=', True), ('is_expense', '=', False)]"/>
+                            <field name="price_unit"/>
+                        </tree>
+                    </field>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
     <record id="project_project_view_form" model="ir.ui.view">
         <field name="name">project.project.form.inherit</field>
         <field name="model">project.project</field>
@@ -9,17 +36,22 @@
             <xpath expr="//header" position="inside">
                 <button name="action_make_billable" string="Create Sales Order" type="object" attrs="{'invisible': [('billable_type', '!=', 'no')]}" group="sale.group_sale_salesman"/>
             </xpath>
+            <xpath expr="//field[@name='partner_id']" position="before">
+                <field name="billable_type" attrs="{'readonly': [('id', '!=', False)]}"/>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="attrs">{'required': [('billable_type', 'in', ['project_rate', 'employee_rate'])]}</attribute>
+            </xpath>
             <xpath expr="//page[@name='emails']" position="after">
                 <page name="billing_employee_rate" string="Invoicing" attrs="{'invisible': [('billable_type', '=', 'no')]}">
                     <group>
-                        <field name="billable_type" invisible="1"/>
-                        <field name="sale_order_id" attrs="{'invisible': [('billable_type', '=', 'no')]}"/>
-                        <field name="sale_line_id" attrs="{'invisible': [('billable_type', '=', 'no')]}" context="{'create': False, 'edit': False, 'delete': False}"/>
+                        <field name="sale_order_id" attrs="{'invisible': [('billable_type', '=', 'no')], 'required': [('billable_type', 'in', ['project_rate', 'employee_rate'])]}" options="{'no_create': True}"/>
+                        <field name="sale_line_id" attrs="{'invisible': ['|', ('billable_type', '=', 'no'), ('partner_id', '=', False)], 'required': [('billable_type', 'in', ['project_rate', 'employee_rate'])]}" options="{'no_create': True}" context="{'create': False, 'edit': False, 'delete': False}"/>
                     </group>
-                    <field name="sale_line_employee_ids">
+                    <field name="sale_line_employee_ids" attrs="{'invisible': ['|', ('billable_type', '!=', 'employee_rate'), ('sale_order_id', '=', False)]}" nolabel="1">
                         <tree editable="top">
                             <field name="employee_id" options="{'no_create': True}"/>
-                            <field name="sale_line_id" options="{'no_create': True}" domain="[('order_id','=',parent.sale_order_id), ('is_service', '=', True)]"/>
+                            <field name="sale_line_id" options="{'no_create': True}" domain="[('order_id','=',parent.sale_order_id), ('is_service', '=', True), ('is_expense', '=', False)]"/>
                             <field name="price_unit"/>
                         </tree>
                     </field>

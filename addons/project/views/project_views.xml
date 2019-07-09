@@ -131,6 +131,11 @@
                             </div>
                         </div>
                     </div>
+                    <group>
+                        <group>
+                            <field name="partner_id" string="Customer"/>
+                        </group>
+                    </group>
                     <notebook>
                         <page name="settings" string="Settings">
                             <group>
@@ -139,7 +144,6 @@
                                     <field name="privacy_visibility" widget="radio"/>
                                 </group>
                                 <group>
-                                    <field name="partner_id" string="Customer"/>
                                     <field name="analytic_account_id" context="{'default_partner_id': partner_id}" groups="analytic.group_analytic_accounting"/>
                                     <label for="rating_status" groups="project.group_project_rating"/>
                                     <div groups="project.group_project_rating">
@@ -259,8 +263,8 @@
             <field name="arch" type="xml">
                 <form string="Project">
                     <group>
-                        <group>
-                            <field name="name" class="o_project_name oe_inline"
+                        <group name="basic_infos">
+                            <field name="name" class="o_project_name"
                                 string="Project Name" placeholder="e.g. Office Party"/>
                             <field name="user_id" invisible="1"/>
                             <label for="alias_name" string="Choose a Project Email" attrs="{'invisible': [('alias_domain', '=', False)]}"/>
