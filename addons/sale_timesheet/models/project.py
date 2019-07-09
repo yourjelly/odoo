@@ -32,7 +32,6 @@ class Project(models.Model):
     _sql_constraints = [
         ('sale_order_required_if_sale_line', "CHECK((sale_line_id IS NOT NULL AND sale_order_id IS NOT NULL) OR (sale_line_id IS NULL))", 'The Project should be linked to a Sale Order to select an Sale Order Items.'),
         ('sale_line_required_if_project_rate', "CHECK((billable_type = 'project_rate' AND sale_line_id IS NOT NULL) OR (billable_type != 'project_rate'))", 'The Project should be linked to a Sales Order Item to defined its rate.'),
-        ('sale_line_required_if_employee_rate', "CHECK((billable_type = 'employee_rate' AND sale_line_id IS NOT NULL) OR (billable_type != 'employee_rate'))", 'The Project billed at employee rate should be linked to a Sales Order Item, as fallback for not defined rate employees.'),
         ('sale_order_required_if_employee_rate', "CHECK((billable_type = 'employee_rate' AND sale_order_id IS NOT NULL) OR (billable_type != 'employee_rate'))", 'The Project should be linked to a Sales Order to be able to fill employees rates.'),
     ]
 
@@ -73,14 +72,16 @@ class Project(models.Model):
 
     @api.constrains('sale_line_id', 'sale_order_id')
     def _check_sale_line_in_sale_order(self):
-        pass
-        # TODO JEM
+        for project in self:
+            if project.sale_order_id and project.sale_line_id:
+                if project.sale_line_id not in project.sale_order_id.order_line:
+                    raise ValidationError(_("The Sales Order Items attached the the project should be linked to Sales Order's Project"))
 
     @api.constrains('billable_type', 'sale_line_employee_ids')
     def _check_billable_type_employee_rate(self):
         for project in self:
             if project.billable_type == 'employee_rate' and not project.sale_line_employee_ids:
-                raise ValidationError(_('A project billed at employee rate must have at least on employee rate defined.'))
+                raise ValidationError(_('A project billed at employee rate must have at least one employee rate defined.'))
 
     @api.multi
     def action_view_timesheet(self):
@@ -169,7 +170,11 @@ class ProjectTask(models.Model):
                 sale_line_id = project.sale_line_id.id
         return sale_line_id
 
-    sale_line_id = fields.Many2one('sale.order.line', 'Sales Order Item', default=_default_sale_line_id, domain="[('is_service', '=', True), ('order_partner_id', '=', partner_id), ('is_expense', '=', False), ('state', 'in', ['sale', 'done'])]",
+    @api.model
+    def _default_domain_sale_line_id(self):
+        return ['&', '&', ('is_service', '=', True), ('is_expense', '=', False), ('state', 'in', ['sale', 'done'])]
+
+    sale_line_id = fields.Many2one('sale.order.line', 'Sales Order Item', default=_default_sale_line_id, domain=lambda self: self._default_domain_sale_line_id(),
         help="Sales order item to which the task is linked. If an employee timesheets on a this task, "
         "and if this employee is not in the 'Employee/Sales Order Item Mapping' of the project, the "
         "timesheet entry will be linked to this sales order item.")
@@ -219,13 +224,20 @@ class ProjectTask(models.Model):
                 self.partner_id = self.project_id.sale_order_id.partner_id
             elif self.billable_type == 'task_rate':
                 self.partner_id = self.sale_line_id.order_partner_id
-        # deduce domain when setting SOL
-        if self.billable_type == 'task_rate':
-            domain = ['&', '&', '&', ('is_service', '=', True), ('is_expense', '=', False), ('order_partner_id', 'child_of', self.partner_id.commercial_partner_id.id), ('state', 'in', ['sale', 'done'])]
-            if self.project_id.sale_order_id:  # task_rat
-                domain = expression.AND([domain, [('order_id', '=', self.project_id.sale_order_id.id)]])
-        result.setdefault('domain', {})['sale_line_id'] = domain
         return result
+
+    @api.onchange('billable_type', 'partner_id')
+    def _onchange_sale_line_domain(self):
+        domain = self._default_domain_sale_line_id()
+        if self.partner_id:
+            domain = expression.AND([domain, [('order_partner_id', 'child_of', self.partner_id.commercial_partner_id.id)]])
+        if self.project_id.sale_order_id:  # task_rate
+            domain = expression.AND([domain, [('order_id', '=', self.project_id.sale_order_id.id)]])
+        return {
+            'domain': {
+                'sale_line_id': domain
+            }
+        }
 
     @api.onchange('project_id')
     def _onchange_billable_type_warning(self):
@@ -240,13 +252,10 @@ class ProjectTask(models.Model):
 
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
-        result = super(ProjectTask, self)._onchange_partner_id()
-        result = result or {}
-        if self.sale_line_id.order_partner_id.commercial_partner_id != self.partner_id.commercial_partner_id:
-            self.sale_line_id = False
-        if self.partner_id:
-            result.setdefault('domain', {})['sale_line_id'] = [('is_service', '=', True), ('is_expense', '=', False), ('order_partner_id', 'child_of', self.partner_id.commercial_partner_id.id), ('state', 'in', ['sale', 'done'])]
-        return result
+        super(ProjectTask, self)._onchange_partner_id()
+        if self.billable_type == 'task_rate':
+            if self.sale_line_id.order_partner_id.commercial_partner_id != self.partner_id.commercial_partner_id:
+                self.sale_line_id = False
 
     @api.multi
     @api.constrains('sale_line_id')

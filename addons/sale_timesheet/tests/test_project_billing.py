@@ -102,17 +102,19 @@ class TestProjectBilling(TestCommonSaleTimesheetNoChart):
             'sale_order_id': cls.sale_order_1.id,
             'partner_id': cls.sale_order_1.partner_id.id,
             'subtask_project_id': cls.project_subtask.id,
+            'sale_line_employee_ids': [
+                (0, 0, {
+                    'sale_line_id': cls.so1_line_order_no_task.id,
+                    'employee_id': cls.employee_manager.id,
+                }),
+                (0, 0, {
+                    'sale_line_id': cls.so1_line_deliver_no_task.id,
+                    'employee_id': cls.employee_user.id,
+                })
+            ]
         })
-        cls.project_employee_rate_manager = cls.env['project.sale.line.employee.map'].create({
-            'project_id': cls.project_employee_rate.id,
-            'sale_line_id': cls.so1_line_order_no_task.id,
-            'employee_id': cls.employee_manager.id,
-        })
-        cls.project_employee_rate_user = cls.env['project.sale.line.employee.map'].create({
-            'project_id': cls.project_employee_rate.id,
-            'sale_line_id': cls.so1_line_deliver_no_task.id,
-            'employee_id': cls.employee_user.id,
-        })
+        cls.project_employee_rate_manager = cls.project_employee_rate.sale_line_employee_ids.filtered(lambda line: line.employee_id == cls.employee_manager)
+        cls.project_employee_rate_user = cls.project_employee_rate.sale_line_employee_ids.filtered(lambda line: line.employee_id == cls.employee_user)
 
     def test_make_billable_at_task_rate(self):
         """ Starting from a non billable project, make it billable at task rate, using the wizard """
