@@ -295,10 +295,12 @@ class ProjectTask(models.Model):
     def write(self, values):
         if values.get('project_id'):
             project_dest = self.env['project.project'].browse(values['project_id'])
-            if project_dest.billable_type == 'employee_rate':
+            if project_dest.billable_type == 'no':
                 values['sale_line_id'] = False
             if project_dest.billable_type == 'project_rate':
                 values['sale_line_id'] = project_dest.sale_line_id.id
+            if project_dest.billable_type == 'employee_rate':
+                values['sale_line_id'] = False
         return super(ProjectTask, self).write(values)
 
     @api.multi

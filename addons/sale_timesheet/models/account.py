@@ -106,6 +106,8 @@ class AccountAnalyticLine(models.Model):
                 return task.project_id.sale_line_id
             elif task.billable_type == 'task_rate':
                 return task.sale_line_id
+            elif task.billable_type == 'project_rate':  # task should have the same SOL then the project but this is better to get it directly from project
+                return task.project_id.sale_line_id
         return self.env['sale.order.line']
 
     def _timesheet_get_portal_domain(self):

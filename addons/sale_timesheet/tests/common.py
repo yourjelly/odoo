@@ -38,7 +38,7 @@ class TestCommonSaleTimesheetNoChart(TestCommonSaleNoChart):
             'name': 'Project for selling timesheets',
             'allow_timesheets': True,
             'analytic_account_id': cls.analytic_account_sale.id,
-            'billable_type': 'task_rate',  # TODO JEM check if we need to limit this
+            'billable_type': 'task_rate',
         })
         cls.project_template = cls.env['project.project'].create({
             'name': 'Project TEMPLATE for services',
