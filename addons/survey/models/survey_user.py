@@ -69,16 +69,25 @@ class SurveyUserInput(models.Model):
     @api.multi
     @api.depends('user_input_line_ids.answer_score', 'user_input_line_ids.question_id')
     def _compute_quizz_score(self):
+        userInputLine = self.env['survey.user_input_line']
         for user_input in self:
+            SurveyQuestion = self.env['survey.question']
+            for question in user_input.question_ids:
+                if question.is_enable_question_dependency and userInputLine.check_dependency_rule(user_input, question):
+                    SurveyQuestion |= question
+                else:
+                    SurveyQuestion |= question
+
             total_possible_score = sum([
                 answer_score if answer_score > 0 else 0
-                for answer_score in user_input.question_ids.mapped('labels_ids.answer_score')
+                for answer_score in SurveyQuestion.mapped('labels_ids.answer_score')
             ])
 
             if total_possible_score == 0:
                 user_input.quizz_score = 0
             else:
-                score = (sum(user_input.user_input_line_ids.mapped('answer_score')) / total_possible_score) * 100
+                user_input_line = user_input.user_input_line_ids.filtered(lambda uil: uil.question_id.is_enable_question_dependency and uil.check_dependency_rule(user_input, uil.question_id))
+                score = (sum(user_input_line.mapped('answer_score')) / total_possible_score) * 100
                 user_input.quizz_score = round(score, 2) if score > 0 else 0
 
     @api.multi
