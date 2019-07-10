@@ -71,22 +71,24 @@ class SurveyUserInput(models.Model):
     def _compute_quizz_score(self):
         userInputLine = self.env['survey.user_input_line']
         for user_input in self:
-            SurveyQuestion = self.env['survey.question']
+            surveyQuestion = self.env['survey.question']
             for question in user_input.question_ids:
                 if question.is_enable_question_dependency and userInputLine.check_dependency_rule(user_input, question):
-                    SurveyQuestion |= question
+                    surveyQuestion |= question
+                elif not question.is_enable_question_dependency:
+                    surveyQuestion |= question
                 else:
-                    SurveyQuestion |= question
+                    continue
 
             total_possible_score = sum([
                 answer_score if answer_score > 0 else 0
-                for answer_score in SurveyQuestion.mapped('labels_ids.answer_score')
+                for answer_score in surveyQuestion.mapped('labels_ids.answer_score')
             ])
 
             if total_possible_score == 0:
                 user_input.quizz_score = 0
             else:
-                user_input_line = user_input.user_input_line_ids.filtered(lambda uil: uil.question_id.is_enable_question_dependency and uil.check_dependency_rule(user_input, uil.question_id))
+                user_input_line = user_input.user_input_line_ids.filtered(lambda uil: not uil.question_id.is_enable_question_dependency or (uil.question_id.is_enable_question_dependency and uil.check_dependency_rule(user_input, uil.question_id)))
                 score = (sum(user_input_line.mapped('answer_score')) / total_possible_score) * 100
                 user_input.quizz_score = round(score, 2) if score > 0 else 0
 
