@@ -84,7 +84,6 @@ class ResConfigSettings(models.TransientModel):
         )
         return res
 
-    @api.multi
     def set_values(self):
         super(ResConfigSettings, self).set_values()
         alias = self._find_default_lead_alias_id()

@@ -128,7 +128,6 @@ class Message(models.Model):
     email_layout_xmlid = fields.Char('Layout', copy=False, oldname='layout')  # xml id of layout
     add_sign = fields.Boolean(default=True)
 
-    @api.multi
     def _get_needaction(self):
         """ Need action on a mail.message = notified on my channel """
         my_messages = self.env['mail.notification'].sudo().search([
@@ -144,7 +143,6 @@ class Message(models.Model):
             return ['&', ('notification_ids.res_partner_id', '=', self.env.user.partner_id.id), ('notification_ids.is_read', '=', False)]
         return ['&', ('notification_ids.res_partner_id', '=', self.env.user.partner_id.id), ('notification_ids.is_read', '=', True)]
 
-    @api.multi
     def _compute_has_error(self):
         error_from_notification = self.env['mail.notification'].sudo().search([
             ('mail_message_id', 'in', self.ids),
@@ -152,7 +150,6 @@ class Message(models.Model):
         for message in self:
             message.has_error = message in error_from_notification
 
-    @api.multi
     def _search_has_error(self, operator, operand):
         if operator == '=' and operand:
             return [('notification_ids.email_status', 'in', ('bounce', 'exception'))]
@@ -172,7 +169,6 @@ class Message(models.Model):
             return [('starred_partner_ids', 'in', [self.env.user.partner_id.id])]
         return [('starred_partner_ids', 'not in', [self.env.user.partner_id.id])]
 
-    @api.multi
     def _compute_need_moderation(self):
         for message in self:
             message.need_moderation = False
@@ -236,7 +232,6 @@ class Message(models.Model):
 
         return ids
 
-    @api.multi
     def set_message_done(self):
         """ Remove the needaction from messages for the current partner. """
         partner_id = self.env.user.partner_id
@@ -289,7 +284,6 @@ class Message(models.Model):
         notification = {'type': 'toggle_star', 'message_ids': ids, 'starred': False}
         self.env['bus.bus'].sendone((self._cr.dbname, 'res.partner', self.env.user.partner_id.id), notification)
 
-    @api.multi
     def toggle_message_starred(self):
         """ Toggle messages as (un)starred. Technically, the notifications related
             to uid are set to (un)starred.
@@ -417,7 +411,6 @@ class Message(models.Model):
 
         return True
 
-    @api.multi
     def message_fetch_failed(self):
         messages = self.search([
             ('has_error', '=', True),
@@ -454,7 +447,6 @@ class Message(models.Model):
             messages = messages.sorted(key='id', reverse=True)[:limit]
         return messages.message_format()
 
-    @api.multi
     def message_format(self):
         """ Get the message values in the format for web client. Since message values can be broadcasted,
             computed fields MUST NOT BE READ and broadcasted.
@@ -529,7 +521,6 @@ class Message(models.Model):
                 message['module_icon'] = modules.module.get_module_icon(self.env[message['model']]._original_module)
         return message_values
 
-    @api.multi
     def _get_message_format_fields(self):
         return [
             'id', 'body', 'date', 'author_id', 'email_from',  # base message fields
@@ -540,7 +531,6 @@ class Message(models.Model):
             'moderation_status',
         ]
 
-    @api.multi
     def _format_mail_failures(self):
         """
         A shorter message to notify a failure update
@@ -572,7 +562,6 @@ class Message(models.Model):
             failures_infos.append(info)
         return failures_infos
 
-    @api.multi
     def _notify_failure_update(self):
         authors = {}
         for author, author_messages in groupby(self, itemgetter('author_id')):
@@ -591,7 +580,6 @@ class Message(models.Model):
         if not self._cr.fetchone():
             self._cr.execute("""CREATE INDEX mail_message_model_res_id_idx ON mail_message (model, res_id)""")
 
-    @api.multi
     def is_thread_message(self, vals=None):
         if vals:
             res_id = vals.get('res_id')
@@ -698,7 +686,6 @@ class Message(models.Model):
             id_list = [id for id in ids if id in final_ids]
             return id_list
 
-    @api.multi
     def check_access_rule(self, operation):
         """ Access rules of mail.message:
             - read: if
@@ -995,7 +982,6 @@ class Message(models.Model):
             message_id = tools.generate_tracking_message_id('private')
         return message_id
 
-    @api.multi
     def _invalidate_documents(self, model=None, res_id=None):
         """ Invalidate the cache of the documents followed by ``self``. """
         for record in self:
@@ -1085,14 +1071,12 @@ class Message(models.Model):
 
         return message
 
-    @api.multi
     def read(self, fields=None, load='_classic_read'):
         """ Override to explicitely call check_access_rule, that is not called
             by the ORM. It instead directly fetches ir.rules and apply them. """
         self.check_access_rule('read')
         return super(Message, self).read(fields=fields, load=load)
 
-    @api.multi
     def write(self, vals):
         record_changed = 'model' in vals or 'res_id' in vals
         if record_changed or 'message_type' in vals:
@@ -1105,7 +1089,6 @@ class Message(models.Model):
             self._invalidate_documents()
         return res
 
-    @api.multi
     def unlink(self):
         # cascade-delete attachments that are directly attached to the message (should only happen
         # for mail.messages that act as parent for a standalone mail.mail record).
@@ -1124,7 +1107,6 @@ class Message(models.Model):
     # Moderation
     # --------------------------------------------------
 
-    @api.multi
     def moderate(self, decision, **kwargs):
         """ Moderate messages. A check is done on moderation status of the
         current user to ensure we only moderate valid messages. """
@@ -1136,7 +1118,6 @@ class Message(models.Model):
         if to_moderate:
             self.browse(to_moderate)._moderate(decision, **kwargs)
 
-    @api.multi
     def _moderate(self, decision, **kwargs):
         """ :param decision
                  * accept       - moderate message and broadcast that message to followers of relevant channels.
@@ -1185,7 +1166,6 @@ class Message(models.Model):
                 # message will always be a thread_message. This check should always be true.
                 self.env[message.model].browse(message.res_id)._notify_thread(message)
 
-    @api.multi
     def _moderate_send_reject_email(self, subject, comment):
         for msg in self:
             if not msg.email_from:
@@ -1206,7 +1186,6 @@ class Message(models.Model):
             }
             self.env['mail.mail'].sudo().create(vals)
 
-    @api.multi
     def _search_from_same_authors(self):
         """ Returns all pending moderation messages that have same email_from and
         same res_id as given recordset. """
@@ -1220,7 +1199,6 @@ class Message(models.Model):
             ])
         return messages
 
-    @api.multi
     def _moderate_discard(self):
         """ Notify deletion of messages to their moderators and authors and then delete them.
         """

@@ -101,7 +101,6 @@ class Survey(models.Model):
         ('attempts_limit_check', "CHECK( (is_attempts_limited=False) OR (attempts_limit is not null AND attempts_limit > 0) )", 'The attempts limit needs to be a positive number if the survey has a limited number of attempts.')
     ]
 
-    @api.multi
     def _compute_users_can_signup(self):
         signup_allowed = self.env['res.users'].sudo()._get_signup_invitation_scope() == 'b2c'
         for survey in self:
@@ -187,7 +186,6 @@ class Survey(models.Model):
         default = dict(default or {}, title=title)
         return super(Survey, self).copy_data(default)
 
-    @api.multi
     def _create_answer(self, user=False, partner=False, email=False, test_entry=False, check_attempts=True, **additional_vals):
         """ Main entry point to get a token back or create a new one. This method
         does check for current user access in order to explicitely validate
@@ -234,7 +232,6 @@ class Survey(models.Model):
 
         return answers
 
-    @api.multi
     def _check_answer_creation(self, user, partner, email, test_entry=False, check_attempts=True, invite_token=False):
         """ Ensure conditions to create new tokens are met. """
         self.ensure_one()
@@ -310,7 +307,6 @@ class Survey(models.Model):
             else:
                 return (pages_or_questions[current_page_index + 1][1], False)
 
-    @api.multi
     def filter_input_ids(self, filters, finished=False):
         """If user applies any filters, then this function returns list of
            filtered user_input_id and label's strings for display data in web.
@@ -437,19 +433,15 @@ class Survey(models.Model):
 
     # Actions
 
-    @api.multi
     def action_draft(self):
         self.write({'state': 'draft'})
 
-    @api.multi
     def action_open(self):
         self.write({'state': 'open'})
 
-    @api.multi
     def action_close(self):
         self.write({'state': 'closed'})
 
-    @api.multi
     def action_start_survey(self):
         """ Open the website page with the survey form """
         self.ensure_one()
@@ -462,7 +454,6 @@ class Survey(models.Model):
             'url': self.public_url + trail
         }
 
-    @api.multi
     def action_send_survey(self):
         """ Open a window to compose an email, pre-filled with the survey message """
         # Ensure that this survey has at least one page with at least one question.
@@ -489,7 +480,6 @@ class Survey(models.Model):
             'context': local_context,
         }
 
-    @api.multi
     def action_print_survey(self):
         """ Open the website page with the survey printable view """
         self.ensure_one()
@@ -502,7 +492,6 @@ class Survey(models.Model):
             'url': '/survey/print/%s%s' % (self.access_token, trail)
         }
 
-    @api.multi
     def action_result_survey(self):
         """ Open the website page with the survey results view """
         self.ensure_one()
@@ -513,7 +502,6 @@ class Survey(models.Model):
             'url': '/survey/results/%s' % self.id
         }
 
-    @api.multi
     def action_test_survey(self):
         ''' Open the website page with the survey form into test mode'''
         self.ensure_one()
@@ -524,7 +512,6 @@ class Survey(models.Model):
             'url': '/survey/test/%s' % self.access_token,
         }
 
-    @api.multi
     def action_survey_user_input_completed(self):
         action_rec = self.env.ref('survey.action_survey_user_input_notest')
         action = action_rec.read()[0]
@@ -534,7 +521,6 @@ class Survey(models.Model):
         action['context'] = ctx
         return action
 
-    @api.multi
     def action_survey_user_input_certified(self):
         action_rec = self.env.ref('survey.action_survey_user_input_notest')
         action = action_rec.read()[0]
@@ -544,7 +530,6 @@ class Survey(models.Model):
         action['context'] = ctx
         return action
 
-    @api.multi
     def action_survey_user_input_invite(self):
         action_rec = self.env.ref('survey.action_survey_user_input_notest')
         action = action_rec.read()[0]
@@ -554,7 +539,6 @@ class Survey(models.Model):
         action['context'] = ctx
         return action
 
-    @api.multi
     def _has_attempts_left(self, partner, email, invite_token):
         self.ensure_one()
 
@@ -563,7 +547,6 @@ class Survey(models.Model):
 
         return True
 
-    @api.multi
     def _get_number_of_attempts_lefts(self, partner, email, invite_token):
         """ Returns the number of attempts left. """
         self.ensure_one()
@@ -584,7 +567,6 @@ class Survey(models.Model):
 
         return self.attempts_limit - self.env['survey.user_input'].search_count(domain)
 
-    @api.multi
     def _prepare_answer_questions(self):
         """ Will generate the questions for a randomized survey.
         It uses the random_questions_count of every sections of the survey to

@@ -384,7 +384,6 @@ class HolidaysRequest(models.Model):
             self.mode_company_id = False
             self.department_id = False
 
-    @api.multi
     def _sync_employee_details(self):
         for holiday in self:
             holiday.manager_id = holiday.employee_id.parent_id.id
@@ -403,7 +402,6 @@ class HolidaysRequest(models.Model):
         else:
             self.number_of_days = 0
 
-    @api.multi
     @api.depends('number_of_days')
     def _compute_number_of_days_display(self):
         for holiday in self:
@@ -413,7 +411,6 @@ class HolidaysRequest(models.Model):
         self.ensure_one()
         return self.employee_id.resource_calendar_id or self.env.company.resource_calendar_id
 
-    @api.multi
     @api.depends('number_of_days')
     def _compute_number_of_hours_display(self):
         for holiday in self:
@@ -424,7 +421,6 @@ class HolidaysRequest(models.Model):
             else:
                 holiday.number_of_hours_display = 0
 
-    @api.multi
     @api.depends('number_of_hours_display', 'number_of_days_display')
     def _compute_duration_display(self):
         for leave in self:
@@ -434,7 +430,6 @@ class HolidaysRequest(models.Model):
                 else float_round(leave.number_of_days_display, precision_digits=2)),
                 _('hour(s)') if leave.leave_type_request_unit == 'hour' else _('day(s)'))
 
-    @api.multi
     @api.depends('state', 'employee_id', 'department_id')
     def _compute_can_reset(self):
         for holiday in self:
@@ -502,7 +497,6 @@ class HolidaysRequest(models.Model):
     # ORM Overrides methods
     ####################################################
 
-    @api.multi
     def name_get(self):
         res = []
         for leave in self:
@@ -534,13 +528,11 @@ class HolidaysRequest(models.Model):
                     )
         return res
 
-    @api.multi
     def add_follower(self, employee_id):
         employee = self.env['hr.employee'].browse(employee_id)
         if employee.user_id:
             self.message_subscribe(partner_ids=employee.user_id.partner_id.ids)
 
-    @api.multi
     @api.constrains('holiday_status_id', 'date_to', 'date_from')
     def _check_leave_type_validity(self):
         for leave in self:
@@ -610,7 +602,6 @@ class HolidaysRequest(models.Model):
                         # skip SpecialValue (e.g. for missing record or access right)
                         pass
 
-    @api.multi
     def write(self, values):
         # Allow an employee to always write his own out of office message
         if len(self) == 1 and values.keys() == {'out_of_office_message'} and self.employee_id.user_id == self.env.user:
@@ -629,13 +620,11 @@ class HolidaysRequest(models.Model):
                     holiday._onchange_leave_dates()
         return result
 
-    @api.multi
     def unlink(self):
         for holiday in self.filtered(lambda holiday: holiday.state not in ['draft', 'cancel', 'confirm']):
             raise UserError(_('You cannot delete a time off which is in %s state.') % (holiday.state,))
         return super(HolidaysRequest, self).unlink()
 
-    @api.multi
     def copy_data(self, default=None):
         raise UserError(_('A leave cannot be duplicated.'))
 
@@ -646,7 +635,6 @@ class HolidaysRequest(models.Model):
     # Business methods
     ####################################################
 
-    @api.multi
     def _create_resource_leave(self):
         """ This method will create entry in resource calendar time off object at the time of holidays validated
         :returns: created `resource.calendar.leaves`
@@ -667,7 +655,6 @@ class HolidaysRequest(models.Model):
             })
         return self.env['resource.calendar.leaves'].create(vals_list)
 
-    @api.multi
     def _remove_resource_leave(self):
         """ This method will create entry in resource calendar time off object at the time of holidays cancel/removed """
         return self.env['resource.calendar.leaves'].search([('holiday_id', 'in', self.ids)]).unlink()
@@ -682,7 +669,6 @@ class HolidaysRequest(models.Model):
             meeting = self.env['calendar.event'].with_context(no_mail_to_attendees=True).create(meeting_values)
             holiday.write({'meeting_id': meeting.id})
 
-    @api.multi
     def _prepare_holidays_meeting_values(self):
         self.ensure_one()
         calendar = self.employee_id.resource_calendar_id or self.env.company.resource_calendar_id
@@ -704,7 +690,6 @@ class HolidaysRequest(models.Model):
                 (4, self.user_id.partner_id.id)]
         return meeting_values
 
-    @api.multi
     def _prepare_holiday_values(self, employee):
         self.ensure_one()
         values = {
@@ -722,7 +707,6 @@ class HolidaysRequest(models.Model):
         }
         return values
 
-    @api.multi
     def action_draft(self):
         for holiday in self:
             if holiday.state not in ['confirm', 'refuse']:
@@ -739,7 +723,6 @@ class HolidaysRequest(models.Model):
         self.activity_update()
         return True
 
-    @api.multi
     def action_confirm(self):
         if self.filtered(lambda holiday: holiday.state != 'draft'):
             raise UserError(_('Time off request must be in Draft state ("To Submit") in order to confirm it.'))
@@ -747,7 +730,6 @@ class HolidaysRequest(models.Model):
         self.activity_update()
         return True
 
-    @api.multi
     def action_approve(self):
         # if validation_type == 'both': this method is the first approval approval
         # if validation_type != 'both': this method calls action_validate() below
@@ -761,7 +743,6 @@ class HolidaysRequest(models.Model):
             self.activity_update()
         return True
 
-    @api.multi
     def action_validate(self):
         current_employee = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
         if any(holiday.state not in ['confirm', 'validate1'] for holiday in self):
@@ -801,7 +782,6 @@ class HolidaysRequest(models.Model):
             employee_requests.filtered(lambda holiday: holiday.validation_type != 'no_validation').activity_update()
         return True
 
-    @api.multi
     def action_refuse(self):
         current_employee = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
         for holiday in self:
@@ -914,14 +894,12 @@ class HolidaysRequest(models.Model):
     # Messaging methods
     ####################################################
 
-    @api.multi
     def _track_subtype(self, init_values):
         if 'state' in init_values and self.state == 'validate':
             leave_notif_subtype = self.holiday_status_id.leave_notif_subtype_id
             return leave_notif_subtype or self.env.ref('hr_holidays.mt_leave')
         return super(HolidaysRequest, self)._track_subtype(init_values)
 
-    @api.multi
     def _notify_get_groups(self):
         """ Handle HR users and officers recipients that can validate or refuse holidays
         directly from email. """
@@ -944,7 +922,6 @@ class HolidaysRequest(models.Model):
 
         return [new_group] + groups
 
-    @api.multi
     def message_subscribe(self, partner_ids=None, channel_ids=None, subtype_ids=None):
         # due to record rule can not allow to add follower and mention on validated leave so subscribe through sudo
         if self.state in ['validate', 'validate1']:

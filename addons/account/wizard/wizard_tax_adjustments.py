@@ -8,7 +8,6 @@ class TaxAdjustments(models.TransientModel):
     _name = 'tax.adjustments.wizard'
     _description = 'Tax Adjustments Wizard'
 
-    @api.multi
     def _get_default_journal(self):
         return self.env['account.journal'].search([('type', '=', 'general')], limit=1).id
 
@@ -22,7 +21,6 @@ class TaxAdjustments(models.TransientModel):
     company_currency_id = fields.Many2one('res.currency', readonly=True, default=lambda self: self.env.company.currency_id)
     tax_id = fields.Many2one('account.tax', string='Adjustment Tax', ondelete='restrict', domain=[('type_tax_use', '=', 'adjustment')], required=True)
 
-    @api.multi
     def _create_move(self):
         adjustment_type = self.env.context.get('adjustment_type', (self.amount > 0.0 and 'debit' or 'credit'))
         move_line_vals = []
@@ -61,11 +59,9 @@ class TaxAdjustments(models.TransientModel):
         move.post()
         return move.id
 
-    @api.multi
     def create_move_debit(self):
         return self.with_context(adjustment_type='debit').create_move()
 
-    @api.multi
     def create_move_credit(self):
         return self.with_context(adjustment_type='credit').create_move()
 
