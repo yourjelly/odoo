@@ -113,6 +113,7 @@ we3.ArchNodeVirtualText = class extends we3.ArchNodeText {
      * @override
      */
     _applyRulesArchNode () {
+        var self = this;
         if (this.parent && (this.parent.isList() || this.parent.isRoot())) {
             return this._mutation('br');
         }
@@ -123,6 +124,12 @@ we3.ArchNodeVirtualText = class extends we3.ArchNodeText {
         }
 
         if (flowBlock.isDeepEmpty()) {
+            if (flowBlock.id === this.parent.id) {
+                var siblings = flowBlock.childNodes.filter(function (n) {
+                    return n.isVirtual() && n.id !== self.id;
+                });
+                siblings.slice().forEach(n => n.remove());
+            }
             return this._mutation('br');
         }
     }

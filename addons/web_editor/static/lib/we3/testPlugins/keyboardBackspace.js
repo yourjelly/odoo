@@ -86,6 +86,16 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             test: "<p>dom◆o edit</p>",
         },
         {
+            name: "in p: 2x BACKSPACE to empty a p with text",
+            content: "<p>a</p><p>bc◆</p><p>d</p>",
+            steps: [{
+                key: 'BACKSPACE',
+            }, {
+                key: 'BACKSPACE',
+            }],
+            test: "<p>a</p><p><br/>◆</p><p>d</p>",
+        },
+        {
             name: "in p (p > span.a before - span.b after): BACKSPACE at beginning (must attach them)",
             content: '<p><span class="a">dom to</span></p><p><span class="b">◆edit</span></p>',
             steps: [{
