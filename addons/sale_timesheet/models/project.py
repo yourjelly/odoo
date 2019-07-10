@@ -347,3 +347,27 @@ class ProjectTask(models.Model):
         if partner:
             return partner
         return super(ProjectTask, self).rating_get_partner_id()
+
+    # ---------------------------------------------------
+    # Business Methods
+    # ---------------------------------------------------
+
+    def _create_sale_order_prepare_values(self):
+        return {
+            'partner_id': self.partner_id.id,
+            'analytic_account_id': self.project_id.analytic_account_id.id,
+            'company_id': self.company_id.id,
+        }
+
+    def _create_sale_order(self):
+        """ Generate a sales order for the given tasks
+            :returns a map {<task_id>: <sale.order>}
+        """
+        result = {}
+        for task in self:
+            values = self._create_sale_order_prepare_values()
+            sale_order = self.env['sale.order'].create(values)
+            sale_order.onchange_partner_id()
+            sale_order.onchange_partner_shipping_id()
+            result[task.id] = sale_order
+        return result

@@ -17,6 +17,7 @@ have real delivered quantities in sales orders.
     'data': [
         'security/ir.model.access.csv',
         'security/sale_timesheet_security.xml',
+        'wizard/project_task_create_sale_order_views.xml',
         'views/account_invoice_views.xml',
         'views/sale_order_views.xml',
         'views/product_views.xml',
@@ -28,7 +29,7 @@ have real delivered quantities in sales orders.
         'report/project_profitability_report_analysis_views.xml',
         'data/sale_timesheet_filters.xml',
         'wizard/project_create_sale_order_views.xml',
-        'wizard/project_create_invoice_views.xml',
+        'wizard/project_create_sale_order_views.xml',
     ],
     'demo': [
         'data/sale_service_demo.xml',

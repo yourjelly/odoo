@@ -90,6 +90,8 @@ class TestProjectMakeBillable(TestCommonSaleTimesheetNoChart):
         self.assertFalse(self.timesheet1.so_line, "The timesheet 1 of the task should not be attach to SOL as the task rate is still not defined.")
         self.assertFalse(self.timesheet2.so_line, "The timesheet 2 of the task should not be attach to SOL as the task rate is still not defined.")
 
+        # TODO JEM: test of create sale order from task
+
     def test_make_billable_at_project_rate(self):
         """ Starting from a non billable project, make it billable at "project rate", using the wizard """
         # set a customer on the project
