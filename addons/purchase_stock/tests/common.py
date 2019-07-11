@@ -53,3 +53,14 @@ class TestPurchase(TestStockCommon):
             'email': "purchaseuser@yourcompany.com",
             'groups_id': [(6, 0, [cls.env.ref('purchase.group_purchase_user').id])],
             })
+
+        cls.res_partner_3 = cls.env['res.partner'].create({
+                            'name': 'Deco Addict',
+                            'is_company': True,
+                            'street': '325 Elsie Drive',
+                            'city': 'Franklin',
+                            'zip': 26807,
+                            'email': 'deco.addict82@example.com',
+                            'phone': '(603)-996-3829',
+                            'website': 'http://www.deco-addict.com'
+                            })
