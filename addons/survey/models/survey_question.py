@@ -126,14 +126,17 @@ class SurveyQuestion(models.Model):
         domain=[('skipped', '=', False)], groups='survey.group_survey_user')
     # show/hide the question depending on the other question.
     is_enable_question_dependency = fields.Boolean('Is Enable Question Dependency')
-    question_depend_id = fields.Many2one('survey.question', string='Question', domain="[('survey_id', '=', survey_id)]")
+    question_depend_id = fields.Many2one('survey.question', string='Question', domain="[('survey_id', '=', survey_id), ('page_id', '=', page_id)]")
     depend_question_type = fields.Selection(related="question_depend_id.question_type")
+    # operator_id = fields.Many2one('survey.operator', string='Operator', default=lambda self: self.env.ref('survey.survey_operator_equalto'))
     operator = fields.Char(string='Operator', default='=')
-    value_text = fields.Char()
-    value_date = fields.Date()
-    value_datetime = fields.Datetime()
-    value_number = fields.Float()
+    value_text = fields.Char(string="Value")
+    value_date = fields.Date(string="Value")
+    value_datetime = fields.Datetime(string="Value")
+    value_number = fields.Float(string="Value")
     action = fields.Selection([('show', 'Show'), ('hide', 'Hide')], string='Action', default='show')
+    # for multiple choice and matrix question
+    value_suggetion_ids = fields.Many2many('survey.label', string="Value", domain="[('question_id', '=', question_depend_id)]")
 
     _sql_constraints = [
         ('positive_len_min', 'CHECK (validation_length_min >= 0)', 'A length must be positive!'),

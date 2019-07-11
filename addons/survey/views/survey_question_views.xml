@@ -163,14 +163,16 @@
                                     <field name="is_enable_question_dependency"/>
                                 </group>
                                 <group string="Dependency Rule" attrs="{'invisible':[('is_enable_question_dependency', '=', False)]}" >
-                                    <field name="question_depend_id" options="{'no_create': True}" domain="[('page_id', '=', context.get('page_id'))]"/>
+                                    <field name="question_depend_id" options="{'no_create': True}" attrs="{'required': [('is_enable_question_dependency', '!=', False)]}" domain="[('page_id', '=', context.get('page_id'))]"/>
                                     <field name="depend_question_type" invisible="1"/>
-                                    <field name="operator"/>
+                                    <field name="operator" attrs="{'invisible':[('question_depend_id', '=', False)], 'required': [('question_depend_id', '!=', False)]}"/>
+                                    <!-- <field name="operator_id" widget="selection" options="{'no_create': True}" attrs="{'invisible':[('question_depend_id', '=', False)], 'required': [('question_depend_id', '!=', False)]}"/> -->
                                     <field name="value_text" attrs="{'invisible':[('depend_question_type', 'not in', ['free_text', 'textbox'])]}"/>
                                     <field name="value_date" attrs="{'invisible':[('depend_question_type', '!=', 'date')]}"/>
                                     <field name="value_datetime" attrs="{'invisible':[('depend_question_type', '!=', 'datetime')]}"/>
                                     <field name="value_number" attrs="{'invisible':[('depend_question_type', '!=', 'numerical_box')]}"/>
-                                    <field name="action"/>
+                                    <field name="value_suggetion_ids" widget="many2many_tags" context="{'default_question_id': question_depend_id}" attrs="{'invisible':[('depend_question_type', 'not in', ['simple_choice', 'multiple_choice', 'matrix'])]}"/>
+                                    <field name="action" attrs="{'invisible':[('question_depend_id', '=', False)], 'required': [('operator', '!=', False)]}"/>
                                 </group>
                             </group>
                         </page>
