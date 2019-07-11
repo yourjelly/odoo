@@ -54,6 +54,18 @@ class TestPurchase(TestStockCommon):
             'groups_id': [(6, 0, [cls.env.ref('purchase.group_purchase_user').id])],
             })
 
+        cls.account_o_expense = cls.env['account.account'].create({
+            'code': 'Y1114',
+            'name': 'Opening Expense - (test)',
+            'user_type_id': cls.env.ref('account.data_account_type_expenses').id
+        })
+
+        cls.account_o_income = cls.env['account.account'].create({
+            'code': 'Y1115',
+            'name': 'Opening Income - (test)',
+            'user_type_id': cls.env.ref('account.data_account_type_other_income').id
+        })
+
         cls.res_partner_3 = cls.env['res.partner'].create({
                             'name': 'Deco Addict',
                             'is_company': True,
