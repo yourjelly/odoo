@@ -80,8 +80,8 @@ var Selector = class extends we3.AbstractPlugin {
      * @param {object} [options]
      * @param {boolean} [options.returnArchNodes]
      * @param {integer[]} [options.filterIds]
-     **/
-    search (archNode, string, options) {
+     */
+    search(archNode, string, options) {
         var self = this;
         var BaseArch = this.dependencies.BaseArch;
         if (typeof archNode === 'string') {
@@ -111,12 +111,15 @@ var Selector = class extends we3.AbstractPlugin {
         return items;
     }
     /**
+     * FIXME this function does not work with most selectors... (like a simple
+     * '.row > div' does not work)... c/c half of jQuery is a bad idea...
+     *
      * @param {ArchNode|Element} [archNode]
      * @param {string} string
      * @param {object} [options]
      * @param {integer[]} [options.filterIds]
      **/
-    is (archNode, string, options) {
+    is(archNode, string, options) {
         var self = this;
         var BaseArch = this.dependencies.BaseArch;
         if (typeof archNode === 'number') {

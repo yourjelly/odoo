@@ -217,12 +217,13 @@
     }
 }
 
+// FIXME data-oe is gone ?
 .o_editable {
-    &:not(:empty), &[data-oe-type] {
-        &:not([data-oe-model="ir.ui.view"]):not([data-oe-type="html"]):hover {
-            box-shadow: $o-brand-odoo 0 0 5px 2px inset;
-        }
-    }
+    // &:not(:empty), &[data-oe-type] {
+    //     &:not([data-oe-model="ir.ui.view"]):not([data-oe-type="html"]):hover {
+    //         box-shadow: $o-brand-odoo 0 0 5px 2px inset;
+    //     }
+    // }
     &:focus, &[data-oe-type] {
         min-height: 0.8em;
         min-width: 8px;

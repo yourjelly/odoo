@@ -141,6 +141,9 @@ we3.AbstractPlugin = class extends we3.EventDispatcher {
      * (`editableDomEvents`, `documentDomEvents`)
      * with their respective node (`dom`).
      *
+     * FIXME the event delegation does not work... do we really want to
+     * implement that ourself ?
+     *
      * @private
      * @param {Node} dom
      * @param {Object []} events {[name]: {String}}

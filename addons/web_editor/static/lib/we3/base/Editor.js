@@ -6,7 +6,10 @@ var PluginsManager = we3.PluginsManager;
 var utils = we3.utils;
 
 we3.Editor = class extends we3.EventDispatcher {
-    constructor (parent, params) {
+    /**
+     * @constructor
+     */
+    constructor(parent, params) {
         super(parent);
         if (!params) {
             params = parent;
@@ -26,11 +29,14 @@ we3.Editor = class extends we3.EventDispatcher {
         this.id = 'wysiwyg-' + (++id);
 
         this.editor = document.createElement('we3-editor');
+        this.editorMainRow = document.createElement('we3-editor-main-row');
         this.container = document.createElement('we3-editable-container');
         this.editable = document.createElement('we3-editable');
         this.editable.contentEditable = 'true';
 
         this._editableContainer = [];
+        this.beforeMainRow = [];
+        this.afterMainRow = [];
         this.beforeContainer = [];
         this.afterContainer = [];
         this.beforeEditable = [];
@@ -40,51 +46,67 @@ we3.Editor = class extends we3.EventDispatcher {
         this._prepareOptions(params);
 
         this._pluginsManager = new PluginsManager(this, {
-                id: this.id,
-                plugins: this.plugins,
-                editable: this.editable,
-                editor: this.editor,
-                addEditableContainer (node) {
-                    if (self._isInsertEditableInContainers) {
-                        throw new Error("Plugin content already inserted, you can't change the container");
-                    } else {
-                        self._editableContainer.push(node);
-                    }
-                },
-                insertBeforeContainer (node) {
-                    if (self._isInsertEditableContainers) {
-                        self.editor.insertBefore(node, self.editor.firstChild);
-                    } else {
-                        self.beforeContainer.push(node);
-                    }
-                },
-                insertAfterContainer (node) {
-                    if (self._isInsertEditableContainers) {
-                        self.editor.appendChild(node);
-                    } else {
-                        self.afterContainer.push(node);
-                    }
-                },
-                insertBeforeEditable (node) {
-                    if (self._isInsertEditableInContainers) {
-                        self.editable.parentNode.insertBefore(node, self.editable.parentNode.firstChild);
-                    } else {
-                        self.beforeEditable.push(node);
-                    }
-                },
-                insertAfterEditable (node) {
-                    if (self._isInsertEditableInContainers) {
-                        self.editable.parentNode.appendChild(node);
-                    } else {
-                        self.afterEditable.push(node);
-                    }
-                },
+            id: this.id,
+            plugins: this.plugins,
+            editable: this.editable,
+            editor: this.editor,
+            addEditableContainer(node) {
+                if (self._isInsertEditableInContainers) {
+                    throw new Error("Plugin content already inserted, you can't change the container");
+                } else {
+                    self._editableContainer.push(node);
+                }
             },
-            this.options);
+            insertBeforeMainRow(node) {
+                if (self._editorMainRowInserted) {
+                    self.editor.insertBefore(node, self.editor.firstChild);
+                } else {
+                    self.beforeMainRow.push(node);
+                }
+            },
+            insertAfterMainRow(node) {
+                if (self._editorMainRowInserted) {
+                    self.editor.appendChild(node);
+                } else {
+                    self.afterMainRow.push(node);
+                }
+            },
+            insertBeforeContainer(node) {
+                if (self._isInsertEditableContainers) {
+                    self.editorMainRow.insertBefore(node, self.editor.firstChild);
+                } else {
+                    self.beforeContainer.push(node);
+                }
+            },
+            insertAfterContainer(node) {
+                if (self._isInsertEditableContainers) {
+                    self.editorMainRow.appendChild(node);
+                } else {
+                    self.afterContainer.push(node);
+                }
+            },
+            insertBeforeEditable(node) {
+                if (self._isInsertEditableInContainers) {
+                    self.editable.parentNode.insertBefore(node, self.editable.parentNode.firstChild);
+                } else {
+                    self.beforeEditable.push(node);
+                }
+            },
+            insertAfterEditable(node) {
+                if (self._isInsertEditableInContainers) {
+                    self.editable.parentNode.appendChild(node);
+                } else {
+                    self.afterEditable.push(node);
+                }
+            },
+        }, this.options);
 
         this.on('change', this, this._onChange);
     }
-    start (target) {
+    /**
+     * @override
+     */
+    start(target) {
         var self = this;
         if (target.wysiwygEditor) {
             target.wysiwygEditor.destroy();
@@ -101,8 +123,20 @@ we3.Editor = class extends we3.EventDispatcher {
             if (self.isDestroyed()) {
                 return;
             }
+            self._insertEditorMainRow();
             self._insertEditorContainers();
             self._insertEditableInContainers();
+
+            self.editor.style.display = 'none';
+            self.editor.id = self.id;
+            if (self.target.nextSibling) {
+                self.target.parentNode.insertBefore(self.editor, self.target.nextSibling);
+            } else if (self.target.parentNode) {
+                self.target.parentNode.appendChild(self.editor);
+            } else {
+                console.info("Can't insert this editor on a node without any parent");
+            }
+
             return self._pluginsManager.start();
         }).then(function () {
             if (self.isDestroyed()) {
@@ -317,45 +351,69 @@ we3.Editor = class extends we3.EventDispatcher {
     /**
      * @private
      */
-    _insertEditorContainers () {
-        this._isInsertEditableContainers = true;
-        this.editor.style.display = 'none';
-        this.editor.id = this.id;
-        if (this.target.nextSibling) {
-            this.target.parentNode.insertBefore(this.editor, this.target.nextSibling);
-        } else if (this.target.parentNode) {
-            this.target.parentNode.appendChild(this.editor);
-        } else {
-            console.info("Can't insert this editor on a node without any parent");
-        }
-        var node;
-        var editableContainer = this.editor;
-        while (node = this.beforeContainer.pop()) {
+    _insertEditorMainRow() {
+        this._editorMainRowInserted = true;
+
+        var node = this.beforeMainRow.pop();
+        while (node) {
             this.editor.appendChild(node);
-        }
-        while (node = this._editableContainer.shift()) {
-            editableContainer.appendChild(node);
-            editableContainer = node;
+            node = this.beforeMainRow.pop();
         }
 
-        editableContainer.appendChild(this.container);
+        this.editor.appendChild(this.editorMainRow);
 
-        while (node = this.afterContainer.pop()) {
+        node = this.afterMainRow.pop();
+        while (node) {
             this.editor.appendChild(node);
+            node = this.afterMainRow.pop();
         }
     }
     /**
      * @private
      */
-    _insertEditableInContainers () {
-        this._isInsertEditableInContainers = true;
-        var node;
-        while (node = this.beforeEditable.pop()) {
-            this.container.appendChild(node);
+    _insertEditorContainers() {
+        this._isInsertEditableContainers = true;
+
+        var node = this.beforeContainer.pop();
+        while (node) {
+            this.editorMainRow.appendChild(node);
+            node = this.beforeContainer.pop();
         }
-        this.container.appendChild(this.editable);
-        while (node = this.afterEditable.shift()) {
+
+        var editableContainer = this.editorMainRow;
+        node = this._editableContainer.shift();
+        while (node) {
+            editableContainer.appendChild(node);
+            editableContainer = node;
+            node = this._editableContainer.shift();
+        }
+
+        editableContainer.appendChild(this.container);
+
+        node = this.afterContainer.pop();
+        while (node) {
+            this.editorMainRow.appendChild(node);
+            node = this.afterContainer.pop();
+        }
+    }
+    /**
+     * @private
+     */
+    _insertEditableInContainers() {
+        this._isInsertEditableInContainers = true;
+
+        var node = this.beforeEditable.pop();
+        while (node) {
             this.container.appendChild(node);
+            node = this.beforeEditable.pop();
+        }
+
+        this.container.appendChild(this.editable);
+
+        node = this.afterEditable.shift();
+        while (node) {
+            this.container.appendChild(node);
+            node = this.afterEditable.shift();
         }
     }
     /**

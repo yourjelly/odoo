@@ -31,7 +31,7 @@ var IframePlugin = class extends we3.AbstractPlugin {
         }
 
         this._loadIframePromise = this._createIframe();
-        this.params.insertAfterContainer(this.iframe);
+        this.params.insertAfterMainRow(this.iframe);
     }
     isInitialized () {
         return Promise.all([this.defAsset, this._preloadIframePromise]);

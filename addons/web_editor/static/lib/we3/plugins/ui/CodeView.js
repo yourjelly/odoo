@@ -20,7 +20,7 @@ var CodeViewPlugin = class extends we3.AbstractPlugin {
             architecturalSpace: true,
         };
         this.codeview = this._createCodable();
-        params.insertAfterContainer(this.codeview);
+        params.insertAfterMainRow(this.codeview);
     }
     /**
      * @override
@@ -35,14 +35,6 @@ var CodeViewPlugin = class extends we3.AbstractPlugin {
     destroy () {
         this.isBeingDestroyed = true;
         super.destroy();
-    }
-    /**
-     * @override
-     */
-    focusEditor () {
-        if (this._isActive()) {
-            this._resize();
-        }
     }
     /**
      * @override
@@ -119,7 +111,6 @@ var CodeViewPlugin = class extends we3.AbstractPlugin {
         this.isActive = true;
         this.codeview.style.display = '';
         this.editable.style.display = 'none';
-        this._resize();
         this._focus();
         this.trigger('active');
     }
@@ -141,7 +132,6 @@ var CodeViewPlugin = class extends we3.AbstractPlugin {
     _createCodable () {
         var codeview = document.createElement('textarea');
         codeview.name = 'codeview';
-        codeview.oninput = this._resize.bind(this);
         codeview.style.display = 'none';
         return codeview;
     }
@@ -183,15 +173,6 @@ var CodeViewPlugin = class extends we3.AbstractPlugin {
      */
     _isActive () {
         return this.isActive;
-    }
-    /**
-     * Resize the code view textarea to fit its contents.
-     *
-     * @private
-     */
-    _resize () {
-        this.codeview.style.height = '';
-        this.codeview.style.height = this.codeview.scrollHeight + "px";
     }
     /**
      * Set the value of the code view.

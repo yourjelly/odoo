@@ -11,7 +11,7 @@ var Modal = class extends we3.AbstractPlugin {
         this._modals = document.createElement('we3-modals');
         this._backdrop = document.createElement('we3-modal-backdrop');
         this._modals.appendChild(this._backdrop);
-        params.insertAfterContainer(this._modals);
+        params.insertAfterMainRow(this._modals);
         this._index = 0;
         this._modalList = [];
         this._modalListCallback = [];

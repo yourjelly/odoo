@@ -21,9 +21,9 @@ var ToolbarPlugin = class extends PopoverPlugin {
     /**
      * @override
      */
-    _createPopover (insertCallback) {
+    _createPopover(params) {
         var toolbar = document.createElement('we3-toolbar');
-        insertCallback(toolbar);
+        params.insertBeforeMainRow(toolbar);
         this.popovers = [{
             pluginNames: this.options.toolbar,
             element: toolbar,

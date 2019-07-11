@@ -8,13 +8,8 @@ we3-editor {
     height: 100%;
     min-height: 200px;
 
-    > textarea[name="codeview"] {
-        flex: 1;
-        border: 0;
-        resize: none;
-        background-color: black;
-        color: white;
-        font-family: "Lucida Console", Monaco, monospace;
+    > * {
+        flex: 0 0 auto;
     }
 
     &.fullscreen {
@@ -26,19 +21,40 @@ we3-editor {
     }
 }
 
+we3-editor-main-row {
+    flex: 1 1 auto;
+    height: 0;
+    min-height: 0;
+    display: flex;
+
+    > * {
+        flex: 0 0 auto;
+    }
+}
+
 we3-editable-container {
     position: relative;
     flex: 1 1 auto;
-    min-height: 0;
+    width: 0;
+    min-width: 0;
+    overflow: auto;
 }
 
 we3-editable {
     position: relative;
     display: block;
-    max-height: 100%;
     min-height: 170px;
-    overflow: auto;
     outline: none;
+}
+
+// Code view
+textarea[name="codeview"] {
+    flex: 9999 0 auto;
+    border: 0;
+    resize: none;
+    background-color: black;
+    color: white;
+    font-family: "Lucida Console", Monaco, monospace;
 }
 
 // style for dropdown & buttons (in popover & toolbar)

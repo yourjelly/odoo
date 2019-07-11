@@ -1,27 +1,13 @@
-@keyframes dropZoneInsert {
-    to {
-        background-color: rgba(124, 123, 173, 0.2);
-    }
-}
-
+// SNIPPETS PANEL
 we3-group[data-plugin="DropBlock"] {
     width: $o-wysiwyg-sidebar-width;
 }
 
-.we3-dropblock-enabled {
-    padding-left: $o-wysiwyg-sidebar-width;
-}
-
-// SNIPPET PANEL
 we3-dropblock {
     @include o-w-preserve-btn;
 
     display: none;
-    position: absolute;
-    top: 0;
-    left: 0;
     width: $o-wysiwyg-sidebar-width;
-    height: 100%;
     overflow: auto;
     background-image: linear-gradient(45deg, $o-wysiwyg-bg-color, darken($o-wysiwyg-bg-color, 10%));
     font-family: Roboto, $font-family-sans-serif;
@@ -132,105 +118,121 @@ we3-dropblock-thumbnail {
     }
 }
 
-we3-dropblock-dropzone-origin we3-dropblock-thumbnail {
-    position: relative;
-    opacity: 0.7;
+@keyframes dropZoneInsert {
+    to {
+        background-color: rgba($o-brand-odoo, 0.2);
+    }
 }
 
 we3-dropblock-dropzone {
-    background-color: rgba(124, 123, 173, 0.05);
+    background-color: rgba($o-brand-odoo, 0.05);
     animation: dropZoneInsert 1s linear 0s infinite alternate;
-    border: 2px dashed #a9a9a9;
+    border: 2px dashed $o-wysiwyg-border-color;
     border-top: none;
     border-bottom: none;
 
-    display: block;
+    display: none;
     position: relative;
     width: 100%;
-    height: 40px;
-    margin: -20px 0;
+    height: $o-wysiwyg-dropzone-size;
+    margin: (-$o-wysiwyg-dropzone-size/2) 0;
+
+    &.we3-dropzone-visible {
+        display: block;
+
+        &.we3-dropzone-vertical {
+            display: inline-block;
+        }
+    }
 
     &:after {
         content: "";
         display: block;
         width: 100%;
         height: 50%;
-        border-bottom: 2px dashed #a9a9a9;
+        border-bottom: 2px dashed $o-wysiwyg-border-color;
         box-sizing: content-box;
     }
 
-    &[orientation="vertical"] {
-        border: 2px dashed #a9a9a9;
+    &.we3-dropzone-vertical {
+        border: 2px dashed $o-brand-odoo;
         border-left: none;
         border-right: none;
 
-        width: 40px;
-        float: left;
-        margin: 0 -20px;
+        width: $o-wysiwyg-dropzone-size;
+        height: 100%;
+        margin: 0 (-$o-wysiwyg-dropzone-size/2);
 
         &:after {
             width: 50%;
             height: 100%;
             border-bottom: none;
-            border-right: 2px dashed #a9a9a9;
+            border-right: 2px dashed $o-wysiwyg-border-color;
         }
     }
 }
 
-we3-dropblock-dropzone-origin {
+we3-dropblock-origin {
     position: absolute;
-}
+    z-index: $o-wysiwyg-zindex;
 
-we3-dropblock-buttons {
-    position: absolute;
-    display: flex;
-
-    we3-button {
+    we3-dropblock-thumbnail {
         position: relative;
-        top: -6px;
-
-        &:before {
-            content: "\2701";
-            font-weight: bold;
-        }
+        opacity: 0.7;
     }
-}
 
-.we3-dropblock-dropable {
-    &:hover {
-        box-shadow: inset 0px 0px 5px 1px rgba(255,0,0,1);
-        position: relative;
-    }
-    /*&:hover:before {
-        cursor: pointer;
-        display: inline-block;
-        padding: 0px 4px;
-        margin: 0;
-        line-height: 1.5;
-        border-radius: 0.2rem;
-        font-weight: 500;
-        color: #666666;
-        text-align: center;
-        vertical-align: middle;
-        background-color: #fff;
-        border: 1px solid #dee2e6;
-        line-height: 1.5;
-        user-select: none;
-
+    we3-drag-thumbnail {
         position: absolute;
-        left: -10px;
-        top: -10px;
-        content: "\2701";
-        font-weight: bold;
-    }*/
+        display: block;
+        border: 1px solid $o-wysiwyg-border-color;
+    }
+
+    we3-dropblock-move-ui {
+        display: none;
+        position: absolute;
+        cursor: pointer;
+        cursor: move;
+
+        $-we3-handle-offset: 10000px; // the same value is used in JS
+        $-we3-handle-width: 1px;
+        $-we3-handle-color: $o-wysiwyg-handles-accent-color;
+
+        > we3-handle {
+            position: absolute;
+            top: $-we3-handle-offset;
+            left: 0;
+            width: 8px;
+            height: 8px;
+
+            &:nth-child(1) {
+                width: 100%;
+                border-top: $-we3-handle-width solid $-we3-handle-color;
+            }
+            &:nth-child(2) {
+                left: auto;
+                right: 0;
+                height: 100%;
+                border-right: $-we3-handle-width solid $-we3-handle-color;
+            }
+            &:nth-child(3) {
+                top: auto;
+                bottom: -$-we3-handle-offset;
+                width: 100%;
+                border-bottom: $-we3-handle-width solid $-we3-handle-color;
+            }
+            &:nth-child(4) {
+                height: 100%;
+                border-left: $-we3-handle-width solid $-we3-handle-color;
+            }
+        }
+
+        &.we3-dropblock-move-ui-visible {
+            display: block;
+        }
+    }
 }
 
 // NOTE EDITOR
-.note-editor.o_snippets_loaded {
-    transition: padding-left 400ms $o-wysiwyg-md-ease 0s;
-    padding-left: $o-wysiwyg-sidebar-width !important;
-}
-
 .note-editor.note-frame .note-editing-area .o_wrap_editable_snippets {
     overflow: auto;
 
@@ -326,57 +328,6 @@ we3-dropblock-buttons {
             &:hover {
                 background: transparent !important;
                 color: $o-wysiwyg-color-danger;
-            }
-        }
-    }
-}
-
-// DROPZONES
-@keyframes dropZoneInsert {
-    to {
-        background-color: rgba($o-brand-odoo, 0.2);
-    }
-}
-
-.note-editable .oe_drop_zone {
-    background-color: rgba($o-brand-odoo, 0.05);
-    animation: dropZoneInsert 1s linear 0s infinite alternate;
-
-    &.oe_insert {
-        z-index: $o-wysiwyg-zindex - 1;
-
-        border: 2px dashed $o-wysiwyg-border-color;
-        border-top: none;
-        border-bottom: none;
-
-        position: relative;
-        width: 100%;
-        height: $o-wysiwyg-dropzone-size;
-        margin: (-$o-wysiwyg-dropzone-size/2) 0;
-
-        &:after {
-            content: "";
-            display: block;
-            width: 100%;
-            height: 50%;
-            border-bottom: 2px dashed $o-wysiwyg-border-color;
-            box-sizing: content-box;
-        }
-
-        &.oe_vertical {
-            border: 2px dashed $o-brand-odoo;
-            border-left: none;
-            border-right: none;
-
-            width: $o-wysiwyg-dropzone-size;
-            float: left;
-            margin: 0 (-$o-wysiwyg-dropzone-size/2);
-
-            &:after {
-                width: 50%;
-                height: 100%;
-                border-bottom: none;
-                border-right: 2px dashed $o-wysiwyg-border-color;
             }
         }
     }

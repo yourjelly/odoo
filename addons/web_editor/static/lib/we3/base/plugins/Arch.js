@@ -371,6 +371,9 @@ var BaseArch = class extends we3.AbstractPlugin {
      * If no element and offset are specified, insert at range (and delete
      * selection if necessary).
      *
+     * FIXME the doc is wrong...
+     * FIXME trying to insert a node at its current location make it go away...
+     *
      * @param {string|Node|DocumentFragment} DOM the node/fragment to insert (or its nodeName/nodeValue)
      * @param {Node} [element] the node in which to insert
      * @param {Number} [offset] the offset of the node at which to insert

@@ -15,13 +15,13 @@ var handleSelector = function (element, selector, callback) {
 };
 
 var PopoverPlugin = class extends we3.AbstractPlugin {
-    constructor (parent, params) {
+    constructor(parent, params) {
         super(...arguments);
         this.dependencies = ['Range', 'Renderer', 'Position'];
         this.POPOVER_MARGIN_LEFT = 5;
         this.POPOVER_MARGIN_TOP = 5;
         this._setOptionalDependencies(params);
-        this._createPopover(params.insertBeforeContainer);
+        this._createPopover(params);
         this._buttonsEnableOnChange = [];
         this._buttonsActiveOnChange = [];
     }
@@ -70,12 +70,12 @@ var PopoverPlugin = class extends we3.AbstractPlugin {
     //--------------------------------------------------------------------------
 
     /**
-     * Create popover container and add it to the beforeEditable list.
-     * Create the local popover definitions
+     * Creates the popover container and adds it to the right location.
+     * Creates the local popover definitionss
      *
-     * @returns [elements]
+     * @param {object} params
      */
-    _createPopover (insertCallback) {
+    _createPopover(params) {
         var self = this;
         this.popovers = [];
         var popovers = this.popoverOptions;
@@ -85,7 +85,7 @@ var PopoverPlugin = class extends we3.AbstractPlugin {
 
             var popover = document.createElement('we3-popover');
             popover.setAttribute('name', checkMethodPluginName);
-            insertCallback(popover);
+            params.insertBeforeEditable(popover);
 
             self.popovers.push({
                 pluginNames: pluginNames,

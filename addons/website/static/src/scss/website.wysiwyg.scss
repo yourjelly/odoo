@@ -517,7 +517,7 @@ we3-toolbar, we3-popover {
     background-color: $o-we-color-dark;
 }
 we3-button, we3-toggler {
-    display: flex;
+    display: inline-flex;
     justify-content: center;
     align-items: center;
     height: 100%;

@@ -3,91 +3,90 @@
 
 var dropBlockSelector = class extends we3.AbstractPlugin {
     /**
-     *
-     * @override
-     *
-     * @param {Object[]} params.blockSelector
-     * @param {string} params.blockSelector.selector
-     * @param {string} params.blockSelector.exclude
-     * @param {string} params.blockSelector.dropIn
-     * @param {string} params.blockSelector.dropNear
-     **/
-    constructor (parent, params) {
+     * @constructor
+     * @param {Object} parent
+     * @param {Object} params
+     * @param {Object} options
+     */
+    constructor(parent, params, options) {
         super(...arguments);
         this.dependencies = ['Arch', 'DropBlock', 'Selector'];
-        if (!this.options.blockSelector) {
-            console.error("'DropblockSelector' plugin should use 'blockSelector' options");
-        }
+        this.dropzonesData = (this.options.blockSelector || [])
+            .filter(function (data) {
+                return (data.dropIn || data.dropNear);
+            });
     }
-
-    start () {
-        var promise = super.start();
-        this.dependencies.DropBlock.on('dropzone', this, this._onDragAndDropNeedDropZone.bind(this));
+    /**
+     * @override
+     */
+    start() {
+        var promise = super.start(...arguments);
+        this.dependencies.DropBlock
+            .on('dropzones_data_demand', this, this._onDropzonesDataDemand.bind(this));
         return promise;
     }
 
     //--------------------------------------------------------------------------
-    // Handle
+    // Handlers
     //--------------------------------------------------------------------------
 
-    _onDragAndDropNeedDropZone (items) {
+    /**
+     * @private
+     */
+    _onDropzonesDataDemand(items) {
+        var self = this;
         var Selector = this.dependencies.Selector;
         var Arch = this.dependencies.Arch;
-        var blockSelector = this.options.blockSelector;
 
+        // If no specific target is asked by a predefined series of items,
+        // consider all of them.
         if (!items.length) {
-            var ids = we3.utils.uniq(we3.utils.flatten(blockSelector.map(function (zone) {
-                return zone.dropIn || zone.dropNear ? Selector.search(zone.selector) : [];
-            })));
-            ids.map(function (id) {
-                items.push({ target: id });
+            var ids = this.dropzonesData.map(function (zone) {
+                return Selector.search(zone.selector);
+            });
+            we3.utils.uniq(we3.utils.flatten(ids)).forEach(function (id) {
+                items.push({target: id});
             });
         }
 
-        var data = items.splice(0);
-        data.forEach(function (item) {
-            if (!item.arch) {
-                if (typeof item.target === 'number') {
-                    item.arch = Arch.getClonedArchNode(item.target);
-                } else {
-                    item.arch = Arch.parse(item.target).firstChild();
-                }
+        // For each defined target, associate the related arch node and a dropIn
+        // and a dropNear function if any.
+        items.forEach(function (item) {
+            if (typeof item.target === 'number') {
+                item.arch = Arch.getClonedArchNode(item.target);
+            } else {
+                item.arch = Arch.parse(item.target).firstChild();
             }
-            var dropIn = [];
-            var dropNear = [];
-            blockSelector.forEach(function (zone) {
-                if ((zone.dropIn || zone.dropNear) && Selector.is(item.arch, zone.selector) && (!zone.exclude || !Selector.is(item.arch, zone.exclude))) {
+
+            var dropInSelectors = [];
+            var dropNearSelectors = [];
+            self.dropzonesData.forEach(function (zone) {
+                if (Selector.is(item.arch, zone.selector)
+                        && (!zone.exclude || !Selector.is(item.arch, zone.exclude))) {
                     if (zone.dropIn) {
-                        dropIn.push(zone.dropIn);
+                        dropInSelectors.push(zone.dropIn);
                     }
                     if (zone.dropNear) {
-                        dropNear.push(zone.dropNear);
+                        dropNearSelectors.push(zone.dropNear);
                     }
                 }
             });
-            if (dropIn.length || dropNear.length) {
-                items.push({
-                    arch: item.arch,
-                    target: item.target,
-                    dropIn: makeDrop(dropIn),
-                    dropNear: makeDrop(dropNear),
-                })
-            }
+            item.dropIn = makeDropFunction(dropInSelectors);
+            item.dropNear = makeDropFunction(dropNearSelectors);
         });
 
-        function makeDrop (dropItems) {
+        function makeDropFunction(dropSelectors) {
             return function () {
-                return we3.utils.uniq(we3.utils.flatten(dropItems.map(function (drop) {
-                    if (drop === 'root') {
+                return we3.utils.uniq(we3.utils.flatten(dropSelectors.map(function (selector) {
+                    if (selector === 'root') {
                         return [1];
                     }
-                    return Selector.search(drop);
+                    return Selector.search(selector);
                 })));
-            }
+            };
         }
     }
 };
 
 we3.addPlugin('DropBlockSelector', dropBlockSelector);
-
 })();

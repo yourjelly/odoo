@@ -137,7 +137,7 @@ var Wysiwyg = Widget.extend({
                 },
                 colors: this._groupColors,
             },
-            dropblocks: this._dropblocks,
+            blocksDataList: this._blocksDataList,
             blockSelector: this._blockSelector,
             renderingAttributeBlacklist: [
                 'data-oe-model',
@@ -393,7 +393,7 @@ var Wysiwyg = Widget.extend({
         var self = this;
         var def = $.when();
         if (!('web_editor.dropBlockTemplate.custom' in QWeb.templates)) {
-            var def = this._rpc({
+            def = this._rpc({
                 model: 'ir.ui.view',
                 method: 'render_template',
                 args: [this.options.snippets, {}],
@@ -403,11 +403,11 @@ var Wysiwyg = Widget.extend({
                 t.innerHTML = template;
                 var xml = new XMLSerializer().serializeToString(t).replace(/\s*xmlns="[^"]+"/, '');
                 QWeb.add_template('<templtes>' + xml + '</templtes>');
-            })
+            });
         }
 
         return def.then(function () {
-            var dropblocks = [];
+            var blocksDataList = [];
             var blockSelector = [];
             var blockCustomisation = [];
 
@@ -421,7 +421,7 @@ var Wysiwyg = Widget.extend({
                         content: this.innerHTML.trim(),
                     });
                 });
-                dropblocks.push({
+                blocksDataList.push({
                     title: $(this).find('.o_panel_header').html().trim(),
                     blocks: blocks,
                 });
@@ -460,15 +460,7 @@ var Wysiwyg = Widget.extend({
                 blockCustomisation.push(data);
             });
 
-            // console.log('------------------');
-            // // console.log(dropblocks);
-            // console.log(blockSelector);
-            // console.log(blockCustomisation);
-            // console.log('------------------');
-
-            console.log(blockSelector);
-
-            self._dropblocks = dropblocks;
+            self._blocksDataList = blocksDataList;
             self._blockSelector = blockSelector;
             self._blockCustomisation = blockCustomisation;
         });
