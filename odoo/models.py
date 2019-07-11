@@ -2932,14 +2932,7 @@ Fields:
                     for index in range(len(ids)):
                         values[index] = translate(ids[index], values[index])
 
-                if field._convert_to_cache_read:
-                    convert = field.convert_to_cache
-                    values = [convert(value, empty, validate=False) for value in values]
-                else:
-                    # FP Note: optimisation to test for large dataset: replace this by using a psycopg None extension for those fields
-                    values = [False if value is None else value for value in values]
-                # else:
-                #     print('no convert')
+                # store values in cache
                 self.env.cache.update(fetched, field, values)
 
             # determine the fields that must be processed now;
@@ -3785,7 +3778,7 @@ Fields:
                 # Set `mail.message.parent_id` to False in cache so it doesn't do the useless SELECT when computing the modified of `child_ids`
                 # in other words, if `parent_id` is not set, no other message `child_ids` are impacted.
                 elif field.type == 'many2one' and not field.compute and field.name not in list(vals) + LOG_ACCESS_COLUMNS + [self.CONCURRENCY_CHECK_FIELD]:
-                    self.env.cache.set(record, field, ())
+                    self.env.cache.set(record, field, None)
             for fname, value in vals.items():
                 field = self._fields[fname]
                 if field.type in ('one2many', 'many2many'):

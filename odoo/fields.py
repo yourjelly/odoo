@@ -776,7 +776,6 @@ class Field(MetaField('DummyField', (object,), {})):
     _description_change_default = property(attrgetter('change_default'))
     _description_deprecated = property(attrgetter('deprecated'))
     _description_group_operator = property(attrgetter('group_operator'))
-    _convert_to_cache_read = False
 
     @property
     def _description_searchable(self):
@@ -831,7 +830,7 @@ class Field(MetaField('DummyField', (object,), {})):
         If the value represents a recordset, it should share the prefetching of
         ``record``.
         """
-        return value
+        return False if value is None else value
 
     def convert_to_read(self, value, record, use_name_get=True):
         """ Convert ``value`` from the record format to the format returned by
@@ -1208,7 +1207,6 @@ class Integer(Field):
     _slots = {
         'group_operator': 'sum',
     }
-    _convert_to_cache_read = True
 
     def convert_to_column(self, value, record, values=None, validate=True):
         return int(value or 0)
@@ -1216,8 +1214,11 @@ class Integer(Field):
     def convert_to_cache(self, value, record, validate=True):
         if isinstance(value, dict):
             # special case, when an integer field is used as inverse for a one2many
-            return value.get('id', False)
+            return value.get('id', None)
         return int(value or 0)
+
+    def convert_to_record(self, value, record):
+        return value or 0
 
     def convert_to_read(self, value, record, use_name_get=True):
         # Integer values greater than 2^31-1 are not supported in pure XMLRPC,
@@ -1250,7 +1251,6 @@ class Float(Field):
         '_digits': None,                # digits argument passed to class initializer
         'group_operator': 'sum',
     }
-    _convert_to_cache_read = True
 
     def __init__(self, string=Default, digits=Default, **kwargs):
         super(Float, self).__init__(string=string, _digits=digits, **kwargs)
@@ -1293,6 +1293,9 @@ class Float(Field):
         digits = self.get_digits(record.env)
         return float_round(value, precision_digits=digits[1]) if digits else value
 
+    def convert_to_record(self, value, record):
+        return value or 0.0
+
     def convert_to_export(self, value, record):
         if value or value == 0.0:
             return value if record._context.get('export_raw_data') else ustr(value)
@@ -1312,7 +1315,6 @@ class Monetary(Field):
         'currency_field': None,
         'group_operator': 'sum',
     }
-    _convert_to_cache_read = True
 
     def __init__(self, string=Default, currency_field=Default, **kwargs):
         super(Monetary, self).__init__(string=string, currency_field=currency_field, **kwargs)
@@ -1368,6 +1370,9 @@ class Monetary(Field):
             # through the `convert_to_column` just above, which do the float_repr before sending the value to db
             value = float(float_repr(currency.round(value), currency.decimal_places))
         return value
+
+    def convert_to_record(self, value, record):
+        return value or 0.0
 
     def convert_to_read(self, value, record, use_name_get=True):
         return value
@@ -1486,7 +1491,7 @@ class Char(_String):
 
     def convert_to_cache(self, value, record, validate=True):
         if value is None or value is False:
-            return False
+            return None
         return pycompat.to_text(value)[:self.size]
 
 
@@ -1506,7 +1511,7 @@ class Text(_String):
 
     def convert_to_cache(self, value, record, validate=True):
         if value is None or value is False:
-            return False
+            return None
         return ustr(value)
 
 
@@ -1541,7 +1546,6 @@ class Html(_String):
     _description_sanitize_style = property(attrgetter('sanitize_style'))
     _description_strip_style = property(attrgetter('strip_style'))
     _description_strip_classes = property(attrgetter('strip_classes'))
-    _convert_to_cache_read = True
 
     def convert_to_column(self, value, record, values=None, validate=True):
         if value is None or value is False:
@@ -1558,7 +1562,7 @@ class Html(_String):
 
     def convert_to_cache(self, value, record, validate=True):
         if value is None or value is False:
-            return False
+            return None
         if validate and self.sanitize:
             return html_sanitize(
                 value, silent=True,
@@ -1655,7 +1659,7 @@ class Date(Field):
 
     def convert_to_cache(self, value, record, validate=True):
         if not value:
-            return False
+            return None
         if isinstance(value, datetime):
             # DLE P28: crm demo data pass datetimes to date fields.
             value = value.date()
@@ -1764,7 +1768,7 @@ class Datetime(Field):
 
     def convert_to_cache(self, value, record, validate=True):
         if not value:
-            return False
+            return None
         # DLE P36:
         # `test_27_company_dependent`
         # Do not force to pass datetime, accept date as well.
@@ -1792,7 +1796,6 @@ class Binary(Field):
         'depends_context': ('bin_size',),      # depends on context (content or size)
         'attachment': True,             # whether value is stored in attachment
     }
-    _convert_to_cache_read = True
 
     @property
     def column_type(self):
@@ -1843,7 +1846,7 @@ class Binary(Field):
             # instead of the content. Presumably a separate request will be done
             # to read the actual content, if necessary.
             return human_size(value)
-        return value
+        return value or None
 
     def read(self, records):
         # values are stored in attachments, retrieve them
@@ -1993,13 +1996,13 @@ class Selection(Field):
 
     def convert_to_cache(self, value, record, validate=True):
         if not validate:
-            return value or False
+            return value or None
         if value and self.column_type[0] == 'int4':
             value = int(value)
         if value in self.get_values(record.env):
             return value
         elif not value:
-            return False
+            return None
         raise ValueError("Wrong value for %s: %r" % (self, value))
 
     def convert_to_export(self, value, record):
@@ -2014,7 +2017,6 @@ class Selection(Field):
 
 class Reference(Selection):
     type = 'reference'
-    _convert_to_cache_read = True
 
     @property
     def column_type(self):
@@ -2024,23 +2026,26 @@ class Reference(Selection):
         return Field.convert_to_column(self, value, record, values, validate)
 
     def convert_to_cache(self, value, record, validate=True):
-        # cache format: (res_model, res_id) or False
+        # cache format: str ("model,id") or None
         if isinstance(value, BaseModel):
             if not validate or (value._name in self.get_values(record.env) and len(value) <= 1):
-                return (value._name, value.id) if value else False
+                return "%s,%s" % (value._name, value.id) if value else None
         elif isinstance(value, str):
             res_model, res_id = value.split(',')
             if not validate or res_model in self.get_values(record.env):
                 if record.env[res_model].browse(int(res_id)).exists():
-                    return (res_model, int(res_id))
+                    return value
                 else:
-                    return False
+                    return None
         elif not value:
-            return False
+            return None
         raise ValueError("Wrong value for %s: %r" % (self, value))
 
     def convert_to_record(self, value, record):
-        return value and record.env[value[0]].browse([value[1]])
+        if value:
+            res_model, res_id = value.split(',')
+            return record.env[res_model].browse(int(res_id))
+        return None
 
     def convert_to_read(self, value, record, use_name_get=True):
         return "%s,%s" % (value._name, value.id) if value else False
@@ -2134,7 +2139,6 @@ class Many2one(_Relational):
         'auto_join': False,             # whether joins are generated upon search
         'delegate': False,              # whether self implements delegation
     }
-    _convert_to_cache_read = True
 
     def __init__(self, comodel_name=Default, string=Default, **kwargs):
         super(Many2one, self).__init__(comodel_name=comodel_name, string=string, **kwargs)
@@ -2198,31 +2202,32 @@ class Many2one(_Relational):
         return value or None
 
     def convert_to_cache(self, value, record, validate=True):
-        # cache format: tuple(ids)
+        # cache format: id or None
         if type(value) in IdType:
-            ids = (value,)
+            id_ = value
         elif isinstance(value, BaseModel):
             if validate and (value._name != self.comodel_name or len(value) > 1):
                 raise ValueError("Wrong value for %s: %r" % (self, value))
-            ids = value._ids
+            id_ = value._ids[0] if value._ids else None
         elif isinstance(value, tuple):
             # value is either a pair (id, name), or a tuple of ids
-            ids = value[:1]
+            id_ = value[0] if value else None
         elif isinstance(value, dict):
-            ids = record.env[self.comodel_name].new(value)._ids
+            id_ = record.env[self.comodel_name].new(value).id
         else:
-            ids = ()
+            id_ = None
 
         if self.delegate and record and not record.id:
             # the parent record of a new record is a new record
-            ids = tuple(it and NewId(it) for it in ids)
+            id_ = id_ and NewId(id_)
 
-        return ids
+        return id_
 
     def convert_to_record(self, value, record):
         # use registry to avoid creating a recordset for the model
-        prefetch_ids = IterableGenerator(prefetch_value_ids, record, self)
-        return record.pool[self.comodel_name]._browse(record.env, value, prefetch_ids)
+        ids = () if value is None else (value,)
+        prefetch_ids = IterableGenerator(prefetch_many2one_ids, record, self)
+        return record.pool[self.comodel_name]._browse(record.env, ids, prefetch_ids)
 
     def convert_to_read(self, value, record, use_name_get=True):
         if use_name_get and value:
@@ -2255,7 +2260,7 @@ class Many2one(_Relational):
 
 class _RelationalMulti(_Relational):
     """ Abstract class for relational fields *2many. """
-    _convert_to_cache_read = True
+
     def _update(self, records, value):
         """ Update the cached value of ``self`` for ``records`` with ``value``, return True if everything is in cache. """
         if not isinstance(records, BaseModel):
@@ -2356,7 +2361,7 @@ class _RelationalMulti(_Relational):
 
     def convert_to_record(self, value, record):
         # use registry to avoid creating a recordset for the model
-        prefetch_ids = IterableGenerator(prefetch_value_ids, record, self)
+        prefetch_ids = IterableGenerator(prefetch_x2many_ids, record, self)
         return record.pool[self.comodel_name]._browse(record.env, value, prefetch_ids)
 
     def convert_to_read(self, value, record, use_name_get=True):
@@ -2476,7 +2481,6 @@ class One2many(_RelationalMulti):
         'limit': None,                  # optional limit to use upon read
         'copy': False,                  # o2m are not copied by default
     }
-    _convert_to_cache_read = True
 
     def __init__(self, comodel_name=Default, inverse_name=Default, string=Default, **kwargs):
         super(One2many, self).__init__(
@@ -2567,7 +2571,7 @@ class One2many(_RelationalMulti):
                 groups = defaultdict(list)
                 lines = comodel.browse(to_relink).sudo().with_context(prefetch_fields=False)
                 for line, record_id in zip(lines, to_relink.values()):
-                    if int(line[inverse]) != record_id:
+                    if int(line[inverse] or 0) != (record_id or 0):
                         groups[record_id].append(line.id)
                 for record_id, line_ids in groups.items():
                     comodel.browse(line_ids).write({inverse: record_id})
@@ -2648,7 +2652,6 @@ class Many2many(_RelationalMulti):
         'auto_join': False,             # whether joins are generated upon search
         'limit': None,                  # optional limit to use upon read
     }
-    _convert_to_cache_read = True
 
     def __init__(self, comodel_name=Default, relation=Default, column1=Default,
                  column2=Default, string=Default, **kwargs):
@@ -2951,13 +2954,22 @@ class Id(Field):
         raise TypeError("field 'id' cannot be assigned")
 
 
-def prefetch_value_ids(record, field):
-    """ Return an iterator over the ids of the cached values of a relational
+def prefetch_many2one_ids(record, field):
+    """ Return an iterator over the ids of the cached values of a many2one
         field for the prefetch set of a record.
     """
     records = record.browse(record._prefetch_ids)
-    ids_seq = record.env.cache.get_values(records, field, ())
-    return unique(id_ for ids in ids_seq for id_ in ids)
+    ids = record.env.cache.get_values(records, field, None)
+    return unique(id_ for id_ in ids if id_ is not None)
+
+
+def prefetch_x2many_ids(record, field):
+    """ Return an iterator over the ids of the cached values of an x2many
+        field for the prefetch set of a record.
+    """
+    records = record.browse(record._prefetch_ids)
+    ids_list = record.env.cache.get_values(records, field, ())
+    return unique(id_ for ids in ids_list for id_ in ids)
 
 
 # imported here to avoid dependency cycle issues
