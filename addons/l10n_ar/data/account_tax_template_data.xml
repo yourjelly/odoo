@@ -8,11 +8,33 @@
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="0.0" name="amount"/>
-        <field name="account_id" ref="ri_percepcion_iva_aplicada"/>
-        <field name="refund_account_id" ref="ri_percepcion_iva_aplicada"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_percepcion_iva_aplicada'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_percepcion_iva_aplicada'),
+                'tag_ids': [ref('l10n_ar.tag_ret_perc_sicore_aplicada')],
+            }),
+        ]"/>
         <field name="type_tax_use">sale</field>
         <field name="tax_group_id" ref="l10n_ar.tax_group_percepcion_iva"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar.tag_ret_perc_sicore_aplicada')])]"/>
     </record>
 
     <record id="ri_tax_percepcion_ganancias_aplicada" model="account.tax.template">
@@ -22,11 +44,33 @@
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="0.0" name="amount"/>
-        <field name="account_id" ref="ri_percepcion_ganancias_aplicada"/>
-        <field name="refund_account_id" ref="ri_percepcion_ganancias_aplicada"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_percepcion_ganancias_aplicada'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_percepcion_ganancias_aplicada'),
+                'tag_ids': [ref('l10n_ar.tag_ret_perc_sicore_aplicada')],
+            }),
+        ]"/>
         <field name="type_tax_use">sale</field>
         <field name="tax_group_id" ref="l10n_ar.tax_group_percepcion_ganancias"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar.tag_ret_perc_sicore_aplicada')])]"/>
     </record>
 
     <record id="ri_tax_percepcion_ganancias_sufrida" model="account.tax.template">
@@ -36,8 +80,30 @@
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="0.0" name="amount"/>
-        <field name="account_id" ref="base_percepcion_ganancias_sufrida"/>
-        <field name="refund_account_id" ref="base_percepcion_ganancias_sufrida"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('base_percepcion_ganancias_sufrida'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('base_percepcion_ganancias_sufrida'),
+            }),
+        ]"/>
         <field name="type_tax_use">purchase</field>
         <field name="tax_group_id" ref="l10n_ar.tax_group_percepcion_ganancias"/>
     </record>
@@ -49,11 +115,33 @@
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="0.0" name="amount"/>
-        <field name="account_id" ref="base_percepcion_iibb_caba_sufrida"/>
-        <field name="refund_account_id" ref="base_percepcion_iibb_caba_sufrida"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('base_percepcion_iibb_caba_sufrida'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('base_percepcion_iibb_caba_sufrida'),
+                'tag_ids': [ref('l10n_ar.tax_tag_a_cuenta_iibb')],
+            }),
+        ]"/>
         <field name="type_tax_use">purchase</field>
         <field name="tax_group_id" ref="l10n_ar.tax_group_percepcion_iibb"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar.tax_tag_a_cuenta_iibb')])]"/>
     </record>
 
     <record id="ri_tax_percepcion_iibb_ba_sufrida" model="account.tax.template">
@@ -63,11 +151,33 @@
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="0.0" name="amount"/>
-        <field name="account_id" ref="base_percepcion_iibb_ba_sufrida"/>
-        <field name="refund_account_id" ref="base_percepcion_iibb_ba_sufrida"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('base_percepcion_iibb_ba_sufrida'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('base_percepcion_iibb_ba_sufrida'),
+                'tag_ids': [ref('l10n_ar.tax_tag_a_cuenta_iibb')],
+            }),
+        ]"/>
         <field name="type_tax_use">purchase</field>
         <field name="tax_group_id" ref="l10n_ar.tax_group_percepcion_iibb"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar.tax_tag_a_cuenta_iibb')])]"/>
     </record>
 
     <record id="ri_tax_percepcion_iibb_co_sufrida" model="account.tax.template">
@@ -77,11 +187,33 @@
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="0.0" name="amount"/>
-        <field name="account_id" ref="base_percepcion_iibb_co_sufrida"/>
-        <field name="refund_account_id" ref="base_percepcion_iibb_co_sufrida"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('base_percepcion_iibb_co_sufrida'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('base_percepcion_iibb_co_sufrida'),
+                'tag_ids': [ref('l10n_ar.tax_tag_a_cuenta_iibb')],
+            }),
+        ]"/>
         <field name="type_tax_use">purchase</field>
         <field name="tax_group_id" ref="l10n_ar.tax_group_percepcion_iibb"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar.tax_tag_a_cuenta_iibb')])]"/>
     </record>
 
     <record id="ri_tax_percepcion_iibb_sf_sufrida" model="account.tax.template">
@@ -91,11 +223,33 @@
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="0.0" name="amount"/>
-        <field name="account_id" ref="base_percepcion_iibb_sf_sufrida"/>
-        <field name="refund_account_id" ref="base_percepcion_iibb_sf_sufrida"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('base_percepcion_iibb_sf_sufrida'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('base_percepcion_iibb_sf_sufrida'),
+                'tag_ids': [ref('l10n_ar.tax_tag_a_cuenta_iibb')],
+            }),
+        ]"/>
         <field name="type_tax_use">purchase</field>
         <field name="tax_group_id" ref="l10n_ar.tax_group_percepcion_iibb"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar.tax_tag_a_cuenta_iibb')])]"/>
     </record>
 
     <record id="ri_tax_percepcion_iibb_aplicada" model="account.tax.template">
@@ -105,11 +259,33 @@
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="0.0" name="amount"/>
-        <field name="account_id" ref="ri_percepcion_iibb_aplicada"/>
-        <field name="refund_account_id" ref="ri_percepcion_iibb_aplicada"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_percepcion_iibb_aplicada'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_percepcion_iibb_aplicada'),
+                'tag_ids': [ref('l10n_ar.tag_ret_perc_iibb_aplicada')],
+            }),
+        ]"/>
         <field name="type_tax_use">sale</field>
         <field name="tax_group_id" ref="l10n_ar.tax_group_percepcion_iibb"/>
-        <field name="tag_ids" eval="[(6, 0, [ref('l10n_ar.tag_ret_perc_iibb_aplicada')])]"/>
     </record>
 
     <!-- SOLO RI -->
@@ -121,8 +297,30 @@
         <field name="sequence">2</field>
         <field name="amount_type">fixed</field>
         <field eval="0.0" name="amount"/>
-        <field name="account_id" ref="ri_iva_debito_fiscal"/>
-        <field name="refund_account_id" ref="ri_iva_credito_fiscal"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_debito_fiscal'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_credito_fiscal'),
+            }),
+        ]"/>
         <field name="tax_group_id" ref="l10n_ar.tax_group_iva_no_corresponde"/>
         <field name="type_tax_use">sale</field>
     </record>
@@ -134,8 +332,30 @@
         <field name="sequence">2</field>
         <field name="amount_type">fixed</field>
         <field eval="0.0" name="amount"/>
-        <field name="account_id" ref="ri_iva_credito_fiscal"/>
-        <field name="refund_account_id" ref="ri_iva_debito_fiscal"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_debito_fiscal'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_credito_fiscal'),
+            }),
+        ]"/>
         <field name="tax_group_id" ref="l10n_ar.tax_group_iva_no_corresponde"/>
         <field name="type_tax_use">purchase</field>
     </record>
@@ -147,8 +367,30 @@
         <field name="sequence">2</field>
         <field name="amount_type">fixed</field>
         <field eval="0.0" name="amount"/>
-        <field name="account_id" ref="ri_iva_debito_fiscal"/>
-        <field name="refund_account_id" ref="ri_iva_credito_fiscal"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_debito_fiscal'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_credito_fiscal'),
+            }),
+        ]"/>
         <field name="tax_group_id" ref="l10n_ar.tax_group_iva_no_gravado"/>
         <field name="type_tax_use">sale</field>
     </record>
@@ -160,8 +402,30 @@
         <field name="sequence">2</field>
         <field name="amount_type">fixed</field>
         <field eval="0.0" name="amount"/>
-        <field name="account_id" ref="ri_iva_credito_fiscal"/>
-        <field name="refund_account_id" ref="ri_iva_debito_fiscal"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_debito_fiscal'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_credito_fiscal'),
+            }),
+        ]"/>
         <field name="tax_group_id" ref="l10n_ar.tax_group_iva_no_gravado"/>
         <field name="type_tax_use">purchase</field>
     </record>
@@ -173,8 +437,30 @@
         <field name="sequence">2</field>
         <field name="amount_type">fixed</field>
         <field eval="0.0" name="amount"/>
-        <field name="account_id" ref="ri_iva_debito_fiscal"/>
-        <field name="refund_account_id" ref="ri_iva_credito_fiscal"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_debito_fiscal'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_credito_fiscal'),
+            }),
+        ]"/>
         <field name="tax_group_id" ref="l10n_ar.tax_group_iva_exento"/>
         <field name="type_tax_use">sale</field>
     </record>
@@ -184,10 +470,32 @@
         <field name="description">IVA Exento</field>
         <field name="name">IVA Compras Exento</field>
         <field name="sequence">2</field>
-        <field name="amount_type">fixed</field>       
-        <field eval="0.0" name="amount"/>     
-        <field name="account_id" ref="ri_iva_credito_fiscal"/>
-        <field name="refund_account_id" ref="ri_iva_debito_fiscal"/>
+        <field name="amount_type">fixed</field>
+        <field eval="0.0" name="amount"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_debito_fiscal'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_credito_fiscal'),
+            }),
+        ]"/>
         <field name="tax_group_id" ref="l10n_ar.tax_group_iva_exento"/>
         <field name="type_tax_use">purchase</field>
     </record>
@@ -199,8 +507,30 @@
         <field name="sequence">2</field>
         <field eval="0.0" name="amount"/>
         <field name="amount_type">percent</field>
-        <field name="account_id" ref="ri_iva_debito_fiscal"/>
-        <field name="refund_account_id" ref="ri_iva_credito_fiscal"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_debito_fiscal'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_credito_fiscal'),
+            }),
+        ]"/>
         <field name="tax_group_id" ref="l10n_ar.tax_group_iva_0"/>
         <field name="type_tax_use">sale</field>
     </record>
@@ -212,8 +542,30 @@
         <field name="sequence">2</field>
         <field eval="0.0" name="amount"/>
         <field name="amount_type">percent</field>
-        <field name="account_id" ref="ri_iva_credito_fiscal"/>
-        <field name="refund_account_id" ref="ri_iva_debito_fiscal"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_debito_fiscal'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_credito_fiscal'),
+            }),
+        ]"/>
         <field name="tax_group_id" ref="l10n_ar.tax_group_iva_0"/>
         <field name="type_tax_use">purchase</field>
     </record>
@@ -225,8 +577,30 @@
         <field name="sequence">2</field>
         <field eval="10.5" name="amount"/>
         <field name="amount_type">percent</field>
-        <field name="account_id" ref="ri_iva_debito_fiscal"/>
-        <field name="refund_account_id" ref="ri_iva_credito_fiscal"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_debito_fiscal'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_credito_fiscal'),
+            }),
+        ]"/>
         <field name="tax_group_id" ref="l10n_ar.tax_group_iva_105"/>
         <field name="type_tax_use">sale</field>
     </record>
@@ -238,8 +612,30 @@
         <field name="sequence">2</field>
         <field eval="10.5" name="amount"/>
         <field name="amount_type">percent</field>
-        <field name="account_id" ref="ri_iva_credito_fiscal"/>
-        <field name="refund_account_id" ref="ri_iva_debito_fiscal"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_debito_fiscal'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_credito_fiscal'),
+            }),
+        ]"/>
         <field name="tax_group_id" ref="l10n_ar.tax_group_iva_105"/>
         <field name="type_tax_use">purchase</field>
     </record>
@@ -251,8 +647,30 @@
         <field name="sequence">1</field>
         <field eval="21" name="amount"/>
         <field name="amount_type">percent</field>
-        <field name="account_id" ref="ri_iva_debito_fiscal"/>
-        <field name="refund_account_id" ref="ri_iva_credito_fiscal"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_debito_fiscal'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_credito_fiscal'),
+            }),
+        ]"/>
         <field name="tax_group_id" ref="l10n_ar.tax_group_iva_21"/>
         <field name="type_tax_use">sale</field>
     </record>
@@ -264,8 +682,30 @@
         <field name="sequence">1</field>
         <field eval="21" name="amount"/>
         <field name="amount_type">percent</field>
-        <field name="account_id" ref="ri_iva_credito_fiscal"/>
-        <field name="refund_account_id" ref="ri_iva_debito_fiscal"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_debito_fiscal'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_credito_fiscal'),
+            }),
+        ]"/>
         <field name="tax_group_id" ref="l10n_ar.tax_group_iva_21"/>
         <field name="type_tax_use">purchase</field>
     </record>
@@ -277,8 +717,30 @@
         <field name="sequence">3</field>
         <field eval="27" name="amount"/>
         <field name="amount_type">percent</field>
-        <field name="account_id" ref="ri_iva_debito_fiscal"/>
-        <field name="refund_account_id" ref="ri_iva_credito_fiscal"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_debito_fiscal'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_credito_fiscal'),
+            }),
+        ]"/>
         <field name="tax_group_id" ref="l10n_ar.tax_group_iva_27"/>
         <field name="type_tax_use">sale</field>
     </record>
@@ -290,8 +752,30 @@
         <field name="sequence">3</field>
         <field eval="27" name="amount"/>
         <field name="amount_type">percent</field>
-        <field name="account_id" ref="ri_iva_credito_fiscal"/>
-        <field name="refund_account_id" ref="ri_iva_debito_fiscal"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_debito_fiscal'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_credito_fiscal'),
+            }),
+        ]"/>
         <field name="tax_group_id" ref="l10n_ar.tax_group_iva_27"/>
         <field name="type_tax_use">purchase</field>
     </record>
@@ -303,8 +787,30 @@
         <field name="sequence">9</field>
         <field eval="2.5" name="amount"/>
         <field name="amount_type">percent</field>
-        <field name="account_id" ref="ri_iva_debito_fiscal"/>
-        <field name="refund_account_id" ref="ri_iva_credito_fiscal"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_debito_fiscal'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_credito_fiscal'),
+            }),
+        ]"/>
         <field name="tax_group_id" ref="l10n_ar.tax_group_iva_025"/>
         <field name="type_tax_use">sale</field>
     </record>
@@ -316,8 +822,30 @@
         <field name="sequence">9</field>
         <field eval="2.5" name="amount"/>
         <field name="amount_type">percent</field>
-        <field name="account_id" ref="ri_iva_credito_fiscal"/>
-        <field name="refund_account_id" ref="ri_iva_debito_fiscal"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_debito_fiscal'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_credito_fiscal'),
+            }),
+        ]"/>
         <field name="tax_group_id" ref="l10n_ar.tax_group_iva_025"/>
         <field name="type_tax_use">purchase</field>
     </record>
@@ -329,8 +857,30 @@
         <field name="sequence">10</field>
         <field eval="5" name="amount"/>
         <field name="amount_type">percent</field>
-        <field name="account_id" ref="ri_iva_debito_fiscal"/>
-        <field name="refund_account_id" ref="ri_iva_credito_fiscal"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_debito_fiscal'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_credito_fiscal'),
+            }),
+        ]"/>
         <field name="tax_group_id" ref="l10n_ar.tax_group_iva_5"/>
         <field name="type_tax_use">sale</field>
     </record>
@@ -342,8 +892,30 @@
         <field name="sequence">10</field>
         <field eval="5" name="amount"/>
         <field name="amount_type">percent</field>
-        <field name="account_id" ref="ri_iva_credito_fiscal"/>
-        <field name="refund_account_id" ref="ri_iva_debito_fiscal"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_debito_fiscal'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_iva_credito_fiscal'),
+            }),
+        ]"/>
         <field name="tax_group_id" ref="l10n_ar.tax_group_iva_5"/>
         <field name="type_tax_use">purchase</field>
     </record>
@@ -355,8 +927,30 @@
         <field name="sequence">4</field>
         <field name="amount_type">fixed</field>
         <field eval="0.0" name="amount"/>
-        <field name="account_id" ref="ri_percepcion_iva_sufrida"/>
-        <field name="refund_account_id" ref="ri_percepcion_iva_sufrida"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_percepcion_iva_sufrida'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_percepcion_iva_sufrida'),
+            }),
+        ]"/>
         <field name="type_tax_use">purchase</field>
         <field name="tax_group_id" ref="l10n_ar.tax_group_percepcion_iva"/>
     </record>
@@ -368,8 +962,30 @@
         <field name="sequence">4</field>
         <field eval="20.0" name="amount"/>
         <field name="amount_type">percent</field>
-        <field name="account_id" ref="ri_percepcion_iva_sufrida"/>
-        <field name="refund_account_id" ref="ri_percepcion_iva_sufrida"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_percepcion_iva_sufrida'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('ri_percepcion_iva_sufrida'),
+            }),
+        ]"/>
         <field name="type_tax_use">purchase</field>
         <field name="tax_group_id" ref="l10n_ar.tax_group_percepcion_iva"/>
     </record>

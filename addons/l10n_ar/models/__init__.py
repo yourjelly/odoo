@@ -10,9 +10,7 @@ from . import res_partner
 from . import res_country
 from . import res_currency
 from . import res_company
-from . import account_invoice_tax
-from . import account_invoice
-from . import account_invoice_line
+# from . import account_invoice_tax
 from . import uom_uom
 from . import account_chart_template
 from . import account_move_line

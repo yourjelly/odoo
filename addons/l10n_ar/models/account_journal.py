@@ -120,10 +120,11 @@ class AccountJournal(models.Model):
         """ Update Document sequences after update journal """
         to_check = set(['type', 'l10n_ar_afip_pos_system', 'l10n_ar_afip_pos_number', 'l10n_ar_share_sequences',
                         'l10n_latam_use_documents'])
+        res = super().write(values)
         if to_check.intersection(set(values.keys())):
             for rec in self:
                 rec.create_document_sequences()
-        return super().write(values)
+        return res
 
     @api.constrains('type', 'l10n_ar_afip_pos_system', 'l10n_ar_afip_pos_number', 'l10n_ar_share_sequences',
                     'l10n_latam_use_documents')
@@ -132,8 +133,7 @@ class AccountJournal(models.Model):
         self.ensure_one()
         if self.company_id.country_id != self.env.ref('base.ar'):
             return True
-        invoices = self.env['account.invoice'].search(
-            [('journal_id', '=', self.id), ('state', 'in', ['open', 'in_payment', 'paid'])])
+        invoices = self.env['account.move'].search([('journal_id', '=', self.id), ('state', '!=', 'draft')])
         if invoices:
             raise ValidationError(_(
                 'You can not change the journal configuration for a journal that already have validate invoices:'

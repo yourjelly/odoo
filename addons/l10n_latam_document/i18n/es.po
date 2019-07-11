@@ -421,7 +421,7 @@ msgstr "Entidades Tributarias"
 
 #. module: l10n_latam_document
 #: model:ir.model.fields,field_description:l10n_latam_document.field_account_invoice__l10n_latam_tax_line_ids
-#: model:ir.model.fields,field_description:l10n_latam_document.field_account_invoice_line__l10n_latam_invoice_line_tax_ids
+#: model:ir.model.fields,field_description:l10n_latam_document.field_account_invoice_line__l10n_latam_tax_ids
 msgid "Taxes"
 msgstr "Impuestos"
 
