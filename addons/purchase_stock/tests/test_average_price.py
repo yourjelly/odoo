@@ -11,10 +11,17 @@ class TestAveragePrice(TestPurchase):
     def test_00_average_price(self):
         """ Testcase for average price computation"""
 
-        self._load('account', 'test', 'account_minimal_test.xml')
-        self._load('stock_account', 'test', 'stock_valuation_account.xml')
-
         # Set a product as using average price.
+        account_o_expense = self.env['account.account'].create({
+            'code': 'Y1114',
+            'name': 'Opening Expense - (test)',
+            'user_type_id': self.ref('account.data_account_type_expenses')
+        })
+        account_o_income = self.env['account.account'].create({
+            'code': 'Y1115',
+            'name': 'Opening Income - (test)',
+            'user_type_id': self.ref('account.data_account_type_other_income')
+        })
         product_cable_management_box = self.env['product.product'].create({
             'default_code': 'AVG',
             'name': 'Average Ice Cream',
@@ -27,14 +34,24 @@ class TestAveragePrice(TestPurchase):
             'supplier_taxes_id': [],
             'description': 'FIFO Ice Cream',
         })
+        res_partner_3 = self.env['res.partner'].create({
+                            'name': 'Deco Addict',
+                            'is_company': True,
+                            'street': '325 Elsie Drive',
+                            'city': 'Franklin',
+                            'zip': 26807,
+                            'email': 'deco.addict82@example.com',
+                            'phone': '(603)-996-3829',
+                            'website': 'http://www.deco-addict.com'
+                            })
         product_cable_management_box.categ_id.property_cost_method = 'average'
         product_cable_management_box.categ_id.property_valuation = 'real_time'
-        product_cable_management_box.categ_id.property_stock_account_input_categ_id = self.ref('purchase.o_expense')
-        product_cable_management_box.categ_id.property_stock_account_output_categ_id = self.ref('purchase.o_income')
+        product_cable_management_box.categ_id.property_stock_account_input_categ_id = account_o_expense
+        product_cable_management_box.categ_id.property_stock_account_output_categ_id = account_o_income
 
         # I create a draft Purchase Order for first incoming shipment for 10 pieces at 60€
         purchase_order_1 = self.env['purchase.order'].create({
-            'partner_id': self.env.ref('base.res_partner_3').id,
+            'partner_id': res_partner_3.id,
             'order_line': [(0, 0, {
                 'name': 'Average Ice Cream',
                 'product_id': product_cable_management_box.id,
@@ -61,7 +78,7 @@ class TestAveragePrice(TestPurchase):
 
         # I create a draft Purchase Order for second incoming shipment for 30 pieces at 80€
         purchase_order_2 = self.env['purchase.order'].create({
-            'partner_id': self.env.ref('base.res_partner_3').id,
+            'partner_id': res_partner_3.id,
             'order_line': [(0, 0, {
                 'name': product_cable_management_box.name,
                 'product_id': product_cable_management_box.id,
@@ -105,7 +122,7 @@ class TestAveragePrice(TestPurchase):
 
         # Make a new purchase order with 500 g Average Ice Cream at a price of 0.2€/g
         purchase_order_3 = self.env['purchase.order'].create({
-            'partner_id': self.env.ref('base.res_partner_3').id,
+            'partner_id': res_partner_3.id,
             'order_line': [(0, 0, {
                 'name': product_cable_management_box.name,
                 'product_id': product_cable_management_box.id,
