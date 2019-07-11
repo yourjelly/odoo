@@ -11,9 +11,6 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
     def test_stock_landed_costs_rounding(self):
         # In order to test the rounding in landed costs feature of stock, I create 2 landed cost
 
-        self._load('account', 'test', 'account_minimal_test.xml')
-        self._load('stock_account', 'test', 'stock_valuation_account.xml')
-
         # Define undivisible units
         product_uom_unit_round_1 = self.env.ref('uom.product_uom_unit')
         product_uom_unit_round_1.write({
@@ -27,9 +24,19 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
             'name': "LC product 3",
             'uom_id': product_uom_unit_round_1.id,
         })
+        account_o_expense = self.env['account.account'].create({
+            'code': 'Y1114',
+            'name': 'Opening Expense - (test)',
+            'user_type_id': self.ref('account.data_account_type_expenses')
+        })
+        account_o_income = self.env['account.account'].create({
+            'code': 'Y1115',
+            'name': 'Opening Income - (test)',
+            'user_type_id': self.ref('account.data_account_type_other_income')
+        })
         product_landed_cost_3.product_tmpl_id.categ_id.property_cost_method = 'fifo'
-        product_landed_cost_3.product_tmpl_id.categ_id.property_stock_account_input_categ_id = self.ref('stock_landed_costs.o_expense')
-        product_landed_cost_3.product_tmpl_id.categ_id.property_stock_account_output_categ_id = self.ref('stock_landed_costs.o_income')
+        product_landed_cost_3.product_tmpl_id.categ_id.property_stock_account_input_categ_id = account_o_expense
+        product_landed_cost_3.product_tmpl_id.categ_id.property_stock_account_output_categ_id = account_o_income
 
         product_landed_cost_4 = self.env['product.product'].create({
             'name': "LC product 4",
@@ -37,8 +44,8 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
         })
         product_landed_cost_4.product_tmpl_id.categ_id.property_cost_method = 'fifo'
         product_landed_cost_4.product_tmpl_id.categ_id.property_valuation = 'real_time'
-        product_landed_cost_4.product_tmpl_id.categ_id.property_stock_account_input_categ_id = self.ref('stock_landed_costs.o_expense')
-        product_landed_cost_4.product_tmpl_id.categ_id.property_stock_account_output_categ_id = self.ref('stock_landed_costs.o_income')
+        product_landed_cost_4.product_tmpl_id.categ_id.property_stock_account_input_categ_id = account_o_expense
+        product_landed_cost_4.product_tmpl_id.categ_id.property_stock_account_output_categ_id = account_o_income
 
         picking_default_vals = self.env['stock.picking'].default_get(list(self.env['stock.picking'].fields_get()))
 
@@ -87,12 +94,35 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
         picking_landed_cost_3.action_assign()
         picking_landed_cost_3.action_done()
 
+        expense_journal = self.env['account.journal'].create({
+            'code': 'TEXJ-Test',
+            'name': 'Vendor Bills - Test',
+            'default_debit_account_id': account_o_expense.id,
+            'default_credit_account_id': account_o_expense.id,
+            'type': 'purchase',
+            'refund_sequence': True
+        })
+
         # I create a landed cost for picking 3
         default_vals = self.env['stock.landed.cost'].default_get(list(self.env['stock.landed.cost'].fields_get()))
+        product_category_3 = self.env['product.category'].create({
+            'name': 'Service',
+        })
+        product_uom_hour = self.env.ref('uom.product_uom_hour')
+        product_product_1 = self.env['product.product'].create({
+            'name': 'Virtual Interior Design',
+            'type': 'consu',
+            'categ_id': product_category_3.id,
+            'standard_price': 20.5,
+            'list_price': 30.75,
+            'uom_id': product_uom_hour.id,
+            'uom_po_id': product_uom_hour.id,
+            'type': 'service'
+        })
         default_vals.update({
             'picking_ids': [picking_landed_cost_3.id],
-            'account_journal_id': self.ref('stock_landed_costs.expenses_journal'),
-            'cost_lines': [(0, 0, {'product_id': self.ref('product.product_product_1')})],
+            'account_journal_id': expense_journal,
+            'cost_lines': [(0, 0, {'product_id': product_product_1})],
             'valuation_adjustment_lines': [],
         })
         stock_landed_cost_2 = self.env['stock.landed.cost'].new(default_vals)
@@ -128,8 +158,8 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
         default_vals = self.env['stock.landed.cost'].default_get(list(self.env['stock.landed.cost'].fields_get()))
         default_vals.update({
             'picking_ids': [picking_landed_cost_4.id],
-            'account_journal_id': self.ref('stock_landed_costs.expenses_journal'),
-            'cost_lines': [(0, 0, {'product_id': self.ref('product.product_product_1')})],
+            'account_journal_id': expense_journal,
+            'cost_lines': [(0, 0, {'product_id': product_product_1})],
             'valuation_adjustment_lines': [],
         })
         stock_landed_cost_3 = self.env['stock.landed.cost'].new(default_vals)
