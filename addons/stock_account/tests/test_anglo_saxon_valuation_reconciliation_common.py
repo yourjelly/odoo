@@ -4,6 +4,7 @@
 
 from odoo.addons.account.tests.account_test_classes import AccountingTestCase
 from odoo import fields
+import time
 
 class ValuationReconciliationTestCase(AccountingTestCase):
     """ Base class for tests checking interim accounts reconciliation works
@@ -141,4 +142,8 @@ class ValuationReconciliationTestCase(AccountingTestCase):
         # entries get automatically reconciled (and you cannot modify a reconciled entry).
         # So, we have to make sure that "today"'s rate will always be the last rate we
         # created in order to ensure complete control of the test.
-        self.env.ref('base.rateUSDbis').unlink()
+        self.env['res.currency.rate'].create({
+            'rate': 1.5289,
+            'currency_id': self.env.ref("base.USD").id,
+            'name': time.strftime('%Y') + '-06-06'
+            }).unlink()
