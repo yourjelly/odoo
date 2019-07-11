@@ -144,6 +144,11 @@ class SurveyQuestion(models.Model):
         ('validation_datetime', 'CHECK (validation_min_datetime <= validation_max_datetime)','Max datetime cannot be smaller than min datetime!')
     ]
 
+    @api.constrains('question_depend_id')
+    def _check_question_depend_id(self):
+        if not self._check_recursion(parent='question_depend_id'):
+            raise ValidationError(_('You cannot use a recursive question as a depended question.'))
+
     @api.onchange('validation_email')
     def onchange_validation_email(self):
         if self.validation_email:
