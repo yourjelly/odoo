@@ -284,7 +284,11 @@ class TestAPI(common.TransactionCase):
         self.assertItemsEqual(partner_ids_with_field, partners.ids)
 
         # partners' states are ready for prefetching
-        state_ids = {sid for partner in partners for sid in partner._cache['state_id']}
+        state_ids = {
+            partner._cache['state_id']
+            for partner in partners
+            if partner._cache['state_id'] is not None
+        }
         self.assertTrue(len(state_ids) > 1)
         self.assertItemsEqual(state_ids, state._prefetch_ids)
 
