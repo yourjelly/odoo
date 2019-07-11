@@ -10,9 +10,6 @@ class TestFifoPrice(TestPurchase):
     def test_00_test_fifo(self):
         """ Test product cost price with fifo removal strategy."""
 
-        self._load('account', 'test', 'account_minimal_test.xml')
-        self._load('stock_account', 'test', 'stock_valuation_account.xml')
-
         # Set a product as using fifo price
         product_cable_management_box = self.env['product.product'].create({
             'default_code': 'FIFO',
@@ -26,14 +23,24 @@ class TestFifoPrice(TestPurchase):
             'supplier_taxes_id': '[]',
             'description': 'FIFO Ice Cream',
         })
+        account_o_expense = self.env['account.account'].create({
+            'code': 'Y1114',
+            'name': 'Opening Expense - (test)',
+            'user_type_id': self.ref('account.data_account_type_expenses')
+        })
+        account_o_income = self.env['account.account'].create({
+            'code': 'Y1115',
+            'name': 'Opening Income - (test)',
+            'user_type_id': self.ref('account.data_account_type_other_income')
+        })
         product_cable_management_box.categ_id.property_cost_method = 'fifo'
         product_cable_management_box.categ_id.property_valuation = 'real_time'
-        product_cable_management_box.categ_id.property_stock_account_input_categ_id = self.ref('purchase.o_expense')
-        product_cable_management_box.categ_id.property_stock_account_output_categ_id = self.ref('purchase.o_income')
+        product_cable_management_box.categ_id.property_stock_account_input_categ_id = account_o_expense
+        product_cable_management_box.categ_id.property_stock_account_output_categ_id = account_o_income
 
         # I create a draft Purchase Order for first in move for 10 kg at 50 euro
         purchase_order_1 = self.env['purchase.order'].create({
-            'partner_id': self.env.ref('base.res_partner_3').id,
+            'partner_id': self.res_partner_3.id,
             'order_line': [(0, 0, {
                 'name': 'FIFO Ice Cream',
                 'product_id': product_cable_management_box.id,
@@ -60,7 +67,7 @@ class TestFifoPrice(TestPurchase):
 
         # I create a draft Purchase Order for second shipment for 30 kg at 80 euro
         purchase_order_2 = self.env['purchase.order'].create({
-            'partner_id': self.env.ref('base.res_partner_3').id,
+            'partner_id': self.res_partner_3.id,
             'order_line': [(0, 0, {
                 'name': 'FIFO Ice Cream',
                 'product_id': product_cable_management_box.id,
@@ -140,7 +147,7 @@ class TestFifoPrice(TestPurchase):
 
         # Create PO for 30000 g at 0.150$/g and 10 kg at 150$/kg
         purchase_order_usd = self.env['purchase.order'].create({
-            'partner_id': self.env.ref('base.res_partner_3').id,
+            'partner_id': self.res_partner_3.id,
             'currency_id': NewUSD.id,
             'order_line': [(0, 0, {
                     'name': 'FIFO Ice Cream',
@@ -222,8 +229,8 @@ class TestFifoPrice(TestPurchase):
         })
         product_fifo_negative.categ_id.property_cost_method = 'fifo'
         product_fifo_negative.categ_id.property_valuation = 'real_time'
-        product_fifo_negative.categ_id.property_stock_account_input_categ_id = self.ref('purchase.o_expense')
-        product_fifo_negative.categ_id.property_stock_account_output_categ_id = self.ref('purchase.o_income')
+        product_fifo_negative.categ_id.property_stock_account_input_categ_id = account_o_expense
+        product_fifo_negative.categ_id.property_stock_account_output_categ_id = account_o_income
 
         # Create outpicking.create delivery order of 100 kg.
         outgoing_shipment_neg = self.env['stock.picking'].create({
@@ -276,7 +283,7 @@ class TestFifoPrice(TestPurchase):
 
         # Receive purchase order with 50 kg Ice Cream at 50€/kg
         purchase_order_neg = self.env['purchase.order'].create({
-            'partner_id': self.env.ref('base.res_partner_3').id,
+            'partner_id': self.res_partner_3.id,
             'order_line': [(0, 0, {
                 'name': 'FIFO Ice Cream',
                 'product_id': product_fifo_negative.id,
@@ -295,7 +302,7 @@ class TestFifoPrice(TestPurchase):
 
         # Receive purchase order with 600 kg FIFO Ice Cream at 80 euro/kg
         purchase_order_neg2 = self.env['purchase.order'].create({
-            'partner_id': self.env.ref('base.res_partner_3').id,
+            'partner_id': self.res_partner_3.id,
             'order_line': [(0, 0, {
                 'name': product_cable_management_box.name,
                 'product_id': product_fifo_negative.id,
