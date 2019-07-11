@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_invoice_form" model="ir.ui.view">
+        <field name="name">l10n_ar invoice.form</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="l10n_latam_document.view_invoice_form"/>
+        <field name="arch" type="xml">
+            <form>
+                <field name="l10n_ar_force_afip_concept" invisible="1"/>
+            </form>
+            <div groups="base.group_multi_currency" position="after">
+                <field name="l10n_ar_currency_rate" attrs="{'invisible': [('l10n_ar_currency_rate', '=', False)]}"/>
+            </div>
+
+            <field name="journal_id" position="after">
+                <field name="l10n_ar_afip_responsability_type_id" options="{'no_open': True, 'no_create': True}" attrs="{'invisible': ['|', ('state', 'not in', ['open', 'paid']), ('l10n_latam_country_code', '!=', 'AR')]}"/>
+            </field>
+
+            <field name="payment_term_id" position="after">
+                <field name='l10n_ar_afip_concept' attrs="{'invisible': ['|', ('l10n_latam_country_code', '!=', 'AR'), ('l10n_latam_use_documents', '=', False)]}"/>
+                <label for="l10n_ar_afip_service_start" attrs="{'invisible':[('l10n_ar_afip_concept','not in',['2', '3', '4'])]}" string="Service Date"/>
+                <div attrs="{'invisible':[('l10n_ar_afip_concept','not in',['2', '3', '4'])]}">
+                    <field name="l10n_ar_afip_service_start" class="oe_inline"/> to <field name="l10n_ar_afip_service_end" class="oe_inline"/>
+                </div>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_supplier_invoice_form" model="ir.ui.view">
+        <field name="name">l10n_ar supplier.invoice.form</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="l10n_latam_document.view_supplier_invoice_form"/>
+        <field name="arch" type="xml">
+            <field name="journal_id" position="after">
+                <field name="l10n_ar_afip_responsability_type_id" options="{'no_open': True, 'no_create': True}" attrs="{'invisible': ['|', ('state', 'not in', ['open', 'paid']), ('l10n_latam_country_code', '!=', 'AR')]}"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>
