@@ -10,9 +10,6 @@ class TestFifoReturns(TestPurchase):
     def test_fifo_returns(self):
         """Test to create product and purchase order to test the FIFO returns of the product"""
 
-        self._load('account', 'test', 'account_minimal_test.xml')
-        self._load('stock_account', 'test', 'stock_valuation_account.xml')
-
         # Set a product as using fifo price
         product_fiforet_icecream = self.env['product.product'].create({
             'default_code': 'FIFORET',
@@ -26,12 +23,12 @@ class TestFifoReturns(TestPurchase):
         })
         product_fiforet_icecream.categ_id.property_cost_method = 'fifo'
         product_fiforet_icecream.categ_id.property_valuation = 'real_time'
-        product_fiforet_icecream.categ_id.property_stock_account_input_categ_id = self.ref('purchase.o_expense')
-        product_fiforet_icecream.categ_id.property_stock_account_output_categ_id = self.ref('purchase.o_income')
+        product_fiforet_icecream.categ_id.property_stock_account_input_categ_id = self.account_o_expense
+        product_fiforet_icecream.categ_id.property_stock_account_output_categ_id = self.account_o_income
 
         # I create a draft Purchase Order for first in move for 10 kg at 50 euro
         purchase_order_1 = self.env['purchase.order'].create({
-            'partner_id': self.ref('base.res_partner_3'),
+            'partner_id': self.res_partner_3.id,
             'order_line': [(0, 0, {
                 'name': 'FIFO Ice Cream',
                 'product_id': product_fiforet_icecream.id,
@@ -44,7 +41,7 @@ class TestFifoReturns(TestPurchase):
 
         # Create a draft Purchase Order for second shipment for 30kg at 80€/kg
         purchase_order_2 = self.env['purchase.order'].create({
-            'partner_id': self.ref('base.res_partner_3'),
+            'partner_id': self.res_partner_3.id,
             'order_line': [(0, 0, {
                 'name': 'FIFO Ice Cream',
                 'product_id': product_fiforet_icecream.id,
