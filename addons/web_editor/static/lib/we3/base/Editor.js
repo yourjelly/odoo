@@ -21,7 +21,6 @@ we3.Editor = class extends we3.EventDispatcher {
             'blur editable': '_onBlurEditable',
             'focus editable': '_onFocusEditable',
             'paste editable': '_onPaste',
-            'paste editable': '_onPaste',
         };
         this._templates = {};
         this.id = 'wysiwyg-' + (++id);
