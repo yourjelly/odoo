@@ -10,9 +10,39 @@ class TestCreatePicking(common.TestProductCommon):
 
     def setUp(self):
         super(TestCreatePicking, self).setUp()
-        self.partner_id = self.env.ref('base.res_partner_1')
-        self.product_id_1 = self.env.ref('product.product_product_8')
-        self.product_id_2 = self.env.ref('product.product_product_11')
+        self.partner_id = self.env['res.partner'].create({
+                            'name': 'Deco Addict',
+                            'is_company': True,
+                            'street': '325 Elsie Drive',
+                            'city': 'Franklin',
+                            'zip': 26807,
+                            'email': 'deco.addict82@example.com',
+                            'phone': '(603)-996-3829',
+                            'website': 'http://www.deco-addict.com'
+                            })
+        product_category_5 = self.env['product.category'].create({
+            'name': 'Office Furniture',
+        })
+        self.product_id_1 = self.env['product.product'].create({
+            'name': 'Large Desk',
+            'type': 'consu',
+            'categ_id': product_category_5.id,
+            'standard_price': 1299.0,
+            'list_price': 1799.0,
+            'weight': 0.01,
+            'uom_id': self.uom_unit.id,
+            'uom_po_id': self.uom_unit.id,
+            'default_code': 'E-COM09'
+        })
+        self.product_id_2 = self.env['product.product'].create({
+            'name': 'Conference Chair',
+            'type': 'consu',
+            'categ_id': product_category_5.id,
+            'standard_price': 14.0,
+            'list_price': 16.50,
+            'uom_id': self.uom_unit.id,
+            'uom_po_id': self.uom_unit.id,
+        })
         res_users_purchase_user = self.env.ref('purchase.group_purchase_user')
 
         Users = self.env['res.users'].with_context({'no_reset_password': True, 'mail_create_nosubscribe': True})
