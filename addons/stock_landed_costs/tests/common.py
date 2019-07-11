@@ -21,8 +21,28 @@ class TestStockLandedCostsCommon(AccountingTestCase):
         self.LandedCost = self.env['stock.landed.cost']
         self.CostLine = self.env['stock.landed.cost.lines']
         # References
-        self.supplier_id = self.ref('base.res_partner_2')
-        self.customer_id = self.ref('base.res_partner_4')
+        self.supplier_id = self.env['res.partner'].create({
+                            'name': 'Deco Addict',
+                            'is_company': True,
+                            'street': '325 Elsie Drive',
+                            'city': 'Franklin',
+                            'zip': 26807,
+                            'email': 'deco.addict82@example.com',
+                            'phone': '(603)-996-3829',
+                            'website': 'http://www.deco-addict.com'
+                            })
+        self.customer_id = self.env['res.partner'].create({
+                            'name': 'Ready Mat',
+                            'customer': False,
+                            'supplier': True,
+                            'is_company': True,
+                            'street': '92 Emily Drive',
+                            'city': 'Columbia',
+                            'zip': 29201,
+                            'email': 'ready.mat28@example.com',
+                            'phone': '(803)-873-6126',
+                            'website': 'http://www.ready-mat.com'
+                            })
         self.picking_type_in_id = self.ref('stock.picking_type_in')
         self.picking_type_out_id = self.ref('stock.picking_type_out')
         self.supplier_location_id = self.ref('stock.stock_location_suppliers')
