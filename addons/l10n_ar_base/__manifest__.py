@@ -21,10 +21,11 @@ Base Module for Argentinian Localization
         'data/res_currency_data.xml',
         'data/l10n_latam_identification_type_data.xml',
         'data/res_country_data.xml',
+        'data/res_partner_demo.xml',
         'views/res_country_view.xml',
     ],
     'demo': [
-        'demo/partner_demo.xml',
+        'demo/res_partner_demo.xml',
     ],
     'installable': True,
     'auto_install': False,
