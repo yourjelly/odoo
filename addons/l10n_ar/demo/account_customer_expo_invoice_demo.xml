@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="True">
+
+    <!-- Invoice to cerro castor, fiscal position changes taxes to exempt
+   La cargamos aparte para poder cambiar el diario cuando la volvamos a cargar
+   con fe -->
+    <record id="demo_invoice_6" model="account.move">
+        <field name="partner_id" ref="res_partner_cerrocastor"/>
+        <field name="invoice_user_id" ref="base.user_demo"/>
+        <field name="invoice_payment_term_id" ref="account.account_payment_term"/>
+        <field name="type">out_invoice</field>
+        <field name="invoice_date" eval="time.strftime('%Y-%m')+'-03'"/>
+        <field name="company_id" ref="base.main_company"/>
+        <field name="invoice_incoterm_id" ref="account.incoterm_EXW"/>
+        <field name="invoice_line_ids" eval="[
+            (0, 0, {'product_id': ref('product.product_product_27'), 'price_unit': 642.0, 'quantity': 5}),
+            (0, 0, {'product_id': ref('product_product_telefonia'), 'price_unit': 250.0, 'quantity': 1}),
+            (0, 0, {'product_id': ref('product.product_product_25'), 'price_unit': 3245.0, 'quantity': 2}),
+            (0, 0, {'product_id': ref('product_product_no_gravado'), 'price_unit': 50.0, 'quantity': 10}),
+            (0, 0, {'product_id': ref('product_product_cero'), 'price_unit': 200.0, 'quantity': 1}),
+            (0, 0, {'product_id': ref('product_product_exento'), 'price_unit': 100.0, 'quantity': 1}),
+        ]"/>
+    </record>
+
+    <!-- Export invoice to expresso, fiscal position changes tax to exempt (type 4 because it have services) -->
+    <record id="demo_invoice_7" model="account.move">
+        <field name="partner_id" ref="res_partner_expresso"/>
+        <field name="invoice_user_id" ref="base.user_demo"/>
+        <field name="invoice_payment_term_id" ref="account.account_payment_term"/>
+        <field name="type">out_invoice</field>
+        <field name="invoice_date" eval="time.strftime('%Y-%m')+'-03'"/>
+        <field name="company_id" ref="base.main_company"/>
+        <field name="invoice_incoterm_id" ref="account.incoterm_EXW"/>
+        <field name="invoice_line_ids" eval="[
+            (0, 0, {'product_id': ref('product.product_product_27'), 'price_unit': 642.0, 'quantity': 5}),
+            (0, 0, {'product_id': ref('product_product_telefonia'), 'price_unit': 250.0, 'quantity': 1}),
+            (0, 0, {'product_id': ref('product.product_product_25'), 'price_unit': 3245.0, 'quantity': 2}),
+            (0, 0, {'product_id': ref('product_product_no_gravado'), 'price_unit': 50.0, 'quantity': 10}),
+            (0, 0, {'product_id': ref('product_product_cero'), 'price_unit': 200.0, 'quantity': 1}),
+            (0, 0, {'product_id': ref('product_product_exento'), 'price_unit': 100.0, 'quantity': 1}),
+        ]"/>
+    </record>
+
+    <!-- Export invoice to expresso, fiscal position changes tax to exempt (type 1 because only products) -->
+    <record id="demo_invoice_14" model="account.move">
+        <field name="partner_id" ref="res_partner_expresso"/>
+        <field name="invoice_user_id" ref="base.user_demo"/>
+        <field name="invoice_payment_term_id" ref="account.account_payment_term"/>
+        <field name="type">out_invoice</field>
+        <field name="invoice_date" eval="time.strftime('%Y-%m')+'-20'"/>
+        <field name="company_id" ref="base.main_company"/>
+        <field name="invoice_incoterm_id" ref="account.incoterm_EXW"/>
+        <field name="invoice_line_ids" eval="[
+            (0, 0, {'product_id': ref('product.product_product_27'), 'price_unit': 642.0, 'quantity': 5}),
+        ]"/>
+    </record>
+
+    <!-- Export invoice to expresso, fiscal position changes tax to exempt (type 2 because only service) -->
+    <record id="demo_invoice_15" model="account.move">
+        <field name="partner_id" ref="res_partner_expresso"/>
+        <field name="invoice_user_id" ref="base.user_demo"/>
+        <field name="invoice_payment_term_id" ref="account.account_payment_term"/>
+        <field name="type">out_invoice</field>
+        <field name="invoice_date" eval="time.strftime('%Y-%m')+'-20'"/>
+        <field name="company_id" ref="base.main_company"/>
+        <field name="invoice_incoterm_id" ref="account.incoterm_EXW"/>
+        <field name="invoice_line_ids" eval="[
+            (0, 0, {'product_id': ref('product_product_telefonia'), 'price_unit': 250.0, 'quantity': 1}),
+        ]"/>
+    </record>
+
+    <!-- Export invoice to expresso, fiscal position changes tax to exempt (type 1 because it have products only, used to test refund of expo) -->
+    <record id="demo_invoice_16" model="account.move">
+        <field name="partner_id" ref="res_partner_expresso"/>
+        <field name="invoice_user_id" ref="base.user_demo"/>
+        <field name="invoice_payment_term_id" ref="account.account_payment_term"/>
+        <field name="type">out_invoice</field>
+        <field name="invoice_date" eval="time.strftime('%Y-%m')+'-18'"/>
+        <field name="company_id" ref="base.main_company"/>
+        <field name="invoice_incoterm_id" ref="account.incoterm_EXW"/>
+        <field name="invoice_line_ids" eval="[
+            (0, 0, {'product_id': ref('product.product_product_27'), 'price_unit': 642.0, 'quantity': 5}),
+        ]"/>
+    </record>
+
+</odoo>

@@ -71,6 +71,18 @@ Follow the next configuration steps
         'demo/respinsc_demo.xml',
         'demo/res_users_demo.xml',
         'demo/res_partner_demo.xml',
+        # from demo_data
+        'demo/account_tax_template_demo.xml',
+        'demo/res_company_demo.xml',
+        'demo/product_product_demo.xml',
+        'demo/partner_demo.xml',
+        'demo/account_customer_invoice_demo.xml',
+        'demo/account_customer_expo_invoice_demo.xml',
+        'demo/account_customer_invoice_validate_demo.xml',
+        'demo/account_customer_refund_demo.xml',
+        'demo/account_supplier_invoice_demo.xml',
+        'demo/account_supplier_invoice_validate_demo.xml',
+        'demo/account_supplier_refund_demo.xml',
     ],
     'post_init_hook': 'post_init_hook',
 }
