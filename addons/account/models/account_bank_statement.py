@@ -264,6 +264,7 @@ class AccountBankStatement(models.Model):
             'view_mode': 'tree,form',
             'res_model': 'account.move',
             'view_id': False,
+            'views': [(self.env.ref('account.view_invoice_tree').id, 'tree'), (self.env.ref('account.view_move_form').id, 'form')],
             'type': 'ir.actions.act_window',
             'domain': [('id', 'in', self.mapped('move_line_ids').mapped('move_id').ids)],
             'context': context,
