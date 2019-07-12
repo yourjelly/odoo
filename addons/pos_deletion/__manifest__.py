@@ -12,14 +12,7 @@
     """,
     'depends': ['point_of_sale'],
     'data': [
-
-    ],
-    'demo': [
-        'data/pos_blackbox_be_demo.xml',
-    ],
-    'qweb': [
-        'static/src/xml/pos_blackbox_be.xml'
+        'views/pos_deletion_assets.xml',
     ],
     'installable': True,
-    'auto_install': True,
 }
