@@ -50,6 +50,7 @@ from weakref import WeakSet
 from decorator import decorate, decorator
 from werkzeug.local import Local, release_local
 
+import odoo
 from odoo.tools import frozendict, classproperty, StackMap
 from odoo.exceptions import CacheMiss
 
@@ -760,6 +761,8 @@ class Cache(object):
 
     def set(self, record, field, value):
         """ Set the value of ``field`` for ``record``. """
+        if field.type == 'many2one':
+            assert value is None or isinstance(value, odoo.models.IdType)
         if field.depends_context:
             key = self._get_context_key(record.env, field)
             self._data[field].setdefault(record._ids[0], {})[key] = value
