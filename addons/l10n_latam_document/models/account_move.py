@@ -10,10 +10,9 @@ class AccountMove(models.Model):
 
     _inherit = "account.move"
 
-    # l10n_latam_amount_tax = fields.Monetary(compute='_compute_l10n_latam_amount_and_taxes')
-    # l10n_latam_amount_untaxed = fields.Monetary(compute='_compute_l10n_latam_amount_and_taxes')
-    # l10n_latam_tax_line_ids = fields.One2many(
-    #     compute="_compute_l10n_latam_amount_and_taxes", comodel_name='account.invoice.tax')
+    l10n_latam_amount_tax = fields.Monetary(compute='_compute_l10n_latam_amount_and_taxes')
+    l10n_latam_amount_untaxed = fields.Monetary(compute='_compute_l10n_latam_amount_and_taxes')
+    l10n_latam_tax_ids = fields.One2many(compute="_compute_l10n_latam_amount_and_taxes", comodel_name='account.move.line')
     l10n_latam_available_document_type_ids = fields.Many2many(
         'l10n_latam.document.type', compute='_compute_l10n_latam_documents')
     l10n_latam_document_type_id = fields.Many2one(
@@ -56,33 +55,27 @@ class AccountMove(models.Model):
         for rec in self.filtered('journal_id'):
             rec.l10n_latam_sequence_id = rec.get_document_type_sequence()
 
-    # @api.depends('amount_untaxed', 'amount_tax', 'tax_line_ids', 'l10n_latam_document_type_id')
-    # @api.depends(
-    #     'line_ids.debit',
-    #     'line_ids.credit',
-    #     'line_ids.currency_id',
-    #     'line_ids.amount_currency',
-    #     'line_ids.amount_residual',
-    #     'line_ids.amount_residual_currency',
-    #     'line_ids.payment_id.state'
-    #     )
-    # def _compute_l10n_latam_amount_and_taxes(self):
-    #     for invoice in self.filtered(lambda x: x.is_invoice(include_receipts=True):
-    #         included_taxes = \
-    #             invoice.l10n_latam_document_type_id and invoice.l10n_latam_document_type_id._filter_taxes_included(
-    #                 invoice.tax_line_ids.mapped('tax_id'))
-    #         if not included_taxes:
-    #             l10n_latam_amount_tax = invoice.amount_tax
-    #             l10n_latam_amount_untaxed = invoice.amount_untaxed
-    #             not_included_invoice_taxes = invoice.tax_line_ids
-    #         else:
-    #             included_invoice_taxes = invoice.tax_line_ids.filtered(lambda x: x.tax_id in included_taxes)
-    #             not_included_invoice_taxes = invoice.tax_line_ids - included_invoice_taxes
-    #             l10n_latam_amount_tax = sum(not_included_invoice_taxes.mapped('amount'))
-    #             l10n_latam_amount_untaxed = invoice.amount_untaxed + sum(included_invoice_taxes.mapped('amount'))
-    #         invoice.l10n_latam_amount_tax = l10n_latam_amount_tax
-    #         invoice.l10n_latam_amount_untaxed = l10n_latam_amount_untaxed
-    #         # invoice.l10n_latam_tax_line_ids = not_included_invoice_taxes
+    def _compute_l10n_latam_amount_and_taxes(self):
+        for invoice in self.filtered(lambda x: x.is_invoice(include_receipts=True)):
+            tax_lines = invoice.line_ids.filtered('tax_line_id')
+            included_taxes = invoice.l10n_latam_document_type_id and \
+                invoice.l10n_latam_document_type_id._filter_taxes_included(tax_lines.mapped('tax_line_id'))
+            if not included_taxes:
+                l10n_latam_amount_tax = invoice.amount_tax
+                l10n_latam_amount_untaxed = invoice.amount_untaxed
+                not_included_invoice_taxes = tax_lines
+            else:
+                included_invoice_taxes = tax_lines.filtered(lambda x: x.tax_line_id in included_taxes)
+                not_included_invoice_taxes = tax_lines - included_invoice_taxes
+                if invoice.is_inbound():
+                    sign = -1
+                else:
+                    sign = 1
+                l10n_latam_amount_tax = sign * sum(not_included_invoice_taxes.mapped('balance'))
+                l10n_latam_amount_untaxed = invoice.amount_untaxed + sign * sum(included_invoice_taxes.mapped('balance'))
+            invoice.l10n_latam_amount_tax = l10n_latam_amount_tax
+            invoice.l10n_latam_amount_untaxed = l10n_latam_amount_untaxed
+            invoice.l10n_latam_tax_ids = not_included_invoice_taxes
 
     def _compute_invoice_sequence_number_next(self):
         """ If journal use documents disable the next number header"""
@@ -156,49 +149,46 @@ class AccountMove(models.Model):
             rec.l10n_latam_document_type_id = rec._compute_l10n_latam_documents()
         return res
 
-    # @api.model
-    # def _prepare_refund(self, invoice, invoice_date=None, date=None, description=None, journal_id=None):
-    #     values = super()._prepare_refund(
-    #         invoice, invoice_date=invoice_date, date=date, description=description, journal_id=journal_id)
-    #     refund_document_type_id = self._context.get('refund_document_type_id', False)
-    #     refund_document_number = self._context.get('refund_document_number', False)
-    #     if refund_document_type_id:
-    #         values['l10n_latam_document_type_id'] = refund_document_type_id
-    #     if refund_document_number:
-    #         values['l10n_latam_document_number'] = refund_document_number
-    #     return values
-
-    # def _amount_by_group(self):
-    #     invoice_with_doc_type = self.filtered('l10n_latam_document_type_id')
-    #     for invoice in invoice_with_doc_type:
-    #         currency = invoice.currency_id or invoice.company_id.currency_id
-    #         fmt = partial(formatLang, invoice.with_context(lang=invoice.partner_id.lang).env, currency_obj=currency)
-    #         res = {}
-    #         for line in invoice.l10n_latam_tax_line_ids:
-    #             tax = line.tax_id
-    #             group_key = (tax.tax_group_id, tax.amount_type, tax.amount)
-    #             res.setdefault(group_key, {'base': 0.0, 'amount': 0.0})
-    #             res[group_key]['amount'] += line.amount_total
-    #             res[group_key]['base'] += line.base
-    #         res = sorted(res.items(), key=lambda l: l[0][0].sequence)
-    #         invoice.amount_by_group = [(
-    #             r[0][0].name, r[1]['amount'], r[1]['base'],
-    #             fmt(r[1]['amount']), fmt(r[1]['base']),
-    #             len(res),
-    #         ) for r in res]
-    #     super(AccountMove, self - invoice_with_doc_type)._amount_by_group()
-
-    # @api.multi
-    # def unlink(self):
-    #     """ When using documents, on vendor bills the document_number is setted manually by the number given from
-    #     the vendor, the odoo sequence is not used. In this case We allow to delete vendor bills with
-    #     document_number/name """
-    #     self.filtered(
-    #         lambda x: x.type in ['in_refund', 'in_invoice'] and x.state in ('draft', 'cancel') and
-    #         x.l10n_latam_use_documents and x.name).write({'name': False})
-    #     return super().unlink()
+    def _compute_invoice_taxes_by_group(self):
+        move_with_doc_type = self.filtered('l10n_latam_document_type_id')
+        for move in move_with_doc_type:
+            lang_env = move.with_context(lang=move.partner_id.lang).env
+            tax_lines = move.l10n_latam_tax_ids
+            res = {}
+            for line in tax_lines:
+                res.setdefault(line.tax_line_id.tax_group_id, {'base': 0.0, 'amount': 0.0})
+                res[line.tax_line_id.tax_group_id]['amount'] += line.price_subtotal
+                res[line.tax_line_id.tax_group_id]['base'] += line.tax_base_amount
+            res = sorted(res.items(), key=lambda l: l[0].sequence)
+            move.amount_by_group = [(
+                group.name, amounts['amount'],
+                amounts['base'],
+                formatLang(lang_env, amounts['amount'], currency_obj=move.currency_id),
+                formatLang(lang_env, amounts['base'], currency_obj=move.currency_id),
+                len(res),
+            ) for group, amounts in res]
+        super(AccountMove, self - move_with_doc_type)._compute_invoice_taxes_by_group()
 
     def get_document_type_sequence(self):
         """ Method to be inherited by different localizations. """
         self.ensure_one()
         return self.env['ir.sequence']
+
+    @api.multi
+    @api.constrains('name', 'partner_id', 'company_id')
+    def _check_unique_vendor_number(self):
+        """ The constraint _check_unique_sequence_number is valid for customer
+        bills but not valid for us on vendor bills because the uniqueness
+        must be per partner and also because we want to validate on entry
+        creation and not on entry validation """
+        for rec in self.filtered(lambda x: x.is_purchase_document() and x.l10n_latam_use_documents and x.l10n_latam_document_number):
+            domain = [
+                ('type', '=', rec.type),
+                # by validating name we validate l10n_latam_document_number and l10n_latam_document_type_id
+                ('name', '=', rec.name),
+                ('company_id', '=', rec.company_id.id),
+                ('id', '!=', rec.id),
+                ('commercial_partner_id', '=', rec.commercial_partner_id.id)
+            ]
+            if rec.search(domain):
+                raise ValidationError(_('Vendor bill number must be unique per vendor and company.'))

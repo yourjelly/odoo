@@ -26,7 +26,7 @@ links between this new model and another Odoo's models.
         'views/report_invoice.xml',
         'views/ir_sequence_view.xml',
         'report/invoice_report_view.xml',
-        # 'wizards/account_invoice_refund_view.xml',
+        'wizards/account_move_reversal_view.xml',
         'security/ir.model.access.csv',
     ],
     'installable': True,

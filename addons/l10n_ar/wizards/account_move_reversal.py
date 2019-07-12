@@ -3,9 +3,9 @@
 from odoo import models, api
 
 
-class AccountInvoiceRefund(models.TransientModel):
+class AccountMoveReversal(models.TransientModel):
 
-    _inherit = 'account.invoice.refund'
+    _inherit = 'account.move.reversal'
 
     @api.multi
     def compute_refund(self, mode='refund'):
