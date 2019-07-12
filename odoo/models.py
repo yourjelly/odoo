@@ -2958,8 +2958,7 @@ Fields:
             # mark non-existing records in missing
             forbidden = self.browse(missing).exists()
             if forbidden:
-                exc = self.env['ir.rule']._make_access_error('read', forbidden)
-                self.env.cache.set_failed(forbidden, self._fields.values(), exc)
+                raise self.env['ir.rule']._make_access_error('read', forbidden)
 
     def get_metadata(self):
         """
@@ -3352,7 +3351,7 @@ Fields:
                             # record[field.name] is not in cache, and it will therefore fetch the one2many ids while it doesn't really need them,
                             # e.g. for [(0, 0, {..})] which only add lines, you do not need to fetch the previous line nor invalidate their inverse.
                             # You only need to invalidate the one you have in cache, not the other ones.
-                            for rec in self.env[field.comodel_name].browse(env.cache.get_value(record, field, [])):
+                            for rec in self.env[field.comodel_name].browse(env.cache.get(record, field, [])):
                                 env.cache.remove(rec, invf)
 
                     if field.type == 'many2many':
@@ -4541,15 +4540,7 @@ Fields:
         query = """SELECT id FROM "%s" WHERE id IN %%s""" % self._table
         self._cr.execute(query, [tuple(ids)])
         ids = [r[0] for r in self._cr.fetchall()]
-        existing = self.browse(ids + new_ids)
-        if len(existing) < len(self):
-            # mark missing records in cache with a failed value
-            exc = MissingError(
-                _("Record does not exist or has been deleted.")
-                + '\n\n({} {}, {} {})'.format(_('Records:'), (self - existing).ids[:6], _('User:'), self._uid)
-            )
-            self.env.cache.set_failed(self - existing, self._fields.values(), exc)
-        return existing
+        return self.browse(ids + new_ids)
 
     def _check_recursion(self, parent=None):
         """
@@ -5146,7 +5137,7 @@ Fields:
             field = recs._fields[name]
             null = field.convert_to_cache(False, self, validate=False)
             if recs:
-                recs = recs.mapped(lambda rec: field.convert_to_record(rec._cache.get_value(name, null), rec))
+                recs = recs.mapped(lambda rec: field.convert_to_record(rec._cache.get(name, null), rec))
             else:
                 recs = field.convert_to_record(null, recs)
         return recs
@@ -6097,26 +6088,6 @@ class RecordCache(MutableMapping):
     def __len__(self):
         """ Return the number of fields with a cached value. """
         return sum(1 for name in self)
-
-    def has_value(self, name):
-        """ Return whether `record` has a cached, regular value for field ``name``. """
-        field = self._record._fields[name]
-        return self._record.env.cache.contains_value(self._record, field)
-
-    def get_value(self, name, default=None):
-        """ Return the cached, regular value of field ``name`` for `record`, or ``default``. """
-        field = self._record._fields[name]
-        return self._record.env.cache.get_value(self._record, field, default)
-
-    def set_special(self, name, getter):
-        """ Use the given getter to get the cached value of field ``name``. """
-        field = self._record._fields[name]
-        self._record.env.cache.set_special(self._record, field, getter)
-
-    def set_failed(self, names, exception):
-        """ Mark the given fields with the given exception. """
-        fields = [self._record._fields[name] for name in names]
-        self._record.env.cache.set_failed(self._record, fields, exception)
 
 
 AbstractModel = BaseModel

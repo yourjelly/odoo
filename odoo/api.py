@@ -711,6 +711,10 @@ class Environments(object):
         return iter(self.envs)
 
 
+# sentinel value for optional parameters
+NOTHING = object()
+
+
 class Cache(object):
     """ Implementation of the cache of records. """
     def __init__(self):
@@ -739,25 +743,18 @@ class Cache(object):
             return key in self._data.get(field, {}).get(record.id, {})
         return record.id in self._data.get(field, ())
 
-    def get_all_values(self, record, field):
-        """ Return the value of ``field`` for ``record``. """
-        # DLE P7: Dictionary changed of size during iteration
-        if field.depends_context:
-            key = self._get_context_key(record.env, field)
-            return self._data.get(field, {}).get(key, {}).values()
-        return self._data.get(field, {}).values()
-
-    def get(self, record, field):
+    def get(self, record, field, default=NOTHING):
         """ Return the value of ``field`` for ``record``. """
         try:
             value = self._data[field][record._ids[0]]
             if field.depends_context:
                 key = self._get_context_key(record.env, field)
                 value = value[key]
+            return value
         except KeyError:
-            raise CacheMiss(record, field)
-
-        return value.get() if isinstance(value, SpecialValue) else value
+            if default is NOTHING:
+                raise CacheMiss(record, field)
+            return default
 
     def set(self, record, field, value):
         """ Set the value of ``field`` for ``record``. """
@@ -784,59 +781,18 @@ class Cache(object):
         except KeyError:
             pass
 
-    def contains_value(self, record, field):
-        """ Return whether ``record`` has a regular value for ``field``. """
-        if field.depends_context:
-            key = self._get_context_key(record.env, field)
-            value = self._data[field].get(record.id, {}).get(key, SpecialValue(None))
-        else:
-            value = self._data[field].get(record.id, SpecialValue(None))
-        return not isinstance(value, SpecialValue)
-
-    def get_value(self, record, field, default=None):
-        """ Return the regular value of ``field`` for ``record``. """
-        if field.depends_context:
-            key = self._get_context_key(record.env, field)
-            value = self._data[field].get(record.id, {}).get(key, SpecialValue(None))
-        else:
-            value = self._data[field].get(record.id, SpecialValue(None))
-        return default if isinstance(value, SpecialValue) else value
-
-    def get_values(self, records, field, default=None):
-        """ Return the regular values of ``field`` for ``records``. """
+    def get_values(self, records, field):
+        """ Return the cached values of ``field`` for ``records``. """
         field_cache = self._data[field]
         key = self._get_context_key(records.env, field) if field.depends_context else None
         for record_id in records._ids:
-            if key:
-                value = field_cache.get(record_id, {}).get(key, SpecialValue(None))
-            else:
-                value = field_cache.get(record_id, SpecialValue(None))
-            yield default if isinstance(value, SpecialValue) else value
-
-    def get_special(self, record, field, default=None):
-        """ Return the special value of ``field`` for ``record``. """
-        if field.depends_context:
-            key = self._get_context_key(record.env, field)
-            value = self._data[field].get(record.id, {}).get(key)
-        else:
-            value = self._data[field].get(record.id)
-        return value.get if isinstance(value, SpecialValue) else default
-
-    def set_special(self, record, field, getter):
-        """ Set the value of ``field`` for ``record`` to return ``getter()``. """
-        if field.depends_context:
-            key = self._get_context_key(record.env, field)
-            self._data[field].setdefault(record.id, {})[key] = SpecialValue(getter)
-        else:
-            self._data[field][record.id] = SpecialValue(getter)
-
-    def set_failed(self, records, fields, exception):
-        """ Mark ``fields`` on ``records`` with the given exception. """
-        def getter():
-            raise exception
-        for field in fields:
-            for record in records:
-                self.set_special(record, field, getter)
+            try:
+                if key:
+                    yield field_cache[record_id][key]
+                else:
+                    yield field_cache[record_id]
+            except KeyError:
+                pass
 
     def get_fields(self, record):
         """ Return the fields with a value for ``record``. """
@@ -913,7 +869,6 @@ class Cache(object):
                                 invalids.append((record, field, info))
                     else:
                         cached = field_dump[record.id]
-                        cached = cached.get() if isinstance(cached, SpecialValue) else cached
                         fetched = record[field.name]
                         value = field.convert_to_record(cached, record)
                         if fetched != value:
@@ -924,14 +879,6 @@ class Cache(object):
 
         if invalids:
             raise UserError('Invalid cache for fields\n' + pformat(invalids))
-
-
-class SpecialValue(object):
-    """ Wrapper for a function to get the cached value of a field. """
-    __slots__ = ['get']
-
-    def __init__(self, getter):
-        self.get = getter
 
 
 # keep those imports here in order to handle cyclic dependencies correctly

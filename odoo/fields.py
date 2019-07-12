@@ -1006,7 +1006,10 @@ class Field(MetaField('DummyField', (object,), {})):
         record.ensure_one()
         if env.check_todo(self, record) and record not in env.protected(self):
             recs = record if self.recursive else env.field_todo(self)
-            self.compute_value(recs)
+            try:
+                self.compute_value(recs)
+            except Exception:
+                self.compute_value(record)
 
         if not env.cache.contains(record, self):
             # real record
@@ -1016,6 +1019,11 @@ class Field(MetaField('DummyField', (object,), {})):
                     recs._fetch_field(self)
                 except AccessError:
                     record._fetch_field(self)
+                if not env.cache.contains(record, self):
+                    raise MissingError("\n".join([
+                        _("Record does not exist or has been deleted."),
+                        _("(Record: %s, User: %s)") % (record, env.uid),
+                    ]))
             elif self.compute:
                 # DLE P78: Infinite recursion when installing sale
                 if record not in env.protected(self):
@@ -1054,7 +1062,6 @@ class Field(MetaField('DummyField', (object,), {})):
                     value = self.convert_to_cache(defaults[self.name], record)
                     env.cache.set(record, self, value)
 
-        # raise access rights here instead of in the end of read()
         value = env.cache.get(record, self)
         return self.convert_to_record(value, record)
 
@@ -2984,7 +2991,7 @@ def prefetch_many2one_ids(record, field):
         field for the prefetch set of a record.
     """
     records = record.browse(record._prefetch_ids)
-    ids = record.env.cache.get_values(records, field, None)
+    ids = record.env.cache.get_values(records, field)
     return unique(id_ for id_ in ids if id_ is not None)
 
 
@@ -2993,7 +3000,7 @@ def prefetch_x2many_ids(record, field):
         field for the prefetch set of a record.
     """
     records = record.browse(record._prefetch_ids)
-    ids_list = record.env.cache.get_values(records, field, ())
+    ids_list = record.env.cache.get_values(records, field)
     return unique(id_ for ids in ids_list for id_ in ids)
 
 
