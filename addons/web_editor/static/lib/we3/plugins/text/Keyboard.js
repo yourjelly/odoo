@@ -7,13 +7,48 @@ we3.addPlugin('Keyboard', class extends we3.AbstractPlugin {
     }
     constructor () {
         super(...arguments);
-        this.dependencies = ['Arch', 'Range', 'Paragraph', 'Link', 'History', 'Table']; // TODO: Remove dependencies
+        this.dependencies = ['Arch', 'Range', 'Renderer'];
         this.editableDomEvents = {
-            'keydown': '_onKeydown',
-            'textInput': '_onTextInput',
-            // 'DOMNodeInserted editable span': '_removeGarbageSpans',
+            'keydown': '_onKeyDown',
+            'keyup': '_onKeyUp',
         };
         this.tab = '\u00A0\u00A0\u00A0\u00A0';
+        this._keypressUpdatedTargets = null;
+    }
+    start () {
+        var self = this;
+        this._observer = new MutationObserver(function onMutation (mutationsList, observer) {
+            if (!self._keypressUpdatedTargets) {
+                return;
+            }
+            mutationsList.forEach(function (mutation) {
+                if (mutation.type == 'characterData') {
+                    self._keypressUpdatedTargets.push(mutation.target);
+                }
+                if (mutation.type == 'childList') {
+                    mutation.addedNodes.forEach(function (target) {
+                        if (self._keypressUpdatedTargets.indexOf(target) === -1) {
+                            self._keypressUpdatedTargets.push(target);
+                        }
+                    });
+                    mutation.removedNodes.forEach(function (target) {
+                        if (self._keypressUpdatedTargets.indexOf(target) === -1) {
+                            self._keypressUpdatedTargets.push(target);
+                        }
+                    });
+                }
+            });
+        });
+        this._observer.observe(this.editable, {
+            characterData: true,
+            childList: true,
+            subtree: true
+        });
+        return super.start();
+    }
+    destroy () {
+        this._observer.disconnect();
+        super.destroy();
     }
 
     //--------------------------------------------------------------------------
@@ -24,34 +59,6 @@ we3.addPlugin('Keyboard', class extends we3.AbstractPlugin {
     // Private
     //--------------------------------------------------------------------------
 
-    /**
-     * Handle the recording of history steps on character input.
-     *
-     * @param {String} key
-     */
-    _handleCharInputHistory (key) {
-        var self = this;
-
-        clearTimeout(this.lastCharIsVisibleTime);
-
-        var stopChars = [' ', ',', ';', ':', '?', '.', '!'];
-        var history = null; //this.dependencies.History.getHistoryStep();
-
-        var isStopChar = stopChars.indexOf(key) !== -1;
-        var isTopOfHistoryStack = !history || history.stack.length ||
-            history.stackOffset >= history.stack.length - 1;
-
-        if (isStopChar || !isTopOfHistoryStack) {
-            this.lastCharVisible = false;
-        }
-        this.lastCharIsVisibleTime = setTimeout(function () {
-            self.lastCharIsVisible = false;
-        }, 500);
-        if (!this.lastCharIsVisible) {
-            this.lastCharIsVisible = true;
-            // this.dependencies.History.recordUndo();
-        }
-    }
     /**
      * Handle deletion (BACKSPACE / DELETE).
      *
@@ -165,44 +172,24 @@ we3.addPlugin('Keyboard', class extends we3.AbstractPlugin {
      * @param {Event} e
      * @returns {Boolean} true if case handled
      */
-    _onKeydown (e) {
-        var isNavKey = e.keyCode >= 33 && e.keyCode <= 40;
-        var isSelectAll = e.ctrlKey && e.key === 'a';
-        if (e.defaultPrevented || isNavKey || isSelectAll) {
+    _onKeyDown (e) {
+        if (e.defaultPrevented) {
             return;
         }
 
-        var handled = false;
-        var isChar = e.key && e.key.length === 1;
-        var isAccented = e.key && (e.key === "Dead" || e.key === "Unidentified");
-        var isModified = e.ctrlKey || e.altKey || e.metaKey;
-        if ((isChar || isAccented) && !isModified) {
-            if (isAccented) {
-                this._accented = isAccented;
-            }
-            this._handleCharInputHistory(e.key);
-        } else {
-            this.lastCharIsVisible = false;
-            switch (e.keyCode) {
-                case 8: // BACKSPACE
-                    handled = this._onBackspace(e);
-                    break;
-                case 9: // TAB
-                    handled = this._onTab(e);
-                    break;
-                case 13: // ENTER
-                    handled = this._onEnter(e);
-                    break;
-                case 46: // DELETE
-                    handled = this._onDelete(e);
-                    break;
-            }
-            if (handled) {
-                e.preventDefault();
-            }
+        if (e.keyCode >= 33 && e.keyCode <= 40) {
+            return;
         }
-        if (e.key !== "Dead") {
-            this._accented = false;
+
+        this._keypressEvents = this._keypressEvents || [];
+        this._keypressUpdatedTargets = this._keypressUpdatedTargets || [];
+
+        if (e.key === ' ' || e.key === 'Space') {
+            this._keypressEvents.push([this.utils.char('nbsp'), e]);
+        } else if (e.key.charCodeAt(0) === 10) {
+            this._keypressEvents.push(['<br/>', e]);
+        } else {
+            this._keypressEvents.push([e.key, e]);
         }
     }
     /**
@@ -282,24 +269,53 @@ we3.addPlugin('Keyboard', class extends we3.AbstractPlugin {
         }
         return handled;
     }
-    /**
-     * Handle visible char keydown event.
-     *
-     * @private
-     * @param {TextEvent} ev
-     */
-    _onTextInput (ev) {
-        ev.preventDefault();
-        this._handleCharInputHistory(ev.data);
-        var text;
-        if (ev.data === ' ') {
-            text = this.utils.char('nbsp');
-        } else if (ev.data.charCodeAt(0) === 10) {
-            text = '<br/>';
-        } else {
-            text = ev.data;
+    _onKeyUp (e) {
+        var self = this;
+
+        if (!this._keypressEvents) {
+            return;
         }
-        this.dependencies.Arch.insert(text);
+
+        if (this._keypressUpdatedTargets) {
+            this._keypressUpdatedTargets.forEach(function (target) {
+                var id = self.dependencies.Renderer.getID(target);
+                if (id) {
+                    self.dependencies.Renderer.markAsDirty(id, {childNodes: true, nodeValue: true});
+
+                    if (self._keypressUpdatedTargets.length > 1) {
+                        var archNode = self.dependencies.Arch.getClonedArchNode(id);
+                        if (archNode.isText()) {
+                            self.dependencies.Renderer.markAsDirty(archNode.parent.id, {childNodes: true});
+                        }
+                    }
+                }
+            });
+            this._keypressUpdatedTargets = null;
+        }
+
+        this.dependencies.Arch.do(function () {
+            self._keypressEvents.forEach(function (ev) {
+                var data = ev[0];
+                var e = ev[1];
+                if (data.length === 1 || data === '<br/>') {
+                    self.dependencies.Arch.insert(data);
+                } else {
+                    data = data.toUpperCase();
+                    if (data === 'BACKSPACE') {
+                        self._onBackspace(e);
+                    } else if (data === 'TAB') {
+                        self._onTab(e);
+                    } else if (data === 'ENTER') {
+                        self._onEnter(e);
+                    } else if (data === 'DELETE') {
+                        self._onDelete(e);
+                    }
+                }
+            });
+        }, {
+            applyRulesForPublicMethod: true,
+        });
+        this._keypressEvents = null;
     }
 });
 

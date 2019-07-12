@@ -68,6 +68,7 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/text/FontStyle.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/text/Indent.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/text/Paragraph.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/text/Keyboard.js"/>
 
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/misc/History.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/misc/Jinja.js"/>
@@ -99,6 +100,7 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarParagraph.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarWand.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/history.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/codeView.js"/>
 </template>
 
 <template id="assets_wysiwyg" name="Wysiwyg Editor Assets">
@@ -164,7 +166,6 @@
 
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/text/ColorPicker.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/text/format_text.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/text/keyboard.js"/>
 
     <!-- plugins drop -->
 

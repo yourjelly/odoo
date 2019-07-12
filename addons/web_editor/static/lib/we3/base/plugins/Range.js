@@ -65,17 +65,8 @@ var BaseRange = class extends we3.AbstractPlugin {
         var Arch = this.dependencies.Arch;
         var sc = Renderer.getElement(this._range.scID);
         var ec = this._range.scID === this._range.ecID ? sc : Renderer.getElement(this._range.ecID);
-        if (!sc || !ec) {
-            return new WrappedRange(Arch, Renderer, {
-                sc: this.editable,
-                scArch: Arch.getClonedArchNode(1),
-                scID: 1,
-                so: 0,
-                ec: this.editable,
-                ecArch: Arch.getClonedArchNode(1),
-                ecID: 1,
-                eo: 0,
-            });
+        if (!Arch.getClonedArchNode(this._range.scID)) {
+            debugger;
         }
         return new WrappedRange(Arch, Renderer, {
             sc: sc,
@@ -667,6 +658,9 @@ var BaseRange = class extends we3.AbstractPlugin {
      * @param {Number} eo
      */
     _select (sc, so, ec, eo) {
+        if (this.editable.style.display === 'none') {
+            return;
+        }
         if (this.editable !== document.activeElement) {
             this.editable.focus();
         }
@@ -694,6 +688,7 @@ var BaseRange = class extends we3.AbstractPlugin {
      * @param {Number} [oldRange.eo]
      * @param {Object} [options]
      * @param {Boolean} [options.muteTrigger]
+     * @param {Boolean} [options.muteDOMRange]
      */
     _setRange (oldRange, options) {
         if (!this._editorFocused) {
@@ -703,9 +698,10 @@ var BaseRange = class extends we3.AbstractPlugin {
         var newRange = this.getRange();
         var nativeReadyNewRange = this._voidoidSelectToNative(newRange);
 
-        if (!oldRange || oldRange.scID === 1 ||
+        if ((!options || !options.muteDOMRange) &&
+            (!oldRange || oldRange.scID === 1 ||
             oldRange.sc !== nativeReadyNewRange.sc || oldRange.so !== nativeReadyNewRange.so ||
-            oldRange.ec !== nativeReadyNewRange.ec || oldRange.eo !== nativeReadyNewRange.eo) {
+            oldRange.ec !== nativeReadyNewRange.ec || oldRange.eo !== nativeReadyNewRange.eo)) {
             // only if the native range change, after the redraw
             // the renderer can associate existing note to the arch (to prevent error on mobile)
             this._select(nativeReadyNewRange.sc, nativeReadyNewRange.so, nativeReadyNewRange.ec, nativeReadyNewRange.eo);
@@ -729,6 +725,9 @@ var BaseRange = class extends we3.AbstractPlugin {
                 this.trigger('focus', res.focus);
             }
         }
+
+        console.log(res.range);
+
         return res;
     }
     /**

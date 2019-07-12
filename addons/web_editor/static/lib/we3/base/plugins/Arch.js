@@ -98,29 +98,35 @@ var BaseArch = class extends we3.AbstractPlugin {
         return res;
     }
     /**
+     * This method receives a function (which can return a promise), the operations performed
+     * in this function as a transaction. At the end of the transaction, the rules are applied,
+     * the dom is updated and the triggers are made.
+     *
      * @param {Function(getArchNode)} fn
      *      The function can return a range if want to apply it instead of the
      *      default range (apply on the first changed node)
      * @param {object} [options]
      * @param {boolean} [options.removeAllVirtualText] true to remove all virtual text before rendering
+     * @param {boolean} [options.applyRulesForPublicMethod] true to apply rules when call a public Arch method.
      */
     async do (callback, options) {
         var self = this;
+        options = options || {};
         this._resetChange();
-        var _concatChanges = this._concatChanges;
-        this._concatChanges = true;
+        var _isDoTransaction = this._isDoTransaction;
+        this._isDoTransaction = options;
         var getArchNode = function (id) {
-            if (!self._concatChanges) {
+            if (!self._isDoTransaction) {
                 throw new Error("It is forbidden to take this function into your plugin.\n You're trying to move to the dark side!");
             }
             return self.getArchNode(id);
         }
         var range = await callback(getArchNode);
-        this._concatChanges = _concatChanges;
-        if (options && options.removeAllVirtualText) {
+        this._isDoTransaction = _isDoTransaction;
+        if (options.removeAllVirtualText) {
             this._removeAllVirtualText();
         }
-        this._updateRendererFromChanges(range);
+        this._applyRulesRangeRedrawFromChanges(range);
     }
     /**
      * @param {string|number|ArchNode|JSON} DOM
@@ -255,7 +261,7 @@ var BaseArch = class extends we3.AbstractPlugin {
         if (this._changes.length > index) {
             this._changes[index].isRange = true;
         }
-        this._updateRendererFromChanges();
+        this._applyRulesRangeRedrawFromChanges();
     }
     /**
      * Create an ArchNode. If no argument is passed, create a VirtualText.
@@ -358,7 +364,7 @@ var BaseArch = class extends we3.AbstractPlugin {
             });
         });
 
-        this._updateRendererFromChanges(range);
+        this._applyRulesRangeRedrawFromChanges(range);
     }
     /**
      * Indent a format node at range.
@@ -401,7 +407,7 @@ var BaseArch = class extends we3.AbstractPlugin {
         if (this._changes.length > index) {
             this._changes[index].isRange = true;
         }
-        this._updateRendererFromChanges();
+        this._applyRulesRangeRedrawFromChanges();
     }
     /**
      * Insert a node or a fragment (several nodes) in the Arch, after a given ArchNode.
@@ -436,14 +442,15 @@ var BaseArch = class extends we3.AbstractPlugin {
      **/
     remove (element) {
         this._resetChange();
+        var index = this._changes.length;
         var id = typeof element === 'number' ? element : element && this.dependencies.BaseRenderer.getID(element);
         if (id) {
             this.getArchNode(id).remove();
         } else {
             this._removeFromRange();
         }
-        this._changes[0].isRange = true;
-        this._updateRendererFromChanges();
+        this._changes[index].isRange = true;
+        this._applyRulesRangeRedrawFromChanges();
     }
     /**
      * Remove to the left of the current range.
@@ -500,7 +507,7 @@ var BaseArch = class extends we3.AbstractPlugin {
         var afterEnd = options.doNotBreakBlocks && ecArch.isBlock() ? null : ecArch.split(range.eo);
         var start = options.doNotBreakBlocks && scArch.isBlock() ? scArch : scArch.split(range.so);
         var end = afterEnd && afterEnd.prev() || ecArch;
-        this._updateRendererFromChanges({
+        this._applyRulesRangeRedrawFromChanges({
             scID: start && start.id || scArch.id,
             so: 0,
             ecID: end.id,
@@ -527,7 +534,7 @@ var BaseArch = class extends we3.AbstractPlugin {
         var end = __hasMatch(ecArch) ? ecArch.splitUntil(ancestor, range.eo) : ecArch.split(range.eo).prev();
         var scArch = this.getArchNode(range.scID);
         var start = __hasMatch(scArch) ? scArch.splitUntil(ancestor, range.so) || scArch : scArch.split(range.so);
-        this._updateRendererFromChanges({
+        this._applyRulesRangeRedrawFromChanges({
             scID: start.id,
             so: 0,
             ecID: end.id,
@@ -550,7 +557,7 @@ var BaseArch = class extends we3.AbstractPlugin {
         });
         // render and select all unwrapped
         var range = ids.length ? this.dependencies.BaseRange.rangeOn(ids[0], ids[ids.length - 1]) : {};
-        this._updateRendererFromChanges(range);
+        this._applyRulesRangeRedrawFromChanges(range);
     }
     /**
      * Unwrap the node(s) corresponding to the given ID(s)
@@ -589,7 +596,7 @@ var BaseArch = class extends we3.AbstractPlugin {
             var ecArch = unwrapped[unwrapped.length - 1];
             range = this.dependencies.BaseRange.rangeOn(scArch, ecArch);
         }
-        this._updateRendererFromChanges(range);
+        this._applyRulesRangeRedrawFromChanges(range);
     }
     /**
      * Unwrap every node in range from their first ancestor
@@ -702,23 +709,39 @@ var BaseArch = class extends we3.AbstractPlugin {
         }
     }
     /**
-     * Add the given ArchNode and offset to the list of changes
-     * and notify the Rules plugin.
+     * Take the list of current changes
+     * Apply the changes to the renderer and update the range
      *
      * @private
-     * @param {ArchNode} archNode
-     * @param {Number} offset
+     * @param {Object} [range]
+     * @param {Object} [result]
      */
-    _changeArch (archNode, offset) {
-        this.dependencies.BaseRules.changeArchTriggered(archNode, offset);
-        if (archNode.isClone()) {
-            return;
+    _applyChangesOnRendererAndRerange (range, result) {
+        var self = this;
+        var BaseRenderer = this.dependencies.BaseRenderer;
+        var BaseRange = this.dependencies.BaseRange;
+
+        BaseRenderer.update(result.json);
+
+        var rangeRes;
+        if (range) {
+            rangeRes = BaseRange.setRange(range, {
+                muteTrigger: true,
+            });
+        } else {
+            range = result.range;
+            if (BaseRenderer.getElement(range.id)) {
+                rangeRes = BaseRange.setRange({
+                    scID: range.id,
+                    so: range.offset,
+                }, {
+                    muteTrigger: true,
+                });
+            }
+            delete result.range;
         }
-        this._changes.push({
-            id: archNode.id,
-            archNode: archNode,
-            offset: offset,
-        });
+
+        return rangeRes;
     }
     /**
      * Get the current changes after application of the rules and filtering
@@ -727,19 +750,24 @@ var BaseArch = class extends we3.AbstractPlugin {
      * and the range.
      *
      * @private
-     * @return {Object} {changes: {JSON []}, range: {Object}}
+     * @return {Object} {changes: {JSON []}, json: {Object []}, removed: {Object}, range: {Object}}
      */
-    _getChanges () {
+    _applyRulesAndGetChanges () {
         var self = this;
+        var BaseRenderer = this.dependencies.BaseRenderer;
         this.dependencies.BaseRules.applyRules(this._changes.map(function (c) {return c.archNode}));
 
         var range;
         var changes = [];
-        var removed = [];
+        var removed = {};
         this._changes.forEach(function (c, i) {
-            if (!c.archNode.id && !c.id || !self.getArchNode(c.archNode.id || c.id)) {
-                if ((c.archNode.id || c.id) && removed.indexOf(c.archNode.id || c.id) === -1) {
-                    removed.push(c.archNode.id);
+            var id = c.archNode.id || c.id;
+            if (!id || !self.getArchNode(id)) {
+                if (id && !removed[id]) {
+                    removed[id] = {
+                        id: id,
+                        element: BaseRenderer.getElement(id),
+                    };
                 }
                 return;
             }
@@ -767,11 +795,85 @@ var BaseArch = class extends we3.AbstractPlugin {
             }
         });
 
+        var json = changes.map(function (change) {
+            return self.getArchNode(change.id).toJSON({
+                keepVirtual: true,
+            });
+        });
+
         return {
             changes: changes,
+            json: json,
             removed: removed,
             range: range,
         };
+    }
+    /**
+     * Take the list of current changes
+     * Apply the rules and render them, except if it's temporary changes (do)
+     * If a range is passed, set it, otherwise deduce it from the changes.
+     *
+     * @private
+     * @param {Object} [range]
+     */
+    _applyRulesRangeRedrawFromChanges (range) {
+        if (this._isDoTransaction) {
+            if (this._changes.length && this._isDoTransaction.applyRulesForPublicMethod) {
+                this._applyRulesAndRangeForTemporaryChanges(range);
+            }
+        } else {
+            var result = this._applyRulesAndGetChanges();
+            if (result.changes.length) {
+                this._cloneArchNodeList = {};
+                var rangeRes = this._applyChangesOnRendererAndRerange(range, result);
+                this._triggerUpdates(result, rangeRes);
+            }
+        }
+    }
+    /**
+     * Take the list of temporary current changes.
+     * If a range is passed, set it, otherwise deduce it from the changes.
+     *
+     * @private
+     */
+    _applyRulesAndRangeForTemporaryChanges () {
+        var self = this;
+        var range;
+
+        this.dependencies.BaseRules.applyRules(this._changes.map(function (c) {return c.archNode}));
+
+        this._changes.forEach(function (c, i) {
+            var id = c.archNode.id || c.id;
+            if ((!range || c.isRange) && id && self.getArchNode(id)) {
+                range = {
+                    scID: id,
+                    so: c.offset,
+                };
+            }
+        });
+        this.dependencies.BaseRange.setRange(range, {
+            muteDOMRange: true,
+            muteTrigger: true,
+        });
+    }
+    /**
+     * Add the given ArchNode and offset to the list of changes
+     * and notify the Rules plugin.
+     *
+     * @private
+     * @param {ArchNode} archNode
+     * @param {Number} offset
+     */
+    _changeArch (archNode, offset) {
+        this.dependencies.BaseRules.changeArchTriggered(archNode, offset);
+        if (archNode.isClone()) {
+            return;
+        }
+        this._changes.push({
+            id: archNode.id,
+            archNode: archNode,
+            offset: offset,
+        });
     }
     /**
      * Return an array of objects containing information on the nodes to unwrap,
@@ -870,7 +972,7 @@ var BaseArch = class extends we3.AbstractPlugin {
                 self[outdent ? '_outdentList' : '_indentList'](archNode);
             }
         });
-        this._updateRendererFromChanges();
+        this._applyRulesRangeRedrawFromChanges();
     }
     /**
      * Indent a list element.
@@ -1126,7 +1228,7 @@ var BaseArch = class extends we3.AbstractPlugin {
                 keepRight: true,
             });
         }
-        this._updateRendererFromChanges();
+        this._applyRulesRangeRedrawFromChanges();
     }
     /**
      * Reset the Arch with the given start value if any.
@@ -1171,10 +1273,46 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @private
      */
     _resetChange () {
-        if (this._concatChanges) {
+        if (this._isDoTransaction) {
             return;
         }
         this._changes = [];
+    }
+    /**
+     * Called after a transaction of changes ('do', or public Arch method)
+     *
+     * @private
+     * @param {Object} [result]
+     * @param {Object} [rangeRes]
+     */
+    _triggerUpdates (result, rangeRes) {
+        var BaseRenderer = this.dependencies.BaseRenderer;
+        var BaseRange = this.dependencies.BaseRange;
+
+        if (!this._bypassChangeTriggerActive) {
+            this.trigger('update', result.json);
+        }
+
+        if (rangeRes && rangeRes.range) {
+            BaseRange.trigger('range', rangeRes.range);
+        }
+        if (rangeRes && rangeRes.focus) {
+            BaseRange.trigger('focus', rangeRes.focus);
+        }
+
+        if (!this._bypassChangeTriggerActive) {
+            this.triggerUp('change', {
+                changes: result.changes.map(function (c) {
+                    return {
+                        id: c.id,
+                        element: BaseRenderer.getElement(c.id),
+                    }
+                }),
+                removed: Object.values(result.removed).filter(function (c) {
+                    return c.element && !BaseRenderer.getID(c.element); // element can be attach to an other node
+                }),
+            });
+        }
     }
     /**
      * Remove all escaping from a text content.
@@ -1187,89 +1325,6 @@ var BaseArch = class extends we3.AbstractPlugin {
             technicalSpan.innerHTML = r;
             return technicalSpan.textContent;
         });
-    }
-    /**
-     * Take the list of current changes, apply the rules and render them.
-     * If a range is passed, set it, otherwise deduce it from the changes.
-     *
-     * @private
-     * @param {Object} [range]
-     */
-    _updateRendererFromChanges (range) {
-        if (this._concatChanges) {
-            return;
-        }
-        var self = this;
-        var BaseRenderer = this.dependencies.BaseRenderer;
-        var BaseRange = this.dependencies.BaseRange;
-
-        var result = this._getChanges();
-        if (!result.changes.length) {
-            return;
-        }
-
-        var removed = [];
-        result.removed.map(function (id) {
-            var el = BaseRenderer.getElement(id);
-            if (el) {
-                removed.push({
-                    id: id,
-                    element: el,
-                });
-            }
-        });
-
-        var json = result.changes.map(function (change) {
-            return self.getArchNode(change.id).toJSON({
-                keepVirtual: true,
-            });
-        });
-        BaseRenderer.update(json);
-
-        this._cloneArchNodeList = {};
-
-        var rangeRes;
-        if (range) {
-            rangeRes = BaseRange.setRange(range, {
-                muteTrigger: true,
-            });
-        } else {
-            range = result.range;
-            if (BaseRenderer.getElement(range.id)) {
-                rangeRes = BaseRange.setRange({
-                    scID: range.id,
-                    so: range.offset,
-                }, {
-                    muteTrigger: true,
-                });
-            }
-            delete result.range;
-        }
-
-        if (!this._bypassChangeTriggerActive) {
-            this.trigger('update', json);
-        }
-
-        if (rangeRes && rangeRes.range) {
-            BaseRange.trigger('range', rangeRes.range);
-        }
-        if (rangeRes && rangeRes.focus) {
-            BaseRange.trigger('focus', rangeRes.focus);
-        }
-
-        result.changes.forEach(function (c) {
-            c.element = BaseRenderer.getElement(c.id);
-        });
-        removed = removed.filter(function (c) {
-            return !BaseRenderer.getID(c.element); // element can be attach to an other node
-        });
-
-        if (!this._bypassChangeTriggerActive) {
-            this.triggerUp('change', {
-                changes: result.changes,
-                removed: removed,
-            });
-        }
     }
     /**
      * Wrap the node(s) corresponding to the given ID(s) inside
@@ -1301,7 +1356,7 @@ var BaseArch = class extends we3.AbstractPlugin {
         var scArch = newParents[0].firstLeaf();
         var ecArch = newParents[newParents.length - 1].lastLeaf();
         var range = this.dependencies.BaseRange.rangeOn(scArch, ecArch);
-        this._updateRendererFromChanges(range);
+        this._applyRulesRangeRedrawFromChanges(range);
         return newParents.map(node => node.id);
     }
 };

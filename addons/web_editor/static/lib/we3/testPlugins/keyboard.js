@@ -87,60 +87,31 @@ var TestKeyboard = class extends we3.AbstractPlugin {
         if (step.do) {
             return step.do();
         }
-        return new Promise(function (resolve) {
-            if (step.start) {
-                self._testSelect(assert, step, testName)
-            }
-            var target;
-            setTimeout(function () {
-                if (step.keyCode || step.key) {
-                    target = self.dependencies.Range.getRange().ec;
-                    if (window.location.search.indexOf('notrycatch') !== -1) {
-                        self.dependencies.Test.keydown(target, {
-                            key: step.key,
-                            keyCode: step.keyCode,
-                            ctrlKey: !!step.ctrlKey,
-                            shiftKey: !!step.shiftKey,
-                            altKey: !!step.altKey,
-                            metaKey: !!step.metaKey,
-                        });
-                    } else {
-                        try {
-                            self.dependencies.Test.keydown(target, {
-                                key: step.key,
-                                keyCode: step.keyCode,
-                                ctrlKey: !!step.ctrlKey,
-                                shiftKey: !!step.shiftKey,
-                                altKey: !!step.altKey,
-                                metaKey: !!step.metaKey,
-                            });
-                        } catch (e) {
-                            console.error(e);
-                            assert.notOk(e.name + '\n\n' + e.stack, testName);
-                        }
-                    }
+        if (step.start) {
+            await self._testSelect(assert, step, testName)
+        }
+        var options = {
+            key: step.key,
+            keyCode: step.keyCode,
+            ctrlKey: !!step.ctrlKey,
+            shiftKey: !!step.shiftKey,
+            altKey: !!step.altKey,
+            metaKey: !!step.metaKey,
+        };
+        if (step.keyCode || step.key) {
+            if (window.location.search.indexOf('notrycatch') !== -1) {
+                await self.dependencies.Test.keydown(this.editable, options);
+            } else {
+                try {
+                    await self.dependencies.Test.keydown(this.editable, options);
+                } catch (e) {
+                    console.error(e);
+                    assert.notOk(e.name + '\n\n' + e.stack, testName);
                 }
-                setTimeout(function () {
-                    if (step.keyCode || step.key) {
-                        target = self.dependencies.Range.getRange().ec;
-                        target = !target || target.tagName ? target : target.parentNode;
-                        if (target) {
-                            self.dependencies.Test.triggerNativeEvents(target, 'keyup', {
-                                key: step.key,
-                                keyCode: step.keyCode,
-                                ctrlKey: !!step.ctrlKey,
-                                shiftKey: !!step.shiftKey,
-                                altKey: !!step.altKey,
-                                metaKey: !!step.metaKey,
-                            });
-                        } else {
-                            assert.notOk("Should have a target to trigger the keyup", testName);
-                        }
-                    }
-                    setTimeout(resolve);
-                });
-            });
-        });
+            }
+        }
+
+        await new Promise(setTimeout);
     }
     /**
      * Get nodes within `document`, using the string `selector`.
@@ -225,11 +196,11 @@ var TestKeyboard = class extends we3.AbstractPlugin {
      * @param {Node} [end.node]
      * @param {int} [end.offset]
      */
-    _selectText (testName, assert, start, end) {
+    async _selectText (testName, assert, start, end) {
         start = this._querySelectorAllWithContents(testName, assert, start);
         var target = start.node;
         target = target.tagName ? target : target.parentNode;
-        this.dependencies.Test.triggerNativeEvents(target, 'mousedown');
+        await this.dependencies.Test.triggerNativeEvents(target, 'mousedown');
         if (end) {
             end = this._querySelectorAllWithContents(testName, assert, end);
             this.dependencies.Range.setRange({
@@ -246,7 +217,7 @@ var TestKeyboard = class extends we3.AbstractPlugin {
         }
         target = end ? end.node : start.node;
         target = target.tagName ? target : target.parentNode;
-        this.dependencies.Test.triggerNativeEvents(target, 'mouseup');
+        await this.dependencies.Test.triggerNativeEvents(target, 'mouseup');
     }
     /**
      * Test the range.
@@ -255,9 +226,9 @@ var TestKeyboard = class extends we3.AbstractPlugin {
      * @param {Object} step
      * @param {string} testName
      */
-    _testSelect (assert, step, testName) {
+    async _testSelect (assert, step, testName) {
         try {
-            this._selectText(testName, assert, step.start, step.end);
+            await this._selectText(testName, assert, step.start, step.end);
         } catch (e) {
             console.error(e);
             assert.notOk(e.message, testName);

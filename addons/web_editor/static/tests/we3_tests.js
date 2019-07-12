@@ -304,6 +304,14 @@ QUnit.module('web_editor', {
         };
         await createFormAndTest(this);
     });
+    QUnit.test('codeView', async function (assert) {
+        assert.expect(8);
+        this.testOptions = {
+            assert: assert,
+            plugins: Object.assign({}, disableAllTests, {TestCodeView: true}),
+        };
+        await createFormAndTest(this);
+    });
 
     QUnit.module('DropBlock plugins');
 

@@ -181,6 +181,7 @@ var Wysiwyg = Widget.extend({
                 'TestToolbarParagraph',
                 'TestToolbarWand',
                 'TestUI',
+                'TestCodeView',
             ],
             upload: {
                 onUpload: this._onMediaUpload.bind(this),

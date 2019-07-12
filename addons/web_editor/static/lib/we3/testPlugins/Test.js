@@ -412,41 +412,45 @@ var TestPlugin = class extends we3.AbstractPlugin {
             keyPress.key = this.utils.keyboardMap[keyPress.keyCode] || String.fromCharCode(keyPress.keyCode);
         }
         keyPress.keyCode = keyPress.keyCode;
-        await this.triggerNativeEvents(target, 'keydown', keyPress).then(function (ev) {
-            ev = ev[0] || ev; // (only one event was triggered)
-            if (!ev.defaultPrevented) {
-                if (keyPress.key.length === 1) {
-                    self._textInput(target, keyPress.key);
-                    document.execCommand("insertText", 0, keyPress.key);
-                } else if (keyPress.key === 'LEFT') {
-                    var range = self.dependencies.Range.getRange();
-                    if (!range.isCollapsed()) {
-                        self._selectRange(range.sc, range.so);
-                    } else if (range.so > 1) {
-                        self._selectRange(range.sc, range.so - 1);
-                    } else if (range.sc.previousSibling) {
-                        var prev = range.sc.previousSibling;
-                        self._selectRange(prev, 'length' in prev ? prev.length : prev.childNodes.length);
-                    } else {
-                        console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
-                    }
-                } else if (keyPress.key === 'RIGHT') {
-                    var range = self.dependencies.Range.getRange();
-                    if (!range.isCollapsed()) {
-                        self._selectRange(range.ec, range.eo);
-                    } else if (range.so < ('length' in range.sc ? range.sc.length : range.sc.childNodes.length)) {
-                        self._selectRange(range.sc, range.so + 1);
-                    } else if (range.sc.nextSibling) {
-                        self._selectRange(range.sc.nextSibling, 0);
-                    } else {
-                        console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
-                    }
+
+        var ev = await this.triggerNativeEvents(target, 'keydown', keyPress);
+
+        ev = ev[0] || ev; // (only one event was triggered)
+        if (!ev.defaultPrevented) {
+            await this.triggerNativeEvents(target, 'keypress', keyPress);
+
+            if (keyPress.key.length === 1) {
+                await self._textInput(target, keyPress.key);
+            } else if (keyPress.key === 'LEFT') {
+                var range = self.dependencies.Range.getRange();
+                if (!range.isCollapsed()) {
+                    self._selectRange(range.sc, range.so);
+                } else if (range.so > 1) {
+                    self._selectRange(range.sc, range.so - 1);
+                } else if (range.sc.previousSibling) {
+                    var prev = range.sc.previousSibling;
+                    self._selectRange(prev, 'length' in prev ? prev.length : prev.childNodes.length);
                 } else {
-                    console.debug('Native "' + keyPress.key + '" is not supported in test');
+                    console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
                 }
+            } else if (keyPress.key === 'RIGHT') {
+                var range = self.dependencies.Range.getRange();
+                if (!range.isCollapsed()) {
+                    self._selectRange(range.ec, range.eo);
+                } else if (range.so < ('length' in range.sc ? range.sc.length : range.sc.childNodes.length)) {
+                    self._selectRange(range.sc, range.so + 1);
+                } else if (range.sc.nextSibling) {
+                    self._selectRange(range.sc.nextSibling, 0);
+                } else {
+                    console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
+                }
+            } else {
+                console.debug('Native "' + keyPress.key + '" is not supported in test');
             }
-        });
-        await this.triggerNativeEvents(target, 'keyup', keyPress);
+        }
+
+        await this.triggerNativeEvents(target.parentNode ? target : this.editable, 'keyup', keyPress);
+
         return target;
     }
     /**
@@ -500,10 +504,10 @@ var TestPlugin = class extends we3.AbstractPlugin {
      *
      * @param {Object} range
      */
-    setRange (range) {
+    async setRange (range) {
         this.dependencies.Range.setRange(range);
         var newRange = this.dependencies.Range.getRange();
-        this.triggerNativeEvents(newRange.sc, ['mousedown', 'focus', 'click', 'mouseup']);
+        await this.triggerNativeEvents(newRange.sc, ['mousedown', 'focus', 'click', 'mouseup']);
     }
     /**
      * Set the range in the editor and make sure to focus the editor.
@@ -519,7 +523,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
      *
      * @param {string} value
      */
-    setValue (value, archNodeId) {
+    async setValue (value, archNodeId) {
         if (this.isDestroyed()) {
             return;
         }
@@ -632,7 +636,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
                 eo: e.offset,
             };
         }
-        this.setRange(range);
+        await this.setRange(range);
     }
     /**
      * Test autoinstall.
@@ -660,7 +664,19 @@ var TestPlugin = class extends we3.AbstractPlugin {
      */
     async triggerNativeEvents (el, events, options) {
         var self = this;
+
+        if (!el) {
+            console.warn('Try to trigger an event on an undefined node');
+            return;
+        }
+
         el = el.tagName ? el : el.parentNode;
+
+        if (!el.parentNode) {
+            console.warn('Try to trigger an event on a node out of the DOM');
+            return;
+        }
+
         options = _.defaults(options || {}, {
             view: window,
             bubbles: true,
@@ -672,17 +688,18 @@ var TestPlugin = class extends we3.AbstractPlugin {
             events = [events];
         }
         var triggeredEvents = []
-        events.forEach(function (eventName) {
-            var event;
+        for (var k = 0; k < events.length; k++) {
+            var eventName = events[k];
+            var ev;
             switch (_eventType(eventName)) {
                 case 'mouse':
-                    event = new MouseEvent(eventName, options);
+                    ev = new MouseEvent(eventName, options);
                     break;
                 case 'keyboard':
-                    event = new KeyboardEvent(eventName, options);
+                    ev = new KeyboardEvent(eventName, options);
                     break;
                 default:
-                    event = new Event(eventName, options);
+                    ev = new Event(eventName, options);
                     break;
             }
 
@@ -694,14 +711,16 @@ var TestPlugin = class extends we3.AbstractPlugin {
                     self.assert.notOk(e, 'ERROR Event: ' + eventName);
                 }
             }
-            el.dispatchEvent(event);
+
+            el.dispatchEvent(ev);
             if (!self.options.test || !self.options.test.assert) {
                 window.onerror = onerror;
             }
+            triggeredEvents.push(ev);
 
-            triggeredEvents.push(event);
-        });
-        return new Promise(function (resolve) {
+            await new Promise(setTimeout);
+        };
+        return new Promise(function (resolve) { // TODO: remove this false timeout => change other tests (link who use a modal...)
             setTimeout(function (argument) {
                 resolve(isMulti ? triggeredEvents : triggeredEvents[0]);
             }, 0);
@@ -876,7 +895,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
      * @returns {Promise|Boolean}
      */
     async _pollTest (assert, test) {
-        this.setValue(test.content);
+        await this.setValue(test.content);
         if (test.do) {
             await test.do(assert, test.name);
         }
@@ -917,7 +936,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
      * @param {Node} target
      * @param {string} char
      */
-    _textInput (target, char) {
+    async _textInput (target, char) {
         var ev = new CustomEvent('textInput', {
             bubbles: true,
             cancelBubble: false,
@@ -936,9 +955,11 @@ var TestPlugin = class extends we3.AbstractPlugin {
         ev.data = char;
         target.dispatchEvent(ev);
 
-         if (!ev.defaultPrevented) {
+        if (!ev.defaultPrevented) {
             document.execCommand("insertText", 0, ev.data);
         }
+
+        await new Promise(setTimeout);
     }
 };
 

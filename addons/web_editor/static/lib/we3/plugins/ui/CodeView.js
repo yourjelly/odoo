@@ -59,19 +59,20 @@ var CodeViewPlugin = class extends we3.AbstractPlugin {
      */
     active (value, options) {
         var self = this;
-        if (!this._isActive()) {
-            if (value) {
-                this._setCodeViewValue(value);
-            } else {
-                this.triggerUp('get_value', {
-                    options: options,
-                    callback (value) {
-                        self._setCodeViewValue(value);
-                    },
-                });
-            }
-            this._activate();
+        if (this._isActive()) {
+            return;
         }
+        if (value) {
+            this._setCodeViewValue(value);
+        } else {
+            this.triggerUp('get_value', {
+                options: options,
+                callback (value) {
+                    self._setCodeViewValue(value);
+                },
+            });
+        }
+        this._activate();
     }
     /**
      * Return to the wysiwyg view and set its value
@@ -111,8 +112,8 @@ var CodeViewPlugin = class extends we3.AbstractPlugin {
         this.isActive = true;
         this.codeview.style.display = '';
         this.editable.style.display = 'none';
-        this._focus();
         this.trigger('active');
+        setTimeout(this._focus.bind(this));
     }
     /**
      * Blur the code view and focus the wysiwyg view.
@@ -163,6 +164,8 @@ var CodeViewPlugin = class extends we3.AbstractPlugin {
      */
     _focus () {
         this.editable.blur();
+        this.codeview.selectionStart = 0;
+        this.codeview.selectionEnd = 0;
         this.codeview.focus();
     }
     /**

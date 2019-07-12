@@ -24,6 +24,19 @@ var BaseRenderer = class extends we3.AbstractPlugin {
         var index = this.elements.indexOf(element);
         return index === -1 ? null : index;
     }
+    markAsDirty (id, options) {
+        options = options || {};
+        this.changes[id] = Object.assign({}, this.changes[id]);
+        if (options.childNodes && ('childNodes' in this.jsonById[id])) {
+            this.changes[id].childNodes = this.changes[id].childNodes || this.jsonById[id].childNodes;
+        }
+        if (options.nodeValue && ('nodeValue' in this.jsonById[id])) {
+            this.changes[id].nodeValue = this.changes[id].nodeValue || this.jsonById[id].nodeValue;
+        }
+        if (options.attributes && ('attributes' in this.jsonById[id])) {
+            this.changes[id].attributes = this.changes[id].attributes || this.jsonById[id].attributes;
+        }
+    }
     /**
      * Render the changes.
      *
@@ -31,7 +44,7 @@ var BaseRenderer = class extends we3.AbstractPlugin {
      * @param {Boolean} [options.showIDs]
      */
     redraw (options) {
-        this._redraw(Object.assing({}, options, {
+        this._redraw(Object.assign({}, options, {
             forceDirty: true,
         }));
     }
@@ -376,6 +389,9 @@ var Renderer = class extends we3.AbstractPlugin {
      */
     getID (element) {
         return this.dependencies.BaseRenderer.getID(element);
+    }
+    markAsDirty (id, options) {
+        this.dependencies.BaseRenderer.markAsDirty(id, options);
     }
     /**
      * Render the changes.
