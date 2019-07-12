@@ -238,7 +238,7 @@ msgid "Created on"
 msgstr ""
 
 #. module: l10n_ar
-#: model:ir.model,name:l10n_ar.model_account_invoice_refund
+#: model:ir.model,name:l10n_ar.model_account_reverse_moves
 msgid "Credit Note"
 msgstr ""
 

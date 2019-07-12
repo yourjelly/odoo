@@ -127,7 +127,7 @@ msgid "Available Document Types"
 msgstr "Tipos de Documento Disponibles"
 
 #. module: l10n_latam_document
-#: model:ir.model.fields,field_description:l10n_latam_document.field_account_invoice_refund__l10n_latam_available_document_type_ids
+#: model:ir.model.fields,field_description:l10n_latam_document.field_account_reverse_moves__l10n_latam_available_document_type_ids
 msgid "Available Journal Document Types"
 msgstr "Tipos de Documento Disponibles"
 
@@ -178,7 +178,7 @@ msgid "Created on"
 msgstr "Creado el"
 
 #. module: l10n_latam_document
-#: model:ir.model,name:l10n_latam_document.model_account_invoice_refund
+#: model:ir.model,name:l10n_latam_document.model_account_reverse_moves
 msgid "Credit Note"
 msgstr "Rectificativa"
 
@@ -205,7 +205,7 @@ msgstr "Prefijo del código de documento"
 
 #. module: l10n_latam_document
 #: model:ir.model.fields,field_description:l10n_latam_document.field_account_invoice__l10n_latam_document_number
-#: model:ir.model.fields,field_description:l10n_latam_document.field_account_invoice_refund__l10n_latam_document_number
+#: model:ir.model.fields,field_description:l10n_latam_document.field_account_reverse_moves__l10n_latam_document_number
 #: model:ir.model.fields,field_description:l10n_latam_document.field_account_move__l10n_latam_document_number
 msgid "Document Number"
 msgstr "Número de Documento"
@@ -217,7 +217,7 @@ msgstr "Referencia de Documento"
 
 #. module: l10n_latam_document
 #: model:ir.model.fields,field_description:l10n_latam_document.field_account_invoice__l10n_latam_document_type_id
-#: model:ir.model.fields,field_description:l10n_latam_document.field_account_invoice_refund__l10n_latam_document_type_id
+#: model:ir.model.fields,field_description:l10n_latam_document.field_account_reverse_moves__l10n_latam_document_type_id
 #: model:ir.model.fields,field_description:l10n_latam_document.field_account_invoice_report__l10n_latam_document_type_id
 #: model:ir.model.fields,field_description:l10n_latam_document.field_account_move__l10n_latam_document_type_id
 #: model:ir.model.fields,field_description:l10n_latam_document.field_account_move_line__l10n_latam_document_type_id
@@ -263,7 +263,7 @@ msgstr "Tipo interno"
 #. module: l10n_latam_document
 #: code:addons/l10n_latam_document/models/account_invoice.py:134
 #: model:ir.model,name:l10n_latam_document.model_account_invoice
-#: model:ir.model.fields,field_description:l10n_latam_document.field_account_invoice_refund__l10n_ar_invoice_id
+#: model:ir.model.fields,field_description:l10n_latam_document.field_account_reverse_moves__l10n_ar_invoice_id
 #, python-format
 msgid "Invoice"
 msgstr "Factura"
@@ -307,7 +307,7 @@ msgstr "Apunte contable"
 
 #. module: l10n_latam_document
 #: model:ir.model.fields,field_description:l10n_latam_document.field_account_invoice__l10n_latam_sequence_id
-#: model:ir.model.fields,field_description:l10n_latam_document.field_account_invoice_refund__l10n_latam_sequence_id
+#: model:ir.model.fields,field_description:l10n_latam_document.field_account_reverse_moves__l10n_latam_sequence_id
 msgid "L10N Latam Sequence"
 msgstr ""
 
@@ -380,7 +380,7 @@ msgid "Refund"
 msgstr ""
 
 #. module: l10n_latam_document
-#: code:addons/l10n_latam_document/wizards/account_invoice_refund.py:18
+#: code:addons/l10n_latam_document/wizards/account_reverse_moves.py:18
 #, python-format
 msgid "Refund wizard must be call only from one invoice"
 msgstr ""
@@ -453,7 +453,7 @@ msgstr "Base imponible"
 
 #. module: l10n_latam_document
 #: model:ir.model.fields,field_description:l10n_latam_document.field_account_invoice__l10n_latam_use_documents
-#: model:ir.model.fields,field_description:l10n_latam_document.field_account_invoice_refund__l10n_latam_use_documents
+#: model:ir.model.fields,field_description:l10n_latam_document.field_account_reverse_moves__l10n_latam_use_documents
 #: model:ir.model.fields,field_description:l10n_latam_document.field_account_journal__l10n_latam_use_documents
 #: model:ir.model.fields,field_description:l10n_latam_document.field_res_company__l10n_latam_use_documents
 msgid "Use Documents?"

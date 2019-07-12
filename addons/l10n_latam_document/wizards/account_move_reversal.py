@@ -22,8 +22,6 @@ class AccountMoveReversal(models.TransientModel):
     l10n_latam_sequence_id = fields.Many2one('ir.sequence', compute='_compute_l10n_latam_sequence')
     l10n_latam_document_number = fields.Char(string='Document Number')
 
-
-
     @api.onchange('move_id')
     def _onchange_move_id(self):
         if self.move_id.l10n_latam_use_documents:

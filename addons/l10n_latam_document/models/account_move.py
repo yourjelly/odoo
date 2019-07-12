@@ -85,6 +85,8 @@ class AccountMove(models.Model):
     @api.multi
     def post(self):
         for rec in self.filtered(lambda x: x.l10n_latam_use_documents and not x.l10n_latam_document_number):
+            if not rec.l10n_latam_sequence_id:
+                raise UserError(_('No sequence or document number linked to invoice_id %s') %  rec.id)
             rec.l10n_latam_document_number = rec.l10n_latam_sequence_id.next_by_id()
         return super().post()
 
@@ -138,16 +140,6 @@ class AccountMove(models.Model):
         recs = super().create(vals_list)
         recs.filtered(lambda x: x.l10n_latam_use_documents and not x.l10n_latam_document_type_id)._compute_l10n_latam_documents()
         return recs
-
-    @api.multi
-    def write(self, vals):
-        """ If someone change the type (for eg from sale_order.action_invoice_create), we update the document type"""
-        if 'type' not in vals:
-            return super().write(vals)
-        res = super().write(vals)
-        for rec in self.filtered('l10n_latam_use_documents'):
-            rec.l10n_latam_document_type_id = rec._compute_l10n_latam_documents()
-        return res
 
     def _compute_invoice_taxes_by_group(self):
         move_with_doc_type = self.filtered('l10n_latam_document_type_id')

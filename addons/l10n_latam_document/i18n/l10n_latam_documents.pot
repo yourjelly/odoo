@@ -105,7 +105,7 @@ msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_account_invoice__l10n_latam_available_journal_document_type_ids
-#: model:ir.model.fields,field_description:l10n_latam_documents.field_account_invoice_refund__l10n_latam_available_journal_document_type_ids
+#: model:ir.model.fields,field_description:l10n_latam_documents.field_account_reverse_moves__l10n_latam_available_journal_document_type_ids
 msgid "Available Journal Document Types"
 msgstr ""
 
@@ -154,7 +154,7 @@ msgid "Created on"
 msgstr ""
 
 #. module: l10n_latam_documents
-#: model:ir.model,name:l10n_latam_documents.model_account_invoice_refund
+#: model:ir.model,name:l10n_latam_documents.model_account_reverse_moves
 msgid "Credit Note"
 msgstr ""
 
@@ -193,7 +193,7 @@ msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_account_invoice__l10n_latam_document_number
-#: model:ir.model.fields,field_description:l10n_latam_documents.field_account_invoice_refund__l10n_latam_document_number
+#: model:ir.model.fields,field_description:l10n_latam_documents.field_account_reverse_moves__l10n_latam_document_number
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_account_move__l10n_latam_document_number
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_account_payment__l10n_latam_document_number
 msgid "Document Number"
@@ -231,7 +231,7 @@ msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_account_invoice__l10n_latam_journal_mapping_id
-#: model:ir.model.fields,field_description:l10n_latam_documents.field_account_invoice_refund__l10n_latam_journal_mapping_id
+#: model:ir.model.fields,field_description:l10n_latam_documents.field_account_reverse_moves__l10n_latam_journal_mapping_id
 msgid "Document Type Mapping"
 msgstr ""
 
@@ -259,7 +259,7 @@ msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_account_invoice__l10n_latam_document_sequence_id
-#: model:ir.model.fields,field_description:l10n_latam_documents.field_account_invoice_refund__l10n_latam_document_sequence_id
+#: model:ir.model.fields,field_description:l10n_latam_documents.field_account_reverse_moves__l10n_latam_document_sequence_id
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_l10n_latam_journal_mapping__sequence_id
 msgid "Entry Sequence"
 msgstr ""
@@ -302,7 +302,7 @@ msgstr ""
 #. module: l10n_latam_documents
 #: code:addons/l10n_latam_documents/models/account_invoice.py:134
 #: model:ir.model,name:l10n_latam_documents.model_account_invoice
-#: model:ir.model.fields,field_description:l10n_latam_documents.field_account_invoice_refund__l10n_ar_invoice_id
+#: model:ir.model.fields,field_description:l10n_latam_documents.field_account_reverse_moves__l10n_ar_invoice_id
 #, python-format
 msgid "Invoice"
 msgstr ""
@@ -501,7 +501,7 @@ msgid "Refund"
 msgstr ""
 
 #. module: l10n_latam_documents
-#: code:addons/l10n_latam_documents/wizards/account_invoice_refund.py:18
+#: code:addons/l10n_latam_documents/wizards/account_reverse_moves.py:18
 #, python-format
 msgid "Refund wizard must be call only from one invoice"
 msgstr ""
@@ -558,7 +558,7 @@ msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,help:l10n_latam_documents.field_account_invoice__l10n_latam_document_sequence_id
-#: model:ir.model.fields,help:l10n_latam_documents.field_account_invoice_refund__l10n_latam_document_sequence_id
+#: model:ir.model.fields,help:l10n_latam_documents.field_account_reverse_moves__l10n_latam_document_sequence_id
 #: model:ir.model.fields,help:l10n_latam_documents.field_l10n_latam_journal_mapping__sequence_id
 msgid "This field contains the information related to the numbering of the documents entries of this document type."
 msgstr ""
@@ -596,7 +596,7 @@ msgstr ""
 
 #. module: l10n_latam_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_account_invoice__l10n_latam_use_documents
-#: model:ir.model.fields,field_description:l10n_latam_documents.field_account_invoice_refund__l10n_latam_use_documents
+#: model:ir.model.fields,field_description:l10n_latam_documents.field_account_reverse_moves__l10n_latam_use_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_account_journal__l10n_latam_use_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_account_payment__l10n_latam_use_documents
 #: model:ir.model.fields,field_description:l10n_latam_documents.field_res_company__l10n_latam_use_documents

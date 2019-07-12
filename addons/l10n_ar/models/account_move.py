@@ -33,7 +33,6 @@ class AccountMove(models.Model):
     # TODO make it editable, we have to change move creation method
     l10n_ar_currency_rate = fields.Float(copy=False, digits=(16, 4), readonly=True, string="Currency Rate")
     # Mostly used on reports
-    l10n_ar_letter = fields.Selection(related='l10n_latam_document_type_id.l10n_ar_letter',)
     l10n_ar_afip_concept = fields.Selection(
         compute='_compute_l10n_ar_afip_concept', inverse='_inverse_l10n_ar_afip_concept',
         selection='get_afip_invoice_concepts', string="AFIP Concept", help="A concept is suggested regarding"
@@ -255,7 +254,8 @@ class AccountMove(models.Model):
         self.ensure_one()
         if self.journal_id.l10n_latam_use_documents and self.l10n_latam_country_code == 'AR':
             if self.journal_id.l10n_ar_share_sequences:
-                return self.journal_id.l10n_ar_sequence_ids.filtered(lambda x: x.l10n_ar_letter == self.l10n_ar_letter)
+                return self.journal_id.l10n_ar_sequence_ids.filtered(
+                    lambda x: x.l10n_ar_letter == self.l10n_latam_document_type_id.l10n_ar_letter)
             res = self.journal_id.l10n_ar_sequence_ids.filtered(
                 lambda x: x.l10n_latam_document_type_id == self.l10n_latam_document_type_id)
             return res
@@ -280,3 +280,45 @@ class AccountMove(models.Model):
                 journal = journal.search(domain + [('l10n_ar_afip_pos_system', 'not in', expo_journals)], limit=1)
             if journal:
                 rec.journal_id = journal.id
+
+    # TODO move this patch to account module (between patch comments)
+    @api.multi
+    def _move_autocomplete_invoice_lines_values(self):
+        ''' This method recomputes dynamic lines on the current journal entry that include taxes, cash rounding
+        and payment terms lines.
+        '''
+        self.ensure_one()
+
+        line_currency = self.currency_id if self.currency_id != self.company_id.currency_id else False
+        for line in self.line_ids:
+            # Do something only on invoice lines.
+            if line.exclude_from_invoice_tab:
+                continue
+
+            # Ensure related fields are well copied.
+            line.partner_id = self.partner_id
+            line.date = self.date
+            line.recompute_tax_line = True
+            line.currency_id = line_currency
+
+            # Shortcut to load the demo data.
+            if not line.account_id:
+                line.account_id = line._get_computed_account()
+                if not line.account_id:
+                    if self.is_sale_document(include_receipts=True):
+                        line.account_id = self.journal_id.default_credit_account_id
+                    elif self.is_purchase_document(include_receipts=True):
+                        line.account_id = self.journal_id.default_debit_account_id
+
+            # PATCH START
+            # Shortcut to load the demo data.
+            if not line.tax_ids:
+                line.tax_ids = line._get_computed_taxes()
+            # PATCH END
+
+        self.line_ids._onchange_price_subtotal()
+        self._recompute_dynamic_lines(recompute_all_taxes=True)
+
+        values = self._convert_to_write(self._cache)
+        values.pop('invoice_line_ids', None)
+        return values
