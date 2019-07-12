@@ -8,6 +8,7 @@
             <field name="arch" type="xml">
                 <form string="Bank">
                     <sheet>
+                        <widget name="web_ribbon" text="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
                         <group name="bank_details" col="4">
                             <field name="name"/>
                             <field name="bic"/>
@@ -66,6 +67,7 @@
             <field name="priority">15</field>
             <field name="arch" type="xml">
                 <form string="Bank account">
+                <sheet>
                     <group>
                         <group>
                             <field name="sequence" invisible="1"/>
@@ -80,6 +82,7 @@
                             <field name="acc_holder_name"/>
                         </group>
                     </group>
+                </sheet>
                 </form>
             </field>
         </record>

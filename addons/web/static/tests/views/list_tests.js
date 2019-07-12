@@ -1473,6 +1473,10 @@ QUnit.module('Views', {
             arch: '<tree><field name="foo"/></tree>',
             mockRPC: function (route) {
                 assert.step(route);
+                if (route === '/web/dataset/call_kw/foo/action_archive') {
+                    this.data.foo.records[0].active = false;
+                    return Promise.resolve();
+                }
                 return this._super.apply(this, arguments);
             },
         });
@@ -1496,7 +1500,7 @@ QUnit.module('Views', {
         assert.strictEqual($('.modal').length, 1, 'a confirm modal should be displayed');
         await testUtils.dom.click($('.modal-footer .btn-primary'));
         assert.containsN(list, 'tbody td.o_list_record_selector', 3, "should have 3 records");
-        assert.verifySteps(['/web/dataset/call_kw/foo/write', '/web/dataset/search_read']);
+        assert.verifySteps(['/web/dataset/call_kw/foo/action_archive', '/web/dataset/search_read']);
         list.destroy();
     });
 
@@ -3373,6 +3377,37 @@ QUnit.module('Views', {
             "the next field should be selected");
 
         form.destroy();
+    });
+
+    QUnit.test('navigation with tab in editable list with only readonly fields', async function (assert) {
+        assert.expect(6);
+
+        var list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree editable="bottom">' +
+                    '<field name="m2o" attrs="{\'readonly\': [(\'int_field\', \'>\', 9)]}"/>' +
+                    '<field name="int_field" readonly="1"/>' +
+                '</tree>',
+        });
+
+        assert.hasClass(list.$('.o_data_row:first .o_data_cell:first'), 'o_readonly_modifier');
+        assert.doesNotHaveClass(list.$('.o_data_row:nth(1) .o_data_cell:first'), 'o_readonly_modifier');
+
+        // try to enter first row in edition
+        await testUtils.dom.click(list.$('.o_data_row .o_data_cell:first'));
+
+        assert.hasClass(list.$('.o_data_row:first'), 'o_selected_row');
+        assert.strictEqual(document.activeElement, list.$('.o_selected_row .o_field_widget[name=m2o]').get(0));
+
+        // press tab to move to next focusable field (next line here)
+        $(document.activeElement).trigger($.Event('keydown', {which: $.ui.keyCode.TAB}));
+        await testUtils.nextTick();
+        assert.hasClass(list.$('.o_data_row:nth(1)'), 'o_selected_row');
+        assert.strictEqual(document.activeElement, list.$('.o_selected_row .o_field_many2one input').get(0));
+
+        list.destroy();
     });
 
     QUnit.test('edition, then navigation with tab (with a readonly field)', async function (assert) {

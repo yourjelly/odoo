@@ -63,8 +63,8 @@
                                         <field name="amount" widget='monetary'/>
                                     </div>
                                     <div class="col-6">
-                                        <span class="float-right badge badge-secondary">
-                                            <field name="state" widget="label_selection" options="{'classes': {'draft': 'default', 'sent': 'success'}}"/>
+                                        <span class="float-right">
+                                            <field name="state" widget="label_selection" options="{'classes': {'draft': 'secondary', 'sent': 'success'}}"/>
                                         </span>
                                     </div>
                                 </div>
@@ -300,6 +300,7 @@
             <field name="name">Register Payment</field>
             <field name="model_id" ref="account.model_account_payment"/>
             <field name="binding_model_id" ref="account.model_account_move"/>
+            <field name="binding_view_types">list</field>
             <field name="state">code</field>
             <field name="code">
                 action = model.action_register_payment()
@@ -313,6 +314,7 @@
             <field name="state">code</field>
             <field name="model_id" ref="account.model_account_payment"/>
             <field name="binding_model_id" ref="account.model_account_payment"/>
+            <field name="binding_view_types">list</field>
             <field name="code">
                 records.post()
             </field>
