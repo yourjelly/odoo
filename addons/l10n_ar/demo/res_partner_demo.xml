@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="l10n_ar_base.res_partner_adhoc" model="res.partner">
+        <field name='l10n_ar_afip_responsability_type_id' ref="res_IVARI"/>
+    </record>
+
+</odoo>
