@@ -23,14 +23,11 @@ class TestRecordCache(TransactionCase):
         def check1(record, field, value):
             # value is None means no value in cache
             self.assertEqual(cache.contains(record, field), value is not None)
-            self.assertEqual(cache.contains_value(record, field), value is not None)
-            self.assertEqual(cache.get_value(record, field), value)
             try:
                 self.assertEqual(cache.get(record, field), value)
                 self.assertIsNotNone(value)
             except CacheMiss:
                 self.assertIsNone(value)
-            self.assertIsNone(cache.get_special(record, field))
             self.assertEqual(field in cache.get_fields(record), value is not None)
             self.assertEqual(record in cache.get_records(record, field), value is not None)
 
@@ -99,14 +96,6 @@ class TestRecordCache(TransactionCase):
         check(foo2, None, None)
         check(bar1, None, None)
         check(bar2, None, None)
-
-        # set a special value
-        cache.set_special(foo1, name, lambda: 'FOO1_SPECIAL_NAME')
-        self.assertTrue(cache.contains(foo1, name))
-        self.assertFalse(cache.contains_value(foo1, name))
-        self.assertEqual(cache.get(foo1, name), 'FOO1_SPECIAL_NAME')
-        self.assertIsNone(cache.get_value(foo1, name))
-        self.assertIsNotNone(cache.get_special(foo1, name))
 
         # copy cache
         cache.set(foo1, name, 'FOO1_NAME')
