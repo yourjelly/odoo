@@ -2826,21 +2826,25 @@ Fields:
         """ Read from the database in order to fetch ``field`` (:class:`Field`
             instance) for ``self`` in cache.
         """
+        self.check_field_access_rights('read', [field.name])
         # determine which fields can be prefetched
-        fs = {field}
         if self._context.get('prefetch_fields', True) and field.prefetch:
-            fs.update(
-                f
-                for f in self._fields.values()
+            fnames = [
+                name
+                for name, f in self._fields.items()
                 # select fields that can be prefetched
                 if f.prefetch
                 # discard fields with groups that the user may not access
                 if not (f.groups and not self.user_has_groups(f.groups))
                 # discard fields that must be recomputed
                 if not (f.compute and self.env.field_todo(f))
-            )
-        fields = self.check_field_access_rights('read', [f.name for f in fs])
-        self._read(fields)
+            ]
+            if field.name not in fnames:
+                fnames.append(field.name)
+                self = self - self.env.records_to_compute(field)
+        else:
+            fnames = [field.name]
+        self._read(fnames)
 
     def _read(self, fields):
         """ Read the given fields of the records in ``self`` from the database,
