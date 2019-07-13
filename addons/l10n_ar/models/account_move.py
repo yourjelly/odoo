@@ -10,13 +10,6 @@ class AccountMove(models.Model):
 
     _inherit = 'account.move'
 
-    # TODO do it on create/write
-    @api.constrains('partner_id')
-    def set_l10n_ar_afip_responsability_type_id(self):
-        for rec in self:
-            commercial_partner = rec.partner_id.commercial_partner_id
-            rec.l10n_ar_afip_responsability_type_id = commercial_partner.l10n_ar_afip_responsability_type_id.id
-
     @staticmethod
     def _l10n_ar_get_document_number_parts(document_number, document_type_code):
         # despachos de importacion
@@ -322,3 +315,22 @@ class AccountMove(models.Model):
         values = self._convert_to_write(self._cache)
         values.pop('invoice_line_ids', None)
         return values
+
+    @api.multi
+    def post(self):
+        for rec in self.filtered(lambda x: x.company_id.country_id == self.env.ref('base.ar')):
+            rec.l10n_ar_afip_responsability_type_id = rec.commercial_partner_id.l10n_ar_afip_responsability_type_id.id
+        return super().post()
+
+    @api.multi
+    def _reverse_moves(self, default_values_list=None, cancel=False):
+        if not default_values_list:
+            default_values_list = [{} for move in self]
+        for move, default_values in zip(self, default_values_list):
+            default_values.update({
+                # TODO enable when we make l10n_ar_currency_rate editable
+                # 'l10n_ar_currency_rate': move.l10n_ar_currency_rate,
+                'l10n_ar_afip_service_start': move.l10n_ar_afip_service_start,
+                'l10n_ar_afip_service_end': move.l10n_ar_afip_service_end,
+            })
+        return super()._reverse_moves(default_values_list=default_values_list, cancel=cancel)

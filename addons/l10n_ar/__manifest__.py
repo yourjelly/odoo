@@ -66,16 +66,15 @@ Follow the next configuration steps
         'views/report_invoice.xml',
     ],
     'demo': [
+        # we create demo data on different companies (not main_company) to
+        # allow different setups and also to allow multi-localization demo data
         'demo/exento_demo.xml',
         'demo/mono_demo.xml',
         'demo/respinsc_demo.xml',
-        'demo/res_users_demo.xml',
         'demo/res_partner_demo.xml',
-        # from demo_data
         'demo/account_tax_template_demo.xml',
         'demo/res_company_demo.xml',
         'demo/product_product_demo.xml',
-        'demo/partner_demo.xml',
         'demo/account_customer_invoice_demo.xml',
         'demo/account_customer_expo_invoice_demo.xml',
         'demo/account_customer_invoice_validate_demo.xml',
@@ -83,6 +82,8 @@ Follow the next configuration steps
         'demo/account_supplier_invoice_demo.xml',
         'demo/account_supplier_invoice_validate_demo.xml',
         'demo/account_supplier_refund_demo.xml',
+        # restore
+        'demo/res_users_demo.xml',
     ],
     'post_init_hook': 'post_init_hook',
 }

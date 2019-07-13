@@ -10,7 +10,7 @@
         <field name="invoice_payment_term_id" ref="account.account_payment_term"/>
         <field name="type">out_invoice</field>
         <field name="invoice_date" eval="time.strftime('%Y-%m')+'-03'"/>
-        <field name="company_id" ref="base.main_company"/>
+        <field name="company_id" ref="company_ri"/>
         <field name="invoice_incoterm_id" ref="account.incoterm_EXW"/>
         <field name="invoice_line_ids" eval="[
             (0, 0, {'product_id': ref('product.product_product_27'), 'price_unit': 642.0, 'quantity': 5}),
@@ -29,7 +29,7 @@
         <field name="invoice_payment_term_id" ref="account.account_payment_term"/>
         <field name="type">out_invoice</field>
         <field name="invoice_date" eval="time.strftime('%Y-%m')+'-03'"/>
-        <field name="company_id" ref="base.main_company"/>
+        <field name="company_id" ref="company_ri"/>
         <field name="invoice_incoterm_id" ref="account.incoterm_EXW"/>
         <field name="invoice_line_ids" eval="[
             (0, 0, {'product_id': ref('product.product_product_27'), 'price_unit': 642.0, 'quantity': 5}),
@@ -48,7 +48,7 @@
         <field name="invoice_payment_term_id" ref="account.account_payment_term"/>
         <field name="type">out_invoice</field>
         <field name="invoice_date" eval="time.strftime('%Y-%m')+'-20'"/>
-        <field name="company_id" ref="base.main_company"/>
+        <field name="company_id" ref="company_ri"/>
         <field name="invoice_incoterm_id" ref="account.incoterm_EXW"/>
         <field name="invoice_line_ids" eval="[
             (0, 0, {'product_id': ref('product.product_product_27'), 'price_unit': 642.0, 'quantity': 5}),
@@ -62,7 +62,7 @@
         <field name="invoice_payment_term_id" ref="account.account_payment_term"/>
         <field name="type">out_invoice</field>
         <field name="invoice_date" eval="time.strftime('%Y-%m')+'-20'"/>
-        <field name="company_id" ref="base.main_company"/>
+        <field name="company_id" ref="company_ri"/>
         <field name="invoice_incoterm_id" ref="account.incoterm_EXW"/>
         <field name="invoice_line_ids" eval="[
             (0, 0, {'product_id': ref('product_product_telefonia'), 'price_unit': 250.0, 'quantity': 1}),
@@ -76,7 +76,7 @@
         <field name="invoice_payment_term_id" ref="account.account_payment_term"/>
         <field name="type">out_invoice</field>
         <field name="invoice_date" eval="time.strftime('%Y-%m')+'-18'"/>
-        <field name="company_id" ref="base.main_company"/>
+        <field name="company_id" ref="company_ri"/>
         <field name="invoice_incoterm_id" ref="account.incoterm_EXW"/>
         <field name="invoice_line_ids" eval="[
             (0, 0, {'product_id': ref('product.product_product_27'), 'price_unit': 642.0, 'quantity': 5}),

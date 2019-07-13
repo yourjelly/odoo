@@ -14,7 +14,8 @@
         <field name="supplier" eval="True"/>
     </record>
 
-    <record id="base.main_company" model="res.company">
+    <!-- we let main company to have another chart installed -->
+    <!-- <record id="base.main_company" model="res.company">
         <field name='currency_id' ref='base.ARS'/>
         <field name='l10n_ar_gross_income_type'>no_liquida</field>
         <field name="l10n_ar_afip_start_date" eval="time.strftime('%Y-%m')+'-1'"/>
@@ -22,6 +23,6 @@
 
     <function model="account.chart.template" name="try_loading_for_current_company">
         <value eval="[ref('l10n_ar.l10nar_ri_chart_template')]"/>
-    </function>
+    </function> -->
 
 </odoo>

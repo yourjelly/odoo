@@ -106,7 +106,6 @@ class AccountJournal(models.Model):
         elif self.l10n_ar_afip_pos_system in ['FEERCEL', 'FEEWS', 'FEERCELP']:
             return expo_codes
 
-    # TODO make it with https://github.com/odoo/odoo/pull/31059
     @api.model
     def create(self, values):
         """ Create Document sequences after create the journal """
@@ -114,7 +113,6 @@ class AccountJournal(models.Model):
         res.create_document_sequences()
         return res
 
-    # TODO make it with https://github.com/odoo/odoo/pull/31059
     @api.multi
     def write(self, values):
         """ Update Document sequences after update journal """
