@@ -447,16 +447,23 @@ class TestFields(common.TransactionCase):
         self.env['test_new_api.message'].create({'discussion': discussion.id, 'body': 'Whatever'})
 
     def test_20_float(self):
-        """ test float fields """
+        """ test rounding of float fields """
         record = self.env['test_new_api.mixed'].create({})
+        query = "SELECT 1 FROM test_new_api_mixed WHERE id=%s AND number=%s"
 
-        # assign value, and expect rounding
-        record.write({'number': 2.4999999999999996})
-        self.assertEqual(record.number, 2.50)
+        # 2.49609375 (exact float) must be rounded to 2.5
+        record.write({'number': 2.49609375})
+        record.flush()
+        self.cr.execute(query, [record.id, '2.5'])
+        self.assertTrue(self.cr.rowcount)
+        self.assertEqual(record.number, 2.5)
 
-        # same with field setter
-        record.number = 2.4999999999999996
-        self.assertEqual(record.number, 2.50)
+        # 1.1 (1.1000000000000000888178420 in float) must be 1.1 in database
+        record.write({'number': 1.1})
+        record.flush()
+        self.cr.execute(query, [record.id, '1.1'])
+        self.assertTrue(self.cr.rowcount)
+        self.assertEqual(record.number, 1.1)
 
     def test_21_float_digits(self):
         """ test field description """
