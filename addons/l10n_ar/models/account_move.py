@@ -80,41 +80,50 @@ class AccountMove(models.Model):
         return afip_concept
 
     @api.multi
-    def _compute_argentina_amounts(self):
-        for rec in self:
+    def _get_argentina_amounts(self):
+        self.ensure_one()
+        tax_lines = self.line_ids.filtered('tax_line_id')
+        vat_taxes = tax_lines.filtered(
+            lambda r: r.tax_line_id.tax_group_id.l10n_ar_type == 'tax' and r.tax_line_id.tax_group_id.l10n_ar_tax == 'vat')
 
-            vat_taxes = rec.tax_line_ids.filtered(
-                lambda r: r.tax_id.tax_group_id.l10n_ar_type == 'tax' and r.tax_id.tax_group_id.l10n_ar_tax == 'vat')
+        # we add and "r.base" because only if a there is a base amount it is considered taxable, this is used for
+        # eg to validate invoices on afif. Does not include afip_code [0, 1, 2] because their are not taxes
+        # themselves: VAT Exempt, VAT Untaxed and VAT Not applicable
+        vat_taxables = vat_taxes.filtered(
+            lambda r: r.tax_line_id.tax_group_id.l10n_ar_afip_code not in [0, 1, 2] and r.tax_base_amount)
 
-            # we add and "r.base" because only if a there is a base amount it is considered taxable, this is used for
-            # eg to validate invoices on afif. Does not include afip_code [0, 1, 2] because their are not taxes
-            # themselves: VAT Exempt, VAT Untaxed and VAT Not applicable
-            vat_taxables = vat_taxes.filtered(
-                lambda r: r.tax_id.tax_group_id.l10n_ar_afip_code not in [0, 1, 2] and r.base)
+        # vat exempt values (are the ones with code 2)
+        vat_exempt_taxes = tax_lines.filtered(
+            lambda r: r.tax_line_id.tax_group_id.l10n_ar_type == 'tax' and r.tax_line_id.tax_group_id.l10n_ar_tax == 'vat' and
+            r.tax_line_id.tax_group_id.l10n_ar_afip_code == 2)
 
-            # vat exempt values (are the ones with code 2)
-            vat_exempt_taxes = rec.tax_line_ids.filtered(
-                lambda r: r.tax_id.tax_group_id.l10n_ar_type == 'tax' and r.tax_id.tax_group_id.l10n_ar_tax == 'vat' and
-                r.tax_id.tax_group_id.l10n_ar_afip_code == 2)
+        # vat untaxed values / no gravado (are the ones with code 1)
+        vat_untaxed_taxes = tax_lines.filtered(
+            lambda r: r.tax_line_id.tax_group_id.l10n_ar_type == 'tax' and r.tax_line_id.tax_group_id.l10n_ar_tax == 'vat' and
+            r.tax_line_id.tax_group_id.l10n_ar_afip_code == 1)
 
-            # vat untaxed values / no gravado (are the ones with code 1)
-            vat_untaxed_taxes = rec.tax_line_ids.filtered(
-                lambda r: r.tax_id.tax_group_id.l10n_ar_type == 'tax' and r.tax_id.tax_group_id.l10n_ar_tax == 'vat' and
-                r.tax_id.tax_group_id.l10n_ar_afip_code == 1)
+        # other taxes values
+        not_vat_taxes = tax_lines - vat_taxes
 
-            # other taxes values
-            not_vat_taxes = rec.tax_line_ids - vat_taxes
+        perc_iibb = tax_lines.filtered(lambda r: r.tax_line_id.tax_group_id.l10n_ar_type == 'perception' and r.tax_line_id.tax_group_id.l10n_ar_application == 'provincial_taxes')
+        perc_mun = tax_lines.filtered(lambda r: r.tax_line_id.tax_group_id.l10n_ar_type == 'perception' and r.tax_line_id.tax_group_id.l10n_ar_application == 'municipal_taxes')
+        imp_internos = tax_lines.filtered(lambda r: r.tax_line_id.tax_group_id.l10n_ar_application == 'others')
+        perc_nacionales = tax_lines.filtered(lambda r: r.tax_line_id.tax_group_id.l10n_ar_type == 'perception' and r.tax_line_id.tax_group_id.l10n_ar_application == 'national_taxes')
 
-            return dict(
-                vat_tax_ids=vat_taxes,
-                vat_taxable_ids=vat_taxables,
-                vat_amount=sum(vat_taxes.mapped('amount')),
-                vat_taxable_amount=sum(vat_taxables.mapped('base')),
-                vat_exempt_base_amount=sum(vat_exempt_taxes.mapped('base')),
-                vat_untaxed_base_amount=sum(vat_untaxed_taxes.mapped('base')),
-                not_vat_tax_ids=not_vat_taxes,
-                other_taxes_amount=sum(not_vat_taxes.mapped('amount')),
-            )
+        return dict(
+            vat_tax_ids=vat_taxes,
+            vat_taxable_ids=vat_taxables,
+            vat_amount=sum(vat_taxes.mapped('price_unit')),
+            vat_taxable_amount=sum(vat_taxables.mapped('tax_base_amount')),
+            vat_exempt_base_amount=sum(vat_exempt_taxes.mapped('tax_base_amount')),
+            vat_untaxed_base_amount=sum(vat_untaxed_taxes.mapped('tax_base_amount')),
+            not_vat_tax_ids=not_vat_taxes,
+            other_taxes_amount=sum(not_vat_taxes.mapped('price_unit')),
+            perc_iibb_amount=sum(perc_iibb.mapped('price_unit')),
+            perc_mun_amount=sum(perc_mun.mapped('price_unit')),
+            imp_internos_amount=sum(imp_internos.mapped('price_unit')),
+            perc_nacionales_amount=sum(perc_nacionales.mapped('price_unit')),
+        )
 
     @api.multi
     def action_invoice_open(self):
@@ -140,24 +149,13 @@ class AccountMove(models.Model):
         return domain
 
     @api.multi
-    def action_move_create(self):
-        """ We add currency rate on move creation so it can be used by electronic invoice later on action_number """
-        self.check_argentinian_invoice_taxes()
-        return super().action_move_create()
-
-    @api.multi
     def check_argentinian_invoice_taxes(self):
         """ We consider argentinian invoices the ones from companies with localization AR that belongs to a journal
         with use_documents """
         _logger.info('Running checks related to argentinian documents')
-        argentinian_invoices = self.filtered(
-            lambda r: r.company_id.country_id == self.env.ref('base.ar') and r.l10n_latam_use_documents)
-        if not argentinian_invoices:
-            return True
 
-        # we check that there is one and only one vat tax. We check upon validation to avoid errors on invoice
-        # creations from other menus and for performance
-        for inv_line in argentinian_invoices.filtered(
+        # check that there is one and only one vat tax per invoice line
+        for inv_line in self.filtered(
                 lambda x: x.company_id.l10n_ar_company_requires_vat).mapped('invoice_line_ids'):
             vat_taxes = inv_line.tax_ids.filtered(
                 lambda x: x.tax_group_id.l10n_ar_tax == 'vat' and x.tax_group_id.l10n_ar_type == 'tax')
@@ -167,32 +165,15 @@ class AccountMove(models.Model):
                         inv_line.product_id.name)))
 
         # check partner has responsability so it will be assigned on invoice validate
-        without_responsability = argentinian_invoices.filtered(
+        without_responsability = self.filtered(
             lambda x: not x.partner_id.l10n_ar_afip_responsability_type_id)
         if without_responsability:
             raise UserError(_(
                 'The following invoices has a partner without AFIP responsability:\n\n%s') % ('\n'.join(
                     ['[%i] %s' % (i.id, i.display_name) for i in without_responsability])))
 
-        # we check all invoice tax lines has tax_id related we exclude exempt vats and untaxed (no gravados)
-        wihtout_tax_id = argentinian_invoices.mapped('tax_line_ids').filtered(lambda r: not r.tax_id)
-        if wihtout_tax_id:
-            raise UserError(_(
-                "Some Invoice Tax Lines don't have a tax_id asociated, please correct them or try to refresh invoice."
-                " Tax lines: %s") % (', '.join(wihtout_tax_id.mapped('name'))))
-
-        # check codes has argentinian tax attributes configured
-        tax_groups = argentinian_invoices.mapped('tax_line_ids.tax_id.tax_group_id')
-        unconfigured_tax_groups = tax_groups.filtered(
-            lambda r: not r.l10n_ar_type or not r.l10n_ar_tax or not r.l10n_ar_application)
-        if unconfigured_tax_groups:
-            raise UserError(_(
-                "You are using argentinian localization and there are some tax groups that are not configured."
-                " Tax Groups (id): %s" % (', '.join(unconfigured_tax_groups.mapped(
-                    lambda x: '%s (%s)' % (x.name, x.id))))))
-
         # verificamos facturas de compra que deben reportar cuit y no lo tienen configurado
-        without_cuit = argentinian_invoices.filtered(
+        without_cuit = self.filtered(
             lambda x: x.type in ['in_invoice', 'in_refund'] and x.l10n_latam_document_type_id.purchase_cuit_required and
             not x.commercial_partner_id.l10n_ar_cuit)
         if without_cuit:
@@ -200,21 +181,21 @@ class AccountMove(models.Model):
                 without_cuit.mapped('commercial_partner_id.name'))))
 
         # facturas que no debería tener ningún iva y tienen
-        not_zero_alicuot = argentinian_invoices.filtered(
+        not_zero_alicuot = self.filtered(
             lambda x: x.type in ['in_invoice', 'in_refund'] and x.l10n_latam_document_type_id.purchase_alicuots == 'zero'
             and any([t.tax_id.tax_group_id.l10n_ar_afip_code != 0
-                     for t in x._compute_argentina_amounts()['vat_tax_ids']]))
+                     for t in x._get_argentina_amounts()['vat_tax_ids']]))
         if not_zero_alicuot:
             raise UserError(_(
                 'Las siguientes facturas tienen configurados IVA incorrecto. Debe utilizar IVA no corresponde.\n'
                 '*Facturas: %s') % (', '.join(not_zero_alicuot.mapped('display_name'))))
 
         # facturas que debería tener iva y tienen no corresponde
-        zero_alicuot = argentinian_invoices.filtered(
+        zero_alicuot = self.filtered(
             lambda x: x.type in ['in_invoice', 'in_refund']
             and x.l10n_latam_document_type_id.purchase_alicuots == 'not_zero' and
             any([t.tax_id.tax_group_id.l10n_ar_afip_code == 0
-                 for t in x._compute_argentina_amounts()['vat_tax_ids']]))
+                 for t in x._get_argentina_amounts()['vat_tax_ids']]))
         if zero_alicuot:
             raise UserError(_(
                 'Las siguientes facturas tienen IVA no corresponde pero debe seleccionar una alícuota correcta'
@@ -318,8 +299,12 @@ class AccountMove(models.Model):
 
     @api.multi
     def post(self):
-        for rec in self.filtered(lambda x: x.company_id.country_id == self.env.ref('base.ar')):
+        ar_invoices = self.filtered(lambda x: x.company_id.country_id == self.env.ref('base.ar') and x.l10n_latam_use_documents)
+        for rec in ar_invoices:
             rec.l10n_ar_afip_responsability_type_id = rec.commercial_partner_id.l10n_ar_afip_responsability_type_id.id
+        # We make validations here and not with a constraint because we want validaiton before sending electronic
+        # data on l10n_ar_edi
+        ar_invoices.check_argentinian_invoice_taxes()
         return super().post()
 
     @api.multi
