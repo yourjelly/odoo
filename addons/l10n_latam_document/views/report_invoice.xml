@@ -2,6 +2,10 @@
 <odoo>
     <template id="report_invoice_document" inherit_id="account.report_invoice_document">
 
+        <t t-esc="o.company_id.country_id.vat_label or 'Tax ID'" position="attributes">
+            <attribute name="t-esc">o.partner_id.l10n_latam_identification_type_id.name or o.company_id.country_id.vat_label or 'Tax ID'</attribute>
+        </t>
+
         <xpath expr="//h2" position="attributes">
             <attribute name="t-if">not o.l10n_latam_document_type_id.report_name</attribute>
         </xpath>

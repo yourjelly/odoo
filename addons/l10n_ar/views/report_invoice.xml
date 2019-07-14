@@ -14,9 +14,7 @@
     </template>
 
     <template id="argentinian_extra_info">
-        <li t-if="company.l10n_ar_afip_responsability_type_id" class="list-inline-item">
-            <t t-esc="company.country_id.vat_label or 'Tax ID'"/>: <span t-field="company.l10n_ar_afip_responsability_type_id"/>
-        </li>
+        <li t-if="company.l10n_ar_afip_responsability_type_id" class="list-inline-item">VAT Cond.: <span t-field="company.l10n_ar_afip_responsability_type_id"/></li>
         <li class="list-inline-item">Gross Income: <span t-esc="company.l10n_ar_gross_income_type == 'no_liquida' and 'Exento' or company.l10n_ar_gross_income_number"/></li>
         <li t-if="company.l10n_ar_afip_start_date" class="list-inline-item">Activities Start Date: <span t-field="company.l10n_ar_afip_start_date"/></li>
     </template>
