@@ -2317,8 +2317,6 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         field = self._fields[column_name]
         if field.default:
             value = field.default(self)
-            value = field.convert_to_cache(value, self, validate=False)
-            value = field.convert_to_record(value, self)
             value = field.convert_to_write(value, self)
             value = field.convert_to_column(value, self)
         else:
@@ -4384,8 +4382,6 @@ Fields:
             field = self._fields['state']
             if field.default:
                 value = field.default(self)
-                value = field.convert_to_cache(value, self)
-                value = field.convert_to_record(value, self)
                 value = field.convert_to_write(value, self)
                 default['state'] = value
 
@@ -5086,8 +5082,6 @@ Fields:
         for name, value in values.items():
             if name in fields:
                 field = fields[name]
-                value = field.convert_to_cache(value, self, validate=False)
-                value = field.convert_to_record(value, self)
                 value = field.convert_to_write(value, self)
                 if not isinstance(value, NewId):
                     result[name] = value
@@ -5575,8 +5569,8 @@ Fields:
         """
         if not self:
             return
-        if len(fnames)==1:
-            tree = self._field_triggers.get(self._fields[fnames[0]])
+        if len(fnames) == 1:
+            tree = self._field_triggers.get(self._fields[next(iter(fnames))])
         else:
             # merge dependency trees to evaluate all triggers at once
             tree = {}
