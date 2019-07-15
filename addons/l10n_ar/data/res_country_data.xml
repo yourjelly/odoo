@@ -2,7 +2,6 @@
 <odoo noupdate="True">
     <record model="res.country" id="base.ar">
         <field name="vat_label">CUIT</field>
-        <field name="address_format" eval="'%(street)s\n%(street2)s\n%(city)s %(zip)s\n%(state_name)s\n%(country_name)s'"/>
     </record>
     <record model='res.country' forcecreate="False" id='base.al'>
         <field name='l10n_ar_afip_code'>401</field>
