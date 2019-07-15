@@ -56,6 +56,7 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Popover.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Toolbar.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/CodeView.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/ContextMenu.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Iframe.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/FullScreen.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Modal.js"/>

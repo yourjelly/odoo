@@ -151,6 +151,16 @@ var BaseRange = class extends we3.AbstractPlugin {
         this._setRange(this._getRange());
     }
     /**
+     * Select all the contents of the previous start container's first
+     * unbreakable ancestor
+     */
+    selectAll () {
+        var scArch = this.dependencies.Arch.getClonedArchNode(this._range.scID);
+        this.setRange({
+            scID: scArch.ancestor('isUnbreakable').id,
+        });
+    }
+    /**
      * Set the range and apply it.
      * Pass only `points.scID` to set the range on the whole element.
      * Pass only `points.scID` and `points.so` to collapse the range on the start.
@@ -891,7 +901,7 @@ var BaseRange = class extends we3.AbstractPlugin {
         var self = this;
         var isSelectAll = e.ctrlKey && e.key === 'a';
         if (isSelectAll) {
-            return this._setRangeFromDOM();
+            return this.selectAll();
         }
         var isNavigationKey = e.keyCode >= 33 && e.keyCode <= 40;
         if (isNavigationKey) {
@@ -1012,6 +1022,13 @@ var Range = class extends we3.AbstractPlugin {
         return this.dependencies.BaseRange.restore();
     }
     /**
+     * Select all the contents of the previous start container's first
+     * unbreakable ancestor
+     */
+    selectAll () {
+        return this.dependencies.BaseRange.selectAll();
+    }
+    /**
      * Set the range and apply it.
      * Pass only `points.scID` to set the range on the whole element.
      * Pass only `points.scID` and `points.so` to collapse the range on the start.
@@ -1022,6 +1039,10 @@ var Range = class extends we3.AbstractPlugin {
      * @param {Node} [points.ecID]
      * @param {Number} [points.eo] must be given if ecID is given
      * @param {Boolean} [points.ltr] true if the selection was made from left to right (from sc to ec)
+     * @param {Object} [options]
+     * @param {Boolean} [options.moveLeft] true if a movement is initiated from right to left
+     * @param {Boolean} [options.moveRight] true if a movement is initiated from left to right
+     * @param {Boolean} [options.muteTrigger]
      */
     setRange (range, options) {
         return this.dependencies.BaseRange.setRange(range, options);

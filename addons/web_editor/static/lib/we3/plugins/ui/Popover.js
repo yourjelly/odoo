@@ -122,7 +122,6 @@ var PopoverPlugin = class extends we3.AbstractPlugin {
         });
     }
     _renderButtons (pluginName) {
-        var self = this;
         var plugin = this.dependencies[pluginName];
         if (!plugin.buttons || !plugin.buttons.template) {
             throw new Error('Button template of "' + pluginName + '" plugin is missing.');

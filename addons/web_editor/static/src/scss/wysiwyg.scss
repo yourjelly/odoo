@@ -238,7 +238,7 @@ we3-modals {
 
 // style for plugins
 
-we3-popover {
+we3-popover, we3-contextmenu {
     display: none;
     position: absolute;
     z-index: 1;
@@ -259,6 +259,37 @@ we3-popover {
     }
 }
 
+we3-contextmenu {
+    background-color: #fff;
+    box-shadow: rgba(0, 0, 0, 0.31) 3px 1px 8px -1px;
+    min-width: 300px;
+    position: fixed;
+    z-index: 2;
+    padding: 0;
+    border: 0;
+    we3-group {
+        flex-direction: column;
+        width: 100%;
+        padding: 0;
+        margin: 0 !important;
+    }
+    we3-button {
+        width: 100%;
+        display: block;
+        border: 0;
+        border-radius: 0;
+        text-align: left;
+        padding: 5px 5px 5px 5px;
+        margin: 0;
+        &:hover {
+            background-color: rgba(135, 90, 123, 0.247);
+        }
+        > .fa {
+            padding-right: 10px
+        }
+    }
+}
+
 we3-toolbar {
     flex: 0 0 auto;
     display: flex;
@@ -267,7 +298,7 @@ we3-toolbar {
     position: relative;
 }
 
-we3-popover, we3-toolbar {
+we3-popover, we3-toolbar, we3-contextmenu {
     white-space: nowrap;
     user-select: none;
 
