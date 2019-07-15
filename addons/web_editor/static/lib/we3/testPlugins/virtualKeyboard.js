@@ -214,6 +214,322 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
         assert.strictEqual(this.dependencies.Test.getValue(), this.updatedValue, "Should insert the char, accent and enter in the Arch");
         assert.strictEqual(this.dependencies.Test.getDomValue(), this.updatedDom, "Should insert the char, accent and enter in the DOM");
     }
+    async _testMacSafari (assert) {
+        var ev;
+        var Test = this.dependencies.Test;
+        Test.setValue(this.value);
+
+        // i
+        await this._triggerKey([
+            ['keydown', {
+                key: 'i',
+                charCode: 0,
+                keyCode: 73,
+            }],
+            ['keypress', {
+                key: 'i',
+                charCode: 105,
+                keyCode: 105,
+            }],
+            ['beforeInput', {
+                data: 'i',
+            }],
+            ['textInput', {
+                data: 'i',
+                insert: 'i',
+            }],
+            ['keyup', {
+                key: 'i',
+                charCode: 0,
+                keyCode: 73,
+            }],
+        ]);
+
+        // ^
+        await this._triggerKey([
+            ['compositionStart', {
+            }],
+            ['compositionUpdate', {
+                data: '^',
+            }],
+            ['beforeInput', {
+                data: '^',
+            }],
+            ['textInput', {
+                data: '^',
+                insert: '^',
+            }],
+            ['keydown', {
+                key: 'Dead',
+                charCode: 0,
+                keyCode: 229,
+            }],
+            ['keyup', {
+                key: '^',
+                charCode: 0,
+                keyCode: 229,
+            }],
+        ]);
+
+        // o
+        await this._triggerKey([
+            ['beforeInput', {
+                data: 'null',
+                inputType: 'deleteContentBackward',
+            }],
+            ['textInput', {
+                data: 'null',
+                inputType: 'deleteContentBackward',
+            }],
+            ['beforeInput', {
+                data: 'ô',
+            }],
+            ['textInput', {
+                data: 'ô',
+            }],
+            ['compositionEnd', {
+                data: 'ô',
+            }],
+            ['keydown', {
+                key: 'ô',
+                charCode: 0,
+                keyCode: 229,
+            }],
+            ['keyup', {
+                key: 'o',
+                charCode: 0,
+                keyCode: 79,
+            }],
+        ]);
+
+        // Enter
+        await this._triggerKey([
+            ['keydown', {
+                key: 'Enter',
+                charCode: 0,
+                keyCode: 13,
+            }],
+            ['keyPress', {
+                key: 'Enter',
+                charCode: 13,
+                keyCode: 13,
+            }],
+            ['keyup', {
+                key: 'Enter',
+                charCode: 0,
+                keyCode: 13,
+            }],
+        ]);
+
+        assert.strictEqual(this.dependencies.Test.getValue(), this.updatedValue, "Should insert the char, accent and enter in the Arch");
+        assert.strictEqual(this.dependencies.Test.getDomValue(), this.updatedDom, "Should insert the char, accent and enter in the DOM");
+    }
+    async _testMacChrome (assert) {
+        var ev;
+        var Test = this.dependencies.Test;
+        Test.setValue(this.value);
+
+        // i
+        await this._triggerKey([
+            ['keydown', {
+                key: 'i',
+                charCode: 0,
+                keyCode: 73,
+            }],
+            ['keypress', {
+                key: 'i',
+                charCode: 105,
+                keyCode: 105,
+            }],
+            ['beforeInput', {
+                data: 'i',
+            }],
+            ['textInput', {
+                data: 'i',
+                insert: 'i',
+            }],
+            ['keyup', {
+                key: 'i',
+                charCode: 0,
+                keyCode: 73,
+            }],
+        ]);
+
+        // ^
+        await this._triggerKey([
+            ['keydown', {
+                key: 'Dead',
+                charCode: 0,
+                keyCode: 229,
+            }],
+            ['compositionStart', {
+            }],
+            ['beforeInput', {
+                data: '^',
+            }],
+            ['compositionUpdate', {
+                data: '^',
+            }],
+            ['textInput', {
+                data: '^',
+                insert: '^',
+            }],
+            ['keyup', {
+                key: 'Dead',
+                charCode: 0,
+                keyCode: 229,
+            }],
+        ]);
+
+        // o
+        await this._triggerKey([
+            ['keydown', {
+                key: 'ô',
+                charCode: 0,
+                keyCode: 229,
+            }],
+            ['beforeInput', {
+                data: 'ô',
+            }],
+            ['compositionUpdate', {
+                data: 'ô',
+            }],
+            ['textInput', {
+                data: 'ô',
+                insert: 'ô',
+            }],
+            ['compositionEnd', {
+                data: 'ô',
+            }],
+            ['keyup', {
+                key: 'o',
+                charCode: 0,
+                keyCode: 229,
+            }],
+        ]);
+
+        // Enter
+        await this._triggerKey([
+            ['keydown', {
+                key: 'Enter',
+                charCode: 0,
+                keyCode: 13,
+            }],
+            ['keyPress', {
+                key: 'Enter',
+                charCode: 13,
+                keyCode: 13,
+            }],
+            ['beforeInput', {
+                data: 'null',
+            }],
+            ['keyup', {
+                key: 'Enter',
+                charCode: 0,
+                keyCode: 13,
+            }],
+        ]);
+
+        assert.strictEqual(this.dependencies.Test.getValue(), this.updatedValue, "Should insert the char, accent and enter in the Arch");
+        assert.strictEqual(this.dependencies.Test.getDomValue(), this.updatedDom, "Should insert the char, accent and enter in the DOM");
+    }
+    async _testMacFirefox (assert) {
+        var ev;
+        var Test = this.dependencies.Test;
+        Test.setValue(this.value);
+
+        // i
+        await this._triggerKey([
+            ['keydown', {
+                key: 'i',
+                charCode: 0,
+                keyCode: 73,
+            }],
+            ['keypress', {
+                key: 'i',
+                charCode: 105,
+                keyCode: 105,
+            }],
+            ['textInput', {
+                data: 'i',
+                insert: 'i',
+            }],
+            ['keyup', {
+                key: 'i',
+                charCode: 0,
+                keyCode: 73,
+            }],
+        ]);
+
+        // ^
+        await this._triggerKey([
+            ['keydown', {
+                key: 'Dead',
+                charCode: 0,
+                keyCode: 160,
+            }],
+            ['compositionStart', {
+            }],
+            ['compositionUpdate', {
+                data: '^',
+            }],
+            ['textInput', {
+                data: '^',
+                insert: '^',
+            }],
+            ['keyup', {
+                key: '^',
+                charCode: 0,
+                keyCode: 160,
+            }],
+        ]);
+
+        // o
+        await this._triggerKey([
+            ['keydown', {
+                key: 'ô',
+                charCode: 0,
+                keyCode: 79,
+            }],
+            ['compositionUpdate', {
+                data: 'ô',
+            }],
+            ['compositionEnd', {
+                data: 'ô',
+            }],
+            ['textInput', {
+                data: 'ô',
+                insert: 'ô',
+            }],
+            ['keyup', {
+                key: 'o',
+                charCode: 0,
+                keyCode: 79,
+            }],
+        ]);
+
+        // Enter
+        await this._triggerKey([
+            ['keydown', {
+                key: 'Enter',
+                charCode: 0,
+                keyCode: 13,
+            }],
+            ['keyPress', {
+                key: 'Enter',
+                charCode: 13,
+                keyCode: 13,
+            }],
+            ['keyup', {
+                key: 'Enter',
+                charCode: 0,
+                keyCode: 13,
+            }],
+        ]);
+
+        assert.strictEqual(this.dependencies.Test.getValue(), this.updatedValue, "Should insert the char, accent and enter in the Arch");
+        assert.strictEqual(this.dependencies.Test.getDomValue(), this.updatedDom, "Should insert the char, accent and enter in the DOM");
+    }
 
     async _triggerKey (data) {
         var ev, e;
@@ -247,11 +563,11 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             isTrusted: true,
             returnValue: true,
             sourceCapabilities: null,
-            type: "textInput",
+            inputType: 'textInput',
             which: 0,
         });
         this.editable.dispatchEvent(ev);
-        if (!ev.defaultPrevented) {
+        if (!ev.defaultPrevented && insert) {
             this.document.execCommand("insertText", 0, insert);
         }
         await new Promise(setTimeout);

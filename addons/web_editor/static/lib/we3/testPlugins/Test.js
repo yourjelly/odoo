@@ -164,7 +164,7 @@ function log (result, testName, value, expectedValue) {
  */
 function _eventType(eventName) {
     var types = {
-        mouse: ['click', 'mouse', 'pointer', 'contextmenu', 'select', 'wheel'],
+        mouse: ['click', 'mouse', 'pointer', 'contextmenu', 'select', 'wheel', 'composition', 'input'],
         keyboard: ['key'],
     };
     var type = 'unknown';
@@ -702,6 +702,12 @@ var TestPlugin = class extends we3.AbstractPlugin {
                 case 'keyboard':
                     ev = new KeyboardEvent(eventName, options);
                     break;
+                case 'composition':
+                    ev = new CompositionEvent(eventName, options);
+                    break;
+                case 'input':
+                    ev = new (window.InputEvent || window.CustomEvent)(eventName, options);
+                    break;
                 default:
                     ev = new Event(eventName, options);
                     break;
@@ -941,7 +947,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
      * @param {string} char
      */
     async _textInput (target, char) {
-        var ev = new (window.InputEvent || window.CustomEvent)('textInput', {
+        var ev = new (window.InputEvent || window.CustomEvent)('input', {
             bubbles: true,
             cancelBubble: false,
             cancelable: true,
@@ -953,7 +959,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
             isTrusted: true,
             returnValue: true,
             sourceCapabilities: null,
-            type: "textInput",
+            inputType: "textInput",
             which: 0,
         });
         target.dispatchEvent(ev);
