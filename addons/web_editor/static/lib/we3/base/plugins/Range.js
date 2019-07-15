@@ -726,8 +726,6 @@ var BaseRange = class extends we3.AbstractPlugin {
             }
         }
 
-        console.log(res.range);
-
         return res;
     }
     /**

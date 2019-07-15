@@ -89,6 +89,7 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardEnter.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardTab.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardUnbreakable.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/virtualKeyboard.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/renderer.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/popover.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbar.js"/>

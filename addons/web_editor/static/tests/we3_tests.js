@@ -296,6 +296,14 @@ QUnit.module('web_editor', {
         };
         await createFormAndTest(this);
     });
+    QUnit.test('virutal keyboard', async function (assert) {
+        assert.expect(11);
+        this.testOptions = {
+            assert: assert,
+            plugins: Object.assign({}, disableAllTests, {TestVirtualKeyboard: true}),
+        };
+        await createFormAndTest(this);
+    });
     QUnit.test('history', async function (assert) {
         assert.expect(35);
         this.testOptions = {

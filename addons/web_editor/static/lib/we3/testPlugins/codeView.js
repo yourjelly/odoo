@@ -7,7 +7,7 @@ var TestCodeView = class extends we3.AbstractPlugin {
     }
     constructor () {
         super(...arguments);
-        this.dependencies = ['Arch', 'Range', 'Renderer', 'Test'];
+        this.dependencies = ['Arch', 'Test'];
     }
 
     start () {

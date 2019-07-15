@@ -10,6 +10,7 @@ we3.addPlugin('Keyboard', class extends we3.AbstractPlugin {
         this.dependencies = ['Arch', 'Range', 'Renderer'];
         this.editableDomEvents = {
             'keydown': '_onKeyDown',
+            'keypress': '_onKeyPress',
             'keyup': '_onKeyUp',
         };
         this.tab = '\u00A0\u00A0\u00A0\u00A0';
@@ -158,28 +159,8 @@ we3.addPlugin('Keyboard', class extends we3.AbstractPlugin {
             this.dependencies.Arch.setRange(range);
         }
     }
-
-
-    //--------------------------------------------------------------------------
-    // Handle
-    //--------------------------------------------------------------------------
-
-    /** 
-     * Customize handling of certain keydown events.
-     *
-     * @private
-     * @param {SummernoteEvent} se
-     * @param {Event} e
-     * @returns {Boolean} true if case handled
-     */
-    _onKeyDown (e) {
-        if (e.defaultPrevented) {
-            return;
-        }
-
-        if (e.keyCode >= 33 && e.keyCode <= 40) {
-            return;
-        }
+    _updateKeyLongPress () {
+        var e = this._currentKey;
 
         this._keypressEvents = this._keypressEvents || [];
         this._keypressUpdatedTargets = this._keypressUpdatedTargets || [];
@@ -191,7 +172,14 @@ we3.addPlugin('Keyboard', class extends we3.AbstractPlugin {
         } else {
             this._keypressEvents.push([e.key, e]);
         }
+
+        this._currentKey = null;
     }
+
+    //--------------------------------------------------------------------------
+    // Handle
+    //--------------------------------------------------------------------------
+
     /**
      * Handle BACKSPACE keydown event.
      *
@@ -249,29 +237,37 @@ we3.addPlugin('Keyboard', class extends we3.AbstractPlugin {
         }
         return true;
     }
-    /**
-     * Handle TAB keydown event.
-     *
-     * @private
-     * @param {KeyboardEvent} e
-     * @returns {Boolean} true if case is handled and event default must be prevented
-     */
-    _onTab (e) {
-        var handled = true;
-        var untab = !!e.shiftKey;
-        var range = this.dependencies.Range.getRange();
-        if (range.scArch.isInCell()) {
-            this._handleTabInCell(range.scArch, untab);
-        } else if (!untab) {
-            this._insertTab();
-        } else {
-            handled = false;
+    _onKeyDown (e) {
+        if (e.defaultPrevented) {
+            return;
         }
-        return handled;
+        if (e.keyCode >= 33 && e.keyCode <= 40) {
+            return;
+        }
+        if (this._currentKey) {
+            this._updateKeyLongPress();
+        }
+        if (e.defaultPrevented) {
+            return;
+        }
+        this._currentKey = e;
+    }
+    _onKeyPress (e) {
+        if (e.defaultPrevented) {
+            return;
+        }
+        if (e.keyCode >= 33 && e.keyCode <= 40) {
+            return;
+        }
+        this._currentKey = e;
+        this._updateKeyLongPress();
     }
     _onKeyUp (e) {
         var self = this;
 
+        if (this._currentKey) {
+            this._updateKeyLongPress();
+        }
         if (!this._keypressEvents) {
             return;
         }
@@ -316,6 +312,26 @@ we3.addPlugin('Keyboard', class extends we3.AbstractPlugin {
             applyRulesForPublicMethod: true,
         });
         this._keypressEvents = null;
+    }
+    /**
+     * Handle TAB keydown event.
+     *
+     * @private
+     * @param {KeyboardEvent} e
+     * @returns {Boolean} true if case is handled and event default must be prevented
+     */
+    _onTab (e) {
+        var handled = true;
+        var untab = !!e.shiftKey;
+        var range = this.dependencies.Range.getRange();
+        if (range.scArch.isInCell()) {
+            this._handleTabInCell(range.scArch, untab);
+        } else if (!untab) {
+            this._insertTab();
+        } else {
+            handled = false;
+        }
+        return handled;
     }
 });
 

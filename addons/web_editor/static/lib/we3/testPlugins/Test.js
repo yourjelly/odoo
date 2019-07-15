@@ -391,6 +391,10 @@ var TestPlugin = class extends we3.AbstractPlugin {
             .replace(/^<[^>]+>/, '').replace(/<\/[^>]+>$/, '') // remove container
             .replace(regExpRangeToCollapsed, rangeCollapsed);
     }
+    getDomValue (archNodeId) {
+        var el = this.dependencies.Renderer.getElement(this._getTestContainer());
+        return this._cleanValue(el.innerHTML);
+    }
     /**
      * Trigger a keydown event on the target.
      *
@@ -760,8 +764,8 @@ var TestPlugin = class extends we3.AbstractPlugin {
             }
         }
         if (test.testDOM) {
-            var el = this.dependencies.Renderer.getElement(this._getTestContainer());
-            if (assert.strictEqual(this._cleanValue(el.innerHTML), this._cleanValue(test.testDOM), test.name)) {
+            var value = this.getDomValue();
+            if (assert.strictEqual(value, this._cleanValue(test.testDOM), test.name)) {
                 ok = true;
             }
         }
@@ -937,7 +941,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
      * @param {string} char
      */
     async _textInput (target, char) {
-        var ev = new CustomEvent('textInput', {
+        var ev = new (window.InputEvent || window.CustomEvent)('textInput', {
             bubbles: true,
             cancelBubble: false,
             cancelable: true,
@@ -952,7 +956,6 @@ var TestPlugin = class extends we3.AbstractPlugin {
             type: "textInput",
             which: 0,
         });
-        ev.data = char;
         target.dispatchEvent(ev);
 
         if (!ev.defaultPrevented) {

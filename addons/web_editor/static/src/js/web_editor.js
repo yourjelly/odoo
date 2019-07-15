@@ -167,6 +167,7 @@ var Wysiwyg = Widget.extend({
                 'TestKeyboardEnter',
                 'TestKeyboardTab',
                 'TestKeyboardUnbreakable',
+                'TestVirtualKeyboard',
                 'TestPopover',
                 'TestRange',
                 'TestRenderer',
