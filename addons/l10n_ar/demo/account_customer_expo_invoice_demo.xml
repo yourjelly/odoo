@@ -75,7 +75,7 @@
         <field name="invoice_user_id" ref="base.user_demo"/>
         <field name="invoice_payment_term_id" ref="account.account_payment_term"/>
         <field name="type">out_invoice</field>
-        <field name="invoice_date" eval="time.strftime('%Y-%m')+'-18'"/>
+        <field name="invoice_date" eval="time.strftime('%Y-%m')+'-22'"/>
         <field name="company_id" ref="company_ri"/>
         <field name="invoice_incoterm_id" ref="account.incoterm_EXW"/>
         <field name="invoice_line_ids" eval="[

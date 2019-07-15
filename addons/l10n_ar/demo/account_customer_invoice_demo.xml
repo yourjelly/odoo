@@ -179,8 +179,8 @@
         <field name="company_id" ref="company_ri"/>
         <field name="invoice_line_ids" eval="[
             (0, 0, {'product_id': ref('product.product_product_2'), 'price_unit': 24.3, 'quantity': 3, 'name': 'Support Services 8', 'discount': 100}),
-            (0, 0, {'product_id': ref('product_product_telefonia'), 'price_unit': 250.0, 'quantity': 1}),
-            (0, 0, {'product_id': ref('product.product_product_25'), 'price_unit': 3245.0, 'quantity': 2}),
+            (0, 0, {'product_id': ref('product_product_telefonia'), 'price_unit': 250.0, 'quantity': 1, 'discount': 100}),
+            (0, 0, {'product_id': ref('product.product_product_25'), 'price_unit': 3245.0, 'quantity': 1}),
         ]"/>
     </record>
 

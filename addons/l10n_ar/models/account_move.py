@@ -169,7 +169,7 @@ class AccountMove(models.Model):
             lambda x: not x.partner_id.l10n_ar_afip_responsability_type_id)
         if without_responsability:
             raise UserError(_(
-                'The following invoices has a partner without AFIP responsability:\n\n%s') % ('\n'.join(
+                'The following invoices has a partner without AFIP responsability:<br/>%s') % ('<br/>'.join(
                     ['[%i] %s' % (i.id, i.display_name) for i in without_responsability])))
 
         # verificamos facturas de compra que deben reportar cuit y no lo tienen configurado
@@ -183,24 +183,24 @@ class AccountMove(models.Model):
         # facturas que no debería tener ningún iva y tienen
         not_zero_alicuot = self.filtered(
             lambda x: x.type in ['in_invoice', 'in_refund'] and x.l10n_latam_document_type_id.purchase_alicuots == 'zero'
-            and any([t.tax_id.tax_group_id.l10n_ar_afip_code != 0
+            and any([t.tax_line_id.tax_group_id.l10n_ar_afip_code != 0
                      for t in x._get_argentina_amounts()['vat_tax_ids']]))
         if not_zero_alicuot:
             raise UserError(_(
-                'Las siguientes facturas tienen configurados IVA incorrecto. Debe utilizar IVA no corresponde.\n'
-                '*Facturas: %s') % (', '.join(not_zero_alicuot.mapped('display_name'))))
+                'Las siguientes facturas tienen configurados IVA incorrecto. Debe utilizar IVA no corresponde.<br/>'
+                '*Facturas: %s') % (', '.join(not_zero_alicuot.mapped('l10n_latam_document_number'))))
 
         # facturas que debería tener iva y tienen no corresponde
         zero_alicuot = self.filtered(
             lambda x: x.type in ['in_invoice', 'in_refund']
             and x.l10n_latam_document_type_id.purchase_alicuots == 'not_zero' and
-            any([t.tax_id.tax_group_id.l10n_ar_afip_code == 0
+            any([t.tax_line_id.tax_group_id.l10n_ar_afip_code == 0
                  for t in x._get_argentina_amounts()['vat_tax_ids']]))
         if zero_alicuot:
             raise UserError(_(
                 'Las siguientes facturas tienen IVA no corresponde pero debe seleccionar una alícuota correcta'
-                ' (No gravado, Exento, Cero, 10,5, etc).\n*Facturas: %s') % (', '.join(
-                    zero_alicuot.mapped('display_name'))))
+                ' (No gravado, Exento, Cero, 10,5, etc).<br/>*Facturas: %s') % (', '.join(
+                    zero_alicuot.mapped('l10n_latam_document_number'))))
 
     @api.constrains('invoice_date')
     def set_date_afip(self):
@@ -296,6 +296,23 @@ class AccountMove(models.Model):
         values = self._convert_to_write(self._cache)
         values.pop('invoice_line_ids', None)
         return values
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """ This funcionality was removed on v13. We need this so that in demo data, invoice creation from external api
+        and impo of csv/xls files, ths fiscal position is auto-detected from the partner and the invoice lines
+        are created mapping the taxes/accounts
+        """
+        onchanges = {'_onchange_partner_id': ['fiscal_position_id'],}
+        for onchange_method, changed_fields in onchanges.items():
+            for vals in vals_list:
+                if any(f not in vals for f in changed_fields):
+                    invoice = self.new(vals)
+                    getattr(invoice, onchange_method)()
+                    for field in changed_fields:
+                        if field not in vals and invoice[field]:
+                            vals[field] = invoice._fields[field].convert_to_write(invoice[field], invoice)
+        return super().create(vals_list)
 
     @api.multi
     def post(self):
