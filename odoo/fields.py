@@ -842,10 +842,12 @@ class Field(MetaField('DummyField', (object,), {})):
         return False if value is None else value
 
     def convert_to_write(self, value, record):
-        """ Convert ``value`` from the record format to the format of method
+        """ Convert ``value`` from any format to the format of method
         :meth:`BaseModel.write`.
         """
-        return self.convert_to_read(value, record)
+        cache_value = self.convert_to_cache(value, record, validate=False)
+        record_value = self.convert_to_record(cache_value, record)
+        return self.convert_to_read(record_value, record)
 
     def convert_to_onchange(self, value, record, names):
         """ Convert ``value`` from the record format to the format returned by
@@ -2251,7 +2253,18 @@ class Many2one(_Relational):
             return value.id
 
     def convert_to_write(self, value, record):
-        return value.id
+        if type(value) in IdType:
+            return value
+        if not value:
+            return False
+        if isinstance(value, BaseModel) and value._name == self.comodel_name:
+            return value.id
+        if isinstance(value, tuple):
+            # value is either a pair (id, name), or a tuple of ids
+            return value[0] if value else False
+        if isinstance(value, dict):
+            return record.env[self.comodel_name].new(value).id
+        raise ValueError("Wrong value for %s: %r" % (self, value))
 
     def convert_to_export(self, value, record):
         return value.display_name if value else ''
@@ -2375,29 +2388,42 @@ class _RelationalMulti(_Relational):
         return value.ids
 
     def convert_to_write(self, value, record):
-        inv_names = {field.name for field in record._field_inverses[self]}
-        # make result with new and existing records
-        result = [(6, 0, [])]
-        for record in value:
-            origin = record._origin
-            if not origin:
-                values = record._convert_to_write({
-                    name: record[name]
-                    for name in record._cache
-                    if name not in inv_names
-                })
-                result.append((0, 0, values))
-            else:
-                result[0][2].append(origin.id)
-                if record != origin:
+        if isinstance(value, BaseModel) and value._name == self.comodel_name:
+            # make result with new and existing records
+            inv_names = {field.name for field in record._field_inverses[self]}
+            result = [(6, 0, [])]
+            for record in value:
+                origin = record._origin
+                if not origin:
                     values = record._convert_to_write({
                         name: record[name]
                         for name in record._cache
-                        if name not in inv_names and record[name] != origin[name]
+                        if name not in inv_names
                     })
-                    if values:
-                        result.append((1, origin.id, values))
-        return result
+                    result.append((0, 0, values))
+                else:
+                    result[0][2].append(origin.id)
+                    if record != origin:
+                        values = record._convert_to_write({
+                            name: record[name]
+                            for name in record._cache
+                            if name not in inv_names and record[name] != origin[name]
+                        })
+                        if values:
+                            result.append((1, origin.id, values))
+            return result
+
+        if value is False or value is None:
+            return [(5,)]
+
+        if isinstance(value, tuple):
+            # a tuple of ids, this is the cache format
+            return [(6, 0, list(value))]
+
+        if isinstance(value, list):
+            return value
+
+        raise ValueError("Wrong value for %s: %s" % (self, value))
 
     def convert_to_onchange(self, value, record, names):
         # return the recordset value as a list of commands; the commands may
