@@ -136,7 +136,7 @@ class SurveyQuestion(models.Model):
     value_number = fields.Float(string="Value")
     action = fields.Selection([('show', 'Show'), ('hide', 'Hide')], string='Action', default='show')
     # for multiple choice and matrix question
-    value_suggetion_ids = fields.Many2many('survey.label', string="Value", domain="[('question_id', '=', question_depend_id)]")
+    value_suggetion_ids = fields.Many2many('survey.label', string="Value", domain="['|', ('question_id', '=', question_depend_id), ('question_id_2', '=', question_depend_id)]")
 
     _sql_constraints = [
         ('positive_len_min', 'CHECK (validation_length_min >= 0)', 'A length must be positive!'),

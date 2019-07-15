@@ -415,7 +415,7 @@ class Survey(http.Controller):
                         values = {'last_displayed_page_id': page.id}
                         last_displayed_page_id = page.id
                         page, last = request.env['survey.survey'].next_page_or_question(answer_sudo, page.id, go_back=go_back)
-                        if page.is_enable_question_dependency:
+                        if page and page.is_enable_question_dependency:
                             check_next = True
                     else:
                         values = {'last_displayed_page_id': last_displayed_page_id or page_or_question_id}

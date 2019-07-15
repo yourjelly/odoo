@@ -8,6 +8,7 @@ import uuid
 
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
+from odoo.osv import expression
 
 from dateutil.relativedelta import relativedelta
 
@@ -237,27 +238,34 @@ class SurveyUserInputLine(models.Model):
             if answer and answer.answer_type != 'suggestion' and not answer.skipped:
                 answer_type = 'value_%s' % answer.answer_type
                 if hasattr(question, answer_type):
-                    domain = [
-                        (answer_type, question.operator, getattr(question, answer_type)),
-                        ('question_id', '=', answer.question_id.id),
-                        ('id', '=',  answer.id)
-                    ]
-                    uli = answer.search(domain)
-                    if uli and question.action == 'show':
-                        if question.question_depend_id.is_enable_question_dependency:
-                            return check_multilevel_dependency(answer_sudo, question.question_depend_id)
-                        else:
-                            return True
-                    elif uli and question.action == 'hide':
-                        return False
-                    elif not uli and question.action == 'hide':
-                        return True
-                    else:
-                        return False
+                    domain = [(answer_type, question.operator, getattr(question, answer_type))]
+            elif answer and answer.answer_type == 'suggestion' and not answer.skipped:
+                answer_question = answer.question_id
+                if answer_question.question_type in ['multiple_choice', 'simple_choice']:
+                    answer_type = 'value_suggested'
+                else:
+                    answer_type = 'value_suggested_row'
+                domain = [(answer_type, question.operator, question.value_suggetion_ids.ids)]
             else:
                 return False
+            if domain:
+                domain = expression.AND([domain, [
+                    ('question_id', '=', answer.question_id.id),
+                    ('id', '=',  answer.id)]
+                ])
+                uli = answer.search(domain)
+                if uli and question.action == 'show':
+                    if question.question_depend_id.is_enable_question_dependency:
+                        return check_multilevel_dependency(answer_sudo, question.question_depend_id)
+                    else:
+                        return True
+                elif uli and question.action == 'hide':
+                    return False
+                elif not uli and question.action == 'hide':
+                    return True
+                else:
+                    return False
         return check_multilevel_dependency(answer_sudo, question)
-
 
     @api.constrains('skipped', 'answer_type')
     def _answered_or_skipped(self):
