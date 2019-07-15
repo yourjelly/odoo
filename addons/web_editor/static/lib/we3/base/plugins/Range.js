@@ -892,6 +892,10 @@ var BaseRange = class extends we3.AbstractPlugin {
      */
     _onKeyup (e) {
         var self = this;
+        var isSelectAll = e.ctrlKey && e.key === 'a';
+        if (isSelectAll) {
+            return this._setRangeFromDOM();
+        }
         var isNavigationKey = e.keyCode >= 33 && e.keyCode <= 40;
         if (isNavigationKey) {
             this._setRangeFromDOM({
