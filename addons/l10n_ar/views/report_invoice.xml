@@ -8,8 +8,13 @@
                 <br/><span>Incoterm: </span><span t-field="o.invoice_incoterm_id.name"/>
             </t>
         </div>
-        <span t-field="o.l10n_latam_document_type_id.report_name" position="after">
-            <span t-field="o.l10n_latam_document_type_id.l10n_ar_letter"/>
+        <span t-field="o.l10n_latam_document_type_id.report_name" position="before">
+            <span style="border: solid; padding: 10px; display: inline-block; text-align: center; line-height: 8px;">
+                <h3 style="line-height: 15px;">
+                    <strong><span t-field="o.l10n_latam_document_type_id.l10n_ar_letter"/></strong>
+                </h3>
+                <span style="font-size: x-small;">Cod <t t-esc="o.l10n_latam_document_type_id.code"/></span>
+            </span>
         </span>
     </template>
 
@@ -20,16 +25,6 @@
     </template>
 
     <template id="external_layout_standard" inherit_id="web.external_layout_standard">
-        <!-- document info -->
-        <div name="company_address" position="after">
-            <div name="document_type" class="col-md-6 ml-auto">
-                <span style="border: solid; padding: 15px; display: inline-block; text-align: center;">
-                    <h3><strong><span t-field="o.l10n_latam_document_type_id.l10n_ar_letter"/></strong></h3>
-                    <span class="small">Cod </span><span class="small" t-field="o.l10n_latam_document_type_id.code"/>
-                </span>
-            </div>
-        </div>
-
         <!-- footer -->
         <ul class="list-inline mb4" position="inside">
             <t t-call="l10n_ar.argentinian_extra_info"/>
