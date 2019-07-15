@@ -3277,10 +3277,6 @@ Fields:
           .. note:: Values marked as ``_`` in the list above are ignored and
                     can be anything, generally ``0`` or ``False``.
         """
-        return self._write_no_override(vals)
-
-    # DLE P146
-    def _write_no_override(self, vals):
         if not self:
             return True
 
@@ -3309,187 +3305,65 @@ Fields:
 
         # protect fields being written against recomputation
         with env.protecting(protected, self):
+            # determine records depending on values
+            self.modified(vals)
+
+            relational_names = []
             # for monetary field, their related currency field must be cached before the amount so it can be rounded correctly
             for fname in sorted(vals, key=lambda x: self._fields[x].type=='monetary'):
                 if fname in bad_names:
                     continue
-                value = vals[fname]
-                field = self._fields.get(fname)
-                # DLE P59: `test_write_base_one2many` `test_performance.py`
-                # Write x2many inverses at the same time
-                toflush = False
-                for record in self:
-                    # DLE P46: need to remove the new records from the one2many field cache as they have been created now.
-                    # test `test_70_x2many_write`, discussion.very_important_messages |= Message.new({..})
-                    # DLE P68: `test_10_sellers`, `test_20_sellers_company`, be careful with inherited one2many fields,
-                    # e.g.`product.template` & `product.product` `seller_ids` field
-                    # if the field is not store, the command write will not happen, and in this case we must set the value to cache
-                    # so the modified is triggered for the inherited field
-                    if field.type not in ('one2many', 'many2many') or not field.store or not record.id:
-                        cache_value = field.convert_to_cache(value, record)
+                field = self._fields[fname]
+                field.write(self, vals[fname])
+                if field.relational:
+                    relational_names.append(fname)
 
-                        # nothing to do, the record already has the newest value
-                        # DLE: What about one2many, many2many commands that are just adding ids to the existing values?
-                        # DLE P49: in an onchange, the record to which we applied a change already has its cache correctly set,
-                        # as we create the `new` record with already the onchanges values
-                        # `record = self.new(values)`
-                        # We nevertheless needs to trigger the write to trigger the modified to get the values that gets modified
-                        # because of this write.
-                        # Alternatively, in the `onchange` method, the new record must be created from the origin record values,
-                        # and then we assign the new values through __set__
-                        # `test_onchange_one2many_with_domain_on_related_field`
-                        if record.id and env.cache.contains(record, field) and (env.cache.get(record, field) == cache_value):
-                            continue
+            # determine records depending on new values
+            self.modified(relational_names)
 
-                    # when updating a relational field, updates it's inverse fields, as well as those reelying on it's old value
-                    if field.relational:
-                        record.modified([field.name])
-                        for invf in record._field_inverses[field]:
-                            # DLE P60: `test_performance.py` `test_write_base_one2many`
-                            # record[field.name] is not in cache, and it will therefore fetch the one2many ids while it doesn't really need them,
-                            # e.g. for [(0, 0, {..})] which only add lines, you do not need to fetch the previous line nor invalidate their inverse.
-                            # You only need to invalidate the one you have in cache, not the other ones.
-                            for rec in self.env[field.comodel_name].browse(env.cache.get(record, field, [])):
-                                env.cache.remove(rec, invf)
+            if self._parent_store and self._parent_name in vals:
+                self.flush([self._parent_name])
 
-                    if field.type == 'many2many':
-                        # DLE P33: `odoo/addons/test_access_rights/tests/test_ir_rules.py`
-                        # test `test_many2many`
-                        # Apparently you can write on many2many values you can't read,
-                        # (You can read A but you can't read B. You should be able to add A & B on a many2many field but not
-                        # but when reading the many2many field, you should see only A, and not B)
-                        # so you should not cache the write value of your many2many, to force to refetch it and re-apply the record rules
-                        # or filter the values by which you can read, and cache only those, I am not sure what the most efficient
-                        # DLE P52: needs to filter out after all, because of onchanges, in the below test
-                        # test `test_onchange_specific`
-                        env.cache.invalidate([(field, record.ids)])
-                    # DLE P68
-                    if field.type not in ('one2many', 'many2many') or not field.store or not record.id:
-                        env.cache.set(record, field, cache_value)
-                    # DLE P2: We set the value to write in the cache, but then it can be overwritten by a prefetch when
-                    # reading another field of the same model. Writing the towrite sooner, before the computation of modified,
-                    # allows the possibility to not prefetch or ignore the reads of values to write
-                    # DLE P74: `test_92_binary_self_avatar_svg`
-                    # Avoid to postpone the write of other fields in towrite/_write,
-                    # so we keep the information on who (uid) is writting
-                    # `mimetype` of `ir.attachment` is a stored field which depends on the uid during the `write`
-                    # When writing on a binary field, e.g. `user.image = SVG`, it's considered an other_field,
-                    # and the `write` in `ir.attachment` was done through the `towrite` and the `flush`, which do not guarantee
-                    # the user.
-                    # Maybe there is something to do for performance, for instance by batching the field.write to all records
-                    if record.id and field.store:
-                        # FP NOTE: we could simplify and keep the one in cache instead
-                        # FP TO CHECK: for one2many / many2many, we might concatenate the values instead of overwrite. (imagine 2 write of [(0,0,{})]
-                        # DLE P20: By writring field.convert_to_write(field.convert_to_record(field.convert_to_cache(value, record), record), record)
-                        # You missed the 2many commands such as [(4, 1), (4, 2)] which were converted to (1, 2), therefore completely replacing
-                        # the existing 2many value instead of just adding new ids to it.
-                        # DLE P65: Support translations in flush
-                        if field.column_type:
-                            if field.translate:
-                                env.all.towrite[record._name][record.id].setdefault(field.name, {})[env.context.get('lang')] = value
-                            else:
-                                env.all.towrite[record._name][record.id][field.name] = value
-                        else:
-                            # DLE P76: do not set delegate the write to the field for related fields,
-                            # they are delayed in their inverse (determine_inverse)
-                            # e.g. `test_10_sellers`, write on `product.product.seller_ids`, which actually should write on `product.template.seller_ids`
-                            # `product.product.seller_ids` store attribute is False, while `product.template.seller_ids` store attribute is True
-                            field.write(record, value)
-
-                    # FP NOTE: possible huge optimization here: if field was already in todo, don't recall modified
-                    record.modified([fname])
-
-                    env.remove_todo(field, record)
-
-                    # DLE P149: `test_40_new_defaults`
-                    # Assigning an existing many2one to a `new` record should not update the inverse `one2many` on the existing record
-                    # ```
-                    # new_msg.discussion = discussion
-                    # self.assertNotIn(new_msg, discussion.messages)
-                    # ```
-                    if record.id:
-                        if field.name == 'active':
-                            # DLE P147:
-                            # `test_manufacturing_3_steps`
-                            # When writing `warehouse.manufacture_steps = 'pbm_sam'`
-                            # it write active: True on a stock.location.route, which must update the inverses with the record that has just been activated
-                            # `route_ids = fields.Many2many('stock.location.route', 'stock_route_warehouse', 'warehouse_id', 'route_id', ...)
-                            # I tried with res.groups.users and user.active, it wasnt working either:
-                            # In [26]: self.env['res.groups'].browse(1).users
-                            # Out[26]: res.users(414, 413, 412, 6, 2, 411)
-                            # In [27]: self.env['res.users'].browse(6).active = False
-                            # In [28]: self.env['res.groups'].browse(1).users
-                            # Out[28]: res.users(414, 413, 412, 6, 2, 411)
-                            # TODO: This is enough for this test, which enable a disabled route, but we have to do something for the opposite: Disabling an active record.
-                            # The `_update` only cares to add a record to an existing one2many
-                            invfs = [(f, [invf for invf in invfs if invf.type in ('one2many', 'many2many')]) for f, invfs in record._field_inverses.items()]
-                        else:
-                            invfs = [(field, record._field_inverses[field])]
-
-                        for f, invfs in invfs:
-                            for invf in invfs:
-                                if field.relational:
-                                    # DLE P60
-                                    records = self.env[f.comodel_name].browse(env.cache.get_value(record, f, []))
-                                else:
-                                    records = record[f.name]
-                                update_res = invf._update(records, record)
-                                toflush = not update_res or toflush
-
-                # flush if parent field
-                if self._parent_store and fname == self._parent_name:
-                    toflush = True
-
-                # DLE P59
-                if toflush:
-                    self.flush([fname])
-
-            # DLE P34
+            # validate non-inversed fields first
+            real_recs = self.filtered('id')
             inverse_fields = [f.name for fs in determine_inverses.values() for f in fs]
-
-            # DLE P36: `test_40_new`, ask RCO if there is not a better way to filter out new records.
-            to_validate = self.filtered('id')
-            # DLE P35: Validate first regular fields, then inverse fields
-            # Because inverse field might be wrong because the regular fields are not valid,
-            # and this can cause infinite recursion or longer processing.
-            # This was the case before: regular fields validation were done in `_write`, which was called before the validation of the inverse fields in `write`
-            # test `test_no_recursion`
-            # DLE P48: do not validate fields in onchange
-            # `test_onchange_related`
-            if to_validate:
-                to_validate._validate_fields(set(vals) - set(inverse_fields))
+            real_recs._validate_fields(set(vals) - set(inverse_fields))
 
             # DLE P34: Batch process inverse fields
             # test `test_13_inverse`
             for fields in determine_inverses.values():
                 # inverse records that are not being computed
-                for record in records_to_inverse[fields[0]]:
-                    try:
-                        fields[0].determine_inverse(record)
-                    except AccessError as e:
-                        # DLE P32: test `test_feedback.py`, `test_local`: When attempting to write on an inherited field,
-                        # the exception raised must be the one below, for a clearer explanation for the user.
-                        if fields[0].inherited:
-                            description = self.env['ir.model']._get(self._name).name
-                            raise AccessError(
-                                _("%(previous_message)s\n\nImplicitly accessed through '%(document_kind)s' (%(document_model)s).") % {
-                                    'previous_message': e.args[0],
-                                    'document_kind': description,
-                                    'document_model': self._name,
-                                }
-                            )
-                        raise
+                try:
+                    fields[0].determine_inverse(real_recs)
+                except AccessError as e:
+                    # DLE P32: test `test_feedback.py`, `test_local`: When attempting to write on an inherited field,
+                    # the exception raised must be the one below, for a clearer explanation for the user.
+                    if fields[0].inherited:
+                        description = self.env['ir.model']._get(self._name).name
+                        raise AccessError(
+                            _("%(previous_message)s\n\nImplicitly accessed through '%(document_kind)s' (%(document_model)s).") % {
+                                'previous_message': e.args[0],
+                                'document_kind': description,
+                                'document_model': self._name,
+                            }
+                        )
+                    raise
+
             # DLE P58: `test_orm.py``test_write_date`
             # If there are only fields that do not trigger _write (e.g. only determine inverse),
             # the below will ensure `_write ` will be called, even with empty vals, to ensure `write_date` and `write_uid` is updated
             if self._log_access and self.ids:
-                if not any(self._fields[fname].column_type for fname in vals.keys() if fname in self._fields):
-                    for record in self:
-                        if record.id:
-                            env.all.towrite[record._name][record.id]['write_uid'] = self.env.uid
-                            env.all.towrite[record._name][record.id]['write_date'] = False
-                self.env.cache.invalidate([(self._fields['write_date'], self.ids), (self._fields['write_uid'], self.ids)])
-            to_validate._validate_fields(inverse_fields)
+                towrite = env.all.towrite[self._name]
+                for record in real_recs:
+                    towrite[record.id]['write_uid'] = self.env.uid
+                    towrite[record.id]['write_date'] = False
+                self.env.cache.invalidate([
+                    (self._fields['write_date'], self.ids),
+                    (self._fields['write_uid'], self.ids),
+                ])
+
+            # validate inversed fields
+            real_recs._validate_fields(inverse_fields)
 
         return True
 
@@ -3506,15 +3380,6 @@ Fields:
 
         # determine SQL values
         columns = []                    # list of (column_name, format, value)
-        updated = []                    # list of updated or translated columns
-        single_lang = len(self.env['res.lang'].get_installed()) <= 1
-        has_translation = self.env.lang and self.env.lang != 'en_US'
-        # when there is only one language, update existing translations but
-        # do not create new ones
-        if single_lang:
-            process_translations = self.env['ir.translation']._update_translations
-        else:
-            process_translations = self.env['ir.translation']._upsert_translations
 
         for name, val in vals.items():
             if self._log_access and name in LOG_ACCESS_COLUMNS and not val:
@@ -3526,22 +3391,14 @@ Fields:
                 _logger.warning('Field %s is deprecated: %s', field, field.deprecated)
 
             assert field.column_type
-            if single_lang or not (has_translation and field.translate is True):
-                # val is not a translation: update the table
-                val = field.convert_to_column(val, self, vals)
-                columns.append((name, field.column_format, val))
-                tname = "%s,%s" % (self._name, name)
-                if field.translate is True and self.env.lang:
-                    self.env['ir.translation']._set_source(tname, self.ids, val)
-            updated.append(name)
+            val = field.convert_to_column(val, self, vals)
+            columns.append((name, field.column_format, val))
 
         if self._log_access:
             if not vals.get('write_uid'):
                 columns.append(('write_uid', '%s', self._uid))
-                updated.append('write_uid')
             if not vals.get('write_date'):
                 columns.append(('write_date', '%s', AsIs("(now() at time zone 'UTC')")))
-                updated.append('write_date')
 
         # update columns
         if columns:
@@ -3556,43 +3413,6 @@ Fields:
                         _('One of the records you are trying to modify has already been deleted (Document type: %s).') % self._description
                         + '\n\n({} {}, {} {})'.format(_('Records:'), sub_ids[:6], _('User:'), self._uid)
                     )
-
-            translation_values = []
-            for name in updated:
-                field = self._fields[name]
-                if callable(field.translate):
-                    # The source value of a field has been modified,
-                    # synchronize translated terms when possible.
-                    self.env['ir.translation']._sync_terms_translations(field, self)
-
-                elif self.env.lang and field.translate:
-                    # The translated value of a field has been modified.
-                    src_trans = self.with_context(lang=None).read([name])[0][name]
-                    if not src_trans:
-                        # Insert value to DB
-                        src_trans = vals[name]
-                        self.with_context(lang=None).write({name: src_trans})
-                    tname = "%s,%s" % (self._name, name)
-                    val = field.convert_to_column(vals[name], self, vals)
-                    translation_values += [dict(
-                        src=src_trans,
-                        value=val,
-                        name=tname,
-                        lang=self.env.lang,
-                        type='model',
-                        state='translated',
-                        res_id=res_id) for res_id in self.ids]
-
-            if translation_values:
-                process_translations(translation_values)
-
-        # mark fields to recompute; do this before setting other fields, because
-        # the latter can require the value of computed fields, e.g., a one2many
-        # checking constraints on records
-        self.modified(updated)
-
-        # check Python constraints
-        # self._validate_fields(vals)
 
         # update parent_path
         if parent_records:
@@ -4281,7 +4101,13 @@ Fields:
                                         model = self.env[rfield.comodel_name]
                                         if rfield.type in ('one2many', 'many2many'):
                                             to_flush[rfield.comodel_name].add(rfield.inverse_name)
-                        model_name = field.comodel_name
+                        if field.comodel_name:
+                            model_name = field.comodel_name
+                # hierarchy operators need the parent field
+                if arg[1] in ('child_of', 'parent_of'):
+                    model = self.env[model_name]
+                    if model._parent_store:
+                        to_flush[model_name].add(model._parent_name)
 
         # DLE P56: needs to flush write the order fields
         # test_15_equivalent_one2many_1
@@ -5255,32 +5081,16 @@ Fields:
         """
         def process(model, id_vals):
             # group record ids by vals, to update in batch when possible
-            updates = defaultdict(lambda: defaultdict(list))
+            updates = defaultdict(list)
             for rid, vals in id_vals.items():
-                # DLE P65: Support translations in flush
-                # e.g assigning with a lang in the context
-                # `email.with_context(lang='fr_FR').label = "bonjour"`
-                # and then flushing without the lang in context
-                # `test_new_fields.py`, `test_80_copy`
-                vals_trans = {}
-                for key, val in dict(vals).items():
-                    if model._fields[key].translate:
-                        for lang, value in val.items():
-                            if lang:
-                                vals_trans.setdefault(lang, {})[key] = vals.pop(key)[lang]
-                            else:
-                                vals[key] = value
-                updates[None][frozendict(vals)].append(rid)
-                for lang, vals in vals_trans.items():
-                    updates[lang][frozendict(vals)].append(rid)
+                updates[frozendict(vals)].append(rid)
 
-            for lang, records in updates.items():
-                for vals, ids in records.items():
-                    recs = model.with_context(lang=lang).browse(ids)
-                    try:
-                        recs._write(vals)
-                    except MissingError:
-                        recs.exists()._write(vals)
+            for vals, ids in updates.items():
+                recs = model.browse(ids)
+                try:
+                    recs._write(vals)
+                except MissingError:
+                    recs.exists()._write(vals)
 
         if fnames is None:
             # flush everything
