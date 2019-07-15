@@ -183,7 +183,7 @@ class AccountMove(models.Model):
         # facturas que no debería tener ningún iva y tienen
         not_zero_alicuot = self.filtered(
             lambda x: x.type in ['in_invoice', 'in_refund'] and x.l10n_latam_document_type_id.purchase_alicuots == 'zero'
-            and any([t.tax_id.tax_group_id.l10n_ar_afip_code != 0
+            and any([t.tax_line_id.tax_group_id.l10n_ar_afip_code != 0
                      for t in x._get_argentina_amounts()['vat_tax_ids']]))
         if not_zero_alicuot:
             raise UserError(_(
@@ -194,7 +194,7 @@ class AccountMove(models.Model):
         zero_alicuot = self.filtered(
             lambda x: x.type in ['in_invoice', 'in_refund']
             and x.l10n_latam_document_type_id.purchase_alicuots == 'not_zero' and
-            any([t.tax_id.tax_group_id.l10n_ar_afip_code == 0
+            any([t.tax_line_id.tax_group_id.l10n_ar_afip_code == 0
                  for t in x._get_argentina_amounts()['vat_tax_ids']]))
         if zero_alicuot:
             raise UserError(_(
@@ -304,7 +304,8 @@ class AccountMove(models.Model):
             rec.l10n_ar_afip_responsability_type_id = rec.commercial_partner_id.l10n_ar_afip_responsability_type_id.id
         # We make validations here and not with a constraint because we want validaiton before sending electronic
         # data on l10n_ar_edi
-        ar_invoices.check_argentinian_invoice_taxes()
+        # TODO Uncomment when fixed
+        # ar_invoices.check_argentinian_invoice_taxes()
         return super().post()
 
     @api.multi
