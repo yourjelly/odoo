@@ -770,7 +770,9 @@ class Cache(object):
         """ Set the values of ``field`` for several ``records``. """
         if field.depends_context:
             key = self._get_context_key(records.env, field)
-            self._data[field].update(zip(records._ids, map(lambda e: {key: e}, values)))
+            field_cache = self._data[field]
+            for record_id, value in zip(records._ids, values):
+                field_cache.setdefault(record_id, {})[key] = value
         else:
             self._data[field].update(zip(records._ids, values))
 
