@@ -113,6 +113,34 @@ var BaseRenderer = class extends we3.AbstractPlugin {
         }
         return ids;
     }
+    _childLink (ids, childNodes) {
+        var self = this;
+        ids.forEach(function (id, index) {
+            var json = self.jsonById[id];
+            if (!json.nodeValue) {
+                return;
+            }
+            var el = self.elements[id];
+            if (el) {
+                if (el.textContent === json.nodeValue) {
+                    return;
+                }
+                for (var k = index; k < childNodes.length; k++) {
+                    if (!el.tagName && el.textContent === json.nodeValue) {
+                        var oldId = this.getID(el);
+                        if (oldId) {
+                            var oldJson = self.jsonById[oldId];
+                            if (el.textContent === oldJson.nodeValue) {
+                                continue;
+                            }
+                            delete self.elements[oldId];
+                        }
+                        self.elements[id] = el;
+                    }
+                }
+            }
+        });
+    }
     /**
      * Remove all DOM references.
      *
@@ -166,9 +194,6 @@ var BaseRenderer = class extends we3.AbstractPlugin {
         var el = this.elements[id];
         var freeElement = target && target !== el && !this.getID(target) ? target : null;
 
-        if (el && freeElement) {
-            freeElement.parentNode.removeChild(freeElement);
-        }
         if (!el && freeElement) {
             el = freeElement;
         }
@@ -180,13 +205,16 @@ var BaseRenderer = class extends we3.AbstractPlugin {
                 el = document.createElement(json.nodeName);
             }
         } else { // virtual node can mutate or try to use a free element
-            var isText = 'nodeValue' in json && !json.nodeName;
-            if (el.tagName && isText) {
-                if (el.parentNode) {
-                    el.parentNode.removeChild(el);
+            if ('nodeValue' in json && !json.nodeName) {
+                if (el.tagName) {
+                    if (el.parentNode) {
+                        el.parentNode.removeChild(el);
+                    }
+                    el = document.createTextNode(json.nodeValue);
+                } else {
+                    el.textContent = json.nodeValue;
                 }
-                el = document.createTextNode(json.nodeValue);
-            } else if (!isText && json.nodeName && (!el.tagName || el.tagName.toLowerCase() !== json.nodeName)) {
+            } else if (json.nodeName && (!el.tagName || el.tagName.toLowerCase() !== json.nodeName)) {
                 if (el.parentNode) {
                     el.parentNode.removeChild(el);
                 }
@@ -349,6 +377,8 @@ var BaseRenderer = class extends we3.AbstractPlugin {
         }
 
         if (changes.childNodes) {
+            self._childLink(changes.childNodes, node.childNodes);
+
             // sort nodes and add new nodes
             changes.childNodes.forEach(function (id, index) {
                 id = +id;
@@ -362,9 +392,19 @@ var BaseRenderer = class extends we3.AbstractPlugin {
                     }
                 }
             });
+
+            self._removeFreeElement(node.childNodes);
         }
 
         return node;
+    }
+    _removeFreeElement (childNodes) {
+        var self = this;
+        [].slice.call(childNodes).forEach(function (el) {
+            if (!self.getID(el)) {
+                el.parentNode.removeChild(el);
+            }
+        });
     }
 };
 
