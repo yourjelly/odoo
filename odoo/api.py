@@ -583,14 +583,27 @@ class Environment(Mapping):
         # test `test_auto_join`
         # with self.assertRaises(NotImplementedError):
         #     partner_obj.search([('category_id.name', '=', 'foo')])
-        todo = dict(self.all.todo)
-        towrite = copy.deepcopy(self.all.towrite)
+        todo = {
+            field: list(recs_list)
+            for field, recs_list in self.all.todo.items()
+        }
+        towrite = {
+            model: {
+                record_id: dict(values)
+                for record_id, values in id_values.items()
+            }
+            for model, id_values in self.all.towrite.items()
+        }
         try:
             yield
         except Exception:
             self.clear()
-            self.all.todo = todo
-            self.all.towrite = towrite
+            self.all.todo.clear()
+            self.all.todo.update(todo)
+            self.all.towrite.clear()
+            for model, id_values in towrite.items():
+                for record_id, values in id_values.items():
+                    self.all.towrite[model][record_id].update(values)
             raise
 
     def protected(self, field):
