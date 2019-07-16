@@ -17,6 +17,11 @@ if (!config.device.isMobile) {
 
 relational_fields.FieldMany2One.include({
 
+    start: function () {
+        var superRes = this._super.apply(this, arguments);
+        this.$input.prop('readonly', true);
+        return superRes;
+    },
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -29,6 +34,24 @@ relational_fields.FieldMany2One.include({
      * @override
      */
     _bindAutoComplete: function () {},
+
+    /**
+     * override to add m2oMode option to search create popup option
+     *
+     * @private
+     * @override
+     */
+    _getSearchCreatePopupOptions: function () {
+        var self = this;
+        var searchCreatePopupOptions = this._super.apply(this, arguments);
+        _.extend(searchCreatePopupOptions, {
+            m2oMode: true,
+            on_clear: function () {
+                self.reinitialize(false);
+            },
+        });
+        return searchCreatePopupOptions;
+    },
 
     /**
      * Override to call name_search and directly open Search Create Popup 

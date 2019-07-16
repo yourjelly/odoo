@@ -312,6 +312,7 @@ var SelectCreateDialog = ViewDialog.extend({
         this._super.apply(this, arguments);
         _.defaults(this.options, { initial_view: 'search' });
         this.on_selected = this.options.on_selected || (function () {});
+        this.on_clear = this.options.on_clear || (function () {});
         this.initialIDs = this.options.initial_ids;
     },
 
@@ -360,7 +361,7 @@ var SelectCreateDialog = ViewDialog.extend({
         if (viewType === 'kanban') {
             _.extend(viewOptions, {
                 noDefaultGroupby: true,
-                m2oMode: true,
+                m2oMode: this.options.m2oMode || false,
             });
         }
         var View = new ViewClass(fieldsViews[viewType], _.extend(viewOptions, {
@@ -388,6 +389,16 @@ var SelectCreateDialog = ViewDialog.extend({
                 classes: 'btn-secondary o_form_button_cancel',
                 close: true,
             }];
+            if (self.options.m2oMode) {
+                self.__buttons.unshift({
+                    text: _t("Clear"),
+                    classes: 'btn-secondary o_clear_button',
+                    close: true,
+                    click: function () {
+                        self.on_clear();
+                    },
+                });
+            }
             if (!self.options.no_create) {
                 self.__buttons.unshift({
                     text: _t("Create"),
