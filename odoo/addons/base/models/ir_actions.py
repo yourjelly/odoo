@@ -435,7 +435,7 @@ class IrActionsServer(models.Model):
     @api.model
     def run_action_multi(self, action, eval_context=None):
         res = False
-        for act in action.child_ids:
+        for act in action.child_ids.sorted():
             result = act.run()
             if result:
                 res = result
