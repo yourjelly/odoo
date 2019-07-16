@@ -2655,7 +2655,7 @@ class AccountMoveLine(models.Model):
 
             # DLE P101: this doesn't work for `new` move line for which move_id is not yet assigned
             # It's actually triggered when computing the amount residual of another line, which is not new,
-            # via `env.field_todo(self)` in fields.py __get__
+            # via `env.records_to_compute(self)` in fields.py __get__
             # Maybe there is something to do there.
             if line.move_id.company_id.currency_id:
                 line.amount_residual = line.move_id.company_id.currency_id.round(amount * sign)
