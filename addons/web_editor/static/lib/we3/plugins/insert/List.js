@@ -616,13 +616,23 @@ var ListPlugin = class extends we3.AbstractPlugin {
      * Indent the list
      */
     indent () {
-        this.dependencies.Arch.do(() => this.dependencies.Arch.indent());
+        var self = this;
+        var range = this.dependencies.Range.getRange();
+        this.dependencies.Arch.do(function () {
+            self.dependencies.Arch.indent();
+            return range;
+        });
     }
     /**
      * Outdent the list
      */
     outdent () {
-        this.dependencies.Arch.do(() => this.dependencies.Arch.outdent());
+        var self = this;
+        var range = this.dependencies.Range.getRange();
+        this.dependencies.Arch.do(function () {
+            self.dependencies.Arch.outdent();
+            return range;
+        });
     }
     /**
      * Insert an ordered list, an unordered list or a checklist.
@@ -850,22 +860,29 @@ var ListPlugin = class extends we3.AbstractPlugin {
             return;
         }
         var range = this.dependencies.Range.getRange();
-        var isLeftEdgeOfLi = range.scArch.isLeftEdgeOfPred(node => node.isLi()) && range.so === 0;
-        if (!range.isCollapsed() || !isLeftEdgeOfLi) {
+        if (!range.scArch.isInLi() || !range.ecArch.isInLi()) {
             return;
         }
+        var isLeftEdgeOfLi = range.scArch.isLeftEdgeOfPred(node => node.isLi()) && range.so === 0;
         switch (e.keyCode) {
             case 8: // BACKSPACE
-                e.preventDefault();
-                e.stopPropagation();
-                this.outdent();
+                if (range.isCollapsed() && isLeftEdgeOfLi) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.outdent();
+                }
                 break;
             case 9: // TAB
-                e.preventDefault();
-                e.stopPropagation();
+                if (this.options.tab && !this.options.tab.enabled) {
+                    return;
+                }
                 if (e.shiftKey) {
+                    e.preventDefault();
+                    e.stopPropagation();
                     this.outdent();
-                } else {
+                } else if (!range.isCollapsed() || isLeftEdgeOfLi) {
+                    e.preventDefault();
+                    e.stopPropagation();
                     this.indent();
                 }
                 break;

@@ -31,6 +31,15 @@ var TestKeyboardTab = class extends we3.AbstractPlugin {
                 test: "<ul><li>◆dom to edit</li></ul>",
             },
             {
+                name: "in indented-li: SHIFT+TAB within text",
+                content: "<ul><li><ul><li>dom t◆o edit</li></ul></li></ul>",
+                steps: [{
+                    key: 'TAB',
+                    shiftKey: true,
+                }],
+                test: "<ul><li>dom t◆o edit</li></ul>",
+            },
+            {
                 name: "in li: TAB within contents",
                 content: "<ul><li>dom t◆o edit</li></ul>",
                 steps: [{
@@ -39,13 +48,13 @@ var TestKeyboardTab = class extends we3.AbstractPlugin {
                 test: "<ul><li>dom t &nbsp; &nbsp;◆o edit</li></ul>",
             },
             {
-                name: "in li: SHIFT+TAB within contents (should do nothing)",
+                name: "in li: SHIFT+TAB within contents (should remove list)",
                 content: "<ul><li>dom t◆o edit</li></ul>",
                 steps: [{
                     key: 'TAB',
                     shiftKey: true,
                 }],
-                test: "<ul><li>dom t◆o edit</li></ul>",
+                test: "<p>dom t◆o edit</p>",
             },
             {
                 name: "in td > p: TAB within contents",
@@ -71,6 +80,15 @@ var TestKeyboardTab = class extends we3.AbstractPlugin {
                     shiftKey: true,
                 }],
                 test: "<p>◆dom to edit</p>",
+            },
+            {
+                name: "in indented-p: SHIFT+TAB within text",
+                content: '<p style="margin-left: 1.5em;">dom t◆o edit</p>',
+                steps: [{
+                    key: 'TAB',
+                    shiftKey: true,
+                }],
+                test: "<p>dom t◆o edit</p>",
             },
             {
                 name: "in p: TAB -> BACKSPACE at start",

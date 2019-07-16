@@ -189,7 +189,9 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             snippets: this.nodeOptions.snippets,
 
             /* todo: uncomment after separation of field_html customization tests and we3 tests
-            tabSize: 0,
+            tab: {
+                enabled: false,
+            }
             keyMap: {
                 pc: {
                     'TAB': null,

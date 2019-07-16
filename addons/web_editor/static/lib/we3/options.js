@@ -185,7 +185,10 @@ Object.assign(we3.options, {
         },
         'pre'
     ],
-    tabSize: 4, // spaces
+    tab: {
+        enabled: true,
+        size: 4, // spaces
+    },
 
     // METHODS //
 

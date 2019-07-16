@@ -13,7 +13,6 @@ we3.addPlugin('Keyboard', class extends we3.AbstractPlugin {
             'keypress': '_onKeyPress',
             'keyup': '_onKeyUp',
         };
-        this.tab = '\u00A0\u00A0\u00A0\u00A0';
         this._keypressUpdatedTargets = null;
     }
     start () {
@@ -94,7 +93,9 @@ we3.addPlugin('Keyboard', class extends we3.AbstractPlugin {
      * @private
      */
     _insertTab () {
-        this.dependencies.Arch.insert(this.tab);
+        var tabSize = this.options.tab && this.options.tab.size || 0;
+        var tab = new Array(tabSize).fill('\u00A0').join('');
+        this.dependencies.Arch.insert(tab);
     }
     _isOffsetLeftEdge (range) {
         var pointArch = this._skipVirtual({
@@ -114,21 +115,6 @@ we3.addPlugin('Keyboard', class extends we3.AbstractPlugin {
         }
         return pointArch;
     }
-    /**
-     * Patch for Google Chrome's contenteditable SPAN bug.
-     *
-     * @private
-     * @param {jQueryEvent} e
-     */
-    /* _removeGarbageSpans (e) {
-        if (e.target.className === "" && e.target.tagName == "SPAN" &&
-            e.target.style.fontStyle === "inherit" &&
-            e.target.style.fontVariantLigatures === "inherit" &&
-            e.target.style.fontVariantCaps === "inherit") {
-            var $span = $(e.target);
-            $span.after($span.contents()).remove();
-        }
-    } */
     /**
      * Select all the contents of the current unbreakable ancestor.
      */
@@ -321,7 +307,10 @@ we3.addPlugin('Keyboard', class extends we3.AbstractPlugin {
      * @returns {Boolean} true if case is handled and event default must be prevented
      */
     _onTab (e) {
-        var handled = true;
+        if (this.options.tab && !this.options.tab.enabled) {
+            return false;
+        }
+        e.stopPropagation();
         var untab = !!e.shiftKey;
         var range = this.dependencies.Range.getRange();
         if (range.scArch.isInCell()) {
@@ -329,9 +318,9 @@ we3.addPlugin('Keyboard', class extends we3.AbstractPlugin {
         } else if (!untab) {
             this._insertTab();
         } else {
-            handled = false;
+            this.dependencies.Arch.outdent();
         }
-        return handled;
+        return true;
     }
 });
 
