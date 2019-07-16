@@ -29,7 +29,6 @@ var TEST = class extends  we3.ArchNodeVirtualText {
         if (archNode.type === 'TEST') {
             return;
         }
-        var childNodes = [];
         var matches = archNode.nodeValue.match(regExpRangeCollapsed) || archNode.nodeValue.match(regExpRangeNotCollapsed);
         if (matches) {
             var fragment = new we3.ArchNodeFragment(archNode.params);

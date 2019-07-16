@@ -24,12 +24,49 @@ var TestComplex = class extends we3.AbstractPlugin {
                 name: "Bold -> Unbold -> Deselect -> Convert list type (depends on: FontStyle, List)",
                 content: "<ul><li><p>a▶b◀c</p></li></ul>",
                 do: async function () {
-                    self.dependencies.Test.triggerNativeEvents(self.btnBold, ['mousedown', 'click']);
-                    self.dependencies.Test.triggerNativeEvents(self.btnBold, ['mousedown', 'click']);
+                    await self.dependencies.Test.triggerNativeEvents(self.btnBold, ['mousedown', 'click']);
+                    await self.dependencies.Test.triggerNativeEvents(self.btnBold, ['mousedown', 'click']);
                     self._collapseRange(false);
-                    self.dependencies.Test.triggerNativeEvents(self.btnOl, ['mousedown', 'click']);
+                    await self.dependencies.Test.triggerNativeEvents(self.btnOl, ['mousedown', 'click']);
                 },
                 test: "<ol><li><p>ab◆c</p></li></ol>",
+            },
+            {
+                name: "(<=>) Convert list type after virtual",
+                content: "<ul><li><p>ab\uFEFF◆c</p></li></ul>",
+                do: async function () {
+                    await self.dependencies.Test.triggerNativeEvents(self.btnOl, ['mousedown', 'click']);
+                },
+                test: "<ol><li><p>ab◆c</p></li></ol>",
+            },
+            {
+                name: "In p: ENTER -> BACKSPACE -> Select across merge -> ENTER",
+                content: "<p>ab◆cd</p>",
+                do: async function () {
+                    await self.dependencies.Test.keydown(self.editable, { keyCode: 13 }); // ENTER
+                    await self.dependencies.Test.keydown(self.editable, { keyCode: 8 }); // BACKSPACE
+                    var currentRange = self.dependencies.Range.getRange();
+                    var root = currentRange.scArch.ancestor('isRoot');
+                    var p = root.descendents(node => node.nodeName === 'p')[0];
+                    var textStart = p.firstChild();
+                    var textEnd = p.lastChild();
+                    await self.dependencies.Range.setRange({
+                        scID: textStart.id,
+                        so: 1,
+                        ecID: textEnd.id,
+                        eo: textEnd.length() - 1,
+                    });
+                    await self.dependencies.Test.keydown(self.editable, { keyCode: 13 }); // ENTER
+                },
+                test: "<p>a</p><p>◆d</p>",
+            },
+            {
+                name: "(<=>) In p: ENTER on selection across virtual",
+                content: "<p>a▶b\uFEFFc◀d</p>",
+                do: async function () {
+                    await self.dependencies.Test.keydown(self.editable, { keyCode: 13 }); // ENTER
+                },
+                test: "<p>a</p><p>◆d</p>",
             },
         ];
     }

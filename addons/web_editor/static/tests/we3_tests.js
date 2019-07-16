@@ -153,7 +153,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('complex default config (integration)', async function (assert) {
-        assert.expect(6);
+        assert.expect(9);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, {TestComplex: true}),
@@ -305,7 +305,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('history', async function (assert) {
-        assert.expect(35);
+        assert.expect(38);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, {TestHistory: true}),

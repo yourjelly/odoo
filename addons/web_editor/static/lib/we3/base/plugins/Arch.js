@@ -1159,14 +1159,16 @@ var BaseArch = class extends we3.AbstractPlugin {
         var virtualTextNodeEnd = this.createArchNode();
 
         var endNode = this.getArchNode(range.ecID);
-        var commonAncestor = endNode.commonAncestor(this.getArchNode(range.scID));
+        var fromNode = this.getArchNode(range.scID);
+        var commonAncestor = endNode.commonAncestor(fromNode);
         endNode.insert(virtualTextNodeEnd, range.eo);
 
-        if (!endNode.__removed) {
+        if (!endNode.__removed && commonAncestor.id !== endNode.parent.id &&
+                fromNode.parent.id !== endNode.parent.id) {
             endNode.splitUntil(commonAncestor, endNode.length());
         }
 
-        var fromNode = this.getArchNode(range.scID);
+        fromNode = this.getArchNode(range.scID);
         fromNode.insert(virtualTextNodeBegin, range.so);
 
         var toRemove = [];
