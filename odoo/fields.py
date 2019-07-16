@@ -159,8 +159,7 @@ class Field(MetaField('DummyField', (object,), {})):
             default ``False`` on computed fields)
 
         :param compute_sudo: whether the field should be recomputed as superuser
-            to bypass access rights (boolean, by default ``False``)
-            Note that this has no effects on non-stored computed fields
+            to bypass access rights (boolean, by default ``True``)
 
         The methods given for ``compute``, ``inverse`` and ``search`` are model
         methods. Their signature is shown in the following example::
@@ -296,11 +295,10 @@ class Field(MetaField('DummyField', (object,), {})):
         'depends_context': None,       # collection of context key dependencies
         'recursive': False,             # whether self depends on itself
         'compute': None,                # compute(recs) computes field on recs
-        'compute_sudo': False,          # whether field should be recomputed as admin
+        'compute_sudo': True,           # whether field should be recomputed as superuser
         'inverse': None,                # inverse(recs) inverses field on recs
         'search': None,                 # search(recs, operator, value) searches on self
         'related': None,                # sequence of field names, for related fields
-        'related_sudo': True,           # whether related fields should be read as admin
         'company_dependent': False,     # whether ``self`` is company-dependent (property field)
         'default': None,                # default(recs) returns the default value
 
@@ -438,6 +436,8 @@ class Field(MetaField('DummyField', (object,), {})):
             attrs['depends_context'] = attrs.get('depends_context', tuple()) + ('lang',)
         if 'depends' in attrs:
             attrs['depends'] = tuple(attrs['depends'])
+        if 'related_sudo' in attrs:
+            attrs['compute_sudo'] = attrs['related_sudo']
 
         return attrs
 
@@ -585,11 +585,6 @@ class Field(MetaField('DummyField', (object,), {})):
 
     def _compute_related(self, records):
         """ Compute the related field ``self`` on ``records``. """
-        # when related_sudo, bypass access rights checks when reading values
-        others = records.sudo() if self.related_sudo else records
-        # copy the cache of draft records into others' cache
-        if not all(records._ids) and records.env != others.env:
-            copy_cache(records - records.filtered('id'), others.env)
         #
         # Traverse fields one by one for all records, in order to take advantage
         # of prefetching for each field access. In order to clarify the impact
@@ -616,7 +611,7 @@ class Field(MetaField('DummyField', (object,), {})):
         # the case where 'bar' is a computed field that takes advantage of batch
         # computation.
         #
-        values = list(others)
+        values = list(records)
         for name in self.related[:-1]:
             try:
                 values = [first(value[name]) for value in values]
@@ -1023,8 +1018,8 @@ class Field(MetaField('DummyField', (object,), {})):
 
         # only a single record may be accessed
         record.ensure_one()
-        if env.check_todo(self, record) and record not in env.protected(self):
-            recs = record if self.recursive else env.field_todo(self)
+        if env.is_to_compute(self, record) and record not in env.protected(self):
+            recs = record if self.recursive else env.records_to_compute(self)
             try:
                 self.compute_value(recs)
             except Exception:
@@ -1113,6 +1108,8 @@ class Field(MetaField('DummyField', (object,), {})):
 
     def compute_value(self, records):
         """ Invoke the compute method on ``records``; the results are in cache. """
+        if self.compute_sudo:
+            records = records.sudo()
         fields = records._field_computed[self]
         # DLE P29: This is part of P29. See other comment.
         with records.env.protecting(fields, records):
@@ -1123,7 +1120,7 @@ class Field(MetaField('DummyField', (object,), {})):
 
         # even if __set__ already removed the todo, compute method might not set a value
         for field in fields:
-            records.env.remove_todo(field, records)
+            records.env.remove_to_compute(field, records)
 
     def determine_inverse(self, records):
         """ Given the value of ``self`` on ``records``, inverse the computation. """
@@ -2553,17 +2550,6 @@ class _RelationalMulti(_Relational):
 
     def convert_to_display_name(self, value, record):
         raise NotImplementedError()
-
-    def _compute_related(self, records):
-        """ Compute the related field ``self`` on ``records``. """
-        super(_RelationalMulti, self)._compute_related(records)
-        if self.related_sudo:
-            # determine which records in the relation are actually accessible
-            line_ids = set(records[self.name]._filter_access_rules('read')._ids)
-            accessible = lambda line: line.id in line_ids
-            # filter values to keep the accessible records only
-            for record in records:
-                record[self.name] = record[self.name].filtered(accessible)
 
     def _setup_regular_base(self, model):
         super(_RelationalMulti, self)._setup_regular_base(model)

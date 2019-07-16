@@ -329,13 +329,13 @@ class Message(models.Model):
         # DLE P109: This is a tricky one. `test_set_star`
         # `starred` depends on `starred_partner_ids`,
         # `starred_partner_ids` is written as sudo in `toggle_message_starred`
-        # therefore, the modified is called as sudo, and the `add_todo` as well.
+        # therefore, the modified is called as sudo, and the `add_to_compute` as well.
         # It therefore adds in the todo list the field `starred` for the msg - as sudo -
         # When reading msg.starred, the field is in the todo list, and it therefore use it,
         # with the records from the todo list, as sudo, to compute the `starred` field.
         # The `starred` field is therefore computed as sudo (uid 1) while we asked it for user_admin (uid 2)
-        self.env.remove_todo(self._fields['starred'], self.sudo())
-        self.env.add_todo(self._fields['starred'], self)
+        self.env.remove_to_compute(self._fields['starred'], self.sudo())
+        self.env.add_to_compute(self._fields['starred'], self)
 
         notification = {'type': 'toggle_star', 'message_ids': [self.id], 'starred': starred}
         self.env['bus.bus'].sendone((self._cr.dbname, 'res.partner', self.env.user.partner_id.id), notification)
