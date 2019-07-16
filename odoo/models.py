@@ -2400,7 +2400,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                     recs = self.with_context(active_test=False).search([])
                     for field in fields_to_compute:
                         _logger.info("Storing computed values of %s", field)
-                        self.env.add_todo(field, recs)
+                        self.env.add_to_compute(field, recs)
 
         if self._auto:
             self._add_sql_constraints()
@@ -2833,7 +2833,7 @@ Fields:
                 # discard fields with groups that the user may not access
                 if not (f.groups and not self.user_has_groups(f.groups))
                 # discard fields that must be recomputed
-                if not (f.compute and self.env.field_todo(f))
+                if not (f.compute and self.env.records_to_compute(f))
             ]
             if field.name not in fnames:
                 fnames.append(field.name)
@@ -3191,7 +3191,7 @@ Fields:
             # DLE P118: performance `test_adv_activity_full`
             # As we just deleted `self`, we can remove the todo directly on it.
             for field in self._fields.values():
-                self.env.remove_todo(field, self)
+                self.env.remove_to_compute(field, self)
             # DLE P93: flush after the unlink, for recompute fields depending on the modified of the unlink
             self.flush()
         # auditing: deletions are infrequent and leave no trace in the database
@@ -5421,7 +5421,7 @@ Fields:
                     # while if you dont it will only happen when accessed, which doesnt happen.
                     if field.compute and field.store:
                         records_to_invalidate = records.filtered(lambda r: not r.id)
-                        self.env.add_todo(field, records - records_to_invalidate)
+                        self.env.add_to_compute(field, records - records_to_invalidate)
                         self.env.cache.invalidate([(field, records_to_invalidate._ids)])
                     else:
                         self.env.cache.invalidate([(field, records._ids)])
@@ -5505,12 +5505,6 @@ Fields:
                             records |= cache_records.filtered(lambda r: set(r[key.name]._ids) & set(self._ids))
                 records._modified_triggers(val, modified=modified)
 
-    def _recompute_check(self, field):
-        """ If ``field`` must be recomputed on some record in ``self``, return the
-            corresponding records that must be recomputed.
-        """
-        return self.env.check_todo(field, self)
-
     @api.model
     def recompute(self, fnames=None):
         """ Recompute all function fields (or the given ``fnames`` if present).
@@ -5518,7 +5512,7 @@ Fields:
             :meth:`modified`.
         """
         def process(field):
-            recs = self.env.field_todo(field)
+            recs = self.env.records_to_compute(field)
             if not recs:
                 return
             # DLE P66: `_compute_complete_name` in product/models/product.py
@@ -5530,20 +5524,21 @@ Fields:
                 except MissingError:
                     field.compute_value(recs.exists())
                     # DLE P61: test_access_deleted_records
-                    # `compute_value` ensures to call `remove_todo` for the record it treats
+                    # `compute_value` ensures to call `remove_to_compute` for the record it treats
                     # but for the record it doesn't treat,
                     # e.g. records that no longer exists,
                     # they have to be removed here
                     # otherwise the record remains forever in the todo list, and leads to an infinite loop.
-                    self.env.remove_todo(field, recs - recs.exists())
+                    self.env.remove_to_compute(field, recs - recs.exists())
             else:
                 self.env.cache.invalidate([(field, recs._ids)])
-                self.env.remove_todo(field, recs)
+                self.env.remove_to_compute(field, recs)
 
         if fnames is None:
             # recompute everything
-            while self.env.has_todo():
-                process(self.env.get_todo())
+            fields_to_compute = self.env.fields_to_compute()
+            while fields_to_compute:
+                process(next(iter(fields_to_compute)))
         else:
             # recompute the given fields on self's model
             for fname in fnames:

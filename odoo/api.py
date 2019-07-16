@@ -564,7 +564,7 @@ class Environment(Mapping):
             This may be useful when recovering from a failed ORM operation.
         """
         self.cache.invalidate()
-        self.all.todo.clear()
+        self.all.tocompute.clear()
         # DLE P17: needs to empty towrite on exception/rollback,
         # otherwise there are pending write transaction which make no sense after the rollback/exception occured.
         self.all.towrite.clear()
@@ -577,15 +577,15 @@ class Environment(Mapping):
         # DLE P14: Not really sure about this one.
         # Basically it's for the self.assertRaises of tests,
         # which can happen in the middle of a test, and it should not rollback the transaction.
-        # Before it was enough to empty the todo and invalidate the cache, but now
-        # that the computation is done when necessary, the todo list and to write list must be preserved.
-        # The only way I see to do that is to copy the cache, todo and towrite somehow, and to apply it back after the "With"
+        # Before it was enough to empty the tocompute and invalidate the cache, but now
+        # that the computation is done when necessary, the tocompute list and to write list must be preserved.
+        # The only way I see to do that is to copy the cache, tocompute and towrite somehow, and to apply it back after the "With"
         # test `test_auto_join`
         # with self.assertRaises(NotImplementedError):
         #     partner_obj.search([('category_id.name', '=', 'foo')])
-        todo = {
-            field: list(recs_list)
-            for field, recs_list in self.all.todo.items()
+        tocompute = {
+            field: set(ids)
+            for field, ids in self.all.tocompute.items()
         }
         towrite = {
             model: {
@@ -598,8 +598,8 @@ class Environment(Mapping):
             yield
         except Exception:
             self.clear()
-            self.all.todo.clear()
-            self.all.todo.update(todo)
+            self.all.tocompute.clear()
+            self.all.tocompute.update(tocompute)
             self.all.towrite.clear()
             for model, id_values in towrite.items():
                 for record_id, values in id_values.items():
@@ -629,68 +629,36 @@ class Environment(Mapping):
         finally:
             protected.popmap()
 
-    def field_todo(self, field):
-        """ Return a recordset with all records to recompute for ``field``. """
-        rec_lists = self.all.todo.get(field, ())
-        if not rec_lists:
-            return ()
-        result = rec_lists[0]
-        for records in rec_lists[1:]:
-            result += records
-        return result
+    def fields_to_compute(self):
+        """ Return a view on the field to compute. """
+        return self.all.tocompute.keys()
 
-    def check_todo(self, field, record):
-        """ Check whether ``field`` must be recomputed on ``record``, and if so,
-            return the corresponding recordset to recompute.
-        """
-        for recs in self.all.todo.get(field, []):
-            if recs & record:
-                return recs
+    def records_to_compute(self, field):
+        """ Return the records to compute for ``field``. """
+        ids = self.all.tocompute.get(field, ())
+        return self[field.model_name].browse(ids)
 
-    def add_todo(self, field, records):
-        """ Mark ``field`` to be recomputed on ``records``, return newly added records. """
+    def is_to_compute(self, field, record):
+        """ Return whether ``field`` must be computed on ``record``. """
+        return record.id in self.all.tocompute.get(field, ())
+
+    def add_to_compute(self, field, records):
+        """ Mark ``field`` to be computed on ``records``, return newly added records. """
         if not records:
             return records
-        recs_list = self.all.todo.setdefault(field, [])
-        result = records
-        for i, recs in enumerate(recs_list):
-            if recs.env == records.env:
-                # only add records if not already in the recordset, much much
-                # cheaper in case recs is big and records is a singleton
-                # already present
-                result -= recs_list[i]
-                try:
-                    if not records <= recs:
-                        recs_list[i] |= result
-                    break
-                except TypeError:
-                    # same field of another object already exists
-                    pass
-        else:
-            recs_list.append(records)
-        return result
+        ids = self.all.tocompute[field]
+        added_ids = [id_ for id_ in records._ids if id_ not in ids]
+        ids.update(added_ids)
+        return records.browse(added_ids)
 
-    # FP NOTE: why is this so complex, rewrite it?
-    def remove_todo(self, field, records):
-        """ Mark ``field`` as recomputed on ``records``. """
-        try:
-            recs_list = [recs - records for recs in self.all.todo.pop(field, [])]
-        except TypeError:
-            recs_list = []
-        recs_list = [r for r in recs_list if r]
-        if recs_list:
-            self.all.todo[field] = recs_list
-
-    def has_todo(self):
-        """ Return whether some fields must be recomputed. """
-        return bool(self.all.todo)
-
-    def get_todo(self):
-        """ Return a pair ``(field, records)`` to recompute.
-            The field is such that none of its dependencies must be recomputed.
-        """
-        field = next(iter(self.all.todo))
-        return field
+    def remove_to_compute(self, field, records):
+        """ Mark ``field`` as computed on ``records``. """
+        if not records:
+            return
+        ids = self.all.tocompute[field]
+        ids.difference_update(records._ids)
+        if not ids:
+            del self.all.tocompute[field]
 
     @property
     def recompute(self):
@@ -709,9 +677,9 @@ class Environment(Mapping):
 class Environments(object):
     """ A common object for all environments in a request. """
     def __init__(self):
-        self.envs = WeakSet()           # weak set of environments
-        self.cache = Cache()            # cache for all records
-        self.todo = {}                  # recomputations {field: [records]}  FP NOTE: should be renamed to "tocompute"
+        self.envs = WeakSet()                   # weak set of environments
+        self.cache = Cache()                    # cache for all records
+        self.tocompute = defaultdict(set)       # recomputations {field: ids}
         self.recompute = True
         self.towrite = defaultdict(lambda : defaultdict(dict))  # {model: {id: {field: value}}}
 
