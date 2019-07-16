@@ -833,6 +833,9 @@ var BaseRange = class extends we3.AbstractPlugin {
      * @returns {object} {scID, so, ecID, eo}
      */
     _voidoidSelectToWE3 (range) {
+        if (!range.scArch || !range.ecArch) {
+            return range;
+        }
         if (!range.isCollapsed() && range.scArch.isText() && range.so === range.scArch.length() && range.scArch.nextSibling() && range.scArch.nextSibling().isVoidoid()) {
             range.scID = range.scArch.nextSibling().id;
             range.so = 0;
