@@ -115,6 +115,7 @@ var BaseArch = class extends we3.AbstractPlugin {
         this._resetChange();
         var _isDoTransaction = this._isDoTransaction;
         this._isDoTransaction = options;
+        this._changesInTransaction = [];
         var getArchNode = function (id) {
             if (!self._isDoTransaction) {
                 throw new Error("It is forbidden to take this function into your plugin.\n You're trying to move to the dark side!");
@@ -760,7 +761,7 @@ var BaseArch = class extends we3.AbstractPlugin {
         var range;
         var changes = [];
         var removed = {};
-        this._changes.forEach(function (c, i) {
+        this._changesInTransaction.concat(this._changes).forEach(function (c, i) {
             var id = c.archNode.id || c.id;
             if (!id || !self.getArchNode(id)) {
                 if (id && !removed[id]) {
@@ -1276,9 +1277,11 @@ var BaseArch = class extends we3.AbstractPlugin {
      */
     _resetChange () {
         if (this._isDoTransaction) {
-            return;
+            this._changesInTransaction = this._changesInTransaction.concat(this._changes);
+            this._changes = [];
+        } else {
+            this._changesInTransaction = this._changes = [];
         }
-        this._changes = [];
     }
     /**
      * Called after a transaction of changes ('do', or public Arch method)

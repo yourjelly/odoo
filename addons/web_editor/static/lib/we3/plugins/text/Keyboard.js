@@ -23,7 +23,7 @@ we3.addPlugin('Keyboard', class extends we3.AbstractPlugin {
                 return;
             }
             mutationsList.forEach(function (mutation) {
-                if (mutation.type == 'characterData') {
+                if (mutation.type == 'characterData' && self._keypressUpdatedTargets.indexOf(mutation.target) === -1) {
                     self._keypressUpdatedTargets.push(mutation.target);
                 }
                 if (mutation.type == 'childList') {
