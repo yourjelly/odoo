@@ -77,6 +77,9 @@ var HistoryPlugin = class extends we3.AbstractPlugin {
             var range = this._range[this.stackOffset];
             this.dependencies.Arch.importUpdate(diff, range);
             this._muteUpdate = false;
+            if (!diff.length) {
+                this.redo();
+            }
         }
     }
     /**
@@ -91,6 +94,9 @@ var HistoryPlugin = class extends we3.AbstractPlugin {
             var range = this._range[this.stackOffset];
             this.dependencies.Arch.importUpdate(diff, range);
             this._muteUpdate = false;
+            if (!diff.length) {
+                this.undo();
+            }
         }
     }
 

@@ -97,12 +97,26 @@ var TestHistory = class extends we3.AbstractPlugin {
 
         await this.dependencies.Test.triggerNativeEvents(undo, ['mousedown', 'click', 'mouseup']);
 
-        assert.strictEqual(this.dependencies.Test.getValue(), domA, "Should restore the previous range");
+        assert.strictEqual(this.dependencies.Test.getValue(), dom, "Should restore the previous range then undo again");
+        assert.ok(undo.classList.contains('disabled'), "The undo button should be disabled");
+        assert.ok(!redo.classList.contains('disabled'), "The redo button should be enabled");
+
+        this.dependencies.Arch.insert('A');
+        this.dependencies.Arch.addLine();
+
+        this.dependencies.Range.setRange({
+            scID: ID,
+            so: 2,
+            ecID: ID,
+            eo: 9,
+        });
+
+        await this.dependencies.Test.triggerNativeEvents(undo, ['mousedown', 'click', 'mouseup']);
+        assert.strictEqual(this.dependencies.Test.getValue(), domA, "Should restore the previous range then undo again (2)");
         assert.ok(!undo.classList.contains('disabled'), "The undo button should be enabled");
         assert.ok(!redo.classList.contains('disabled'), "The redo button should be enabled");
 
         await this.dependencies.Test.triggerNativeEvents(undo, ['mousedown', 'click', 'mouseup']);
-
         assert.strictEqual(this.dependencies.Test.getValue(), dom, "Should restore the dom (with char) and range");
         assert.ok(undo.classList.contains('disabled'), "The undo button should be disabled");
         assert.ok(!redo.classList.contains('disabled'), "The redo button should be enabled");
