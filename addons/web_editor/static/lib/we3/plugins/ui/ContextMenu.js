@@ -105,6 +105,23 @@ var ContextMenuPlugin = class extends PopoverPlugin {
     _updatePopover () {
         this.contextMenu.display = true;
     }
+    /**
+     * @override
+     */
+    _updatePopoverButtons () {
+        var self = this;
+        var buttons = [].slice.call(this.contextMenu.element.getElementsByTagName('we3-button'));
+        buttons.forEach(function (button) {
+            var name = button.getAttribute('name');
+            if (name) {
+                var method = self.buttons.enabled;
+                var enabled = typeof method === 'string' ? self[method](name) : method(name);
+                button.classList[enabled ? 'remove' : 'add']('disabled');
+            }
+        });
+        this._toggleDropDownEnabled();
+        this._updatePluginPlaceholder();
+    }
     _updatePosition (left, top) {
         this.contextMenu.element.style.left = left + 'px';
         this.contextMenu.element.style.top = top + 'px';
@@ -118,6 +135,7 @@ var ContextMenuPlugin = class extends PopoverPlugin {
         e.preventDefault();
         this._updatePopover();
         this.contextMenu.element.style.display = 'flex';
+        this._updatePopoverButtons();
         this._updatePosition(e.pageX, e.pageY);
     }
     _onMouseDown () {
