@@ -125,18 +125,6 @@ class AccountMove(models.Model):
             perc_nacionales_amount=sum(perc_nacionales.mapped('price_unit')),
         )
 
-    @api.multi
-    def action_invoice_open(self):
-        for rec in self.filtered(lambda x: x.company_id.country_id == self.env.ref('base.ar')):
-            if rec.company_id.currency_id == rec.currency_id:
-                l10n_ar_currency_rate = 1.0
-            else:
-                l10n_ar_currency_rate = rec.currency_id._convert(
-                    1.0, rec.company_id.currency_id, rec.company_id, rec.invoice_date or fields.Date.today(),
-                    round=False)
-            rec.l10n_ar_currency_rate = l10n_ar_currency_rate
-        return super().action_invoice_open()
-
     def _get_l10n_latam_documents_domain(self):
         self.ensure_one()
         domain = super()._get_l10n_latam_documents_domain()
@@ -302,8 +290,16 @@ class AccountMove(models.Model):
         ar_invoices = self.filtered(lambda x: x.company_id.country_id == self.env.ref('base.ar') and x.l10n_latam_use_documents)
         for rec in ar_invoices:
             rec.l10n_ar_afip_responsability_type_id = rec.commercial_partner_id.l10n_ar_afip_responsability_type_id.id
+            if rec.company_id.currency_id == rec.currency_id:
+                l10n_ar_currency_rate = 1.0
+            else:
+                l10n_ar_currency_rate = rec.currency_id._convert(
+                    1.0, rec.company_id.currency_id, rec.company_id, rec.invoice_date or fields.Date.today(), round=False)
+            rec.l10n_ar_currency_rate = l10n_ar_currency_rate
+
         # We make validations here and not with a constraint because we want validaiton before sending electronic
         # data on l10n_ar_edi
+
         # TODO Uncomment when fixed
         # ar_invoices.check_argentinian_invoice_taxes()
         return super().post()
