@@ -7,22 +7,17 @@
         <field name="model">res.partner</field>
         <field type="xml" name="arch">
             <field name="vat" position="attributes">
-                <attribute name="placeholder">Number</attribute>
-                <attribute name="class">oe_inline</attribute>
-                <!-- the widget field_partner_autocomplete make this field to be render on a new line on edit mode -->
-                <attribute name="widget"></attribute>
+                <attribute name="invisible">1</attribute>
             </field>
-            <div class="o_address_format" position="after">
+            <field name="vat" position="before">
                 <label for="l10n_latam_identification_type_id" string="Identification Number"/>
                 <div>
                     <field name="l10n_latam_identification_type_id" options="{'no_open': True, 'no_create': True}" placeholder="VAT" attrs="{'readonly': [('parent_id','!=',False)]}" class="oe_inline"/>
                     <span class="oe_read_only" attrs="{'invisible': [('l10n_latam_identification_type_id','!=',False)]}">VAT</span>
-                    <span name="vat_separator" class="oe_read_only"> - </span>
+                    <span class="oe_read_only"> - </span>
+                    <field name="l10n_latam_identification_number" placeholder="Number" class="oe_inline" attrs="{'readonly': [('parent_id','!=',False)]}"/>
                 </div>
-            </div>
-            <span name="vat_separator" position="after">
-                <field name="vat" position="move"/>
-            </span>
+            </field>
         </field>
     </record>
 

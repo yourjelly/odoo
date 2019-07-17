@@ -12,6 +12,7 @@ class ResPartner(models.Model):
             self.env.user.company_id.country_id.id),
         help="The type of identifications defined for LATAM countries")
     vat = fields.Char(string='VAT/Identification Number')
+    l10n_latam_identification_number = fields.Char(related='vat')
 
     @api.model
     def _commercial_fields(self):

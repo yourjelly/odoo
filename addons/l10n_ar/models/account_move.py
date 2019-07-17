@@ -243,48 +243,6 @@ class AccountMove(models.Model):
             if journal:
                 rec.journal_id = journal.id
 
-    # TODO move this patch to account module (between patch comments)
-    @api.multi
-    def _move_autocomplete_invoice_lines_values(self):
-        ''' This method recomputes dynamic lines on the current journal entry that include taxes, cash rounding
-        and payment terms lines.
-        '''
-        self.ensure_one()
-
-        line_currency = self.currency_id if self.currency_id != self.company_id.currency_id else False
-        for line in self.line_ids:
-            # Do something only on invoice lines.
-            if line.exclude_from_invoice_tab:
-                continue
-
-            # Ensure related fields are well copied.
-            line.partner_id = self.partner_id
-            line.date = self.date
-            line.recompute_tax_line = True
-            line.currency_id = line_currency
-
-            # Shortcut to load the demo data.
-            if not line.account_id:
-                line.account_id = line._get_computed_account()
-                if not line.account_id:
-                    if self.is_sale_document(include_receipts=True):
-                        line.account_id = self.journal_id.default_credit_account_id
-                    elif self.is_purchase_document(include_receipts=True):
-                        line.account_id = self.journal_id.default_debit_account_id
-
-            # PATCH START
-            # Shortcut to load the demo data.
-            if not line.tax_ids:
-                line.tax_ids = line._get_computed_taxes()
-            # PATCH END
-
-        self.line_ids._onchange_price_subtotal()
-        self._recompute_dynamic_lines(recompute_all_taxes=True)
-
-        values = self._convert_to_write(self._cache)
-        values.pop('invoice_line_ids', None)
-        return values
-
     @api.model_create_multi
     def create(self, vals_list):
         """ This funcionality was removed on v13. We need this so that in demo data, invoice creation from external api
