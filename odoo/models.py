@@ -5523,16 +5523,17 @@ Fields:
             recs = recs - self.env.protected(field)
             if field.compute and field.store:
                 try:
-                    field.compute_value(recs)
+                    recs.mapped(field.name)
                 except MissingError:
-                    field.compute_value(recs.exists())
+                    existing = recs.exists()
+                    existing.mapped(field.name)
                     # DLE P61: test_access_deleted_records
                     # `compute_value` ensures to call `remove_to_compute` for the record it treats
                     # but for the record it doesn't treat,
                     # e.g. records that no longer exists,
                     # they have to be removed here
                     # otherwise the record remains forever in the todo list, and leads to an infinite loop.
-                    self.env.remove_to_compute(field, recs - recs.exists())
+                    self.env.remove_to_compute(field, recs - existing)
             else:
                 self.env.cache.invalidate([(field, recs._ids)])
                 self.env.remove_to_compute(field, recs)
