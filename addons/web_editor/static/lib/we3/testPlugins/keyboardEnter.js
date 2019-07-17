@@ -440,7 +440,7 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                     key: 'ENTER',
                     shiftKey: true,
                 }],
-                test: "<p><b>dom<br/>◆ to edit</b></p>",
+                test: "<p><b>dom<br/>◆&nbsp;to edit</b></p>",
             },
             {
                 name: "in p > b: SHIFT+ENTER -> 'a'",
@@ -504,7 +504,7 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                     key: 'ENTER',
                     shiftKey: true,
                 }],
-                test: "<p><span><b>dom<br/>◆ to edit</b></span></p>",
+                test: "<p><span><b>dom<br/>◆&nbsp;to edit</b></span></p>",
             },
             {
                 name: "in span > b: SHIFT+ENTER -> 'a'",

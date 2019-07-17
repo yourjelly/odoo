@@ -102,7 +102,7 @@ var TestHistory = class extends we3.AbstractPlugin {
         assert.ok(!redo.classList.contains('disabled'), "The redo button should be enabled");
 
         this.dependencies.Arch.insert('A');
-        this.dependencies.Arch.addLine();
+        this.dependencies.Test.keypress(this.editable, {key: 'Enter'});
 
         this.dependencies.Range.setRange({
             scID: ID,

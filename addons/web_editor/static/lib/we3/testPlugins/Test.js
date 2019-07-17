@@ -716,13 +716,14 @@ var TestPlugin = class extends we3.AbstractPlugin {
             }
             triggeredEvents.push(ev);
 
-            await new Promise(setTimeout);
+            if (eventName !== 'keydown' && eventName !== 'keypress' && eventName !== 'beforeinput') {
+                await new Promise(setTimeout);
+            }
         };
-        return new Promise(function (resolve) { // TODO: remove this false timeout => change other tests (link who use a modal...)
-            setTimeout(function (argument) {
-                resolve(isMulti ? triggeredEvents : triggeredEvents[0]);
-            }, 0);
-        });
+
+        // await new Promise(setTimeout); // TODO: remove this false timeout => change other tests (link who use a modal...)
+
+        return isMulti ? triggeredEvents : triggeredEvents[0];
     }
 
     //--------------------------------------------------------------------------
@@ -734,13 +735,68 @@ var TestPlugin = class extends we3.AbstractPlugin {
             if (!keyPress.noTextInput) {
                 await this._textInput(target, keyPress.key);
             }
-        } else if (keyPress.key === 'Delete' && document.queryCommandSupported('forwardDelete')) {
+            return;
+        }
+        if (keyPress.key === 'Delete' && document.queryCommandSupported('forwardDelete')) {
             document.execCommand("forwardDelete", true);
-        } else if (keyPress.key === 'Backspace' && document.queryCommandSupported('delete')) {
+            return;
+        }
+        if (keyPress.key === 'Backspace' && document.queryCommandSupported('delete')) {
             document.execCommand("delete", true);
-        } else if (keyPress.key === 'Enter' && document.queryCommandSupported('insertBrOnReturn')) {
-            document.execCommand("insertBrOnReturn", true);
-        } else if (keyPress.key === 'ArrowLeft') {
+            return;
+        }
+        if (keyPress.key === 'Enter') {
+            if (keyPress.shiftKey) {
+                if (document.queryCommandSupported('insertHTML')) {
+                    document.execCommand("insertHTML", false, '<br>');
+                    return;
+                }
+            } else if (keyPress.altKey) {
+                if (document.queryCommandSupported('insertHTML')) {
+                    document.execCommand("insertHTML", false, '<hr>');
+                    return;
+                }
+            } else if (document.queryCommandSupported('insertBrOnReturn')) {
+                document.execCommand("insertBrOnReturn", true);
+                return;
+            } else {
+                var range = this.dependencies.Range.getRange();
+                if (range.isCollapsed() || document.queryCommandSupported('delete')) {
+                    if (!range.isCollapsed()) {
+                        document.execCommand("delete", true);
+                    }
+                    var node = range.sc;
+                    var offset = range.so;
+                    while (node !== this.editable && node.tagName !== "TEST-CONTAINER" && node.parentNode) {
+                        var n = node.cloneNode(false);
+                        if (node.tagName) {
+                            [].slice.call(node.childNodes).forEach(function (child, index) {
+                                if (index < offset) {
+                                    n.appendChild(child);
+                                }
+                            });
+                            if (n.tagName !== 'BR' && n.innerHTML === '') {
+                                n.innerHTML = '<br/>';
+                            }
+                        } else {
+                            n.nodeValue = node.nodeValue.slice(0, offset);
+                            node.nodeValue = node.nodeValue.slice(offset);
+                        }
+
+                        node.parentNode.insertBefore(n, node);
+
+                        if (node.tagName && window.getComputedStyle(node).display === 'block') {
+                            break;
+                        }
+
+                        offset = [].indexOf.call(node.parentNode.childNodes, node);
+                        node = node.parentNode;
+                    }
+                    return;
+                }
+            }
+        }
+        if (keyPress.key === 'ArrowLeft') {
             var range = this.dependencies.Range.getRange();
             if (!range.isCollapsed()) {
                 this._selectRange(range.sc, range.so);
@@ -752,7 +808,9 @@ var TestPlugin = class extends we3.AbstractPlugin {
             } else {
                 console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
             }
-        } else if (keyPress.key === 'ArrowRight') {
+            return;
+        }
+        if (keyPress.key === 'ArrowRight') {
             var range = this.dependencies.Range.getRange();
             if (!range.isCollapsed()) {
                 this._selectRange(range.ec, range.eo);
@@ -763,9 +821,9 @@ var TestPlugin = class extends we3.AbstractPlugin {
             } else {
                 console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
             }
-        } else {
-            console.warn('Native "' + keyPress.key + '" is not supported in test');
+            return;
         }
+        console.warn('Native "' + keyPress.key + '" is not supported in test');
     }
     /**
      * clean the value for testing, display space, virtual...
