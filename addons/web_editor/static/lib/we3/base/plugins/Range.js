@@ -801,13 +801,13 @@ var BaseRange = class extends we3.AbstractPlugin {
     _voidoidSelectToNative (range) {
         var sc = range.sc;
         var so = range.so;
-        if (range.scArch.isVoidoid()) {
+        if (range.scArch.isVoidoid() && sc.parentNode) {
             so = [].indexOf.call(sc.parentNode.childNodes, sc);
             sc = sc.parentNode;
         }
         var ec = range.ec;
         var eo = range.eo;
-        if (range.ecArch.isVoidoid()) {
+        if (range.ecArch.isVoidoid() && sc.parentNode) {
             eo = [].indexOf.call(ec.parentNode.childNodes, ec);
             ec = ec.parentNode;
         }

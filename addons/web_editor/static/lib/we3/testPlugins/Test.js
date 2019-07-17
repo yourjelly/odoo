@@ -729,6 +729,44 @@ var TestPlugin = class extends we3.AbstractPlugin {
     // Private
     //--------------------------------------------------------------------------
 
+    async _afterTriggerNativeKeyPressEvents (target, keyPress) {
+        if (keyPress.key.length === 1) {
+            if (!keyPress.noTextInput) {
+                await this._textInput(target, keyPress.key);
+            }
+        } else if (keyPress.key === 'Delete' && document.queryCommandSupported('forwardDelete')) {
+            document.execCommand("forwardDelete", true);
+        } else if (keyPress.key === 'Backspace' && document.queryCommandSupported('delete')) {
+            document.execCommand("delete", true);
+        } else if (keyPress.key === 'Enter' && document.queryCommandSupported('insertBrOnReturn')) {
+            document.execCommand("insertBrOnReturn", true);
+        } else if (keyPress.key === 'ArrowLeft') {
+            var range = this.dependencies.Range.getRange();
+            if (!range.isCollapsed()) {
+                this._selectRange(range.sc, range.so);
+            } else if (range.so > 1) {
+                this._selectRange(range.sc, range.so - 1);
+            } else if (range.sc.previousSibling) {
+                var prev = range.sc.previousSibling;
+                this._selectRange(prev, 'length' in prev ? prev.length : prev.childNodes.length);
+            } else {
+                console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
+            }
+        } else if (keyPress.key === 'ArrowRight') {
+            var range = this.dependencies.Range.getRange();
+            if (!range.isCollapsed()) {
+                this._selectRange(range.ec, range.eo);
+            } else if (range.so < ('length' in range.sc ? range.sc.length : range.sc.childNodes.length)) {
+                this._selectRange(range.sc, range.so + 1);
+            } else if (range.sc.nextSibling) {
+                this._selectRange(range.sc.nextSibling, 0);
+            } else {
+                console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
+            }
+        } else {
+            console.warn('Native "' + keyPress.key + '" is not supported in test');
+        }
+    }
     /**
      * clean the value for testing, display space, virtual...
      *
@@ -861,6 +899,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
 
             if (button) {
                 button.style.backgroundColor = '#ccffcc';
+                button.style.color = '#333333';
                 button.classList.add('good');
                 button.classList.remove('fail');
                 button.lastChild.innerHTML = '(' + nTests + ')';
@@ -870,6 +909,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
 
             if (button) {
                 button.style.backgroundColor = '#ffcccc';
+                button.style.color = '#333333';
                 button.classList.remove('good');
                 button.classList.add('fail');
                 button.lastChild.innerHTML = '(' + nOKTests + '/' + nTests + ')';
@@ -881,6 +921,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
             var good = buttonList.lastElementChild.querySelectorAll('.good').length;
             var fail = buttonList.lastElementChild.querySelectorAll('.fail').length;
             buttonList.firstElementChild.style.backgroundColor = fail ? '#ffcccc' : '#ccffcc';
+            buttonList.firstElementChild.style.color = '#333333';
             buttonList.firstElementChild.textContent = 'Test (' + good + '/' + total + ')';
         }
     }
@@ -925,44 +966,6 @@ var TestPlugin = class extends we3.AbstractPlugin {
         this._complete = true;
         if (this.options.test && this.options.test.callback) {
             this.options.test.callback(this._results);
-        }
-    }
-    async _afterTriggerNativeKeyPressEvents (target, keyPress) {
-        if (keyPress.key.length === 1) {
-            if (!keyPress.noTextInput) {
-                await this._textInput(target, keyPress.key);
-            }
-        } else if (keyPress.key === 'Delete' && document.queryCommandSupported('forwardDelete')) {
-            document.execCommand("forwardDelete", true);
-        } else if (keyPress.key === 'Backspace' && document.queryCommandSupported('delete')) {
-            document.execCommand("delete", true);
-        } else if (keyPress.key === 'Enter' && document.queryCommandSupported('insertBrOnReturn')) {
-            document.execCommand("insertBrOnReturn", true);
-        } else if (keyPress.key === 'ArrowLeft') {
-            var range = this.dependencies.Range.getRange();
-            if (!range.isCollapsed()) {
-                this._selectRange(range.sc, range.so);
-            } else if (range.so > 1) {
-                this._selectRange(range.sc, range.so - 1);
-            } else if (range.sc.previousSibling) {
-                var prev = range.sc.previousSibling;
-                this._selectRange(prev, 'length' in prev ? prev.length : prev.childNodes.length);
-            } else {
-                console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
-            }
-        } else if (keyPress.key === 'ArrowRight') {
-            var range = this.dependencies.Range.getRange();
-            if (!range.isCollapsed()) {
-                this._selectRange(range.ec, range.eo);
-            } else if (range.so < ('length' in range.sc ? range.sc.length : range.sc.childNodes.length)) {
-                this._selectRange(range.sc, range.so + 1);
-            } else if (range.sc.nextSibling) {
-                this._selectRange(range.sc.nextSibling, 0);
-            } else {
-                console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
-            }
-        } else {
-            console.warn('Native "' + keyPress.key + '" is not supported in test');
         }
     }
     /**
