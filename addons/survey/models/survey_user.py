@@ -234,37 +234,43 @@ class SurveyUserInputLine(models.Model):
     def check_dependency_rule(self, answer_sudo, question):
         """ show/hide the question based on dependency rule """
         def check_multilevel_dependency(answer_sudo, question):
+            result = False
             answer = answer_sudo.user_input_line_ids.filtered(lambda answer: answer.question_id.id == question.question_depend_id.id)
-            if answer and answer.answer_type != 'suggestion' and not answer.skipped:
-                answer_type = 'value_%s' % answer.answer_type
-                if hasattr(question, answer_type):
-                    domain = [(answer_type, question.operator, getattr(question, answer_type))]
-            elif answer and answer.answer_type == 'suggestion' and not answer.skipped:
-                answer_question = answer.question_id
-                if answer_question.question_type in ['multiple_choice', 'simple_choice']:
-                    answer_type = 'value_suggested'
+            if question.question_depend_id.question_type not in ['multiple_choice', 'matrix']:
+                # always get single user input line
+                if answer and answer.answer_type != 'suggestion' and not answer.skipped:
+                    answer_type = 'value_%s' % answer.answer_type
+                    if hasattr(question, answer_type):
+                        result = self.search([
+                            (answer_type, question.operator, getattr(question, answer_type)),
+                            ('id', '=',  answer.id),
+                            ('question_id', '=', answer.question_id.id)
+                        ])
+                if answer and answer.answer_type == 'suggestion' and not answer.skipped:
+                    result = self.search([
+                        ('value_suggested', question.operator, question.value_suggestions_id.id),
+                        ('id', '=',  answer.id),
+                        ('question_id', '=', answer.question_id.id)
+                    ])
+            else:
+                if answer and question.question_depend_id.question_type == 'multiple_choice':
+                    result = question.search([
+                        ('value_suggestions_ids', question.operator, answer.mapped('value_suggested').ids),
+                        ('id', '=',  question.id),
+                    ])
                 else:
-                    answer_type = 'value_suggested_row'
-                domain = [(answer_type, question.operator, question.value_suggetion_ids.ids)]
+                    return False
+            if result and question.action == 'show':
+                if question.question_depend_id.is_enable_question_dependency:
+                    return check_multilevel_dependency(answer_sudo, question.question_depend_id)
+                else:
+                    return True
+            elif result and question.action == 'hide':
+                return False
+            elif not result and question.action == 'hide':
+                return True
             else:
                 return False
-            if domain:
-                domain = expression.AND([domain, [
-                    ('question_id', '=', answer.question_id.id),
-                    ('id', '=',  answer.id)]
-                ])
-                uli = answer.search(domain)
-                if uli and question.action == 'show':
-                    if question.question_depend_id.is_enable_question_dependency:
-                        return check_multilevel_dependency(answer_sudo, question.question_depend_id)
-                    else:
-                        return True
-                elif uli and question.action == 'hide':
-                    return False
-                elif not uli and question.action == 'hide':
-                    return True
-                else:
-                    return False
         return check_multilevel_dependency(answer_sudo, question)
 
     @api.constrains('skipped', 'answer_type')

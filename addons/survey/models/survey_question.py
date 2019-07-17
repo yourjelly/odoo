@@ -136,7 +136,9 @@ class SurveyQuestion(models.Model):
     value_number = fields.Float(string="Value")
     action = fields.Selection([('show', 'Show'), ('hide', 'Hide')], string='Action', default='show')
     # for multiple choice and matrix question
-    value_suggetion_ids = fields.Many2many('survey.label', string="Value", domain="['|', ('question_id', '=', question_depend_id), ('question_id_2', '=', question_depend_id)]")
+    value_suggestions_id = fields.Many2one('survey.label', string="Value Suggestion", domain="['|', ('question_id', '=', question_depend_id), ('question_id_2', '=', question_depend_id)]")
+    value_suggestions_ids = fields.Many2many('survey.label', string="Value Suggestion Multichoice", domain="['|', ('question_id', '=', question_depend_id), ('question_id_2', '=', question_depend_id)]")
+    value_suggestions_row_ids = fields.One2many('survey.suggested.label', 'question_depend_id', string="Value")
 
     _sql_constraints = [
         ('positive_len_min', 'CHECK (validation_length_min >= 0)', 'A length must be positive!'),
@@ -405,3 +407,12 @@ class SurveyLabel(models.Model):
         for label in self:
             if not bool(label.question_id) != bool(label.question_id_2):
                 raise ValidationError(_("A label must be attached to only one question."))
+
+
+class SurveySuggestedLabel(models.Model):
+    """ A suggested answer for a depended question """
+    _name = 'survey.suggested.label'
+
+    question_depend_id = fields.Many2one('survey.question', string='Question', ondelete='cascade')
+    suggested_row_id = fields.Many2one('survey.label', string="Suggested Row", domain="[('question_id_2', '=', question_depend_id)]")
+    suggested_answer_id = fields.Many2one('survey.label', string="Suggested Answer", domain="[('question_id', '=', question_depend_id)]")
