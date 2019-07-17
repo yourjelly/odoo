@@ -385,7 +385,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         # this field must override any other column or field
         self._add_field(self.CONCURRENCY_CHECK_FIELD, fields.Datetime(
-            string='Last Modified on', compute=last_modified_name, automatic=True))
+            string='Last Modified on', compute=last_modified_name,
+            compute_sudo=False, automatic=True))
 
     def compute_concurrency_field(self):
         for record in self:
