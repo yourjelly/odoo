@@ -743,8 +743,8 @@ class test_m2m(ImporterCase):
         self.assertEqual(len(result['ids']), 3)
 
         b = self.browse()
-        self.assertEqual(values(b[0].value), [3, 44])
-        self.assertEqual(values(b[2].value), [44, 84])
+        self.assertCountEqual(values(b[0].value), [3, 44])
+        self.assertCountEqual(values(b[2].value), [44, 84])
 
     def test_noxids(self):
         result = self.import_(['value/id'], [['noxidforthat']])
