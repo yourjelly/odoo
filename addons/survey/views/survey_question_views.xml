@@ -163,7 +163,8 @@
                                     <field name="is_enable_question_dependency"/>
                                 </group>
                                 <group string="Dependency Rule" attrs="{'invisible':[('is_enable_question_dependency', '=', False)]}" >
-                                    <field name="question_depend_id" options="{'no_create': True}" attrs="{'required': [('is_enable_question_dependency', '!=', False)]}" domain="[('id', '!=', context.get('active_id')), ('page_id', '=', context.get('page_id'))]"/>
+                                    <!-- <field name="question_depend_id" options="{'no_create': True}" attrs="{'required': [('is_enable_question_dependency', '!=', False)]}" domain="[('question_type', '!=', 'matrix'),('id', '!=', context.get('active_id')), ('page_id', '=', context.get('page_id'))]"/> -->
+                                    <field name="question_depend_id" options="{'no_create': True}" attrs="{'required': [('is_enable_question_dependency', '!=', False)]}"/>
                                     <field name="depend_question_type" invisible="1"/>
                                     <field name="operator" attrs="{'invisible':[('question_depend_id', '=', False)], 'required': [('question_depend_id', '!=', False)]}"/>
                                     <!-- <field name="operator_id" widget="selection" options="{'no_create': True}" attrs="{'invisible':[('question_depend_id', '=', False)], 'required': [('question_depend_id', '!=', False)]}"/> -->
@@ -173,13 +174,6 @@
                                     <field name="value_number" attrs="{'invisible':[('depend_question_type', '!=', 'numerical_box')]}"/>
                                     <field name="value_suggestions_id" options="{'no_create': True}" context="{'default_question_id': question_depend_id}" attrs="{'invisible':[('depend_question_type', '!=', 'simple_choice')]}"/>
                                     <field name="value_suggestions_ids" widget="many2many_tags" options="{'no_create': True}" context="{'default_question_id': question_depend_id}" attrs="{'invisible':[('depend_question_type', '!=', 'multiple_choice')]}"/>
-                                    <field name="value_suggestions_row_ids" context="{'default_question_depend_id': question_depend_id}" attrs="{'invisible':[('depend_question_type', '!=', 'matrix')]}">
-                                        <tree editable="bottom">
-                                            <field name="question_depend_id" invisible="1"/>
-                                            <field name="suggested_row_id" string="Row"/>
-                                            <field name="suggested_answer_id" string="Answer"/>
-                                        </tree>
-                                    </field>
                                     <field name="action" attrs="{'invisible':[('question_depend_id', '=', False)], 'required': [('operator', '!=', False)]}"/>
                                 </group>
                             </group>
