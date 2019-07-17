@@ -45,7 +45,7 @@ var TestRenderer = class extends we3.AbstractPlugin {
                     key: 'ENTER',
                 }],
                 test: '<p><b>dom to edit</b></p><p><br/>◆</p><p>other content</p>',
-                testDOM: '<p>\uFEFF<b>dom to edit</b></p><p><br></p><p>other content</p>', // todo: remove useless virtual
+                testDOM: '<p><b>dom to edit</b></p><p><br></p><p>other content</p>',
             },
         ];
     }

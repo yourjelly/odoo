@@ -146,9 +146,11 @@ var BaseRange = class extends we3.AbstractPlugin {
     }
     /**
      * Restore the range to its last saved value.
+     *
+     * @returns {Object|undefined} {range: {WrappedRange}, focus: {ArchNode}}
      */
     restore () {
-        this._setRange(this._getRange());
+        return this._setRange(this._getRange());
     }
     /**
      * Select all the contents of the previous start container's first
@@ -175,6 +177,7 @@ var BaseRange = class extends we3.AbstractPlugin {
      * @param {Boolean} [options.moveLeft] true if a movement is initiated from right to left
      * @param {Boolean} [options.moveRight] true if a movement is initiated from left to right
      * @param {Boolean} [options.muteTrigger]
+     * @returns {Object|undefined} {range: {WrappedRange}, focus: {ArchNode}}
      */
     setRange (points, options) {
         this._computeSetRange(points, options);
@@ -699,6 +702,7 @@ var BaseRange = class extends we3.AbstractPlugin {
      * @param {Object} [options]
      * @param {Boolean} [options.muteTrigger]
      * @param {Boolean} [options.muteDOMRange]
+     * @returns {Object|undefined} {range: {WrappedRange}, focus: {ArchNode}}
      */
     _setRange (oldRange, options) {
         if (!this._editorFocused) {
@@ -727,12 +731,16 @@ var BaseRange = class extends we3.AbstractPlugin {
             res.range = this.toJSON();
             if (!options || !options.muteTrigger) {
                 this.trigger('range', res.range);
+            } else {
+                // this._didRangeChange = didRangeChange; // TODO: fix undo
             }
         }
         if (isChangeFocusNode) {
             res.focus = this.getFocusedNode();
             if (!options || !options.muteTrigger) {
                 this.trigger('focus', res.focus);
+            } else {
+                this._didChangeFocusNode = isChangeFocusNode;
             }
         }
 
@@ -801,13 +809,13 @@ var BaseRange = class extends we3.AbstractPlugin {
     _voidoidSelectToNative (range) {
         var sc = range.sc;
         var so = range.so;
-        if (range.scArch.isVoidoid() && sc.parentNode) {
+        if (range.scArch.isVoidoid() && sc && sc.parentNode) {
             so = [].indexOf.call(sc.parentNode.childNodes, sc);
             sc = sc.parentNode;
         }
         var ec = range.ec;
         var eo = range.eo;
-        if (range.ecArch.isVoidoid() && sc.parentNode) {
+        if (range.ecArch.isVoidoid() && sc && sc.parentNode) {
             eo = [].indexOf.call(ec.parentNode.childNodes, ec);
             ec = ec.parentNode;
         }
@@ -1020,6 +1028,8 @@ var Range = class extends we3.AbstractPlugin {
     }
     /**
      * Restore the range to its last saved value.
+     *
+     * @returns {Object|undefined} {range: {WrappedRange}, focus: {ArchNode}}
      */
     restore () {
         return this.dependencies.BaseRange.restore();
@@ -1046,6 +1056,7 @@ var Range = class extends we3.AbstractPlugin {
      * @param {Boolean} [options.moveLeft] true if a movement is initiated from right to left
      * @param {Boolean} [options.moveRight] true if a movement is initiated from left to right
      * @param {Boolean} [options.muteTrigger]
+     * @returns {Object|undefined} {range: {WrappedRange}, focus: {ArchNode}}
      */
     setRange (range, options) {
         return this.dependencies.BaseRange.setRange(range, options);

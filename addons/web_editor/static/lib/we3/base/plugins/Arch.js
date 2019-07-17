@@ -614,13 +614,13 @@ var BaseArch = class extends we3.AbstractPlugin {
         options = options || {};
         var range = this.dependencies.BaseRange.getRange();
         var start, end;
+        var scArch = this.getArchNode(range.scID)
         if (range.isCollapsed()) {
             start = end = this.createArchNode();
-            this.insert(start);
+            scArch.insert(start, range.so);
         } else {
             var ecArch = this.getArchNode(range.ecID);
             end = options.doNotSplit ? ecArch : ecArch.split(range.eo) || ecArch;
-            var scArch = this.getArchNode(range.scID)
             start = options.doNotSplit ? scArch : scArch.split(range.so) || scArch;
         }
         var selectedNodes = start.getNodesUntil(end, {
@@ -678,7 +678,7 @@ var BaseArch = class extends we3.AbstractPlugin {
         }
         if (!toWrap.length) {
             var virtual = this.createArchNode();
-            this.insert(virtual);
+            scArch.insert(start, range.so);
             toWrap = [virtual];
         }
         return this._wrap(toWrap.map(node => node.id), wrapperName, options);
@@ -716,37 +716,45 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @private
      * @param {Object} [range]
      * @param {Object} [result]
+     * @returns {Object|undefined} {range: {WrappedRange}, focus: {ArchNode}}
      */
     _applyChangesOnRendererAndRerange (range, result) {
-        var self = this;
         var BaseRenderer = this.dependencies.BaseRenderer;
         var BaseRange = this.dependencies.BaseRange;
-
-        BaseRenderer.update(result.json);
 
         var rangeRes;
         if (range) {
             rangeRes = BaseRange.setRange(range, {
+                muteDOMRange: true,
                 muteTrigger: true,
             });
         } else {
             range = result.range;
-            if (BaseRenderer.getElement(range.id)) {
-                rangeRes = BaseRange.setRange({
-                    scID: range.id,
-                    so: range.offset,
-                }, {
-                    muteTrigger: true,
-                });
-            }
+            rangeRes = BaseRange.setRange({
+                scID: range.id,
+                so: range.offset,
+            }, {
+                muteDOMRange: true,
+                muteTrigger: true,
+            });
             delete result.range;
         }
+
+        this._changes = [];
+        this._cleanUnnecessaryVirtuals();
+        if (this._changes.length) {
+            var processedChanges = this._processChanges(this._changes);
+            result.json = result.json.concat(processedChanges.json);
+        }
+
+        BaseRenderer.update(result.json);
+        rangeRes = BaseRange.restore();
 
         return rangeRes;
     }
     /**
      * Get the current changes after application of the rules and filtering
-     * out the nodes are not in the Arch anymore.
+     * out the nodes that are not in the Arch anymore.
      * Deduce the range from the changes and return an object with the changes
      * and the range.
      *
@@ -754,60 +762,10 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @return {Object} {changes: {JSON []}, json: {Object []}, removed: {Object}, range: {Object}}
      */
     _applyRulesAndGetChanges () {
-        var self = this;
-        var BaseRenderer = this.dependencies.BaseRenderer;
-        this.dependencies.BaseRules.applyRules(this._changes.map(function (c) {return c.archNode}));
-
-        var range;
-        var changes = [];
-        var removed = {};
-        this._changesInTransaction.concat(this._changes).forEach(function (c, i) {
-            var id = c.archNode.id || c.id;
-            if (!id || !self.getArchNode(id)) {
-                if (id && !removed[id]) {
-                    removed[id] = {
-                        id: id,
-                        element: BaseRenderer.getElement(id),
-                    };
-                }
-                return;
-            }
-            var toAdd = true;
-            changes.forEach(function (change) {
-                if (change.id === c.archNode.id || change.id && change.id === c.id) {
-                    toAdd = false;
-                    if (c.offset != null || change.offset == null) {
-                        change.offset = c.offset;
-                    }
-                    if (c.isRange) {
-                        range = change;
-                    }
-                }
-            });
-            if (toAdd) {
-                var change = {
-                    id: c.archNode.id || c.id,
-                    offset: c.offset,
-                };
-                changes.push(change);
-                if (!range || c.isRange) {
-                    range = change;
-                }
-            }
-        });
-
-        var json = changes.map(function (change) {
-            return self.getArchNode(change.id).toJSON({
-                keepVirtual: true,
-            });
-        });
-
-        return {
-            changes: changes,
-            json: json,
-            removed: removed,
-            range: range,
-        };
+        var changedArchNodes = this._changes.map(change => change.archNode);
+        this.dependencies.BaseRules.applyRules(changedArchNodes);
+        var changesToProcess = this._changesInTransaction.concat(this._changes);
+        return this._processChanges(changesToProcess);
     }
     /**
      * Take the list of current changes
@@ -874,6 +832,43 @@ var BaseArch = class extends we3.AbstractPlugin {
             id: archNode.id,
             archNode: archNode,
             offset: offset,
+        });
+    }
+    /**
+     * Before rendering, remove all unnecessary virtual nodes. At most one
+     * virtual node should stay at a time. The virtual can stay iff:
+     * - if the range is on the virtual
+     * - AND the virtual is not next to a text node
+     */
+    _cleanUnnecessaryVirtuals () {
+        var BaseRange = this.dependencies.BaseRange;
+        var range = BaseRange.getRange();
+        if (!range.scArch.isVirtual() && !range.ecArch.isVirtual()) {
+            return this._removeAllVirtualText(); // remove if not on range
+        }
+
+        var virtuals = this._arch.descendents('isVirtual', true);
+        virtuals.slice().forEach(function (virtual) {
+            var isSc = range.scID === virtual.id;
+            var isEc = range.ecID === virtual.id;
+            if (!isSc && !isEc) {
+                return virtual.remove(); // remove if not on range
+            }
+
+            var prev = virtual.previousSibling();
+            var isPrevText = prev && prev.isText();
+            var next = virtual.nextSibling();
+            var isNextText = next && next.isText();
+            if (isPrevText || isNextText) {
+                var textNode = isPrevText ? prev : next;
+                virtual.remove(); // remove if next to text (rerange on text)
+                BaseRange.setRange({
+                    scID: isSc ? textNode.id : range.scID,
+                    so: isSc ? (isPrevText ? textNode.length() : 0) : range.so,
+                    ecID: isEc ? textNode.id : range.ecID,
+                    eo: isEc ? (isPrevText ? textNode.length() : 0) : range.eo,
+                }, { muteDOMRange: true });
+            }
         });
     }
     /**
@@ -1101,6 +1096,69 @@ var BaseArch = class extends we3.AbstractPlugin {
             });
         }
         return archNode;
+    }
+    /**
+     * Filter out the nodes that are not in the Arch anymore from a list of
+     * changes. Deduce the range from the changes and return an object with the
+     * changes and the range.
+     *
+     * @private
+     * @param {Object []} changesToProcess
+     * @return {Object} {changes: {JSON []}, json: {Object []}, removed: {Object}, range: {Object}}
+     */
+    _processChanges (changesToProcess) {
+        var self = this;
+        var BaseRenderer = this.dependencies.BaseRenderer;
+        var range;
+        var changes = [];
+        var removed = {};
+        changesToProcess.forEach(function (c) {
+            var id = c.archNode.id || c.id;
+            if (!id || !self.getArchNode(id)) {
+                if (id && !removed[id]) {
+                    removed[id] = {
+                        id: id,
+                        element: BaseRenderer.getElement(id),
+                    };
+                }
+                return;
+            }
+            var toAdd = true;
+            changes.forEach(function (change) {
+                if (change.id === c.archNode.id || change.id && change.id === c.id) {
+                    toAdd = false;
+                    if (c.offset != null || change.offset == null) {
+                        change.offset = c.offset;
+                    }
+                    if (c.isRange) {
+                        range = change;
+                    }
+                }
+            });
+            if (toAdd) {
+                var change = {
+                    id: c.archNode.id || c.id,
+                    offset: c.offset,
+                };
+                changes.push(change);
+                if (!range || c.isRange) {
+                    range = change;
+                }
+            }
+        });
+
+        var json = changes.map(function (change) {
+            return self.getArchNode(change.id).toJSON({
+                keepVirtual: true,
+            });
+        });
+
+        return {
+            changes: changes,
+            json: json,
+            removed: removed,
+            range: range,
+        };
     }
     /**
      * Remove all virtual text nodes from the Arch, except the optional

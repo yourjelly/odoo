@@ -420,7 +420,8 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                 }, {
                     key: 'ENTER',
                 }],
-                test: "<p><b>dom<br/></b></p><p><b>◆ to edit</b></p>",
+                test: "<p><b>dom<br/><br/></b></p><p><b>◆ to edit</b></p>",
+                // the extra BR appeared to make the first one visible
             },
             {
                 name: "in p > b: ENTER -> a'",
@@ -463,7 +464,8 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                 }, {
                     key: 'a',
                 }],
-                test: "<p><b>dom<br/></b></p><p><b>a◆ to edit</b></p>",
+                test: "<p><b>dom<br/><br/></b></p><p><b>a◆ to edit</b></p>",
+                // the extra BR appeared to make the first one visible
             },
             {
                 name: "in span > b: ENTER",
@@ -482,7 +484,8 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                 }, {
                     key: 'ENTER',
                 }],
-                test: "<p><span><b>dom<br/></b></span></p><p><span><b>◆ to edit</b></span></p>",
+                test: "<p><span><b>dom<br/><br/></b></span></p><p><span><b>◆ to edit</b></span></p>",
+                // the extra BR appeared to make the first one visible
             },
             {
                 name: "in span > b: ENTER -> 'a'",
@@ -525,7 +528,8 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                 }, {
                     key: 'a',
                 }],
-                test: "<p><span><b>dom<br/></b></span></p><p><span><b>a◆ to edit</b></span></p>",
+                test: "<p><span><b>dom<br/><br/></b></span></p><p><span><b>a◆ to edit</b></span></p>",
+                // the extra BR appeared to make the first one visible
             },
             {
                 name: "in p: 2x SHIFT+ENTER -> 'a'",
@@ -571,7 +575,8 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                     key: 'ENTER',
                     shiftKey: true,
                 }],
-                test: "<p>dom&nbsp;<br/>◆</p><p>to edit</p>",
+                test: "<p>dom&nbsp;<br/><br/>◆</p><p>to edit</p>",
+                // the extra BR appeared to make the first one visible
             },
             {
                 name: "in p: SHIFT+ENTER at end -> '寺'",
