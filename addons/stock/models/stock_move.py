@@ -147,7 +147,6 @@ class StockMove(models.Model):
     string_availability_info = fields.Text(
         'Availability', compute='_compute_string_qty_information',
         readonly=True, help='Show various information on stock availability for this move')
-    restrict_partner_id = fields.Many2one('res.partner', 'Owner ', help="Technical field used to depict a restriction on the ownership of quants to consider when marking this move as 'done'")
     route_ids = fields.Many2many('stock.location.route', 'stock_location_route_move', 'move_id', 'route_id', 'Destination route', help="Preferred route")
     warehouse_id = fields.Many2one('stock.warehouse', 'Warehouse', help="Technical field depicting the warehouse to consider for the route selection on the next procurement (if any).")
     has_tracking = fields.Selection(related='product_id.tracking', string='Product with Tracking')
@@ -634,7 +633,7 @@ class StockMove(models.Model):
     def _prepare_merge_moves_distinct_fields(self):
         return [
             'product_id', 'price_unit', 'product_packaging', 'procure_method',
-            'product_uom', 'restrict_partner_id', 'scrapped', 'origin_returned_move_id',
+            'product_uom', 'scrapped', 'origin_returned_move_id',
             'package_level_id', 'propagate_cancel', 'propagate_date', 'propagate_date_minimum_delta',
             'delay_alert',
         ]
@@ -643,8 +642,8 @@ class StockMove(models.Model):
     def _prepare_merge_move_sort_method(self, move):
         move.ensure_one()
         return [
-            move.product_id.id, move.price_unit, move.product_packaging.id, move.procure_method, 
-            move.product_uom.id, move.restrict_partner_id.id, move.scrapped, move.origin_returned_move_id.id,
+            move.product_id.id, move.price_unit, move.product_packaging.id, move.procure_method,
+            move.product_uom.id, move.scrapped, move.origin_returned_move_id.id,
             move.package_level_id.id, move.propagate_cancel, move.propagate_date, move.propagate_date_minimum_delta,
             move.delay_alert,
         ]
@@ -1284,11 +1283,10 @@ class StockMove(models.Model):
             vals['product_uom'] = self.env.context['force_split_uom_id']
         return vals
 
-    def _split(self, qty, restrict_partner_id=False):
+    def _split(self, qty):
         """ Splits qty from move move into a new move
 
         :param qty: float. quantity to split (given in product UoM)
-        :param restrict_partner_id: optional partner that can be given in order to force the new move to restrict its choice of quants to the ones belonging to this partner.
         :param context: dictionay. can contains the special key 'source_location_id' in order to force the source location when copying the move
         :returns: id of the backorder move created """
         self = self.with_prefetch() # This makes the ORM only look for one record and not 300 at a time, which improves performance
@@ -1312,9 +1310,6 @@ class StockMove(models.Model):
             defaults = self._prepare_move_split_vals(uom_qty)
         else:
             defaults = self.with_context(force_split_uom_id=self.product_id.uom_id.id)._prepare_move_split_vals(qty)
-
-        if restrict_partner_id:
-            defaults['restrict_partner_id'] = restrict_partner_id
 
         # TDE CLEANME: remove context key + add as parameter
         if self.env.context.get('source_location_id'):

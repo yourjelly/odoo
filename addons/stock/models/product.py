@@ -104,8 +104,6 @@ class Product(models.Model):
             domain_quant += [('lot_id', '=', lot_id)]
         if owner_id is not None:
             domain_quant += [('owner_id', '=', owner_id)]
-            domain_move_in += [('restrict_partner_id', '=', owner_id)]
-            domain_move_out += [('restrict_partner_id', '=', owner_id)]
         if package_id is not None:
             domain_quant += [('package_id', '=', package_id)]
         if dates_in_the_past:

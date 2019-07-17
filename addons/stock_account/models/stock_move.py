@@ -445,7 +445,7 @@ class StockMove(models.Model):
         if self.product_id.type != 'product':
             # no stock valuation for consumable products
             return False
-        if self.restrict_partner_id:
+        if all(line.owner_id for line in self.move_line_ids):
             # if the move isn't owned by the company, we don't make any valuation
             return False
 

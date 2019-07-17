@@ -44,7 +44,6 @@ class TestVirtualAvailable(TestStockCommon):
             'location_id': self.env.ref('stock.stock_location_stock').id,
             'location_dest_id': self.env.ref('stock.stock_location_customers').id})
         self.env['stock.move'].create({
-            'restrict_partner_id': self.user_stock_user.partner_id.id,
             'name': 'another move',
             'product_id': self.product_3.id,
             'product_uom_qty': 5.0,

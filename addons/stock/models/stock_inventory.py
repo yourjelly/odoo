@@ -448,7 +448,6 @@ class InventoryLine(models.Model):
             'company_id': self.inventory_id.company_id.id,
             'inventory_id': self.inventory_id.id,
             'state': 'confirmed',
-            'restrict_partner_id': self.partner_id.id,
             'location_id': location_id,
             'location_dest_id': location_dest_id,
             'move_line_ids': [(0, 0, {
