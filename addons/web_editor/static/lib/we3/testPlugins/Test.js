@@ -163,13 +163,15 @@ function log (result, testName, value, expectedValue) {
  */
 function _eventType(eventName) {
     var types = {
-        mouse: ['click', 'mouse', 'pointer', 'contextmenu', 'select', 'wheel', 'composition', 'input'],
+        mouse: ['click', 'mouse', 'pointer', 'contextmenu', 'select', 'wheel'],
+        composition: ['composition'],
+        input: ['input'],
         keyboard: ['key'],
     };
     var type = 'unknown';
     Object.keys(types).forEach(function (key, index) {
         var isType = types[key].some(function (str) {
-            return eventName.indexOf(str) !== -1;
+            return eventName.toLowerCase().indexOf(str) !== -1;
         });
         if (isType) {
             type = key;
@@ -427,13 +429,13 @@ var TestPlugin = class extends we3.AbstractPlugin {
         keyPress.keyCode = keyPress.keyCode;
 
         var ev = await this.triggerNativeEvents(target, 'keydown', keyPress);
-
-        ev = ev[0] || ev; // (only one event was triggered)
         if (!ev.defaultPrevented) {
             await this.triggerNativeEvents(target, 'keypress', keyPress);
         }
 
+        await new Promise(setTimeout);
         await this.triggerNativeEvents(target.parentNode ? target : this.editable, 'keyup', keyPress);
+        await new Promise(setTimeout);
 
         return target;
     }
@@ -674,8 +676,9 @@ var TestPlugin = class extends we3.AbstractPlugin {
         var triggeredEvents = []
         for (var k = 0; k < events.length; k++) {
             var eventName = events[k];
+            var type = _eventType(eventName);
             var ev;
-            switch (_eventType(eventName)) {
+            switch (type) {
                 case 'mouse':
                     ev = new MouseEvent(eventName, options);
                     break;
@@ -716,7 +719,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
             }
             triggeredEvents.push(ev);
 
-            if (eventName !== 'keydown' && eventName !== 'keypress' && eventName !== 'beforeinput') {
+            if (type !== 'keyboard' && type !== 'composition' && type !== 'input') {
                 await new Promise(setTimeout);
             }
         };
@@ -765,6 +768,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
                     if (!range.isCollapsed()) {
                         document.execCommand("delete", true);
                     }
+                    var nextRangeNode;
                     var node = range.sc;
                     var offset = range.so;
                     while (node !== this.editable && node.tagName !== "TEST-CONTAINER" && node.parentNode) {
@@ -783,6 +787,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
                             node.nodeValue = node.nodeValue.slice(offset);
                         }
 
+                        nextRangeNode = nextRangeNode || node;
                         node.parentNode.insertBefore(n, node);
 
                         if (node.tagName && window.getComputedStyle(node).display === 'block') {
@@ -792,6 +797,8 @@ var TestPlugin = class extends we3.AbstractPlugin {
                         offset = [].indexOf.call(node.parentNode.childNodes, node);
                         node = node.parentNode;
                     }
+
+                    this._selectRange(nextRangeNode, 0, nextRangeNode, 0);
                     return;
                 }
             }
@@ -1054,8 +1061,6 @@ var TestPlugin = class extends we3.AbstractPlugin {
         if (!ev.defaultPrevented) {
             document.execCommand("insertText", 0, ev.data);
         }
-
-        await new Promise(setTimeout);
     }
 };
 

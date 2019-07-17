@@ -27,7 +27,7 @@ we3.ArchNodeText = class extends we3.ArchNode {
      * @override
      */
     empty () {
-        this.nodeValue = '';
+        this.setNodeValue('');
     }
     /**
      * @override
@@ -119,6 +119,10 @@ we3.ArchNodeText = class extends we3.ArchNode {
      */
     removeRight (offset) {
         return this._removeSide(offset, false);
+    }
+    setNodeValue (nodeValue) {
+        this.nodeValue = nodeValue;
+        return this.params.change(this, nodeValue.length);
     }
     /**
      * @override

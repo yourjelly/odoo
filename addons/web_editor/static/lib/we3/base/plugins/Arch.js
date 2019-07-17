@@ -243,28 +243,6 @@ var BaseArch = class extends we3.AbstractPlugin {
     //--------------------------------------------------------------------------
 
     /**
-     * Add a newline at range: split a paragraph if possible, after
-     * removing the selection if needed.
-     */
-    addLine () {
-        this._resetChange();
-        var range = this.dependencies.BaseRange.getRange();
-        var id, offset;
-        if (range.isCollapsed()) {
-            id = range.scID;
-            offset = range.so;
-        } else {
-            id = this._removeFromRange().id;
-            offset = 0;
-        }
-        var index = this._changes.length;
-        this.getArchNode(id).addLine(offset);
-        if (this._changes.length > index) {
-            this._changes[index].isRange = true;
-        }
-        this._applyRulesRangeRedrawFromChanges();
-    }
-    /**
      * Create an ArchNode. If no argument is passed, create a VirtualText.
      *
      * @param {String} [nodeName]
@@ -285,6 +263,9 @@ var BaseArch = class extends we3.AbstractPlugin {
             Constructor = VirtualText;
         }
         return new Constructor(this._arch.params, nodeName, nodeName ? attributes || [] : null, nodeValue);
+    }
+    nextChangeIsRange () {
+        this._nextChangeIsRange = true;
     }
     /**
      * Import changes and apply/render them.
@@ -397,17 +378,14 @@ var BaseArch = class extends we3.AbstractPlugin {
                 id = range.scID;
                 offset = range.so;
             } else {
-                id = this._removeFromRange({
+                id = this.removeFromRange({
                     doNotRemoveEmpty: true,
                 }).id;
                 offset = 0;
             }
         }
-        var index = this._changes.length;
+        this.nextChangeIsRange();
         this._insert(DOM, id, offset);
-        if (this._changes.length > index) {
-            this._changes[index].isRange = true;
-        }
         this._applyRulesRangeRedrawFromChanges();
     }
     /**
@@ -443,27 +421,79 @@ var BaseArch = class extends we3.AbstractPlugin {
      **/
     remove (element) {
         this._resetChange();
-        var index = this._changes.length;
         var id = typeof element === 'number' ? element : element && this.dependencies.BaseRenderer.getID(element);
         if (id) {
             this.getArchNode(id).remove();
         } else {
-            this._removeFromRange();
+            this.removeFromRange();
         }
-        this._changes[index].isRange = true;
         this._applyRulesRangeRedrawFromChanges();
     }
     /**
-     * Remove to the left of the current range.
+     * Delete everything between the start and end points of the range.
+     *
+     * @private
+     * @param {Object} [options]
+     * @param {Object} [options.doNotRemoveEmpty] true to prevent the removal of empty nodes
+     * @returns {VirtualText} the VirtualText node inserted at the beginning of the range
      */
-    removeLeft () {
-        this._removeSide(true);
-    }
-    /**
-     * Remove to the right of the current range.
-     */
-    removeRight () {
-        this._removeSide(false);
+    removeFromRange (options) {
+        var range = this.dependencies.BaseRange.getRange();
+        if (range.isCollapsed()) {
+            return;
+        }
+
+        options = options || {};
+        var virtualTextNodeBegin = this.createArchNode(); // the next range
+        var virtualTextNodeEnd = this.createArchNode();
+
+        var endNode = this.getArchNode(range.ecID);
+        var fromNode = this.getArchNode(range.scID);
+        var commonAncestor = endNode.commonAncestor(fromNode);
+        endNode.insert(virtualTextNodeEnd, range.eo);
+
+        if (!endNode.__removed && commonAncestor.id !== endNode.parent.id &&
+                fromNode.parent.id !== endNode.parent.id) {
+            endNode.splitUntil(commonAncestor, endNode.length());
+        }
+
+        fromNode = this.getArchNode(range.scID);
+        fromNode.insert(virtualTextNodeBegin, range.so);
+
+        var toRemove = [];
+        virtualTextNodeBegin.nextUntil(function (next) {
+            if (next === virtualTextNodeEnd) {
+                return true;
+            }
+            if (next.parent && !next.isAllowUpdate() && next.parent.isAllowUpdate()) {
+                toRemove.push(next);
+                return false;
+            }
+            if (next.isAllowUpdate() && (!next.childNodes || !next.childNodes.length)) {
+                toRemove.push(next);
+            }
+            return false;
+        });
+
+        toRemove.forEach(function (archNode) {
+            var parent = archNode.parent;
+            archNode.remove();
+            while (parent && parent.isEmpty() && !parent.contains(virtualTextNodeBegin) &&
+                (!parent.parent || parent.parent.isAllowUpdate())) {
+                var newParent = parent.parent;
+                parent.remove();
+                parent = newParent;
+            }
+        });
+
+        options.keepRight = true;
+        if (range.ecID !== range.scID && virtualTextNodeBegin.parent.id !== commonAncestor.id) {
+            virtualTextNodeBegin.parent.deleteEdge(false, options);
+        }
+
+        this._removeAllVirtualText([virtualTextNodeBegin.id]);
+
+        return virtualTextNodeBegin;
     }
     /**
      * Set a technical data on an ArchNode. The technical data are never
@@ -832,7 +862,9 @@ var BaseArch = class extends we3.AbstractPlugin {
             id: archNode.id,
             archNode: archNode,
             offset: offset,
+            isRange: this._nextChangeIsRange,
         });
+        this._nextChangeIsRange = false;
     }
     /**
      * Before rendering, remove all unnecessary virtual nodes. At most one
@@ -1016,9 +1048,13 @@ var BaseArch = class extends we3.AbstractPlugin {
             offset = 0;
         }
 
+        var nextChangeIsRange = this._nextChangeIsRange;
         var changes = this._changes.slice();
         var fragment = this.parse(DOM);
         this._changes = changes;
+        if (nextChangeIsRange) {
+            this.nextChangeIsRange();
+        }
 
         offset = offset || 0;
         var childNodes = fragment.childNodes.slice();
@@ -1200,98 +1236,6 @@ var BaseArch = class extends we3.AbstractPlugin {
         }
     }
     /**
-     * Delete everything between the start and end points of the range.
-     *
-     * @private
-     * @param {Object} [options]
-     * @param {Object} [options.doNotRemoveEmpty] true to prevent the removal of empty nodes
-     * @returns {VirtualText} the VirtualText node inserted at the beginning of the range
-     */
-    _removeFromRange (options) {
-        var range = this.dependencies.BaseRange.getRange();
-        if (range.isCollapsed()) {
-            return;
-        }
-
-        options = options || {};
-        var virtualTextNodeBegin = this.createArchNode(); // the next range
-        var virtualTextNodeEnd = this.createArchNode();
-
-        var endNode = this.getArchNode(range.ecID);
-        var fromNode = this.getArchNode(range.scID);
-        var commonAncestor = endNode.commonAncestor(fromNode);
-        endNode.insert(virtualTextNodeEnd, range.eo);
-
-        if (!endNode.__removed && commonAncestor.id !== endNode.parent.id &&
-                fromNode.parent.id !== endNode.parent.id) {
-            endNode.splitUntil(commonAncestor, endNode.length());
-        }
-
-        fromNode = this.getArchNode(range.scID);
-        fromNode.insert(virtualTextNodeBegin, range.so);
-
-        var toRemove = [];
-        virtualTextNodeBegin.nextUntil(function (next) {
-            if (next === virtualTextNodeEnd) {
-                return true;
-            }
-            if (next.parent && !next.isAllowUpdate() && next.parent.isAllowUpdate()) {
-                toRemove.push(next);
-                return false;
-            }
-            if (next.isAllowUpdate() && (!next.childNodes || !next.childNodes.length)) {
-                toRemove.push(next);
-            }
-            return false;
-        });
-
-        toRemove.forEach(function (archNode) {
-            var parent = archNode.parent;
-            archNode.remove();
-            while (parent && parent.isEmpty() && !parent.contains(virtualTextNodeBegin) &&
-                (!parent.parent || parent.parent.isAllowUpdate())) {
-                var newParent = parent.parent;
-                parent.remove();
-                parent = newParent;
-            }
-        });
-
-        options.keepRight = true;
-        if (range.ecID !== range.scID && virtualTextNodeBegin.parent.id !== commonAncestor.id) {
-            virtualTextNodeBegin.parent.deleteEdge(false, options);
-        }
-
-        this._removeAllVirtualText([virtualTextNodeBegin.id]);
-
-        return virtualTextNodeBegin;
-    }
-    /**
-     * Remove to the side of the current range.
-     *
-     * @private
-     * @param {Boolean} isLeft true to remove to the left
-     */
-    _removeSide (isLeft) {
-        this._resetChange();
-        var range = this.dependencies.BaseRange.getRange();
-        if (range.isCollapsed()) {
-            var offset = range.so;
-            var node = this.getArchNode(range.scID);
-            var next = node[isLeft ? 'removeLeft' : 'removeRight'](offset);
-            if (next) {
-                next.lastLeaf().deleteEdge(true, {
-                    doNotBreakBlocks: true,
-                });
-            }
-         } else {
-            var virtualText = this._removeFromRange();
-            virtualText.parent.deleteEdge(false,  {
-                keepRight: true,
-            });
-        }
-        this._applyRulesRangeRedrawFromChanges();
-    }
-    /**
      * Reset the Arch with the given start value if any.
      *
      * @private
@@ -1334,6 +1278,7 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @private
      */
     _resetChange () {
+        this.nextChangeIsRange();
         if (this._isDoTransaction) {
             this._changesInTransaction = this._changesInTransaction.concat(this._changes);
             this._changes = [];
@@ -1544,13 +1489,6 @@ var Arch = class extends we3.AbstractPlugin {
     //--------------------------------------------------------------------------
 
     /**
-     * Add a newline at range: split a paragraph if possible, after
-     * removing the selection if needed.
-     */
-    addLine () {
-        return this.dependencies.BaseArch.addLine();
-    }
-    /**
      * Create an ArchNode. If no argument is passed, create a VirtualText.
      *
      * @param {String} [nodeName]
@@ -1621,18 +1559,6 @@ var Arch = class extends we3.AbstractPlugin {
      **/
     remove (element) {
         return this.dependencies.BaseArch.remove(element);
-    }
-    /**
-     * Remove to the left of the current range.
-     */
-    removeLeft () {
-        return this.dependencies.BaseArch.removeLeft();
-    }
-    /**
-     * Remove to the right of the current range.
-     */
-    removeRight () {
-        return this.dependencies.BaseArch.removeRight();
     }
     /**
      * Set a technical data on an ArchNode. The technical data are never

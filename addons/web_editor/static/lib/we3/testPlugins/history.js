@@ -44,7 +44,7 @@ var TestHistory = class extends we3.AbstractPlugin {
         var domA = "<p>dom to editA◆</p>";
         var domADOM = "<p>dom to editA</p>";
 
-        this.dependencies.Test.setValue(dom);
+        await this.dependencies.Test.setValue(dom);
 
         var undo = this.editor.querySelector('we3-button[data-plugin="History"][data-method="undo"]');
         var redo = this.editor.querySelector('we3-button[data-plugin="History"][data-method="redo"]');
@@ -78,7 +78,7 @@ var TestHistory = class extends we3.AbstractPlugin {
         var domA = "<p>dom to editA◆</p>";
         var domARange = "<p>do▶m to ed◀itA</p>";
 
-        this.dependencies.Test.setValue(dom);
+       await this.dependencies.Test.setValue(dom);
 
         var undo = this.editor.querySelector('we3-button[data-plugin="History"][data-method="undo"]');
         var redo = this.editor.querySelector('we3-button[data-plugin="History"][data-method="redo"]');
@@ -102,7 +102,7 @@ var TestHistory = class extends we3.AbstractPlugin {
         assert.ok(!redo.classList.contains('disabled'), "The redo button should be enabled");
 
         this.dependencies.Arch.insert('A');
-        this.dependencies.Test.keypress(this.editable, {key: 'Enter'});
+        await this.dependencies.Test.keydown(this.editable, {key: 'Enter'});
 
         this.dependencies.Range.setRange({
             scID: ID,
@@ -130,7 +130,7 @@ var TestHistory = class extends we3.AbstractPlugin {
         var undo = this.editor.querySelector('we3-button[data-plugin="History"][data-method="undo"]');
         var redo = this.editor.querySelector('we3-button[data-plugin="History"][data-method="redo"]');
 
-        this.dependencies.Test.setValue(dom);
+       await this.dependencies.Test.setValue(dom);
 
         var container = document.querySelector('test-container');
 

@@ -45,7 +45,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
     async _testMultikeypress (assert) {
         var ev;
         var Test = this.dependencies.Test;
-        Test.setValue("<p>aaa◆</p>");
+        await Test.setValue("<p>aaa◆</p>");
 
         await this._triggerKey([
             // key down char without key up
@@ -66,23 +66,26 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 data: 'i',
                 insert: 'i',
             }],
+        ]);
 
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             // Backspace down char without key up
             ['keydown', {
                 key: 'Backspace',
                 charCode: 0,
                 keyCode: 8,
             }],
-            ['keypress', {
-                key: 'Backspace',
-                charCode: 8,
-                keyCode: 8,
+            ['beforeInput', {
+                inputType: 'deleteContentBackward',
+            }],
+            ['input', {
+                inputType: 'deleteContentBackward',
             }],
         ]);
 
-        var textNode = this.editable.querySelector('p').firstChild;
-        textNode.textContent = 'aaa';
-        this._selectDOMRange(textNode, 3);
+        await new Promise(setTimeout);
 
         await this._triggerKey([
             // Space down char without key up
@@ -103,18 +106,32 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 data: ' ',
                 insert: ' ',
             }],
+        ]);
 
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             // keyup
-            ['keyup', {
-                key: 'Backspace',
-                charCode: 0,
-                keyCode: 8,
-            }],
             ['keyup', {
                 key: 'i',
                 charCode: 0,
                 keyCode: 73,
             }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
+            ['keyup', {
+                key: 'Backspace',
+                charCode: 0,
+                keyCode: 8,
+            }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: ' ',
                 charCode: 0,
@@ -122,13 +139,16 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             }],
         ]);
 
+        await new Promise(setTimeout);
+
         assert.strictEqual(this.dependencies.Test.getValue(), "<p>aaa ◆</p>", "Should insert a space in the Arch");
         assert.strictEqual(this.dependencies.Test.getDomValue(), "<p>aaa&nbsp;</p>", "Should insert a space in the DOM");
     }
+
     async _testAccentUbuntuChrome (assert) {
         var ev;
         var Test = this.dependencies.Test;
-        Test.setValue(this.value);
+        await Test.setValue(this.value);
 
         // i
         await this._triggerKey([
@@ -149,12 +169,19 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 data: 'i',
                 insert: 'i',
             }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: 'i',
                 charCode: 0,
                 keyCode: 73,
             }],
         ]);
+
+        await new Promise(setTimeout);
 
         // ^
         await this._triggerKey([
@@ -165,6 +192,8 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             }],
         ]);
 
+        await new Promise(setTimeout);
+
         // o
         await this._triggerKey([
             ['keydown', {
@@ -184,12 +213,19 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 data: 'ô',
                 insert: 'ô',
             }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: 'o',
                 charCode: 0,
                 keyCode: 79,
             }],
         ]);
+
+        await new Promise(setTimeout);
 
         // Enter
         await this._triggerKey([
@@ -206,12 +242,19 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             ['beforeInput', {
                 data: 'null',
             }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: 'Enter',
                 charCode: 0,
                 keyCode: 13,
             }],
         ]);
+
+        await new Promise(setTimeout);
 
         assert.strictEqual(this.dependencies.Test.getValue(), this.updatedValue, "Should insert the char, accent and enter in the Arch");
         assert.strictEqual(this.dependencies.Test.getDomValue(), this.updatedDom, "Should insert the char, accent and enter in the DOM");
@@ -219,7 +262,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
     async _testAccentUbuntuFireFox (assert) {
         var ev;
         var Test = this.dependencies.Test;
-        Test.setValue(this.value);
+        await Test.setValue(this.value);
 
         // i
         await this._triggerKey([
@@ -236,12 +279,19 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             ['textInput', {
                 insert: 'i',
             }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: 'i',
                 charCode: 0,
                 keyCode: 73,
             }],
         ]);
+
+        await new Promise(setTimeout);
 
         // ^
         await this._triggerKey([
@@ -250,12 +300,19 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 charCode: 0,
                 keyCode: 0,
             }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: 'Dead',
                 charCode: 0,
                 keyCode: 0,
             }],
         ]);
+
+        await new Promise(setTimeout);
 
         // o
         await this._triggerKey([
@@ -272,12 +329,19 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             ['textInput', {
                 insert: 'ô',
             }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: 'o',
                 charCode: 0,
                 keyCode: 79,
             }],
         ]);
+
+        await new Promise(setTimeout);
 
         // Enter
         await this._triggerKey([
@@ -291,12 +355,19 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 charCode: 13,
                 keyCode: 13,
             }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: 'Enter',
                 charCode: 0,
                 keyCode: 13,
             }],
         ]);
+
+        await new Promise(setTimeout);
 
         assert.strictEqual(this.dependencies.Test.getValue(), this.updatedValue, "Should insert the char, accent and enter in the Arch");
         assert.strictEqual(this.dependencies.Test.getDomValue(), this.updatedDom, "Should insert the char, accent and enter in the DOM");
@@ -304,7 +375,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
     async _testAccentMacSafari (assert) {
         var ev;
         var Test = this.dependencies.Test;
-        Test.setValue(this.value);
+        await Test.setValue(this.value);
 
         // i
         await this._triggerKey([
@@ -325,12 +396,19 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 data: 'i',
                 insert: 'i',
             }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: 'i',
                 charCode: 0,
                 keyCode: 73,
             }],
         ]);
+
+        await new Promise(setTimeout);
 
         // ^
         await this._triggerKey([
@@ -351,12 +429,19 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 charCode: 0,
                 keyCode: 229,
             }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: '^',
                 charCode: 0,
                 keyCode: 229,
             }],
         ]);
+
+        await new Promise(setTimeout);
 
         // o
         await this._triggerKey([
@@ -382,6 +467,15 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 charCode: 0,
                 keyCode: 229,
             }],
+        ]);
+
+        var textNode = this.editable.querySelector('p').firstChild;
+        textNode.textContent = '.iô.';
+        this._selectDOMRange(textNode, 3);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: 'o',
                 charCode: 0,
@@ -401,12 +495,19 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 charCode: 13,
                 keyCode: 13,
             }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: 'Enter',
                 charCode: 0,
                 keyCode: 13,
             }],
         ]);
+
+        await new Promise(setTimeout);
 
         assert.strictEqual(this.dependencies.Test.getValue(), this.updatedValue, "Should insert the char, accent and enter in the Arch");
         assert.strictEqual(this.dependencies.Test.getDomValue(), this.updatedDom, "Should insert the char, accent and enter in the DOM");
@@ -414,7 +515,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
     async _testAccentMacChrome (assert) {
         var ev;
         var Test = this.dependencies.Test;
-        Test.setValue(this.value);
+        await Test.setValue(this.value);
 
         // i
         await this._triggerKey([
@@ -435,12 +536,19 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 data: 'i',
                 insert: 'i',
             }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: 'i',
                 charCode: 0,
                 keyCode: 73,
             }],
         ]);
+
+        await new Promise(setTimeout);
 
         // ^
         await this._triggerKey([
@@ -461,12 +569,19 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 data: '^',
                 insert: '^',
             }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: 'Dead',
                 charCode: 0,
                 keyCode: 229,
             }],
         ]);
+
+        await new Promise(setTimeout);
 
         // o
         await this._triggerKey([
@@ -488,12 +603,23 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             ['compositionend', {
                 data: 'ô',
             }],
+        ]);
+
+        var textNode = this.editable.querySelector('p').firstChild;
+        textNode.textContent = '.iô.';
+        this._selectDOMRange(textNode, 3);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: 'o',
                 charCode: 0,
                 keyCode: 229,
             }],
         ]);
+
+        await new Promise(setTimeout);
 
         // Enter
         await this._triggerKey([
@@ -510,6 +636,11 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             ['beforeInput', {
                 data: 'null',
             }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: 'Enter',
                 charCode: 0,
@@ -517,13 +648,15 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             }],
         ]);
 
+        await new Promise(setTimeout);
+
         assert.strictEqual(this.dependencies.Test.getValue(), this.updatedValue, "Should insert the char, accent and enter in the Arch");
         assert.strictEqual(this.dependencies.Test.getDomValue(), this.updatedDom, "Should insert the char, accent and enter in the DOM");
     }
     async _testAccentMacFirefox (assert) {
         var ev;
         var Test = this.dependencies.Test;
-        Test.setValue(this.value);
+        await Test.setValue(this.value);
 
         // i
         await this._triggerKey([
@@ -541,12 +674,19 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 data: 'i',
                 insert: 'i',
             }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: 'i',
                 charCode: 0,
                 keyCode: 73,
             }],
         ]);
+
+        await new Promise(setTimeout);
 
         // ^
         await this._triggerKey([
@@ -564,12 +704,19 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 data: '^',
                 insert: '^',
             }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: '^',
                 charCode: 0,
                 keyCode: 160,
             }],
         ]);
+
+        await new Promise(setTimeout);
 
         // o
         await this._triggerKey([
@@ -588,12 +735,23 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 data: 'ô',
                 insert: 'ô',
             }],
+        ]);
+
+        var textNode = this.editable.querySelector('p').firstChild;
+        textNode.textContent = '.iô.';
+        this._selectDOMRange(textNode, 3);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: 'o',
                 charCode: 0,
                 keyCode: 79,
             }],
         ]);
+
+        await new Promise(setTimeout);
 
         // Enter
         await this._triggerKey([
@@ -607,6 +765,11 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 charCode: 13,
                 keyCode: 13,
             }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: 'Enter',
                 charCode: 0,
@@ -614,13 +777,15 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             }],
         ]);
 
+        await new Promise(setTimeout);
+
         assert.strictEqual(this.dependencies.Test.getValue(), this.updatedValue, "Should insert the char, accent and enter in the Arch");
         assert.strictEqual(this.dependencies.Test.getDomValue(), this.updatedDom, "Should insert the char, accent and enter in the DOM");
     }
-    async __testAccentSwiftKey (assert) {
+    async _testAccentSwiftKey (assert) {
         var ev;
         var Test = this.dependencies.Test;
-        Test.setValue(this.value);
+        await Test.setValue(this.value);
 
         // i
         await this._triggerKey([
@@ -636,12 +801,19 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 data: 'i',
                 insert: 'i',
             }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: 'Unidentified',
                 charCode: 0,
                 keyCode: 229,
             }],
         ]);
+
+        await new Promise(setTimeout);
 
         // ô
         await this._triggerKey([
@@ -657,12 +829,23 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 data: 'ô',
                 insert: 'ô',
             }],
+        ]);
+
+        var textNode = this.editable.querySelector('p').firstChild;
+        textNode.textContent = '.iô.';
+        this._selectDOMRange(textNode, 3);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: 'Unidentified',
                 charCode: 0,
                 keyCode: 229,
             }],
         ]);
+
+        await new Promise(setTimeout);
 
         // Enter
         await this._triggerKey([
@@ -680,6 +863,11 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 charCode: 13,
                 keyCode: 13,
             }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: 'Enter',
                 charCode: 0,
@@ -687,14 +875,16 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             }],
         ]);
 
+        await new Promise(setTimeout);
+
         assert.strictEqual(this.dependencies.Test.getValue(), this.updatedValue, "Should insert the char, accent and enter in the Arch");
         assert.strictEqual(this.dependencies.Test.getDomValue(), this.updatedDom, "Should insert the char, accent and enter in the DOM");
     }
 
-    async __testCompletionSwiftKey (assert) {
+    async _testCompletionSwiftKey (assert) {
         var ev;
         var Test = this.dependencies.Test;
-        Test.setValue(this.completion);
+        await Test.setValue(this.completion);
 
         // s
         await this._triggerKey([
@@ -710,12 +900,19 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 data: 's',
                 insert: 's',
             }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
             ['keyup', {
                 key: 'Unidentified',
                 charCode: 0,
                 keyCode: 229,
             }],
         ]);
+
+        await new Promise(setTimeout);
 
         // Christophe
         await this._triggerKey([
@@ -774,6 +971,8 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             }],
         ]);
 
+        await new Promise(setTimeout);
+
         assert.strictEqual(this.dependencies.Test.getValue(), this.completionValue, "Should insert the word in the Arch");
         assert.strictEqual(this.dependencies.Test.getDomValue(), this.completionDom, "Should insert the word in the DOM");
     }
@@ -786,7 +985,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 continue;
             }
             if (e[0] === 'textInput') {
-                ev = await this._triggerTextInput(e[1].data, e[1].insert);
+                ev = this._triggerTextInput(e[1].data, e[1].insert);
             } else {
                 var o = Object.assign({}, e[1]);
                 if (e[0] === 'keypress') {
@@ -801,7 +1000,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
      * @param {string} data
      * @param {string} insert
      */
-    async _triggerTextInput (data, insert) {
+    _triggerTextInput (data, insert) {
         var ev = new (window.InputEvent || window.CustomEvent)('textInput', {
             bubbles: true,
             cancelBubble: false,
@@ -821,7 +1020,6 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
         if (!ev.defaultPrevented && insert) {
             this.document.execCommand("insertText", 0, insert);
         }
-        await new Promise(setTimeout);
     }
 
     _selectDOMRange (node, offset) {

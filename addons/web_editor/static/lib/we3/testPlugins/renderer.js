@@ -26,7 +26,7 @@ var TestRenderer = class extends we3.AbstractPlugin {
                 name: "ENTER at the end of b in p",
                 content: "<p><b>dom to edit◆</b></p>",
                 steps: [{
-                    key: 'ENTER',
+                    key: 'Enter',
                 }],
                 test: "<p><b>dom to edit</b></p><p><br/>◆</p>",
                 testDOM: "<p><b>dom to edit</b></p><p><br></p>",
@@ -39,10 +39,10 @@ var TestRenderer = class extends we3.AbstractPlugin {
                         var p = self.editable.querySelector('test-container p');
                         var bold = self.editor.querySelector('we3-button[data-method="formatText"][data-value="b"]');
                         await self.dependencies.Test.triggerNativeEvents(bold, ['mousedown', 'click', 'mouseup']);
-                        self.dependencies.Test.setRangeFromDOM(p.lastChild, 1);
+                        await self.dependencies.Test.setRangeFromDOM(p.lastChild, 1);
                     }
                 }, {
-                    key: 'ENTER',
+                    key: 'Enter',
                 }],
                 test: '<p><b>dom to edit</b></p><p><br/>◆</p><p>other content</p>',
                 testDOM: '<p><b>dom to edit</b></p><p><br></p><p>other content</p>',

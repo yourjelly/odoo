@@ -40,6 +40,7 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Arch.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Range.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Renderer.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Keyboard.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Selector.js"/>
 
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/we3.js"/>
@@ -69,7 +70,6 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/text/FontStyle.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/text/Indent.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/text/Paragraph.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/text/Keyboard.js"/>
 
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/misc/History.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/misc/Jinja.js"/>

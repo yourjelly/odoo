@@ -6,7 +6,7 @@ var reDOMSelection = /^(.+?)(:contents(\(\)\[|\()([0-9]+)[\]|\)])?(->([0-9]+))?$
 
 var TestKeyboard = class extends we3.AbstractPlugin {
     static get autoInstall () {
-        return ['Test', 'Keyboard'];
+        return ['Test'];
     }
     constructor () {
         super(...arguments);
