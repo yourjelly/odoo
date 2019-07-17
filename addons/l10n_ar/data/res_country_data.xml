@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo noupdate="True">
+    <record model="res.country" id="base.ar">
+        <field name="vat_label">CUIT</field>
+    </record>
     <record model='res.country' forcecreate="False" id='base.al'>
         <field name='l10n_ar_afip_code'>401</field>
     </record>

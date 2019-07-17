@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
     'name': 'Argentinian Localization Base',
-    'version': '12.0.1.0.0',
+    'version': '13.0.1.0.0',
     'category': 'Localization',
     'sequence': 14,
     'author': 'ADHOC SA',
@@ -24,7 +24,7 @@ Base Module for Argentinian Localization
         'views/res_country_view.xml',
     ],
     'demo': [
-        'demo/partner_demo.xml',
+        'demo/res_partner_demo.xml',
     ],
     'installable': True,
     'auto_install': False,

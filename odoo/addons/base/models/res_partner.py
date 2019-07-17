@@ -241,7 +241,6 @@ class Partner(models.Model):
         ('check_name', "CHECK( (type='contact' AND name IS NOT NULL) or (type!='contact') )", 'Contacts require a name.'),
     ]
 
-    @api.model_cr
     def init(self):
         self._cr.execute("""SELECT indexname FROM pg_indexes WHERE indexname = 'res_partner_vat_index'""")
         if not self._cr.fetchone():
@@ -279,9 +278,9 @@ class Partner(models.Model):
         for partner in self:
             partner.contact_address = partner._display_address()
 
-    @api.one
     def _compute_get_ids(self):
-        self.self = self.id
+        for partner in self:
+            partner.self = partner.id
 
     @api.depends('is_company', 'parent_id.commercial_partner_id')
     def _compute_commercial_partner(self):

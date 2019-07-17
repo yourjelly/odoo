@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
     'name': 'Argentinian Accounting',
-    'version': '12.0.1.0.0',
+    'version': '13.0.1.0.0',
     'description': """
 Argentinian accounting chart and tax localization.
 ==================================================
@@ -51,7 +51,6 @@ Follow the next configuration steps
         'data/res_currency_data.xml',
         'data/res_country_data.xml',
         'data/product_product_data.xml',
-        'views/account_move_line_view.xml',
         'views/account_move_view.xml',
         'views/res_partner_view.xml',
         'views/res_company_view.xml',
@@ -61,15 +60,28 @@ Follow the next configuration steps
         'views/account_fiscal_position_view.xml',
         'views/uom_uom_view.xml',
         'views/account_journal_view.xml',
-        'views/account_invoice_view.xml',
         'views/l10n_latam_document_type_view.xml',
         'views/ir_sequence_view.xml',
         'views/report_invoice.xml',
     ],
     'demo': [
+        # we create demo data on different companies (not main_company) to
+        # allow different setups and also to allow multi-localization demo data
         'demo/exento_demo.xml',
         'demo/mono_demo.xml',
         'demo/respinsc_demo.xml',
+        'demo/res_partner_demo.xml',
+        'demo/account_tax_template_demo.xml',
+        'demo/res_company_demo.xml',
+        'demo/product_product_demo.xml',
+        'demo/account_customer_invoice_demo.xml',
+        'demo/account_customer_expo_invoice_demo.xml',
+        'demo/account_customer_invoice_validate_demo.xml',
+        'demo/account_customer_refund_demo.xml',
+        'demo/account_supplier_invoice_demo.xml',
+        'demo/account_supplier_invoice_validate_demo.xml',
+        'demo/account_supplier_refund_demo.xml',
+        # restore
         'demo/res_users_demo.xml',
     ],
     'post_init_hook': 'post_init_hook',

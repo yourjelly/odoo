@@ -13,7 +13,6 @@ class UoMCategory(models.Model):
     measure_type = fields.Selection([
         ('unit', 'Units'),
         ('weight', 'Weight'),
-        ('time', 'Time (Duration)'),
         ('working_time', 'Working Time'),
         ('length', 'Length'),
         ('volume', 'Volume'),
@@ -25,7 +24,7 @@ class UoMCategory(models.Model):
 
     @api.multi
     def unlink(self):
-        if self.filtered(lambda categ: categ.measure_type in ['working_time', 'time']):
+        if self.filtered(lambda categ: categ.measure_type == 'working_time'):
             raise UserError(_("You cannot delete this UoM Category as it is used by the system."))
         return super(UoMCategory, self).unlink()
 
@@ -64,10 +63,10 @@ class UoM(models.Model):
         ('factor_reference_is_one', "CHECK((uom_type = 'reference' AND factor = 1.0) OR (uom_type != 'reference'))", "The reference unit must have a conversion factor equal to 1.")
     ]
 
-    @api.one
     @api.depends('factor')
     def _compute_factor_inv(self):
-        self.factor_inv = self.factor and (1.0 / self.factor) or 0.0
+        for uom in self:
+            uom.factor_inv = uom.factor and (1.0 / uom.factor) or 0.0
 
     @api.onchange('uom_type')
     def _onchange_uom_type(self):

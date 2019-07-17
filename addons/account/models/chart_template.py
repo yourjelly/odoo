@@ -161,12 +161,10 @@ class AccountChartTemplate(models.Model):
             'chart_template_id': self.id,
         }
 
-    @api.one
     def try_loading_for_current_company(self):
         """ Installs this chart of accounts for the current company if not chart
         of accounts had been created for it yet.
         """
-        self.ensure_one()
         # do not use `request.env` here, it can cause deadlocks
         if request and hasattr(request, 'allowed_company_ids'):
             company = self.env['res.company'].browse(request.allowed_company_ids[0])
@@ -174,7 +172,8 @@ class AccountChartTemplate(models.Model):
             company = self.env.company
         # If we don't have any chart of account on this company, install this chart of account
         if not company.chart_template_id and not self.existing_accounting(company):
-            self.load_for_current_company(15.0, 15.0)
+            for template in self:
+                template.load_for_current_company(15.0, 15.0)
 
     def load_for_current_company(self, sale_tax_rate, purchase_tax_rate):
         """ Installs this chart of accounts on the current company, replacing
@@ -799,8 +798,8 @@ class AccountTaxTemplate(models.Model):
     chart_template_id = fields.Many2one('account.chart.template', string='Chart Template', required=True)
 
     name = fields.Char(string='Tax Name', required=True)
-    type_tax_use = fields.Selection([('sale', 'Sales'), ('purchase', 'Purchases'), ('none', 'None'), ('adjustment', 'Adjustment')], string='Tax Scope', required=True, default="sale",
-        help="Determines where the tax is selectable. Note : 'None' means a tax can't be used by itself, however it can still be used in a group. 'adjustment' is used to perform tax adjustment.")
+    type_tax_use = fields.Selection([('sale', 'Sales'), ('purchase', 'Purchases'), ('none', 'None')], string='Tax Scope', required=True, default="sale",
+        help="Determines where the tax is selectable. Note : 'None' means a tax can't be used by itself, however it can still be used in a group.")
     amount_type = fields.Selection(default='percent', string="Tax Computation", required=True,
         selection=[('group', 'Group of Taxes'), ('fixed', 'Fixed'), ('percent', 'Percentage of Price'), ('division', 'Percentage of Price Tax Included')])
     active = fields.Boolean(default=True, help="Set active to false to hide the tax without removing it.")

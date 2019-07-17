@@ -27,4 +27,18 @@
         <field name="image" type="base64" file="l10n_ar_base/demo/adhoc_jjs.jpeg"/>
     </record>
 
+    <record id="res_partner_adhoc_mc" model="res.partner">
+        <field name="name">Manuel Cordoba</field>
+        <field name="type">contact</field>
+        <field name="parent_id" ref="res_partner_adhoc"/>
+        <field name="image" type="base64" file="l10n_ar_base/demo/adhoc_gr.png"/>
+    </record>
+
+    <record id="res_partner_adhoc_gr" model="res.partner">
+        <field name="name">Gonzalo Ruzafa</field>
+        <field name="type">contact</field>
+        <field name="parent_id" ref="res_partner_adhoc"/>
+        <field name="image" type="base64" file="l10n_ar_base/demo/adhoc_mc.png"/>
+    </record>
+
 </odoo>

@@ -298,7 +298,6 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         """
         pass
 
-    @api.model_cr_context
     def _reflect(self):
         """ Reflect the model and its fields in the models 'ir.model' and
         'ir.model.fields'. Also create entries in 'ir.model.data' if the key
@@ -585,9 +584,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
     @classmethod
     def _init_constraints_onchanges(cls):
-        # store sql constraint error messages
-        for (key, _, msg) in cls._sql_constraints:
-            cls.pool._sql_error[cls._table + '_' + key] = msg
+        # store list of sql constraint qualified names
+        for (key, _, _) in cls._sql_constraints:
+            cls.pool._sql_constraints.add(cls._table + '_' + key)
 
         # reset properties memoized on cls
         cls._constraint_methods = BaseModel._constraint_methods
@@ -2281,7 +2280,6 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         else:
             return '"%s"."%s"' % (alias, fname)
 
-    @api.model_cr
     def _parent_store_compute(self):
         """ Compute parent_path field from scratch. """
         if not self._parent_store:
@@ -2320,7 +2318,6 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         self.invalidate_cache(['parent_path'])
         return True
 
-    @api.model_cr
     def _check_removed_columns(self, log=False):
         # iterate on the database columns to drop the NOT NULL constraints of
         # fields which were required but have been removed (or will be added by
@@ -2343,7 +2340,6 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             if row['attnotnull']:
                 tools.drop_not_null(cr, self._table, row['attname'])
 
-    @api.model_cr_context
     def _init_column(self, column_name):
         """ Initialize the value of the given column for existing rows. """
         # get the default value; ideally, we should use default_get(), but it
@@ -2375,7 +2371,6 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         self.env.cr.execute('SELECT 1 FROM "%s" LIMIT 1' % self._table)
         return self.env.cr.rowcount
 
-    @api.model_cr_context
     def _auto_init(self):
         """ Initialize the database schema of ``self``:
             - create the corresponding table,
@@ -2446,14 +2441,12 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         if parent_path_compute:
             self._parent_store_compute()
 
-    @api.model_cr
     def init(self):
         """ This method is called after :meth:`~._auto_init`, and may be
             overridden to create or modify a model's database schema.
         """
         pass
 
-    @api.model_cr
     def _create_parent_columns(self):
         tools.create_column(self._cr, self._table, 'parent_path', 'VARCHAR')
         if 'parent_path' not in self._fields:
@@ -2461,7 +2454,6 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         elif not self._fields['parent_path'].index:
             _logger.error('parent_path field on model %s must be indexed! Add index=True to the field definition)', self._name)
 
-    @api.model_cr
     def _add_sql_constraints(self):
         """
 
@@ -2489,7 +2481,6 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             else:
                 process(key, definition)
 
-    @api.model_cr
     def _execute_sql(self):
         """ Execute the SQL code from the _sql attribute (if any)."""
         if hasattr(self, "_sql"):
@@ -4527,7 +4518,6 @@ Fields:
         """
         return cls._transient
 
-    @api.model_cr
     def _transient_clean_rows_older_than(self, seconds):
         assert self._transient, "Model %s is not transient, it cannot be vacuumed!" % self._name
         # Never delete rows used in last 5 minutes
@@ -4539,7 +4529,6 @@ Fields:
         ids = [x[0] for x in self._cr.fetchall()]
         self.sudo().browse(ids).unlink()
 
-    @api.model_cr
     def _transient_clean_old_rows(self, max_count):
         # Check how many rows we have in the table
         self._cr.execute("SELECT count(*) AS row_count FROM " + self._table)
@@ -4682,7 +4671,21 @@ Fields:
         for record in self:
             record.active = not record.active
 
-    @api.model_cr
+    def action_archive(self):
+        """
+            Set active=False on a recordset, by calling toggle_active to take the
+            corresponding actions according to the model
+        """
+        return self.filtered(lambda record: record.active).toggle_active()
+
+    @api.multi
+    def action_unarchive(self):
+        """
+            Set active=True on a recordset, by calling toggle_active to take the
+            corresponding actions according to the model
+        """
+        return self.filtered(lambda record: not record.active).toggle_active()
+
     def _register_hook(self):
         """ stuff to do right after the registry is built """
         pass
@@ -4714,7 +4717,7 @@ Fields:
         origin = getattr(cls, name)
         method.origin = origin
         # propagate decorators from origin to method, and apply api decorator
-        wrapped = api.guess(api.propagate(origin, method))
+        wrapped = api.propagate(origin, method)
         wrapped.origin = origin
         setattr(cls, name, wrapped)
 
@@ -5053,26 +5056,6 @@ Fields:
         ids = tuple(origin_ids(self._ids))
         prefetch_ids = IterableGenerator(origin_ids, self._prefetch_ids)
         return self._browse(self.env, ids, prefetch_ids)
-
-    #
-    # Dirty flags, to mark record fields modified (in draft mode)
-    #
-
-    def _is_dirty(self):
-        """ Return whether any record in ``self`` is dirty. """
-        dirty = self.env.dirty
-        return any(record in dirty for record in self)
-
-    def _get_dirty(self):
-        """ Return the list of field names for which ``self`` is dirty. """
-        dirty = self.env.dirty
-        return list(dirty.get(self, ()))
-
-    def _set_dirty(self, field_name):
-        """ Mark the records in ``self`` as dirty for the given ``field_name``. """
-        dirty = self.env.dirty
-        for record in self:
-            dirty[record].add(field_name)
 
     #
     # "Dunder" methods
@@ -5591,8 +5574,8 @@ Fields:
                 for subname in subnames:
                     new_lines.mapped(subname)
 
-        # Isolate changed x2many values, to handle inconsistent data sent from
-        # the client side: when a form view contains two one2many fields that
+        # Isolate changed values, to handle inconsistent data sent from the
+        # client side: when a form view contains two one2many fields that
         # overlap, the lines that appear in both fields may be sent with
         # different data. Consider, for instance:
         #
@@ -5607,22 +5590,26 @@ Fields:
         # The idea is to put 'foo_ids' in cache first, so that the snapshot
         # contains value=1 for line in 'foo_ids'. The snapshot is then updated
         # with the value of `bar_ids`, which will contain value=2 on line.
-        values = dict(values)
-        changed_x2many = {
-            name: values.pop(name, [])
-            for name in names
-            if self._fields[name].type in ('one2many', 'many2many')
-        }
+        #
+        # The issue also occurs with other fields. For instance, an onchange on
+        # a move line has a value for the field 'move_id' that contains the
+        # values of the move, among which the one2many that contains the line
+        # itself, with old values!
+        #
+        changed_values = {name: values[name] for name in names}
+        # set changed values to null in initial_values; not setting them
+        # triggers default_get() on the new record when creating snapshot0
+        initial_values = dict(values, **dict.fromkeys(names, False))
 
-        # create a new record with values, and attach ``self`` to it
-        record = self.new(values, origin=self)
+        # create a new record with values
+        record = self.new(initial_values, origin=self)
 
         # make a snapshot based on the initial values of record
         snapshot0 = Snapshot(record, nametree)
 
         # store changed values in cache, and update snapshot0
-        for name, value in changed_x2many.items():
-            record._update_cache({name: value}, validate=False)
+        record._update_cache(changed_values, validate=False)
+        for name in names:
             snapshot0.fetch(name)
 
         # determine which field(s) should be triggered an onchange

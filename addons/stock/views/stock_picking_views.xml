@@ -35,13 +35,10 @@
             <field name="arch" type="xml">
                 <form string="Operation Types">
                     <sheet>
-                        <div class="oe_button_box" name="button_box">
-                            <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
-                                <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
-                            </button>
-                        </div>
+                        <widget name="web_ribbon" text="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
                         <group>
                             <group>
+                                <field name="active" invisible="1"/>
                                 <field name="name"/>
                                 <field name="sequence_id"/>
                                 <field name="warehouse_id" groups="stock.group_stock_multi_warehouses"/>
@@ -422,6 +419,7 @@
             <field name="name">Assign a Responsible</field>
             <field name="model_id" ref="model_stock_picking"/>
             <field name="binding_model_id" ref="stock.model_stock_picking"/>
+            <field name="binding_view_types">list</field>
             <field name="state">code</field>
             <field name="code">
 action_values = env.ref('stock.stock_assign_responsible_action').read()[0]

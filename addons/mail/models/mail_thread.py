@@ -114,11 +114,11 @@ class MailThread(models.AbstractModel):
     message_attachment_count = fields.Integer('Attachment Count', compute='_compute_message_attachment_count', groups="base.group_user")
     message_main_attachment_id = fields.Many2one(string="Main Attachment", comodel_name='ir.attachment', index=True, copy=False)
 
-    @api.one
     @api.depends('message_follower_ids')
     def _get_followers(self):
-        self.message_partner_ids = self.message_follower_ids.mapped('partner_id')
-        self.message_channel_ids = self.message_follower_ids.mapped('channel_id')
+        for thread in self:
+            thread.message_partner_ids = thread.message_follower_ids.mapped('partner_id')
+            thread.message_channel_ids = thread.message_follower_ids.mapped('channel_id')
 
     @api.model
     def _search_follower_partners(self, operator, operand):
@@ -290,9 +290,9 @@ class MailThread(models.AbstractModel):
                 subtype = thread._creation_subtype()
                 body = _('%s created') % doc_name
                 if subtype:  # if we have a sybtype, post message to notify users from _message_auto_subscribe
-                    thread.sudo().message_post(body=body, subtype_id=subtype.id, author_id=self.env.user.partner_id.id, )
+                    thread.sudo().message_post(body=body, subtype_id=subtype.id, author_id=self.env.user.partner_id.id)
                 else:
-                    thread._message_log(body=body)  # todo optimise email_from
+                    thread._message_log(body=body)
 
         # post track template if a tracked field changed
         if not self._context.get('mail_notrack'):
@@ -315,7 +315,7 @@ class MailThread(models.AbstractModel):
 
         # Track initial values of tracked fields
         track_self = self.with_lang()
-        
+
         tracked_fields = None
         if not self._context.get('mail_notrack'):
             tracked_fields = track_self._get_tracked_fields()
@@ -1929,17 +1929,17 @@ class MailThread(models.AbstractModel):
         self.ensure_one()
         if author_id:
             author = self.env['res.partner'].sudo().browse(author_id)
-        elif self.env.user.email:
+        else:
             author = self.env.user.partner_id
             author_id = author.id
-        else:
-            # the current user has no email address (like the public user)
-            author = self.env.user.browse(SUPERUSER_ID).partner_id
-            author_id = author.id
 
-        if not author.email:
+        if author.email:
+            email_from = author.email_formatted
+        elif self.env.su:
+            # superuser mode without author email -> probably public user; anyway we don't want to crash
+            email_from = False
+        else:
             raise exceptions.UserError(_("Unable to log message, please configure the sender's email address."))
-        email_from = author.email_formatted
 
         message_values = {
             'subject': subject,
@@ -1999,15 +1999,15 @@ class MailThread(models.AbstractModel):
         if rdata['channels']:
             message_values['channel_ids'] = [(6, 0, [r['id'] for r in rdata['channels']])]
         if rdata['partners']:
-            message_values['needaction_partner_ids'] = [(6, 0, [r['id'] for r in rdata['partners'] if rdata['partners'] != 'channel_email'])] 
-            # change of behaviour to check: since email_cids partner are added in _notify_compute_recipients,
-            # they will be added to needaction_partner_ids to. 
+            message_values['needaction_partner_ids'] = [(6, 0, [r['id'] for r in rdata['partners'] if r['type'] != 'channel_email'])] 
+            # change of behavior to check: since email_cids partner are added in _notify_compute_recipients,
+            # they will be added to needaction_partner_ids to.
             # we may want to filter them (example with channel_email, a cleaner solution may be great)
-            # -> instead of using _notify_customize_recipients, we could add a flag on rdata 
+            # -> instead of using _notify_customize_recipients, we could add a flag on rdata
             # (would work for needactions,  not if we want to erase partner_ids, ids)
-            # (could also be interresting for, we could add partners with r['notif'] = 'ocn_client' and r['needaction']=False)
-            # then overide a notify_recipients (as it was before) to effectively send ocn notifications.
-            # enveloppe will contain more needaction, those for the member of a email channel. 
+            # (could also be interesting for, we could add partners with r['notif'] = 'ocn_client' and r['needaction']=False)
+            # then override a notify_recipients (as it was before) to effectively send ocn notifications.
+            # envelope will contain more needaction, those for the member of a email channel.
         if message_values and self:
             message_values.update(self._notify_customize_recipients(message, msg_vals))
         if message_values:
@@ -2032,7 +2032,7 @@ class MailThread(models.AbstractModel):
             self.env['bus.bus'].sudo().sendmany(notifications)
         return True
 
-    def _notify_record_by_email(self, message, partners_data, msg_vals=False, model_description=False, mail_auto_delete=True, send_after_commit=False):
+    def _notify_record_by_email(self, message, partners_data, msg_vals=False, model_description=False, mail_auto_delete=True, send_after_commit=True):
         """ Method to send email linked to notified messages.
         :param message: mail.message record to notify;
         :param partners_data: partner to notify by email coming from _notify_compute_recipients
@@ -2255,9 +2255,10 @@ class MailThread(models.AbstractModel):
         email_cids = [r['id'] for r in recipient_data['channels'] if r['notif'] == 'email']
         if email_cids:
             # we are doing a similar search in ocn_client
-            # Could be interresting to make everything in a single query.
+            # Could be interesting to make everything in a single query.
             # ocn_client: (searching all partners linked to channels of type chat).
             # here      : (searching all partners linked to channels with notif email if email is not the author one)
+            # TDE FIXME: use email_sanitized
             email_from = msg_vals.get('email_from') or message.email_from
             exept_partner = [r['id'] for r in recipient_data['partners']]
             if author_id:

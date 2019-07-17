@@ -5,7 +5,5 @@ from . import l10n_latam_document_type
 from . import account_journal
 from . import account_move
 from . import account_move_line
-from . import account_invoice
-from . import account_invoice_line
 from . import account_chart_template
 from . import ir_sequence

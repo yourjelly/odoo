@@ -22,5 +22,5 @@ class AccountFiscalPosition(models.Model):
             ]
             if self.env.context.get('force_company'):
                 domain.append(('company_id', '=', self.env.context.get('force_company')))
-            return self.search(domain, limit=1)
+            return self.search(domain, limit=1).id
         return super().get_fiscal_position(partner_id, delivery_id=delivery_id)

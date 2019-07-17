@@ -273,7 +273,7 @@ msgid "Country Code"
 msgstr "Código de país"
 
 #. module: l10n_ar
-#: model:ir.model,name:l10n_ar.model_account_invoice_refund
+#: model:ir.model,name:l10n_ar.model_account_reverse_moves
 msgid "Credit Note"
 msgstr "Rectificativa"
 

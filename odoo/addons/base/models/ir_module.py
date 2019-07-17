@@ -887,7 +887,7 @@ class Module(models.Model):
             for mod in update_mods
         }
         mod_names = topological_sort(mod_dict)
-        self.env['ir.translation'].load_module_terms(mod_names, filter_lang)
+        self.env['ir.translation']._load_module_terms(mod_names, filter_lang)
 
     @api.multi
     def _check(self):
@@ -938,10 +938,10 @@ class ModuleDependency(models.Model):
         for dep in self:
             dep.depend_id = name_mod.get(dep.name)
 
-    @api.one
     @api.depends('depend_id.state')
     def _compute_state(self):
-        self.state = self.depend_id.state or 'unknown'
+        for dependency in self:
+            dependency.state = dependency.depend_id.state or 'unknown'
 
 
 class ModuleExclusion(models.Model):
@@ -970,7 +970,7 @@ class ModuleExclusion(models.Model):
         for excl in self:
             excl.exclusion_id = name_mod.get(excl.name)
 
-    @api.one
     @api.depends('exclusion_id.state')
     def _compute_state(self):
-        self.state = self.exclusion_id.state or 'unknown'
+        for exclusion in self:
+            exclusion.state = exclusion.exclusion_id.state or 'unknown'
