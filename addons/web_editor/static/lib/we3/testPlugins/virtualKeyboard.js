@@ -42,7 +42,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
     // Private
     //--------------------------------------------------------------------------
 
-    async _testMultiKeyPress (assert) {
+    async _testMultikeypress (assert) {
         var ev;
         var Test = this.dependencies.Test;
         Test.setValue("<p>aaa◆</p>");
@@ -54,7 +54,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 charCode: 0,
                 keyCode: 73,
             }],
-            ['keyPress', {
+            ['keypress', {
                 key: 'i',
                 charCode: 105,
                 keyCode: 105,
@@ -73,7 +73,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 charCode: 0,
                 keyCode: 8,
             }],
-            ['keyPress', {
+            ['keypress', {
                 key: 'Backspace',
                 charCode: 8,
                 keyCode: 8,
@@ -91,7 +91,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 charCode: 0,
                 keyCode: 32,
             }],
-            ['keyPress', {
+            ['keypress', {
                 key: ' ',
                 charCode: 32,
                 keyCode: 32,
@@ -137,7 +137,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 charCode: 0,
                 keyCode: 73,
             }],
-            ['keyPress', {
+            ['keypress', {
                 key: 'i',
                 charCode: 105,
                 keyCode: 105,
@@ -198,7 +198,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 charCode: 0,
                 keyCode: 13,
             }],
-            ['keyPress', {
+            ['keypress', {
                 key: 'Enter',
                 charCode: 13,
                 keyCode: 13,
@@ -264,7 +264,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 charCode: 0,
                 keyCode: 79,
             }],
-            ['keyPress', {
+            ['keypress', {
                 key: 'ô',
                 charCode: 244,
                 keyCode: 244,
@@ -286,7 +286,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 charCode: 0,
                 keyCode: 13,
             }],
-            ['keyPress', {
+            ['keypress', {
                 key: 'Enter',
                 charCode: 13,
                 keyCode: 13,
@@ -396,7 +396,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 charCode: 0,
                 keyCode: 13,
             }],
-            ['keyPress', {
+            ['keypress', {
                 key: 'Enter',
                 charCode: 13,
                 keyCode: 13,
@@ -502,7 +502,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 charCode: 0,
                 keyCode: 13,
             }],
-            ['keyPress', {
+            ['keypress', {
                 key: 'Enter',
                 charCode: 13,
                 keyCode: 13,
@@ -602,7 +602,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 charCode: 0,
                 keyCode: 13,
             }],
-            ['keyPress', {
+            ['keypress', {
                 key: 'Enter',
                 charCode: 13,
                 keyCode: 13,
@@ -675,7 +675,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 data: 'null',
                 inputType: 'insertLineBreak',
             }],
-            ['keyPress', {
+            ['keypress', {
                 key: 'Enter',
                 charCode: 13,
                 keyCode: 13,
@@ -788,7 +788,11 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             if (e[0] === 'textInput') {
                 ev = await this._triggerTextInput(e[1].data, e[1].insert);
             } else {
-                ev = await this.dependencies.Test.triggerNativeEvents(this.editable, e[0], Object.assign({}, e[1]));
+                var o = Object.assign({}, e[1]);
+                if (e[0] === 'keypress') {
+                    o.noTextInput = true;
+                }
+                ev = await this.dependencies.Test.triggerNativeEvents(this.editable, e[0], o);
             }
         }
     }

@@ -177,7 +177,16 @@ function _eventType(eventName) {
     });
     return type;
 }
-
+function _eventKeyName(eventName) {
+    eventName = eventName.toLowerCase();
+    if (eventName.indexOf('left') !== -1) {
+        return 'ArrowLeft'
+    }
+    if (eventName.indexOf('right') !== -1) {
+        return 'ArrowRight'
+    }
+    return eventName.substr(0,1).toUpperCase() + eventName.substr(1, eventName.length);
+}
 
 var TestPlugin = class extends we3.AbstractPlugin {
     /**
@@ -414,6 +423,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
         } else {
             keyPress.key = this.utils.keyboardMap[keyPress.keyCode] || String.fromCharCode(keyPress.keyCode);
         }
+
         keyPress.keyCode = keyPress.keyCode;
 
         var ev = await this.triggerNativeEvents(target, 'keydown', keyPress);
@@ -421,35 +431,6 @@ var TestPlugin = class extends we3.AbstractPlugin {
         ev = ev[0] || ev; // (only one event was triggered)
         if (!ev.defaultPrevented) {
             await this.triggerNativeEvents(target, 'keypress', keyPress);
-
-            if (keyPress.key.length === 1) {
-                await self._textInput(target, keyPress.key);
-            } else if (keyPress.key === 'LEFT') {
-                var range = self.dependencies.Range.getRange();
-                if (!range.isCollapsed()) {
-                    self._selectRange(range.sc, range.so);
-                } else if (range.so > 1) {
-                    self._selectRange(range.sc, range.so - 1);
-                } else if (range.sc.previousSibling) {
-                    var prev = range.sc.previousSibling;
-                    self._selectRange(prev, 'length' in prev ? prev.length : prev.childNodes.length);
-                } else {
-                    console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
-                }
-            } else if (keyPress.key === 'RIGHT') {
-                var range = self.dependencies.Range.getRange();
-                if (!range.isCollapsed()) {
-                    self._selectRange(range.ec, range.eo);
-                } else if (range.so < ('length' in range.sc ? range.sc.length : range.sc.childNodes.length)) {
-                    self._selectRange(range.sc, range.so + 1);
-                } else if (range.sc.nextSibling) {
-                    self._selectRange(range.sc.nextSibling, 0);
-                } else {
-                    console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
-                }
-            } else {
-                console.debug('Native "' + keyPress.key + '" is not supported in test');
-            }
         }
 
         await this.triggerNativeEvents(target.parentNode ? target : this.editable, 'keyup', keyPress);
@@ -699,6 +680,9 @@ var TestPlugin = class extends we3.AbstractPlugin {
                     ev = new MouseEvent(eventName, options);
                     break;
                 case 'keyboard':
+                    if (options.key && options.key.length > 1) {
+                        options.key = _eventKeyName(options.key);
+                    }
                     ev = new KeyboardEvent(eventName, options);
                     break;
                 case 'composition':
@@ -722,6 +706,11 @@ var TestPlugin = class extends we3.AbstractPlugin {
             }
 
             el.dispatchEvent(ev);
+
+            if (eventName === 'keypress') {
+                await this._afterTriggerNativeKeyPressEvents(el, options);
+            }
+
             if (!self.options.test || !self.options.test.assert) {
                 window.onerror = onerror;
             }
@@ -936,6 +925,44 @@ var TestPlugin = class extends we3.AbstractPlugin {
         this._complete = true;
         if (this.options.test && this.options.test.callback) {
             this.options.test.callback(this._results);
+        }
+    }
+    async _afterTriggerNativeKeyPressEvents (target, keyPress) {
+        if (keyPress.key.length === 1) {
+            if (!keyPress.noTextInput) {
+                await this._textInput(target, keyPress.key);
+            }
+        } else if (keyPress.key === 'Delete' && document.queryCommandSupported('forwardDelete')) {
+            document.execCommand("forwardDelete", true);
+        } else if (keyPress.key === 'Backspace' && document.queryCommandSupported('delete')) {
+            document.execCommand("delete", true);
+        } else if (keyPress.key === 'Enter' && document.queryCommandSupported('insertBrOnReturn')) {
+            document.execCommand("insertBrOnReturn", true);
+        } else if (keyPress.key === 'ArrowLeft') {
+            var range = this.dependencies.Range.getRange();
+            if (!range.isCollapsed()) {
+                this._selectRange(range.sc, range.so);
+            } else if (range.so > 1) {
+                this._selectRange(range.sc, range.so - 1);
+            } else if (range.sc.previousSibling) {
+                var prev = range.sc.previousSibling;
+                this._selectRange(prev, 'length' in prev ? prev.length : prev.childNodes.length);
+            } else {
+                console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
+            }
+        } else if (keyPress.key === 'ArrowRight') {
+            var range = this.dependencies.Range.getRange();
+            if (!range.isCollapsed()) {
+                this._selectRange(range.ec, range.eo);
+            } else if (range.so < ('length' in range.sc ? range.sc.length : range.sc.childNodes.length)) {
+                this._selectRange(range.sc, range.so + 1);
+            } else if (range.sc.nextSibling) {
+                this._selectRange(range.sc.nextSibling, 0);
+            } else {
+                console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
+            }
+        } else {
+            console.warn('Native "' + keyPress.key + '" is not supported in test');
         }
     }
     /**
