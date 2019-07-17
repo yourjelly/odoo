@@ -35,7 +35,7 @@
             {
                 name: "Click ADD AN IMAGE URL in empty p: p -> img in p",
                 async: true,
-                content: '<p>◆</p>',
+                content: '<p><br/>◆</p>',
                 do: async function (assert, testName) {
                     await _clickMedia(async function() {
                         await _uploadAndInsertImg('https://www.odoo.com/logo.png');

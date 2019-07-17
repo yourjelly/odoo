@@ -1026,6 +1026,15 @@ we3.ArchNode = class {
         this._triggerChange(index);
     }
     /**
+     * Perform the required cleaning operations after merging two nodes (can be
+     * overridden by custom ArchNodes). This is called on the node that stays
+     * after merging.
+     *
+     * @private
+     * @param {boolean} isLeft true if the merge took place from right to left
+     */
+    _cleanAfterMerge (isLeft) {}
+    /**
      * Clean the Arch after performing an unwrap:
      * - Remove generated empty nodes
      * - Delete new edges
@@ -1077,7 +1086,7 @@ we3.ArchNode = class {
             return this._deleteEdgeDifferentTypes(node, next, isLeft);
         }
         // regular merge
-        if (node._isMergeableWith(next)) {
+        if (this._isMergeableSameType(node, next)) {
             node._mergeInto(next, isLeft);
         }
     }
@@ -1118,7 +1127,7 @@ we3.ArchNode = class {
         } else {
             this._moveItemOutOfList(childOfLi, formatNode);
         }
-        if (formatNode._isMergeableWith(childOfLi)) {
+        if (this._isMergeableSameType(formatNode, childOfLi)) {
             formatNode._mergeInto(childOfLi, isLeft);
         }
     }
@@ -1196,8 +1205,10 @@ we3.ArchNode = class {
         return childOfLi.isText() ? childOfLi.wrap('p') : childOfLi;
     }
     /**
-     * Return true if `node` and `next` are elements of different types that can be merged.
+     * Return true if `node` and `next` are elements of different types that
+     * can be merged (eg: an h1 with a p).
      *
+     * @private
      * @param {ArchNode} node
      * @param {ArchNode} next
      * @returns {boolean}
@@ -1205,22 +1216,26 @@ we3.ArchNode = class {
     _isMergeableDifferentTypes (node, next) {
         var isBlockVSFormat = node.isBlock() && next.isFormatNode();
         var areBothLists = node.isList() && next.isList();
-        return !this._isMergeForbidden(node, next) && (isBlockVSFormat || areBothLists);
+        return !this._isMergeableSameType(node, next) &&
+            !this._isMergeForbidden(node, next) &&
+            (isBlockVSFormat || areBothLists);
     }
     /**
-     * Return true if this ArchNode can be merged with `node`.
+     * Return true if `node` and `next` are elements of the same type that
+     * can be merged.
      * That is, they have the same node names, the same attributes,
      * and the same classes.
      *
      * @private
      * @param {ArchNode} node
+     * @param {ArchNode} next
      * @returns {boolean}
      */
-    _isMergeableWith (node) {
-        var haveSameNodeNames = this.nodeName === node.nodeName;
-        var haveSameAttributes = this.attributes.isEqual(node.attributes);
-        var haveSameClasses = this.className.isEqual(node.className);
-        return !this._isMergeForbidden(this, node) && haveSameNodeNames && haveSameAttributes && haveSameClasses;
+    _isMergeableSameType (node, next) {
+        var haveSameNodeNames = node.nodeName === next.nodeName;
+        var haveSameAttributes = node.attributes.isEqual(next.attributes);
+        var haveSameClasses = node.className.isEqual(next.className);
+        return !this._isMergeForbidden(node, next) && haveSameNodeNames && haveSameAttributes && haveSameClasses;
     }
     /**
      * Return true if it is forbidden to merge `node` and `next`
@@ -1243,25 +1258,25 @@ we3.ArchNode = class {
      * @param {boolean} isLeft true if the merge is happening from right to left
      */
     _mergeInto (next, isLeft) {
+        // handle edge BRs
+        var edge = this[isLeft ? 'firstLeaf' : 'lastLeaf']();
         var nextEdge = next[isLeft ? 'lastLeaf' : 'firstLeaf']();
-        if (nextEdge.isBR()) {
+        if (nextEdge.isPlaceholderBR() || nextEdge.isBR() && nextEdge.isAfterBR()) {
             nextEdge.remove();
-        } else {
-            var edge = this[isLeft ? 'firstLeaf' : 'lastLeaf']();
-            if (edge.isPlaceholderBR()) {
-                edge[isLeft ? 'before' : 'after'](this.params.create());
-                edge.remove();
-            }
+        } else if (edge.isPlaceholderBR() || edge.isBR() && edge.isAfterBR()) {
+            edge[isLeft ? 'before' : 'after'](this.params.create());
+            edge.remove();
         }
-        if (this._mergeMixedIndents(isLeft, next)) {
+        // try to merge elements with mixed indentations
+        var didMergeMixedIndents = this._mergeMixedIndents(isLeft, next);
+        if (didMergeMixedIndents) {
             return;
         }
+        // move the children to their new parent and remove the old parent
         var childNodes = this.childNodes.slice();
         next[isLeft ? 'append' : 'prepend'](isLeft ? childNodes : childNodes.reverse());
         this.remove();
-        if (next.isLi() && next.cleanTextVSFormat) {
-            next.cleanTextVSFormat(isLeft);
-        }
+        next._cleanAfterMerge(isLeft);
     }
     /**
      * Merge an indented list with a non-indented list item if needed.

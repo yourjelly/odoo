@@ -61,7 +61,7 @@ customArchNodes.br = class extends we3.ArchNode {
             return;
         }
         var prev = this.previousSibling();
-        if (archNode.isText() && !archNode.isVirtual() &&
+        if (archNode.isInline() && !archNode.isVirtual() &&
             (!prev || prev.isEmpty() && (!prev.isText() || prev.isVirtual()))) {
             this.params.change(archNode, archNode.length());
             this.before(archNode);

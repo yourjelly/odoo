@@ -118,6 +118,12 @@ we3.ArchNodeVirtualText = class extends we3.ArchNodeText {
             return this._mutation('br');
         }
 
+        // <p>text<br/>[VIRTUAL]</p> => mutate virtual into <br/> to persist it
+        var prev = this.previousSibling();
+        if (prev && prev.isBR() && this.isRightEdgeOfBlock()) {
+            return this._mutation('br');
+        }
+
         var flowBlock = this.ancestor('isFlowBlock');
         if (!flowBlock) {
             return this.remove();

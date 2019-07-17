@@ -407,6 +407,15 @@ Object.assign(we3.ArchNode.prototype, isInType);
  */
 var isBrowse = {
     /**
+     * Return true if the node has a BR element as previous sibling.
+     *
+     * @returns {Boolean}
+     */
+    isAfterBR: function () {
+        var previousSibling = this.previousSibling();
+        return previousSibling && previousSibling.isBR();
+    },
+    /**
      * Return true if the node has no visible content.
      *
      * @returns {Boolean}

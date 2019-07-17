@@ -129,7 +129,7 @@ var LIST = class extends we3.ArchNode {
 
         var previousLi = beforeList.items(true).pop();
         contents.slice().forEach(node => previousLi.append(node));
-        previousLi.cleanTextVSFormat(false);
+        previousLi._cleanTextVSFormat(false);
         this._cleanEdgesAfterUnlistMerge(contents);
 
         return previousLi;
@@ -177,31 +177,6 @@ var li = class extends we3.ArchNode {
     // Public
     //--------------------------------------------------------------------------
 
-    /**
-     * In merging two list elements, we might end up with a list element
-     * containing format node alongside plain text nodes. This merges them.
-     */
-    cleanTextVSFormat (isLeft) {
-        var nodes = isLeft ? this.childNodes.reverse() : this.childNodes;
-        var hasText = nodes.some(node => node.isText());
-        var hasFormat = nodes.some(node => node.isFormatNode());
-        if (!hasText || !hasFormat) {
-            return;
-        }
-        var prev;
-        nodes.slice().forEach(function (node) {
-            if (prev && node.isFormatNode() && prev.isText()) {
-                var last = node.lastChild();
-                prev.after(node.childNodes);
-                node.remove();
-                prev = last;
-            } else if (prev && node.isText() && prev.isFormatNode()) {
-                prev.append(node);
-            } else {
-                prev = node;
-            }
-        });
-    }
     /**
      * Indent this list item
      */
@@ -293,6 +268,40 @@ var li = class extends we3.ArchNode {
             this.className.add(indentClass);
         }
         super._applyRulesArchNode();
+    }
+    /**
+     * @override
+     */
+    _cleanAfterMerge (isLeft) {
+        this._cleanTextVSFormat(isLeft);
+    }
+    /**
+     * In merging two list elements, we might end up with a list element
+     * containing format node alongside plain text nodes. This merges them.
+     *
+     * @private
+     * @param {boolean} isLeft true if the merge took place from right to left
+     */
+    _cleanTextVSFormat (isLeft) {
+        var nodes = isLeft ? this.childNodes.reverse() : this.childNodes;
+        var hasText = nodes.some(node => node.isText());
+        var hasFormat = nodes.some(node => node.isFormatNode());
+        if (!hasText || !hasFormat) {
+            return;
+        }
+        var prev;
+        nodes.slice().forEach(function (node) {
+            if (prev && node.isFormatNode() && prev.isText()) {
+                var last = node.lastChild();
+                prev.after(node.childNodes);
+                node.remove();
+                prev = last;
+            } else if (prev && node.isText() && prev.isFormatNode()) {
+                prev.append(node);
+            } else {
+                prev = node;
+            }
+        });
     }
 }
 we3.addArchNode('li', li);

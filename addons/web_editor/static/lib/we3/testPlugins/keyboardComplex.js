@@ -37,7 +37,7 @@ var TestKeyboardComplex = class extends we3.AbstractPlugin {
                 }, {
                     key: 'BACKSPACE',
                 }],
-                test: "<p><span><b>dom<br/>◆&nbsp;to edit</b></span></p>",
+                test: "<p><span><b>dom<br/>◆ to edit</b></span></p>",
             },
             {
                 name: "in span > b: SHIFT+ENTER -> ENTER -> BACKSPACE -> 'a'",
@@ -52,7 +52,7 @@ var TestKeyboardComplex = class extends we3.AbstractPlugin {
                 }, {
                     key: 'a',
                 }],
-                test: "<p><span><b>dom<br/>a◆&nbsp;to edit</b></span></p>",
+                test: "<p><span><b>dom<br/>a◆ to edit</b></span></p>",
             },
             {
                 name: "in p > b: 2x SHIFT+ENTER -> BACKSPACE",
@@ -147,7 +147,8 @@ var TestKeyboardComplex = class extends we3.AbstractPlugin {
                 }, {
                     key: 'a',
                 }],
-                test: "<ul><li><p>dom<br/></p></li><li><p>a◆ to edit</p></li></ul>",
+                test: "<ul><li><p>dom<br/><br/></p></li><li><p>a◆ to edit</p></li></ul>",
+                // the extra BR appeared to make the first one visible
             },
             {
                 name: "within p (p before and after): 3x SHIFT+ENTER -> 3x BACKSPACE",
