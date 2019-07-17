@@ -227,7 +227,7 @@ class IrRule(models.Model):
         # so it is relatively safe here to include the list of rules and
         # record names.
         rules = self._get_failing(records, mode=operation).sudo()
-        return AccessError(_("""The requested operation ("%(operation)s" on "%(document_kind)s" (%(document_model)s)) was rejected because of the following rules:
+        error = AccessError(_("""The requested operation ("%(operation)s" on "%(document_kind)s" (%(document_model)s)) was rejected because of the following rules:
 %(rules_list)s
 %(multi_company_warning)s
 (Records: %(example_records)s, User: %(user_id)s)""") % {
@@ -240,6 +240,10 @@ class IrRule(models.Model):
             'example_records': ' - '.join(['%s (id=%s)' % (rec.display_name, rec.id) for rec in records[:6].sudo()]),
             'user_id': '%s (id=%s)' % (self.env.user.name, self.env.user.id),
         })
+        # clean up the cache of records prefetched with display_name above
+        for record in records[:6]:
+            record._cache.clear()
+        return error
 
 #
 # Hack for field 'global': this field cannot be defined like others, because
