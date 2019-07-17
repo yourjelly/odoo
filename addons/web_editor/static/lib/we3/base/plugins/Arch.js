@@ -102,7 +102,7 @@ var BaseArch = class extends we3.AbstractPlugin {
      * in this function as a transaction. At the end of the transaction, the rules are applied,
      * the dom is updated and the triggers are made.
      *
-     * @param {Function(getArchNode)} fn
+     * @param {Function(getArchNode)} callback
      *      The function can return a range if want to apply it instead of the
      *      default range (apply on the first changed node)
      * @param {object} [options]

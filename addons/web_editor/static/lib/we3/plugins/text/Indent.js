@@ -71,7 +71,7 @@ var IndentPlugin = class extends we3.AbstractPlugin {
         }
         var range = this.dependencies.Range.getRange();
         var isLeftEdgeOfBlock = range.scArch.isLeftEdgeOfBlock() && range.so === 0;
-        if (!range.isCollapsed() || !isLeftEdgeOfBlock) {
+        if (!range.isCollapsed() || !e.shiftKey && !isLeftEdgeOfBlock) {
             return;
         }
         switch (e.keyCode) {
