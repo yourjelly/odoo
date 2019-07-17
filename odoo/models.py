@@ -3316,7 +3316,7 @@ Fields:
                     continue
                 field = self._fields[fname]
                 field.write(self, vals[fname])
-                if field.relational:
+                if field.relational or self._field_inverses[field]:
                     relational_names.append(fname)
 
             # determine records depending on new values
