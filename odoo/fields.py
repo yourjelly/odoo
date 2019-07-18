@@ -2484,6 +2484,10 @@ class _RelationalMulti(_Relational):
         return value.ids
 
     def convert_to_write(self, value, record):
+        if isinstance(value, tuple):
+            # a tuple of ids, this is the cache format
+            value = record.env[self.comodel_name].browse(value)
+
         if isinstance(value, BaseModel) and value._name == self.comodel_name:
             # make result with new and existing records
             inv_names = {field.name for field in record._field_inverses[self]}
@@ -2511,10 +2515,6 @@ class _RelationalMulti(_Relational):
 
         if value is False or value is None:
             return [(5,)]
-
-        if isinstance(value, tuple):
-            # a tuple of ids, this is the cache format
-            return [(6, 0, list(value))]
 
         if isinstance(value, list):
             return value
