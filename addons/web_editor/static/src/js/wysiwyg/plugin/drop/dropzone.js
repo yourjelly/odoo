@@ -23,32 +23,6 @@ var DropzonePlugin = class extends we3.AbstractPlugin {
     //--------------------------------------------------------------------------
 
     /**
-     * Clean up then drops HTML or plain text into the editor.
-     *
-     * @private
-     * @param {String} html
-     * @param {Boolean} textOnly true to allow only dropping plain text
-     */
-    _dropHTML (html, textOnly) {
-        this.context.invoke('editor.beforeCommand');
-
-        // Clean up
-        var nodes = this.context.invoke('ClipboardPlugin.prepareClipboardData', html);
-
-        // Delete selection
-        var point = this.dom.deleteSelection(this.dependencies.Range.getRange(), true);
-        var range = this.dependencies.Arch.setRange({
-            sc: point.node,
-            so: point.offset,
-        });
-
-        // Insert the nodes
-        this.context.invoke('ClipboardPlugin.pasteNodes', nodes, textOnly);
-        range = this.dependencies.Range.getRange().normalize();
-
-        this.context.invoke('editor.afterCommand');
-    }
-    /**
      * Drop images into the editor: save them as attachments.
      *
      * @private
@@ -207,10 +181,6 @@ var DropzonePlugin = class extends we3.AbstractPlugin {
             return;
         }
 
-        if (dataTransfer.getData('text/html')) {
-            this._dropHTML(dataTransfer.getData('text/html'));
-            return;
-        }
         if (dataTransfer.files.length) {
             var images = [];
             _.each(dataTransfer.files, function (file) {
