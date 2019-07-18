@@ -14,6 +14,7 @@ A lot of Latin American countries need to verify
 * Add Countries code defined by AFIP/... to identify legal entities and natural persons of foreign countries.""",
     'depends': [
         'contacts',
+        'base_vat',
     ],
     'data': [
         'data/l10n_latam_identification_type_data.xml',
@@ -24,4 +25,5 @@ A lot of Latin American countries need to verify
     'installable': True,
     'auto_install': False,
     'application': False,
+    'post_init_hook': '_set_default_identification_type',
 }
