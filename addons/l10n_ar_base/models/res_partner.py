@@ -51,7 +51,7 @@ class ResPartner(models.Model):
 
     @api.constrains('vat', 'l10n_latam_identification_type_id')
     def check_vat(self):
-        l10n_ar_partners = self.filtered('l10n_latam_identification_type_id')
+        l10n_ar_partners = self.filtered(lambda x: x.l10n_latam_identification_type_id.l10n_ar_afip_code)
         l10n_ar_partners.l10n_ar_identification_validation()
         return super(ResPartner, self - l10n_ar_partners).check_vat()
 
@@ -70,10 +70,10 @@ class ResPartner(models.Model):
             try:
                 module.validate(rec.vat)
             except module.InvalidChecksum:
-                raise ValidationError(_('The validation digit is not valid.'))
+                raise ValidationError(_('The validation digit is not valid for "%s"') % rec.l10n_latam_identification_type_id.name)
             except module.InvalidLength:
-                raise ValidationError(_('Invalid length.'))
+                raise ValidationError(_('Invalid length for "%s"') % rec.l10n_latam_identification_type_id.name)
             except module.InvalidFormat:
-                raise ValidationError(_('Only numbers allowed.'))
+                raise ValidationError(_('Only numbers allowed for "%s"') % rec.l10n_latam_identification_type_id.name)
             except Exception as error:
                 raise ValidationError(repr(error))

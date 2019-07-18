@@ -6,13 +6,14 @@ from odoo.osv import expression
 
 class L10nLatamIdentificationType(models.Model):
     _name = 'l10n_latam.identification.type'
-    _description = "Partner Identification Type for LATAM countries"
+    _description = "Identification Types"
     _order = 'sequence'
 
     sequence = fields.Integer(default=10)
     name = fields.Char(translate=True, required=True,)
-    description = fields.Char(translate=True,)
+    description = fields.Char()
     active = fields.Boolean(default=True)
+    is_vat = fields.Boolean()
     country_id = fields.Many2one('res.country')
 
     def name_get(self):
