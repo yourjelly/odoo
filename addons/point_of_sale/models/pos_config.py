@@ -13,7 +13,6 @@ class AccountCashboxLine(models.Model):
 
     default_pos_id = fields.Many2one('pos.config', string='This cashbox line is used by default when opening or closing a balance for this point of sale')
 
-    @api.multi
     def name_get(self):
         result = []
         for cashbox_line in self:
@@ -184,9 +183,7 @@ class PosConfig(models.Model):
     @api.depends('session_ids')
     def _compute_current_session(self):
         for pos_config in self:
-            session = pos_config.session_ids.filtered(lambda r: r.user_id.id == self.env.uid and \
-                not r.state == 'closed' and \
-                not r.rescue)
+            session = pos_config.session_ids.filtered(lambda s: s.state != 'closed' and not s.rescue)
             # sessions ordered by id desc
             pos_config.current_session_id = session and session[0].id or False
             pos_config.current_session_state = session and session[0].state or False
@@ -246,7 +243,7 @@ class PosConfig(models.Model):
                                     " the Accounting application."))
         if self.invoice_journal_id.currency_id and self.invoice_journal_id.currency_id != self.currency_id:
             raise ValidationError(_("The invoice journal must be in the same currency as the Sales Journal or the company currency if that is not set."))
-        if any(self.journal_ids.mapped(lambda journal: journal.currency_id and journal.currency_id != self.currency_id)):
+        if any(self.journal_ids.mapped(lambda journal: self.currency_id not in (journal.company_id.currency_id, journal.currency_id))):
             raise ValidationError(_("All payment methods must be in the same currency as the Sales Journal or the company currency if that is not set."))
 
     @api.constrains('company_id', 'available_pricelist_ids')
@@ -321,7 +318,6 @@ class PosConfig(models.Model):
             self.receipt_header = False
             self.receipt_footer = False
 
-    @api.multi
     def name_get(self):
         result = []
         for config in self:
@@ -356,7 +352,6 @@ class PosConfig(models.Model):
         # If you plan to add something after this, use a new environment. The one above is no longer valid after the modules install.
         return pos_config
 
-    @api.multi
     def write(self, vals):
         result = super(PosConfig, self).write(vals)
 
@@ -369,7 +364,6 @@ class PosConfig(models.Model):
         self.sudo()._check_groups_implied()
         return result
 
-    @api.multi
     def unlink(self):
         for pos_config in self.filtered(lambda pos_config: pos_config.sequence_id or pos_config.sequence_line_id):
             pos_config.sequence_id.unlink()
@@ -413,7 +407,6 @@ class PosConfig(models.Model):
          }
 
     # Methods to open the POS
-    @api.multi
     def open_ui(self):
         """ open the pos interface """
         self.ensure_one()
@@ -423,7 +416,6 @@ class PosConfig(models.Model):
             'target': 'self',
         }
 
-    @api.multi
     def open_session_cb(self):
         """ new session button
 
@@ -445,7 +437,6 @@ class PosConfig(models.Model):
             return self._open_session(self.current_session_id.id)
         return self._open_session(self.current_session_id.id)
 
-    @api.multi
     def open_existing_session_cb(self):
         """ close session button
 

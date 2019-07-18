@@ -78,7 +78,6 @@ class AccountAccountTemplate(models.Model):
     tag_ids = fields.Many2many('account.account.tag', 'account_account_template_account_tag', string='Account tag', help="Optional tags you may want to assign for custom reporting")
     group_id = fields.Many2one('account.group')
 
-    @api.multi
     @api.depends('name', 'code')
     def name_get(self):
         res = []
@@ -339,7 +338,6 @@ class AccountChartTemplate(models.Model):
         """
         return [{'acc_name': _('Cash'), 'account_type': 'cash'}, {'acc_name': _('Bank'), 'account_type': 'bank'}]
 
-    @api.multi
     def open_select_template_wizard(self):
         # Add action to open wizard to select between several templates
         if not self.company_id.chart_template_id:
@@ -390,7 +388,6 @@ class AccountChartTemplate(models.Model):
                 company.write({'tax_cash_basis_journal_id': journal.id})
         return True
 
-    @api.multi
     def _prepare_all_journals(self, acc_template_ref, company, journals_dict=None):
         def _get_default_account(journal_vals, type='debit'):
             # Get the default accounts
@@ -431,7 +428,6 @@ class AccountChartTemplate(models.Model):
             journal_data.append(vals)
         return journal_data
 
-    @api.multi
     def generate_properties(self, acc_template_ref, company):
         """
         This method used for creating properties.
@@ -483,7 +479,6 @@ class AccountChartTemplate(models.Model):
                 company.write({stock_property: value})
         return True
 
-    @api.multi
     def _install_template(self, company, code_digits=None, obj_wizard=None, acc_ref=None, taxes_ref=None):
         """ Recursively load the template objects and create the real objects from them.
 
@@ -513,7 +508,6 @@ class AccountChartTemplate(models.Model):
         taxes_ref.update(tmp2)
         return acc_ref, taxes_ref
 
-    @api.multi
     def _load_template(self, company, code_digits=None, account_ref=None, taxes_ref=None):
         """ Generate all the objects from the templates
 
@@ -574,7 +568,6 @@ class AccountChartTemplate(models.Model):
 
         return account_ref, taxes_ref
 
-    @api.multi
     def create_record_with_xmlid(self, company, template, model, vals):
         return self._create_records_with_xmlid(model, [(template, vals)], company).id
 
@@ -640,7 +633,6 @@ class AccountChartTemplate(models.Model):
             }
         return val
 
-    @api.multi
     def generate_account(self, tax_template_ref, acc_template_ref, code_digits, company):
         """ This method generates accounts from account templates.
 
@@ -706,7 +698,6 @@ class AccountChartTemplate(models.Model):
                 'second_tax_ids': [[4, tax_template_ref[tax.id], 0] for tax in account_reconcile_model.second_tax_ids],
             }
 
-    @api.multi
     def generate_account_reconcile_model(self, tax_template_ref, acc_template_ref, company):
         """ This method creates account reconcile models
 
@@ -725,7 +716,6 @@ class AccountChartTemplate(models.Model):
             self.create_record_with_xmlid(company, account_reconcile_model, 'account.reconcile.model', vals)
         return True
 
-    @api.multi
     def _get_fp_vals(self, company, position):
         return {
             'company_id': company.id,
@@ -741,7 +731,6 @@ class AccountChartTemplate(models.Model):
             'zip_to': position.zip_to,
         }
 
-    @api.multi
     def generate_fiscal_position(self, tax_template_ref, acc_template_ref, company):
         """ This method generates Fiscal Position, Fiscal Position Accounts
         and Fiscal Position Taxes from templates.
@@ -831,7 +820,6 @@ class AccountTaxTemplate(models.Model):
         ('name_company_uniq', 'unique(name, type_tax_use, chart_template_id)', 'Tax names must be unique !'),
     ]
 
-    @api.multi
     @api.depends('name', 'description')
     def name_get(self):
         res = []
@@ -876,7 +864,6 @@ class AccountTaxTemplate(models.Model):
             val['tax_group_id'] = self.tax_group_id.id
         return val
 
-    @api.multi
     def _generate_tax(self, company):
         """ This method generate taxes from templates.
 

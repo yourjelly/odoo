@@ -17,7 +17,6 @@ TRANSLATION_TYPE = [
     ('model_terms', 'Structured Model Field'),
     ('selection', 'Selection'),
     ('code', 'Code'),
-    ('constraint', 'Constraint'),
 ]
 
 
@@ -126,9 +125,9 @@ class IrTranslationImport(object):
             cr.execute(""" INSERT INTO %s(name, lang, res_id, src, type, value, module, state, comments)
                            SELECT name, lang, res_id, src, type, value, module, state, comments
                            FROM %s
-                           WHERE type IN ('selection', 'constraint')
+                           WHERE type = 'selection'
                            AND noupdate IS NOT TRUE
-                           ON CONFLICT (type, lang, name, md5(src)) WHERE type IN ('selection', 'constraint')
+                           ON CONFLICT (type, lang, name, md5(src)) WHERE type = 'selection'
                             DO UPDATE SET (name, lang, res_id, src, type, value, module, state, comments) = (EXCLUDED.name, EXCLUDED.lang, EXCLUDED.res_id, EXCLUDED.src, EXCLUDED.type, EXCLUDED.value, EXCLUDED.module, EXCLUDED.state, EXCLUDED.comments)
                             WHERE EXCLUDED.value IS NOT NULL AND EXCLUDED.value != '';
                        """ % (self._model_table, self._table))
@@ -258,7 +257,7 @@ class IrTranslation(models.Model):
         if not tools.index_exists(self._cr, 'ir_translation_model_unique'):
             self._cr.execute("CREATE UNIQUE INDEX ir_translation_model_unique ON ir_translation (type, lang, name, res_id) WHERE type = 'model'")
         if not tools.index_exists(self._cr, 'ir_translation_selection_unique'):
-            self._cr.execute("CREATE UNIQUE INDEX ir_translation_selection_unique ON ir_translation (type, lang, name, md5(src)) WHERE type IN ('selection', 'constraint')")
+            self._cr.execute("CREATE UNIQUE INDEX ir_translation_selection_unique ON ir_translation (type, lang, name, md5(src)) WHERE type = 'selection'")
         return res
 
     @api.model
@@ -288,7 +287,6 @@ class IrTranslation(models.Model):
         if model_name in self.CACHED_MODELS:
             self.clear_caches()
 
-    @api.multi
     def _modified(self):
         """ Invalidate the ormcache if necessary, depending on the translations ``self``. """
         for trans in self:
@@ -507,7 +505,6 @@ class IrTranslation(models.Model):
         fields = self.env['ir.model.fields'].sudo().search([('model', '=', model_name)])
         return {field.name: field.help for field in fields}
 
-    @api.multi
     def check(self, mode):
         """ Check access rights of operation ``mode`` on ``self`` for the
         current user. Raise an AccessError in case conditions are not met.
@@ -569,7 +566,6 @@ class IrTranslation(models.Model):
         records._modified()
         return records
 
-    @api.multi
     def write(self, vals):
         if vals.get('value'):
             vals.setdefault('state', 'translated')
@@ -581,7 +577,6 @@ class IrTranslation(models.Model):
         self._modified()
         return result
 
-    @api.multi
     def unlink(self):
         self.check('unlink')
         self._modified()

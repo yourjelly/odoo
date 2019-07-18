@@ -271,6 +271,19 @@ QUnit.module('Views', {
         list.destroy();
     });
 
+    QUnit.test('boolean field has no title', async function (assert) {
+        assert.expect(1);
+
+        var list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree><field name="bar"/></tree>',
+        });
+        assert.equal(list.$('tbody tr:first td:eq(1)').attr('title'), "");
+        list.destroy();
+    });
+
     QUnit.test('record-depending invisible lines are correctly aligned', async function (assert) {
         assert.expect(4);
 
@@ -6504,6 +6517,37 @@ QUnit.module('Views', {
 
         assert.ok(list.$('th:contains(Reference Field)').is(':visible'),
             "should have a visible reference field");
+
+        list.destroy();
+    });
+
+    QUnit.test('always display field help as toolip of header cells', async function (assert) {
+        assert.expect(6);
+
+        this.data.foo.fields.foo.help = "This is Foo field";
+        var list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: `<tree>
+                    <field name="foo"/>
+                    <field name="bar" help="This is Bar field"/>
+                </tree>`,
+        });
+
+        var $fooHeader = list.$('th[data-name=foo]');
+        $fooHeader.tooltip('show', true);
+        $fooHeader.trigger($.Event('mouseenter'));
+        assert.containsOnce(document.body, '.oe_tooltip_string');
+        assert.strictEqual($('.oe_tooltip_string').text().trim(), 'Foo');
+        assert.strictEqual($('.oe_tooltip_help').text().trim(), 'This is Foo field');
+
+        var $barHeader = list.$('th[data-name=bar]');
+        $barHeader.tooltip('show', true);
+        $barHeader.trigger($.Event('mouseenter'));
+        assert.containsOnce(document.body, '.oe_tooltip_string');
+        assert.strictEqual($('.oe_tooltip_string').text().trim(), 'Bar');
+        assert.strictEqual($('.oe_tooltip_help').text().trim(), 'This is Bar field');
 
         list.destroy();
     });

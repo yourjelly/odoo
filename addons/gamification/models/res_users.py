@@ -25,7 +25,6 @@ class Users(models.Model):
         for user in self:
             user.karma_position = 0
 
-    @api.multi
     @api.depends('badge_ids')
     def _get_user_badge_level(self):
         """ Return total badge per level of users
@@ -55,14 +54,12 @@ class Users(models.Model):
         res._recompute_rank()
         return res
 
-    @api.multi
     def write(self, vals):
         result = super(Users, self).write(vals)
         if 'karma' in vals:
             self._recompute_rank()
         return result
 
-    @api.multi
     def add_karma(self, karma):
         for user in self:
             user.karma += karma
@@ -95,6 +92,14 @@ class Users(models.Model):
                         break
             if old_rank != user.rank_id:
                 user._rank_changed()
+
+    def _get_next_rank(self):
+        """ For fresh users with 0 karma that don't have a rank_id and next_rank_id yet
+        this method returns the first karma rank (by karma ascending). This acts as a
+        default value in related views.
+
+        TDE FIXME in post-12.4: make next_rank_id a non-stored computed field correctly computed """
+        return self.next_rank_id or (not self.rank_id and self.env['gamification.karma.rank'].search([], order="karma_min ASC", limit=1))
 
     def get_gamification_redirection_data(self):
         """
