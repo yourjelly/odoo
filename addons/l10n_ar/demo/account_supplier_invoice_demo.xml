@@ -6,6 +6,7 @@
     <!-- Invoice from gritti support service, auto fiscal position set tax no corresponde -->
     <record id="demo_sup_invoice_1" model="account.move">
         <field name="partner_id" ref="res_partner_gritti_agrimensura"/>
+        <field name="fiscal_position_id" model="account.fiscal.position" eval="obj().search([('company_id', '=', obj().env.ref('l10n_ar.company_ri').id), ('name', '=', 'IVA Compras no corresponde')], limit=1).id"/>
         <field name="invoice_user_id" ref="base.user_demo"/>
         <field name="invoice_payment_term_id" ref="account.account_payment_term"/>
         <field name="type">in_invoice</field>
@@ -101,6 +102,7 @@
     <record id="demo_sup_invoice_6" model="account.move">
         <field name="partner_id" ref="res_partner_odoo"/>
         <field name="invoice_user_id" ref="base.user_demo"/>
+        <field name="fiscal_position_id" model="account.fiscal.position" eval="obj().search([('company_id', '=', obj().env.ref('l10n_ar.company_ri').id), ('name', '=', 'IVA Compras no corresponde')], limit=1).id"/>
         <field name="invoice_payment_term_id" ref="account.account_payment_term"/>
         <field name="type">in_invoice</field>
         <field name="invoice_date" eval="time.strftime('%Y-%m')+'-26'"/>
@@ -117,6 +119,7 @@
     <record id="demo_sup_invoice_7" model="account.move">
         <field name="partner_id" ref="res_partner_odoo"/>
         <field name="invoice_user_id" ref="base.user_demo"/>
+        <field name="fiscal_position_id" model="account.fiscal.position" eval="obj().search([('company_id', '=', obj().env.ref('l10n_ar.company_ri').id), ('name', '=', 'IVA Compras no corresponde')], limit=1).id"/>
         <field name="invoice_payment_term_id" ref="account.account_payment_term"/>
         <field name="type">in_invoice</field>
         <field name="invoice_date" eval="time.strftime('%Y-%m')+'-27'"/>

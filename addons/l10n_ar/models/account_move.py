@@ -243,23 +243,6 @@ class AccountMove(models.Model):
             if journal:
                 rec.journal_id = journal.id
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        """ This funcionality was removed on v13. We need this so that in demo data, invoice creation from external api
-        and impo of csv/xls files, ths fiscal position is auto-detected from the partner and the invoice lines
-        are created mapping the taxes/accounts
-        """
-        onchanges = {'_onchange_partner_id': ['fiscal_position_id'],}
-        for onchange_method, changed_fields in onchanges.items():
-            for vals in vals_list:
-                if any(f not in vals for f in changed_fields):
-                    invoice = self.new(vals)
-                    getattr(invoice, onchange_method)()
-                    for field in changed_fields:
-                        if field not in vals and invoice[field]:
-                            vals[field] = invoice._fields[field].convert_to_write(invoice[field], invoice)
-        return super().create(vals_list)
-
     @api.multi
     def post(self):
         ar_invoices = self.filtered(lambda x: x.company_id.country_id == self.env.ref('base.ar') and x.l10n_latam_use_documents)
@@ -274,9 +257,7 @@ class AccountMove(models.Model):
 
         # We make validations here and not with a constraint because we want validaiton before sending electronic
         # data on l10n_ar_edi
-
-        # TODO Uncomment when fixed
-        # ar_invoices.check_argentinian_invoice_taxes()
+        ar_invoices.check_argentinian_invoice_taxes()
         return super().post()
 
     @api.multi
