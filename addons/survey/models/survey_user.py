@@ -238,24 +238,25 @@ class SurveyUserInputLine(models.Model):
             depend_id = question.question_depend_id
             question_type = depend_id.question_type
             answer = answer_sudo.user_input_line_ids.filtered(lambda answer: answer.question_id.id == depend_id.id)
+            operator = question.operator_id.code
             if question_type not in ['simple_choice', 'multiple_choice', 'matrix']:
                 if answer and answer.answer_type != 'suggestion' and not answer.skipped:
                     answer_type = 'value_%s' % answer.answer_type
                     if hasattr(question, answer_type):
                         result = self.search([
-                            (answer_type, question.operator, getattr(question, answer_type)),
+                            (answer_type, operator, getattr(question, answer_type)),
                             ('id', '=',  answer.id),
                             ('question_id', '=', answer.question_id.id)
                         ])
             if question_type == 'simple_choice' and answer and answer.answer_type == 'suggestion' and not answer.skipped:
                 result = self.search([
-                    ('value_suggested', question.operator, question.value_suggestions_id.id),
+                    ('value_suggested', operator, question.value_suggestions_id.id),
                     ('id', '=',  answer.id),
                     ('question_id', '=', answer.question_id.id)
                 ])
             if question_type == 'multiple_choice':
                 result = question.search([
-                    ('value_suggestions_ids', question.operator, answer.mapped('value_suggested').ids),
+                    ('value_suggestions_ids', operator, answer.mapped('value_suggested').ids),
                     ('id', '=',  question.id),
                 ])
 

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- survey operator for dependency rule -->
+        <record model="survey.operator" id="survey_operator_equalto">
+            <field name="code">=</field>
+            <field name="name">=</field>
+        </record>
+        <record model="survey.operator" id="survey_operator_notequalto">
+            <field name="code">!=</field>
+            <field name="name">is not =</field>
+        </record>
+        <record model="survey.operator" id="survey_operator_greaterthan">
+            <field name="code">&gt;</field>
+            <field name="name">&gt;</field>
+        </record>
+        <record model="survey.operator" id="survey_operator_lessthan">
+            <field name="code">&lt;</field>
+            <field name="name">&lt;</field>
+        </record>
+        <record model="survey.operator" id="survey_operator_greaterthan_equalto">
+            <field name="code">&gt;=</field>
+            <field name="name">&gt;=</field>
+        </record>
+        <record model="survey.operator" id="survey_operator_lessthan_equalto">
+            <field name="code">&lt;=</field>
+            <field name="name">&lt;=</field>
+        </record>
+        <record model="survey.operator" id="survey_operator_ilike">
+            <field name="code">ilike</field>
+            <field name="name">contains</field>
+        </record>
+        <record model="survey.operator" id="survey_operator_not_ilike">
+            <field name="code">not ilike</field>
+            <field name="name">does not contain</field>
+        </record>
+        <record model="survey.operator" id="survey_operator_in">
+            <field name="code">in</field>
+            <field name="name">in</field>
+        </record>
+        <record model="survey.operator" id="survey_operator_not_in">
+            <field name="code">not in</field>
+            <field name="name">not in</field>
+        </record>
+        <record model="survey.operator" id="survey_operator_like">
+            <field name="code">like</field>
+            <field name="name">like</field>
+        </record>
+        <record model="survey.operator" id="survey_operator_not_like">
+            <field name="code">not like</field>
+            <field name="name">not like</field>
+        </record>
+        <record model="survey.operator" id="survey_operator_equalto_like">
+            <field name="code">=like</field>
+            <field name="name">=like</field>
+        </record>
+        <record model="survey.operator" id="survey_operator_equalto_ilike">
+            <field name="code">=ilike</field>
+            <field name="name">=ilike</field>
+        </record>
+        <record model="survey.operator" id="survey_operator_set">
+            <field name="code">set</field>
+            <field name="name">is set</field>
+        </record>
+        <record model="survey.operator" id="survey_operator_not_set">
+            <field name="code">not set</field>
+            <field name="name">is not set</field>
+        </record>
+    </data>
+</odoo>
