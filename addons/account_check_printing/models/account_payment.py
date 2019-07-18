@@ -96,8 +96,14 @@ class AccountPayment(models.Model):
         self.write({'state': 'posted'})
 
     def do_print_checks(self):
-        """ This method is a hook for l10n_xx_check_printing modules to implement actual check printing capabilities """
-        raise UserError(_("You have to choose a check layout. For this, go in Apps, search for 'Checks layout' and install one."))
+        if self:
+            report_action = self[0].journal_id.company_id.account_check_printing_report_action_id or False
+            action = report_action and report_action.report_action(self) or False
+            if action:
+                self.write({'state': 'sent'})
+                return action
+        else:
+            raise UserError(_("You have to choose a check layout. For this, go in Apps, search for 'Checks layout' and install one."))
 
     #######################
     #CHECK PRINTING METHODS

@@ -38,7 +38,7 @@ class IrActions(models.Model):
 
     name = fields.Char(required=True)
     type = fields.Char(string='Action Type', required=True)
-    xml_id = fields.Char(compute='_compute_xml_id', string="External ID")
+    xml_id = fields.Char(compute='_compute_xml_id', search='_search_xml_id', string="External ID")
     help = fields.Html(string='Action Description',
                        help='Optional help text for the users with a description of the target view, such as its usage and purpose.',
                        translate=True)
@@ -53,6 +53,15 @@ class IrActions(models.Model):
         res = self.get_external_id()
         for record in self:
             record.xml_id = res.get(record.id)
+
+    def _search_xml_id(self, operator, value):
+        res_ids = []
+        if value:
+            res_ids = self.env['ir.model.data'].search(['&',
+                ('model', '=', self._name),
+                '|', ('module', operator, value), ('name', operator, value)
+            ]).mapped('res_id')
+        return [('id', 'in', res_ids)]
 
     @api.model_create_multi
     def create(self, vals_list):

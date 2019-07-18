@@ -5,16 +5,10 @@ from openerp import models, api, fields
 class res_company(models.Model):
     _inherit = "res.company"
 
-    account_check_printing_layout = fields.Selection(string="Check Layout", required=True,
+    account_check_printing_report_action_id = fields.Many2one('ir.actions.report',
+        domain=[('model', '=', 'account.payment'), ('xml_id', 'ilike', 'check_printing')],
         help="Select the format corresponding to the check paper you will be printing your checks on.\n"
-             "In order to disable the printing feature, select 'None'.",
-        selection=[
-            ('disabled', 'None'),
-            ('action_print_check_top', 'check on top'),
-            ('action_print_check_middle', 'check in middle'),
-            ('action_print_check_bottom', 'check on bottom')
-        ],
-        default="action_print_check_top")
+             "In order to disable the printing feature, leave it empty.")
 
     account_check_printing_date_label = fields.Boolean('Print Date Label', default=True,
         help="This option allows you to print the date label on the check as per CPA. Disable this if your pre-printed check includes the date label.")
