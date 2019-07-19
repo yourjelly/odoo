@@ -15,7 +15,7 @@ var BaseKeyboard = class extends we3.AbstractPlugin {
             'compositionend': '_onCompositionEnd',
         };
     }
-    start () {
+    willStart () {
         var self = this;
         this._observer = new MutationObserver(function onMutation (mutationsList, observer) {
             if (!self._currentEvent) {
@@ -45,7 +45,7 @@ var BaseKeyboard = class extends we3.AbstractPlugin {
             childList: true,
             subtree: true,
         });
-        return super.start();
+        return super.willStart();
     }
     destroy () {
         this._observer.disconnect();

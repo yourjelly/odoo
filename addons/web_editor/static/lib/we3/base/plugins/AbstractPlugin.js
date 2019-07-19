@@ -50,6 +50,12 @@ we3.AbstractPlugin = class extends we3.EventDispatcher {
     /**
      * @see Manager.start
      */
+    willStart () {
+        return Promise.resolve();
+    }
+    /**
+     * @see Manager.start
+     */
     start () {
         this._bindSelfEvents(this.pluginEvents);
         this._bindDOMEvents(window.top.document, this.documentDomEvents);

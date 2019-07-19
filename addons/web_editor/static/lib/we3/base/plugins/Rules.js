@@ -193,7 +193,7 @@ var BaseRules = class extends we3.AbstractPlugin {
         }
         this.currentRuleID = 0;
     }
-    start () {
+    willStart () {
         var self = this;
         this._constructors = [];
         this._names = Object.keys(customArchNodes);
@@ -206,7 +206,7 @@ var BaseRules = class extends we3.AbstractPlugin {
                 self.parserRuleList.push(Constructor.parse);
             }
         });
-        return super.start();
+        return super.willStart();
     }
 
     //--------------------------------------------------------------------------

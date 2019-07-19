@@ -18,7 +18,7 @@ var BaseRange = class extends we3.AbstractPlugin {
             'mouseup': '_onMouseUp',
         };
     }
-    start () {
+    willStart () {
         this._focusedNodeID = 1;
         this._range = {
             scID: 1,
@@ -26,7 +26,7 @@ var BaseRange = class extends we3.AbstractPlugin {
             ecID: 1,
             eo: 0,
         };
-        return super.start();
+        return super.willStart();
     }
     blurEditor () {
         this._editorFocused = false;

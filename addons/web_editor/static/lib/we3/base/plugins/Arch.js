@@ -31,9 +31,9 @@ var BaseArch = class extends we3.AbstractPlugin {
         this.setValue(value);
         return this._arch.toString({});
     }
-    start () {
+    willStart () {
         var self = this;
-        var promise = super.start();
+        var promise = super.willStart();
         var Rules = this.dependencies.BaseRules;
 
         this._changes = [];

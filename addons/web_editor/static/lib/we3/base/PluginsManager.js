@@ -41,17 +41,33 @@ we3.PluginsManager = class extends we3.EventDispatcher {
      * @returns {Promise}
      */
     isInitialized () {
-        return Promise.all([this._promiseLoadPlugins, this._eachAsyncParallel('isInitialized')]);
+        var promises = [];
+        for (var i = 0; i < this._pluginNames.length; i++) {
+            promises.push(this._plugins[this._pluginNames[i]].isInitialized());
+        }
+        promises.push(this._promiseLoadPlugins);
+        return Promise.all(promises);
     }
     /**
      * Start all plugins when all plugins are initialized and the editor and plugins
      * are inserted into the deepest container.
-     * When all plugin are starte, the DOM references are added to all plugins
+     *
+     * Begin to call every plugins 'willStart' method in dependencies order then
+     * call every plugins 'start' method in anti dependencies order
+     *
+     * When all plugin are started, the DOM references are added to all plugins
      *
      * @returns {Promise}
      */
-    start () {
-        return this._eachAsyncParallel('start').then(this._afterStartAddDomTools.bind(this));
+    async start () {
+        var promises = [];
+        for (var i = 0; i < this._pluginNames.length; i++) {
+            await this._plugins[this._pluginNames[i]].willStart();
+        }
+        for (var i = this._pluginNames.length - 1; i >= 0; i--) {
+            await this._plugins[this._pluginNames[i]].start();
+        }
+        this._afterStartAddDomTools();
     }
 
     //--------------------------------------------------------------------------
@@ -348,24 +364,6 @@ we3.PluginsManager = class extends we3.EventDispatcher {
         return promise;
     }
     /**
-     * Call the given method asynchronously and parallely
-     * on every plugin that has it, with the given arguments.
-     *
-     * @private
-     * @param {any} methodName
-     * @param {any} value
-     * @returns {Promise}
-     */
-    _eachAsyncParallel (methodName, value) {
-        var promises = [];
-        for (var i = 0; i < this._pluginNames.length; i++) {
-            var pluginName = this._pluginNames[i];
-            var plugin = this._plugins[pluginName];
-            promises.push(plugin[methodName](value));
-        }
-        return Promise.all(promises);
-    }
-    /**
      * Get the constructor for the given plugin.
      *
      * @private
@@ -389,25 +387,34 @@ we3.PluginsManager = class extends we3.EventDispatcher {
      */
     _getSortedPluginNames (pluginInstances) {
         var pluginNames = Object.keys(pluginInstances);
-        function deepestPluginsDependent(pluginNames, deep) {
-            deep += 1;
-            for (var i = 0; i < pluginNames.length; i++) {
-                var pluginInstance = pluginInstances[pluginNames[i]];
-                if (deep > pluginInstance._deepestPluginsDependent) {
-                    pluginInstance._deepestPluginsDependent = deep;
+        function deepestPluginsDependent(pluginNames) {
+            var deep = [];
+            pluginNames.forEach(function (pluginName) {
+                var pluginInstance = pluginInstances[pluginName];
+                if (!pluginInstance._deepestPluginsDependent) {
+                    var dependencies = pluginInstance.dependencies;
+                    if (dependencies && dependencies.length && !isBase(pluginInstance.pluginName)) {
+                        pluginInstance._deepestPluginsDependent = Math.max.apply(Math, deepestPluginsDependent(dependencies)) + 1;
+                    } else {
+                        pluginInstance._deepestPluginsDependent = 1;
+                    }
                 }
-                deepestPluginsDependent(pluginInstance.dependencies);
-            }
+                deep.push(pluginInstance._deepestPluginsDependent);
+            });
+            return deep;
         }
-        deepestPluginsDependent(pluginInstances);
+        deepestPluginsDependent(pluginNames);
+
         pluginNames.sort(function (a, b) {
-            return pluginInstances[b]._deepestPluginsDependent - pluginInstances[a]._deepestPluginsDependent;
+            return pluginInstances[a]._deepestPluginsDependent - pluginInstances[b]._deepestPluginsDependent;
         });
+        pluginNames.splice(pluginNames.indexOf('BaseArch'), 1);
+        pluginNames.unshift('BaseArch');
+
         for (var i = 0; i < pluginNames.length; i++) {
             delete pluginInstances[pluginNames[i]]._deepestPluginsDependent;
         }
-        pluginNames.splice(pluginNames.indexOf('BaseArch'), 1);
-        pluginNames.unshift('BaseArch');
+
         return pluginNames;
     }
     /**
