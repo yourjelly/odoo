@@ -8,6 +8,7 @@ var BaseRange = class extends we3.AbstractPlugin {
         super(...arguments);
         this.dependencies = ['Arch', 'Renderer', 'BaseArch', 'BaseRenderer'];
         this.editableDomEvents = {
+            'mousedown': '_onMouseDownEditable',
             'mouseup': '_onMouseUpEditable',
             'click': '_onClick',
             'keydown': '_onKeydown',
@@ -66,7 +67,7 @@ var BaseRange = class extends we3.AbstractPlugin {
         var sc = Renderer.getElement(this._range.scID);
         var ec = this._range.scID === this._range.ecID ? sc : Renderer.getElement(this._range.ecID);
         if (!Arch.getClonedArchNode(this._range.scID)) {
-            debugger;
+            console.warn('The range is corrupt');
         }
         return new WrappedRange(Arch, Renderer, {
             sc: sc,
@@ -756,6 +757,11 @@ var BaseRange = class extends we3.AbstractPlugin {
      */
     _setRangeFromDOM (options) {
         var range = this._getRange();
+        if (!range.scID || (range.scArch.type === 'TEXT-VIRTUAL' ? 1 : range.scArch.length()) < range.so ||
+            !range.ecID || (range.scArch.type === 'TEXT-VIRTUAL' ? 1 : range.ecArch.length()) < range.eo) {
+            console.warn("Try to take the range from DOM but does not seem synchronized", range);
+            return;
+        }
         range = this._voidoidSelectToWE3(range);
         this._computeSetRange(range, options);
         this._setRange(range);
@@ -931,7 +937,18 @@ var BaseRange = class extends we3.AbstractPlugin {
      * @private
      * @param {MouseEvent} e
      */
+    _onMouseDownEditable () {
+        this._mousedownInEditable = true;
+    }
+    /**
+     * @private
+     * @param {MouseEvent} e
+     */
     _onMouseUp (e) {
+        if (!this._mousedownInEditable) {
+            return;
+        }
+        this._mousedownInEditable = false;
         this._setRangeFromDOM();
         if (!this.editor.contains(e.target) || this.editable === e.target || this.editable.contains(e.target)) {
             return;
