@@ -60,7 +60,7 @@ we3.addPlugin('ForeColor', class extends (we3.getPlugin('ForeColor')) {
     constructor() {
         super(...arguments);
         this.templatesDependencies.push('/web_editor/static/src/xml/wysiwyg_colorpicker_custom.xml');
-        this.buttons.template = 'wysiwyg.buttons.forecolor';
+        this.buttons.template = 'we3.buttons.forecolor';
         this.custom = custom.bind(this);
     }
     _insertGrid(rows, target, prepend) {
@@ -76,7 +76,7 @@ we3.addPlugin('BgColor', class extends (we3.getPlugin('BgColor')) {
     constructor() {
         super(...arguments);
         this.templatesDependencies.push('/web_editor/static/src/xml/wysiwyg_colorpicker_custom.xml');
-        this.buttons.template = 'wysiwyg.buttons.bgcolor';
+        this.buttons.template = 'we3.buttons.bgcolor';
         this.custom = custom.bind(this);
     }
     _insertGrid(rows, target, prepend) {

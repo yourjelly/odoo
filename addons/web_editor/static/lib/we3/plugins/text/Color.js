@@ -4,7 +4,7 @@
 var ColorPlugin = class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
-        this.templatesDependencies = ['/web_editor/static/src/xml/wysiwyg_colorpicker.xml'];
+        this.templatesDependencies = ['xml/colorpicker.xml'];
         this.dependencies = ['Arch', 'Range', 'Text'];
 
         var self = this;
@@ -330,7 +330,7 @@ var ForeColorPlugin = class extends ColorPlugin {
     constructor () {
         super(...arguments);
         this.buttons = {
-            template: 'wysiwyg.buttons.forecolor',
+            template: 'we3.buttons.forecolor',
             active: '_active',
             enabled: '_enabled',
         };
@@ -343,7 +343,7 @@ var BgColorPlugin = class extends ColorPlugin {
     constructor () {
         super(...arguments);
         this.buttons = {
-            template: 'wysiwyg.buttons.bgcolor',
+            template: 'we3.buttons.bgcolor',
             active: '_active',
             enabled: '_enabled',
         };
