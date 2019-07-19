@@ -2868,7 +2868,7 @@ Fields:
         # DLE P27: `test` test_update_with_id:
         # On the same model, if a read follows a write, we must flush the towrite as `read` fetch from database and overwrites the cache
         # FP NOTE: we should remove that and, instead do not overwrite existing values in the cache
-        self.flush(fields)
+        self.flush(fields, self)
 
         field_names = []
         inherited_field_names = []
@@ -5083,7 +5083,7 @@ Fields:
                 record[name] = value
 
     @api.model
-    def flush(self, fnames=None):
+    def flush(self, fnames=None, records=None):
         """ Process all the pending recomputations (or at least the given field
             names `fnames` if present) and flush the pending updates to the
             database.
@@ -5109,7 +5109,18 @@ Fields:
                 process(self.env[model_name], id_vals)
         else:
             # flush self's model if any of the fields must be flushed
-            self.recompute(fnames)
+            self.recompute(fnames, records=records)
+
+            # check whether any of 'records' must be flushed
+            if records is not None:
+                fnames = set(fnames)
+                towrite = self.env.all.towrite.get(self._name)
+                if not towrite or all(
+                    fnames.isdisjoint(towrite.get(record.id, ()))
+                    for record in records
+                ):
+                    return
+
             # DLE P76: test_onchange_one2many_with_domain_on_related_field
             # ```
             # email.important = True
@@ -5515,7 +5526,7 @@ Fields:
                 records._modified_triggers(val, modified=modified)
 
     @api.model
-    def recompute(self, fnames=None):
+    def recompute(self, fnames=None, records=None):
         """ Recompute all function fields (or the given ``fnames`` if present).
             The fields and records to recompute have been determined by method
             :meth:`modified`.
@@ -5550,9 +5561,18 @@ Fields:
             while fields_to_compute:
                 process(next(iter(fields_to_compute)))
         else:
+            fields = [self._fields[fname] for fname in fnames]
+
+            # check whether any 'records' must be computed
+            if records is not None and not any(
+                records & self.env.records_to_compute(field)
+                for field in fields
+            ):
+                return
+
             # recompute the given fields on self's model
-            for fname in fnames:
-                process(self._fields[fname])
+            for field in fields:
+                process(field)
 
     #
     # Generic onchange method
