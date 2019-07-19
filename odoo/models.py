@@ -2795,11 +2795,17 @@ Fields:
         """
         fields = self.check_field_access_rights('read', fields)
 
-        self.recompute(fields)
-
-        # fetch stored fields from the database to the cache; this should feed
-        # the prefetching of secondary records
-        self._read(fields)
+        # fetch stored fields from the database to the cache
+        stored_fields = set()
+        for name in fields:
+            field = self._fields[name]
+            if field.store:
+                stored_fields.add(name)
+            elif field.compute:
+                # optimization: prefetch direct field dependencies
+                for dotname in field.depends:
+                    stored_fields.add(dotname.split('.')[0])
+        self._read(stored_fields)
 
         # retrieve results from records; this takes values from the cache and
         # computes remaining fields
