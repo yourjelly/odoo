@@ -1,6 +1,7 @@
 (function () {
 'use strict';
 
+
 var TestVirtualKeyboard = class extends we3.AbstractPlugin {
     static get autoInstall () {
         return ['Test'];
@@ -16,6 +17,10 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
         this.completion = "<p>.chi◆.</p>";
         this.completionValue = "<p>.Christophe ◆.</p>";
         this.completionDom = "<p>.Christophe .</p>";
+
+        this.completionBold = "<p>.<b>chr</b>is◆ .</p>";
+        this.completionBoldValue = "<p>.<b>Christophe</b>&nbsp;◆.</p>";
+        this.completionBoldDom = "<p>.<b>Christophe</b>&nbsp;.</p>";
     }
 
     start () {
@@ -62,9 +67,10 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             ['beforeInput', {
                 data: 'i',
             }],
-            ['textInput', {
+            ['input', {
                 data: 'i',
                 insert: 'i',
+                inputType: 'textInput',
             }],
         ]);
 
@@ -102,9 +108,10 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             ['beforeInput', {
                 data: ' ',
             }],
-            ['textInput', {
+            ['input', {
                 data: ' ',
                 insert: ' ',
+                inputType: 'textInput',
             }],
         ]);
 
@@ -165,9 +172,10 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             ['beforeInput', {
                 data: 'i',
             }],
-            ['textInput', {
+            ['input', {
                 data: 'i',
                 insert: 'i',
+                inputType: 'textInput',
             }],
         ]);
 
@@ -209,9 +217,10 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             ['beforeInput', {
                 data: 'ô',
             }],
-            ['textInput', {
+            ['input', {
                 data: 'ô',
                 insert: 'ô',
+                inputType: 'textInput',
             }],
         ]);
 
@@ -276,8 +285,9 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 charCode: 105,
                 keyCode: 105,
             }],
-            ['textInput', {
+            ['input', {
                 insert: 'i',
+                inputType: 'textInput',
             }],
         ]);
 
@@ -326,8 +336,9 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 charCode: 244,
                 keyCode: 244,
             }],
-            ['textInput', {
+            ['input', {
                 insert: 'ô',
+                inputType: 'textInput',
             }],
         ]);
 
@@ -392,9 +403,10 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             ['beforeInput', {
                 data: 'i',
             }],
-            ['textInput', {
+            ['input', {
                 data: 'i',
                 insert: 'i',
+                inputType: 'textInput',
             }],
         ]);
 
@@ -420,9 +432,10 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             ['beforeInput', {
                 data: '^',
             }],
-            ['textInput', {
+            ['input', {
                 data: '^',
                 insert: '^',
+                inputType: 'textInput',
             }],
             ['keydown', {
                 key: 'Dead',
@@ -449,15 +462,16 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 data: 'null',
                 inputType: 'deleteContentBackward',
             }],
-            ['textInput', {
+            ['input', {
                 data: 'null',
                 inputType: 'deleteContentBackward',
             }],
             ['beforeInput', {
                 data: 'ô',
             }],
-            ['textInput', {
+            ['input', {
                 data: 'ô',
+                inputType: 'textInput',
             }],
             ['compositionend', {
                 data: 'ô',
@@ -532,9 +546,10 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             ['beforeInput', {
                 data: 'i',
             }],
-            ['textInput', {
+            ['input', {
                 data: 'i',
                 insert: 'i',
+                inputType: 'textInput',
             }],
         ]);
 
@@ -565,9 +580,10 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             ['compositionupdate', {
                 data: '^',
             }],
-            ['textInput', {
+            ['input', {
                 data: '^',
                 insert: '^',
+                inputType: 'textInput',
             }],
         ]);
 
@@ -596,9 +612,10 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             ['compositionupdate', {
                 data: 'ô',
             }],
-            ['textInput', {
+            ['input', {
                 data: 'ô',
                 insert: 'ô',
+                inputType: 'textInput',
             }],
             ['compositionend', {
                 data: 'ô',
@@ -670,9 +687,10 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 charCode: 105,
                 keyCode: 105,
             }],
-            ['textInput', {
+            ['input', {
                 data: 'i',
                 insert: 'i',
+                inputType: 'textInput',
             }],
         ]);
 
@@ -700,9 +718,10 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             ['compositionupdate', {
                 data: '^',
             }],
-            ['textInput', {
+            ['input', {
                 data: '^',
                 insert: '^',
+                inputType: 'textInput',
             }],
         ]);
 
@@ -731,9 +750,10 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             ['compositionend', {
                 data: 'ô',
             }],
-            ['textInput', {
+            ['input', {
                 data: 'ô',
                 insert: 'ô',
+                inputType: 'textInput',
             }],
         ]);
 
@@ -797,9 +817,10 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             ['beforeInput', {
                 data: 'i',
             }],
-            ['textInput', {
+            ['input', {
                 data: 'i',
                 insert: 'i',
+                inputType: 'textInput',
             }],
         ]);
 
@@ -825,9 +846,10 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             ['beforeInput', {
                 data: 'ô',
             }],
-            ['textInput', {
+            ['input', {
                 data: 'ô',
                 insert: 'ô',
+                inputType: 'textInput',
             }],
         ]);
 
@@ -896,9 +918,10 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             ['beforeInput', {
                 data: 's',
             }],
-            ['textInput', {
+            ['input', {
                 data: 's',
                 insert: 's',
+                inputType: 'textInput',
             }],
         ]);
 
@@ -950,7 +973,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 data: 'Christophe',
             }],
 
-            // auto add space after autocompletion
+            // auto add space after autocompletion (if no space after)
 
             ['keydown', {
                 key: 'Unidentified',
@@ -960,9 +983,10 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             ['beforeInput', {
                 data: ' ',
             }],
-            ['textInput', {
+            ['input', {
                 data: ' ',
                 insert: ' ',
+                inputType: 'textInput',
             }],
             ['keyup', {
                 key: 'Unidentified',
@@ -977,6 +1001,64 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
         assert.strictEqual(this.dependencies.Test.getDomValue(), this.completionDom, "Should insert the word in the DOM");
     }
 
+    async _testCompletionWithBoldSwiftKey (assert) {
+        var ev;
+        var Test = this.dependencies.Test;
+        await Test.setValue(this.completionBold);
+
+        // Christophe
+        await this._triggerKey([
+            ['compositionstart', {
+            }],
+            ['compositionupdate', {
+                data: 'chris',
+            }],
+            ['keydown', {
+                key: 'Unidentified',
+                charCode: 0,
+                keyCode: 229,
+            }],
+            ['beforeInput', {
+                data: 'Christophe',
+                inputType: 'insertCompositionText',
+            }],
+            ['compositionupdate', {
+                data: 'Christophe',
+            }],
+            ['input', {
+                data: 'Christophe',
+                inputType: 'insertCompositionText',
+            }],
+        ]);
+
+        var p = this.editable.querySelector('p');
+        p.removeChild(p.firstChild);
+        p.firstChild.removeChild(p.firstChild.firstChild);
+        p.removeChild(p.firstChild);
+
+        var text = document.createTextNode('.');
+        p.insertBefore(text, p.lastChild);
+
+        var b = document.createElement('b');
+        b.innerHTML = 'Christophe';
+        p.insertBefore(b, p.lastChild);
+
+        p.lastChild.nodeValue = '\u00A0.';
+
+        this._selectDOMRange(b.firstChild, b.firstChild.textContent.length);
+
+        await this._triggerKey([
+            ['compositionend', {
+                data: 'Christophe',
+            }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        assert.strictEqual(this.dependencies.Test.getValue(), this.completionBoldValue, "Should insert the word in the Arch");
+        assert.strictEqual(this.dependencies.Test.getDomValue(), this.completionBoldDom, "Should insert the word in the DOM");
+    }
+
     async _triggerKey (data) {
         var ev, e;
         for (var k = 0; k < data.length; k++) {
@@ -984,7 +1066,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             if (ev && e[0] !== 'keydown' && e[0] !== 'keyup' && ev.defaultPrevented) {
                 continue;
             }
-            if (e[0] === 'textInput') {
+            if (e[0] === 'textInput' || e[1].inputType === 'textInput') {
                 ev = this._triggerTextInput(e[1].data, e[1].insert);
             } else {
                 var o = Object.assign({}, e[1]);

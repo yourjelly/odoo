@@ -416,7 +416,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
 
         Arch.getClonedArchNode(1, true); // trash the previous clone
 
-        return result
+        return this._cleanValue(result)
             .replace(/^<[^>]+>/, '').replace(/<\/[^>]+>$/, '') // remove container
             .replace(regExpRangeToCollapsed, rangeCollapsed);
     }

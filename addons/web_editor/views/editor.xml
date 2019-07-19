@@ -40,7 +40,7 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Arch.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Range.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Renderer.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Keyboard.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Input.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Selector.js"/>
 
     <script type="text/javascript" src="/web_editor/static/lib/we3/base/we3.js"/>

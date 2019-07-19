@@ -3,10 +3,10 @@
 
 var pluginsRegistry = we3.pluginsRegistry = {};
 function whiteList (pluginName) {
-    return [ 'Arch', 'Range', 'Renderer', 'Rules', 'BaseArch', 'BaseRange', 'BaseRenderer', 'BaseRules', 'BaseKeyboard', 'Selector'].indexOf(pluginName) !== -1;
+    return [ 'Arch', 'Range', 'Renderer', 'Rules', 'BaseArch', 'BaseRange', 'BaseRenderer', 'BaseRules', 'BaseInput', 'Selector'].indexOf(pluginName) !== -1;
 }
 function isBase (pluginName) {
-    return ['BaseArch', 'BaseRange', 'BaseRenderer', 'BaseRules', 'BaseKeyboard'].indexOf(pluginName) !== -1;
+    return ['BaseArch', 'BaseRange', 'BaseRenderer', 'BaseRules', 'BaseInput'].indexOf(pluginName) !== -1;
 }
 
 we3.PluginsManager = class extends we3.EventDispatcher {
@@ -25,10 +25,11 @@ we3.PluginsManager = class extends we3.EventDispatcher {
         params.plugins.BaseRange = true;
         params.plugins.BaseRenderer = true;
         params.plugins.BaseRules = true;
-        params.plugins.BaseKeyboard = true;
+        params.plugins.BaseInput = true;
         params.plugins.Arch = true;
         params.plugins.Range = true;
         params.plugins.Rules = true;
+        params.plugins.Input = true;
         this._promiseLoadPlugins = this._loadPlugins(params, options);
         this.on('change', this, this.changeEditorValue);
         this.on('callPluginMethod', this, this._onCallPluginMethod);

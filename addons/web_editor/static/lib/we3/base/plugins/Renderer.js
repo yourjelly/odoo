@@ -12,7 +12,10 @@ var BaseRenderer = class extends we3.AbstractPlugin {
      * @param {int} id
      * @returns {Node}
      */
-    getElement (id) {
+    getElement (id, insertIfMissing) {
+        if (insertIfMissing) {
+            this._insertInEditable(this.jsonById[id]);
+        }
         return this.elements[id];
     }
     /**
@@ -20,9 +23,13 @@ var BaseRenderer = class extends we3.AbstractPlugin {
      *
      * @param {Node} element
      */
-    getID (element) {
+    getID (element, insertIfMissing) {
         var index = this.elements.indexOf(element);
-        return index === -1 ? null : index;
+        var id = index === -1 ? null : index;
+        if (id && insertIfMissing) {
+            this._insertInEditable(this.jsonById[id]);
+        }
+        return id;
     }
     markAsDirty (id, options) {
         options = options || {};
@@ -108,7 +115,9 @@ var BaseRenderer = class extends we3.AbstractPlugin {
         ids[id] = id;
         if (json.childNodes) {
             for (var k = 0; k < json.childNodes.length; k++) {
-                this._allIds(json.childNodes[k], ids);
+                var childID = json.childNodes[k];
+                this.jsonById[childID].parentID = json.id;
+                this._allIds(childID, ids);
             }
         }
         return ids;
@@ -190,6 +199,10 @@ var BaseRenderer = class extends we3.AbstractPlugin {
      * @returns {Node}
      */
     _getElement (id, target) {
+        if (id === 1) {
+            return this.editable;
+        }
+
         var json = this.jsonById[id];
         var el = this.elements[id];
         var freeElement = target && target !== el && !this.getID(target) ? target : null;
@@ -211,8 +224,6 @@ var BaseRenderer = class extends we3.AbstractPlugin {
                         el.parentNode.removeChild(el);
                     }
                     el = document.createTextNode(json.nodeValue);
-                } else {
-                    el.textContent = json.nodeValue;
                 }
             } else if (json.nodeName && (!el.tagName || el.tagName.toLowerCase() !== json.nodeName)) {
                 if (el.parentNode) {
@@ -222,7 +233,49 @@ var BaseRenderer = class extends we3.AbstractPlugin {
             }
         }
         this.elements[id] = el;
+
+        this._insertInEditable(json);
+
         return el;
+    }
+    _insertInEditable (json, dontCheckParent) {
+        if (json && json.id === 1) {
+            return;
+        }
+        if (!dontCheckParent) {
+            this._insertInEditable(this.jsonById[json.parentID]);
+        }
+
+        var self = this;
+        var parent = this._getElement(json.parentID);
+        var index = this.jsonById[json.parentID].childNodes.indexOf(json.id);
+        var el = this.elements[json.id];
+        var child = parent.childNodes[index];
+        if (el === child) {
+            return;
+        }
+
+        var childID = this.elements.indexOf(child);
+        if (!child) {
+            parent.appendChild(el);
+        } else if ((!child.tagName && !json.nodeName || child.nodeName.toLowerCase() === json.nodeName) && childID === -1) {
+            if (childID !== -1) {
+                delete this.elements[childID];
+            }
+
+            this.elements[json.id] = child;
+            if (json.childNodes) {
+                json.childNodes.forEach(function (id) {
+                    self._insertInEditable(self.jsonById[id], true);
+                });
+            }
+
+            if (childID !== -1) {
+                this._getElement(childID);
+            }
+        } else {
+            parent.insertBefore(el, parent.childNodes[index]);
+        }
     }
     /**
      * Update the `changes` with a JSON containing the differences between the previous state
@@ -332,6 +385,12 @@ var BaseRenderer = class extends we3.AbstractPlugin {
 
         if (options.forceDirty) {
             this._markAllDirty();
+        } else {
+            this.elements.forEach(function (el, id) {
+                if (el && !self.editable.contains(el)) {
+                    self.markAsDirty(id);
+                }
+            })
         }
 
         Object.keys(this.changes).forEach(function (id) {
@@ -376,8 +435,8 @@ var BaseRenderer = class extends we3.AbstractPlugin {
             }
         }
 
-        if ('nodeValue' in changes) {
-            node.textContent = changes.nodeValue;
+        if (('nodeValue' in changes) || json.nodeValue !== node.textContent) {
+            node.textContent = changes.nodeValue || json.nodeValue;
         }
 
         if (changes.childNodes) {
@@ -385,16 +444,7 @@ var BaseRenderer = class extends we3.AbstractPlugin {
 
             // sort nodes and add new nodes
             changes.childNodes.forEach(function (id, index) {
-                id = +id;
-                var childNode = self._getElement(id, node.childNodes[index]);
-                var childIndex = [].indexOf.call(node.childNodes, childNode);
-                if (childIndex !== index) {
-                    if (!node.childNodes[index]) {
-                        node.appendChild(childNode);
-                    } else {
-                        node.insertBefore(childNode, node.childNodes[index]);
-                    }
-                }
+                self._getElement(+id, node.childNodes[index]);
             });
 
             self._removeFreeElement(node.childNodes);

@@ -273,6 +273,14 @@ var isType = {
         return this.nodeName === 'pre';
     },
     /**
+     * Return true if the node is removed from this arch
+     *
+     * @returns {Boolean}
+     */
+    isRemoved: function () {
+        return this.__removed;
+    },
+    /**
      * Return true if the node's text is aligned to the right.
      *
      * @returns {Boolean}

@@ -257,7 +257,7 @@ we3.ArchNode = class {
      */
     applyPath (path) {
         var node = this;
-        while (path.length) {
+        while (node && path.length) {
             node = node.childNodes[path.shift()];
         }
         return node;
