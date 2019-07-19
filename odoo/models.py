@@ -5384,7 +5384,7 @@ Fields:
             :param fnames: iterable of field names that have been modified on
                 records ``self``
         """
-        if not self:
+        if not self or not fnames:
             return
         if len(fnames) == 1:
             tree = self._field_triggers.get(self._fields[next(iter(fnames))])
