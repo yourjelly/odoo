@@ -265,7 +265,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('keyboard enter', async function (assert) {
-        assert.expect(64);
+        assert.expect(62);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, {TestKeyboardEnter: true}),
