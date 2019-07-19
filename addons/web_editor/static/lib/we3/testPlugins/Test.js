@@ -798,7 +798,9 @@ var TestPlugin = class extends we3.AbstractPlugin {
                         node = node.parentNode;
                     }
 
-                    this._selectRange(nextRangeNode, 0, nextRangeNode, 0);
+                    if (nextRangeNode) {
+                        this._selectRange(nextRangeNode, 0, nextRangeNode, 0);
+                    }
                     return;
                 }
             }

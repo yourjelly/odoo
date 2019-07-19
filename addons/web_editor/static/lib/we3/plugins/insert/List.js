@@ -873,15 +873,15 @@ var ListPlugin = class extends we3.AbstractPlugin {
             return;
         }
         var isLeftEdgeOfLi = range.scArch.isLeftEdgeOfPred(node => node.isLi()) && range.so === 0;
-        switch (e.keyCode) {
-            case 8: // BACKSPACE
+        switch (e.key) {
+            case 'Backspace':
                 if (range.isCollapsed() && isLeftEdgeOfLi) {
                     e.preventDefault();
                     e.stopPropagation();
                     this.outdent();
                 }
                 break;
-            case 9: // TAB
+            case 'Tab':
                 if (this.options.tab && !this.options.tab.enabled) {
                     return;
                 }

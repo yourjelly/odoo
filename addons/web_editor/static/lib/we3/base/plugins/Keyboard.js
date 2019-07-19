@@ -76,34 +76,6 @@ var BaseKeyboard = class extends we3.AbstractPlugin {
             self.dependencies.BaseArch.getArchNode(id).addLine(offset);
         });
     }
-    /**
-     * Move to next cell on tab in a cell
-     *
-     * @param {ArchNode} scArch
-     * @param {Boolean} untab true to move left
-     */
-    _handleTabInCell (scArch, untab) {
-        var cell = scArch.ancestor('isCell');
-        var nextCell = cell[untab ? 'previousSibling' : 'nextSibling']();
-        if (!nextCell) {
-            return;
-        }
-        var leaf = nextCell[untab ? 'lastLeaf' : 'firstLeaf']();
-        this.dependencies.BaseRange.setRange({
-            scID: leaf.id,
-            so: untab ? leaf.length() : 0,
-        });
-    }
-    /**
-     * Insert a TAB (4 non-breakable spaces).
-     *
-     * @private
-     */
-    _insertTab () {
-        var tabSize = this.options.tab && this.options.tab.size || 0;
-        var tab = new Array(tabSize).fill('\u00A0').join('');
-        return this.dependencies.BaseArch.insert(tab);
-    }
     _isOffsetLeftEdge (range) {
         var pointArch = this._skipVirtual({
             archNode: range.scArch,
@@ -208,10 +180,15 @@ var BaseKeyboard = class extends we3.AbstractPlugin {
             }
         });
 
+        if (param.ctrlKey || param.altKey) {
+            if (param.targets.length) {
+                BaseRenderer.redraw({forceDirty: false});
+            }
+            return;
+        }
+
         if (param.shiftKey) {
             return BaseArch.insert('<br/>');
-        } else if (param.ctrlKey) {
-            return BaseArch.insert('<hr/>');
         } else {
             var range = BaseRange.getRange();
             var liAncestor = range.scArch.ancestor('isLi');
@@ -224,6 +201,8 @@ var BaseKeyboard = class extends we3.AbstractPlugin {
         }
     }
     /**
+     * Insert a TAB (4 non-breakable spaces).
+     *
      * @private
      * @param {object} param
      */
@@ -231,13 +210,12 @@ var BaseKeyboard = class extends we3.AbstractPlugin {
         if (this.options.tab && !this.options.tab.enabled) {
             return;
         }
-        var untab = param.shiftKey;
-        var range = this.dependencies.BaseRange.getRange();
-        if (range.scArch.isInCell()) {
-            return this._handleTabInCell(range.scArch, untab);
-        } else if (!untab) {
-            return this._insertTab();
+        if (param.shiftKey || param.ctrlKey || param.altKey) {
+            return;
         }
+        var tabSize = this.options.tab && this.options.tab.size || 0;
+        var tab = new Array(tabSize).fill(this.utils.char('nbsp')).join('');
+        return this.dependencies.BaseArch.insert(tab);
     }
     _skipVirtual (pointArch) {
         if (pointArch.archNode.isVirtual()) {
@@ -312,21 +290,12 @@ var BaseKeyboard = class extends we3.AbstractPlugin {
         if (this.editable.style.display === 'none') {
             return;
         }
-        this._currentEventIsDefaultPrevented = e.defaultPrevented;
-        if (this._currentEventIsDefaultPrevented) {
-            return;
-        }
-        if (e.key === 'Tab') {
-            e.stopPropagation();
-        }
-        if (e.keyCode >= 33 && e.keyCode <= 40) {
-            return;
-        }
         var param = this._onKeyDownNextTick();
         param.defaultPrevented = param.defaultPrevented || e.defaultPrevented;
         param.type = param.type || e.type;
         param.shiftKey = e.shiftKey;
         param.ctrlKey = e.ctrlKey;
+        param.altKey = e.altKey;
         param.key = e.key;
     }
     _onTextInput (e) {

@@ -70,24 +70,26 @@ var IndentPlugin = class extends we3.AbstractPlugin {
             return;
         }
         var range = this.dependencies.Range.getRange();
-        var isLeftEdgeOfBlock = range.scArch.isLeftEdgeOfBlock() && range.so === 0;
-        if (!range.isCollapsed() || !e.shiftKey && !isLeftEdgeOfBlock) {
+        if (!range.isCollapsed()) {
             return;
         }
-        switch (e.keyCode) {
-            case 8: // BACKSPACE
-                if (range.scArch.isLeftEdgeOfPred(node => node.isIndented())) {
+        switch (e.key) {
+            case 'Backspace':
+                if (range.so === 0 && range.scArch.isLeftEdgeOfPred(node => node.isIndented())) {
                     e.preventDefault();
                     e.stopPropagation();
                     this.outdent();
                 }
                 break;
-            case 9: // TAB
-                e.preventDefault();
-                e.stopPropagation();
-                if (e.shiftKey && range.scArch.isLeftEdgeOfPred(node => node.isIndented())) {
+            case 'Tab':
+                if (e.shiftKey && range.scArch.ancestor('isIndented')) {
+                    e.preventDefault();
+                    e.stopPropagation();
                     this.outdent();
-                } else {
+                }
+                if (!e.shiftKey && !range.so && range.scArch.isLeftEdgeOfBlock()) {
+                    e.preventDefault();
+                    e.stopPropagation();
                     this.indent();
                 }
                 break;

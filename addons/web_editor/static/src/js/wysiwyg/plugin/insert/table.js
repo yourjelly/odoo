@@ -203,10 +203,13 @@ var TablePicker = class extends we3.AbstractPlugin {
 var Table = class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
+        this.dependencies = ['Range'];
         this.templatesDependencies = ['/web_editor/static/src/xml/wysiwyg_table.xml'];
-        this.dependencies = [];
         this.buttons = {
             template: 'wysiwyg.popover.table',
+        };
+        this.editableDomEvents = {
+            'keydown': '_onKeyDown',
         };
     }
 
@@ -405,6 +408,46 @@ var Table = class extends we3.AbstractPlugin {
      */
     _currentTable (cell) {
         return cell.ancestor(node => node.isTable());
+    }
+    /**
+     * Move to next cell on tab in a cell
+     *
+     * @param {ArchNode} scArch
+     * @param {Boolean} untab true to move left
+     */
+    _handleTabInCell (scArch, untab) {
+        var cell = scArch.ancestor('isCell');
+        var nextCell = cell[untab ? 'previousSibling' : 'nextSibling']();
+        if (!nextCell) {
+            return;
+        }
+        var leaf = nextCell[untab ? 'lastLeaf' : 'firstLeaf']();
+        this.dependencies.Range.setRange({
+            scID: leaf.id,
+            so: untab ? leaf.length() : 0,
+        });
+    }
+
+    //--------------------------------------------------------------------------
+    // Handle
+    //--------------------------------------------------------------------------
+
+    /**
+     * Handle special list behavior of `TAB` key presses
+     *
+     * @private
+     * @param {KeyboardEvent} e
+     */
+    _onKeyDown (e) {
+        if (e.defaultPrevented || e.key !== 'Tab') {
+            return;
+        }
+        var range = this.dependencies.Range.getRange();
+        if (range.scArch.isInCell()) {
+            e.preventDefault();
+            e.stopPropagation();
+            return this._handleTabInCell(range.scArch, e.shiftKey);
+        }
     }
 };
 

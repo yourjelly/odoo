@@ -44,9 +44,9 @@ var BaseRenderer = class extends we3.AbstractPlugin {
      * @param {Boolean} [options.showIDs]
      */
     redraw (options) {
-        this._redraw(Object.assign({}, options, {
+        this._redraw(Object.assign({}, {
             forceDirty: true,
-        }));
+        }, options));
     }
     /**
      * Reset the DOM, with a starting DOM if `json` is passed.
@@ -304,12 +304,16 @@ var BaseRenderer = class extends we3.AbstractPlugin {
      * @private
      */
     _markAllDirty () {
+        var self = this;
         this.jsonById.forEach(function (json, id) {
             var json = Object.assign({}, json);
+            if (!json) {
+                return;
+            }
             self.changes[id] = json;
             if (json.childNodes) {
                 json.childNodes = json.childNodes.map(function (json) {
-                    return json.id;
+                    return json.id || json;
                 });
             }
         });
