@@ -265,7 +265,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('keyboard enter', async function (assert) {
-        assert.expect(62);
+        assert.expect(69);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, {TestKeyboardEnter: true}),
@@ -281,7 +281,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('keyboard complex dom', async function (assert) {
-        assert.expect(21);
+        assert.expect(24);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, {TestKeyboardComplex: true}),

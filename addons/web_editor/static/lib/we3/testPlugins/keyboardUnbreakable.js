@@ -475,7 +475,7 @@ var TestKeyboardUnbreakable = class extends we3.AbstractPlugin {
                     key: '1',
                 }],
                 test: '<noteditable>' +
-                        '<p><b data-oe-type="monetary" class="editable oe_price">$&nbsp;<span class="oe_currency_value">1◆750.00</span></b></p>' +
+                        '<p><b data-oe-type="monetary" class="editable oe_price">$ <span class="oe_currency_value">1◆750.00</span></b></p>' +
                     '</noteditable>',
             },
             {
@@ -488,7 +488,7 @@ var TestKeyboardUnbreakable = class extends we3.AbstractPlugin {
                     key: '1',
                 }],
                 test: '<noteditable>' +
-                        '<p><b data-oe-type="monetary" class="editable oe_price">$&nbsp;<span class="oe_currency_value">750.001◆</span></b></p>' +
+                        '<p><b data-oe-type="monetary" class="editable oe_price">$ <span class="oe_currency_value">750.001◆</span></b></p>' +
                     '</noteditable>',
             },
             {
@@ -501,7 +501,7 @@ var TestKeyboardUnbreakable = class extends we3.AbstractPlugin {
                     key: '1',
                 }],
                 test:   '<noteditable>' +
-                            '<p><b data-oe-type="monetary" class="editable oe_price">$&nbsp;<span class="oe_currency_value">1◆750.00</span></b></p>' +
+                            '<p><b data-oe-type="monetary" class="editable oe_price">$ <span class="oe_currency_value">1◆750.00</span></b></p>' +
                         '</noteditable>',
             },
             /* {

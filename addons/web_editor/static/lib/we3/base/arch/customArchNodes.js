@@ -54,21 +54,23 @@ customArchNodes.br = class extends we3.ArchNode {
     /**
      * @override
      */
-    insert (archNode) {
+    insert (archNode, offset) {
+        if (archNode.isFragment()) {
+            return this._insertFragment(archNode, offset);
+        }
         if (archNode.isBR()) {
             this.params.change(archNode, archNode.length());
-            this.after(archNode);
-            return;
+            return this.after(archNode);
         }
         var prev = this.previousSibling();
         if (archNode.isInline() && !archNode.isVirtual() &&
             (!prev || prev.isEmpty() && (!prev.isText() || prev.isVirtual()))) {
             this.params.change(archNode, archNode.length());
-            this.before(archNode);
+            var res = this.before(archNode);
             this.remove();
-            return;
+            return res;
         }
-        this.parent.insert(archNode, this.index() + 1);
+        return this.parent.insert(archNode, this.index() + 1);
     }
     /**
      * @override
@@ -93,6 +95,17 @@ customArchNodes.br = class extends we3.ArchNode {
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * @override
+     */
+    _applyRulesArchNode () {
+        var prev = this.previousSibling();
+        if (prev && prev.isText() && this.isRightEdgeOfBlock()) {
+            // add a BR to make this one visible
+            var extraBR = this.params.create('br');
+            this.before(extraBR);
+        }
+    }
     /**
      * Remove the BR's first block ancestor.
      *

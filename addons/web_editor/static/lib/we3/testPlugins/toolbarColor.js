@@ -94,7 +94,7 @@ var TestToolbarColor = class extends we3.AbstractPlugin {
                     await self.dependencies.Test.triggerNativeEvents(self.foreColorToggler, ['mousedown', 'click']);
                     await self.dependencies.Test.triggerNativeEvents(self.foreColorDropdown.querySelector('we3-button[name="color-#0000FF"]'), ['mousedown', 'click']);
                 },
-                test: '<p>d<font style="color:#0000FF">▶om&nbsp;<i class="fa fa-glass"></i>not to◀</font> edit</p>',
+                test: '<p>d<font style="color:#0000FF">▶om <i class="fa fa-glass"></i>not to◀</font> edit</p>',
             },
             {
                 name: "Apply color, then 'a' (no selection)",

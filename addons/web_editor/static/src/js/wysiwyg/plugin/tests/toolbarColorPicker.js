@@ -86,7 +86,7 @@ var TestToolbarColorPicker = class extends we3.AbstractPlugin {
                 test: '<p>d<font style="color:#cfafaf">▶om to◀</font> edit</p>',
             },
             {
-                name: "CUSTOM COLOR: mousedow on sliders",
+                name: "CUSTOM COLOR: mousedown on sliders",
                 content: '<p>d▶om to◀ edit</p>',
                 do: async function (assert, testName) {
                     await self.dependencies.Test.triggerNativeEvents(self.foreColorToggler, ['mousedown', 'click']);

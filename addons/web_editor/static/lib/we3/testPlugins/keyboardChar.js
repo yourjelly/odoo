@@ -291,7 +291,7 @@ var TestKeyboardChar = class extends we3.AbstractPlugin {
                 steps: [{
                     key: ' ',
                 }],
-                test: '<p>dom to edit ◆</p>',
+                test: '<p>dom to edit&nbsp;◆</p>',
             },
             {
                 name: "' ' within p",
@@ -307,7 +307,7 @@ var TestKeyboardChar = class extends we3.AbstractPlugin {
                 steps: [{
                     key: ' ',
                 }],
-                test: '<p>dom ◆ to edit</p>',
+                test: '<p>dom ◆&nbsp;to edit</p>',
             },
             {
                 name: "' ' after space within p",
@@ -327,7 +327,7 @@ var TestKeyboardChar = class extends we3.AbstractPlugin {
                 }, {
                     key: ' ',
                 }],
-                test: '<p>&nbsp;&nbsp; ◆dom to edit</p>',
+                test: '<p>&nbsp; &nbsp;◆dom to edit</p>',
             },
             {
                 name: "3x ' ' at end of p",
@@ -339,7 +339,7 @@ var TestKeyboardChar = class extends we3.AbstractPlugin {
                 }, {
                     key: ' ',
                 }],
-                test: '<p>dom to edit &nbsp; ◆</p>',
+                test: '<p>dom to edit &nbsp;&nbsp;◆</p>',
             },
             {
                 name: "3x ' ' within p",
@@ -363,7 +363,7 @@ var TestKeyboardChar = class extends we3.AbstractPlugin {
                 }, {
                     key: ' ',
                 }],
-                test: '<p>dom &nbsp; ◆ to edit</p>',
+                test: '<p>dom &nbsp; ◆&nbsp;to edit</p>',
             },
             {
                 name: "3x ' ' after space in p",

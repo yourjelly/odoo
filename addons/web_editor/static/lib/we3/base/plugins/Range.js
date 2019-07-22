@@ -558,7 +558,7 @@ var BaseRange = class extends we3.AbstractPlugin {
         }
         var isLeftEdge = !prev.isBR() && next.isBR();
         var isRightEdge = prev.isBR() && !next.isBR();
-        if (isRightEdge || isLeftEdge) {
+        if (isRightEdge || isLeftEdge || prev.isText() && next.isText()) {
             return {
                 scID: isLeftEdge ? prev.id : next.id,
                 so: isLeftEdge ? prev.length() : 0,

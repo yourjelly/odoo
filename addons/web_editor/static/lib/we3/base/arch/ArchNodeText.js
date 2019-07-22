@@ -35,16 +35,26 @@ we3.ArchNodeText = class extends we3.ArchNode {
     insert (archNode, offset) {
         if (!this.isAllowUpdate()) {
             console.warn("cannot split a not editable node");
-            return;
+            return [];
+        }
+        if (archNode.isFragment()) {
+            return this._insertFragment(archNode, offset);
         }
 
-        if (archNode.isText() && archNode.isVisibleText()) {
+        if (archNode.isText() && !archNode.isVirtual()) {
             this._insertTextInText(archNode.nodeValue, offset);
-            return;
+            var newOffset = offset + archNode.length();
+            archNode.remove();
+            this.params.change(this, newOffset);
+            return [this];
         }
 
         var next = this.split(offset);
-        this.parent.insert(archNode, next.index());
+        var res = this.parent.insert(archNode, next.index());
+        if (next.isEmpty()) {
+            next.remove();
+        }
+        return res;
     }
     /**
      * @override
@@ -144,7 +154,7 @@ we3.ArchNodeText = class extends we3.ArchNode {
         }
 
         if (text.length) {
-            archNode = new this.constructor(this.params, null, null, text);
+            archNode = this.params.create(this.nodeName, this.attributes, text, this.type);
         } else {
             archNode = this.params.create();
         }
@@ -181,18 +191,15 @@ we3.ArchNodeText = class extends we3.ArchNode {
      * @override
      */
     _applyRulesArchNode () {
-        if (this.nodeValue.length && this.ancestor('isPre')) {
+        if (this.nodeValue.length && this.isInPre()) {
             return super._applyRulesArchNode();
         }
         var text = this._removeFormatSpace();
         if (text.length) {
-            if (this.previousSibling() && this.previousSibling().isBR()) {
-                var startSpace = /^ /;
-                text = text.replace(startSpace, '\u00A0');
-            }
+            text = this._handleNbsps(text);
             if (this.nodeValue !== text) {
                 this.nodeValue = text;
-                this.params.change(this, 0);
+                this.params.change(this, null);
             }
         } else {
             this.remove();
@@ -205,13 +212,37 @@ we3.ArchNodeText = class extends we3.ArchNode {
     /**
      * Return a string  with clean handling of no-break spaces, which need to be replaced
      * by spaces when inserting next to them, while regular spaces can't ever be successive
-     * or at the edges of the node.
+     * or at the edges of a block.
      *
      * @param {String} text
      * @returns {String}
      */
     _handleNbsps (text) {
-        return text.replace(/\u00A0/g, ' ').replace(/  /g, ' \u00A0').replace(/^ | $/g, '\u00A0');
+        if (this.isInPre()) {
+            return text;
+        }
+        var startSpace = /^ /;
+        var endSpace = / $/;
+        var prevLeaf = this.prevUntil(node => !node.isVirtual(), {
+            doNotInsertVirtual: true,
+            leafToLeaf: true,
+            stopAtBlock: true,
+        });
+        var isPrevBR = prevLeaf && prevLeaf.isBR();
+        var isPrevEndsWithSpace = prevLeaf && endSpace.test(prevLeaf.nodeValue);
+        var isLoose = this.parent.isRoot();
+        var isLeftEdgeOfBlock = this.isLeftEdgeOfBlock(true);
+        var isRightEdgeOfBlock = this.isRightEdgeOfBlock(true);
+
+        text = text.replace(/\u00A0/g, ' ');
+        if (isLeftEdgeOfBlock || isPrevBR || isPrevEndsWithSpace || isLoose) {
+            text = text.replace(startSpace, '\u00A0');
+        }
+        if (isRightEdgeOfBlock || isLoose) {
+            text = text.replace(endSpace, '\u00A0');
+        }
+        text = text.replace(/  /g, ' \u00A0');
+        return text;
     }
     /**
      * Insert a string in a text node (this) at given offset.
@@ -222,9 +253,7 @@ we3.ArchNodeText = class extends we3.ArchNode {
     _insertTextInText(text, offset) {
         var start = this.nodeValue.slice(0, offset);
         var end = this.nodeValue.slice(offset);
-        var isInPre = !!this.ancestor('isPre');
-        this.nodeValue = isInPre ? start + text + end : this._handleNbsps(start + text + end);
-        this.params.change(this, offset + text.length);
+        this.nodeValue = start + text + end;
     }
     /**
      * Return a string with the value of a text node stripped of its format space,

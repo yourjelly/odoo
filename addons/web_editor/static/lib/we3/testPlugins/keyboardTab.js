@@ -106,7 +106,7 @@ var TestKeyboardTab = class extends we3.AbstractPlugin {
                 steps: [{
                     key: 'TAB',
                 }],
-                test: "<p>dom <b>&nbsp;&nbsp; &nbsp;◆to edit</b></p>",
+                test: "<p>dom <b>&nbsp; &nbsp; ◆to edit</b></p>",
             },
             {
                 name: "in p > b: TAB -> BACKSPACE at start",
@@ -116,7 +116,7 @@ var TestKeyboardTab = class extends we3.AbstractPlugin {
                 }, {
                     key: 'BACKSPACE',
                 }],
-                test: "<p>dom <b>&nbsp;&nbsp; ◆to edit</b></p>",
+                test: "<p>dom <b>&nbsp; &nbsp;◆to edit</b></p>",
             },
         ];
     }

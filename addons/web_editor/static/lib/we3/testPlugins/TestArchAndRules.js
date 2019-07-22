@@ -45,8 +45,8 @@ var TestArchAndRules = class extends we3.AbstractPlugin {
             },
             {
                 name: "Order inlines (2)",
-                content: `<p>hel<b>l</b><i>o</i> <u>fucking <i><b>world</b></i></u></p>`,
-                test: `<p>hel<b>l</b><i>o</i> <u>fucking </u><b><i><u>world</u></i></b></p>`,
+                content: `<p>abc<b>d</b><i>e</i> <u>fghijgl <i><b>mnopq</b></i></u></p>`,
+                test: `<p>abc<b>d</b><i>e</i> <u>fghijgl </u><b><i><u>mnopq</u></i></b></p>`,
             },
             {
                 name: 'Fix forbidden dom',

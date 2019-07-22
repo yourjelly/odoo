@@ -384,8 +384,15 @@ var BaseArch = class extends we3.AbstractPlugin {
                 offset = 0;
             }
         }
-        this.nextChangeIsRange();
-        this._insert(DOM, id, offset);
+        var index = this._changes.length;
+        var insertedIDs = this._insert(DOM, id, offset);
+        if (this._changes.length > index) {
+            if (insertedIDs.length > 1) {
+                this._changes[this._changes.length - 1].isRange = true;
+            } else {
+                this._changes[index].isRange = true;
+            }
+        }
         this._applyRulesRangeRedrawFromChanges();
     }
     /**
@@ -726,7 +733,10 @@ var BaseArch = class extends we3.AbstractPlugin {
      */
     _addToArch (archNode) {
         var self = this;
-        if (!archNode.__removed && archNode.parent && archNode.parent.id && !archNode.parent.isClone()) {
+        var isInArch = archNode.parent && archNode.parent.id &&
+            !archNode.parent.isClone() && archNode.isInRoot();
+        if (isInArch) {
+            archNode.__removed = false;
             if (!archNode.id) {
                 archNode.id = ++this._id;
             }
@@ -1038,7 +1048,7 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @param {string|Node|DocumentFragment} DOM
      * @param {Number} [id]
      * @param {Number} [offset]
-     * @returns {Number}
+     * @returns {Number []} the ids of the inserted nodes
      */
     _insert (DOM, id, offset) {
         var targetArchNode = id ? this.getArchNode(id) : this._arch;
@@ -1057,10 +1067,8 @@ var BaseArch = class extends we3.AbstractPlugin {
         }
 
         offset = offset || 0;
-        var childNodes = fragment.childNodes.slice();
-        childNodes.forEach(function (child, index) {
-            targetArchNode.insert(child, offset + index);
-        });
+        var insertedNodes = targetArchNode.insert(fragment, offset);
+        return insertedNodes.map(node => node.id);
     }
     /**
      * Outdent a list element.
@@ -1228,6 +1236,7 @@ var BaseArch = class extends we3.AbstractPlugin {
             if (this._archNodeList[archNode.id] === archNode) {
                 delete this._archNodeList[archNode.id];
             }
+            archNode.__removed = true;
             if (archNode.childNodes) {
                 archNode.childNodes.forEach(function (archNode) {
                     self._removeFromArch(archNode);

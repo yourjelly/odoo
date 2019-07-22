@@ -150,6 +150,13 @@ function log (result, testName, value, expectedValue) {
     } else if (result === true) {
         console.info('%cTEST: ' + testName, 'color: green;');
     } else if (result === false) {
+        // escape invisible chars
+        if (typeof expectedValue === 'string') {
+            expectedValue = expectedValue.replace(/\u00A0/g, '&nbsp;').replace(/\uFEFF/g, '&#65279;');
+        }
+        if (typeof value === 'string') {
+            value = value.replace(/\u00A0/g, '&nbsp;').replace(/\uFEFF/g, '&#65279;');
+        }
         console.error('TEST: ', testName, '\nExpected:\n', expectedValue, '\nResult:\n' + value);
     }
 }
