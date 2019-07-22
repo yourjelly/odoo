@@ -56,7 +56,7 @@ class TestReconciliationMatchingRules(AccountingTestCase):
             'name': 'write-off model',
             'rule_type': 'writeoff_suggestion',
             'match_partner': True,
-            'match_partner_ids': [6, 0, (self.partner_1 + self.partner_2).ids],
+            'match_partner_ids': [],
             'account_id': current_assets_account.id,
         })
 

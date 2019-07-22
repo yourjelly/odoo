@@ -1087,10 +1087,11 @@ class Field(MetaField('DummyField', (object,), {})):
         new_records = records.filtered(lambda record: not record.id)
         if new_records:
             # new records: no business logic
-            new_records.modified([self.name])
-            self.write(new_records, value)
-            if self.relational:
+            with records.env.protecting(records._field_computed.get(self, [self]), records):
                 new_records.modified([self.name])
+                self.write(new_records, value)
+                if self.relational:
+                    new_records.modified([self.name])
             records -= new_records
 
         if records:
@@ -2337,12 +2338,10 @@ class Many2one(_Relational):
                 id_ for id_ in cache.get_values(records, self) if id_
             )
             for corecord in corecords:
-                try:
+                if cache.contains(corecord, invf):
                     ids0 = cache.get(corecord, invf)
                     ids1 = tuple(id_ for id_ in ids0 if id_ not in record_ids)
                     cache.set(corecord, invf, ids1)
-                except KeyError:
-                    pass
 
         # update the cache of self
         cache.update(records, self, [cache_value] * len(records))
@@ -2354,12 +2353,16 @@ class Many2one(_Relational):
                 valid_ids = records.filtered_domain(invf.get_domain_list(corecord))._ids
                 if not valid_ids:
                     continue
-                try:
-                    ids0 = cache.get(corecord, invf)
-                    ids1 = ids0 + valid_ids
+                cache_contains = cache.contains(corecord, invf)
+                # DLE P158: if the value for the corecord is not in cache, but this is a new record, assign it anyway,
+                # as you won't be able to fetch it from database as this is a new record.
+                # `test_sale_order`, which assign line to account.move.invoice_line_ids when assignign lines to account.move.line_ids in the onchange
+                # See `_recompute_dynamic_lines`
+                if cache_contains or not corecord.id:
+                    ids0 = cache.get(corecord, invf) if cache_contains else ()
+                    # DLE P159: `test_in_invoice_line_onchange_business_fields_1`
+                    ids1 = tuple(set(ids0 + valid_ids))
                     cache.set(corecord, invf, ids1)
-                except KeyError:
-                    pass
 
         # update towrite
         if self.store:
@@ -2571,6 +2574,9 @@ class _RelationalMulti(_Relational):
             value = [(6, 0, value._ids)]
         elif value is False or value is None:
             value = [(5,)]
+        # DLE P171: `_get_invoiced ` set invoice_ids as a list of ids, which must be converted to a tuple to be correctly handled to convert_to_write as [(6, 0, [...])]
+        elif isinstance(value, list) and value and not isinstance(value[0], (tuple, list)):
+            value = [(6, 0, tuple(value))]
 
         if not isinstance(value, list):
             raise ValueError("Wrong value for %s: %s" % (self, value))
@@ -2777,8 +2783,8 @@ class One2many(_RelationalMulti):
                     # assign the given lines to the last record only
                     records[self.name][inverse] = False
                     cache.update(records, self, [()] * len(records))
-                    if command[0] == 6:
-                        browse(command[2])[inverse] = records[-1]
+                    lines = comodel.browse(command[2] if command[0] == 6 else [])
+                    cache.set(records[-1], self, lines._ids)
 
         else:
             def link(record, lines):
