@@ -2067,7 +2067,7 @@ class TestReconciliationExec(TestReconciliation):
             'mv_line_ids': [move_payment_lines[1].id, move_product_lines[1].id],
             'new_mv_line_dicts': [{
                 'account_id': liquidity_account.id,
-                'analytic_tag_ids': [6, None, []],
+                'analytic_tag_ids': [(6, None, [])],
                 'credit': 0,
                 'date': time.strftime('%Y') + '-01-01',
                 'debit': 15.0,
