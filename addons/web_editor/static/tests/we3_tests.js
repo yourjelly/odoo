@@ -129,7 +129,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('range', async function (assert) {
-        assert.expect(8);
+        assert.expect(9);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, {TestRange: true}),

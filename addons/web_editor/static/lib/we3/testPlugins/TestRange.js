@@ -29,6 +29,11 @@ var TestRange = class extends we3.AbstractPlugin {
             content: "<p>a</p><table><tbody><tr><td>b</td><td>c</td></tr></tbody></table>◆<p>d</p>",
             test: "<p>a</p><table><tbody><tr><td>b</td><td>c◆</td></tr></tbody></table><p>d</p>",
         },
+        {
+            name: "Range across BR",
+            content: "<p>a<br/>▶<br/>b◀</p>",
+            test: "<p>a<br/>▶<br/>b◀</p>",
+        },
     ];
 
     }

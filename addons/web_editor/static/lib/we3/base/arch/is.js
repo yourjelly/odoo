@@ -657,7 +657,7 @@ var isEditable = {
      */
     isUnbreakable: function () {
         return this.isInArch() && (["td", "tr", "tbody", "tfoot", "thead", "table"].indexOf(this.nodeName) !== -1 ||
-            this.isVoidoid() ||
+            this.isVoidoid() && !this.isVoid() ||
             this.isContentEditable() ||
             this.params.isUnbreakableNode(this) ||
             !this.isAllowUpdate() ||

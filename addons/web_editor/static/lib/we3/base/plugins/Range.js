@@ -438,7 +438,7 @@ var BaseRange = class extends we3.AbstractPlugin {
         var end = this.dependencies.BaseArch.getArchNode(ltr ? points.ecID : points.scID);
         var startUnbreakable = start.ancestor('isUnbreakable');
         var endUnbreakable = end.ancestor('isUnbreakable');
-        if (startUnbreakable !== endUnbreakable) {
+        if (startUnbreakable.id !== endUnbreakable.id) {
             end = end[ltr ? 'prevUntil' : 'nextUntil'](function (prev) {
                 return prev.ancestor('isUnbreakable') === startUnbreakable && prev.isEditable();
             }, {
