@@ -34,6 +34,7 @@ Object.assign(we3.options, {
     popover: {
         'Image.getArchNode': ['Padding', 'MediaSize', 'Float', '|', 'Image', 'CropImage', 'Media', 'Alt'],
         'Document.getArchNode': ['Float', 'Media'],
+        'Field.getArchNode': ['Field'],
         'Pictogram.getArchNode':  ['FontSize', 'Float', 'Pictogram', 'Media'],
         'Video.getArchNode': ['Padding', 'MediaSize', 'Float', 'Media'],
         'TagMany2one.getArchNode':  ['TagMany2one'],
