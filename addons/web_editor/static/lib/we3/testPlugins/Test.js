@@ -227,7 +227,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
         this.nTests = 0;
         this.nOKTests = 0;
 
-        var assert = this.assert = {
+        this.assert = {
             ok (value, testName) {
                 self.nTests++;
                 var didPass = !!value;
@@ -311,11 +311,19 @@ var TestPlugin = class extends we3.AbstractPlugin {
 
         if (this.buttons.elements) {
             var dropdown = this.buttons.elements[0].querySelector("we3-vertical-items");
-            this._plugins.forEach(function (plugin) {
+            var sortedPlugins = this._plugins.slice().sort(function (a, b) {
+                return a.pluginName.toUpperCase() < b.pluginName.toUpperCase() ? -1 : 1;
+            });
+            sortedPlugins.forEach(function (plugin) {
                 var button = document.createElement('we3-button');
                 button.setAttribute('data-method', 'loadTest');
                 button.setAttribute('data-value', plugin.pluginName);
-                button.innerHTML = plugin.pluginName + '&nbsp;';
+                var buttonName = plugin.pluginName;
+                if (buttonName !== 'Test') {
+                    buttonName = buttonName.replace('Test', '')
+                        .replace(/([A-Z][^A-Z])/g, ' $1').trim();
+                }
+                button.innerHTML = buttonName + '&nbsp;';
                 button.appendChild(document.createElement('small'));
                 dropdown.appendChild(button);
             });
