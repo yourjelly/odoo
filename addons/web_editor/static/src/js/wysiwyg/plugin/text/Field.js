@@ -25,7 +25,7 @@
 we3.addPlugin('Field', class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
-        this.dependencies = ['Arch'];
+        this.dependencies = ['Arch', 'Renderer'];
         this.templatesDependencies = ['xml/media.xml'];
         this.buttons = {
             template: 'we3.buttons.fieldEdit',
@@ -35,13 +35,27 @@ we3.addPlugin('Field', class extends we3.AbstractPlugin {
     }
 
     edit (value, archNode) {
+        var elementInDom = this.dependencies.Renderer.getElement(archNode.id);
+        var fieldType = elementInDom.getAttribute('data-oe-type');
+        var input = document.createElement('input');
+        input.setAttribute('value', elementInDom.textContent);
+        if (fieldType === 'date') {
+            input.setAttribute('type', 'date');
+        } else if (fieldType === 'text') {
+            input.setAttribute('type', 'text');
+        }
+        elementInDom.parentNode.insertBefore(input, elementInDom);
+        elementInDom.style.visibility = "hidden";
+        input.addEventListener('focusout', function (ev) {
+            debugger;
+        });
         debugger;
         // this.dependencies.Arch.importUpdate(archNode.toJSON());
     }
 
     getArchNode(archNode) {
         return archNode.ancestor(function (node) {
-            return node.nodeName === 'span';
+            return node.attributes && node.attributes['data-oe-type'];
         });
     }
 
@@ -49,15 +63,10 @@ we3.addPlugin('Field', class extends we3.AbstractPlugin {
         return false;
     }
     _enabled (buttonName, focusNode) {
-        var ancestorHTMLNode = focusNode.ancestor(function (node) {
-            return node.nodeName === 'span';
+        var ancestorFieldNode = focusNode.ancestor(function (node) {
+            return node.attributes && node.attributes['data-oe-type'];
         });
-        if (ancestorHTMLNode) {
-            debugger;
-        }
-        var res = ancestorHTMLNode && ancestorHTMLNode.attributes['data-oe-type'];
-        console.log(res);
-        return res;
+        return ancestorFieldNode;
     }
 });
 
