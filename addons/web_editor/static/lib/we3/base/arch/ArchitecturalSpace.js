@@ -57,8 +57,11 @@ var ArchitecturalSpace = class extends we3.ArchNodeText {
     /**
      * @override
      */
-    insert (node, offset) {
-        this.parent.insert(node, this.index());
+    insert (archNode, offset) {
+        if (archNode.isFragment()) {
+            return this._insertFragment(archNode, offset);
+        }
+        return this.parent.insert(archNode, this.index());
     }
     /**
      * @override

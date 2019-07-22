@@ -387,7 +387,7 @@ var TestToolbarList = class extends we3.AbstractPlugin {
                 do: async function () {
                     await self.dependencies.Test.triggerNativeEvents(self.btnOl, ['mousedown', 'click']);
                 },
-                test: '<div><ol><li><h1><font style="font-size:62px">table of co◆ntents&nbsp;<a href="p23">p23</a> (cfr: 34)</font></h1></li></ol></div>',
+                test: '<div><ol><li><h1><font style="font-size:62px">table of co◆ntents <a href="p23">p23</a> (cfr: 34)</font></h1></li></ol></div>',
             },
         ];
         this.checklistTests = [

@@ -141,7 +141,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
 
         await new Promise(setTimeout);
 
-        assert.strictEqual(this.dependencies.Test.getValue(), "<p>aaa ◆</p>", "Should insert a space in the Arch");
+        assert.strictEqual(this.dependencies.Test.getValue(), "<p>aaa\u00A0◆</p>", "Should insert a space in the Arch");
         assert.strictEqual(this.dependencies.Test.getDomValue(), "<p>aaa&nbsp;</p>", "Should insert a space in the DOM");
     }
 

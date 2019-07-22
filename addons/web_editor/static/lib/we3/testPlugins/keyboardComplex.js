@@ -37,7 +37,7 @@ var TestKeyboardComplex = class extends we3.AbstractPlugin {
                 }, {
                     key: 'BACKSPACE',
                 }],
-                test: "<p><span><b>dom<br/>◆ to edit</b></span></p>",
+                test: "<p><span><b>dom<br/>◆&nbsp;to edit</b></span></p>",
             },
             {
                 name: "in span > b: SHIFT+ENTER -> ENTER -> BACKSPACE -> 'a'",
@@ -82,7 +82,7 @@ var TestKeyboardComplex = class extends we3.AbstractPlugin {
                 }, {
                     key: 'BACKSPACE',
                 }],
-                test: "<p><b>dom◆&nbsp;to edit</b></p>",
+                test: "<p><b>dom◆ to edit</b></p>",
             },
             {
                 name: "in empty-p: 2x ENTER -> 2x BACKSPACE",
@@ -127,7 +127,7 @@ var TestKeyboardComplex = class extends we3.AbstractPlugin {
                 }, {
                     key: 'a',
                 }],
-                test: "<p><b>dom<br/>a◆&nbsp;to edit</b></p>",
+                test: "<p><b>dom<br/>a◆ to edit</b></p>",
             },
             {
                 name: "in li -> ENTER before br -> 'a'",
@@ -225,6 +225,47 @@ var TestKeyboardComplex = class extends we3.AbstractPlugin {
                     key: 'BACKSPACE',
                 }],
                 test: "<h1>dom not to edit◆dom to edit</h1>",
+            },
+            {
+                name: "in p: SHIFT+ENTER at end -> BACKSPACE",
+                content: "<p>dom to edit◆</p>",
+                steps: [{
+                    key: 'ENTER',
+                    shiftKey: true,
+                }, {
+                    key: 'BACKSPACE',
+                }],
+                test: "<p>dom to edit◆</p>",
+            },
+            {
+                name: "in p: 2x SHIFT+ENTER within text -> BACKSPACE",
+                content: "<p>dom t◆o edit</p>",
+                steps: [{
+                    key: 'ENTER',
+                    shiftKey: true,
+                }, {
+                    key: 'ENTER',
+                    shiftKey: true,
+                }, {
+                    key: 'BACKSPACE',
+                }],
+                test: "<p>dom t<br/>◆o edit</p>",
+            },
+            {
+                name: "in p: 2x SHIFT+ENTER at end -> 2x BACKSPACE",
+                content: "<p>dom to edit◆</p>",
+                steps: [{
+                    key: 'ENTER',
+                    shiftKey: true,
+                }, {
+                    key: 'ENTER',
+                    shiftKey: true,
+                }, {
+                    key: 'BACKSPACE',
+                }, {
+                    key: 'BACKSPACE',
+                }],
+                test: "<p>dom to edit◆</p>",
             },
         ];
     }

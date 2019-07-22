@@ -36,7 +36,6 @@ var TestCodeView = class extends we3.AbstractPlugin {
 
     async _testBasicCodeView (assert) {
         var btnCodeView = document.querySelector('we3-editor we3-button[data-plugin="CodeView"]');
-        var container = this.editable.querySelector('test-container');
         this.dependencies.Arch.setValue('<p>aaa</p>');
         await this.dependencies.Test.triggerNativeEvents(this.editable.firstChild, ['mousedown', 'click', 'mouseup']);
         await this.dependencies.Test.triggerNativeEvents(btnCodeView, ['mousedown', 'click', 'mouseup']);

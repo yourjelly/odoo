@@ -46,21 +46,25 @@ we3.ArchNodeVirtualText = class extends we3.ArchNodeText {
     /**
      * @override
      */
-    insert (node) {
+    insert (archNode, offset) {
+        if (archNode.isFragment()) {
+            return this._insertFragment(archNode, offset);
+        }
         var prev = this.previousSibling();
-        if (this.parent.isEmpty() && node.isBR()) {
+        if (this.parent.isEmpty() && archNode.isBR()) {
             var parent = this.parent;
             var index = this.index();
             this.applyRules();
-            parent.insert(node, index);
-            return;
+            return parent.insert(archNode, index);
         }
+        var res = [];
         if (prev && prev.isText()) {
-            prev.insert(node, prev.length());
+            res = prev.insert(archNode, prev.length());
         } else {
-            this.parent.insert(node, this.index());
+            res = this.parent.insert(archNode, this.index());
         }
         this.remove();
+        return res;
     }
     /**
      * @override

@@ -409,10 +409,12 @@ var isBrowse = {
     /**
      * Return true if the node has a BR element as previous sibling.
      *
+     * @param {Boolean} [ignoreVirtual] true to ignore virtual text nodes
      * @returns {Boolean}
      */
-    isAfterBR: function () {
-        var previousSibling = this.previousSibling();
+    isAfterBR: function (ignoreVirtual) {
+        var pred = node => !ignoreVirtual || !node.isVirtual();
+        var previousSibling = this.previousSibling(pred);
         return previousSibling && previousSibling.isBR();
     },
     /**
@@ -506,7 +508,7 @@ var isBrowse = {
         while (previousSibling.length && 
             (previousSibling[0].isArchitecturalSpace() ||
                 ignoreVirtual && previousSibling[0].isVirtual())) {
-            previousSibling.pop();
+            previousSibling.shift();
         }
         return !previousSibling.length;
     },
@@ -568,7 +570,7 @@ var isBrowse = {
         while (nextSibling.length &&
             (nextSibling[0].isArchitecturalSpace() ||
                 ignoreVirtual && nextSibling[0].isVirtual())) {
-            nextSibling.pop();
+            nextSibling.shift();
         }
         return !nextSibling.length;
     },

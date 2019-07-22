@@ -908,7 +908,8 @@ var BaseRules = class extends we3.AbstractPlugin {
         var next = parent.split(targetArchNode.index());
         var nextNext = next.split(1);
         next.before(targetArchNode);
-        next.append(targetArchNode.childNodes);
+        var fragment = targetArchNode._fragmentWithChildren(targetArchNode.childNodes);
+        next.append(fragment);
         targetArchNode.append(next);
         parent.removeIfEmpty(true);
         next.removeIfEmpty(true);

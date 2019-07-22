@@ -542,6 +542,7 @@ we3.ArchNode = class {
      * @param {Object} [options]
      * @param {Boolean} [options.doCrossUnbreakables] true to ignore unbreakable rules and indeed cross unbreakables
      * @param {Boolean} [options.doNotInsertVirtual] true to prevent the insertion of virtual nodes
+     * @param {Boolean} [options.doNotLeaveNode] true to prevent leaving the current node
      * @param {Boolean} [options.leafToLeaf] true to only give leaf nodes and skip parents
      * @param {Boolean} [options.stopAtBlock] true to prevent passing through blocks
      * @returns {ArchNode|null}
@@ -672,40 +673,31 @@ we3.ArchNode = class {
         return;
     }
     /**
-     * Insert a(n) (list of) archNode(s) after the current archNode
+     * Insert an archNode or a fragment after the current archNode
      *
-     * @param {ArchNode|ArchNode []} archNode
+     * @param {ArchNode} archNode
+     * @returns {ArchNode []} the inserted ArchNodes
      */
     after (archNode) {
-        if (Array.isArray(archNode)) {
-            archNode.slice().forEach(this.after.bind(this));
-            return;
-        }
-        this.parent.insertAfter(archNode, this);
+        return this.parent.insertAfter(archNode, this);
     }
     /**
-     * Insert a(n) (list of) archNode(s) at the end of the current archNode's children
+     * Insert an archNode or a fragment at the end of the current archNode's children
      *
-     * @param {ArchNode|ArchNode []} archNode
+     * @param {ArchNode} archNode
+     * @returns {ArchNode []} the inserted ArchNodes
      */
     append (archNode) {
-        if (Array.isArray(archNode)) {
-            archNode.slice().forEach(this.append.bind(this));
-            return;
-        }
-        this._changeParent(archNode, this.childNodes.length);
+        return this._changeParent(archNode, this.childNodes.length);
     }
     /**
-     * Insert a(n) (list of) archNode(s) before the current archNode
+     * Insert an archNode or a fragment before the current archNode
      *
-     * @param {ArchNode|ArchNode []} archNode
+     * @param {ArchNode} archNode
+     * @returns {ArchNode []} the inserted ArchNodes
      */
     before (archNode) {
-        if (Array.isArray(archNode)) {
-            archNode.slice().forEach(this.before.bind(this));
-            return;
-        }
-        this.parent.insertBefore(archNode, this);
+        return this.parent.insertBefore(archNode, this);
     }
     /**
      * Delete the edges between this node and its siblings of which it's at the
@@ -746,64 +738,67 @@ we3.ArchNode = class {
         this._triggerChange(0);
     }
     /**
-     * Insert the given ArchNode at the given offset of this ArchNode.
+     * Insert an archNode or a fragment at the given offset of this ArchNode.
      *
      * @param {ArchNode} archNode
      * @param {int} offset
+     * @returns {ArchNode []} the inserted ArchNodes
      */
     insert (archNode, offset) {
         if (!this.isAllowUpdate()) {
             console.warn("can not insert a item in a not editable node");
-            return;
+            return [];
         }
-        if (this.isVoid()) {
-            this.parent.insert(archNode, this.index());
-            return;
+        if (archNode.isFragment()) {
+            return this._insertFragment(archNode, offset);
+        }
+        if (this.isVoidoid()) {
+            var index = offset ? this.index() + 1 : this.index();
+            return this.parent.insert(archNode, index);
         }
         if (this.isFormatNode() && archNode.isBlock()) {
-            this.before(archNode);
-            return;
+            var next = this.split(offset);
+            var res = next.before(archNode);
+            if (next.isEmpty()) {
+                next.remove();
+            }
+            return res;
         }
         archNode._triggerChange(archNode.length());
         var ref = this.childNodes[offset];
-        if (ref) {
-            this.insertBefore(archNode, ref);
-        } else {
-            this.append(archNode);
-        }
+        return ref ? this.insertBefore(archNode, ref) : this.append(archNode);
     }
     /**
-     * Insert the given ArchNode after `ref`.
+     * Insert an archNode or a fragment after `ref`.
      *
      * @param {ArchNode} archNode
      * @param {ArchNode} ref
+     * @returns {ArchNode []} the inserted ArchNodes
      */
     insertAfter (archNode, ref) {
         if (!ref) {
             ref = this;
         }
-        this._changeParent(archNode, ref.index() + 1);
+        return this._changeParent(archNode, ref.index() + 1);
     }
     /**
-     * Insert the given ArchNode before `ref`.
+     * Insert an archNode or a fragment before `ref`.
      *
      * @param {ArchNode} archNode
      * @param {ArchNode} ref
+     * @returns {ArchNode []} the ids of the inserted ArchNodes
      */
     insertBefore (archNode, ref) {
-        this._changeParent(archNode, ref.index());
+        return this._changeParent(archNode, ref.index());
     }
     /**
-     * Insert a(n) (list of) archNode(s) at the beginning of the current archNode's children
+     * Insert an archNode or a fragment at the beginning of the current archNode's children
      *
-     * @param {ArchNode|ArchNode []} archNode
+     * @param {ArchNode} archNode
+     * @returns {ArchNode []} the inserted ArchNodes
      */
     prepend (archNode) {
-        if (Array.isArray(archNode)) {
-            archNode.slice().forEach(this.prepend.bind(this));
-            return;
-        }
-        this._changeParent(archNode, 0);
+        return this._changeParent(archNode, 0);
     }
     /**
      * Remove this ArchNode.
@@ -820,7 +815,6 @@ we3.ArchNode = class {
         }
         this.params.remove(this);
         this.parent = null;
-        this.__removed = true;
     }
     /**
      * Remove this ArchNode if it has no children.
@@ -975,10 +969,9 @@ we3.ArchNode = class {
      * @private
      * @param {ArchNode|ArchFragment} archNode
      * @param {int} index
-     * @returns {undefined|int []} only returns int [] if ArchNode is a fragment
+     * @returns {ArchNode []} the inserted ArchNodes
      */
     _changeParent (archNode, index) {
-        var self = this;
         if (this.isVoid()) {
             throw new Error("You can't add a node into a void node");
         }
@@ -987,24 +980,22 @@ we3.ArchNode = class {
         }
         if (!this.isAllowUpdate()) {
             console.warn("cannot add a node into a non editable node");
-            return;
+            return [];
         }
         if (archNode.parent && !archNode.parent.isAllowUpdate()) {
             console.warn("cannot remove a node from a non editable node");
-            return;
+            return [];
         }
         if (this.ancestor(function (node) { return node === archNode;})) {
             console.warn("cannot add a node into itself");
-            return;
+            return [];
         }
 
         if (archNode.isFragment()) {
-            var ids = [];
-            archNode.childNodes.slice().forEach(function (archNode) {
-                ids = ids.concat(self._changeParent(archNode, index++));
-            });
+            var changeOne = archNode => this._changeParent(archNode, index++);
+            var res = we3.utils.flatMap(archNode.childNodes.slice(), changeOne);
             archNode.remove();
-            return ids;
+            return res;
         }
 
         if (archNode.parent) {
@@ -1024,6 +1015,7 @@ we3.ArchNode = class {
         this.params.add(archNode);
 
         this._triggerChange(index);
+        return [archNode];
     }
     /**
      * Perform the required cleaning operations after merging two nodes (can be
@@ -1191,6 +1183,17 @@ we3.ArchNode = class {
         return edges;
     }
     /**
+     * Return a fragment containing a given list of child nodes.
+     *
+     * @param {ArchNode []} children
+     * @returns {ArchNodeFragment}
+     */
+    _fragmentWithChildren (children) {
+        var fragment = new we3.ArchNodeFragment(this.params);
+        children.slice().forEach(fragment.append.bind(fragment));
+        return fragment;
+    }
+    /**
      * From a list node, return the first (or last if `isLast` is true) non-text node
      * that is the direct child of a list item. If there is none (ie there is text directly
      * within the list item), wrap the list item's content in a paragraph element and return that.
@@ -1203,6 +1206,29 @@ we3.ArchNode = class {
         var method = isLast ? 'lastChild' : 'firstChild';
         var childOfLi = list[method](child => child.parent.isLi() && !child.isList());
         return childOfLi.isText() ? childOfLi.wrap('p') : childOfLi;
+    }
+    /**
+     * Insert a fragment at the given offset of this ArchNode.
+     *
+     * @param {ArchNodeFragment} fragment
+     * @param {int} offset
+     * @returns {ArchNode []} the inserted ArchNodes
+     */
+    _insertFragment (fragment, offset) {
+        if (!fragment.childNodes.length) {
+            return [];
+        }
+        var lastInserted = this.insert(fragment.childNodes[0], offset)[0];
+        if (fragment.childNodes.length) {
+            var others;
+            if (lastInserted.isText()) {
+                others = lastInserted.insert(fragment, lastInserted.length());
+            } else {
+                others = lastInserted.after(fragment);
+            }
+            return [lastInserted].concat(others);
+        }
+        return [lastInserted];
     }
     /**
      * Return true if `node` and `next` are elements of different types that
@@ -1274,7 +1300,8 @@ we3.ArchNode = class {
         }
         // move the children to their new parent and remove the old parent
         var childNodes = this.childNodes.slice();
-        next[isLeft ? 'append' : 'prepend'](isLeft ? childNodes : childNodes.reverse());
+        var fragment = this._fragmentWithChildren(childNodes);
+        next[isLeft ? 'append' : 'prepend'](fragment);
         this.remove();
         next._cleanAfterMerge(isLeft);
     }

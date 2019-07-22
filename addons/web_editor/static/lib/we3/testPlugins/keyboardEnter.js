@@ -23,6 +23,14 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                 test: "<p><br/></p><p><br/>◆</p>",
             },
             {
+                name: "in p: ENTER at start",
+                content: "<p>◆dom to edit</p>",
+                steps: [{
+                    key: 'ENTER',
+                }],
+                test: "<p><br/></p><p>◆dom to edit</p>",
+            },
+            {
                 name: "in p: ENTER",
                 content: "<p>d◆om to edit</p>",
                 steps: [{
@@ -41,6 +49,23 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                 test: "<p>d</p><p><br/></p><p>◆om to edit</p>",
             },
             {
+                name: "in p: ENTER at end",
+                content: "<p>dom to edit◆</p>",
+                steps: [{
+                    key: 'ENTER',
+                }],
+                test: "<p>dom to edit</p><p><br/>◆</p>",
+            },
+            {
+                name: "in p: SHIFT+ENTER at start",
+                content: "<p>◆dom to edit</p>",
+                steps: [{
+                    key: 'ENTER',
+                    shiftKey: true,
+                }],
+                test: "<p><br/>◆dom to edit</p>",
+            },
+            {
                 name: "in p: SHIFT+ENTER",
                 content: "<p>d◆om to edit</p>",
                 steps: [{
@@ -48,6 +73,28 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                     shiftKey: true,
                 }],
                 test: "<p>d<br/>◆om to edit</p>",
+            },
+            {
+                name: "in p: 2x SHIFT+ENTER",
+                content: "<p>d◆om to edit</p>",
+                steps: [{
+                    key: 'ENTER',
+                    shiftKey: true,
+                }, {
+                    key: 'ENTER',
+                    shiftKey: true,
+                }],
+                test: "<p>d<br/><br/>◆om to edit</p>",
+            },
+            {
+                name: "in p: SHIFT+ENTER at end",
+                content: "<p>dom to edit◆</p>",
+                steps: [{
+                    key: 'ENTER',
+                    shiftKey: true,
+                }],
+                test: "<p>dom to edit<br/><br/>◆</p>",
+                // the extra BR appeared to make the first one visible
             },
             {
                 name: "in empty-p: SHIFT+ENTER",
@@ -298,14 +345,14 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
             },
             {
                 name: "after p > b: SHIFT+ENTER -> 'a'",
-                content: "<p><b>dom</b>◆&nbsp;to edit</p>",
+                content: "<p><b>dom</b>◆ to edit</p>",
                 steps: [{
                     key: 'ENTER',
                     shiftKey: true,
                 }, {
                     key: 'a',
                 }],
-                test: "<p><b>dom<br/>a◆</b>&nbsp;to edit</p>", // after b always reranges to within b
+                test: "<p><b>dom<br/>a◆</b> to edit</p>", // after b always reranges to within b
             },
             {
                 name: "in p (other-p > span.a before - p > span.b after): ENTER at beginning",
@@ -409,7 +456,7 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                 steps: [{
                     key: 'ENTER',
                 }],
-                test: "<p><b>dom</b></p><p><b>◆ to edit</b></p>",
+                test: "<p><b>dom</b></p><p><b>◆&nbsp;to edit</b></p>",
             },
             {
                 name: "in p > b: SHIFT+ENTER -> ENTER",
@@ -420,7 +467,7 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                 }, {
                     key: 'ENTER',
                 }],
-                test: "<p><b>dom<br/><br/></b></p><p><b>◆ to edit</b></p>",
+                test: "<p><b>dom<br/><br/></b></p><p><b>◆&nbsp;to edit</b></p>",
                 // the extra BR appeared to make the first one visible
             },
             {
@@ -433,15 +480,15 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                 }],
                 test: "<p><b>dom</b></p><p><b>a◆ to edit</b></p>",
             },
-            // { TODO
-            //     name: "in p > b: SHIFT+ENTER",
-            //     content: "<p><b>dom◆ to edit</b></p>",
-            //     steps: [{
-            //         key: 'ENTER',
-            //         shiftKey: true,
-            //     }],
-            //     test: "<p><b>dom<br/>◆&nbsp;to edit</b></p>",
-            // },
+            {
+                name: "in p > b: SHIFT+ENTER",
+                content: "<p><b>dom◆ to edit</b></p>",
+                steps: [{
+                    key: 'ENTER',
+                    shiftKey: true,
+                }],
+                test: "<p><b>dom<br/>◆&nbsp;to edit</b></p>",
+            },
             {
                 name: "in p > b: SHIFT+ENTER -> 'a'",
                 content: "<p><b>dom◆ to edit</b></p>",
@@ -473,7 +520,7 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                 steps: [{
                     key: 'ENTER',
                 }],
-                test: "<p><span><b>dom</b></span></p><p><span><b>◆ to edit</b></span></p>",
+                test: "<p><span><b>dom</b></span></p><p><span><b>◆&nbsp;to edit</b></span></p>",
             },
             {
                 name: "in span > b: SHIFT+ENTER -> ENTER",
@@ -484,7 +531,7 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                 }, {
                     key: 'ENTER',
                 }],
-                test: "<p><span><b>dom<br/><br/></b></span></p><p><span><b>◆ to edit</b></span></p>",
+                test: "<p><span><b>dom<br/><br/></b></span></p><p><span><b>◆&nbsp;to edit</b></span></p>",
                 // the extra BR appeared to make the first one visible
             },
             {
@@ -497,15 +544,15 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                 }],
                 test: "<p><span><b>dom</b></span></p><p><span><b>a◆ to edit</b></span></p>",
             },
-            // { TODO
-            //     name: "in span > b: SHIFT+ENTER",
-            //     content: "<span><b>dom◆ to edit</b></span>",
-            //     steps: [{
-            //         key: 'ENTER',
-            //         shiftKey: true,
-            //     }],
-            //     test: "<p><span><b>dom<br/>◆&nbsp;to edit</b></span></p>",
-            // },
+            {
+                name: "in span > b: SHIFT+ENTER",
+                content: "<span><b>dom◆ to edit</b></span>",
+                steps: [{
+                    key: 'ENTER',
+                    shiftKey: true,
+                }],
+                test: "<p><span><b>dom<br/>◆&nbsp;to edit</b></span></p>",
+            },
             {
                 name: "in span > b: SHIFT+ENTER -> 'a'",
                 content: "<span><b>dom◆ to edit</b></span>",
@@ -575,7 +622,7 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                     key: 'ENTER',
                     shiftKey: true,
                 }],
-                test: "<p>dom&nbsp;<br/><br/>◆</p><p>to edit</p>",
+                test: "<p>dom <br/><br/>◆</p><p>to edit</p>",
                 // the extra BR appeared to make the first one visible
             },
             {
@@ -587,7 +634,7 @@ var TestKeyboardEnter = class extends we3.AbstractPlugin {
                 }, {
                     keyCode: 23546, /*temple in chinese*/
                 }],
-                test: "<p>dom&nbsp;<br/>寺◆</p><p>to edit</p>",
+                test: "<p>dom <br/>寺◆</p><p>to edit</p>",
             },
             {
                 name: "in empty-p (div > a after): 3x SHIFT+ENTER -> 'a'",

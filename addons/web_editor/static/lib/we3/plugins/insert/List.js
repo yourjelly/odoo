@@ -12,7 +12,8 @@ var LIST = class extends we3.ArchNode {
     static parse (archNode) {
         if (!archNode.isChecklist && (archNode.nodeName === 'ul' || archNode.nodeName === 'ol')) {
             var list = new LIST(archNode.params, archNode.nodeName, archNode.attributes.toJSON());
-            list.append(archNode.childNodes);
+            var fragment = archNode._fragmentWithChildren(archNode.childNodes);
+            list.append(fragment);
             return list;
         }
     }
@@ -293,7 +294,9 @@ var li = class extends we3.ArchNode {
         nodes.slice().forEach(function (node) {
             if (prev && node.isFormatNode() && prev.isText()) {
                 var last = node.lastChild();
-                prev.after(node.childNodes);
+                var fragment = new we3.ArchNodeFragment(node.params);
+                node.childNodes.slice().forEach(fragment.append.bind(fragment));
+                prev.after(fragment);
                 node.remove();
                 prev = last;
             } else if (prev && node.isText() && prev.isFormatNode()) {
@@ -320,7 +323,8 @@ var CHECKLIST = class extends LIST {
                 archNode.className.add(checklistClass);
             }
             var checklist = new CHECKLIST(archNode.params, 'ul', archNode.attributes.toJSON());
-            checklist.append(archNode.childNodes);
+            var fragment = archNode._fragmentWithChildren(archNode.childNodes);
+            checklist.append(fragment);
             return checklist;
         }
     }
@@ -376,7 +380,8 @@ var CHECKLIST_ITEM = class extends li {
         if (archNode.isLi() && archNode.isInChecklist && archNode.isInChecklist() &&
             (!archNode.isParentOfIndented || !archNode.isParentOfIndented())) {
             var checklistItem = new CHECKLIST_ITEM(archNode.params, archNode.nodeName, archNode.attributes.toJSON());
-            checklistItem.append(archNode.childNodes);
+            var fragment = archNode._fragmentWithChildren(archNode.childNodes);
+            checklistItem.append(fragment);
             return checklistItem;
         }
     }
