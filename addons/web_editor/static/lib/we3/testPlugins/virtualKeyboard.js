@@ -151,6 +151,63 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
         assert.strictEqual(this.dependencies.Test.getValue(), "<p>aaa&nbsp;◆</p>", "Should insert a space in the Arch");
         assert.strictEqual(this.dependencies.Test.getDomValue(), "<p>aaa&nbsp;</p>", "Should insert a space in the DOM");
     }
+    async _testMultikeypressCTRLA (assert) {
+        var ev;
+        var Test = this.dependencies.Test;
+        await Test.setValue("<p>aaa◆</p>");
+
+        await this._triggerKey([
+            ['keydown', {
+                key: 'Control',
+                charCode: 0,
+                keyCode: 17,
+                ctrlKey: true,
+            }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
+            ['keydown', {
+                key: 'a',
+                charCode: 0,
+                keyCode: 65,
+                ctrlKey: true,
+            }],
+            ['keypress', {
+                key: 'a',
+                charCode: 1,
+                keyCode: 1,
+                ctrlKey: true,
+            }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
+            ['keyup', {
+                key: 'a',
+                charCode: 0,
+                keyCode: 73,
+                ctrlKey: true,
+            }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
+            ['keyup', {
+                key: 'Control',
+                charCode: 0,
+                keyCode: 17,
+            }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        assert.strictEqual(this.dependencies.Test.getValue(), "<p>▶aaa◀</p>", "Should select all in the Arch");
+        assert.strictEqual(this.dependencies.Test.getDomValue(), "<p>aaa</p>", "Should select all in the DOM without changes");
+    }
 
     async _testAccentUbuntuChrome (assert) {
         var ev;
