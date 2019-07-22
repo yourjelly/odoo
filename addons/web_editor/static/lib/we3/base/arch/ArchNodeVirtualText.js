@@ -47,6 +47,11 @@ we3.ArchNodeVirtualText = class extends we3.ArchNodeText {
      * @override
      */
     insert (archNode, offset) {
+        if (!this.isAllowUpdate()) {
+            console.warn("can not insert in not editable node");
+            return [];
+        }
+
         if (archNode.isFragment()) {
             return this._insertFragment(archNode, offset);
         }
@@ -101,6 +106,20 @@ we3.ArchNodeVirtualText = class extends we3.ArchNodeText {
      */
     length () {
         return 0;
+    }
+    /**
+     * @override
+     */
+    setNodeValue (nodeValue) {
+        if (!this.isAllowUpdate()) {
+            console.warn("can not update a not editable node");
+            return [];
+        }
+
+        var archNode = this.params.create(null, null, nodeValue);
+        var res = this.parent.insert(archNode, this.index());
+        this.remove();
+        return res;
     }
     /**
      * @override

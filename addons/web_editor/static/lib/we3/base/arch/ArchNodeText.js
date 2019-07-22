@@ -131,8 +131,14 @@ we3.ArchNodeText = class extends we3.ArchNode {
         return this._removeSide(offset, false);
     }
     setNodeValue (nodeValue) {
+        if (!this.isAllowUpdate()) {
+            console.warn("can not update a not editable node");
+            return [];
+        }
+
         this.nodeValue = nodeValue;
-        return this.params.change(this, nodeValue.length);
+        this.params.change(this, nodeValue.length);
+        return [];
     }
     /**
      * @override

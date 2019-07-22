@@ -12,6 +12,7 @@ var BaseInput = class extends we3.AbstractPlugin {
             'keydown': '_onKeyDown',
             'keypress': '_onKeyDown',
             'input': '_onInput',
+            // 'textInput': '_onInput',
             'compositionend': '_onCompositionEnd',
         };
     }
@@ -184,7 +185,6 @@ var BaseInput = class extends we3.AbstractPlugin {
             }
 
             var lastTextNodeID;
-            var lastTextNodeNewValue;
             var lastTextNodeOldValue;
             var newArch = BaseArch.parse(formatNode);
             newArch.nextUntil(function (archNode) {
@@ -192,34 +192,52 @@ var BaseInput = class extends we3.AbstractPlugin {
                     return;
                 }
                 var target = arch.applyPath(archNode.path(newArch));
-                if (target) {
-                    lastTextNodeNewValue = archNode.nodeValue;
+                if (target.isText()) {
                     lastTextNodeOldValue = target.nodeValue;
                     lastTextNodeID = target.id;
                     target.setNodeValue(archNode.nodeValue);
+                } else if (target.isBR()) {
+                    var res = target.insert(archNode.params.create(null, null, archNode.nodeValue));
+                    lastTextNodeOldValue = archNode.nodeValue;
+                    lastTextNodeID = res[0] && res[0].id;
                 }
             }, {doNotLeaveNode: true});
 
             if (lastTextNodeID) {
-                var offset = 0;
+                var archNode = BaseArch.getArchNode(lastTextNodeID);
+                var lastTextNodeNewValue = archNode.nodeValue.replace(/\u00A0/g, ' ');
+                var newOffset = lastTextNodeNewValue.length;
+
+                param.data = param.data.replace(/\u00A0/g, ' ');
                 if (lastTextNodeID === range.scID) {
+                    var offset = 0;
                     if (lastTextNodeID === range.scID) {
                         offset = range.so;
                         if (lastTextNodeOldValue.length > lastTextNodeNewValue.length) {
                             offset -= lastTextNodeOldValue.length - lastTextNodeNewValue.length;
+                            if (offset < 0) {
+                                offset = 0;
+                            }
                         }
                     }
-                    offset = self._findOffsetInsertion(lastTextNodeNewValue, offset, param.data);
-                    offset = offset !== -1 ? offset : 0;
-                }
-                var archNode = BaseArch.getArchNode(lastTextNodeID);
-                if (archNode.nodeValue[0] === ' ' || archNode.nodeValue[0] === self.utils.char('nbsp')) {
-                    offset++;
+
+                    var newOffset = self._findOffsetInsertion(lastTextNodeNewValue, offset, param.data);
+                    newOffset = newOffset !== -1 ? newOffset : offset;
+
+                    if (lastTextNodeNewValue[newOffset] === ' ') {
+                        newOffset++;
+                    }
                 }
                 return {
                     scID: lastTextNodeID,
-                    so: offset,
-                }
+                    so: newOffset,
+                };
+            }
+
+            var lastLeaf = formatNode.lastLeaf();
+            return {
+                scID: lastLeaf.id,
+                so: lastLeaf.length(),
             }
         });
     }
@@ -379,10 +397,8 @@ var BaseInput = class extends we3.AbstractPlugin {
         if (e.key === 'End' || e.key === 'Home' || e.key === 'PageUp' || e.key === 'PageDown' || e.key.indexOf('Arrow') === 0) {
             return;
         }
-        var param = this._onKeyDownNextTick();
+        var param = this._onKeyDownNextTick(e);
         param.defaultPrevented = param.defaultPrevented || e.defaultPrevented;
-        param.types += e.type + ',';
-        param.inputType += ',';
         param.type = param.type || e.type;
         param.shiftKey = e.shiftKey;
         param.ctrlKey = e.ctrlKey;
@@ -394,9 +410,6 @@ var BaseInput = class extends we3.AbstractPlugin {
             return;
         }
         var param = this._onKeyDownNextTick();
-
-        param.types = e.type + ',';
-        param.inputType += e.inputType + ',';
 
         if (!param.type) {
             param.type = e.type;
@@ -428,15 +441,13 @@ var BaseInput = class extends we3.AbstractPlugin {
         if (this.editable.style.display === 'none') {
             return;
         }
-        var param = this._onKeyDownNextTick();
+        var param = this._onKeyDownNextTick(e);
         param.type = e.type;
-        param.types += e.type + ',';
-        param.inputType += ',';
         param.data = e.data;
     }
-    _onKeyDownNextTick () {
+    _onKeyDownNextTick (e) {
         if (this._currentEvent) {
-            this._currentEvent.previous.push(Object.assign({}, this._currentEvent));
+            this._currentEvent.events.push(e);
             return this._currentEvent;
         }
         this._currentEvent = {
@@ -447,9 +458,7 @@ var BaseInput = class extends we3.AbstractPlugin {
             ctrlKey: false,
             mutationsList: [],
             defaultPrevented: false,
-            types: '', // for debug
-            inputType: '', // for debug
-            previous: [],
+            events: [e],
         };
         setTimeout(this.__onKeyDownNextTick.bind(this));
         return this._currentEvent;
@@ -459,6 +468,8 @@ var BaseInput = class extends we3.AbstractPlugin {
         var param = this._currentEvent;
         this._currentEvent = null;
 
+
+console.log(param);
         var ev = this._eventsNormalization(param);
         if (!ev.defaultPrevented) {
             Input.trigger(ev.name, ev);

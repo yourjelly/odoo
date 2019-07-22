@@ -1057,6 +1057,129 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
         assert.strictEqual(this.dependencies.Test.getValue(), this.completionValue, "Should insert the word in the Arch");
         assert.strictEqual(this.dependencies.Test.getDomValue(), this.completionDom, "Should insert the word in the DOM");
     }
+    async _testSpaceAtEndSwiftKey (assert) {
+        var ev;
+        var Test = this.dependencies.Test;
+        await Test.setValue('<p>p◆</p>');
+
+        await this._triggerKey([
+            ['compositionstart', {
+                data: '',
+            }],
+            ['compositionupdate', {
+                data: 'p',
+            }],
+            ['keydown', {
+                key: 'Unidentified',
+                charCode: 0,
+                keyCode: 229,
+            }],
+            ['beforeInput', {
+                data: 'p',
+                inputType: 'insertCompositionText',
+            }],
+            ['compositionupdate', {
+                data: 'p',
+            }],
+            ['input', {
+                data: 'p',
+                inputType: 'insertCompositionText',
+            }],
+            ['compositionend', {
+                data: 'p',
+            }],
+            ['keydown', {
+                key: 'Unidentified',
+                charCode: 0,
+                keyCode: 229,
+            }],
+            ['beforeInput', {
+                data: ' ',
+                inputType: 'insertCompositionText',
+            }],
+            ['input', {
+                data: ' ',
+                insert: ' ',
+                inputType: 'textInput',
+            }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        assert.strictEqual(this.dependencies.Test.getValue(), '<p>p&nbsp;◆</p>', "Should insert the space in the Arch");
+        assert.strictEqual(this.dependencies.Test.getDomValue(), '<p>p&nbsp;</p>', "Should insert the space in the DOM");
+    }
+    async _testCompletionOnBRSwiftKey (assert) {
+        var ev;
+        var Test = this.dependencies.Test;
+        await Test.setValue('<p><br/>◆</p>');
+
+        // Christophe
+        await this._triggerKey([
+            ['compositionstart', {
+                data: '',
+            }],
+            ['compositionupdate', {
+                data: '',
+            }],
+            ['keydown', {
+                key: 'Unidentified',
+                charCode: 0,
+                keyCode: 229,
+            }],
+            ['beforeInput', {
+                data: 'Christophe',
+                inputType: 'insertCompositionText',
+            }],
+            ['compositionupdate', {
+                data: 'Christophe',
+            }],
+        ]);
+
+        var p = this.editable.querySelector('p');
+        p.removeChild(p.firstChild);
+        var textNode = document.createTextNode('Christophe');
+        p.appendChild(textNode);
+        this._selectDOMRange(textNode, 10);
+
+        await this._triggerKey([
+            ['keyup', {
+                key: 'Unidentified',
+                charCode: 0,
+                keyCode: 229,
+            }],
+            ['compositionend', {
+                data: 'Christophe',
+            }],
+
+            // auto add space after autocompletion (if no space after)
+
+            ['keydown', {
+                key: 'Unidentified',
+                charCode: 0,
+                keyCode: 229,
+                noTimeout: true,
+            }],
+            ['beforeInput', {
+                data: ' ',
+            }],
+            ['input', {
+                data: ' ',
+                insert: ' ',
+                inputType: 'textInput',
+            }],
+            ['keyup', {
+                key: 'Unidentified',
+                charCode: 0,
+                keyCode: 229,
+            }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        assert.strictEqual(this.dependencies.Test.getValue(), '<p>Christophe&nbsp;◆</p>', "Should insert the word in the Arch");
+        assert.strictEqual(this.dependencies.Test.getDomValue(), '<p>Christophe&nbsp;</p>', "Should insert the word in the DOM");
+    }
 
     async _testCompletionWithBoldSwiftKey (assert) {
         var ev;
@@ -1140,7 +1263,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
      * @param {string} insert
      */
     _triggerTextInput (data, insert) {
-        var ev = new (window.InputEvent || window.CustomEvent)('textInput', {
+        var ev = new (window.InputEvent || window.CustomEvent)('input', {
             bubbles: true,
             cancelBubble: false,
             cancelable: true,

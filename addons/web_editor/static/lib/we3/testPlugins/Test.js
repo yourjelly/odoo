@@ -738,7 +738,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
             }
             triggeredEvents.push(ev);
 
-            if (type !== 'keyboard' && type !== 'composition' && type !== 'input') {
+            if (type !== 'keyboard' && type !== 'composition' && type !== 'input' && !options.noTimeout) {
                 await new Promise(setTimeout);
             }
         };
