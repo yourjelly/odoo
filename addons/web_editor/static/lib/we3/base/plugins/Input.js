@@ -90,7 +90,8 @@ var BaseInput = class extends we3.AbstractPlugin {
             } else if (param.key === 'Enter') {
                 ev.name = 'Enter';
                 return ev;
-            } else if (param.data && param.data.length === 1 || param.key && param.key.length === 1 || param.key === 'Space') {
+            } else if ((!param.ctrlKey && !param.altKey || param.inputType === 'insertText') &&
+                    (param.data && param.data.length === 1 || param.key && param.key.length === 1 || param.key === 'Space')) {
                 ev.data = param.data && param.data.length === 1 ? param.data : param.key;
                 if (param.data === 'Space') {
                     param.data = ' ';
@@ -119,8 +120,6 @@ var BaseInput = class extends we3.AbstractPlugin {
             this._pressInsertEnter(ev);
         } else if (ev.name === 'char') {
             this._pressInsertChar(ev);
-        } else {
-            console.warn('No Command found', param);
         }
     }
     _findOffsetInsertion (text, offset, insert) {
