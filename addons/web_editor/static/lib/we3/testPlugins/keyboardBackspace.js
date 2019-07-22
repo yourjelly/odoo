@@ -40,7 +40,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'BACKSPACE',
             }],
-            test: "<p><br/>◆</p>",
+            test: "<p>▶<br/>◀</p>",
         },{
             name: "in p: 2 x BACKSPACE after br + 1 char",
             content: "<p>aaa</p><p><br>a◆</p>",
@@ -49,7 +49,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             }, {
                 key: 'BACKSPACE',
             }],
-            test: "<p>aaa</p><p><br/>◆</p>",
+            test: "<p>aaa</p><p>▶<br/>◀</p>",
         },
         {
             name: "in p (empty-p before): BACKSPACE",
@@ -93,7 +93,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             }, {
                 key: 'BACKSPACE',
             }],
-            test: "<p>a</p><p><br/>◆</p><p>d</p>",
+            test: "<p>a</p><p>▶<br/>◀</p><p>d</p>",
         },
         {
             name: "in p (p > span.a before - span.b after): BACKSPACE at beginning (must attach them)",
@@ -149,7 +149,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'BACKSPACE',
             }],
-            test: "<p>dom to edi<br/><br/>◆</p>", // should insert new br to make it visible
+            test: "<p>dom to edi<br/>▶<br/>◀</p>", // should insert new br to make it visible
         },
         {
             name: "in p: BACKSPACE -> 'a' at end, after space-char",
@@ -234,7 +234,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'BACKSPACE',
             }],
-            test: "<ul><li><p><br/>◆</p></li></ul>",
+            test: "<ul><li><p>▶<br/>◀</p></li></ul>",
         },
         {
             name: "in ul > indented-li (no other li - p before): BACKSPACE at beginning",
@@ -284,7 +284,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'BACKSPACE',
             }],
-            test: "<ul><li><br/>◆</li></ul>",
+            test: "<ul><li>▶<br/>◀</li></ul>",
         },
         {
             name: "in li (no other li): BACKSPACE -> 'a' on selection of all contents",
@@ -302,7 +302,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'BACKSPACE',
             }],
-            test: "<p><br/>◆</p>",
+            test: "<p>▶<br/>◀</p>",
         },
         {
             name: "in empty-li (no other li - empty-p before): BACKSPACE -> 'a'",
@@ -320,7 +320,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'BACKSPACE',
             }],
-            test: "<p>toto</p><p><br/>◆</p>",
+            test: "<p>toto</p><p>▶<br/>◀</p>",
         },
         {
             name: "in li (no other li - p before): BACKSPACE at start",
@@ -336,7 +336,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'BACKSPACE',
             }],
-            test: "<ul><li><p>toto</p></li><li><br/>◆</li><li><p>tutu</p></li></ul>",
+            test: "<ul><li><p>toto</p></li><li>▶<br/>◀</li><li><p>tutu</p></li></ul>",
         },
         {
             name: "in empty-indented-li (other li - other indented-li): BACKSPACE",
@@ -344,7 +344,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'BACKSPACE',
             }],
-            test: '<ul><li><p>toto</p></li><li><br/>◆</li><li class="o_indent"><ul><li><br/></li></ul></li><li><p>tutu</p></li></ul>',
+            test: '<ul><li><p>toto</p></li><li>▶<br/>◀</li><li class="o_indent"><ul><li><br/></li></ul></li><li><p>tutu</p></li></ul>',
         },
         {
             name: "in empty-indented-li (no other li, no other indented-li): BACKSPACE",
@@ -352,7 +352,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'BACKSPACE',
             }],
-            test: "<ul><li><br/>◆</li></ul>",
+            test: "<ul><li>▶<br/>◀</li></ul>",
         },
         {
             name: "in indented-li (other li, other indented-li): BACKSPACE at start",
@@ -407,7 +407,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'BACKSPACE',
             }],
-            test: "<ul><li><p><br/>◆</p></li></ul>",
+            test: "<ul><li><p>▶<br/>◀</p></li></ul>",
         },
         {
             name: "in li > p: BACKSPACE -> 'a' after single character",
@@ -476,7 +476,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'BACKSPACE',
             }],
-            test: "<p><br/>◆</p>",
+            test: "<p>▶<br/>◀</p>",
         },
         {
             name: "in p: BACKSPACE -> 'a' on selection of all contents",
@@ -502,7 +502,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'BACKSPACE',
             }],
-            test: "<p><b><br/>◆</b></p>",
+            test: "<p><b>▶<br/>◀</b></p>",
         },
         {
             name: "in p: BACKSPACE after br",
@@ -553,7 +553,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'BACKSPACE',
             }],
-            test: '<p>dom to</p><p><br/>◆<br/><br/></p><p>edit</p>', // is on BR2
+            test: '<p>dom to</p><p>▶<br/>◀<br/><br/></p><p>edit</p>', // is on BR2
         },
         {
             name: "BR backspace test 2-2",
@@ -571,7 +571,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'BACKSPACE',
             }],
-            test: '<p>dom to</p><p><br/><br/>◆<br/></p><p>edit</p>', // is on BR3
+            test: '<p>dom to</p><p><br/>▶<br/>◀<br/></p><p>edit</p>', // is on BR3
         },
         {
             name: "BR backspace test 3-2",
@@ -581,7 +581,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
                     key: 'BACKSPACE',
                 };
             }),
-            test: '<p>dom to</p><p><br/>◆<br/></p><p>edit</p>', // is on BR2
+            test: '<p>dom to</p><p>▶<br/>◀<br/></p><p>edit</p>', // is on BR2
         },
         {
             name: "BR backspace test 3-3",
@@ -599,7 +599,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'BACKSPACE',
             }],
-            test: '<p>dom to</p><p><br/><br/><br/>◆</p><p>edit</p>', // is on BR3
+            test: '<p>dom to</p><p><br/><br/>▶<br/>◀</p><p>edit</p>', // is on BR3
         },
         {
             name: "BR backspace test 4-2",
@@ -609,7 +609,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
                     key: 'BACKSPACE',
                 };
             }),
-            test: '<p>dom to</p><p><br/><br/>◆</p><p>edit</p>', // is on BR2
+            test: '<p>dom to</p><p><br/>▶<br/>◀</p><p>edit</p>', // is on BR2
         },
         {
             name: "BR backspace test 4-3",
@@ -619,7 +619,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
                     key: 'BACKSPACE',
                 };
             }),
-            test: '<p>dom to</p><p><br/>◆</p><p>edit</p>', // is on BR1
+            test: '<p>dom to</p><p>▶<br/>◀</p><p>edit</p>', // is on BR1
         },
         {
             name: "BR backspace test 4-4",
@@ -637,7 +637,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'BACKSPACE',
             }],
-            test: '<p>dom to</p><p><br/><br/><br/>◆</p><p>edit</p>', // should be identical to BR backspace test 4-1
+            test: '<p>dom to</p><p><br/><br/>▶<br/>◀</p><p>edit</p>', // should be identical to BR backspace test 4-1
         },
         {
             name: "BR backspace test 5-2",
@@ -647,7 +647,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
                     key: 'BACKSPACE',
                 };
             }),
-            test: '<p>dom to</p><p><br/><br/>◆</p><p>edit</p>', // should be identical to BR backspace test 4-2
+            test: '<p>dom to</p><p><br/>▶<br/>◀</p><p>edit</p>', // should be identical to BR backspace test 4-2
         },
         {
             name: "BR backspace test 5-3",
@@ -657,7 +657,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
                     key: 'BACKSPACE',
                 };
             }),
-            test: '<p>dom to</p><p><br/>◆</p><p>edit</p>', // should be identical to BR backspace test 4-3
+            test: '<p>dom to</p><p>▶<br/>◀</p><p>edit</p>', // should be identical to BR backspace test 4-3
         },
         {
             name: "BR backspace test 5-4",
@@ -695,7 +695,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
                     key: 'BACKSPACE',
                 };
             }),
-            test: '<p>dom to</p><p><br/>◆edit</p>',
+            test: '<p>dom to</p><p>▶<br/>◀edit</p>',
         },
         {
             name: "BR backspace test 6-4",

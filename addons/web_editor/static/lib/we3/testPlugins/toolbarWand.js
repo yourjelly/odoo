@@ -48,7 +48,7 @@ var TestToolbarWand = class extends we3.AbstractPlugin {
                     await self.dependencies.Test.triggerNativeEvents(self.styleToggler, ['mousedown', 'click']);
                     await self.dependencies.Test.triggerNativeEvents(self.styleDropdown.querySelector('we3-button[name="formatBlock-h1"]'), ['mousedown', 'click']);
                 },
-                test: '<h1><br/>◆</h1>',
+                test: '<h1>▶<br/>◀</h1>',
             },
             {
                 name: "Click H1 in selection containing multiple blocks (1)",

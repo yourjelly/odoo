@@ -98,7 +98,7 @@ var TestKeyboardComplex = class extends we3.AbstractPlugin {
                 }, {
                     key: 'BACKSPACE',
                 }],
-                test: "<p><br/>◆</p>",
+                test: "<p>▶<br/>◀</p>",
             },
             {
                 name: "in empty-p (p before): ENTER -> 2x BACKSPACE",

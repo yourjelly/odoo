@@ -28,7 +28,7 @@ var TestRenderer = class extends we3.AbstractPlugin {
                 steps: [{
                     key: 'Enter',
                 }],
-                test: "<p><b>dom to edit</b></p><p><br/>◆</p>",
+                test: "<p><b>dom to edit</b></p><p>▶<br/>◀</p>",
                 testDOM: "<p><b>dom to edit</b></p><p><br></p>",
             },
             {
@@ -44,7 +44,7 @@ var TestRenderer = class extends we3.AbstractPlugin {
                 }, {
                     key: 'Enter',
                 }],
-                test: '<p><b>dom to edit</b></p><p><br/>◆</p><p>other content</p>',
+                test: '<p><b>dom to edit</b></p><p>▶<br/>◀</p><p>other content</p>',
                 testDOM: '<p><b>dom to edit</b></p><p><br></p><p>other content</p>',
             },
         ];

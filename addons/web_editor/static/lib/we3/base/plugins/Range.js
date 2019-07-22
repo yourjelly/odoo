@@ -548,7 +548,8 @@ var BaseRange = class extends we3.AbstractPlugin {
      */
     _moveToEdgeOfBRSequence (points) {
         var archNode = this.dependencies.BaseArch.getArchNode(points.scID);
-        if (!this._isCollapsed() || !archNode.isBR()) {
+        var isCollapsed = points.scID === points.ecID && points.so === points.eo;
+        if (!isCollapsed || !archNode.isBR()) {
             return points;
         }
         var prev = archNode.previousSibling();

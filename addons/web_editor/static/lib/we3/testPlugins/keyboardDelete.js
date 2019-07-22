@@ -19,7 +19,7 @@ var TestKeyboardDelete = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'DELETE',
             }],
-            test: "<p><br/>◆</p>",
+            test: "<p>▶<br/>◀</p>",
         },
         {
             name: "in empty-p: DELETE (must leave it unchanged)",
@@ -27,7 +27,7 @@ var TestKeyboardDelete = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'DELETE',
             }],
-            test: "<p><br/>◆</p>",
+            test: "<p>▶<br/>◀</p>",
         },
         {
             name: "in empty-p (p after): DELETE",
@@ -146,7 +146,7 @@ var TestKeyboardDelete = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'DELETE',
             }],
-            test: "<ul><li><br/>◆</li></ul>",
+            test: "<ul><li>▶<br/>◀</li></ul>",
         },
         {
             name: "from p to li > p: DELETE on whole list",
@@ -191,7 +191,7 @@ var TestKeyboardDelete = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'DELETE',
             }],
-            test: "<ul><li><p><br/>◆</p></li></ul>",
+            test: "<ul><li><p>▶<br/>◀</p></li></ul>",
         },
         {
             name: "in li > p: DELETE -> 'a' before single character",
@@ -283,7 +283,7 @@ var TestKeyboardDelete = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'DELETE',
             }],
-            test: "<ul><li><br/>◆</li></ul>",
+            test: "<ul><li>▶<br/>◀</li></ul>",
         },
         {
             name: "in li: DELETE -> 'a' on selection of all contents",
@@ -376,7 +376,7 @@ var TestKeyboardDelete = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'DELETE',
             }],
-            test: "<p><br/>◆</p>",
+            test: "<p>▶<br/>◀</p>",
         },
         {
             name: "in p: DELETE -> 'a' on selection of all contents",
@@ -410,7 +410,7 @@ var TestKeyboardDelete = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'DELETE',
             }],
-            test: "<p><b><br/>◆</b></p>",
+            test: "<p><b>▶<br/>◀</b></p>",
         },
         {
             name: "in complex-dom (span > b -> ENTER): DELETE",
@@ -493,7 +493,7 @@ var TestKeyboardDelete = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'DELETE',
             }],
-            test: '<p>dom to</p><p><br/><br/><br/>◆</p><p>edit</p>', // is on BR3
+            test: '<p>dom to</p><p><br/><br/>▶<br/>◀</p><p>edit</p>', // is on BR3
         },
         {
             name: "BR delete test 3-2",
@@ -511,7 +511,7 @@ var TestKeyboardDelete = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'DELETE',
             }],
-            test: '<p>dom to</p><p><br/><br/>◆<br/></p><p>edit</p>', // is on BR3
+            test: '<p>dom to</p><p><br/>▶<br/>◀<br/></p><p>edit</p>', // is on BR3
         },
         {
             name: "BR delete test 4-2",
@@ -521,7 +521,7 @@ var TestKeyboardDelete = class extends we3.AbstractPlugin {
                     key: 'DELETE',
                 };
             }),
-            test: '<p>dom to</p><p><br/><br/>◆</p><p>edit</p>', // is on BR2
+            test: '<p>dom to</p><p><br/>▶<br/>◀</p><p>edit</p>', // is on BR2
         },
         {
             name: "BR delete test 4-3",
@@ -539,7 +539,7 @@ var TestKeyboardDelete = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'DELETE',
             }],
-            test: '<p>dom to</p><p><br/>◆<br/><br/></p><p>edit</p>', // is on BR2
+            test: '<p>dom to</p><p>▶<br/>◀<br/><br/></p><p>edit</p>', // is on BR2
         },
         {
             name: "BR delete test 5-2",
@@ -549,7 +549,7 @@ var TestKeyboardDelete = class extends we3.AbstractPlugin {
                     key: 'DELETE',
                 };
             }),
-            test: '<p>dom to</p><p><br/>◆<br/></p><p>edit</p>', // is on BR2
+            test: '<p>dom to</p><p>▶<br/>◀<br/></p><p>edit</p>', // is on BR2
         },
         {
             name: "BR delete test 5-3",
@@ -559,7 +559,7 @@ var TestKeyboardDelete = class extends we3.AbstractPlugin {
                     key: 'DELETE',
                 };
             }),
-            test: '<p>dom to</p><p><br/>◆</p><p>edit</p>',
+            test: '<p>dom to</p><p>▶<br/>◀</p><p>edit</p>',
         },
         {
             name: "BR delete test 5-4",

@@ -29,7 +29,7 @@ var TestToolbarList = class extends we3.AbstractPlugin {
                 do: async function () {
                     await self.dependencies.Test.triggerNativeEvents(self.btnUl, ['mousedown', 'click']);
                 },
-                test: '<ul><li><p><br/>◆</p></li></ul>',
+                test: '<ul><li><p>▶<br/>◀</p></li></ul>',
             },
             {
                 name: "Click UL: p -> ul",
@@ -149,7 +149,7 @@ var TestToolbarList = class extends we3.AbstractPlugin {
                         '<tbody>' +
                         '<tr>' +
                         '<td><br/></td>' +
-                        '<td><ol><li><br/>◆</li></ol></td>' +
+                        '<td><ol><li>▶<br/>◀</li></ol></td>' +
                         '<td><br/></td>' +
                         '</tr>' +
                         '<tr>' +
@@ -189,7 +189,7 @@ var TestToolbarList = class extends we3.AbstractPlugin {
                         '<tbody>' +
                         '<tr>' +
                         '<td><br/></td>' +
-                        '<td><ol><li><br/>◆</li></ol></td>' +
+                        '<td><ol><li>▶<br/>◀</li></ol></td>' +
                         '<td><br/></td>' +
                         '</tr>' +
                         '<tr>' +
@@ -229,7 +229,7 @@ var TestToolbarList = class extends we3.AbstractPlugin {
                         '<tbody>' +
                         '<tr>' +
                         '<td><br/></td>' +
-                        '<td><ol><li><br/>◆</li></ol></td>' +
+                        '<td><ol><li>▶<br/>◀</li></ol></td>' +
                         '<td><br/></td>' +
                         '</tr>' +
                         '<tr>' +
@@ -397,7 +397,7 @@ var TestToolbarList = class extends we3.AbstractPlugin {
                 do: async function () {
                     await self.dependencies.Test.triggerNativeEvents(self.btnChecklist, ['mousedown', 'click']);
                 },
-                test: '<ul class="o_checklist"><li><p><br/>◆</p></li></ul>',
+                test: '<ul class="o_checklist"><li><p>▶<br/>◀</p></li></ul>',
             },
             {
                 name: "check checkbox in checklist with children",
@@ -900,7 +900,7 @@ var TestToolbarList = class extends we3.AbstractPlugin {
                 do: async function () {
                     await self.dependencies.Test.triggerNativeEvents(self.btnOl, ['mousedown', 'click']);
                 },
-                test: '<p>dom not to edit</p><ul><li><p>a</p></li></ul><ol><li><br/>◆</li></ol>',
+                test: '<p>dom not to edit</p><ul><li><p>a</p></li></ul><ol><li>▶<br/>◀</li></ol>',
             },
             {
                 name: "Click OL: ul -> ol (from second li > br)",
@@ -908,7 +908,7 @@ var TestToolbarList = class extends we3.AbstractPlugin {
                 do: async function () {
                     await self.dependencies.Test.triggerNativeEvents(self.btnOl, ['mousedown', 'click']);
                 },
-                test: '<p>dom not to edit</p><ul><li><p>a</p></li></ul><ol><li><br/>◆</li></ol>',
+                test: '<p>dom not to edit</p><ul><li><p>a</p></li></ul><ol><li>▶<br/>◀</li></ol>',
             },
             // Checklist -> OL
             {

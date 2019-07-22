@@ -366,7 +366,7 @@ var isType = {
      * @returns {Boolean}
      */
     isVoidoid: function () {
-        return (!this.isBR() && this.isVoid()) || this.params.isVoidoid(this);
+        return this.isVoid() || this.params.isVoidoid(this);
     },
 };
 Object.assign(we3.ArchNode.prototype, isType);
