@@ -377,6 +377,14 @@ var TestKeyboardChar = class extends we3.AbstractPlugin {
                 }],
                 test: '<p>dom &nbsp; &nbsp;◆to edit</p>',
             },
+            {
+                name: "'b' on selection across br",
+                content: '<p>dom▶<br/>t◀o edit</p>',
+                steps: [{
+                    key: 'b',
+                }],
+                test: '<p>domb◆o edit</p>',
+            },
         ];
     }
 
