@@ -341,7 +341,7 @@ QUnit.module('web_editor', {
     ];
 
     QUnit.test('range + popover + rules + char + DropBlock', async function (assert) {
-        assert.expect(98);
+        assert.expect(100);
 
         this.testOptions = {
             assert: assert,
@@ -357,7 +357,7 @@ QUnit.module('web_editor', {
     });
 
     QUnit.test('DropBlock & DropBlockSelector', async function (assert) {
-        assert.expect(36);
+        assert.expect(37);
 
         this.testOptions = {
             assert: assert,
@@ -372,7 +372,7 @@ QUnit.module('web_editor', {
     });
 
     QUnit.test('DropBlock & CustomizeBlock', async function (assert) {
-        assert.expect(51);
+        assert.expect(52);
 
         this.testOptions = {
             assert: assert,
