@@ -19,8 +19,8 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
         this.completionDom = "<p>.Christophe .</p>";
 
         this.completionBold = "<p>.<b>chr</b>is◆ .</p>";
-        this.completionBoldValue = "<p>.<b>Christophe</b>&nbsp;◆.</p>";
-        this.completionBoldDom = "<p>.<b>Christophe</b>&nbsp;.</p>";
+        this.completionBoldValue = "<p>.<b>Christophe</b> ◆.</p>";
+        this.completionBoldDom = "<p>.<b>Christophe</b> .</p>";
     }
 
     start () {
@@ -148,7 +148,7 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
 
         await new Promise(setTimeout);
 
-        assert.strictEqual(this.dependencies.Test.getValue(), "<p>aaa\u00A0◆</p>", "Should insert a space in the Arch");
+        assert.strictEqual(this.dependencies.Test.getValue(), "<p>aaa&nbsp;◆</p>", "Should insert a space in the Arch");
         assert.strictEqual(this.dependencies.Test.getDomValue(), "<p>aaa&nbsp;</p>", "Should insert a space in the DOM");
     }
 
