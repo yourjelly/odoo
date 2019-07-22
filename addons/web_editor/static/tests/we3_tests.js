@@ -398,6 +398,17 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
 
+    QUnit.module('Dynamic fields');
+
+    QUnit.test('Many2one', async function (assert) {
+        assert.expect(15);
+        this.testOptions = {
+            assert: assert,
+            plugins: Object.assign({}, disableAllTests, { TestMany2one: true }),
+        };
+        await createFormAndTest(this);
+    });
+
 });
 
 });

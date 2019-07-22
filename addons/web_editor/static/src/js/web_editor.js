@@ -155,6 +155,7 @@ var Wysiwyg = Widget.extend({
             loadTemplates: this._loadTemplates.bind(this),
             translate: this._translate.bind(this),
             getXHR: this._getXHR.bind(this),
+            rpc: this._rpc.bind(this),
             tests: [
                 'TestArchAndRules',
                 'TestComplex',

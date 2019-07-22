@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="website.fields.many2one">
+        <we3-vertical-items>
+            <input type="text" name="inputPartner" data-method="_onInputRecordChange" />
+            <we3-button class="" name="1" data-method="_testclick"><span>foo</span>bar</we3-button>
+            <we3-button name="2" data-method="_testclick"><span>foo</span>bar</we3-button>
+            <we3-button name="3" data-method="_testclick"><span>foo</span>bar</we3-button>
+        </we3-vertical-items>
+    </t>
+</templates>

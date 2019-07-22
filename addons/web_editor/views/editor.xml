@@ -105,6 +105,9 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarWand.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/history.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/codeView.js"/>
+
+    <script type="text/javascript" src="/web_editor/static/tests/plugins/TestDynamicFields.js"/>
+
 </template>
 
 <template id="assets_wysiwyg" name="Wysiwyg Editor Assets">
@@ -257,6 +260,7 @@
         <script type="text/javascript" src="/web_editor/static/tests/we3_tests.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/media_crop_tests.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/color_picker_tests.js"/>
+        <script type="text/javascript" src="/web_editor/static/tests/plugins/TestDynamicFields.js"/>
         <!-- <script type="text/javascript" src="/web_editor/static/tests/field_html_tests.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/wysiwyg_tests.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/wysiwyg_keyboard_tests.js"/>

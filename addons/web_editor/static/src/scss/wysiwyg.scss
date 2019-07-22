@@ -116,13 +116,15 @@ we3-dropdown {
         background-color: #FFFFFF;
         padding: 4px;
     }
-    > we3-vertical-items {
-        display: block;
+}
 
-        > we3-button {
-            width: 100%;
-            display: block;
-        }
+we3-vertical-items {
+    display: block;
+
+    > we3-button {
+        width: 100%;
+        height: auto;
+        display: block;
     }
 }
 
@@ -322,6 +324,9 @@ we3-popover, we3-toolbar, we3-contextmenu {
             padding: 5px 8px;
         }
     }
+    we3-group.we3-vertical {
+        flex-direction: column;
+    }
     we3-button {
         flex: 1 1 auto;
     }
@@ -330,6 +335,21 @@ we3-popover, we3-toolbar, we3-contextmenu {
     }
     > we3-button {
         margin: 0 2px;
+    }
+}
+
+we3-popover{
+    we3-span {
+        display: inline;
+    }
+    input {
+        width: 100%;
+    }
+    we3-vertical-items we3-button {
+        text-align: left;
+    }
+    we3-button we3-span {
+        font-weight: bold;
     }
 }
 
