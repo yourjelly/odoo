@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <odoo noupdate="1">
   <record model="account.group" id="account_group_activo">
-    <field name="name">ACTIVO</field>
+    <field name="name">Activo</field>
     <field name="code_prefix">1</field>
   </record>
   <record model="account.group" id="account_group_activo_corriente">
-    <field name="name">ACTIVO CORRIENTE</field>
+    <field name="name">Activo Corriente</field>
     <field name="parent_id" ref="account_group_activo"/>
     <field name="code_prefix">1.1</field>
   </record>
@@ -24,60 +24,50 @@
     <field name="parent_id" ref="account_group_cajas_y_bancos"/>
     <field name="code_prefix">1.1.1.02</field>
   </record>
-  <record model="account.group" id="account_group_moneda_extranjera">
-    <field name="name">Moneda Extranjera</field>
-    <field name="parent_id" ref="account_group_cajas_y_bancos"/>
-    <field name="code_prefix">1.1.1.03</field>
-  </record>
   <record model="account.group" id="account_group_inversiones">
     <field name="name">Inversiones</field>
     <field name="parent_id" ref="account_group_activo_corriente"/>
     <field name="code_prefix">1.1.2</field>
   </record>
-  <record model="account.group" id="account_group_creditos">
-    <field name="name">Créditos</field>
+  <record model="account.group" id="account_group_creditos_por_ventas">
+    <field name="name">Créditos por ventas</field>
     <field name="parent_id" ref="account_group_activo_corriente"/>
     <field name="code_prefix">1.1.3</field>
   </record>
-  <record model="account.group" id="account_group_creditos_por_ventas">
-    <field name="name">Créditos por ventas</field>
-    <field name="parent_id" ref="account_group_creditos"/>
-    <field name="code_prefix">1.1.3.01</field>
-  </record>
-  <record model="account.group" id="account_group_otros_creditos">
-    <field name="name">Otros créditos</field>
-    <field name="parent_id" ref="account_group_creditos"/>
-    <field name="code_prefix">1.1.3.02</field>
+  <record model="account.group" id="account_group_creditos_fiscales">
+    <field name="name">Créditos fiscales</field>
+    <field name="parent_id" ref="account_group_activo_corriente"/>
+    <field name="code_prefix">1.1.4</field>
   </record>
   <record model="account.group" id="account_group_creditos_fiscales_municipales">
     <field name="name">Créditos Fiscales Municipales</field>
-    <field name="parent_id" ref="account_group_otros_creditos"/>
-    <field name="code_prefix">1.1.3.02.0</field>
+    <field name="parent_id" ref="account_group_creditos_fiscales"/>
+    <field name="code_prefix">1.1.4.01</field>
   </record>
   <record model="account.group" id="account_group_creditos_fiscales_iibb">
     <field name="name">Créditos Fiscales IIBB</field>
-    <field name="parent_id" ref="account_group_otros_creditos"/>
-    <field name="code_prefix">1.1.3.02.1</field>
+    <field name="parent_id" ref="account_group_creditos_fiscales"/>
+    <field name="code_prefix">1.1.4.02</field>
   </record>
   <record model="account.group" id="account_group_creditos_fiscales_suss">
     <field name="name">Créditos Fiscales SUSS</field>
-    <field name="parent_id" ref="account_group_otros_creditos"/>
-    <field name="code_prefix">1.1.3.02.2</field>
+    <field name="parent_id" ref="account_group_creditos_fiscales"/>
+    <field name="code_prefix">1.1.4.03</field>
   </record>
   <record model="account.group" id="account_group_creditos_fiscales_iva">
     <field name="name">Créditos Fiscales IVA</field>
-    <field name="parent_id" ref="account_group_otros_creditos"/>
-    <field name="code_prefix">1.1.3.02.3</field>
+    <field name="parent_id" ref="account_group_creditos_fiscales"/>
+    <field name="code_prefix">1.1.4.04</field>
   </record>
   <record model="account.group" id="account_group_creditos_fiscales_ganancias">
     <field name="name">Créditos Fiscales Ganancias</field>
-    <field name="parent_id" ref="account_group_otros_creditos"/>
-    <field name="code_prefix">1.1.3.02.4</field>
+    <field name="parent_id" ref="account_group_creditos_fiscales"/>
+    <field name="code_prefix">1.1.4.05</field>
   </record>
-  <record model="account.group" id="account_group_otros_creditos_fiscales">
-    <field name="name">Otros Créditos Fiscales</field>
-    <field name="parent_id" ref="account_group_otros_creditos"/>
-    <field name="code_prefix">1.1.3.02.5</field>
+  <record model="account.group" id="account_group_otros_creditos">
+    <field name="name">Otros créditos</field>
+    <field name="parent_id" ref="account_group_activo_corriente"/>
+    <field name="code_prefix">1.1.5</field>
   </record>
   <record model="account.group" id="account_group_bienes_de_cambio">
     <field name="name">Bienes de Cambio</field>
@@ -85,7 +75,7 @@
     <field name="code_prefix">1.1.4</field>
   </record>
   <record model="account.group" id="account_group_activo_no_corriente">
-    <field name="name">ACTIVO NO CORRIENTE</field>
+    <field name="name">Activo no corriente</field>
     <field name="parent_id" ref="account_group_activo"/>
     <field name="code_prefix">1.2</field>
   </record>
@@ -125,11 +115,11 @@
     <field name="code_prefix">1.2.2.01</field>
   </record>
   <record model="account.group" id="account_group_pasivo">
-    <field name="name">PASIVO</field>
+    <field name="name">Pasivo</field>
     <field name="code_prefix">2</field>
   </record>
   <record model="account.group" id="account_group_pasivo_corriente">
-    <field name="name">PASIVO CORRIENTE</field>
+    <field name="name">Pasivo Corriente</field>
     <field name="parent_id" ref="account_group_pasivo"/>
     <field name="code_prefix">2.1</field>
   </record>
@@ -179,7 +169,7 @@
     <field name="code_prefix">2.1.5</field>
   </record>
   <record model="account.group" id="account_group_pasivo_no_corriente">
-    <field name="name">PASIVO NO CORRIENTE</field>
+    <field name="name">Pasivo no Corriente</field>
     <field name="parent_id" ref="account_group_pasivo"/>
     <field name="code_prefix">2.2</field>
   </record>
@@ -194,7 +184,7 @@
     <field name="code_prefix">2.2.2</field>
   </record>
   <record model="account.group" id="account_group_patrimonio_neto">
-    <field name="name">PATRIMONIO NETO</field>
+    <field name="name">Patrimonio Neto</field>
     <field name="code_prefix">3</field>
   </record>
   <record model="account.group" id="account_group_capital_social">
@@ -213,7 +203,7 @@
     <field name="code_prefix">3.3</field>
   </record>
   <record model="account.group" id="account_group_ingresos">
-    <field name="name">INGRESOS</field>
+    <field name="name">Ingresos</field>
     <field name="code_prefix">4</field>
   </record>
   <record model="account.group" id="account_group_ingresos_por_ventas">
@@ -232,7 +222,7 @@
     <field name="code_prefix">4.3</field>
   </record>
   <record model="account.group" id="account_group_egresos">
-    <field name="name">EGRESOS</field>
+    <field name="name">Egresos</field>
     <field name="code_prefix">5</field>
   </record>
   <record model="account.group" id="account_group_gastos_operativos">
