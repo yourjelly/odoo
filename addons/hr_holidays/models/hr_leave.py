@@ -610,7 +610,7 @@ class HolidaysRequest(models.Model):
 
     def _read(self, fields):
         if 'name' in fields and 'employee_id' not in fields:
-            fields.append('employee_id')
+            fields.add('employee_id')
         super(HolidaysRequest, self)._read(fields)
         if 'name' in fields:
             if self.user_has_groups('hr_holidays.group_hr_holidays_user'):
