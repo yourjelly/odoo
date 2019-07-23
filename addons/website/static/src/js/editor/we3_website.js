@@ -138,10 +138,6 @@ var OdooWebsite = class extends we3.AbstractPlugin {
         this.options.xhr.res_model = res_model;
         this.options.xhr.res_id = res_id;
         this.options.xhr.xpath = xpath;
-
-        if (res_model) {
-            console.log(res_model, res_id, xpath);
-        }
     }
     _overwriteBootstrap () {
         var self = this;

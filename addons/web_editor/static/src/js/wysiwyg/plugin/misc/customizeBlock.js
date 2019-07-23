@@ -79,7 +79,7 @@ var customizeBlock = class extends we3.AbstractPlugin {
         var selected = this._getCustomizableArchNode(focusNode);
         var Arch = this.dependencies.Arch;
 
-        console.log(selected);
+        // console.log(selected);
     }
 };
 
