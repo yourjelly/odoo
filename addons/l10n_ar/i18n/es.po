@@ -153,11 +153,6 @@ msgid "Tariff"
 msgstr "Arancel"
 
 #. module: l10n_ar
-#: model_terms:ir.ui.view,arch_db:l10n_ar.view_partner_property_form
-msgid "Arg. Fiscal Data"
-msgstr "Data Fiscal Argentina"
-
-#. module: l10n_ar
 #: model:ir.ui.menu,name:l10n_ar.account_reports_ar_statements_menu
 msgid "Argentina Statements"
 msgstr "Informes Argentinos"

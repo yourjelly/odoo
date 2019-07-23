@@ -149,11 +149,6 @@ msgid "Tariff"
 msgstr ""
 
 #. module: l10n_ar
-#: model_terms:ir.ui.view,arch_db:l10n_ar.view_partner_property_form
-msgid "Arg. Fiscal Data"
-msgstr ""
-
-#. module: l10n_ar
 #: model:ir.ui.menu,name:l10n_ar.account_reports_ar_statements_menu
 msgid "Argentinian Statements"
 msgstr ""
