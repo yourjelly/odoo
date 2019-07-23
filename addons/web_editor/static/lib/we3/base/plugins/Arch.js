@@ -748,7 +748,7 @@ var BaseArch = class extends we3.AbstractPlugin {
             if (archNode.childNodes) {
                 archNode.childNodes.forEach(function (archNode) {
                     self._addToArch(archNode);
-                    self._changeArch(archNode, 0);
+                    self._changeArch(archNode, null);
                 });
             }
         }

@@ -321,27 +321,28 @@ we3.ArchNodeText = class extends we3.ArchNode {
      * @returns {ArchNode} the node that will be focused after removing
      */
     _removeSideBlock (nextBlock, isLeft) {
-        var virtualText = this.params.create();
-        this.parent[isLeft ? 'prepend' : 'append'](virtualText);
+        this._triggerChange(isLeft ? 0 : this.length());
         nextBlock = nextBlock.contains(this) ? nextBlock[isLeft ? 'previousSibling' : 'nextSibling']() : nextBlock;
-        if (nextBlock && nextBlock.isVoid()) {
+        if (!nextBlock) {
+            return this.deleteEdge(isLeft);
+        }
+        if (nextBlock.isVoid()) {
             return nextBlock.remove();
         }
-        if (nextBlock && virtualText.isInList()) {
+        if (this.isInList()) {
             // handle edge of between list items of same or different indentations
             // by outdenting the next list item until it's on ground level
             if (nextBlock.isLi()) {
-                var liAncestor = virtualText.ancestor('isLi');
+                var liAncestor = this.ancestor('isLi');
                 while (nextBlock && nextBlock.isLi() && nextBlock !== liAncestor && nextBlock.outdent) {
                     nextBlock = nextBlock.outdent();
                 }
             // handle edge between li > text and same li > p (ie: `<li>a<p>text</p></li>`)
             } else if (this.parent.isLi() && this.commonAncestor(nextBlock).isInList()) {
-                var p = this.wrap('p');
-                p[isLeft ? 'prepend' : 'append'](virtualText);
+                this.wrap('p');
             }
         }
-        return virtualText.deleteEdge(isLeft);
+        return this.deleteEdge(isLeft);
     }
     /**
      * Remove to the side of the TextNode,

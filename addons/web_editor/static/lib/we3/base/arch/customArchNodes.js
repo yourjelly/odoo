@@ -168,8 +168,8 @@ customArchNodes.br = class extends we3.ArchNode {
         }
         var nextRange = {};
         if (isLeft) {
-            nextRange.node = prev || next || parent;
-            nextRange.offset = prev ? prev.length() : 0;
+            nextRange.node = next && !next.isBR() ? next : prev || parent;
+            nextRange.offset = nextRange.node === prev ? prev.length() : 0;
         } else {
             nextRange.node = prev && !prev.isBR() ? prev : next || parent;
             nextRange.offset = nextRange.node === prev ? prev.length() : 0;

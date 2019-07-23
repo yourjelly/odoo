@@ -199,24 +199,24 @@ var BaseRange = class extends we3.AbstractPlugin {
 
     /**
      * Compute and set the range.
-     * Pass only `points.scID` to set the range on the whole element.
-     * Pass only `points.scID` and `points.so` to collapse the range on the start.
+     * Pass only `startPoints.scID` to set the range on the whole element.
+     * Pass only `startPoints.scID` and `startPoints.so` to collapse the range on the start.
      *
      * @private
-     * @param {Object} points
-     * @param {Node} points.scID
-     * @param {Number} [points.so]
-     * @param {Node} [points.ecID]
-     * @param {Number} [points.eo] must be given if ecID is given
-     * @param {Boolean} [points.ltr] true if the selection was made from left to right (from sc to ec)
+     * @param {Object} startPoints
+     * @param {Node} startPoints.scID
+     * @param {Number} [startPoints.so]
+     * @param {Node} [startPoints.ecID]
+     * @param {Number} [startPoints.eo] must be given if ecID is given
+     * @param {Boolean} [startPoints.ltr] true if the selection was made from left to right (from sc to ec)
      * @param {Object} [options]
      * @param {Boolean} [options.moveLeft] true if a movement is initiated from right to left
      * @param {Boolean} [options.moveRight] true if a movement is initiated from left to right
      */
-    _computeSetRange (points, options) {
-        var ltr = typeof points.ltr === 'undefined' ? true : points.ltr;
+    _computeSetRange (startPoints, options) {
+        var ltr = typeof startPoints.ltr === 'undefined' ? true : startPoints.ltr;
         options = options || {};
-        points = this._deducePoints(points);
+        var points = this._deducePoints(startPoints);
         if (options.moveLeft || options.moveRight) {
             points = this._jumpOverVirtualText(points, options);
         }

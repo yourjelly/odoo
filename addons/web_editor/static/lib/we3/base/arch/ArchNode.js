@@ -588,10 +588,11 @@ we3.ArchNode = class {
     /**
      * Get a representation of the Arch with architectural space, node IDs and virtual nodes
      *
+     * @param {boolean} noArchitectural true to not show architectural space
      * @returns {string}
      */
-    repr () {
-        return this.parent && this.parent.repr();
+    repr (noArchitectural) {
+        return this.parent && this.parent.repr(noArchitectural);
     }
     /**
      * Return a list of child nodes that are not architectural space.
@@ -950,7 +951,7 @@ we3.ArchNode = class {
         var wrapper = this.params.create(nodeName);
         this.before(wrapper);
         wrapper.append(this);
-        this.params.change(this, 0);
+        this.params.change(this, null);
         wrapper._deleteEdges({
             doNotBreakBlocks: true,
             doNotRemoveEmpty: true,

@@ -45,11 +45,11 @@ we3.ArchNodeRoot = class extends we3.ArchNode {
     /**
      * @override
      */
-    repr () {
+    repr (noArchitectural) {
         var value = this.toString({
             showIDs: true,
             keepVirtual: true,
-            architecturalSpace: true,
+            architecturalSpace: !noArchitectural,
         }).trim();
         return value;
     }

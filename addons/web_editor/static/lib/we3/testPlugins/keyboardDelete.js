@@ -172,8 +172,7 @@ var TestKeyboardDelete = class extends we3.AbstractPlugin {
             steps: [{
                 key: 'DELETE',
             }],
-            test: "<ul><li>dom to&nbsp;◆edit</li></ul>",
-            // todo: handle remove nbsp (not handled because no change triggered in "abc&nbsp;" so no rules applied)
+            test: "<ul><li>dom to ◆edit</li></ul>",
         },
         {
             name: "in li (li after): DELETE -> 'a' at end (must move contents of second li to carret, then write)",

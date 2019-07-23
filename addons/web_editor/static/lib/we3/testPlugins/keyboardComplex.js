@@ -24,7 +24,7 @@ var TestKeyboardComplex = class extends we3.AbstractPlugin {
                 }, {
                     key: 'a',
                 }],
-                test: "<p><span><b>doma◆&nbsp;to edit</b></span></p>",
+                test: "<p><span><b>doma◆ to edit</b></span></p>",
             },
             {
                 name: "in span > b: SHIFT+ENTER -> ENTER -> BACKSPACE",

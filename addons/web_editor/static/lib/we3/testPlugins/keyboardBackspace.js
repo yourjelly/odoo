@@ -695,7 +695,7 @@ var TestKeyboardBackspace = class extends we3.AbstractPlugin {
                     key: 'BACKSPACE',
                 };
             }),
-            test: '<p>dom to</p><p>▶<br/>◀edit</p>',
+            test: '<p>dom to</p><p><br/>◆edit</p>',
         },
         {
             name: "BR backspace test 6-4",
