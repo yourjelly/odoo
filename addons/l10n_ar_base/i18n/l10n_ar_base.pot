@@ -231,8 +231,8 @@ msgid ""
 msgstr ""
 
 #. module: l10n_ar_base
-#: model:ir.model.fields,help:l10n_ar_base.field_res_partner__l10n_ar_formated_cuit
-#: model:ir.model.fields,help:l10n_ar_base.field_res_users__l10n_ar_formated_cuit
+#: model:ir.model.fields,help:l10n_ar_base.field_res_partner__l10n_ar_formatted_cuit
+#: model:ir.model.fields,help:l10n_ar_base.field_res_users__l10n_ar_formatted_cuit
 msgid ""
 "Computed field that will convert the given cuit number to the format "
 "{person_category:2}-{number:10}-{validation_number:1}"
@@ -259,8 +259,8 @@ msgid "ET"
 msgstr ""
 
 #. module: l10n_ar_base
-#: model:ir.model.fields,field_description:l10n_ar_base.field_res_partner__l10n_ar_formated_cuit
-#: model:ir.model.fields,field_description:l10n_ar_base.field_res_users__l10n_ar_formated_cuit
+#: model:ir.model.fields,field_description:l10n_ar_base.field_res_partner__l10n_ar_formatted_cuit
+#: model:ir.model.fields,field_description:l10n_ar_base.field_res_users__l10n_ar_formatted_cuit
 msgid "Formated CUIT"
 msgstr ""
 

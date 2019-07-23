@@ -10,8 +10,8 @@ class ResPartner(models.Model):
     l10n_ar_cuit = fields.Char(
         compute='_compute_l10n_ar_cuit', string="CUIT", help='Computed field that returns cuit or nothing if this one'
         ' is not set for the partner')
-    l10n_ar_formated_cuit = fields.Char(
-        compute='_compute_l10n_ar_formated_cuit', string="Formated CUIT", help='Computed field that will convert the'
+    l10n_ar_formatted_cuit = fields.Char(
+        compute='_compute_l10n_ar_formatted_cuit', string="Formated CUIT", help='Computed field that will convert the'
         ' given cuit number to the format {person_category:2}-{number:10}-{validation_number:1}')
 
     def ensure_cuit(self):
@@ -27,11 +27,11 @@ class ResPartner(models.Model):
         return self.l10n_ar_cuit
 
     @api.depends('l10n_ar_cuit')
-    def _compute_l10n_ar_formated_cuit(self):
+    def _compute_l10n_ar_formatted_cuit(self):
         """ This will add some dash to the CUIT number in order to show in his natural format:
         {person_category}-{number}-{validation_number} """
         for rec in self.filtered('l10n_ar_cuit'):
-            rec.l10n_ar_formated_cuit = stdnum.ar.cuit.format(rec.l10n_ar_cuit)
+            rec.l10n_ar_formatted_cuit = stdnum.ar.cuit.format(rec.l10n_ar_cuit)
 
     @api.depends('vat', 'l10n_latam_identification_type_id')
     def _compute_l10n_ar_cuit(self):
