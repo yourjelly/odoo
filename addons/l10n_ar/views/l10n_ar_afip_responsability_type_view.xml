@@ -5,7 +5,7 @@
         <field name="name">afip.responsability.type.form</field>
         <field name="model">l10n_ar.afip.responsability.type</field>
         <field name="arch" type="xml">
-            <form string="Afip Responsability Type">
+            <form string="AFIP Responsability Type">
                 <group>
                     <field name="name"/>
                     <field name='code'/>
@@ -19,7 +19,7 @@
         <field name="name">afip.responsability.type.tree</field>
         <field name="model">l10n_ar.afip.responsability.type</field>
         <field name="arch" type="xml">
-            <tree string="Afip Responsability Type" decoration-muted="(not active)">
+            <tree string="AFIP Responsability Type" decoration-muted="(not active)">
                 <field name="name"/>
                 <field name="code"/>
                 <field name='active'/>
@@ -28,7 +28,7 @@
     </record>
 
     <record model="ir.actions.act_window" id="action_afip_responsability_type">
-        <field name="name">Afip Responsability Types</field>
+        <field name="name">AFIP Responsability Types</field>
         <field name="res_model">l10n_ar.afip.responsability.type</field>
     </record>
 

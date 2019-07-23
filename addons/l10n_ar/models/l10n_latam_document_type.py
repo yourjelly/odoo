@@ -12,20 +12,10 @@ class L10nLatamDocumentType(models.Model):
         help='Letters defined by the AFIP that can be used to identify the'
         ' documents presented to the goverment and that depends on the'
         ' operation type, the responsability of both the issuer and the'
-        ' receptor or the document. The possible letters are:\n'
-        '* A\n'
-        '* B\n'
-        '* C\n'
-        '* E\n'
-        '* M\n'
-        '* T\n'
-        '* I\n',
-    )
-    purchase_cuit_required = fields.Boolean(
-        help='Verdadero si la declaración del CITI compras requiere informar CUIT')
+        ' receptor of the document')
+    purchase_cuit_required = fields.Boolean(help='True if the CITI purchase statement requires to inform CUIT')
     purchase_alicuots = fields.Selection(
-        [('not_zero', 'No Cero'), ('zero', 'Cero')], help='Cero o No cero según lo requiere la declaración del CITI'
-        ' compras')
+        [('not_zero', 'Nor Zero'), ('zero', 'Zero')], help='Zero or No Zero as required by the CITI purchase statement')
 
     def _get_l10n_ar_letters(self):
         """ Return the list of values of the selection field. """
@@ -78,7 +68,7 @@ class L10nLatamDocumentType(models.Model):
         if not document_number:
             return False
 
-        msg = _("'%s' is not a valid value for '%s'.\n%s")
+        msg = "'%s' " + _("is not a valid value for") + " '%s'.<br/>%s"
 
         # Import Dispatch Validator
         if self.code in ['66', '67']:

@@ -145,15 +145,15 @@ class AccountMove(models.Model):
                 lambda x: x.tax_group_id.l10n_ar_tax == 'vat' and x.tax_group_id.l10n_ar_type == 'tax')
             if len(vat_taxes) != 1:
                 raise UserError(_(
-                    'Debe haber un y solo un impuesto de IVA por línea. Verificar líneas con producto "%s"' % (
-                        inv_line.product_id.name)))
+                    'There must be one and only one VAT tax per line. Verify lines with product') + ' "%s"' % (
+                        inv_line.product_id.name))
 
         # check partner has responsability so it will be assigned on invoice validate
         without_responsability = self.filtered(
             lambda x: not x.partner_id.l10n_ar_afip_responsability_type_id)
         if without_responsability:
             raise UserError(_(
-                'The following invoices has a partner without AFIP responsability:<br/>%s') % ('<br/>'.join(
+                'The following invoices has a partner without AFIP responsability') + ':<br/>%s' % ('<br/>'.join(
                     ['[%i] %s' % (i.id, i.display_name) for i in without_responsability])))
 
         # verificamos facturas de compra que deben reportar cuit y no lo tienen configurado
@@ -161,7 +161,7 @@ class AccountMove(models.Model):
             lambda x: x.type in ['in_invoice', 'in_refund'] and x.l10n_latam_document_type_id.purchase_cuit_required and
             not x.commercial_partner_id.l10n_ar_cuit)
         if without_cuit:
-            raise UserError(_('Las siguientes partners no tienen configurado CUIT: %s') % (', '.join(
+            raise UserError(_('The following partners do not have CUIT configured') + ': %s' % (', '.join(
                 without_cuit.mapped('commercial_partner_id.name'))))
 
         # facturas que no debería tener ningún iva y tienen
@@ -171,8 +171,8 @@ class AccountMove(models.Model):
                      for t in x._get_argentina_amounts()['vat_tax_ids']]))
         if not_zero_alicuot:
             raise UserError(_(
-                'Las siguientes facturas tienen configurados IVA incorrecto. Debe utilizar IVA no corresponde.<br/>'
-                '*Facturas: %s') % (', '.join(not_zero_alicuot.mapped('l10n_latam_document_number'))))
+                'The following invoices have incorrect VAT configured. You must use VAT Not Applicable.<br/>'
+                ' * Invoices: %s') % (', '.join(not_zero_alicuot.mapped('l10n_latam_document_number'))))
 
         # facturas que debería tener iva y tienen no corresponde
         zero_alicuot = self.filtered(
@@ -182,8 +182,8 @@ class AccountMove(models.Model):
                  for t in x._get_argentina_amounts()['vat_tax_ids']]))
         if zero_alicuot:
             raise UserError(_(
-                'Las siguientes facturas tienen IVA no corresponde pero debe seleccionar una alícuota correcta'
-                ' (No gravado, Exento, Cero, 10,5, etc).<br/>*Facturas: %s') % (', '.join(
+                'The following invoices have VAT not applicable but you must select a correct rate (Not Taxed, Exempt,'
+                ' Zero, 10.5, etc.)') + '. <br/> * ' + _('Invoices') + ': %s' % (', '.join(
                     zero_alicuot.mapped('l10n_latam_document_number'))))
 
     @api.constrains('invoice_date')

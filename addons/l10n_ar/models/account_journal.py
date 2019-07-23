@@ -11,8 +11,7 @@ class AccountJournal(models.Model):
     l10n_ar_afip_pos_system = fields.Selection(
         selection='_get_l10n_ar_afip_pos_types_selection', string='AFIP POS System')
     l10n_ar_afip_pos_number = fields.Integer(
-        'AFIP POS Number', help='This is the point of sale number assigned by AFIP in order to you in order to'
-        ' generate invoices')
+        'AFIP POS Number', help='This is the point of sale number assigned by AFIP in order to generate invoices')
     l10n_ar_afip_pos_partner_id = fields.Many2one(
         'res.partner', 'AFIP POS Address', help='This is the address used for invoice reports of this POS')
     l10n_ar_sequence_ids = fields.One2many('ir.sequence', 'l10n_latam_journal_id')
@@ -133,8 +132,8 @@ class AccountJournal(models.Model):
         invoices = self.env['account.move'].search([('journal_id', '=', self.id), ('state', '!=', 'draft')])
         if invoices:
             raise ValidationError(_(
-                'You can not change the journal configuration for a journal that already have validate invoices:'
-                '\n\n - %s' % ('\n - '.join(invoices.mapped('display_name')))))
+                'You can not change the journal configuration for a journal that already have validate invoices') +
+                ':<br/><br/> - %s' % ('<br/>- '.join(invoices.mapped('display_name'))))
 
     def create_document_sequences(self):
         """ IF AFIP Configuration change try to review if this can be done and then create / update the document
