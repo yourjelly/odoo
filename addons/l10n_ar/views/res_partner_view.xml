@@ -24,19 +24,16 @@
                 </group>
             </xpath>
 
-            <page name="accounting" position="after">
-                <page string="Arg. Fiscal Data" name="fiscal_data" attrs="{'invisible': [('is_company','=',False),('parent_id','!=',False)]}">
-                    <group>
-                        <group name="gross_income">
-                            <label for="l10n_ar_gross_income_number" string="Gross Income"/>
-                            <div>
-                                <field name="l10n_ar_gross_income_type" class="oe_inline"/>
-                                <field name="l10n_ar_gross_income_number" placeholder="Number..." class="oe_inline" attrs="{'invisible': [('l10n_ar_gross_income_type', 'not in', ['multilateral', 'local'])], 'required': [('l10n_ar_gross_income_type', 'in', ['multilateral', 'local'])]}"/>
-                            </div>
-                        </group>
-                    </group>
-                </page>
-            </page>
+            <field name="property_account_position_id" position="after">
+                <group name="gross_income">
+                    <label for="l10n_ar_gross_income_number" string="Gross Income"/>
+                    <div>
+                        <field name="l10n_ar_gross_income_type" class="oe_inline"/>
+                        <field name="l10n_ar_gross_income_number" placeholder="Number..." class="oe_inline" attrs="{'invisible': [('l10n_ar_gross_income_type', 'not in', ['multilateral', 'local'])], 'required': [('l10n_ar_gross_income_type', 'in', ['multilateral', 'local'])]}"/>
+                    </div>
+                </group>
+            </field>
+
         </field>
     </record>
 
