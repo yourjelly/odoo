@@ -187,6 +187,8 @@ class StockMove(models.Model):
         for move in self:
             if move.picking_id:
                 move.is_locked = move.picking_id.is_locked
+            else:
+                move.is_locked = False
 
     @api.depends('product_id', 'has_tracking')
     def _compute_show_details_visible(self):
