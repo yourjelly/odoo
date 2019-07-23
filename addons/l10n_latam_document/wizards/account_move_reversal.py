@@ -37,7 +37,6 @@ class AccountMoveReversal(models.TransientModel):
             return {'domain': {'l10n_latam_document_type_id': [
                 ('id', 'in', refund.l10n_latam_available_document_type_ids.ids)]}}
 
-    @api.multi
     def reverse_moves(self):
         return super(AccountMoveReversal, self.with_context(
             default_l10n_latam_document_type_id=self.l10n_latam_document_type_id.id,

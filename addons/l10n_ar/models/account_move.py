@@ -51,13 +51,11 @@ class AccountMove(models.Model):
             rec.l10n_ar_afip_concept = rec.l10n_ar_force_afip_concept if rec.l10n_ar_force_afip_concept \
                 else rec._get_concept()
 
-    @api.multi
     def _inverse_l10n_ar_afip_concept(self):
         for rec in self:
             rec.l10n_ar_force_afip_concept = False if rec._get_concept() == rec.l10n_ar_afip_concept \
                 else rec.l10n_ar_afip_concept
 
-    @api.multi
     def _get_concept(self):
         """ Method to get the concept of the invoice considering the type of the products on the invoice """
         self.ensure_one()
@@ -79,7 +77,6 @@ class AccountMove(models.Model):
             afip_concept = '1'
         return afip_concept
 
-    @api.multi
     def _get_argentina_amounts(self):
         self.ensure_one()
         tax_lines = self.line_ids.filtered('tax_line_id')
@@ -136,7 +133,6 @@ class AccountMove(models.Model):
                 domain.append(('code', 'in', codes))
         return domain
 
-    @api.multi
     def check_argentinian_invoice_taxes(self):
         """ We consider argentinian invoices the ones from companies with localization AR that belongs to a journal
         with use_documents """
@@ -243,7 +239,6 @@ class AccountMove(models.Model):
             if journal:
                 rec.journal_id = journal.id
 
-    @api.multi
     def post(self):
         ar_invoices = self.filtered(lambda x: x.company_id.country_id == self.env.ref('base.ar') and x.l10n_latam_use_documents)
         for rec in ar_invoices:
@@ -260,7 +255,6 @@ class AccountMove(models.Model):
         ar_invoices.check_argentinian_invoice_taxes()
         return super().post()
 
-    @api.multi
     def _reverse_moves(self, default_values_list=None, cancel=False):
         if not default_values_list:
             default_values_list = [{} for move in self]

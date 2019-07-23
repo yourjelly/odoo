@@ -113,7 +113,6 @@ class AccountJournal(models.Model):
         res.create_document_sequences()
         return res
 
-    @api.multi
     def write(self, values):
         """ Update Document sequences after update journal """
         to_check = set(['type', 'l10n_ar_afip_pos_system', 'l10n_ar_afip_pos_number', 'l10n_ar_share_sequences',

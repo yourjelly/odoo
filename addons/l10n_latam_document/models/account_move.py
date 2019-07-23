@@ -82,7 +82,6 @@ class AccountMove(models.Model):
         with_latam_document_number = self.filtered('l10n_latam_use_documents')
         return super(AccountMove, self - with_latam_document_number)._compute_invoice_sequence_number_next()
 
-    @api.multi
     def post(self):
         for rec in self.filtered(lambda x: x.l10n_latam_use_documents and not x.l10n_latam_document_number):
             if not rec.l10n_latam_sequence_id:
@@ -166,7 +165,6 @@ class AccountMove(models.Model):
         self.ensure_one()
         return self.env['ir.sequence']
 
-    @api.multi
     @api.constrains('name', 'partner_id', 'company_id')
     def _check_unique_vendor_number(self):
         """ The constraint _check_unique_sequence_number is valid for customer

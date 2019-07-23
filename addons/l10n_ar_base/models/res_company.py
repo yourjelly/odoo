@@ -8,6 +8,5 @@ class ResCompany(models.Model):
 
     l10n_ar_cuit = fields.Char(related='partner_id.l10n_ar_cuit')
 
-    @api.multi
     def ensure_cuit(self):
         return self.partner_id.ensure_cuit()

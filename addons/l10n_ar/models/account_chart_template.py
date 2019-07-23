@@ -7,7 +7,6 @@ class AccountChartTemplate(models.Model):
 
     _inherit = 'account.chart.template'
 
-    @api.multi
     def _get_fp_vals(self, company, position):
         res = super()._get_fp_vals(company, position)
         if company.country_id == self.env.ref('base.ar'):
@@ -15,7 +14,6 @@ class AccountChartTemplate(models.Model):
                 (6, False, position.l10n_ar_afip_responsability_type_ids.ids)]
         return res
 
-    @api.multi
     def _prepare_all_journals(self, acc_template_ref, company, journals_dict=None):
         """ If argentinian chart, we don't create sales journal as we need more
         data to create it properly

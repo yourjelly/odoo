@@ -41,7 +41,6 @@ class L10nLatamDocumentType(models.Model):
             ('I', 'I'),  # used for mapping of imports
         ]
 
-    @api.multi
     def get_document_sequence_vals(self, journal):
         """ Values to create the sequences """
         values = super().get_document_sequence_vals(journal)
@@ -57,7 +56,6 @@ class L10nLatamDocumentType(models.Model):
             values.update({'name': '%s - %s' % (journal.name, self.name), 'l10n_latam_document_type_id': self.id})
         return values
 
-    @api.multi
     def _filter_taxes_included(self, taxes):
         """ In argentina we include taxes depending on document letter
         """
@@ -67,7 +65,6 @@ class L10nLatamDocumentType(models.Model):
                 lambda x: x.tax_group_id.l10n_ar_tax == 'vat' and x.tax_group_id.l10n_ar_type == 'tax')
         return super()._filter_taxes_included(taxes)
 
-    @api.multi
     def _format_document_number(self, document_number):
         """ Method to be inherited by different localizations. The purpose of this method is to allow:
 

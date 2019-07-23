@@ -14,7 +14,6 @@ class ResPartner(models.Model):
         compute='_compute_l10n_ar_formated_cuit', string="Formated CUIT", help='Computed field that will convert the'
         ' given cuit number to the format {person_category:2}-{number:10}-{validation_number:1}')
 
-    @api.multi
     def ensure_cuit(self):
         """ This method is a helper that returns the cuit number is this one is defined if not raise an UserError.
 

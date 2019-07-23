@@ -30,7 +30,6 @@ class L10nLatamDocumentType(models.Model):
         ' we are working with. (not only related to account.move, could be for documents of other models like'
         ' stock.picking)')
 
-    @api.multi
     def _format_document_number(self, document_number):
         """ Method to be inherited by different localizations. The purpose of this method is to allow:
         * making validations on the document_number. If it is wrong it should raise an exception
@@ -39,7 +38,6 @@ class L10nLatamDocumentType(models.Model):
         self.ensure_one()
         return document_number
 
-    @api.multi
     def name_get(self):
         result = []
         for rec in self:
@@ -49,7 +47,6 @@ class L10nLatamDocumentType(models.Model):
             result.append((rec.id, name))
         return result
 
-    @api.multi
     def _filter_taxes_included(self, taxes):
         """ This method is to be inherited by different localizations and must return filter the given taxes recordset
         returning the taxes to be included on reports of this document type. All taxes are going to be discriminated
@@ -57,7 +54,6 @@ class L10nLatamDocumentType(models.Model):
         self.ensure_one()
         return self.env['account.tax']
 
-    @api.multi
     def get_document_sequence_vals(self, journal):
         self.ensure_one()
         return {'name': '%s - %s' % (journal.name, self.name), 'padding': 8, 'prefix': self.code}
