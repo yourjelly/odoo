@@ -96,6 +96,7 @@ class TestCertificationBadge(common.SurveyCase, HttpCase):
                     'certification_give_badge': True,
                     'certification_badge_id': self.certification_badge.id
                 })
+                self.certification_survey.flush()
 
     def test_badge_configuration(self):
         # add a certification badge on a new survey
