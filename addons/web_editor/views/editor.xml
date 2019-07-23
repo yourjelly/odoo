@@ -53,8 +53,10 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/drop/DropBlock.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/drop/DropBlockSelector.js"/>
 
+    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Overlay.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Position.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Popover.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Sidebar.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Toolbar.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/CodeView.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/ContextMenu.js"/>

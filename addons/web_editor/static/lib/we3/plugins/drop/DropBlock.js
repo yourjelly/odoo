@@ -17,13 +17,11 @@ var DropBlock = class extends we3.AbstractPlugin {
     constructor(parent, params, options) {
         super(...arguments);
 
-        this.dependencies = ['Arch', 'Renderer', 'Rules'];
+        this.dependencies = ['Arch', 'Overlay', 'Renderer', 'Rules', 'Sidebar'];
         this.templatesDependencies = ['/web_editor/static/src/xml/wysiwyg_dropblock.xml'];
 
         this.buttons = {
             template: 'wysiwyg.buttons.dropblock',
-            active: '_isActive',
-            enabled: '_enabled',
         };
 
         this.documentDomEvents = {
@@ -33,36 +31,28 @@ var DropBlock = class extends we3.AbstractPlugin {
             'touchend': '_onTouchEnd',
             'touchcancel': '_onTouchEnd',
         };
-        this.editableDomEvents = {
-            // FIXME event delegation for mouseenter / mouseleave ?
-            'mouseover .we3-dropblock-draggable': '_onDraggableMouseEnter',
-        };
         this.blocksContainerEvents = {
             'mousedown': '_onBlockMouseDown',
             'touchstart': '_onBlockTouchStart',
         };
         this.blocksUIEvents = {
-            'mousedown we3-dropblock-move-ui > we3-handle': '_onHandleMouseDown',
-            'touchstart we3-dropblock-move-ui > we3-handle': '_onHandleTouchStart',
+            'mousedown we3-dropblock-move-handle': '_onHandleMouseDown',
+            'touchstart we3-dropblock-move-handle': '_onHandleTouchStart',
         };
 
-        this._blocksContainer = document.createElement('we3-dropblock');
-        params.insertBeforeContainer(this._blocksContainer);
-
         this._origin = document.createElement('we3-dropblock-origin');
-        this._origin.setAttribute('contentEditable', 'false');
-        params.insertBeforeEditable(this._origin);
+        params.insertAfterEditable(this._origin);
 
         this._dragAndDropSelectClosestDropzone = this._throttled(50, this._dragAndDropSelectClosestDropzone.bind(this));
-
-        this._moveUIElements = [];
     }
     /**
      * @override
      */
     start() {
-        var self = this;
         var promise = super.start(...arguments);
+
+        var Overlay = this.dependencies.Overlay;
+        var Sidebar = this.dependencies.Sidebar;
 
         // FIXME what is this ?
         var Arch = this.dependencies.Arch;
@@ -76,9 +66,11 @@ var DropBlock = class extends we3.AbstractPlugin {
         } else {
             // Note: the template must have the same structure created by
             // the '_createBlocks' method
+            var container = document.createElement('div');
             var dropBlockTemplate = this.options.dropBlockTemplate || 'wysiwyg.dropblock.defaultblocks';
-            this._blocksContainer.innerHTML = this.options.renderTemplate('DropBlock', dropBlockTemplate);
-            this._blockNodes = [].slice.call(this._blocksContainer.querySelectorAll('we3-block'));
+            container.innerHTML = this.options.renderTemplate('DropBlock', dropBlockTemplate);
+            this._sidebarElements = [].slice.call(container.children);
+            this._blockNodes = [].slice.call(container.querySelectorAll('we3-block'));
         }
 
         // Fetch information about where each individual block can be dropped
@@ -87,15 +79,20 @@ var DropBlock = class extends we3.AbstractPlugin {
         });
         this._blocksDropzonesData = this._fetchDropzonesData(targets);
 
+        // Initialize dependencies
+        Overlay.on('overlay_refresh', this, this._onOverlayRefresh);
+        Overlay.registerUIEvents(this, this.blocksUIEvents);
+        this._createMoveUIElements();
+
+        Sidebar.registerEvents(this, this.blocksContainerEvents);
+
         // Finish preparing the DOM
-        this._bindDOMEvents(this._blocksContainer, this.blocksContainerEvents);
-        this._bindDOMEvents(this._origin, this.blocksUIEvents);
-        this._adaptUIToDOMChanges();
-        if (this.options.dropblockStayOpen || this.options.dropblockOpenDefault) {
+        this._markDragableBlocks();
+        if (this.options.dropblockAutoOpen) {
             this.open();
         }
         return promise.then(function () {
-            self._blocksContainer.classList.add('we3-snippets-loaded');
+            Sidebar.toggleClass('we3-snippets-loaded', true);
         });
     }
     /**
@@ -120,7 +117,7 @@ var DropBlock = class extends we3.AbstractPlugin {
      * @override
      */
     setEditorValue() {
-        this._adaptUIToDOMChanges();
+        this._markDragableBlocks();
     }
 
     //--------------------------------------------------------------------------
@@ -145,25 +142,13 @@ var DropBlock = class extends we3.AbstractPlugin {
      * @param {boolean} [open]
      */
     toggle(open) {
-        this.isOpen = open !== undefined ? open : !this.isOpen;
-        if (this.options.dropblockStayOpen) {
-            this.isOpen = true;
-        }
-
-        this._blocksContainer.style.display = this.isOpen ? 'block' : 'none';
+        this.dependencies.Sidebar.toggle(this._sidebarElements, open);
     }
 
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
-    /**
-     * @private
-     */
-    _adaptUIToDOMChanges() {
-        this._markDragableBlocks();
-        this._createMoveUIElements();
-    }
     /**
      * @private
      * @param {object[]} blocksDataList
@@ -174,7 +159,7 @@ var DropBlock = class extends we3.AbstractPlugin {
      * @param {string} blocksDataList[].blocks[].content
      */
     _createBlocks(blocksDataList) {
-        var self = this;
+        var sidebarElements = [];
         var blocks = [];
         blocksDataList.forEach(function (blocksData) {
             var blocksNode = document.createElement('we3-blocks');
@@ -201,8 +186,9 @@ var DropBlock = class extends we3.AbstractPlugin {
                 blocksNode.appendChild(blockNode);
             });
 
-            self._blocksContainer.appendChild(blocksNode);
+            sidebarElements.push(blocksNode);
         });
+        this._sidebarElements = sidebarElements;
         this._blockNodes = blocks;
     }
     /**
@@ -335,11 +321,8 @@ var DropBlock = class extends we3.AbstractPlugin {
      * @private
      */
     _createMoveUIElements() {
-        var self = this;
         var Arch = this.dependencies.Arch;
-        var Renderer = this.dependencies.Renderer;
-
-        this._destroyMoveUIElements();
+        var Overlay = this.dependencies.Overlay;
 
         var items = this._fetchDropzonesData();
         items.forEach(function (item) {
@@ -348,36 +331,14 @@ var DropBlock = class extends we3.AbstractPlugin {
                 dropNear: item.dropNear,
             });
 
-            var targetNode = Renderer.getElement(item.target);
-            targetNode.classList.add('we3-dropblock-draggable');
-
             var ui = document.createElement('we3-dropblock-move-ui');
-            ui.we3TargetNodeID = item.target;
-            ui.we3DropableDropIn = item.dropIn;
-            ui.we3DropableDropNear = item.dropNear;
-
             for (var i = 0; i < 4; i++) {
-                ui.appendChild(document.createElement('we3-handle'));
+                ui.appendChild(document.createElement('we3-dropblock-move-handle'));
             }
-
-            self._origin.appendChild(ui);
-            self._moveUIElements.push(ui);
-        });
-    }
-    /**
-     * @private
-     */
-    _destroyMoveUIElements() {
-        this._moveUIElements.forEach(function (el) {
-            if (el.parentNode) {
-                el.parentNode.removeChild(el);
-            }
-        });
-        this._moveUIElements = [];
-
-        // Unmark dragable items
-        this.editable.querySelectorAll('.we3-dropblock-draggable').forEach(function (el) {
-            el.classList.remove('we3-dropblock-draggable');
+            Overlay.addUIElement(ui, item.target, {
+                dropIn: item.dropIn,
+                dropNear: item.dropNear,
+            });
         });
     }
     /**
@@ -388,20 +349,21 @@ var DropBlock = class extends we3.AbstractPlugin {
      * @param {object} data
      * @param {float} clientX
      * @param {float} clientY
-     * @param {boolean} [autoClose]
-     *      Specify if the blocks menu should be closed, default to the related
-     *      'autoCloseDropblock' plug-in option.
+     * @param {boolean} [autoClose=false]
+     *      Specify if the blocks menu should be closed
      */
     _dragAndDropStart(data, clientX, clientY, autoClose) {
+        this.open(); // Force showing droppable blocks on drag start
+
         // Close the dropblock area if needed
-        if (autoClose || (autoClose === undefined && this.options.autoCloseDropblock)) {
+        if (autoClose) {
             this.close();
         }
 
         this.editable.setAttribute('contentEditable', 'false');
-        this._hideMoveUIElements();
 
         this._dragAndDrop = data;
+        this.dependencies.Overlay.block();
 
         this._origin.appendChild(this._dragAndDrop.thumbnail);
         this._dragAndDrop.thumbnail.style.width = this._dragAndDrop.width + 'px';
@@ -433,9 +395,8 @@ var DropBlock = class extends we3.AbstractPlugin {
         this._dragAndDrop.dx = clientX - originBox.left;
         this._dragAndDrop.dy = clientY - originBox.top;
 
-        var handlePosition = this.editable.getBoundingClientRect();
-        var left = this._dragAndDrop.left = clientX - handlePosition.left - this._dragAndDrop.width / 2;
-        var top = this._dragAndDrop.top = clientY - handlePosition.top - this._dragAndDrop.height / 2;
+        var left = this._dragAndDrop.left = this._dragAndDrop.dx - this._dragAndDrop.width / 2;
+        var top = this._dragAndDrop.top = this._dragAndDrop.dy - this._dragAndDrop.height / 2;
         this._dragAndDrop.thumbnail.style.left = (left >= 0 ? '+' : '') + left + 'px';
         this._dragAndDrop.thumbnail.style.top = (top >= 0 ? '+' : '') + top + 'px';
 
@@ -558,16 +519,11 @@ var DropBlock = class extends we3.AbstractPlugin {
                 Arch.insert(add, id, Infinity);
                 break;
         }
-        this._adaptUIToDOMChanges();
+        this.dependencies.Overlay.setEditorValue(); // FIXME
+        this._markDragableBlocks();
 
         this._dragAndDrop = null;
-    }
-    /**
-     * @private
-     * @returns {Boolean}
-     */
-    _enabled() {
-        return true;
+        this.dependencies.Overlay.unblock();
     }
     /**
      * @private
@@ -624,8 +580,10 @@ var DropBlock = class extends we3.AbstractPlugin {
      * @private
      */
     _handleDOMDragStart(ev, button, x, y, autoClose) {
+        var Overlay = this.dependencies.Overlay;
         var ui = button.parentNode;
-        var id = ui.we3TargetNodeID;
+        var id = Overlay.getUIElementNodeID(ui);
+        var data = Overlay.getUIElementData(ui);
         if (!id || id === 1) {
             return;
         }
@@ -657,26 +615,9 @@ var DropBlock = class extends we3.AbstractPlugin {
             thumbnail: document.createElement('we3-drag-thumbnail'),
             elements: elements,
             content: node.outerHTML,
-            dropIn: ui.we3DropableDropIn,
-            dropNear: ui.we3DropableDropNear,
+            dropIn: data.dropIn,
+            dropNear: data.dropNear,
         }, x, y, autoClose);
-    }
-    /**
-     * @private
-     */
-    _hideMoveUIElements() {
-        this._moveUIElements.forEach(function (ui) {
-            ui.classList.remove('we3-dropblock-move-ui-visible');
-        });
-    }
-    /**
-     * Returns true if the menu is opened.
-     *
-     * @private
-     * @returns {Boolean}
-     */
-    _isActive() {
-        return this.isOpen;
     }
     /**
      * Makes blocks appear disabled in the menu when there is no location where
@@ -688,11 +629,8 @@ var DropBlock = class extends we3.AbstractPlugin {
         var self = this;
         this._blockNodes.forEach(function (block, index) {
             var data = self._blocksDropzonesData[index];
-            if (data.dropIn().length || data.dropNear().length) {
-                block.classList.remove('we3-disabled');
-            } else {
-                block.classList.add('we3-disabled');
-            }
+            block.classList.toggle('we3-disabled',
+                !data.dropIn().length && !data.dropNear().length);
         });
     }
 
@@ -712,33 +650,6 @@ var DropBlock = class extends we3.AbstractPlugin {
     _onBlockTouchStart(ev) {
         var t = ev.touches[0];
         this._handleBlockDragStart(ev, ev.target, t.clientX, t.clientY, true);
-    }
-    /**
-     * @private
-     */
-    _onDraggableMouseEnter(ev) {
-        if (this._dragAndDrop) {
-            return;
-        }
-
-        var originBox = this._origin.getBoundingClientRect();
-        var node = ev.target;
-        var nodeID = this.dependencies.Renderer.getID(node);
-        var nodeBox = node.getBoundingClientRect();
-
-        this._hideMoveUIElements();
-        this._moveUIElements.forEach(function (ui) {
-            if (ui.we3TargetNodeID !== nodeID) {
-                return;
-            }
-
-            ui.style.left = (nodeBox.left - originBox.left) + 'px';
-            ui.style.top = (nodeBox.top - originBox.top - 10000) + 'px'; // 10000 is a value in CSS
-            ui.style.width = nodeBox.width + 'px';
-            ui.style.height = nodeBox.height + 'px';
-
-            ui.classList.add('we3-dropblock-move-ui-visible');
-        });
     }
     /**
      * @private
@@ -764,6 +675,12 @@ var DropBlock = class extends we3.AbstractPlugin {
      */
     _onMouseUp(ev) {
         this._dragAndDropEnd();
+    }
+    /**
+     * @private
+     */
+    _onOverlayRefresh() {
+        this._createMoveUIElements();
     }
     /**
      * @private

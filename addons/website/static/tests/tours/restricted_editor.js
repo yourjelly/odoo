@@ -11,7 +11,7 @@ tour.register("restricted_editor", {
     content: "Click \"EDIT\" button of website as Restricted Editor",
     extra_trigger: ".homepage",
 }, {
-    trigger: 'we3-dropblock.we3-snippets-loaded',
+    trigger: 'we3-sidebar.we3-snippets-loaded',
     content: "Check that the snippets loaded properly",
 }]);
 });

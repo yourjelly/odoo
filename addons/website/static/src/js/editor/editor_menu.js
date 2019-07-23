@@ -221,7 +221,7 @@ var EditorMenu = Widget.extend({
             },
             recordInfo: recordInfo,
             snippets: 'website.snippets',
-            dropblockStayOpen: true,
+            dropblockAutoOpen: true,
         });
     },
 

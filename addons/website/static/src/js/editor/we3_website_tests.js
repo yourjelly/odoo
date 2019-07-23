@@ -244,7 +244,6 @@ QUnit.module('website', {
             },
             recordInfo: recordInfo,
             snippets: 'web_editor.snippets',
-            dropblockStayOpen: true,
         });
 
         await wysiwyg.attachTo($website);

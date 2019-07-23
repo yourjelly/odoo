@@ -3,15 +3,16 @@ we3-group[data-plugin="DropBlock"] {
     width: $o-wysiwyg-sidebar-width;
 }
 
-we3-dropblock {
-    @include o-w-preserve-btn;
-
-    display: none;
-    width: $o-wysiwyg-sidebar-width;
+we3-sidebar {
+    width: 0;
     overflow: auto;
     background-image: linear-gradient(45deg, $o-wysiwyg-bg-color, darken($o-wysiwyg-bg-color, 10%));
     font-family: Roboto, $font-family-sans-serif;
-    transition: left 400ms $o-wysiwyg-md-ease 0s;
+    transition: width 200ms $o-wysiwyg-md-ease 0s;
+
+    &.we3-sidebar-visible {
+        width: $o-wysiwyg-sidebar-width;
+    }
 }
 
 we3-blocks {
@@ -174,6 +175,8 @@ we3-dropblock-dropzone {
 
 we3-dropblock-origin {
     position: absolute;
+    top: 0;
+    left: 0;
     z-index: $o-wysiwyg-zindex;
 
     we3-dropblock-thumbnail {
@@ -186,48 +189,65 @@ we3-dropblock-origin {
         display: block;
         border: 1px solid $o-wysiwyg-border-color;
     }
+}
 
-    we3-dropblock-move-ui {
-        display: none;
+$-we3-overlay-offset: 10000px; // the same value is used in JS
+
+we3-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: $o-wysiwyg-zindex;
+
+    > * {
         position: absolute;
-        cursor: pointer;
-        cursor: move;
+        display: none;
+        border-color: $o-wysiwyg-handles-accent-color;
 
-        $-we3-handle-offset: 10000px; // the same value is used in JS
-        $-we3-handle-width: 1px;
-        $-we3-handle-color: $o-wysiwyg-handles-accent-color;
-
-        > we3-handle {
-            position: absolute;
-            top: $-we3-handle-offset;
-            left: 0;
-            width: 8px;
-            height: 8px;
-
-            &:nth-child(1) {
-                width: 100%;
-                border-top: $-we3-handle-width solid $-we3-handle-color;
-            }
-            &:nth-child(2) {
-                left: auto;
-                right: 0;
-                height: 100%;
-                border-right: $-we3-handle-width solid $-we3-handle-color;
-            }
-            &:nth-child(3) {
-                top: auto;
-                bottom: -$-we3-handle-offset;
-                width: 100%;
-                border-bottom: $-we3-handle-width solid $-we3-handle-color;
-            }
-            &:nth-child(4) {
-                height: 100%;
-                border-left: $-we3-handle-width solid $-we3-handle-color;
-            }
+        &.we3-overlay-ui-visible {
+            display: block;
         }
 
-        &.we3-dropblock-move-ui-visible {
-            display: block;
+        > *, &::before, &::after {
+            position: absolute;
+            top: $-we3-overlay-offset;
+        }
+    }
+}
+
+we3-dropblock-move-ui {
+    cursor: pointer;
+    cursor: move;
+
+    $-we3-handle-width: 1px;
+
+    > we3-dropblock-move-handle {
+        left: 0;
+        width: 8px;
+        height: 8px;
+        border-width: 0;
+        border-style: solid;
+        border-color: inherit;
+
+        &:nth-child(1) {
+            width: 100%;
+            border-top-width: $-we3-handle-width;
+        }
+        &:nth-child(2) {
+            left: auto;
+            right: 0;
+            height: 100%;
+            border-right-width: $-we3-handle-width;
+        }
+        &:nth-child(3) {
+            top: auto;
+            bottom: -$-we3-overlay-offset;
+            width: 100%;
+            border-bottom-width: $-we3-handle-width;
+        }
+        &:nth-child(4) {
+            height: 100%;
+            border-left-width: $-we3-handle-width;
         }
     }
 }
