@@ -265,7 +265,7 @@ msgstr ""
 #. module: l10n_latam_document
 #: code:addons/l10n_latam_document/models/account_move.py:88
 #, python-format
-msgid "No sequence or document number linked to invoice_id %s"
+msgid "No sequence or document number linked to invoice id %s"
 msgstr ""
 
 #. module: l10n_latam_document

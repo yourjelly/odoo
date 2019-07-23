@@ -271,7 +271,7 @@ msgstr "Nombre que será impreso en los reportes, por ejemplo \"NOTA DE CREDITO\
 #. module: l10n_latam_document
 #: code:addons/l10n_latam_document/models/account_move.py:88
 #, python-format
-msgid "No sequence or document number linked to invoice_id %s"
+msgid "No sequence or document number linked to invoice id %s"
 msgstr "No hay secuencia o número de documento vinculado a la factura %s"
 
 #. module: l10n_latam_document

@@ -85,7 +85,7 @@ class AccountMove(models.Model):
     def post(self):
         for rec in self.filtered(lambda x: x.l10n_latam_use_documents and not x.l10n_latam_document_number):
             if not rec.l10n_latam_sequence_id:
-                raise UserError(_('No sequence or document number linked to invoice_id %s') %  rec.id)
+                raise UserError(_('No sequence or document number linked to invoice id %s') %  rec.id)
             rec.l10n_latam_document_number = rec.l10n_latam_sequence_id.next_by_id()
         return super().post()
 
