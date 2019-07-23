@@ -14,6 +14,8 @@ var BaseInput = class extends we3.AbstractPlugin {
             'input': '_onInput',
             // 'textInput': '_onInput',
             'compositionend': '_onCompositionEnd',
+            'mousedown': '_onMousedDown',
+            'touchstart': '_onMousedDown',
         };
     }
     willStart () {
@@ -73,7 +75,7 @@ var BaseInput = class extends we3.AbstractPlugin {
             // nothing
         } else if (param.type === 'composition') {
             ev.data = param.data;
-            ev.replacement = param.replacement;
+            ev.previous = param.previous && param.previous.update ? param.previous.data : false;
             ev.name = 'composition';
             return ev;
         } else {
@@ -187,34 +189,29 @@ var BaseInput = class extends we3.AbstractPlugin {
 
             var lastTextNodeID;
             var lastTextNodeOldValue;
-            var newArch = BaseArch.parse(formatNode);
+            var newArch = BaseArch.parse(formatNode.cloneNode(true));
             newArch.nextUntil(function (archNode) {
                 if (!archNode.isText()) {
                     return;
                 }
                 var target = arch.applyPath(archNode.path(newArch));
-                if (target.isText()) {
+                if (target && target.isText()) {
                     lastTextNodeOldValue = target.nodeValue;
                     lastTextNodeID = target.id;
-                    var nodeValue = archNode.nodeValue.replace(/\u00A0/g, ' ');
 
-                    if (param.replacement) {
+                    if (range.scID === lastTextNodeID && param.previous) {
                         // eg: 'paaa' from replacement of 'a' in 'aa' ==> must be 'paa'
-                        var add = nodeValue.indexOf(lastTextNodeOldValue.replace(/\u00A0/g, ' ')) === 0 ?
-                                nodeValue.slice(lastTextNodeOldValue.length) : '';
-                        var rest = nodeValue.slice(0, -add.length);
-                        var lastIndex = add.length;
-                        while (lastIndex > 0) {
-                            if (rest.slice(-lastIndex) === add.slice(0, lastIndex)) {
-                                archNode.nodeValue = rest.slice(0, -lastIndex) + add;
-                                break;
-                            }
-                            lastIndex--;
+                        var previous = param.previous ? param.previous.replace(/\u00A0/g, ' ') : '';
+                        var beforeRange = lastTextNodeOldValue.replace(/\u00A0/g, ' ').slice(0, range.so);
+                        var afterRange = lastTextNodeOldValue.replace(/\u00A0/g, ' ').slice(range.so);
+                        if (previous && beforeRange.slice(-previous.length) === previous) {
+                            beforeRange = beforeRange.slice(0, -previous.length);
                         }
+                        archNode.nodeValue = beforeRange + param.data + afterRange;
                     }
 
                     target.setNodeValue(archNode.nodeValue);
-                } else if (target.isBR()) {
+                } else if (target && target.isBR()) {
                     var res = target.insert(archNode.params.create(null, null, archNode.nodeValue));
                     lastTextNodeOldValue = archNode.nodeValue;
                     lastTextNodeID = res[0] && res[0].id;
@@ -248,7 +245,7 @@ var BaseInput = class extends we3.AbstractPlugin {
                 }
                 return {
                     scID: lastTextNodeID,
-                    so: newOffset,
+                    so: Math.min(newOffset, archNode.nodeValue.length),
                 };
             }
 
@@ -405,23 +402,14 @@ var BaseInput = class extends we3.AbstractPlugin {
     // Handle
     //--------------------------------------------------------------------------
 
-    _onKeyDown (e) {
+    _onCompositionEnd (e) {
         if (this.editable.style.display === 'none') {
             return;
         }
-        if (e.type === 'keydown' && e.key === 'Dead') {
-            return;
-        }
-        if (e.key === 'End' || e.key === 'Home' || e.key === 'PageUp' || e.key === 'PageDown' || e.key.indexOf('Arrow') === 0) {
-            return;
-        }
         var param = this._onKeyDownNextTick(e);
-        param.defaultPrevented = param.defaultPrevented || e.defaultPrevented;
-        param.type = param.type || e.type;
-        param.shiftKey = e.shiftKey;
-        param.ctrlKey = e.ctrlKey;
-        param.altKey = e.altKey;
-        param.key = e.key;
+        param.type = 'composition';
+        param.update = false;
+        param.data = e.data;
     }
     _onInput (e) {
         if (this.editable.style.display === 'none') {
@@ -437,8 +425,8 @@ var BaseInput = class extends we3.AbstractPlugin {
         // todo: delete word <=> composition
 
         if (e.inputType === 'insertCompositionText' || e.inputType === 'insertReplacementText') {
+            param.update = param.update || param.type !== 'composition';
             param.type = 'composition';
-            param.replacement = true;
             param.data = e.data;
         } else if (e.inputType === 'insertParagraph' && param.key === 'Unidentified') {
             param.key = 'Enter';
@@ -459,13 +447,23 @@ var BaseInput = class extends we3.AbstractPlugin {
             }
         }
     }
-    _onCompositionEnd (e) {
+    _onKeyDown (e) {
         if (this.editable.style.display === 'none') {
             return;
         }
+        if (e.type === 'keydown' && e.key === 'Dead') {
+            return;
+        }
+        if (e.key === 'End' || e.key === 'Home' || e.key === 'PageUp' || e.key === 'PageDown' || e.key.indexOf('Arrow') === 0) {
+            return;
+        }
         var param = this._onKeyDownNextTick(e);
-        param.type = 'composition';
-        param.data = e.data;
+        param.defaultPrevented = param.defaultPrevented || e.defaultPrevented;
+        param.type = param.type || e.type;
+        param.shiftKey = e.shiftKey;
+        param.ctrlKey = e.ctrlKey;
+        param.altKey = e.altKey;
+        param.key = e.key;
     }
     _onKeyDownNextTick (e) {
         if (this._currentEvent) {
@@ -485,9 +483,14 @@ var BaseInput = class extends we3.AbstractPlugin {
         setTimeout(this.__onKeyDownNextTick.bind(this));
         return this._currentEvent;
     }
+    _onMousedDown () {
+        this._previousEvent = null;
+    }
     __onKeyDownNextTick () {
         var Input = this.dependencies.Input;
         var param = this._currentEvent;
+        param.previous = this._previousEvent;
+        this._previousEvent = param;
         this._currentEvent = null;
 
         var ev = this._eventsNormalization(param);

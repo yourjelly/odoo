@@ -1084,7 +1084,88 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
         assert.strictEqual(this.dependencies.Test.getValue(), '<p>p aa◆</p>', "Should insert the char, accent and enter in the Arch");
         assert.strictEqual(this.dependencies.Test.getDomValue(), '<p>p aa</p>', "Should insert the char, accent and enter in the DOM");
     }
+    async _testBackspaceAndroidPad (assert) {
+        var ev;
+        var Test = this.dependencies.Test;
+        await Test.setValue('<p>aaa ◆, bbb</p>');
 
+        var list = ['b', 'bo', 'bom', 'bo', 'bon'];
+        for (var k = 0; k < list.length; k++) {
+            var str = list[k];
+            await this._triggerKey([
+                ['keydown', {
+                    key: 'Unidentified',
+                    charCode: 0,
+                    keyCode: 229,
+                }],
+                ['compositionstart', {
+                    data: '',
+                }],
+                ['beforeInput', {
+                    data: str,
+                }],
+                ['compositionupdate', {
+                    data: str,
+                }],
+                ['input', {
+                    data: str,
+                    inputType: 'insertCompositionText',
+                }],
+            ]);
+            this.document.execCommand("insertText", 0, str);
+            await new Promise(setTimeout);
+        }
+
+        await this._triggerKey([
+            ['keydown', {
+                key: 'Unidentified',
+                charCode: 0,
+                keyCode: 229,
+            }],
+            ['compositionstart', {
+                data: '',
+            }],
+            ['beforeInput', {
+                data: 'Bonjour',
+                inputType: 'insertCompositionText',
+            }],
+            ['compositionupdate', {
+                data: 'Bonjour',
+            }],
+            ['input', {
+                data: 'Bonjour',
+                inputType: 'insertCompositionText',
+            }],
+            ['keydown', {
+                key: 'Unidentified',
+                charCode: 0,
+                keyCode: 229,
+            }],
+            ['beforeInput', {
+                data: 'Bonjour',
+                inputType: 'insertCompositionText',
+            }],
+            ['compositionupdate', {
+                data: 'Bonjour',
+            }],
+            ['input', {
+                data: 'Bonjour',
+                inputType: 'textInput',
+            }],
+            ['input', {
+                data: 'Bonjour',
+                inputType: 'insertCompositionText',
+            }],
+            ['compositionend', {
+                data: 'Bonjour',
+            }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        assert.strictEqual(this.dependencies.Test.getValue(), '<p>aaa Bonjour◆, bbb</p>', "Should insert the char, accent and enter in the Arch");
+        assert.strictEqual(this.dependencies.Test.getDomValue(), '<p>aaa Bonjour, bbb</p>', "Should insert the char, accent and enter in the DOM");
+    }
 
     async _testCompletionSwiftKey (assert) {
         var ev;
@@ -1182,6 +1263,121 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
 
         assert.strictEqual(this.dependencies.Test.getValue(), this.completionValue, "Should insert the word in the Arch");
         assert.strictEqual(this.dependencies.Test.getDomValue(), this.completionDom, "Should insert the word in the DOM");
+    }
+    async _testDoubleCompletionSwiftKey (assert) {
+        var ev;
+        var Test = this.dependencies.Test;
+        await Test.setValue('<p>ab◆</p>');
+
+        await this._triggerKey([
+            ['compositionstart', {
+                data: '',
+            }],
+            ['compositionupdate', {
+                data: 'ab',
+            }],
+            ['keydown', {
+                key: 'Unidentified',
+                charCode: 0,
+                keyCode: 229,
+            }],
+            ['beforeInput', {
+                data: 'Abc',
+                inputType: 'insertCompositionText',
+            }],
+            ['compositionupdate', {
+                data: 'Abc',
+            }],
+            ['input', {
+                data: 'Christophe',
+                inputType: 'insertCompositionText',
+            }],
+        ]);
+
+        var textNode = this.editable.querySelector('p').firstChild;
+        textNode.textContent = 'Abc';
+        this._selectDOMRange(textNode, 3);
+
+        await this._triggerKey([
+            ['compositionend', {
+                data: 'Abc',
+            }],
+
+            // auto add space after autocompletion (if no space after)
+
+            ['keydown', {
+                key: 'Unidentified',
+                charCode: 0,
+                keyCode: 229,
+            }],
+            ['beforeInput', {
+                data: ' ',
+            }],
+            ['input', {
+                data: ' ',
+                inputType: 'insertText',
+            }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
+            ['compositionstart', {
+                data: '',
+            }],
+            ['compositionupdate', {
+                data: '',
+            }],
+            ['keydown', {
+                key: 'Unidentified',
+                charCode: 0,
+                keyCode: 229,
+            }],
+            ['compositionstart', {
+                data: '',
+            }],
+            ['beforeInput', {
+                data: 'def',
+                inputType: 'insertCompositionText',
+            }],
+            ['compositionupdate', {
+                data: 'def',
+            }],
+            ['input', {
+                data: 'def',
+                inputType: 'insertCompositionText',
+            }],
+        ]);
+
+        var textNode = this.editable.querySelector('p').firstChild;
+        textNode.textContent = 'Abc def';
+        this._selectDOMRange(textNode, 7);
+
+        await this._triggerKey([
+            ['compositionend', {
+                data: 'def',
+            }],
+
+            // auto add space after autocompletion (if no space after)
+
+            ['keydown', {
+                key: 'Unidentified',
+                charCode: 0,
+                keyCode: 229,
+            }],
+            ['beforeInput', {
+                data: ' ',
+            }],
+            ['input', {
+                data: ' ',
+                inputType: 'insertText',
+            }],
+        ]);
+
+        await new Promise(setTimeout);
+
+        assert.strictEqual(this.dependencies.Test.getValue(), '<p>Abc def&nbsp;◆</p>', "Should insert 2 words in the Arch");
+        assert.strictEqual(this.dependencies.Test.getDomValue(), '<p>Abc def&nbsp;</p>', "Should insert 2 words in the DOM");
     }
     async _testSpaceAtEndSwiftKey (assert) {
         var ev;
@@ -1371,7 +1567,9 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
             if (ev && e[0] !== 'keydown' && e[0] !== 'keyup' && ev.defaultPrevented) {
                 continue;
             }
-            if (e[0] === 'textInput' || e[1].inputType === 'textInput') {
+            if (e[1].inputType === 'insertText') {
+                this.document.execCommand("insertText", 0, e[1].data);
+            } else if (e[0] === 'textInput' || e[1].inputType === 'textInput') {
                 ev = this._triggerTextInput(e[1].data, e[1].insert);
             } else {
                 var o = Object.assign({}, e[1]);
