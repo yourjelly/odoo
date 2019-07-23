@@ -438,7 +438,6 @@ var TestPlugin = class extends we3.AbstractPlugin {
      * @returns {Node} target
      */
     async keydown (target, keyPress) {
-        var self = this;
         target = target.tagName ? target : target.parentNode;
         if (!keyPress.keyCode) {
             for (var keyCode in this.utils.keyboardMap) {
@@ -646,6 +645,11 @@ var TestPlugin = class extends we3.AbstractPlugin {
                     offset = path[path.length - 1];
                     arch = archNode.applyPath(path.slice(0, -1));
                 }
+                var next = arch && arch.nextSibling();
+                /* if (arch && arch.isVirtual() && next) {
+                    arch = next.firstLeaf();
+                    offset = 0;
+                } */
                 return {
                     node: arch,
                     offset: offset,
@@ -849,28 +853,78 @@ var TestPlugin = class extends we3.AbstractPlugin {
         }
         if (keyPress.key === 'ArrowLeft') {
             var range = this.dependencies.Range.getRange();
-            if (!range.isCollapsed()) {
-                this._selectRange(range.sc, range.so);
-            } else if (range.so > 1) {
-                this._selectRange(range.sc, range.so - 1);
-            } else if (range.sc.previousSibling) {
-                var prev = range.sc.previousSibling;
-                this._selectRange(prev, 'length' in prev ? prev.length : prev.childNodes.length);
+            if (keyPress.ctrlKey || keyPress.altKey) {
+                var specialKeys = (keyPress.ctrlKey ? 'CTRL + ' : '') + (keyPress.altKey ? 'ALT + ' : '');
+                console.debug('"' + specialKeys + keyPress.key + '" is not supported in test');
+            } else if (keyPress.shiftKey) {
+                if (range.ltr && !range.isCollapsed()) {
+                    if (range.eo >= 1) {
+                        this._selectRange(range.sc, range.so, range.ec, range.eo - 1);
+                    } else if (range.ec.previousSibling) {
+                        var prev = range.ec.previousSibling;
+                        this._selectRange(range.sc, range.so, prev, 'length' in prev ? prev.length : prev.childNodes.length);
+                    } else {
+                        console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
+                    }
+                } else {
+                    if (range.so >= 1) {
+                        this._selectRange(range.sc, range.so - 1, range.ec, range.eo, true);
+                    } else if (range.sc.previousSibling) {
+                        var prev = range.sc.previousSibling;
+                        this._selectRange(prev, 'length' in prev ? prev.length : prev.childNodes.length, range.ec, range.eo, true);
+                    } else {
+                        console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
+                    }
+                }
             } else {
-                console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
+                if (!range.isCollapsed()) {
+                    this._selectRange(range.sc, range.so);
+                } else if (range.so > 1) {
+                    this._selectRange(range.sc, range.so - 1);
+                } else if (range.sc.previousSibling) {
+                    var prev = range.sc.previousSibling;
+                    this._selectRange(prev, 'length' in prev ? prev.length : prev.childNodes.length);
+                } else {
+                    console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
+                }
             }
             return;
         }
         if (keyPress.key === 'ArrowRight') {
             var range = this.dependencies.Range.getRange();
-            if (!range.isCollapsed()) {
-                this._selectRange(range.ec, range.eo);
-            } else if (range.so < ('length' in range.sc ? range.sc.length : range.sc.childNodes.length)) {
-                this._selectRange(range.sc, range.so + 1);
-            } else if (range.sc.nextSibling) {
-                this._selectRange(range.sc.nextSibling, 0);
+            if (keyPress.ctrlKey || keyPress.altKey) {
+                var specialKeys = (keyPress.ctrlKey ? 'CTRL + ' : '') + (keyPress.altKey ? 'ALT + ' : '');
+                console.debug('"' + specialKeys + keyPress.key + '" is not supported in test');
+            } else if (keyPress.shiftKey) {
+                if (range.ltr || range.isCollapsed()) {
+                    if (range.eo < ('length' in range.ec ? range.ec.length : range.ec.childNodes.length)) {
+                        this._selectRange(range.sc, range.so, range.ec, range.eo + 1);
+                    } else if (range.ec.nextSibling) {
+                        var next = range.ec.nextSibling;
+                        this._selectRange(range.sc, range.so, next, 0);
+                    } else {
+                        console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
+                    }
+                } else {
+                    if (range.so < ('length' in range.sc ? range.sc.length : range.sc.childNodes.length)) {
+                        this._selectRange(range.sc, range.so + 1, range.ec, range.eo, true);
+                    } else if (range.sc.nextSibling) {
+                        var next = range.sc.nextSibling;
+                        this._selectRange(next, 0, range.ec, range.eo, true);
+                    } else {
+                        console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
+                    }
+                }
             } else {
-                console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
+                if (!range.isCollapsed()) {
+                    this._selectRange(range.ec, range.eo);
+                } else if (range.so < ('length' in range.sc ? range.sc.length : range.sc.childNodes.length)) {
+                    this._selectRange(range.sc, range.so + 1);
+                } else if (range.sc.nextSibling) {
+                    this._selectRange(range.sc.nextSibling, 0);
+                } else {
+                    console.debug('Native "' + keyPress.key + '" is not exactly supported in test');
+                }
             }
             return;
         }
@@ -1055,13 +1109,28 @@ var TestPlugin = class extends we3.AbstractPlugin {
      * @private
      * @param {Node} sc
      * @param {offset} so
+     * @param {Node} [ec]
+     * @param {offset} [eo]
+     * @param {boolean} [rtl]
      */
-    _selectRange (sc, so, ec, eo) {
+    _selectRange (sc, so, ec, eo, rtl) {
+        ec = ec || sc;
+        eo = eo == null ? so : eo;
         var nativeRange = sc.ownerDocument.createRange();
         nativeRange.setStart(sc, so);
-        nativeRange.setEnd(ec || sc, eo == null ? so : eo);
+        nativeRange.setEnd(ec, eo);
         var selection = sc.ownerDocument.getSelection();
         if (selection.rangeCount > 0) {
+            selection.removeAllRanges();
+        }
+        if (rtl) {
+            // select in the rtl direction
+            nativeRange.setStart(ec, eo);
+            nativeRange.setEnd(ec, eo);
+            selection.removeAllRanges();
+            selection.addRange(nativeRange);
+            selection = sc.ownerDocument.getSelection();
+            selection.extend(sc, so);
             selection.removeAllRanges();
         }
         selection.addRange(nativeRange);

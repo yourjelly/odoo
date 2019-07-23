@@ -27,6 +27,7 @@ var BaseRange = class extends we3.AbstractPlugin {
             so: 0,
             ecID: 1,
             eo: 0,
+            ltr: true,
         };
         return super.willStart();
     }
@@ -40,6 +41,7 @@ var BaseRange = class extends we3.AbstractPlugin {
             so: this._range.so || 0,
             ecID: this._range.ecID || 1,
             eo: this._range.eo || 0,
+            ltr: true,
         });
     }
     setEditorValue () {
@@ -80,7 +82,17 @@ var BaseRange = class extends we3.AbstractPlugin {
             ecArch: Arch.getClonedArchNode(this._range.ecID),
             ecID: this._range.ecID,
             eo: this._range.eo,
+            ltr: this._range.ltr,
         });
+    }
+    /**
+     * Get the range from the selection in the DOM.
+     *
+     * @private
+     * @returns {WrappedRange}
+     */
+    getRangeFromDOM () {
+        return new WrappedRange(this.dependencies.Arch, this.dependencies.Renderer, {});
     }
     /**
      * Returns a list of all selected leaves in the range.
@@ -207,6 +219,7 @@ var BaseRange = class extends we3.AbstractPlugin {
         var ltr = typeof startPoints.ltr === 'undefined' ? true : startPoints.ltr;
         options = options || {};
         var points = this._deducePoints(startPoints);
+        var isCollapsed = points.scID === points.ecID && points.so === points.eo;
         if (options.moveLeft || options.moveRight) {
             points = this._jumpOverVirtualText(points, options);
         }
@@ -217,15 +230,17 @@ var BaseRange = class extends we3.AbstractPlugin {
         points = this._moveUpToVoidoid(points);
         points = this._moveToEndOfInline(points);
         points = this._moveToBeforeInline(points);
-        points = this._moveToEdgeOfBRSequence(points);
+        if (!options.moveLeft && !options.moveRight) {
+            points = this._moveToEdgeOfBRSequence(points);
+        }
+        if ((options.moveLeft || options.moveRight)) {
+            var wasCollapsed = this.isCollapsed();
+            var doReverseSelection = !ltr && !wasCollapsed;
+            points = this._moveToSideOfVoidoid(points, !!options.moveLeft, isCollapsed, doReverseSelection);
+        }
 
         this._didRangeChange = this._willRangeChange(points) || this._didRangeChange;
         var focusedNodeID = this._getFutureFocusNode(points);
-        var focusedNode = this.dependencies.BaseArch.getArchNode(focusedNodeID);
-        if ((options.moveLeft || options.moveRight) && focusedNode.isVoidoid()) {
-            points = this._moveToSideOfVoidoid(points, !!options.moveLeft);
-            focusedNodeID = points.scID;
-        }
 
         if (this._focusedNodeID !== focusedNodeID) {
             this._didChangeFocusNode = true;
@@ -236,6 +251,7 @@ var BaseRange = class extends we3.AbstractPlugin {
         this._range.so = points.so;
         this._range.ecID = points.ecID;
         this._range.eo = points.eo;
+        this._range.ltr = ltr;
     }
     /**
      * Deduce the intended ids and offsets from the given ids and offsets.
@@ -340,10 +356,20 @@ var BaseRange = class extends we3.AbstractPlugin {
             if (prev) {
                 points.scID = prev.id;
                 points.so = prev.length();
+                if (!isCollapsed && points.so) {
+                    points.so = points.so - 1; // otherwise it selects the virtual
+                }
             }
         } else if (options.moveLeft && oldStart.type === 'TEXT-VIRTUAL' && points.so > 0) {
             // range moved from a virtual and is not at the start of prev
             points.so = points.so - 1;
+        } else if (!isCollapsed && options.moveLeft && (end.type === 'TEXT-VIRTUAL' || oldEnd.type === 'TEXT-VIRTUAL' && points.eo === end.length())) {
+            // deselect a virtual node to the left (on end)
+            var prev = end.prevUntil(a => a.type !== 'TEXT-VIRTUAL', {doCrossUnbreakables: true, doNotInsertVirtual: true});
+            if (prev) {
+                points.ecID = prev.id;
+                points.eo = prev.length();
+            }
         }
         // range end is on a virtual node or it already moved from one
         if (options.moveRight && (end.type === 'TEXT-VIRTUAL' || oldEnd.type === 'TEXT-VIRTUAL' && points.eo === end.length())) {
@@ -355,6 +381,12 @@ var BaseRange = class extends we3.AbstractPlugin {
         } else if (options.moveRight && oldEnd.type === 'TEXT-VIRTUAL' && points.eo < end.length()) {
             // range moved from a virtual and is not at the end of next
             points.eo = points.eo + 1;
+        } else if (!isCollapsed && options.moveRight && (start.type === 'TEXT-VIRTUAL' || oldStart.type === 'TEXT-VIRTUAL' && !points.so)) {
+            var next = start.nextUntil(a => a.type !== 'TEXT-VIRTUAL', {doCrossUnbreakables: true, doNotInsertVirtual: true});
+            if (next) {
+                points.scID = next.id;
+                points.so = next.isText() && end.type === 'TEXT-VIRTUAL' ? 1 : 0;
+            }
         }
         if (isCollapsed) {
             if (options.moveLeft) {
@@ -421,18 +453,38 @@ var BaseRange = class extends we3.AbstractPlugin {
     _moveOutOfUnbreakable (points, ltr) {
         var start = this.dependencies.BaseArch.getArchNode(ltr ? points.scID : points.ecID);
         var end = this.dependencies.BaseArch.getArchNode(ltr ? points.ecID : points.scID);
-        var startUnbreakable = start.ancestor('isUnbreakable');
-        var endUnbreakable = end.ancestor('isUnbreakable');
-        if (startUnbreakable.id !== endUnbreakable.id) {
-            end = end[ltr ? 'prevUntil' : 'nextUntil'](function (prev) {
-                return prev.ancestor('isUnbreakable') === startUnbreakable && prev.isEditable();
-            }, {
-                doNotInsertVirtual: true,
-                doCrossUnbreakables: true,
+        var unbreakableAncestorOf = function (node) {
+            return node.ancestor(function (ancestor) {
+                return ancestor.isUnbreakable() && ancestor.isNotVoidoid();
             });
+        };
+        var startUnbreakable = unbreakableAncestorOf(start);
+        var endUnbreakable = unbreakableAncestorOf(end);
+        var nextOptions = {
+            doNotInsertVirtual: true,
+            doCrossUnbreakables: true,
+        };
+        if (startUnbreakable.id !== endUnbreakable.id) {
+            var nextPred = function (ref) {
+                return function (next) {
+                    return (!ref || next.ancestor('isUnbreakable') === ref) &&
+                        next.isEditable();
+                };
+            };
+            var prevNext;
+            var toStart = !ltr;;
+            if (endUnbreakable.isVoidoid()) {
+                prevNext = ltr ? 'nextUntil' : 'prevUntil';
+                end = end[prevNext](nextPred(), nextOptions);
+                toStart = ltr;
+            } else {
+                prevNext = ltr ? 'prevUntil' : 'nextUntil';
+                end = end[prevNext](nextPred(startUnbreakable), nextOptions);
+            }
             if (end) {
                 points[ltr ? 'ecID' : 'scID'] = end.id;
-                points[ltr ? 'eo' : 'so'] = ltr ? end.length() : 0; // selection from left to right -> move end left
+                // selection from left to right -> move end left
+                points[ltr ? 'eo' : 'so'] = toStart ? 0 : end.length();
             }
         }
         return points;
@@ -492,19 +544,27 @@ var BaseRange = class extends we3.AbstractPlugin {
             if (!archNode) {
                 return;
             }
+            var newOffset = offset;
             while (archNode.childNodes && archNode.childNodes.length && !archNode.isVoidoid()) {
-                if (!offset && archNode.previousSibling() && archNode.previousSibling().isTable()) {
+                if (!newOffset && archNode.previousSibling() && archNode.previousSibling().isTable()) {
                     archNode = archNode.previousSibling().lastLeaf();
-                    offset = archNode.length();
+                    newOffset = archNode.length();
                 } else {
-                    var isAfterEnd = offset >= archNode.childNodes.length;
-                    archNode = archNode.nthChild(isAfterEnd ? archNode.childNodes.length - 1 : offset);
-                    offset = isAfterEnd ? archNode.length() : 0;
+                    var isAfterEnd = newOffset >= archNode.childNodes.length;
+                    archNode = archNode.nthChild(isAfterEnd ? archNode.childNodes.length - 1 : newOffset);
+                    newOffset = isAfterEnd ? archNode.length() : 0;
                 }
+            }
+            if (archNode.isVoidoid() && !archNode.isBR() &&
+                (archNode.isLeftEdgeOfBlock() || archNode.isRightEdgeOfBlock())) {
+                return {
+                    id: id,
+                    offset: offset,
+                };
             }
             return {
                 id: archNode.id,
-                offset: offset,
+                offset: newOffset,
             };
         };
         if (!startPoint) {
@@ -592,23 +652,113 @@ var BaseRange = class extends we3.AbstractPlugin {
         return points;
     }
     /**
+     * Move the points from in a voidoid to the specified side of it, if the
+     * voidoid is on the edge of its unbreakable container.
+     *
+     * @param {Object} points
+     * @param {Number} points.scID
+     * @param {Number} points.so
+     * @param {Number} points.ecID
+     * @param {Number} points.eo
+     * @param {boolean} [moveLeft] true to move to the left
+     * @param {boolean} [isCollapsed] true if the range started collapsed
+     * @param {boolean} [doReverseSelection] true to reverse the selection
+     * @returns {Object}
+     */
+    _moveToSideOfEdgeVoidoid (points, moveLeft, isCollapsed, doReverseSelection) {
+        var scArch = this.dependencies.BaseArch.getArchNode(points.scID);
+        var ecArch = this.dependencies.BaseArch.getArchNode(points.ecID);
+        var left = doReverseSelection ? ecArch : scArch;
+        var right = doReverseSelection ? scArch : ecArch;
+        var node = moveLeft ? left.parent : right.parent;
+        if (isCollapsed) {
+            points.so = points.eo = moveLeft ? 0 : node.length();
+            points.scID = points.ecID = node.id;
+        } else if (moveLeft) {
+            points[doReverseSelection ? 'eo' : 'so'] = 0;
+            points[doReverseSelection ? 'ecID' : 'scID'] = node.id;
+        } else {
+            points[doReverseSelection ? 'so' : 'eo'] = node.length();
+            points[doReverseSelection ? 'scID' : 'ecID'] = node.id;
+        }
+        return points;
+    }
+    /**
+     * Move the points from in a voidoid to the specified side of it, if the
+     * voidoid is not on the edge of its unbreakable container.
+     *
+     * @param {Object} points
+     * @param {Number} points.scID
+     * @param {Number} points.so
+     * @param {Number} points.ecID
+     * @param {Number} points.eo
+     * @param {boolean} [moveLeft] true to move to the left
+     * @param {boolean} [isCollapsed] true if the range started collapsed
+     * @param {boolean} [doReverseSelection] true to reverse the selection
+     * @returns {Object}
+     */
+    _moveToSideOfMiddleVoidoid (points, moveLeft, isCollapsed, doReverseSelection) {
+        var scArch = this.dependencies.BaseArch.getArchNode(points.scID);
+        var ecArch = this.dependencies.BaseArch.getArchNode(points.ecID);
+        var prevOptions = {
+            leafToLeaf: true,
+            // voidoid is an unbreakable, we need to be able to cross it:
+            doCrossUnbreakables: true,
+            doNotInsertVirtual: true,
+        };
+        var left = doReverseSelection ? ecArch : scArch;
+        var right = doReverseSelection ? scArch : ecArch;
+        var prev = left.prev(prevOptions);
+        var next = right.next(prevOptions);
+        if (isCollapsed) {
+            points.so = points.eo = moveLeft ? prev.length() : 0;
+            points.scID = points.ecID = moveLeft ? prev.id : next.id;
+        } else if (moveLeft) {
+            points[doReverseSelection ? 'eo' : 'so'] = doReverseSelection ? next.length() : prev.length();
+            points[doReverseSelection ? 'ecID' : 'scID'] = doReverseSelection ? next.id : prev.id;
+        } else {
+            points[doReverseSelection ? 'so' : 'eo'] = 0
+            points[doReverseSelection ? 'scID' : 'ecID'] = doReverseSelection ? prev.id : next.id;
+        }
+        return points;
+    }
+    /**
      * Move the points from in a voidoid to the specified side of it.
      *
      * @param {object} points
-     * @param {boolean} moveLeft true to move to the left
+     * @param {Number} points.scID
+     * @param {Number} points.so
+     * @param {Number} points.ecID
+     * @param {Number} points.eo
+     * @param {boolean} [moveLeft] true to move to the left
+     * @param {boolean} [isCollapsed] true if the range started collapsed
+     * @param {boolean} [doReverseSelection] true to reverse the selection
      * @returns {object}
      */
-    _moveToSideOfVoidoid (points, moveLeft) {
+    _moveToSideOfVoidoid (points, moveLeft, isCollapsed, doReverseSelection) {
         var scArch = this.dependencies.BaseArch.getArchNode(points.scID);
-        var node = scArch[moveLeft ? 'previousSibling' : 'nextSibling']();
-        if (node) {
-            points.so = points.eo = node.length();
-        } else {
-            node = scArch.parent;
-            points.so = points.eo = moveLeft ? 0 : node.length();
+        var ecArch = this.dependencies.BaseArch.getArchNode(points.ecID);
+        if ((!scArch.isVoidoid() || scArch.isBR()) && (!ecArch.isVoidoid() || ecArch.isBR())) {
+            return points;
         }
-        points.scID = points.ecID = node.id;
-        return points;
+
+        var unbreakableAncestorOf = function (node) {
+            return node.ancestor(function (ancestor) {
+                return ancestor.isUnbreakable() && ancestor.isNotVoidoid();
+            });
+        };
+        var left = doReverseSelection ? ecArch : scArch;
+        var right = doReverseSelection ? scArch : ecArch;
+        var isLeftEdge = left.isLeftEdgeOf(unbreakableAncestorOf(left));
+        var isRightEdge = right.isRightEdgeOf(unbreakableAncestorOf(right));
+
+        if (isLeftEdge && moveLeft || isRightEdge && !moveLeft) {
+            return this._moveToSideOfEdgeVoidoid(points, moveLeft, isCollapsed, doReverseSelection);
+        } else if (!isLeftEdge && !isRightEdge) {
+            return this._moveToSideOfMiddleVoidoid(points, moveLeft, isCollapsed, doReverseSelection);
+        } else {
+            return points;
+        }
     }
     /**
      * Move the points from WITHIN a voidoid to select the whole voidoid instead if needed.
@@ -666,8 +816,9 @@ var BaseRange = class extends we3.AbstractPlugin {
      * @param {Number} so
      * @param {Node} ec
      * @param {Number} eo
+     * @param {Boolean} [rtl]
      */
-    _select (sc, so, ec, eo) {
+    _select (sc, so, ec, eo, rtl) {
         if (this.editable.style.display === 'none') {
             return;
         }
@@ -682,6 +833,15 @@ var BaseRange = class extends we3.AbstractPlugin {
         if (!this.document.body.contains(sc)) {
             console.warn("The given range isn't in document.");
             return;
+        }
+        if (rtl) {
+            // select in the rtl direction
+            nativeRange.setStart(ec, eo);
+            nativeRange.setEnd(ec, eo);
+            selection.removeAllRanges();
+            selection.addRange(nativeRange);
+            selection = sc.ownerDocument.getSelection();
+            selection.extend(sc, so);
         }
         selection.addRange(nativeRange);
     }
@@ -716,7 +876,7 @@ var BaseRange = class extends we3.AbstractPlugin {
             // only if the native range change, after the redraw
             // the renderer can associate existing note to the arch (to prevent error on mobile)
             if (nativeReadyNewRange.sc && nativeReadyNewRange.ec) {
-                this._select(nativeReadyNewRange.sc, nativeReadyNewRange.so, nativeReadyNewRange.ec, nativeReadyNewRange.eo);
+                this._select(nativeReadyNewRange.sc, nativeReadyNewRange.so, nativeReadyNewRange.ec, nativeReadyNewRange.eo, !this._range.ltr);
             } else {
                 var msg = 'Wrong Range! The nodes could node be found in the DOM.';
                 console.warn(msg + '\nnewRange: ', newRange, '\nnativeRange:', nativeRange);
@@ -759,7 +919,7 @@ var BaseRange = class extends we3.AbstractPlugin {
     _setRangeFromDOM (options) {
         var range = this.getRangeFromDOM();
         if (!range.scID || range.scArch && (range.scArch.type === 'TEXT-VIRTUAL' ? 1 : range.scArch.length()) < range.so ||
-            !range.ecID || range.scArch && (range.scArch.type === 'TEXT-VIRTUAL' ? 1 : range.ecArch.length()) < range.eo) {
+            !range.ecID || range.ecArch && (range.ecArch.type === 'TEXT-VIRTUAL' ? 1 : range.ecArch.length()) < range.eo) {
             console.warn("Try to take the range from DOM but does not seem synchronized", range);
             return;
         }
@@ -848,14 +1008,18 @@ var BaseRange = class extends we3.AbstractPlugin {
      * @returns {object} {scID, so, ecID, eo}
      */
     _voidoidSelectToWE3 (range) {
-        if (!range.scArch || !range.ecArch) {
+        if (!range.scArch || !range.ecArch || range.isCollapsed()) {
             return range;
         }
-        if (!range.isCollapsed() && range.scArch.isText() && range.so === range.scArch.length() && range.scArch.nextSibling() && range.scArch.nextSibling().isVoidoid()) {
+        var startIsBeforeVoidoid = range.scArch.isText() &&
+            range.so === range.scArch.length() && range.scArch.nextSibling() &&
+            range.scArch.nextSibling().isVoidoid();
+        var endIsAfterVoidoid = range.ecArch.isText() && range.eo === 0 &&
+            range.ecArch.previousSibling() &&
+            range.ecArch.previousSibling().isVoidoid()
+        if (startIsBeforeVoidoid && endIsAfterVoidoid) {
             range.scID = range.scArch.nextSibling().id;
             range.so = 0;
-        }
-        if (!range.isCollapsed() && range.ecArch.isText() && range.eo === 0 && range.ecArch.previousSibling() && range.ecArch.previousSibling().isVoidoid()) {
             range.ecID = range.ecArch.previousSibling().id;
             range.eo = 0;
         }
@@ -922,10 +1086,12 @@ var BaseRange = class extends we3.AbstractPlugin {
             return this.selectAll();
         }
         var isNavigationKey = e.keyCode >= 33 && e.keyCode <= 40;
+        var leftish = [33, 36, 37, 38];
+        var rightish = [34, 35, 39, 40];
         if (isNavigationKey) {
             this._setRangeFromDOM({
-                moveLeft: e.keyCode === 37 || e.keyCode === 38,
-                moveRight: e.keyCode === 39 || e.keyCode === 40,
+                moveLeft: leftish.indexOf(e.keyCode) !== -1,
+                moveRight: rightish.indexOf(e.keyCode) !== -1,
             });
         }
         if (e.keyCode === 38 || e.keyCode === 40) {

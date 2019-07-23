@@ -1515,7 +1515,8 @@ we3.ArchNode = class {
             var child = this.childNodes[isLeft ? offset - 1 : offset];
             return child[isLeft ? 'removeLeft' : 'removeRight'](isLeft ? child.length() : 0);
         }
-        var next = this[isLeft ? 'prev' : 'next']({
+        var target = this.childNodes && this.childNodes.length ? this.nthChild(offset) : this;
+        var next = target && target[isLeft ? 'prev' : 'next']({
             leafToLeaf: true,
             stopAtBlock: true,
         });
