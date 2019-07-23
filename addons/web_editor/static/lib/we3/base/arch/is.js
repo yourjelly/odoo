@@ -448,7 +448,7 @@ var isBrowse = {
     isDescendentOf: function (ancestor) {
         var node = this;
         while (node) {
-            if (node === ancestor) {
+            if (node.id === ancestor.id) {
                 return true;
             }
             node = node.parent;

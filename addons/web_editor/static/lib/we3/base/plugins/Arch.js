@@ -65,6 +65,10 @@ var BaseArch = class extends we3.AbstractPlugin {
 
         return promise;
     }
+    start () {
+        this._lastFocus = this._arch;
+        this.dependencies.BaseRange.on('focus', this, this._onFocusNode);
+    }
 
     //--------------------------------------------------------------------------
     // Public
@@ -1375,6 +1379,35 @@ var BaseArch = class extends we3.AbstractPlugin {
         var range = this.dependencies.BaseRange.rangeOn(scArch, ecArch);
         this._applyRulesRangeRedrawFromChanges(range);
         return newParents.map(node => node.id);
+    }
+
+
+    _onFocusNode (focusNode) {
+        // get the previous focus Node's block ancestor
+        var lastBlockClone = this._lastFocus.ancestor('isBlock');
+        var lastBlock = lastBlockClone && this.getArchNode(lastBlockClone.id);
+
+        if (lastBlock) {
+            // find all empty format descendents
+            var range = this.dependencies.BaseRange.getRange();
+            var formatNodes = lastBlock.descendents(function (node) {
+                return we3.tags.format.indexOf(node.nodeName) !== -1;
+             }, true);
+            var toRemove = formatNodes.filter(function (node) {
+                return node.isEmpty() && node.isAllowUpdate() &&
+                    !range.scArch.isDescendentOf(node) &&
+                    !range.scArch.isDescendentOf(node);
+            });
+
+            // remove the empty format descendents and preserve range
+            if (toRemove.length) {
+                this.do(function () {
+                    toRemove.forEach(node => node.remove());
+                    return range;
+                });
+            }
+        }
+        this._lastFocus = focusNode;
     }
 };
 

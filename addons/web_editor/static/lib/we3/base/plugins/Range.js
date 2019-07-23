@@ -758,8 +758,8 @@ var BaseRange = class extends we3.AbstractPlugin {
      */
     _setRangeFromDOM (options) {
         var range = this._getRange();
-        if (!range.scID || (range.scArch.type === 'TEXT-VIRTUAL' ? 1 : range.scArch.length()) < range.so ||
-            !range.ecID || (range.scArch.type === 'TEXT-VIRTUAL' ? 1 : range.ecArch.length()) < range.eo) {
+        if (!range.scID || range.scArch && (range.scArch.type === 'TEXT-VIRTUAL' ? 1 : range.scArch.length()) < range.so ||
+            !range.ecID || range.scArch && (range.scArch.type === 'TEXT-VIRTUAL' ? 1 : range.ecArch.length()) < range.eo) {
             console.warn("Try to take the range from DOM but does not seem synchronized", range);
             return;
         }
