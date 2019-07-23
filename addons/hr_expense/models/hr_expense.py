@@ -47,7 +47,8 @@ class HrExpense(models.Model):
     employee_id = fields.Many2one('hr.employee', string="Employee", required=True, readonly=True, states={'draft': [('readonly', False)], 'reported': [('readonly', False)], 'refused': [('readonly', False)]}, default=_default_employee_id, domain=lambda self: self._get_employee_id_domain())
     # product_id not required to allow create an expense without product via mail alias, but should be required on the view.
     product_id = fields.Many2one('product.product', string='Product', readonly=True, states={'draft': [('readonly', False)], 'reported': [('readonly', False)], 'refused': [('readonly', False)]}, domain=[('can_be_expensed', '=', True)])
-    product_uom_id = fields.Many2one('uom.uom', string='Unit of Measure', readonly=True, states={'draft': [('readonly', False)], 'refused': [('readonly', False)]}, default=_default_product_uom_id)
+    product_uom_id = fields.Many2one('uom.uom', string='Unit of Measure', readonly=True, states={'draft': [('readonly', False)], 'refused': [('readonly', False)]}, default=_default_product_uom_id, domain="[('category_id', '=', product_uom_category_id)]")
+    product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id', readonly=True)
     unit_amount = fields.Float("Unit Price", readonly=True, required=True, states={'draft': [('readonly', False)], 'reported': [('readonly', False)], 'refused': [('readonly', False)]}, digits='Product Price')
     quantity = fields.Float(required=True, readonly=True, states={'draft': [('readonly', False)], 'reported': [('readonly', False)], 'refused': [('readonly', False)]}, digits='Product Unit of Measure', default=1)
     tax_ids = fields.Many2many('account.tax', 'expense_tax', 'expense_id', 'tax_id', string='Taxes')
@@ -149,9 +150,6 @@ class HrExpense(models.Model):
             account = self.product_id.product_tmpl_id._get_product_accounts()['expense']
             if account:
                 self.account_id = account
-            return {'domain': {'product_uom_id': [('category_id', '=', self.product_id.uom_id.category_id.id)]}}
-        else:
-            return {'domain': {'product_uom_id': []}}
 
     @api.onchange('product_uom_id')
     def _onchange_product_uom_id(self):
@@ -334,6 +332,7 @@ class HrExpense(models.Model):
                 'expense_id': expense.id,
                 'partner_id': partner_id,
                 'tax_ids': [(6, 0, expense.tax_ids.ids)],
+                'tag_ids': [(6, 0, taxes['base_tags'])],
                 'currency_id': expense.currency_id.id if different_currency else False,
             }
             move_line_values.append(move_line_src)
@@ -355,6 +354,7 @@ class HrExpense(models.Model):
                     'amount_currency': amount_currency if different_currency else 0.0,
                     'account_id': tax['account_id'] or move_line_src['account_id'],
                     'tax_repartition_line_id': tax['tax_repartition_line_id'],
+                    'tag_ids': tax['tag_ids'],
                     'tax_base_amount': tax['base'],
                     'expense_id': expense.id,
                     'partner_id': partner_id,

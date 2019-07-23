@@ -4,7 +4,7 @@
 from datetime import datetime, timedelta
 
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 
 class SaleOrder(models.Model):
@@ -13,11 +13,20 @@ class SaleOrder(models.Model):
     sale_order_template_id = fields.Many2one(
         'sale.order.template', 'Quotation Template',
         readonly=True,
-        states={'draft': [('readonly', False)], 'sent': [('readonly', False)]})
+        states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     sale_order_option_ids = fields.One2many(
         'sale.order.option', 'order_id', 'Optional Products Lines',
         copy=True, readonly=True,
         states={'draft': [('readonly', False)], 'sent': [('readonly', False)]})
+
+    @api.constrains('company_id', 'sale_order_option_ids')
+    def _check_optional_product_company_id(self):
+        for order in self:
+            companies = order.sale_order_option_ids.product_id.company_id
+            if companies and companies != order.company_id:
+                bad_products = order.sale_order_option_ids.product_id.filtered(lambda p: p.company_id and p.company_id != order.company_id)
+                raise ValidationError((_("Your quotation contains products from company %s whereas your quotation belongs to company %s. \n Please change the company of your quotation or remove the products from other companies (%s).") % (', '.join(companies.mapped('display_name')), order.company_id.display_name, ', '.join(bad_products.mapped('display_name')))))
 
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
@@ -160,7 +169,8 @@ class SaleOrderOption(models.Model):
     product_id = fields.Many2one('product.product', 'Product', required=True, domain=[('sale_ok', '=', True)])
     price_unit = fields.Float('Unit Price', required=True, digits='Product Price')
     discount = fields.Float('Discount (%)', digits='Discount')
-    uom_id = fields.Many2one('uom.uom', 'Unit of Measure ', required=True)
+    uom_id = fields.Many2one('uom.uom', 'Unit of Measure ', required=True, domain="[('category_id', '=', product_uom_category_id)]")
+    product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id', readonly=True)
     quantity = fields.Float('Quantity', required=True, digits='Product UoS', default=1)
     sequence = fields.Integer('Sequence', help="Gives the sequence order when displaying a list of optional products.")
 

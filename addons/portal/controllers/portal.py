@@ -8,7 +8,7 @@ import re
 
 from werkzeug import urls
 
-from odoo import fields as odoo_fields, tools, _
+from odoo import fields as odoo_fields, tools, _, SUPERUSER_ID
 from odoo.exceptions import ValidationError, AccessError, MissingError, UserError
 from odoo.http import content_disposition, Controller, request, route
 from odoo.tools import consteq
@@ -242,7 +242,7 @@ class CustomerPortal(Controller):
 
     def _document_check_access(self, model_name, document_id, access_token=None):
         document = request.env[model_name].browse([document_id])
-        document_sudo = document.sudo().exists()
+        document_sudo = document.with_user(SUPERUSER_ID).exists()
         if not document_sudo:
             raise MissingError("This document does not exist.")
         try:
@@ -258,6 +258,7 @@ class CustomerPortal(Controller):
             # if no_breadcrumbs = False -> force breadcrumbs even if access_token to `invite` users to register if they click on it
             values['no_breadcrumbs'] = no_breadcrumbs
             values['access_token'] = access_token
+            values['token'] = access_token  # for portal chatter
 
         # Those are used notably whenever the payment form is implied in the portal.
         if kwargs.get('error'):
