@@ -40,8 +40,7 @@ class ResCompany(models.Model):
         resupply_route.rule_ids = [(0, 0, {
             'name': '%s → %s' % (subcontracting_location.name, production_location.name),
             'action': 'pull',
-            'picking_type_id': wh.subcontracting_type_id,
-            'location_src_id': subcontracting_location,
-            'location_id': production_location,
-        })],
-
+            'picking_type_id': wh.subcontracting_type_id.id,
+            'location_src_id': subcontracting_location.id,
+            'location_id': production_location.id,
+        })]
