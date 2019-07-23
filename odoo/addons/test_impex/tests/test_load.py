@@ -904,7 +904,7 @@ class test_o2m(ImporterCase):
         [b] = self.browse()
         self.assertEqual(b.const, 42)
         # automatically forces link between core record and o2ms
-        self.assertEqual(values(b.value), [109, 262])
+        self.assertCountEqual(values(b.value), [109, 262])
         self.assertEqual(values(b.value, field='parent_id'), [b, b])
 
     def test_link_2(self):
