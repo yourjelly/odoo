@@ -960,6 +960,69 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
         assert.strictEqual(this.dependencies.Test.getDomValue(), this.updatedDom, "Should insert the char, accent and enter in the DOM");
     }
 
+    async _testCharAndroidPad (assert) {
+        var ev;
+        var Test = this.dependencies.Test;
+        await Test.setValue('<p>p◆</p>');
+
+        await this._triggerKey([
+            ['keydown', {
+                key: 'Unidentified',
+                charCode: 0,
+                keyCode: 229,
+            }],
+            ['compositionstart', {
+                data: '',
+            }],
+            ['beforeInput', {
+                data: 'a',
+            }],
+            ['compositionupdate', {
+                data: 'a',
+            }],
+            ['input', {
+                data: 'a',
+                inputType: 'insertCompositionText',
+            }],
+        ]);
+
+        var textNode = this.editable.querySelector('p').firstChild;
+        textNode.textContent = textNode.textContent + 'a';
+        this._selectDOMRange(textNode, textNode.textContent.length);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
+            ['keydown', {
+                key: 'Unidentified',
+                charCode: 0,
+                keyCode: 229,
+            }],
+            ['compositionstart', {
+                data: '',
+            }],
+            ['beforeInput', {
+                data: 'aa',
+            }],
+            ['compositionupdate', {
+                data: 'aa',
+            }],
+            ['input', {
+                data: 'aa',
+                inputType: 'insertCompositionText',
+            }],
+        ]);
+
+        var textNode = this.editable.querySelector('p').firstChild;
+        textNode.textContent = textNode.textContent + 'aa';
+        this._selectDOMRange(textNode, textNode.textContent.length);
+
+        await new Promise(setTimeout);
+
+        assert.strictEqual(this.dependencies.Test.getValue(), '<p>paa◆</p>', "Should insert the char, accent and enter in the Arch");
+        assert.strictEqual(this.dependencies.Test.getDomValue(), '<p>paa</p>', "Should insert the char, accent and enter in the DOM");
+    }
+
     async _testCompletionSwiftKey (assert) {
         var ev;
         var Test = this.dependencies.Test;
@@ -1180,7 +1243,6 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
         assert.strictEqual(this.dependencies.Test.getValue(), '<p>Christophe&nbsp;◆</p>', "Should insert the word in the Arch");
         assert.strictEqual(this.dependencies.Test.getDomValue(), '<p>Christophe&nbsp;</p>', "Should insert the word in the DOM");
     }
-
     async _testCompletionWithBoldSwiftKey (assert) {
         var ev;
         var Test = this.dependencies.Test;

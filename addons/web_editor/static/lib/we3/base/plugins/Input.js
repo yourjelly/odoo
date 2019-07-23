@@ -71,8 +71,9 @@ var BaseInput = class extends we3.AbstractPlugin {
 
         if (param.defaultPrevented) {
             // nothing
-        } else if (param.type === 'compositionend') {
+        } else if (param.type === 'composition') {
             ev.data = param.data;
+            ev.replacement = param.replacement;
             ev.name = 'composition';
             return ev;
         } else {
@@ -110,7 +111,7 @@ var BaseInput = class extends we3.AbstractPlugin {
     }
     _eventsdDspatcher (ev, param) {
         if (ev.name === 'composition') {
-            this._pressInsertComposition(param);
+            this._pressInsertComposition(ev);
         } else if (ev.name === 'Backspace') {
             this._removeSide(true);
         } else if (ev.name === 'Delete') {
@@ -195,6 +196,23 @@ var BaseInput = class extends we3.AbstractPlugin {
                 if (target.isText()) {
                     lastTextNodeOldValue = target.nodeValue;
                     lastTextNodeID = target.id;
+                    var nodeValue = archNode.nodeValue.replace(/\u00A0/g, ' ');
+
+                    if (param.replacement) {
+                        // eg: 'paaa' from replacement of 'a' in 'aa' ==> must be 'paa'
+                        var add = nodeValue.indexOf(lastTextNodeOldValue.replace(/\u00A0/g, ' ')) === 0 ?
+                                nodeValue.slice(lastTextNodeOldValue.length) : '';
+                        var rest = nodeValue.slice(0, add.length);
+                        var lastIndex = add.length;
+                        while (lastIndex > 0) {
+                            if (rest.slice(-lastIndex) === add.slice(0, lastIndex)) {
+                                archNode.nodeValue = rest.slice(0, -lastIndex) + add;
+                                break;
+                            }
+                            lastIndex--;
+                        }
+                    }
+
                     target.setNodeValue(archNode.nodeValue);
                 } else if (target.isBR()) {
                     var res = target.insert(archNode.params.create(null, null, archNode.nodeValue));
@@ -409,14 +427,18 @@ var BaseInput = class extends we3.AbstractPlugin {
         if (this.editable.style.display === 'none') {
             return;
         }
-        var param = this._onKeyDownNextTick();
+        var param = this._onKeyDownNextTick(e);
 
         if (!param.type) {
             param.type = e.type;
             param.data = e.data;
         }
+
+        // todo: delete word <=> composition
+
         if (e.inputType === 'insertCompositionText' || e.inputType === 'insertReplacementText') {
-            param.type = 'compositionend';
+            param.type = 'composition';
+            param.replacement = true;
             param.data = e.data;
         } else if (e.inputType === 'insertParagraph' && param.key === 'Unidentified') {
             param.key = 'Enter';
@@ -429,7 +451,7 @@ var BaseInput = class extends we3.AbstractPlugin {
         } else if (e.inputType === "insertText") {
             if (param.type.indexOf('key') === 0 && param.key.length === 1 && e.data.length === 1) {
                 param.key = e.data; // keep accent
-            } else if(e.data && e.data.length === 1 && e.data !== param.data && param.type === 'compositionend') {
+            } else if(e.data && e.data.length === 1 && e.data !== param.data && param.type === 'composition') {
                 // swiftKey add automatically a space after the composition, without this line the arch is correct but not the range
                 param.data += e.data;
             } else if (param.key === 'Unidentified') {
@@ -442,7 +464,7 @@ var BaseInput = class extends we3.AbstractPlugin {
             return;
         }
         var param = this._onKeyDownNextTick(e);
-        param.type = e.type;
+        param.type = 'composition';
         param.data = e.data;
     }
     _onKeyDownNextTick (e) {
@@ -468,8 +490,6 @@ var BaseInput = class extends we3.AbstractPlugin {
         var param = this._currentEvent;
         this._currentEvent = null;
 
-
-console.log(param);
         var ev = this._eventsNormalization(param);
         if (!ev.defaultPrevented) {
             Input.trigger(ev.name, ev);
