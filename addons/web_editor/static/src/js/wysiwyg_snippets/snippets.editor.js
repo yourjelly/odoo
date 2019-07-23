@@ -270,22 +270,6 @@ var SnippetEditor = Widget.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * DOMElements have a default name which appears in the overlay when they
-     * are being edited. This method retrieves this name; it can be defined
-     * directly in the DOM thanks to the `data-name` attribute.
-     *
-     * @private
-     */
-    _getName: function () {
-        if (this.$target.data('name') !== undefined) {
-            return this.$target.data('name');
-        }
-        if (this.$target.parent('.row').length) {
-            return _t("Column");
-        }
-        return _t("Block");
-    },
-    /**
      * Instantiates the snippet's options.
      *
      * @private
@@ -356,23 +340,9 @@ var SnippetEditor = Widget.extend({
      */
     _onCloneClick: function (ev) {
         ev.preventDefault();
-        this.trigger_up('cover_will_change');
+        this.trigger_up('cover_will_change'); // AT THE BEGINNING
 
-        var $clone = this.$target.clone(false);
-
-        this.trigger_up('request_history_undo_record', {$target: this.$target});
-        this.$target.after($clone);
-        this.trigger_up('call_for_each_child_snippet', {
-            $snippet: $clone,
-            callback: function (editor, $snippet) {
-                for (var i in editor.styles) {
-                    editor.styles[i].onClone({
-                        isCurrent: ($snippet.is($clone)),
-                    });
-                }
-            },
-        });
-        this.trigger_up('snippet_cloned', {$target: $clone});
+        this.trigger_up('snippet_cloned', {$target: $clone}); // AT THE END
         $clone.trigger('content_changed');
     },
     /**

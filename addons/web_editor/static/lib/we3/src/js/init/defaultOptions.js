@@ -45,7 +45,7 @@ Object.assign(we3.options, {
 
     // SETUP //
 
-    blockSelector: [],
+    blockOptions: [],
     // palette colors(n x n)
     color: {
         classPrefix: {

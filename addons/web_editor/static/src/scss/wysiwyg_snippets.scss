@@ -13,6 +13,13 @@ we3-sidebar {
     &.we3-sidebar-visible {
         width: $o-wysiwyg-sidebar-width;
     }
+
+    > we3-title {
+        display: block;
+        margin: 0.5rem 0;
+        text-align: center;
+        font-size: 1.2rem;
+    }
 }
 
 we3-blocks {
@@ -191,6 +198,101 @@ we3-dropblock-origin {
     }
 }
 
+we3-customizeblock-options {
+    display: block;
+    border: 0.25rem solid transparent;
+
+    + we3-customizeblock-options {
+        margin-top: 0.25rem;
+    }
+
+    > we3-title {
+        display: flex;
+        margin: 0.25rem 0;
+        padding: 0 0.5rem;
+        font-weight: bold;
+        color: inherit !important;
+
+        > we3-button-group {
+            flex: 0 0 auto;
+            display: block;
+            padding: 0.25rem 0;
+            margin-left: auto;
+            text-align: center;
+
+            > we3-button {
+                margin-left: 0.25rem;
+                width: 1.5rem;
+                padding: 0.125rem;
+            }
+        }
+    }
+}
+
+%we3-icon-button {
+    position: relative;
+    padding-right: 0.5rem + 1rem + 0.5rem;
+
+    &::after {
+        position: absolute;
+        right: 0.5rem;
+        font-family: FontAwesome;
+    }
+}
+
+@mixin we3-icon-button($icon, $color: null) {
+    @extend %we3-icon-button;
+
+    &::after {
+        content: $icon;
+        color: $color;
+    }
+}
+
+we3-customizeblock-option {
+    display: block;
+
+    &.we3-customizeblock-option-hidden {
+        display: none;
+    }
+
+    + we3-customizeblock-option {
+        margin-top: 0.25rem;
+    }
+
+    we3-button, we3-toggler {
+        display: block;
+        text-align: left;
+        border-radius: 0;
+    }
+    we3-button {
+        &.we3-button-hover-icon:hover {
+            @include we3-icon-button('\f040');
+        }
+
+        &.active {
+            @include we3-icon-button('\f00c', $o-wysiwyg-color-success);
+        }
+    }
+    we3-collapse {
+        display: block;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 200ms ease 0s;
+    }
+    we3-toggler {
+        @include we3-icon-button('\f0d7');
+
+        &.active {
+            @include we3-icon-button('\f0d8');
+
+            + we3-collapse {
+                max-height: 300px;
+            }
+        }
+    }
+}
+
 $-we3-overlay-offset: 10000px; // the same value is used in JS
 
 we3-overlay {
@@ -204,8 +306,11 @@ we3-overlay {
         display: none;
         border-color: $o-wysiwyg-handles-accent-color;
 
-        &.we3-overlay-ui-visible {
+        &.we3-overlay-ui-visible, &.we3-overlay-ui-sticky {
             display: block;
+        }
+        &.we3-overlay-ui-sticky {
+            border-color: $o-wysiwyg-color-success;
         }
 
         > *, &::before, &::after {
@@ -216,10 +321,9 @@ we3-overlay {
 }
 
 we3-dropblock-move-ui {
+    z-index: $o-wysiwyg-zindex + 1; // FIXME on top of customize
     cursor: pointer;
     cursor: move;
-
-    $-we3-handle-width: 1px;
 
     > we3-dropblock-move-handle {
         left: 0;
@@ -231,23 +335,165 @@ we3-dropblock-move-ui {
 
         &:nth-child(1) {
             width: 100%;
-            border-top-width: $-we3-handle-width;
+            border-top-width: 1px;
         }
         &:nth-child(2) {
             left: auto;
             right: 0;
             height: 100%;
-            border-right-width: $-we3-handle-width;
+            border-right-width: 1px;
         }
         &:nth-child(3) {
             top: auto;
             bottom: -$-we3-overlay-offset;
             width: 100%;
-            border-bottom-width: $-we3-handle-width;
+            border-bottom-width: 1px;
         }
         &:nth-child(4) {
             height: 100%;
-            border-left-width: $-we3-handle-width;
+            border-left-width: 1px;
+        }
+    }
+}
+
+we3-customizeblock-ui {
+    z-index: $o-wysiwyg-zindex;
+
+    &::before {
+        content: "";
+        display: block;
+        width: 100%;
+        height: 100%;
+        border: 1px solid transparent;
+        border-color: inherit;
+        pointer-events: none;
+    }
+
+    &:hover > we3-overlaysizing-handle {
+        background-color: rgba($o-wysiwyg-handles-accent-color, 0.05);
+    }
+
+    &.we3-overlay-ui-sticky > we3-overlaysizing-handle {
+        transition: background 300ms ease 0s;
+        text-align: center;
+
+        &:hover,
+        &.o_active {
+            background-color: rgba($o-wysiwyg-handles-accent-color, 0.2);
+
+            &::before {
+                content: '';
+                @include o-position-absolute(0, $left: 50%);
+                width: 1px;
+                height: 100%;
+                margin-left: -1px;
+                background-color: rgba($o-wysiwyg-handles-accent-color, 0.5);
+            }
+
+            &.w::before {
+                @include o-position-absolute(50%, $left: 0);
+                width: 100%;
+                height: 1px;
+            }
+
+            &:after {
+                border-color: darken($o-wysiwyg-handles-accent-color, 10%);
+                background-color: darken($o-wysiwyg-handles-accent-color, 20%);
+            }
+        }
+
+        &::after {
+            display: block;
+            width: $o-wysiwyg-handles-btn-size;
+            height: $o-wysiwyg-handles-btn-size;
+            border: solid 1px darken($o-wysiwyg-handles-accent-color, 10%);
+            line-height: $o-wysiwyg-handles-btn-size - 2;
+            font-size: 14px;
+            font-family: FontAwesome;
+            background-color: darken($o-wysiwyg-handles-accent-color, 20%);
+            color: white;
+        }
+
+        &.w::after,
+        &.e::after {
+            content: "\f07e";
+        }
+
+        &.s::after,
+        &.n::after {
+            content: "\f07d";
+        }
+
+        &.o_handle_start {
+
+            &.w::after,
+            &.e::after {
+                content: '\f061';
+            }
+
+            &.n::after,
+            &.s::after {
+                content: '\f063';
+            }
+        }
+
+        &.o_handle_end {
+
+            &.w::after,
+            &.e::after {
+                content: '\f060';
+            }
+
+            &.n::after,
+            &.s::after {
+                content: '\f062';
+            }
+        }
+
+        &.w {
+            @include o-position-absolute($-we3-overlay-offset, $left: 0);
+            width: $o-wysiwyg-handle-edge-size;
+            height: 100%;
+            cursor: e-resize;
+
+            &::after {
+                @include o-position-absolute($top: 50%, $left: 40%);
+                margin-top: -$o-wysiwyg-handles-btn-size/2;
+            }
+        }
+
+        &.e {
+            @include o-position-absolute($-we3-overlay-offset, $right: 0);
+            width: $o-wysiwyg-handle-edge-size;
+            height: 100%;
+            cursor: w-resize;
+
+            &::after {
+                @include o-position-absolute($top: 50%, $right: 40%);
+                margin-top: -$o-wysiwyg-handles-btn-size/2;
+            }
+        }
+
+        &.n {
+            @include o-position-absolute($-we3-overlay-offset, $left: 0);
+            width: 100%;
+            cursor: ns-resize;
+
+            &::after {
+                @include o-position-absolute($left: 50%, $top: 40%);
+                margin-left: -$o-wysiwyg-handles-btn-size/2;
+            }
+        }
+
+        &.s {
+            @include o-position-absolute($top: auto, $left: 0, $bottom: -$-we3-overlay-offset);
+            width: 100%;
+            cursor: ns-resize;
+
+            &::after {
+                @include o-position-absolute($left: 50%, $bottom: 40%);
+                margin-left: -$o-wysiwyg-handles-btn-size/2;
+            }
         }
     }
 }
@@ -355,410 +601,12 @@ we3-dropblock-move-ui {
 
 // MANIPULATORS
 #oe_manipulators {
-    position: relative;
 
     // SNIPPET MANIPULATORS
     .oe_overlay {
-        @include o-position-absolute;
-        display: none;
-        height: 0;
-        background: transparent;
-        text-align: center;
-        transition: opacity 400ms linear 0s;
 
         &.o_keypress {
             opacity: 0;
-        }
-
-        &.oe_active {
-            display: block;
-        }
-
-        // OVERLAY OPTIONS
-        >.oe_overlay_options {
-            font-family: $o-wysiwyg-font-family;
-            @include o-position-absolute($bottom: 0, $left: 0);
-            width: 250px; // the parent oe_overlay has a width equal to the snippet width, the 250px is there to force the options to stay on one line without overriding bootstrap .btn-group
-            text-align: left;
-            z-index: $o-wysiwyg-zindex + 1;
-
-            >.btn-group {
-                white-space: nowrap;
-                border: 0;
-
-                .btn {
-                    display: inline-block;
-                    width: $o-wysiwyg-overlay-option-size;
-                    height: $o-wysiwyg-overlay-option-size;
-                    padding: 0;
-                    border: 1px solid $o-wysiwyg-bg-color;
-                    line-height: $o-wysiwyg-overlay-option-size;
-                    font-size: 11px;
-                    border-radius: 0;
-                    font-weight: normal;
-
-                    transition: all 400ms ease 0s;
-                    color: $o-wysiwyg-color;
-                    background-color: $o-wysiwyg-bg-color;
-
-                    &:hover {
-                        color: $o-wysiwyg-color-light;
-                        background-color: lighten($o-wysiwyg-bg-color, 10%);
-                    }
-
-                    &.oe_snippet_remove {
-                        color: $o-wysiwyg-color;
-                        background-color: $o-wysiwyg-color-danger;
-                        border-color: darken($o-wysiwyg-color-danger, 20%);
-
-                        >.fa {
-                            color: $o-wysiwyg-color;
-                        }
-
-                        &:hover {
-                            background-color: darken($o-wysiwyg-color-danger, 20%);
-                        }
-                    }
-
-                    &.oe_snippet_parent>i {
-                        transform: scaleX(-1);
-                        font-size: 12px;
-                    }
-
-                    >.fa {
-                        color: $o-wysiwyg-color;
-                        line-height: inherit;
-                        vertical-align: top;
-                    }
-                }
-
-                // CUSTOMIZE MENU BUTTON
-                >.oe_options {
-                    .btn {
-                        width: auto;
-                        padding: 0 25px 0 5px;
-                        background-color: $o-wysiwyg-bg-color;
-                        text-transform: uppercase;
-
-                        &:hover,
-                        &:active,
-                        &:focus {
-                            background-color: lighten($o-wysiwyg-bg-color, 5%);
-                            border-color: lighten($o-wysiwyg-bg-color, 10%);
-                        }
-
-                        &:before,
-                        &:after {
-                            content: "";
-                            width: 7px;
-                            height: 2px;
-                            background-color: $o-wysiwyg-color-light;
-                            @include o-position-absolute(46%);
-                            transition: all 0.3s ease 0s;
-                        }
-
-                        &:before {
-                            right: 9px;
-                            transform: rotate(45deg);
-                        }
-
-                        &:after {
-                            right: 5px;
-                            transform: rotate(-45deg);
-                        }
-                    }
-
-                    // Open menu
-                    &.show .btn {
-
-                        &:active,
-                        &:focus,
-                        &:active:focus {
-                            box-shadow: none;
-                        }
-
-                        &:before,
-                        &:after {
-                            width: 9px;
-                        }
-
-                        &:before {
-                            right: 10px;
-                            transform: translateX(5px) rotate(-45deg);
-                        }
-
-                        &:after {
-                            transform: rotate(45deg);
-                        }
-                    }
-
-                    // CUSTOMIZE MENU
-                    .dropdown-menu {
-                        margin: -1px 0 0 0;
-                        padding: 0;
-                        border: 1px solid $o-wysiwyg-bg-color;
-                        border-radius: 0;
-                        background-color: $o-wysiwyg-bg-color;
-
-                        .dropdown-item {
-                            position: relative;
-                            color: $o-wysiwyg-color-light;
-                            font-weight: normal;
-                            font-size: 12px;
-                            padding: 5px 40px 5px 10px;
-
-                            &:hover {
-                                background: transparent;
-                                cursor: pointer;
-                            }
-
-                            &.active {
-                                &:before {
-                                    @include o-position-absolute($top: 5px, $right: 5px);
-                                    content: "\f00c";
-                                    font-family: "FontAwesome";
-                                    color: $o-brand-primary;
-                                }
-                            }
-
-                            >i {
-                                width: 15px;
-                                margin-right: 10px;
-                                text-align: center;
-                            }
-                        }
-
-                        .dropdown-submenu {
-                            position: relative;
-
-                            &::before {
-                                @include o-position-absolute($top: 12px, $right: 10px);
-                                @include o-caret-right(4px);
-                                border-left-color: $o-wysiwyg-color-light;
-                            }
-
-                            &:hover>.dropdown-menu {
-                                display: block;
-                                left: 100%;
-                                top: 0;
-
-                                &.o_open_to_left {
-                                    left: auto;
-                                    right: 100%;
-                                }
-                            }
-                        }
-
-                        .dropdown-divider {
-                            display: block;
-                            height: 1px;
-                            border-top: 1px solid #666;
-                            margin: 0;
-                        }
-
-                        .dropdown-header {
-                            color: $o-wysiwyg-color-light;
-                            font-size: 11px;
-                            margin-top: 2px;
-                            text-transform: uppercase;
-
-                            &:hover {
-                                background-color: initial;
-                            }
-
-                            &.o_main_header {
-                                padding-left: 10px;
-                            }
-
-                            &.o_parent_editor_header {
-                                position: relative;
-                                color: $o-wysiwyg-color-light;
-                                font-weight: 400;
-                                font-size: 10px;
-                                margin: 10px 0 0 10px;
-                                text-transform: uppercase;
-                                padding-bottom: .25em;
-
-                                &::before {
-                                    content: "\f148";
-                                    @include o-position-absolute($top: 5px, $left: 4px);
-                                    font-family: FontAwesome;
-                                    transform: scaleX(-1);
-                                }
-
-                                ~.dropdown-submenu .dropdown-item,
-                                ~.dropdown-item {
-                                    font-size: 11px;
-                                    opacity: 0.7;
-
-                                    &:hover {
-                                        opacity: 1;
-                                    }
-                                }
-
-                                ~.dropdown-submenu::before {
-                                    @include o-position-absolute($top: 10px, $right: 10px);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        &.o_top_cover>.oe_overlay_options {
-            bottom: auto;
-            top: 1px;
-            right: 1px;
-        }
-
-        // HANDLES
-        >.o_handles {
-            @include o-position-absolute(-$o-wysiwyg-handles-offset-to-hide, 0, auto, 0);
-            z-index: $o-wysiwyg-zindex;
-
-            &:hover>.o_handle {
-                background-color: rgba($o-wysiwyg-handles-accent-color, 0.05);
-            }
-
-            >.o_handle {
-
-                position: relative;
-                border: 0 solid $o-wysiwyg-handles-accent-color;
-                transition: background 300ms ease 0s;
-
-                &:hover,
-                &.o_active {
-                    background-color: rgba($o-wysiwyg-handles-accent-color, 0.2);
-
-                    &:before {
-                        content: '';
-                        @include o-position-absolute(0, $left: 50%);
-                        width: 1px;
-                        height: 100%;
-                        margin-left: -1px;
-                        background-color: rgba($o-wysiwyg-handles-accent-color, 0.5);
-                    }
-
-                    &.w:before {
-                        @include o-position-absolute(50%, $left: 0);
-                        width: 100%;
-                        height: 1px;
-                    }
-
-                    &:after {
-                        border-color: darken($o-wysiwyg-handles-accent-color, 10%);
-                        background-color: darken($o-wysiwyg-handles-accent-color, 20%);
-                    }
-                }
-
-                &:after {
-                    display: block;
-                    width: $o-wysiwyg-handles-btn-size;
-                    height: $o-wysiwyg-handles-btn-size;
-                    border: solid 1px darken($o-wysiwyg-handles-accent-color, 10%);
-                    line-height: $o-wysiwyg-handles-btn-size - 2;
-                    font-size: 14px;
-                    font-family: FontAwesome;
-                    background-color: darken($o-wysiwyg-handles-accent-color, 20%);
-                    color: white;
-                }
-
-                &.w:after,
-                &.e:after {
-                    content: "\f07e";
-                }
-
-                &.s:after,
-                &.n:after {
-                    content: "\f07d";
-                }
-
-                &.o_handle_start {
-
-                    &.w:after,
-                    &.e:after {
-                        content: '\f061';
-                    }
-
-                    &.n:after,
-                    &.s:after {
-                        content: '\f063';
-                    }
-                }
-
-                &.o_handle_end {
-
-                    &.w:after,
-                    &.e:after {
-                        content: '\f060';
-                    }
-
-                    &.n:after,
-                    &.s:after {
-                        content: '\f062';
-                    }
-                }
-
-                &.w {
-                    @include o-position-absolute($o-wysiwyg-handles-offset-to-hide, auto, -$o-wysiwyg-handles-offset-to-hide, 0);
-                    width: $o-wysiwyg-handle-edge-size;
-                    border-width: $o-wysiwyg-handle-border-width;
-                    border-right-width: 0;
-                    cursor: e-resize;
-
-                    &:after {
-                        @include o-position-absolute($top: 50%, $left: 40%);
-                        margin-top: -$o-wysiwyg-handles-btn-size/2;
-                    }
-                }
-
-                &.e {
-                    @include o-position-absolute($o-wysiwyg-handles-offset-to-hide, 0, -$o-wysiwyg-handles-offset-to-hide, auto);
-                    width: $o-wysiwyg-handle-edge-size;
-                    border-right-width: $o-wysiwyg-handle-border-width;
-                    cursor: w-resize;
-
-                    &:after {
-                        @include o-position-absolute($top: 50%, $right: 40%);
-                        margin-top: -$o-wysiwyg-handles-btn-size/2;
-                    }
-                }
-
-                &.n {
-                    @include o-position-absolute($o-wysiwyg-handles-offset-to-hide, 0, auto, 0);
-                    border-top-width: $o-wysiwyg-handle-border-width;
-                    cursor: ns-resize;
-
-                    &:after {
-                        @include o-position-absolute($left: 50%, $top: 40%);
-                        margin-left: -$o-wysiwyg-handles-btn-size/2;
-                    }
-                }
-
-                &.s {
-                    @include o-position-absolute(auto, 0, -$o-wysiwyg-handles-offset-to-hide, 0);
-                    border-bottom-width: $o-wysiwyg-handle-border-width;
-                    cursor: ns-resize;
-
-                    &:after {
-                        @include o-position-absolute($left: 50%, $bottom: 40%);
-                        margin-left: -$o-wysiwyg-handles-btn-size/2;
-                    }
-                }
-
-                &.readonly {
-                    cursor: auto !important;
-
-                    &:after {
-                        display: none !important;
-                    }
-
-                    &:hover {
-                        opacity: 0.5;
-                    }
-                }
-            }
         }
     }
 

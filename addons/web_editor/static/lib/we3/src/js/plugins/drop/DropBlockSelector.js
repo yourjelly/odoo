@@ -11,7 +11,7 @@ var dropBlockSelector = class extends we3.AbstractPlugin {
     constructor(parent, params, options) {
         super(...arguments);
         this.dependencies = ['Arch', 'DropBlock', 'Selector'];
-        this.dropzonesData = (this.options.blockSelector || [])
+        this.dropzonesData = (this.options.blockOptions || [])
             .filter(function (data) {
                 return (data.dropIn || data.dropNear);
             });

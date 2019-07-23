@@ -206,7 +206,13 @@
 
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/misc/keymap.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/misc/transform.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/misc/customizeBlock.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/misc/CustomizeBlock.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/misc/BlockOption.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/misc/blockoptions/Background.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/misc/blockoptions/BackgroundPosition.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/misc/blockoptions/Colorpicker.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/misc/blockoptions/OverlaySizing.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/misc/blockoptions/VerticalSizing.js"/>
 
     <!-- Tests -->
 

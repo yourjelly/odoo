@@ -103,7 +103,11 @@
     </t>
     <link rel="stylesheet" type="text/scss" href="/website/static/src/scss/website.wysiwyg.scss"/>
 
-    <script type="text/javascript" src="/website/static/src/js/editor/snippets.options.js"/>
+    <script type="text/javascript" src="/website/static/src/js/editor/plugin/blockoptions/AnchorName.js"/>
+    <script type="text/javascript" src="/website/static/src/js/editor/plugin/blockoptions/ColumnSizing.js"/>
+    <script type="text/javascript" src="/website/static/src/js/editor/plugin/blockoptions/FacebookPage.js"/>
+    <script type="text/javascript" src="/website/static/src/js/editor/plugin/blockoptions/LayoutColumn.js"/>
+
     <script type="text/javascript" src="/website/static/src/js/editor/wysiwyg_multizone.js"/>
     <script type="text/javascript" src="/website/static/src/js/editor/wysiwyg_multizone_translate.js"/>
     <script type="text/javascript" src="/website/static/src/js/editor/widget_link.js"/>

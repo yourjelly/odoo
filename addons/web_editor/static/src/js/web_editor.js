@@ -138,7 +138,7 @@ var Wysiwyg = Widget.extend({
                 colors: this._groupColors,
             },
             blocksDataList: this._blocksDataList,
-            blockSelector: this._blockSelector,
+            blockOptions: this._blockOptions,
             renderingAttributeBlacklist: [
                 // 'data-oe-model',
                 // 'data-oe-id',
@@ -413,8 +413,7 @@ var Wysiwyg = Widget.extend({
 
         return def.then(function () {
             var blocksDataList = [];
-            var blockSelector = [];
-            var blockCustomisation = [];
+            var blockOptions = [];
 
             var $dropBlockTemplate = $(QWeb.render('web_editor.dropBlockTemplate.custom'));
             $dropBlockTemplate.filter('#o_scroll').find('.o_panel').each(function () {
@@ -433,41 +432,34 @@ var Wysiwyg = Widget.extend({
             });
 
             $dropBlockTemplate.filter('#snippet_options').children().each(function () {
-                var data = $(this).data();
-                blockSelector.push({
+                var $el = $(this);
+                var data = $el.data();
+                var $children = $el.children();
+
+                var option = {
                     selector: data.selector,
                     exclude: data.exclude,
-                    dropIn: data.dropIn,
-                    dropNear: data.dropNear,
-                    customizeAllowNotEditable: data.noCheck,
-                    customizeType: data.js,
-                    customizeTargets: data.target,
-                });
+                };
 
-                //TODO QSM: => colorPrefix , paletteTitle, paletteDefault, paletteExclude
+                // Initialize data needed for the 'DropBlock' feature
+                option.dropIn = data.dropIn;
+                option.dropNear = data.dropNear;
 
+                // Initialize data needed for the 'CustomizeBlock' feature
+                if (data.js || $children.length) {
+                    option.customizeBlockOptionName = data.js || 'default';
+                    option.customizeAllowNotEditable = data.noCheck;
+                    option.customizeTarget = data.target;
+                    option.customizeUIElements = _.map($el.children(), function (el) {
+                        return el;
+                    });
+                }
 
-                var menu = [];
-                $(this).children().each(function () {
-                    var $child = $(this);
-                    if ($child.hasClass('dropdown-submenu')) {
-                        // console.log(this);
-                        var submenu = [];
-                        $child.each(function () {
-
-                        });
-                    } else {
-
-                    }
-                });
-
-                data.menu = menu;
-                blockCustomisation.push(data);
+                blockOptions.push(option);
             });
 
             self._blocksDataList = blocksDataList;
-            self._blockSelector = blockSelector;
-            self._blockCustomisation = blockCustomisation;
+            self._blockOptions = blockOptions;
         });
     },
     _loadTemplates: function (xmlPaths) {

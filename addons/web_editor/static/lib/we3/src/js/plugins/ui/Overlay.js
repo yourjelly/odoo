@@ -35,6 +35,9 @@ var OverlayPlugin = class extends we3.AbstractPlugin {
         var prom = super.start(...arguments);
         this.__onWindowResize = this._onWindowResize.bind(this);
         window.addEventListener('resize', this.__onWindowResize);
+
+        this.on('reposition_demand', this, this.reposition);
+
         return prom;
     }
     /**
@@ -67,9 +70,11 @@ var OverlayPlugin = class extends we3.AbstractPlugin {
     //--------------------------------------------------------------------------
 
     /**
-     * @param {DOMElement} uiElement
+     * @param {HTMLElement} uiElement
      * @param {number} nodeID
      * @param {object} [data]
+     * @param {string} [extraClass]
+     * @returns {HTMLElement}
      */
     addUIElement(uiElement, nodeID, data, extraClass) {
         var node = this.dependencies.Renderer.getElement(nodeID);
@@ -83,12 +88,14 @@ var OverlayPlugin = class extends we3.AbstractPlugin {
         this._uiAllData.push(data);
 
         this._overlay.appendChild(uiElement);
+
+        return uiElement;
     }
     /**
      * Disables the overlay behaviors.
      */
     block() {
-        this._hideUIElements();
+        this._hideUIElements(true);
         this._isActive = false;
     }
     /**
@@ -112,6 +119,23 @@ var OverlayPlugin = class extends we3.AbstractPlugin {
         return this._uiNodeIDs[index];
     }
     /**
+     * @param {number} [nodeID]
+     * @param {string} [color]
+     */
+    makeUIStickyFor(nodeID, color) {
+        var self = this;
+        this._uiElements.forEach(nodeID ? function (ui, index) {
+            if (self._uiNodeIDs[index] !== nodeID) {
+                return;
+            }
+            ui.classList.add('we3-overlay-ui-sticky');
+            ui.style.borderColor = color;
+        } : function (ui) {
+            ui.classList.remove('we3-overlay-ui-sticky');
+            ui.style.borderColor = '';
+        });
+    }
+    /**
      * @param {object} self
      * @param {object} events
      */
@@ -128,16 +152,22 @@ var OverlayPlugin = class extends we3.AbstractPlugin {
         var originBox = this._overlay.getBoundingClientRect();
 
         this._uiElements.forEach(function (ui, index) {
-            if (!ui.classList.contains('we3-overlay-ui-visible')) {
+            if (!ui.classList.contains('we3-overlay-ui-visible')
+                    && !ui.classList.contains('we3-overlay-ui-sticky')) {
                 return;
             }
             var node = Renderer.getElement(self._uiNodeIDs[index]);
             var nodeBox = node.getBoundingClientRect();
+            var style = window.getComputedStyle(node);
+            var marginTop = parseFloat(style.marginTop);
+            var marginRight = parseFloat(style.marginRight);
+            var marginBottom = parseFloat(style.marginBottom);
+            var marginLeft = parseFloat(style.marginLeft);
 
-            ui.style.left = (nodeBox.left - originBox.left) + 'px';
-            ui.style.top = (nodeBox.top - originBox.top - OVERLAY_OFFSET) + 'px';
-            ui.style.width = (nodeBox.width) + 'px';
-            ui.style.height = (nodeBox.height) + 'px';
+            ui.style.left = (nodeBox.left - originBox.left - marginLeft) + 'px';
+            ui.style.top = (nodeBox.top - originBox.top - OVERLAY_OFFSET - marginTop) + 'px';
+            ui.style.width = (nodeBox.width + marginLeft + marginRight) + 'px';
+            ui.style.height = (nodeBox.height + marginTop + marginBottom) + 'px';
         });
     }
     /**
@@ -175,10 +205,14 @@ var OverlayPlugin = class extends we3.AbstractPlugin {
     }
     /**
      * @private
+     * @param {boolean} [stickyToo=false]
      */
-    _hideUIElements() {
+    _hideUIElements(stickyToo) {
         this._uiElements.forEach(function (ui) {
             ui.classList.remove('we3-overlay-ui-visible');
+            if (stickyToo) {
+                ui.classList.remove('we3-overlay-ui-sticky');
+            }
         });
     }
 
@@ -199,7 +233,7 @@ var OverlayPlugin = class extends we3.AbstractPlugin {
             return;
         }
 
-        this._hideUIElements();
+        this._hideUIElements(false);
 
         var node = ev.target;
         while (node && node.classList) {
@@ -213,20 +247,13 @@ var OverlayPlugin = class extends we3.AbstractPlugin {
         }
 
         var nodeID = this.dependencies.Renderer.getID(node);
-        var originBox = this._overlay.getBoundingClientRect();
-        var nodeBox = node.getBoundingClientRect();
-
         this._uiElements.forEach(function (ui, index) {
             if (self._uiNodeIDs[index] !== nodeID) {
                 return;
             }
-
-            ui.style.left = (nodeBox.left - originBox.left) + 'px';
-            ui.style.top = (nodeBox.top - originBox.top - OVERLAY_OFFSET) + 'px';
-            ui.style.width = (nodeBox.width) + 'px';
-            ui.style.height = (nodeBox.height) + 'px';
             ui.classList.add('we3-overlay-ui-visible');
         });
+        this.reposition();
     }
     /**
      * @private

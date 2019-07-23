@@ -171,6 +171,7 @@ var DropBlock = class extends we3.AbstractPlugin {
             blocksData.blocks.forEach(function (block) {
                 var blockNode = document.createElement('we3-block');
                 blockNode.setAttribute('data-content', block.content);
+                blockNode.setAttribute('title', block.title);
 
                 var thumbnail = document.createElement('we3-dropblock-thumbnail');
                 var preview = document.createElement('we3-preview');
@@ -562,6 +563,7 @@ var DropBlock = class extends we3.AbstractPlugin {
         var content = blockNode.getAttribute('data-content');
         var el = document.createElement('we3-content');
         el.innerHTML = content;
+        el.firstChild.setAttribute('data-name', blockNode.getAttribute('title'));
         var elements = [].slice.call(el.childNodes);
 
         this._dragAndDropStart({
@@ -571,7 +573,7 @@ var DropBlock = class extends we3.AbstractPlugin {
             height: box.height,
             thumbnail: thumbnail.cloneNode(true),
             elements: elements,
-            content: content,
+            content: el.innerHTML,
             dropIn: dropzonesData.dropIn,
             dropNear: dropzonesData.dropNear,
         }, x, y, autoClose);
