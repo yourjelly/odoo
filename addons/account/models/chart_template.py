@@ -165,7 +165,10 @@ class AccountChartTemplate(models.Model):
         of accounts had been created for it yet.
         """
         # do not use `request.env` here, it can cause deadlocks
-        company = self.env.user.company_id
+        if request and hasattr(request, 'allowed_company_ids'):
+            company = self.env['res.company'].browse(request.allowed_company_ids[0])
+        else:
+            company = self.env.company
         # If we don't have any chart of account on this company, install this chart of account
         if not company.chart_template_id and not self.existing_accounting(company):
             for template in self:
@@ -180,7 +183,11 @@ class AccountChartTemplate(models.Model):
         rights.
         """
         self.ensure_one()
-        company = self.env.user.company_id
+        # do not use `request.env` here, it can cause deadlocks
+        if request and hasattr(request, 'allowed_company_ids'):
+            company = self.env['res.company'].browse(request.allowed_company_ids[0])
+        else:
+            company = self.env.company
         # Ensure everything is translated to the company's language, not the user's one.
         self = self.with_context(lang=company.partner_id.lang)
         if not self.env.is_admin():
