@@ -38,18 +38,23 @@ we3.addPlugin('Field', class extends we3.AbstractPlugin {
         var elementInDom = this.dependencies.Renderer.getElement(archNode.id);
         var fieldType = elementInDom.getAttribute('data-oe-type');
         var input = document.createElement('input');
-        input.setAttribute('value', elementInDom.textContent);
+        var inputValue = elementInDom.textContent;
         if (fieldType === 'date') {
             input.setAttribute('type', 'date');
+            inputValue = elementInDom.getAttribute('data-oe-original');
         } else if (fieldType === 'text') {
             input.setAttribute('type', 'text');
         }
-        elementInDom.parentNode.insertBefore(input, elementInDom);
-        elementInDom.style.visibility = "hidden";
-        input.addEventListener('focusout', function (ev) {
-            debugger;
+        input.setAttribute('value', inputValue);
+        // elementInDom.parentNode.insertBefore(input, elementInDom);
+        // elementInDom.style.visibility = 'hidden';
+        var button = document.querySelector('we3-button[name="field-edit"]');
+        button.parentNode.insertBefore(input, button);
+        button.style.visibility = "hidden";
+        input.addEventListener('focusout', function () {
+            elementInDom.textContent = this.value;
+            elementInDom.visibility = 'visible';
         });
-        debugger;
         // this.dependencies.Arch.importUpdate(archNode.toJSON());
     }
 

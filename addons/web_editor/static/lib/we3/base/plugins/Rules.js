@@ -14,7 +14,7 @@ var parserRules = [
 
 /**
  * Rules concerning parenting
- * 
+ *
  * @property
  * @param {Object[]} parentedRules
  * @param {Object[]} parentedRules.nodes the nodes to consider
@@ -157,7 +157,7 @@ var parentedRules = [
  * Eg: if ['i', 'b'], a 'b' node can be in an 'i' node but not otherwise
  */
 var orderRules = [
-    ['span', 'font'].concat(tags.format.filter((tag) => tag !== 'span' && tag !== 'font')),
+    ['font'].concat(tags.format.filter((tag) => tag !== 'span' && tag !== 'font')),
 ];
 
 
