@@ -540,6 +540,7 @@ class TestAssetsBundleInBrowser(HttpCase):
             'arch': view_arch,
             'inherit_id': self.browse_ref('test_assetsbundle.bundle1').id,
         })
+        self.env.user.flush()
 
         self.phantom_js(
             "/test_assetsbundle/js",
