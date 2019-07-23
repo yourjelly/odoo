@@ -25,23 +25,27 @@
         <field name='l10n_ar_gross_income_type'>no_liquida</field>
     </record>
 
-    <record id="base.user_root" model="res.users">
-        <field name="company_ids" eval="[(4,ref('company_ri'))]"/>
-        <field name="company_id" ref="company_ri"/>
-    </record>
+    <function model="res.users" name="write">
+        <value eval="[1, 2]"/>
+        <value eval="{'company_id': ref('l10n_ar.company_ri'), 'company_ids': [(4, ref('l10n_ar.company_ri'))]}"/>
+    </function>
 
-    <record id="base.user_admin" model="res.users">
-        <field name="company_ids" eval="[(4,ref('company_ri'))]"/>
-        <field name="company_id" ref="company_ri"/>
-    </record>
+    <function model="res.config.settings" name="create">
+        <value model="res.config.settings" eval="dict(
+            obj().default_get(list(obj().fields_get())),
+            **{
+                'chart_template_id': obj().env.ref('l10n_ar.l10nar_ri_chart_template').id,
+                'company_id': obj().env.ref('l10n_ar.company_ri').id,
+            }
+        )"/>
+    </function>
 
-    <record id="base.user_demo" model="res.users">
-        <field name="company_ids" eval="[(4,ref('company_ri'))]"/>
-        <field name="company_id" ref="company_ri"/>
-    </record>
+    <function model="res.config.settings" name="execute">
+        <value model="res.config.settings" eval="obj().search([('chart_template_id', '=', obj().env.ref('l10n_ar.l10nar_ri_chart_template').id)], order='create_date desc', limit=1).id"/>
+    </function>
 
-    <function model="account.chart.template" name="try_loading_for_current_company">
-        <value eval="[ref('l10n_ar.l10nar_ri_chart_template')]"/>
+    <function model="res.config.settings" name="unlink">
+        <value model="res.config.settings" eval="obj().search([('chart_template_id', '=', obj().env.ref('l10n_ar.l10nar_ri_chart_template').id)], order='create_date desc', limit=1).id"/>
     </function>
 
 </odoo>
