@@ -66,7 +66,6 @@ var BaseArch = class extends we3.AbstractPlugin {
         return promise;
     }
     start () {
-        this._lastFocus = this._arch;
         this.dependencies.BaseRange.on('focus', this, this._onFocusNode);
     }
 
@@ -1384,7 +1383,7 @@ var BaseArch = class extends we3.AbstractPlugin {
 
     _onFocusNode (focusNode) {
         // get the previous focus Node's block ancestor
-        var lastBlockClone = this._lastFocus.ancestor('isBlock');
+        var lastBlockClone = this._lastFocus && this._lastFocus.ancestor('isBlock');
         var lastBlock = lastBlockClone && this.getArchNode(lastBlockClone.id);
 
         if (lastBlock) {

@@ -754,6 +754,9 @@ we3.ArchNode = class {
             return this._insertFragment(archNode, offset);
         }
         if (this.isVoidoid()) {
+            if (!this.parent) {
+                return [];
+            }
             var index = offset ? this.index() + 1 : this.index();
             return this.parent.insert(archNode, index);
         }

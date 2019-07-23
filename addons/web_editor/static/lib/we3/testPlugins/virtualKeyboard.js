@@ -1022,6 +1022,69 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
         assert.strictEqual(this.dependencies.Test.getValue(), '<p>paa◆</p>', "Should insert the char, accent and enter in the Arch");
         assert.strictEqual(this.dependencies.Test.getDomValue(), '<p>paa</p>', "Should insert the char, accent and enter in the DOM");
     }
+    async _testChar2AndroidPad (assert) {
+        var ev;
+        var Test = this.dependencies.Test;
+        await Test.setValue('<p>p\u00A0◆</p>');
+
+        await this._triggerKey([
+            ['keydown', {
+                key: 'Unidentified',
+                charCode: 0,
+                keyCode: 229,
+            }],
+            ['compositionstart', {
+                data: '',
+            }],
+            ['beforeInput', {
+                data: 'a',
+            }],
+            ['compositionupdate', {
+                data: 'a',
+            }],
+            ['input', {
+                data: 'a',
+                inputType: 'insertCompositionText',
+            }],
+        ]);
+
+        var textNode = this.editable.querySelector('p').firstChild;
+        textNode.textContent = textNode.textContent + 'a';
+        this._selectDOMRange(textNode, textNode.textContent.length);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
+            ['keydown', {
+                key: 'Unidentified',
+                charCode: 0,
+                keyCode: 229,
+            }],
+            ['compositionstart', {
+                data: '',
+            }],
+            ['beforeInput', {
+                data: 'aa',
+            }],
+            ['compositionupdate', {
+                data: 'aa',
+            }],
+            ['input', {
+                data: 'aa',
+                inputType: 'insertCompositionText',
+            }],
+        ]);
+
+        var textNode = this.editable.querySelector('p').firstChild;
+        textNode.textContent = textNode.textContent + 'aa';
+        this._selectDOMRange(textNode, textNode.textContent.length);
+
+        await new Promise(setTimeout);
+
+        assert.strictEqual(this.dependencies.Test.getValue(), '<p>p aa◆</p>', "Should insert the char, accent and enter in the Arch");
+        assert.strictEqual(this.dependencies.Test.getDomValue(), '<p>p aa</p>', "Should insert the char, accent and enter in the DOM");
+    }
+
 
     async _testCompletionSwiftKey (assert) {
         var ev;

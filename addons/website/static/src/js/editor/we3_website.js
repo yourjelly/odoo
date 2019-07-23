@@ -20,6 +20,12 @@ var OdooWebsite = class extends we3.AbstractPlugin {
         this._overwriteBootstrap();
         this.dependencies.Range.on('focus', this, this._onFocusNode);
 
+        this.dependencies.Rules.addVoidoidCheck(function (archNode) {
+            if (archNode.isNotText() && archNode.className.toString().indexOf('-icon') !== -1) {
+                return true;
+            }
+        });
+
         this.dependencies.Rules.addEditableNodeCheck(function (archNode) {
             if (archNode.isRoot()) {
                 return false;

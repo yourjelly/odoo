@@ -202,7 +202,7 @@ var BaseInput = class extends we3.AbstractPlugin {
                         // eg: 'paaa' from replacement of 'a' in 'aa' ==> must be 'paa'
                         var add = nodeValue.indexOf(lastTextNodeOldValue.replace(/\u00A0/g, ' ')) === 0 ?
                                 nodeValue.slice(lastTextNodeOldValue.length) : '';
-                        var rest = nodeValue.slice(0, add.length);
+                        var rest = nodeValue.slice(0, -add.length);
                         var lastIndex = add.length;
                         while (lastIndex > 0) {
                             if (rest.slice(-lastIndex) === add.slice(0, lastIndex)) {
