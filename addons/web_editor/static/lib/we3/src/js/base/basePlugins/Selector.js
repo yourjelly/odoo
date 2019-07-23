@@ -355,7 +355,7 @@ var Selector = class extends we3.AbstractPlugin {
             val = val.toString();
             switch (value[0]) {
                 case '=': return val == value[1];
-                default: debugger;
+                default: break; // FIXME debugger;
             }
         });
     }
