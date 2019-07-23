@@ -2312,8 +2312,19 @@ class Many2one(_Relational):
         # remove records from the cache of one2many fields of old corecords
         record_ids = set(records._ids)
         for invf in records._field_inverses[self]:
+            # DLE P160: `test_00_mrp_byproduct`
+            # `self.move_raw_ids = [(2, move.id) for move in self.move_raw_ids.filtered(lambda m: m.bom_line_id)]`
+            # The above is supposed to remove the lines from move_raw_ids, which goes through
+            # ```
+            # One2many.write_new(self, records, value):
+            # ...
+            # elif command[0] == 2:
+            #     browse([command[1]])[inverse] = False
+            # ...
+            # ```
+            # Which then goes here, and it was not removing the reference because _id is a NewId
             corecords = records.env[self.comodel_name].browse(
-                id_ for id_ in cache.get_values(records, self) if id_
+                id_ for id_ in cache.get_values(records, self)
             )
             for corecord in corecords:
                 if cache.contains(corecord, invf):
