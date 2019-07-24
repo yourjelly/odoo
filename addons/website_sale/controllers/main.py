@@ -622,7 +622,11 @@ class WebsiteSale(http.Controller):
         return partner_id
 
     def values_preprocess(self, order, mode, values):
-        return values
+        # DLE P168: `test_sale_process.py`
+        # country_id was sent as a string, and set in the cache as a string.
+        # As it no longer relies on postgres to do the cast, we have to type it correctly
+        partner_fields = request.env['res.partner']._fields
+        return {k: int(v) if v and k in partner_fields and partner_fields[k].type == 'many2one' else v for k, v in values.items()}
 
     def values_postprocess(self, order, mode, values, errors, error_msg):
         new_values = {}
@@ -1063,7 +1067,10 @@ class WebsiteSale(http.Controller):
     # ------------------------------------------------------
 
     @http.route(['/shop/add_product'], type='json', auth="user", methods=['POST'], website=True)
-    def add_product(self, name=None, category=0, **post):
+    # DLE P169: `test_sale_process.py`
+    # category = 0 is an integer. It doesnt apply to one2may/many2many.
+    # Even for many2one it would be wrong as it would be interpreted as an ID and not as Falsy
+    def add_product(self, name=None, category=None, **post):
         product = request.env['product.product'].create({
             'name': name or _("New Product"),
             'public_categ_ids': category,
