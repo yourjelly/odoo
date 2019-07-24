@@ -184,6 +184,7 @@ var Wysiwyg = Widget.extend({
                 'TestToolbarWand',
                 'TestUI',
                 'TestCodeView',
+                'TestMany2one',
             ],
             upload: {
                 onUpload: this._onMediaUpload.bind(this),

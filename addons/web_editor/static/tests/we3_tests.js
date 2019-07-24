@@ -401,7 +401,7 @@ QUnit.module('web_editor', {
     QUnit.module('Dynamic fields');
 
     QUnit.test('Many2one', async function (assert) {
-        assert.expect(15);
+        assert.expect(5);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, { TestMany2one: true }),

@@ -47,20 +47,20 @@
             };
 
             this.toolbarTests = [
-            {
-                name: 'Click ADD A VIDEO (youtube) in empty p: p -> div iframe before p',
-                async: false,
-                content: '<p>◆</p>',
-                do: async function (assert, testName) {
-                    await _insertVideo('https://www.youtube.com/watch?v=xxxxxxxxxxx');
-                    // debugger
-                },
-                test: '▶<div class="media_iframe_video">'+
-                        '<div class="media_iframe_video_size"></div>'+
-                        '<iframe width="1280" height="720" frameborder="0" class="o_video_dialog_iframe" src="//www.youtube.com/embed/xxxxxxxxxxx?autoplay=0&amp;loop=0&amp;controls=1&amp;fs=1&amp;modestbranding=1"/>'+
-                    '</div>◀'+
-                    '<p></p>',
-            },
+            // {
+            //     name: 'Click ADD A VIDEO (youtube) in empty p: p -> div iframe before p',
+            //     async: false,
+            //     content: '<p>◆</p>',
+            //     do: async function (assert, testName) {
+            //         await _insertVideo('https://www.youtube.com/watch?v=xxxxxxxxxxx');
+            //         // debugger
+            //     },
+            //     test: '▶<div class="media_iframe_video">'+
+            //             '<div class="media_iframe_video_size"></div>'+
+            //             '<iframe width="1280" height="720" frameborder="0" class="o_video_dialog_iframe" src="//www.youtube.com/embed/xxxxxxxxxxx?autoplay=0&amp;loop=0&amp;controls=1&amp;fs=1&amp;modestbranding=1"/>'+
+            //         '</div>◀'+
+            //         '<p></p>',
+            // },
             // todo: make the test work by spliting the "p" node (in the Rules or Arch?)
             // {
             //     name: "Add VIDEO (youtube) in p in breakable in unbreakable in breakable: p -> div.media_iframe_video after p",
@@ -78,16 +78,16 @@
             // },
 
             // Remove video
-            {
-                name: "Click REMOVE in popover after adding video in empty p",
-                async: true,
-                content: '<p>◆<br/></p>',
-                do: async function () {
-                    await _insertVideo('https://www.youtube.com/watch?v=xxxxxxxxxxx');
-                    await _triggerEvents('we3-popover[name="Video"] we3-button[name="image-remove"]', ['mousedown', 'click']);
-                },
-                test: '<p><br/>◆</p>',
-            },
+            // {
+            //     name: "Click REMOVE in popover after adding video in empty p",
+            //     async: true,
+            //     content: '<p>◆<br/></p>',
+            //     do: async function () {
+            //         await _insertVideo('https://www.youtube.com/watch?v=xxxxxxxxxxx');
+            //         await _triggerEvents('we3-popover[name="Video"] we3-button[name="image-remove"]', ['mousedown', 'click']);
+            //     },
+            //     test: '<p><br/>◆</p>',
+            // },
             // /* VIDEO POPOVER */
             // Multiple clicks
             // todo: make the test work by spliting the "p" node (in the Rules or Arch?)
