@@ -1861,6 +1861,12 @@ class Binary(Field):
             return human_size(value)
         return None if value is False else value
 
+    # DLE P163: `test_01_website_reset_password_tour`
+    def convert_to_record(self, value, record):
+        if isinstance(value, _BINARY):
+            return bytes(value)
+        return False if value is None else value
+
     def read(self, records):
         # values are stored in attachments, retrieve them
         assert self.attachment
