@@ -3303,6 +3303,7 @@ Fields:
         # DLE P34
         determine_inverses = {}
         records_to_inverse = {}
+        relational_names = []
         protected = set()
         for fname in vals:
             field = self._fields[fname]
@@ -3310,25 +3311,32 @@ Fields:
                 determine_inverses.setdefault(field.inverse, []).append(field)
                 # DLE P150: `test_cancel_propagation`, `test_manufacturing_3_steps`, `test_manufacturing_flow`
                 records_to_inverse[field] = self.filtered('id')
+            if field.relational or self._field_inverses[field]:
+                relational_names.append(fname)
             protected.update(self._field_computed.get(field, [field]))
 
         # protect fields being written against recomputation
         with env.protecting(protected, self):
             # determine records depending on values
-            self.modified(vals)
+            self.modified(relational_names)
 
-            relational_names = []
             # for monetary field, their related currency field must be cached before the amount so it can be rounded correctly
             for fname in sorted(vals, key=lambda x: self._fields[x].type=='monetary'):
                 if fname in bad_names:
                     continue
                 field = self._fields[fname]
                 field.write(self, vals[fname])
-                if field.relational or self._field_inverses[field]:
-                    relational_names.append(fname)
 
             # determine records depending on new values
-            self.modified(relational_names)
+            # DLE P164: `test_01_website_reset_password_tour`
+            # Call modified after write, because the modified can trigger a search which can trigger a flush
+            # which can trigger a recompute which remove the field from the recompute list while
+            # all the values required for the computation could not be yet in cache.
+            # e.g. Write on `name` of `res.partner` trigger the recompute of `display_name`,
+            # which triggers a search on child_ids to find the childs to which the display_name must be recomputed,
+            # which triggers the flush of `display_name` because the _order of res.partner includes display_name.
+            # The computation of display_name is then done too soon because the parent_id was not yet written.
+            self.modified(vals)
 
             if self._parent_store and self._parent_name in vals:
                 self.flush([self._parent_name])
