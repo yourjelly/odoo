@@ -29,6 +29,8 @@ class SaleOrder(models.Model):
     website_id = fields.Many2one('website', string='Website', readonly=True,
                                  help='Website through which this order was placed.')
 
+    # DLE P167: odoo.startTour('shop_wishlist')
+    @api.depends('order_line')
     def _compute_website_order_line(self):
         for order in self:
             order.website_order_line = order.order_line
