@@ -60,11 +60,21 @@ we3.ArchNode = class extends we3.ArchNode {
             return;
         }
 
-        if (this.isBlock() && (this.parent.isBlock() || this.parent.isRoot() && this.previousSibling())) {
-            this.before(this.params.create('ArchitecturalSpace'));
-            if (!this.nextSibling()) {
-                this.after(this.params.create('ArchitecturalSpace'));
+        var parentIsBlock = this.parent.isBlock();
+        if (this.isBlock()) {
+            if (parentIsBlock || this.parent.isRoot() && this.previousSibling()) {
+                this.before(this.params.create('ArchitecturalSpace'));
+                if (!this.nextSibling()) {
+                    this.after(this.params.create('ArchitecturalSpace'));
+                }
             }
+        // } else if (parentIsBlock) { // TODO à discuter, espace au debut et fin des blocks
+        //     if (!this.previousSibling()) {
+        //         this.before(this.params.create('ArchitecturalSpace'));
+        //     }
+        //     if (!this.nextSibling()) {
+        //         this.after(this.params.create('ArchitecturalSpace'));
+        //     }
         }
     }
     /**

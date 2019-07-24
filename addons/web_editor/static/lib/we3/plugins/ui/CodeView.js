@@ -59,6 +59,7 @@ var CodeViewPlugin = class extends we3.AbstractPlugin {
      */
     active (value, options) {
         var self = this;
+        options = Object.assign({}, this.getValueOptions, options);
         if (this._isActive()) {
             return;
         }
@@ -95,7 +96,7 @@ var CodeViewPlugin = class extends we3.AbstractPlugin {
         if (this._isActive()) {
             this.deactivate();
         } else {
-            this.active(null, this.getValueOptions);
+            this.active(null);
         }
     }
 

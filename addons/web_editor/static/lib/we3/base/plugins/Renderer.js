@@ -208,7 +208,7 @@ var BaseRenderer = class extends we3.AbstractPlugin {
      * @param {Node} [target]
      * @returns {Node}
      */
-    _getElement (id, target) {
+    _getElement (id, target, dontCheckParent) {
         if (id === 1) {
             return this.editable;
         }
@@ -223,7 +223,7 @@ var BaseRenderer = class extends we3.AbstractPlugin {
 
         if (!el) {
             el = this._createElement(json);
-        } else { // virtual node can mutate or try to use a free element
+        } else if (el === freeElement) { // virtual node can mutate or try to use a free element
             if ('nodeValue' in json && !json.nodeName) {
                 if (el.tagName) {
                     if (el.parentNode) {
@@ -240,7 +240,7 @@ var BaseRenderer = class extends we3.AbstractPlugin {
             this.elements[id] = el;
         }
 
-        this._insertInEditable(json);
+        this._insertInEditable(json, dontCheckParent);
 
         return el;
     }
@@ -248,20 +248,18 @@ var BaseRenderer = class extends we3.AbstractPlugin {
         if (json && json.id === 1) {
             return;
         }
-        if (!dontCheckParent) {
-            this._insertInEditable(this.jsonById[json.parentID]);
-        }
 
         var self = this;
-        var parent = this._getElement(json.parentID);
-        var index = this.jsonById[json.parentID].childNodes.indexOf(json.id);
+        var parent = dontCheckParent && this.elements[json.parentID] || this._getElement(json.parentID, null, true);
+        var parentJSON = this.jsonById[json.parentID];
+        var index = parentJSON.childNodes.indexOf(json.id);
         var el = this.elements[json.id];
         var child = parent.childNodes[index];
         if (el === child) {
             return;
         }
 
-        var childID = this.elements.indexOf(child);
+        var childID = this.getID(child);
         if (!child) {
             if (!el) {
                 el = this._createElement(json);
@@ -280,7 +278,7 @@ var BaseRenderer = class extends we3.AbstractPlugin {
             }
 
             if (childID !== -1) {
-                this._getElement(childID);
+                this._getElement(childID, null, true);
             }
         } else {
             if (!el) {

@@ -3,7 +3,7 @@
 
 var ArchitecturalSpace = class extends we3.ArchNodeText {
     get type () {
-        return 'TEXT-ARCH';
+        return 'ArchitecturalSpace';
     }
 
     //--------------------------------------------------------------------------
