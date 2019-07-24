@@ -9,6 +9,7 @@ var BaseRange = class extends we3.AbstractPlugin {
         this.dependencies = ['Arch', 'Renderer', 'BaseArch', 'BaseRenderer'];
         this.editableDomEvents = {
             'mousedown': '_onMouseDownEditable',
+            'touchstart': '_onMouseDownEditable',
             'mouseup': '_onMouseUpEditable',
             'click': '_onClick',
             'keydown': '_onKeydown',
@@ -16,6 +17,7 @@ var BaseRange = class extends we3.AbstractPlugin {
         };
         this.documentDomEvents = {
             'mouseup': '_onMouseUp',
+            'touchend': '_onMouseUp',
         };
     }
     willStart () {
