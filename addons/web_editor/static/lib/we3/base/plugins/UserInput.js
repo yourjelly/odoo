@@ -1,18 +1,17 @@
 (function () {
 'use strict';
 
-var BaseInput = class extends we3.AbstractPlugin {
+var BaseUserInput = class extends we3.AbstractPlugin {
     static get autoInstall () {
         return [];
     }
     constructor () {
         super(...arguments);
-        this.dependencies = ['BaseArch', 'BaseRange', 'BaseRenderer', 'Input'];
+        this.dependencies = ['BaseArch', 'BaseRange', 'BaseRenderer', 'UserInput'];
         this.editableDomEvents = {
             'keydown': '_onKeyDown',
             'keypress': '_onKeyDown',
             'input': '_onInput',
-            // 'textInput': '_onInput',
             'compositionend': '_onCompositionEnd',
             'mousedown': '_onMousedDown',
             'touchstart': '_onMousedDown',
@@ -509,9 +508,9 @@ var BaseInput = class extends we3.AbstractPlugin {
     }
 };
 
-var Input = class extends we3.AbstractPlugin {};
+var UserInput = class extends we3.AbstractPlugin {};
 
-we3.pluginsRegistry.BaseInput = BaseInput;
-we3.pluginsRegistry.Input = Input;
+we3.pluginsRegistry.BaseUserInput = BaseUserInput;
+we3.pluginsRegistry.UserInput = UserInput;
 
 })();
