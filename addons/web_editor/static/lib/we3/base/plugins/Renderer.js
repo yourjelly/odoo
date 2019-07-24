@@ -190,6 +190,16 @@ var BaseRenderer = class extends we3.AbstractPlugin {
             }
         });
     }
+    _createElement (json) {
+        var el;
+        if (json.nodeValue) {
+            el = document.createTextNode(json.nodeValue);
+        } else if (json.nodeName) {
+            el = document.createElement(json.nodeName);
+        }
+        this.elements[json.id] = el;
+        return el;
+    }
     /**
      * Get a Node by the ID of its corresponding ArchNode.
      *
@@ -212,11 +222,7 @@ var BaseRenderer = class extends we3.AbstractPlugin {
         }
 
         if (!el) {
-            if (json.nodeValue) {
-                el = document.createTextNode(json.nodeValue);
-            } else if (json.nodeName) {
-                el = document.createElement(json.nodeName);
-            }
+            el = this._createElement(json);
         } else { // virtual node can mutate or try to use a free element
             if ('nodeValue' in json && !json.nodeName) {
                 if (el.tagName) {
@@ -231,8 +237,8 @@ var BaseRenderer = class extends we3.AbstractPlugin {
                 }
                 el = document.createElement(json.nodeName);
             }
+            this.elements[id] = el;
         }
-        this.elements[id] = el;
 
         this._insertInEditable(json);
 
@@ -257,6 +263,9 @@ var BaseRenderer = class extends we3.AbstractPlugin {
 
         var childID = this.elements.indexOf(child);
         if (!child) {
+            if (!el) {
+                el = this._createElement(json);
+            }
             parent.appendChild(el);
         } else if ((!child.tagName && !json.nodeName || child.nodeName.toLowerCase() === json.nodeName) && childID === -1) {
             if (childID !== -1) {
@@ -274,6 +283,9 @@ var BaseRenderer = class extends we3.AbstractPlugin {
                 this._getElement(childID);
             }
         } else {
+            if (!el) {
+                el = this._createElement(json);
+            }
             parent.insertBefore(el, parent.childNodes[index]);
         }
     }
@@ -435,7 +447,7 @@ var BaseRenderer = class extends we3.AbstractPlugin {
             }
         }
 
-        if (('nodeValue' in changes) || json.nodeValue !== node.textContent) {
+        if (('nodeValue' in changes) && json.nodeValue !== node.textContent) {
             node.textContent = changes.nodeValue || json.nodeValue;
         }
 

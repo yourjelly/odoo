@@ -110,7 +110,8 @@ QUnit.module('website', {
                 <header id="top" data-anchor="true" class=" o_affix_enabled">
                     <nav class="bg-light navbar navbar-expand-md navbar-light">
                         <div class="container">
-                            <p><a href="/" class="logo navbar-brand"><span data-oe-model="res.company" data-oe-id="1" data-oe-field="logo" data-oe-type="image" data-oe-expression="res_company.logo" role="img" aria-label="Logo of YourCompany" title="YourCompany" class=" o_editable"><img src="/web/image/res.company/1/logo/YourCompany?unique=c804d95" class="img img-fluid" alt="YourCompany"/></span></a></p><button type="button" class="navbar-toggler o_editable" data-toggle="collapse" data-target="#top_menu_collapse" data-oe-model="ir.ui.view" data-oe-id="362" data-oe-field="arch" data-oe-xpath="/data/xpath[2]/nav/div[1]/button[1]"><span class="navbar-toggler-icon"></span></button>
+                            <p><a href="/" class="logo navbar-brand"><span data-oe-model="res.company" data-oe-id="1" data-oe-field="logo" data-oe-type="image" data-oe-expression="res_company.logo" role="img" aria-label="Logo of YourCompany" title="YourCompany" class=" o_editable"><img src="/web/image/res.company/1/logo/YourCompany?unique=c804d95" class="img img-fluid" alt="YourCompany"/></span></a></p>
+                            <button type="button" class="navbar-toggler o_editable" data-toggle="collapse" data-target="#top_menu_collapse" data-oe-model="ir.ui.view" data-oe-id="362" data-oe-field="arch" data-oe-xpath="/data/xpath[2]/nav/div[1]/button[1]"><span class="navbar-toggler-icon"></span></button>
                             <div class="collapse navbar-collapse" id="top_menu_collapse" aria-expanded="false">
                                 <ul class="ml-auto nav navbar-nav text-right" id="top_menu">
                                     <li class="nav-item">
@@ -139,7 +140,7 @@ QUnit.module('website', {
                             <div class="d-md-inline-flex d-none fade o_tooltip_container">
                                 <p>Follow all the</p>
                                 <div class="bottom o_tooltip"></div>
-                                <p>signs to get your website ready in no time.</p>
+                                <p>◆signs to get your website ready in no time.</p>
                             </div>
                         </div>
                     </div>

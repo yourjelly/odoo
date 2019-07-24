@@ -1559,6 +1559,70 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
         assert.strictEqual(this.dependencies.Test.getValue(), this.completionBoldValue, "Should insert the word in the Arch");
         assert.strictEqual(this.dependencies.Test.getDomValue(), this.completionBoldDom, "Should insert the word in the DOM");
     }
+    async _testAudioSwiftKey (assert) {
+        var ev;
+        var Test = this.dependencies.Test;
+        await Test.setValue('<p>ab&nbsp;◆</p>');
+
+        await this._triggerKey([
+            ['keydown', {
+                key: 'Unidentified',
+                charCode: 0,
+                keyCode: 229,
+            }],
+            ['compositionstart', {
+                data: '',
+            }],
+            ['beforeInput', {
+                data: 'test',
+                inputType: 'insertCompositionText',
+            }],
+            ['compositionupdate', {
+                data: 'test',
+            }],
+            ['input', {
+                data: 'test',
+                inputType: 'insertCompositionText',
+            }],
+        ]);
+
+        var textNode = this.editable.querySelector('p').firstChild;
+        textNode.textContent = 'ab test';
+        this._selectDOMRange(textNode, textNode.textContent.length);
+
+        await new Promise(setTimeout);
+
+        await this._triggerKey([
+            ['keydown', {
+                key: 'Unidentified',
+                charCode: 0,
+                keyCode: 229,
+            }],
+            ['compositionstart', {
+                data: '',
+            }],
+            ['beforeInput', {
+                data: ' test vocal',
+                inputType: 'insertCompositionText',
+            }],
+            ['compositionupdate', {
+                data: ' test vocal',
+            }],
+            ['input', {
+                data: ' test vocal',
+                inputType: 'insertCompositionText',
+            }],
+        ]);
+
+        var textNode = this.editable.querySelector('p').firstChild;
+        textNode.textContent += ' test vocal';
+        this._selectDOMRange(textNode, textNode.textContent.length);
+
+        await new Promise(setTimeout);
+
+        assert.strictEqual(this.dependencies.Test.getValue(), '<p>ab test test vocal◆</p>', "Should insert 2 audio parts in the Arch");
+        assert.strictEqual(this.dependencies.Test.getDomValue(), '<p>ab test test vocal</p>', "Should insert 2 audio parts in the DOM");
+    }
 
     async _triggerKey (data) {
         var ev, e;

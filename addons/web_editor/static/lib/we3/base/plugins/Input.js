@@ -75,7 +75,9 @@ var BaseInput = class extends we3.AbstractPlugin {
             // nothing
         } else if (param.type === 'composition') {
             ev.data = param.data;
-            ev.previous = param.previous && param.previous.update ? param.previous.data : false;
+            // previous.update = audroid update for each char
+            // param.data[0] !== ' ' = audio insertion
+            ev.previous = param.data[0] !== ' ' && param.previous && param.previous.update ? param.previous.data : false;
             ev.name = 'composition';
             return ev;
         } else {
@@ -113,17 +115,17 @@ var BaseInput = class extends we3.AbstractPlugin {
     }
     _eventsdDspatcher (ev, param) {
         if (ev.name === 'composition') {
-            this._pressInsertComposition(ev);
+            return this._pressInsertComposition(ev);
         } else if (ev.name === 'Backspace') {
-            this._removeSide(true);
+            return this._removeSide(true);
         } else if (ev.name === 'Delete') {
-            this._removeSide(false);
+            return this._removeSide(false);
         } else if (ev.name === 'Tab') {
-            this._pressInsertTab(ev);
+            return this._pressInsertTab(ev);
         } else if (ev.name === 'Enter') {
-            this._pressInsertEnter(ev);
+            return this._pressInsertEnter(ev);
         } else if (ev.name === 'char') {
-            this._pressInsertChar(ev);
+            return this._pressInsertChar(ev);
         }
     }
     _findOffsetInsertion (text, offset, insert) {
@@ -243,9 +245,11 @@ var BaseInput = class extends we3.AbstractPlugin {
                         newOffset++;
                     }
                 }
+
+                newOffset = Math.min(newOffset, archNode.nodeValue.length);
                 return {
                     scID: lastTextNodeID,
-                    so: Math.min(newOffset, archNode.nodeValue.length),
+                    so: newOffset,
                 };
             }
 
@@ -486,7 +490,7 @@ var BaseInput = class extends we3.AbstractPlugin {
     _onMousedDown () {
         this._previousEvent = null;
     }
-    __onKeyDownNextTick () {
+    async __onKeyDownNextTick () {
         var Input = this.dependencies.Input;
         var param = this._currentEvent;
         param.previous = this._previousEvent;
@@ -498,7 +502,7 @@ var BaseInput = class extends we3.AbstractPlugin {
             Input.trigger(ev.name, ev);
         }
         if (!ev.defaultPrevented) {
-            this._eventsdDspatcher(ev, param);
+            await this._eventsdDspatcher(ev, param);
         }
 
         this._redrawToRemoveArtefact(param.mutationsList);

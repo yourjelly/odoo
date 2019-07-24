@@ -1370,7 +1370,7 @@ var BaseArch = class extends we3.AbstractPlugin {
             newParents.push(wrapper);
         } else {
             newParents = ids.map(id => self.getArchNode(id).wrap(wrapperName));
-            newParents = newParents.filter(parent => parent.isInArch());
+            newParents = newParents.filter(parent => parent && parent.isInArch());
         }
         // render and select every wrapped node
         var scArch = newParents[0].firstLeaf();
@@ -1390,7 +1390,7 @@ var BaseArch = class extends we3.AbstractPlugin {
             // find all empty format descendents
             var range = this.dependencies.BaseRange.getRange();
             var formatNodes = lastBlock.descendents(function (node) {
-                return we3.tags.format.indexOf(node.nodeName) !== -1;
+                return !node.isInVoidoid() && we3.tags.format.indexOf(node.nodeName) !== -1;
              }, true);
             var toRemove = formatNodes.filter(function (node) {
                 return node.isEmpty() && node.isAllowUpdate() &&

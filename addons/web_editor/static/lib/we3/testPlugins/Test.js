@@ -542,12 +542,21 @@ var TestPlugin = class extends we3.AbstractPlugin {
             var containers = Arch.findAll('isRoot');
             Arch.bypassUpdateConstraints(function () {
                 Arch.bypassChangeTrigger(function () {
-                    containers.forEach(function (a) {
-                        Arch.remove(a.id);
+                    containers.forEach(function (a, index) {
+                        if (index === 0 && a.nodeName === 'test-container') {
+                            a.empty();
+                            container = a;
+                        } else {
+                            Arch.remove(a.id);
+                        }
                     });
                 });
 
-                var root = Arch.getClonedArchNode(1);
+                if (container) {
+                    return;
+                }
+
+                var root = Arch.getClonedArchNode(1, true);
                 container = new TEST_CONTAINER(root.params, 'test-container');
                 Arch.bypassUpdateConstraints(function () {
                     Arch.bypassChangeTrigger(function () {

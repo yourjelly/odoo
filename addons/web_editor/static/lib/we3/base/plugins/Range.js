@@ -121,6 +121,15 @@ var BaseRange = class extends we3.AbstractPlugin {
         return selection;
     }
     /**
+     * Get the range from the selection in the DOM.
+     *
+     * @private
+     * @returns {WrappedRange}
+     */
+    getRangeFromDOM () {
+        return new WrappedRange(this.dependencies.Arch, this.dependencies.Renderer, {});
+    }
+    /**
      * Return true if the start range is the same point as the end range.
      *
      * @returns {Boolean}
@@ -151,7 +160,7 @@ var BaseRange = class extends we3.AbstractPlugin {
      * @returns {Object|undefined} {range: {WrappedRange}, focus: {ArchNode}}
      */
     restore () {
-        return this._setRange(this._getRange());
+        return this._setRange(this.getRangeFromDOM());
     }
     /**
      * Select all the contents of the previous start container's first
@@ -182,7 +191,7 @@ var BaseRange = class extends we3.AbstractPlugin {
      */
     setRange (points, options) {
         this._computeSetRange(points, options);
-        return this._setRange(this._getRange(), options);
+        return this._setRange(this.getRangeFromDOM(), options);
     }
     /**
      * Return a deep copy of the range values.
@@ -306,15 +315,6 @@ var BaseRange = class extends we3.AbstractPlugin {
         } else {
             return (start.commonAncestor(end) || start).id;
         }
-    }
-    /**
-     * Get the range from the selection in the DOM.
-     *
-     * @private
-     * @returns {WrappedRange}
-     */
-    _getRange () {
-        return new WrappedRange(this.dependencies.Arch, this.dependencies.Renderer, {});
     }
     /**
      * Return true if the saved range is collapsed.
@@ -757,7 +757,7 @@ var BaseRange = class extends we3.AbstractPlugin {
      * @param {Boolean} [options.moveRight] true if a movement is initiated from left to right
      */
     _setRangeFromDOM (options) {
-        var range = this._getRange();
+        var range = this.getRangeFromDOM();
         if (!range.scID || range.scArch && (range.scArch.type === 'TEXT-VIRTUAL' ? 1 : range.scArch.length()) < range.so ||
             !range.ecID || range.scArch && (range.scArch.type === 'TEXT-VIRTUAL' ? 1 : range.ecArch.length()) < range.eo) {
             console.warn("Try to take the range from DOM but does not seem synchronized", range);
@@ -964,7 +964,7 @@ var BaseRange = class extends we3.AbstractPlugin {
      * @param {MouseEvent} e
      */
     _onMouseUpEditable (e) {
-        var range = this._getRange();
+        var range = this.getRangeFromDOM();
         if (!range || range.sc !== e.target && !e.target.contains(range.sc) && range.ec !== e.target && !e.target.contains(range.ec)) {
             var archNodeID = this.dependencies.Renderer.getID(e.target);
             var archNode = archNodeID && this.dependencies.Arch.getClonedArchNode(archNodeID);
