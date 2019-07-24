@@ -6,7 +6,7 @@ class AccountTaxGroup(models.Model):
 
     _inherit = 'account.tax.group'
 
-    l10n_ar_afip_code = fields.Integer(
+    l10n_ar_afip_code = fields.Char(
         'AFIP Code', help='This code will be used on electronic invoice and citi reports', readonly=True)
     l10n_ar_type = fields.Selection([
         ('tax', 'TAX'),
