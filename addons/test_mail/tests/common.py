@@ -243,9 +243,12 @@ class MockEmails(common.SingleTransactionCase):
         for expected in expected_email_values:
             sent_mail = next((mail for mail in self._mails if set(mail['email_to']) == set(expected['email_to'])), False)
             self.assertTrue(bool(sent_mail), 'Expected mail to %s not found' % expected['email_to'])
-            for val in ['email_from', 'reply_to', 'subject', 'body', 'references', 'attachments']:
+            for val in ['email_from', 'reply_to', 'subject', 'body', 'references']:
                 if val in expected:
                     self.assertEqual(expected[val], sent_mail[val], 'Value for %s: expected %s, received %s' % (val, expected[val], sent_mail[val]))
+            for val in ['attachments']:
+                if val in expected:
+                    self.assertCountEqual(expected[val], sent_mail[val], 'Value for %s: expected %s, received %s' % (val, expected[val], sent_mail[val]))
             for val in ['body_content', 'body_alternative', 'references_content']:
                 if val in expected:
                     self.assertIn(expected[val], sent_mail[val[:-8]], 'Value for %s: %s does not contain %s' % (val, sent_mail[val[:-8]], expected[val]))
