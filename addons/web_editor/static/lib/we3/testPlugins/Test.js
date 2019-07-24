@@ -363,10 +363,13 @@ var TestPlugin = class extends we3.AbstractPlugin {
         if (!node) {
             return;
         }
-        return this.triggerNativeEvents(node, 'mousedown').then(function (ev) {
-            if (!ev.defaultPrevented) {
-                self._selectRange(target, DOMRangeOffset|0);
+        return this.triggerNativeEvents(node, 'mousedown', {
+            afterEvent: function (ev) {
+                if (!ev.defaultPrevented) {
+                    self._selectRange(target, DOMRangeOffset|0);
+                }
             }
+        }).then(function () {
             return self.triggerNativeEvents(node, 'click').then(function () {
                 return self.triggerNativeEvents(node, 'mouseup');
             });
@@ -737,6 +740,9 @@ var TestPlugin = class extends we3.AbstractPlugin {
             }
 
             el.dispatchEvent(ev);
+            if (options.afterEvent) {
+                options.afterEvent(ev);
+            }
 
             if (eventName === 'keypress') {
                 await this._afterTriggerNativeKeyPressEvents(el, options);

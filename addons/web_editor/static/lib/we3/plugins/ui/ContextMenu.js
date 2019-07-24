@@ -3,9 +3,6 @@
 
 var PopoverPlugin = we3.getPlugin('Popover');
 var ContextMenuPlugin = class extends PopoverPlugin {
-    static get autoInstall () {
-        return [];
-    }
     /**
      * @override
      */

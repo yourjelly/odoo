@@ -9,13 +9,22 @@ var BaseUserInput = class extends we3.AbstractPlugin {
         super(...arguments);
         this.dependencies = ['BaseArch', 'BaseRange', 'BaseRenderer', 'UserInput'];
         this.editableDomEvents = {
-            'keydown': '_onKeyDown',
-            'keypress': '_onKeyDown',
-            'input': '_onInput',
-            'compositionend': '_onCompositionEnd',
-            'mousedown': '_onMousedDown',
-            'touchstart': '_onMousedDown',
+            keydown: '_onKeyDown',
+            keypress: '_onKeyDown',
+            input: '_onInput',
+            compositionend: '_onCompositionEnd',
+            mousedown: '_onMousedDown',
+            touchstart: '_onMousedDown',
         };
+        var self = this;
+        this.documentDomEvents = {
+            selectionchange: '_onSelectionChange',
+            mousedown: '_onMousedActivity',
+            mousemove: '_onMousedActivity',
+            click: '_onMousedActivity',
+            mouseup: '_onMousedActivity',
+        };
+        this._mouseActivity = 0;
     }
     willStart () {
         var self = this;
@@ -30,6 +39,12 @@ var BaseUserInput = class extends we3.AbstractPlugin {
             subtree: true,
         });
         return super.willStart();
+    }
+    blurEditor () {
+        this._editorFocused = false;
+    }
+    focusEditor () {
+        this._editorFocused = true;
     }
     destroy () {
         this._observer.disconnect();
@@ -72,6 +87,8 @@ var BaseUserInput = class extends we3.AbstractPlugin {
 
         if (param.defaultPrevented) {
             // nothing
+        } else if (param.type === 'selectAll') {
+            ev.name = 'selectAll';
         } else if (param.type === 'composition') {
             ev.data = param.data;
             // previous.update = audroid update for each char
@@ -489,8 +506,18 @@ var BaseUserInput = class extends we3.AbstractPlugin {
     _onMousedDown () {
         this._previousEvent = null;
     }
+    _onMousedActivity (e) {
+        if (e.detail === 0 || !this._editorFocused || this.editable !== e.target && !this.editable.contains(e.target)) {
+            return;
+        }
+        var self = this;
+        this._mouseActivity++;
+        setTimeout(function () {
+            self._mouseActivity--;
+        });
+    }
     async __onKeyDownNextTick () {
-        var Input = this.dependencies.Input;
+        var UserInput = this.dependencies.UserInput;
         var param = this._currentEvent;
         param.previous = this._previousEvent;
         this._previousEvent = param;
@@ -498,13 +525,99 @@ var BaseUserInput = class extends we3.AbstractPlugin {
 
         var ev = this._eventsNormalization(param);
         if (!ev.defaultPrevented) {
-            Input.trigger(ev.name, ev);
+            UserInput.trigger(ev.name, ev);
         }
         if (!ev.defaultPrevented) {
             await this._eventsdDspatcher(ev, param);
         }
 
         this._redrawToRemoveArtefact(param.mutationsList);
+    }
+    _onSelectionChange (e) {
+        if (!this._editorFocused || this._mouseActivity || this.editable.style.display === 'none') {
+            return;
+        }
+
+        var UserInput = this.dependencies.UserInput;
+        var range = this.dependencies.BaseRange.getRange();
+        var rangeDOM = this.dependencies.BaseRange.getRangeFromDOM();
+        if (range.sc === rangeDOM.sc && range.so === rangeDOM.so &&
+            range.ec === rangeDOM.ec && range.eo === rangeDOM.eo) {
+            return;
+        }
+
+        if (rangeDOM.isCollapsed() || !rangeDOM.sc || !rangeDOM.ec) {
+            return;
+        }
+        if (!this.document.body.contains(rangeDOM.sc) || !this.document.body.contains(rangeDOM.ec)) {
+            return;
+        }
+        if (rangeDOM.so !== 0 && rangeDOM.sc.nodeType === 3 || rangeDOM.ec.nodeType === 3 && rangeDOM.eo !== rangeDOM.ec.textContent.length) {
+            return;
+        }
+
+        function isVisible (el) {
+            if (el.tagName === 'WE3-EDITABLE') {
+                return true;
+            }
+            var style = window.getComputedStyle(el.parentNode);
+            if (style.display === 'none' || style.visibility === 'hidden') {
+                return false;
+            }
+            return isVisible(el.parentNode);
+        }
+
+        var el;
+        if (this.editable.contains(rangeDOM.sc)) {
+            el = this.editable;
+            while (el) {
+                if (el === rangeDOM.sc) {
+                    break;
+                }
+                if (el.nodeType === 3 && isVisible(el.parentNode)) {
+                    return;
+                }
+                if (el.firstChild) {
+                    el = el.firstChild;
+                } else if (el.nextSibling) {
+                    el = el.nextSibling;
+                } else if (el.parentNode !== this.editable) {
+                    el = el.parentNode.nextSibling;
+                } else {
+                    el = null;
+                }
+            }
+        }
+
+        if (this.editable.contains(rangeDOM.ec)) {
+            el = this.editable;
+            while (el) {
+                if (el === rangeDOM.ec) {
+                    break;
+                }
+                if (el.nodeType === 3 && isVisible(el)) {
+                    return;
+                }
+                if (el.lastChild) {
+                    el = el.lastChild;
+                } else if (el.previousSibling) {
+                    el = el.previousSibling;
+                } else if (el.parentNode !== this.editable) {
+                    el = el.parentNode.previousSibling;
+                } else {
+                    el = null;
+                }
+            }
+        }
+
+        var ev = this._eventsNormalization({type: 'selectAll'});
+        UserInput.trigger(ev.name, ev);
+
+        if (ev.defaultPrevented) {
+            this.dependencies.BaseRange.restore();
+        } else {
+            this.dependencies.BaseRange.selectAll();
+        }
     }
 };
 

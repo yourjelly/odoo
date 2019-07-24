@@ -8,14 +8,14 @@ var BaseRange = class extends we3.AbstractPlugin {
         super(...arguments);
         this.dependencies = ['Arch', 'Renderer', 'BaseArch', 'BaseRenderer'];
         this.editableDomEvents = {
-            'mousedown': '_onMouseDownEditable',
-            'touchstart': '_onMouseDownEditable',
             'mouseup': '_onMouseUpEditable',
             'click': '_onClick',
             'keydown': '_onKeydown',
             'keyup': '_onKeyup',
         };
         this.documentDomEvents = {
+            'mousedown': '_onMouseDown',
+            'touchstart': '_onMouseDown',
             'mouseup': '_onMouseUp',
             'touchend': '_onMouseUp',
         };
@@ -169,7 +169,7 @@ var BaseRange = class extends we3.AbstractPlugin {
      * unbreakable ancestor
      */
     selectAll () {
-        var scArch = this.dependencies.Arch.getClonedArchNode(this._range.scID);
+        var scArch = this.dependencies.BaseArch.getArchNode(this._range.scID);
         this.setRange({
             scID: scArch.ancestor('isUnbreakable').id,
         });
@@ -940,8 +940,8 @@ var BaseRange = class extends we3.AbstractPlugin {
      * @private
      * @param {MouseEvent} e
      */
-    _onMouseDownEditable () {
-        this._mousedownInEditable = true;
+    _onMouseDown (e) {
+        this._mousedownInEditable = this.editable === e.target || this.editable.contains(e.target);
     }
     /**
      * @private

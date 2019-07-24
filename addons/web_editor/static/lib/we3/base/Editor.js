@@ -17,6 +17,7 @@ we3.Editor = class extends we3.EventDispatcher {
         }
         var self = this;
         this.editorEvents = {
+            'touchstart document': '_onMouseDown',
             'mousedown document': '_onMouseDown',
             'mouseenter document': '_onMouseEnter',
             'mouseleave document': '_onMouseLeave',
