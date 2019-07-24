@@ -419,7 +419,6 @@ class Post(models.Model):
         elif post.parent_id and not post.can_answer:
             raise KarmaError(_('%d karma required to answer a question.') % post.forum_id.karma_answer)
         if not post.parent_id and not post.can_post:
-            post.invalidate_cache(['can_edit'])
             post.sudo().state = 'pending'
 
         # add karma for posting new questions

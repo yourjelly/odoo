@@ -246,7 +246,6 @@ class TestForum(TestForumCommon):
 
         # portal user flags a post: not allowed, unsufficient karma
         with self.assertRaises(KarmaError):
-            post.invalidate_cache(['can_flag'])
             post.with_user(self.user_portal).flag()
 
         # portal user flags a post: ok if enough karma
@@ -265,7 +264,6 @@ class TestForum(TestForumCommon):
 
         # portal user validate a post: not allowed, unsufficient karma
         with self.assertRaises(KarmaError):
-            post.invalidate_cache(['can_moderate'])
             post.with_user(self.user_portal).validate()
 
         # portal user validate a pending post
@@ -299,7 +297,6 @@ class TestForum(TestForumCommon):
 
         # portal user validate a post: not allowed, unsufficient karma
         with self.assertRaises(KarmaError):
-            post.invalidate_cache(['can_moderate'])
             post.with_user(self.user_portal).refuse()
 
         # portal user validate a pending post
@@ -320,7 +317,6 @@ class TestForum(TestForumCommon):
 
         # portal user mark a post as offensive: not allowed, unsufficient karma
         with self.assertRaises(KarmaError):
-            post.invalidate_cache(['can_moderate'])
             post.with_user(self.user_portal).mark_as_offensive(12)
 
         # portal user mark a post as offensive
