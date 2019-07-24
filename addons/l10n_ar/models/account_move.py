@@ -27,12 +27,9 @@ class AccountMove(models.Model):
     l10n_ar_currency_rate = fields.Float(copy=False, digits=(16, 4), readonly=True, string="Currency Rate")
     # Mostly used on reports
     l10n_ar_afip_concept = fields.Selection(
-        compute='_compute_l10n_ar_afip_concept', inverse='_inverse_l10n_ar_afip_concept',
-        selection='get_afip_invoice_concepts', string="AFIP Concept", help="A concept is suggested regarding"
-        " the type of the products on the invoice but it is allowed to force a different type if required.",
-        readonly=True, states={'draft': [('readonly', False)]})
-    l10n_ar_force_afip_concept = fields.Selection(
-        selection='get_afip_invoice_concepts', string="Forced AFIP Concept", readonly=True,)
+        compute='_compute_l10n_ar_afip_concept', selection='get_afip_invoice_concepts', string="AFIP Concept",
+        help="A concept is suggested regarding the type of the products on the invoice but it is allowed to force a"
+        " different type if required.", readonly=True, states={'draft': [('readonly', False)]})
     l10n_ar_afip_service_start = fields.Date(
         string='AFIP Service Start Date', readonly=True, states={'draft': [('readonly', False)]})
     l10n_ar_afip_service_end = fields.Date(
@@ -43,18 +40,11 @@ class AccountMove(models.Model):
         return [('1', 'Products / Definitive export of goods'), ('2', 'Services'), ('3', 'Products and Services'),
                 ('4', '4-Other (export)')]
 
-    @api.depends('invoice_line_ids', 'invoice_line_ids.product_id', 'invoice_line_ids.product_id.type',
-                 'l10n_ar_force_afip_concept', 'journal_id')
+    @api.depends('invoice_line_ids', 'invoice_line_ids.product_id', 'invoice_line_ids.product_id.type', 'journal_id')
     def _compute_l10n_ar_afip_concept(self):
         for rec in self.filtered(lambda x: x.company_id.country_id == self.env.ref('base.ar')
                                  and x.l10n_latam_use_documents):
-            rec.l10n_ar_afip_concept = rec.l10n_ar_force_afip_concept if rec.l10n_ar_force_afip_concept \
-                else rec._get_concept()
-
-    def _inverse_l10n_ar_afip_concept(self):
-        for rec in self:
-            rec.l10n_ar_force_afip_concept = False if rec._get_concept() == rec.l10n_ar_afip_concept \
-                else rec.l10n_ar_afip_concept
+            rec.l10n_ar_afip_concept = rec._get_concept()
 
     def _get_concept(self):
         """ Method to get the concept of the invoice considering the type of the products on the invoice """
