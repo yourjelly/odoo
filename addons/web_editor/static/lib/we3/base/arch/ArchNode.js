@@ -1408,25 +1408,29 @@ we3.ArchNode = class {
      **/
     _prevNextUntil (unbreakableContainer, isPrev, pred, options) {
         options = options || {};
-        var next = this.walk(isPrev);
-        if (!next || !options.doCrossUnbreakables && !unbreakableContainer.contains(next)) {
-            if (!options.doNotInsertVirtual && this.isAllowUpdate() && !this.isRoot()) {
-                var virtualText = this.params.create();
-                this[isPrev ? 'before' : 'after'](virtualText);
-                return virtualText;
+        var node = this;
+        while (true) {
+            var next = node.walk(isPrev);
+
+            if (!next || !options.doCrossUnbreakables && !unbreakableContainer.contains(next)) {
+                if (!options.doNotInsertVirtual && node.isAllowUpdate() && !node.isRoot()) {
+                    var virtualText = this.params.create();
+                    node[isPrev ? 'before' : 'after'](virtualText);
+                    return virtualText;
+                }
+                return null;
             }
-            return null;
+            if (options.stopAtBlock && next.isBlock()) {
+                return next;
+            }
+            if (options.leafToLeaf && next.childNodes && next.childNodes.length) {
+                return next._prevNextUntil(unbreakableContainer, isPrev, pred, options);
+            }
+            if (!pred || pred.call(next, next)) {
+                return next;
+            }
+            node = next;
         }
-        if (options.stopAtBlock && next.isBlock()) {
-            return next;
-        }
-        if (options.leafToLeaf && next.childNodes && next.childNodes.length) {
-            return next._prevNextUntil(unbreakableContainer, isPrev, pred, options);
-        }
-        if (!pred || pred.call(next, next)) {
-            return next;
-        }
-        return next._prevNextUntil(unbreakableContainer, isPrev, pred, options);
     }
     /**
      * Remove to the side of the ArchNode,

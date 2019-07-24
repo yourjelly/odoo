@@ -735,20 +735,22 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @param {ArchNode} archNode
      */
     _addToArch (archNode) {
-        var self = this;
         var isInArch = archNode.parent && archNode.parent.id &&
             !archNode.parent.isClone() && archNode.isInRoot();
         if (isInArch) {
-            archNode.__removed = false;
-            if (!archNode.id) {
-                archNode.id = ++this._id;
-            }
-            this._archNodeList[archNode.id] = archNode;
-            if (archNode.childNodes) {
-                archNode.childNodes.forEach(function (archNode) {
-                    self._addToArch(archNode);
-                    self._changeArch(archNode, null);
-                });
+            var archNodeList = this._archNodeList;
+            var toAdd = [archNode];
+            while (archNode = toAdd.pop()) {
+                archNode.__removed = false;
+                archNode.id = archNode.id || ++this._id;
+                archNodeList[archNode.id] = archNode;
+                if (archNode.childNodes) {
+                    for (var k = 0, len = archNode.childNodes.length; k < len; k++) {
+                        var child = archNode.childNodes[k];
+                        toAdd.push(child);
+                        this._changeArch(child, null);
+                    }
+                }
             }
         }
     }
