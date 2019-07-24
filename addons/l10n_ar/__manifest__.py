@@ -52,7 +52,6 @@ Follow the next configuration steps
         'data/res_partner_data.xml',
         'data/res_currency_data.xml',
         'data/res_country_data.xml',
-        'data/product_product_data.xml',
         'views/account_move_view.xml',
         'views/res_partner_view.xml',
         'views/res_company_view.xml',

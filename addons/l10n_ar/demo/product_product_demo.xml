@@ -1,15 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- agregamos impuesto no gravado a productos de data ya que en data no fuciona porque todavia no esta instalado plan de cuentas, aca si porque justamente esto lo carga el plan de cuentas -->
 
-    <record id="l10n_ar.product_product_arancel" model="product.product">
+    <record id="product_product_quote_despacho" model="product.product">
+        <field name="name">Import Clearance</field>
+        <field name="type">service</field>
+        <field name="default_code">AFIP_DESPACHO</field>
+        <field name="sale_ok" eval="False"/>
+        <field name="uom_id" ref="uom.product_uom_unit"/>
+    </record>
+
+    <record id="product_product_tasa_estadistica" model="product.product">
+        <field name="name">Statistics Rate</field>
+        <field name="type">service</field>
+        <field name="default_code">AFIP_TASA_EST</field>
+        <field name="sale_ok" eval="False"/>
+        <field name="uom_id" ref="uom.product_uom_unit"/>
+    </record>
+
+    <record id="product_product_arancel" model="product.product">
+        <field name="name">Tariff</field>
+        <field name="type">service</field>
+        <field name="default_code">AFIP_ARANCEL</field>
+        <field name="sale_ok" eval="False"/>
+        <field name="uom_id" ref="uom.product_uom_unit"/>
         <field name="supplier_taxes_id" search="[('type_tax_use', '=', 'purchase'), ('tax_group_id', '=', 'VAT Untaxed')]"/>
     </record>
-    <record id="l10n_ar.product_product_servicio_de_guarda" model="product.product">
+
+    <record id="product_product_servicio_de_guarda" model="product.product">
+        <field name="name">Guard Service</field>
+        <field name="type">service</field>
+        <field name="default_code">AFIP_SERV_GUARDA</field>
+        <field name="sale_ok" eval="False"/>
+        <field name="uom_id" ref="uom.product_uom_unit"/>
         <field name="supplier_taxes_id" search="[('type_tax_use', '=', 'purchase'), ('tax_group_id', '=', 'VAT Untaxed')]"/>
     </record>
 
-<!-- Creamos productos para distintos casos de uso -->
     <record id="product_product_exento" model="product.product">
         <field name="name">Book "Development in Odoo" (VAT Exempt)</field>
         <field name="categ_id" ref="product.product_category_5"/>
@@ -60,7 +85,8 @@
         <field name="supplier_taxes_id" search="[('type_tax_use', '=', 'purchase'), ('tax_group_id', '=', 'VAT 27%')]"/>
     </record>
 
-    <!-- VAT 10,5% (lamptos) -->
+    <!-- VAT 10,5% -->
+
     <record id="product.product_product_25" model="product.product">
         <field name="name">Laptop E5023 (IVA 10,5)</field>
         <!-- agregamos percecipn aplicada y sufrida tambien -->
