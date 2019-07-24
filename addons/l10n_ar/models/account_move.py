@@ -148,8 +148,7 @@ class AccountMove(models.Model):
 
         # verificamos facturas de compra que deben reportar cuit y no lo tienen configurado
         without_cuit = self.filtered(
-            lambda x: x.type in ['in_invoice', 'in_refund'] and x.l10n_latam_document_type_id.purchase_cuit_required and
-            not x.commercial_partner_id.l10n_ar_cuit)
+            lambda x: x.type in ['in_invoice', 'in_refund'] and not x.commercial_partner_id.l10n_ar_cuit)
         if without_cuit:
             raise UserError(_('The following partners do not have CUIT configured') + ': %s' % (', '.join(
                 without_cuit.mapped('commercial_partner_id.name'))))

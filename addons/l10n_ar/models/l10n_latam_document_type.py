@@ -13,7 +13,6 @@ class L10nLatamDocumentType(models.Model):
         ' documents presented to the goverment and that depends on the'
         ' operation type, the responsability of both the issuer and the'
         ' receptor of the document')
-    purchase_cuit_required = fields.Boolean(help='True if the CITI purchase statement requires to inform CUIT')
     purchase_alicuots = fields.Selection(
         [('not_zero', 'Nor Zero'), ('zero', 'Zero')], help='Zero or No Zero as required by the CITI purchase statement')
 
