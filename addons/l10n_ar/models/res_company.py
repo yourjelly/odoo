@@ -33,3 +33,17 @@ class ResCompany(models.Model):
         """ Argentinian localization use documents """
         self.ensure_one()
         return True if self.country_id == self.env.ref('base.ar') else super()._localization_use_documents()
+
+    def write(self, values):
+        """ Set companies AFIP Responsability and Country from the if AR CoA installed """
+        chart_template_id = values.get('chart_template_id', False)
+        if chart_template_id:
+            match = {
+                self.env.ref('l10n_ar.l10nar_base_chart_template').id: self.env.ref('l10n_ar.res_RM').id,
+                self.env.ref('l10n_ar.l10nar_ex_chart_template').id: self.env.ref('l10n_ar.res_IVAE').id,
+                self.env.ref('l10n_ar.l10nar_ri_chart_template').id: self.env.ref('l10n_ar.res_IVARI').id,
+            }
+            ar_coa = match.get(chart_template_id, False)
+            if ar_coa:
+                values.update(l10n_ar_afip_responsability_type_id=ar_coa, country_id=self.env.ref('base.ar').id)
+        return super().write(values)
