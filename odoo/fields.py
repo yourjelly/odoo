@@ -3012,6 +3012,21 @@ class Many2many(_RelationalMulti):
 
         # determine old and new relation {x: ys}
         set = OrderedSet
+        # DLE P166: test_write_base_many2many
+        # Before, old relation was computed using plain sql
+        # Now, we attempt to use `record[self.name]`, but if its not in cache, this triggers a read,
+        # which do 2 sql queries:
+        # - One just fetching the records regular field, but in this case there is none, it therefore just fetch the ids.
+        # - One to fetch "tag_ids" which is in another many2many table.
+        # We could ignore to do the "basic" select when reading fields which are all "other fields", such as x2many,
+        # but I think the select of the ids acts also as an access right check, so we cant.
+        # Instead, I use field.read for the records missing this field in the cache.
+        # This might actually be faster than doing a plain models read anyway as models.read
+        # do some stuff before doing also fields.read in the end. Calling field.read directly is a shortcut.
+        if self.store:
+            missing_ids = list(records.env.cache.get_missing_ids(records, self))
+            if missing_ids:
+                self.read(records.browse(missing_ids))
         old_relation = {record.id: set(record[self.name]._ids) for record in records}
         new_relation = {x: set(ys) for x, ys in old_relation.items()}
 
