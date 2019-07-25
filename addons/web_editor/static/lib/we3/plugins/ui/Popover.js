@@ -150,21 +150,6 @@ var PopoverPlugin = class extends we3.AbstractPlugin {
         this._addButtonHandlersEvents(plugin, element);
         this._addButtonHandlersDataMethod(plugin, element);
         this._addButtonHandlersDropdown(element);
-
-        // prevent all click (avoid href...)
-        element.addEventListener('mousedown', function (ev) {
-            ev.preventDefault();
-        }, false);
-        element.addEventListener('click', function (ev) {
-            ev.preventDefault();
-        }, false);
-        element.addEventListener('mouseup', function (ev) {
-            ev.preventDefault();
-            ev.stopPropagation();
-            if (ev.target.tagName === 'INPUT') {
-                ev.target.focus();
-            }
-        }, false);
     }
     _addButtonHandlersEvents (plugin, element) {
         // add plugins button event as handler

@@ -34,44 +34,68 @@ we3.addPlugin('Field', class extends we3.AbstractPlugin {
         };
     }
 
-    edit (value, archNode) {
-        var elementInDom = this.dependencies.Renderer.getElement(archNode.id);
-        var fieldType = elementInDom.getAttribute('data-oe-type');
-        var input = document.createElement('input');
-        var inputValue = elementInDom.textContent;
-        if (fieldType === 'date') {
-            input.setAttribute('type', 'date');
-            inputValue = elementInDom.getAttribute('data-oe-original');
-        } else if (fieldType === 'text') {
-            input.setAttribute('type', 'text');
-        }
-        input.setAttribute('value', inputValue);
-        // elementInDom.parentNode.insertBefore(input, elementInDom);
-        // elementInDom.style.visibility = 'hidden';
-        var button = document.querySelector('we3-button[name="field-edit"]');
-        button.parentNode.insertBefore(input, button);
-        button.style.visibility = "hidden";
-        input.addEventListener('focusout', function () {
-            elementInDom.textContent = this.value;
-            elementInDom.visibility = 'visible';
-        });
-        // this.dependencies.Arch.importUpdate(archNode.toJSON());
+    start() {
+        this.buttons.elements[0].querySelector('input').addEventListener('input', this._onInputChange.bind(this));
+        this.input = this.buttons.elements[0].querySelector('input');
     }
 
+    // edit (value, archNode) {
+    //     var elementInDom = this.dependencies.Renderer.getElement(archNode.id);
+    //     var fieldType = elementInDom.getAttribute('data-oe-type');
+    //     var input = document.createElement('input');
+    //     var inputValue = elementInDom.textContent;
+    //     if (fieldType === 'date') {
+    //         input.setAttribute('type', 'date');
+    //         inputValue = elementInDom.getAttribute('data-oe-original');
+    //     } else if (fieldType === 'text') {
+    //         input.setAttribute('type', 'text');
+    //     }
+    //     input.setAttribute('value', inputValue);
+    //     // elementInDom.parentNode.insertBefore(input, elementInDom);
+    //     // elementInDom.style.visibility = 'hidden';
+    //     var button = document.querySelector('we3-button[name="field-edit"]');
+    //     button.parentNode.insertBefore(input, button);
+    //     button.style.visibility = "hidden";
+    //     input.addEventListener('focusout', function () {
+    //         elementInDom.textContent = this.value;
+    //         elementInDom.visibility = 'visible';
+    //     });
+    //     // this.dependencies.Arch.importUpdate(archNode.toJSON());
+    // }
+
     getArchNode(archNode) {
-        return archNode.ancestor(function (node) {
+        const fieldAncestor = archNode.ancestor(function (node) {
             return node.attributes && node.attributes['data-oe-type'];
         });
+
+        if (fieldAncestor && fieldAncestor.attributes['data-oe-type'] === 'date') {
+            this.input.type = 'date';
+            const inputValue = fieldAncestor.attributes['data-oe-original'];
+            this.input.value = inputValue;
+        }
+
+        this.fieldNode = fieldAncestor;
+
+        return fieldAncestor;
     }
 
     _active (buttonName, focusNode) {
         return false;
     }
+
     _enabled (buttonName, focusNode) {
         var ancestorFieldNode = focusNode.ancestor(function (node) {
             return node.attributes && node.attributes['data-oe-type'];
         });
         return ancestorFieldNode;
+    }
+
+    _onInputChange() {
+        this.dependencies.Arch.do((getArchNode) => {
+            const archNode = getArchNode(this.fieldNode.id);
+            archNode.empty();
+            archNode.insert(this.dependencies.Arch.parse(this.input.value));
+        });
     }
 });
 

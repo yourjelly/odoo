@@ -154,7 +154,8 @@
 </we3-group>
 
 <we3-group t-name="we3.buttons.fieldEdit">
-    <we3-button name="field-edit" data-method="edit" data-value="">Edit</we3-button>
+    <!-- <we3-button name="field-edit" data-method="edit" data-value="">Edit</we3-button> -->
+    <input name="inputField"/>
 </we3-group>
 
 <!--=================-->
