@@ -152,7 +152,7 @@
                                     <label for="has_google_analytics_dashboard"/>
                                     <span class="fa fa-lg fa-globe" title="Values set here are website-specific." groups="website.group_multi_website"/>
                                     <div class="text-muted">
-                                        Follow your website traffic in Odoo.
+                                        Follow your website traffic in HelloApp.
                                     </div>
                                     <div class="content-group" attrs="{'invisible': [('has_google_analytics_dashboard', '=', False)]}">
                                         <div class="row mt16">
@@ -309,7 +309,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-lg-6 o_setting_box" id="utm_tracker_settings" title="Analyze the efficiency of your marketing campaigns by using trackable UTM trackers (campaigns, medium, sources). Create trackers and follow clicks from the Promote menu of your website. Those trackers can be used in Google Analytics or in Odoo reports where you can see the opportunities and sales revenue generated thanks to your links.">
+                            <div class="col-12 col-lg-6 o_setting_box" id="utm_tracker_settings" title="Analyze the efficiency of your marketing campaigns by using trackable UTM trackers (campaigns, medium, sources). Create trackers and follow clicks from the Promote menu of your website. Those trackers can be used in Google Analytics or in HelloApp reports where you can see the opportunities and sales revenue generated thanks to your links.">
                                 <div class="o_setting_left_pane">
                                     <field name="module_website_links"/>
                                 </div>

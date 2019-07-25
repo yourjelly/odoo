@@ -596,7 +596,7 @@
               <p class="o_view_nocontent_smiling_face">
                 Create a new stock operation
               </p><p>
-                Most operations are prepared automatically by Odoo according
+                Most operations are prepared automatically by HelloApp according
                 to your preconfigured logistics rules, but you can also record
                 manual stock movements.
               </p>

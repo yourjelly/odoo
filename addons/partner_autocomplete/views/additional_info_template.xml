@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="additional_info_template">
-        <p>Partner created by Odoo Partner Autocomplete Service</p>
+        <p>Partner created by HelloApp Partner Autocomplete Service</p>
         <div class="bg-white mt-3 mb-3 p-5 mr-5">
             <h4>
                 <span class="mr-3" t-esc="name"/>

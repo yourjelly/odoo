@@ -569,7 +569,7 @@
                                 <div class="o_setting_right_pane">
                                     <label for="module_account_invoice_extract"/>
                                     <div class="text-muted">
-                                        When receiving an email with a bill, or uploading scanned bills, Odoo will parse them (OCR) and auto-complete (AI) Draft Bills to validate.
+                                        When receiving an email with a bill, or uploading scanned bills, HelloApp will parse them (OCR) and auto-complete (AI) Draft Bills to validate.
                                     </div>
                                     <div id="msg_invoice_extract" class="content-group" attrs="{'invisible': [('module_account_invoice_extract', '=', False)]}">
                                         <div class="text-warning mt16 mb4">

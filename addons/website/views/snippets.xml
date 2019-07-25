@@ -46,7 +46,7 @@
                     </div>
                 </div>
                 <div class="col-lg-6 pt16 pb16">
-                    <img src="/web/image/website.s_text_image_default_image" class="img img-fluid mx-auto" alt="Odoo • Text and Image"/>
+                    <img src="/web/image/website.s_text_image_default_image" class="img img-fluid mx-auto" alt="HelloApp • Text and Image"/>
                 </div>
             </div>
         </div>
@@ -58,7 +58,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-6 pt16 pb16">
-                    <img src="/web/image/website.s_image_text_default_image" class="img img-fluid mx-auto" alt="Odoo • Image and Text"/>
+                    <img src="/web/image/website.s_image_text_default_image" class="img img-fluid mx-auto" alt="HelloApp • Image and Text"/>
                 </div>
                 <div class="col-lg-6 pt16 pb16">
                     <h2>Section Subtitle</h2>
@@ -140,7 +140,7 @@
             <div class="row d-flex align-items-stretch">
                 <div class="col-lg-4 s_col_no_bgcolor pt16 pb16">
                     <div class="card bg-white">
-                        <img class="card-img-top" src="/web/image/website.library_image_11" alt="Odoo - Sample 1 for three columns"/>
+                        <img class="card-img-top" src="/web/image/website.library_image_11" alt="HelloApp - Sample 1 for three columns"/>
                         <div class="card-body">
                             <h3 class="card-title">Feature One</h3>
                             <p class="card-text">Adapt these three columns to fit you design need. To duplicate, delete or move columns, select the column and use the top icons to perform your action.</p>
@@ -149,7 +149,7 @@
                 </div>
                 <div class="col-lg-4 s_col_no_bgcolor pt16 pb16">
                     <div class="card bg-white">
-                        <img class="card-img-top" src="/web/image/website.library_image_13" alt="Odoo - Sample 2 for three columns"/>
+                        <img class="card-img-top" src="/web/image/website.library_image_13" alt="HelloApp - Sample 2 for three columns"/>
                         <div class="card-body">
                             <h3 class="card-title">Feature Two</h3>
                             <p class="card-text">To add a fourth column, reduce the size of these three columns using the right icon of each block. Then, duplicate one of the column to create a new one as a copy.</p>
@@ -161,7 +161,7 @@
                 </div>
                 <div class="col-lg-4 s_col_no_bgcolor pt16 pb16">
                     <div class="card bg-white">
-                        <img class="card-img-top" src="/web/image/website.library_image_07" alt="Odoo - Sample 3 for three columns"/>
+                        <img class="card-img-top" src="/web/image/website.library_image_07" alt="HelloApp - Sample 3 for three columns"/>
                         <div class="card-body">
                             <h3 class="card-title">Feature Three</h3>
                             <p class="card-text">Delete the above image or replace it with a picture that illustrates your message. Click on the picture to change it's <em>rounded corner</em> style.</p>
@@ -188,7 +188,7 @@
                 </div>
                 <div class="col-lg-8 offset-lg-2 pb24">
                     <figure class="figure">
-                        <img src="/web/image/website.s_picture_default_image" class="figure-img img-fluid rounded img-thumbnail padding-large" alt="Odoo • A picture with a caption"/>
+                        <img src="/web/image/website.s_picture_default_image" class="figure-img img-fluid rounded img-thumbnail padding-large" alt="HelloApp • A picture with a caption"/>
                         <figcaption class="figure-caption py-3 text-center"><i class="fa fa-1x fa-picture-o mr-2"/>Add a caption to enhance the meaning of this image.</figcaption>
                     </figure>
                 </div>
@@ -514,7 +514,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-9 pb24">
-                    <h3><b>50,000+ companies</b> run Odoo to grow their businesses.</h3>
+                    <h3><b>50,000+ companies</b> run HelloApp to grow their businesses.</h3>
                     <p class="lead">Join us and make your company a better place.</p>
                 </div>
                 <div class="col-lg-3 s_btn text-right pt8 pb24">
@@ -782,7 +782,7 @@
                 <div class="container">
                     <div class="row content">
                         <blockquote class="col-lg-6 bg-white">
-                            <p>Odoo provides essential platform for our project management. Things are better organized and more visible with it.</p>
+                            <p>HelloApp provides essential platform for our project management. Things are better organized and more visible with it.</p>
                             <footer>
                                 <img class="img" src="/web/image/website.s_quotes_carousel_demo_image_4" alt=""/>
                                 <span>— John DOE, CEO of <b>MyCompany</b></span>
@@ -796,7 +796,7 @@
                 <div class="container">
                     <div class="row content">
                         <blockquote class="col-lg-6 offset-lg-6 bg-white">
-                            <p>Odoo provides essential platform for our project management. Things are better organized and more visible with it.</p>
+                            <p>HelloApp provides essential platform for our project management. Things are better organized and more visible with it.</p>
                             <footer class="blockquote-footer">
                                 <img class="img" src="/web/image/website.s_quotes_carousel_demo_image_5" alt=""/>
                                 <span>— Jane DOE, CEO of <b>MyCompany</b></span>

@@ -1548,7 +1548,7 @@
     <a role="menuitem" href="#" data-menu="support" class="dropdown-item">Support</a>
     <div role="separator" class="dropdown-divider"/>
     <a role="menuitem" href="#" data-menu="settings" class="dropdown-item">Preferences</a>
-    <a role="menuitem" href="#" data-menu="account" class="dropdown-item">My Odoo.com account</a>
+    <a role="menuitem" href="#" data-menu="account" class="dropdown-item">My HelloApp.com account</a>
     <a role="menuitem" href="#" data-menu="logout" class="dropdown-item">Log out</a>
 </t>
 
@@ -1564,7 +1564,7 @@
 <t t-name="EnterpriseUpgrade">
     <div class="row" role="status">
         <div class="col-6">
-            Get this feature and much more with Odoo Enterprise!
+            Get this feature and much more with HelloApp Enterprise!
             <ul class="list-unstyled">
                 <li><i class="fa fa-check"></i> Access to all Enterprise Apps</li>
                 <li><i class="fa fa-check"></i> New design</li>

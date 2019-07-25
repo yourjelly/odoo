@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Remove Odoo bootstrap overridde -->
+    <!-- Remove HelloApp bootstrap overridde -->
     <template id="_assets_frontend_helpers" inherit_id="web._assets_frontend_helpers">
         <xpath expr="//link[@href='/web_editor/static/src/scss/bootstrap_overridden.scss']" position="replace"/>
         <xpath expr="//link[@href='/website/static/src/scss/bootstrap_overridden.scss']" position="replace"/>

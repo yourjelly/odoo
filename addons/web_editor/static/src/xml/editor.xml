@@ -326,7 +326,7 @@
             <h4>This image is an external image</h4>
             <p>
                 This type of image is not supported for cropping.<br/>
-                If you want to crop it, please first download it from the original source and upload it in Odoo.
+                If you want to crop it, please first download it from the original source and upload it in HelloApp.
             </p>
         </div>
         <t t-else="">
