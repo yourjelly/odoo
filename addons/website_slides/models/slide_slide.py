@@ -33,6 +33,24 @@ class SlidePartnerRelation(models.Model):
     completed = fields.Boolean('Completed')
     quiz_attempts_count = fields.Integer('Quiz attempts count', default=0)
 
+    def create(self, values):
+        res = super(SlidePartnerRelation, self).create(values)
+        completed = res.filtered('completed')
+        if completed:
+            completed._completed_callback()
+        return res
+
+    def write(self, values):
+        res = super(SlidePartnerRelation, self).write(values)
+        if values.get('completed'):
+            self._completed_callback()
+        return res
+
+    def _completed_callback(self):
+        self.env['slide.channel.partner'].search([
+            ('channel_id', 'in', self.channel_id.ids),
+            ('partner_id', 'in', self.partner_id.ids),
+        ])._slide_completed()
 
 class SlideLink(models.Model):
     _name = 'slide.slide.link'
@@ -113,7 +131,7 @@ class Slide(models.Model):
                                    string='Subscribers', groups='website.group_website_publisher')
     slide_partner_ids = fields.One2many('slide.slide.partner', 'slide_id', string='Subscribers information', groups='website.group_website_publisher')
     user_membership_id = fields.Many2one(
-        'slide.slide.partner', string="Subscriber information", compute='_compute_user_membership_id',
+        'slide.slide.partner', string="Subscriber information", compute='_compute_user_membership_id', compute_sudo=False,
         help="Subscriber information for the current logged in user")
     # Quiz related fields
     question_ids = fields.One2many("slide.question","slide_id", string="Questions")
@@ -143,9 +161,9 @@ class Slide(models.Model):
     # website
     website_id = fields.Many2one(related='channel_id.website_id', readonly=True)
     date_published = fields.Datetime('Publish Date')
-    likes = fields.Integer('Likes', compute='_compute_user_info', store=True)
-    dislikes = fields.Integer('Dislikes', compute='_compute_user_info', store=True)
-    user_vote = fields.Integer('User vote', compute='_compute_user_info')
+    likes = fields.Integer('Likes', compute='_compute_user_info', store=True, compute_sudo=False)
+    dislikes = fields.Integer('Dislikes', compute='_compute_user_info', store=True, compute_sudo=False)
+    user_vote = fields.Integer('User vote', compute='_compute_user_info', compute_sudo=False)
     embed_code = fields.Text('Embed Code', readonly=True, compute='_compute_embed_code')
     # views
     embedcount_ids = fields.One2many('slide.embed', 'slide_id', string="Embed Count")
@@ -163,6 +181,7 @@ class Slide(models.Model):
             record.total_views = record.slide_views + record.public_views
 
     @api.depends('slide_partner_ids.vote')
+    @api.depends_context('uid')
     def _compute_user_info(self):
         slide_data = dict.fromkeys(self.ids, dict({'likes': 0, 'dislikes': 0, 'user_vote': False}))
         slide_partners = self.env['slide.slide.partner'].sudo().search([
@@ -193,6 +212,7 @@ class Slide(models.Model):
             slide.slide_views = mapped_data.get(slide.id, 0)
 
     @api.depends('slide_partner_ids.partner_id')
+    @api.depends('uid')
     def _compute_user_membership_id(self):
         slide_partners = self.env['slide.slide.partner'].sudo().search([
             ('slide_id', 'in', self.ids),
@@ -302,6 +322,11 @@ class Slide(models.Model):
         if values.get('website_published'):
             self.date_published = datetime.datetime.now()
             self._post_publication()
+
+        if 'is_published' in values:
+            # if the slide is published/unpublished, recompute the completion for the partners
+            self.slide_partner_ids._completed_callback()
+
         return res
 
     # ---------------------------------------------------------
