@@ -106,6 +106,7 @@ class Discussion(models.Model):
             # add new dummy message
             message_vals = self.messages._add_missing_default_values({'body': 'dummy message', 'important': True})
             self.messages |= self.messages.new(message_vals)
+            self.important_messages |= self.messages.new(message_vals)
 
     @api.onchange('moderator')
     def _onchange_moderator(self):
