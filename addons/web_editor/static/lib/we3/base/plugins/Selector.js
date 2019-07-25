@@ -81,7 +81,7 @@ var Selector = class extends we3.AbstractPlugin {
      * @param {boolean} [options.returnArchNodes]
      * @param {integer[]} [options.filterIds]
      */
-    search(archNode, string, options) {
+    search (archNode, string, options) {
         var self = this;
         var BaseArch = this.dependencies.BaseArch;
         if (typeof archNode === 'string') {
@@ -111,66 +111,31 @@ var Selector = class extends we3.AbstractPlugin {
         return items;
     }
     /**
-     * FIXME this function does not work with most selectors... (like a simple
-     * '.row > div' does not work)... c/c half of jQuery is a bad idea...
-     *
      * @param {ArchNode|Element} [archNode]
      * @param {string} string
      * @param {object} [options]
-     * @param {integer[]} [options.filterIds]
      **/
-    is(archNode, string, options) {
+    is (archNode, string, options) {
         var self = this;
         var BaseArch = this.dependencies.BaseArch;
-        if (typeof archNode === 'number') {
+        if (typeof archNode === 'string') {
+            options = string;
+            string = archNode;
+            archNode = BaseArch.getArchNode(1);
+        } else if (typeof archNode === 'number') {
             archNode = BaseArch.getArchNode(archNode);
+        } else {
+            archNode = BaseArch.getArchNode(archNode.id) || archNode;
         }
-        var isFragment = archNode.isNotInRoot();
+
+        options = options || {};
+        string = string.trim();
 
         var is = false;
-        this._tokenize(string.trim()).token.forEach(function (token) {
-            if (is) {
-                return;
-            }
-            var hasChild = false;
-            token.forEach(function (t) {
-                if (t.type === 'BROWSE') {
-                    hasChild = true;
-                }
-            })
-            if (hasChild) {
-                var opt = options || {};
-                if (!opt.filterIds) {
-                    var filterIds = [];
-                    filterIds[1] = true;
-                    var node = archNode;
-                    while (node) {
-                        self._getChildren(node, false, {}).forEach(function (archNode) {
-                            filterIds[archNode.id] = true;
-                        });
-                        node = node.parent;
-                    }
-                    opt = Object.assign({filterIds: filterIds}, opt);
-                }
-
-                token = self._tokenizeForSearch(token);
-
-                var arch = BaseArch.getArchNode(1);
-                if (isFragment) {
-                    arch.childNodes.push(archNode);
-                    archNode.parent = arch;
-                }
-                var archNodes = self._searchFromToken([arch], token, opt);
-                if (isFragment) {
-                    arch.childNodes.pop();
-                    delete archNode.parent;
-                }
-
-                is = archNodes.indexOf(archNode) !== -1 || archNodes.map(function (a) { return a.id; }).indexOf(archNode.id) !== -1;
-            } else {
-                is = !!self._searchFromToken([archNode], token, options).length;
-            }
+        this._tokenize(string).token.forEach(function (token) {
+            is = is || self._isFromToken([archNode], token, options);
         });
+
         return is;
     }
 
@@ -305,6 +270,14 @@ var Selector = class extends we3.AbstractPlugin {
         }
         return archNodes;
     }
+    _isFromToken (archNodes, token, options) {
+        for (var k = token.length - 1; k >= 0 ; k--) {
+            var t = token[k];
+            var method = this['_isFromToken_' + t.type] || this['_searchFromToken_' + t.type];
+            archNodes = method.call(this, archNodes, t.identifier, t.value, options);
+        }
+        return !!archNodes.length;
+    }
 
 
     _getChildren (archNode, loop, options, _nodes) {
@@ -322,6 +295,42 @@ var Selector = class extends we3.AbstractPlugin {
                     this._getChildren(archNode, loop, options, nodes);
                 }
             };
+        }
+        return nodes;
+    }
+
+
+    //////////////////////////////////////////////////////
+
+
+    _isFromToken_BROWSE (archNodes, identifier, value, options) {
+        var self = this;
+        var nodes = [];
+        if (identifier === '>') {
+            archNodes.forEach(function (archNode) {
+                var parent = archNode.parent;
+                if (parent && nodes.indexOf(parent) === -1) {
+                    nodes.push(parent);
+                }
+            });
+        } else if (identifier === '+' || identifier === '-') {
+            archNodes.forEach(function (archNode) {
+                var siblings = archNode.parent && archNode.parent.childNodes || [];
+                var prev = siblings[siblings.indexOf(archNode) + (identifier === '+' ? -1 : 1)];
+                if (prev && nodes.indexOf(prev) === -1) {
+                    nodes.push(prev);
+                }
+            });
+        } else {
+            archNodes.forEach(function (archNode) {
+                while (archNode.parent) {
+                    var parent = archNode.parent;
+                    if (nodes.indexOf(parent) === -1) {
+                        nodes.push(parent);
+                    }
+                    archNode = parent;
+                }
+            });
         }
         return nodes;
     }
