@@ -7,7 +7,7 @@
     'category': 'Hidden',
     'version': '1.0',
 
-    'depends': ['website_slides', 'website_sale'],
+    'depends': ['website_slides', 'website_sale', 'sale_product_configurator'],
     'installable': True,
     'data': [
         'views/assets.xml',

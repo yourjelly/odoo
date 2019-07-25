@@ -484,6 +484,7 @@ class ProductTemplate(models.Model):
         return prices
 
     def create_variant_ids(self):
+        self.flush()
         Product = self.env["product.product"]
 
         variants_to_create = []
