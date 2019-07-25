@@ -1153,8 +1153,31 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 field = field.related_field
                 parent_fields[field.model_name].append(field.name)
 
+        # DLE P170: `sale_product_configurator_edition_tour`
+        # a commands list is passed to default_get, e.g. [[4, 2], [4, 3]]
+        # Before, `_convert_to_write` did convert_to_cache, convert_to_record, convert_to_write, which returned [(6, 0, [2,3])]
+        # Now, `_convert_to_write` only call `convert_to_write`, which returns back [[4, 2], [4, 3]]
+        # And it doesnt seem to be supported by the web client, it only accept [(6, 0, [...)]
+        # Either we add the support in the client web, either we do the retro-compatibility for default_get,
+        # this is what I do here.
+        # For reference, here are the code line responsible for this in sale_product_configurator:
+        # /home/dle/src/odoo/master-nochange-cleanup-rco/addons/sale/static/src/js/product_configurator_widget.js:162
+        # ```
+        # _.each(recordData.res_ids, function (resId) {
+        #     convertedValues.push([4, parseInt(resId)]);
+        # });
+        # ```
+        # /home/dle/src/odoo/master-nochange-cleanup-rco/addons/sale_product_configurator/static/src/js/product_configurator_widget.js:167
+        # ```
+        # default_product_template_attribute_value_ids: this._convertFromMany2Many(
+        #     this.recordData.product_template_attribute_value_ids
+        # )
+        # ```
         # convert default values to the right format
-        defaults = self._convert_to_write(defaults)
+        for fname, value in defaults.items():
+            if fname in self._fields:
+                field = self._fields[fname]
+                defaults[fname] = field.convert_to_write(field.convert_to_cache(value, self), self)
 
         # add default values for inherited fields
         for model, names in parent_fields.items():
