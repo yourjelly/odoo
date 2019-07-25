@@ -982,6 +982,15 @@ class HttpCase(TransactionCase):
             base_url = "http://%s:%s" % (HOST, PORT)
             ICP = self.env['ir.config_parameter']
             ICP.set_param('web.base.url', base_url)
+            # DLE P162: Some tour tests do some modification before launching the test, such as the point of sale.
+            # `/home/dle/src/odoo/master-nochange-cleanup-rco/addons/point_of_sale/tests/test_frontend.py`
+            # At first I put the flush in the method `start_tour`, but then I came accross another issue for the tour `website_reset_password`
+            # which requires the above ICP.set_param to be flushed for the test to work.
+            # It's not automatically pushed when accessing get_param because the requests are completely independant (from the browser)
+            # and the towrite for these other envs are empty.
+            # All tests requests use the same cursor, the test cursor, so there is no need of commit or anything,
+            # the `execute` alone is enough, so we cannot rely on the commit hook which will do the flush for this specifically.
+            ICP.flush()
             url = "%s%s" % (base_url, url_path or '/')
             self._logger.info('Open "%s" in browser', url)
 
@@ -1017,8 +1026,6 @@ class HttpCase(TransactionCase):
         """Wrapper for `browser_js` to start the given `tour_name` with the
         optional delay between steps `step_delay`. Other arguments from
         `browser_js` can be passed as keyword arguments."""
-        # DLE P162: Some tour tests do some modification before launching the test, such as the point of sale.
-        self.env['res.users'].flush()
         step_delay = ', %s' % step_delay if step_delay else ''
         code = kwargs.pop('code', "odoo.startTour('%s'%s)" % (tour_name, step_delay))
         ready = kwargs.pop('ready', "odoo.__DEBUG__.services['web_tour.tour'].tours.%s.ready" % tour_name)
