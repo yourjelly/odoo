@@ -121,7 +121,7 @@ QUnit.module('web_editor', {
     var disableAllTests = { disableAllTests: true };
 
     QUnit.test('popover', async function (assert) {
-        assert.expect(19);
+        assert.expect(26);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, {TestPopover: true}),
@@ -153,7 +153,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('complex default config (integration)', async function (assert) {
-        assert.expect(9);
+        assert.expect(13);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, {TestComplexInteraction: true}),
@@ -161,7 +161,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('change range with arrow', async function (assert) {
-        assert.expect(64);
+        assert.expect(123);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, {TestKeyboardArrow: true}),
@@ -177,7 +177,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('toolbar color', async function (assert) {
-        assert.expect(23);
+        assert.expect(41);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, { TestToolbarColor: true }),
@@ -185,7 +185,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('toolbar indent', async function (assert) {
-        assert.expect(9);
+        assert.expect(13);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, { TestToolbarIndent: true }),
@@ -193,7 +193,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('toolbar keymap', async function (assert) {
-        assert.expect(13);
+        assert.expect(14);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, { TestToolbarKeymap: true }),
@@ -201,7 +201,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('toolbar link', async function (assert) {
-        assert.expect(17);
+        assert.expect(25);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, { TestToolbarLink: true }),
@@ -209,7 +209,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('toolbar list', async function (assert) {
-        assert.expect(72);
+        assert.expect(139);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, { TestToolbarList: true }),
@@ -217,7 +217,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('toolbar paragraph', async function (assert) {
-        assert.expect(15);
+        assert.expect(25);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, { TestToolbarParagraph: true }),
@@ -225,7 +225,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('toolbar wand', async function (assert) {
-        assert.expect(18);
+        assert.expect(31);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, {TestToolbarWand: true}),
@@ -233,7 +233,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('toolbar style', async function (assert) {
-        assert.expect(28);
+        assert.expect(51);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, {TestToolbarFontStyle: true}),
@@ -241,7 +241,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('unbreakable', async function (assert) {
-        assert.expect(24);
+        assert.expect(43);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, {TestKeyboardUnbreakable: true}),
@@ -249,7 +249,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('keyboard char', async function (assert) {
-        assert.expect(37);
+        assert.expect(69);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, {TestKeyboardChar: true}),
@@ -257,7 +257,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('keyboard tab', async function (assert) {
-        assert.expect(17);
+        assert.expect(29);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, {TestKeyboardTab: true}),
@@ -265,7 +265,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('keyboard enter', async function (assert) {
-        assert.expect(69);
+        assert.expect(133);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, {TestKeyboardEnter: true}),
@@ -273,7 +273,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('keyboard delete', async function (assert) {
-        assert.expect(82);
+        assert.expect(159);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, {TestKeyboardDelete: true}),
@@ -281,7 +281,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('keyboard complex dom', async function (assert) {
-        assert.expect(24);
+        assert.expect(43);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, {TestKeyboardComplex: true}),
@@ -289,7 +289,7 @@ QUnit.module('web_editor', {
         await createFormAndTest(this);
     });
     QUnit.test('keyboard backspace', async function (assert) {
-        assert.expect(102);
+        assert.expect(199);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, {TestKeyboardBackspace: true}),
@@ -341,7 +341,7 @@ QUnit.module('web_editor', {
     ];
 
     QUnit.test('range + popover + rules + char + DropBlock', async function (assert) {
-        assert.expect(100);
+        assert.expect(139);
 
         this.testOptions = {
             assert: assert,
@@ -357,7 +357,7 @@ QUnit.module('web_editor', {
     });
 
     QUnit.test('DropBlock & DropBlockSelector', async function (assert) {
-        assert.expect(37);
+        assert.expect(69);
 
         this.testOptions = {
             assert: assert,
@@ -372,7 +372,7 @@ QUnit.module('web_editor', {
     });
 
     QUnit.test('DropBlock & CustomizeBlock', async function (assert) {
-        assert.expect(52);
+        assert.expect(91);
 
         this.testOptions = {
             assert: assert,
@@ -390,7 +390,7 @@ QUnit.module('web_editor', {
     QUnit.module('Media');
 
     QUnit.test('Image', async function (assert) {
-        assert.expect(15);
+        assert.expect(24);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, disableAllTests, { TestToolbarMedia: true }),

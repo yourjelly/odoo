@@ -119,7 +119,7 @@ QUnit.module('web_editor', {
     QUnit.module('media crop');
 
     QUnit.test('Image Crop', async function (assert) {
-        assert.expect(8);
+        assert.expect(11);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, { disableAllTests: true }, { TestToolbarCrop: true }),

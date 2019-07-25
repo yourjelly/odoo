@@ -216,7 +216,7 @@ var HistoryPlugin = class extends we3.AbstractPlugin {
      * On Arch update, update the history.
      *
      * @private
-     * @param {Object []} diffToNew
+     * @param {Object diffToNew
      */
     _onArchUpdate (diffToNew) {
         var self = this;
@@ -225,6 +225,7 @@ var HistoryPlugin = class extends we3.AbstractPlugin {
         }
 
         var old = this._getStep(this.stackOffset);
+        diffToNew = Object.values(diffToNew);
 
         var concatTextHistory = false;
         if (diffToNew.length === 1 && diffToNew[0].type === 'TEXT') {
@@ -256,11 +257,6 @@ var HistoryPlugin = class extends we3.AbstractPlugin {
             var nodeHistory = self._eachNodeHistory[json.id];
             if (!nodeHistory) {
                 self._eachNodeHistory[json.id] = nodeHistory = [];
-            }
-            if (json.childNodes) {
-                json.childNodes = json.childNodes.map(function (child) {
-                    return child.id || child;
-                });
             }
             var oldJSON = old[json.id];
             if (oldJSON) {

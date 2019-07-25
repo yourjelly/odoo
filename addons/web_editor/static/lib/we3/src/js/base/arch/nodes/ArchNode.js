@@ -73,6 +73,7 @@ we3.ArchNode = class {
         this.nodeName = nodeName && nodeName.toLowerCase();
         this.nodeValue = !nodeName && nodeValue;
         if (nodeName || !this.isText()) {
+            this.__preventTriggerChange = true;
             this.attributes = new Attributes(this, attributes || []);
             if (!this.attributes.class) {
                 this.attributes.add('class', '');
@@ -80,6 +81,7 @@ we3.ArchNode = class {
             if (!this.attributes.style) {
                 this.attributes.add('style', '');
             }
+            this.__preventTriggerChange = false;
         }
         this.childNodes = [];
         this._triggerChange(this.length());
@@ -116,6 +118,7 @@ we3.ArchNode = class {
      * @param {Object} [options]
      * @param {boolean} [options.keepVirtual] true to include virtual text nodes
      * @param {boolean} [options.architecturalSpace] true to include architectural space
+     * @param {boolean} [options.onlyChildNodesIDS] true to return ids list in childNodes 
      * @returns {JSON}
      **/
     toJSON (options) {
@@ -125,16 +128,20 @@ we3.ArchNode = class {
         if (this.id) {
             data.id = this.id;
         }
-
+        options = options || {};
         if (this.childNodes) {
             var childNodes = [];
             this.childNodes.forEach(function (archNode) {
+                if (options.onlyChildNodesIDS) {
+                    if (!archNode.isVirtual() || options.keepVirtual) {
+                        childNodes.push(archNode.id);
+                    }
+                    return;
+                }
                 var json = archNode.toJSON(options);
                 if (json) {
-                    if (json.type !== 'FRAGMENT' || json.nodeName || json.nodeValue) {
+                    if (json.nodeName || json.nodeValue) {
                         childNodes.push(json);
-                    } else if (json.childNodes) {
-                        childNodes = childNodes.concat(json.childNodes);
                     }
                 }
             });
@@ -145,7 +152,7 @@ we3.ArchNode = class {
 
         if (this.isVirtual()) {
             data.isVirtual = true;
-            if (!options || !options.keepVirtual) {
+            if (!options.keepVirtual) {
                 return data;
             }
         }
@@ -157,7 +164,7 @@ we3.ArchNode = class {
             data.nodeValue = this.nodeValue;
         }
         if (this.attributes) {
-            var attributes = this.attributes.toJSON();
+            var attributes = this.attributes.toJSON(options);
             if (attributes.length) {
                 data.attributes = attributes;
             }
@@ -901,7 +908,6 @@ we3.ArchNode = class {
 
         var Constructor = this.constructor;
         var archNode = new Constructor(this.params, this.nodeName, this.attributes ? this.attributes.toJSON() : []);
-        archNode._triggerChange(0);
 
         if (this.childNodes) {
             var childNodes = this.childNodes.slice(offset);
@@ -1561,6 +1567,9 @@ we3.ArchNode = class {
      * @param {int} offset
      */
     _triggerChange (offset) {
+        if (this.__preventTriggerChange) {
+            return;
+        }
         this.params.change(this, offset);
     }
     /**

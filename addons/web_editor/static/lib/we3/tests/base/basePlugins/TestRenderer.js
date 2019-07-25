@@ -29,7 +29,7 @@ var TestRenderer = class extends we3.AbstractPlugin {
                     key: 'Enter',
                 }],
                 test: "<p><b>dom to edit</b></p><p>▶<br/>◀</p>",
-                testDOM: "<p><b>dom to edit</b></p><p><br></p>",
+                testDOM: "<p><b>dom to edit</b></p><p><br/></p>",
             },
             {
                 name: "ENTER after click bold, at the end of b in p",
@@ -45,7 +45,7 @@ var TestRenderer = class extends we3.AbstractPlugin {
                     key: 'Enter',
                 }],
                 test: '<p><b>dom to edit</b></p><p>▶<br/>◀</p><p>other content</p>',
-                testDOM: '<p><b>dom to edit</b></p><p><br></p><p>other content</p>',
+                testDOM: '<p><b>dom to edit</b></p><p><br/></p><p>other content</p>',
             },
         ];
     }

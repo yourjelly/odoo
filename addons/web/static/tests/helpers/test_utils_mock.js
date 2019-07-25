@@ -66,7 +66,7 @@ function removeSrcAttribute(el, widget) {
                     if (!node.getAttribute('data-src')) {
                         node.setAttribute('data-src', src);
                     }
-                } else { // if real url
+                } else if (src.indexOf('transparent.png') === -1) { // if real url
                     node.setAttribute('data-src', src);
                     node.setAttribute('src', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==');
                 }

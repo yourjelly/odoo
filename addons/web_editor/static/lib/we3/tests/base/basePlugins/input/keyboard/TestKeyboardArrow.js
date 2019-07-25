@@ -45,6 +45,7 @@ var TestKeyboardArrow = class extends we3.AbstractPlugin {
                 rightTest: "<p>dom to◆ edit</p>",
                 // shiftLeftTest: "<p>dom ▶t◀o edit</p>",
                 shiftRightTest: "<p>dom t▶o◀ edit</p>",
+                testDOM: "<p>dom t&#65279;o edit</p>",
             },
             {
                 repeat: 2,
@@ -55,6 +56,7 @@ var TestKeyboardArrow = class extends we3.AbstractPlugin {
                 // rightTest: "<p>dom to◆ edit</p>",
                 // shiftLeftTest: "<p>dom ▶to◀ edit</p>",
                 shiftRightTest: "<p>dom ▶to◀ edit</p>",
+                testDOM: "<p>dom t&#65279;o edit</p>",
             },
             {
                 repeat: 2,
@@ -65,6 +67,7 @@ var TestKeyboardArrow = class extends we3.AbstractPlugin {
                 rightTest: "<p>dom to◆ edit</p>",
                 // shiftLeftTest: "<p>dom ▶to◀ edit</p>",
                 shiftRightTest: "<p>dom ▶to◀ edit</p>",
+                testDOM: "<p>dom t&#65279;&#65279;&#65279;o edit</p>",
             },
             // crossing images
             {
@@ -259,6 +262,7 @@ var TestKeyboardArrow = class extends we3.AbstractPlugin {
                         };
                     }),
                     test: test.leftTest || test.test,
+                    testDOM: test.testDOM,
                 });
                 nthTest = "";
             }
@@ -273,6 +277,7 @@ var TestKeyboardArrow = class extends we3.AbstractPlugin {
                         };
                     }),
                     test: test.rightTest || test.test,
+                    testDOM: test.testDOM,
                 });
                 nthTest = "";
             }
@@ -288,6 +293,7 @@ var TestKeyboardArrow = class extends we3.AbstractPlugin {
                         };
                     }),
                     test: test.shiftLeftTest || test.test,
+                    testDOM: test.testDOM,
                 });
                 nthTest = "";
             }
@@ -303,6 +309,7 @@ var TestKeyboardArrow = class extends we3.AbstractPlugin {
                         };
                     }),
                     test: test.shiftRightTest || test.test,
+                    testDOM: test.testDOM,
                 });
                 nthTest = "";
             }

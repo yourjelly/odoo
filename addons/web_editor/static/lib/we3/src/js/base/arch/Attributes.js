@@ -18,6 +18,7 @@ var ClassName = class {
         } else {
             this.value = classNames.trim().length ? classNames.replace(regMultiSpace, ' ').split(' ') : [];
         }
+        this.archNode._triggerChange(null);
     }
     get length () {
         return this.toString().length;
@@ -140,6 +141,7 @@ var Attributes = we3.Attributes = class {
         }
     }
     add (name, value) {
+        name = name.toLowerCase(); // Like DOM setAttribute method
         if ((name !== 'class' && name !== 'style' || value !== '') && !this.archNode.isAllowUpdate()) {
             console.warn("cannot update style of a non editable node");
             return;
@@ -175,6 +177,7 @@ var Attributes = we3.Attributes = class {
             delete self[name];
         });
         this.__order__ = [];
+        this.archNode._triggerChange(null);
     }
     isEqual (obj, options) {
         if (!obj) {
@@ -269,8 +272,11 @@ var Style = class extends Attributes {
                 }
             });
         }
+        this.archNode._triggerChange(null);
     }
     add (name, value) {
+        name = name.toLowerCase();
+        value = value.toLowerCase();
         if (!this.archNode.isAllowUpdate()) {
             console.warn("cannot update style of a non editable node");
             return;

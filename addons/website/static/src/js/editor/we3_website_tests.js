@@ -103,7 +103,7 @@ QUnit.module('website', {
     QUnit.module('home page edition');
 
     QUnit.test('we3', async function (assert) {
-        assert.expect(85);
+        assert.expect(117);
 
         var $website = $(`<div id="wrapwrap" class="homepage">
                 <header id="top" data-anchor="true" class=" o_affix_enabled">

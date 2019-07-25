@@ -27,6 +27,18 @@ var ColorPlugin = class extends we3.AbstractPlugin {
         return $.when(super.isInitialized(), this._initializePromise);
     }
     start () {
+        var self = this;
+        this._colors.forEach(function (list, index) {
+            if (typeof list === 'string') {
+                return;
+            }
+            self._colors[index] = list.map(function (color) {
+                if (color && (color.startsWith('#') || color.startsWith('rgb'))) {
+                    return color.toLowerCase();
+                }
+                return color;
+            });
+        });
         this._insertColors();
     }
 
@@ -106,7 +118,7 @@ var ColorPlugin = class extends we3.AbstractPlugin {
      */
     _applyColor (node, color) {
         node = node.isText() ? node.parent : node;
-        if (!color || color.startsWith('#') || color.startsWith('rgba')) {
+        if (!color || color.startsWith('#') || color.startsWith('rgb')) {
             this._applyColorStyle(node, color || '');
         } else {
             this._applyColorClass(node, color);

@@ -40,7 +40,7 @@ var CropImageDialog = Dialog.extend({
         ];
         this.imageData = {
             imageSrc: src,
-            originalSrc: this.media.attributes['data-crop:originalSrc'] || src, // the original src for cropped DB images will be fetched later
+            originalSrc: this.media.attributes['data-crop:originalsrc'] || src, // the original src for cropped DB images will be fetched later
             mimetype: this.media.attributes['data-crop:mimetype'] || (_.str.endsWith(src, '.png') ? 'image/png' : 'image/jpeg'), // the mimetype for DB images will be fetched later
             aspectRatio: this.media.attributes['data-aspectRatio'] || this.aspectRatioList[0][1],
             isExternalImage: src.substr(0, 5) !== 'data:' && src[0] !== '/' && src.indexOf(window.location.host) < 0,
@@ -142,11 +142,11 @@ var CropImageDialog = Dialog.extend({
         this.media.className.add('o_cropped_img_to_save');
 
         // ... and attach required data
-        this.media.attributes.set('data-crop:resModel', this.options.res_model);
-        this.media.attributes.set('data-crop:resID', this.options.res_id);
+        this.media.attributes.set('data-crop:resmodel', this.options.res_model);
+        this.media.attributes.set('data-crop:resid', this.options.res_id);
         this.media.attributes.set('data-crop:id', this.imageData.id);
         this.media.attributes.set('data-crop:mimetype', this.imageData.mimetype);
-        this.media.attributes.set('data-crop:originalSrc', this.imageData.originalSrc);
+        this.media.attributes.set('data-crop:originalsrc', this.imageData.originalSrc);
 
         // Mark the media with the cropping information which is required for
         // a future crop edition

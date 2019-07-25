@@ -783,6 +783,7 @@ var BaseArch = class extends we3.AbstractPlugin {
     _applyChangesOnRendererAndRerange (range, result) {
         var BaseRenderer = this.dependencies.BaseRenderer;
         var BaseRange = this.dependencies.BaseRange;
+        var self = this;
 
         var rangeRes;
         if (range) {
@@ -805,11 +806,28 @@ var BaseArch = class extends we3.AbstractPlugin {
         this._changes = [];
         this._cleanUnnecessaryVirtuals();
         if (this._changes.length) {
-            var processedChanges = this._processChanges(this._changes);
-            result.json = result.json.concat(processedChanges.json);
+            this._processChanges(this._changes, result);
         }
 
-        BaseRenderer.update(result.json);
+        var json = {};
+        result.changes = result.changes.filter(function (change) {
+            var archNode = self.getArchNode(change.id);
+            if (archNode) {
+                json[change.id] = archNode.toJSON({
+                    keepVirtual: true,
+                    onlyChildNodesIDS: true,
+                });
+                return true;
+            } else if (!result.removed[change.id]) {
+                result.removed[change.id] = {
+                    id: change.id,
+                    element: BaseRenderer.getElement(change.id),
+                };
+            }
+        });
+        result.json = json;
+
+        BaseRenderer.update(Object.values(json));
         rangeRes = BaseRange.restore();
 
         return rangeRes;
@@ -821,7 +839,7 @@ var BaseArch = class extends we3.AbstractPlugin {
      * and the range.
      *
      * @private
-     * @return {Object} {changes: {JSON []}, json: {Object []}, removed: {Object}, range: {Object}}
+     * @return {Object} {changes: {JSON []}, removed: {Object}, range: {Object}}
      */
     _applyRulesAndGetChanges () {
         var changedArchNodes = this._changes.map(change => change.archNode);
@@ -1170,14 +1188,15 @@ var BaseArch = class extends we3.AbstractPlugin {
      *
      * @private
      * @param {Object []} changesToProcess
-     * @return {Object} {changes: {JSON []}, json: {Object []}, removed: {Object}, range: {Object}}
+     * @param {Object []} [previousChange]
+     * @return {Object} {changes: {JSON []}, removed: {Object}, range: {Object}}
      */
-    _processChanges (changesToProcess) {
+    _processChanges (changesToProcess, previous) {
         var self = this;
         var BaseRenderer = this.dependencies.BaseRenderer;
-        var range;
-        var changes = [];
-        var removed = {};
+        var changes = previous && previous.change || [];
+        var removed = previous && previous.removed || {};
+        var range = previous && previous.range;
         changesToProcess.forEach(function (c) {
             var id = c.archNode.id || c.id;
             if (!id || !self.getArchNode(id)) {
@@ -1212,16 +1231,8 @@ var BaseArch = class extends we3.AbstractPlugin {
                 }
             }
         });
-
-        var json = changes.map(function (change) {
-            return self.getArchNode(change.id).toJSON({
-                keepVirtual: true,
-            });
-        });
-
         return {
             changes: changes,
-            json: json,
             removed: removed,
             range: range,
         };
@@ -1299,7 +1310,19 @@ var BaseArch = class extends we3.AbstractPlugin {
             this.dependencies.BaseRules.applyRules(this._changes.map(function (c) {return c.archNode}));
         }
 
-        this.dependencies.BaseRenderer.reset(this._arch.toJSON({keepVirtual: true}));
+        var json = [this._arch.toJSON({
+            keepVirtual: true,
+        })];
+        (function flatJSON (childNodes) {
+            return childNodes.map(function (child) {
+                json.push(child);
+                if (child.childNodes) {
+                    child.childNodes = flatJSON(child.childNodes);
+                }
+                return child.id;
+            });
+        })(json.slice());
+        this.dependencies.BaseRenderer.reset(json);
 
         this._changes = [];
     }

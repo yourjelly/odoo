@@ -39,11 +39,11 @@ we3.addPlugin('CropImage', class extends we3.AbstractPlugin {
                 return;
             }
             node.className.remove('o_cropped_img_to_save');
-            var resModel = node.attributes['data-crop:resModel'];
-            var resID = node.attributes['data-crop:resID'];
+            var resModel = node.attributes['data-crop:resmodel'];
+            var resID = node.attributes['data-crop:resid'];
             var cropID = node.attributes['data-crop:id'];
             var mimetype = node.attributes['data-crop:mimetype'];
-            var originalSrc = node.attributes['data-crop:originalSrc'];
+            var originalSrc = node.attributes['data-crop:originalsrc'];
             var datas = node.attributes['src'].split(',')[1];
             if (!cropID) {
                 var name = originalSrc + '.crop';

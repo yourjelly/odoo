@@ -428,7 +428,9 @@ var TestPlugin = class extends we3.AbstractPlugin {
     }
     getDomValue (archNodeId) {
         var el = this.dependencies.Renderer.getElement(this._getTestContainer());
-        return this._cleanValue(el.innerHTML);
+        var xml = new XMLSerializer().serializeToString(el);
+        xml = xml.replace(/ \/>|><\/iframe>/g, '/>').replace(/^<[^>]+>/, '').replace(/<[^>]+>$/, '');
+        return this._cleanValue(xml);
     }
     /**
      * Trigger a keydown event on the target.
@@ -958,9 +960,14 @@ var TestPlugin = class extends we3.AbstractPlugin {
                 ok = true;
             }
         }
+        var value = this.getDomValue();
         if (test.testDOM) {
-            var value = this.getDomValue();
-            if (assert.strictEqual(value, this._cleanValue(test.testDOM), test.name)) {
+            if (assert.strictEqual(value, this._cleanValue(test.testDOM), test.name + ' (DOM)')) {
+                ok = true;
+            }
+        } else if (test.test) {
+            var testDOM = this._cleanValue(test.test.replace(regExpRange, ''));
+            if (assert.strictEqual(value, testDOM, test.name + ' (DOM)')) {
                 ok = true;
             }
         }

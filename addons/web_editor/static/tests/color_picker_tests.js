@@ -91,7 +91,7 @@ QUnit.module('web_editor', {
     QUnit.module('Custom Color');
 
     QUnit.test('Custom Color Picker', async function (assert) {
-        assert.expect(25);
+        assert.expect(31);
         this.testOptions = {
             assert: assert,
             plugins: Object.assign({}, { disableAllTests: true }, { TestToolbarColorPicker: true }),

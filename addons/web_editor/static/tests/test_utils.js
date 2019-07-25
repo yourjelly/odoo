@@ -400,6 +400,7 @@ function createWysiwyg(params) {
     params.data = wysiwygData(params.data);
 
     var parent = new Widget();
+    parent.__ffff = true;
     testUtils.mock.addMockEnvironment(parent, params);
 
     var wysiwygOptions = _.extend({}, params.wysiwygOptions, {

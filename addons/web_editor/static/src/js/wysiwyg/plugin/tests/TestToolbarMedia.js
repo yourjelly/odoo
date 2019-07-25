@@ -171,7 +171,7 @@
             {
                 name: "add an image in a table",
                 async: true,
-                content: '<section><div class="container"><div class="row"><div class="col-lg-6">' +
+                content: '<div>' +
                     '<table class="table table-bordered">' +
                     '    <tbody>' +
                     '        <tr>' +
@@ -187,12 +187,12 @@
                     '        </tr>' +
                     '    </tbody>' +
                     '</table>' +
-                    '</div></div></div></section>',
+                    '</div>',
                 do: async function () {
                     await _clickMedia();
                     await _uploadAndInsertImg('https://www.odoo.com/logo.png');
                 },
-                test: '<section><div class="container"><div class="row"><div class="col-lg-6">' +
+                test: '<div>' +
                         '<table class="table table-bordered">' +
                             '<tbody>' +
                                 '<tr>' +
@@ -208,7 +208,7 @@
                                 '</tr>' +
                             '</tbody>' +
                         '</table>' +
-                        '</div></div></div></section>',
+                    '</div>',
             },
             // BR IS NOT REMOVED AND IS ALWAYS PUT FIRST ?
             // {

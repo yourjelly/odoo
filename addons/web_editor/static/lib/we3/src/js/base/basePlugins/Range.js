@@ -879,7 +879,7 @@ var BaseRange = class extends we3.AbstractPlugin {
                 this._select(nativeReadyNewRange.sc, nativeReadyNewRange.so, nativeReadyNewRange.ec, nativeReadyNewRange.eo, !this._range.ltr);
             } else {
                 var msg = 'Wrong Range! The nodes could node be found in the DOM.';
-                console.warn(msg + '\nnewRange: ', newRange, '\nnativeRange:', nativeRange);
+                console.warn(msg + '\nnewRange: ', newRange, '\nnativeRange:', nativeReadyNewRange);
             }
         }
 

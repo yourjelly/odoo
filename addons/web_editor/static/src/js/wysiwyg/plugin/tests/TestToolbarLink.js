@@ -64,6 +64,7 @@
                     });
                 },
                 test: '<h1><a href="#newlink" class="btn btn-lg btn-outline-alpha">dom to edit</a>◆</h1>',
+                testDOM: '<h1><a href="#newlink" class="btn btn-lg btn-outline-alpha">dom to edit</a>&#65279;</h1>',
             },
             {
                 name: "Click LINK: p -> a in p (w/ Email)",
@@ -101,6 +102,7 @@
                     });
                 },
                 test: '<p><a href="#" class="btn btn-outline-alpha" target="_blank">dom to edit</a>◆</p>',
+                testDOM: '<p><a href="#" class="btn btn-outline-alpha" target="_blank">dom to edit</a>&#65279;</p>',
             },
             // POPOVER
             {

@@ -63,7 +63,7 @@ var BaseRenderer = class extends we3.AbstractPlugin {
      * @param {Boolean} [options.showIDs]
      */
     reset (json, options) {
-        this.changes = {};
+        this.changes = [];
         this.jsonById = [null, {
             id: 1,
             childNodes: [],
@@ -83,11 +83,8 @@ var BaseRenderer = class extends we3.AbstractPlugin {
      * @param {Boolean} [options.showIDs]
      */
     update (newJSON, options) {
-        if (newJSON.forEach) {
-            newJSON.forEach(this._makeDiff.bind(this));
-        } else {
-            this._makeDiff(newJSON);
-        }
+        this._makeDiff(newJSON);
+        this._saveChanges(this.changes);
         this._clean();
         this._redraw(options);
         this._cleanElements();
@@ -240,6 +237,16 @@ var BaseRenderer = class extends we3.AbstractPlugin {
             this.elements[id] = el;
         }
 
+        if (el === freeElement && freeElement.attributes) {
+            if (!this.changes[id]) {
+                this.changes[id] = {id: id};
+            }
+            var attr = Object.values(freeElement.attributes).map(function (item) {
+                return [item.name, item.value];
+            });
+            this.changes[id].attributes = this._makeDiffAttributes(attr, this.jsonById[id].attributes);
+        }
+
         this._insertInEditable(json, dontCheckParent);
 
         return el;
@@ -295,70 +302,81 @@ var BaseRenderer = class extends we3.AbstractPlugin {
      * @param {JSON} newJSON
      */
     _makeDiff (newJSON) {
-        var oldJSON = this.jsonById[newJSON.id] = (this.jsonById[newJSON.id] || {id: newJSON.id});
-
-        if (newJSON.nodeName && !oldJSON.nodeName) {
-            oldJSON.nodeName = newJSON.nodeName;
+        if (newJSON.forEach) {
+            newJSON.forEach(this._makeDiff.bind(this));
+            return;
         }
 
-        var changes = {};
+        var self = this;
+        var oldJSON = this.jsonById[newJSON.id] || {};
+        var changes = this.changes[newJSON.id] || {};
+
+        if (newJSON.nodeName && newJSON.nodeName !== oldJSON.nodeName) {
+            changes.nodeName = newJSON.nodeName;
+        }
         if (oldJSON.nodeValue !== newJSON.nodeValue) {
             changes.nodeValue = newJSON.nodeValue;
-            oldJSON.nodeValue = newJSON.nodeValue;
         }
         if (newJSON.attributes || oldJSON.attributes) {
-            if (!oldJSON.attributes) {
-                changes.attributes = newJSON.attributes.slice();
-            } else {
-                var attributes = [];
-                newJSON.attributes = newJSON.attributes || [[]];
-                oldJSON.attributes.forEach(function (attribute) {
-                    for (var k = 0; k < newJSON.attributes.length; k++) {
-                        if (newJSON.attributes[k][0] === attribute[0]) {
-                            return;
-                        }
-                    }
-                    attributes.push([attribute[0], false]);
-                });
-                (newJSON.attributes || []).slice().forEach(function (attribute) {
-                    for (var k = 0; k < oldJSON.attributes.length; k++) {
-                        if (oldJSON.attributes[k][0] === attribute[0]) {
-                            if (oldJSON.attributes[k][1] === attribute[1]) {
-                                return;
-                            }
-                            break;
-                        }
-                    }
-                    attributes.push(attribute);
-                });
-                if (attributes.length) {
-                    changes.attributes = attributes;
-                }
-            }
-            oldJSON.attributes = newJSON.attributes.slice();
+            changes.attributes = this._makeDiffAttributes(oldJSON.attributes, newJSON.attributes);
+            changes.allAttributes = newJSON.attributes;
         }
         if (newJSON.childNodes || oldJSON.childNodes) {
-            newJSON.childNodes = newJSON.childNodes || [];
-            var childNodesIds = newJSON.childNodes.map(function (json) { return json.id; });
-
-            if (!oldJSON.childNodes) {
+            var childNodesIds = newJSON.childNodes || [];
+            var oldChildNodes = changes.childNodes || oldJSON.childNodes;
+            if (!oldChildNodes) {
                 changes.childNodes = childNodesIds;
-            } else if (oldJSON.childNodes.length !== newJSON.childNodes.length) {
+            } else if (oldChildNodes.length !== childNodesIds.length) {
                 changes.childNodes = childNodesIds;
             } else {
                 for (var k = 0; k < childNodesIds.length; k++) {
-                    if (oldJSON.childNodes[k] !== childNodesIds[k]) {
+                    if (oldChildNodes[k] !== childNodesIds[k]) {
                         changes.childNodes = childNodesIds;
                         break;
                     }
                 }
             }
-            newJSON.childNodes.forEach(this._makeDiff.bind(this));
-            oldJSON.childNodes = childNodesIds;
         }
 
         if (Object.keys(changes).length) {
+            changes.id = newJSON.id;
             this.changes[newJSON.id] = changes;
+        }
+    }
+    /**
+     * return the differences between the previous attributes state and the new one.
+     *
+     * @private
+     * @param {JSON} oldAttributes
+     * @param {JSON} newAttributes
+     * @returns {JSON}
+     */
+    _makeDiffAttributes (oldAttributes, newAttributes) {
+        if (!oldAttributes || !oldAttributes.length) {
+            return newAttributes && newAttributes.slice();
+        } else {
+            var attributes = [];
+            newAttributes = newAttributes || [];
+            oldAttributes.forEach(function (attribute) {
+                for (var k = 0; k < newAttributes.length; k++) {
+                    if (newAttributes[k][0] === attribute[0]) {
+                        return;
+                    }
+                }
+                attributes.push([attribute[0], false]);
+            });
+            newAttributes.forEach(function (attribute) {
+                for (var k = 0; k < oldAttributes.length; k++) {
+                    if (oldAttributes[k][0] === attribute[0]) {
+                        if (oldAttributes[k][1] === attribute[1]) {
+                            return;
+                        }
+                        break;
+                    }
+                }
+                attributes.push(attribute);
+            });
+            return attributes.length && attributes || null;
         }
     }
     /**
@@ -369,16 +387,10 @@ var BaseRenderer = class extends we3.AbstractPlugin {
     _markAllDirty () {
         var self = this;
         this.jsonById.forEach(function (json, id) {
-            var json = Object.assign({}, json);
             if (!json) {
                 return;
             }
-            self.changes[id] = json;
-            if (json.childNodes) {
-                json.childNodes = json.childNodes.map(function (json) {
-                    return json.id || json;
-                });
-            }
+            self.changes[id] = Object.assign({}, json);
         });
     }
     /**
@@ -403,13 +415,14 @@ var BaseRenderer = class extends we3.AbstractPlugin {
             })
         }
 
-        Object.keys(this.changes).forEach(function (id) {
-            var changes = self.changes[id];
-            delete self.changes[id];
+        this.changes.forEach(function (changes, id) {
+            id = +id;
             if (self.jsonById[id]) {
                 self._redrawOne(self.jsonById[id], changes, options);
             }
+            delete self.changes[id];
         });
+        this.changes = [];
     }
     /**
      * Render one node from changes.
@@ -469,6 +482,27 @@ var BaseRenderer = class extends we3.AbstractPlugin {
                 el.parentNode.removeChild(el);
             }
         });
+    }
+    _saveChanges (changes) {
+        if (changes && !changes.id) {
+            Object.values(changes).forEach(this._saveChanges.bind(this));
+            return;
+        }
+
+        var self = this;
+        var json = this.jsonById[changes.id] = (this.jsonById[changes.id] || {id: changes.id});
+        if (changes.nodeName) {
+            json.nodeName = changes.nodeName;
+        }
+        if (changes.nodeValue) {
+            json.nodeValue = changes.nodeValue;
+        }
+        if (changes.allAttributes) {
+            json.attributes = changes.allAttributes.slice();
+        }
+        if (changes.childNodes) {
+            json.childNodes = changes.childNodes;
+        }
     }
 };
 
