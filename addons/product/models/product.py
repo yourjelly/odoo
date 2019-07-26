@@ -217,7 +217,7 @@ class ProductProduct(models.Model):
     # DLE P79: `test_10_calculation_price_of_products_pricelist`
     # even if `context.get('date')` can not be found directly in this compute field method,
     # `get_products_price` depends on it, and therefore this method as well
-    @api.depends_context('pricelist', 'partner', 'quantity', 'uom', 'date')
+    @api.depends_context('pricelist', 'partner', 'quantity', 'uom', 'date', 'no_variant_attributes_price_extra')
     def _compute_product_price(self):
         prices = {}
         pricelist_id_or_name = self._context.get('pricelist')
