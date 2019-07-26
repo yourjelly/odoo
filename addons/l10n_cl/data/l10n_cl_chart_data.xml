@@ -277,6 +277,14 @@
         <field name="chart_template_id" ref="cl_chart_template"/>
     </record>
 
+    <record id="110710" model="account.account.template">
+        <field name="code">110710</field>
+        <field name="name">IVA Crédito Fiscal</field>
+        <field ref="account.data_account_type_current_assets" name="user_type_id"/>
+        <field name="reconcile" eval="False"/>
+        <field name="chart_template_id" ref="cl_chart_template"/>
+    </record>
+
     <record id="165" model="account.account.template">
         <field name="name">Activo Fijo / (-) Depreciación Acumulada</field>
         <field name="code">165</field>

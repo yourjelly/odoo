@@ -73,4 +73,304 @@
             }),
         ]"/>
     </record>
+
+    <record id="I_IU2C" model="account.tax.template">
+        <field name="chart_template_id" ref="cl_chart_template"/>
+        <field name="name">Retención de Segunda Categoría</field>
+        <field name="description">Retención de Segunda Categoría</field>
+        <field name="amount">-10</field>
+        <field name="sequence" eval="2"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('244'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('244'),
+            }),
+        ]"/>
+    </record>
+
+    <record id="especifico_compra" model="account.tax.template">
+        <field name="chart_template_id" ref="cl_chart_template"/>
+        <field name="name">Específico Compra</field>
+        <field name="description">Especifico</field>
+        <field name="amount">63</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('110710'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('110710'),
+            }),
+        ]"/>
+        <field name="sequence" eval="5"/>
+    </record>
+
+    <record id="iva_activo_fijo" model="account.tax.template">
+        <field name="chart_template_id" ref="cl_chart_template"/>
+        <field name="name">IVA Compra - 19% Activo Fijo</field>
+        <field name="description">IVA 19% ActF</field>
+        <field name="amount">19</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('125'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('125'),
+            }),
+        ]"/>
+        <field name="sequence" eval="6"/>
+    </record>
+
+    <record id="vat_non_recoverable" model="account.tax.template">
+        <field name="chart_template_id" ref="cl_chart_template"/>
+        <field name="name">IVA Compra - No recuperable</field>
+        <field name="description">19% NoRec</field>
+        <field name="amount">19</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('125'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('125'),
+            }),
+        ]"/>
+        <field name="sequence" eval="7"/>
+    </record>
+
+    <record id="retencion_iva" model="account.tax.template">
+        <field name="chart_template_id" ref="cl_chart_template"/>
+        <field name="name">Retención Total IVA</field>
+        <field name="description">Retención</field>
+        <field name="amount">19</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('231'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('231'),
+            }),
+        ]"/>
+        <field name="sequence" eval="4"/>
+    </record>
+
+    <record id="ila_a_100" model="account.tax.template">
+        <field name="chart_template_id" ref="cl_chart_template"/>
+        <field name="active">True</field>
+        <field name="include_base_amount">"False</field>
+        <field name="amount_type">percent</field>
+        <field name="description">ILA A 10</field>
+        <field name="amount">10.0</field>
+        <field name="price_include">False</field>
+        <field name="name">Beb. Analcólicas 10%</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('125'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('125'),
+            }),
+        ]"/>
+        <field name="sequence">10</field>
+    </record>
+
+    <record id="ila_a_180" model="account.tax.template">
+        <field name="chart_template_id" ref="cl_chart_template"/>
+        <field name="active">True</field>
+        <field name="include_base_amount">False</field>
+        <field name="amount_type">percent</field>
+        <field name="description">ILA A 18</field>
+        <field name="amount">18.0</field>
+        <field name="price_include">False</field>
+        <field name="name">Beb. Analcólicas 18%</field>
+        <field name="sequence">12</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('125'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('125'),
+            }),
+        ]"/>
+    </record>
+
+    <record id="ila_l_315" model="account.tax.template">
+        <field name="chart_template_id" ref="cl_chart_template"/>
+        <field name="active">True</field>
+        <field name="include_base_amount">False</field>
+        <field name="amount_type">percent</field>
+        <field name="description">ILA L 31.5</field>
+        <field name="amount">31.5</field>
+        <field name="price_include">False</field>
+        <field name="name">Licores 31.5%</field>
+        <field name="sequence">14</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('125'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('125'),
+            }),
+        ]"/>
+    </record>
+
+    <record id="ila_v_205" model="account.tax.template">
+        <field name="chart_template_id" ref="cl_chart_template"/>
+        <field name="active">True</field>
+        <field name="include_base_amount">False</field>
+        <field name="amount_type">percent</field>
+        <field name="description">ILA V 20.5</field>
+        <field name="amount">20.5</field>
+        <field name="price_include">False</field>
+        <field name="name">Vinos</field>
+        <field name="sequence">15</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('125'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('125'),
+            }),
+        ]"/>
+    </record>
 </odoo>
