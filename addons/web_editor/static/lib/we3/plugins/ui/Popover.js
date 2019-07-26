@@ -17,7 +17,7 @@ var handleSelector = function (element, selector, callback) {
 var PopoverPlugin = class extends we3.AbstractPlugin {
     constructor(parent, params) {
         super(...arguments);
-        this.dependencies = ['Range', 'Renderer', 'Position'];
+        this.dependencies = ['Arch', 'Range', 'Renderer', 'Position'];
         this.POPOVER_MARGIN_LEFT = 5;
         this.POPOVER_MARGIN_TOP = 5;
         this._setOptionalDependencies(params);
@@ -528,7 +528,10 @@ var PopoverPlugin = class extends we3.AbstractPlugin {
             buttonOptions = JSON.parse(button.getAttribute('options'));
         }
 
-        plugin[method](value, focusNode);
+        var args = [value, focusNode];
+        var noTransaction = button.hasAttribute('no-transaction')
+        this.call(plugin.pluginName, method, args, noTransaction);
+
         if (this.dependencies.Range.getFocusedNode().id === focusNode.id) {
             this._updatePopovers(focusNode);
             this._updatePopoverButtons(focusNode);

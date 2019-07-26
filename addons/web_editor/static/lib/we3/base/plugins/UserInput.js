@@ -129,7 +129,7 @@ var BaseUserInput = class extends we3.AbstractPlugin {
         ev.name = 'default';
         return ev;
     }
-    _eventsdDspatcher (ev, param) {
+    _eventsdDispatcher (ev) {
         if (ev.name === 'composition') {
             return this._pressInsertComposition(ev);
         } else if (ev.name === 'Backspace') {
@@ -450,7 +450,7 @@ var BaseUserInput = class extends we3.AbstractPlugin {
             param.data = e.data;
         } else if (e.inputType === 'insertParagraph' && param.key === 'Unidentified') {
             param.key = 'Enter';
-        } else if (e.inputType === 'deleteContentBackward' && param.key === 'Unidentified') {
+        } else if (e.inputType === 'deleteContentBackwards' && param.key === 'Unidentified') {
             param.key = 'Backspace';
         } else if (e.inputType === 'deleteContentForward' && param.key === 'Unidentified') {
             param.key = 'Delete';
@@ -528,7 +528,7 @@ var BaseUserInput = class extends we3.AbstractPlugin {
             UserInput.trigger(ev.name, ev);
         }
         if (!ev.defaultPrevented) {
-            await this._eventsdDspatcher(ev, param);
+            await this._eventsdDispatcher(ev, param);
         }
 
         this._redrawToRemoveArtefact(param.mutationsList);

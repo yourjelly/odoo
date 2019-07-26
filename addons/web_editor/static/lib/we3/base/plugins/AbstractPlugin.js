@@ -84,6 +84,27 @@ we3.AbstractPlugin = class extends we3.EventDispatcher {
      */
     blurEditor () {}
     /**
+     * Call the given method of the given plugin, with the given arguments.
+     *
+     * @see PluginsManager.call
+     * @see Arch.do
+     * @param {string} pluginName
+     * @param {string} methodName
+     *      if `noTransaction` is not true, this method will be called as
+     *      callback to `Arch.do`, which means it can return:
+     *      - a range to apply instead of the default range (ie the first change)
+     *      - an array to set the range from the start of its first item to
+     *        the end of its last item (eg: select all inserted nodes)
+     *      - false to keep the range as it was before the changes
+     * @param {any []} [args]
+     * @param {boolean} [noTransaction]
+     * @returns {any} the return value of the method called, or undefined
+     */
+    call (pluginName, method, args, noTransaction) {
+        var pluginsManager = this._parentedParent; // todo: trigger_up instead?
+        return pluginsManager.call(pluginName, method, args, noTransaction);
+    }
+    /**
      * @see Manager.cancelEditor
      */
     cancelEditor () {

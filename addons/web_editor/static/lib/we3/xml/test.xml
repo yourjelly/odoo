@@ -4,7 +4,7 @@
         <we3-dropdown name="Test">
             <we3-toggler title="Test">Test</we3-toggler>
             <we3-vertical-items direction="vertical">
-                <we3-button name="all-Test" data-method="loadTest">
+                <we3-button name="all-Test" data-method="loadTest" no-transaction="true">
                     Launch all available tests
                 </we3-button>
             </we3-vertical-items>

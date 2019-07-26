@@ -78,14 +78,33 @@ we3.PluginsManager = class extends we3.EventDispatcher {
     /**
      * Call the given method of the given plugin, with the given arguments.
      *
+     * @see Arch.do
      * @param {string} pluginName
      * @param {string} methodName
+     *      if `noTransaction` is not true, this method will be called as
+     *      callback to `Arch.do`, which means it can return:
+     *      - a range to apply instead of the default range (ie the first change)
+     *      - an array to set the range from the start of its first item to
+     *        the end of its last item (eg: select all inserted nodes)
+     *      - false to keep the range as it was before the changes
      * @param {any []} [args]
+     * @param {boolean} [noTransaction]
+     * @returns {any} the return value of the method called, or undefined
      */
-    call (pluginName, methodName, args) {
+    call (pluginName, methodName, args, noTransaction) {
         var plugin = this._plugins[pluginName];
         if (plugin) {
-            return plugin[methodName].apply(plugin, args);
+            if (noTransaction) {
+                return plugin[methodName].apply(plugin, args);
+            } else {
+                var res;
+                this._plugins.Arch.do(async function (getArchNode) {
+                    args.push(getArchNode);
+                    res = await plugin[methodName].apply(plugin, args);
+                    return res;
+                });
+                return res;
+            }
         }
     }
 

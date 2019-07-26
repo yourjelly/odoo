@@ -162,6 +162,37 @@ we3.WrappedRange = class we3 {
         });
     }
     /**
+     * Returns a list of all selected nodes in the range.
+     * If a predicate function is included, only nodes meeting its
+     * conditions will be returned.
+     *
+     * @param {function} [pred]
+     * @returns {ArchNode []}
+     */
+    getSelectedNodes (pred) {
+        var start = this.scArch.firstLeaf();
+        var end = this.ecArch.lastLeaf();
+        if (this.scID !== this.ecID && this.so === this.scArch.length()) {
+            start = this.scArch.nextSibling() || this.scArch;
+        }
+        if (this.scID !== this.ecID && this.eo === 0) {
+            end = this.scArch.previousSibling() || this.ecArch;
+        }
+        var selection = [];
+        if (!pred || pred.call(start, start)) {
+            selection.push(start);
+        }
+        if (this.scID !== this.ecID) {
+            start.nextUntil(function (next) {
+                if (!pred || pred.call(next, next)) {
+                    selection.push(next);
+                }
+                return next === end;
+            });
+        }
+        return selection;
+    }
+    /**
      * Get the current selection from the DOM.
      *
      * @returns {Selection}

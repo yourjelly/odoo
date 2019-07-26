@@ -888,13 +888,16 @@ we3.ArchNode = class {
      * Split the current node's parent at both edges of this node.
      */
     splitAround () {
+        // a virtual is considered empty -> do not remove them if
+        // what we are trying to isolate is specifically a virtual
+        var removeEmpty = !this.isVirtual();
         // split at start if not on left edge
         if (this.index()) {
-            this.parent.split(this.index(), true);
+            this.parent.split(this.index(), removeEmpty);
         }
         // split at end if not on right edge
         if (this.index() + 1 < this.parent.length()) {
-            this.parent.split(this.index() + 1, true);
+            this.parent.split(this.index() + 1, removeEmpty);
         }
     }
     /**

@@ -318,6 +318,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
                 var button = document.createElement('we3-button');
                 button.setAttribute('data-method', 'loadTest');
                 button.setAttribute('data-value', plugin.pluginName);
+                button.setAttribute('no-transaction', 'true');
                 var buttonName = plugin.pluginName;
                 if (buttonName !== 'Test') {
                     buttonName = buttonName.replace('Test', '')

@@ -186,7 +186,8 @@ var keyMapPlugin = class extends we3.AbstractPlugin {
 
         ev.preventDefault();
 
-        this._parentedParent.call(item.pluginName, item.methodName, [item.value, this.dependencies.Range.getRange()]);
+        var args = [item.value, this.dependencies.Range.getRange()];
+        this.call(item.pluginName, item.methodName, args, false);
     }
 };
 
