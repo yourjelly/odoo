@@ -1355,7 +1355,7 @@ class SaleOrderLine(models.Model):
         ]
         if no_variant_attributes_price_extra:
             product = product.with_context(
-                no_variant_attributes_price_extra=no_variant_attributes_price_extra
+                no_variant_attributes_price_extra=tuple(no_variant_attributes_price_extra)
             )
 
         if self.order_id.pricelist_id.discount_policy == 'with_discount':
