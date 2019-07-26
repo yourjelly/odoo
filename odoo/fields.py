@@ -78,7 +78,9 @@ class MetaField(type):
         slots = dict(base_slots)
         slots.update(attrs.get('_slots', ()))
 
-        attrs['__slots__'] = set(slots) - set(base_slots)
+        # DLE P172: If __slots__ is defined, unfortunately, I cannot monkey patch fields.write for automated action.
+        # `addons/base_automation/tests/test_base_automation.py`
+        # attrs['__slots__'] = set(slots) - set(base_slots)
         attrs['_slots'] = slots
         return type.__new__(meta, name, bases, attrs)
 
