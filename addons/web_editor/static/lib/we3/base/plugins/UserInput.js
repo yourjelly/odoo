@@ -198,7 +198,8 @@ var BaseUserInput = class extends we3.AbstractPlugin {
 
         return BaseArch.do(function () {
             var range = BaseRange.getRange();
-            var arch = BaseArch.getArchNode(range.scID).ancestor('isFormatNode');
+            var archNode = BaseArch.getArchNode(range.scID);
+            var arch = archNode.ancestor('isFormatNode') || archNode.ancestor('isUnbreakable');
             var formatNode = BaseRenderer.getElement(arch.id);
 
             if (!formatNode) {
@@ -270,9 +271,19 @@ var BaseUserInput = class extends we3.AbstractPlugin {
             }
 
             var lastLeaf = formatNode.lastLeaf();
-            return {
-                scID: lastLeaf.id,
-                so: lastLeaf.length(),
+            if (lastLeaf) {
+                return {
+                    scID: lastLeaf.id,
+                    so: lastLeaf.length(),
+                };
+            }
+
+            var rangeDOM = BaseRange.getRangeFromDOM();
+            if (rangeDOM && rangeDOM.scID && rangeDOM.scArch.length() <= rangeDOM.so) {
+                return {
+                    scID: rangeDOM.scID,
+                    so: rangeDOM.so,
+                };
             }
         });
     }
