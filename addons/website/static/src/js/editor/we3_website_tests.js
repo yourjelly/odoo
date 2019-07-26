@@ -65,7 +65,6 @@ var TestOdooWebsite = class extends we3.AbstractPlugin {
         return super.start();
     }
     test (assert) {
-        var self = this;
         var Arch = this.dependencies.Arch;
         var Test = this.dependencies.Test;
         var wrapArchNode = Arch.getClonedArchNode(1).nextUntil(function (archNode) {
@@ -253,14 +252,14 @@ QUnit.module('website', {
         assert.ok($website.is(':hidden'), "Html value should be hidden");
         assert.ok($('we3-editor #wrapwrap:visible'), "Html value should be appear in the editable area");
 
-        await wysiwyg.editor._editor._pluginsManager.call('Test', 'loadTest', ['TestOdooWebsite']);
-        await wysiwyg.editor._editor._pluginsManager.call('Test', 'loadTest', ['TestKeyboardChar']);
-        await wysiwyg.editor._editor._pluginsManager.call('Test', 'loadTest', ['TestArchAndRules']);
+        await wysiwyg.editor._editor._pluginsManager.call('Test', 'loadTest', ['TestOdooWebsite'], true);
+        await wysiwyg.editor._editor._pluginsManager.call('Test', 'loadTest', ['TestKeyboardChar'], true);
+        await wysiwyg.editor._editor._pluginsManager.call('Test', 'loadTest', ['TestArchAndRules'], true);
 
         var target = $('we3-editable #wrap h2 b:first')[0].firstChild;
-        var id = wysiwyg.editor._editor._pluginsManager.call('Renderer', 'getID', [target]);
-        await wysiwyg.editor._editor._pluginsManager.call('Test', 'setRange', [{scID: id, so: 4}]);
-        await wysiwyg.editor._editor._pluginsManager.call('Test', 'keydown', [target, {keyCode: 13}]);
+        var id = wysiwyg.editor._editor._pluginsManager.call('Renderer', 'getID', [target], true);
+        await wysiwyg.editor._editor._pluginsManager.call('Test', 'setRange', [{scID: id, so: 4}], true);
+        await wysiwyg.editor._editor._pluginsManager.call('Test', 'keydown', [target, {keyCode: 13}], true);
 
         await wysiwyg.save().then(function (result) {
             var area = result.arch.descendents('isWebsiteEditable');

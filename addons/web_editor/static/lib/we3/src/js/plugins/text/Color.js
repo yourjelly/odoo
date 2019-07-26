@@ -40,34 +40,40 @@ var ColorPlugin = class extends we3.AbstractPlugin {
     reset () {
         var self = this;
         this.dependencies.Arch.splitRangeUntil(node => node.isFont(), {doNotBreakBlocks: true});
-        var rangeToPreserve = this.dependencies.Range.getRange();
         var selection = this.dependencies.Range.getSelectedNodes();
         var styled = selection.filter(function (node) {
             return node.style && node.style.length || self._colorClasses(node).length;
         });
         // remove colors on every styled node in the selection
-        var json = styled.map(function (node) {
-            var parentID = node.parent.id;
+        styled.forEach(function (node) {
             self._removeColorClasses(node);
             self._removeColorStyles(node);
             self._removeEmptyFont(node); // remove the node if it has not attributes
-            return self.dependencies.Arch.getClonedArchNode(parentID).toJSON();
         });
-        this.dependencies.Arch.importUpdate(json);
-        this.dependencies.Range.setRange(rangeToPreserve);
+        return false; // keep the range where it was before
     }
     /**
      * Change the selection's fore color.
      *
      * @param {string} color (hexadecimal or class name)
      */
-    update (color) {
-        var _update = getArchNode => this._update(color, getArchNode);
-        this.dependencies.Arch.do(_update, {
-            // If range is collapsed we need a virtual text node to style and on
-            // which to put the carret. Otherwise they can all go.
-            removeAllVirtualText: !this.dependencies.Range.isCollapsed(),
+    update (color, focusNode, getArchNode) {
+        var self = this;
+        var range = this.dependencies.Range.getRange();
+        var scArch = getArchNode(range.scID);
+        var ecArch = getArchNode(range.ecID);
+        var toColor = this._getNodesToColor(scArch, range.so, ecArch, range.eo)
+            .map(id => getArchNode(id));
+
+        toColor.forEach(function (node) {
+            var fontNode = node.ancestor('isFont') || node.wrap('font');
+            self._applyColor(fontNode, color);
+            fontNode._deleteEdges({
+                doNotBreakBlocks: true,
+                mergeOnlyIfSameType: true,
+            });
         });
+        return toColor; // select all newly colored nodes
     }
 
     //--------------------------------------------------------------------------
@@ -221,7 +227,9 @@ var ColorPlugin = class extends we3.AbstractPlugin {
         var startFont = start.ancestor('isFont');
         if (startFont) {
             start = start.splitUntil(startFont, startOffset);
-            start = start.firstLeaf().next({ leafToLeaf: true });
+            if (!start.isVoidoid()) {
+                start = start.firstLeaf().next({ leafToLeaf: true });
+            }
         } else {
             start = start.split(startOffset) || start;
         }
@@ -293,36 +301,6 @@ var ColorPlugin = class extends we3.AbstractPlugin {
         } else {
             node.remove();
         }
-    }
-    /**
-     * Change the selection's fore color.
-     *
-     * @param {string} color (hexadecimal or class name)
-     * @param {function} getArchNode
-     */
-    _update (color, getArchNode) {
-        var self = this;
-        var range = this.dependencies.Range.getRange();
-        var scArch = getArchNode(range.scID);
-        var ecArch = getArchNode(range.ecID);
-        var toColor = this._getNodesToColor(scArch, range.so, ecArch, range.eo)
-            .map(id => getArchNode(id));
-
-        toColor.forEach(function (node) {
-            var fontNode = node.ancestor('isFont') || node.wrap('font');
-            self._applyColor(fontNode, color);
-            fontNode._deleteEdges({
-                doNotBreakBlocks: true,
-                mergeOnlyIfSameType: true,
-            });
-        });
-        // keep the original selection
-        return {
-            scID: toColor[0].id,
-            so: 0,
-            ecID: toColor[toColor.length - 1].id,
-            eo: toColor[toColor.length - 1].length(),
-        };
     }
 };
 

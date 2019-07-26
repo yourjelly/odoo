@@ -48,7 +48,9 @@ var custom = function (value, archNode) {
 
         // Reset range to where it was before fiddling with the colorpicker dialog
         self.dependencies.Range.setRange(range);
-        self.update(cssColor);
+        self.dependencies.Arch.do(function (getArchNode) {
+            return self.update(cssColor, null, getArchNode);
+        });
     });
     colorPickerDialog.open();
 }

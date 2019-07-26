@@ -33,7 +33,8 @@ var FontStylePlugin = class extends we3.AbstractPlugin {
                 styleAncestors.push(ancestor.id);
             }
         });
-        this.dependencies.Arch.wrap(this.utils.uniq(styleAncestors), nodeName);
+        var changedIDs = this.dependencies.Arch.wrap(this.utils.uniq(styleAncestors), nodeName);
+        return changedIDs.length ? changedIDs : false;
     }
     /**
      * (Un-)format text: make it bold, italic, ...
@@ -42,16 +43,16 @@ var FontStylePlugin = class extends we3.AbstractPlugin {
      *       B, I, U, S, SUP, SUB
      */
     formatText (nodeName) {
+        nodeName = nodeName.toLowerCase();
         var range = this.dependencies.Range.getRange();
-        var selectedTextNodes = this.dependencies.Range.getSelectedNodes((node) => node.isText() || node.isVoidoid());
-        if (selectedTextNodes.length && selectedTextNodes.every((node) => node.ancestor((a) => a.nodeName === nodeName))) {
-            this.dependencies.Arch.unwrapRangeFrom(nodeName);
+        var selectedTextNodes = this.dependencies.Range.getSelectedNodes(node => node.isText() || node.isVoidoid());
+        var changedIDs = [];
+        if (selectedTextNodes.length && selectedTextNodes.every(node => node.ancestor(a => a.nodeName === nodeName))) {
+            changedIDs = this.dependencies.Arch.unwrapRangeFrom(nodeName);
         } else {
-            this.dependencies.Arch.wrapRange(nodeName);
+            changedIDs = this.dependencies.Arch.wrapRange(nodeName);
         }
-        if (range.scID !== range.ecID) {
-            this.dependencies.Range.setRange(range);
-        }
+        return range.scID !== range.ecID ? range : changedIDs;
     }
     /**
      * Remove format on the current range. If the range is collapsed, remove
@@ -63,30 +64,27 @@ var FontStylePlugin = class extends we3.AbstractPlugin {
      */
     removeFormat (value, focusNode) {
         var range = this.dependencies.Range.getRange();
+        var changedIDs = [];
         // Unwrap everything at range from the removeFormat candidates
         if (this.dependencies.Range.isCollapsed()) {
-            this.dependencies.Arch.unwrapFrom(focusNode.id, we3.tags.format);
+            changedIDs = this.dependencies.Arch.unwrapFrom(focusNode.id, we3.tags.format);
         } else {
-            this.dependencies.Arch.unwrapRangeFrom(we3.tags.format);
-        }
-        // Reset the range if it was across several node (otherwise let Arch handle it)
-        if (range.scID !== range.ecID) {
-            this.dependencies.Range.setRange(range);
+            changedIDs = this.dependencies.Arch.unwrapRangeFrom(we3.tags.format);
         }
         // Remove the styles of everything at range
         var unstyledNodes = [];
-        if (this.dependencies.Range.isCollapsed()) {
-            unstyledNodes = this._unstyle(this.dependencies.Range.scArch);
+        if (range.isCollapsed()) {
+            unstyledNodes = this._unstyle(range.scArch);
         } else {
-            unstyledNodes = this._unstyle(this.dependencies.Range.getSelectedNodes());
+            unstyledNodes = this._unstyle(range.getSelectedNodes());
         }
-        // Render anew if anything changed
-        if (unstyledNodes.length) {
-            var parentsOfUnstyledNodes = we3.utils.uniq(unstyledNodes.map(node => node.parent));
-            var json = parentsOfUnstyledNodes.map(node => node.toJSON());
-            this.dependencies.Arch.importUpdate(json);
-            this.dependencies.Range.setRange(range);
+        // Reset the range if it was across several node
+        if (range.scID !== range.ecID) {
+            return range;
         }
+        // select the nodes of which the styles were removed
+        // or the nodes that were unwrapped
+        return unstyledNodes.length ? unstyledNodes : changedIDs;
     }
 
     //--------------------------------------------------------------------------

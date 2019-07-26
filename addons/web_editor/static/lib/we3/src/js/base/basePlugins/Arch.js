@@ -106,10 +106,12 @@ var BaseArch = class extends we3.AbstractPlugin {
      * the dom is updated and the triggers are made.
      *
      * @param {Function(getArchNode)} callback
-     *      The function can return a range if want to apply it instead of the
-     *      default range (apply on the first changed node)
+     *      The function can return:
+     *      - a range to apply instead of the default range (ie the first change)
+     *      - an array to set the range from the start of its first item to
+     *        the end of its last item (eg: select all inserted nodes)
+     *      - false to keep the range as it was before the changes
      * @param {object} [options]
-     * @param {boolean} [options.removeAllVirtualText] true to remove all virtual text before rendering
      * @param {boolean} [options.applyRulesForPublicMethod] true to apply rules when call a public Arch method.
      */
     async do (callback, options) {
@@ -125,11 +127,23 @@ var BaseArch = class extends we3.AbstractPlugin {
             }
             return self.getArchNode(id);
         }
-        var range = await callback(getArchNode);
-        this._isDoTransaction = _isDoTransaction;
-        if (options.removeAllVirtualText) {
-            this._removeAllVirtualText();
+        var previousRange = this.dependencies.BaseRange.getRange();
+        var rangeInfo = await callback(getArchNode);
+        var range;
+        if (rangeInfo && Array.isArray(rangeInfo)) {
+            // select from start of first item to end of last item
+            var first = rangeInfo[0];
+            var last = rangeInfo[rangeInfo.length - 1];
+            range = first && last ? {
+                scID: typeof first === 'number' ? first : first.id,
+                ecID: typeof last === 'number' ? last : last.id,
+            } : {};
+        } else if (rangeInfo === false) {
+            range = previousRange;  // keep the range as it was before
+        } else {
+            range = rangeInfo; // rangeInfo is a range or undefined
         }
+        this._isDoTransaction = _isDoTransaction;
         this._applyRulesRangeRedrawFromChanges(range);
     }
     /**
@@ -607,6 +621,7 @@ var BaseArch = class extends we3.AbstractPlugin {
      *
      * @param {Number|Number []} id
      * @param {string|string []} wrapperName
+     * @returns {int []} the ids of the unwrapped nodes
      */
     unwrapFrom (id, wrapperName) {
         var ids = Array.isArray(id) ? id : [id];
@@ -638,6 +653,7 @@ var BaseArch = class extends we3.AbstractPlugin {
             range = this.dependencies.BaseRange.rangeOn(scArch, ecArch);
         }
         this._applyRulesRangeRedrawFromChanges(range);
+        return unwrapped.map(node => node.id);
     }
     /**
      * Unwrap every node in range from their first ancestor
@@ -649,6 +665,7 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @param {string|string []} wrapperName
      * @param {object} [options]
      * @param {boolean} [options.doNotSplit] true to unwrap the full nodes without splitting them
+     * @returns {int []} the ids of the unwrapped nodes
      */
     unwrapRangeFrom (wrapperName, options) {
         options = options || {};
@@ -667,7 +684,7 @@ var BaseArch = class extends we3.AbstractPlugin {
             includeStart: true,
             includeEnd: !!options.doNotSplit,
         });
-        this.unwrapFrom(selectedNodes, wrapperName);
+        return this.unwrapFrom(selectedNodes, wrapperName);
     }
     /**
      * Wrap the node(s) corresponding to the given ID(s) inside
@@ -1653,6 +1670,7 @@ var Arch = class extends we3.AbstractPlugin {
      *
      * @param {Number|Number []} id
      * @param {string|string []} wrapperName
+     * @returns {int []} the ids of the unwrapped nodes
      */
     unwrapFrom (id, wrapperName) {
         return this.dependencies.BaseArch.unwrapFrom(id, wrapperName);

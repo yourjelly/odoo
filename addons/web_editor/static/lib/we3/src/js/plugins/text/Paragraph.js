@@ -23,14 +23,8 @@ var ParagraphPlugin = class extends we3.AbstractPlugin {
      *       left, center, right, justify
      */
     align (align) {
-        var self = this;
-        var rangeToPreserve = this.dependencies.Range.getRange();
-        var selection = this.dependencies.Range.getSelectedNodes();
-        var changed = selection.map(node => self._alignOne(node, align))
-            .filter(item => item);
-        var json = changed.filter(node => node).map(node => node.parent.toJSON());
-        this.dependencies.Arch.importUpdate(json);
-        this.dependencies.Range.setRange(rangeToPreserve);
+        this.dependencies.Range.getSelectedNodes().forEach(node => this._alignOne(node, align));
+        return false;
     }
 
     //--------------------------------------------------------------------------

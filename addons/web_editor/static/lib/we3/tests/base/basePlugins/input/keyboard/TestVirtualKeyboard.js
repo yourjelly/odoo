@@ -84,10 +84,10 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
                 keyCode: 8,
             }],
             ['beforeInput', {
-                inputType: 'deleteContentBackward',
+                inputType: 'deleteContentBackwards',
             }],
             ['input', {
-                inputType: 'deleteContentBackward',
+                inputType: 'deleteContentBackwards',
             }],
         ]);
 
@@ -517,11 +517,11 @@ var TestVirtualKeyboard = class extends we3.AbstractPlugin {
         await this._triggerKey([
             ['beforeInput', {
                 data: 'null',
-                inputType: 'deleteContentBackward',
+                inputType: 'deleteContentBackwards',
             }],
             ['input', {
                 data: 'null',
-                inputType: 'deleteContentBackward',
+                inputType: 'deleteContentBackwards',
             }],
             ['beforeInput', {
                 data: 'ô',

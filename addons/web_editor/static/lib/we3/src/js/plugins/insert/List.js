@@ -630,23 +630,15 @@ var ListPlugin = class extends we3.AbstractPlugin {
      * Indent the list
      */
     indent () {
-        var self = this;
-        var range = this.dependencies.Range.getRange();
-        this.dependencies.Arch.do(function () {
-            self.dependencies.Arch.indent();
-            return range;
-        });
+        this.dependencies.Arch.indent();
+        return false; // keep the range where it was before
     }
     /**
      * Outdent the list
      */
     outdent () {
-        var self = this;
-        var range = this.dependencies.Range.getRange();
-        this.dependencies.Arch.do(function () {
-            self.dependencies.Arch.outdent();
-            return range;
-        });
+        this.dependencies.Arch.outdent();
+        return false; // keep the range where it was before
     }
     /**
      * Insert an ordered list, an unordered list or a checklist.
@@ -654,8 +646,30 @@ var ListPlugin = class extends we3.AbstractPlugin {
      *
      * @param {string('ol'|'ul'|'checklist')} type the type of list to insert
      */
-    toggle (type) {
-        this.dependencies.Arch.do(getArchNode => this._toggle(type, getArchNode));
+    toggle (type, focusNode, getArchNode) {
+        var range = this.dependencies.Range.getRange();
+        var selectedLeaves = this.dependencies.Range.getSelectedLeaves();
+        var newLists = [];
+        if (this._isAllInList(selectedLeaves)) {
+            if (this._isAllInListType(selectedLeaves, type)) {
+                this._removeList(getArchNode); // [ REMOVE ]
+            } else {
+                newLists = this._convertList(type, getArchNode); // [ CONVERT ]
+            }
+        } else {
+            newLists = this._insertList(type, getArchNode); // [ INSERT ]
+        }
+        newLists.slice().forEach(this._mergeSiblingLists); // Clean edges
+        var start = getArchNode(selectedLeaves[0].id); // Restore range
+        var end = getArchNode(selectedLeaves[selectedLeaves.length - 1].id);
+        if (start && end) {
+            return {
+                scID: start.id,
+                so: range.so,
+                ecID: end.id,
+                eo: range.eo,
+            };
+        }
     }
 
     //--------------------------------------------------------------------------
@@ -824,39 +838,6 @@ var ListPlugin = class extends we3.AbstractPlugin {
         var selectedLeaves = this.dependencies.Range.getSelectedLeaves();
         var listAncestors = selectedLeaves.map(node => node.ancestor('isList'));
         return we3.utils.uniq(listAncestors.filter(node => node));
-    }
-    /**
-     * Insert an ordered list, an unordered list or a checklist.
-     * If already in list, remove the list or convert it to the given type.
-     *
-     * @private
-     * @param {string('ol'|'ul'|'checklist')} type the type of list to insert
-     * @param {function} getArchNode
-     */
-    _toggle (type, getArchNode) {
-        var range = this.dependencies.Range.getRange();
-        var selectedLeaves = this.dependencies.Range.getSelectedLeaves();
-        var newLists = [];
-        if (this._isAllInList(selectedLeaves)) {
-            if (this._isAllInListType(selectedLeaves, type)) {
-                this._removeList(getArchNode); // [ REMOVE ]
-            } else {
-                newLists = this._convertList(type, getArchNode); // [ CONVERT ]
-            }
-        } else {
-            newLists = this._insertList(type, getArchNode); // [ INSERT ]
-        }
-        newLists.slice().forEach(this._mergeSiblingLists); // Clean edges
-        var start = getArchNode(selectedLeaves[0].id); // Restore range
-        var end = getArchNode(selectedLeaves[selectedLeaves.length - 1].id);
-        if (start && end) {
-            return {
-                scID: start.id,
-                so: range.so,
-                ecID: end.id,
-                eo: range.eo,
-            };
-        }
     }
 
     //--------------------------------------------------------------------------

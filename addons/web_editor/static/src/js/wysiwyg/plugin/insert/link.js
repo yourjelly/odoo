@@ -134,7 +134,11 @@ var Link = class extends we3.AbstractPlugin {
      * Remove the current link, keep its contents.
      */
     unlink (value, node) {
-        this.dependencies.Arch.unwrap(node.childNodes.map(node => node.id));
+        var toUnwrap = node.childNodes.map(node => node.id);
+        if (toUnwrap.length) {
+            this.dependencies.Arch.unwrap(toUnwrap);
+            return toUnwrap;
+        }
     }
 
     //--------------------------------------------------------------------------

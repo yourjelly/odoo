@@ -99,28 +99,7 @@ var BaseRange = class extends we3.AbstractPlugin {
      * @returns {ArchNode []}
      */
     getSelectedNodes (pred) {
-        var range = this.getRange();
-        var start = range.scArch.firstLeaf();
-        var end = range.ecArch.lastLeaf();
-        if (range.scID !== range.ecID && range.so === range.scArch.length()) {
-            start = range.scArch.nextSibling() || range.scArch;
-        }
-        if (range.scID !== range.ecID && range.eo === 0) {
-            end = range.scArch.previousSibling() || range.ecArch;
-        }
-        var selection = [];
-        if (!pred || pred.call(start, start)) {
-            selection.push(start);
-        }
-        if (range.scID !== range.ecID) {
-            start.nextUntil(function (next) {
-                if (!pred || pred.call(next, next)) {
-                    selection.push(next);
-                }
-                return next === end;
-            });
-        }
-        return selection;
+        return this.getRange().getSelectedNodes(pred);
     }
     /**
      * Get the range from the selection in the DOM.
@@ -262,6 +241,7 @@ var BaseRange = class extends we3.AbstractPlugin {
      * Deduce the intended ids and offsets from the given ids and offsets.
      * Pass only `points.scID` to get the whole element.
      * Pass only `points.scID` and `points.so` to collapse on the start node.
+     * Pass only `points.scID` and `points.ecID` to select from start of sc to end of ec
      *
      * @private
      * @param {Object} pointsWithIDs
@@ -284,6 +264,9 @@ var BaseRange = class extends we3.AbstractPlugin {
         var eo = pointsWithIDs.eo;
         if (!pointsWithIDs.ecID) {
             eo = typeof pointsWithIDs.so === 'number' ? so : this.dependencies.BaseArch.getArchNode(scID).length();
+        }
+        if (!eo && eo !== 0) {
+            eo = this.dependencies.BaseArch.getArchNode(ecID).length();
         }
         return {
             scID: scID,
@@ -456,6 +439,8 @@ var BaseRange = class extends we3.AbstractPlugin {
     }
     /**
      * Move the points to before an inline node if it's on its left edge.
+     * This is used to harmonize the behavior between browsers.
+     * Eg: text<b>◆text</b>text -> text◆<b>text</b>text
      *
      * @private
      * @param {Object} points
@@ -468,7 +453,10 @@ var BaseRange = class extends we3.AbstractPlugin {
     _moveToBeforeInline (points) {
         var isCollapsed = points.scID === points.ecID && points.so === points.eo;
         var archSC = this.dependencies.BaseArch.getArchNode(points.scID);
-        if (archSC.isVoidoid() || archSC.isVoid()) {
+        /* This only concerns inline nodes that can have children.
+        Also, do not move if we are on a virtual as it means its position is
+        intentional (eg: <b>virtual</b> so we can write in bold). */
+        if (archSC.isVoidoid() || archSC.isVoid() || archSC.isVirtual()) {
             return points;
         }
         var isLeftEdgeOfInline = !points.so &&
@@ -573,6 +561,8 @@ var BaseRange = class extends we3.AbstractPlugin {
     }
     /**
      * Move the points to within an inline node if it's on its right edge.
+     * This is used to harmonize the behavior between browsers.
+     * Eg: text<b>text</b>◆text -> text<b>text◆</b>text
      *
      * @param {Object} points
      * @param {Number} points.scID
@@ -584,7 +574,10 @@ var BaseRange = class extends we3.AbstractPlugin {
     _moveToEndOfInline (points) {
         var isCollapsed = points.scID === points.ecID && points.so === points.eo;
         var archSC = this.dependencies.BaseArch.getArchNode(points.scID);
-        if (archSC.isVoidoid() || archSC.isVoid()) {
+        /* This only concerns inline nodes that can have children.
+        Also, do not move if we are on a virtual as it means its position is
+        intentional (eg: <b>virtual</b> so we can write in bold). */
+        if (archSC.isVoidoid() || archSC.isVoid() || archSC.isVirtual()) {
             return points;
         }
         var prev = archSC.previousSibling();
@@ -1027,6 +1020,7 @@ var Range = class extends we3.AbstractPlugin {
     /**
      * Returns a list of all selected nodes in the range.
      *
+     * @see WrappedRange.getSelectedNodes
      * @param {function} [pred]
      * @returns {ArchNode []}
      */

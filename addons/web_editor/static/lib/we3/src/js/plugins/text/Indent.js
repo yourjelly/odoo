@@ -23,17 +23,15 @@ var IndentPlugin = class extends we3.AbstractPlugin {
      * Indent
      */
     indent () {
-        var rangeToPreserve = this.dependencies.Range.getRange();
         this.dependencies.Arch.indent();
-        this.dependencies.Range.setRange(rangeToPreserve);
+        return false;
     }
     /**
      * Outdent the list
      */
     outdent () {
-        var rangeToPreserve = this.dependencies.Range.getRange();
         this.dependencies.Arch.outdent();
-        this.dependencies.Range.setRange(rangeToPreserve);
+        return false;
     }
 
     //--------------------------------------------------------------------------
