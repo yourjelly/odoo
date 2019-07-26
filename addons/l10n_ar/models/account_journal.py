@@ -182,3 +182,13 @@ class AccountJournal(models.Model):
         company_partner = self.company_id.partner_id.id
         return {'domain': {'l10n_ar_afip_pos_partner_id': [
             '|', ('id', '=', company_partner), '&', ('id', 'child_of', company_partner), ('type', '!=', 'contact')]}}
+
+    @api.onchange('l10n_ar_afip_pos_number', 'type')
+    def _onchange_set_short_name(self):
+        """ Will define the AFIP POS Address field domain taking into account the company configured in the journal
+        The short code of the journal only admit 5 characters, so depending on the size of the pos_number (also max 5)
+        we add or not a prefix to indetify sales journal.
+        """
+        if self.type == 'sale' and self.l10n_ar_afip_pos_number:
+            pos_num = str(self.l10n_ar_afip_pos_number)
+            self.code = pos_num if len(pos_num) > 4 else _('S') + "%04d" % self.l10n_ar_afip_pos_number
