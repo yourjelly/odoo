@@ -36,7 +36,8 @@ Object.assign(we3.options, {
         'Document.getArchNode': ['Float', 'Media'],
         'Pictogram.getArchNode':  ['FontSize', 'Float', 'Pictogram', 'Media'],
         'Video.getArchNode': ['Padding', 'MediaSize', 'Float', 'Media'],
-        'TagMany2one.getArchNode':  ['TagMany2one'],
+        // todo: nby: place this line in the proper file
+        // 'TagMany2one.getArchNode':  ['TagMany2one'],
         'Link.get': ['Link'],
         'Table.get':  ['Table'],
         // 'Text.get': ['FontStyle', 'FontSize', 'ForeColor', 'BgColor', 'Paragraph'], // eg for air mode

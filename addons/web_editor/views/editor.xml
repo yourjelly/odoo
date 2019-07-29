@@ -106,7 +106,8 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/history.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/codeView.js"/>
 
-    <script type="text/javascript" src="/web_editor/static/tests/plugins/TestDynamicFields.js"/>
+    <!-- todo: place this test in the proper folder and place the following line in the proper file -->
+    <!-- <script type="text/javascript" src="/web_editor/static/tests/plugins/TestDynamicFields.js"/> -->
 
 </template>
 
@@ -260,7 +261,8 @@
         <script type="text/javascript" src="/web_editor/static/tests/we3_tests.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/media_crop_tests.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/color_picker_tests.js"/>
-        <script type="text/javascript" src="/web_editor/static/tests/plugins/TestDynamicFields.js"/>
+        <!-- todo: nby fix me -->
+        <!-- <script type="text/javascript" src="/web_editor/static/tests/plugins/TestDynamicFields.js"/> -->
         <!-- <script type="text/javascript" src="/web_editor/static/tests/field_html_tests.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/wysiwyg_tests.js"/>
         <script type="text/javascript" src="/web_editor/static/tests/wysiwyg_keyboard_tests.js"/>
