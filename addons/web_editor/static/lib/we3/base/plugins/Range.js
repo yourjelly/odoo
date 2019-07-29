@@ -722,7 +722,12 @@ var BaseRange = class extends we3.AbstractPlugin {
             oldRange.ec !== nativeReadyNewRange.ec || oldRange.eo !== nativeReadyNewRange.eo)) {
             // only if the native range change, after the redraw
             // the renderer can associate existing note to the arch (to prevent error on mobile)
-            this._select(nativeReadyNewRange.sc, nativeReadyNewRange.so, nativeReadyNewRange.ec, nativeReadyNewRange.eo);
+            if (nativeReadyNewRange.sc && nativeReadyNewRange.ec) {
+                this._select(nativeReadyNewRange.sc, nativeReadyNewRange.so, nativeReadyNewRange.ec, nativeReadyNewRange.eo);
+            } else {
+                var msg = 'Wrong Range! The nodes could node be found in the DOM.';
+                console.warn(msg + '\nnewRange: ', newRange, '\nnativeRange:', nativeRange);
+            }
         }
 
         var didRangeChange = this._didRangeChange;
