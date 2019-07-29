@@ -248,6 +248,7 @@ class PosConfig(models.Model):
             else:
                 pos_config.last_session_closing_cash = 0
                 pos_config.last_session_closing_date = False
+                pos_config.last_session_closing_cashbox = False
 
     @api.depends('session_ids')
     def _compute_current_session_user(self):
