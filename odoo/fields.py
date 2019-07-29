@@ -2678,6 +2678,7 @@ class One2many(_RelationalMulti):
             inverse = self.inverse_name
             to_create = []                  # line vals to create
             to_delete = []                  # line ids to delete
+            to_inverse = {}
 
             def unlink(lines):
                 if getattr(comodel._fields[inverse], 'ondelete', False) == 'cascade':
@@ -2694,6 +2695,9 @@ class One2many(_RelationalMulti):
                     # create() will add the new lines to the cache of records
                     comodel.create(to_create)
                     to_create.clear()
+                if to_inverse:
+                    for record, inverse_ids in to_inverse.items():
+                        comodel.browse(inverse_ids)[inverse] = records[-1]
 
             for command in value:
                 if command[0] == 0:
@@ -2706,7 +2710,7 @@ class One2many(_RelationalMulti):
                 elif command[0] == 3:
                     unlink(comodel.browse(command[1]))
                 elif command[0] == 4:
-                    comodel.browse(command[1])[inverse] = records[-1]
+                    to_inverse.setdefault(records[-1], set()).add(command[1])
                 elif command[0] in (5, 6):
                     flush()
                     # assign the given lines to the last record only

@@ -3339,6 +3339,21 @@ Fields:
             # determine records depending on values
             self.modified(relational_names)
 
+            real_recs = self.filtered('id')
+
+            # DLE P58: `test_orm.py``test_write_date`
+            # If there are only fields that do not trigger _write (e.g. only determine inverse),
+            # the below will ensure `_write ` will be called, even with empty vals, to ensure `write_date` and `write_uid` is updated
+            if self._log_access and self.ids:
+                towrite = env.all.towrite[self._name]
+                for record in real_recs:
+                    towrite[record.id]['write_uid'] = self.env.uid
+                    towrite[record.id]['write_date'] = False
+                self.env.cache.invalidate([
+                    (self._fields['write_date'], self.ids),
+                    (self._fields['write_uid'], self.ids),
+                ])
+
             # for monetary field, their related currency field must be cached before the amount so it can be rounded correctly
             for fname in sorted(vals, key=lambda x: self._fields[x].type=='monetary'):
                 if fname in bad_names:
@@ -3361,7 +3376,6 @@ Fields:
                 self.flush([self._parent_name])
 
             # validate non-inversed fields first
-            real_recs = self.filtered('id')
             inverse_fields = [f.name for fs in determine_inverses.values() for f in fs]
             real_recs._validate_fields(set(vals) - set(inverse_fields))
 
@@ -3384,19 +3398,6 @@ Fields:
                             }
                         )
                     raise
-
-            # DLE P58: `test_orm.py``test_write_date`
-            # If there are only fields that do not trigger _write (e.g. only determine inverse),
-            # the below will ensure `_write ` will be called, even with empty vals, to ensure `write_date` and `write_uid` is updated
-            if self._log_access and self.ids:
-                towrite = env.all.towrite[self._name]
-                for record in real_recs:
-                    towrite[record.id]['write_uid'] = self.env.uid
-                    towrite[record.id]['write_date'] = False
-                self.env.cache.invalidate([
-                    (self._fields['write_date'], self.ids),
-                    (self._fields['write_uid'], self.ids),
-                ])
 
             # validate inversed fields
             real_recs._validate_fields(inverse_fields)
