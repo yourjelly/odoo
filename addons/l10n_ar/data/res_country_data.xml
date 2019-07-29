@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo noupdate="True">
+    <record model="res.country" id="base.ar">
+        <field name="vat_label">CUIT</field>
+    </record>
+</odoo>

@@ -1,0 +1,810 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* l10n_ar
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 13.0alpha1+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-07-23 13:46+0000\n"
+"PO-Revision-Date: 2019-07-23 13:46+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: l10n_ar
+#: code:addons/l10n_ar/models/l10n_latam_document_type.py:81
+#, python-format
+msgid "is not a valid value for"
+msgstr ""
+
+#. module: l10n_ar
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
+msgid "<br/><span>Incoterm: </span>"
+msgstr ""
+
+#. module: l10n_ar
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
+msgid "<span>VAT Cond.: </span>"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,help:l10n_ar.field_account_move__l10n_ar_afip_concept
+msgid ""
+"A concept is suggested regarding the type of the products on the invoice but"
+" it is allowed to force a different type if required."
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.ui.menu,name:l10n_ar.menu_afip_config
+msgid "AFIP"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_account_tax_group__l10n_ar_afip_code
+#: model:ir.model.fields,field_description:l10n_ar.field_res_country__l10n_ar_afip_code
+#: model:ir.model.fields,field_description:l10n_ar.field_res_currency__l10n_ar_afip_code
+#: model:ir.model.fields,field_description:l10n_ar.field_uom_uom__l10n_ar_afip_code
+msgid "AFIP Code"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_account_move__l10n_ar_afip_concept
+msgid "AFIP Concept"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_account_journal__l10n_ar_afip_pos_partner_id
+msgid "AFIP POS Address"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_account_journal__l10n_ar_afip_pos_number
+msgid "AFIP POS Number"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_account_journal__l10n_ar_afip_pos_system
+msgid "AFIP POS System"
+msgstr ""
+
+#. module: l10n_ar
+#: model_terms:ir.ui.view,arch_db:l10n_ar.base_view_partner_form
+msgid "AFIP Responsability"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model,name:l10n_ar.model_l10n_ar_afip_responsability_type
+#: model:ir.model.fields,field_description:l10n_ar.field_account_move__l10n_ar_afip_responsability_type_id
+#: model:ir.model.fields,field_description:l10n_ar.field_res_company__l10n_ar_afip_responsability_type_id
+#: model:ir.model.fields,field_description:l10n_ar.field_res_partner__l10n_ar_afip_responsability_type_id
+#: model:ir.model.fields,field_description:l10n_ar.field_res_users__l10n_ar_afip_responsability_type_id
+#: model_terms:ir.ui.view,arch_db:l10n_ar.view_account_move_filter
+#: model_terms:ir.ui.view,arch_db:l10n_ar.view_res_partner_filter
+#: model_terms:ir.ui.view,arch_db:l10n_ar.view_afip_responsability_type_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar.view_afip_responsability_type_tree
+msgid "AFIP Responsability Type"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_account_fiscal_position__l10n_ar_afip_responsability_type_ids
+#: model:ir.model.fields,field_description:l10n_ar.field_account_fiscal_position_template__l10n_ar_afip_responsability_type_ids
+#: model:ir.actions.act_window,name:l10n_ar.action_afip_responsability_type
+msgid "AFIP Responsability Types"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_account_move__l10n_ar_afip_service_end
+msgid "AFIP Service End Date"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_account_move__l10n_ar_afip_service_start
+msgid "AFIP Service Start Date"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model,name:l10n_ar.model_account_chart_template
+msgid "Account Chart Template"
+msgstr ""
+
+#. module: l10n_ar
+#: model_terms:ir.ui.view,arch_db:l10n_ar.view_partner_property_form
+msgid "Accounting Documents"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_l10n_ar_afip_responsability_type__active
+msgid "Active"
+msgstr ""
+
+#. module: l10n_ar
+#: model_terms:ir.ui.view,arch_db:l10n_ar.argentinian_extra_info
+msgid "Activities Start Date:"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_res_company__l10n_ar_afip_start_date
+msgid "Activities start"
+msgstr ""
+
+#. module: l10n_ar
+#: model:product.product,name:l10n_ar.product_product_cero
+#: model:product.template,name:l10n_ar.product_product_cero_product_template
+msgid "Non-industrialized animals and vegetables (zero VAT)"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_account_tax_group__l10n_ar_application_code
+msgid "Application Code"
+msgstr ""
+
+#. module: l10n_ar
+#: model:product.product,name:l10n_ar.product_product_arancel
+#: model:product.template,name:l10n_ar.product_product_arancel_product_template
+msgid "Tariff"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.ui.menu,name:l10n_ar.account_reports_ar_statements_menu
+msgid "Argentinian Statements"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_account_tax_group__l10n_ar_application
+msgid "Argentinian Application"
+msgstr ""
+
+#. module: l10n_ar
+#: model_terms:ir.ui.view,arch_db:l10n_ar.view_document_type_filter
+msgid "Argentinian Documents"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_account_tax_group__l10n_ar_tax
+msgid "Argentinian Tax"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_account_tax_group__l10n_ar_type
+msgid "Argentinian Type"
+msgstr ""
+
+#. module: l10n_ar
+#: code:addons/l10n_ar/models/account_journal.py:67
+#, python-format
+msgid ""
+"Can not create chart of account until you configure your company AFIP "
+"Responsability and VAT."
+msgstr ""
+
+#. module: l10n_ar
+#: selection:l10n_latam.document.type,purchase_alicuots:0
+msgid "Zero"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,help:l10n_ar.field_l10n_latam_document_type__purchase_alicuots
+msgid "Zero or No Zero as required by the CITI purchase statement"
+msgstr ""
+
+#. module: l10n_ar
+#: model_terms:ir.ui.view,arch_db:l10n_ar.report_invoice_document
+msgid "Cod"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_l10n_ar_afip_responsability_type__code
+msgid "Code"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.constraint,message:l10n_ar.constraint_l10n_ar_afip_responsability_type_code
+#: sql_constraint:l10n_ar.afip.responsability.type:0
+msgid "Code must be unique!"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model,name:l10n_ar.model_res_company
+msgid "Companies"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_res_company__l10n_ar_company_requires_vat
+msgid "Company Requires Vat?"
+msgstr ""
+
+#. module: l10n_ar
+#: model:product.product,name:l10n_ar.product_product_no_gravado
+#: model:product.template,name:l10n_ar.product_product_no_gravado_product_template
+msgid "Untaxed concepts (VAT NG)"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model,name:l10n_ar.model_res_partner
+msgid "Contact"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model,name:l10n_ar.model_res_country
+msgid "Country"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_res_company__l10n_ar_country_code
+msgid "Country Code"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_l10n_ar_afip_responsability_type__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_l10n_ar_afip_responsability_type__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model,name:l10n_ar.model_res_currency
+msgid "Currency"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_account_move__l10n_ar_currency_rate
+msgid "Currency Rate"
+msgstr ""
+
+#. module: l10n_ar
+#: model:res.company,overdue_msg:l10n_ar.company_exento
+#: model:res.company,overdue_msg:l10n_ar.company_mono
+#: model:res.company,overdue_msg:l10n_ar.company_ri
+msgid ""
+"Dear Sir/Madam,\n"
+"\n"
+"Our records indicate that some payments on your account are still due. Please find details below.\n"
+"If the amount has already been paid, please disregard this notice. Otherwise, please forward us the total amount stated below.\n"
+"If you have any queries regarding your account, Please contact us.\n"
+"\n"
+"Thank you in advance for your cooperation.\n"
+"Best Regards,"
+msgstr ""
+
+#. module: l10n_ar
+#: code:addons/l10n_ar/models/account_move.py:148
+#, python-format
+msgid "There must be one and only one VAT tax per line. Verify lines with product"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,help:l10n_ar.field_account_move__l10n_ar_afip_responsability_type_id
+#: model:ir.model.fields,help:l10n_ar.field_res_company__l10n_ar_afip_responsability_type_id
+#: model:ir.model.fields,help:l10n_ar.field_res_partner__l10n_ar_afip_responsability_type_id
+#: model:ir.model.fields,help:l10n_ar.field_res_users__l10n_ar_afip_responsability_type_id
+msgid ""
+"Defined by AFIP to identify the type of responsabilities that a person or a "
+"legal entity could have and that impacts in the type of operations and "
+"requirements they need."
+msgstr ""
+
+#. module: l10n_ar
+#: model:product.product,name:l10n_ar.product_product_quote_despacho
+#: model:product.template,name:l10n_ar.product_product_quote_despacho_product_template
+msgid "Import Clearance"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_l10n_ar_afip_responsability_type__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: l10n_ar
+#: model_terms:ir.ui.view,arch_db:l10n_ar.view_document_type_filter
+msgid "Document Letter"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.actions.act_window,name:l10n_ar.action_document_type_argentina
+#: model:ir.ui.menu,name:l10n_ar.menu_document_type_argentina
+msgid "Document Types"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model,name:l10n_ar.model_account_fiscal_position
+msgid "Fiscal Position"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_account_move__l10n_ar_force_afip_concept
+msgid "Forced AFIP Concept"
+msgstr ""
+
+#. module: l10n_ar
+#: code:addons/l10n_ar/models/account_journal.py:69
+#, python-format
+msgid "Go to Companies"
+msgstr ""
+
+#. module: l10n_ar
+#: selection:account.tax.group,l10n_ar_tax:0
+#: model:ir.model.fields,field_description:l10n_ar.field_res_company__l10n_ar_gross_income_type
+#: model_terms:ir.ui.view,arch_db:l10n_ar.view_company_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar.view_partner_property_form
+msgid "Gross Income"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_res_company__l10n_ar_gross_income_number
+#: model:ir.model.fields,field_description:l10n_ar.field_res_partner__l10n_ar_gross_income_number
+#: model:ir.model.fields,field_description:l10n_ar.field_res_users__l10n_ar_gross_income_number
+msgid "Gross Income Number"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_res_partner__l10n_ar_gross_income_type
+#: model:ir.model.fields,field_description:l10n_ar.field_res_users__l10n_ar_gross_income_type
+msgid "Gross Income Type"
+msgstr ""
+
+#. module: l10n_ar
+#: model_terms:ir.ui.view,arch_db:l10n_ar.argentinian_extra_info
+msgid "Gross Income:"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_l10n_ar_afip_responsability_type__id
+msgid "ID"
+msgstr ""
+
+#. module: l10n_ar
+#: model:account.tax.group,name:l10n_ar.tax_group_iva_0
+msgid "IVA 0%"
+msgstr ""
+
+#. module: l10n_ar
+#: model:account.tax.group,name:l10n_ar.tax_group_iva_105
+msgid "IVA 10.5%"
+msgstr ""
+
+#. module: l10n_ar
+#: model:account.tax.group,name:l10n_ar.tax_group_iva_025
+msgid "IVA 2,5%"
+msgstr ""
+
+#. module: l10n_ar
+#: model:account.tax.group,name:l10n_ar.tax_group_iva_21
+msgid "IVA 21%"
+msgstr ""
+
+#. module: l10n_ar
+#: model:account.tax.group,name:l10n_ar.tax_group_iva_27
+msgid "IVA 27%"
+msgstr ""
+
+#. module: l10n_ar
+#: model:account.tax.group,name:l10n_ar.tax_group_iva_5
+msgid "IVA 5%"
+msgstr ""
+
+#. module: l10n_ar
+#: model:account.tax.group,name:l10n_ar.tax_group_iva_exento
+msgid "IVA Exento"
+msgstr ""
+
+#. module: l10n_ar
+#: model:account.tax.group,name:l10n_ar.tax_group_iva_gravado
+msgid "VAT Taxed"
+msgstr ""
+
+#. module: l10n_ar
+#: model:account.tax.group,name:l10n_ar.tax_group_iva_no_corresponde
+msgid "VAT Not Applicable"
+msgstr ""
+
+#. module: l10n_ar
+#: model:account.tax.group,name:l10n_ar.tax_group_iva_no_gravado
+msgid "VAT Untaxed"
+msgstr ""
+
+#. module: l10n_ar
+#: selection:account.tax.group,l10n_ar_application:0
+msgid "Internal Taxes"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model,name:l10n_ar.model_account_journal
+msgid "Journal"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model,name:l10n_ar.model_account_move
+msgid "Journal Entries"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_account_journal__l10n_ar_sequence_ids
+msgid "L10N Ar Sequence"
+msgstr ""
+
+#. module: l10n_ar
+#: code:addons/l10n_ar/models/account_move.py:184
+#, python-format
+msgid ""
+"The following invoices have VAT not applicable but you must select a correct rate (Not Taxed, Exempt,"
+" Zero, 10.5, etc.)"
+msgstr ""
+
+#. module: l10n_ar
+#: code:addons/l10n_ar/models/account_move.py:173
+#, python-format
+msgid ""
+"The following invoices have incorrect VAT configured. You must use VAT Not Applicable.<br/>"
+" * Invoices: %s"
+msgstr ""
+
+#. module: l10n_ar
+#: code:addons/l10n_ar/models/account_move.py:164
+#, python-format
+msgid "The following partners do not have CUIT configured"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_l10n_ar_afip_responsability_type____last_update
+msgid "Last Modified on"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_l10n_ar_afip_responsability_type__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_l10n_ar_afip_responsability_type__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model,name:l10n_ar.model_l10n_latam_document_type
+msgid "Latam Document Type"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_ir_sequence__l10n_ar_letter
+msgid "Letter"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_l10n_latam_document_type__l10n_ar_letter
+msgid "Letters"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,help:l10n_ar.field_l10n_latam_document_type__l10n_ar_letter
+msgid ""
+"Letters defined by the AFIP that can be used to identify the documents presented to the goverment and that depends on the operation type, the responsability of both the issuer and the receptor of the document"
+msgstr ""
+
+#. module: l10n_ar
+#: model:product.product,name:l10n_ar.product_product_exento
+#: model:product.template,name:l10n_ar.product_product_exento_product_template
+msgid "Book \"Development in Odoo\" (VAT Exempt)"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,help:l10n_ar.field_account_fiscal_position__l10n_ar_afip_responsability_type_ids
+msgid ""
+"List of AFIP responsabilities where this fiscal position should be auto-"
+"detected"
+msgstr ""
+
+#. module: l10n_ar
+#: selection:res.partner,l10n_ar_gross_income_type:0
+msgid "Local"
+msgstr ""
+
+#. module: l10n_ar
+#: selection:res.partner,l10n_ar_gross_income_type:0
+msgid "Multilateral"
+msgstr ""
+
+#. module: l10n_ar
+#: selection:account.tax.group,l10n_ar_application:0
+msgid "Municipal Taxes"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_l10n_ar_afip_responsability_type__name
+msgid "Name"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.constraint,message:l10n_ar.constraint_l10n_ar_afip_responsability_type_name
+#: sql_constraint:l10n_ar.afip.responsability.type:0
+msgid "Name must be unique!"
+msgstr ""
+
+#. module: l10n_ar
+#: selection:account.tax.group,l10n_ar_application:0
+msgid "National Taxes"
+msgstr ""
+
+#. module: l10n_ar
+#: model_terms:ir.ui.view,arch_db:l10n_ar.view_account_journal_form
+msgid "Next Number"
+msgstr ""
+
+#. module: l10n_ar
+#: selection:l10n_latam.document.type,purchase_alicuots:0
+msgid "Not Zero"
+msgstr ""
+
+#. module: l10n_ar
+#: selection:res.partner,l10n_ar_gross_income_type:0
+msgid "No Liquida"
+msgstr ""
+
+#. module: l10n_ar
+#: model_terms:ir.ui.view,arch_db:l10n_ar.view_company_form
+#: model_terms:ir.ui.view,arch_db:l10n_ar.view_partner_property_form
+msgid "Number..."
+msgstr ""
+
+#. module: l10n_ar
+#: selection:account.tax.group,l10n_ar_tax:0
+#: selection:account.tax.group,l10n_ar_type:0
+msgid "Other"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_res_partner__l10n_ar_special_purchase_document_type_ids
+#: model:ir.model.fields,field_description:l10n_ar.field_res_users__l10n_ar_special_purchase_document_type_ids
+msgid "Other Purchase Documents"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,help:l10n_ar.field_account_tax_group__l10n_ar_application
+msgid "Other Taxes According AFIP"
+msgstr ""
+
+#. module: l10n_ar
+#: selection:account.tax.group,l10n_ar_application:0
+msgid "Others"
+msgstr ""
+
+#. module: l10n_ar
+#: model:account.tax.group,name:l10n_ar.tax_group_percepcion_drei
+msgid "Percepción DREI"
+msgstr ""
+
+#. module: l10n_ar
+#: model:account.tax.group,name:l10n_ar.tax_group_percepcion_ganancias
+msgid "Percepción Ganancias"
+msgstr ""
+
+#. module: l10n_ar
+#: model:account.tax.group,name:l10n_ar.tax_group_percepcion_iibb
+msgid "Percepción IIBB"
+msgstr ""
+
+#. module: l10n_ar
+#: model:account.tax.group,name:l10n_ar.tax_group_percepcion_iva
+msgid "Percepción IVA"
+msgstr ""
+
+#. module: l10n_ar
+#: selection:account.tax.group,l10n_ar_type:0
+msgid "Perception"
+msgstr ""
+
+#. module: l10n_ar
+#: code:addons/l10n_ar/models/account_journal.py:173
+#, python-format
+msgid "Please define a valid AFIP POS number"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model,name:l10n_ar.model_uom_uom
+msgid "Product Unit of Measure"
+msgstr ""
+
+#. module: l10n_ar
+#: selection:account.tax.group,l10n_ar_tax:0
+msgid "Profits"
+msgstr ""
+
+#. module: l10n_ar
+#: selection:account.tax.group,l10n_ar_application:0
+msgid "Provincial Taxes"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_l10n_latam_document_type__purchase_alicuots
+msgid "Purchase Alicuots"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_l10n_latam_document_type__purchase_cuit_required
+msgid "Purchase Cuit Required"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.ui.menu,name:l10n_ar.menu_afip_responsability_type
+msgid "Responsability Types"
+msgstr ""
+
+#. module: l10n_ar
+#: model:account.tax.group,name:l10n_ar.tax_group_retencion_drei
+msgid "Retención DREI"
+msgstr ""
+
+#. module: l10n_ar
+#: model:account.tax.group,name:l10n_ar.tax_group_retencion_ganancias
+msgid "Retención Ganancias"
+msgstr ""
+
+#. module: l10n_ar
+#: model:account.tax.group,name:l10n_ar.tax_group_retencion_iibb
+msgid "Retención IIBB"
+msgstr ""
+
+#. module: l10n_ar
+#: model:account.tax.group,name:l10n_ar.tax_group_retencion_iva
+msgid "Retención IVA"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model,name:l10n_ar.model_ir_sequence
+#: model:ir.model.fields,field_description:l10n_ar.field_l10n_ar_afip_responsability_type__sequence
+#: model_terms:ir.ui.view,arch_db:l10n_ar.view_account_journal_form
+msgid "Sequence"
+msgstr ""
+
+#. module: l10n_ar
+#: model_terms:ir.ui.view,arch_db:l10n_ar.view_move_form
+msgid "Service Date"
+msgstr ""
+
+#. module: l10n_ar
+#: model:product.product,name:l10n_ar.product_product_servicio_de_guarda
+#: model:product.template,name:l10n_ar.product_product_servicio_de_guarda_product_template
+msgid "Guard Service"
+msgstr ""
+
+#. module: l10n_ar
+#: model:product.product,name:l10n_ar.product_product_telefonia
+#: model:product.template,name:l10n_ar.product_product_telefonia_product_template
+msgid "Telephone service (VAT 27)"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,help:l10n_ar.field_res_partner__l10n_ar_special_purchase_document_type_ids
+#: model:ir.model.fields,help:l10n_ar.field_res_users__l10n_ar_special_purchase_document_type_ids
+msgid ""
+"Set here if this partner can issue other documents further than invoices, "
+"credit notes and debit notes"
+msgstr ""
+
+#. module: l10n_ar
+#: selection:account.tax.group,l10n_ar_type:0
+msgid "TAX"
+msgstr ""
+
+#. module: l10n_ar
+#: model:product.product,name:l10n_ar.product_product_tasa_estadistica
+#: model:product.template,name:l10n_ar.product_product_tasa_estadistica_product_template
+msgid "Statistics Rate"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model,name:l10n_ar.model_account_tax_group
+msgid "Tax Group"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model,name:l10n_ar.model_account_fiscal_position_template
+msgid "Template for Fiscal Position"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,help:l10n_ar.field_res_company__l10n_ar_country_code
+msgid ""
+"The ISO country code in two chars. \n"
+"You can use this field for quick search."
+msgstr ""
+
+#. module: l10n_ar
+#: code:addons/l10n_ar/models/account_move.py:155
+#, python-format
+msgid ""
+"The following invoices has a partner without AFIP responsability"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,help:l10n_ar.field_account_tax_group__l10n_ar_afip_code
+#: model:ir.model.fields,help:l10n_ar.field_res_country__l10n_ar_afip_code
+#: model:ir.model.fields,help:l10n_ar.field_res_currency__l10n_ar_afip_code
+#: model:ir.model.fields,help:l10n_ar.field_uom_uom__l10n_ar_afip_code
+msgid "This code will be used on electronic invoice and citi reports"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,help:l10n_ar.field_account_journal__l10n_ar_afip_pos_partner_id
+msgid "This is the address used for invoice reports of this POS"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,help:l10n_ar.field_account_journal__l10n_ar_afip_pos_number
+msgid "This is the point of sale number assigned by AFIP in order to generate invoices"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,help:l10n_ar.field_res_company__l10n_ar_gross_income_type
+#: model:ir.model.fields,help:l10n_ar.field_res_partner__l10n_ar_gross_income_type
+#: model:ir.model.fields,help:l10n_ar.field_res_users__l10n_ar_gross_income_type
+msgid "Type of gross income: exempt, local, multilateral"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,field_description:l10n_ar.field_account_journal__l10n_ar_share_sequences
+msgid "Unified Book"
+msgstr ""
+
+#. module: l10n_ar
+#: model:product.product,uom_name:l10n_ar.product_product_arancel
+#: model:product.product,uom_name:l10n_ar.product_product_cero
+#: model:product.product,uom_name:l10n_ar.product_product_exento
+#: model:product.product,uom_name:l10n_ar.product_product_no_gravado
+#: model:product.product,uom_name:l10n_ar.product_product_quote_despacho
+#: model:product.product,uom_name:l10n_ar.product_product_servicio_de_guarda
+#: model:product.product,uom_name:l10n_ar.product_product_tasa_estadistica
+#: model:product.product,uom_name:l10n_ar.product_product_telefonia
+#: model:product.template,uom_name:l10n_ar.product_product_arancel_product_template
+#: model:product.template,uom_name:l10n_ar.product_product_cero_product_template
+#: model:product.template,uom_name:l10n_ar.product_product_exento_product_template
+#: model:product.template,uom_name:l10n_ar.product_product_no_gravado_product_template
+#: model:product.template,uom_name:l10n_ar.product_product_quote_despacho_product_template
+#: model:product.template,uom_name:l10n_ar.product_product_servicio_de_guarda_product_template
+#: model:product.template,uom_name:l10n_ar.product_product_tasa_estadistica_product_template
+#: model:product.template,uom_name:l10n_ar.product_product_telefonia_product_template
+msgid "Units"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,help:l10n_ar.field_account_journal__l10n_ar_share_sequences
+msgid "Use same sequence for documents with the same letter"
+msgstr ""
+
+#. module: l10n_ar
+#: selection:account.tax.group,l10n_ar_tax:0
+msgid "VAT"
+msgstr ""
+
+#. module: l10n_ar
+#: model_terms:ir.ui.view,arch_db:l10n_ar.argentinian_extra_info
+msgid "VAT Cond.:"
+msgstr ""
+
+#. module: l10n_ar
+#: model:ir.model.fields,help:l10n_ar.field_l10n_latam_document_type__purchase_cuit_required
+msgid "True if the CITI purchase statement requires to inform CUIT"
+msgstr ""
+
+#. module: l10n_ar
+#: selection:account.tax.group,l10n_ar_type:0
+msgid "Withholding"
+msgstr ""
+
+#. module: l10n_ar
+#: code:addons/l10n_ar/models/account_journal.py:137
+#, python-format
+msgid ""
+"You can not change the journal configuration for a journal that already have validate invoices"
+msgstr ""
+
+#. module: l10n_ar
+#: model_terms:ir.ui.view,arch_db:l10n_ar.view_move_form
+msgid "to"
+msgstr ""

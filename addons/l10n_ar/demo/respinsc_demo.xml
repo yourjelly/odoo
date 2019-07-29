@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="partner_ri" model="res.partner">
+        <field name='name'>(AR) Responsabile Inscripto</field>
+        <field name='l10n_ar_afip_responsability_type_id' ref="res_IVARI"/>
+        <field name='l10n_latam_identification_type_id' ref="l10n_ar_base.it_cuit"/>
+        <field name='vat'>20222222223</field>
+        <field name="street">Calle Falsa 123</field>
+        <field name="city">Rosario</field>
+        <field name="country_id" ref="base.ar"/>
+        <field name="state_id" ref="base.state_ar_s"/>
+        <field name="zip">2000</field>
+        <field name="phone">+1 555 123 8069</field>
+        <field name="email">info@yourcompany.example.com</field>
+        <field name="website">www.example.com</field>
+        <field name="supplier" eval="True"/>
+    </record>
+
+    <record id="company_ri" model="res.company">
+        <field name='parent_id' ref='base.main_company'/>
+        <field name='currency_id' ref='base.ARS'/>
+        <field name='partner_id' ref='partner_ri'/>
+        <field name='name'>(AR) Responsable Inscripto</field>
+        <field name='l10n_ar_gross_income_type'>no_liquida</field>
+    </record>
+
+    <function model="res.users" name="write">
+        <value eval="[1, 2]"/>
+        <value eval="{'company_id': ref('l10n_ar.company_ri'), 'company_ids': [(4, ref('l10n_ar.company_ri'))]}"/>
+    </function>
+
+    <function model="res.config.settings" name="create">
+        <value model="res.config.settings" eval="dict(
+            obj().default_get(list(obj().fields_get())),
+            **{
+                'chart_template_id': obj().env.ref('l10n_ar.l10nar_ri_chart_template').id,
+                'company_id': obj().env.ref('l10n_ar.company_ri').id,
+            }
+        )"/>
+    </function>
+
+    <function model="res.config.settings" name="execute">
+        <value model="res.config.settings" eval="obj().search([('chart_template_id', '=', obj().env.ref('l10n_ar.l10nar_ri_chart_template').id)], order='create_date desc', limit=1).id"/>
+    </function>
+
+    <function model="res.config.settings" name="unlink">
+        <value model="res.config.settings" eval="obj().search([('chart_template_id', '=', obj().env.ref('l10n_ar.l10nar_ri_chart_template').id)], order='create_date desc', limit=1).id"/>
+    </function>
+
+</odoo>
