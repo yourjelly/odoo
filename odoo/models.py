@@ -551,7 +551,6 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         cls._sequence = None
         cls._log_access = cls._auto
         cls._inherits = {}
-        cls._depends = {}
         cls._sql_constraints = {}
 
         for base in reversed(cls.__bases__):
@@ -565,9 +564,6 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 cls._log_access = getattr(base, '_log_access', cls._log_access)
 
             cls._inherits.update(base._inherits)
-
-            for mname, fnames in base._depends.items():
-                cls._depends[mname] = cls._depends.get(mname, []) + fnames
 
             for cons in base._sql_constraints:
                 cls._sql_constraints[cons[0]] = cons
