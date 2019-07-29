@@ -731,7 +731,8 @@ class Field(MetaField('DummyField', (object,), {})):
             path = []                   # fields from model to field_model
             for fname in dotnames.split('.'):
                 field = field_model._fields[fname]
-                add_trigger(field, path)
+                if (field.type != 'one2many') or not field_model._field_inverses[field]:
+                    add_trigger(field, path)
 
                 if (field is self) and path:
                     self.recursive = True
