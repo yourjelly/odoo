@@ -642,7 +642,9 @@ var DropBlock = class extends we3.AbstractPlugin {
      * @private
      */
     _onBlockMouseDown(ev) {
-        this._handleBlockDragStart(ev, ev.target, ev.clientX, ev.clientY);
+        if (ev.button === 0) {
+            this._handleBlockDragStart(ev, ev.target, ev.clientX, ev.clientY);
+        }
     }
     /**
      * @private
@@ -655,7 +657,9 @@ var DropBlock = class extends we3.AbstractPlugin {
      * @private
      */
     _onHandleMouseDown(ev) {
-        this._handleDOMDragStart(ev, ev.target, ev.clientX, ev.clientY);
+        if (ev.button === 0) {
+            this._handleDOMDragStart(ev, ev.target, ev.clientX, ev.clientY);
+        }
     }
     /**
      * @private
