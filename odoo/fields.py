@@ -2719,7 +2719,7 @@ class One2many(_RelationalMulti):
                     to_create.clear()
                 if to_inverse:
                     for record, inverse_ids in to_inverse.items():
-                        comodel.browse(inverse_ids)[inverse] = records[-1]
+                        comodel.browse(inverse_ids)[inverse] = record
 
             for command in value:
                 if command[0] == 0:
