@@ -1,6 +1,9 @@
 (function () {
 'use strict';
 
+var rangeStart = '\u25B6';
+var rangeEnd = '\u25C0';
+
 var CodeViewPlugin = class extends we3.AbstractPlugin {
     /**
      * @override
@@ -8,6 +11,7 @@ var CodeViewPlugin = class extends we3.AbstractPlugin {
     constructor (parent, params) {
         super(...arguments);
 
+        this.dependencies = ['Range'];
         this.templatesDependencies = ['/web_editor/static/src/xml/wysiwyg_codeview.xml'];
         this.buttons = {
             template: 'wysiwyg.buttons.codeview',
@@ -59,7 +63,21 @@ var CodeViewPlugin = class extends we3.AbstractPlugin {
      */
     active (value, options) {
         var self = this;
-        options = Object.assign({}, this.getValueOptions, options);
+        var range = this.dependencies.Range.getRange();
+        options = Object.assign({
+            markers: [
+                {
+                    id: range.scID,
+                    offset: range.so,
+                    string: rangeStart,
+                },
+                {
+                    id: range.ecID,
+                    offset: range.eo,
+                    string: rangeEnd,
+                },
+            ],
+        }, this.getValueOptions, options);
         if (this._isActive()) {
             return;
         }
@@ -165,8 +183,6 @@ var CodeViewPlugin = class extends we3.AbstractPlugin {
      */
     _focus () {
         this.editable.blur();
-        this.codeview.selectionStart = 0;
-        this.codeview.selectionEnd = 0;
         this.codeview.focus();
     }
     /**
@@ -185,7 +201,13 @@ var CodeViewPlugin = class extends we3.AbstractPlugin {
      * @param {String} value
      */
     _setCodeViewValue (value) {
+        var start = value.indexOf(rangeStart);
+        value = value.replace(rangeStart, '');
+        var end = value.indexOf(rangeEnd);
+        value = value.replace(rangeEnd, '');
         this.codeview.value = value.trim();
+        this.codeview.selectionStart = start;
+        this.codeview.selectionEnd = end;
     }
 };
 

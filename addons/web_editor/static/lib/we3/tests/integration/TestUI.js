@@ -23,19 +23,15 @@ var TestUI = class extends we3.AbstractPlugin {
         var self = this;
         var Test = self.dependencies.Test;
         var input = document.createElement('input');
-        this.editor.parentNode.insertBefore(input, this.editor);
+        var firstButton = this.editor.querySelector('we3-toolbar we3-group we3-button, we3-toolbar we3-group we3-toggler');
 
-        await Test.triggerNativeEvents(this.editable, ['mousedown', 'focus', 'click', 'mouseup']);
-        await new Promise(setTimeout);
-        assert.ok(!!this.editor.querySelector('we3-toolbar we3-group we3-button:not(.disabled)'), "Should enable the toolbar on blur the editor");
-        await new Promise(setTimeout);
-        await Test.triggerNativeEvents(input, ['mousedown', 'focus', 'click', 'mouseup']);
-        await new Promise(setTimeout);
-        assert.notOk(!!this.editor.querySelector('we3-toolbar we3-group we3-button:not(.disabled)'), "Should disabled the toolbar on blur the editor");
-        await new Promise(setTimeout);
-        await Test.triggerNativeEvents(this.editable, ['mousedown', 'focus', 'click', 'mouseup']);
-        await new Promise(setTimeout);
-        assert.ok(!!this.editor.querySelector('we3-toolbar we3-group we3-button:not(.disabled)'), "Should enable the toolbar on blur the editor");
+        this.editor.parentNode.insertBefore(input, this.editor);
+        await Test.click(this.editable);
+        assert.ok(!firstButton.classList.contains('disabled'), "Should enable the toolbar on focus the editor");
+        await Test.click(input);
+        assert.ok(firstButton.classList.contains('disabled'), "Should disabled the toolbar on blur the editor");
+        await Test.click(this.editable);
+        assert.ok(!firstButton.classList.contains('disabled'), "Should re-enable the toolbar on re-focus the editor");
 
         this.editor.parentNode.removeChild(input);
     }

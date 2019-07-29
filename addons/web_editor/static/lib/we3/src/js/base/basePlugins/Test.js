@@ -368,9 +368,10 @@ var TestPlugin = class extends we3.AbstractPlugin {
             afterEvent: function (ev) {
                 if (!ev.defaultPrevented) {
                     self._selectRange(target, DOMRangeOffset|0);
+                    ev.target.focus();
                 }
             }
-        }).then(function () {
+        }).then(function (ev) {
             return self.triggerNativeEvents(node, 'click').then(function () {
                 return self.triggerNativeEvents(node, 'mouseup');
             });
@@ -390,36 +391,37 @@ var TestPlugin = class extends we3.AbstractPlugin {
         return defPollTest;
     }
     getValue (archNodeId) {
-        var Arch = this.dependencies.Arch;
-        var root = Arch.getClonedArchNode(1, true);
-
-        var params = root.params;
         var range = this.dependencies.Range.getRange();
-
-        if (range.isCollapsed()) {
-            if (range.scArch.isVoidoid()) {
-                range.ecArch.after(new TEST(params, null, null, rangeEnd));
-                range.scArch.before(new TEST(params, null, null, rangeStart));
-            } else {
-                range.scArch.insert(new TEST(params, null, null, rangeCollapsed), range.so);
-            }
+        var container = this.dependencies.Arch.getClonedArchNode(this._getTestContainer(archNodeId), true);
+        var markers;
+        if (range.isCollapsed() && range.scArch.isVoidoid()) {
+            markers = [
+                {
+                    id: range.scArch.parent.id,
+                    offset: range.scArch.index(),
+                    string: rangeStart,
+                },
+                {
+                    id: range.ecArch.parent.id,
+                    offset: range.ecArch.index() + 1,
+                    string: rangeEnd,
+                },
+            ];
         } else {
-            if (range.ecArch.isVoidoid()) {
-                range.ecArch.after(new TEST(params, null, null, rangeEnd));
-            } else {
-                range.ecArch.insert(new TEST(params, null, null, rangeEnd), range.eo);
-            }
-            if (range.scArch.isVoidoid()) {
-                range.scArch.before(new TEST(params, null, null, rangeStart));
-            } else {
-                range.scArch.insert(new TEST(params, null, null, rangeStart), range.so);
-            }
+            markers = [
+                {
+                    id: range.scID,
+                    offset: range.so,
+                    string: rangeStart,
+                },
+                {
+                    id: range.ecID,
+                    offset: range.eo,
+                    string: rangeEnd,
+                },
+            ];
         }
-
-        var result = this.dependencies.Arch.getClonedArchNode(this._getTestContainer(archNodeId)).toString();
-
-        Arch.getClonedArchNode(1, true); // trash the previous clone
-
+        var result = container.toString({ markers: markers });
         return this._cleanValue(result)
             .replace(/^<[^>]+>/, '').replace(/<\/[^>]+>$/, '') // remove container
             .replace(regExpRangeToCollapsed, rangeCollapsed);
@@ -473,6 +475,11 @@ var TestPlugin = class extends we3.AbstractPlugin {
         if (this.isDestroyed()) {
             return;
         }
+
+        await new Promise(function (resolve) { // wait for mouseup test menu
+            setTimeout(resolve, 200);
+        });
+
         var value = this.dependencies.Arch.getValue();
         var range = this.dependencies.Range.getRange();
         var sp = range.scArch.path();

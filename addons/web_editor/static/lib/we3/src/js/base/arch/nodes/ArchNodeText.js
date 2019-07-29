@@ -177,16 +177,39 @@ we3.ArchNodeText = class extends we3.ArchNode {
      */
     toString (options) {
         options = options || {};
-        if (this.isVirtual() && !options.keepVirtual) {
-            return '';
+        var markers;
+        if (options.markers) {
+            for (var u = 0; u < options.markers.length; u++) {
+                var marker = options.markers[u];
+                if (marker.id === this.id) {
+                    if (!markers) {
+                        markers = [];
+                    }
+                    markers[marker.offset] = (markers[marker.offset] || '') + marker.string;
+                }
+            }
         }
+
+        var text = this.nodeValue || '';
+        if (this.isVirtual() && !options.keepVirtual) {
+            text = '';
+        }
+
+        if (markers) {
+            for (var k = markers.length - 1; k >= 0; k--) {
+                if (markers[k]) {
+                    text = text.slice(0, k) + markers[k] + text.slice(k);
+                }
+            }
+        }
+
         if (options.showIDs) {
             if (this.isVirtual()) {
                 return '[virtual archID="' + this.id + '"/]';
             }
-            return '[text archID="' + this.id + '"]' + this.nodeValue + '[/text]';
+            return '[text archID="' + this.id + '"]' + text + '[/text]';
         }
-        return this.nodeValue || '';
+        return text;
     }
 
     //--------------------------------------------------------------------------

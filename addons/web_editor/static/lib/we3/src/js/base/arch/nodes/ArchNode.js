@@ -172,11 +172,32 @@ we3.ArchNode = class {
      * @param {boolean} [options.keepVirtual] true to include virtual text nodes
      * @param {boolean} [options.architecturalSpace] true to include architectural space
      * @param {boolean} [options.showIDs] true to show the arch node id's
+     * @param {Object[]} [options.markers] markers/string to insert in string of the arch
+     * @param {integer} [options.markers[].id] archNode id
+     * @param {integer} [options.markers[].offset]
+     * @param {string} [options.markers[].string]
      * @returns {JSON}
      **/
     toString (options) {
         options = options || {};
         var string = '';
+        var markers;
+        if (options.markers) {
+            for (var u = 0; u < options.markers.length; u++) {
+                var marker = options.markers[u];
+                if (marker.id === this.id) {
+                    if (!markers) {
+                        markers = [];
+                    }
+                    markers[marker.offset] = (markers[marker.offset] || '') + marker.string;
+                }
+            }
+        }
+
+        if (markers && this.isVoid() && markers[0]) {
+            string += markers[0];
+            delete markers[0];
+        }
 
         if (this.nodeName && (!this.isVirtual() || options.keepVirtual) && !options.onlyText) {
             string += '<' + this.nodeName;
@@ -193,14 +214,25 @@ we3.ArchNode = class {
             }
             string += '>';
         }
-        var i = 0;
-        while (i < this.childNodes.length) {
+        var len = this.childNodes.length;
+        for (var i = 0; i < len; i++) {
+            if (markers && markers[i]) {
+                string += markers[i];
+                delete markers[i];
+            }
             string += this.childNodes[i].toString(options);
-            i++;
+        }
+        if (this.isVoid()) {
+            len = 1;
+        }
+        if (markers && markers[len]) {
+            string += markers[len];
+            delete markers[len];
         }
         if (this.nodeName && (!this.isVirtual() || options.keepVirtual) && !options.onlyText && (!this.isVoid() || this.childNodes.length)) {
             string += '</' + this.nodeName + '>';
         }
+
         return string;
     }
 

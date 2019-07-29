@@ -42,9 +42,9 @@ var TestCodeView = class extends we3.AbstractPlugin {
         var textarea = this.editor.querySelector('textarea[name="codeview"]');
         await this.dependencies.Test.triggerNativeEvents(textarea, ['mousedown', 'click', 'mouseup']);
         this.document.execCommand("insertText", 0, 'bbb');
-        assert.strictEqual(textarea.value, 'bbb<p>aaa</p>', "Should change the texarea value");
+        assert.strictEqual(textarea.value, '<p>bbbaaa</p>', "Should change the texarea value");
         await this.dependencies.Test.triggerNativeEvents(btnCodeView, ['mousedown', 'click', 'mouseup']);
-        assert.strictEqual(this.dependencies.Arch.getValue(), '<p>bbb</p><p>aaa</p>', "Should change the wysiwyg editable value");
+        assert.strictEqual(this.dependencies.Arch.getValue(), '<p>bbbaaa</p>', "Should change the wysiwyg editable value");
     }
 };
 
