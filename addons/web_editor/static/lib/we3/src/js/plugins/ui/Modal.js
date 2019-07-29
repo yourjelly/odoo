@@ -7,7 +7,7 @@ var Modal = class extends we3.AbstractPlugin {
      */
     constructor (parent, params) {
         super(...arguments);
-        this.templatesDependencies = ['xml/modal.xml'];
+        this.templatesDependencies = ['src/xml/modal.xml'];
         this._modals = document.createElement('we3-modals');
         this._backdrop = document.createElement('we3-modal-backdrop');
         this._modals.appendChild(this._backdrop);

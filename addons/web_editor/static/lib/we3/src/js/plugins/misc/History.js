@@ -22,7 +22,7 @@ var HistoryPlugin = class extends we3.AbstractPlugin {
         this._eachNodeHistory = [[]];
         this._range = [];
 
-        this.templatesDependencies = ['xml/history.xml'];
+        this.templatesDependencies = ['src/xml/history.xml'];
         this.dependencies = ['Arch', 'Range'];
         this.buttons = {
             template: 'wysiwyg.buttons.history',

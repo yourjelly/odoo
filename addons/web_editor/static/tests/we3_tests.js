@@ -156,7 +156,7 @@ QUnit.module('web_editor', {
         assert.expect(9);
         this.testOptions = {
             assert: assert,
-            plugins: Object.assign({}, disableAllTests, {TestComplex: true}),
+            plugins: Object.assign({}, disableAllTests, {TestComplexInteraction: true}),
         };
         await createFormAndTest(this);
     });

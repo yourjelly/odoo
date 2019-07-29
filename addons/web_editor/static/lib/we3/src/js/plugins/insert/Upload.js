@@ -28,7 +28,7 @@ we3.addPlugin('Upload', class extends we3.AbstractPlugin {
      **/
     constructor () {
         super(...arguments);
-        this.templatesDependencies = ['xml/upload.xml'];
+        this.templatesDependencies = ['src/xml/upload.xml'];
         if (!this.options.upload) {
             console.error("'UploadImage' plugin should use 'upload' options");
             return;

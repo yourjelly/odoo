@@ -24,9 +24,9 @@ var TestPopover = class extends we3.AbstractPlugin {
         // 'Document.getArchNode': plugins
         {
             name: 'Click on document shoud select document display the document popover',
-            content: '<p>◆aaa <a title="image" href="/web_editor/static/src/img/transparent.png" target="_BLANK" class="we3-document"><img src="/web_editor/static/lib/we3/img/mimetypes/image.svg" class="we3-document-image"/></a> bbb</p>',
+            content: '<p>◆aaa <a title="image" href="/web_editor/static/src/img/transparent.png" target="_BLANK" class="we3-document"><img src="/web_editor/static/lib/we3/src/img/mimetypes/image.svg" class="we3-document-image"/></a> bbb</p>',
             click: 'we3-editable img',
-            test: '<p>aaa ▶<a title="image" href="/web_editor/static/src/img/transparent.png" target="_BLANK" class="we3-document"><img src="/web_editor/static/lib/we3/img/mimetypes/image.svg" class="we3-document-image"/></a>◀ bbb</p>',
+            test: '<p>aaa ▶<a title="image" href="/web_editor/static/src/img/transparent.png" target="_BLANK" class="we3-document"><img src="/web_editor/static/lib/we3/src/img/mimetypes/image.svg" class="we3-document-image"/></a>◀ bbb</p>',
             activePopovers: ['Document'],
         },
 

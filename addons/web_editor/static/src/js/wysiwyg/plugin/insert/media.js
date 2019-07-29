@@ -6,7 +6,7 @@ var weWidgets = require('wysiwyg.widgets');
 we3.addPlugin('CropImage', class extends we3.AbstractPlugin {
     constructor() {
         super(...arguments);
-        this.templatesDependencies = ['xml/media.xml'];
+        this.templatesDependencies = ['src/xml/media.xml'];
         this.dependencies = ['Arch'];
         this.buttons = {
             template: 'we3.buttons.image.crop',

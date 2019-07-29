@@ -47,7 +47,7 @@ we3.addPlugin('MediaSize', class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
         this.dependencies = ['Arch'];
-        this.templatesDependencies = ['xml/media.xml'];
+        this.templatesDependencies = ['src/xml/media.xml'];
         this.buttons = {
             template: 'we3.buttons.size',
             active: '_active',
@@ -80,7 +80,7 @@ we3.addPlugin('Padding', class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
         this.dependencies = ['Arch'];
-        this.templatesDependencies = ['xml/media.xml'];
+        this.templatesDependencies = ['src/xml/media.xml'];
         this.buttons = {
             template: 'we3.buttons.padding',
             active: '_active',
@@ -122,7 +122,7 @@ we3.addPlugin('Padding', class extends we3.AbstractPlugin {
 we3.addPlugin('Alt', class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
-        this.templatesDependencies = ['xml/media.xml'];
+        this.templatesDependencies = ['src/xml/media.xml'];
         this.dependencies = ['Arch', 'Modal'];
         this.buttons = {
             template: 'we3.buttons.image.alt',
@@ -178,7 +178,7 @@ we3.addPlugin('Media', class extends we3.AbstractPlugin {
      */
     constructor (parent, params) {
         super(...arguments);
-        this.templatesDependencies = ['xml/media.xml'];
+        this.templatesDependencies = ['src/xml/media.xml'];
         this.dependencies = ['Arch', 'Range', 'Renderer', 'Rules', 'Modal'];
         this.editableDomEvents = {
             'dblclick': '_onDblclick',
@@ -380,7 +380,7 @@ var Media = class extends we3.ArchNode {
 we3.addPlugin('Image', class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
-        this.templatesDependencies = ['xml/media.xml'];
+        this.templatesDependencies = ['src/xml/media.xml'];
         this.dependencies = ['Arch', 'Media'];
         this.buttons = {
             template: 'we3.buttons.image',
@@ -423,7 +423,7 @@ we3.addPlugin('ImageUrl', class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
         this.dependencies = ['Arch', 'Media'];
-        this.templatesDependencies = ['xml/media.xml'];
+        this.templatesDependencies = ['src/xml/media.xml'];
     }
     start () {
         var title = this.options.translate('ImageUrl', 'Image');
@@ -520,7 +520,7 @@ we3.addPlugin('Document', class extends we3.AbstractPlugin {
                 break;
             }
         }
-        img.setAttribute('src', this.options.xhrPath + 'img/mimetypes/' + mimetype + '.svg');
+        img.setAttribute('src', this.options.xhrPath + 'src/img/mimetypes/' + mimetype + '.svg');
         img.classList.add('we3-document-image');
         a.appendChild(img);
         return a;
@@ -533,7 +533,7 @@ we3.addPlugin('DocumentUrl', class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
         this.dependencies = ['Arch', 'Media'];
-        this.templatesDependencies = ['xml/media.xml'];
+        this.templatesDependencies = ['src/xml/media.xml'];
     }
     start () {
         var title = this.options.translate('DocumentUrl', 'Document');
@@ -684,7 +684,7 @@ we3.addPlugin('Pictogram', class extends we3.AbstractPlugin {
      */
     constructor () {
         super(...arguments);
-        this.templatesDependencies = ['xml/media.xml'];
+        this.templatesDependencies = ['src/xml/media.xml'];
         this.dependencies = ['Arch', 'Media'];
         this.buttons = {
             template: 'we3.buttons.pictogram',

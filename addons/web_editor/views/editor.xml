@@ -13,98 +13,121 @@
 <template id="we3" name="we3 library Assets">
     <!-- Base -->
 
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/init.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/init/init.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/init/baseOptions.js"/>
 
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/tools/utils.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/tools/tags.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/tools/WrappedRange.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/tools/EventDispatcher.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/options.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/AbstractPlugin.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/PluginsManager.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/Editor.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/tools/utils.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/tools/tags.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/WrappedRange.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/EventDispatcher.js"/>
 
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/Attributes.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/ArchNode.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/is.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/rules.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/architectural.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/ArchNodeText.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/ArchNodeVirtualText.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/ArchNodeFragment.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/ArchNodeRoot.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/customArchNodes.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/arch/ArchitecturalSpace.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/AbstractPlugin.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/PluginsManager.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/Editor.js"/>
 
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Rules.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Arch.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Range.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Renderer.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/UserInput.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/plugins/Selector.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/Attributes.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/nodes/ArchNode.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/is.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/rules.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/architectural.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/nodes/ArchNodeText.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/nodes/ArchNodeVirtualText.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/nodes/ArchNodeFragment.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/nodes/ArchNodeRoot.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/nodes/ArchNodeBr.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/customArchNodes.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/nodes/ArchNodeSpace.js"/>
 
-    <script type="text/javascript" src="/web_editor/static/lib/we3/base/we3.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/basePlugins/Rules.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/basePlugins/Arch.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/basePlugins/Range.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/basePlugins/Renderer.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/basePlugins/UserInput.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/basePlugins/Selector.js"/>
+
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/init/we3.js"/>
 
     <!-- Plugins -->
 
-    <script type="text/javascript" src="/web_editor/static/lib/we3/options.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/init/defaultOptions.js"/>
 
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/drop/Clipboard.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/drop/DropBlock.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/drop/DropBlockSelector.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/drop/Clipboard.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/drop/DropBlock.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/drop/DropBlockSelector.js"/>
 
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Overlay.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Position.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Popover.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Sidebar.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Toolbar.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/CodeView.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/ContextMenu.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Iframe.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/FullScreen.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/ui/Modal.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/ui/Overlay.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/ui/Position.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/ui/Popover.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/ui/Sidebar.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/ui/Toolbar.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/ui/CodeView.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/ui/ContextMenu.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/ui/Iframe.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/ui/FullScreen.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/ui/Modal.js"/>
 
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/insert/List.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/insert/Media.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/insert/Upload.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/insert/List.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/insert/Media.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/insert/Upload.js"/>
 
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/text/Color.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/text/FontStyle.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/text/Indent.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/text/Paragraph.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/text/Color.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/text/FontStyle.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/text/Indent.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/text/Paragraph.js"/>
 
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/misc/History.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/plugins/misc/Jinja.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/misc/History.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/misc/Jinja.js"/>
 
-    <!-- Tests -->
+    <!-- Tests base -->
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/basePlugins/Test.js"/>
 
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/Test.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/TestArchAndRules.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/TestComplexDefaultConfig.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/TestRange.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/ui.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboard.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardArrow.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardBackspace.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardChar.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardComplex.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardDelete.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardEnter.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardTab.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/keyboardUnbreakable.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/virtualKeyboard.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/renderer.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/popover.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbar.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarColor.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarFontStyle.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarIndent.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarKeymap.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarList.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarParagraph.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/toolbarWand.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/history.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/testPlugins/codeView.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/base/arch/TestAttributes.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/base/arch/TestIs.js"/>
+
+    <!-- Tests base plugins -->
+
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/base/basePlugins/TestArchAndRules.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/base/basePlugins/TestRange.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/base/basePlugins/TestRenderer.js"/>
+
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/base/basePlugins/input/keyboard/TestKeyboard.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/base/basePlugins/input/keyboard/TestKeyboardArrow.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/base/basePlugins/input/keyboard/TestKeyboardBackspace.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/base/basePlugins/input/keyboard/TestKeyboardChar.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/base/basePlugins/input/keyboard/TestKeyboardComplex.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/base/basePlugins/input/keyboard/TestKeyboardDelete.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/base/basePlugins/input/keyboard/TestKeyboardEnter.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/base/basePlugins/input/keyboard/TestKeyboardTab.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/base/basePlugins/input/keyboard/TestKeyboardUnbreakable.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/base/basePlugins/input/keyboard/TestVirtualKeyboard.js"/>
+
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/integration/TestComplexInteraction.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/integration/TestUI.js"/>
+
+    <!-- Tests plugins -->
+
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/plugins/drop/TestClipboard.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/plugins/drop/TestDropBlock.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/plugins/drop/TestDropBlockSelector.js"/>
+
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/plugins/insert/TestList.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/plugins/insert/TestMedia.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/plugins/insert/TestUpload.js"/>
+
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/plugins/misc/TestHistory.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/plugins/misc/TestJinja.js"/>
+
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/plugins/ui/TestCodeView.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/plugins/ui/TestPopover.js"/>
+
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/plugins/ui/toolbar/TestToolbar.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/plugins/ui/toolbar/TestToolbarColor.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/plugins/ui/toolbar/TestToolbarFontStyle.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/plugins/ui/toolbar/TestToolbarIndent.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/plugins/ui/toolbar/TestToolbarKeymap.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/plugins/ui/toolbar/TestToolbarList.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/plugins/ui/toolbar/TestToolbarParagraph.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/plugins/ui/toolbar/TestToolbarWand.js"/>
 
     <!-- todo: place this test in the proper folder and place the following line in the proper file -->
     <!-- <script type="text/javascript" src="/web_editor/static/tests/plugins/TestDynamicFields.js"/> -->
@@ -128,10 +151,10 @@
     <!-- lib we3 -->
 
     <t t-call="web_editor.we3"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarLink.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarMedia.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarCrop.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/toolbarColorPicker.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/TestToolbarLink.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/TestToolbarMedia.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/TestToolbarCrop.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/plugin/tests/TestToolbarColorPicker.js"/>
 
     <!-- odoo -->
 

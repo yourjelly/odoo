@@ -10,7 +10,7 @@ var ContextMenuPlugin = class extends PopoverPlugin {
         super(...arguments);
 
         this.dependencies.push('History');
-        this.templatesDependencies = ['xml/contextmenu.xml'];
+        this.templatesDependencies = ['src/xml/contextmenu.xml'];
         this.buttons = {
             template: 'wysiwyg.buttons.contextmenu',
             active: () => false,

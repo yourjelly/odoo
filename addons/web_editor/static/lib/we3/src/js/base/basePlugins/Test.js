@@ -214,7 +214,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
         var self = this;
         this.dependencies = ['Arch', 'Range', 'Rules', 'Renderer'];
 
-        this.templatesDependencies = ['xml/test.xml'];
+        this.templatesDependencies = ['src/xml/test.xml'];
         this.buttons = {
             template: 'we3.buttons.test',
         };

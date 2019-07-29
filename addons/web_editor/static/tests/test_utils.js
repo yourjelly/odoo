@@ -104,7 +104,7 @@ MockServer.include({
                 return Promise.resolve(template);
             }
         }
-        if (route === "/web_editor/static/lib/we3/img/mimetypes/image.svg") {
+        if (route === "/web_editor/static/lib/we3/src/img/mimetypes/image.svg") {
             return Promise.resolve(null);
         }
         return this._super.apply(this, arguments);

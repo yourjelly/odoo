@@ -9,7 +9,7 @@ var _t = core._t;
 
 var ColorpickerDialog = Dialog.extend({
     xmlDependencies: (Dialog.prototype.xmlDependencies || [])
-        .concat(['/web_editor/static/lib/we3/xml/colorpicker.xml']),
+        .concat(['/web_editor/static/lib/we3/src/xml/colorpicker.xml']),
 
     template: 'wysiwyg.widgets.ColorpickerDialog',
     events: _.extend({}, Dialog.prototype.events || {}, {

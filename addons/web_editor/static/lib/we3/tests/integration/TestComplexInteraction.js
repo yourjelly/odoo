@@ -6,7 +6,7 @@
  * Disable if you do not use all plugins of the default configuration.
  */
 
-var TestComplex = class extends we3.AbstractPlugin {
+var TestComplexInteraction = class extends we3.AbstractPlugin {
     static get autoInstall () {
         return ['Test'];
     }
@@ -102,6 +102,6 @@ var TestComplex = class extends we3.AbstractPlugin {
     }
 };
 
-we3.addPlugin('TestComplex', TestComplex);
+we3.addPlugin('TestComplexInteraction', TestComplexInteraction);
 
 })();

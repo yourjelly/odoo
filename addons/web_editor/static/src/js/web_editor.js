@@ -158,7 +158,7 @@ var Wysiwyg = Widget.extend({
             rpc: this._rpc.bind(this),
             tests: [
                 'TestArchAndRules',
-                'TestComplex',
+                'TestComplexInteraction',
                 'TestHistory',
                 'TestKeyboardArrow',
                 'TestKeyboardBackspace',

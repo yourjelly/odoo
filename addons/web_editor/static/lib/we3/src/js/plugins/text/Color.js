@@ -4,7 +4,7 @@
 var ColorPlugin = class extends we3.AbstractPlugin {
     constructor () {
         super(...arguments);
-        this.templatesDependencies = ['xml/colorpicker.xml'];
+        this.templatesDependencies = ['src/xml/colorpicker.xml'];
         this.dependencies = ['Arch', 'Range', 'Text'];
 
         var self = this;
