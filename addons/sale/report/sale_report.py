@@ -58,6 +58,7 @@ class SaleReport(models.Model):
     source_id = fields.Many2one('utm.source', 'Source')
 
     order_id = fields.Many2one('sale.order', 'Order #', readonly=True)
+    company_currency_id = fields.Many2one('res.currency', 'Company Currency', readonly=True)
 
     def _query(self, with_clause='', fields={}, groupby='', from_clause=''):
         with_ = ("WITH %s" % with_clause) if with_clause else ""
@@ -82,6 +83,7 @@ class SaleReport(models.Model):
             s.partner_id as partner_id,
             s.user_id as user_id,
             s.company_id as company_id,
+            rc.currency_id as company_currency_id,
             s.campaign_id as campaign_id,
             s.medium_id as medium_id,
             s.source_id as source_id,
@@ -113,6 +115,7 @@ class SaleReport(models.Model):
                     left join uom_uom u on (u.id=l.product_uom)
                     left join uom_uom u2 on (u2.id=t.uom_id)
                     left join product_pricelist pp on (s.pricelist_id = pp.id)
+                    left join res_company rc on (s.company_id = rc.id)
                 %s
         """ % from_clause
 
@@ -128,6 +131,7 @@ class SaleReport(models.Model):
             s.user_id,
             s.state,
             s.company_id,
+            rc.currency_id,
             s.campaign_id,
             s.medium_id,
             s.source_id,
