@@ -238,6 +238,7 @@ class ResPartner(models.Model):
                       """ + where_clause + """
                       GROUP BY account_move_line.partner_id, act.type
                       """, where_params)
+        self.credit = 0
         for pid, type, val in self._cr.fetchall():
             partner = self.browse(pid)
             if type == 'receivable':
