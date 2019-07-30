@@ -2590,25 +2590,38 @@ class _RelationalMulti(_Relational):
             self.depends_context = (self.depends_context or tuple()) + ('active_test',)
 
     def write(self, records, value):
-        if isinstance(value, tuple):
-            value = [(6, 0, value)]
-        elif isinstance(value, BaseModel) and value._name == self.comodel_name:
-            value = [(6, 0, value._ids)]
-        elif value is False or value is None:
-            value = [(5,)]
-        # DLE P171: `_get_invoiced ` set invoice_ids as a list of ids, which must be converted to a tuple to be correctly handled to convert_to_write as [(6, 0, [...])]
-        elif isinstance(value, list) and value and not isinstance(value[0], (tuple, list)):
-            value = [(6, 0, tuple(value))]
+        return self.write_batch([(records, value)])
 
-        if not isinstance(value, list):
-            raise ValueError("Wrong value for %s: %s" % (self, value))
+    def write_batch(self, records_commands_list):
+        # TBE: I really don't like this implementation
+        if not records_commands_list:
+            return False
 
-        if all(records._ids):
-            return self.write_real([(records, value)])
+        for idx, (recs, value) in enumerate(records_commands_list):
+            if isinstance(value, tuple):
+                value = [(6, 0, value)]
+            elif isinstance(value, BaseModel) and value._name == self.comodel_name:
+                value = [(6, 0, value._ids)]
+            elif value is False or value is None:
+                value = [(5,)]
+            # DLE P171: `_get_invoiced ` set invoice_ids as a list of ids, which must be converted to a tuple to be correctly handled to convert_to_write as [(6, 0, [...])]
+            elif isinstance(value, list) and value and not isinstance(value[0], (tuple, list)):
+                value = [(6, 0, tuple(value))]
+
+            if not isinstance(value, list):
+                raise ValueError("Wrong value for %s: %s" % (self, value))
+
+            records_commands_list[idx] = (recs, value)
+
+        record_ids = {rid for recs, cs in records_commands_list for rid in recs._ids}
+        if all(record_ids):
+            return self.write_real(records_commands_list)
         else:
-            assert not any(records._ids)
-            return self.write_new(records, value)
-
+            assert not any(record_ids)
+            recs = records_commands_list[0][0].browse()
+            for records, value in records_commands_list:
+                recs |= self.write_new(records, value)
+            return recs
 
 class One2many(_RelationalMulti):
     """ One2many field; the value of such a field is the recordset of all the
@@ -2995,6 +3008,16 @@ class Many2many(_RelationalMulti):
         if sql.table_kind(cr, comodel._table) != 'v':
             sql.add_foreign_key(cr, self.relation, self.column2, comodel._table, 'id', 'cascade')
             reflect(model, '%s_%s_fkey' % (self.relation, self.column2), 'f', None, self._module)
+
+    def create(self, record_values):
+        """ Write the value of ``self`` on the given records, which have just
+        been created.
+
+        :param record_values: a list of pairs ``(record, value)``, where
+            ``value`` is in the format of method :meth:`BaseModel.write`
+        """
+        self.write_batch(record_values)
+
 
     def read(self, records):
         comodel = records.env[self.comodel_name].with_context(**self.context)
