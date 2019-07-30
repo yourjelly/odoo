@@ -17,7 +17,7 @@
     </record>
 
     <record id="tax_report_line_l10n_at_tva_line_4_3" model="account.tax.report.line">
-        <field name="name">4.3 abzüglich Umsätze, für die die Steuerschuld gemäß § 19 Abs. 1 zweiter Satz sowie gemäß § 19 Abs. 1a, 1b, 1c, 1d und 1e auf den Leistungsempfänger übergegangen ist.</field>
+        <field name="name">4.3 abzüglich Umsätze, für die die Steuerschuld gemäß § 19 Abs. 1 (Leistungsempfänger)</field>
         <field name="tag_name">KZ 021</field>
         <field name="code">AT_021</field>
         <field name="sequence" eval="4"/>
@@ -48,8 +48,7 @@
     </record>
 
     <record id="tax_report_line_l10n_at_tva_line_4_7" model="account.tax.report.line">
-        <field name="name">4.7 § 6 Abs. 1 Z 2 bis 6 sowie § 23 Abs. 5 (Seeschifffahrt, Luftfahrt, grenzüberschreitende Personenbeförderung,
-Diplomaten, Reisevorleistungen im Drittlandsgebiet usw.). </field>
+        <field name="name">4.7 § 6 Abs. 1 Z 2 bis 6 sowie § 23 Abs. 5 (Seeschifffahrt, Luftfahrt, ...)</field>
     <field name="tag_name">KZ 015</field>
         <field name="code">AT_015</field>
         <field name="sequence" eval="8"/>
@@ -406,7 +405,7 @@ Art. 2 erfolgten.</field>
     </record>
 
     <record id="tax_report_line_l10n_at_tva_line_5_7" model="account.tax.report.line">
-        <field name="name">5.7 Vorsteuern betreffend die Steuerschuld gemäß § 19 Abs. 1b (Sicherungseigentum, Vorbehaltseigentum und Grundstücke im Zwangsversteigerungsverfahren)</field>
+        <field name="name">5.7 Vorsteuern betreffend die Steuerschuld gemäß § 19 Abs. 1b (Sicherungseigentum, ...)</field>
         <field name="tag_name">KZ 087</field>
         <field name="code">AT_087</field>
         <field name="sequence" eval="105"/>
