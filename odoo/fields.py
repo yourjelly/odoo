@@ -3020,14 +3020,6 @@ class Many2many(_RelationalMulti):
         for record in records:
             cache.set(record, self, tuple(group[record.id]))
 
-    def create(self, record_values):
-        """ Write the value of ``self`` on the given records, which have just
-        been created.
-
-        :param record_values: a list of pairs ``(record, value)``, where
-            ``value`` is in the format of method :meth:`BaseModel.write`
-        """
-        self.write_real(record_values)
 
     def write_real(self, records_commands_list):
         # records_commands_list = [(records, commands), ...]
@@ -3081,9 +3073,9 @@ class Many2many(_RelationalMulti):
         def relation_delete(ys):
             # the pairs (x, y) have been cascade-deleted from relation
             for ys1 in old_relation.values():
-                ys1.difference_update(ys)
+                ys1 -= ys
             for ys1 in new_relation.values():
-                ys1.difference_update(ys)
+                ys1 -= ys
 
         to_create = []                  # line vals to create
         to_delete = []                  # line ids to delete
