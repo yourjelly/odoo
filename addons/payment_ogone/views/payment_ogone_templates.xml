@@ -44,11 +44,11 @@
 
         <template id="ogone_s2s_form">
         <!-- THIS IS USED FOR THE PAYMENTS ON THE ODOO WEBSITE -->
-            <input type="hidden" name="data_set" data-create-route="/payment/ogone/s2s/create_json_3ds"/>
+            <input type="hidden" name="data_set" data-create-route="/payment/ogone/s2s/create_3ds"/>
             <input type="hidden" name="acquirer_id" t-att-value="id"/>
             <input t-if="return_url" type="hidden" name="return_url" t-att-value="return_url"/>
             <input t-if="partner_id" type="hidden" name="partner_id" t-att-value="partner_id"/>
-            <input type="hidden" name="PSPID" t-att-value="acq.ogone_pspid"/>
+            <input type="hidden" name='PSPID' t-att-value='acq.sudo().ogone_pspid'/>
             <div t-attf-class="row mt8 #{'' if bootstrap_formatting else 'o_card_brand_detail'}">
                 <div t-att-class="'form-group col-lg-12' if bootstrap_formatting else 'form-group'">
                     <input type="tel" name="cc_number" id="cc_number" class="form-control" placeholder="Card number" data-is-required="true"/>

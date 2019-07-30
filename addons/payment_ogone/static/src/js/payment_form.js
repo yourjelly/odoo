@@ -25,12 +25,24 @@ odoo.define('payment_ogone.payment_form', function (require) {
          * @param {Boolean} addPmEvent
          */
         _OgoneTransaction: function (ev, $checkedRadio, addPmEvent) {
+            var CC_FIELDS = ['cc_cvc', 'cc_number', 'cc_holder_name', 'cc_expiry', 'cc_brand'];
             var self = this;
             var acquirerID = this.getAcquirerIdFromRadio($checkedRadio);
             var acquirerForm = this.$('#o_payment_add_token_acq_' + acquirerID);
             var inputsForm = $('input', acquirerForm);
             var ds = $('input[name="data_set"]', acquirerForm)[0];
-            var kwargs =  {"partner_id": this.options.partnerId};
+            var paymentForm = this.getFormData(self.$el);
+            _.omit(paymentForm, CC_FIELDS);
+            var param_plus = {
+                partner_id: this.options.partnerId,
+                paymentForm: JSON.stringify(paymentForm),
+                paymentFormAction: self.el.getAttribute('action'),
+            };
+            param_plus = $.param(param_plus);
+            var kwargs =  {
+                partner_id: parseInt(this.options.partnerId),
+                param_plus: param_plus,
+            };
             if (this.options.partnerId === undefined) {
                 console.warn('payment_form: unset partner_id when adding new token; things could go wrong');
                 kwargs= {};
@@ -39,10 +51,11 @@ odoo.define('payment_ogone.payment_form', function (require) {
             console.log(formData);
 
             self._rpc({
-                model: 'payment.token',
-                method: 'ogone_prepare_token',
-                context: self.context,
+                model: 'payment.acquirer',
+                method: 'ogone_gateway_values',
+                args: [[parseInt(formData.acquirer_id)]],
                 kwargs: kwargs,
+                context: self.context,
             }).then(function (result) {
 
                 result['CVC'] = formData.cc_cvc;
@@ -55,6 +68,7 @@ odoo.define('payment_ogone.payment_form', function (require) {
                 var ogoneForm = document.createElement("form");
                 ogoneForm.method = "POST";
                 ogoneForm.action = APIUrl;
+                self.add_ogone_3ds_inputs(ogoneForm);
                 var el = document.createElement("input");
                 el.setAttribute('type', 'submit');
                 el.setAttribute('name', "Submit");
@@ -69,7 +83,6 @@ odoo.define('payment_ogone.payment_form', function (require) {
                 });
                 document.body.appendChild(ogoneForm);
                 ogoneForm.submit();
-
             });
             
             // FLOW:
@@ -95,6 +108,23 @@ odoo.define('payment_ogone.payment_form', function (require) {
                 // ORDERID
                 // PSPID= SEE XML FILE
                 // SHASIGN= xxx
+        },
+
+        add_ogone_3ds_inputs: function createHiddenInput(form) {
+            var createHiddenInput = function(name, value) {
+                var input = document.createElement("input");
+                input.setAttribute("type", "hidden");
+                input.setAttribute("name", name); 
+                input.setAttribute("value", value);
+                form.appendChild(input);
+                }
+
+            createHiddenInput("browserColorDepth", screen.colorDepth);
+            createHiddenInput("browserJavaEnabled", navigator.javaEnabled());
+            createHiddenInput("browserLanguage", navigator.language);
+            createHiddenInput("browserScreenHeight", screen.height);
+            createHiddenInput("browserScreenWidth", screen.width);
+            createHiddenInput("browserTimeZone", new Date().getTimezoneOffset());
         },
         
         /**

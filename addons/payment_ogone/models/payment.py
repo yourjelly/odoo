@@ -149,31 +149,30 @@ class PaymentAcquirerOgone(models.Model):
         sign = ''.join('%s=%s%s' % (k, v, key) for k, v in items if v and filter_key(k))
         sign = sign.encode("utf-8")
         shasign = sha1(sign).hexdigest()
-        return shasign
+        return shasign.upper()
 
-    def ogone_form_constantes_values(self, partner_id):
-        # base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
-        base_url = "http://arj-odoo.agayon.be" # testing purpose
-        path_url = "payment/ogone/feedback/"
-        ogone_tx_values = {'PSPID': self.ogone_pspid,
+    def ogone_gateway_values(self, partner_id, param_plus='', **kwargs):
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        path_url = "payment/ogone/s2s/create_3ds/"
+        acquirer_sudo = self.sudo()
+        ogone_tx_values = {'PSPID': acquirer_sudo.ogone_pspid,
                            'ACCEPTURL': urls.url_join(base_url, path_url),
-                           # 'DECLINEURL': urls.url_join(base_url,path_url),
                            'EXCEPTIONURL':  urls.url_join(base_url, path_url),
-                           # 'CANCELURL': urls.url_join(base_url,path_url),
-                           'ALIASPERSISTEDAFTERUSE': 'N', 'ALIAS': 'ARJ-TEST-ODOO-NEW-ALIAS-%s' % time.time(),
-                           'PARAMPLUS': "partner_id={}".format(partner_id)
+                           'ALIASPERSISTEDAFTERUSE': 'N',
+                           'ALIAS': 'ODOO-NEW-ALIAS-%s' % time.time(),
+                           'PARAMPLUS': param_plus,
                            }
 
-        self.save_token = 'always'
-        if self.save_token in ['ask', 'always']:
+        acquirer_sudo.save_token = 'always'
+        if acquirer_sudo.save_token in ['ask', 'always']:
             ogone_tx_values['ALIASPERSISTEDAFTERUSE'] = 'Y'
         # Generate sha sign here.
         # https: // payment - services.ingenico.com / int / en / ogone / support / guides / integration % 20
         #  guides / e - commerce / security - pre - payment - check  # shainsignature
         # # TODO: try the upper function
-        shasign = self._ogone_generate_shasign('in', ogone_tx_values)
-
-        return ogone_tx_values, shasign
+        shasign = acquirer_sudo._ogone_generate_shasign('in', ogone_tx_values)
+        ogone_tx_values['SHASIGN'] = shasign
+        return ogone_tx_values
 
 
     def ogone_form_generate_values(self, values):
@@ -558,30 +557,8 @@ class PaymentToken(models.Model):
     _inherit = 'payment.token'
 
     def ogone_create(self, values):
+        import pudb; pu.db
         return {
-            'acquirer_ref': values['alias'],
-            'name': "{} - {}".format(values['cc_number'], values['cc_holder_name'])
+            'acquirer_ref': values['ALIAS'],
+            'name': "{} - {}".format(values['CC_NUMBER'], values['CC_HOLDER_NAME'])
         }
-
-
-    @api.model
-    def ogone_prepare_token(self, *args, **kwargs):
-        """
-        Prepare the data needed to the token creation.
-        Needed values:
-        :return:
-        :rtype:
-        """
-        print("kwargs", kwargs)
-        print("args", args)
-        try:
-            partner_id = kwargs['partner_id']
-        except KeyError:
-            partner_id = None
-            pass
-        acquirer = self.env['payment.acquirer'].search([('provider', '=', 'ogone')])
-        data, shasign = acquirer.ogone_form_constantes_values(partner_id=partner_id)
-        # if values.get(values['partner']):
-        #     data['partner_id'] =  1 #self.env['res_partner'].browse()
-        data['SHASIGN'] = shasign
-        return data

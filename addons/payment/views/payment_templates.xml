@@ -23,7 +23,7 @@
             - 'show_manage_btn' if True, a button is added in the footer to manage payment methods
         -->
         <form t-if="pms or acquirers" method="post" class="o_payment_form mt-3 clearfix"
-                t-att-action="form_action if form_action else '#'"
+                t-att-action="form_action if form_action else ''"
                 t-att-data-success-url="success_url or ''"
                 t-att-data-error-url="error_url or ''"
                 t-att-data-access-token="access_token or ''"

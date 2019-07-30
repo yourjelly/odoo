@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import logging
 import pprint
 import werkzeug
@@ -6,6 +7,7 @@ from werkzeug.urls import url_unquote_plus
 
 from odoo import http
 from odoo.http import request
+from odoo.tools import consteq
 from odoo.addons.payment.models.payment_acquirer import ValidationError
 from odoo.addons.payment.controllers.portal import PaymentProcessing
 
@@ -126,103 +128,54 @@ class OgoneController(http.Controller):
         return 'ok'
 
 
-    @http.route(['/payment/ogone/feedback',], type='http', auth='public')
+    @http.route(['/payment/ogone/s2s/create_3ds',], type='http', auth='public')
     def ogone_alias_gateway_feedback(self, **post):
-        ################################
-        # For DBO
-        ################################
         """
-        Salut !
-        C'est ici que je suis arrivé. La fonction est appelée à la suite de l'appel à l'alias gateway.
-        Pour l'instant, la gateway redirige vers http://arj-odoo.agayon.be. Pour que ça marche chez toi, il faut modifier
-        la variable path_url = "payment/ogone/feedback/" dans le fichier payment.py du module payment_ogone.
-        La variable ret permet de construire une page html basique qui montre les arguments reçus.
+        Feedback route for Alias Gateway creation.
+    
+        In the case of a payment, there will be a serialized payment form in the paymentForm
+        parameter; in that case we need to redirect to the correct paymentFormAction (e.g. website_sale,
+        website_payment, etc) with the paymentForm as GET params.
 
-        La signature est correcte et la variable shasign correspond (elle est bien calculée). Pour
-        Je crée ensuite un token  token = request.env['payment.token'].create(token_parameters, )
-
-        Je suis coincé au moment de rattacher le paiement de la facture.
-        Je lance PaymentProcessing.add_payment_transaction(tx)
-
-        request.env['payment.transaction'].sudo().ogone_s2s_do_transaction(return_url="http://arj-odoo.agayon.be/shop/payment")
-        mais il retourn une 404 (vers http://arj-odoo.agayon.be/payment/false)
-
-
+        In the case of a card registration without payment, then we just need to validate
+        the card (if provider set up for it) and redirect at the end.
         """
-        """ Ogone contacts using GET, at least for accept """
         _logger.info('Ogone: feeback Alias gateway with post data %s', pprint.pformat(post))  # debug)
         # If you have configured an SHA-OUT passphrase for these feedback requests,
         # you need to take the ALIAS parameter into account for your signature.
         pprint.pformat(post)
-        ret = "<h1>FEEDBACK Ingenico Alias gateway</h1>"
-        for key, value in post.items():
-            print(key, value)
-            ret += "{} : {} </br>".format(key, value)
-
         # We have created the token. We can now make the payment and create the transaction.
-        try:
-            ogone_order_id = post['OrderID']
-        except KeyError:
-            ret += "MISSING ogone_order_id"+ "</br>"
-            import time
-            ogone_order_id = time.time()
-        cvc_masked = 'XXX'
         card_number_masked = post['CardNo']
-        acquirer = request.env['payment.acquirer'].search([('provider', '=', 'ogone')])
-        # transaction = request.env['payment.transaction'].search([('provider', '=', 'ogone')])
-        # TODO: check integrity of partner_id to prevent malicious data manipulation on the client side.
-        try:
-            partner_id = post['partner_id']
-        except KeyError:
-            ret +=  "</br>" + "MISSING PARTNER ID" + "</br>"
-            return ret
+        pprint.pformat(post)
+        form_values = json.loads(url_unquote_plus(post.get('paymentForm')))
+        pspid = form_values.get('PSPID')
+        acquirer = request.env['payment.acquirer'].sudo().search([('provider', '=', 'ogone'), ('ogone_pspid', '=', pspid)])
+        partner_id = post['partner_id']
+        if not partner_id:
+            raise ValidationError('payment token must be stored for a specific partner')
         data_clean = {}
         for key, value in post.items():
             data_clean[key.upper()] = value
-        # TODO do something if the sha is bad. NOTE: IT IS RECHECKED in add_payment_transaction
         shasign = acquirer._ogone_generate_shasign('out', data_clean)
-        print(data_clean['SHASIGN'])
-        print(shasign.upper())
-        ret += str(data_clean) + '</br>' + data_clean['SHASIGN'] + '</br>' + shasign.upper()
+        if not consteq(shasign, post.get('SHASign')):
+            _logger.exception('SHA Signature mismatch, feedback rejected')
+            raise ValidationError('SHA Signature mismatch, feedback rejected')
         if partner_id:
             token_parameters = {
-                'cc_number': card_number_masked,
-                'cc_cvc': cvc_masked,
-                'cc_holder_name': data_clean['CN'],
-                'cc_expiry': data_clean['ED'],
-                'cc_brand': data_clean['BRAND'],
+                'CC_NUMBER': card_number_masked,
+                'CC_HOLDER_NAME': data_clean['CN'],
+                'CC_EXPIRY': data_clean['ED'],
+                'CC_BRAND': data_clean['BRAND'],
                 'acquirer_id': acquirer.id,
                 'partner_id': partner_id,
                 'alias_gateway': True,
-                'alias': data_clean['ALIAS'],
+                'ALIAS': data_clean['ALIAS'],
             }
             token = request.env['payment.token'].create(token_parameters, )
-            print(token)
             baseurl = request.env['ir.config_parameter'].sudo().get_param('web.base.url')
-            params = {
-                'accept_url': baseurl + '/payment/ogone/validate/accept',
-                'decline_url': baseurl + '/payment/ogone/validate/decline',
-                'exception_url': baseurl + '/payment/ogone/validate/exception',
-                'return_url': post.get('return_url', baseurl)
-            }
-            tx = token.validate(**params)
-            if tx and tx.html_3ds:
-                return tx.html_3ds
-            PaymentProcessing.add_payment_transaction(tx)
-
-            # I don't know if the following function must be called manually or triggered with a redirection.
-            # request.env['payment.transaction'].sudo().ogone_s2s_do_transaction(return_url="http://arj-odoo.agayon.be/shop/payment")
-            return werkzeug.utils.redirect("/payment/process")
-            # try:
-            #     # request.env['payment.transaction'].sudo().form_feedback(post, 'ogone')
-            #     # PaymentProcessing.add_payment_transaction(tx)
-            #     # return werkzeug.utils.redirect("/payment/process")
-            # except ValidationError:
-            #     return ret
-
-            # return ret
-        else:
-            return ret
-
-
-
+            form_values['pm_id'] = token.id
+            form_action = url_unquote_plus(post.get('paymentFormAction'))
+            if not form_action:
+                return werkzeug.utils.redirect(werkzeug.urls.url_join(baseurl, '/my/payment_method'))  # I hope at least...
+            form_url = werkzeug.urls.url_join(baseurl, form_action)
+            return werkzeug.utils.redirect("?".join([form_url, werkzeug.urls.url_encode(form_values)]))
