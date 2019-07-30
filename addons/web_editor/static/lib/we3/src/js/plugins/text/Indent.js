@@ -24,14 +24,12 @@ var IndentPlugin = class extends we3.AbstractPlugin {
      */
     indent () {
         this.dependencies.Arch.indent();
-        return false;
     }
     /**
      * Outdent the list
      */
     outdent () {
         this.dependencies.Arch.outdent();
-        return false;
     }
 
     //--------------------------------------------------------------------------

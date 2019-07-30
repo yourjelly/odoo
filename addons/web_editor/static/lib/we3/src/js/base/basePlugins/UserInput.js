@@ -73,6 +73,7 @@ var BaseUserInput = class extends we3.AbstractPlugin {
             }
             self.dependencies.BaseArch.nextChangeIsRange();
             self.dependencies.BaseArch.getArchNode(id).addLine(offset);
+            return false; // default behavior of range from `Arch._processChanges`
         });
     }
     _eventsNormalization (param) {
@@ -203,7 +204,7 @@ var BaseUserInput = class extends we3.AbstractPlugin {
             var formatNode = BaseRenderer.getElement(arch.id);
 
             if (!formatNode) {
-                return;
+                return false; // default behavior of range from `Arch._processChanges`
             }
 
             var lastTextNodeID;
@@ -285,6 +286,7 @@ var BaseUserInput = class extends we3.AbstractPlugin {
                     so: rangeDOM.so,
                 };
             }
+            return false; // default behavior of range from `Arch._processChanges`
         });
     }
     /**
@@ -426,6 +428,7 @@ var BaseUserInput = class extends we3.AbstractPlugin {
                     keepRight: true,
                 });
             }
+            return false; // default behavior of range from `Arch._processChanges`
         });
     }
 

@@ -544,7 +544,6 @@ var TestPlugin = class extends we3.AbstractPlugin {
         if (this.isDestroyed()) {
             return;
         }
-        var self = this;
         var Arch = this.dependencies.Arch;
         var container;
 
@@ -647,8 +646,8 @@ var TestPlugin = class extends we3.AbstractPlugin {
                     offset = path[path.length - 1];
                     arch = archNode.applyPath(path.slice(0, -1));
                 }
-                var next = arch && arch.nextSibling();
-                /* if (arch && arch.isVirtual() && next) {
+                /* var next = arch && arch.nextSibling();
+                if (arch && arch.isVirtual() && next) {
                     arch = next.firstLeaf();
                     offset = 0;
                 } */
@@ -666,6 +665,11 @@ var TestPlugin = class extends we3.AbstractPlugin {
                 ecID: e.node.id,
                 eo: e.offset,
             };
+        }
+        var sParent = this.dependencies.Arch.getClonedArchNode(range.scID).parent;
+        if (sParent.childNodes.length === 1 && sParent.id === range.ecID) {
+            // eg: <p>▶<img/>◀</p> => select whole P
+            range = { scID: sParent.id };
         }
         await this.setRange(range);
     }

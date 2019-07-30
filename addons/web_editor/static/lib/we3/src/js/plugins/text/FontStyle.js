@@ -34,7 +34,7 @@ var FontStylePlugin = class extends we3.AbstractPlugin {
             }
         });
         var changedIDs = this.dependencies.Arch.wrap(this.utils.uniq(styleAncestors), nodeName);
-        return changedIDs.length ? changedIDs : false;
+        return changedIDs;
     }
     /**
      * (Un-)format text: make it bold, italic, ...
@@ -44,15 +44,12 @@ var FontStylePlugin = class extends we3.AbstractPlugin {
      */
     formatText (nodeName) {
         nodeName = nodeName.toLowerCase();
-        var range = this.dependencies.Range.getRange();
         var selectedTextNodes = this.dependencies.Range.getSelectedNodes(node => node.isText() || node.isVoidoid());
-        var changedIDs = [];
         if (selectedTextNodes.length && selectedTextNodes.every(node => node.ancestor(a => a.nodeName === nodeName))) {
-            changedIDs = this.dependencies.Arch.unwrapRangeFrom(nodeName);
+            this.dependencies.Arch.unwrapRangeFrom(nodeName);
         } else {
-            changedIDs = this.dependencies.Arch.wrapRange(nodeName);
+            this.dependencies.Arch.wrapRange(nodeName);
         }
-        return range.scID !== range.ecID ? range : changedIDs;
     }
     /**
      * Remove format on the current range. If the range is collapsed, remove
@@ -64,27 +61,18 @@ var FontStylePlugin = class extends we3.AbstractPlugin {
      */
     removeFormat (value, focusNode) {
         var range = this.dependencies.Range.getRange();
-        var changedIDs = [];
         // Unwrap everything at range from the removeFormat candidates
         if (this.dependencies.Range.isCollapsed()) {
-            changedIDs = this.dependencies.Arch.unwrapFrom(focusNode.id, we3.tags.format);
+            this.dependencies.Arch.unwrapFrom(focusNode.id, we3.tags.format);
         } else {
-            changedIDs = this.dependencies.Arch.unwrapRangeFrom(we3.tags.format);
+            this.dependencies.Arch.unwrapRangeFrom(we3.tags.format);
         }
         // Remove the styles of everything at range
-        var unstyledNodes = [];
         if (range.isCollapsed()) {
-            unstyledNodes = this._unstyle(range.scArch);
+            this._unstyle(range.scArch);
         } else {
-            unstyledNodes = this._unstyle(range.getSelectedNodes());
+            this._unstyle(range.getSelectedNodes());
         }
-        // Reset the range if it was across several node
-        if (range.scID !== range.ecID) {
-            return range;
-        }
-        // select the nodes of which the styles were removed
-        // or the nodes that were unwrapped
-        return unstyledNodes.length ? unstyledNodes : changedIDs;
     }
 
     //--------------------------------------------------------------------------

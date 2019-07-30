@@ -107,10 +107,11 @@ var BaseArch = class extends we3.AbstractPlugin {
      *
      * @param {Function(getArchNode)} callback
      *      The function can return:
-     *      - a range to apply instead of the default range (ie the first change)
+     *      - nothing to keep the range as it was before the changes
+     *      - false to apply the default range from changes (from `Arch._processChanges`)
+     *      - a range to apply instead of the default range
      *      - an array to set the range from the start of its first item to
      *        the end of its last item (eg: select all inserted nodes)
-     *      - false to keep the range as it was before the changes
      * @param {object} [options]
      * @param {boolean} [options.applyRulesForPublicMethod] true to apply rules when call a public Arch method.
      */
@@ -130,18 +131,21 @@ var BaseArch = class extends we3.AbstractPlugin {
         var previousRange = this.dependencies.BaseRange.getRange();
         var rangeInfo = await callback(getArchNode);
         var range;
-        if (rangeInfo && Array.isArray(rangeInfo)) {
-            // select from start of first item to end of last item
+        if (typeof rangeInfo === 'undefined') { // keep the range as it was
+            range = this._restorePreviousRange(previousRange);
+        } else if (rangeInfo && Array.isArray(rangeInfo)) {
+            // select from start of first item to end of last item, if any
             var first = rangeInfo[0];
             var last = rangeInfo[rangeInfo.length - 1];
             range = first && last ? {
                 scID: typeof first === 'number' ? first : first.id,
                 ecID: typeof last === 'number' ? last : last.id,
-            } : {};
+            } : undefined;
         } else if (rangeInfo === false) {
-            range = previousRange;  // keep the range as it was before
+            // default behavior of range from `Arch._processChanges`
+            range = undefined;
         } else {
-            range = rangeInfo; // rangeInfo is a range or undefined
+            range = rangeInfo; // `rangeInfo` _is_ the range
         }
         this._isDoTransaction = _isDoTransaction;
         this._applyRulesRangeRedrawFromChanges(range);
@@ -674,9 +678,11 @@ var BaseArch = class extends we3.AbstractPlugin {
         var scArch = this.getArchNode(range.scID)
         if (range.isCollapsed()) {
             start = end = this.createArchNode();
+            start._triggerChange(0);
             scArch.insert(start, range.so);
         } else {
             var ecArch = this.getArchNode(range.ecID);
+            scArch._triggerChange(range.so);
             end = options.doNotSplit ? ecArch : ecArch.split(range.eo) || ecArch;
             start = options.doNotSplit ? scArch : scArch.split(range.so) || scArch;
         }
@@ -719,10 +725,19 @@ var BaseArch = class extends we3.AbstractPlugin {
         this._resetChange();
         options = options || {};
         var range = this.dependencies.BaseRange.getRange();
-        var ecArch = this.getArchNode(range.ecID);
-        var end = options.doNotSplit ? ecArch : ecArch.split(range.eo) || ecArch;
-        var scArch = this.getArchNode(range.scID)
-        var start = options.doNotSplit ? scArch : scArch.split(range.so) || scArch;
+        var start, scArch = start = this.getArchNode(range.scID);
+        var end, ecArch = end = this.getArchNode(range.ecID);
+        var virtual = this.createArchNode();
+        if (!options.doNotSplit) {
+            if (range.isCollapsed()) {
+                virtual._triggerChange(0);
+                scArch.insert(virtual, range.so);
+                return this._wrap(virtual.id, wrapperName, options);
+            }
+            scArch._triggerChange(range.so);
+            end = ecArch.split(range.eo) || ecArch;
+            start = scArch.split(range.so) || scArch;
+        }
 
         var toWrap = start.getNodesUntil(end, {
             includeStart: true,
@@ -734,8 +749,7 @@ var BaseArch = class extends we3.AbstractPlugin {
             toWrap = we3.utils.uniq(toWrap);
         }
         if (!toWrap.length) {
-            var virtual = this.createArchNode();
-            scArch.insert(start, range.so);
+            scArch.insert(virtual, range.so);
             toWrap = [virtual];
         }
         return this._wrap(toWrap.map(node => node.id), wrapperName, options);
@@ -1341,6 +1355,95 @@ var BaseArch = class extends we3.AbstractPlugin {
         }
     }
     /**
+     * Recalculate the range after a `Arch.do` to match the `previousRange` or
+     * inducing its equivalent post-changes.
+     *
+     * @see Arch.do
+     * @private
+     * @param {object} previousRange
+     * @returns {object}
+     */
+    _restorePreviousRange (previousRange) {
+        var oldScID = this.dependencies.BaseRenderer.getID(previousRange.sc);
+        var oldScArch = this.getArchNode(oldScID);
+        var oldEcID = this.dependencies.BaseRenderer.getID(previousRange.ec);
+        var oldEcArch = this.getArchNode(oldEcID);
+        var changes = this._changes.filter(c => c.archNode.isInArch());
+
+        /* If the change that is marked as `isRange` is a virtual node, select
+        it as it was likely introduced to mark the position of the cursor. */
+        var rangeChange = changes.filter(c => c.isRange)[0];
+        if (rangeChange && rangeChange.archNode.isVirtual()) {
+           return { scID: rangeChange.archNode.id }; // select the virtual
+        }
+
+        /* If the changes modified the range in a way that makes the previous
+        range invalid (ie. one of the offsets is bigger than its node and the
+        nodes can be found in the Arch), restore that previous range as is. */
+        var isStartValid = oldScArch && previousRange.so <= oldScArch.length();
+        var isEndValid = oldEcArch && previousRange.eo <= oldEcArch.length();
+        var isPreviousRangeValid = isStartValid && isEndValid;
+        if (isPreviousRangeValid) {
+            return previousRange; // keep the range as it was before
+        }
+
+        /* If no changes were made, return `undefined` so the default range
+        behavior is applied (in `Arch._processChanges`). */
+        if (!changes.length) {
+            return; // apply default range from `Arch._processChanges`
+        }
+
+        /* In other cases, recompute the previous range by setting it from the
+        first to the last change (with some correction to account for the
+        changes themselves). */
+        var __isCNodeEqualToAndHasOffset = function (node) {
+            return c => c.archNode.id === node.id && c.offset !== null;
+        };
+        var __isEqualTo = node => (n => n.id === node.id);
+        var nextOptions = {
+            leafToLeaf: true,
+            doNotInsertVirtual: true,
+        };
+        // Induce `scArch` and `so`.
+        var scArch = changes[0].archNode;
+        var scChanges = changes.filter(__isCNodeEqualToAndHasOffset(scArch));
+        var so = scChanges.length ? scChanges[scChanges.length - 1].offset : 0;
+        // Induce `ecArch` and `eo`.
+        var ecArch = (changes[1] || changes[0]).archNode;
+        var ecChanges = changes.filter(__isCNodeEqualToAndHasOffset(ecArch));
+        var eo = ecChanges.length ? ecChanges[ecChanges.length - 1].offset : 0;
+        // If `so` is at the right edge of its node, try to move to next
+        if (so === scArch.length()) {
+            var next = scArch.next(nextOptions);
+            // Make sure not to set a start that is after the end
+            var isNextAfterEC = next && next.prevUntil(__isEqualTo(ecArch), {
+                doNotInsertVirtual: true,
+            });
+            if (next && !isNextAfterEC) {
+                scArch = next;
+                so = 0;
+            }
+        }
+        // If `eo` is at the left edge of its node, try to move to prev
+        if (eo === 0) {
+            var prev = ecArch.prev(nextOptions);
+            // Make sure not to set an end that is before the start
+            var isPrevBeforeSC = prev && prev.nextUntil(__isEqualTo(scArch), {
+                doNotInsertVirtual: true,
+            });
+            if (prev && !isPrevBeforeSC) {
+                ecArch = prev;
+                eo = ecArch.length();
+            }
+        }
+        return {
+            scID: scArch.id,
+            so: so,
+            ecID: ecArch.id,
+            eo: eo,
+        }; // apply this range
+    }
+    /**
      * Called after a transaction of changes ('do', or public Arch method)
      *
      * @private
@@ -1444,7 +1547,6 @@ var BaseArch = class extends we3.AbstractPlugin {
             if (toRemove.length) {
                 this.do(function () {
                     toRemove.forEach(node => node.remove());
-                    return range;
                 });
             }
         }

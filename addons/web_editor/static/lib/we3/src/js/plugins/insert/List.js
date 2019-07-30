@@ -631,14 +631,12 @@ var ListPlugin = class extends we3.AbstractPlugin {
      */
     indent () {
         this.dependencies.Arch.indent();
-        return false; // keep the range where it was before
     }
     /**
      * Outdent the list
      */
     outdent () {
         this.dependencies.Arch.outdent();
-        return false; // keep the range where it was before
     }
     /**
      * Insert an ordered list, an unordered list or a checklist.
@@ -660,16 +658,6 @@ var ListPlugin = class extends we3.AbstractPlugin {
             newLists = this._insertList(type, getArchNode); // [ INSERT ]
         }
         newLists.slice().forEach(this._mergeSiblingLists); // Clean edges
-        var start = getArchNode(selectedLeaves[0].id); // Restore range
-        var end = getArchNode(selectedLeaves[selectedLeaves.length - 1].id);
-        if (start && end) {
-            return {
-                scID: start.id,
-                so: range.so,
-                ecID: end.id,
-                eo: range.eo,
-            };
-        }
     }
 
     //--------------------------------------------------------------------------

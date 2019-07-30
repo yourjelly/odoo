@@ -24,7 +24,6 @@ var ParagraphPlugin = class extends we3.AbstractPlugin {
      */
     align (align) {
         this.dependencies.Range.getSelectedNodes().forEach(node => this._alignOne(node, align));
-        return false;
     }
 
     //--------------------------------------------------------------------------

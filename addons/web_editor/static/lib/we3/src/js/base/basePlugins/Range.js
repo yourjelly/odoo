@@ -539,13 +539,22 @@ var BaseRange = class extends we3.AbstractPlugin {
         var self = this;
         var startPoint = __moveToDeepest(points.scID, points.so);
         var endPoint = __moveToDeepest(points.ecID, points.eo);
+        function __isEdgeVoidoid(node) {
+            var isLeftEdge = node.isLeftEdgeOfBlock();
+            var isRightEdge = node.isRightEdgeOfBlock();
+            return node.isVoidoid() && (isLeftEdge  || isRightEdge);
+        }
         function __moveToDeepest(id, offset) {
             var archNode = self.dependencies.BaseArch.getArchNode(id);
             if (!archNode) {
                 return;
             }
+            var previousOffset = offset;
             var newOffset = offset;
+            var previousArchNode = archNode;
             while (archNode.childNodes && archNode.childNodes.length && !archNode.isVoidoid()) {
+                previousArchNode = archNode;
+                previousOffset = newOffset;
                 if (!newOffset && archNode.previousSibling() && archNode.previousSibling().isTable()) {
                     archNode = archNode.previousSibling().lastLeaf();
                     newOffset = archNode.length();
@@ -555,11 +564,10 @@ var BaseRange = class extends we3.AbstractPlugin {
                     newOffset = isAfterEnd ? archNode.length() : 0;
                 }
             }
-            if (archNode.isVoidoid() && !archNode.isBR() &&
-                (archNode.isLeftEdgeOfBlock() || archNode.isRightEdgeOfBlock())) {
+            if (__isEdgeVoidoid(archNode) && !archNode.isBR()) {
                 return {
-                    id: id,
-                    offset: offset,
+                    id: previousArchNode.id,
+                    offset: previousOffset,
                 };
             }
             return {

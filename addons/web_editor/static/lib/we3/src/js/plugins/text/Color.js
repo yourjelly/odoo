@@ -62,7 +62,6 @@ var ColorPlugin = class extends we3.AbstractPlugin {
             self._removeColorStyles(node);
             self._removeEmptyFont(node); // remove the node if it has not attributes
         });
-        return false; // keep the range where it was before
     }
     /**
      * Change the selection's fore color.
