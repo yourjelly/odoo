@@ -1,131 +1,9 @@
 (function () {
 'use strict';
 
-var rangeCollapsed = '\u25C6'; // ◆
-var rangeStart = '\u25B6'; // ▶
-var rangeEnd = '\u25C0'; // ◀
+const regex = we3.utils.regex.TestManagerPlugin;
 
-var regExpRange = new RegExp('(' + rangeStart + '|' + rangeEnd + '|' + rangeCollapsed + ')', 'g');
-var regExpRangeToCollapsed = new RegExp(rangeStart + rangeEnd, 'g');
-var other = '[^' + rangeStart + '' + rangeEnd + ']*';
-var regExpRangeCollapsed = new RegExp('^(' + other + ')(' + rangeCollapsed + ')(' + other + ')$');
-var regExpRangeNotCollapsed = new RegExp('^(' + other + ')(' + rangeStart + ')?(' + other + ')(' + rangeEnd + ')?(' + other + ')$');
-var regSpace = /\u00A0/g;
-var regInvisible = /\uFEFF/g;
-
-/////////////////////////////////////////////////////////////////
-
-var TEST = class extends  we3.ArchNodeVirtualText {
-    //--------------------------------------------------------------------------
-    // static
-    //--------------------------------------------------------------------------
-
-    static parse (archNode) {
-        if (TEST._isTestingVirtualNode(archNode)) {
-            return TEST._createTestingVirtualNode(archNode);
-        }
-    }
-    static _createTestingVirtualNode (archNode) {
-        if (archNode.type === 'TEST') {
-            return;
-        }
-        var matches = archNode.nodeValue.match(regExpRangeCollapsed) || archNode.nodeValue.match(regExpRangeNotCollapsed);
-        if (matches) {
-            var fragment = new we3.ArchNodeFragment(archNode.params);
-            matches.shift();
-            matches.forEach(function (match) {
-                if (match === rangeCollapsed) {
-                    fragment.append(new TEST(archNode.params, null, null, rangeStart));
-                    fragment.append(new TEST(archNode.params, null, null, rangeEnd));
-                } else if (match && match.length) {
-                    if (match === rangeStart || match === rangeEnd) {
-                        fragment.append(new TEST(archNode.params, null, null, match));
-                    } else {
-                        fragment.append(new we3.ArchNodeText(archNode.params, null, null, match));
-                    }
-                }
-            });
-            return fragment;
-        }
-    }
-    static _isTestingVirtualNode (archNode) {
-        return archNode.nodeValue && regExpRange.test(archNode.nodeValue);
-    }
-
-    //--------------------------------------------------------------------------
-    // public
-    //--------------------------------------------------------------------------
-
-    constructor (params, nodeName, attributes, nodeValue) {
-        super(...arguments)
-        this.nodeValue = nodeValue;
-    }
-    isVisibleText () {
-        return true;
-    }
-    isTestNode () {
-        return true;
-    }
-    toString (options) {
-        return this.nodeValue;
-    }
-    get type () {
-        return 'TEST';
-    }
-
-    //--------------------------------------------------------------------------
-    // private
-    //--------------------------------------------------------------------------
-
-    _applyRulesArchNode () {}
-};
-we3.addArchNode('TEST', TEST);
-
-/////////////////////////////////////////////////////////////////
-
-var TEST_CONTAINER = class extends we3.ArchNode {
-    //--------------------------------------------------------------------------
-    // public
-    //--------------------------------------------------------------------------
-
-    isBlock () {
-        return true;
-    }
-    isContentEditable () {
-        return true;
-    }
-    isEditable () {
-        return true;
-    }
-    isRoot () {
-        return true;
-    }
-    isTestNode () {
-        return true;
-    }
-    isUnbreakable () {
-        return true;
-    }
-    split (offset) {
-        var virtualText = this.params.create();
-        this.childNodes[offset].after(virtualText);
-        return virtualText;
-    }
-    get type () {
-        return 'TEST_CONTAINER';
-    }
-
-    //--------------------------------------------------------------------------
-    // private
-    //--------------------------------------------------------------------------
-
-    _applyRulesArchNode () {}
-};
-we3.addArchNode('TEST_CONTAINER', TEST_CONTAINER);
-
-/////////////////////////////////////////////////////////////////
-
-function deepEqual (v1, v2) {
+function deepEqual(v1, v2) {
     if (v1 === v2) {
         return true;
     }
@@ -197,7 +75,7 @@ function _eventKeyName(eventName) {
     return eventName.substr(0,1).toUpperCase() + eventName.substr(1, eventName.length);
 }
 
-var TestPlugin = class extends we3.AbstractPlugin {
+class TestManagerPlugin extends we3.AbstractPlugin {
     /**
      *@param {Object} options
      *@param {Object} options.test
@@ -392,6 +270,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
     }
     getValue (archNodeId) {
         var range = this.dependencies.Range.getRange();
+
         var container = this.dependencies.Arch.getClonedArchNode(this._getTestContainer(archNodeId), true);
         var markers;
         if (range.isCollapsed() && range.scArch.isVoidoid()) {
@@ -399,12 +278,12 @@ var TestPlugin = class extends we3.AbstractPlugin {
                 {
                     id: range.scArch.parent.id,
                     offset: range.scArch.index(),
-                    string: rangeStart,
+                    string: regex.rangeStartMarker,
                 },
                 {
                     id: range.ecArch.parent.id,
                     offset: range.ecArch.index() + 1,
-                    string: rangeEnd,
+                    string: regex.rangeEndMarker,
                 },
             ];
         } else {
@@ -412,19 +291,19 @@ var TestPlugin = class extends we3.AbstractPlugin {
                 {
                     id: range.scID,
                     offset: range.so,
-                    string: rangeStart,
+                    string: regex.rangeStartMarker,
                 },
                 {
                     id: range.ecID,
                     offset: range.eo,
-                    string: rangeEnd,
+                    string: regex.rangeEndMarker,
                 },
             ];
         }
         var result = container.toString({ markers: markers });
         return this._cleanValue(result)
             .replace(/^<[^>]+>/, '').replace(/<\/[^>]+>$/, '') // remove container
-            .replace(regExpRangeToCollapsed, rangeCollapsed);
+            .replace(regex.rangeToCollapsed, regex.rangeCollapsedMarker);
     }
     getDomValue (archNodeId) {
         var el = this.dependencies.Renderer.getElement(this._getTestContainer());
@@ -568,7 +447,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
                 }
 
                 var root = Arch.getClonedArchNode(1, true);
-                container = new TEST_CONTAINER(root.params, 'test-container');
+                container = new we3.TestContainerNode(root.params, 'test-container');
                 Arch.bypassUpdateConstraints(function () {
                     Arch.bypassChangeTrigger(function () {
                         if (root.childNodes.length) {
@@ -588,7 +467,7 @@ var TestPlugin = class extends we3.AbstractPlugin {
 
         var archNode = Arch.getClonedArchNode(container.id, true);
 
-        Arch.setValue(value.replace(regExpRange, ''), container.id);
+        Arch.setValue(value.replace(regex.range, ''), container.id);
         this._parentedParent._each('setEditorValue', null, ['BaseArch']);
 
         var range;
@@ -945,8 +824,8 @@ var TestPlugin = class extends we3.AbstractPlugin {
      */
     _cleanValue (value) {
         return value
-            .replace(regSpace, '&nbsp;')
-            .replace(regInvisible, '&#65279;');
+            .replace(regex.space, '&nbsp;')
+            .replace(regex.invisible, '&#65279;');
     }
     /**
      * Exec a test's value test.
@@ -1006,8 +885,8 @@ var TestPlugin = class extends we3.AbstractPlugin {
      * @param {JSON} json
      * @returns {Boolean}
      */
-    _isTestingVirtualNode (json) {
-        return regExpRange.test(json.nodeValue);
+    _isTestingVirtualNode(json) {
+        return regex.range.test(json.nodeValue);
     }
     /**
      * Load a test.
@@ -1186,28 +1065,8 @@ var TestPlugin = class extends we3.AbstractPlugin {
             document.execCommand("insertText", 0, ev.data);
         }
     }
-};
+}
 
-
-var TestAutoInstall = class extends we3.AbstractPlugin {
-    static get autoInstall () {
-        return ['Test'];
-    }
-    constructor () {
-        super(...arguments);
-        this.dependencies = ['Test'];
-    }
-    start () {
-        this.dependencies.Test.add(this);
-        return super.start();
-    }
-    test () {
-        return Promise.resolve();
-    }
-};
-
-
-we3.addPlugin('Test', TestPlugin);
-we3.addPlugin('TestAutoInstall', TestAutoInstall);
+we3.addPlugin('Test', TestManagerPlugin);
 
 })();

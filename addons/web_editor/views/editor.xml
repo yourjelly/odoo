@@ -47,6 +47,13 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/basePlugins/UserInput.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/basePlugins/Selector.js"/>
 
+    <!-- Tests base -->
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/testManager/TestManagerUtils.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/testManager/TestContainerNode.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/testManager/TestNode.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/testManager/TestManagerPlugin.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/tests/base/pluginManager/TestAutoInstall.js"/>
+
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/init/we3.js"/>
 
     <!-- Plugins -->
@@ -79,9 +86,6 @@
 
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/misc/History.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/misc/Jinja.js"/>
-
-    <!-- Tests base -->
-    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/testManager/TestManagerPlugin.js"/>
 
     <script type="text/javascript" src="/web_editor/static/lib/we3/tests/base/arch/TestAttributes.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/tests/base/arch/TestIs.js"/>
