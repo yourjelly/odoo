@@ -223,6 +223,7 @@ class ResPartner(models.Model):
     _name = 'res.partner'
     _inherit = 'res.partner'
 
+    @api.depends_context('force_company')
     def _credit_debit_get(self):
         tables, where_clause, where_params = self.env['account.move.line'].with_context(company_id=self.env.company.id)._query_get()
         where_params = [tuple(self.ids)] + where_params
