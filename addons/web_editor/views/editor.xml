@@ -87,6 +87,7 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/list/ChecklistNode.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/list/ChecklistItemNode.js"/>
 
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/media/MediaOptions.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/media/AbstractMediaNode.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/media/AltPlugin.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/media/FloatPlugin.js"/>
