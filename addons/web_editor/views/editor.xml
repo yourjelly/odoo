@@ -29,16 +29,16 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/attributes/ClassName.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/attributes/Style.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/nodes/ArchNode.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/is.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/rules.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/architectural.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/nodes/utils/is.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/nodes/utils/rules.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/nodes/utils/formatting.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/nodes/ArchNodeText.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/nodes/ArchNodeVirtualText.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/nodes/ArchNodeFragment.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/nodes/ArchNodeRoot.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/nodes/ArchNodeBr.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/customArchNodes.js"/>
-    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/nodes/ArchNodeSpace.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/tags.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/nodes/ArchNodeFormattingSpace.js"/>
 
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/basePlugins/Rules.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/basePlugins/Arch.js"/>
