@@ -604,40 +604,8 @@ options.registry.gallery = options.Class.extend({
      * @override
      */
     start: function () {
-        var self = this;
-
         // The snippet should not be editable
         this.$target.addClass('o_fake_not_editable').attr('contentEditable', false);
-
-        // Make sure image previews are updated if images are changed
-        this.$target.on('save', 'img', function (ev) {
-            var $img = $(ev.currentTarget);
-            var index = self.$target.find('.carousel-item.active').index();
-            self.$('.carousel:first li[data-target]:eq(' + index + ')')
-                .css('background-image', 'url(' + $img.attr('src') + ')');
-        });
-
-        // When the snippet is empty, an edition button is the default content
-        // TODO find a nicer way to do that to have editor style
-        this.$target.on('click', '.o_add_images', function (e) {
-            e.stopImmediatePropagation();
-            self.addImages(false);
-        });
-
-        this.$target.on('dropped', 'img', function (ev) {
-            self.mode(null, self.getMode());
-            if (!ev.target.height) {
-                $(ev.target).one('load', function () {
-                    setTimeout(function () {
-                        self.trigger_up('cover_update');
-                    });
-                });
-            }
-        });
-
-        if (this.$('.container:first > *:not(div)').length) {
-            self.mode(null, self.getMode());
-        }
 
         return this._super.apply(this, arguments);
     },
@@ -699,45 +667,6 @@ options.registry.gallery = options.Class.extend({
         this.mode(null, $activeMode.data('mode'), $activeMode);
     },
     /**
-     * Get the image target's layout mode (slideshow, masonry, grid or nomode).
-     *
-     * @returns {String('slideshow'|'masonry'|'grid'|'nomode')}
-     */
-    getMode: function () {
-        var mode = 'slideshow';
-        if (this.$target.hasClass('o_masonry')) {
-            mode = 'masonry';
-        }
-        if (this.$target.hasClass('o_grid')) {
-            mode = 'grid';
-        }
-        if (this.$target.hasClass('o_nomode')) {
-            mode = 'nomode';
-        }
-        return mode;
-    },
-    /**
-     * Displays the images with the "grid" layout.
-     */
-    grid: function () {
-        var imgs = this._getImages();
-        var $row = $('<div/>', {class: 'row'});
-        var columns = this._getColumns();
-        var colClass = 'col-lg-' + (12 / columns);
-        var $container = this._replaceContent($row);
-
-        _.each(imgs, function (img, index) {
-            var $img = $(img);
-            var $col = $('<div/>', {class: colClass});
-            $col.append($img).appendTo($row);
-            if ((index + 1) % columns === 0) {
-                $row = $('<div/>', {class: 'row'});
-                $row.appendTo($container);
-            }
-        });
-        this.$target.css('height', '');
-    },
-    /**
      * Allows to changes the interval of automatic slideshow (not active in
      * edit mode).
      */
@@ -779,19 +708,6 @@ options.registry.gallery = options.Class.extend({
             });
             $lowest.append(imgs.pop());
         }
-    },
-    /**
-     * Allows to change the images layout. @see grid, masonry, nomode, slideshow
-     *
-     * @see this.selectClass for parameters
-     */
-    mode: function (previewMode, value, $opt) {
-        this.$target.css('height', '');
-        this[value]();
-        this.$target
-            .removeClass('o_nomode o_masonry o_grid o_slideshow')
-            .addClass('o_' + value);
-        this.trigger_up('cover_update');
     },
     /**
      * Displays the images with the standard layout: floating images.
@@ -917,30 +833,6 @@ options.registry.gallery = options.Class.extend({
     // Private
     //--------------------------------------------------------------------------
 
-    /**
-     * Returns the images, sorted by index.
-     *
-     * @private
-     * @returns {DOMElement[]}
-     */
-    _getImages: function () {
-        var imgs = this.$('img').get();
-        var self = this;
-        imgs.sort(function (a, b) {
-            return self._getIndex(a) - self._getIndex(b);
-        });
-        return imgs;
-    },
-    /**
-     * Returns the index associated to a given image.
-     *
-     * @private
-     * @param {DOMElement} img
-     * @returns {integer}
-     */
-    _getIndex: function (img) {
-        return img.dataset.index || 0;
-    },
     /**
      * Returns the currently selected column option.
      *

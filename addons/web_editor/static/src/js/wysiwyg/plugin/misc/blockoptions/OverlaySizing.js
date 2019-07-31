@@ -31,28 +31,19 @@ var OverlaySizingOption = class extends (we3.getPlugin('BlockOption:default')) {
     /**
      * @override
      */
-    onFocus(ui, target) {
-        // this._onResize(overlay, target, this._getSize(target)); FIXME
-    }
-
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
-    registerUIAndTarget(ui, target, overlay) {
-        var state = super.registerUIAndTarget(...arguments);
-
+    onStart(ui, target, state) {
         var resizeValues = this._getSize(target);
         Object.keys(resizeValues).forEach(function (key) {
             var handle = document.createElement('we3-overlaysizing-handle');
             handle.classList.add('o_handle', key); // FIXME class name
-            overlay.appendChild(handle);
+            state._overlay.appendChild(handle);
         });
-
-        return state;
+    }
+    /**
+     * @override
+     */
+    onFocus(ui, target, state) {
+        // this._onResize(overlay, target, this._getSize(target)); FIXME
     }
 
     //--------------------------------------------------------------------------

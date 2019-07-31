@@ -14,7 +14,7 @@ var BackgroundPositionOption = class extends (we3.getPlugin('BlockOption:default
     /**
      * @override
      */
-    onFocus(ui, target) {
+    onFocus(ui, target, state) {
         this.onForeignOptionChange(ui, target);
     }
     /**

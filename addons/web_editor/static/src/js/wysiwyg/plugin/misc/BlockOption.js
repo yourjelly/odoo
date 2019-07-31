@@ -24,6 +24,25 @@ var BlockOption = class extends we3.AbstractPlugin {
         this._states = [];
     }
     /**
+     * @abstract
+     * @param {DOMElement} ui - a registered UI
+     * @param {DOMElement} target - the associated registered target
+     * @param {DOMElement} state - the associated registered state
+     */
+    onStart(ui, target, state) {}
+    /**
+     * Called when the edition overlay is covering the associated snippet
+     * (the first time, this follows the call to the @see start method).
+     *
+     * FIXME only the first time is called right now...
+     *
+     * @abstract
+     * @param {DOMElement} ui - a registered UI
+     * @param {DOMElement} target - the associated registered target
+     * @param {DOMElement} state - the associated registered state
+     */
+    onFocus(ui, target, state) {}
+    /**
      * Called when a block is copied - @see CustomizeBlock
      * The method is in charge of updating the relevant target according to it.
      *
@@ -36,17 +55,6 @@ var BlockOption = class extends we3.AbstractPlugin {
      *        was cloned)
      */
     onClone(target, options) {}
-    /**
-     * Called when the edition overlay is covering the associated snippet
-     * (the first time, this follows the call to the @see start method).
-     *
-     * FIXME only the first time is called right now...
-     *
-     * @abstract
-     * @param {DOMElement} ui - a registered UI
-     * @param {DOMElement} target - a registered target
-     */
-    onFocus(ui, target) {}
     /**
      * @abstract
      * @param {DOMElement} ui - a registered UI
@@ -86,6 +94,7 @@ var BlockOption = class extends we3.AbstractPlugin {
 
         var state = {
             __methodNames: [],
+            _overlay: overlay,
         };
 
         this._uiElements.push(ui);
@@ -97,8 +106,10 @@ var BlockOption = class extends we3.AbstractPlugin {
             self._bindDOMEvents(el, self._uiEvents);
         });
 
+        this.onStart(ui, target, state);
+        this.onFocus(ui, target, state);
+
         this._setActive(ui, target);
-        this.onFocus(ui, target);
 
         return state;
     }

@@ -113,18 +113,12 @@ var FacebookPageDialog = weWidgets.Dialog.extend({
 
 var FacebookPageOption = class extends (we3.getPlugin('BlockOption:default')) {
 
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
     /**
      * Initializes the required facebook page data to create the iframe.
      *
      * @override
      */
-    registerUIAndTarget(ui, target, overlay) {
-        var state = super.registerUIAndTarget(...arguments);
-
+    onStart(ui, target, state) {
         var defaults = {
             'href': false,
             'height': 215,
@@ -160,8 +154,6 @@ var FacebookPageOption = class extends (we3.getPlugin('BlockOption:default')) {
             this.fbPageOptions();
         }).bind(this, target);
         target.addEventListener('click', state._onFacebookPageAddClick);
-
-        return state;
     }
     /**
      * @override
