@@ -613,7 +613,7 @@ class TestStockValuationChangeCostMethod(TestStockValuationCommon):
         self.assertEqual(self.product1.quantity_svl, 19)
 
         self.assertEqual(len(self.product1.stock_valuation_layer_ids), 5)
-        for svl in self.product1.stock_valuation_layer_ids[-2:]:
+        for svl in self.product1.stock_valuation_layer_ids.sorted()[-2:]:
             self.assertEqual(svl.description, 'Costing method change for product category All: from standard to fifo.')
 
     def test_standard_to_fifo_2(self):
