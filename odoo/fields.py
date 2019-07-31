@@ -733,7 +733,8 @@ class Field(MetaField('DummyField', (object,), {})):
             path = []                   # fields from model to field_model
             for fname in dotnames.split('.'):
                 field = field_model._fields[fname]
-                add_trigger(field, path)
+                if (field.type != 'one2many') or not field_model._field_inverses[field]:
+                    add_trigger(field, path)
 
                 if (field is self) and path:
                     self.recursive = True
@@ -988,7 +989,7 @@ class Field(MetaField('DummyField', (object,), {})):
         records = records.filtered(lambda record: cache.get(record, self, NOTHING) != cache_value)
         if not records:
             return records
-        cache.update(records, self, [cache_value] * len(records))
+        self.set_cache(records, cache_value)
 
         # update towrite
         if self.store:
@@ -997,6 +998,10 @@ class Field(MetaField('DummyField', (object,), {})):
                 towrite[record.id][self.name] = value
 
         return records
+
+    def set_cache(self, records, value):
+        cache = records.env.cache
+        cache.update(records, self, [value] * len(records))
 
     ############################################################################
     #
@@ -1401,7 +1406,7 @@ class _String(Field):
         records = records.filtered(lambda record: cache.get(record, self, NOTHING) != cache_value)
         if not records:
             return records
-        cache.update(records, self, [cache_value] * len(records))
+        self.set_cache(records, cache_value)
 
         if not self.store:
             return records
@@ -1916,7 +1921,7 @@ class Binary(Field):
         records = records.filtered(lambda record: cache.get(record, self, NOTHING) != cache_value)
         if not records:
             return records
-        cache.update(records, self, [cache_value] * len(records))
+        self.set_cache(records, cache_value)
 
         # retrieve the attachments that store the values, and adapt them
         if self.store:
@@ -2338,7 +2343,19 @@ class Many2one(_Relational):
         records = records.filtered(lambda record: cache.get(record, self, NOTHING) != cache_value)
         if not records:
             return records
+        self.set_cache(records, cache_value)
 
+        # update towrite
+        if self.store:
+            towrite = records.env.all.towrite[self.model_name]
+            write_value = self.convert_to_write(cache_value, records)
+            for record in records.filtered('id'):
+                towrite[record.id][self.name] = write_value
+
+        return records
+
+    def set_cache(self, records, value):
+        cache = records.env.cache
         # remove records from the cache of one2many fields of old corecords
         record_ids = set(records._ids)
         for invf in records._field_inverses[self]:
@@ -2363,11 +2380,11 @@ class Many2one(_Relational):
                     cache.set(corecord, invf, ids1)
 
         # update the cache of self
-        cache.update(records, self, [cache_value] * len(records))
+        cache.update(records, self, [value] * len(records))
 
         # update the cache of one2many fields of new corecord
-        if cache_value is not None:
-            corecord = self.convert_to_record(cache_value, records)
+        if value is not None:
+            corecord = self.convert_to_record(value, records)
             for invf in records._field_inverses[self]:
                 valid_ids = records.filtered_domain(invf.get_domain_list(corecord))._ids
                 if not valid_ids:
@@ -2382,15 +2399,6 @@ class Many2one(_Relational):
                     # DLE P159: `test_in_invoice_line_onchange_business_fields_1`
                     ids1 = tuple(set(ids0 + valid_ids))
                     cache.set(corecord, invf, ids1)
-
-        # update towrite
-        if self.store:
-            towrite = records.env.all.towrite[self.model_name]
-            write_value = self.convert_to_write(cache_value, records)
-            for record in records.filtered('id'):
-                towrite[record.id][self.name] = write_value
-
-        return records
 
 
 class _RelationalMulti(_Relational):

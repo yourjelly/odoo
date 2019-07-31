@@ -3659,11 +3659,12 @@ Fields:
                 if field.type in ('one2many', 'many2many'):
                     cachetoclear.append((record, field))
                 else:
-                    value = field.convert_to_cache(value, record)
-                    self.env.cache.set(record, field, value)
-                    for invf in record._field_inverses[field]:
-                        # DLE P138
-                        inverses_update.append((invf, record[field.name], record))
+                    field.set_cache(record, field.convert_to_cache(value, record))
+                    if field.type == 'integer' and record._field_inverses[field]:
+                        # Special case for integer which are actually many2one (res_id/res_model)
+                        for invf in record._field_inverses[field]:
+                            # DLE P138
+                            inverses_update.append((invf, record[field.name], record))
 
         # update parent_path
         records._parent_store_create()

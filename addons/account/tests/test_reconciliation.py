@@ -1590,10 +1590,13 @@ class TestReconciliationExec(TestReconciliation):
         to_reconcile.reconcile()
 
         # check reconciliation in Payable account
-        self.assertTrue(purchase_move.line_ids[2].full_reconcile_id.exists())
+        purchase_line_ids = purchase_move.line_ids.sorted()
+        fx_move_01_line_ids = fx_move_01.line_ids.sorted()
+        payment_move_line_ids = payment_move.line_ids.sorted()
+        self.assertTrue(purchase_line_ids[2].full_reconcile_id.exists())
         self.assertEqual(
-            purchase_move.line_ids[2].full_reconcile_id.reconciled_line_ids,
-            purchase_move.line_ids[2] + fx_move_01.line_ids[0] + payment_move.line_ids[0])
+            purchase_line_ids[2].full_reconcile_id.reconciled_line_ids,
+            purchase_line_ids[2] + fx_move_01_line_ids[0] + payment_move_line_ids[0])
 
         # check cash basis
         cash_basis_moves = self.env['account.move'].search(
@@ -1769,11 +1772,15 @@ class TestReconciliationExec(TestReconciliation):
         to_reconcile.reconcile()
 
         # check reconciliation in Payable account
-        self.assertTrue(purchase_move.line_ids[2].full_reconcile_id.exists())
+        purchase_move_line_ids = purchase_move.line_ids.sorted()
+        fx_move_01_line_ids = fx_move_01.line_ids.sorted()
+        fx_move_02_line_ids = fx_move_02.line_ids.sorted()
+        payment_move_line_ids = payment_move.line_ids.sorted()
+        self.assertTrue(purchase_move_line_ids[2].full_reconcile_id.exists())
         self.assertEqual(
-            purchase_move.line_ids[2].full_reconcile_id.reconciled_line_ids,
-            purchase_move.line_ids[2] + fx_move_01.line_ids[0] + fx_move_02.line_ids[0] +
-            payment_move.line_ids[0])
+            purchase_move_line_ids[2].full_reconcile_id.reconciled_line_ids,
+            purchase_move_line_ids[2] + fx_move_01_line_ids[0] + fx_move_02_line_ids[0] +
+            payment_move_line_ids[0])
 
         # check cash basis
         cash_basis_moves = self.env['account.move'].search(
