@@ -414,6 +414,7 @@
         <field name="amount_type">percent</field>
 		<field name="chart_template_id" ref="l10n_at_chart_template"/>
 		<field name="tax_group_id" ref="tax_group_20"/>
+        <field name="sequence">0</field>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0,{
               'factor_percent': 100,
@@ -1025,6 +1026,7 @@
         <field name="amount_type">percent</field>
 		<field name="chart_template_id" ref="l10n_at_chart_template"/>
 		<field name="tax_group_id" ref="tax_group_20"/>
+        <field name="sequence">0</field>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0,{
               'factor_percent': 100,
