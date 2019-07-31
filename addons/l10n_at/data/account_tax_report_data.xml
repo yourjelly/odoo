@@ -108,6 +108,7 @@ Art. 2 erfolgten.</field>
         <field name="sequence" eval="15"/>
         <field name="country_id" ref="base.at"/>
     </record>
+
     <record id="tax_report_line_l10n_at_tva_line_4_14_base" model="account.tax.report.line">
         <field name="name">4.14 20% Normalsteuersatz</field>
         <field name="tag_name">KZ 022 BASE</field>
@@ -169,7 +170,7 @@ Art. 2 erfolgten.</field>
     </record>
 
     <record id="tax_report_line_l10n_at_tva_line_4_14_tax" model="account.tax.report.line">
-        <field name="name">4.14 20% Normalsteuersatz tax</field>
+        <field name="name">4.14 20% Normalsteuersatz</field>
         <field name="tag_name">KZ 022 TAX</field>
         <field name="code">AT_022_tax</field>
         <field name="sequence" eval="26"/>
@@ -292,7 +293,7 @@ Art. 2 erfolgten.</field>
     </record>
 
     <record id="tax_report_line_l10n_at_tva_line_4_28_base" model="account.tax.report.line">
-        <field name="name">4.28 20% Normalsteuersatz base</field>
+        <field name="name">4.28 20% Normalsteuersatz</field>
         <field name="tag_name">KZ 072 BASE</field>
         <field name="code">AT_072_base</field>
         <field name="sequence" eval="40"/>
@@ -301,7 +302,7 @@ Art. 2 erfolgten.</field>
     </record>
 
     <record id="tax_report_line_l10n_at_tva_line_4_29_base" model="account.tax.report.line">
-        <field name="name">4.29 10% ermäßigter Steuersatz base</field>
+        <field name="name">4.29 10% ermäßigter Steuersatz</field>
         <field name="tag_name">KZ 073 BASE</field>
         <field name="code">AT_073_base</field>
         <field name="sequence" eval="42"/>
@@ -310,7 +311,7 @@ Art. 2 erfolgten.</field>
     </record>
 
     <record id="tax_report_line_l10n_at_tva_line_4_30_base" model="account.tax.report.line">
-        <field name="name">4.30 13% ermäßigter Steuersatz base</field>
+        <field name="name">4.30 13% ermäßigter Steuersatz</field>
         <field name="tag_name">KZ 008 BASE</field>
         <field name="code">AT_008_base</field>
         <field name="sequence" eval="45"/>
@@ -334,7 +335,7 @@ Art. 2 erfolgten.</field>
     </record>
 
     <record id="tax_report_line_l10n_at_tva_line_4_28_tax" model="account.tax.report.line">
-        <field name="name">4.28 20% Normalsteuersatz tax</field>
+        <field name="name">4.28 20% Normalsteuersatz</field>
         <field name="tag_name">KZ 072 TAX</field>
         <field name="code">AT_072_tax</field>
         <field name="sequence" eval="41"/>
@@ -343,7 +344,7 @@ Art. 2 erfolgten.</field>
     </record>
 
     <record id="tax_report_line_l10n_at_tva_line_4_29_tax" model="account.tax.report.line">
-        <field name="name">4.29 10% ermäßigter Steuersatz tax</field>
+        <field name="name">4.29 10% ermäßigter Steuersatz</field>
         <field name="tag_name">KZ 073 TAX</field>
         <field name="code">AT_073_tax</field>
         <field name="sequence" eval="43"/>
@@ -352,7 +353,7 @@ Art. 2 erfolgten.</field>
     </record>
 
     <record id="tax_report_line_l10n_at_tva_line_4_30_tax" model="account.tax.report.line">
-        <field name="name">4.30 13% ermäßigter Steuersatz tax</field>
+        <field name="name">4.30 13% ermäßigter Steuersatz</field>
         <field name="tag_name">KZ 008 TAX</field>
         <field name="code">AT_008_tax</field>
         <field name="sequence" eval="50"/>
