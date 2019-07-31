@@ -166,6 +166,7 @@ class MrpWorkorder(models.Model):
         number or a lot in other workorders. If yes, restrict the selectable lot
         to the lot/sn used in other workorders.
         """
+        self.allowed_lots_domain = False
         productions = self.mapped('production_id')
         for production in productions:
             if production.product_id.tracking == 'none':
