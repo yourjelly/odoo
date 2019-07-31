@@ -635,9 +635,6 @@ var BaseUserInput = class extends we3.AbstractPlugin {
     }
 };
 
-var UserInput = class extends we3.AbstractPlugin {};
-
 we3.pluginsRegistry.BaseUserInput = BaseUserInput;
-we3.pluginsRegistry.UserInput = UserInput;
 
 })();
