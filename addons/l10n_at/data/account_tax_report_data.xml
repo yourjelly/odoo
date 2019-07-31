@@ -103,16 +103,17 @@ Art. 2 erfolgten.</field>
         <field name="country_id" ref="base.at"/>
     </record>
 
-    <record id="tax_report_line_at_base_title_umsatz_base" model="account.tax.report.line">
+    <record id="tax_report_line_at_base_title_umsatz_base_4_14_19" model="account.tax.report.line">
         <field name="name">Base</field>
         <field name="sequence" eval="15"/>
+        <field name="country_id" ref="base.at"/>
     </record>
     <record id="tax_report_line_l10n_at_tva_line_4_14_base" model="account.tax.report.line">
-        <field name="name">4.14 20% Normalsteuersatz base</field>
+        <field name="name">4.14 20% Normalsteuersatz</field>
         <field name="tag_name">KZ 022 BASE</field>
         <field name="code">AT_022_base</field>
         <field name="sequence" eval="20"/>
-        <field name="parent_id" ref="tax_report_line_at_base_title_umsatz_base"/>
+        <field name="parent_id" ref="tax_report_line_at_base_title_umsatz_base_4_14_19"/>
         <field name="country_id" ref="base.at"/>
     </record>
 
@@ -121,7 +122,7 @@ Art. 2 erfolgten.</field>
         <field name="tag_name">KZ 029 BASE</field>
         <field name="code">AT_029_base</field>
         <field name="sequence" eval="21"/>
-        <field name="parent_id" ref="tax_report_line_at_base_title_umsatz_base"/>
+        <field name="parent_id" ref="tax_report_line_at_base_title_umsatz_base_4_14_19"/>
         <field name="country_id" ref="base.at"/>
     </record>
 
@@ -130,7 +131,7 @@ Art. 2 erfolgten.</field>
         <field name="tag_name">KZ 006 BASE</field>
         <field name="code">AT_006_base</field>
         <field name="sequence" eval="22"/>
-        <field name="parent_id" ref="tax_report_line_at_base_title_umsatz_base"/>
+        <field name="parent_id" ref="tax_report_line_at_base_title_umsatz_base_4_14_19"/>
         <field name="country_id" ref="base.at"/>
     </record>
 
@@ -139,7 +140,7 @@ Art. 2 erfolgten.</field>
         <field name="tag_name">KZ 037 BASE</field>
         <field name="code">AT_037_base</field>
         <field name="sequence" eval="23"/>
-        <field name="parent_id" ref="tax_report_line_at_base_title_umsatz_base"/>
+        <field name="parent_id" ref="tax_report_line_at_base_title_umsatz_base_4_14_19"/>
         <field name="country_id" ref="base.at"/>
     </record>
 
@@ -148,7 +149,7 @@ Art. 2 erfolgten.</field>
         <field name="tag_name">KZ 052 BASE</field>
         <field name="code">AT_052_base</field>
         <field name="sequence" eval="24"/>
-        <field name="parent_id" ref="tax_report_line_at_base_title_umsatz_base"/>
+        <field name="parent_id" ref="tax_report_line_at_base_title_umsatz_base_4_14_19"/>
         <field name="country_id" ref="base.at"/>
     </record>
 
@@ -157,7 +158,13 @@ Art. 2 erfolgten.</field>
         <field name="tag_name">KZ 007 BASE</field>
         <field name="code">AT_007_base</field>
         <field name="sequence" eval="25"/>
-        <field name="parent_id" ref="tax_report_line_at_base_title_umsatz_base"/>
+        <field name="parent_id" ref="tax_report_line_at_base_title_umsatz_base_4_14_19"/>
+        <field name="country_id" ref="base.at"/>
+    </record>
+
+    <record id="tax_report_line_at_tax_title_4_14_19" model="account.tax.report.line">
+        <field name="name">Tax</field>
+        <field name="sequence" eval="15"/>
         <field name="country_id" ref="base.at"/>
     </record>
 
@@ -166,26 +173,25 @@ Art. 2 erfolgten.</field>
         <field name="tag_name">KZ 022 TAX</field>
         <field name="code">AT_022_tax</field>
         <field name="sequence" eval="26"/>
+        <field name="parent_id" ref="tax_report_line_at_tax_title_4_14_19"/>
         <field name="country_id" ref="base.at"/>
     </record>
-
-
 
     <record id="tax_report_line_l10n_at_tva_line_4_15_tax" model="account.tax.report.line">
         <field name="name">4.15 10% ermäßigter Steuersatz</field>
         <field name="tag_name">KZ 029 TAX</field>
         <field name="code">AT_029_tax</field>
         <field name="sequence" eval="27"/>
+        <field name="parent_id" ref="tax_report_line_at_tax_title_4_14_19"/>
         <field name="country_id" ref="base.at"/>
     </record>
-
-
 
     <record id="tax_report_line_l10n_at_tva_line_4_16_tax" model="account.tax.report.line">
         <field name="name">4.16 13% ermäßigter Steuersatz</field>
         <field name="tag_name">KZ 006 TAX</field>
         <field name="code">AT_006_tax</field>
         <field name="sequence" eval="28"/>
+        <field name="parent_id" ref="tax_report_line_at_tax_title_4_14_19"/>
         <field name="country_id" ref="base.at"/>
     </record>
 
@@ -194,6 +200,7 @@ Art. 2 erfolgten.</field>
         <field name="tag_name">KZ 037 TAX</field>
         <field name="code">AT_037_tax</field>
         <field name="sequence" eval="29"/>
+        <field name="parent_id" ref="tax_report_line_at_tax_title_4_14_19"/>
         <field name="country_id" ref="base.at"/>
     </record>
 
@@ -202,6 +209,7 @@ Art. 2 erfolgten.</field>
         <field name="tag_name">KZ 052 TAX</field>
         <field name="code">AT_052_tax</field>
         <field name="sequence" eval="30"/>
+        <field name="parent_id" ref="tax_report_line_at_tax_title_4_14_19"/>
         <field name="country_id" ref="base.at"/>
     </record>
 
@@ -210,6 +218,7 @@ Art. 2 erfolgten.</field>
         <field name="tag_name">KZ 007 TAX</field>
         <field name="code">AT_007_tax</field>
         <field name="sequence" eval="31"/>
+        <field name="parent_id" ref="tax_report_line_at_tax_title_4_14_19"/>
         <field name="country_id" ref="base.at"/>
     </record>
 
@@ -276,19 +285,18 @@ Art. 2 erfolgten.</field>
         <field name="country_id" ref="base.at"/>
     </record>
 
+    <record id="tax_report_line_at_base_title_umsatz_base_4_28_31" model="account.tax.report.line">
+        <field name="name">Base</field>
+        <field name="sequence" eval="40"/>
+        <field name="country_id" ref="base.at"/>
+    </record>
+
     <record id="tax_report_line_l10n_at_tva_line_4_28_base" model="account.tax.report.line">
         <field name="name">4.28 20% Normalsteuersatz base</field>
         <field name="tag_name">KZ 072 BASE</field>
         <field name="code">AT_072_base</field>
         <field name="sequence" eval="40"/>
-        <field name="country_id" ref="base.at"/>
-    </record>
-
-    <record id="tax_report_line_l10n_at_tva_line_4_28_tax" model="account.tax.report.line">
-        <field name="name">4.28 20% Normalsteuersatz tax</field>
-        <field name="tag_name">KZ 072 TAX</field>
-        <field name="code">AT_072_tax</field>
-        <field name="sequence" eval="41"/>
+        <field name="parent_id" ref="tax_report_line_at_base_title_umsatz_base_4_28_31"/>
         <field name="country_id" ref="base.at"/>
     </record>
 
@@ -297,14 +305,7 @@ Art. 2 erfolgten.</field>
         <field name="tag_name">KZ 073 BASE</field>
         <field name="code">AT_073_base</field>
         <field name="sequence" eval="42"/>
-        <field name="country_id" ref="base.at"/>
-    </record>
-
-    <record id="tax_report_line_l10n_at_tva_line_4_29_tax" model="account.tax.report.line">
-        <field name="name">4.29 10% ermäßigter Steuersatz tax</field>
-        <field name="tag_name">KZ 073 TAX</field>
-        <field name="code">AT_073_tax</field>
-        <field name="sequence" eval="43"/>
+        <field name="parent_id" ref="tax_report_line_at_base_title_umsatz_base_4_28_31"/>
         <field name="country_id" ref="base.at"/>
     </record>
 
@@ -313,14 +314,7 @@ Art. 2 erfolgten.</field>
         <field name="tag_name">KZ 008 BASE</field>
         <field name="code">AT_008_base</field>
         <field name="sequence" eval="45"/>
-        <field name="country_id" ref="base.at"/>
-    </record>
-
-    <record id="tax_report_line_l10n_at_tva_line_4_30_tax" model="account.tax.report.line">
-        <field name="name">4.30 13% ermäßigter Steuersatz tax</field>
-        <field name="tag_name">KZ 008 TAX</field>
-        <field name="code">AT_008_tax</field>
-        <field name="sequence" eval="50"/>
+        <field name="parent_id" ref="tax_report_line_at_base_title_umsatz_base_4_28_31"/>
         <field name="country_id" ref="base.at"/>
     </record>
 
@@ -329,6 +323,40 @@ Art. 2 erfolgten.</field>
         <field name="tag_name">KZ 088 BASE</field>
         <field name="code">AT_088_base</field>
         <field name="sequence" eval="55"/>
+        <field name="parent_id" ref="tax_report_line_at_base_title_umsatz_base_4_28_31"/>
+        <field name="country_id" ref="base.at"/>
+    </record>
+
+    <record id="tax_report_line_at_tax_title_4_28_31" model="account.tax.report.line">
+        <field name="name">Tax</field>
+        <field name="sequence" eval="41"/>
+        <field name="country_id" ref="base.at"/>
+    </record>
+
+    <record id="tax_report_line_l10n_at_tva_line_4_28_tax" model="account.tax.report.line">
+        <field name="name">4.28 20% Normalsteuersatz tax</field>
+        <field name="tag_name">KZ 072 TAX</field>
+        <field name="code">AT_072_tax</field>
+        <field name="sequence" eval="41"/>
+        <field name="parent_id" ref="tax_report_line_at_tax_title_4_28_31"/>
+        <field name="country_id" ref="base.at"/>
+    </record>
+
+    <record id="tax_report_line_l10n_at_tva_line_4_29_tax" model="account.tax.report.line">
+        <field name="name">4.29 10% ermäßigter Steuersatz tax</field>
+        <field name="tag_name">KZ 073 TAX</field>
+        <field name="code">AT_073_tax</field>
+        <field name="sequence" eval="43"/>
+        <field name="parent_id" ref="tax_report_line_at_tax_title_4_28_31"/>
+        <field name="country_id" ref="base.at"/>
+    </record>
+
+    <record id="tax_report_line_l10n_at_tva_line_4_30_tax" model="account.tax.report.line">
+        <field name="name">4.30 13% ermäßigter Steuersatz tax</field>
+        <field name="tag_name">KZ 008 TAX</field>
+        <field name="code">AT_008_tax</field>
+        <field name="sequence" eval="50"/>
+        <field name="parent_id" ref="tax_report_line_at_tax_title_4_28_31"/>
         <field name="country_id" ref="base.at"/>
     </record>
 
@@ -337,6 +365,7 @@ Art. 2 erfolgten.</field>
         <field name="tag_name">KZ 088 TAX</field>
         <field name="code">AT_088_tax</field>
         <field name="sequence" eval="60"/>
+        <field name="parent_id" ref="tax_report_line_at_tax_title_4_28_31"/>
         <field name="country_id" ref="base.at"/>
     </record>
 
