@@ -61,7 +61,7 @@ class TestPerformance(TransactionCase):
 
         # create N lines on rec1: O(N) queries
         rec1.invalidate_cache()
-        with self.assertQueryCount(3):
+        with self.assertQueryCount(4):
             rec1.write({'line_ids': [(0, 0, {'value': 0})]})
         self.assertEqual(len(rec1.line_ids), 1)
 
