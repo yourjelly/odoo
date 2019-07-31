@@ -756,7 +756,7 @@ class Partner(models.Model):
         self = self.sudo(name_get_uid or self.env.uid)
         if args is None:
             args = []
-        if name and operator in ('=', 'ilike', '=ilike', 'like', '=like'):
+        if operator in ('=', 'ilike', '=ilike', 'like', '=like'):
             self.check_access_rights('read')
             where_query = self._where_calc(args)
             self._apply_ir_rules(where_query, 'read')
@@ -773,16 +773,26 @@ class Partner(models.Model):
 
             unaccent = get_unaccent_wrapper(self.env.cr)
 
+            partner_search_mode = self.env.context.get('res_partner_search_mode')
+            if partner_search_mode in ('customer', 'supplier'):
+                model = self.env['sale.order'] if partner_search_mode == 'customer' else self.env['purchase.order']
+                join_clause = "LEFT JOIN {table} ON res_partner.id = {table}.partner_id".format(table=model._table)
+            else:
+                join_clause = ''
+
             query = """SELECT res_partner.id
                          FROM {from_str}
+                         {join}
                       {where} ({email} {operator} {percent}
                            OR {display_name} {operator} {percent}
                            OR {reference} {operator} {percent}
                            OR {vat} {operator} {percent})
                            -- don't panic, trust postgres bitmap
-                     ORDER BY {display_name} {operator} {percent} desc,
+                     GROUP BY res_partner.id
+                     ORDER BY COUNT(*) DESC, {display_name} {operator} {percent} desc,
                               {display_name}
                     """.format(from_str=from_str,
+                               join=join_clause,
                                where=where_str,
                                operator=operator,
                                email=unaccent('res_partner.email'),
