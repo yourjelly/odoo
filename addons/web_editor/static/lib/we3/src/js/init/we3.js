@@ -71,6 +71,13 @@ we3.ArchNodeText = we3Classes.ArchNodeText;
 we3.ArchNodeFragment = we3Classes.ArchNodeFragment;
 we3.ArchNodeVirtualText = we3Classes.ArchNodeVirtualText;
 
+we3.ClassName = we3Classes.ClassName;
+// we3.Attributes = we3Classes.Attributes;
+we3.Style = we3Classes.Style;
+
+we3.TestContainerNode = we3Classes.TestContainerNode;
+we3.TestNode = we3Classes.TestNode;
+
 Object.freeze(we3.ArchNode.prototype);
 Object.freeze(we3.ArchNodeText.prototype);
 Object.freeze(we3.ArchNodeFragment.prototype);
