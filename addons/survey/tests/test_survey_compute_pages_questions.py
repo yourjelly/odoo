@@ -34,6 +34,10 @@ class TestSurveyComputePagesQuestions(common.SurveyCase):
             page1_q1 = self._add_question(page_1, 'Q7', 'free_text', survey_id=survey.id)
             page1_q2 = self._add_question(page_1, 'Q8', 'free_text', survey_id=survey.id)
             page1_q3 = self._add_question(page_1, 'Q9', 'free_text', survey_id=survey.id)
+            # DLE P177
+            # page_ids and question_ids are computed fields which depends on the order of question_and_page_ids
+            # as we just created the survey, the order of the one2manys are not guaranteed :(
+            survey.invalidate_cache(['question_and_page_ids'])
 
         self.assertEqual(len(survey.page_ids), 2, "Survey should have 2 pages")
         self.assertIn(page_0, survey.page_ids, "Page 1 should be contained in survey's page_ids")
