@@ -26,6 +26,8 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/Editor.js"/>
 
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/attributes/Attributes.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/attributes/ClassName.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/attributes/Style.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/nodes/ArchNode.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/is.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/arch/rules.js"/>

@@ -75,6 +75,11 @@ Object.freeze(we3.ArchNode.prototype);
 Object.freeze(we3.ArchNodeText.prototype);
 Object.freeze(we3.ArchNodeFragment.prototype);
 Object.freeze(we3.ArchNodeVirtualText.prototype);
+
+// TODO: remove me when we find another way to freeze we3
+we3.ClassName = we3Classes.ClassName;
+we3.Style = we3Classes.Style;
+
 Object.freeze(we3);
 
 })();
