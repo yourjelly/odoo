@@ -81,7 +81,7 @@
     <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/misc/Jinja.js"/>
 
     <!-- Tests base -->
-    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/base/basePlugins/Test.js"/>
+    <script type="text/javascript" src="/web_editor/static/lib/we3/src/js/plugins/testManager/TestManagerPlugin.js"/>
 
     <script type="text/javascript" src="/web_editor/static/lib/we3/tests/base/arch/TestAttributes.js"/>
     <script type="text/javascript" src="/web_editor/static/lib/we3/tests/base/arch/TestIs.js"/>
