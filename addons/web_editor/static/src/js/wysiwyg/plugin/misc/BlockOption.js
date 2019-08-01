@@ -1,35 +1,30 @@
 (function () {
 'use strict';
 
-var BlockOption = class extends we3.AbstractPlugin {
-    /**
-     * @constructor
-     * @param {Object} parent
-     * @param {Object} params
-     * @param {Object} options
-     */
-    constructor(parent, params, options) {
-        super(...arguments);
-
-        this.dependencies = ['Arch', 'Overlay', 'Renderer'];
-
-        this._uiEvents = {
-            'mouseenter': '_onButtonEnter',
-            'click': '_onButtonClick',
-            'mouseleave': '_onMouseLeave',
-        };
-
-        this._uiElements = [];
-        this._targetElements = [];
-        this._states = [];
-    }
+var BlockOptionHandler = class extends we3.EventDispatcher {
     /**
      * @abstract
-     * @param {DOMElement} ui - a registered UI
-     * @param {DOMElement} target - the associated registered target
-     * @param {DOMElement} state - the associated registered state
+     * @param {HTMLElement} target
+     * @param {HTMLElement} ui
+     * @param {HTMLElement} overlay
      */
-    onStart(ui, target, state) {}
+    constructor(target, ui, overlay) {
+        super(...arguments);
+        this.target = target;
+        this.ui = ui;
+        this.overlay = overlay;
+
+        this.__methodNames = [];
+
+        // TODO event delegation
+        this.ui.querySelectorAll('we3-button').forEach(button => {
+            button.addEventListener('mouseenter', this._onButtonEnter.bind(this));
+            button.addEventListener('click', this._onButtonClick.bind(this));
+            button.addEventListener('mouseleave', this._onMouseLeave.bind(this));
+        });
+
+        this._setActive();
+    }
     /**
      * Called when the edition overlay is covering the associated snippet
      * (the first time, this follows the call to the @see start method).
@@ -37,82 +32,28 @@ var BlockOption = class extends we3.AbstractPlugin {
      * FIXME only the first time is called right now...
      *
      * @abstract
-     * @param {DOMElement} ui - a registered UI
-     * @param {DOMElement} target - the associated registered target
-     * @param {DOMElement} state - the associated registered state
      */
-    onFocus(ui, target, state) {}
+    onFocus() {}
     /**
      * Called when a block is copied - @see CustomizeBlock
      * The method is in charge of updating the relevant target according to it.
      *
      * @abstract
-     * @param {DOMElement} target - a registered target
      * @param {Object} options
      * @param {boolean} options.isCurrent
      *        true if the associated snippet is a clone of the main element that
      *        was cloned (so not a clone of a child of this main element that
      *        was cloned)
      */
-    onClone(target, options) {}
+    onClone(options) {}
     /**
      * @abstract
-     * @param {DOMElement} ui - a registered UI
-     * @param {DOMElement} target - a registered target
      */
-    onForeignOptionChange(ui, target) {}
+    onForeignOptionChange() {}
     /**
      * @abstract
-     * @param {DOMElement} ui - a registered UI
-     * @param {DOMElement} target - a registered target
      */
-    onForeignOptionPreview(ui, target) {}
-
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    /**
-     * @param {DOMElement} target
-     * @returns {HTMLElement|null}
-     */
-    getUIFromTarget(target) {
-        var index = this._targetElements.indexOf(target);
-        if (index >= 0) {
-            return this._uiElements[index];
-        }
-        return null;
-    }
-    /**
-     * TODO review the system (how to unregister ?)
-     *
-     * @param {DOMElement} ui
-     * @param {DOMElement} target
-     */
-    registerUIAndTarget(ui, target, overlay) {
-        var self = this;
-
-        var state = {
-            __methodNames: [],
-            _overlay: overlay,
-        };
-
-        this._uiElements.push(ui);
-        this._targetElements.push(target);
-        this._states.push(state);
-
-        // FIXME event delegation ?
-        ui.querySelectorAll('we3-button').forEach(function (el) {
-            self._bindDOMEvents(el, self._uiEvents);
-        });
-
-        this.onStart(ui, target, state);
-        this.onFocus(ui, target, state);
-
-        this._setActive(ui, target);
-
-        return state;
-    }
+    onForeignOptionPreview() {}
 
     //--------------------------------------------------------------------------
     // Options
@@ -124,34 +65,29 @@ var BlockOption = class extends we3.AbstractPlugin {
      * case is having a subset with each item having a `data-select-class`
      * value allowing to choose the associated class.
      *
-     * @param {DOMElement} target
-     * @param {Object} state
      * @param {boolean|string} previewMode
      *        - truthy if the option is enabled for preview or if leaving it (in
      *          that second case, the value is 'reset')
      *        - false if the option should be activated for good
      * @param {*} value - the class to activate (opt.dataset.selectClass)
-     * @param {DOMElement} ui
      * @param {DOMElement} opt
      */
-    selectClass(target, state, previewMode, value, ui, opt) {
-        var self = this;
-
-        var group = ui;
-        while (opt !== ui) {
+    selectClass(previewMode, value, opt) {
+        var group = this.ui;
+        while (opt !== this.ui) {
             if (opt.tagName === 'we3-collapse-area') {
                 group = opt;
             }
             opt = opt.parentNode;
         }
 
-        group.querySelectorAll('[data-select-class]').forEach(function (el) {
-            el.dataset.selectClass.split(' ').forEach(function (className) {
-                self._removeClass(target, previewMode, className);
+        group.querySelectorAll('[data-select-class]').forEach(el => {
+            el.dataset.selectClass.split(' ').forEach(className => {
+                this._removeClass(this.target, previewMode, className);
             });
         });
         if (value) {
-            this._addClass(target, previewMode, value);
+            this._addClass(this.target, previewMode, value);
         }
     }
     /**
@@ -162,15 +98,14 @@ var BlockOption = class extends we3.AbstractPlugin {
      *
      * @see this.selectClass
      */
-    toggleClass(target, state, previewMode, value, ui, opt) {
-        var self = this;
-        ui.querySelectorAll('[data-toggle-class]').forEach(function (el) {
-            el.dataset.toggleClass.split(' ').forEach(function (className) {
-                self._toggleClass(target, previewMode, className, el.classList.contains('active'));
+    toggleClass(previewMode, value, opt) {
+        this.ui.querySelectorAll('[data-toggle-class]').forEach(el => {
+            el.dataset.toggleClass.split(' ').forEach(className => {
+                this._toggleClass(this.target, previewMode, className, el.classList.contains('active'));
             });
         });
         if (value && previewMode !== 'reset') {
-            this._toggleClass(target, previewMode, value);
+            this._toggleClass(this.target, previewMode, value);
         }
     }
 
@@ -180,55 +115,31 @@ var BlockOption = class extends we3.AbstractPlugin {
 
     /**
      * @private
-     * @param {DOMElement} element
-     * @returns {object}
      */
-    _getUIAndTargetFromUIChild(element) {
-        var index = -1;
-        while (element) {
-            if (element.tagName === 'WE3-CUSTOMIZEBLOCK-OPTION') {
-                index = this._uiElements.indexOf(element);
-                break;
-            }
-            element = element.parentNode;
-        }
-        if (index < 0) {
-            return null;
-        }
-        return [element, this._targetElements[index], this._states[index]];
-    }
-    /**
-     * @private
-     */
-    _notifyAll(previewMode, ui, target) {
-        this.trigger(previewMode ? 'snippet-option-preview' : 'snippet-option-change', {
-            target: target,
+    _notifyAll(previewMode) {
+        this.triggerUp(previewMode ? 'snippet-option-preview' : 'snippet-option-change', {
+            handler: this,
         });
     }
     /**
      * Reactivate the options that were activated before previews.
      *
      * @param {DOMElement} opt - an element from the option's UI
-     * @param {DOMElement} [ui] - allow to not search for ui and targets
-     * @param {DOMElement} [target] - allow to not search for ui and targets
-     * @param {Object} [state] - allow to not search for ui and targets
      */
-    _reset(opt, ui, target, state) {
-        var self = this;
-        if (!ui || !target) {
-            var uiAndTarget = this._getUIAndTargetFromUIChild(opt);
-            ui = uiAndTarget[0];
-            target = uiAndTarget[1];
-            state = uiAndTarget[2];
-        }
-        ui.querySelectorAll('.active').forEach(function (activeElement) {
-            state.__methodNames = _.without.apply(_, [state.__methodNames].concat(Object.keys(activeElement.dataset)));
-            self._select('reset', activeElement, ui, target, state);
+    _reset(opt) {
+        this.ui.querySelectorAll('.active').forEach(activeElement => {
+            Object.keys(activeElement.dataset).forEach(methodName => {
+                var index = this.__methodNames.indexOf(methodName);
+                if (index >= 0) {
+                    this.__methodNames.splice(index, 1);
+                }
+            });
+            this._select('reset', activeElement);
         });
-        state.__methodNames.forEach(function (methodName) {
-            self[methodName](target, state, 'reset', undefined, ui, opt);
+        this.__methodNames.forEach(methodName => {
+            this[methodName]('reset', undefined, opt);
         });
-        state.__methodNames = [];
+        this.__methodNames = [];
 
         this.dependencies.Overlay.reposition(); // FIXME should be auto on DOM change ?
     }
@@ -241,29 +152,17 @@ var BlockOption = class extends we3.AbstractPlugin {
      *          that second case, the value is 'reset')
      *        - false if the option should be activated for good
      * @param {DOMElement} opt - the related DOMElement option
-     * @param {DOMElement} [ui] - allow to not search for ui and targets
-     * @param {DOMElement} [target] - allow to not search for ui and targets
-     * @param {Object} [state] - allow to not search for ui and targets
      */
-    _select(previewMode, opt, ui, target, state) {
-        var self = this;
-
+    _select(previewMode, opt) {
         // Options can say they respond to strong choice
         if (previewMode && (opt.dataset.noPreview || opt.parentNode.dataset.noPreview)) {
             return;
         }
 
-        if (!ui || !target) {
-            var uiAndTarget = this._getUIAndTargetFromUIChild(opt);
-            ui = uiAndTarget[0];
-            target = uiAndTarget[1];
-            state = uiAndTarget[2];
-        }
-
         // If it is not preview mode, the user selected the option for good
         // (so record the action)
         if (!previewMode) {
-            this._reset(opt, ui, target, state);
+            this._reset(opt);
             // this.$target.trigger('content_changed'); FIXME
         }
 
@@ -274,32 +173,32 @@ var BlockOption = class extends we3.AbstractPlugin {
         do {
             methods.push([el, el.dataset]);
             el = el.parentNode;
-        } while (el && el !== ui);
+        } while (el && el !== this.ui);
 
         // Call the found method in the right order (parents -> child)
-        methods.reverse().forEach(function (data) {
+        methods.reverse().forEach(data => {
             var el = data[0];
             var methods = data[1];
 
-            Object.keys(methods).forEach(function (methodName) {
-                if (!self[methodName]) {
+            Object.keys(methods).forEach(methodName => {
+                if (!this[methodName]) {
                     return;
                 }
                 if (previewMode === true) {
-                    state.__methodNames.push(methodName);
+                    this.__methodNames.push(methodName);
                 }
-                self[methodName](target, state, previewMode, methods[methodName], ui, el);
+                this[methodName](previewMode, methods[methodName], el);
             });
         });
-        state.__methodNames = state.__methodNames.filter(function (item, index, array) {
+        this.__methodNames = this.__methodNames.filter((item, index, array) => {
             return array.indexOf(item) === index;
         });
 
         if (!previewMode) {
-            this._setActive(ui, target);
+            this._setActive();
         }
 
-        this._notifyAll(previewMode, ui, target);
+        this._notifyAll(previewMode);
 
         this.dependencies.Overlay.reposition(); // FIXME should be auto on DOM change ?
     }
@@ -309,20 +208,19 @@ var BlockOption = class extends we3.AbstractPlugin {
      *
      * @todo should be extendable in a more easy way
      * @private
-     * @param {DOMElement} ui
-     * @param {DOMElement} target
      */
-    _setActive(ui, target) {
-        ui.querySelectorAll('[data-toggle-class]').forEach(function (el) {
+    _setActive() {
+        this.ui.querySelectorAll('[data-toggle-class]').forEach(el => {
             var className = el.dataset.toggleClass;
-            el.classList.toggle('active', !className || target.classList.contains(className));
+            var active = !className || this.target.classList.contains(className);
+            el.classList.toggle('active', active);
         });
 
         // Get submenus which are not inside submenus
-        var submenus = [].slice.call(ui.querySelectorAll('we3-collapse-area'))
-            .filter(function (el) {
+        var submenus = [].slice.call(this.ui.querySelectorAll('we3-collapse-area'))
+            .filter(el => {
                 var node = el.parentNode;
-                while (node !== ui) {
+                while (node !== this.ui) {
                     if (node.tagName === 'we3-collapse-area') {
                         return false;
                     }
@@ -332,23 +230,23 @@ var BlockOption = class extends we3.AbstractPlugin {
             });
 
         // Add unique active class for each submenu active item
-        submenus.forEach(function (submenu) {
-            var elements = _getSelectClassElements(submenu);
-            _processSelectClassElements(elements);
+        submenus.forEach(submenu => {
+            var elements = _getSelectClassElements.call(this, submenu);
+            _processSelectClassElements.call(this, elements);
         });
 
         // Add unique active class for out-of-submenu active item
-        var externalElements = _getSelectClassElements(ui)
-            .filter(function (el) {
-                while (el !== ui) {
-                    if (el.tagName === 'we3-collapse-area') {
-                        return false;
-                    }
-                    el = el.parentNode;
+        var externalElements = _getSelectClassElements.call(this, this.ui);
+        externalElements = externalElements.filter(el => {
+            while (el !== this.ui) {
+                if (el.tagName === 'we3-collapse-area') {
+                    return false;
                 }
-                return true;
-            });
-        _processSelectClassElements(externalElements);
+                el = el.parentNode;
+            }
+            return true;
+        });
+        _processSelectClassElements.call(this, externalElements);
 
         function _getSelectClassElements(el) {
             return [].slice.call(el.querySelectorAll('[data-select-class]'));
@@ -362,7 +260,7 @@ var BlockOption = class extends we3.AbstractPlugin {
                 var className = el.dataset.selectClass;
                 var nbClasses = className ? className.split(' ').length : 0;
                 if (nbClasses >= maxNbClasses
-                        && (!className || target.classList.contains(className))) {
+                        && (!className || this.target.classList.contains(className))) {
                     maxNbClasses = nbClasses;
                     activeElement = el;
                 }
@@ -374,11 +272,10 @@ var BlockOption = class extends we3.AbstractPlugin {
     }
     /**
      * @private
-     * @param {DOMElement} ui
      * @param {boolean} [show]
      */
-    _toggleUI(ui, show) {
-        ui.classList.toggle('we3-customizeblock-option-hidden', !show);
+    _toggleUI(show) {
+        this.ui.classList.toggle('we3-customizeblock-option-hidden', !show);
     }
 
     //--------------------------------------------------------------------------
@@ -413,7 +310,7 @@ var BlockOption = class extends we3.AbstractPlugin {
             styles = {};
             styles[styleName] = styleValue;
         }
-        Object.keys(styles).forEach(function (propName) {
+        Object.keys(styles).forEach(propName => {
             element.style[propName] = styles[propName];
         });
         if (!previewMode) {
@@ -461,7 +358,7 @@ var BlockOption = class extends we3.AbstractPlugin {
         if (typeof names === 'string') {
             names = names.split(' ');
         }
-        names.forEach(function (name) {
+        names.forEach(name => {
             element.removeAttribute(name);
         });
         if (!previewMode) {
@@ -478,7 +375,7 @@ var BlockOption = class extends we3.AbstractPlugin {
         if (typeof dataNames === 'string') {
             dataNames = dataNames.split(' ');
         }
-        dataNames.forEach(function (name) {
+        dataNames.forEach(name => {
             delete element.dataset[name];
         });
         if (!previewMode) {
@@ -495,7 +392,7 @@ var BlockOption = class extends we3.AbstractPlugin {
         if (typeof propNames === 'string') {
             propNames = propNames.split(' ');
         }
-        propNames.forEach(function (propName) {
+        propNames.forEach(propName => {
             element.style.removeProperty(propName);
         });
         if (!previewMode) {
@@ -515,7 +412,7 @@ var BlockOption = class extends we3.AbstractPlugin {
             attrs = {};
             attrs[name] = value;
         }
-        Object.keys(attrs).forEach(function (name) {
+        Object.keys(attrs).forEach(name => {
             element.setAttribute(name, attrs[name]);
         });
         if (!previewMode) {
@@ -535,7 +432,7 @@ var BlockOption = class extends we3.AbstractPlugin {
             dataAttrs = {};
             dataAttrs[dataName] = dataValue;
         }
-        Object.keys(dataAttrs).forEach(function (name) {
+        Object.keys(dataAttrs).forEach(name => {
             element.dataset[name] = dataAttrs[name];
         });
         if (!previewMode) {
@@ -553,7 +450,7 @@ var BlockOption = class extends we3.AbstractPlugin {
         if (typeof classes === 'string') {
             classes = classes.split(' ');
         }
-        classes.forEach(function (className) {
+        classes.forEach(className => {
             element.classList.toggle(className, add);
         });
         if (!previewMode) {
@@ -609,6 +506,79 @@ var BlockOption = class extends we3.AbstractPlugin {
         }
         this._reset(ev.currentTarget);
     }
+};
+
+var BlockOption = class extends we3.AbstractPlugin {
+    /**
+     * @constructor
+     * @param {Object} parent
+     * @param {Object} params
+     * @param {Object} options
+     */
+    constructor(parent, params, options) {
+        super(...arguments);
+
+        this.dependencies = ['Arch', 'Overlay', 'Renderer'];
+    }
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * Notify all foreign option handlers which have the same target.
+     *
+     * @param {BlockOptionHandler} handler
+     */
+    onForeignOptionChange(handler) {
+        this._handlers.forEach(_handler => {
+            if (_handler === handler || _handler.target !== handler.target) {
+                return;
+            }
+            _handler.onForeignOptionChange();
+        });
+    }
+    /**
+     * Notify all foreign option handlers which have the same target.
+     *
+     * @param {BlockOptionHandler} handler
+     */
+    onForeignOptionPreview(handler) {
+        this._handlers.forEach(_handler => {
+            if (_handler === handler || _handler.target !== handler.target) {
+                return;
+            }
+            _handler.onForeignOptionPreview();
+        });
+    }
+    /**
+     * TODO review the system (how to unregister ?)
+     *
+     * @param {HTMLElement} target
+     * @param {HTMLElement} ui
+     * @param {HTMLElement} overlay
+     * @param {object} [cloneData]
+     */
+    registerTarget(target, ui, overlay, forClone, cloneData) {
+        var handler = new this.constructor.Handler(target, ui, overlay);
+        this._handlers.push(handler);
+
+        handler.onStart();
+        handler.onFocus();
+        if (cloneData) {
+            handler.onClone(cloneData);
+        }
+    }
+
+    //--------------------------------------------------------------------------
+    // Static
+    //--------------------------------------------------------------------------
+
+    /**
+     * Static class in charge of handling a specific target and specific ui
+     * for the same option plug-in.
+     */
+    static Handler = BlockOptionHandler;
 };
 
 we3.getPlugin('CustomizeBlock').registerOptionPlugIn('default', BlockOption);

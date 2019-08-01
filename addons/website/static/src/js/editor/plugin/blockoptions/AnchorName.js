@@ -8,9 +8,10 @@ var Dialog = require('web.Dialog');
 var _t = core._t;
 var qweb = core.qweb;
 
+var BlockOption = we3.getPlugin('BlockOption:default');
+var BlockOptionHandler = BlockOption.Handler;
 
-var AnchorNameOption = class extends (we3.getPlugin('BlockOption:default')) {
-
+var AnchorNameOptionHandler = class extends BlockOptionHandler {
     /**
      * @override
      */
@@ -92,6 +93,9 @@ var AnchorNameOption = class extends (we3.getPlugin('BlockOption:default')) {
         }
         // this.$target.trigger('content_changed'); FIXME
     }
+};
+var AnchorNameOption = class extends BlockOption {
+    static Handler = AnchorNameOptionHandler
 };
 
 we3.getPlugin('CustomizeBlock').registerOptionPlugIn('anchorName', AnchorNameOption);

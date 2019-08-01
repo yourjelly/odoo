@@ -33,7 +33,6 @@ var CustomizeBlock = class extends we3.AbstractPlugin {
      */
     start() {
         var promise = super.start(...arguments);
-        var self = this;
 
         var Overlay = this.dependencies.Overlay;
         var Range = this.dependencies.Range;
@@ -47,26 +46,18 @@ var CustomizeBlock = class extends we3.AbstractPlugin {
 
         Sidebar.registerEvents(this, this.customizeOptionsEvents);
 
-        // FIXME performance !!
-        optionPlugIns.forEach(function (optionName) {
-            var PlugIn = self.dependencies[optionName];
-            PlugIn.on('snippet-option-preview', self, function (data) {
-                optionPlugIns.forEach(function (optionName) {
-                    var PlugIn = self.dependencies[optionName];
-                    var ui = PlugIn.getUIFromTarget(data.target);
-                    if (ui) {
-                        PlugIn.onForeignOptionPreview(ui, data.target);
-                    }
-                });
+        this.on('snippet-option-change', this, ev => {
+            ev.stopPropagation();
+            optionPlugIns.forEach(optionName => {
+                var PlugIn = this.dependencies[optionName];
+                PlugIn.onForeignOptionPreview(ev.data.handler);
             });
-            PlugIn.on('snippet-option-change', self, function (data) {
-                optionPlugIns.forEach(function (optionName) {
-                    var PlugIn = self.dependencies[optionName];
-                    var ui = PlugIn.getUIFromTarget(data.target);
-                    if (ui) {
-                        PlugIn.onForeignOptionChange(ui, data.target);
-                    }
-                });
+        });
+        this.on('snippet-option-preview', this, ev => {
+            ev.stopPropagation();
+            optionPlugIns.forEach(optionName => {
+                var PlugIn = this.dependencies[optionName];
+                PlugIn.onForeignOptionPreview(ev.data.handler);
             });
         });
 
@@ -95,10 +86,9 @@ var CustomizeBlock = class extends we3.AbstractPlugin {
     /**
      * @private
      * @param {DOMElement} element
-     * @param {boolean} [forClone=False]
      * @param {object} [cloneData]
      */
-    _createOptionElements(element, forClone, cloneData) {
+    _createOptionElements(element, cloneData) {
         var nodeID = this.dependencies.Renderer.getID(element);
         var optElements = this._nodeOptionsElements[nodeID];
         if (optElements !== undefined) {
@@ -145,10 +135,7 @@ var CustomizeBlock = class extends we3.AbstractPlugin {
                 console.warn('The block option "' + optionName + '" is missing.'); // FIXME should crash not warn
                 return;
             }
-            optionPlugIn.registerUIAndTarget(opt, optionData.target, overlayElement);
-            if (forClone) {
-                optionPlugIn.onClone(optionData.target, cloneData);
-            }
+            optionPlugIn.registerTarget(optionData.target, opt, overlayElement, cloneData);
         });
 
         // Specific buttons (duplicate and delete)
@@ -327,9 +314,9 @@ var CustomizeBlock = class extends we3.AbstractPlugin {
         this.dependencies.Overlay.setEditorValue(); // FIXME
 
         clone = element.nextElementSibling; // FIXME ugly hack
-        this._createOptionElements(clone, true, {isCurrent: true});
+        this._createOptionElements(clone, {isCurrent: true});
         clone.querySelectorAll('.we3-customizeblock-enabled').forEach(function (el) {
-            self._createOptionElements(el, true, {isCurrent: false});
+            self._createOptionElements(el, {isCurrent: false});
         });
     }
     /**
