@@ -619,6 +619,9 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
                 if module and module.state in ('installed', 'to upgrade'):
                     to_uninstall_modules += module
 
+        if to_install or to_uninstall_modules:
+            self.flush()
+
         if to_uninstall_modules:
             to_uninstall_modules.button_immediate_uninstall()
 
