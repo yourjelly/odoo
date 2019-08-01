@@ -154,6 +154,13 @@ class Website(models.Model):
             self.env['ir.qweb'].clear_caches()
         return result
 
+    @api.multi
+    def unlink(self):
+        attachments_to_unlink = self.env['ir.attachment'].search(
+            [('website_id', 'in', self.ids)])
+        attachments_to_unlink.unlink()
+        return super(Website, self).unlink()
+
     # ----------------------------------------------------------
     # Page Management
     # ----------------------------------------------------------
