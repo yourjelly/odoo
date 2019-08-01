@@ -849,7 +849,7 @@ class TestManagerPlugin extends we3.AbstractPlugin {
                 ok = true;
             }
         } else if (test.test) {
-            var testDOM = this._cleanValue(test.test.replace(regExpRange, ''));
+            var testDOM = this._cleanValue(test.test.replace(regex.range, ''));
             if (assert.strictEqual(value, testDOM, test.name + ' (DOM)')) {
                 ok = true;
             }
