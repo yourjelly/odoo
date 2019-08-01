@@ -729,7 +729,7 @@ class TestSaleMrpFlow(common.SavepointCase):
         self._assert_quantities(move_lines, expected_quantities)
 
         # Process only x1 of the first component then create a backorder for the missing components
-        picking_original.move_lines[0].write({'quantity_done': 1})
+        picking_original.move_lines.sorted()[0].write({'quantity_done': 1})
         backorder_wizard = self.env['stock.backorder.confirmation'].create({'pick_ids': [(4, so.picking_ids[0].id)]})
         backorder_wizard.process()
 
