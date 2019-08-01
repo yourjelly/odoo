@@ -105,7 +105,7 @@ var BaseArch = class extends we3.AbstractPlugin {
      * in this function as a transaction. At the end of the transaction, the rules are applied,
      * the dom is updated and the triggers are made.
      *
-     * @param {Function(getArchNode)} callback
+     * @param {Function} callback
      *      The function can return:
      *      - nothing to keep the range as it was before the changes
      *      - false to apply the default range from changes (from `Arch._processChanges`)
@@ -116,20 +116,13 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @param {boolean} [options.applyRulesForPublicMethod] true to apply rules when call a public Arch method.
      */
     async do (callback, options) {
-        var self = this;
         options = options || {};
         this._resetChange();
         var _isDoTransaction = this._isDoTransaction;
         this._isDoTransaction = options;
         this._changesInTransaction = [];
-        var getArchNode = function (id) {
-            if (!self._isDoTransaction) {
-                throw new Error("It is forbidden to take this function into your plugin.\n You're trying to move to the dark side!");
-            }
-            return self.getArchNode(id);
-        }
         var previousRange = this.dependencies.BaseRange.getRange();
-        var rangeInfo = await callback(getArchNode);
+        var rangeInfo = await callback();
         var range;
         if (typeof rangeInfo === 'undefined') { // keep the range as it was
             range = this._restorePreviousRange(previousRange);
@@ -151,38 +144,38 @@ var BaseArch = class extends we3.AbstractPlugin {
         this._applyRulesRangeRedrawFromChanges(range);
     }
     /**
-     * @param {string|number|ArchNode|JSON} DOM
+     * @param {string|number|ArchNode|JSON} toInsert
      * @returns {ArchNode}
      **/
-    parse (DOM) {
+    parse (toInsert) {
         var self = this;
         var fragment;
-        if (typeof DOM === 'string') {
-            fragment = this._parse(DOM);
-        } else if (typeof DOM === 'number') {
-            var archNode = this.getArchNode(DOM);
+        if (typeof toInsert === 'string') {
+            fragment = this._parse(toInsert);
+        } else if (typeof toInsert === 'number') {
+            var archNode = this.getArchNode(toInsert);
             if (archNode !== this._arch && !archNode.isFragment()) {
                 fragment = new FragmentNode(this._arch.params);
                 fragment.append(archNode);
             } else {
                 fragment = archNode;
             }
-        } else if (DOM instanceof ArchNode) {
-            var archNode = DOM.isClone() ? this._importJSON(DOM.toJSON({keepVirtual: true})) : DOM;
+        } else if (toInsert instanceof ArchNode) {
+            var archNode = toInsert;
             fragment = new FragmentNode(this._arch.params);
             fragment.append(archNode);
-        } else if (DOM.ATTRIBUTE_NODE && DOM.DOCUMENT_NODE) {
+        } else if (toInsert.ATTRIBUTE_NODE && toInsert.DOCUMENT_NODE) {
             fragment = new FragmentNode(this._arch.params);
-            if (DOM.nodeType !== DOM.DOCUMENT_FRAGMENT_NODE) {
+            if (toInsert.nodeType !== toInsert.DOCUMENT_FRAGMENT_NODE) {
                 var dom = document.createDocumentFragment();
-                dom.append(DOM);
-                DOM = dom;
+                dom.append(toInsert);
+                toInsert = dom;
             }
-            DOM.childNodes.forEach(function (node) {
+            toInsert.childNodes.forEach(function (node) {
                 fragment.append(self._parseElement(node));
             });
         } else {
-            var archNode = this._importJSON(DOM);
+            var archNode = this._importJSON(toInsert);
             if (archNode.isFragment()) {
                 fragment = archNode;
             } else {
@@ -227,12 +220,21 @@ var BaseArch = class extends we3.AbstractPlugin {
     /**
      * Get a technical data on an ArchNode.
      *
-     * @param {integer} id
+     * @param {number|ArchNode} idOrArchNode
      * @param {string} name
+     * @returns {any}
      */
-    getTechnicalData (id, name, value) {
-        var archNode = this.getArchNode(id);
+    getTechnicalData (idOrArchNode, name) {
+        var archNode = this._archNodeFromIDOrArchNode(idOrArchNode);
         return archNode && archNode._technicalData && archNode._technicalData[name];
+    }
+    /**
+     * Get the root ArchNode of the editor.
+     *
+     * @returns {ArchNode}
+     */
+    get root () {
+        return this._arch;
     }
     /**
      * Get a JSON representation of the ArchNode corresponding to the given ID
@@ -380,35 +382,44 @@ var BaseArch = class extends we3.AbstractPlugin {
      * If no element and offset are specified, insert at range (and delete
      * selection if necessary).
      *
-     * FIXME the doc is wrong...
      * FIXME trying to insert a node at its current location make it go away...
      *
-     * @param {string|Node|DocumentFragment} DOM the node/fragment to insert (or its nodeName/nodeValue)
-     * @param {Node} [element] the node in which to insert
-     * @param {Number} [offset] the offset of the node at which to insert
+     * @param {string|Node|DocumentFragment} toInsert the node/fragment to insert,
+     *                                       or its nodeName/nodeValue),
+     *                                       or HTML/XML to parse before insert
+     * @param {ArchNode|Node|int} [insertInto] the node/ArchNode in which to insert,
+     *                   or its id in the Arch
+     * @param {int} [offset] the offset of the node at which to insert
      */
-    insert (DOM, element, offset) {
+    insert (toInsert, insertInto, offset) {
         this._resetChange();
-        if (typeof DOM !== 'string' && this.dependencies.BaseRenderer.getID(DOM)) {
-            DOM = this.dependencies.BaseRenderer.getID(DOM);
+        if (typeof toInsert !== 'string' && this.dependencies.BaseRenderer.getID(toInsert)) {
+            toInsert = this.dependencies.BaseRenderer.getID(toInsert);
         }
-        var id = typeof element === 'number' ? element : element && this.dependencies.BaseRenderer.getID(element);
-        if (!id) {
+        var insertIntoArchNode;
+        if (typeof insertInto === 'number') {
+            insertIntoArchNode = this.getArchNode(insertInto);
+        } else if (insertInto instanceof ArchNode) {
+            insertIntoArchNode = insertIntoArchNode;
+        } else if (insertInto) {
+            var id = this.dependencies.BaseRenderer.getID(insertInto);
+            insertIntoArchNode = this.getArchNode(id);
+        } else {
             var range = this.dependencies.BaseRange.getRange();
             if (range.isCollapsed()) {
-                id = range.scID;
+                insertIntoArchNode = range.scArch;
                 offset = range.so;
             } else {
-                id = this.removeFromRange({
+                insertIntoArchNode = this.removeFromRange({
                     doNotRemoveEmpty: true,
-                }).id;
+                });
                 offset = 0;
             }
         }
         var index = this._changes.length;
-        var insertedIDs = this._insert(DOM, id, offset);
+        var insertedNodes = this._insert(toInsert, insertIntoArchNode, offset);
         if (this._changes.length > index) {
-            if (insertedIDs.length > 1) {
+            if (insertedNodes.length > 1) {
                 this._changes[this._changes.length - 1].isRange = true;
             } else {
                 this._changes[index].isRange = true;
@@ -419,22 +430,22 @@ var BaseArch = class extends we3.AbstractPlugin {
     /**
      * Insert a node or a fragment (several nodes) in the Arch, after a given ArchNode.
      *
-     * @param {string|Node|DocumentFragment} DOM the node/fragment to insert (or its nodeName/nodeValue)
-     * @param {Number} [id] the ID of the ArchNode after which to insert
+     * @param {string|Node|DocumentFragment} toInsert the node/fragment to insert (or its nodeName/nodeValue)
+     * @param {number|ArchNode} [idOrArchNode] the (id of the) ArchNode after which to insert
      */
-    insertAfter (DOM, id) {
-        var archNode = this.getArchNode(id);
-        this.insert(DOM, archNode.parent.id, archNode.index() + 1);
+    insertAfter (toInsert, idOrArchNode) {
+        var archNode = this._archNodeFromIDOrArchNode(idOrArchNode);
+        this.insert(toInsert, archNode.parent, archNode.index() + 1);
     }
     /**
      * Insert a node or a fragment (several nodes) in the Arch, before a given ArchNode.
      *
-     * @param {string|Node|DocumentFragment} DOM the node/fragment to insert (or its nodeName/nodeValue)
-     * @param {Number} [id] the ID of the ArchNode before which to insert
+     * @param {string|Node|DocumentFragment} toInsert the node/fragment to insert (or its nodeName/nodeValue)
+     * @param {number|ArchNode} [idOrArchNode] the (id of the) ArchNode before which to insert
      */
-    insertBefore (DOM, id) {
-        var archNode = this.getArchNode(id);
-        this.insert(DOM, archNode.parent.id, archNode.index());
+    insertBefore (toInsert, idOrArchNode) {
+        var archNode = this._archNodeFromIDOrArchNode(idOrArchNode);
+        this.insert(toInsert, archNode.parent, archNode.index());
     }
     /**
      * Outdent a format node at range.
@@ -445,13 +456,20 @@ var BaseArch = class extends we3.AbstractPlugin {
     /**
      * Remove an element from the Arch. If no element is given, remove the focusNode.
      *
-     * @param {Node|null} [element] (by default, use the range)
+     * @param {ArchNode|Node|int|null} [element] (by default, use the range)
      **/
     remove (element) {
         this._resetChange();
-        var id = typeof element === 'number' ? element : element && this.dependencies.BaseRenderer.getID(element);
-        if (id) {
-            this.getArchNode(id).remove();
+        var archNode;
+        if (typeof element === 'number') {
+            archNode = this.getArchNode(element);
+        } else if (element instanceof ArchNode) {
+            archNode = element;
+        } else if (element) {
+            archNode = this.dependencies.BaseRenderer.getID(element);
+        }
+        if (archNode) {
+            archNode.remove();
         } else {
             this.removeFromRange();
         }
@@ -519,7 +537,7 @@ var BaseArch = class extends we3.AbstractPlugin {
             virtualTextNodeBegin.parent.deleteEdge(false, options);
         }
 
-        this._removeAllVirtualText([virtualTextNodeBegin.id]);
+        this._removeAllVirtualText(virtualTextNodeBegin);
 
         return virtualTextNodeBegin;
     }
@@ -527,12 +545,12 @@ var BaseArch = class extends we3.AbstractPlugin {
      * Set a technical data on an ArchNode. The technical data are never
      * redered or exported.
      *
-     * @param {integer} id
+     * @param {number|ArchNode} idOrArchNode
      * @param {string} name
      * @param {any} value
      */
-    setTechnicalData (id, name, value) {
-        var archNode = this.getArchNode(id);
+    setTechnicalData (idOrArchNode, name, value) {
+        var archNode = this._archNodeFromIDOrArchNode(idOrArchNode);
         if (!archNode._technicalData) {
             archNode._technicalData = {};
         }
@@ -561,13 +579,17 @@ var BaseArch = class extends we3.AbstractPlugin {
     splitRange (options) {
         options = options || {};
         var range = this.dependencies.BaseRange.getRange();
-        var scArch = this.getArchNode(range.scID);
-        var ecArch = this.getArchNode(range.ecID);
-        var afterEnd = options.doNotBreakBlocks && ecArch.isBlock() ? null : ecArch.split(range.eo);
-        var start = options.doNotBreakBlocks && scArch.isBlock() ? scArch : scArch.split(range.so);
-        var end = afterEnd && afterEnd.prev() || ecArch;
+        var afterEnd;
+        if (!options.doNotBreakBlocks || !range.ecArch.isBlock()) {
+            afterEnd = range.ecArch.split(range.eo);
+        }
+        var start = range.scArch;
+        if (!options.doNotBreakBlocks || !range.scArch.isBlock()) {
+            start = range.scArch.split(range.so);
+        }
+        var end = afterEnd && afterEnd.prev() || range.ecArch;
         this._applyRulesRangeRedrawFromChanges({
-            scID: start && start.id || scArch.id,
+            scID: start && start.id || range.scArch.id,
             so: 0,
             ecID: end.id,
             eo: end.length(),
@@ -583,7 +605,6 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @param {ArchNode|function} ancestor
      * @param {object} [options]
      * @param {boolean} [options.doNotBreakBlocks]
-     * @returns {ArchNode}
      */
     splitRangeUntil (ancestor, options) {
         options = options || {};
@@ -601,43 +622,46 @@ var BaseArch = class extends we3.AbstractPlugin {
         });
     }
     /**
-     * Unwrap the node(s) corresponding to the given ID(s)
+     * Unwrap the node(s) (corresponding to the given ID(s))
      * from its (their) parent.
      *
-     * @param {Number|Number []} id
+     * @param {int|ArchNode|(int|ArchNode) []} archNodeOrID
      */
-    unwrap (id) {
-        var self = this;
+    unwrap (archNodeOrID) {
         this._resetChange();
-        var ids = Array.isArray(id) ? id : [id];
+        var arr = Array.isArray(archNodeOrID) ? archNodeOrID : [archNodeOrID];
+        var archNodes = arr.map(this._archNodeFromIDOrArchNode.bind(this));
         // unwrap
-        ids.forEach(function (id) {
-            self.getArchNode(id).unwrap();
-        });
+        archNodes.forEach(archNode => archNode.unwrap());
         // render and select all unwrapped
-        var range = ids.length ? this.dependencies.BaseRange.rangeOn(ids[0], ids[ids.length - 1]) : {};
+        var range = {};
+        if (archNodes.length) {
+            var last = archNodes[archNodes.length - 1];
+            range = this.dependencies.BaseRange.rangeOn(archNodes[0], last);
+        }
         this._applyRulesRangeRedrawFromChanges(range);
     }
     /**
-     * Unwrap the node(s) corresponding to the given ID(s)
+     * Unwrap the node(s) (corresponding to the given ID(s))
      * from its (their) first ancestor with the given
      * nodeName(s) (`wrapperName`).
      *
-     * @param {Number|Number []} id
+     * @param {int|ArchNode|(int|ArchNode) []} archNodeOrID
      * @param {string|string []} wrapperName
-     * @returns {int []} the ids of the unwrapped nodes
+     * @returns {ArchNode []} the unwrapped nodes
      */
-    unwrapFrom (id, wrapperName) {
-        var ids = Array.isArray(id) ? id : [id];
+    unwrapFrom (archNodeOrID, wrapperName) {
+        var arr = Array.isArray(archNodeOrID) ? archNodeOrID : [archNodeOrID];
+        var archNodes = arr.map(this._archNodeFromIDOrArchNode.bind(this));
         var wrapperNames = Array.isArray(wrapperName) ? wrapperName : [wrapperName];
-        var toUnwrap = this._getNodesToUnwrap(ids, wrapperNames);
+        var toUnwrap = this._getNodesToUnwrap(archNodes, wrapperNames);
         toUnwrap.forEach(function (unwrapInfo) {
-            if (!unwrapInfo.node || !unwrapInfo.node.isInArch()) {
+            if (!unwrapInfo.archNode || !unwrapInfo.archNode.isInArch()) {
                 return;
             }
             /* Split to isolate the node to unwrap (that is, the node
             whose parent needs to go) */
-            var ancestorToUnwrap = unwrapInfo.node.ancestor(function (a) {
+            var ancestorToUnwrap = unwrapInfo.archNode.ancestor(function (a) {
                 a.splitAround();
                 return a.parent.nodeName === unwrapInfo.wrapperName;
             });
@@ -646,8 +670,8 @@ var BaseArch = class extends we3.AbstractPlugin {
             }
         });
         var unwrapped = we3.utils.uniq(
-            toUnwrap.map(unwrapInfo => unwrapInfo.node)
-                .filter(node => node && node.isInArch())
+            toUnwrap.map(unwrapInfo => unwrapInfo.archNode)
+                .filter(archNode => archNode && archNode.isInArch())
         );
         unwrapped = we3.utils.uniq(unwrapped);
         var range;
@@ -657,7 +681,7 @@ var BaseArch = class extends we3.AbstractPlugin {
             range = this.dependencies.BaseRange.rangeOn(scArch, ecArch);
         }
         this._applyRulesRangeRedrawFromChanges(range);
-        return unwrapped.map(node => node.id);
+        return unwrapped;
     }
     /**
      * Unwrap every node in range from their first ancestor
@@ -669,7 +693,7 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @param {string|string []} wrapperName
      * @param {object} [options]
      * @param {boolean} [options.doNotSplit] true to unwrap the full nodes without splitting them
-     * @returns {int []} the ids of the unwrapped nodes
+     * @returns {ArchNode []} the unwrapped nodes
      */
     unwrapRangeFrom (wrapperName, options) {
         options = options || {};
@@ -693,20 +717,20 @@ var BaseArch = class extends we3.AbstractPlugin {
         return this.unwrapFrom(selectedNodes, wrapperName);
     }
     /**
-     * Wrap the node(s) corresponding to the given ID(s) inside
+     * Wrap the node(s) (corresponding to the given ID(s)) inside
      * (a) new ArchNode(s) with the given nodeName.
      * If no ID is passed or `id` is an empty Array, insert a virtual
      * at range and wrap it.
      *
-     * @param {Number|Number []} [id]
+     * @param {int|ArchNode|(int|ArchNode) []} archNodeOrID
      * @param {String} wrapperName
      * @param {object} [options]
      * @param {boolean} [options.asOne] true to wrap the nodes together as one instead of individually
-     * @returns {number []} ids of the genereated wrappers
+     * @returns {ArchNode []} the genereated wrappers
      */
-    wrap (id, wrapperName, options) {
+    wrap (archNodeOrID, wrapperName, options) {
         this._resetChange();
-        return this._wrap(id, wrapperName, options || {});
+        return this._wrap(archNodeOrID, wrapperName, options || {});
     }
     /**
      * Wrap every node in range into a new node with the given nodeName (`wrapperName`).
@@ -719,40 +743,40 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @param {function} [options.wrapAncestorPred] if specified, wrap the selected node's first ancestors that match the predicate
      * @param {boolean} [options.doNotSplit] true to wrap the full nodes without splitting them
      * @param {boolean} [options.asOne] true to wrap the nodes together as one instead of individually
-     * @returns {number []} ids of the genereated wrappers
+     * @returns {ArchNode []} the genereated wrappers
      */
     wrapRange (wrapperName, options) {
         this._resetChange();
         options = options || {};
         var range = this.dependencies.BaseRange.getRange();
-        var start, scArch = start = this.getArchNode(range.scID);
-        var end, ecArch = end = this.getArchNode(range.ecID);
+        var start = range.scArch;
+        var end = range.ecArch;
         var virtual = this.createArchNode();
         if (!options.doNotSplit) {
             if (range.isCollapsed()) {
                 virtual._triggerChange(0);
-                scArch.insert(virtual, range.so);
-                return this._wrap(virtual.id, wrapperName, options);
+                range.scArch.insert(virtual, range.so);
+                return this._wrap(virtual, wrapperName, options);
             }
-            scArch._triggerChange(range.so);
-            end = ecArch.split(range.eo) || ecArch;
-            start = scArch.split(range.so) || scArch;
+            range.scArch._triggerChange(range.so);
+            end = range.ecArch.split(range.eo) || range.ecArch;
+            start = range.scArch.split(range.so) || range.scArch;
         }
 
         var toWrap = start.getNodesUntil(end, {
             includeStart: true,
             includeEnd: !!options.doNotSplit,
-        }).map(id => this.getArchNode(id));
+        });
         if (options.wrapAncestorPred) {
             toWrap = toWrap.map(node => node.ancestor(ancestor => options.wrapAncestorPred(ancestor)))
                            .filter(node => node && node.isInArch());
             toWrap = we3.utils.uniq(toWrap);
         }
         if (!toWrap.length) {
-            scArch.insert(virtual, range.so);
+            range.scArch.insert(virtual, range.so);
             toWrap = [virtual];
         }
-        return this._wrap(toWrap.map(node => node.id), wrapperName, options);
+        return this._wrap(toWrap, wrapperName, options);
     }
 
     //--------------------------------------------------------------------------
@@ -766,8 +790,7 @@ var BaseArch = class extends we3.AbstractPlugin {
      * @param {ArchNode} archNode
      */
     _addToArch (archNode) {
-        var isInArch = archNode.parent && archNode.parent.id &&
-            !archNode.parent.isClone() && archNode.isInRoot();
+        var isInArch = archNode.parent && archNode.parent.id && archNode.isInRoot();
         if (isInArch) {
             var archNodeList = this._archNodeList;
             var toAdd = [archNode];
@@ -910,6 +933,18 @@ var BaseArch = class extends we3.AbstractPlugin {
         });
     }
     /**
+     * Take an ID or an ArchNode and return the corresponding ArchNode.
+     *
+     * @param {int|ArchNode} idOrArchNode
+     * @return {ArchNode}
+     */
+    _archNodeFromIDOrArchNode (idOrArchNode) {
+        if (typeof idOrArchNode === 'number') {
+            return this.getArchNode(idOrArchNode);
+        }
+        return idOrArchNode;
+    }
+    /**
      * Add the given ArchNode and offset to the list of changes
      * and notify the Rules plugin.
      *
@@ -919,9 +954,6 @@ var BaseArch = class extends we3.AbstractPlugin {
      */
     _changeArch (archNode, offset) {
         this.dependencies.BaseRules.changeArchTriggered(archNode, offset);
-        if (archNode.isClone()) {
-            return;
-        }
         this._changes.push({
             id: archNode.id,
             archNode: archNode,
@@ -972,22 +1004,19 @@ var BaseArch = class extends we3.AbstractPlugin {
      * given the ids of nodes to inspect and the nodeNames from which to unwrap.
      *
      * @private
-     * @param {number []} ids
+     * @param {ArchNode []} archNodes
      * @param {string []} wrapperNames
-     * @returns {object []} {node: {ArchNode} the node to unwrap
+     * @returns {object []} {archNode: {ArchNode} the node to unwrap
      *                       wrapperName: {string} the nodeName to unwrap it from}
      */
-    _getNodesToUnwrap (ids, wrapperNames) {
-        var self = this;
-        var nodes = ids.map((id) => self.getArchNode(id));
-        var toUnwrap = [];
-        nodes.forEach(function (node) {
+    _getNodesToUnwrap (archNodes, wrapperNames) {
+        var toUnwrap = we3.utils.flatMap(archNodes, function (archNode) {
             var descendentsToUnwrap = [];
-            node.ancestor(function (a) {
+            archNode.ancestor(function (a) {
                 var isToUnwrapFromParent = a.parent && wrapperNames.indexOf(a.parent.nodeName) !== -1;
                 if (isToUnwrapFromParent) {
                     descendentsToUnwrap.push({
-                        id: node.id,
+                        archNode: archNode,
                         wrapperName: a.parent.nodeName,
                     });
                 }
@@ -995,18 +1024,12 @@ var BaseArch = class extends we3.AbstractPlugin {
             /* Reverse to get the higher ancestor first. This way we ensure
             unwrapping from ancestor down to descendent (otherwise we might
             try to unwrap a node that was already removed) */
-            descendentsToUnwrap.reverse();
-            toUnwrap = toUnwrap.concat(descendentsToUnwrap);
+            return descendentsToUnwrap.reverse();
         });
         // We want a single ID only once with the same wrapper name
         // but we want to return the nodes, not the IDs.
         return we3.utils.uniq(toUnwrap, {
             deepCompare: true,
-        }).map(function (unwrapInfo) {
-            return {
-                node: self.getArchNode(unwrapInfo.id),
-                wrapperName: unwrapInfo.wrapperName,
-            }
         });
     }
     /**
@@ -1049,9 +1072,7 @@ var BaseArch = class extends we3.AbstractPlugin {
         this._resetChange();
         var range = this.dependencies.BaseRange.getRange();
         var selectedLeaves = this.dependencies.BaseRange.getSelectedLeaves();
-        var selectedLeavesIDs = we3.utils.uniq(selectedLeaves.map(clone => clone.id));
-        selectedLeavesIDs.forEach(function (id) {
-            var archNode = self.getArchNode(id);
+        selectedLeaves.forEach(function (archNode) {
             if (!archNode.isAllowUpdate()) {
                 return;
             }
@@ -1099,13 +1120,18 @@ var BaseArch = class extends we3.AbstractPlugin {
      * at its given offset if any, or at the root if none.
      *
      * @private
-     * @param {string|Node|DocumentFragment} DOM
-     * @param {Number} [id]
-     * @param {Number} [offset]
-     * @returns {Number []} the ids of the inserted nodes
+     * @param {string|Node|DocumentFragment} toInsert
+     * @param {ArchNode|int} [insertIntoArchNodeOrID]
+     * @param {int} [offset]
+     * @returns {ArchNode []} the inserted nodes
      */
-    _insert (DOM, id, offset) {
-        var targetArchNode = id ? this.getArchNode(id) : this._arch;
+    _insert (toInsert, insertIntoArchNodeOrID, offset) {
+        var targetArchNode;
+        if (insertIntoArchNodeOrID) {
+            targetArchNode = this._archNodeFromIDOrArchNode(insertIntoArchNodeOrID);
+        } else {
+            targetArchNode = this._arch;
+        }
         if (!targetArchNode) {
             console.warn('The node ' + id + ' is no longer in the ach.');
             targetArchNode = this._arch;
@@ -1114,7 +1140,7 @@ var BaseArch = class extends we3.AbstractPlugin {
 
         var nextChangeIsRange = this._nextChangeIsRange;
         var changes = this._changes.slice();
-        var fragment = this.parse(DOM);
+        var fragment = this.parse(toInsert);
         this._changes = changes;
         if (nextChangeIsRange) {
             this.nextChangeIsRange();
@@ -1122,7 +1148,7 @@ var BaseArch = class extends we3.AbstractPlugin {
 
         offset = offset || 0;
         var insertedNodes = targetArchNode.insert(fragment, offset);
-        return insertedNodes.map(node => node.id);
+        return insertedNodes;
     }
     /**
      * Outdent a list element.
@@ -1256,10 +1282,19 @@ var BaseArch = class extends we3.AbstractPlugin {
      * list passed in argument.
      *
      * @private
-     * @param {Number []} [except] id's to ignore
+     * @param {(int|ArchNode) []} [except] virtuals to ignore (or their ids)
      */
     _removeAllVirtualText (except) {
         var self = this;
+        if (except) {
+            except = Array.isArray(except) ? except : [except];
+            except = except.map(function (archNodeOrID) {
+                if (typeof archNodeOrID === 'number') {
+                    return archNodeOrID;
+                }
+                return archNodeOrID.id;
+            });
+        }
         Object.keys(this._archNodeList).forEach(function (id) {
             id = parseInt(id);
             if (except && except.indexOf(id) !== -1) {
@@ -1279,7 +1314,7 @@ var BaseArch = class extends we3.AbstractPlugin {
      */
     _removeFromArch (archNode) {
         var self = this;
-        if (this._archNodeList[archNode.id] && !archNode.isClone()) {
+        if (this._archNodeList[archNode.id]) {
             if (this._archNodeList[archNode.id] === archNode) {
                 delete this._archNodeList[archNode.id];
             }
@@ -1295,8 +1330,8 @@ var BaseArch = class extends we3.AbstractPlugin {
      * Reset the Arch with the given start value if any.
      *
      * @private
-     * @param {String} [value]
-     * @param {ArchNode} [target]
+     * @param {string} [value]
+     * @param {int} [id]
      */
     _reset (value, id) {
         this._changes = [];
@@ -1492,29 +1527,29 @@ var BaseArch = class extends we3.AbstractPlugin {
         });
     }
     /**
-     * Wrap the node(s) corresponding to the given ID(s) inside
-     * (a) new ArchNode(s) with the given nodeName.
-     * If no ID is passed or `id` is an empty Array, insert a virtual
-     * at range and wrap it.
+     * Wrap the node(s) (corresponding to the given ID(s)) inside (a) new
+     * ArchNode(s) with the given nodeName.
+     * If no ArchNode/ID is passed or `archNodeOrID` is an empty Array, insert a
+     * virtual at range and wrap it.
      *
-     * @param {Number|Number []} [id]
+     * @param {int|ArchNode|(int|ArchNode) []} archNodeOrID
      * @param {String} wrapperName
      * @param {object} [options]
      * @param {boolean} [options.asOne] true to wrap the nodes together as one instead of individually
-     * @returns {number []} ids of the genereated wrappers
+     * @returns {ArchNode []} the genereated wrappers
      */
-    _wrap (id, wrapperName, options) {
-        var self = this;
-        var ids = Array.isArray(id) ? id : [id];
+    _wrap (archNodeOrID, wrapperName, options) {
+        var arr = Array.isArray(archNodeOrID) ? archNodeOrID : [archNodeOrID];
+        var archNodes = arr.map(this._archNodeFromIDOrArchNode.bind(this));
         // wrap
         var newParents = [];
         if (options.asOne) {
             var wrapper = this.createArchNode(wrapperName);
-            this.getArchNode(ids[0]).before(wrapper);
-            ids.forEach(id => wrapper.append(self.getArchNode(id)));
+            archNodes[0].before(wrapper);
+            archNodes.forEach(archNode => wrapper.append(archNode));
             newParents.push(wrapper);
         } else {
-            newParents = ids.map(id => self.getArchNode(id).wrap(wrapperName));
+            newParents = archNodes.map(archNode => archNode.wrap(wrapperName));
             newParents = newParents.filter(parent => parent && parent.isInArch());
         }
         // render and select every wrapped node
@@ -1522,15 +1557,13 @@ var BaseArch = class extends we3.AbstractPlugin {
         var ecArch = newParents[newParents.length - 1].lastLeaf();
         var range = this.dependencies.BaseRange.rangeOn(scArch, ecArch);
         this._applyRulesRangeRedrawFromChanges(range);
-        return newParents.map(node => node.id);
+        return newParents;
     }
 
 
     _onFocusNode (focusNode) {
         // get the previous focus Node's block ancestor
-        var lastBlockClone = this._lastFocus && this._lastFocus.ancestor('isBlock');
-        var lastBlock = lastBlockClone && this.getArchNode(lastBlockClone.id);
-
+        var lastBlock = this._lastFocus && this._lastFocus.ancestor('isBlock');
         if (lastBlock) {
             // find all empty format descendents
             var range = this.dependencies.BaseRange.getRange();
@@ -1544,11 +1577,7 @@ var BaseArch = class extends we3.AbstractPlugin {
             });
 
             // remove the empty format descendents and preserve range
-            if (toRemove.length) {
-                this.do(function () {
-                    toRemove.forEach(node => node.remove());
-                });
-            }
+            toRemove.forEach(node => node.remove());
         }
         this._lastFocus = focusNode;
     }

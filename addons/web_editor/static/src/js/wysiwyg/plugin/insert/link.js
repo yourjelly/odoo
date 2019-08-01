@@ -51,48 +51,48 @@ var LinkCreate = class extends we3.AbstractPlugin {
      * @param {Boolean} linkInfo.isNewWindow
      */
     _onSaveDialog (linkInfo) {
-        var anchor;
-        if (linkInfo.isAnchor) {
-            anchor = linkInfo.anchor;
-        } else {
-            var anchorID = this.dependencies.Arch.wrapRange('A')[0];
-            anchor = this.dependencies.Arch.getClonedArchNode(anchorID);
-        }
-
-        if (!linkInfo.node.isVoidoid()) {
-            anchor.empty();
-            var linkContent;
-            if (linkInfo.text && linkInfo.text.length) {
-                linkContent = linkInfo.text;
+        var self = this;
+        this.dependencies.Arch.do(function () {
+            var anchor;
+            if (linkInfo.isAnchor) {
+                anchor = linkInfo.anchor;
             } else {
-                linkContent = linkInfo.url;
+                anchor = self.dependencies.Arch.wrapRange('A')[0];
             }
-            anchor.insert(this.dependencies.Arch.parse(linkContent));
-        }
 
-        anchor.attributes.add('href', linkInfo.url);
-        anchor.attributes.add('class', linkInfo.className);
-        if (linkInfo.isNewWindow) {
-            anchor.attributes.add('target', '_blank');
-        } else {
-            anchor.attributes.remove('target');
-        }
-        if (linkInfo.style) {
-            anchor.attributes.style.update(linkInfo.style);
-        }
+            if (!linkInfo.node.isVoidoid()) {
+                anchor.empty();
+                var linkContent;
+                if (linkInfo.text && linkInfo.text.length) {
+                    linkContent = linkInfo.text;
+                } else {
+                    linkContent = linkInfo.url;
+                }
+                anchor.insert(self.dependencies.Arch.parse(linkContent));
+            }
 
-        this.dependencies.Arch.importUpdate([anchor.toJSON()]);
+            anchor.attributes.add('href', linkInfo.url);
+            anchor.attributes.add('class', linkInfo.className);
+            if (linkInfo.isNewWindow) {
+                anchor.attributes.add('target', '_blank');
+            } else {
+                anchor.attributes.remove('target');
+            }
+            if (linkInfo.style) {
+                anchor.attributes.style.update(linkInfo.style);
+            }
 
-        anchor = this.dependencies.Arch.getClonedArchNode(anchor.id);
-        var nextSibling = anchor.lastChild().next();
-        if (!nextSibling.id) {
-            this.dependencies.Arch.insertAfter(nextSibling, anchor.id);
-        } else {
-            this.dependencies.Range.setRange({
+            // get out of the anchor to continue editing
+            var nextSibling = anchor.nextSibling();
+            if (!nextSibling) {
+                nextSibling = anchor.params.create();
+                anchor.after(nextSibling);
+            }
+            return {
                 scID: nextSibling.id,
                 so: 0
-            });
-        }
+            };
+        });
     }
 };
 
@@ -133,12 +133,10 @@ var Link = class extends we3.AbstractPlugin {
     /**
      * Remove the current link, keep its contents.
      */
-    unlink (value, node) {
-        var toUnwrap = node.childNodes.map(node => node.id);
-        if (toUnwrap.length) {
-            this.dependencies.Arch.unwrap(toUnwrap);
-            return toUnwrap;
-        }
+    unlink (value, anchor) {
+        var toUnwrap = anchor.childNodes.slice();
+        this.dependencies.Arch.unwrap(toUnwrap);
+        return toUnwrap;
     }
 
     //--------------------------------------------------------------------------

@@ -29,12 +29,12 @@ class FontStylePlugin extends we3.AbstractPlugin {
         var styleAncestors = [];
         selection.map(function (node) {
             var ancestor = node.ancestor((a) => self.options.styleTags.indexOf(a.nodeName) !== -1);
-            if (ancestor && ancestor.isEditable()) {
-                styleAncestors.push(ancestor.id);
+            if (ancestor && ancestor.isEditable() &&
+                !styleAncestors.filter(a => a.id === ancestor.id).length) { // is not yet in list
+                styleAncestors.push(ancestor);
             }
         });
-        var changedIDs = this.dependencies.Arch.wrap(this.utils.uniq(styleAncestors), nodeName);
-        return changedIDs;
+        return this.dependencies.Arch.wrap(styleAncestors, nodeName);
     }
     /**
      * (Un-)format text: make it bold, italic, ...
@@ -63,7 +63,7 @@ class FontStylePlugin extends we3.AbstractPlugin {
         var range = this.dependencies.Range.getRange();
         // Unwrap everything at range from the removeFormat candidates
         if (this.dependencies.Range.isCollapsed()) {
-            this.dependencies.Arch.unwrapFrom(focusNode.id, we3.tags.format);
+            this.dependencies.Arch.unwrapFrom(focusNode, we3.tags.format);
         } else {
             this.dependencies.Arch.unwrapRangeFrom(we3.tags.format);
         }

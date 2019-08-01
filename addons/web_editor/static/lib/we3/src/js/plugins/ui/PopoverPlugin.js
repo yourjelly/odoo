@@ -223,7 +223,7 @@ class PopoverPlugin extends we3.AbstractPlugin {
     }
     _getNewPosition (popover, focusNode) {
         var top = this.POPOVER_MARGIN_TOP;
-        var target = this.dependencies.Renderer.getElement(focusNode.id);
+        var target = this.dependencies.Renderer.getElement(focusNode);
         var offset = 0;
         var position;
         if (popover.useRangePosition) {
@@ -231,8 +231,8 @@ class PopoverPlugin extends we3.AbstractPlugin {
             top += parseInt(fontSize);
             position = this.dependencies.Position.getPosition();
         } else {
-            var focus = this.dependencies.Renderer.getElement(focusNode.id);
-            target = popover.targetArchNode ? this.dependencies.Renderer.getElement(popover.targetArchNode.id) : target;
+            var focus = this.dependencies.Renderer.getElement(focusNode);
+            target = popover.targetArchNode ? this.dependencies.Renderer.getElement(popover.targetArchNode) : target;
             if (focus !== target && target.contains(focus)) {
                 top += focus.offsetHeight || focus.parentNode.offsetHeight;
             }

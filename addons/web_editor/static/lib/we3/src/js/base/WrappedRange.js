@@ -106,7 +106,7 @@ we3.WrappedRange = class we3 {
      * Move the current range to the given node
      * (from its start to its end unless it's a void node).
      *
-     * @param {Node} node
+     * @param {Node|ArchNode|int} node
      * @returns {WrappedRange}
      */
     getFromNode (node) {
@@ -120,7 +120,7 @@ we3.WrappedRange = class we3 {
             id = node;
             arch = null;
             node = null;
-            len = this.ArchPlugin.getClonedArchNode(id).length();
+            len = this.ArchPlugin.getArchNode(id).length();
         } else {
             if (node.nodeType === 3) {
                 len = node.nodeValue.length;
@@ -244,7 +244,7 @@ we3.WrappedRange = class we3 {
         }
         this.scArch = this.scArch;
         if (!this.scArch && this.scID) {
-            this.scArch = this.ArchPlugin.getClonedArchNode(this.scID);
+            this.scArch = this.ArchPlugin.getArchNode(this.scID);
         }
         this.sc = this.RendererPlugin.getElement(this.scID);
 
@@ -261,7 +261,7 @@ we3.WrappedRange = class we3 {
             this.ecID = this.scID;
         }
         if (!this.ecArch && this.ecID) {
-            this.ecArch = this.ArchPlugin.getClonedArchNode(this.ecID);
+            this.ecArch = this.ArchPlugin.getArchNode(this.ecID);
         }
         this.ec = this.RendererPlugin.getElement(this.ecID);
 

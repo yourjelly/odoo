@@ -22,7 +22,6 @@ class FloatPlugin extends we3.AbstractPlugin {
         } else if (float !== 'none') {
             archNode.className.add('pull-' + float);
         }
-        this.dependencies.Arch.importUpdate(archNode.toJSON());
     }
     _active (buttonName, focusNode) {
         switch (buttonName) {

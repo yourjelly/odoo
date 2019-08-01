@@ -263,9 +263,8 @@ class TestManagerPlugin extends we3.AbstractPlugin {
      * @returns {Promise}
      */
     async execTests (assert, tests) {
-        var self = this;
         var defPollTest = Promise.resolve();
-        tests.forEach((test) => defPollTest = defPollTest.then(this._pollTest.bind(this, this.assert, test)));
+        tests.forEach(test => defPollTest = defPollTest.then(this._pollTest.bind(this, this.assert, test)));
         return defPollTest;
     }
     getValue (archNodeId) {
@@ -451,7 +450,7 @@ class TestManagerPlugin extends we3.AbstractPlugin {
                 Arch.bypassUpdateConstraints(function () {
                     Arch.bypassChangeTrigger(function () {
                         if (root.childNodes.length) {
-                            Arch.insertBefore(container, root.childNodes[0].id);
+                            Arch.insertBefore(container, root.childNodes[0]);
                         } else {
                             Arch.insert(container, root.id, 0);
                         }

@@ -285,8 +285,8 @@ we3.AbstractPlugin = class extends we3.EventDispatcher {
      * @param {Function} fn
      * @returns {Function}
      */
-    _throttled  (delay, fn) {
-        var  lastCall = 0;
+    _throttled (delay, fn) {
+        var lastCall = 0;
         return function () {
             var args = arguments;
             var now = new Date().getTime();

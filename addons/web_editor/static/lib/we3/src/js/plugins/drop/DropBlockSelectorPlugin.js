@@ -53,7 +53,7 @@ class DropBlockSelectorPlugin extends we3.AbstractPlugin {
         // and a dropNear function if any.
         items.forEach(function (item) {
             if (typeof item.target === 'number') {
-                item.arch = Arch.getClonedArchNode(item.target);
+                item.arch = Arch.getArchNode(item.target);
             } else {
                 item.arch = Arch.parse(item.target).firstChild();
             }

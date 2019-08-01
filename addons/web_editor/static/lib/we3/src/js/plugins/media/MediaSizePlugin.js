@@ -19,7 +19,6 @@ class MediaSizePlugin extends we3.AbstractPlugin {
 
     update (size, archNode) {
         archNode.style.add('width', size === 'auto' ? '' : size);
-        this.dependencies.Arch.importUpdate(archNode.toJSON());
     }
 
     _active (buttonName, focusNode) {

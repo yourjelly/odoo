@@ -126,10 +126,10 @@ const TagMany2one = class extends we3.AbstractPlugin {
     }
 
     _insertAtNode (node, htmlContent) {
-        this.dependencies.Arch.do((getArchNode)=> {
-            const archNode = getArchNode(this.getArchNode(node).id);
+        this.dependencies.Arch.do(() => {
+            const archNode = this.getArchNode(node);
             archNode.empty();
-            this.dependencies.Arch.insert('<span>waiting todo</span>', archNode.id, 0);
+            this.dependencies.Arch.insert('<span>waiting todo</span>', archNode, 0);
             // todo: replace previous line with the following one when addVoidoidCheck works.
         });
     }

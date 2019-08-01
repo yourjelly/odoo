@@ -24,7 +24,6 @@ class PaddingPlugin extends we3.AbstractPlugin {
     update (value, archNode) {
         archNode.className = archNode.className.toString().replace(/(\s+)?padding-\S+/, '');
         archNode.className.add(value);
-        this.dependencies.Arch.importUpdate(archNode.toJSON());
     }
 
     //--------------------------------------------------------------------------

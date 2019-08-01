@@ -29,7 +29,6 @@ class ImagePlugin extends we3.AbstractPlugin {
     }
     toggleClass (value, archNode) {
         archNode.className.toggle(value);
-        this.dependencies.Arch.importUpdate(archNode.toJSON());
     }
 
     //--------------------------------------------------------------------------

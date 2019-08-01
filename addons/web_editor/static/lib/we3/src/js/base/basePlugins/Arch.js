@@ -46,11 +46,11 @@ class Arch extends we3.AbstractPlugin {
         return this.dependencies.BaseArch.getEditorValue(options);
     }
     /**
-     * @param {string|number|ArchNode|JSON} DOM
+     * @param {string|number|ArchNode|JSON} toInsert
      * @returns {ArchNode}
      **/
-    parse (DOM) {
-        return this.dependencies.BaseArch.parse(DOM);
+    parse (toInsert) {
+        return this.dependencies.BaseArch.parse(toInsert);
     }
     setValue (value, id) {
         return this.dependencies.BaseArch.setValue(value, id);
@@ -70,7 +70,7 @@ class Arch extends we3.AbstractPlugin {
      * @returns {ArchNode|undefined}
      */
     find (fn) {
-        return this.dependencies.BaseArch.getClonedArchNode(1).nextUntil(function (a) {
+        return this.dependencies.BaseArch.root.nextUntil(function (a) {
             return a.id !== 1 && (typeof fn === 'string' ? a[fn] && a[fn].call(a, a) : fn.call(a, a));
         });
     }
@@ -82,12 +82,21 @@ class Arch extends we3.AbstractPlugin {
      */
     findAll (fn) {
         var archNodes = [];
-        this.dependencies.BaseArch.getClonedArchNode(1).nextUntil(function (a) {
+        this.dependencies.BaseArch.root.nextUntil(function (a) {
             if(a.id !== 1 && (typeof fn === 'string' ? a[fn] && a[fn].call(a, a) : fn.call(a, a))) {
                 archNodes.push(a);
             }
         });
         return archNodes;
+    }
+    /**
+     * Get an ArchNode from its ID or its corresponding node in the DOM.
+     *
+     * @param {int|Node} idOrElement
+     * @returns {ArchNode}
+     */
+    getArchNode (idOrElement) {
+        return this.dependencies.BaseArch.getArchNode(idOrElement);
     }
     /**
      * Get a clone of an ArchNode from its ID or its corresponding node in the DOM.
@@ -99,8 +108,22 @@ class Arch extends we3.AbstractPlugin {
     getClonedArchNode (idOrElement, generateNewClone) {
         return this.dependencies.BaseArch.getClonedArchNode(idOrElement, generateNewClone);
     }
-    getTechnicalData (id, name) {
-        return this.dependencies.BaseArch.getTechnicalData(id, name);
+    /**
+     * Get a technical data on an ArchNode.
+     *
+     * @param {int|ArchNode} idOrArchNode
+     * @param {string} name
+     */
+    getTechnicalData (idOrArchNode, name) {
+        return this.dependencies.BaseArch.getTechnicalData(idOrArchNode, name);
+    }
+    /**
+     * Get the root ArchNode of the editor.
+     *
+     * @returns {ArchNode}
+     */
+    get root () {
+        return this.dependencies.BaseArch.root;
     }
     /**
      * Get a JSON representation of the ArchNode corresponding to the given ID
@@ -153,30 +176,32 @@ class Arch extends we3.AbstractPlugin {
      * If no element and offset are specified, insert at range (and delete
      * selection if necessary).
      *
-     * @param {string|Node|DocumentFragment} DOM the node/fragment to insert (or its nodeName/nodeValue)
-     * @param {Node} [element] the node in which to insert
-     * @param {Number} [offset] the offset of the node at which to insert
+     * @param {string|Node|DocumentFragment} toInsert the node/fragment to insert,
+     *                                       or its nodeName/nodeValue),
+     *                                       or HTML/XML to parse before insert
+     * @param {Node|int} [insertInto] the DOM node in which to insert, or its id
+     * @param {int} [offset] the offset of the node at which to insert
      */
-    insert (DOM, element, offset) {
-        return this.dependencies.BaseArch.insert(DOM, element, offset);
+    insert (toInsert, insertInto, offset) {
+        return this.dependencies.BaseArch.insert(toInsert, insertInto, offset);
     }
     /**
      * Insert a node or a fragment (several nodes) in the Arch, after a given ArchNode.
      *
-     * @param {string|Node|DocumentFragment} DOM the node/fragment to insert (or its nodeName/nodeValue)
-     * @param {Number} [id] the ID of the ArchNode after which to insert
+     * @param {string|Node|DocumentFragment} toInsert the node/fragment to insert (or its nodeName/nodeValue)
+     * @param {number|ArchNode} [idOrArchNode] the (id of the) ArchNode after which to insert
      */
-    insertAfter (DOM, id) {
-        return this.dependencies.BaseArch.insertAfter(DOM, id);
+    insertAfter (toInsert, idOrArchNode) {
+        return this.dependencies.BaseArch.insertAfter(toInsert, idOrArchNode);
     }
     /**
      * Insert a node or a fragment (several nodes) in the Arch, before a given ArchNode.
      *
-     * @param {string|Node|DocumentFragment} DOM the node/fragment to insert (or its nodeName/nodeValue)
-     * @param {Number} [id] the ID of the ArchNode before which to insert
+     * @param {string|Node|DocumentFragment} toInsert the node/fragment to insert (or its nodeName/nodeValue)
+     * @param {number|ArchNode} [idOrArchNode] the (id of the) ArchNode before which to insert
      */
-    insertBefore (DOM, id) {
-        return this.dependencies.BaseArch.insertBefore(DOM, id);
+    insertBefore (toInsert, idOrArchNode) {
+        return this.dependencies.BaseArch.insertBefore(toInsert, idOrArchNode);
     }
     /**
      * Outdent a format node at range.
@@ -187,7 +212,7 @@ class Arch extends we3.AbstractPlugin {
     /**
      * Remove an element from the Arch. If no element is given, remove the focusNode.
      *
-     * @param {Node|null} [element] (by default, use the range)
+     * @param {ArchNode|Node|int|null} [element] (by default, use the range)
      **/
     remove (element) {
         return this.dependencies.BaseArch.remove(element);
@@ -196,12 +221,12 @@ class Arch extends we3.AbstractPlugin {
      * Set a technical data on an ArchNode. The technical data are never
      * redered or exported.
      *
-     * @param {integer} id
+     * @param {ArchNode} archNode
      * @param {string} name
      * @param {any} value
      */
-    setTechnicalData (id, name, value) {
-        return this.dependencies.BaseArch.setTechnicalData(id, name, value);
+    setTechnicalData (archNode, name, value) {
+        return this.dependencies.BaseArch.setTechnicalData(archNode, name, value);
     }
     /**
      * Split the start node at start offset and the end node at end offset.
@@ -227,25 +252,25 @@ class Arch extends we3.AbstractPlugin {
         return this.dependencies.BaseArch.splitRangeUntil(ancestor, options);
     }
     /**
-     * Unwrap the node(s) corresponding to the given ID(s)
+     * Unwrap the node(s) (corresponding to the given ID(s))
      * from its (their) parent.
      *
-     * @param {Number|Number []} id
+     * @param {int|ArchNode|(int|ArchNode) []} archNodeOrID
      */
-    unwrap (id) {
-        return this.dependencies.BaseArch.unwrap(id);
+    unwrap (archNodeOrID) {
+        return this.dependencies.BaseArch.unwrap(archNodeOrID);
     }
     /**
-     * Unwrap the node(s) corresponding to the given ID(s)
+     * Unwrap the node(s) (corresponding to the given ID(s))
      * from its (their) first ancestor with the given
      * nodeName(s) (`wrapperName`).
      *
-     * @param {Number|Number []} id
+     * @param {int|ArchNode|(int|ArchNode) []} archNodeOrID
      * @param {string|string []} wrapperName
-     * @returns {int []} the ids of the unwrapped nodes
+     * @returns {ArchNode []} the unwrapped nodes
      */
-    unwrapFrom (id, wrapperName) {
-        return this.dependencies.BaseArch.unwrapFrom(id, wrapperName);
+    unwrapFrom (archNodeOrID, wrapperName) {
+        return this.dependencies.BaseArch.unwrapFrom(archNodeOrID, wrapperName);
     }
     /**
      * Unwrap every node in range from their first ancestor
@@ -262,19 +287,19 @@ class Arch extends we3.AbstractPlugin {
         return this.dependencies.BaseArch.unwrapRangeFrom(wrapperName, options);
     }
     /**
-     * Wrap the node(s) corresponding to the given ID(s) inside
+     * Wrap the node(s) (corresponding to the given ID(s)) inside
      * (a) new ArchNode(s) with the given nodeName.
      * If no ID is passed or `id` is an empty Array, insert a virtual
      * at range and wrap it.
      *
-     * @param {Number|Number []} [id]
+     * @param {int|ArchNode|(int|ArchNode) []} archNodeOrID
      * @param {String} wrapperName
      * @param {object} [options]
      * @param {boolean} [options.asOne] true to wrap the nodes together as one instead of individually
-     * @returns {number []} ids of the genereated wrappers
+     * @returns {ArchNode []} the genereated wrappers
      */
-    wrap (id, wrapperName, options) {
-        return this.dependencies.BaseArch.wrap(id, wrapperName, options);
+    wrap (archNodeOrID, wrapperName, options) {
+        return this.dependencies.BaseArch.wrap(archNodeOrID, wrapperName, options);
     }
     /**
      * Wrap every node in range into a new node with the given nodeName (`wrapperName`).
@@ -287,7 +312,7 @@ class Arch extends we3.AbstractPlugin {
      * @param {function} [options.wrapAncestorPred] if specified, wrap the selected node's first ancestors that match the predicate
      * @param {boolean} [options.doNotSplit] true to wrap the full nodes without splitting them
      * @param {boolean} [options.asOne] true to wrap the nodes together as one instead of individually
-     * @returns {number []} ids of the genereated wrappers
+     * @returns {ArchNode []} the genereated wrappers
      */
     wrapRange (wrapperName, options) {
         return this.dependencies.BaseArch.wrapRange(wrapperName, options);

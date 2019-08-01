@@ -63,16 +63,16 @@ var BaseUserInput = class extends we3.AbstractPlugin {
         var self = this;
         return this.dependencies.BaseArch.do(function () {
             var range = self.dependencies.BaseRange.getRange();
-            var id, offset;
+            var archNode, offset;
             if (range.isCollapsed()) {
-                id = range.scID;
+                archNode = range.scArch;
                 offset = range.so;
             } else {
-                id = self.dependencies.BaseArch.removeFromRange().id;
+                archNode = self.dependencies.BaseArch.removeFromRange();
                 offset = 0;
             }
             self.dependencies.BaseArch.nextChangeIsRange();
-            self.dependencies.BaseArch.getArchNode(id).addLine(offset);
+            archNode.addLine(offset);
             return false; // default behavior of range from `Arch._processChanges`
         });
     }
@@ -199,15 +199,15 @@ var BaseUserInput = class extends we3.AbstractPlugin {
 
         return BaseArch.do(function () {
             var range = BaseRange.getRange();
-            var archNode = BaseArch.getArchNode(range.scID);
+            var archNode = range.scArch;
             var arch = archNode.ancestor('isFormatNode') || archNode.ancestor('isUnbreakable');
-            var formatNode = BaseRenderer.getElement(arch.id);
+            var formatNode = BaseRenderer.getElement(arch);
 
             if (!formatNode) {
                 return false; // default behavior of range from `Arch._processChanges`
             }
 
-            var lastTextNodeID;
+            var lastTextNode;
             var lastTextNodeOldValue;
             var newArch = BaseArch.parse(formatNode.cloneNode(true));
             newArch.nextUntil(function (archNode) {
@@ -217,9 +217,9 @@ var BaseUserInput = class extends we3.AbstractPlugin {
                 var target = arch.applyPath(archNode.path(newArch));
                 if (target && target.isText()) {
                     lastTextNodeOldValue = target.nodeValue;
-                    lastTextNodeID = target.id;
+                    lastTextNode = target;
 
-                    if (range.scID === lastTextNodeID && param.previous) {
+                    if (range.scID === lastTextNode.id && param.previous) {
                         // eg: 'paaa' from replacement of 'a' in 'aa' ==> must be 'paa'
                         var previous = param.previous ? param.previous.replace(/\u00A0/g, ' ') : '';
                         var beforeRange = lastTextNodeOldValue.replace(/\u00A0/g, ' ').slice(0, range.so);
@@ -234,19 +234,18 @@ var BaseUserInput = class extends we3.AbstractPlugin {
                 } else if (target && target.isBR()) {
                     var res = target.insert(archNode.params.create(null, null, archNode.nodeValue));
                     lastTextNodeOldValue = archNode.nodeValue;
-                    lastTextNodeID = res[0] && res[0].id;
+                    lastTextNode = res[0];
                 }
             }, {doNotLeaveNode: true});
 
-            if (lastTextNodeID) {
-                var archNode = BaseArch.getArchNode(lastTextNodeID);
-                var lastTextNodeNewValue = archNode.nodeValue.replace(/\u00A0/g, ' ');
+            if (lastTextNode) {
+                var lastTextNodeNewValue = lastTextNode.nodeValue.replace(/\u00A0/g, ' ');
                 var newOffset = lastTextNodeNewValue.length;
 
                 param.data = param.data.replace(/\u00A0/g, ' ');
-                if (lastTextNodeID === range.scID) {
+                if (lastTextNode.id === range.scID) {
                     var offset = 0;
-                    if (lastTextNodeID === range.scID) {
+                    if (lastTextNode.id === range.scID) {
                         offset = range.so;
                         if (lastTextNodeOldValue.length > lastTextNodeNewValue.length) {
                             offset -= lastTextNodeOldValue.length - lastTextNodeNewValue.length;
@@ -264,9 +263,9 @@ var BaseUserInput = class extends we3.AbstractPlugin {
                     }
                 }
 
-                newOffset = Math.min(newOffset, archNode.nodeValue.length);
+                newOffset = Math.min(newOffset, lastTextNode.nodeValue.length);
                 return {
-                    scID: lastTextNodeID,
+                    scID: lastTextNode.id,
                     so: newOffset,
                 };
             }
@@ -415,7 +414,7 @@ var BaseUserInput = class extends we3.AbstractPlugin {
             var range = self.dependencies.BaseRange.getRange();
             if (range.isCollapsed()) {
                 var offset = range.so;
-                var node = self.dependencies.BaseArch.getArchNode(range.scID);
+                var node = range.scArch;
                 var next = node[isLeft ? 'removeLeft' : 'removeRight'](offset);
                 if (next) {
                     next.lastLeaf().deleteEdge(true, {

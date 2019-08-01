@@ -46,18 +46,17 @@ var ListPlugin = class extends we3.AbstractPlugin {
      *
      * @param {string('ol'|'ul'|'checklist')} type the type of list to insert
      */
-    toggle(type, focusNode, getArchNode) {
-        var range = this.dependencies.Range.getRange();
+    toggle(type) {
         var selectedLeaves = this.dependencies.Range.getSelectedLeaves();
         var newLists = [];
         if (this._isAllInList(selectedLeaves)) {
             if (this._isAllInListType(selectedLeaves, type)) {
-                this._removeList(getArchNode); // [ REMOVE ]
+                this._removeList(); // [ REMOVE ]
             } else {
-                newLists = this._convertList(type, getArchNode); // [ CONVERT ]
+                newLists = this._convertList(type); // [ CONVERT ]
             }
         } else {
-            newLists = this._insertList(type, getArchNode); // [ INSERT ]
+            newLists = this._insertList(type); // [ INSERT ]
         }
         newLists.slice().forEach(this._mergeSiblingLists); // Clean edges
     }
@@ -85,41 +84,36 @@ var ListPlugin = class extends we3.AbstractPlugin {
      *
      * @private
      * @param {string('ol'|'ul'|'checklist')} type the type of list to insert
-     * @param {function} getArchNode
      * @returns {ArchNode []} list of created lists
      */
-    _convertList (type, getArchNode) {
-        var idsToWrap = this._removeList(getArchNode);
-        return this._insertList(type, getArchNode, idsToWrap);
+    _convertList (type) {
+        var archNodesToWrap = this._removeList();
+        return this._insertList(type, archNodesToWrap);
     }
     /**
      * Insert a list at range or turn `nodeToWrap` into a list.
      *
      * @private
      * @param {string('ol'|'ul'|'checklist')} nodeName the type of list to insert
-     * @param {function} getArchNode
-     * @param {ArchNode|number []} [nodesToWrap] the node to wrap or its id
+     * @param {ArchNode|ArchNode []} [archNodesToWrap] the archNode(s) to wrap
      * @returns {ArchNode []} list of created lists
      */
-    _insertList (nodeName, getArchNode, nodesToWrap) {
-        var idsToWrap = (nodesToWrap || []).map(function (nodeOrID) {
-            return typeof nodeOrID === 'number' ? nodeOrID : nodeOrID.id;
-        });
-        var liIDs = [];
+    _insertList (nodeName, archNodesToWrap) {
+        var lis = [];
         // wrap each lowest level block at range into a li
-        if (idsToWrap.length) {
-            liIDs = this.dependencies.Arch.wrap(idsToWrap, 'li');
+        if (archNodesToWrap && archNodesToWrap.length) {
+            lis = this.dependencies.Arch.wrap(archNodesToWrap, 'li');
         } else {
             /* `wrapAncestorPred` ensures we wrap either the block parent or the
             child of a `td` */
-            liIDs = this.dependencies.Arch.wrapRange('li', {
+            lis = this.dependencies.Arch.wrapRange('li', {
                 doNotSplit: true,
                 wrapAncestorPred: n => n.parent && n.parent.isTd() || n.isBlock(),
             });
         }
         // wrap the generated list items into a list of type `nodeName`
-        return this.dependencies.Arch.wrap(liIDs, nodeName)
-            .map(getArchNode).filter(node => node && node.isList());
+        return this.dependencies.Arch.wrap(lis, nodeName)
+            .filter(node => node && node.isList());
     }
     /**
      * Return true if every node in the given array is in a list.
@@ -181,42 +175,38 @@ var ListPlugin = class extends we3.AbstractPlugin {
      * Remove a list at range
      *
      * @private
-     * @param {function} getArchNode
-     * @returns {number []} the ids of the unwrapped contents
+     * @returns {ArchNode []} the unwrapped contents
      */
-    _removeList (getArchNode) {
+    _removeList () {
         var nodeNamesToRemove = ['li', 'ol', 'ul'];
-        var liAncestors = this._selectedListItems().map(getArchNode);
-        var contentIDs = we3.utils.flatMap(liAncestors, li => li.childNodes)
-            .map(node => node.id);
+        var liAncestors = this._selectedListItems();
+        var contents = we3.utils.flatMap(liAncestors, li => li.childNodes);
         if (liAncestors.length && liAncestors.every(li => li.isIndented())) {
             this.dependencies.Arch.outdent();
         } else if (this.dependencies.Range.isCollapsed()) {
-            if (!contentIDs.length) { // li has no children => append a virtual
+            if (!contents.length) { // li has no children => append a virtual
                 var virtual = liAncestors[0].params.create();
                 liAncestors[0].append(virtual);
-                contentIDs.push(virtual.id);
+                contents.push(virtual);
             }
-            this.dependencies.Arch.unwrapFrom(contentIDs, nodeNamesToRemove);
+            this.dependencies.Arch.unwrapFrom(contents, nodeNamesToRemove);
         } else {
             this.dependencies.Arch.unwrapRangeFrom(nodeNamesToRemove, {
                 doNotSplit: true,
             });
         }
-        return contentIDs;
+        return contents;
     }
     /**
      * Return a list of ids of list items (`li`) at range
      *
      * @private
-     * @returns {number []}
+     * @returns {ArchNode []}
      */
     _selectedListItems () {
         var selectedLeaves = this.dependencies.Range.getSelectedLeaves();
-        return selectedLeaves.map(function (node) {
-            var liAncestor = node.ancestor('isLi');
-            return liAncestor && liAncestor.id;
-        }).filter(id => id);
+        return selectedLeaves.map(node => node.ancestor('isLi'))
+            .filter(node => node);
     }
     /**
      * Return a list of lists (`ul`, `ol`, `checklist`) at range
@@ -280,19 +270,20 @@ var ListPlugin = class extends we3.AbstractPlugin {
      * @param {MouseEvent} e
      */
     _onMouseDown (e) {
-        var archNode = this.dependencies.Arch.getClonedArchNode(e.target);
+        var archNode = this.dependencies.Arch.getArchNode(e.target);
         var isChecklistItem = archNode && archNode.isChecklistItem && archNode.isChecklistItem();
         var isClickInCheckbox = isChecklistItem && e.offsetX <= 0;
         if (!isClickInCheckbox) {
             return;
         }
         e.preventDefault();
-        archNode.toggleChecked();
-        var highestChecklist = archNode.ancestor(node => node.isChecklist && node.isChecklist(), true);
-        this.dependencies.Arch.importUpdate(highestChecklist.toJSON());
-        this.dependencies.Range.setRange({
-            scID: archNode.id,
-            so: 0,
+        this.dependencies.Arch.do(function () {
+            archNode.toggleChecked();
+            archNode.ancestor(node => node.isChecklist && node.isChecklist(), true);
+            return {
+                scID: archNode.id,
+                so: 0,
+            };
         });
     }
 };

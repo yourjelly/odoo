@@ -81,8 +81,8 @@ Object.assign(we3.options, {
     },
     keyMap: {
         pc: {
-            'CTRL+Z':           'History.undo',
-            'CTRL+Y':           'History.redo',
+            'CTRL+Z':           'History.undo no-transaction',
+            'CTRL+Y':           'History.redo no-transaction',
             'CTRL+B':           'FontStyle.formatText:B',
             'CTRL+I':           'FontStyle.formatText:I',
             'CTRL+U':           'FontStyle.formatText:U',
@@ -111,8 +111,8 @@ Object.assign(we3.options, {
             // 'CTRL+ENTER':       'insertHorizontalRule',
         },
         mac: {
-            'CMD+Z':            'History.undo',
-            'CMD+SHIFT+Z':      'History.redo',
+            'CMD+Z':            'History.undo no-transaction',
+            'CMD+SHIFT+Z':      'History.redo no-transaction',
             'CMD+B':            'FontStyle.formatText:B',
             'CMD+I':            'FontStyle.formatText:I',
             'CMD+U':            'FontStyle.formatText:U',
@@ -141,8 +141,8 @@ Object.assign(we3.options, {
             // 'CMD+ENTER':       'insertHorizontalRule',
         },
         help: {
-            'History.undo':             'Undoes the last command',
-            'History.redo':             'Redoes the last command',
+            'History.undo no-transaction': 'Undoes the last command',
+            'History.redo no-transaction': 'Redoes the last command',
             'FontStyle.formatText:B':   'Set a bold style',
             'FontStyle.formatText:I':   'Set a italic style',
             'FontStyle.formatText:U':   'Set a underline style',

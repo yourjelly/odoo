@@ -57,7 +57,7 @@ class DropBlockPlugin extends we3.AbstractPlugin {
         // FIXME what is this ?
         var Arch = this.dependencies.Arch;
         this.dependencies.Rules.addUnbreakableNodeCheck(function (a) {
-            return Arch.getTechnicalData(a.id, 'dropblock') || a.nodeName === 'section';
+            return Arch.getTechnicalData(a, 'dropblock') || a.nodeName === 'section';
         });
 
         // Render blocks and menus

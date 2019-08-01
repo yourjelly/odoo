@@ -79,14 +79,17 @@ var keyMapPlugin = class extends we3.AbstractPlugin {
             }
             var pluginMethod = command.split('.');
             var pluginName = pluginMethod[0];
-            var method = pluginMethod[1].split(':');
+            var method = pluginMethod[1].split(/[: ]/);
+            var value = method[1] === 'no-transaction' ? method[2] : method[1];
+            value = value === 'true' ? true : (value === 'false' ? false : value);
             self.keyMap[shortcut] = {
                 command: command,
                 shortcut: shortcut,
                 pluginName: pluginName,
                 methodName: method[0],
-                value: method[1] === 'true' ? true : (method[1] === 'false' ? false : method[1]),
+                value: value,
                 description: help[command] && self.options.translate('KeyMap', help[command]),
+                noTransaction: method.indexOf('no-transaction') !== -1,
             };
             if (!help[command]) {
                 console.info("No description for '" + command + "'");
@@ -187,7 +190,7 @@ var keyMapPlugin = class extends we3.AbstractPlugin {
         ev.preventDefault();
 
         var args = [item.value, this.dependencies.Range.getRange()];
-        this.call(item.pluginName, item.methodName, args, false);
+        this.call(item.pluginName, item.methodName, args, item.noTransaction);
     }
 };
 

@@ -101,7 +101,6 @@ var isType = {
         var align = alignedAncestor && alignedAncestor.style['text-align'];
         return align && align === 'center';
     },
-    isClone: False,
     /**
      * Return true if the node is a data element (DATA).
      *

@@ -414,20 +414,20 @@ we3.ArchNode = class {
         }
     }
     /**
-     * Return an array with the ids of all the nodes between this and `end`, not included.
+     * Return an array with all the nodes between this and `end`, not included.
      *
      * @private
      * @param {ArchNode} end
      * @param {object} [options]
      * @param {object} [options.includeStart] true to include this
      * @param {object} [options.includeEnd] true to include `end`
-     * @returns {number []}
+     * @returns {ArchNode []}
      */
     getNodesUntil (end, options) {
         options = options || {};
         var start = this.firstLeaf();
         end = end.lastLeaf();
-        var nodes = options.includeStart && start.isInArch() ? [start.id] : [];
+        var nodes = options.includeStart && start.isInArch() ? [start] : [];
         var nextOptions = {
             doNotInsertVirtual: true,
             leafToLeaf: true,
@@ -437,7 +437,7 @@ we3.ArchNode = class {
         }
         start.nextUntil(function (node) {
             if (node.isInArch() && (node.id !== end.id || options.includeEnd && end.isInArch())) {
-                nodes.push(node.id);
+                nodes.push(node);
             }
             return node.id === end.id;
         }, nextOptions);

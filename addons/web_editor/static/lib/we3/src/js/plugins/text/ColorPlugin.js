@@ -13,9 +13,7 @@ class ColorPlugin extends we3.AbstractPlugin {
         this._classPrefix = this._classPrefixes && this._classPrefixes.text || 'color-';
         this._styleName = 'color';
         if (this.options.getColor) {
-                console.log('COLOR to load');
             this._initializePromise = this.options.getColors().then(function (colors) {
-                console.log('COLOR');
                 self._colors = colors;
             });
         }
@@ -68,13 +66,12 @@ class ColorPlugin extends we3.AbstractPlugin {
      *
      * @param {string} color (hexadecimal or class name)
      */
-    update (color, focusNode, getArchNode) {
+    update (color) {
         var self = this;
         var range = this.dependencies.Range.getRange();
-        var scArch = getArchNode(range.scID);
-        var ecArch = getArchNode(range.ecID);
-        var toColor = this._getNodesToColor(scArch, range.so, ecArch, range.eo)
-            .map(id => getArchNode(id));
+        var scArch = range.scArch;
+        var ecArch = range.ecArch;
+        var toColor = this._getNodesToColor(scArch, range.so, ecArch, range.eo);
 
         toColor.forEach(function (node) {
             var fontNode = node.ancestor('isFont') || node.wrap('font');
@@ -168,7 +165,7 @@ class ColorPlugin extends we3.AbstractPlugin {
     _createColorButton (color) {
         var button = document.createElement('we3-button');
         if (color.startsWith('#')) {
-            button.setAttribute('style', 'background-color: ' + color + ';')
+            button.setAttribute('style', 'background-color: ' + color + ';');
         } else {
             var bgClassPrefix = this._classPrefixes && this._classPrefixes.background || 'bg-';
             button.setAttribute('class', bgClassPrefix + color);
@@ -215,17 +212,19 @@ class ColorPlugin extends we3.AbstractPlugin {
      * @override
      */
     _enabled (buttonName, focusNode) {
-        return !!focusNode.ancestor('isFormatNode') || focusNode.childNodes && focusNode.childNodes.every(child => child.isFormatNode());
+        return !!focusNode.ancestor('isFormatNode') ||
+            focusNode.childNodes &&
+            focusNode.childNodes.every(child => child.isFormatNode());
     }
     /**
      * After splitting the nodes (until their font ancestor if any), return the ids of
-     * the nodes to color, between `start` at `startFffset`, and `end` at `endOffset`.
+     * the nodes to color, between `start` at `startOffset`, and `end` at `endOffset`.
      *
      * @param {ArchNode} start
      * @param {number} startOffset
      * @param {ArchNode} end
      * @param {number} endOffset
-     * @returns {number []}
+     * @returns {ArchNode []}
      */
     _getNodesToColor (start, startOffset, end, endOffset) {
         var endFont = end.ancestor('isFont');
@@ -307,7 +306,7 @@ class ColorPlugin extends we3.AbstractPlugin {
         }
         if (node.childNodes.length) {
             node.childNodes.slice().forEach(function (child) {
-                self.dependencies.Arch.unwrapFrom(child.id, 'font');
+                self.dependencies.Arch.unwrapFrom(child, 'font');
             });
         } else {
             node.remove();

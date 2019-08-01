@@ -7,12 +7,19 @@ var BaseRenderer = class extends we3.AbstractPlugin {
     //--------------------------------------------------------------------------
 
     /**
-     * Get a rendered node from its ID in the Arch.
+     * Get a rendered node from its equivalent in the Arch (or its ID).
      *
-     * @param {int} id
+     * @param {int|ArchNode} idOrArchNode
+     * @param {boolean} [insertIfMissing]
      * @returns {Node}
      */
-    getElement (id, insertIfMissing) {
+    getElement (idOrArchNode, insertIfMissing) {
+        var id;
+        if (typeof idOrArchNode === 'number') {
+            id = idOrArchNode;
+        } else if (idOrArchNode) {
+            id = idOrArchNode.id;
+        }
         if (insertIfMissing) {
             this._insertInEditable(this.jsonById[id]);
         }

@@ -75,7 +75,7 @@ var Selector = class extends we3.AbstractPlugin {
     //--------------------------------------------------------------------------
 
     /**
-     * @param {ArchNode} [archNode]
+     * @param {ArchNode|string|int} [archNode]
      * @param {string} string
      * @param {object} [options]
      * @param {boolean} [options.returnArchNodes]
@@ -87,10 +87,10 @@ var Selector = class extends we3.AbstractPlugin {
         if (typeof archNode === 'string') {
             options = string;
             string = archNode;
-            archNode = BaseArch.getArchNode(1);
+            archNode = BaseArch.root;
         }
         if (!archNode) {
-            archNode = BaseArch.getArchNode(1);
+            archNode = BaseArch.root;
         }
         if (typeof archNode === 'number') {
             archNode = BaseArch.getArchNode(archNode);
@@ -102,7 +102,7 @@ var Selector = class extends we3.AbstractPlugin {
         this._tokenize(string).token.forEach(function (token) {
             token = self._tokenizeForSearch(token);
             self._searchFromToken([archNode], token, options).forEach(function (archNode) {
-                var item = options.returnArchNodes ? BaseArch.getClonedArchNode(archNode.id) : archNode.id;
+                var item = options.returnArchNodes ? BaseArch.getArchNode(archNode.id) : archNode.id;
                 if (item !== 1 && items.indexOf(item) === -1) {
                     items.push(item);
                 }
@@ -111,7 +111,7 @@ var Selector = class extends we3.AbstractPlugin {
         return items;
     }
     /**
-     * @param {ArchNode|Element} [archNode]
+     * @param {ArchNode|Element|int|string} [archNode]
      * @param {string} string
      * @param {object} [options]
      **/
@@ -121,11 +121,9 @@ var Selector = class extends we3.AbstractPlugin {
         if (typeof archNode === 'string') {
             options = string;
             string = archNode;
-            archNode = BaseArch.getArchNode(1);
-        } else if (typeof archNode === 'number') {
+            archNode = BaseArch.root;
+        } else if (!(archNode instanceof we3.ArchNode)) { // id or Element
             archNode = BaseArch.getArchNode(archNode);
-        } else {
-            archNode = BaseArch.getArchNode(archNode.id) || archNode;
         }
 
         options = options || {};

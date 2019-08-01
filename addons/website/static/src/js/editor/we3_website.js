@@ -79,20 +79,21 @@ var OdooWebsite = class extends we3.AbstractPlugin {
     // Public
     //--------------------------------------------------------------------------
 
-    getBrandingNodeIds () {
-        var ids = [];
-        var Arch = this.dependencies.Arch;
-        var Renderer = this.dependencies.Renderer;
-        Arch.getClonedArchNode(1).nextUntil(function (next) {
+    /**
+     * @returns {ArchNode []}
+     */
+    getBrandingArchNodes () {
+        var archNodes = [];
+        this.dependencies.Arch.root.nextUntil(function (next) {
             if (next.isWebsiteEditable && next.isWebsiteEditable()) {
-                ids.push(next.id);
+                archNodes.push(next);
             }
         });
-        return ids;
+        return archNodes;
     }
     setEditorValue () {
-        var ids = this.getBrandingNodeIds();
-        this._postRenderingReadOnly(ids);
+        var archNodes = this.getBrandingArchNodes();
+        this._postRenderingReadOnly(archNodes);
     }
 
     //--------------------------------------------------------------------------
@@ -157,14 +158,16 @@ var OdooWebsite = class extends we3.AbstractPlugin {
             return res;
         };
     }
-    _postRenderingReadOnly (ids) {
-        var Arch = this.dependencies.Arch;
+    /**
+     * @param {ArchNode []} archNodes
+     */
+    _postRenderingReadOnly (archNodes) {
         var Renderer = this.dependencies.Renderer;
-        var readonly = ids.filter(function (id) {
-            return Arch.getClonedArchNode(id).isReadOnly();
+        var readonly = archNodes.filter(function (archNode) {
+            return archNode.isReadOnly();
         });
-        var $readonly = $(readonly.map(function (id) {
-            return Renderer.getElement(id);
+        var $readonly = $(readonly.map(function (archNode) {
+            return Renderer.getElement(archNode);
         }));
         $readonly.tooltip({
                 container: 'body',

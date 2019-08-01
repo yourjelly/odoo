@@ -59,7 +59,7 @@ class MediaPlugin extends we3.AbstractPlugin {
     removeMedia (value, archNode) {
         var mediaArchNode = archNode.ancestor('isMedia');
         if (mediaArchNode) {
-            this.dependencies.Arch.remove(mediaArchNode.id);
+            this.dependencies.Arch.remove(mediaArchNode);
         }
     }
 
@@ -141,27 +141,29 @@ class MediaPlugin extends we3.AbstractPlugin {
 
     _onClickSave (mediaArchNode) {
         var self = this;
-        var modal = this.dependencies.Modal.get(this._modalId);
-        var tabpanels = modal.querySelector('we3-tabpanels');
-        var activePanel = tabpanels.querySelector('we3-tabpanel.active');
-        var pluginOnSave = this._panels[[].indexOf.call(tabpanels.children, activePanel)].onSave;
-        pluginOnSave(activePanel).then(function (media) {
-            console.log('TODO use', mediaArchNode);
-            if (mediaArchNode) {
-                self.dependencies.Range.setRange({
-                    scID: mediaArchNode.parent.id,
-                    so:   mediaArchNode.index() + 1,
-                });
-                self.dependencies.Arch.insert(media);
-                self.dependencies.Arch.remove(mediaArchNode.id);
-            } else {
-                self.dependencies.Arch.insert(media);
-            }
+        this.dependencies.Arch.do(function () {
+            var modal = self.dependencies.Modal.get(self._modalId);
+            var tabpanels = modal.querySelector('we3-tabpanels');
+            var activePanel = tabpanels.querySelector('we3-tabpanel.active');
+            var pluginOnSave = self._panels[[].indexOf.call(tabpanels.children, activePanel)].onSave;
+            pluginOnSave(activePanel).then(function (media) {
+                console.log('TODO use', mediaArchNode);
+                if (mediaArchNode) {
+                    self.dependencies.Range.setRange({
+                        scID: mediaArchNode.parent.id,
+                        so:   mediaArchNode.index() + 1,
+                    });
+                    self.dependencies.Arch.insert(media);
+                    self.dependencies.Arch.remove(mediaArchNode);
+                } else {
+                    self.dependencies.Arch.insert(media);
+                }
+            });
         });
     }
     _onDblclick (ev) {
-        var id = this.dependencies.Renderer.getID(ev.target);
-        var mediaArchNode = id && this.dependencies.Arch.getClonedArchNode(id).ancestor('isMedia', true);
+        var archNode = this.dependencies.Arch.getArchNode(ev.target);
+        var mediaArchNode = archNode && archNode.ancestor('isMedia', true);
         if (mediaArchNode) {
             ev.preventDefault();
             ev.stopPropagation();

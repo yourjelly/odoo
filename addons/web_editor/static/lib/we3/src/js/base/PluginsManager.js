@@ -98,8 +98,7 @@ we3.PluginsManager = class extends we3.EventDispatcher {
                 return plugin[methodName].apply(plugin, args);
             } else {
                 var res;
-                this._plugins.Arch.do(async function (getArchNode) {
-                    args.push(getArchNode);
+                this._plugins.Arch.do(async function () {
                     res = await plugin[methodName].apply(plugin, args);
                     return res;
                 });
@@ -165,13 +164,11 @@ we3.PluginsManager = class extends we3.EventDispatcher {
      * @returns {Promise<ArchNode>}
      */
     saveEditor () {
-        var self = this;
-        var Arch = this._plugins.Arch;
+        var root = this._plugins.Arch.root;
         this._each('getEditorValue', null, ['BaseArch']);
         return this._eachAsync('saveEditor').then(function () {
-            var arch = Arch.getClonedArchNode(1);
-            arch.nextUntil(function () {}); // force to clone all this
-            return arch;
+            root.nextUntil(function () {}); // force to clone all this
+            return root;
         });
     }
     /**

@@ -7,13 +7,14 @@ var Renderer = class extends we3.AbstractPlugin {
         this.dependencies = ['BaseRenderer'];
     }
     /**
-     * Get a rendered node from its ID in the Arch.
+     * Get a rendered node from its equivalent in the Arch (or its ID).
      *
-     * @param {int} id
+     * @param {int|ArchNode} idOrArchNode
+     * @param {boolean} [insertIfMissing]
      * @returns {Node}
      */
-    getElement (id) {
-        return this.dependencies.BaseRenderer.getElement(id);
+    getElement (idOrArchNode, insertIfMissing) {
+        return this.dependencies.BaseRenderer.getElement(idOrArchNode, insertIfMissing);
     }
     /**
      * Get the ID in the Arch of a rendered Node.
