@@ -8,40 +8,48 @@ class L10nInAccountInvoiceReport(models.Model):
     _name = "l10n_in.account.invoice.report"
     _description = "Account Invoice Statistics"
     _auto = False
-    _order = 'date desc'
+    _order = "date desc"
 
-    account_move_id = fields.Many2one('account.move', string="Account Move")
-    invoice_id = fields.Many2one('account.move', string="Invoice")
-    company_id = fields.Many2one('res.company', string="Company")
+    account_move_id = fields.Many2one("account.move", string="Account Move")
+    move_id = fields.Many2one("account.move", string="Invoice")
+    company_id = fields.Many2one("res.company", string="Company")
     date = fields.Date(string="Accounting Date")
     name = fields.Char(string="Invoice Number")
-    partner_id = fields.Many2one('res.partner', string="Customer")
+    partner_id = fields.Many2one("res.partner", string="Customer")
     is_reverse_charge = fields.Char("Reverse Charge")
-    l10n_in_export_type = fields.Selection([
-        ('regular', 'Regular'), ('deemed', 'Deemed'),
-        ('sale_from_bonded_wh', 'Sale from Bonded WH'),
-        ('export_with_igst', 'Export with IGST'),
-        ('sez_with_igst', 'SEZ with IGST payment'),
-        ('sez_without_igst', 'SEZ without IGST payment')])
-    journal_id = fields.Many2one('account.journal', string="Journal")
-    state = fields.Selection([('draft', 'Unposted'), ('posted', 'Posted')], string='Status')
+    l10n_in_export_type = fields.Selection(
+        [
+            ("regular", "Regular"),
+            ("deemed", "Deemed"),
+            ("sale_from_bonded_wh", "Sale from Bonded WH"),
+            ("export_with_igst", "Export with IGST"),
+            ("sez_with_igst", "SEZ with IGST payment"),
+            ("sez_without_igst", "SEZ without IGST payment"),
+        ]
+    )
+    journal_id = fields.Many2one("account.journal", string="Journal")
+    state = fields.Selection([("draft", "Unposted"), ("posted", "Posted")], string="Status")
     igst_amount = fields.Float(string="IGST Amount")
     cgst_amount = fields.Float(string="CGST Amount")
     sgst_amount = fields.Float(string="SGST Amount")
     cess_amount = fields.Float(string="Cess Amount")
-    price_total = fields.Float(string='Total Without Tax')
+    price_total = fields.Float(string="Total Without Tax")
     total = fields.Float(string="Invoice Total")
-    reversed_entry_id = fields.Many2one('account.move', string="Refund Invoice", help="From where this Refund is created")
+    reversed_entry_id = fields.Many2one(
+        "account.move", string="Refund Invoice", help="From where this Refund is created"
+    )
     shipping_bill_number = fields.Char(string="Shipping Bill Number")
     shipping_bill_date = fields.Date(string="Shipping Bill Date")
-    shipping_port_code_id = fields.Many2one('l10n_in.port.code', string='Shipping port code')
-    ecommerce_partner_id = fields.Many2one('res.partner', string="E-commerce")
-    invoice_type = fields.Selection([
-        ('out_invoice', 'Customer Invoice'),
-        ('in_invoice', 'Vendor Bill'),
-        ('out_refund', 'Customer Credit Note'),
-        ('in_refund', 'Vendor Credit Note'),
-        ])
+    shipping_port_code_id = fields.Many2one("l10n_in.port.code", string="Shipping port code")
+    ecommerce_partner_id = fields.Many2one("res.partner", string="E-commerce")
+    invoice_type = fields.Selection(
+        [
+            ("out_invoice", "Customer Invoice"),
+            ("in_invoice", "Vendor Bill"),
+            ("out_refund", "Customer Credit Note"),
+            ("in_refund", "Vendor Credit Note"),
+        ]
+    )
     partner_vat = fields.Char(string="Customer GSTIN")
     ecommerce_vat = fields.Char(string="E-commerce GSTIN")
     tax_rate = fields.Float(string="Rate")
@@ -58,7 +66,7 @@ class L10nInAccountInvoiceReport(models.Model):
     gst_format_date = fields.Char(string="Formated Date")
     gst_format_refund_date = fields.Char(string="Formated Refund Date")
     gst_format_shipping_bill_date = fields.Char(string="Formated Shipping Bill Date")
-    tax_id = fields.Many2one('account.tax', string="Tax")
+    tax_id = fields.Many2one("account.tax", string="Tax")
 
     def _select(self):
         select_str = """
@@ -305,9 +313,11 @@ class L10nInAccountInvoiceReport(models.Model):
     @api.model_cr
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
-        self.env.cr.execute("""CREATE or REPLACE VIEW %s AS (
+        self.env.cr.execute(
+            """CREATE or REPLACE VIEW %s AS (
             %s
             FROM (
                 %s %s %s
-            ) AS sub %s)""" % (self._table, self._select(), self._sub_select(),
-                self._from(), self._where(), self._group_by()))
+            ) AS sub %s)"""
+            % (self._table, self._select(), self._sub_select(), self._from(), self._where(), self._group_by())
+        )
