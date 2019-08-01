@@ -721,18 +721,20 @@ class Field(MetaField('DummyField', (object,), {})):
         def add_trigger(field, path):
             """ add a trigger on field to recompute self """
             field_model = model.env[field.model_name]
-            node = field_model._field_triggers.setdefault(field, {})
-            for f in reversed(path):
-                node = node.setdefault(f, {})
-            node.setdefault(None, []).append(self)
+            nodes = [field_model._field_triggers_onchange.setdefault(field, {})]
+            if (field.type != 'one2many') or not field_model._field_inverses[field]:
+                nodes.append(field_model._field_triggers.setdefault(field, {}))
+            for node in nodes:
+                for f in reversed(path):
+                    node = node.setdefault(f, {})
+                node.setdefault(None, []).append(self)
 
         for dotnames in self.depends:
             field_model = model
             path = []                   # fields from model to field_model
             for fname in dotnames.split('.'):
                 field = field_model._fields[fname]
-                if (field.type != 'one2many') or not field_model._field_inverses[field]:
-                    add_trigger(field, path)
+                add_trigger(field, path)
 
                 if (field is self) and path:
                     self.recursive = True
@@ -1098,7 +1100,7 @@ class Field(MetaField('DummyField', (object,), {})):
         if new_records:
             # new records: no business logic
             with records.env.protecting(records._field_computed.get(self, [self]), records):
-                new_records.modified([self.name])
+                new_records.modified([self.name], onchange=True)
                 self.write(new_records, value)
                 if self.relational:
                     new_records.modified([self.name])
