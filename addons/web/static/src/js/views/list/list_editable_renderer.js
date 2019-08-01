@@ -11,10 +11,12 @@ odoo.define('web.EditableListRenderer', function (require) {
  * Unlike Odoo v10 and before, this list renderer is independant from the form
  * view. It uses the same widgets, but the code is totally stand alone.
  */
+var config = require('web.config');
 var core = require('web.core');
 var dom = require('web.dom');
 var ListRenderer = require('web.ListRenderer');
 var utils = require('web.utils');
+var Sortable = window.Sortable;
 
 var _t = core._t;
 
@@ -812,24 +814,45 @@ ListRenderer.include({
         var self = this;
         var $body = this._super.apply(this, arguments);
         if (this.hasHandle) {
-            $body.sortable({
-                axis: 'y',
-                items: '> tr.o_data_row',
-                helper: 'clone',
+            var $scrollableParent = this._getScrollableParent();
+            new Sortable($body[0], {
                 handle: '.o_row_handle',
-                stop: function (event, ui) {
+                ghostClass: 'o_data_row_ghost',
+                draggable: 'tr.o_data_row',
+                // in testcase we are not getting scrollableParent.
+                scroll: $scrollableParent ? $scrollableParent[0] : true,
+                onEnd: function (event, ui) {
                     // update currentID taking moved line into account
                     if (self.currentRow !== null) {
                         var currentID = self.state.data[self.currentRow].id;
                         self.currentRow = self._getRow(currentID).index();
                     }
                     self.unselectRow().then(function () {
-                        self._moveRecord(ui.item.data('id'), ui.item.index());
+                        self._moveRecord($(event.item).data('id'), $(event.item).index());
                     });
                 },
+                forceFallback: true,
+                fallbackClass: 'o_data_row_clone',
             });
         }
         return $body;
+    },
+    /**
+     * triggers get_scrollable_parent to find scrollable parent element
+     * get_scrollable_parent event is hanled by parents to return specific scrollable element
+     * else action_manager element is returned
+     *
+     * @private
+     * @returns {jQuery|undefined} scrollable parent element
+     */
+    _getScrollableParent: function () {
+        var $scrollableParent;
+        this.trigger_up('get_scrollable_parent', {
+            callback: function ($scrollable_parent) {
+                $scrollableParent = $scrollable_parent;
+            }
+        });
+        return $scrollableParent;
     },
     /**
      * Override to optionally add a th in the header for the remove icon column.

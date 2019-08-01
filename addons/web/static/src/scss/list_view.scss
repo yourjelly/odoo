@@ -26,6 +26,16 @@
                 }
             }
         }
+
+        tbody {
+            tr.o_data_row_ghost {
+                opacity: 0;
+            }
+            tr.o_data_row_clone {
+                opacity: 1 !important;
+            }
+        }
+
         tbody > tr > td:not(.o_list_record_selector) {
             @include o-text-overflow(table-cell);
 

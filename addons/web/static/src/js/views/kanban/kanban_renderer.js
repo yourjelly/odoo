@@ -14,6 +14,7 @@ var viewUtils = require('web.viewUtils');
 
 var qweb = core.qweb;
 var _t = core._t;
+var Sortable = window.Sortable;
 
 function findInNode(node, predicate) {
     if (predicate(node)) {
@@ -350,16 +351,18 @@ var KanbanRenderer = BasicRenderer.extend({
         }
         if (this.groupedByM2O) {
             // Enable column sorting
-            this.$el.sortable({
-                axis: 'x',
-                items: '> .o_kanban_group',
+            var $scrollableParent = this._getScrollableParent();
+            new Sortable(this.el, {
                 handle: '.o_kanban_header_title',
-                cursor: 'move',
-                revert: 150,
-                delay: 100,
-                tolerance: 'pointer',
-                forcePlaceholderSize: true,
-                stop: function () {
+                ghostClass: 'o_kanban_group_ghost',
+                dragoverBubble: true,
+                sort: true,
+                draggable: '.o_kanban_group',
+                scroll: $scrollableParent && $scrollableParent[0],
+                // dragoverBubble: true,
+                forceFallback: true,
+                fallbackClass: 'o_kanban_group_clone',
+                onEnd: function (event) {
                     var ids = [];
                     self.$('.o_kanban_group').each(function (index, u) {
                         // Ignore 'Undefined' column
@@ -385,6 +388,25 @@ var KanbanRenderer = BasicRenderer.extend({
             }
         }
     },
+
+    /**
+     * triggers get_scrollable_parent to find scrollable parent element
+     * get_scrollable_parent event is hanled by parents to return specific scrollable element
+     * else action_manager element is returned
+     *
+     * @private
+     * @returns {jQuery|undefined} scrollable parent element
+     */
+    _getScrollableParent: function () {
+        var $scrollableParent;
+        this.trigger_up('get_scrollable_parent', {
+            callback: function ($scrollable_parent) {
+                $scrollableParent = $scrollable_parent;
+            }
+        });
+        return $scrollableParent;
+    },
+
     /**
      * Renders an ungrouped kanban view in a fragment.
      *
@@ -553,7 +575,7 @@ var KanbanRenderer = BasicRenderer.extend({
      * @param {string} direction  contains either 'LEFT' or 'RIGHT'
      */
     _focusOnCardInColumn: function(eventTarget, direction) {
-        var currentColumn = eventTarget.parentElement;
+        var currentColumn = !this.state.groupedBy.length ? eventTarget.parentElement : eventTarget.parentElement.parentElement;
         var hasSelectedACard = false;
         var cannotSelectAColumn = false;
         while (!hasSelectedACard && !cannotSelectAColumn) {
