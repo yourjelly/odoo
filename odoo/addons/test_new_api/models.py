@@ -573,7 +573,7 @@ class Attachment(models.Model):
             rec.name = self.env[rec.res_model].browse(rec.res_id).display_name
 
     # DLE P55: `test_cache_invalidation`
-    def modified(self, fnames, modified=None):
+    def modified(self, fnames, modified=None, onchange=False):
         if not self:
             return
         comodel = self.env[self.res_model]
