@@ -2600,6 +2600,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         cls._field_computed = {}            # fields computed with the same method
         cls._field_inverses = Collector()   # inverse fields for related fields
         cls._field_triggers = {}            # {depfield: {depfield: {...}, None: [compute_fields]}}
+        cls._field_triggers_onchange = {}            # {depfield: {depfield: {...}, None: [compute_fields]}}
 
         cls._setup_done = True
 
@@ -5416,7 +5417,7 @@ Fields:
                [(invf, None) for f in fields for invf in self._field_inverses[f]]
         self.env.cache.invalidate(spec)
 
-    def modified(self, fnames, modified=None):
+    def modified(self, fnames, modified=None, onchange=False):
         """ Notify that fields have been modified on ``self``. This invalidates
             the cache, and prepares the recomputation of stored function fields
             (new-style fields only).
@@ -5426,13 +5427,14 @@ Fields:
         """
         if not self or not fnames:
             return
+        field_triggers = self._field_triggers if not onchange else self._field_triggers_onchange
         if len(fnames) == 1:
-            tree = self._field_triggers.get(self._fields[next(iter(fnames))])
+            tree = field_triggers.get(self._fields[next(iter(fnames))])
         else:
             # merge dependency trees to evaluate all triggers at once
             tree = {}
             for fname in fnames:
-                node = self._field_triggers.get(self._fields[fname])
+                node = field_triggers.get(self._fields[fname])
                 if node:
                     trigger_tree_merge(tree, node)
         if tree:
@@ -5613,7 +5615,7 @@ Fields:
                     yield from val
                 else:
                     yield from traverse(val)
-        return traverse(self._field_triggers.get(field, {}))
+        return traverse(self._field_triggers_onchange.get(field, {}))
 
     def _has_onchange(self, field, other_fields):
         """ Return whether ``field`` should trigger an onchange event in the
