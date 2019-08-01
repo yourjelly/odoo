@@ -1204,7 +1204,7 @@ class AccountMove(models.Model):
         if 'posted' in self.mapped('line_ids.payment_id.state'):
             raise ValidationError(_("You cannot modify a journal entry linked to a posted payment."))
 
-    @api.constrains('name', 'journal_id')
+    @api.constrains('name', 'journal_id', 'state')
     def _check_unique_sequence_number(self):
         if not self:
             return

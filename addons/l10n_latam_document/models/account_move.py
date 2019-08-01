@@ -77,16 +77,72 @@ class AccountMove(models.Model):
             invoice.l10n_latam_amount_untaxed = l10n_latam_amount_untaxed
             invoice.l10n_latam_tax_ids = not_included_invoice_taxes
 
+
+    def _get_domain(self):
+        return [('journal_id', '=', self.journal_id.id), ('l10n_latam_document_type_id', '=', self.l10n_latam_document_type_id.id),
+                ('state', '=', 'posted')]
+
+    @api.depends('journal_id', 'l10n_latam_document_type_id')
     def _compute_invoice_sequence_number_next(self):
         """ If journal use documents disable the next number header"""
         with_latam_document_number = self.filtered('l10n_latam_use_documents')
+        moves = with_latam_document_number.filtered(lambda move: move.is_invoice() and move.name == '/')
+        if not moves:
+            return
+
+        # TODO: let's write it in an inefficient way first / groupby takes us too far, so optimize afterwards
+        # TODO: might need to be integrated in basic accounting anyways as it is mainly the domain that changes
+        for move in moves:
+            domain = move._get_domain()
+            if not isinstance(self.id, models.NewId):
+                domain.append(('id', '!=', self.id))
+            if move.journal_id.type == 'sale':
+                domain.append(('type', 'in', ('out_invoice', 'out_refund')))
+            elif move.journal_id.type == 'purchase':
+                domain.append(('type', 'in', ('in_invoice', 'in_refund')))
+            if move.search_count(domain):
+                continue
+            move.invoice_sequence_number_next_prefix = move.l10n_latam_document_type_id.doc_code_prefix
+            move.invoice_sequence_number_next = " 0001-00000001"
         return super(AccountMove, self - with_latam_document_number)._compute_invoice_sequence_number_next()
+
+
+    def _inverse_invoice_sequence_number_next(self):
+        ''' Set the number_next on the sequence related to the invoice/bill/refund'''
+        # Check user group.
+        if not self.env.is_admin():
+            return
+
+        with_latam_document_number = self.filtered('l10n_latam_use_documents')
+        # Set the next number in the sequence.
+        for move in with_latam_document_number:
+            if not move.invoice_sequence_number_next:
+                continue
+            move.l10n_latam_document_number = move.invoice_sequence_number_next
+        super(AccountMove, self - with_latam_document_number)._inverse_invoice_sequence_number_next()
+
+    def _get_next(self):
+        # SEARCH for last invoice
+        self.ensure_one()
+        domain = self._get_domain()
+        check = self.search(domain, order="name desc", limit=1)
+        if check:
+            try:
+                self._cr.execute("SELECT NULL FROM account_move WHERE id = %s FOR UPDATE", (check.id, ))
+            except: #TODO: could be more specific
+                raise UserError(_('Could not do the update'))
+            name_parts = check.l10n_latam_document_number.split("-")
+            if len(name_parts) == 2:
+                return name_parts[0] + "-" + str(int(name_parts[1]) + 1).zfill(8)
+            else:
+                raise UserError(_("Should use proper naming for invoices"))
+
+        #TODO: not sure we need an else here
+        # SELECT
 
     def post(self):
         for rec in self.filtered(lambda x: x.l10n_latam_use_documents and not x.l10n_latam_document_number):
-            if not rec.l10n_latam_sequence_id:
-                raise UserError(_('No sequence or document number linked to invoice id %s') %  rec.id)
-            rec.l10n_latam_document_number = rec.l10n_latam_sequence_id.next_by_id()
+            rec.l10n_latam_document_number = rec._get_next()
         return super().post()
 
     @api.constrains('state', 'l10n_latam_document_type_id')
