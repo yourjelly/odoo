@@ -865,6 +865,7 @@ class AccountMove(models.Model):
                 move.bank_partner_id = move.company_id.partner_id
 
     @api.depends(
+        'state',
         'line_ids.debit',
         'line_ids.credit',
         'line_ids.currency_id',
