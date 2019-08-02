@@ -78,9 +78,7 @@ class MetaField(type):
         slots = dict(base_slots)
         slots.update(attrs.get('_slots', ()))
 
-        # DLE P172: If __slots__ is defined, unfortunately, I cannot monkey patch fields.write for automated action.
-        # `addons/base_automation/tests/test_base_automation.py`
-        # attrs['__slots__'] = set(slots) - set(base_slots)
+        attrs['__slots__'] = set(slots) - set(base_slots)
         attrs['_slots'] = slots
         return type.__new__(meta, name, bases, attrs)
 
@@ -1123,10 +1121,7 @@ class Field(MetaField('DummyField', (object,), {})):
         fields = records._field_computed[self]
         # DLE P29: This is part of P29. See other comment.
         with records.env.protecting(fields, records):
-            if isinstance(self.compute, str):
-                getattr(records, self.compute)()
-            else:
-                self.compute(records)
+            records._compute_field_value(self)
 
         # even if __set__ already removed the todo, compute method might not set a value
         for field in fields:
