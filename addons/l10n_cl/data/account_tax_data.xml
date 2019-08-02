@@ -7,6 +7,7 @@
         <field name="name">IVA 19% Venta</field>
         <field name="description">IVA 19% Venta</field>
         <field name="amount">19</field>
+        <field name="sequence" eval="1"/>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">sale</field>
         <field name="tax_group_id" ref="tax_group_iva_19"/>
@@ -43,6 +44,7 @@
       <field name="name">IVA 19% Compra</field>
       <field name="description">IVA 19% Compra</field>
       <field name="amount">19</field>
+      <field name="sequence" eval="1"/>
       <field name="amount_type">percent</field>
       <field name="type_tax_use">purchase</field>
       <field name="tax_group_id" ref="tax_group_iva_19"/>
