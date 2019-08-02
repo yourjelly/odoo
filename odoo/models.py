@@ -3717,6 +3717,15 @@ Fields:
 
         return records
 
+    def _compute_field_value(self, field):
+        # DLE P182: This is for base automation,
+        # to have something to override to catch the changes of values for stored compute fields.
+        # `test_10_recomputed_field`
+        if isinstance(field.compute, str):
+            getattr(self, field.compute)()
+        else:
+            field.compute(self)
+
     def _parent_store_create(self):
         """ Set the parent_path field on ``self`` after its creation. """
         if not self._parent_store:
