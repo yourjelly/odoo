@@ -96,9 +96,8 @@ class test(models.Model):
 
     def testme4(self):
         t = time.time()
-        main_id = self.env['test.main'].create({
-            'name': 'bla',
-        })
+        for i in range(1000):
+            self.testme3()
         if hasattr(self, 'flush'):
             self.flush()
         return time.time()-t
