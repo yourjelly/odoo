@@ -1021,6 +1021,8 @@ class Field(MetaField('DummyField', (object,), {})):
         env = record.env
 
         # only a single record may be accessed
+        record.ensure_one()
+
         # FP NOte: to check: do we really need the "record not in protected?"
         if self.compute and (record.id in env.all.tocompute.get(self, ())) and record not in env.protected(self):
             recs = record if self.recursive else env.records_to_compute(self)
