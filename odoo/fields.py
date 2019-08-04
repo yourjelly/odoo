@@ -1024,15 +1024,17 @@ class Field(MetaField('DummyField', (object,), {})):
         env = record.env
 
         # only a single record may be accessed
-        record.ensure_one()
-        if env.is_to_compute(self, record) and record not in env.protected(self):
+        # FP NOte: to check: do we really need the "record not in protected?"
+        if self.compute and (record.id in env.all.tocompute.get(self, ())) and record not in env.protected(self):
             recs = record if self.recursive else env.records_to_compute(self)
             try:
                 self.compute_value(recs)
             except Exception:
                 self.compute_value(record)
 
-        if not env.cache.contains(record, self):
+        try:
+            value = env.cache.get(record, self)
+        except:
             # real record
             if record.id and self.store:
                 recs = record._in_cache_without(self)
@@ -1045,6 +1047,7 @@ class Field(MetaField('DummyField', (object,), {})):
                         _("Record does not exist or has been deleted."),
                         _("(Record: %s, User: %s)") % (record, env.uid),
                     ]))
+                value = env.cache.get(record, self)
             elif self.compute:
                 # DLE P78: Infinite recursion when installing sale
                 if record not in env.protected(self):
@@ -1057,6 +1060,7 @@ class Field(MetaField('DummyField', (object,), {})):
                         self.compute_value(record)
                 else:
                     env.cache.set(record, self, self.convert_to_cache(False, record, validate=False))
+                value = env.cache.get(record, self)
 
             elif (not record.id) and record._origin:
                 # FP Note: the _origin concept should be removed otherwise, onchange behave differently
@@ -1083,7 +1087,6 @@ class Field(MetaField('DummyField', (object,), {})):
                     value = self.convert_to_cache(defaults[self.name], record)
                     env.cache.set(record, self, value)
 
-        value = env.cache.get(record, self)
         return self.convert_to_record(value, record)
 
     def __set__(self, records, value):
