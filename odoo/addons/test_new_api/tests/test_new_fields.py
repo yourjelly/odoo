@@ -1478,6 +1478,7 @@ class TestFields(common.TransactionCase):
         record.write({
             'image_256': image_h,
         })
+        record.invalidate_cache(fnames=['image_256'], ids=record.ids)
         self.assertEqual(Image.open(io.BytesIO(base64.b64decode(record.image_512))).size, (256, 512))
         self.assertEqual(Image.open(io.BytesIO(base64.b64decode(record.image))).size, (2000, 4000))
         self.assertEqual(Image.open(io.BytesIO(base64.b64decode(record.image_256))).size, (128, 256))
