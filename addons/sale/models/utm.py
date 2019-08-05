@@ -22,7 +22,7 @@ class UtmCampaign(models.Model):
 
     def _compute_sale_invoiced_amount(self):
         self.env['account.move.line'].flush(['balance', 'move_id', 'account_id', 'exclude_from_invoice_tab'])
-        self.env['account.move.line'].flush(['state', 'campaign_id', 'type'])
+        self.env['account.move'].flush(['state', 'campaign_id', 'type'])
         query = """SELECT move.campaign_id, -SUM(line.balance) as price_subtotal
                     FROM account_move_line line
                     INNER JOIN account_move move ON line.move_id = move.id
