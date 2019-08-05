@@ -2010,7 +2010,7 @@ class Image(Binary):
     def _compute_related(self, records):
         super(Image, self)._compute_related(records)
         for record in records:
-            self.set_cache(record, self._image_process(record[self.name]))
+            record[self.name] = self._image_process(record[self.name])
 
 
 class Selection(Field):
