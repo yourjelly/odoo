@@ -14,7 +14,8 @@ class UtmCampaign(models.Model):
 
     def _compute_items_total(self):
         """Empty method that will be implemented by inheriting classes"""
-        return
+        self.clicked_total = 0
+        self.items_total = 0
 
     @api.depends('items_total', 'clicked_total')
     def _compute_clicks_ratio(self):
