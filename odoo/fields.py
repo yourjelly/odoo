@@ -1982,12 +1982,25 @@ class Image(Binary):
     def create(self, record_values):
         new_record_values = []
         for record, value in record_values:
-            new_record_values.append((record, self._image_process(value)))
+            # DLE P181: `test_94_image`. There is a really strange behavior in current master regarding this.
+            # e.g. image_512 is a related to image, but resized to 512 px.
+            # When writing on this related field, e.g. record.write({'image_512': image}),
+            # it is expected to store in the field `image` the image not resized,
+            # but as it gets its value from image_512 when determining the inverse,
+            # in this branch this is already resized when determining the inverse.
+            # It works in master because the cache of image_512 is set to the value of the full image, which is wrong.
+            # Then, when determining the inverse, as the cache is wrongly set with the full image, it works.
+            # The fact the test `test_94_image` has to permanently invalidate the related field on which it writes on
+            # is the proof. e.g. `record.invalidate_cache(fnames=['image_512'], ids=record.ids)`
+            new_value = self._image_process(value)
+            new_record_values.append((record, new_value))
+            self.set_cache(record, self.related_field._image_process(value) if self.related else new_value)
         super(Image, self).create(new_record_values)
 
     def write(self, records, value):
-        value = self._image_process(value)
-        super(Image, self).write(records, value)
+        new_value = self._image_process(value)
+        super(Image, self).write(records, new_value)
+        self.set_cache(records, self.related_field._image_process(value) if self.related else new_value)
 
     def _image_process(self, value):
         if value and (self.max_width or self.max_height):
@@ -1997,7 +2010,7 @@ class Image(Binary):
     def _compute_related(self, records):
         super(Image, self)._compute_related(records)
         for record in records:
-            record[self.name] = self._image_process(record[self.name])
+            self.set_cache(record, self._image_process(record[self.name]))
 
 
 class Selection(Field):
