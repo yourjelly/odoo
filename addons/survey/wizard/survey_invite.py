@@ -61,9 +61,9 @@ class SurveyInvite(models.TransientModel):
     mail_server_id = fields.Many2one('ir.mail_server', 'Outgoing mail server')
     # survey
     survey_id = fields.Many2one('survey.survey', string='Survey', required=True)
-    survey_url = fields.Char(related="survey_id.public_url", readonly=True)
-    survey_access_mode = fields.Selection(related="survey_id.access_mode", readonly=True)
-    survey_users_login_required = fields.Boolean(related="survey_id.users_login_required", readonly=True)
+    survey_url = fields.Char(related="survey_id.public_url", depends=['survey_id'], readonly=True)
+    survey_access_mode = fields.Selection(related="survey_id.access_mode", depends=['survey_id'], readonly=True)
+    survey_users_login_required = fields.Boolean(related="survey_id.users_login_required", depends=['survey_id'], readonly=True)
     deadline = fields.Datetime(string="Answer deadline")
 
     @api.depends('partner_ids', 'survey_id')
