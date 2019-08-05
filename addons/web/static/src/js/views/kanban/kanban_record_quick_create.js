@@ -117,11 +117,13 @@ var RecordQuickCreate = Widget.extend({
      */
     cancel: function () {
         var self = this;
-        return this.controller.commitChanges().then(function () {
-            if (!self.controller.isDirty()) {
-                self._cancel();
-            }
-        });
+        if (this.controller){
+            return this.controller.commitChanges().then(function () {
+                if (!self.controller.isDirty()) {
+                    self._cancel();
+                }
+            });
+        }
     },
 
     //--------------------------------------------------------------------------
