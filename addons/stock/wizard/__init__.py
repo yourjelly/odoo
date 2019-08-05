@@ -13,4 +13,4 @@ from . import stock_warn_insufficient_qty
 from . import product_replenish
 from . import stock_track_confirmation
 from . import stock_package_destination
-from . import stock_picking_responsible  # TODO: Remove this import in 13.1
+from . import stock_zero_quantity_count

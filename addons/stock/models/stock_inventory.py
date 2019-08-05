@@ -57,6 +57,7 @@ class Inventory(models.Model):
         help="Allows to start with prefill counted quantity for each lines or "
         "with all counted quantity set to zero.", default='counted',
         selection=[('counted', 'Default to stock on hand'), ('zero', 'Default to zero')])
+    picking_id = fields.Many2one('stock.picking', string='Picking triggering the inventory')
 
     @api.onchange('company_id')
     def _onchange_company_id(self):
@@ -115,6 +116,10 @@ class Inventory(models.Model):
         self.write({'state': 'done'})
         self.post_inventory()
         return True
+
+    def action_validate_zqc(self):
+        to_validate_pick_ids = self.env.context.get('to_validate_pick_ids')
+        return self.env['stock.picking'].browse(to_validate_pick_ids).with_context({'skip_zqc': True})._button_validate()
 
     def post_inventory(self):
         # The inventory is posted as a single step which means quants cannot be moved from an internal location to another using an inventory
