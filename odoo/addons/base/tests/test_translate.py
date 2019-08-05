@@ -363,6 +363,8 @@ class TestTranslation(TransactionCase):
         self.assertEqual(cheese.with_context(lang=None).name, 'Cheese')
         self.assertEqual(cheese.with_context(lang='fr_FR').name, 'Fromage')
         self.assertEqual(cheese.with_context(lang='en_US').name, 'The Cheese')
+        cheese.flush()
+        cheese.invalidate_cache()
 
         # set a new master value
         cheese.with_context(lang='en_US').write({'name': 'Delicious Cheese'})

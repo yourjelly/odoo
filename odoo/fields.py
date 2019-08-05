@@ -1122,12 +1122,16 @@ class Field(MetaField('DummyField', (object,), {})):
             records = records.sudo()
         fields = records._field_computed[self]
         # DLE P29: This is part of P29. See other comment.
-        with records.env.protecting(fields, records):
-            records._compute_field_value(self)
-
         # even if __set__ already removed the todo, compute method might not set a value
         for field in fields:
             records.env.remove_to_compute(field, records)
+        try:
+            with records.env.protecting(fields, records):
+                records._compute_field_value(self)
+        except Exception:
+            for field in fields:
+                records.env.add_to_compute(field, records)
+            raise
 
     def determine_inverse(self, records):
         """ Given the value of ``self`` on ``records``, inverse the computation. """
@@ -1415,11 +1419,12 @@ class _String(Field):
 
         update_column = True
         update_trans = False
+        single_lang = len(records.env['res.lang'].get_installed()) <= 1
         if self.translate:
             lang = records.env.lang or 'en_US'
-            if len(records.env['res.lang'].get_installed()) <= 1:
-                # a single language is installed, no translation needed
-                pass
+            if single_lang:
+                # a single language is installed
+                update_trans = True
             elif callable(self.translate):
                 # update the source and synchronize translations
                 update_column = True
@@ -1452,9 +1457,19 @@ class _String(Field):
                     source_recs[self.name] = value
                     source_value = value
                 tname = "%s,%s" % (self.model_name, self.name)
-                records.env['ir.translation']._set_ids(
-                    tname, 'model', lang, real_recs.ids, value, source_value,
-                )
+                if single_lang:
+                    records.env['ir.translation']._update_translations([dict(
+                        src=source_value,
+                        value=value,
+                        name=tname,
+                        lang=records.env.lang,
+                        type='model',
+                        state='translated',
+                        res_id=res_id) for res_id in real_recs.ids])
+                else:
+                    records.env['ir.translation']._set_ids(
+                        tname, 'model', lang, real_recs.ids, value, source_value,
+                    )
 
         return records
 
