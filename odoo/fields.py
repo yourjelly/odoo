@@ -1994,13 +1994,13 @@ class Image(Binary):
             # is the proof. e.g. `record.invalidate_cache(fnames=['image_512'], ids=record.ids)`
             new_value = self._image_process(value)
             new_record_values.append((record, new_value))
-            self.set_cache(record, self.related_field._image_process(value) if self.related else new_value)
+            self.set_cache(record, value if self.related else new_value)
         super(Image, self).create(new_record_values)
 
     def write(self, records, value):
         new_value = self._image_process(value)
         super(Image, self).write(records, new_value)
-        self.set_cache(records, self.related_field._image_process(value) if self.related else new_value)
+        self.set_cache(records, value if self.related else new_value)
 
     def _image_process(self, value):
         if value and (self.max_width or self.max_height):
