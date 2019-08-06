@@ -4849,9 +4849,12 @@ Fields:
 
             The returned recordset has the same prefetch object as ``self``.
         """
-        if args and 'allowed_company_ids' not in args[0] and 'allowed_company_ids' in self._context:
-            args[0]['allowed_company_ids'] = self._context.get('allowed_company_ids') 
-        context = dict(args[0] if args else self._context, **kwargs)
+        if args:
+            context = dict(args[0], **kwargs)
+            if 'allowed_company_ids' not in context and 'allowed_company_ids' in self._context:
+                context['allowed_company_ids'] = self._context.get('allowed_company_ids')
+        else:
+            context = dict(self._context, **kwargs)
         return self.with_env(self.env(context=context))
 
     def with_prefetch(self, prefetch_ids=None):
