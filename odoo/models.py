@@ -3663,6 +3663,9 @@ Fields:
                     self.env.cache.set(record, field, cache_value)
                     if field.type in ('many2one', 'many2one_reference') and record._field_inverses[field]:
                         inverses_update.append((field, record, cache_value))
+        # DLE P138: `test_activity_flow_employee`, res_model is a related to res_model_id, yet it is used.
+        for field, record, value in inverses_update:
+            field._update_inverses(record, value)
 
         # update parent_path
         records._parent_store_create()
@@ -3687,10 +3690,6 @@ Fields:
 
                 # mark fields to recompute
                 records.modified([field.name for field in other_fields])
-
-            # DLE P138: `test_activity_flow_employee`, res_model is a related to res_model_id, yet it is used.
-            for field, record, value in inverses_update:
-                field._update_inverses(record, value)
 
             # if value in cache has not been updated by other_fields, remove it
             for record, field in cachetoclear:

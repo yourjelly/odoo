@@ -2469,8 +2469,9 @@ class Many2oneReference(Integer):
         cache = records.env.cache
         for record in records:
             model = records[self.model_field]
-            if not model:
-                continue
+            if not model and records._fields[self.model_field].compute:
+                records._fields[self.model_field].compute_value(records)
+                model = records[self.model_field]
             corecord = record.env[model].browse(value)
             for invf in record._field_inverses[self]:
                 valid_ids = record.filtered_domain(invf.get_domain_list(corecord))._ids
