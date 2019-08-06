@@ -245,7 +245,6 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
             # need to commit any modification the module's installation or
             # update made to the schema or data so the tests can run
             # (separately in their own transaction)
-            module.flush()
             cr.commit()
 
             if tools.config.options['test_enable']:
@@ -490,7 +489,6 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
 
                 Module = env['ir.module.module']
                 Module.browse(modules_to_remove.values()).module_uninstall()
-                Module.flush()
                 # Recursive reload, should only happen once, because there should be no
                 # modules to remove next time
                 cr.commit()

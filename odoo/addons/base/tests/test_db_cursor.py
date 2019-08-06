@@ -62,18 +62,13 @@ class TestTestCursor(common.TransactionCase):
         """ Check the behavior of a single test cursor. """
         self.assertIsInstance(self.cr, TestCursor)
         self.write(self.record, 'A')
-        # DLE P13: Writes are not directly applied in db unless flush is called, and if we want the update
-        # to be commited, we need to call flush before the cr.commit()
-        self.flush(self.record)
         self.cr.commit()
 
         self.write(self.record, 'B')
-        self.flush(self.record)
         self.cr.rollback()
         self.check(self.record, 'A')
 
         self.write(self.record, 'C')
-        self.flush(self.record)
         self.cr.rollback()
         self.check(self.record, 'A')
 
@@ -81,7 +76,6 @@ class TestTestCursor(common.TransactionCase):
         """ Check the behavior of a subcursor that commits. """
         self.assertIsInstance(self.cr, TestCursor)
         self.write(self.record, 'A')
-        self.flush(self.record)
         self.cr.commit()
 
         self.write(self.record, 'B')
@@ -93,7 +87,6 @@ class TestTestCursor(common.TransactionCase):
             record = self.record.with_env(self.env(cr=cr))
             self.check(record, 'B')
             self.write(record, 'C')
-            self.flush(self.record)
 
         self.check(self.record, 'C')
 
@@ -104,7 +97,6 @@ class TestTestCursor(common.TransactionCase):
         """ Check the behavior of a subcursor that rollbacks. """
         self.assertIsInstance(self.cr, TestCursor)
         self.write(self.record, 'A')
-        self.flush(self.record)
         self.cr.commit()
 
         self.write(self.record, 'B')
@@ -117,7 +109,6 @@ class TestTestCursor(common.TransactionCase):
                 record = self.record.with_env(self.env(cr=cr))
                 self.check(record, 'B')
                 self.write(record, 'C')
-                self.flush(self.record)
                 raise ValueError(42)
 
         self.check(self.record, 'B')

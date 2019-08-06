@@ -410,7 +410,7 @@ class Environment(Mapping):
 
     @classproperty
     def envs(cls):
-        return cls._local.environments
+        return cls._local.environments if hasattr(cls._local, 'environments') else []
 
     @classmethod
     @contextmanager
