@@ -12,4 +12,93 @@
             <script type="text/javascript" src="/point_of_sale/static/tests/tours/point_of_sale.js"></script>
         </xpath>
     </template>
+
+    <record id="paperformat_report_pos_ticket" model="report.paperformat">
+        <field name="name">European A6 low margin</field>
+        <field name="default" eval="True"/>
+        <field name="format">A6</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">7</field>
+        <field name="margin_bottom">2</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">35</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <data>
+        <template id="PosTicket">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="order">
+                    <div class="page" align='center' width='40' value-thousands-separator='' >
+                        <!--    Header -->
+                        <div font='b'>
+                            <t t-if='order.config_id.company_id.logo'>
+                                <img t-att-src='order.config_id.company_id.logo' alt="Logo"/>
+                                <br/>
+                            </t>
+                            <span t-field="order.config_id.company_id.name"/>
+                            <t t-if='order.config_id.company_id.phone'>
+                                <div>Tel:<t t-esc='order.config_id.company_id.phone' /></div>
+                            </t>
+                            <t t-if='order.config_id.company_id.vat'>
+                                <div>VAT:<t t-esc='order.config_id.company_id.vat' /></div>
+                            </t>
+                            <t t-if='order.config_id.company_id.email'>
+                                <div><t t-esc='order.config_id.company_id.email' /></div>
+                            </t>
+                            <t t-if='order.config_id.company_id.website'>
+                                <div><t t-esc='order.config_id.company_id.website' /></div>
+                            </t>
+                            <br/>
+                        </div>
+
+                        <!--    Order line -->
+                        <div class='orderlines' line-ratio='0.6'>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="text-align: left;">Description</th>
+                                        <th style="text-align: right;">Quantity</th>
+                                        <th style="text-align: right;">Unit Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach='order.lines' t-as='line'>
+                                        <tr>
+                                            <td><span t-field="line.product_id"/></td>
+                                            <td style="text-align: right;"><span t-field="line.qty"/></td>
+                                            <td style="text-align: right;"><span t-options='{"widget": "monetary", "display_currency": order.pricelist_id.currency_id}' t-esc="line.price_unit"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfooter>
+                                    <tr>
+                                        <td style="text-align: left;">Tax:</td>
+                                        <td/>
+                                        <td style="text-align: right;"><span t-options='{"widget": "monetary", "display_currency": order.pricelist_id.currency_id}' t-esc="order.amount_tax"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: left;">SubTotal:</td>
+                                        <td/>
+                                        <td style="text-align: right;"><span t-options='{"widget": "monetary", "display_currency": order.pricelist_id.currency_id}' t-esc="order.amount_total"/></td>
+                                    </tr>
+                                </tfooter>
+                            </table>
+                            <br/>
+                        </div>
+
+                        <!--    Footer -->
+                        <div>
+                            <span t-field="order.pos_reference"/><br/>
+                            <span t-field="order.date_order"/>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </template>
+    </data>
 </odoo>
