@@ -1359,7 +1359,7 @@ class IrModelData(models.Model):
     reference = fields.Char(string='Reference', compute='_compute_reference', readonly=True, store=False)
 
     _sql_constraints = [
-        ('name_unique', 'UNIQUE(name)', "XIDs must be unique."),
+        ('name_unique', 'UNIQUE(name, model)', "XIDs must be unique."),
     ]
 
     @api.depends('module', 'name')
