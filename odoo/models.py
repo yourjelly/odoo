@@ -3641,7 +3641,7 @@ Fields:
         cachetoclear = []
         records = self.browse(ids)
         # DLE P138
-        inverses_update = []
+        inverses_update = {}
         for data, record in zip(data_list, records):
             data['record'] = record
             # DLE P104: test_inherit.py, test_50_search_one2many
@@ -3662,10 +3662,10 @@ Fields:
                     cache_value = field.convert_to_cache(value, record)
                     self.env.cache.set(record, field, cache_value)
                     if field.type in ('many2one', 'many2one_reference') and record._field_inverses[field]:
-                        inverses_update.append((field, record, cache_value))
+                        inverses_update.setdefault((field, cache_value), set()).add(record.id)
         # DLE P138: `test_activity_flow_employee`, res_model is a related to res_model_id, yet it is used.
-        for field, record, value in inverses_update:
-            field._update_inverses(record, value)
+        for (field, value), record_ids in inverses_update.items():
+            field._update_inverses(self.browse(record_ids), value)
 
         # update parent_path
         records._parent_store_create()

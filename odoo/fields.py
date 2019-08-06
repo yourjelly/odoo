@@ -2451,13 +2451,13 @@ class Many2oneReference(Integer):
         cache = records.env.cache
         # remove records from the cache of one2many fields of old corecords
         record_ids = set(records._ids)
-        for record in records:
-            model = records[self.model_field]
-            if not model:
-                continue
-            for invf in record._field_inverses[self]:
-                corecords = record.env[model].browse(
-                    id_ for id_ in cache.get_values(record, self)
+
+        for model, record_ids in self._record_ids_per_res_model(records).items():
+            for invf in records._field_inverses[self]:
+                if invf.model_name != model:
+                    continue
+                corecords = records.env[model].browse(
+                    id_ for id_ in cache.get_values(records, self)
                 )
                 for corecord in corecords:
                     if cache.contains(corecord, invf):
@@ -2467,14 +2467,14 @@ class Many2oneReference(Integer):
 
     def _update_inverses(self, records, value):
         cache = records.env.cache
-        for record in records:
-            model = records[self.model_field]
-            if not model and records._fields[self.model_field].compute:
-                records._fields[self.model_field].compute_value(records)
-                model = records[self.model_field]
-            corecord = record.env[model].browse(value)
-            for invf in record._field_inverses[self]:
-                valid_ids = record.filtered_domain(invf.get_domain_list(corecord))._ids
+
+        for model, record_ids in self._record_ids_per_res_model(records).items():
+            corecord = records.env[model].browse(value)
+            records = records.browse(record_ids)
+            for invf in records._field_inverses[self]:
+                if invf.model_name != model:
+                    continue
+                valid_ids = records.filtered_domain(invf.get_domain_list(corecord))._ids
                 if not valid_ids:
                     continue
                 cache_contains = cache.contains(corecord, invf)
@@ -2487,6 +2487,16 @@ class Many2oneReference(Integer):
                     # DLE P159: `test_in_invoice_line_onchange_business_fields_1`
                     ids1 = tuple(set(ids0 + valid_ids))
                     cache.set(corecord, invf, ids1)
+
+    def _record_ids_per_res_model(self, records):
+        model_record_ids = {}
+        for record in records:
+            model = record[self.model_field]
+            if not model and record._fields[self.model_field].compute:
+                record._fields[self.model_field].compute_value(record)
+                model = record[self.model_field]
+            model_record_ids.setdefault(model, set()).add(record.id)
+        return model_record_ids
 
 
 class _RelationalMulti(_Relational):
