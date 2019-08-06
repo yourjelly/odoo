@@ -115,13 +115,13 @@ class MailActivity(models.Model):
         return res
 
     # owner
-    res_id = fields.Integer('Related Document ID', index=True, required=True)
     res_model_id = fields.Many2one(
         'ir.model', 'Document Model',
         index=True, ondelete='cascade', required=True)
     res_model = fields.Char(
         'Related Document Model',
         index=True, related='res_model_id.model', compute_sudo=True, store=True, readonly=True)
+    res_id = fields.Many2oneReference(string='Related Document ID', index=True, required=True, model_field='res_model')
     res_name = fields.Char(
         'Document Name', compute='_compute_res_name', compute_sudo=True, store=True,
         help="Display name of the related document.", readonly=True)
@@ -567,8 +567,7 @@ class MailActivityMixin(models.AbstractModel):
     activity_ids = fields.One2many(
         'mail.activity', 'res_id', 'Activities',
         auto_join=True,
-        groups="base.group_user",
-        domain=lambda self: [('res_model', '=', self._name)])
+        groups="base.group_user",)
     activity_state = fields.Selection([
         ('overdue', 'Overdue'),
         ('today', 'Today'),

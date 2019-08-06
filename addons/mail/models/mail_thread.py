@@ -82,8 +82,7 @@ class MailThread(models.AbstractModel):
     message_is_follower = fields.Boolean(
         'Is Follower', compute='_compute_is_follower', search='_search_is_follower')
     message_follower_ids = fields.One2many(
-        'mail.followers', 'res_id', string='Followers',
-        domain=lambda self: [('res_model', '=', self._name)])
+        'mail.followers', 'res_id', string='Followers')
     message_partner_ids = fields.Many2many(
         comodel_name='res.partner', string='Followers (Partners)',
         compute='_get_followers', search='_search_follower_partners')

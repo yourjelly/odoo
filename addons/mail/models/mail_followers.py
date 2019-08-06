@@ -26,8 +26,8 @@ class Followers(models.Model):
     # (see 'ir.model' inheritance).
     res_model = fields.Char(
         'Related Document Model Name', required=True, index=True)
-    res_id = fields.Integer(
-        'Related Document ID', index=True, help='Id of the followed resource')
+    res_id = fields.Many2oneReference(
+        'Related Document ID', index=True, help='Id of the followed resource', model_field='res_model')
     partner_id = fields.Many2one(
         'res.partner', string='Related Partner', ondelete='cascade', index=True)
     channel_id = fields.Many2one(

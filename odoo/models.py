@@ -3659,12 +3659,10 @@ Fields:
                 if field.type in ('one2many', 'many2many'):
                     cachetoclear.append((record, field))
                 else:
-                    field.set_cache(record, field.convert_to_cache(value, record))
-                    if field.type == 'integer' and record._field_inverses[field]:
-                        # Special case for integer which are actually many2one (res_id/res_model)
-                        for invf in record._field_inverses[field]:
-                            # DLE P138
-                            inverses_update.append((invf, record[field.name], record))
+                    cache_value = field.convert_to_cache(value, record)
+                    self.env.cache.set(record, field, cache_value)
+                    if field.type in ('many2one', 'many2one_reference') and record._field_inverses[field]:
+                        inverses_update.append((field, record, cache_value))
 
         # update parent_path
         records._parent_store_create()
@@ -3691,8 +3689,8 @@ Fields:
                 records.modified([field.name for field in other_fields])
 
             # DLE P138: `test_activity_flow_employee`, res_model is a related to res_model_id, yet it is used.
-            for invf, inv_records, record in inverses_update:
-                invf._update(inv_records, record)
+            for field, record, value in inverses_update:
+                field._update_inverses(record, value)
 
             # if value in cache has not been updated by other_fields, remove it
             for record, field in cachetoclear:
@@ -5497,69 +5495,55 @@ Fields:
                 for invf in model._field_inverses[key]:
                     # use an inverse of field without domain
                     if not (invf.type in ('one2many', 'many2many') and invf.domain):
-                        try:
-                            records = self.mapped(invf.name)
-                        except MissingError:
-                            records = self.exists().mapped(invf.name)
+                        if invf.type == 'many2one_reference':
+                            rec_ids = set()
+                            for rec in self:
+                                if rec[invf.model_field] == key.model_name:
+                                    rec_ids.add(rec[invf.name])
+                            records = model.browse(rec_ids)
+                        else:
+                            try:
+                                records = self.mapped(invf.name)
+                            except MissingError:
+                                records = self.exists().mapped(invf.name)
+
                         # TBE: avoid using different model which will crash when trying to substract them
                         # the issue can be triggered by installing hr_holidays
                         if key.model_name == records._name:
                             break
                 else:
-                    # DLE P121: `test_adv_activity_full`, `test_adv_activity_mixin`
-                    # When creating a mail activity, to find the inverse field that must be updated
-                    # (res.partner.activity_ids, mail.test.activity.activity_ids)
-                    # it did a search on res.partner, with activity_ids in the domain
-                    # e.g. env['res.partner'].search([('activity_ids', in, self.ids)])
-                    # While it had all the information required in self.res_id and self.res_model
-                    # TODO: A better way than hardcoded 'res_id' and 'res_model', possibility attributes for such cases
-                    # in fields.One2many.
-                    # Currently, activity_ids is defined in a mixin as
-                    # activity_ids = fields.One2many('mail.activity', 'res_id', 'Activities', auto_join=True, groups="base.group_user", domain=lambda self: [('res_model', '=', self._name)])
-                    # For instance, these field on ir.model.data are 'res_id' and 'model' (not 'res_model')
-                    # And it does have an opposite:
-                    # model_ids = fields.One2many('ir.model.data', 'res_id', string="Models", domain=[('model', '=', 'ir.ui.view')], auto_join=True)
-                    # That could benefit of the same performance optimization if we find a way to define these res_id/res_model fields on these kind of one2many fields.
-                    if key.type in ('one2many',) and key.inverse_name == 'res_id' and 'res_model' in self._fields:
-                        records = model.browse()
-                        for r in self:
-                            ids = set()
-                            if r.res_model == key.model_name:
-                                ids |= set([r.res_id])
-                            records = model.browse(ids)
-                    else:
-                        # DLE P77: you can't do a search to find the inverse of new records, as they are not yet in database :(
-                        # `test_onchange_one2many_with_domain_on_related_field`
-                        # self.assertEqual(
-                        #     result['value']['important_emails'],
-                        #     [(5,), (1, email.id, {
-                        #         'name': u'[Foo Bar] %s' % USER.name,
-                        #         ...
-                        #     })],
-                        # )
-                        new_records = self.filtered(lambda r: not r.id)
-                        existing_records = self - new_records
-                        records = model.browse()
-                        # DLE P144: `website_sale`
-                        # pricelist_id = fields.Many2one('product.pricelist', compute='_compute_pricelist_id', string='Default Pricelist')
-                        # currency_id = fields.Many2one('res.currency', related='pricelist_id.currency_id', related_sudo=False, string='Default Currency', readonly=False)
-                        # When changing writing on the currency of a pricelist, we look for the website to which we must change the `currency_id`
-                        # To do so, we have to find the website using the pricelist that has been changed,
-                        # which is not possible with a search as this is a compute field not stored.
-                        # But, to be able to have currency_id in the cache, we must have computed the website pricelist
-                        # and so we can assume that if website.currency_id is in the cache, website.pricelist_id is as well.
-                        # We can therefore just take all websites having that pricelist from the cache
-                        if key.store and existing_records:
-                            # DLE P82: `test_event_activity`
-                            # `hr.employee` overrides `_search`, and when you don't have the read access to `hr.employee`,
-                            # it calls `_search` on `hr.employee.public`, which do not share all the same fields than `hr.employee`
-                            # In this specific case, it tries to compute `res_name` of `mail.activity`,
-                            # which requires for that a search on `hr.employee.activity_ids`, which doesn't exist on `hr.employee.public`
-                            # No other way than do this as sudo.
-                            records |= model.sudo().search([(key.name, 'in', existing_records.ids)])
-                        if not key.store or new_records:
-                            cache_records = self.env.cache.get_records(model, key)
-                            records |= cache_records.filtered(lambda r: set(r[key.name]._ids) & set(self._ids))
+                    # DLE P77: you can't do a search to find the inverse of new records, as they are not yet in database :(
+                    # `test_onchange_one2many_with_domain_on_related_field`
+                    # self.assertEqual(
+                    #     result['value']['important_emails'],
+                    #     [(5,), (1, email.id, {
+                    #         'name': u'[Foo Bar] %s' % USER.name,
+                    #         ...
+                    #     })],
+                    # )
+                    new_records = self.filtered(lambda r: not r.id)
+                    existing_records = self - new_records
+                    records = model.browse()
+                    # DLE P144: `website_sale`
+                    # pricelist_id = fields.Many2one('product.pricelist', compute='_compute_pricelist_id', string='Default Pricelist')
+                    # currency_id = fields.Many2one('res.currency', related='pricelist_id.currency_id', related_sudo=False, string='Default Currency', readonly=False)
+                    # When changing writing on the currency of a pricelist, we look for the website to which we must change the `currency_id`
+                    # To do so, we have to find the website using the pricelist that has been changed,
+                    # which is not possible with a search as this is a compute field not stored.
+                    # But, to be able to have currency_id in the cache, we must have computed the website pricelist
+                    # and so we can assume that if website.currency_id is in the cache, website.pricelist_id is as well.
+                    # We can therefore just take all websites having that pricelist from the cache
+                    if key.store and existing_records:
+                        # DLE P82: `test_event_activity`
+                        # `hr.employee` overrides `_search`, and when you don't have the read access to `hr.employee`,
+                        # it calls `_search` on `hr.employee.public`, which do not share all the same fields than `hr.employee`
+                        # In this specific case, it tries to compute `res_name` of `mail.activity`,
+                        # which requires for that a search on `hr.employee.activity_ids`, which doesn't exist on `hr.employee.public`
+                        # No other way than do this as sudo.
+                        records |= model.sudo().search([(key.name, 'in', existing_records.ids)])
+                    if not key.store or new_records:
+                        cache_records = self.env.cache.get_records(model, key)
+                        records |= cache_records.filtered(lambda r: set(r[key.name]._ids) & set(self._ids))
                 records._modified_triggers(val, modified=modified)
 
     @api.model

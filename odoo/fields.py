@@ -989,7 +989,7 @@ class Field(MetaField('DummyField', (object,), {})):
         records = records.filtered(lambda record: cache.get(record, self, NOTHING) != cache_value)
         if not records:
             return records
-        self.set_cache(records, cache_value)
+        cache.update(records, self, [cache_value] * len(records))
 
         # update towrite
         if self.store:
@@ -998,10 +998,6 @@ class Field(MetaField('DummyField', (object,), {})):
                 towrite[record.id][self.name] = value
 
         return records
-
-    def set_cache(self, records, value):
-        cache = records.env.cache
-        cache.update(records, self, [value] * len(records))
 
     ############################################################################
     #
@@ -1412,7 +1408,7 @@ class _String(Field):
         records = records.filtered(lambda record: cache.get(record, self, NOTHING) != cache_value)
         if not records:
             return records
-        self.set_cache(records, cache_value)
+        cache.update(records, self, [cache_value] * len(records))
 
         if not self.store:
             return records
@@ -1938,7 +1934,7 @@ class Binary(Field):
         records = records.filtered(lambda record: cache.get(record, self, NOTHING) != cache_value)
         if not records:
             return records
-        self.set_cache(records, cache_value)
+        cache.update(records, self, [cache_value] * len(records))
 
         # retrieve the attachments that store the values, and adapt them
         if self.store:
@@ -1991,13 +1987,13 @@ class Image(Binary):
             # is the proof. e.g. `record.invalidate_cache(fnames=['image_512'], ids=record.ids)`
             new_value = self._image_process(value)
             new_record_values.append((record, new_value))
-            self.set_cache(record, value if self.related else new_value)
+            record.env.cache.update(record, self, [value if self.related else new_value] * len(record))
         super(Image, self).create(new_record_values)
 
     def write(self, records, value):
         new_value = self._image_process(value)
         super(Image, self).write(records, new_value)
-        self.set_cache(records, value if self.related else new_value)
+        records.env.cache.update(records, self, [value if self.related else new_value] * len(records))
 
     def _image_process(self, value):
         if value and (self.max_width or self.max_height):
@@ -2373,7 +2369,15 @@ class Many2one(_Relational):
         records = records.filtered(lambda record: cache.get(record, self, NOTHING) != cache_value)
         if not records:
             return records
-        self.set_cache(records, cache_value)
+
+        # remove records from the cache of one2many fields of old corecords
+        self._remove_inverses(records, cache_value)
+
+        # update the cache of self
+        cache.update(records, self, [cache_value] * len(records))
+
+        # update the cache of one2many fields of new corecord
+        self._update_inverses(records, cache_value)
 
         # update towrite
         if self.store:
@@ -2384,9 +2388,8 @@ class Many2one(_Relational):
 
         return records
 
-    def set_cache(self, records, value):
+    def _remove_inverses(self, records, value):
         cache = records.env.cache
-        # remove records from the cache of one2many fields of old corecords
         record_ids = set(records._ids)
         for invf in records._field_inverses[self]:
             # DLE P160: `test_00_mrp_byproduct`
@@ -2409,14 +2412,68 @@ class Many2one(_Relational):
                     ids1 = tuple(id_ for id_ in ids0 if id_ not in record_ids)
                     cache.set(corecord, invf, ids1)
 
-        # update the cache of self
-        cache.update(records, self, [value] * len(records))
-
+    def _update_inverses(self, records, value):
+        cache = records.env.cache
         # update the cache of one2many fields of new corecord
         if value is not None:
             corecord = self.convert_to_record(value, records)
             for invf in records._field_inverses[self]:
                 valid_ids = records.filtered_domain(invf.get_domain_list(corecord))._ids
+                if not valid_ids:
+                    continue
+                cache_contains = cache.contains(corecord, invf)
+                # DLE P158: if the value for the corecord is not in cache, but this is a new record, assign it anyway,
+                # as you won't be able to fetch it from database as this is a new record.
+                # `test_sale_order`, which assign line to account.move.invoice_line_ids when assignign lines to account.move.line_ids in the onchange
+                # See `_recompute_dynamic_lines`
+                if cache_contains or not corecord.id:
+                    ids0 = cache.get(corecord, invf) if cache_contains else ()
+                    # DLE P159: `test_in_invoice_line_onchange_business_fields_1`
+                    ids1 = tuple(set(ids0 + valid_ids))
+                    cache.set(corecord, invf, ids1)
+
+
+class Many2oneReference(Integer):
+    type = 'many2one_reference'
+
+    _slots = {
+        'model_field': None,
+    }
+
+    def convert_to_cache(self, value, record, validate=True):
+        # cache format: id or None
+        if isinstance(value, BaseModel):
+            value = value._ids[0] if value._ids else None
+
+        return value
+
+    def _remove_inverses(self, records, value):
+        cache = records.env.cache
+        # remove records from the cache of one2many fields of old corecords
+        record_ids = set(records._ids)
+        for record in records:
+            model = records[self.model_field]
+            if not model:
+                continue
+            for invf in record._field_inverses[self]:
+                corecords = record.env[model].browse(
+                    id_ for id_ in cache.get_values(record, self)
+                )
+                for corecord in corecords:
+                    if cache.contains(corecord, invf):
+                        ids0 = cache.get(corecord, invf)
+                        ids1 = tuple(id_ for id_ in ids0 if id_ not in record_ids)
+                        cache.set(corecord, invf, ids1)
+
+    def _update_inverses(self, records, value):
+        cache = records.env.cache
+        for record in records:
+            model = records[self.model_field]
+            if not model:
+                continue
+            corecord = record.env[model].browse(value)
+            for invf in record._field_inverses[self]:
+                valid_ids = record.filtered_domain(invf.get_domain_list(corecord))._ids
                 if not valid_ids:
                     continue
                 cache_contains = cache.contains(corecord, invf)
@@ -2704,7 +2761,7 @@ class One2many(_RelationalMulti):
             # link self to its inverse field and vice-versa
             comodel = model.env[self.comodel_name]
             invf = comodel._fields[self.inverse_name]
-            if isinstance(invf, Many2one):
+            if isinstance(invf, (Many2one, Many2oneReference)):
                 # setting one2many fields only invalidates many2one inverses;
                 # integer inverses (res_model/res_id pairs) are not supported
                 model._field_inverses.add(self, invf)
@@ -2723,11 +2780,20 @@ class One2many(_RelationalMulti):
             if self.inverse_name not in comodel._fields:
                 raise UserError(_("No inverse field %r found for %r") % (self.inverse_name, self.comodel_name))
 
+    def get_domain_list(self, records):
+        comodel = records.env.registry[self.comodel_name]
+        inverse_field = comodel._fields[self.inverse_name]
+        domain = super(One2many, self).get_domain_list(records)
+        if inverse_field.type == 'many2one_reference':
+            domain = domain + [(inverse_field.model_field, '=', records._name)]
+        return domain
+
     def read(self, records):
         # retrieve the lines in the comodel
         comodel = records.env[self.comodel_name].with_context(**self.context)
         inverse = self.inverse_name
-        get_id = (lambda rec: rec.id) if comodel._fields[inverse].type == 'many2one' else int
+        inverse_field = comodel._fields[inverse]
+        get_id = (lambda rec: rec.id) if inverse_field.type == 'many2one' else int
         domain = self.get_domain_list(records) + [(inverse, 'in', records.ids)]
         lines = comodel.search(domain, limit=self.limit)
 
