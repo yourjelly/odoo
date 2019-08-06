@@ -1614,7 +1614,7 @@ var ReceiptScreenWidget = ScreenWidget.extend({
         this.handle_auto_print();
     },
     handle_auto_print: function() {
-        if (this.should_auto_print()) {
+        if (this.should_auto_print() && !this.pos.get_order().is_to_email()) {
             this.print();
             if (this.should_close_immediately()){
                 this.click_next();
@@ -1999,6 +1999,11 @@ var PaymentScreenWidget = ScreenWidget.extend({
             this.$('.js_invoice').removeClass('highlight');
         }
     },
+    click_email: function(){
+        var order = this.pos.get_order();
+        order.set_to_email(!order.is_to_email());
+        this.$('.js_email').toggleClass('highlight', order.is_to_email());
+    },
     click_tip: function(){
         var self   = this;
         var order  = this.pos.get_order();
@@ -2022,7 +2027,11 @@ var PaymentScreenWidget = ScreenWidget.extend({
     },
     customer_changed: function() {
         var client = this.pos.get_client();
-        this.$('.js_customer_name').text( client ? client.name : _t('Customer') ); 
+        this.$('.js_customer_name').text( client ? client.name : _t('Customer') );
+        this.$('.js_email').toggleClass('oe_hidden', !client);
+        if (!client && this.pos.get_order().is_to_email()) {
+            this.click_email();
+        }
     },
     click_set_customer: function(){
         this.gui.show_screen('clientlist');
@@ -2060,7 +2069,9 @@ var PaymentScreenWidget = ScreenWidget.extend({
         this.$('.js_invoice').click(function(){
             self.click_invoice();
         });
-
+        this.$('.js_email').click(function(){
+            self.click_email();
+        });
         this.$('.js_cashdrawer').click(function(){
             self.pos.proxy.open_cashbox();
         });
@@ -2129,7 +2140,7 @@ var PaymentScreenWidget = ScreenWidget.extend({
             return false;
         }
 
-        // The exact amount must be paid if there is no cash payment method defined.
+        // The exact amount must be paid if there is no cash payment method defined
         if (Math.abs(order.get_total_with_tax() - order.get_total_paid()) > 0.00001) {
             var cash = false;
             for (var i = 0; i < this.pos.cashregisters.length; i++) {
@@ -2142,6 +2153,17 @@ var PaymentScreenWidget = ScreenWidget.extend({
                 });
                 return false;
             }
+        }
+
+        if (order.is_to_email() && !order.get_client().email) {
+            this.gui.show_popup('confirm', {
+                'title': _t('Please fill the Customer Email'),
+                'body': _t('This customer does not have an email address, define one or do not send an email'),
+                confirm: function () {
+                    this.gui.show_screen('clientlist');
+                },
+            });
+            return false;
         }
 
         // if the change is too large, it's probably an input error, make the user confirm.
@@ -2189,9 +2211,21 @@ var PaymentScreenWidget = ScreenWidget.extend({
                 self.invoicing = false;
                 self.gui.show_screen('receipt');
             });
-        } else {
-            this.pos.push_order(order);
-            this.gui.show_screen('receipt');
+        } else if (order.is_to_email() && !order.get_client().email ){
+            order.finalized = false;
+            this.gui.show_popup('confirm',{
+                'title': _t('Please fill the Customer Email'),
+                'body': _t('This customer does not have an email address, define one or do not send an email'),
+                confirm: function(){
+                    this.gui.show_screen('clientlist');
+                },
+            });
+        }else {
+            var ordered = this.pos.push_order(order, {'to_email': order.to_email});
+
+             ordered.then(function(){
+                self.gui.show_screen('receipt');
+            });
         }
 
     },

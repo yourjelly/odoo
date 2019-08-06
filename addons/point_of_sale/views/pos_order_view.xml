@@ -1,16 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <report id="action_pos_ticket_print"
-            string="Ticket"
-            model="pos.order"
-            report_type="qweb-pdf"
-            name="point_of_sale.PosTicket"
-            file="point_of_sale.PosTicket"
-            menu="False"
-            print_report_name="(object.name + '_PosTicket')"
-            attachment_use="False"
-            paperformat="point_of_sale.paperformat_report_pos_ticket"/>
-
     <record id="view_pos_pos_form" model="ir.ui.view">
         <field name="name">pos.order.form</field>
         <field name="model">pos.order</field>

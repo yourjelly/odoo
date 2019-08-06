@@ -695,6 +695,7 @@ class PosOrder(models.Model):
 
         for tmp_order in orders_to_save:
             to_invoice = tmp_order['to_invoice']
+            to_email = tmp_order['to_email']
             order = tmp_order['data']
             if to_invoice:
                 self._match_payment_to_invoice(order)
@@ -712,6 +713,10 @@ class PosOrder(models.Model):
             if to_invoice:
                 pos_order.action_pos_order_invoice()
                 pos_order.account_move.sudo().with_context(force_company=self.env.user.company_id.id).post()
+
+            if to_email:
+                self.env.ref('point_of_sale.email_template_pos_sale').send_mail(pos_order.id)
+
         return order_ids
 
     def test_paid(self):
