@@ -191,7 +191,10 @@ class Lead(models.Model):
     @api.depends('date_open')
     def _compute_day_open(self):
         """ Compute difference between create date and open date """
-        for lead in self.filtered(lambda l: l.date_open and l.create_date):
+        leads = self.filtered(lambda l: l.date_open and l.create_date)
+        others = self - leads
+        others.day_open = None
+        for lead in leads:
             date_create = fields.Datetime.from_string(lead.create_date)
             date_open = fields.Datetime.from_string(lead.date_open)
             lead.day_open = abs((date_open - date_create).days)
@@ -199,7 +202,10 @@ class Lead(models.Model):
     @api.depends('date_closed')
     def _compute_day_close(self):
         """ Compute difference between current date and log date """
-        for lead in self.filtered(lambda l: l.date_closed and l.create_date):
+        leads = self.filtered(lambda l: l.date_closed and l.create_date)
+        others = self - leads
+        others.day_close = None
+        for lead in leads:
             date_create = fields.Datetime.from_string(lead.create_date)
             date_close = fields.Datetime.from_string(lead.date_closed)
             lead.day_close = abs((date_close - date_create).days)
