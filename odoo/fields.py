@@ -1458,7 +1458,7 @@ class _String(Field):
                         src=source_value,
                         value=value,
                         name=tname,
-                        lang=records.env.lang,
+                        lang=lang,
                         type='model',
                         state='translated',
                         res_id=res_id) for res_id in real_recs.ids])
