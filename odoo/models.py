@@ -3182,7 +3182,10 @@ Fields:
             Data = self.env['ir.model.data'].sudo().with_context({})
             Defaults = self.env['ir.default'].sudo()
             Attachment = self.env['ir.attachment']
-
+            # TBE: avoid to recompute fields of inexisting records
+            # This avoid infinite loops when trying to recompute a field that triggers the recompute of
+            # a field using the same compute function, which then retrigger infinitely the computation of those two fields
+            self.env.remove_records_to_compute(self)
             for sub_ids in cr.split_for_in_conditions(self.ids):
                 query = "DELETE FROM %s WHERE id IN %%s" % self._table
                 cr.execute(query, (sub_ids,))
@@ -3215,10 +3218,6 @@ Fields:
             # invalidate the *whole* cache, since the orm does not handle all
             # changes made in the database, like cascading delete!
             self.invalidate_cache()
-            # DLE P118: performance `test_adv_activity_full`
-            # As we just deleted `self`, we can remove the todo directly on it.
-            for field in self._fields.values():
-                self.env.remove_to_compute(field, self)
             # DLE P93: flush after the unlink, for recompute fields depending on the modified of the unlink
             self.flush()
         # auditing: deletions are infrequent and leave no trace in the database

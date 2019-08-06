@@ -660,6 +660,14 @@ class Environment(Mapping):
         if not ids:
             del self.all.tocompute[field]
 
+    def remove_records_to_compute(self, records):
+        if not records:
+            return
+        for field in records._fields.values():
+            ids = self.all.tocompute[field]
+            ids.difference_update(records._ids)
+            if not ids:
+                del self.all.tocompute[field]
     @property
     def recompute(self):
         return self.all.recompute
