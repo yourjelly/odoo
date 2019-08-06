@@ -1358,6 +1358,10 @@ class IrModelData(models.Model):
     date_init = fields.Datetime(string='Init Date', default=fields.Datetime.now)
     reference = fields.Char(string='Reference', compute='_compute_reference', readonly=True, store=False)
 
+    _sql_constraints = [
+        ('name_unique', 'UNIQUE(name)', "XIDs must be unique."),
+    ]
+
     @api.depends('module', 'name')
     def _compute_complete_name(self):
         for res in self:
