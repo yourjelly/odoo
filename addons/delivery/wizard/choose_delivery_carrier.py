@@ -10,17 +10,17 @@ class ChooseDeliveryCarrier(models.TransientModel):
     _description = 'Delivery Carrier Selection Wizard'
 
     order_id = fields.Many2one('sale.order', required=True, ondelete="cascade")
-    partner_id = fields.Many2one('res.partner', related='order_id.partner_id', required=True)
+    partner_id = fields.Many2one('res.partner', related='order_id.partner_id', depends=['order_id'], required=True)
     carrier_id = fields.Many2one(
         'delivery.carrier',
         string="Shipping Method",
         help="Choose the method to deliver your goods",
         required=True,
     )
-    delivery_type = fields.Selection(related='carrier_id.delivery_type')
+    delivery_type = fields.Selection(related='carrier_id.delivery_type', depends=['carrier_id'])
     delivery_price = fields.Float()
     display_price = fields.Float(string='Cost', readonly=True)
-    currency_id = fields.Many2one('res.currency', related='order_id.currency_id')
+    currency_id = fields.Many2one('res.currency', related='order_id.currency_id', depends=['order_id'])
     available_carrier_ids = fields.Many2many("delivery.carrier", compute='_compute_available_carrier', string="Available Carriers")
     invoicing_message = fields.Text(compute='_compute_invoicing_message')
     delivery_message = fields.Text(readonly=True)

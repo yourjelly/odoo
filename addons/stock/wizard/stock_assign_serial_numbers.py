@@ -11,7 +11,7 @@ class StockAssignSerialNumbers(models.TransientModel):
     _description = 'Stock Assign Serial Numbers'
 
     product_id = fields.Many2one('product.product', 'Product',
-        related='move_id.product_id', required=True)
+        related='move_id.product_id', required=True, depends=['move_id'])
     move_id = fields.Many2one('stock.move', required=True)
     next_serial_number = fields.Char('Next Serial Number')
 

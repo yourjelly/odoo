@@ -44,7 +44,7 @@ class SlideChannelInvite(models.TransientModel):
     partner_ids = fields.Many2many('res.partner', string='Recipients')
     # slide channel
     channel_id = fields.Many2one('slide.channel', string='Slide channel', required=True)
-    channel_url = fields.Char(related="channel_id.website_url", readonly=True)
+    channel_url = fields.Char(related="channel_id.website_url", depends=['channel_id'], readonly=True)
 
     @api.onchange('template_id')
     def _onchange_template_id(self):
