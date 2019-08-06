@@ -316,6 +316,8 @@ class ProductTemplate(models.Model):
         for p in self:
             if len(p.product_variant_ids) == 1:
                 p.packaging_ids = p.product_variant_ids.packaging_ids
+            else:
+                p.packaging_ids = False
 
     def _set_packaging_ids(self):
         for p in self:

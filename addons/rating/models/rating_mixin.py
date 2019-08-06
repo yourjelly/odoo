@@ -57,8 +57,7 @@ class RatingMixin(models.AbstractModel):
     def _compute_rating_last_value(self):
         for record in self:
             ratings = self.env['rating.rating'].search([('res_model', '=', self._name), ('res_id', '=', record.id)], limit=1)
-            if ratings:
-                record.rating_last_value = ratings.rating
+            record.rating_last_value = ratings and ratings.rating or 0
 
     @api.depends('rating_ids')
     def _compute_rating_stats(self):
