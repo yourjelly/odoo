@@ -90,13 +90,17 @@ class MrpProduction(models.Model):
         help="Location where the system will stock the finished products.")
     date_planned_start = fields.Datetime(
         'Planned Date', copy=False, default=fields.Datetime.now,
-        help="Plan from: Work orders will be planned based on the availability of the work centers\
-              starting from this date. If empty, the work orders will be planned as soon as possible.\n\
-              Planned date: Date at which you plan to start the production.",
+        help="Date at which you plan to start the production.",
         index=True, required=True, oldname="date_planned")
     date_planned_finished = fields.Datetime(
         'Planned End Date', compute='_compute_date_planned',
         copy=False, store=True)
+    date_from = fields.Datetime(
+        'Planned From', copy=False, default=fields.Datetime.now,
+        compute='_compute_date_from', inverse='_inverse_date_from',
+        help="Work orders will be planned based on the availability of the work centers\
+              starting from this date. If empty, the work orders will be planned as soon as possible.",
+    )
     date_deadline = fields.Datetime(
         'Deadline', copy=False, index=True,
         help="Informative date allowing to define when the manufacturing order should be processed at the latest to fulfill delivery on time.")
@@ -215,6 +219,15 @@ class MrpProduction(models.Model):
                 productions_with_done_move[production_record[0]] = True
         for production in self:
             production.confirm_cancel = productions_with_done_move.get(production.id, False)
+
+    @api.depends('date_planned_start')
+    def _compute_date_from(self):
+        for order in self:
+            order.date_from = order.date_planned_start
+
+    def _inverse_date_from(self):
+        for order in self:
+            order.date_planned_start = order.date_from
 
     @api.depends('procurement_group_id')
     def _compute_picking_ids(self):
