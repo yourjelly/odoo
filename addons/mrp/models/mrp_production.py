@@ -96,8 +96,7 @@ class MrpProduction(models.Model):
         'Planned End Date', compute='_compute_date_planned',
         copy=False, store=True)
     date_from = fields.Datetime(
-        'Planned From', copy=False, default=fields.Datetime.now,
-        compute='_compute_date_from', inverse='_inverse_date_from',
+        'Planned From', related='date_planned_start', readonly=False,
         help="Work orders will be planned based on the availability of the work centers\
               starting from this date. If empty, the work orders will be planned as soon as possible.",
     )
@@ -219,15 +218,6 @@ class MrpProduction(models.Model):
                 productions_with_done_move[production_record[0]] = True
         for production in self:
             production.confirm_cancel = productions_with_done_move.get(production.id, False)
-
-    @api.depends('date_planned_start')
-    def _compute_date_from(self):
-        for order in self:
-            order.date_from = order.date_planned_start
-
-    def _inverse_date_from(self):
-        for order in self:
-            order.date_planned_start = order.date_from
 
     @api.depends('procurement_group_id')
     def _compute_picking_ids(self):
