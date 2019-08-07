@@ -4161,7 +4161,7 @@ Fields:
                                     to_flush[model._name].add(f)
                                     if rfield.type in ('many2one', 'one2many', 'many2many'):
                                         model = self.env[rfield.comodel_name]
-                                        if rfield.type in ('one2many', 'many2many'):
+                                        if rfield.type == 'one2many':
                                             to_flush[rfield.comodel_name].add(rfield.inverse_name)
                         if field.comodel_name:
                             model_name = field.comodel_name
