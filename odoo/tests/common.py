@@ -1029,7 +1029,12 @@ class HttpCase(TransactionCase):
         step_delay = ', %s' % step_delay if step_delay else ''
         code = kwargs.pop('code', "odoo.startTour('%s'%s)" % (tour_name, step_delay))
         ready = kwargs.pop('ready', "odoo.__DEBUG__.services['web_tour.tour'].tours.%s.ready" % tour_name)
-        return self.browser_js(url_path=url_path, code=code, ready=ready, **kwargs)
+        res = self.browser_js(url_path=url_path, code=code, ready=ready, **kwargs)
+        # Some tests reads the results after the tour ran, and as the tour and the test file do not share the same cache,
+        # invalidate the test cache so it fetches the data from databases after the tour ran.
+        # e.g. test_barcode_client_action.py
+        self.env.cache.invalidate()
+        return res
 
     phantom_js = browser_js
 
