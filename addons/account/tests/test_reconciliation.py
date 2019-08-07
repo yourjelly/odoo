@@ -23,7 +23,7 @@ class TestReconciliation(AccountingTestCase):
         self.res_currency_model = self.registry('res.currency')
         self.res_currency_rate_model = self.registry('res.currency.rate')
 
-        self.partner_agrolait = self.env.ref("base.res_partner_2")
+        self.partner_agrolait = self.env['res.partner'].create({'name': 'Partner Test'})
         self.partner_agrolait_id = self.partner_agrolait.id
         self.currency_swiss_id = self.env.ref("base.CHF").id
         self.currency_usd_id = self.env.ref("base.USD").id
@@ -32,7 +32,7 @@ class TestReconciliation(AccountingTestCase):
         self.cr.execute("UPDATE res_company SET currency_id = %s WHERE id = %s", [self.currency_euro_id, company.id])
         self.account_rcv = self.partner_agrolait.property_account_receivable_id or self.env['account.account'].search([('user_type_id', '=', self.env.ref('account.data_account_type_receivable').id)], limit=1)
         self.account_rsa = self.partner_agrolait.property_account_payable_id or self.env['account.account'].search([('user_type_id', '=', self.env.ref('account.data_account_type_payable').id)], limit=1)
-        self.product = self.env.ref("product.product_product_4")
+        self.product = self.env['product.product'].create({'name': 'Customizable Desk', 'type': 'consu', 'list_price': 750.0, 'standard_price': 500.0, 'taxes_id': False})
 
         self.bank_journal_euro = self.env['account.journal'].create({'name': 'Bank', 'type': 'bank', 'code': 'BNK67'})
         self.account_euro = self.bank_journal_euro.default_debit_account_id
