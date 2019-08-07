@@ -55,7 +55,7 @@ class Message(models.Model):
     child_ids = fields.One2many('mail.message', 'parent_id', 'Child Messages')
     # related document
     model = fields.Char('Related Document Model', index=True)
-    res_id = fields.Integer('Related Document ID', index=True)
+    res_id = fields.Many2oneReference('Related Document ID', index=True, model_field='model')
     record_name = fields.Char('Message Record Name', help="Name get of the related document.")
     # characteristics
     message_type = fields.Selection([

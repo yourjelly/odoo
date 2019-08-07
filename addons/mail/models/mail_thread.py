@@ -91,7 +91,7 @@ class MailThread(models.AbstractModel):
         compute='_get_followers', search='_search_follower_channels')
     message_ids = fields.One2many(
         'mail.message', 'res_id', string='Messages',
-        domain=lambda self: [('model', '=', self._name), ('message_type', '!=', 'user_notification')], auto_join=True)
+        domain=lambda self: [('message_type', '!=', 'user_notification')], auto_join=True)
     message_unread = fields.Boolean(
         'Unread Messages', compute='_get_message_unread',
         help="If checked new messages require your attention.")

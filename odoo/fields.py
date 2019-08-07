@@ -2495,6 +2495,8 @@ class Many2oneReference(Integer):
             if not model and record._fields[self.model_field].compute:
                 record._fields[self.model_field].compute_value(record)
                 model = record[self.model_field]
+            if not model:
+                continue
             model_record_ids.setdefault(model, set()).add(record.id)
         return model_record_ids
 
