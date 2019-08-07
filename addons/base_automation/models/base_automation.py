@@ -98,8 +98,8 @@ class BaseAutomation(models.Model):
     def create(self, vals):
         vals['usage'] = 'base_automation'
         base_automation = super(BaseAutomation, self).create(vals)
-        self._update_cron()
-        self._update_registry()
+        base_automation._update_cron()
+        base_automation._update_registry()
         return base_automation
 
     def write(self, vals):
@@ -130,6 +130,13 @@ class BaseAutomation(models.Model):
             self.env.reset()
             registry = Registry.new(self._cr.dbname)
             registry.registry_invalidated = True
+            # DLE P184: Creating a new automated action raised a miss cache on display_name
+            # This is because the display_name is computed as sudo, which create a new env, and,
+            # as we just reset the envs, just above (self.env.reset),
+            # creating the new env (as sudo) does not share the same cache, and when computing display_name
+            # it sets the value in the cache of the new sudo env, but not in the current env, as they no longer share the same cache.
+            # overiding the current env with a new env using the new registry solves the issue.
+            self.env = api.Environment(self.env.cr, self.env.uid, self.env.context)
 
     def _get_actions(self, records, triggers):
         """ Return the actions of the given triggers for records' model. The
