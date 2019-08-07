@@ -761,6 +761,7 @@ class IrModelFields(models.Model):
 
         res = super(IrModelFields, self).write(vals)
 
+        self.flush()
         self.clear_caches()                         # for _existing_field_data()
 
         if column_rename:
