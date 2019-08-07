@@ -3181,8 +3181,8 @@ Fields:
             cr = self._cr
             Data = self.env['ir.model.data'].sudo().with_context({})
             Defaults = self.env['ir.default'].sudo()
-            Attachment = self.env['ir.attachment']
-            ir_model_data_unlink = self.env['ir.model.data']
+            Attachment = self.env['ir.attachment'].sudo()
+            ir_model_data_unlink = Data
             ir_attachment_unlink = Attachment
             # TBE: avoid to recompute fields of inexisting records
             # This avoid infinite loops when trying to recompute a field that triggers the recompute of
@@ -3220,8 +3220,10 @@ Fields:
             # invalidate the *whole* cache, since the orm does not handle all
             # changes made in the database, like cascading delete!
             self.invalidate_cache()
-            ir_model_data_unlink.unlink()
-            ir_attachment_unlink.unlink()
+            if ir_model_data_unlink:
+                ir_model_data_unlink.unlink()
+            if ir_attachment_unlink:
+                ir_attachment_unlink.unlink()
             # DLE P93: flush after the unlink, for recompute fields depending on the modified of the unlink
             self.flush()
         # auditing: deletions are infrequent and leave no trace in the database
