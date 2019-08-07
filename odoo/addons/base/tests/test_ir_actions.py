@@ -325,7 +325,7 @@ class TestCustomFields(common.TransactionCase):
         """ one cannot create two fields with the same name on a given model """
         field1 = self.create_field('x_foo')
         field2 = self.create_field('x_bar')
-        with self.assertRaises(ProgrammingError), mute_logger('odoo.sql_db'):
+        with self.assertRaises(IntegrityError), mute_logger('odoo.sql_db'):
             field2.name = field1.name
 
     def test_remove_without_view(self):
