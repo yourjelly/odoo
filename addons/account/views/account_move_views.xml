@@ -612,14 +612,23 @@
                                            attrs="{'invisible': [('type', 'not in', ('in_invoice', 'in_refund', 'in_receipt'))]}"/>
                                 </div>
                                 <field name="invoice_date" nolabel="1"
-                                       attrs="{'invisible': [('type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))]}"/>
+                                       attrs="{
+                                            'invisible': [('type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))],
+                                            'readonly': [('state', '!=', 'draft')],
+                                        }"/>
 
                                 <field name="date" string="Accounting Date"
-                                       attrs="{'invisible': [('type', 'in', ('out_invoice', 'out_refund', 'out_receipt'))]}"/>
+                                       attrs="{
+                                            'invisible': [('type', 'in', ('out_invoice', 'out_refund', 'out_receipt'))],
+                                            'readonly': [('state', '!=', 'draft')],
+                                        }"/>
 
                                 <!-- Invoice payment terms (only invoices) + due date (only invoices / receipts) -->
                                 <label for="invoice_payment_term_id"
-                                       attrs="{'invisible': [('type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))]}"/>
+                                       attrs="{
+                                            'invisible': [('type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))],
+                                            'readonly': [('state', '!=', 'draft')],
+                                        }"/>
                                 <div class="d-flex" attrs="{'invisible': [('type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))]}">
                                     <field name="invoice_payment_term_id"
                                            placeholder="Terms"
@@ -635,21 +644,22 @@
                                        invisible="context.get('default_journal_id') and context.get('type', 'entry') != 'entry'"
                                        groups="account.group_account_user"
                                        options="{'no_create': True}"
+                                       attrs="{'readonly': [('state', '!=', 'draft')]}"
                                        domain="[('type', '=?', invoice_filter_type_domain)]"/>
 
                                 <field name="currency_id"
                                        groups="base.group_multi_currency"
-                                       attrs="{'invisible': [('type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'))]}"/>
+                                       attrs="{
+                                            'invisible': [('type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'))],
+                                            'readonly': [('state', '!=', 'draft')],
+                                       }"/>
                             </group>
                         </group>
                         <notebook>
                             <page id="invoice_tab"
                                   string="Invoice Lines"
                                   attrs="{'invisible': [('type', '=', 'entry')]}">
-                                <field name="invoice_line_ids"
-                                       widget="section_and_note_one2many"
-                                       mode="tree,kanban"
-                                       context="{'journal_id': journal_id, 'default_partner_id': commercial_partner_id, 'default_currency_id': currency_id != company_currency_id and currency_id or False}">
+                                <field name="invoice_line_ids" widget="section_and_note_one2many">
                                     <tree editable="bottom" string="Journal Items" default_order="sequence, date desc, move_name desc, id">
                                         <control>
                                             <create name="add_line_control" string="Add a line"/>
@@ -698,6 +708,7 @@
                                         <field name="debit" invisible="1"/>
                                         <field name="credit" invisible="1"/>
                                         <field name="date" invisible="1"/>
+                                        <field name="balance" invisible="1"/>
                                         <field name="date_maturity" invisible="1"/>
 
                                         <field name="tax_line_id" invisible="1"/>
@@ -705,7 +716,7 @@
                                         <field name="tag_ids" invisible="1"/>
                                         <field name="tax_base_amount" invisible="1"/>
                                         <field name="tax_exigible" invisible="1"/>
-                                        <field name="company_id" invisible="1"/>
+                                        <field name="company_id" invisible="1" force_save="1"/>
                                         <field name="company_currency_id" invisible="1"/>
                                         <field name="recompute_tax_line" invisible="1" force_save="1"/>
                                         <field name="display_type" force_save="1" invisible="1"/>
@@ -739,8 +750,7 @@
                                 <field name="narration" placeholder="Add an internal note..." nolabel="1" height="50"/>
                             </page>
                             <page id="aml_tab" string="Journal Items" groups="account.group_account_user">
-                                <field name="line_ids"
-                                       context="{'line_ids': line_ids, 'journal_id': journal_id, 'default_partner_id': commercial_partner_id, 'default_currency_id': currency_id != company_currency_id and currency_id or False}">
+                                <field name="line_ids">
                                     <tree editable="bottom" string="Journal Items" decoration-muted="display_type in ('line_section', 'line_note')" default_order="sequence, date desc, move_name desc, id">
                                         <!-- Displayed fields -->
                                         <field name="account_id"
@@ -803,6 +813,7 @@
                                         <field name="discount" invisible="1"/>
                                         <field name="price_subtotal" invisible="1"/>
                                         <field name="price_total" invisible="1"/>
+                                        <field name="balance" invisible="1"/>
 
                                         <field name="sequence" invisible="1"/>
                                         <field name="move_name" invisible="1"/>
@@ -812,7 +823,7 @@
                                         <field name="tax_repartition_line_id" invisible="1" force_save="1"/>
                                         <field name="tax_base_amount" invisible="1" force_save="1"/>
                                         <field name="tax_exigible" invisible="1" force_save="1"/>
-                                        <field name="company_id" invisible="1"/>
+                                        <field name="company_id" invisible="1" force_save="1"/>
                                         <field name="company_currency_id" invisible="1"/>
                                         <field name="recompute_tax_line" invisible="1" force_save="1"/>
                                         <field name="display_type" force_save="1" invisible="1"/>
@@ -857,7 +868,8 @@
                                            name="accounting_info_group"
                                            attrs="{'invisible': [('type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'))]}">
                                         <field name="invoice_incoterm_id"/>
-                                        <field name="fiscal_position_id"/>
+                                        <field name="fiscal_position_id"
+                                               attrs="{'readonly': [('state', '!=', 'draft')]}"/>
                                         <field name="invoice_cash_rounding_id" groups="account.group_cash_rounding"/>
                                         <field name="invoice_source_email"
                                                widget="email"
