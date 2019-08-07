@@ -1024,7 +1024,7 @@ class Field(MetaField('DummyField', (object,), {})):
             recs = record if self.recursive else env.records_to_compute(self)
             try:
                 self.compute_value(recs)
-            except Exception:
+            except AccessError:
                 self.compute_value(record)
 
         try:

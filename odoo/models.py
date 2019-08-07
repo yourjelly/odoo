@@ -3642,6 +3642,7 @@ Fields:
         records = self.browse(ids)
         # DLE P138
         inverses_update = {}
+        compute_inversed = defaultdict(set)
         for data, record in zip(data_list, records):
             data['record'] = record
             # DLE P104: test_inherit.py, test_50_search_one2many
@@ -3663,6 +3664,8 @@ Fields:
                     self.env.cache.set(record, field, cache_value)
                     if field.type in ('many2one', 'many2one_reference') and record._field_inverses[field]:
                         inverses_update.setdefault((field, cache_value), set()).add(record.id)
+                if field.compute and field.store and field.inverse:
+                    compute_inversed[field].add(record.id)
         # DLE P138: `test_activity_flow_employee`, res_model is a related to res_model_id, yet it is used.
         for (field, value), record_ids in inverses_update.items():
             field._update_inverses(self.browse(record_ids), value)
@@ -3676,6 +3679,23 @@ Fields:
             # mark computed fields as todo
             # DLE P31: modification of a *2many field can trigger a compute field
             # e.g. ir.rule.global depends on `ir.rule.groups`
+            for field in self._fields.values():
+                if field.compute and field.store:
+                    # DLE P183: mrp.workcenter working_state field on creation of the working center
+                    # The issue occurs since we removed the one2many from the field_triggers,
+                    # as we rely on the write of the inverse many2one to trigger the modified of fields depending on the one2many
+                    # Here the issue occurs for stored compute field depending on one2many which must be something else than Falsy on creation
+                    # e.g. mrp.workcenter.working_state must be 'normal' when there is no `time_ids`
+                    # When the workcenter is created, there is no write on the inverse many2one of `time_ids`,
+                    # and therefore its modifieds do not occur, and working_state is not computed as it should.
+                    # I solve this by forcing the compute of compute stored fields at creation.
+                    # Be careful to not recompute compute fields which has an inverse method and which were inversed during the above creation
+                    # e.g. `test_13_inverse`
+                    inversed_record_ids = compute_inversed.get(field, [])
+                    recs = records
+                    if inversed_record_ids:
+                        recs = records - records.browse(inversed_record_ids)
+                    recs.env.add_to_compute(field, recs)
             records.modified(self._fields)
 
             if other_fields:

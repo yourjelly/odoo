@@ -27,7 +27,7 @@ class account_journal(models.Model):
                 journal.kanban_dashboard_graph = json.dumps(journal.get_line_graph_datas())
             else:
                 # DLE P71: no longer assume computed field are initialized to False
-                self.kanban_dashboard_graph = False
+                journal.kanban_dashboard_graph = False
 
     def _get_json_activity_data(self):
         for journal in self:
