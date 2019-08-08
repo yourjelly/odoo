@@ -721,7 +721,7 @@ class Field(MetaField('DummyField', (object,), {})):
         def add_trigger(field, path):
             """ add a trigger on field to recompute self """
             field_model = model.env[field.model_name]
-            nodes = [field_model._field_triggers_onchange.setdefault(field, {})]
+            nodes = [field_model._field_triggers_create.setdefault(field, {})]
             if (field.type != 'one2many') or not field_model._field_inverses[field]:
                 nodes.append(field_model._field_triggers.setdefault(field, {}))
             for node in nodes:
@@ -1096,7 +1096,7 @@ class Field(MetaField('DummyField', (object,), {})):
         if new_records:
             # new records: no business logic
             with records.env.protecting(records._field_computed.get(self, [self]), records):
-                new_records.modified([self.name], onchange=True)
+                new_records.modified([self.name], create=True)
                 self.write(new_records, value)
                 if self.relational:
                     new_records.modified([self.name])
