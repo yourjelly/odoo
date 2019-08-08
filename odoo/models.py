@@ -3532,7 +3532,7 @@ Fields:
                 # DLE P83: `test_validation_error`, ignore the protection of compute fields which do not have an inverse
                 # Otherwise their computation are not correctly performed, neither the fields which are computed in the same compute method.
                 if not field.compute or field.inverse:
-                    protected.update([field])
+                    protected.update(self._field_computed.get(field, [field]))
 
             data_list.append(data)
 
