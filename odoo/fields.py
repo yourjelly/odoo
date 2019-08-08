@@ -2429,7 +2429,11 @@ class Many2one(_Relational):
                 if cache_contains or not corecord.id:
                     ids0 = cache.get(corecord, invf) if cache_contains else ()
                     # DLE P159: `test_in_invoice_line_onchange_business_fields_1`
-                    ids1 = tuple(set(ids0 + valid_ids))
+                    # OrderedSet instead of set to force a determinist order
+                    # e.g.
+                    # set((5, 1, 4, 3) + (5, 3)) = (1, 3, 4, 5)
+                    # OrderedSet((5, 1, 4, 3) + (5, 3)) = (5, 1, 4, 3)
+                    ids1 = tuple(OrderedSet(ids0 + valid_ids))
                     cache.set(corecord, invf, ids1)
 
 
