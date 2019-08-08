@@ -213,7 +213,7 @@ class TestInvoiceTaxes(AccountingTestCase):
         self.assertEqual(len(inv_tax_lines), 2, "There should be two tax lines, one for each repartition line.")
         self.assertEqual(abs(inv_tax_lines.filtered(lambda x: x.account_id == account_1).balance), 4.2, "Tax line on account 1 should amount to 4.2 (10% of 42)")
         self.assertEqual(inv_tax_lines.filtered(lambda x: x.account_id == account_1).tag_ids, inv_tax_tag_10, "Tax line on account 1 should have 10% tag")
-        self.assertEqual(abs(inv_tax_lines.filtered(lambda x: x.account_id == account_2).balance), 37.8, "Tax line on account 2 should amount to 37.8 (90% of 42)")
+        self.assertEqual(abs(inv_tax_lines.filtered(lambda x: x.account_id == account_2).balance), 46.2, "Tax line on account 2 should amount to 46.2 (42 + 10%)")
         self.assertEqual(inv_tax_lines.filtered(lambda x: x.account_id == account_2).tag_ids, inv_tax_tag_90, "Tax line on account 2 should have 90% tag")
 
         # Test refund repartition
