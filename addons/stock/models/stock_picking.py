@@ -199,6 +199,7 @@ class PickingType(models.Model):
             'search_default_picking_type_id': [self.id],
             'default_picking_type_id': self.id,
             'default_immediate_transfer': default_immediate_tranfer,
+            'default_company_id': self.company_id.id,
         }
 
         action_context = literal_eval(action['context'])
@@ -233,7 +234,7 @@ class PickingType(models.Model):
 
 class Picking(models.Model):
     _name = "stock.picking"
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'company.consistency.mixin']
     _description = "Transfer"
     _order = "priority desc, date asc, id desc"
 
@@ -251,6 +252,7 @@ class Picking(models.Model):
         'stock.picking', 'Back Order of',
         copy=False, index=True,
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
+        domain="[('company_id', '=', company_id)]",
         help="If this shipment was split, then this field links to the shipment which contains the already processed part.")
 
     backorder_ids = fields.One2many('stock.picking', 'backorder_id', 'Back Orders')
@@ -302,11 +304,13 @@ class Picking(models.Model):
     location_id = fields.Many2one(
         'stock.location', "Source Location",
         default=lambda self: self.env['stock.picking.type'].browse(self._context.get('default_picking_type_id')).default_location_src_id,
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         readonly=True, required=True,
         states={'draft': [('readonly', False)]})
     location_dest_id = fields.Many2one(
         'stock.location', "Destination Location",
         default=lambda self: self.env['stock.picking.type'].browse(self._context.get('default_picking_type_id')).default_location_dest_id,
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         readonly=True, required=True,
         states={'draft': [('readonly', False)]})
     move_lines = fields.One2many('stock.move', 'picking_id', string="Stock Moves", copy=True)
@@ -317,6 +321,7 @@ class Picking(models.Model):
         'stock.picking.type', 'Operation Type',
         required=True,
         readonly=True,
+        domain="[('company_id', '=', company_id)]",
         states={'draft': [('readonly', False)]})
     picking_type_code = fields.Selection([
         ('incoming', 'Vendors'),
@@ -328,12 +333,11 @@ class Picking(models.Model):
 
     partner_id = fields.Many2one(
         'res.partner', 'Contact',
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
     company_id = fields.Many2one(
-        'res.company', 'Company',
-        default=lambda self: self.env.company,
-        index=True, required=True,
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
+        'res.company', string='Company',
+        readonly=True, store=True, required=True, index=True)
     user_id = fields.Many2one(
         'res.users', 'Responsible', tracking=True,
         domain=lambda self: [('groups_id', 'in', self.env.ref('stock.group_stock_user').id)],
@@ -365,6 +369,7 @@ class Picking(models.Model):
     owner_id = fields.Many2one(
         'res.partner', 'Assign owner',
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         help="When validating the transfer, the products will be assigned to this owner.")
     printed = fields.Boolean('Printed')
     is_locked = fields.Boolean(default=True, help='When the picking is not done this allows changing the '
@@ -538,6 +543,8 @@ class Picking(models.Model):
             if self.state == 'draft':
                 self.location_id = location_id
                 self.location_dest_id = location_dest_id
+                self.company_id = self.picking_type_id.company_id
+
         # TDE CLEANME move into onchange_partner_id
         if self.partner_id and self.partner_id.picking_warn:
             if self.partner_id.picking_warn == 'no-message' and self.partner_id.parent_id:
@@ -556,12 +563,15 @@ class Picking(models.Model):
 
     @api.model
     def create(self, vals):
-        # TDE FIXME: clean that brol
         defaults = self.default_get(['name', 'picking_type_id'])
+        picking_type = self.env['stock.picking.type'].browse(vals.get('picking_type_id', defaults.get('picking_type_id')))
         if vals.get('name', '/') == '/' and defaults.get('name', '/') == '/' and vals.get('picking_type_id', defaults.get('picking_type_id')):
-            vals['name'] = self.env['stock.picking.type'].browse(vals.get('picking_type_id', defaults.get('picking_type_id'))).sequence_id.next_by_id()
+            vals['name'] = picking_type.sequence_id.next_by_id()
 
-        # TDE FIXME: what ?
+        # FIXME sle maybe we want that everywhere?
+        if 'company_id' not in vals and not 'default_company_id' in self.env.context:
+            vals['company_id'] = picking_type.company_id.id
+
         # As the on_change in one2many list is WIP, we will overwrite the locations on the stock moves here
         # As it is a create the format will be a list of (0, 0, dict)
         moves = vals.get('move_lines') or vals.get('move_ids_without_package')
@@ -575,6 +585,8 @@ class Picking(models.Model):
         return res
 
     def write(self, vals):
+        if vals.get('picking_type_id') and self.state != 'draft':
+            raise UserError(_("Changing the operation type of this record is forbidden at this point."))
         res = super(Picking, self).write(vals)
         # Change locations of moves if those of the picking change
         after_vals = {}
@@ -616,6 +628,7 @@ class Picking(models.Model):
         return self.env.ref('stock.action_report_picking').report_action(self)
 
     def action_confirm(self):
+        self._company_consistency_check()
         self.mapped('package_level_ids').filtered(lambda pl: pl.state == 'draft' and not pl.move_ids)._generate_moves()
         # call `_action_confirm` on every draft move
         self.mapped('move_lines')\
@@ -655,7 +668,8 @@ class Picking(models.Model):
         Normally that happens when the button "Done" is pressed on a Picking view.
         @return: True
         """
-        # TDE FIXME: remove decorator when migration the remaining
+        self._company_consistency_check()
+
         todo_moves = self.mapped('move_lines').filtered(lambda self: self.state in ['draft', 'waiting', 'partially_available', 'assigned', 'confirmed'])
         # Check if there are ops not linked to moves yet
         for pick in self:
@@ -696,7 +710,8 @@ class Picking(models.Model):
                                                     'location_dest_id': pick.location_dest_id.id,
                                                     'picking_id': pick.id,
                                                     'picking_type_id': pick.picking_type_id.id,
-                                                    'restrict_partner_id': pick.owner_id.id
+                                                    'restrict_partner_id': pick.owner_id.id,
+                                                    'company_id': pick.company_id.id,
                                                    })
                     ops.move_id = new_move.id
                     new_move._action_confirm()
@@ -1199,3 +1214,12 @@ class Picking(models.Model):
         action['context'] = self.env.context
         action['domain'] = [('picking_id', 'in', self.ids)]
         return action
+
+    def _company_consistency_m2o_required_cid_fields(self):
+        res = super(Picking, self)._company_consistency_m2o_required_cid_fields()
+        return res + ['backorder_id', 'picking_type_id']
+
+    def _company_consistency_m2o_optional_cid_fields(self):
+        res = super(Picking, self)._company_consistency_m2o_optional_cid_fields()
+        return res + ['location_id', 'location_dest_id', 'partner_id', 'owner_id']
+
