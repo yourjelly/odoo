@@ -238,9 +238,12 @@ class AccountInvoice(models.Model):
 
     @api.one
     def _create_invoice_from_attachment(self, attachment):
-        if 'pdf' in attachment.mimetype:
+        # Handle both _Attachment namedtuple from mail.thread or real ir.attachment
+        fname = getattr(attachment, 'fname', '') or attachment.name
+        mtype = (getattr(attachment, 'mimetype', '') or fname.split('.')[-1]).lower()
+        if 'pdf' in mtype:
             self._create_invoice_from_pdf(attachment)
-        if 'xml' in attachment.mimetype:
+        elif 'xml' in mtype:
             self._create_invoice_from_xml(attachment)
 
     def _create_invoice_from_pdf(self, attachment):
