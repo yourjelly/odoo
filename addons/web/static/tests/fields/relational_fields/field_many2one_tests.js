@@ -1769,6 +1769,7 @@ QUnit.module('fields', {}, function () {
         });
 
         QUnit.test('X2Many sequence list in modal', async function (assert) {
+            var done = assert.async();
             assert.expect(5);
 
             this.data.partner.fields.sequence = { string: 'Sequence', type: 'integer' };
@@ -1832,6 +1833,9 @@ QUnit.module('fields', {}, function () {
                 },
             });
 
+            // need to prepend view on body because html5 drag and drop is not working if view is not available in DOM
+            var $view = $('#qunit-fixture').contents();
+            $view.prependTo('body');
             await testUtils.form.clickEdit(form);
             await testUtils.dom.click(form.$('.o_data_cell'));
             await testUtils.dom.click(form.$('.o_external_button'));
@@ -1845,15 +1849,17 @@ QUnit.module('fields', {}, function () {
                 'There should be 2 sequence handlers');
 
             await testUtils.dom.dragAndDrop($handles.eq(1),
-                $modal.find('tbody tr').first(), { position: 'top' });
+                $modal.find('tbody tr').first(), { position: 'top', nativeDragAndDrop: true });
 
             // Saving the modal and then the original model
             await testUtils.dom.click($modal.find('.modal-footer .btn-primary'));
             await testUtils.form.clickSave(form);
 
             assert.verifySteps(['onchange sequence', 'partner_type write']);
-
+            
+            $view.remove();
             form.destroy();
+            done();
         });
 
         QUnit.test('autocompletion in a many2one, in form view with a domain', async function (assert) {

@@ -1,6 +1,6 @@
 odoo.define('web.kanban_mobile_tests', function (require) {
 "use strict";
-
+var concurrency = require('web.concurrency');
 var KanbanView = require('web.KanbanView');
 var testUtils = require('web.test_utils');
 
@@ -77,9 +77,9 @@ QUnit.module('Views', {
             "first tab is the active tab with class 'o_current'");
         assert.hasClass(kanban.$('.o_kanban_group:first'),'o_current',
             "first column is the active column with class 'o_current'");
-        assert.containsN(kanban, '.o_kanban_group:first > div.o_kanban_record', 2,
+        assert.containsN(kanban, '.o_kanban_group:first .o_kanban_record_wrap > div.o_kanban_record', 2,
             "there are 2 records in active tab");
-        assert.strictEqual(kanban.$('.o_kanban_group:nth(1) > div.o_kanban_record').length, 0,
+        assert.strictEqual(kanban.$('.o_kanban_group:nth(1) .o_kanban_record_wrap > div.o_kanban_record').length, 0,
             "there is no records in next tab. Records will be loaded when it will be opened");
 
         // quick create in first column
@@ -194,5 +194,48 @@ QUnit.module('Views', {
 
         kanban.destroy();
     });
+
+    QUnit.test('drag and drop in mobile', function (assert) {
+        var done = assert.async();
+        assert.expect(1);
+         var def1 = $.Deferred();
+        var leftSwipeCount = 0;
+        var kanban = createView({
+            View: KanbanView,
+            model: 'partner',
+            data: this.data,
+            arch: '<kanban class="o_kanban_test o_kanban_small_column">' +
+                    '<templates><t t-name="kanban-box">' +
+                        '<div><field name="foo"/></div>' +
+                    '</t></templates>' +
+                '</kanban>',
+            groupBy: ['foo'],
+        });
+         var $view = $('#qunit-fixture').contents();
+        $view.prependTo('body');
+        var $record = kanban.$('.o_kanban_group .o_kanban_record_wrap:eq(0) .o_kanban_record:first');
+        var elementCenter = $record.offset();
+        var $to = kanban.$('.o_kanban_group .o_kanban_record_wrap:eq(1)');
+        var toOffset = $to.offset();
+        toOffset.left += $to.outerWidth()/2;
+        toOffset.top += $to.outerHeight()/2;
+        // cant call dragAndDrop method because we need to drag card till end of kanban view
+        // because we have put the delay of 200 ms 
+        testUtils.triggerPositionalMouseEvent(elementCenter.left, elementCenter.top, 'mousedown', $record[0]);
+        kanban.$('.o_kanban_mobile_tab:nth(1)').trigger('click');
+        concurrency.delay(200).then(function () {
+            testUtils.triggerPositionalMouseEvent(toOffset.left, toOffset.top, 'mousemove', $record[0]);
+            concurrency.delay(50).then(function () {
+                testUtils.triggerPositionalMouseEvent(toOffset.left, toOffset.top , 'mouseup', $record[0]);
+                assert.strictEqual(kanban.$('.o_kanban_group:eq(1) .o_kanban_record_wrap .o_kanban_record').length, 3,
+                            "column should now contain 2 records");
+                 $view.remove();
+                kanban.destroy();
+                done();
+            });
+        });
+    });
+
+    
 });
 });

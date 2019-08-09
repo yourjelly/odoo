@@ -3960,7 +3960,9 @@ QUnit.module('Views', {
                 return this._super.apply(this, arguments);
             },
         });
-
+        // need to prepend view on body because html5 drag and drop is not working if view is not available in DOM
+        var $view = $('#qunit-fixture').contents();
+        $view.prependTo('body');
         assert.strictEqual(list.$('tbody tr:eq(0) td:last').text(), '1200',
             "default first record should have amount 1200");
         assert.strictEqual(list.$('tbody tr:eq(1) td:last').text(), '500',
@@ -3974,7 +3976,7 @@ QUnit.module('Views', {
         await testUtils.dom.dragAndDrop(
             list.$('.ui-sortable-handle').eq(3),
             list.$('tbody tr').first(),
-            {position: 'bottom'}
+            {position: 'bottom', nativeDragAndDrop: true}
         );
 
         assert.strictEqual(list.$('tbody tr:eq(0) td:last').text(), '1200',
@@ -3985,7 +3987,7 @@ QUnit.module('Views', {
             "new third record should have amount 500");
         assert.strictEqual(list.$('tbody tr:eq(3) td:last').text(), '300',
             "new fourth record should have amount 300");
-
+        $view.remove();
         list.destroy();
     });
 
@@ -4050,12 +4052,15 @@ QUnit.module('Views', {
                 return this._super.apply(this, arguments);
             },
         });
+        // need to prepend view on body because html5 drag and drop is not working if view is not available in DOM
+        var $view = $('#qunit-fixture').contents();
+        $view.prependTo('body');
         assert.strictEqual(list.$('tbody tr td.o_list_number').text(), '1234',
             "default should be sorted by id");
         await testUtils.dom.dragAndDrop(
             list.$('.ui-sortable-handle').eq(3),
             list.$('tbody tr').eq(2),
-            {position: 'top'}
+            {position: 'left', nativeDragAndDrop: true}
         );
         assert.strictEqual(list.$('tbody tr td.o_list_number').text(), '1243',
             "the int_field (sequence) should have been correctly updated");
@@ -4063,7 +4068,7 @@ QUnit.module('Views', {
         await testUtils.dom.dragAndDrop(
             list.$('.ui-sortable-handle').eq(2),
             list.$('tbody tr').eq(1),
-            {position: 'top'}
+            {position: 'top', nativeDragAndDrop: true}
         );
         assert.deepEqual(list.$('tbody tr td.o_list_number').text(), '1423',
             "the int_field (sequence) should have been correctly updated");
@@ -4071,7 +4076,7 @@ QUnit.module('Views', {
         await testUtils.dom.dragAndDrop(
             list.$('.ui-sortable-handle').eq(1),
             list.$('tbody tr').eq(3),
-            {position: 'top'}
+            {position: 'bottom', nativeDragAndDrop: true}
         );
         assert.deepEqual(list.$('tbody tr td.o_list_number').text(), '1243',
             "the int_field (sequence) should have been correctly updated");
@@ -4079,10 +4084,11 @@ QUnit.module('Views', {
         await testUtils.dom.dragAndDrop(
             list.$('.ui-sortable-handle').eq(2),
             list.$('tbody tr').eq(1),
-            {position: 'top'}
+            {position: 'top', nativeDragAndDrop: true}
         );
         assert.deepEqual(list.$('tbody tr td.o_list_number').text(), '1423',
             "the int_field (sequence) should have been correctly updated");
+        $view.remove();
         list.destroy();
     });
 
@@ -4115,7 +4121,9 @@ QUnit.module('Views', {
                 return this._super.apply(this, arguments);
             },
         });
-
+        // need to prepend view on body because html5 drag and drop is not working if view is not available in DOM
+        var $view = $('#qunit-fixture').contents();
+        $view.prependTo('body');
         assert.strictEqual(list.$('tbody tr:eq(0) td:last').text(), '1200',
             "default first record should have amount 1200");
         assert.strictEqual(list.$('tbody tr:eq(1) td:last').text(), '500',
@@ -4129,7 +4137,7 @@ QUnit.module('Views', {
         await testUtils.dom.dragAndDrop(
             list.$('.ui-sortable-handle').eq(3),
             list.$('tbody tr').first(),
-            {position: 'bottom'}
+            {position: 'bottom', nativeDragAndDrop: true}
         );
 
         assert.strictEqual(list.$('tbody tr:eq(0) td:last').text(), '1200',
@@ -4145,7 +4153,7 @@ QUnit.module('Views', {
 
         assert.strictEqual(list.$('tbody tr:eq(1) td:last input').val(), '0',
             "the edited record should be the good one");
-
+        $view.remove();
         list.destroy();
     });
 
@@ -4169,7 +4177,9 @@ QUnit.module('Views', {
                     '<field name="amount" widget="float"/>' +
                   '</tree>',
         });
-
+        // need to prepend view on body because html5 drag and drop is not working if view is not available in DOM
+        var $view = $('#qunit-fixture').contents();
+        $view.prependTo('body');
         assert.strictEqual(list.$('tbody span[name="amount"]').text(), '1200.00500.00300.000.00',
             "default should be sorted by int_field");
 
@@ -4177,11 +4187,11 @@ QUnit.module('Views', {
         await testUtils.dom.dragAndDrop(
             list.$('.ui-sortable-handle').eq(3),
             list.$('tbody tr').first(),
-            {position: 'bottom'}
+            {position: 'bottom', nativeDragAndDrop: true}
         );
 
         // Handle should be unlocked at this point
-        assert.strictEqual(list.$('tbody span[name="amount"]').text(), '1200.000.00500.00300.00',
+        await assert.strictEqual(list.$('tbody span[name="amount"]').text(), '1200.000.00500.00300.00',
             "drag and drop should have succeeded, as the handle is unlocked");
 
         // Sorting by a field different for int_field should lock the handle
@@ -4194,7 +4204,7 @@ QUnit.module('Views', {
         await testUtils.dom.dragAndDrop(
             list.$('.ui-sortable-handle').eq(3),
             list.$('tbody tr').first(),
-            {position: 'bottom'}
+            {position: 'bottom', nativeDragAndDrop: true}
         );
 
         assert.strictEqual(list.$('tbody span[name="amount"]').text(), '0.00300.00500.001200.00',
@@ -4210,12 +4220,12 @@ QUnit.module('Views', {
         await testUtils.dom.dragAndDrop(
             list.$('.ui-sortable-handle').eq(3),
             list.$('tbody tr').first(),
-            {position: 'bottom'}
+            {position: 'bottom', nativeDragAndDrop: true}
         );
 
         assert.strictEqual(list.$('tbody span[name="amount"]').text(), '1200.00300.000.00500.00',
             "drag and drop should have worked as the handle is unlocked");
-
+        $view.remove();
         list.destroy();
     });
 
@@ -4254,6 +4264,9 @@ QUnit.module('Views', {
                 return this._super.apply(this, arguments);
             },
         });
+        // need to prepend view on body because html5 drag and drop is not working if view is not available in DOM
+        var $view = $('#qunit-fixture').contents();
+        $view.prependTo('body');
         assert.strictEqual(list.$('tbody tr:eq(0) td:last').text(), '1200',
             "default first record should have amount 1200");
         assert.strictEqual(list.$('tbody tr:eq(1) td:last').text(), '500',
@@ -4267,7 +4280,7 @@ QUnit.module('Views', {
         await testUtils.dom.dragAndDrop(
             list.$('.ui-sortable-handle').eq(3),
             list.$('tbody tr').first(),
-            {position: 'bottom'}
+            {position: 'bottom', nativeDragAndDrop: true}
         );
 
         // edit moved row before the end of resequence
@@ -4303,7 +4316,7 @@ QUnit.module('Views', {
         await testUtils.dom.click(list.$('tbody tr:eq(3) td:last'));
         assert.strictEqual(list.$('tbody tr:eq(3) td:last input').val(), '301',
             "fourth record should have amount 301");
-
+        $view.remove();
         list.destroy();
     });
 

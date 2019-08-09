@@ -111,7 +111,7 @@ var KanbanColumn = Widget.extend({
             ghostClass: 'oe_kanban_card_ghost',
             chosenClass: 'o_kanban_record_chosen',
             draggable: '.o_kanban_record:not(.o_updating)',
-            scroll: config.device.isMobile ? true  : $scrollableParent && $scrollableParent[0],
+            scroll: config.device.isMobile ? true : $scrollableParent && $scrollableParent[0],
             // bubbleScroll: true,
             scrollSpeed: 20,
             scrollSensitivity: 40,
@@ -123,16 +123,38 @@ var KanbanColumn = Widget.extend({
                 // rubaxa calls scrollFn on each 24 miliseconds, 24 seconds are fix we can not configure it
                 // we need to add such custom logic to increase delay
                 // MSH: we should fork rubaxa and do some customization as per our need, as it has too rigid timeout and some rigid code
-                if (offsetX !== 0) { // while dragging horizontally
+                // if (offsetX !== 0) { // while dragging horizontally
+                //     scrollDelay += 1;
+                //     if (scrollDelay > 50) {
+                //         var swipeTo = offsetX > 0 ? 'left' : 'right';
+                //         debugger;
+                //         self.trigger_up("kanban_column_swipe_" + swipeTo);
+                //         scrollDelay = 0;
+                //     }
+                // }
+                // else if (offsetY !== 0) { // while dragging vertically
+                //     self.$el.scrollTop(self.$el.scrollTop() + offsetY);
+                // }
+                var offsetWidth = this.el.offsetWidth;
+                var swapEnabledWidth = offsetWidth - offsetWidth * 0.20;
+
+                if (originalEvent.layerX > swapEnabledWidth) {
                     scrollDelay += 1;
                     if (scrollDelay > 50) {
-                        var swipeTo = offsetX > 0 ? 'left' : 'right';
-                        self.trigger_up("kanban_column_swipe_" + swipeTo);
+                        self.trigger_up("kanban_column_swipe_left");
                         scrollDelay = 0;
                     }
-                } else if (offsetY !== 0) { // while dragging vertically
-                    self.$el.scrollTop(self.$el.scrollTop() + offsetY);
                 }
+                if (originalEvent.layerX < 0) {
+                    scrollDelay += 1;
+                    if (scrollDelay > 50) {
+                        self.trigger_up("kanban_column_swipe_right");
+                        scrollDelay = 0;
+                    }
+                }
+                // else if (originalEvent.layerX !== 0) { // while dragging vertically
+                //     self.$el.scrollTop(self.$el.scrollTop() + this._lastY);
+                // }
             } : false,
             onStart: function () {
                 if (config.device.isMobile) {
