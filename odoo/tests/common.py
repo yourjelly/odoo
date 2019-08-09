@@ -389,7 +389,7 @@ class TransactionCase(BaseCase):
         self.cr = self.cursor()
         #: :class:`~odoo.api.Environment` for the current test case
         self.env = api.Environment(self.cr, odoo.SUPERUSER_ID, {})
-
+        self._save_env = self.env
         @self.addCleanup
         def reset():
             # rollback and close the cursor, and reset the environments
@@ -411,6 +411,12 @@ class TransactionCase(BaseCase):
         """ Patch the order of the given model (name), and prepare cleanup. """
         self.patch(type(self.env[model]), '_order', order)
 
+    def tearDown(self):
+        super(TransactionCase, self).tearDown()
+        self.assertEqual(self.env.context, {})
+        self.assertEqual(self.env.uid, odoo.SUPERUSER_ID)
+        self.assertEqual(self.env, self._save_env)
+
 
 class SingleTransactionCase(BaseCase):
     """ TestCase in which all test methods are run in the same transaction,
@@ -424,6 +430,13 @@ class SingleTransactionCase(BaseCase):
         cls.registry = odoo.registry(get_db_name())
         cls.cr = cls.registry.cursor()
         cls.env = api.Environment(cls.cr, odoo.SUPERUSER_ID, {})
+        cls._save_env = cls.env
+
+    def tearDown(self):
+        self.assertEqual(self.env.context, {})
+        self.assertEqual(self.env.uid, odoo.SUPERUSER_ID)
+        self.assertEqual(self.env, self._save_env)
+        # rollback and close the cursor, and reset the environments
 
     @classmethod
     def tearDownClass(cls):
