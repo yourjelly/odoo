@@ -2698,10 +2698,19 @@ class _RelationalMulti(_Relational):
         if 'active' in model.env[self.comodel_name] and (not self.depends_context or 'active_test' not in self.depends_context):
             self.depends_context = (self.depends_context or tuple()) + ('active_test',)
 
+    def create(self, record_values):
+        """ Write the value of ``self`` on the given records, which have just
+        been created.
+
+        :param record_values: a list of pairs ``(record, value)``, where
+            ``value`` is in the format of method :meth:`BaseModel.write`
+        """
+        self.write_batch(record_values, True)
+
     def write(self, records, value):
         return self.write_batch([(records, value)])
 
-    def write_batch(self, records_commands_list):
+    def write_batch(self, records_commands_list, create=False):
         # TBE: I really don't like this implementation
         if not records_commands_list:
             return False
@@ -2724,7 +2733,7 @@ class _RelationalMulti(_Relational):
 
         record_ids = {rid for recs, cs in records_commands_list for rid in recs._ids}
         if all(record_ids):
-            return self.write_real(records_commands_list)
+            return self.write_real(records_commands_list, create)
         else:
             assert not any(record_ids)
             recs = records_commands_list[0][0].browse()
@@ -2825,7 +2834,7 @@ class One2many(_RelationalMulti):
         for record in records:
             cache.set(record, self, tuple(group[record.id]))
 
-    def write_real(self, records_commands_list):
+    def write_real(self, records_commands_list, create=False):
         """ Update real records. """
         # records_commands_list = [(records, commands), ...]
         if not records_commands_list:
@@ -2842,6 +2851,7 @@ class One2many(_RelationalMulti):
             to_create = []                  # line vals to create
             to_delete = []                  # line ids to delete
             to_inverse = {}
+            allow_full_delete = not create
 
             def unlink(lines):
                 if getattr(comodel._fields[inverse], 'ondelete', False) == 'cascade':
@@ -2867,6 +2877,7 @@ class One2many(_RelationalMulti):
                     if command[0] == 0:
                         for record in recs:
                             to_create.append(dict(command[2], **{inverse: record.id}))
+                        allow_full_delete = False
                     elif command[0] == 1:
                         comodel.browse(command[1]).write(command[2])
                     elif command[0] == 2:
@@ -2875,10 +2886,15 @@ class One2many(_RelationalMulti):
                         unlink(comodel.browse(command[1]))
                     elif command[0] == 4:
                         to_inverse.setdefault(recs[-1], set()).add(command[1])
-                    elif command[0] in (5, 6):
+                        allow_full_delete = False
+                    elif command[0] in (5, 6) :
+                        # do not try to delete anything in creation mode if nothing has been created before
+                        line_ids = command[2] if command[0] == 6 else []
+                        if not allow_full_delete and not line_ids:
+                            continue
                         flush()
                         # assign the given lines to the last record only
-                        lines = comodel.browse(command[2] if command[0] == 6 else [])
+                        lines = comodel.browse(line_ids)
                         domain = self.get_domain_list(model) + \
                             [(inverse, 'in', recs.ids), ('id', 'not in', lines.ids)]
                         unlink(comodel.search(domain))
@@ -3127,16 +3143,6 @@ class Many2many(_RelationalMulti):
             sql.add_foreign_key(cr, self.relation, self.column2, comodel._table, 'id', 'cascade')
             reflect(model, '%s_%s_fkey' % (self.relation, self.column2), 'f', None, self._module)
 
-    def create(self, record_values):
-        """ Write the value of ``self`` on the given records, which have just
-        been created.
-
-        :param record_values: a list of pairs ``(record, value)``, where
-            ``value`` is in the format of method :meth:`BaseModel.write`
-        """
-        self.write_batch(record_values)
-
-
     def read(self, records):
         comodel = records.env[self.comodel_name].with_context(**self.context)
         domain = self.get_domain_list(records)
@@ -3165,7 +3171,7 @@ class Many2many(_RelationalMulti):
             cache.set(record, self, tuple(group[record.id]))
 
 
-    def write_real(self, records_commands_list):
+    def write_real(self, records_commands_list, create=False):
         # records_commands_list = [(records, commands), ...]
         if not records_commands_list:
             return
