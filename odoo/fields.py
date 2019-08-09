@@ -2934,8 +2934,12 @@ class One2many(_RelationalMulti):
         if not records_commands_list:
             return
 
-        cache = records.env.cache
-        comodel = records.env[self.comodel_name].with_context(**self.context)
+        model = records_commands_list[0][0].browse()
+        cache = model.env.cache
+        comodel = model.env[self.comodel_name].with_context(**self.context)
+
+        ids = {record.id for records, _ in records_commands_list for record in records}
+        records = model.browse(ids)
 
         def browse(ids):
             return comodel.browse([id_ and NewId(id_) for id_ in ids])
