@@ -825,6 +825,7 @@ class Warehouse(models.Model):
                 'barcode': self.code.replace(" ", "").upper() + "-RECEIPTS",
                 'show_reserved': False,
                 'sequence_code': 'IN',
+                'company_id': self.company_id.id,
             }, 'out_type_id': {
                 'name': _('Delivery Orders'),
                 'code': 'outgoing',
@@ -834,6 +835,7 @@ class Warehouse(models.Model):
                 'sequence': max_sequence + 5,
                 'barcode': self.code.replace(" ", "").upper() + "-DELIVERY",
                 'sequence_code': 'OUT',
+                'company_id': self.company_id.id,
             }, 'pack_type_id': {
                 'name': _('Pack'),
                 'code': 'internal',
@@ -844,6 +846,7 @@ class Warehouse(models.Model):
                 'sequence': max_sequence + 4,
                 'barcode': self.code.replace(" ", "").upper() + "-PACK",
                 'sequence_code': 'PACK',
+                'company_id': self.company_id.id,
             }, 'pick_type_id': {
                 'name': _('Pick'),
                 'code': 'internal',
@@ -853,6 +856,7 @@ class Warehouse(models.Model):
                 'sequence': max_sequence + 3,
                 'barcode': self.code.replace(" ", "").upper() + "-PICK",
                 'sequence_code': 'PICK',
+                'company_id': self.company_id.id,
             }, 'int_type_id': {
                 'name': _('Internal Transfers'),
                 'code': 'internal',
@@ -864,6 +868,7 @@ class Warehouse(models.Model):
                 'sequence': max_sequence + 2,
                 'barcode': self.code.replace(" ", "").upper() + "-INTERNAL",
                 'sequence_code': 'INT',
+                'company_id': self.company_id.id,
             },
         }, max_sequence + 6
 

@@ -17,6 +17,7 @@ from odoo.addons.stock.models.stock_move import PROCUREMENT_PRIORITIES
 
 class PickingType(models.Model):
     _name = "stock.picking.type"
+    _inherit = 'company.consistency.mixin'
     _description = "Picking Type"
     _order = 'sequence, id'
 
@@ -28,19 +29,26 @@ class PickingType(models.Model):
     name = fields.Char('Operation Type', required=True, translate=True)
     color = fields.Integer('Color')
     sequence = fields.Integer('Sequence', help="Used to order the 'All Operations' kanban view")
-    sequence_id = fields.Many2one('ir.sequence', 'Reference Sequence')
+    sequence_id = fields.Many2one(
+        'ir.sequence', 'Reference Sequence',
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",)
     sequence_code = fields.Char('Code', required=True)
     default_location_src_id = fields.Many2one(
         'stock.location', 'Default Source Location',
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         help="This is the default source location when you create a picking manually with this operation type. It is possible however to change it or that the routes put another location. If it is empty, it will check for the supplier location on the partner. ")
     default_location_dest_id = fields.Many2one(
         'stock.location', 'Default Destination Location',
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         help="This is the default destination location when you create a picking manually with this operation type. It is possible however to change it or that the routes put another location. If it is empty, it will check for the customer location on the partner. ")
     code = fields.Selection([('incoming', 'Receipt'), ('outgoing', 'Delivery'), ('internal', 'Internal Transfer')], 'Type of Operation', required=True)
-    return_picking_type_id = fields.Many2one('stock.picking.type', 'Operation Type for Returns')
+    return_picking_type_id = fields.Many2one(
+        'stock.picking.type', 'Operation Type for Returns',
+        domain="[('company_id', '=', company_id)]")
     show_entire_packs = fields.Boolean('Move Entire Packages', help="If ticked, you will be able to select entire packages to move")
     warehouse_id = fields.Many2one(
         'stock.warehouse', 'Warehouse', ondelete='cascade',
+        domain="[('company_id', '=', company_id)]",
         default=lambda self: self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1))
     active = fields.Boolean('Active', default=True)
     use_create_lots = fields.Boolean(
@@ -67,7 +75,9 @@ class PickingType(models.Model):
     rate_picking_late = fields.Integer(compute='_compute_picking_count')
     rate_picking_backorders = fields.Integer(compute='_compute_picking_count')
     barcode = fields.Char('Barcode', copy=False)
-    company_id = fields.Many2one('res.company', 'Company', related='warehouse_id.company_id', store=True)
+    company_id = fields.Many2one(
+        'res.company', 'Company', required=True,
+        default=lambda s: s.env.company.id, index=True)
 
     @api.model
     def create(self, vals):
@@ -160,6 +170,22 @@ class PickingType(models.Model):
         if self.show_operations and self.code != 'incoming':
             self.show_reserved = True
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        res = super(PickingType, self).create(vals_list)
+        res._company_consistency_check()
+        return res
+
+    def write(self, vals):
+        if 'company_id' in vals:
+            for picking_type in self:
+                if picking_type.company_id.id != vals['company_id']:
+                    raise UserError(_("Changing the company of this record is forbidden at this point, you should rather archive it and create a new one."))
+        res = super(PickingType, self).write(vals)
+        if any(field in vals for field in self._company_consistency_fields()):
+            self._company_consistency_check()
+        return res
+
     def _get_action(self, action_xmlid):
         action = self.env.ref(action_xmlid).read()[0]
         if self:
@@ -193,6 +219,16 @@ class PickingType(models.Model):
 
     def get_stock_picking_action_picking_type(self):
         return self._get_action('stock.stock_picking_action_picking_type')
+
+    @api.model
+    def _company_consistency_m2o_required_cid_fields(self):
+        res = super(PickingType, self)._company_consistency_m2o_required_cid_fields()
+        return res + ['return_picking_type_id', 'warehouse_id']
+
+    @api.model
+    def _company_consistency_m2o_optional_cid_fields(self):
+        res = super(PickingType, self)._company_consistency_m2o_optional_cid_fields()
+        return res + ['sequence_id', 'default_location_src_id', 'default_location_dest_id']
 
 
 class Picking(models.Model):
