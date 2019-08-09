@@ -1121,6 +1121,9 @@ class Field(MetaField('DummyField', (object,), {})):
         # even if __set__ already removed the todo, compute method might not set a value
         for field in fields:
             records.env.remove_to_compute(field, records)
+            if field.readonly and not field.store:
+                cache_value = field.convert_to_cache(False, records, validate=False)
+                records.env.cache.update(records, field, [cache_value] * len(records))
         try:
             with records.env.protecting(fields, records):
                 records._compute_field_value(self)
