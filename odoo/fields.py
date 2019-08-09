@@ -2711,7 +2711,6 @@ class _RelationalMulti(_Relational):
         return self.write_batch([(records, value)])
 
     def write_batch(self, records_commands_list, create=False):
-        # TBE: I really don't like this implementation
         if not records_commands_list:
             return False
 
@@ -2728,7 +2727,7 @@ class _RelationalMulti(_Relational):
 
             if not isinstance(value, list):
                 raise ValueError("Wrong value for %s: %s" % (self, value))
-
+            # TBE: awfull, has anyone a better solution?
             records_commands_list[idx] = (recs, value)
 
         record_ids = {rid for recs, cs in records_commands_list for rid in recs._ids}
@@ -2736,10 +2735,7 @@ class _RelationalMulti(_Relational):
             return self.write_real(records_commands_list, create)
         else:
             assert not any(record_ids)
-            recs = records_commands_list[0][0].browse()
-            for records, value in records_commands_list:
-                recs |= self.write_new(records, value)
-            return recs
+            return self.write_new(records_commands_list)
 
 class One2many(_RelationalMulti):
     """ One2many field; the value of such a field is the recordset of all the
@@ -2934,8 +2930,10 @@ class One2many(_RelationalMulti):
 
         return records
 
-    def write_new(self, records, value):
-        """ Update new records. """
+    def write_new(self, records_commands_list):
+        if not records_commands_list:
+            return
+
         cache = records.env.cache
         comodel = records.env[self.comodel_name].with_context(**self.context)
 
@@ -2948,24 +2946,25 @@ class One2many(_RelationalMulti):
         if self.store:
             inverse = self.inverse_name
 
-            for command in value:
-                if command[0] == 0:
-                    for record in records:
-                        line = comodel.new(command[2], ref=command[1])
-                        line[inverse] = record
-                elif command[0] == 1:
-                    browse([command[1]]).update(command[2])
-                elif command[0] == 2:
-                    browse([command[1]])[inverse] = False
-                elif command[0] == 3:
-                    browse([command[1]])[inverse] = False
-                elif command[0] == 4:
-                    browse([command[1]])[inverse] = records[-1]
-                elif command[0] in (5, 6):
-                    # assign the given lines to the last record only
-                    cache.update(records, self, [()] * len(records))
-                    lines = comodel.browse(command[2] if command[0] == 6 else [])
-                    cache.set(records[-1], self, lines._ids)
+            for recs, commands in records_commands_list:
+                for command in commands:
+                    if command[0] == 0:
+                        for record in recs:
+                            line = comodel.new(command[2], ref=command[1])
+                            line[inverse] = record
+                    elif command[0] == 1:
+                        browse([command[1]]).update(command[2])
+                    elif command[0] == 2:
+                        browse([command[1]])[inverse] = False
+                    elif command[0] == 3:
+                        browse([command[1]])[inverse] = False
+                    elif command[0] == 4:
+                        browse([command[1]])[inverse] = recs[-1]
+                    elif command[0] in (5, 6):
+                        # assign the given lines to the last record only
+                        cache.update(recs, self, [()] * len(recs))
+                        lines = comodel.browse(command[2] if command[0] == 6 else [])
+                        cache.set(recs[-1], self, lines._ids)
 
         else:
             def link(record, lines):
@@ -2976,23 +2975,24 @@ class One2many(_RelationalMulti):
                 for record in records:
                     cache.set(record, self, (record[self.name] - lines)._ids)
 
-            for command in value:
-                if command[0] == 0:
-                    for record in records:
-                        link(record, comodel.new(command[2], ref=command[1]))
-                elif command[0] == 1:
-                    browse([command[1]]).update(command[2])
-                elif command[0] == 2:
-                    unlink(browse([command[1]]))
-                elif command[0] == 3:
-                    unlink(browse([command[1]]))
-                elif command[0] == 4:
-                    link(records[-1], browse([command[1]]))
-                elif command[0] in (5, 6):
-                    # assign the given lines to the last record only
-                    cache.update(records, self, [()] * len(records))
-                    lines = comodel.browse(command[2] if command[0] == 6 else [])
-                    cache.set(records[-1], self, lines._ids)
+            for recs, commands in records_commands_list:
+                for command in commands:
+                    if command[0] == 0:
+                        for record in recs:
+                            link(record, comodel.new(command[2], ref=command[1]))
+                    elif command[0] == 1:
+                        browse([command[1]]).update(command[2])
+                    elif command[0] == 2:
+                        unlink(browse([command[1]]))
+                    elif command[0] == 3:
+                        unlink(browse([command[1]]))
+                    elif command[0] == 4:
+                        link(recs[-1], browse([command[1]]))
+                    elif command[0] in (5, 6):
+                        # assign the given lines to the last record only
+                        cache.update(recs, self, [()] * len(recs))
+                        lines = comodel.browse(command[2] if command[0] == 6 else [])
+                        cache.set(recs[-1], self, lines._ids)
 
         return records
 
@@ -3331,44 +3331,52 @@ class Many2many(_RelationalMulti):
             lambda record: new_relation[record.id] != old_relation[record.id]
         )
 
-    def write_new(self, records, value):
+    def write_new(self, records_commands_list):
         """ Update self on new records. """
-        comodel = records.env[self.comodel_name].with_context(**self.context)
+        if not records_commands_list:
+            return
+
+        model = records_commands_list[0][0].browse()
+        comodel = model.env[self.comodel_name].with_context(**self.context)
         new = lambda id_: id_ and NewId(id_)
 
         # determine old and new relation {x: ys}
         set = OrderedSet
-        old_relation = {record.id: set(record[self.name]._ids) for record in records}
+        old_relation = {record.id: set(record[self.name]._ids) for records, _ in records_commands_list for record in records}
         new_relation = {x: set(ys) for x, ys in old_relation.items()}
+        ids = set(old_relation.keys())
 
-        for command in value:
-            if not isinstance(command, (list, tuple)) or not command:
-                continue
-            if command[0] == 0:
-                line_id = comodel.new(command[2], ref=command[1]).id
-                for line_ids in new_relation.values():
-                    line_ids.add(line_id)
-            elif command[0] == 1:
-                line_id = new(command[1])
-                comodel.browse([line_id]).update(command[2])
-            elif command[0] == 2:
-                line_id = new(command[1])
-                for line_ids in new_relation.values():
-                    line_ids.discard(line_id)
-            elif command[0] == 3:
-                line_id = new(command[1])
-                for line_ids in new_relation.values():
-                    line_ids.discard(line_id)
-            elif command[0] == 4:
-                line_id = new(command[1])
-                for line_ids in new_relation.values():
-                    line_ids.add(line_id)
-            elif command[0] in (5, 6):
-                # new lines must no longer be linked to records
-                line_ids = command[2] if command[0] == 6 else ()
-                line_ids = set(new(line_id) for line_id in line_ids)
-                for id_ in records._ids:
-                    new_relation[id_] = set(line_ids)
+        records = model.browse(ids)
+
+        for recs, commands in records_commands_list:
+            for command in commands:
+                if not isinstance(command, (list, tuple)) or not command:
+                    continue
+                if command[0] == 0:
+                    line_id = comodel.new(command[2], ref=command[1]).id
+                    for line_ids in new_relation.values():
+                        line_ids.add(line_id)
+                elif command[0] == 1:
+                    line_id = new(command[1])
+                    comodel.browse([line_id]).update(command[2])
+                elif command[0] == 2:
+                    line_id = new(command[1])
+                    for line_ids in new_relation.values():
+                        line_ids.discard(line_id)
+                elif command[0] == 3:
+                    line_id = new(command[1])
+                    for line_ids in new_relation.values():
+                        line_ids.discard(line_id)
+                elif command[0] == 4:
+                    line_id = new(command[1])
+                    for line_ids in new_relation.values():
+                        line_ids.add(line_id)
+                elif command[0] in (5, 6):
+                    # new lines must no longer be linked to records
+                    line_ids = command[2] if command[0] == 6 else ()
+                    line_ids = set(new(line_id) for line_id in line_ids)
+                    for id_ in recs._ids:
+                        new_relation[id_] = set(line_ids)
 
         if new_relation == old_relation:
             return records.browse()
