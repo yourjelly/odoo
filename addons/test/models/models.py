@@ -58,6 +58,7 @@ class test(models.Model):
 
     def testme2(self):
         t = time.time()
+        print('* Create with two lines')
         main_id = self.create({
             'name': 'bla',
             'line_ids': [
@@ -94,28 +95,6 @@ class test(models.Model):
             self.flush()
         return time.time()-t
 
-    def testme4(self):
-        t = time.time()
-        for i in range(1000):
-            self.testme3()
-        if hasattr(self, 'flush'):
-            self.flush()
-        return time.time()-t
-
-
-    def test(self):
-        main = self.create({
-            'name': 'main',
-        })
-        second = self.create({
-            'name': 'second',
-        })
-
-        self.recompute()
-        # Crash here to rollback
-        1/0          # noqa
-
-
 class test_line(models.Model):
     """
         test line
@@ -125,7 +104,6 @@ class test_line(models.Model):
 
     name = fields.Char(compute='_get_name', store=True)
     name2 = fields.Char('Related Name', related='test_id.name', store=True)
-
     test_id = fields.Many2one('test')
     intx2   = fields.Integer(compute='_get_intx2', store=True)
 

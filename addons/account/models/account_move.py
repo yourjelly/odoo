@@ -2530,11 +2530,13 @@ class AccountMoveLine(models.Model):
             if not line.product_id or line.display_type in ('line_section', 'line_note'):
                 continue
 
-            line.name = line._get_computed_name()
-            line.account_id = line._get_computed_account()
-            line.tax_ids = line._get_computed_taxes()
-            line.product_uom_id = line._get_computed_uom()
-            line.price_unit = line._get_computed_price_unit()
+            line.write({
+                'name': line._get_computed_name(),
+                'account_id': line._get_computed_account(),
+                'tax_ids': line._get_computed_taxes(),
+                'product_uom_id': line._get_computed_uom(),
+                'price_unit': line._get_computed_price_unit()
+            })
 
         if len(self) == 1:
             return {'domain': {'product_uom_id': [('category_id', '=', self.product_uom_id.category_id.id)]}}
