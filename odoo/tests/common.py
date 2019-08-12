@@ -385,21 +385,16 @@ class TransactionCase(BaseCase):
     def setUp(self):
         super(TransactionCase, self).setUp()
         self.registry = odoo.registry(get_db_name())
+        self.addCleanup(self.registry.reset_changes)
+        self.addCleanup(self.registry.clear_caches)
         #: current transaction's cursor
         self.cr = self.cursor()
+        self.addCleanup(self.cr.close)
         #: :class:`~odoo.api.Environment` for the current test case
         self.env = api.Environment(self.cr, odoo.SUPERUSER_ID, {})
+        self.addCleanup(self.env.reset)
         self._save_env = self.env
         self._save_cr = self.cr
-        @self.addCleanup
-        def reset():
-            # rollback and close the cursor, and reset the environments
-            self.registry.clear_caches()
-            self.registry.reset_changes()
-            self.env.reset()
-            self.save_env.reset()
-            self.cr.rollback()
-            self.cr.close()
 
         self.patch(type(self.env['res.partner']), '_get_gravatar_image', lambda *a: False)
 
@@ -447,8 +442,9 @@ class SingleTransactionCase(BaseCase):
     @classmethod
     def tearDownClass(cls):
         # rollback and close the cursor, and reset the environments
+        cls.registry.reset_changes()
         cls.registry.clear_caches()
-        cls.env.reset()
+        api.Environment.reset()
         cls.cr.rollback()
         cls.cr.close()
         super(SingleTransactionCase, cls).tearDownClass()
