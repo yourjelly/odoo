@@ -65,7 +65,6 @@ class PickingType(models.Model):
         help="If this checkbox is ticked, Odoo will automatically pre-fill the detailed "
         "operations with the corresponding products, locations and lot/serial numbers.")
 
-    # Statistics for the kanban view
     count_picking_draft = fields.Integer(compute='_compute_picking_count')
     count_picking_ready = fields.Integer(compute='_compute_picking_count')
     count_picking = fields.Integer(compute='_compute_picking_count')
@@ -247,22 +246,18 @@ class Picking(models.Model):
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
         help="Reference of the document")
     note = fields.Text('Notes')
-
     backorder_id = fields.Many2one(
         'stock.picking', 'Back Order of',
         copy=False, index=True,
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
         domain="[('company_id', '=', company_id)]",
         help="If this shipment was split, then this field links to the shipment which contains the already processed part.")
-
     backorder_ids = fields.One2many('stock.picking', 'backorder_id', 'Back Orders')
-
     move_type = fields.Selection([
         ('direct', 'As soon as possible'), ('one', 'When all products are ready')], 'Shipping Policy',
         default='direct', required=True,
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
         help="It specifies goods to be deliver partially or all at once")
-
     state = fields.Selection([
         ('draft', 'Draft'),
         ('waiting', 'Waiting Another Operation'),
@@ -278,15 +273,12 @@ class Picking(models.Model):
              " * Ready: The transfer is ready to be processed.\n(a) The shipping policy is \"As soon as possible\": at least one product has been reserved.\n(b) The shipping policy is \"When all products are ready\": all product have been reserved.\n"
              " * Done: The transfer has been processed.\n"
              " * Cancelled: The transfer has been cancelled.")
-
     group_id = fields.Many2one(
         'procurement.group', 'Procurement Group',
         readonly=True, related='move_lines.group_id', store=True)
-
     priority = fields.Selection(
         PROCUREMENT_PRIORITIES, string='Priority',
         compute='_compute_priority', inverse='_set_priority', store=True,
-        # default='1', required=True,  # TDE: required, depending on moves ? strange
         index=True, tracking=True,
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
         help="Products will be reserved first for the transfers with the highest priorities.")
@@ -300,7 +292,6 @@ class Picking(models.Model):
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
         help="Creation Date, usually the time of the order")
     date_done = fields.Datetime('Date of Transfer', copy=False, readonly=True, help="Date at which the transfer has been processed or cancelled.")
-
     location_id = fields.Many2one(
         'stock.location', "Source Location",
         default=lambda self: self.env['stock.picking.type'].browse(self._context.get('default_picking_type_id')).default_location_src_id,
@@ -330,7 +321,6 @@ class Picking(models.Model):
         readonly=True)
     picking_type_entire_packs = fields.Boolean(related='picking_type_id.show_entire_packs',
         readonly=True)
-
     partner_id = fields.Many2one(
         'res.partner', 'Contact',
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
@@ -342,19 +332,15 @@ class Picking(models.Model):
         'res.users', 'Responsible', tracking=True,
         domain=lambda self: [('groups_id', 'in', self.env.ref('stock.group_stock_user').id)],
         default=lambda self: self.env.user)
-
     move_line_ids = fields.One2many('stock.move.line', 'picking_id', 'Operations')
     move_line_ids_without_package = fields.One2many('stock.move.line', 'picking_id', 'Operations without package', domain=['|',('package_level_id', '=', False), ('picking_type_entire_packs', '=', False)])
     move_line_nosuggest_ids = fields.One2many('stock.move.line', 'picking_id', domain=[('product_qty', '=', 0.0)])
-
     move_line_exist = fields.Boolean(
         'Has Pack Operations', compute='_compute_move_line_exist',
         help='Check the existence of pack operation on the picking')
-
     has_packages = fields.Boolean(
         'Has Packages', compute='_compute_has_packages',
         help='Check the existence of destination packages on move lines')
-
     show_check_availability = fields.Boolean(
         compute='_compute_show_check_availability',
         help='Technical field used to compute whether the check availability button should be shown.')
@@ -365,7 +351,6 @@ class Picking(models.Model):
         compute='_compute_show_validate',
         help='Technical field used to compute whether the validate should be shown.')
     use_create_lots = fields.Boolean(related='picking_type_id.use_create_lots')
-
     owner_id = fields.Many2one(
         'res.partner', 'Assign owner',
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
@@ -375,7 +360,6 @@ class Picking(models.Model):
     is_locked = fields.Boolean(default=True, help='When the picking is not done this allows changing the '
                                'initial demand. When the picking is done this allows '
                                'changing the done quantities.')
-    # Used to search on pickings
     product_id = fields.Many2one('product.product', 'Product', related='move_lines.product_id', readonly=False)
     show_operations = fields.Boolean(compute='_compute_show_operations')
     show_reserved = fields.Boolean(related='picking_type_id.show_reserved')
@@ -615,9 +599,6 @@ class Picking(models.Model):
         self.mapped('move_lines')._action_cancel()
         self.mapped('move_lines').unlink() # Checks if moves are not done
         return super(Picking, self).unlink()
-
-    # Actions
-    # ----------------------------------------
 
     def action_assign_partner(self):
         for picking in self:
@@ -917,8 +898,8 @@ class Picking(models.Model):
     def _create_backorder(self):
 
         """ This method is called when the user chose to create a backorder. It will create a new
-        picking, the backorder, and move the stock.moves that are not `done` or `cancel` into it.
-        """
+        picking, the backorder, and move the stock.moves that are not `done` or `cancel` into it.
+        """
         backorders = self.env['stock.picking']
         for picking in self:
             moves_to_backorder = picking.move_lines.filtered(lambda x: x.state not in ('done', 'cancel'))
