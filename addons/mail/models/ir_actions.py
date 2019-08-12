@@ -150,5 +150,5 @@ class ServerActions(models.Model):
         eval_context = super(ServerActions, self)._get_eval_context(action=action)
         ctx = dict(eval_context['env'].context)
         ctx['mail_notify_force_send'] = False
-        eval_context['env'].context = ctx
+        eval_context['env'] = eval_context['env'](context=ctx)
         return eval_context

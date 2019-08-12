@@ -390,12 +390,14 @@ class TransactionCase(BaseCase):
         #: :class:`~odoo.api.Environment` for the current test case
         self.env = api.Environment(self.cr, odoo.SUPERUSER_ID, {})
         self._save_env = self.env
+        self._save_cr = self.cr
         @self.addCleanup
         def reset():
             # rollback and close the cursor, and reset the environments
             self.registry.clear_caches()
             self.registry.reset_changes()
             self.env.reset()
+            self.save_env.reset()
             self.cr.rollback()
             self.cr.close()
 
@@ -413,9 +415,11 @@ class TransactionCase(BaseCase):
 
     def tearDown(self):
         super(TransactionCase, self).tearDown()
-        self.assertEqual(self.env.context, {})
-        self.assertEqual(self.env.uid, odoo.SUPERUSER_ID)
-        self.assertEqual(self.env, self._save_env)
+        # env can be replaced on test, but original env cannot be modified
+        self.assertEqual(self._save_env.context, {})
+        self.assertEqual(self._save_env.uid, odoo.SUPERUSER_ID)
+        self.assertEqual(self._save_env.cr, self._save_cr)
+        self.assertEqual(self._save_cr, self.cr)
 
 
 class SingleTransactionCase(BaseCase):
@@ -431,11 +435,13 @@ class SingleTransactionCase(BaseCase):
         cls.cr = cls.registry.cursor()
         cls.env = api.Environment(cls.cr, odoo.SUPERUSER_ID, {})
         cls._save_env = cls.env
+        cls._save_cr = cls.cr
 
     def tearDown(self):
-        self.assertEqual(self.env.context, {})
-        self.assertEqual(self.env.uid, odoo.SUPERUSER_ID)
-        self.assertEqual(self.env, self._save_env)
+        self.assertEqual(self._save_env.context, {})
+        self.assertEqual(self._save_env.uid, odoo.SUPERUSER_ID)
+        self.assertEqual(self._save_env.cr, self._save_cr)
+        self.assertEqual(self._save_cr, self.cr)
         # rollback and close the cursor, and reset the environments
 
     @classmethod

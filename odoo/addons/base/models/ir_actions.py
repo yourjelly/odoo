@@ -576,7 +576,7 @@ class IrActionsServer(models.Model):
                 for active_id in active_ids:
                     # run context dedicated to a particular active_id
                     run_self = self.with_context(active_ids=[active_id], active_id=active_id)
-                    eval_context["env"].context = run_self._context
+                    eval_context["env"] = eval_context['env'](context=run_self._context)
                     # call the single method related to the action: run_action_<STATE>
                     func = getattr(run_self, 'run_action_%s' % action.state)
                     res = func(action, eval_context=eval_context)

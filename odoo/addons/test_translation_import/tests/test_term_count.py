@@ -177,9 +177,8 @@ class TestTermCount(common.TransactionCase):
 
         trans_count = self.env['ir.translation'].search_count([('lang', '=', 'tlh')])
         self.assertEqual(trans_count, 1, "The imported translations were not created")
-
-        self.env.context = dict(self.env.context, lang="tlh")
-        self.assertEqual(_("Klingon"), "tlhIngan", "The code translation was not applied")
+        self.env = self.env(context={'lang':"tlh"})
+        self.with_context(lang="tlh").assertEqual(_("Klingon"), "tlhIngan", "The code translation was not applied")
 
     def test_lazy_translation(self):
         """Test the import from a single po file works"""
@@ -226,8 +225,7 @@ class TestTermCount(common.TransactionCase):
 
         trans_count = self.env['ir.translation'].search_count([('lang', '=', 'dot')])
         self.assertEqual(trans_count, 1, "The imported translations were not created")
-
-        self.env.context = dict(self.env.context, lang="dot")
+        self.env = self.env(context={'lang':"dot"})
         self.assertEqual(_("Accounting"), "samva", "The code translation was not applied")
 
 @tagged('post_install', '-at_install')
