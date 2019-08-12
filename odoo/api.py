@@ -424,7 +424,11 @@ class Environment(Mapping):
         # otherwise create environment, and add it in the set
         self = object.__new__(cls)
         args = (cr, uid, frozendict(context), su)
-        self.cr, self.uid, self.context, self.su = self.args = args
+        a_cr, a_uid, a_context, a_su = self.args = args
+        object.__setattr__(self, 'cr', a_cr)
+        object.__setattr__(self, 'uid', a_uid)
+        object.__setattr__(self, 'context', a_context)
+        object.__setattr__(self, 'su', a_su)
         self.registry = Registry(cr.dbname)
         self.cache = envs.cache
         self._cache_key = (cr, uid, su)
@@ -432,6 +436,13 @@ class Environment(Mapping):
         self.all = envs
         envs.add(self)
         return self
+
+    def __setattr__(self, name, value):
+        if name in ['context', 'uid', 'cr', 'su']:
+            import traceback
+            stack = ''.join(traceback.format_stack(limit=7))
+            _logger.error('Writing %s on  env.%s\n%s' % (value, name, stack))
+        object.__setattr__(self, name, value)
 
     #
     # Mapping methods
