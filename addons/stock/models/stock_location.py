@@ -196,6 +196,7 @@ class Location(models.Model):
 class Route(models.Model):
     _name = 'stock.location.route'
     _description = "Inventory Routes"
+    _inherit = 'company.consistency.mixin'
     _order = 'sequence'
 
     name = fields.Char('Route', required=True, translate=True)
@@ -211,9 +212,34 @@ class Route(models.Model):
         'res.company', 'Company',
         default=lambda self: self.env.company, index=True,
         help='Leave this field empty if this route is shared between all companies')
-    product_ids = fields.Many2many('product.template', 'stock_route_product', 'route_id', 'product_id', 'Products', copy=False)
+    product_ids = fields.Many2many(
+        'product.template', 'stock_route_product', 'route_id', 'product_id',
+        'Products', copy=False, domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     categ_ids = fields.Many2many('product.category', 'stock_location_route_categ', 'route_id', 'categ_id', 'Product Categories', copy=False)
-    warehouse_ids = fields.Many2many('stock.warehouse', 'stock_route_warehouse', 'route_id', 'warehouse_id', 'Warehouses', copy=False)
+    warehouse_ids = fields.Many2many(
+        'stock.warehouse', 'stock_route_warehouse', 'route_id', 'warehouse_id',
+        'Warehouses', copy=False)
+
+    def create(self, values):
+        res = super(Route, self).create(values)
+        res._company_consistency_check()
+        return res
+
+    def write(self, values):
+        res = super(Route, self).write(values)
+        if any(field in values for field in self._company_consistency_fields()):
+            self._company_consistency_check()
+        return res
+
+    @api.model
+    def _company_consistency_m2m_required_cid_fields(self):
+        res = super(Route, self)._company_consistency_m2m_required_cid_fields()
+        return res + ['warehouse_ids']
+
+    @api.model
+    def _company_consistency_m2m_optional_cid_fields(self):
+        res = super(Route, self)._company_consistency_m2m_optional_cid_fields()
+        return res + ['product_ids']
 
     @api.onchange('warehouse_selectable')
     def _onchange_warehouse_selectable(self):
