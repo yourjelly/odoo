@@ -12,6 +12,7 @@ class TestStockFlow(TestStockCommon):
         cls.partner_company2 = cls.env['res.partner'].create({
             'name': 'My Company (Chicago)-demo',
             'email': 'chicago@yourcompany.com',
+            'company_id': False,
             })
         cls.company = cls.env['res.company'].create({
             'currency_id': cls.env.ref('base.USD').id,

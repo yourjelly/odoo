@@ -17,6 +17,7 @@ _logger = logging.getLogger(__name__)
 
 class Warehouse(models.Model):
     _name = "stock.warehouse"
+    _inherit = 'company.consistency.mixin'
     _description = "Warehouse"
     _order = 'sequence,id'
     # namedtuple used in helper methods generating values for routes
@@ -28,13 +29,20 @@ class Warehouse(models.Model):
         'res.company', 'Company', default=lambda self: self.env.company,
         index=True, readonly=True, required=True,
         help='The company is automatically set from your user preferences.')
-    partner_id = fields.Many2one('res.partner', 'Address', default=lambda self: self.env.company.partner_id)
-    view_location_id = fields.Many2one('stock.location', 'View Location', domain=[('usage', '=', 'view')], required=True)
-    lot_stock_id = fields.Many2one('stock.location', 'Location Stock', domain=[('usage', '=', 'internal')], required=True)
+    partner_id = fields.Many2one('res.partner', 'Address', default=lambda self: self.env.company.partner_id, domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+    view_location_id = fields.Many2one(
+        'stock.location', 'View Location',
+        domain="[('usage', '=', 'view'), ('company_id', '=', company_id)]",
+        required=True)
+    lot_stock_id = fields.Many2one(
+        'stock.location', 'Location Stock',
+        domain="[('usage', '=', 'internal'), ('company_id', '=', company_id)]",
+        required=True)
     code = fields.Char('Short Name', required=True, size=5, help="Short name used to identify your warehouse")
     route_ids = fields.Many2many(
         'stock.location.route', 'stock_route_warehouse', 'warehouse_id', 'route_id',
-        'Routes', domain="[('warehouse_selectable', '=', True)]",
+        'Routes',
+        domain="[('warehouse_selectable', '=', True), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         help='Defaults routes through the warehouse')
     reception_steps = fields.Selection([
         ('one_step', 'Receive goods directly (1 step)'),
@@ -48,16 +56,29 @@ class Warehouse(models.Model):
         ('pick_pack_ship', 'Pack goods, send goods in output and then deliver (3 steps)')],
         'Outgoing Shipments', default='ship_only', required=True,
         help="Default outgoing route to follow")
-    wh_input_stock_loc_id = fields.Many2one('stock.location', 'Input Location')
-    wh_qc_stock_loc_id = fields.Many2one('stock.location', 'Quality Control Location')
-    wh_output_stock_loc_id = fields.Many2one('stock.location', 'Output Location')
-    wh_pack_stock_loc_id = fields.Many2one('stock.location', 'Packing Location')
+    wh_input_stock_loc_id = fields.Many2one(
+        'stock.location', 'Input Location',
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+    wh_qc_stock_loc_id = fields.Many2one(
+        'stock.location', 'Quality Control Location',
+        domain="[('company_id', '=', company_id)]")
+    wh_output_stock_loc_id = fields.Many2one(
+        'stock.location', 'Output Location',
+        domain="[('company_id', '=', company_id)]")
+    wh_pack_stock_loc_id = fields.Many2one(
+        'stock.location', 'Packing Location',
+        domain="[('company_id', '=', company_id)]")
     mto_pull_id = fields.Many2one('stock.rule', 'MTO rule')
-    pick_type_id = fields.Many2one('stock.picking.type', 'Pick Type')
-    pack_type_id = fields.Many2one('stock.picking.type', 'Pack Type')
-    out_type_id = fields.Many2one('stock.picking.type', 'Out Type')
-    in_type_id = fields.Many2one('stock.picking.type', 'In Type')
-    int_type_id = fields.Many2one('stock.picking.type', 'Internal Type')
+    pick_type_id = fields.Many2one(
+        'stock.picking.type', 'Pick Type', domain="[('company_id', '=', company_id)]")
+    pack_type_id = fields.Many2one(
+        'stock.picking.type', 'Pack Type', domain="[('company_id', '=', company_id)]")
+    out_type_id = fields.Many2one(
+        'stock.picking.type', 'Out Type', domain="[('company_id', '=', company_id)]")
+    in_type_id = fields.Many2one(
+        'stock.picking.type', 'In Type', domain="[('company_id', '=', company_id)]")
+    int_type_id = fields.Many2one(
+        'stock.picking.type', 'Internal Type', domain="[('company_id', '=', company_id)]")
     crossdock_route_id = fields.Many2one('stock.location.route', 'Crossdock Route', ondelete='restrict')
     reception_route_id = fields.Many2one('stock.location.route', 'Receipt Route', ondelete='restrict')
     delivery_route_id = fields.Many2one('stock.location.route', 'Delivery Route', ondelete='restrict')
@@ -119,9 +140,15 @@ class Warehouse(models.Model):
         # update partner data if partner assigned
         if vals.get('partner_id'):
             self._update_partner_data(vals['partner_id'], vals.get('company_id'))
+        warehouse._company_consistency_check()
         return warehouse
 
     def write(self, vals):
+        if 'company_id' in vals:
+            for warehouse in self:
+                if warehouse.company_id.id != vals['company_id']:
+                    raise UserError(_("Changing the company of this record is forbidden at this point, you should rather archive it and create a new one."))
+
         Route = self.env['stock.location.route']
         warehouses = self.with_context(active_test=False)
 
@@ -232,6 +259,8 @@ class Warehouse(models.Model):
                     Route.search([('supplied_wh_id', '=', warehouse.id), ('supplier_wh_id', 'in', to_remove.ids)]).write({'active': False})
                     # TDE FIXME: shouldn't we remove stock rules also ? because this could make them global (not sure)
 
+        if any(field in vals for field in self._company_consistency_fields()):
+            self._company_consistency_check()
         return res
 
     @api.model
@@ -936,6 +965,20 @@ class Warehouse(models.Model):
             'limit': 20,
             'context': dict(self._context, default_warehouse_selectable=True, default_warehouse_ids=self.ids)
         }
+
+    @api.model
+    def _company_consistency_m2o_required_cid_fields(self):
+        res = super(Warehouse, self)._company_consistency_m2o_required_cid_fields()
+        res += ['pick_type_id', 'pack_type_id', 'out_type_id', 'in_type_id', 'int_type_id']
+        res += ['view_location_id', 'lot_stock_id']
+        res += ['wh_input_stock_loc_id', 'wh_qc_stock_loc_id', 'wh_output_stock_loc_id', 'wh_pack_stock_loc_id']
+        return res
+
+    @api.model
+    def _company_consistency_m2o_optional_cid_fields(self):
+        res = super(Warehouse, self)._company_consistency_m2o_optional_cid_fields()
+        return res + ['partner_id']
+
 
 
 class Orderpoint(models.Model):
