@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
     <data>
         <record id="view_account_analytic_line_form_inherit_account" model="ir.ui.view">
@@ -14,13 +14,13 @@
                     <xpath expr="//field[@name='product_uom_id']" position="before">
                         <field name="product_id"/>
                     </xpath>
-                    <group name="amount" position="after">
+                    <xpath position="after" expr="//group[@name='amount']">
                         <group/> <!-- put Accounting group under Amount group -->
                         <group name="accounting" string="Accounting">
                             <field name="general_account_id" options="{'no_create': True}"/>
                             <field name="move_id"/>
                         </group>
-                    </group>
+                    </xpath>
                 </data>
             </field>
         </record>
@@ -69,30 +69,12 @@
             </field>
         </record>
 
-        <menuitem
-            name="Analytic Items"
-            parent="account.menu_finance_entries_accounting_miscellaneous"
-            action="analytic.account_analytic_line_action_entries"
-            id="menu_action_analytic_lines_tree"
-            sequence="35"
-            groups="analytic.group_analytic_accounting"/>
-        <menuitem action="analytic.action_account_analytic_account_form" id="account_analytic_def_account"
-            parent="menu_analytic_accounting"
-            groups="analytic.group_analytic_accounting" sequence="0"/>
+        <menuitem name="Analytic Items" parent="account.menu_finance_entries_accounting_miscellaneous" action="analytic.account_analytic_line_action_entries" id="menu_action_analytic_lines_tree" sequence="35" groups="analytic.group_analytic_accounting"/>
+        <menuitem action="analytic.action_account_analytic_account_form" id="account_analytic_def_account" parent="menu_analytic_accounting" groups="analytic.group_analytic_accounting" sequence="0"/>
 
-        <menuitem
-            id="account_analytic_tag_menu"
-            name="Analytic Tags"
-            parent="menu_analytic_accounting"
-            action="analytic.account_analytic_tag_action"
-            groups="analytic.group_analytic_tags"/>
+        <menuitem id="account_analytic_tag_menu" name="Analytic Tags" parent="menu_analytic_accounting" action="analytic.account_analytic_tag_action" groups="analytic.group_analytic_tags"/>
 
-        <menuitem
-            id="account_analytic_group_menu"
-            name="Analytic Account Groups"
-            parent="menu_analytic_accounting"
-            action="analytic.account_analytic_group_action"
-            groups="analytic.group_analytic_accounting"/>
+        <menuitem id="account_analytic_group_menu" name="Analytic Account Groups" parent="menu_analytic_accounting" action="analytic.account_analytic_group_action" groups="analytic.group_analytic_accounting"/>
 
     </data>
 </odoo>

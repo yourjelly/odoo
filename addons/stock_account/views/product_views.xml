@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
     <data>
 
@@ -7,22 +7,22 @@
             <field name="model">product.category</field>
             <field name="inherit_id" ref="account.view_category_property_form"/>
             <field name="arch" type="xml">
-                <group name="account_property" position="inside">
+                <xpath position="inside" expr="//group[@name='account_property']">
                     <group name="account_stock_property" string="Account Stock Properties" groups="account.group_account_user">
-                        <field name="property_stock_account_input_categ_id" domain="[('deprecated', '=', False)]" attrs="{'required':[ ('property_valuation', '=', 'real_time')]}" />
-                        <field name="property_stock_account_output_categ_id" domain="[('deprecated', '=', False)]" attrs="{'required':[ ('property_valuation', '=', 'real_time')]}" />
+                        <field name="property_stock_account_input_categ_id" domain="[('deprecated', '=', False)]" attrs="{'required':[ ('property_valuation', '=', 'real_time')]}"/>
+                        <field name="property_stock_account_output_categ_id" domain="[('deprecated', '=', False)]" attrs="{'required':[ ('property_valuation', '=', 'real_time')]}"/>
                         <field name="property_stock_valuation_account_id" options="{'no_create': True}" domain="[('deprecated', '=', False)]" attrs="{'required':[ ('property_valuation', '=', 'real_time')]}"/>
-                        <field name="property_stock_journal" attrs="{'required':[ ('property_valuation', '=', 'real_time')]}" />
+                        <field name="property_stock_journal" attrs="{'required':[ ('property_valuation', '=', 'real_time')]}"/>
                     </group>
-                </group>
-                <group name="account_property" position="before">
+                </xpath>
+                <xpath position="before" expr="//group[@name='account_property']">
                     <group>
                         <group string="Inventory Valuation">
                             <field name="property_cost_method"/>
                             <field name="property_valuation" groups="account.group_account_user"/>
                         </group>
                     </group>
-                </group>
+                </xpath>
             </field>
         </record>
 
@@ -37,17 +37,11 @@
                         <field name="cost_method" invisible="1" readonly="1"/>
                     </field>
                     <field name="standard_price" position="replace">
-                        <field name="standard_price"
-                            attrs="{'readonly':[('cost_method', '!=', 'fifo')]}"
-                            widget='monetary' options="{'currency_field': 'cost_currency_id', 'field_digits': True}"
-                            class="oe_inline"/>
+                        <field name="standard_price" attrs="{'readonly':[('cost_method', '!=', 'fifo')]}" widget="monetary" options="{'currency_field': 'cost_currency_id', 'field_digits': True}" class="oe_inline"/>
                     </field>
                     <xpath expr="//div[@name='standard_price_uom']" position="inside">
                         <span name="update_cost_price">
-                            <button string="Update Cost" type="action"
-                                name="%(action_view_change_standard_price)d"
-                                attrs="{'invisible':['|', ('cost_method', '=', 'fifo'), ('product_variant_count', '>', 1)]}"
-                                class="oe_link pt-0 oe_inline"/>
+                            <button string="Update Cost" type="action" name="%(action_view_change_standard_price)d" attrs="{'invisible':['|', ('cost_method', '=', 'fifo'), ('product_variant_count', '&gt;', 1)]}" class="oe_link pt-0 oe_inline"/>
                         </span>
                     </xpath>
                 </data>
@@ -61,17 +55,11 @@
             <field name="arch" type="xml">
                 <data>
                     <field name="standard_price" position="replace">
-                        <field name="standard_price"
-                            attrs="{'readonly':[('cost_method', '!=', 'fifo')]}"
-                            widget='monetary' options="{'currency_field': 'cost_currency_id', 'field_digits': True}"
-                            class="oe_inline"/>
+                        <field name="standard_price" attrs="{'readonly':[('cost_method', '!=', 'fifo')]}" widget="monetary" options="{'currency_field': 'cost_currency_id', 'field_digits': True}" class="oe_inline"/>
                     </field>
                     <xpath expr="//div[@name='standard_price_uom']" position="inside">
                         <span name="update_cost_price">
-                            <button string="Update Cost" type="action"
-                                name="%(action_view_change_standard_price)d"
-                                attrs="{'invisible':['|', ('cost_method', '=', 'fifo'), ('product_variant_count', '=', 1)]}"
-                                class="oe_link pt-0 oe_inline"/>
+                            <button string="Update Cost" type="action" name="%(action_view_change_standard_price)d" attrs="{'invisible':['|', ('cost_method', '=', 'fifo'), ('product_variant_count', '=', 1)]}" class="oe_link pt-0 oe_inline"/>
                         </span>
                     </xpath>
                 </data>
@@ -89,16 +77,10 @@
                         <field name="cost_method" invisible="1" readonly="1"/>
                         <div class="o_td_label" name="update_cost_price">
                             <label for="standard_price"/>
-                            <button string="Update Cost" type="action"
-                                name="%(action_view_change_standard_price)d"
-                                attrs="{'invisible':[('cost_method', '=', 'fifo')]}"
-                                class="oe_link oe_inline"/>
+                            <button string="Update Cost" type="action" name="%(action_view_change_standard_price)d" attrs="{'invisible':[('cost_method', '=', 'fifo')]}" class="oe_link oe_inline"/>
                         </div>
                         <div class="o_row">
-                            <field name="standard_price"
-                                attrs="{'readonly':[('cost_method', '!=', 'fifo')]}"
-                                widget='monetary' options="{'currency_field': 'cost_currency_id', 'field_digits': True}"
-                                class="oe_inline"/>
+                            <field name="standard_price" attrs="{'readonly':[('cost_method', '!=', 'fifo')]}" widget="monetary" options="{'currency_field': 'cost_currency_id', 'field_digits': True}" class="oe_inline"/>
                         </div>
                     </field>
                 </data>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
     <record id="hr_employee_view_search" model="ir.ui.view">
         <field name="name">hr.employee.view.search</field>
@@ -6,9 +6,9 @@
         <field name="inherit_id" ref="hr.view_employee_filter"/>
         <field name="groups_id" eval="[(4, ref('hr.group_hr_manager'))]"/>
         <field name="arch" type="xml">
-            <filter name="group_manager" position="after">
+            <xpath position="after" expr="//filter[@name='group_manager']">
                 <filter name="group_hr_presence_state" string="Presence" domain="[]" context="{'group_by':'hr_presence_state_display'}"/>
-            </filter>
+            </xpath>
         </field>
     </record>
 

@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
     <record id="res_config_settings_view_form" model="ir.ui.view">
         <field name="name">res.config.settings.view.form.inherit.website.twitter</field>
         <field name="model">res.config.settings</field>
         <field name="inherit_id" ref="website.res_config_settings_view_form"/>
         <field name="arch" type="xml">
-            <div id="google_maps_setting" position="after">
+            <xpath position="after" expr="//div[@id='google_maps_setting']">
                 <div class="col-12 col-lg-6 o_setting_box" id="twitter_roller_install_setting">
                     <div class="o_setting_right_pane">
                         <span class="o_form_label">Twitter Roller</span>
@@ -36,13 +36,13 @@
                                                 <li><strong>Name: </strong> Odoo Twitter Integration</li>
                                                 <li><strong>Description: </strong> Odoo Twitter Integration </li>
                                                 <li><strong>Website: </strong>
-                                                <b><field name="twitter_server_uri" /></b></li>
+                                                <b><field name="twitter_server_uri"/></b></li>
                                                 <li><strong>Callback URL: </strong>Leave blank</li>
                                                 <li>Accept terms of use and click on the Create your Twitter application button at the bottom</li>
                                             </ul>
                                         </li>
                                         <li>Switch to the API Keys tab: <br/>
-                                            <img src='/website_twitter/static/src/img/api_key.png' alt="API Key"/>
+                                            <img src="/website_twitter/static/src/img/api_key.png" alt="API Key"/>
                                         </li><br/>
                                         <li>Copy/Paste Consumer Key (API Key) and Consumer Secret (API Secret) keys below.</li>
                                     </ol>
@@ -55,7 +55,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </xpath>
         </field>
     </record>
 </odoo>

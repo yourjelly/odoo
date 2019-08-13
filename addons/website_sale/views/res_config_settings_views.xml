@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
 
     <record id="res_config_settings_view_form" model="ir.ui.view">
@@ -6,7 +6,7 @@
         <field name="model">res.config.settings</field>
         <field name="inherit_id" ref="website.res_config_settings_view_form"/>
         <field name="arch" type="xml">
-            <div id="webmaster_settings" position="after">
+            <xpath position="after" expr="//div[@id='webmaster_settings']">
                 <h2>Products</h2>
                 <div class="row mt16 o_settings_container" id="sale_product_catalog_settings">
                     <div class="col-12 col-lg-6 o_setting_box" id="product_attributes_setting">
@@ -100,7 +100,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-lg-6 o_setting_box" id="pricelists_setting"  title="With the first mode you can set several prices in the product config form (from Sales tab). With the second one, you set prices and computation rules from Pricelists.">
+                    <div class="col-12 col-lg-6 o_setting_box" id="pricelists_setting" title="With the first mode you can set several prices in the product config form (from Sales tab). With the second one, you set prices and computation rules from Pricelists.">
                         <div class="o_setting_left_pane">
                             <field name="multi_sales_price"/>
                         </div>
@@ -252,7 +252,7 @@
                     </div>
                 </div>
 
-                <field name='module_account' invisible="1"/>
+                <field name="module_account" invisible="1"/>
                 <div attrs="{'invisible': [('module_account', '=', False)]}">
                     <h2>Invoicing</h2>
                     <div class="row mt16 o_settings_container" id="sale_invoicing_settings">
@@ -278,7 +278,7 @@
                                 <div class="text-muted">
                                     Generate the invoice automatically when the online payment is confirmed
                                 </div>
-                                <div  attrs="{'invisible': [('automatic_invoice','=',False)]}">
+                                <div attrs="{'invisible': [('automatic_invoice','=',False)]}">
                                     <label for="template_id" class="o_light_label"/>
                                     <field name="template_id" class="oe_inline"/>
                                 </div>
@@ -299,7 +299,7 @@
                             <div class="content-group">
                                 <div class="row mt16">
                                     <label class="o_light_label col-lg-3" string="Sales Team" for="salesteam_id"/>
-                                    <field name="salesteam_id" kanban_view_ref="%(sales_team.crm_team_view_kanban)s" />
+                                    <field name="salesteam_id" kanban_view_ref="%(sales_team.crm_team_view_kanban)s"/>
                                 </div>
                                 <div class="row">
                                     <label class="o_light_label col-lg-3" for="salesperson_id"/>
@@ -320,7 +320,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-xs-12 col-lg-6 o_setting_box" id="abandoned_carts_setting" title="Abandoned carts are all carts left unconfirmed by website visitors. You can find them in *Website > Orders > Abandoned Carts*. From there you can send recovery emails to visitors who entered their contact details.">
+                    <div class="col-xs-12 col-lg-6 o_setting_box" id="abandoned_carts_setting" title="Abandoned carts are all carts left unconfirmed by website visitors. You can find them in *Website &gt; Orders &gt; Abandoned Carts*. From there you can send recovery emails to visitors who entered their contact details.">
                         <div class="o_setting_left_pane"/>
                         <div class="o_setting_right_pane">
                             <span class="o_form_label">Abandoned Carts</span>
@@ -345,7 +345,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </xpath>
         </field>
     </record>
 </odoo>

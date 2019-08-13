@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
 
     <record id="res_config_settings_view_form_sale" model="ir.ui.view">
@@ -32,7 +32,7 @@
         <field name="model">res.config.settings</field>
         <field name="inherit_id" ref="stock.res_config_settings_view_form"/>
         <field name="arch" type="xml">
-            <div id="production_lot_info" position="inside">
+            <xpath position="inside" expr="//div[@id='production_lot_info']">
                 <div class="col-12 col-lg-6 o_setting_box" attrs="{'invisible': [('group_stock_production_lot', '=', False)]}" id="group_lot_on_invoice">
                     <div class="o_setting_left_pane">
                         <field name="group_lot_on_invoice"/>
@@ -44,8 +44,8 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div id="warning_info" position="after">
+            </xpath>
+            <xpath position="after" expr="//div[@id='warning_info']">
                 <div class="col-12 col-lg-6 o_setting_box" title="Reserving products manually in delivery orders or by running the scheduler is advised to better manage priorities in case of long customer lead times or/and frequent stock-outs. By default, the scheduler runs automatically every 24 hours.">
                     <div class="o_setting_right_pane">
                         <label for="module_procurement_jit"/>
@@ -72,11 +72,11 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </xpath>
             <xpath expr="//h2[@id='schedule_info']" position="attributes">
                 <attribute name="invisible">0</attribute>
             </xpath>
-            <div id="sale_security_lead" position="replace">
+            <xpath position="replace" expr="//div[@id='sale_security_lead']">
                 <div class="col-12 col-lg-6 o_setting_box" title="Margin of error for dates promised to customers. Products will be scheduled for procurement and delivery that many days earlier than the actual promised date, to cope with unexpected delays in the supply chain.">
                     <div class="o_setting_left_pane">
                         <field name="use_security_lead"/>
@@ -94,7 +94,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </xpath>
         </field>
     </record>
 

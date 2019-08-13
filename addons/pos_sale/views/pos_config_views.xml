@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
 
     <record id="pos_config_view_form_pos_sale" model="ir.ui.view">
@@ -6,7 +6,7 @@
         <field name="model">pos.config</field>
         <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
         <field name="arch" type="xml">
-            <div id="accounting_section" position="after">
+            <xpath position="after" expr="//div[@id='accounting_section']">
                 <h2>Sales Reporting</h2>
                 <div class="row mt16 o_settings_container">
                     <div class="col-12 col-lg-6 o_setting_box">
@@ -19,7 +19,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </xpath>
         </field>
     </record>
 </odoo>

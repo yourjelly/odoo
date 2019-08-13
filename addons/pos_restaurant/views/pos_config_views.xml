@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
 
     <record id="pos_config_view_form_inherit_restaurant" model="ir.ui.view">
@@ -6,11 +6,9 @@
         <field name="model">pos.config</field>
         <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
         <field name="arch" type="xml">
-            <button id="btn_use_pos_restaurant" position="replace"/>
-            <div id="iface_invoicing" position="before">
-                <div class="col-12 col-lg-6 o_setting_box"
-                     id="iface_printbill"
-                     attrs="{'invisible': [('module_pos_restaurant', '=', False)]}">
+            <xpath position="replace" expr="//button[@id='btn_use_pos_restaurant']"/>
+            <xpath position="before" expr="//div[@id='iface_invoicing']">
+                <div class="col-12 col-lg-6 o_setting_box" id="iface_printbill" attrs="{'invisible': [('module_pos_restaurant', '=', False)]}">
                     <div class="o_setting_left_pane">
                         <field name="iface_printbill"/>
                     </div>
@@ -22,9 +20,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-lg-6 o_setting_box"
-                     id="iface_splitbill"
-                     attrs="{'invisible': [('module_pos_restaurant', '=', False)]}">
+                <div class="col-12 col-lg-6 o_setting_box" id="iface_splitbill" attrs="{'invisible': [('module_pos_restaurant', '=', False)]}">
                     <div class="o_setting_left_pane">
                         <field name="iface_splitbill"/>
                     </div>
@@ -36,10 +32,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-lg-6 o_setting_box"
-                     id="iface_tipproduct"
-                     title="This product is used as reference on customer receipts."
-                     attrs="{'invisible': [('module_pos_restaurant', '=', False)]}">
+                <div class="col-12 col-lg-6 o_setting_box" id="iface_tipproduct" title="This product is used as reference on customer receipts." attrs="{'invisible': [('module_pos_restaurant', '=', False)]}">
                     <div class="o_setting_left_pane">
                         <field name="iface_tipproduct"/>
                     </div>
@@ -52,18 +45,14 @@
                         <div class="content-group" attrs="{'invisible': [('iface_tipproduct', '=', False)]}">
                             <div class="mt16">
                                 <label string="Tip Product" for="tip_product_id" class="o_light_label"/>
-                                <field name="tip_product_id"
-                                       domain="[('available_in_pos', '=', True)]"
-                                       context="{'default_available_in_pos': True}"/>
+                                <field name="tip_product_id" domain="[('available_in_pos', '=', True)]" context="{'default_available_in_pos': True}"/>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div id="barcode_scanner" position="after">
-                <div class="col-12 col-lg-6 o_setting_box"
-                     id="is_order_printer"
-                     attrs="{'invisible': [('module_pos_restaurant', '=', False)]}">
+            </xpath>
+            <xpath position="after" expr="//div[@id='barcode_scanner']">
+                <div class="col-12 col-lg-6 o_setting_box" id="is_order_printer" attrs="{'invisible': [('module_pos_restaurant', '=', False)]}">
                     <div class="o_setting_left_pane">
                         <field name="is_order_printer"/>
                     </div>
@@ -84,11 +73,9 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div id="category_reference" position="before">
-                <div class="col-12 col-lg-6 o_setting_box"
-                     id="is_table_management"
-                     attrs="{'invisible': [('module_pos_restaurant', '=', False)]}">
+            </xpath>
+            <xpath position="before" expr="//div[@id='category_reference']">
+                <div class="col-12 col-lg-6 o_setting_box" id="is_table_management" attrs="{'invisible': [('module_pos_restaurant', '=', False)]}">
                     <div class="o_setting_left_pane">
                         <field name="is_table_management"/>
                     </div>
@@ -109,9 +96,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-lg-6 o_setting_box"
-                     id="iface_orderline_notes"
-                     attrs="{'invisible': [('module_pos_restaurant', '=', False)]}">
+                <div class="col-12 col-lg-6 o_setting_box" id="iface_orderline_notes" attrs="{'invisible': [('module_pos_restaurant', '=', False)]}">
                     <div class="o_setting_left_pane">
                         <field name="iface_orderline_notes"/>
                     </div>
@@ -123,7 +108,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </xpath>
         </field>
     </record>
 

@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
     <data>
 
@@ -69,36 +69,24 @@
         <field name="arch" type="xml">
           <form string="Jobs - Recruitment Form">
             <header>
-                <button string="Create Employee" name="create_employee_from_applicant" type="object"
-                        class="oe_highlight" attrs="{'invisible': ['|',('emp_id', '!=', False),('active', '=', False)]}" confirm="Are you sure?"/>
+                <button string="Create Employee" name="create_employee_from_applicant" type="object" class="oe_highlight" attrs="{'invisible': ['|',('emp_id', '!=', False),('active', '=', False)]}" confirm="Are you sure?"/>
                 <button string="Refuse" name="archive_applicant" type="object" attrs="{'invisible': [('active', '=', False)]}"/>
                 <button string="Restore" name="reset_applicant" type="object" attrs="{'invisible': [('active', '=', True)]}"/>
                 <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}" attrs="{'invisible': [('active', '=', False),('emp_id', '=', False)]}"/>
             </header>
             <sheet>
                 <div class="oe_button_box" name="button_box">
-                    <button name="action_applications_email"
-                            class="oe_stat_button"
-                            icon="fa-pencil"
-                            type="object"
-                            attrs="{'invisible': [('application_count', '=', 0)]}">
+                    <button name="action_applications_email" class="oe_stat_button" icon="fa-pencil" type="object" attrs="{'invisible': [('application_count', '=', 0)]}">
                         <field name="application_count" widget="statinfo" string="Other Applications"/>
                     </button>
-                    <button name="action_makeMeeting" class="oe_stat_button" icon="fa-calendar" type="object"
-                         help="Schedule interview with this applicant">
+                    <button name="action_makeMeeting" class="oe_stat_button" icon="fa-calendar" type="object" help="Schedule interview with this applicant">
                         <field name="meeting_count" widget="statinfo" string="Meetings"/>
                     </button>
-                    <button name="action_get_attachment_tree_view"
-                        class="oe_stat_button"
-                        icon="fa-file-text-o"
-                        type="object">
+                    <button name="action_get_attachment_tree_view" class="oe_stat_button" icon="fa-file-text-o" type="object">
                         <field name="attachment_number" widget="statinfo" string="Documents"/>
                     </button>
-                    <button name="toggle_active" type="object"
-                            class="oe_stat_button" icon="fa-archive"
-                            attrs="{'invisible': [('active', '=', True)]}">
-                        <field name="active" widget="boolean_button"
-                            options='{"terminology": "archive"}'/>
+                    <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive" attrs="{'invisible': [('active', '=', True)]}">
+                        <field name="active" widget="boolean_button" options="{&quot;terminology&quot;: &quot;archive&quot;}"/>
                     </button>
                 </div>
                 <widget name="web_ribbon" text="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
@@ -123,7 +111,7 @@
                 </div>
                 <group>
                     <group>
-                        <field name="partner_id" invisible="1" />
+                        <field name="partner_id" invisible="1"/>
                         <field name="email_from" widget="email"/>
                         <field name="email_cc" groups="base.group_no_one"/>
                         <field name="partner_phone"/>
@@ -133,13 +121,13 @@
                     <group>
                         <field name="user_id"/>
                         <field name="priority" widget="priority"/>
-                        <field name="medium_id" groups="base.group_no_one" />
+                        <field name="medium_id" groups="base.group_no_one"/>
                         <field name="source_id"/>
                     </group>
                     <group string="Job">
                         <field name="job_id"/>
                         <field name="department_id"/>
-                        <field name="company_id" groups="base.group_multi_company" options='{"no_open":True}' />
+                        <field name="company_id" groups="base.group_multi_company" options="{&quot;no_open&quot;:True}"/>
                     </group>
                     <group string="Contract">
                         <label for="salary_expected"/>
@@ -211,21 +199,15 @@
                 <filter string="Blocked" name="blocked" domain="[('kanban_state', '=', 'blocked')]"/>
                 <filter string="In progress" name="in_progress" domain="[('kanban_state', '=', 'normal')]"/>
                 <separator/>
-                <filter invisible="1" string="Late Activities" name="activities_overdue"
-                    domain="[('activity_ids.date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"
-                    help="Show all records which has next action date is before today"/>
-                <filter invisible="1" string="Today Activities" name="activities_today"
-                    domain="[('activity_ids.date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
-                <filter invisible="1" string="Future Activities" name="activities_upcoming_all"
-                        domain="[('activity_ids.date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))
-                        ]"/>
-                <filter string="Exception Activities" name="activities_exception"
-                        domain="[('activity_exception_decoration', '!=', False)]"/>
+                <filter invisible="1" string="Late Activities" name="activities_overdue" domain="[('activity_ids.date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]" help="Show all records which has next action date is before today"/>
+                <filter invisible="1" string="Today Activities" name="activities_today" domain="[('activity_ids.date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter invisible="1" string="Future Activities" name="activities_upcoming_all" domain="[('activity_ids.date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))                         ]"/>
+                <filter string="Exception Activities" name="activities_exception" domain="[('activity_exception_decoration', '!=', False)]"/>
                 <field name="categ_ids"/>
                 <field name="attachment_ids" filter_domain="[('attachment_ids.index_content', 'ilike', self)]" string="Attachments"/>
                 <separator/>
                 <group expand="0" string="Group By">
-                    <filter string="Responsible" name="responsible" domain="[]"  context="{'group_by':'user_id'}"/>
+                    <filter string="Responsible" name="responsible" domain="[]" context="{'group_by':'user_id'}"/>
                     <filter string="Job" name="job" domain="[]" context="{'group_by':'job_id'}"/>
                     <filter string="Degree" name="degree" domain="[]" context="{'group_by':'type_id'}"/>
                     <filter string="Stage" name="stage" domain="[]" context="{'group_by':'stage_id'}"/>
@@ -272,7 +254,7 @@
         <field name="model">hr.applicant</field>
         <field name="arch" type="xml">
             <kanban default_group_by="stage_id" class="o_kanban_applicant" quick_create_view="hr_recruitment.quick_create_applicant_form">
-                <field name="stage_id" options='{"group_by_tooltip": {"requirements": "Requirements"}}'/>
+                <field name="stage_id" options="{&quot;group_by_tooltip&quot;: {&quot;requirements&quot;: &quot;Requirements&quot;}}"/>
                 <field name="color"/>
                 <field name="priority"/>
                 <field name="user_id"/>
@@ -284,9 +266,9 @@
                 <field name="message_needaction_counter"/>
                 <field name="attachment_number"/>
                 <field name="active"/>
-                <field name="activity_ids" />
-                <field name="activity_state" />
-                <progressbar field="activity_state" colors='{"planned": "success", "overdue": "danger", "today": "warning"}'/>
+                <field name="activity_ids"/>
+                <field name="activity_state"/>
+                <progressbar field="activity_state" colors="{&quot;planned&quot;: &quot;success&quot;, &quot;overdue&quot;: &quot;danger&quot;, &quot;today&quot;: &quot;warning&quot;}"/>
                 <templates>
                     <t t-name="kanban-box">
                         <div t-attf-class="{{!selection_mode ? 'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) : ''}} oe_kanban_card oe_kanban_global_click oe_applicant_kanban oe_semantic_html_override">
@@ -297,7 +279,7 @@
                                 <div class="dropdown-menu" role="menu">
                                     <t t-if="widget.deletable"><a role="menuitem" type="delete" class="dropdown-item">Delete</a></t>
                                     <a role="menuitem" name="action_makeMeeting" type="object" class="dropdown-item">Schedule Interview</a>
-                                    <div role="separator" class="dropdown-divider"></div>
+                                    <div role="separator" class="dropdown-divider"/>
                                     <ul class="oe_kanban_colorpicker" data-field="color"/>
                                 </div>
                             </div>
@@ -325,12 +307,12 @@
                                             <field name="activity_ids" widget="kanban_activity"/>
                                         </div>
                                         <t t-if="record.message_needaction_counter.raw_value">
-                                            <span role="alert" class='oe_kanban_mail_new mr4' title='Unread Messages'><i class='fa fa-comments' role="img" aria-label="Unread messages"/><t t-raw="record.message_needaction_counter.raw_value"/></span>
+                                            <span role="alert" class="oe_kanban_mail_new mr4" title="Unread Messages"><i class="fa fa-comments" role="img" aria-label="Unread messages"/><t t-raw="record.message_needaction_counter.raw_value"/></span>
                                         </t>
                                     </div>
                                     <div class="oe_kanban_bottom_right">
                                         <a name="action_get_attachment_tree_view" type="object">
-                                            <span title='Documents'><i class='fa fa-paperclip' role="img" aria-label="Documents"/>
+                                            <span title="Documents"><i class="fa fa-paperclip" role="img" aria-label="Documents"/>
                                                 <t t-esc="record.attachment_number.raw_value"/>
                                             </span>
                                         </a>
@@ -345,7 +327,7 @@
 
                                 </div>
                             </div>
-                            <div class="oe_clear"></div>
+                            <div class="oe_clear"/>
                         </div>
                     </t>
                 </templates>
@@ -416,7 +398,7 @@
                 <filter string="Unread Messages" name="message_needaction" domain="[('message_needaction','=',True)]"/>
             </field>
             <xpath expr="//filter[@name='in_position']" position="before">
-                <filter string="My Favorites"  name="my_favorite_jobs" domain="[('favorite_user_ids', 'in', uid)]"/>
+                <filter string="My Favorites" name="my_favorite_jobs" domain="[('favorite_user_ids', 'in', uid)]"/>
             </xpath>
         </field>
     </record>
@@ -462,7 +444,7 @@
         <field name="inherit_id" ref="hr.view_hr_job_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='department_id']" position="after">
-                <field name="address_id" context="{'show_address': 1}" domain= "[('is_company', '=', True )]" options="{'always_reload': True}"/>
+                <field name="address_id" context="{'show_address': 1}" domain="[('is_company', '=', True )]" options="{'always_reload': True}"/>
                 <label for="alias_name" string="Email Alias" attrs="{'invisible': [('alias_domain', '=', False)]}" help="Define a specific contact address for this job position. If you keep it empty, the default email address will be used which is in human resources settings"/>
                 <div name="alias_def" attrs="{'invisible': [('alias_domain', '=', False)]}">
                     <field name="alias_id" class="oe_read_only" string="Email Alias" required="0"/>
@@ -472,28 +454,19 @@
                 </div>
                 <field name="user_id"/>
             </xpath>
-            <div name="button_box" position="inside">
-                <button class="oe_stat_button"
-                    icon="fa-pencil"
-                    name="%(action_hr_job_applications)d"
-                    context="{'default_user_id': user_id}"
-                    type="action">
+            <xpath position="inside" expr="//div[@name='button_box']">
+                <button class="oe_stat_button" icon="fa-pencil" name="%(action_hr_job_applications)d" context="{'default_user_id': user_id}" type="action">
                     <field name="application_count" widget="statinfo" string="Applications"/>
                 </button>
-                <button class="oe_stat_button"
-                    icon="fa-file-text-o"
-                    name="action_get_attachment_tree_view"
-                    type="object">
+                <button class="oe_stat_button" icon="fa-file-text-o" name="action_get_attachment_tree_view" type="object">
                     <field name="documents_count" widget="statinfo" string="Documents"/>
                 </button>
-                <button class="oe_stat_button" type="action"
-                    name="%(action_hr_job_sources)d" icon="fa-bar-chart-o"
-                    context="{'default_job_id': active_id}">
+                <button class="oe_stat_button" type="action" name="%(action_hr_job_sources)d" icon="fa-bar-chart-o" context="{'default_job_id': active_id}">
                     <div class="o_field_widget o_stat_info">
                         <span class="o_stat_text">Trackers</span>
                     </div>
                 </button>
-            </div>
+            </xpath>
         </field>
     </record>
 
@@ -502,10 +475,7 @@
             <field name="name">Job Positions</field>
             <field name="res_model">hr.job</field>
             <field name="view_mode">tree,kanban,form</field>
-            <field name="view_ids" eval="[(5, 0, 0),
-                (0, 0, {'view_mode': 'tree', 'view_id': ref('hr.view_hr_job_tree')}),
-                (0, 0, {'view_mode': 'kanban', 'view_id': ref('hr.hr_job_view_kanban')}),
-                (0, 0, {'view_mode': 'form', 'view_id': ref('hr.view_hr_job_form')})]"/>
+            <field name="view_ids" eval="[(5, 0, 0),                 (0, 0, {'view_mode': 'tree', 'view_id': ref('hr.view_hr_job_tree')}),                 (0, 0, {'view_mode': 'kanban', 'view_id': ref('hr.hr_job_view_kanban')}),                 (0, 0, {'view_mode': 'form', 'view_id': ref('hr.view_hr_job_form')})]"/>
             <field name="context">{'search_default_in_recruitment': 1}</field>
             <field name="help" type="html">
               <p class="o_view_nocontent_smiling_face">
@@ -559,7 +529,7 @@
         <field name="act_window_id" ref="crm_case_categ0_act_job"/>
     </record>
 
-    <record  id="hr_applicant_action_view_pivot" model="ir.actions.act_window.view">
+    <record id="hr_applicant_action_view_pivot" model="ir.actions.act_window.view">
         <field name="sequence" eval="3"/>
         <field name="view_mode">pivot</field>
         <field name="view_id" ref="crm_case_pivot_view_job"/>
@@ -573,27 +543,15 @@
         <field name="act_window_id" ref="crm_case_categ0_act_job"/>
     </record>
 
-    <menuitem
-        name="Recruitment"
-        id="menu_hr_recruitment_root"
-        web_icon="hr_recruitment,static/description/icon.png"
-        groups="hr_recruitment.group_hr_recruitment_user"
-        sequence="80"/>
+    <menuitem name="Recruitment" id="menu_hr_recruitment_root" web_icon="hr_recruitment,static/description/icon.png" groups="hr_recruitment.group_hr_recruitment_user" sequence="80"/>
 
-    <menuitem id="menu_hr_recruitment_configuration" name="Configuration" parent="menu_hr_recruitment_root"
-        sequence="100"/>
+    <menuitem id="menu_hr_recruitment_configuration" name="Configuration" parent="menu_hr_recruitment_root" sequence="100"/>
 
     <!-- ALL JOBS REQUESTS -->
     <menuitem parent="menu_hr_recruitment_configuration" id="menu_hr_job_position_config" action="action_hr_job_config" sequence="10"/>
-    <menuitem
-        name="Applications"
-        parent="menu_hr_recruitment_root"
-        id="menu_crm_case_categ0_act_job" sequence="2"/>
+    <menuitem name="Applications" parent="menu_hr_recruitment_root" id="menu_crm_case_categ0_act_job" sequence="2"/>
 
-    <menuitem
-        name="All Applications"
-        parent="menu_crm_case_categ0_act_job"
-        id="menu_crm_case_categ_all_app" action="crm_case_categ0_act_job" sequence="2"/>
+    <menuitem name="All Applications" parent="menu_crm_case_categ0_act_job" id="menu_crm_case_categ_all_app" action="crm_case_categ0_act_job" sequence="2"/>
 
     <!-- Resume and Letters -->
     <record id="ir_attachment_view_search_inherit_hr_recruitment" model="ir.ui.view">
@@ -606,13 +564,13 @@
                 <field name="index_content" string="Content"/>
             </xpath>
             <xpath expr="//filter[@name='my_documents_filter']" position="attributes">
-                <attribute name='invisible'>1</attribute>
+                <attribute name="invisible">1</attribute>
             </xpath>
             <xpath expr="//filter[@name='url_filter']" position="attributes">
-                <attribute name='invisible'>1</attribute>
+                <attribute name="invisible">1</attribute>
             </xpath>
             <xpath expr="//filter[@name='binary_filter']" position="attributes">
-                <attribute name='invisible'>1</attribute>
+                <attribute name="invisible">1</attribute>
             </xpath>
         </field>
     </record>
@@ -678,7 +636,7 @@ action = act
                     <group>
                         <field name="name"/>
                         <field name="sequence" groups="base.group_no_one"/>
-                        <field name="template_id" domain= "[('model_id.model', '=', 'hr.applicant')]"/>
+                        <field name="template_id" domain="[('model_id.model', '=', 'hr.applicant')]"/>
                     </group>
                     <group name="stage_details">
                         <field name="fold"/>
@@ -720,13 +678,7 @@ action = act
         </field>
     </record>
 
-    <menuitem
-        id="menu_hr_recruitment_stage"
-        name="Stages"
-        parent="menu_hr_recruitment_configuration"
-        action="hr_recruitment_stage_act"
-        groups="base.group_no_one"
-        sequence="1"/>
+    <menuitem id="menu_hr_recruitment_stage" name="Stages" parent="menu_hr_recruitment_configuration" action="hr_recruitment_stage_act" groups="base.group_no_one" sequence="1"/>
 
     <!-- Tag Form View -->
     <record id="hr_applicant_category_view_form" model="ir.ui.view">
@@ -766,11 +718,7 @@ action = act
         </field>
     </record>
 
-    <menuitem
-        id="hr_applicant_category_menu"
-        parent="menu_hr_recruitment_configuration"
-        action="hr_applicant_category_action"
-        sequence="2" groups="base.group_no_one"/>
+    <menuitem id="hr_applicant_category_menu" parent="menu_hr_recruitment_configuration" action="hr_applicant_category_action" sequence="2" groups="base.group_no_one"/>
 
     <!-- Degree Tree View -->
     <record model="ir.ui.view" id="hr_recruitment_degree_tree">
@@ -807,12 +755,7 @@ action = act
         <field name="view_id" ref="hr_recruitment_degree_tree"/>
     </record>
 
-     <menuitem
-            id="menu_hr_recruitment_degree"
-            name="Degrees"
-            parent="menu_hr_recruitment_configuration"
-            action="hr_recruitment_degree_action"
-            sequence="5" groups="base.group_no_one"/>
+     <menuitem id="menu_hr_recruitment_degree" name="Degrees" parent="menu_hr_recruitment_configuration" action="hr_recruitment_degree_action" sequence="5" groups="base.group_no_one"/>
 
     <!-- Source Tree View -->
     <record model="ir.ui.view" id="hr_recruitment_source_tree">
@@ -822,7 +765,7 @@ action = act
             <tree string="Sources of Applicants" editable="top">
                 <field name="source_id"/>
                 <field name="email"/>
-                <button name="create_alias" string="Create alias" type="object" icon="fa-repeat text-success" />
+                <button name="create_alias" string="Create alias" type="object" icon="fa-repeat text-success"/>
             </tree>
         </field>
     </record>
@@ -831,12 +774,7 @@ action = act
         <field name="res_model">hr.recruitment.source</field>
     </record>
 
-    <menuitem
-        id="menu_hr_recruitment_source"
-        parent="menu_hr_recruitment_configuration"
-        action="hr_recruitment_source_action"
-        groups="base.group_no_one"
-        sequence="10"/>
+    <menuitem id="menu_hr_recruitment_source" parent="menu_hr_recruitment_configuration" action="hr_recruitment_source_action" groups="base.group_no_one" sequence="10"/>
 
     <record id="hr_applicant_action_from_department" model="ir.actions.act_window">
         <field name="name">New Applications</field>
@@ -921,11 +859,11 @@ action = act
                     <field name="date_closed"/>
                 </group>
                 <group expand="1" string="Group By">
-                   <filter string="Responsible" name='User' context="{'group_by':'user_id'}"/>
+                   <filter string="Responsible" name="User" context="{'group_by':'user_id'}"/>
                    <filter string="Company" name="company" context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
                    <filter string="Jobs" name="job" context="{'group_by':'job_id'}"/>
                    <filter string="Department" name="department" context="{'group_by':'department_id'}"/>
-                   <filter string="Stage" name="stage" context="{'group_by':'stage_id'}" />
+                   <filter string="Stage" name="stage" context="{'group_by':'stage_id'}"/>
                    <separator/>
                    <filter string="Creation Date" name="creation_week" context="{'group_by':'create_date:week'}" help="Creation Date"/>
                 </group>
@@ -938,16 +876,11 @@ action = act
         <field name="res_model">hr.applicant</field>
         <field name="view_mode">graph,pivot</field>
         <field name="search_view_id" ref="hr_applicant_view_search"/>
-        <field name="view_ids" eval="[
-            (5, 0, 0),
-            (0, 0, {'view_mode': 'pivot', 'view_id': ref('hr_applicant_view_pivot')}),
-            (0, 0, {'view_mode': 'graph', 'view_id': ref('hr_applicant_view_graph')})]"/>
+        <field name="view_ids" eval="[             (5, 0, 0),             (0, 0, {'view_mode': 'pivot', 'view_id': ref('hr_applicant_view_pivot')}),             (0, 0, {'view_mode': 'graph', 'view_id': ref('hr_applicant_view_graph')})]"/>
         <field name="context">{}</field>  <!-- force empty -->
     </record>
-    <menuitem name="Reporting" id="report_hr_recruitment" parent="menu_hr_recruitment_root"
-    sequence="99"/>
-    <menuitem name="Recruitment Analysis" id="hr_applicant_report_menu" parent="report_hr_recruitment"
-    sequence="50" action="hr_applicant_action_analysis"/>
+    <menuitem name="Reporting" id="report_hr_recruitment" parent="menu_hr_recruitment_root" sequence="99"/>
+    <menuitem name="Recruitment Analysis" id="hr_applicant_report_menu" parent="report_hr_recruitment" sequence="50" action="hr_applicant_action_analysis"/>
     <record id="action_hr_recruitment_report_filtered_department" model="ir.actions.act_window">
         <field name="name">Recruitment Analysis</field>
         <field name="res_model">hr.applicant</field>

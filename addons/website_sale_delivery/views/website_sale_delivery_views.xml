@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
 
     <record id="view_delivery_carrier_form_website_delivery" model="ir.ui.view">
@@ -6,15 +6,15 @@
         <field name="model">delivery.carrier</field>
         <field name="inherit_id" ref="delivery.view_delivery_carrier_form"/>
         <field name="arch" type="xml">
-            <field name="company_id" position='after'>
+            <field name="company_id" position="after">
                 <field name="website_id" groups="website.group_multi_website" options="{'no_open': True, 'no_create_edit': True}"/>
             </field>
-            <xpath expr="//page[@name='destination']" position='after'>
+            <xpath expr="//page[@name='destination']" position="after">
                 <page string="Description">
-                    <field name="website_description"  placeholder="Description displayed on the eCommerce and on online quotations."/>
+                    <field name="website_description" placeholder="Description displayed on the eCommerce and on online quotations."/>
                 </page>
             </xpath>
-            <xpath expr="//button[@name='toggle_prod_environment']" position='before'>
+            <xpath expr="//button[@name='toggle_prod_environment']" position="before">
                 <button name="website_publish_button" type="object" class="oe_stat_button" icon="fa-globe">
                     <field name="is_published" widget="website_publish_button"/>
                 </button>
@@ -39,16 +39,12 @@
         <field name="model">delivery.carrier</field>
         <field name="inherit_id" ref="delivery.view_delivery_carrier_search"/>
         <field name="arch" type="xml">
-            <filter name="inactive" position="after">
+            <xpath position="after" expr="//filter[@name='inactive']">
                 <filter string="Published" name="is_published" domain="[('is_published','=',True)]"/>
-            </filter>
+            </xpath>
         </field>
     </record>
 
-    <menuitem
-        id="menu_ecommerce_delivery"
-        parent="website_sale.menu_ecommerce_settings"
-        name="Shipping Methods"
-        action="delivery.action_delivery_carrier_form"/>
+    <menuitem id="menu_ecommerce_delivery" parent="website_sale.menu_ecommerce_settings" name="Shipping Methods" action="delivery.action_delivery_carrier_form"/>
 
 </odoo>

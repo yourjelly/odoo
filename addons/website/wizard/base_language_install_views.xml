@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
 
     <record id="view_base_language_install" model="ir.ui.view">
@@ -6,9 +6,9 @@
         <field name="model">base.language.install</field>
         <field name="inherit_id" ref="base.view_base_language_install"/>
         <field name="arch" type="xml">
-            <group states="init" position="inside">
+            <xpath position="inside" expr="//group[@states='init']">
                 <field name="website_ids" widget="many2many_checkboxes" groups="website.group_multi_website"/>
-            </group>
+            </xpath>
         </field>
     </record>
 

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
 
     <menuitem action="sale_coupon.sale_coupon_program_action_promo_program" id="menu_promotion_type_config" name="Promotion Programs" parent="website_sale.menu_catalog" groups="sales_team.group_sale_manager" sequence="50"/>
@@ -9,12 +9,12 @@
         <field name="model">sale.coupon.program</field>
         <field name="inherit_id" ref="sale_coupon.sale_coupon_program_view_form_common"/>
         <field name="arch" type="xml">
-            <group name="validity" position="inside">
+            <xpath position="inside" expr="//group[@name='validity']">
                 <label for="website_id" groups="website.group_multi_website"/>
                 <div>
                     <field name="website_id" options="{'no_create': True}" groups="website.group_multi_website"/>
                 </div>
-            </group>
+            </xpath>
         </field>
     </record>
 

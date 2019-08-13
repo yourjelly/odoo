@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
 
         <menuitem id="crm_menu_resellers" name="Resellers" parent="crm.crm_menu_config" sequence="16"/>
@@ -12,8 +12,8 @@
                 <form string="Activation">
                     <sheet>
                         <group col="4">
-                            <field name="name" />
-                            <field name="sequence" />
+                            <field name="name"/>
+                            <field name="sequence"/>
                         </group>
                     </sheet>
                 </form>
@@ -36,8 +36,7 @@
             <field name="view_mode">tree,form</field>
         </record>
 
-        <menuitem id="res_partner_activation_config_mi" parent="crm_menu_resellers" action="res_partner_activation_act"
-            sequence="6"/>
+        <menuitem id="res_partner_activation_config_mi" parent="crm_menu_resellers" action="res_partner_activation_act" sequence="6"/>
 
     <!--Partner Level -->
 
@@ -79,9 +78,7 @@
         <field name="name">Partner Level</field>
         <field name="res_model">res.partner.grade</field>
     </record>
-    <menuitem action="res_partner_grade_action" id="menu_res_partner_grade_action"
-        parent="crm_menu_resellers"
-        sequence="5" />
+    <menuitem action="res_partner_grade_action" id="menu_res_partner_grade_action" parent="crm_menu_resellers" sequence="5"/>
 
     <!-- Partner form -->
     <record id="view_res_partner_filter_assign_tree" model="ir.ui.view">
@@ -102,9 +99,9 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_res_partner_filter"/>
         <field name="arch" type="xml">
-            <filter name="salesperson" position="after">
+            <xpath position="after" expr="//filter[@name='salesperson']">
                 <filter string="Activation" name="activation" context="{'group_by' : 'activation'}" domain="[]"/>
-            </filter>
+            </xpath>
             <field name="category_id" position="after">
                 <field name="grade_id"/>
             </field>

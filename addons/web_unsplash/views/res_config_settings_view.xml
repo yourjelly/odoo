@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
     <record id="res_config_settings_view_form" model="ir.ui.view">
         <field name="name">res.config.settings.view.form.inherit.web.unsplash</field>
         <field name="model">res.config.settings</field>
         <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
         <field name="arch" type="xml">
-            <div id="web_unsplash_settings" position="inside">
+            <xpath position="inside" expr="//div[@id='web_unsplash_settings']">
                 <div attrs="{'invisible': [('module_web_unsplash', '=', False)]}">
                     <div class="content-group mt16">
                         <label for="unsplash_access_key" class="o_light_label"/>
@@ -17,7 +17,7 @@
                         </a>
                     </div>
                 </div>
-            </div>
+            </xpath>
         </field>
     </record>
 </odoo>

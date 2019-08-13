@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
-    <record id="view_hr_recruitment_tree_url" model="ir.ui.view" >
+    <record id="view_hr_recruitment_tree_url" model="ir.ui.view">
         <field name="name">hr.recruitment.tree.inherit.url</field>
         <field name="model">hr.recruitment.source</field>
         <field name="inherit_id" ref="hr_recruitment.hr_recruitment_source_tree"/>
@@ -11,14 +11,14 @@
         </field>
     </record>
 
-    <record id="view_hr_job_form_website_published_button" model="ir.ui.view" >
+    <record id="view_hr_job_form_website_published_button" model="ir.ui.view">
         <field name="name">hr.job.form.inherit.published.button</field>
         <field name="model">hr.job</field>
         <field name="inherit_id" ref="hr_recruitment.hr_job_survey"/>
         <field name="arch" type="xml">
-            <div name="button_box" position="inside">
+            <xpath position="inside" expr="//div[@name='button_box']">
                 <field name="is_published" widget="website_redirect_button"/>
-            </div>
+            </xpath>
         </field>
     </record>
 

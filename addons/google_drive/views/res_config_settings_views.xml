@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
 
     <record id="res_config_settings_view_form" model="ir.ui.view">
@@ -6,43 +6,30 @@
         <field name="model">res.config.settings</field>
         <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
         <field name="arch" type="xml">
-            <div id="msg_module_google_drive" position="replace">
-                <div class="content-group"
-                     attrs="{'invisible': [('module_google_drive','=',False)]}">
+            <xpath position="replace" expr="//div[@id='msg_module_google_drive']">
+                <div class="content-group" attrs="{'invisible': [('module_google_drive','=',False)]}">
                     <div class="mt-2 row">
                         <div class="col-sm">
                             <field name="is_google_drive_token_generated" invisible="1"/>
-                            <div role="alert"
-                                 attrs="{'invisible': [('is_google_drive_token_generated', '=', False)]}">
-                                <i class="text-success fa fa-check"></i> &amp;nbsp; Refresh token set
+                            <div role="alert" attrs="{'invisible': [('is_google_drive_token_generated', '=', False)]}">
+                                <i class="text-success fa fa-check"/> &amp;nbsp; Refresh token set
                             </div>
-                            <div role="alert"
-                                 attrs="{'invisible': [('is_google_drive_token_generated', '=', True)]}">
-                                <i class="fa fa-exclamation-triangle text-warning"></i> &amp;nbsp; No refresh token set
+                            <div role="alert" attrs="{'invisible': [('is_google_drive_token_generated', '=', True)]}">
+                                <i class="fa fa-exclamation-triangle text-warning"/> &amp;nbsp; No refresh token set
                             </div>
                         </div>
-                        <div class="col-sm text-center"
-                             attrs="{'invisible': [('is_google_drive_token_generated', '=', True)]}">
-                            <button class="btn btn-link pt-0"
-                                    name="action_setup_token"
-                                    type="object"><i class="fa fa-arrow-right"></i> Set up token</button>
+                        <div class="col-sm text-center" attrs="{'invisible': [('is_google_drive_token_generated', '=', True)]}">
+                            <button class="btn btn-link pt-0" name="action_setup_token" type="object"><i class="fa fa-arrow-right"/> Set up token</button>
                         </div>
-                        <div class="col-sm text-center"
-                             attrs="{'invisible': [('is_google_drive_token_generated', '=', False)]}">
-                            <button class="btn btn-link pt-0"
-                                    name="action_setup_token"
-                                    type="object"><i class="fa fa-arrow-right"></i> Reset token</button>
+                        <div class="col-sm text-center" attrs="{'invisible': [('is_google_drive_token_generated', '=', False)]}">
+                            <button class="btn btn-link pt-0" name="action_setup_token" type="object"><i class="fa fa-arrow-right"/> Reset token</button>
                         </div>
                     </div>
                     <div>
-                        <button type="action"
-                                name="%(action_google_drive_users_config)d"
-                                string="Google Drive Templates"
-                                icon="fa-arrow-right"
-                                class="btn-link"/>
+                        <button type="action" name="%(action_google_drive_users_config)d" string="Google Drive Templates" icon="fa-arrow-right" class="btn-link"/>
                     </div>
                 </div>
-            </div>
+            </xpath>
         </field>
     </record>
 
@@ -55,21 +42,14 @@
             <form>
                 <group>
                     <span>Get an authorization code and set it in the field below.</span>
-                    <field name="google_drive_uri"
-                           class="fa fa-arrow-right mt-1"
-                           widget="url"
-                           text="Get Authorization Code"
-                           nolabel="1"/>
+                    <field name="google_drive_uri" class="fa fa-arrow-right mt-1" widget="url" text="Get Authorization Code" nolabel="1"/>
                 </group>
                 <group class="mt-3">
                     <field name="google_drive_authorization_code" required="1"/>
                 </group>
                 <footer>
-                    <button string="Confirm"
-                            class="btn btn-primary"
-                            name="confirm_setup_token"
-                            type="object"/>
-                    <button special="cancel" string="Cancel" />
+                    <button string="Confirm" class="btn btn-primary" name="confirm_setup_token" type="object"/>
+                    <button special="cancel" string="Cancel"/>
                 </footer>
             </form>
         </field>

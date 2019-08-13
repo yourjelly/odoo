@@ -29,7 +29,7 @@
                 </xpath>
 
                 <xpath expr="//div[hasclass('o_kanban_primary_right')]" position="inside">
-                    <div t-if="record.leave_to_approve_count.raw_value > 0" class="row">
+                    <div t-if="record.leave_to_approve_count.raw_value &gt; 0" class="row">
                         <div class="col-9">
                             <a name="%(hr_leave_action_action_approve_department)d" type="action">
                                 Time Off Requests
@@ -39,7 +39,7 @@
                             <field name="leave_to_approve_count"/>
                         </div>
                     </div>
-                    <div t-if="record.allocation_to_approve_count.raw_value > 0" class="row">
+                    <div t-if="record.allocation_to_approve_count.raw_value &gt; 0" class="row">
                         <div class="col-9">
                             <a name="%(hr_leave_allocation_action_approve_department)d" type="action">
                                 Allocation Requests
@@ -120,9 +120,7 @@
                 <field name="leave_date_to"/>
             </xpath>
             <xpath expr="//li[@id='last_login']" position="inside">
-                <span t-if="record.current_leave_id.raw_value" style="font-size: 100%%"
-                        t-att-class="record.current_leave_state.raw_value=='validate'?'oe_kanban_button oe_kanban_color_3':'oe_kanban_button oe_kanban_color_2'"
-                        t-att-title="moment(record.leave_date_from.raw_value).format('ddd Do MMM') + ' - ' + moment(record.leave_date_to.raw_value).format('ddd Do MMM')">
+                <span t-if="record.current_leave_id.raw_value" style="font-size: 100%%" t-att-class="record.current_leave_state.raw_value=='validate'?'oe_kanban_button oe_kanban_color_3':'oe_kanban_button oe_kanban_color_2'" t-att-title="moment(record.leave_date_from.raw_value).format('ddd Do MMM') + ' - ' + moment(record.leave_date_to.raw_value).format('ddd Do MMM')">
                     <field name="current_leave_id"/>
                 </span>
             </xpath>
@@ -143,14 +141,11 @@
             <xpath expr="//group[@name='managers']" position="inside">
                 <field name="leave_manager_id"/>
             </xpath>
-            <div name="button_box" position="inside">
+            <xpath position="inside" expr="//div[@name='button_box']">
                 <field name="current_leave_id" invisible="1"/>
                 <field name="show_leaves" invisible="1"/>
                 <field name="is_absent" invisible="1"/>
-                <button disabled="1"
-                        class="oe_stat_button"
-                        context="{'search_default_employee_id': active_id}"
-                        attrs="{'invisible': [('is_absent', '=', False)]}">
+                <button disabled="1" class="oe_stat_button" context="{'search_default_employee_id': active_id}" attrs="{'invisible': [('is_absent', '=', False)]}">
                     <div role="img" class="fa fa-fw fa-plane o_button_icon text-danger" aria-label="Off Till" title="Off Till"/>
                     <div class="o_field_widget o_stat_info">
                         <span class="o_stat_value">
@@ -161,14 +156,7 @@
                         </span>
                     </div>
                 </button>
-                <button name="%(act_hr_employee_holiday_request)d"
-                        type="action"
-                        class="oe_stat_button"
-                        icon="fa-calendar"
-                        attrs="{'invisible': [('show_leaves','=', False)]}"
-                        context="{'search_default_employee_id': active_id}"
-                        groups="base.group_user"
-                        help="Remaining leaves">
+                <button name="%(act_hr_employee_holiday_request)d" type="action" class="oe_stat_button" icon="fa-calendar" attrs="{'invisible': [('show_leaves','=', False)]}" context="{'search_default_employee_id': active_id}" groups="base.group_user" help="Remaining leaves">
                     <div class="o_field_widget o_stat_info">
                         <span class="o_stat_value">
                             <field name="allocation_used_display"/>/<field name="allocation_display"/> Days
@@ -178,7 +166,7 @@
                         </span>
                     </div>
                 </button>
-            </div>
+            </xpath>
         </field>
     </record>
 
@@ -194,9 +182,7 @@
                 <field name="current_leave_id" invisible="1"/>
                 <field name="show_leaves" invisible="1"/>
                 <field name="is_absent" invisible="1"/>
-                <button disabled="1"
-                        class="oe_stat_button"
-                        attrs="{'invisible': [('is_absent', '=', False)]}">
+                <button disabled="1" class="oe_stat_button" attrs="{'invisible': [('is_absent', '=', False)]}">
                     <div role="img" class="fa fa-fw fa-plane o_button_icon text-warning" aria-label="Off Till" title="Off Till"/>
                     <div class="o_field_widget o_stat_info">
                         <span class="o_stat_value">
@@ -217,16 +203,10 @@
         <field name="inherit_id" ref="hr.res_users_view_form_profile"/>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
-                <button name="%(hr_leave_action_new_request)d"
-                string="Request Time off"
-                type="action"
-                class="btn btn-primary"/>
+                <button name="%(hr_leave_action_new_request)d" string="Request Time off" type="action" class="btn btn-primary"/>
             </xpath>
             <xpath expr="//header" position="inside">
-                <button name="%(hr_leave_allocation_action_my)d"
-                string="Request Allocation"
-                type="action"
-                class="btn btn-primary"/>
+                <button name="%(hr_leave_allocation_action_my)d" string="Request Allocation" type="action" class="btn btn-primary"/>
             </xpath>
             <xpath expr="//group[@name='managers']" position="inside">
                 <field name="leave_manager_id"/>
@@ -235,10 +215,7 @@
                 <field name="show_leaves" invisible="1"/>
                 <field name="employee_ids" invisible="1"/>
                 <field name="is_absent" invisible="1"/>
-                <button name="%(hr_leave_action_new_request)d" type="action"
-                        class="oe_stat_button"
-                        invisible="context.get('from_my_profile', False)"
-                        attrs="{'invisible': [('is_absent', '=', False)]}">
+                <button name="%(hr_leave_action_new_request)d" type="action" class="oe_stat_button" invisible="context.get('from_my_profile', False)" attrs="{'invisible': [('is_absent', '=', False)]}">
                     <div role="img" class="fa fa-fw fa-plane o_button_icon text-danger" aria-label="Off Till" title="Off Till"/>
                     <div class="o_field_widget o_stat_info">
                         <span class="o_stat_value">
@@ -249,13 +226,7 @@
                         </span>
                     </div>
                 </button>
-                <button name="%(hr_leave_action_new_request)d"
-                        type="action"
-                        class="oe_stat_button"
-                        icon="fa-calendar"
-                        attrs="{'invisible': [('show_leaves','=', False)]}"
-                        groups="base.group_user"
-                        help="Remaining leaves">
+                <button name="%(hr_leave_action_new_request)d" type="action" class="oe_stat_button" icon="fa-calendar" attrs="{'invisible': [('show_leaves','=', False)]}" groups="base.group_user" help="Remaining leaves">
                     <div class="o_field_widget o_stat_info">
                         <span class="o_stat_value">
                             <field name="allocation_used_display"/>/<field name="allocation_display"/> Days

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
     <record id="res_config_settings_view_form" model="ir.ui.view">
         <field name="name">res.config.settings.view.form.inherit.base.gengo</field>
@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//div[@name='base_gengo_right_pane']" position="inside">
-                <div name="base_gengo_right_pane" position="replace">
+                <xpath position="replace" expr="//div[@name='base_gengo_right_pane']">
                     <label for="id" string="Public Key" attrs="{'invisible': [('module_base_gengo','=',False)]}"/>
                     <div name="gengo_public_key" attrs="{'invisible': [('module_base_gengo','=',False)]}">
                         <div name="gengo_public_key">
@@ -37,7 +37,7 @@
                             <field name="gengo_comment" nolabel="1" placeholder="Add your comments here for translator...."/>
                         </div>
                     </div>
-                </div>
+                </xpath>
             </xpath>
             <xpath expr="//div[@name='base_gengo_warning']" position="replace"/>
         </field>

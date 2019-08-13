@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
 
     <record id="event_type_view_form_inherit_website" model="ir.ui.view">
@@ -6,7 +6,7 @@
         <field name="model">event.type</field>
         <field name="inherit_id" ref="event.view_event_type_form"/>
         <field name="arch" type="xml">
-            <div name="event_type_visibility_seats" position="after">
+            <xpath position="after" expr="//div[@name='event_type_visibility_seats']">
                 <div class="col-12 col-lg-6 o_setting_box" name="event_type_visibility_website">
                     <div class="o_setting_left_pane">
                         <field name="website_menu"/>
@@ -21,7 +21,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </xpath>
         </field>
     </record>
 
@@ -33,24 +33,17 @@
             <field name="organizer_id" position="before">
                 <field name="website_id" options="{'no_create': True}" groups="website.group_multi_website"/>
             </field>
-            <div name="button_box" position="inside">
+            <xpath position="inside" expr="//div[@name='button_box']">
                 <field name="website_url" invisible="1"/>
                 <field name="is_published" widget="website_redirect_button"/>
-            </div>
-            <label for="is_online" position="after">
+            </xpath>
+            <xpath position="after" expr="//label[@for='is_online']">
                 <field name="website_menu"/>
                 <label for="website_menu" string="Website Menu"/>
-            </label>
+            </xpath>
             <xpath expr="//button[@name='button_done']" position="before">
-                <button name="action_open_badge_editor"
-                    type="object"
-                    states="confirm"
-                    string="Preview Badges"
-                    class="oe_highlight"/>
-                <button name="action_open_badge_editor"
-                    type="object"
-                    states="done"
-                    string="Preview Badges"/>
+                <button name="action_open_badge_editor" type="object" states="confirm" string="Preview Badges" class="oe_highlight"/>
+                <button name="action_open_badge_editor" type="object" states="done" string="Preview Badges"/>
             </xpath>
         </field>
     </record>

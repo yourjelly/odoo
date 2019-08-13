@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
 
         <record id="hr_badge_form_view" model="ir.ui.view">
@@ -6,11 +6,11 @@
             <field name="model">gamification.badge</field>
             <field name="inherit_id" ref="gamification.badge_form_view"/>
             <field name="arch" type="xml">
-                <div name="button_box" position="inside">
+                <xpath position="inside" expr="//div[@name='button_box']">
                     <button class="oe_stat_button" type="object" name="get_granted_employees" attrs="{'invisible': [('stat_count','=',0)]}" icon="fa-user">
                         <field name="granted_employees_count" string="Granted" widget="statinfo"/>
                     </button>
-                </div>
+                </xpath>
             </field>
         </record>
 
@@ -62,7 +62,7 @@
 
         <menuitem id="menu_hr_gamification" parent="hr.menu_human_resources_configuration" name="Challenges" sequence="100"/>
 
-        <menuitem id="gamification_badge_menu_hr" parent="menu_hr_gamification" action="gamification.badge_list_action" />
+        <menuitem id="gamification_badge_menu_hr" parent="menu_hr_gamification" action="gamification.badge_list_action"/>
         <menuitem id="gamification_challenge_menu_hr" parent="menu_hr_gamification" action="challenge_list_action2" groups="hr.group_hr_user"/>
         <menuitem id="gamification_goal_menu_hr" parent="menu_hr_gamification" action="goals_menu_groupby_action2" groups="hr.group_hr_user"/>
 

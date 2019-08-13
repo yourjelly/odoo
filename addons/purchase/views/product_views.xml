@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
 
         <!-- Product Suppliers-->
@@ -11,31 +11,29 @@
                 <xpath expr="//page[@name='purchase']" position="attributes">
                     <attribute name="invisible">0</attribute>
                 </xpath>
-                <group name="purchase" position="before">
+                <xpath position="before" expr="//group[@name='purchase']">
                     <group string="Vendors" name="vendors" attrs="{'invisible': [('product_variant_count','&gt;',1)]}">
                         <field name="seller_ids" context="{'default_product_tmpl_id':context.get('product_tmpl_id',active_id), 'product_template_invisible_variant': True}" nolabel="1"/>
                     </group>
                     <group string="Vendors" name="variant_vendors" attrs="{'invisible': [('product_variant_count','&lt;=',1)]}">
                         <field name="variant_seller_ids" context="{'default_product_tmpl_id': context.get('product_tmpl_id', active_id)}" nolabel="1"/>
                     </group>
-                </group>
+                </xpath>
                 <group name="bill" position="attributes">
                     <attribute name="groups">purchase.group_purchase_manager</attribute>
                 </group>
-                <group name="bill" position="inside">
+                <xpath position="inside" expr="//group[@name='bill']">
                     <field name="purchase_method" widget="radio"/>
-                </group>
-                <page name="purchase" position="inside">
+                </xpath>
+                <xpath position="inside" expr="//page[@name='purchase']">
                     <group string="Purchase Description">
-                       <field name="description_purchase" nolabel="1"
-                            placeholder="This note will show up on purchase orders."/>
+                       <field name="description_purchase" nolabel="1" placeholder="This note will show up on purchase orders."/>
                     </group>
                     <group string="Warning when Purchasing this Product" groups="purchase.group_warning_purchase">
                         <field name="purchase_line_warn" nolabel="1"/>
-                        <field name="purchase_line_warn_msg" colspan="3" nolabel="1"
-                                attrs="{'required':[('purchase_line_warn','!=','no-message')],'readonly':[('purchase_line_warn','=','no-message')], 'invisible':[('purchase_line_warn','=','no-message')]}"/>
+                        <field name="purchase_line_warn_msg" colspan="3" nolabel="1" attrs="{'required':[('purchase_line_warn','!=','no-message')],'readonly':[('purchase_line_warn','=','no-message')], 'invisible':[('purchase_line_warn','=','no-message')]}"/>
                     </group>
-                </page>
+                </xpath>
             </field>
         </record>
 
@@ -59,7 +57,7 @@
                     <attribute name="domain">[('deprecated','=',False)]</attribute>
                     <attribute name="attrs">{'readonly': [('purchase_ok', '=', 0)]}</attribute>
                 </field>
-                <field name='supplier_taxes_id' position="replace" >
+                <field name="supplier_taxes_id" position="replace">
                      <field name="supplier_taxes_id" colspan="2" widget="many2many_tags" attrs="{'readonly':[('purchase_ok','=',0)]}"/>
                 </field>
             </field>
@@ -71,9 +69,8 @@
             <field name="inherit_id" ref="product.product_template_only_form_view"/>
             <field name="groups_id" eval="[(4, ref('purchase.group_purchase_user'))]"/>
             <field name="arch" type="xml">
-                <div name="button_box" position="inside">
-                    <button class="oe_stat_button" name="action_view_po"
-                        type="object" icon="fa-shopping-cart" attrs="{'invisible': [('purchase_ok', '=', False)]}" help="Purchased in the last 365 days">
+                <xpath position="inside" expr="//div[@name='button_box']">
+                    <button class="oe_stat_button" name="action_view_po" type="object" icon="fa-shopping-cart" attrs="{'invisible': [('purchase_ok', '=', False)]}" help="Purchased in the last 365 days">
                         <div class="o_field_widget o_stat_info">
                             <span class="o_stat_value">
                                 <field name="purchased_product_qty" widget="statinfo" nolabel="1" class="mr4"/>
@@ -82,7 +79,7 @@
                             <span class="o_stat_text">Purchased</span>
                         </div>
                     </button>
-                </div>
+                </xpath>
             </field>
         </record>
 
@@ -103,9 +100,8 @@
             <field name="inherit_id" ref="product.product_normal_form_view"/>
             <field name="groups_id" eval="[(4, ref('purchase.group_purchase_user'))]"/>
             <field name="arch" type="xml">
-                <div name="button_box" position="inside">
-                    <button class="oe_stat_button" name="action_view_po"
-                        type="object" icon="fa-shopping-cart" attrs="{'invisible': [('purchase_ok', '=', False)]}" help="Purchased in the last 365 days">
+                <xpath position="inside" expr="//div[@name='button_box']">
+                    <button class="oe_stat_button" name="action_view_po" type="object" icon="fa-shopping-cart" attrs="{'invisible': [('purchase_ok', '=', False)]}" help="Purchased in the last 365 days">
                         <div class="o_field_widget o_stat_info">
                             <span class="o_stat_value">
                                 <field name="purchased_product_qty" widget="statinfo" nolabel="1" class="mr4"/>
@@ -114,7 +110,7 @@
                             <span class="o_stat_text">Purchased</span>
                         </div>
                     </button>
-                </div>
+                </xpath>
             </field>
         </record>
 
