@@ -28,9 +28,15 @@ class StockMoveLine(models.Model):
         compute='_compute_product_qty', inverse='_set_product_qty', store=True)
     product_uom_qty = fields.Float('Reserved', default=0.0, digits='Product Unit of Measure', required=True)
     qty_done = fields.Float('Done', default=0.0, digits='Product Unit of Measure', copy=False)
-    package_id = fields.Many2one('stock.quant.package', 'Source Package', ondelete='restrict')
-    package_level_id = fields.Many2one('stock.package_level', 'Package Level')
-    lot_id = fields.Many2one('stock.production.lot', 'Lot/Serial Number')
+    package_id = fields.Many2one(
+        'stock.quant.package', 'Source Package', ondelete='restrict',
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+    package_level_id = fields.Many2one(
+        'stock.package_level', 'Package Level',
+        domain="[('company_id', '=', company_id)]")
+    lot_id = fields.Many2one(
+        'stock.production.lot', 'Lot/Serial Number',
+        domain="[('product_id', '=', product_id), ('company_id', '=', company_id)]")
     lot_name = fields.Char('Lot/Serial Number Name')
     result_package_id = fields.Many2one(
         'stock.quant.package', 'Destination Package',
@@ -400,7 +406,7 @@ class StockMoveLine(models.Model):
                             # `use_create_lots` and `use_existing_lots`.
                             if ml.lot_name and not ml.lot_id:
                                 lot = self.env['stock.production.lot'].create(
-                                    {'name': ml.lot_name, 'product_id': ml.product_id.id}
+                                    {'name': ml.lot_name, 'product_id': ml.product_id.id, 'company_id': ml.move_id.company_id.id}
                                 )
                                 ml.write({'lot_id': lot.id})
                         elif not picking_type_id.use_create_lots and not picking_type_id.use_existing_lots:

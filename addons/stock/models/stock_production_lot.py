@@ -7,7 +7,7 @@ from odoo.exceptions import UserError
 
 class ProductionLot(models.Model):
     _name = 'stock.production.lot'
-    _inherit = ['mail.thread','mail.activity.mixin']
+    _inherit = ['mail.thread','mail.activity.mixin', 'company.consistency.mixin']
     _description = 'Lot/Serial'
 
     name = fields.Char(
@@ -16,7 +16,8 @@ class ProductionLot(models.Model):
     ref = fields.Char('Internal Reference', help="Internal reference number in case it differs from the manufacturer's lot/serial number")
     product_id = fields.Many2one(
         'product.product', 'Product',
-        domain=[('type', '=', 'product')], required=True)
+        domain="[('type', '=', 'product'), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        required=True)
     product_uom_id = fields.Many2one(
         'uom.uom', 'Unit of Measure',
         related='product_id.uom_id', store=True, readonly=False)
@@ -24,9 +25,10 @@ class ProductionLot(models.Model):
     product_qty = fields.Float('Quantity', compute='_product_qty')
     note = fields.Html(string='Description')
     display_complete = fields.Boolean(compute='_compute_display_complete')
+    company_id = fields.Many2one('res.company', 'Company', required=True, stored=True, index=True)
 
     _sql_constraints = [
-        ('name_ref_uniq', 'unique (name, product_id)', 'The combination of serial number and product must be unique !'),
+        ('name_ref_uniq', 'unique (name, product_id, company_id)', 'The combination of serial number and product must be unique across a company !'),
     ]
 
     def _check_create(self):
@@ -49,9 +51,15 @@ class ProductionLot(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         self._check_create()
-        return super(ProductionLot, self).create(vals_list)
+        res = super(ProductionLot, self).create(vals_list)
+        res._company_consistency_check()
+        return res
 
     def write(self, vals):
+        if 'company_id' in vals:
+            for lot in self:
+                if lot.company_id.id != vals['company_id']:
+                    raise UserError(_("Changing the company of this record is forbidden at this point, you should rather archive it and create a new one."))
         if 'product_id' in vals and any([vals['product_id'] != lot.product_id.id for lot in self]):
             move_lines = self.env['stock.move.line'].search([('lot_id', 'in', self.ids)])
             if move_lines:
@@ -60,7 +68,10 @@ class ProductionLot(models.Model):
                     'if some stock moves have already been created with that number. ' +
                     'This would lead to inconsistencies in your stock.'
                 ))
-        return super(ProductionLot, self).write(vals)
+        res = super(ProductionLot, self).write(vals)
+        if any(field in vals for field in self._company_consistency_fields()):
+            self._company_consistency_check()
+        return res
 
     def _product_qty(self):
         for lot in self:
@@ -73,3 +84,8 @@ class ProductionLot(models.Model):
         if self.user_has_groups('stock.group_stock_manager'):
             self = self.with_context(inventory_mode=True)
         return self.env['stock.quant']._get_quants_action()
+
+    @api.model
+    def _company_consistency_m2o_optional_cid_fields(self):
+        res = super(ProductionLot, self)._company_consistency_m2o_optional_cid_fields()
+        return res + ['product_id']

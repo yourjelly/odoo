@@ -543,7 +543,7 @@ class InventoryLine(models.Model):
     @api.model
     def _company_consistency_m2o_required_cid_fields(self):
         res = super(InventoryLine, self)._company_consistency_m2o_required_cid_fields()
-        return res + ['package_id', 'inventory_id']
+        return res + ['package_id', 'inventory_id', 'prod_lot_id']
 
     @api.model
     def _company_consistency_m2o_optional_cid_fields(self):

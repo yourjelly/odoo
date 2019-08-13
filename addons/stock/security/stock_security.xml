@@ -86,6 +86,12 @@
         <field name="domain_force">[('company_id','in', company_ids)]</field>
     </record>
 
+    <record model="ir.rule" id="stock_production_lot_rule">
+        <field name="name">Stock Production Lot multi-company</field>
+        <field name="model_id" search="[('model','=','stock.production.lot')]" model="ir.model"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id','in', company_ids)]</field>
+    </record>
 
     <record model="ir.rule" id="stock_warehouse_comp_rule">
         <field name="name">Warehouse multi-company</field>
