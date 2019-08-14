@@ -76,12 +76,14 @@ class TestChatterTweaks(BaseFunctionalTest, TestRecipients):
 class TestNotifications(BaseFunctionalTest, MockEmails):
 
     def setUp(self):
-        super(TestNotifications, self).setUp()
         self.partner_1 = self.env['res.partner'].with_context(BaseFunctionalTest._test_context).create({
             'name': 'Valid Lelitre',
             'email': 'valid.lelitre@agrolait.com'})
 
         (self.user_employee | self.user_admin).write({'notification_type': 'inbox'})
+        # DLE P108: Needs to call setup after, as the flush is done in the setup, and the above requirements were not flushed
+        # `test_inactive_follower`
+        super(TestNotifications, self).setUp()
 
     def test_needaction(self):
         with self.assertNotifications(partner_employee=(1, 'inbox', 'unread'), partner_admin=(0, '', '')):

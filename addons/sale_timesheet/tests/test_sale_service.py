@@ -510,6 +510,9 @@ class TestSaleService(TestCommonSaleTimesheetNoChart):
         })
         so_line_deliver_new_task_project.product_id_change()
         so_line_deliver_new_task_project_2.product_id_change()
+        # DLE P178: the sale order line assigned to the task is the first line of the sale order.
+        # Therefore, force the order_line to be correctly ordered before validating the sale_order.
+        self.sale_order.invalidate_cache(['order_line'])
         self.sale_order.action_confirm()
 
         project = so_line_deliver_new_task_project.project_id

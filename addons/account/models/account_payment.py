@@ -158,9 +158,12 @@ class account_payment(models.Model):
 
     @api.depends('invoice_ids', 'amount', 'payment_date', 'currency_id', 'payment_type')
     def _compute_payment_difference(self):
-        for pay in self.filtered(lambda p: p.invoice_ids and p.state == 'draft'):
+        draft_payments = self.filtered(lambda p: p.invoice_ids and p.state == 'draft')
+        for pay in draft_payments:
             payment_amount = -pay.amount if pay.payment_type == 'outbound' else pay.amount
             pay.payment_difference = pay._compute_payment_amount(pay.invoice_ids, pay.currency_id, pay.journal_id, pay.payment_date) - payment_amount
+        for pay in self - draft_payments:
+            pay.payment_difference = 0
 
     @api.onchange('journal_id')
     def _onchange_journal(self):
@@ -296,6 +299,10 @@ class account_payment(models.Model):
         if not invoices:
             return 0.0
 
+        self.env['account.move'].flush(['type', 'currency_id'])
+        self.env['account.move.line'].flush(['amount_residual', 'amount_residual_currency', 'move_id', 'account_id'])
+        self.env['account.account'].flush(['user_type_id'])
+        self.env['account.account.type'].flush(['type'])
         self._cr.execute('''
             SELECT
                 move.type AS type,

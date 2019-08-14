@@ -33,7 +33,7 @@ from lxml import etree, html
 
 from odoo.models import BaseModel
 from odoo.osv.expression import normalize_domain
-from odoo.tools import single_email_re
+from odoo.tools import float_compare, single_email_re
 from odoo.tools.misc import find_in_path
 from odoo.tools.safe_eval import safe_eval
 
@@ -259,7 +259,7 @@ class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
             return self._assertRaises(exception)
 
     @contextmanager
-    def assertQueryCount(self, default=0, **counters):
+    def assertQueryCount(self, default=0, flush=True, **counters):
         """ Context manager that counts queries. It may be invoked either with
             one value, or with a set of named arguments like ``login=value``::
 
@@ -276,8 +276,12 @@ class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
             with self.subTest(), patch('random.random', lambda: 1):
                 login = self.env.user.login
                 expected = counters.get(login, default)
+                if flush:
+                    self.env.user.flush()
                 count0 = self.cr.sql_log_count
                 yield
+                if flush:
+                    self.env.user.flush()
                 count = self.cr.sql_log_count - count0
                 if count != expected:
                     # add some info on caller to allow semi-automatic update of query count
@@ -293,6 +297,8 @@ class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
                         logger.info(msg, login, count, expected, funcname, filename, linenum)
         else:
             yield
+            if flush:
+                self.env.user.flush()
 
     def assertRecordValues(self, records, expected_values):
         ''' Compare a recordset with a list of dictionaries representing the expected results.
@@ -314,7 +320,8 @@ class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
             for field_name in candidate.keys():
                 record_value = record[field_name]
                 candidate_value = candidate[field_name]
-                field_type = record._fields[field_name].type
+                field = record._fields[field_name]
+                field_type = field.type
                 if field_type == 'monetary':
                     # Compare monetary field.
                     currency_field_name = record._fields[field_name].currency_field
@@ -322,6 +329,8 @@ class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
                     if record_currency.compare_amounts(candidate_value, record_value)\
                             if record_currency else candidate_value != record_value:
                         return False
+                elif field_type == 'float' and field.get_digits(record.env):
+                    return not float_compare(candidate_value, record_value, precision_digits=field.get_digits(record.env)[1])
                 elif field_type in ('one2many', 'many2many'):
                     # Compare x2many relational fields.
                     # Empty comparison must be an empty list to be True.
@@ -363,8 +372,13 @@ class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
             msg = 'Wrong number of records to compare: %d != %d.\n\n' % (len(records), len(expected_values))
             self.fail(msg + _format_message(records, expected_values))
 
+        candidates = list(expected_values)
         for index, record in enumerate(records):
-            if not _compare_candidate(record, expected_values[index]):
+            for candidate_index, candidate in enumerate(candidates):
+                if _compare_candidate(record, candidate):
+                    candidates.pop(candidate_index)
+                    break
+            else:
                 msg = 'Record doesn\'t match expected values at index %d.\n\n' % index
                 self.fail(msg + _format_message(records, expected_values))
 
@@ -424,6 +438,10 @@ class SingleTransactionCase(BaseCase):
         cls.registry = odoo.registry(get_db_name())
         cls.cr = cls.registry.cursor()
         cls.env = api.Environment(cls.cr, odoo.SUPERUSER_ID, {})
+
+    def setUp(self):
+        super(SingleTransactionCase, self).setUp()
+        self.env.user.flush()
 
     @classmethod
     def tearDownClass(cls):
@@ -885,6 +903,7 @@ class HttpCase(TransactionCase):
         self.opener.cookies['session_id'] = self.session_id
 
     def url_open(self, url, data=None, files=None, timeout=10, headers=None):
+        self.env['base'].flush()
         if url.startswith('/'):
             url = "http://%s:%s%s" % (HOST, PORT, url)
         if data or files:
@@ -965,6 +984,15 @@ class HttpCase(TransactionCase):
             base_url = "http://%s:%s" % (HOST, PORT)
             ICP = self.env['ir.config_parameter']
             ICP.set_param('web.base.url', base_url)
+            # DLE P162: Some tour tests do some modification before launching the test, such as the point of sale.
+            # `/home/dle/src/odoo/master-nochange-cleanup-rco/addons/point_of_sale/tests/test_frontend.py`
+            # At first I put the flush in the method `start_tour`, but then I came accross another issue for the tour `website_reset_password`
+            # which requires the above ICP.set_param to be flushed for the test to work.
+            # It's not automatically pushed when accessing get_param because the requests are completely independant (from the browser)
+            # and the towrite for these other envs are empty.
+            # All tests requests use the same cursor, the test cursor, so there is no need of commit or anything,
+            # the `execute` alone is enough, so we cannot rely on the commit hook which will do the flush for this specifically.
+            ICP.flush()
             url = "%s%s" % (base_url, url_path or '/')
             self._logger.info('Open "%s" in browser', url)
 
@@ -1003,7 +1031,12 @@ class HttpCase(TransactionCase):
         step_delay = ', %s' % step_delay if step_delay else ''
         code = kwargs.pop('code', "odoo.startTour('%s'%s)" % (tour_name, step_delay))
         ready = kwargs.pop('ready', "odoo.__DEBUG__.services['web_tour.tour'].tours.%s.ready" % tour_name)
-        return self.browser_js(url_path=url_path, code=code, ready=ready, **kwargs)
+        res = self.browser_js(url_path=url_path, code=code, ready=ready, **kwargs)
+        # Some tests reads the results after the tour ran, and as the tour and the test file do not share the same cache,
+        # invalidate the test cache so it fetches the data from databases after the tour ran.
+        # e.g. test_barcode_client_action.py
+        self.env.cache.invalidate()
+        return res
 
     phantom_js = browser_js
 
@@ -1026,6 +1059,11 @@ def users(*logins):
                     # switch user and execute func
                     self.uid = user_id[login]
                     func(*args, **kwargs)
+                # DLE P122: `test_read_mail`, `test_write_mail`
+                # Invalidate the cache between each users performance tests,
+                # Otherwise the cache may be filled with value of the other user.
+                # It wasn't the case before as the cache was not shared between users.
+                self.env.cache.invalidate()
         finally:
             self.uid = old_uid
 
@@ -1042,8 +1080,14 @@ def warmup(func, *args, **kwargs):
     self = args[0]
     # run once to warm up the caches
     self.warm = False
+    # DLE P154: `test_composer_mass_active_domain`
+    # invalidate the cache before the warmup, otherwise it could benefit of the previous test(s) cache and do less
+    # queries in order to fill the orm cache (e.g. access rights rules)
+    self.env['base'].flush()
+    self.env.cache.invalidate()
     self.cr.execute('SAVEPOINT test_warmup')
     func(*args, **kwargs)
+    self.env['base'].flush()
     self.cr.execute('ROLLBACK TO SAVEPOINT test_warmup')
     self.env.cache.invalidate()
     # run once for real

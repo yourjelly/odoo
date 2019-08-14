@@ -242,6 +242,7 @@ class PosConfig(models.Model):
             else:
                 pos_config.last_session_closing_cash = 0
                 pos_config.last_session_closing_date = False
+                pos_config.last_session_closing_cashbox = False
 
     @api.depends('session_ids')
     def _compute_current_session_user(self):
@@ -476,7 +477,7 @@ class PosConfig(models.Model):
             self._check_company_invoice_journal()
             self._check_company_payment()
             self._check_currencies()
-            self.current_session_id = self.env['pos.session'].create({
+            self.env['pos.session'].create({
                 'user_id': self.env.uid,
                 'config_id': self.id
             })

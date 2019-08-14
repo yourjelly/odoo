@@ -34,8 +34,18 @@ class TestWebsiteSaleProductAttributeValueConfig(TestSaleProductAttributeValueSe
         pricelist.discount_policy = 'with_discount'
 
         # CASE: B2B setting
-        self.env.ref('account.group_show_line_subtotals_tax_included').users -= self.env.user
-        self.env.ref('account.group_show_line_subtotals_tax_excluded').users |= self.env.user
+        # Adding an inactive user to a group in order to test things is a bit weird.
+        # When doing
+        # self.env.ref('account.group_show_line_subtotals_tax_excluded').users |= self.env.user
+        # You would expect self.env.user to be in self.env.ref('account.group_show_line_subtotals_tax_excluded').users
+        # BUT, self.env.user is uid 1, which is inactive,
+        # and the active_test=True should therefore exclude this user from the many2many users of the group.
+        # In this case, it will add the user in the many2many cache field even if the user is not active and active_test is enabled,
+        # which in my sense is not entirely False because this is what the developer wanted here.
+        group_tax_included = self.env.ref('account.group_show_line_subtotals_tax_included').with_context(active_test=False)
+        group_tax_excluded = self.env.ref('account.group_show_line_subtotals_tax_excluded').with_context(active_test=False)
+        group_tax_included.users -= self.env.user
+        group_tax_excluded.users |= self.env.user
 
         combination_info = self.computer._get_combination_info()
         self.assertEqual(combination_info['price'], 2222 * discount_rate * currency_ratio)
@@ -43,8 +53,8 @@ class TestWebsiteSaleProductAttributeValueConfig(TestSaleProductAttributeValueSe
         self.assertEqual(combination_info['has_discounted_price'], False)
 
         # CASE: B2C setting
-        self.env.ref('account.group_show_line_subtotals_tax_excluded').users -= self.env.user
-        self.env.ref('account.group_show_line_subtotals_tax_included').users |= self.env.user
+        group_tax_excluded.users -= self.env.user
+        group_tax_included.users |= self.env.user
 
         combination_info = self.computer._get_combination_info()
         self.assertEqual(combination_info['price'], 2222 * discount_rate * currency_ratio * tax_ratio)

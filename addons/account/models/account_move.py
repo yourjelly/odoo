@@ -864,6 +864,7 @@ class AccountMove(models.Model):
                 move.bank_partner_id = move.company_id.partner_id
 
     @api.depends(
+        'state',
         'line_ids.debit',
         'line_ids.credit',
         'line_ids.currency_id',
@@ -873,6 +874,7 @@ class AccountMove(models.Model):
         'line_ids.payment_id.state')
     def _compute_amount(self):
         invoice_ids = [move.id for move in self if move.id and move.is_invoice(include_receipts=True)]
+        self.env['account.payment'].flush(['state'])
         if invoice_ids:
             self._cr.execute(
                 '''
@@ -1007,14 +1009,15 @@ class AccountMove(models.Model):
     def _compute_invoice_partner_display_info(self):
         for move in self:
             vendor_display_name = move.partner_id.name
-            move.invoice_icon = ''
             if not vendor_display_name:
                 if move.invoice_source_email:
                     vendor_display_name = _('From: ') + move.invoice_source_email
                     move.invoice_partner_icon = '@'
                 else:
-                    vendor_display_name = _('Created by: %s') % move.sudo().create_uid.name
+                    vendor_display_name = _('Created by: %s') % (move.sudo().create_uid.name or self.env.user.name)
                     move.invoice_partner_icon = '#'
+            else:
+                move.invoice_partner_icon = ''
             move.invoice_partner_display_name = vendor_display_name
 
     @api.depends('state', 'journal_id', 'invoice_date')
@@ -1029,14 +1032,18 @@ class AccountMove(models.Model):
 
         # Check moves being candidates to set a custom number next.
         moves = self.filtered(lambda move: move.is_invoice() and move.name == '/')
+        treated = self.browse()
+        for move in self:
+            move.invoice_sequence_number_next_prefix = False
+            move.invoice_sequence_number_next = False
         if not moves:
             return
 
         for key, group in groupby(moves, key=lambda move: (move.journal_id, move._get_sequence())):
             journal, sequence = key
             domain = [('journal_id', '=', journal.id), ('state', '=', 'posted')]
-            if not isinstance(self.id, models.NewId):
-                domain.append(('id', '!=', self.id))
+            if self.ids:
+                domain.append(('id', 'not in', self.ids))
             if journal.type == 'sale':
                 domain.append(('type', 'in', ('out_invoice', 'out_refund')))
             elif journal.type == 'purchase':
@@ -1051,6 +1058,7 @@ class AccountMove(models.Model):
                 number_next = sequence._get_current_sequence().number_next_actual
                 move.invoice_sequence_number_next_prefix = prefix
                 move.invoice_sequence_number_next = '%%0%sd' % sequence.padding % number_next
+                treated |= move
 
     def _inverse_invoice_sequence_number_next(self):
         ''' Set the number_next on the sequence related to the invoice/bill/refund'''
@@ -1072,6 +1080,7 @@ class AccountMove(models.Model):
     def _compute_payments_widget_to_reconcile_info(self):
         for move in self:
             move.invoice_outstanding_credits_debits_widget = json.dumps(False)
+            move.invoice_has_outstanding = False
 
             if move.state != 'posted' or move.invoice_payment_state != 'not_paid' or not move.is_invoice(include_receipts=True):
                 continue
@@ -1156,6 +1165,7 @@ class AccountMove(models.Model):
     @api.depends('type', 'line_ids.amount_residual')
     def _compute_payments_widget_reconciled_info(self):
         for move in self:
+            move.invoice_payments_widget = json.dumps(False)
             if move.state != 'posted' or not move.is_invoice(include_receipts=True):
                 continue
             reconciled_vals = move._get_reconciled_info_JSON_values()
@@ -1166,8 +1176,6 @@ class AccountMove(models.Model):
                     'content': reconciled_vals,
                 }
                 move.invoice_payments_widget = json.dumps(info, default=date_utils.json_default)
-            else:
-                move.invoice_payments_widget = json.dumps(False)
 
     @api.depends('line_ids.price_subtotal', 'line_ids.tax_base_amount', 'line_ids.tax_line_id', 'partner_id', 'currency_id')
     def _compute_invoice_taxes_by_group(self):
@@ -1264,6 +1272,7 @@ class AccountMove(models.Model):
         # /!\ As this method is called in create / write, we can't make the assumption the computed stored fields
         # are already done. Then, this query MUST NOT depend of computed stored fields (e.g. balance).
         # It happens as the ORM makes the create with the 'no_recompute' statement.
+        self.env['account.move.line'].flush(['debit', 'credit'])
         self._cr.execute('''
             SELECT line.move_id
             FROM account_move_line line
@@ -1402,6 +1411,7 @@ class AccountMove(models.Model):
 
             move = self_ctx.new(new_vals)
             new_vals_list.append(move._move_autocomplete_invoice_lines_values())
+
         return new_vals_list
 
     def _move_autocomplete_invoice_lines_write(self, vals):
@@ -1440,6 +1450,9 @@ class AccountMove(models.Model):
         return moves
 
     def write(self, vals):
+        new_records = self - self.filtered('id')
+        result = super(AccountMove, new_records).write(vals)
+        self = self - new_records
         not_paid_invoices = self.filtered(lambda move: move.is_invoice(include_receipts=True) and move.invoice_payment_state not in ('paid', 'in_payment'))
 
         if self._move_autocomplete_invoice_lines_write(vals):
@@ -1456,7 +1469,7 @@ class AccountMove(models.Model):
         # Trigger 'action_invoice_paid' when the invoice becomes paid after a write.
         not_paid_invoices.filtered(lambda move: move.invoice_payment_state in ('paid', 'in_payment')).action_invoice_paid()
 
-        return res
+        return result and res
 
     def unlink(self):
         for move in self:
@@ -2597,7 +2610,7 @@ class AccountMoveLine(models.Model):
         for line in self:
             line.balance = line.debit - line.credit
 
-    @api.depends('debit', 'credit', 'amount_currency', 'currency_id', 'matched_debit_ids', 'matched_credit_ids', 'matched_debit_ids.amount', 'matched_credit_ids.amount', 'move_id.state')
+    @api.depends('debit', 'credit', 'amount_currency', 'currency_id', 'matched_debit_ids', 'matched_credit_ids', 'matched_debit_ids.amount', 'matched_credit_ids.amount', 'move_id.state', 'company_id')
     def _amount_residual(self):
         """ Computes the residual amount of a move line from a reconcilable account in the company currency and the line's currency.
             This amount will be 0 for fully reconciled lines or lines from a non-reconcilable account, the original line amount
@@ -2648,7 +2661,14 @@ class AccountMoveLine(models.Model):
                     reconciled = True
             line.reconciled = reconciled
 
-            line.amount_residual = line.move_id.company_id.currency_id.round(amount * sign)
+            # DLE P101: this doesn't work for `new` move line for which move_id is not yet assigned
+            # It's actually triggered when computing the amount residual of another line, which is not new,
+            # via `env.records_to_compute(self)` in fields.py __get__
+            # Maybe there is something to do there.
+            if line.move_id.company_id.currency_id:
+                line.amount_residual = line.move_id.company_id.currency_id.round(amount * sign)
+            else:
+                line.amount_residual = amount * sign
             line.amount_residual_currency = line.currency_id and line.currency_id.round(amount_residual_currency * sign) or 0.0
 
     @api.depends('tax_repartition_line_id.invoice_tax_id', 'tax_repartition_line_id.refund_tax_id')
@@ -2836,6 +2856,9 @@ class AccountMoveLine(models.Model):
         return lines
 
     def write(self, vals):
+        new_records = self - self.filtered('id')
+        result = super(AccountMoveLine, new_records).write(vals)
+        self = self - new_records
         # OVERRIDE
         ACCOUNTING_FIELDS = ('debit', 'credit', 'amount_currency')
         BUSINESS_FIELDS = ('price_unit', 'quantity', 'discount', 'tax_ids')
@@ -2857,7 +2880,7 @@ class AccountMoveLine(models.Model):
                         lambda r: r.id != record.id and r.account_id.internal_type == 'liquidity')):
                     record.payment_id.state = 'reconciled'
 
-        result = super(AccountMoveLine, self).write(vals)
+        result = result and super(AccountMoveLine, self).write(vals)
 
         for line in self:
             if not line.move_id.is_invoice(include_receipts=True):
@@ -3128,8 +3151,6 @@ class AccountMoveLine(models.Model):
                 # if the pair belongs to move being reverted, do not create CABA entry
                 if cash_basis and not (new_rec.debit_move_id + new_rec.credit_move_id).mapped('move_id.reversed_entry_id'):
                     new_rec.create_tax_cash_basis_entry(cash_basis_percentage_before_rec)
-        self.recompute()
-
         return debit_moves+credit_moves
 
     def auto_reconcile_lines(self):
@@ -3705,7 +3726,6 @@ class AccountPartialReconcile(models.Model):
                                     'amount_currency': self.amount_currency and line.currency_id.round(-line.amount_currency * amount / line.balance) or 0.0,
                                     'partner_id': line.partner_id.id,
                                 })
-        self.recompute()
         if newly_created_move:
             if move_date > (self.company_id.period_lock_date or date.min) and newly_created_move.date != move_date:
                 # The move date should be the maximum date between payment and invoice (in case

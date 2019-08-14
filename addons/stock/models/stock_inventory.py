@@ -138,9 +138,11 @@ class Inventory(models.Model):
         self.write({'state': 'draft'})
 
     def action_start(self):
-        self.ensure_one()
-        self._action_start()
-        return self.action_open_inventory_lines()
+        # DLE P102: Allow to -i sale_stock multiple times
+        if self:
+            self.ensure_one()
+            self._action_start()
+            return self.action_open_inventory_lines()
 
     def _action_start(self):
         """ Confirms the Inventory Adjustment and generates its inventory lines
@@ -206,6 +208,7 @@ class Inventory(models.Model):
     def _get_inventory_lines_values(self):
         # TDE CLEANME: is sql really necessary ? I don't think so
         locations = self.env['stock.location']
+        locations.flush()
         if self.location_ids:
             locations = self.env['stock.location'].search([('id', 'child_of', self.location_ids.ids)])
         else:
@@ -324,7 +327,7 @@ class InventoryLine(models.Model):
         for line in self:
             line.difference_qty = line.product_qty - line.theoretical_qty
 
-    @api.depends('inventory_date', 'product_id.stock_move_ids')
+    @api.depends('inventory_date', 'product_id.stock_move_ids', 'theoretical_qty', 'product_uom_id.rounding')
     def _compute_outdated(self):
         grouped_quants = self.env['stock.quant'].read_group(
             [('product_id', 'in', self.product_id.ids), ('location_id', 'in', self.location_id.ids)],

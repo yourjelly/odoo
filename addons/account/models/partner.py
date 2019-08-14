@@ -223,6 +223,7 @@ class ResPartner(models.Model):
     _name = 'res.partner'
     _inherit = 'res.partner'
 
+    @api.depends_context('force_company')
     def _credit_debit_get(self):
         tables, where_clause, where_params = self.env['account.move.line'].with_context(company_id=self.env.company.id)._query_get()
         where_params = [tuple(self.ids)] + where_params
@@ -238,6 +239,8 @@ class ResPartner(models.Model):
                       """ + where_clause + """
                       GROUP BY account_move_line.partner_id, act.type
                       """, where_params)
+        self.credit = 0
+        self.debit = 0
         for pid, type, val in self._cr.fetchall():
             partner = self.browse(pid)
             if type == 'receivable':
@@ -337,6 +340,7 @@ class ResPartner(models.Model):
         for partner in self:
             # Avoid useless work if has_unreconciled_entries is not relevant for this partner
             if not partner.active or not partner.is_company and partner.parent_id:
+                partner.has_unreconciled_entries = False
                 continue
             self.env.cr.execute(
                 """ SELECT 1 FROM(

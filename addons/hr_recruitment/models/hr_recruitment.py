@@ -182,6 +182,7 @@ class Applicant(models.Model):
         application_data = self.env['hr.applicant'].read_group([
             ('email_from', 'in', list(set(self.mapped('email_from'))))], ['email_from'], ['email_from'])
         application_data_mapped = dict((data['email_from'], data['email_from_count']) for data in application_data)
+        self.application_count = 0
         for applicant in self.filtered(lambda applicant: applicant.email_from):
             applicant.application_count = application_data_mapped.get(applicant.email_from, 1) - 1
 

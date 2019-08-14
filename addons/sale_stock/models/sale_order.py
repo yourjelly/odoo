@@ -42,7 +42,7 @@ class SaleOrder(models.Model):
         for order in self:
             pickings = order.picking_ids.filtered(lambda x: x.state == 'done' and x.location_dest_id.usage == 'customer')
             dates_list = [date for date in pickings.mapped('date_done') if date]
-            order.effective_date = dates_list and min(dates_list).date()
+            order.effective_date = min(dates_list).date() if dates_list else False
 
     @api.depends('picking_policy')
     def _compute_expected_date(self):
@@ -224,6 +224,10 @@ class SaleOrderLine(models.Model):
         grouped_lines = defaultdict(lambda: self.env['sale.order.line'])
         # We first loop over the SO lines to group them by warehouse and schedule
         # date in order to batch the read of the quantities computed field.
+        self.virtual_available_at_date = False
+        self.scheduled_date = False
+        self.free_qty_today = False
+        self.qty_available_today = False
         for line in self:
             if not line.display_qty_widget:
                 continue
@@ -259,11 +263,11 @@ class SaleOrderLine(models.Model):
             set 'is_available' at True if the product availibility in stock does
             not need to be verified, which is the case in MTO, Cross-Dock or Drop-Shipping
         """
+        self.is_mto = False
         for line in self:
             if not line.display_qty_widget:
                 continue
             product = line.product_id
-            line.is_mto = False
             product_routes = line.route_id or (product.route_ids + product.categ_id.total_route_ids)
 
             # Check MTO

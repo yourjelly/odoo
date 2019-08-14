@@ -30,6 +30,21 @@ class Website(models.Model):
         default=_get_default_website_team)
     pricelist_ids = fields.One2many('product.pricelist', compute="_compute_pricelist_ids",
                                     string='Price list available for this Ecommerce/Website')
+    # test_website_sale_pricelist.py
+    # ```
+    # self.w2_pl = Pricelist.create({
+    #     'name': 'Website 2 Pricelist',
+    #     'website_id': self.website2.id,
+    # })
+    # ```
+    # One can assume that when creating a new pricelist with a `website_id`,
+    # the opposite one2many website.pricelist_ids would update automatically,
+    # except that this is a computed one2many, which therefore requires a depends in other to recompute correctly.
+    # The below technical regular one2many field is added,
+    # so it gets updated when adding a new pricelist with a website_id.
+    # pricelist_ids can depends then on this field in other to know when it has to recompute itself.
+    all_pricelist_ids = fields.One2many('product.pricelist', 'website_id', string='All pricelists',
+                                        help='Technical: Used to recompute pricelist_ids')
 
     def _default_recovery_mail_template(self):
         try:
@@ -43,6 +58,7 @@ class Website(models.Model):
     shop_ppg = fields.Integer(default=20, string="Number of products in the grid on the shop")
     shop_ppr = fields.Integer(default=4, string="Number of grid columns on the shop")
 
+    @api.depends('all_pricelist_ids')
     def _compute_pricelist_ids(self):
         Pricelist = self.env['product.pricelist']
         for website in self:
@@ -50,6 +66,7 @@ class Website(models.Model):
                 Pricelist._get_website_pricelists_domain(website.id)
             )
 
+    @api.depends_context('website_id')
     def _compute_pricelist_id(self):
         for website in self:
             if website._context.get('website_id') != website.id:

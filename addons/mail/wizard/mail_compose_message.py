@@ -282,6 +282,10 @@ class MailComposer(models.TransientModel):
                             ActiveModel.browse(res_id).message_post(**post_params)
 
                 if wizard.composition_mode == 'mass_mail':
+                    # DLE P115: Force correct order of attachments before sending them
+                    # `test_composer_w_template_mass_mailing`
+                    batch_mails.mail_message_id.invalidate_cache(['attachment_ids'])
+                    batch_mails.invalidate_cache(['attachment_ids'])
                     batch_mails.send(auto_commit=auto_commit)
 
     def get_mail_values(self, res_ids):
@@ -392,7 +396,7 @@ class MailComposer(models.TransientModel):
             fields = ['subject', 'body_html', 'email_from', 'reply_to', 'mail_server_id']
             values = dict((field, getattr(template, field)) for field in fields if getattr(template, field))
             if template.attachment_ids:
-                values['attachment_ids'] = [att.id for att in template.attachment_ids]
+                values['attachment_ids'] = [(6, 0, [att.id for att in template.attachment_ids])]
             if template.mail_server_id:
                 values['mail_server_id'] = template.mail_server_id.id
             if template.user_signature and 'body_html' in values:
@@ -414,9 +418,9 @@ class MailComposer(models.TransientModel):
                 }
                 attachment_ids.append(Attachment.create(data_attach).id)
             if values.get('attachment_ids', []) or attachment_ids:
-                values['attachment_ids'] = [(5,)] + values.get('attachment_ids', []) + attachment_ids
+                values['attachment_ids'] = [(6, 0, values.get('attachment_ids', []) + attachment_ids)]
         else:
-            default_values = self.with_context(default_composition_mode=composition_mode, default_model=model, default_res_id=res_id).default_get(['composition_mode', 'model', 'res_id', 'parent_id', 'partner_ids', 'subject', 'body', 'email_from', 'reply_to', 'attachment_ids', 'mail_server_id'])
+            default_values = self.with_context(default_attachment_ids=[(5,)], default_composition_mode=composition_mode, default_model=model, default_res_id=res_id).default_get(['composition_mode', 'model', 'res_id', 'parent_id', 'partner_ids', 'subject', 'body', 'email_from', 'reply_to', 'attachment_ids', 'mail_server_id'])
             values = dict((key, default_values[key]) for key in ['subject', 'body', 'partner_ids', 'email_from', 'reply_to', 'attachment_ids', 'mail_server_id'] if key in default_values)
 
         if values.get('body_html'):

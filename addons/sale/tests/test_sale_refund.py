@@ -62,6 +62,11 @@ class TestSaleToInvoice(TestCommonSaleNoChart):
 
         # Confirm the SO
         cls.sale_order.action_confirm()
+        # DLE P175: The test expects the order lines to be sorted in the right order
+        # e.g. `test_refund_cancel` edit the first and second invoice line,
+        # and if the order lines are not well sorted when calling below `create_invoices`,
+        # the invoice lines are not sorted well either.
+        cls.sale_order.invalidate_cache([('order_line')])
 
         # Create an invoice with invoiceable lines only
         payment = cls.env['sale.advance.payment.inv'].with_context({

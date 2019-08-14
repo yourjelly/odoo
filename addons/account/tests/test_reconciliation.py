@@ -1040,6 +1040,8 @@ class TestReconciliationExec(TestReconciliation):
         self.env.cr.execute('UPDATE account_partial_reconcile SET create_date = %(date)s WHERE id = %(partial_id)s',
             {'date': invoice.invoice_date,
              'partial_id': statement_partial_id.id})
+        # DLE P94, a cr.execute update in a test, :D
+        statement.flush()
 
         # Case 1: report date is invoice date
         # There should be an entry for the partner
@@ -1249,6 +1251,8 @@ class TestReconciliationExec(TestReconciliation):
         })
         payment_move.post()
 
+        # DLE P96
+        (purchase_move + payment_move).invalidate_cache(['line_ids'])
         to_reconcile = (purchase_move + payment_move).mapped('line_ids').filtered(lambda l: l.account_id.internal_type == 'payable')
         to_reconcile.reconcile()
 
@@ -1362,6 +1366,10 @@ class TestReconciliationExec(TestReconciliation):
         })
         payment_move1.post()
 
+        # DLE P96: The cash basis entries amounts depends on the order in which are reconciled the lines
+        # The order is not really important, as its the sum of the cash basis entries that matter,
+        # but the below test check the amount of each intermediate entries, which are different, despite the total is not.
+        (purchase_move + payment_move0 + payment_move1).invalidate_cache(['line_ids'])
         (purchase_move + payment_move0).mapped('line_ids').filtered(lambda l: l.account_id.internal_type == 'payable').reconcile()
         (purchase_move + payment_move1).mapped('line_ids').filtered(lambda l: l.account_id.internal_type == 'payable').reconcile()
 
@@ -1582,10 +1590,13 @@ class TestReconciliationExec(TestReconciliation):
         to_reconcile.reconcile()
 
         # check reconciliation in Payable account
-        self.assertTrue(purchase_move.line_ids[2].full_reconcile_id.exists())
+        purchase_line_ids = purchase_move.line_ids.sorted()
+        fx_move_01_line_ids = fx_move_01.line_ids.sorted()
+        payment_move_line_ids = payment_move.line_ids.sorted()
+        self.assertTrue(purchase_line_ids[2].full_reconcile_id.exists())
         self.assertEqual(
-            purchase_move.line_ids[2].full_reconcile_id.reconciled_line_ids,
-            purchase_move.line_ids[2] + fx_move_01.line_ids[0] + payment_move.line_ids[0])
+            purchase_line_ids[2].full_reconcile_id.reconciled_line_ids,
+            purchase_line_ids[2] + fx_move_01_line_ids[0] + payment_move_line_ids[0])
 
         # check cash basis
         cash_basis_moves = self.env['account.move'].search(
@@ -1761,11 +1772,15 @@ class TestReconciliationExec(TestReconciliation):
         to_reconcile.reconcile()
 
         # check reconciliation in Payable account
-        self.assertTrue(purchase_move.line_ids[2].full_reconcile_id.exists())
+        purchase_move_line_ids = purchase_move.line_ids.sorted()
+        fx_move_01_line_ids = fx_move_01.line_ids.sorted()
+        fx_move_02_line_ids = fx_move_02.line_ids.sorted()
+        payment_move_line_ids = payment_move.line_ids.sorted()
+        self.assertTrue(purchase_move_line_ids[2].full_reconcile_id.exists())
         self.assertEqual(
-            purchase_move.line_ids[2].full_reconcile_id.reconciled_line_ids,
-            purchase_move.line_ids[2] + fx_move_01.line_ids[0] + fx_move_02.line_ids[0] +
-            payment_move.line_ids[0])
+            purchase_move_line_ids[2].full_reconcile_id.reconciled_line_ids,
+            purchase_move_line_ids[2] + fx_move_01_line_ids[0] + fx_move_02_line_ids[0] +
+            payment_move_line_ids[0])
 
         # check cash basis
         cash_basis_moves = self.env['account.move'].search(
@@ -2059,7 +2074,7 @@ class TestReconciliationExec(TestReconciliation):
             'mv_line_ids': [move_payment_lines[1].id, move_product_lines[1].id],
             'new_mv_line_dicts': [{
                 'account_id': liquidity_account.id,
-                'analytic_tag_ids': [6, None, []],
+                'analytic_tag_ids': [(6, None, [])],
                 'credit': 0,
                 'date': time.strftime('%Y') + '-01-01',
                 'debit': 15.0,

@@ -18,6 +18,7 @@ class res_partner(models.Model):
             domain=[('partner_id', 'in', all_partners.ids)],
             fields=['partner_id'], groupby=['partner_id']
         )
+        self.purchase_order_count = 0
         for group in purchase_order_groups:
             partner = self.browse(group['partner_id'][0])
             while partner:
@@ -35,6 +36,7 @@ class res_partner(models.Model):
                     ('type', 'in', ('in_invoice', 'in_refund'))],
             fields=['partner_id'], groupby=['partner_id']
         )
+        self.supplier_invoice_count = 0
         for group in supplier_invoice_groups:
             partner = self.browse(group['partner_id'][0])
             while partner:

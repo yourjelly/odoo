@@ -57,32 +57,40 @@ class TestKarmaGain(common.SlidesCase):
         (self.slide_2 | self.slide_3).with_user(user).action_set_completed()
         self.assertTrue(self.channel.with_user(user).completed)
         computed_karma += self.channel.karma_gen_channel_finish
+        user.flush()
         self.assertEqual(user.karma, computed_karma)
 
         # Begin then finish the second Course
         self.slide_2_0.with_user(user).action_set_completed()
         self.assertFalse(self.channel_2.with_user(user).completed)
+        user.flush()
         self.assertEqual(user.karma, computed_karma)
 
         self.slide_2_1.with_user(user).action_set_completed()
         self.assertTrue(self.channel_2.with_user(user).completed)
         computed_karma += self.channel_2.karma_gen_channel_finish
+        user.flush()
         self.assertEqual(user.karma, computed_karma)
 
         # Vote for a slide
         slide_user = self.slide.with_user(user)
         slide_user.action_like()
         computed_karma += self.channel.karma_gen_slide_vote
+        user.flush()
         self.assertEqual(user.karma, computed_karma)
         slide_user.action_like()  # re-like something already liked should not add karma again
+        user.flush()
         self.assertEqual(user.karma, computed_karma)
         slide_user.action_dislike()
         computed_karma -= self.channel.karma_gen_slide_vote
+        user.flush()
         self.assertEqual(user.karma, computed_karma)
         slide_user.action_dislike()
         computed_karma -= self.channel.karma_gen_slide_vote
+        user.flush()
         self.assertEqual(user.karma, computed_karma)
         slide_user.action_dislike()  # dislike again something already disliked should not remove karma again
+        user.flush()
         self.assertEqual(user.karma, computed_karma)
 
     @mute_logger('odoo.models')
@@ -95,6 +103,7 @@ class TestKarmaGain(common.SlidesCase):
         # Finish two course at the same time (should not ever happen but hey, we never know)
         (self.channel | self.channel_2)._action_add_members(user.partner_id)
 
-        (self.slide | self.slide_2 | self.slide_3 | self.slide_2_0 | self.slide_2_1).with_user(user).action_set_completed()
         computed_karma += self.channel.karma_gen_channel_finish + self.channel_2.karma_gen_channel_finish
+        (self.slide | self.slide_2 | self.slide_3 | self.slide_2_0 | self.slide_2_1).with_user(user).action_set_completed()
+        user.flush()
         self.assertEqual(user.karma, computed_karma)
