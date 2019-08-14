@@ -117,9 +117,10 @@ class MailComposer(models.TransientModel):
     notify = fields.Boolean('Notify followers', help='Notify followers of the document (mass post only)')
     auto_delete = fields.Boolean('Delete Emails', help='Delete sent emails (mass mailing only)')
     auto_delete_message = fields.Boolean('Delete Message Copy', help='Do not keep a copy of the email in the document communication history (mass mailing only)')
+    company_id = fields.Many2one('res.company', string="Company", default=lambda self: self.env.user.company_id)
     template_id = fields.Many2one(
         'mail.template', 'Use template', index=True,
-        domain="[('model', '=', model)]")
+        domain="[('model', '=', model), ('company_id', '=', company_id)]")
     # mail_message updated fields
     message_type = fields.Selection(default="comment")
     subtype_id = fields.Many2one(default=lambda self: self.env['ir.model.data'].xmlid_to_res_id('mail.mt_comment'))

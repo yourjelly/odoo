@@ -67,6 +67,7 @@
                             </page>
                             <page string="Advanced Settings">
                                 <group>
+                                    <field name="company_id"/>
                                     <field name="lang"/>
                                     <field name="mail_server_id"/>
                                     <field name="auto_delete"/>
