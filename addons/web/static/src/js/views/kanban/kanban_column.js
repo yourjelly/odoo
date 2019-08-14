@@ -135,26 +135,40 @@ var KanbanColumn = Widget.extend({
                 // else if (offsetY !== 0) { // while dragging vertically
                 //     self.$el.scrollTop(self.$el.scrollTop() + offsetY);
                 // }
+
+                console.log(">>>offsetX",offsetX,">>>offsetY",offsetY, originalEvent.layerX, );
+
                 var offsetWidth = this.el.offsetWidth;
                 var swapEnabledWidth = offsetWidth - offsetWidth * 0.20;
 
-                if (originalEvent.layerX > swapEnabledWidth) {
+                if(originalEvent.layerX !== 0){
                     scrollDelay += 1;
                     if (scrollDelay > 50) {
-                        self.trigger_up("kanban_column_swipe_left");
+                        if (originalEvent.layerX > swapEnabledWidth) {
+                            self.trigger_up("kanban_column_swipe_left");
+                        }
+                        if (originalEvent.layerX < 0) {
+                            self.trigger_up("kanban_column_swipe_right");
+                        }    
                         scrollDelay = 0;
                     }
+                    // if (originalEvent.layerX > swapEnabledWidth) {
+                    //     if (scrollDelay > 50) {
+                    //         self.trigger_up("kanban_column_swipe_left");
+                    //         scrollDelay = 0;
+                    //     }
+                    // }
+                    // if (originalEvent.layerX < 0) {
+                    //     scrollDelay += 1;
+                    //     if (scrollDelay > 50) {
+                    //         self.trigger_up("kanban_column_swipe_right");
+                    //         scrollDelay = 0;
+                    //     }
+                    // }
                 }
-                if (originalEvent.layerX < 0) {
-                    scrollDelay += 1;
-                    if (scrollDelay > 50) {
-                        self.trigger_up("kanban_column_swipe_right");
-                        scrollDelay = 0;
-                    }
+                else if (originalEvent.layerY !== 0) { // while dragging vertically
+                    self.$el.scrollTop(self.$el.scrollTop() + originalEvent.layerY);
                 }
-                // else if (originalEvent.layerX !== 0) { // while dragging vertically
-                //     self.$el.scrollTop(self.$el.scrollTop() + this._lastY);
-                // }
             } : false,
             onStart: function () {
                 if (config.device.isMobile) {
