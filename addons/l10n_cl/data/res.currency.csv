@@ -29,4 +29,4 @@ base.UTM,,UTM,Unidad Tributaria Mensual,0.01,after,UTM,Unidad Tributaria Mensual
 base.UYU,26,UYU,PESO URUG,1,,$,,
 base.VEF,134,VEF,BOLIVAR,1,,Bs.F,,
 base.ZAR,128,ZAR,RAND,1,,R,,
-l10n_cl_account.OTR,900,OTR,OTR,1,,OTR,,
+l10n_cl.OTR,900,OTR,OTR,1,,OTR,,

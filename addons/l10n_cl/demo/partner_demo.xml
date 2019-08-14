@@ -3,8 +3,6 @@
 
     <record id="res_partner_bmya" model="res.partner">
         <field name="name">Blanco Martin &amp; Asociados EIRL</field>
-        <field eval="1" name="supplier"/>
-        <field eval="1" name="customer"/>
         <field name="email">info@bmya.cl</field>
         <field name="is_company">1</field>
         <field name="city">Las Condes</field>
@@ -28,8 +26,6 @@
 
     <record id="res_partner_teksa" model="res.partner">
         <field name="name">Teksa SpA</field>
-        <field eval="1" name="supplier"/>
-        <field eval="1" name="customer"/>
         <field name="email">teksa@teksa.cl</field>
         <field name="is_company">1</field>
         <field name="city">Pudahuel</field>
