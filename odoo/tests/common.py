@@ -960,6 +960,7 @@ class HttpCase(TransactionCase):
             self.browser.set_cookie('session_id', self.session_id, '/', HOST)
 
     def browser_js(self, url_path, code, ready='', login=None, timeout=60, **kw):
+        init_time = time.time()
         """ Test js code running in the browser
         - optionnally log as 'login'
         - load page given by url_path
@@ -978,10 +979,15 @@ class HttpCase(TransactionCase):
         if any(f.filename.endswith('/coverage/execfile.py') for f in inspect.stack()  if f.filename):
             timeout = timeout * 1.5
 
+        s_time = time.time()
         self.start_browser()
-
+        self._logger.info('exectime start_browser: %s', time.time()-s_time)
+        s_time = time.time()
         try:
             self.authenticate(login, login)
+
+            self._logger.info('exectime authenticate: %s', time.time()-s_time)
+            s_time = time.time()
             base_url = "http://%s:%s" % (HOST, PORT)
             ICP = self.env['ir.config_parameter']
             ICP.set_param('web.base.url', base_url)
@@ -994,18 +1000,31 @@ class HttpCase(TransactionCase):
             if self.browser.screencasts_dir:
                 self._logger.info('Starting screencast')
                 self.browser.start_screencast()
+
+            self._logger.info('exectime setup: %s', time.time()-s_time)
+            s_time = time.time()
+
             self.browser.navigate_to(url, wait_stop=not bool(ready))
 
+            self._logger.info('exectime navigate_to: %s', time.time()-s_time)
+            s_time = time.time()
             # Needed because tests like test01.js (qunit tests) are passing a ready
             # code = ""
             ready = ready or "document.readyState === 'complete'"
             self.assertTrue(self.browser._wait_ready(ready), 'The ready "%s" code was always falsy' % ready)
 
+            self._logger.info('exectime _wait_ready: %s', time.time()-s_time)
+            s_time = time.time()
+
             error = False
             try:
                 self.browser._wait_code_ok(code, timeout)
+                self._logger.info('exectime _wait_code_ok: %s', time.time()-s_time)
+                s_time = time.time()
             except ChromeBrowserException as chrome_browser_exception:
                 error = chrome_browser_exception
+                self._logger.info('exectime _wait_code_ok_failure: %s (failure)', time.time()-s_time)
+                s_time = time.time()
             if error:  # dont keep initial traceback, keep that outside of except
                 if code:
                     message = 'The test code "%s" failed' % code
@@ -1017,7 +1036,12 @@ class HttpCase(TransactionCase):
             # clear browser to make it stop sending requests, in case we call
             # the method several times in a test method
             self.browser.clear()
+            self._logger.info('exectime browser_clear: %s', time.time()-s_time)
+            s_time = time.time()
             self._wait_remaining_requests()
+            self._logger.info('exectime _wait_remaining_requests: %s', time.time()-s_time)
+            s_time = time.time()
+            self._logger.info('exectime browser_js: %s', time.time()-init_time)
 
     def start_tour(self, url_path, tour_name, step_delay=None, **kwargs):
         """Wrapper for `browser_js` to start the given `tour_name` with the
