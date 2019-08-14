@@ -696,18 +696,18 @@
                                                attrs="{
                                                     'required': [('display_type', 'not in', ('line_section', 'line_note'))],
                                                     'invisible': [('display_type', 'in', ('line_section', 'line_note'))],
-                                               }"/>
+                                               }"  optional="show"/>
                                         <field name="partner_id"
                                                domain="['|', ('parent_id', '=', False), ('is_company', '=', True)]"
                                                attrs="{'column_invisible': [('parent.type', '!=', 'entry')]}"/>
-                                        <field name="name" widget="section_and_note_text"/>
+                                        <field name="name" widget="section_and_note_text"  optional="show"/>
                                         <field name="analytic_account_id"
                                                groups="analytic.group_analytic_accounting"
-                                               attrs="{'invisible': [('display_type', 'in', ('line_section', 'line_note'))]}"/>
+                                               attrs="{'invisible': [('display_type', 'in', ('line_section', 'line_note'))]}"  optional="show"/>
                                         <field name="analytic_tag_ids"
                                                groups="analytic.group_analytic_tags"
                                                widget="many2many_tags"
-                                               attrs="{'invisible': [('display_type', 'in', ('line_section', 'line_note'))]}"/>
+                                               attrs="{'invisible': [('display_type', 'in', ('line_section', 'line_note'))]}"  optional="show"/>
                                         <field name="amount_currency"
                                                groups="base.group_multi_currency"/>
                                         <field name="currency_id" options="{'no_create': True}"

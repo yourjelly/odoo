@@ -1300,11 +1300,13 @@ class AccountMove(models.Model):
 
         self._cr.execute('''
             SELECT move.id, company.tax_lock_date
-            FROM account_move move
+            FROM account_move_line move_line
+            JOIN account_move move ON move.id = move_line.move_id
             JOIN account_journal journal ON journal.id = move.journal_id
             JOIN res_company company ON company.id = journal.company_id
             WHERE move.id IN %s
             AND move.date < company.tax_lock_date
+            AND move_line.tax_line_id is not null
         ''', [tuple(self.ids)])
 
         query_res = self._cr.fetchone()
@@ -2707,16 +2709,7 @@ class AccountMoveLine(models.Model):
             if control_type_failed or control_account_failed:
                 raise UserError(_('You cannot use this general account in this journal, check the tab \'Entry Controls\' on the related journal.'))
 
-    @api.constrains('tax_ids', 'tax_line_id')
-    def _check_tax_lock_date1(self):
-        for line in self:
-            if line.date <= (line.company_id.tax_lock_date or date.min):
-                raise ValidationError(
-                    _("The operation is refused as it would impact an already issued tax statement. " +
-                      "Please change the journal entry date or the tax lock date set in the settings ({}) to proceed").format(
-                        line.company_id.tax_lock_date or date.min))
-
-    @api.constrains('credit', 'debit', 'date')
+    @api.constrains('credit', 'debit', 'date', 'tax_ids', 'tax_line_id')
     def _check_tax_lock_date2(self):
         for line in self:
             if (line.tax_ids or line.tax_line_id) and line.date <= (line.company_id.tax_lock_date or date.min):

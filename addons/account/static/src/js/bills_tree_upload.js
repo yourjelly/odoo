@@ -53,6 +53,12 @@ odoo.define('account.upload.bill.mixin', function (require) {
                 $formContainer = $(qweb.render('account.BillsHiddenUploadForm', {widget: this}));
                 $formContainer.appendTo(this.$('.o_content'));
             }
+            if (event.currentTarget.attributes.journal_type.value == 'sale'){
+                this.initialState.context['default_type'] = 'out_invoice'
+            }
+            if (event.currentTarget.attributes.journal_type.value == 'purchase'){
+                this.initialState.context['default_type'] = 'in_invoice'
+            }
             // Trigger the input to select a file
             this.$('.o_vendor_bill_upload .o_input_file').click();
         },
