@@ -96,18 +96,15 @@ class AccountMove(models.Model):
                 elif purchase_aliquots == 'not_zero' and vat_taxes.tax_group_id.l10n_ar_vat_afip_code == '0':
                     raise UserError(_('On invoice id "%s" you must use VAT taxes different than VAT Not Applicable.')  % inv.id)
 
-    # TODO make it with create/write or with https://github.com/odoo/odoo/pull/31059
-    @api.constrains('invoice_date')
+    @api.onchange('invoice_date')
     def set_afip_date(self):
         for rec in self.filtered('invoice_date'):
             invoice_date = fields.Datetime.from_string(rec.invoice_date)
             vals = {}
             if not rec.l10n_ar_afip_service_start:
-                vals['l10n_ar_afip_service_start'] = invoice_date + relativedelta(day=1)
+                rec.l10n_ar_afip_service_start = invoice_date + relativedelta(day=1)
             if not rec.l10n_ar_afip_service_end:
-                vals['l10n_ar_afip_service_end'] = invoice_date + relativedelta(day=1, days=-1, months=+1)
-            if vals:
-                rec.write(vals)
+                rec.l10n_ar_afip_service_end = invoice_date + relativedelta(day=1, days=-1, months=+1)
 
     @api.onchange('partner_id')
     def check_afip_responsibility(self):
@@ -130,8 +127,6 @@ class AccountMove(models.Model):
             return res
         return super().get_document_type_sequence()
 
-    # TODO make it with create/write or with https://github.com/odoo/odoo/pull/31059
-    @api.constrains('partner_id')
     @api.onchange('partner_id')
     def _onchange_partner_journal(self):
         """ This method is used when the invoice is created from the sale or subscription """
