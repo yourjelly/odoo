@@ -39,7 +39,6 @@ Plan contable chileno e impuestos de acuerdo a disposiciones vigentes
         'data/res.currency.csv',
         'data/res.bank.csv',
         'data/res.country.csv',
-        'data/res_config_settings.xml',
         'data/res_partner.xml',
         'data/account_fiscal_template.xml',
         'data/account_chart_template_data.xml',
