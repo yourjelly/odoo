@@ -754,7 +754,8 @@ class Picking(models.Model):
                             'package_id': pack.id,
                             'location_id': pack.location_id.id,
                             'location_dest_id': picking.move_line_ids.filtered(lambda ml: ml.package_id == pack).mapped('location_dest_id')[:1].id,
-                            'move_line_ids': [(6, 0, move_lines_to_pack.ids)]
+                            'move_line_ids': [(6, 0, move_lines_to_pack.ids)],
+                            'company_id': picking.company_id.id,
                         })
                         move_lines_to_pack.write({
                             'result_package_id': pack.id,
@@ -1131,7 +1132,8 @@ class Picking(models.Model):
                 'picking_id': pick.id,
                 'location_id': False,
                 'location_dest_id': move_line_ids.mapped('location_dest_id').id,
-                'move_line_ids': [(6, 0, move_lines_to_pack.ids)]
+                'move_line_ids': [(6, 0, move_lines_to_pack.ids)],
+                'company_id': pick.company_id.id,
             })
             move_lines_to_pack.write({
                 'result_package_id': package.id,
