@@ -17,6 +17,7 @@ PROCUREMENT_PRIORITIES = [('0', 'Not urgent'), ('1', 'Normal'), ('2', 'Urgent'),
 
 class StockMove(models.Model):
     _name = "stock.move"
+    _inherit = 'company.consistency.mixin'
     _description = "Stock Move"
     _order = 'sequence, id'
 
@@ -43,7 +44,7 @@ class StockMove(models.Model):
         help="Scheduled date for the processing of this move")
     product_id = fields.Many2one(
         'product.product', 'Product',
-        domain=[('type', 'in', ['product', 'consu'])], index=True, required=True,
+        domain="[('type', 'in', ['product', 'consu']), '|', ('company_id', '=', False), ('company_id', '=', company_id)]", index=True, required=True,
         states={'done': [('readonly', True)]})
     description_picking = fields.Text('Description of Picking')
     product_qty = fields.Float(
@@ -74,15 +75,17 @@ class StockMove(models.Model):
     location_id = fields.Many2one(
         'stock.location', 'Source Location',
         auto_join=True, index=True, required=True,
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         help="Sets a location if you produce at a fixed location. This can be a partner location if you subcontract the manufacturing operations.")
     location_dest_id = fields.Many2one(
         'stock.location', 'Destination Location',
         auto_join=True, index=True, required=True,
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         help="Location where the system will stock the finished products.")
     partner_id = fields.Many2one(
         'res.partner', 'Destination Address ',
         states={'done': [('readonly', True)]},
-        help="Optional address where goods are to be delivered, specifically used for allotment")
+    help="Optional address where goods are to be delivered, specifically used for allotment")
     move_dest_ids = fields.Many2many(
         'stock.move', 'stock_move_move_rel', 'move_orig_id', 'move_dest_id', 'Destination Moves',
         copy=False,
@@ -91,7 +94,9 @@ class StockMove(models.Model):
         'stock.move', 'stock_move_move_rel', 'move_dest_id', 'move_orig_id', 'Original Move',
         copy=False,
         help="Optional: previous stock move when chaining them")
-    picking_id = fields.Many2one('stock.picking', 'Transfer Reference', index=True, states={'done': [('readonly', True)]})
+    picking_id = fields.Many2one(
+        'stock.picking', 'Transfer Reference', index=True, states={'done': [('readonly', True)]},
+        domain="[('company_id', '=', company_id)]")
     picking_partner_id = fields.Many2one('res.partner', 'Transfer Destination Address', related='picking_id.partner_id', readonly=False)
     note = fields.Text('Notes')
     state = fields.Selection([
@@ -123,7 +128,9 @@ class StockMove(models.Model):
     scrapped = fields.Boolean('Scrapped', related='location_dest_id.scrap_location', readonly=True, store=True)
     scrap_ids = fields.One2many('stock.scrap', 'move_id')
     group_id = fields.Many2one('procurement.group', 'Procurement Group', default=_default_group_id)
-    rule_id = fields.Many2one('stock.rule', 'Stock Rule', ondelete='restrict', help='The stock rule that created this stock move')
+    rule_id = fields.Many2one(
+        'stock.rule', 'Stock Rule', ondelete='restrict', help='The stock rule that created this stock move',
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     propagate_cancel = fields.Boolean(
         'Propagate cancel and split', default=True,
         help='If checked, when this move is cancelled, cancel the linked move too')
@@ -132,8 +139,12 @@ class StockMove(models.Model):
     propagate_date_minimum_delta = fields.Integer(string='Reschedule if Higher Than',
         help='The change must be higher than this value to be propagated')
     delay_alert = fields.Boolean('Alert if Delay')
-    picking_type_id = fields.Many2one('stock.picking.type', 'Operation Type')
-    inventory_id = fields.Many2one('stock.inventory', 'Inventory')
+    picking_type_id = fields.Many2one(
+        'stock.picking.type', 'Operation Type',
+        domain="[('company_id', '=', company_id)]")
+    inventory_id = fields.Many2one(
+        'stock.inventory', 'Inventory',
+        domain="[('company_id', '=', company_id)]")
     move_line_ids = fields.One2many('stock.move.line', 'move_id')
     move_line_nosuggest_ids = fields.One2many('stock.move.line', 'move_id', domain=[('product_qty', '=', 0.0)])
     origin_returned_move_id = fields.Many2one('stock.move', 'Origin return move', copy=False, help='Move that created the return move')
@@ -148,9 +159,15 @@ class StockMove(models.Model):
     string_availability_info = fields.Text(
         'Availability', compute='_compute_string_qty_information',
         readonly=True, help='Show various information on stock availability for this move')
-    restrict_partner_id = fields.Many2one('res.partner', 'Owner ', help="Technical field used to depict a restriction on the ownership of quants to consider when marking this move as 'done'")
-    route_ids = fields.Many2many('stock.location.route', 'stock_location_route_move', 'move_id', 'route_id', 'Destination route', help="Preferred route")
-    warehouse_id = fields.Many2one('stock.warehouse', 'Warehouse', help="Technical field depicting the warehouse to consider for the route selection on the next procurement (if any).")
+    restrict_partner_id = fields.Many2one(
+        'res.partner', 'Owner ', help="Technical field used to depict a restriction on the ownership of quants to consider when marking this move as 'done'",
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+    route_ids = fields.Many2many(
+        'stock.location.route', 'stock_location_route_move', 'move_id', 'route_id', 'Destination route', help="Preferred route",
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+    warehouse_id = fields.Many2one(
+        'stock.warehouse', 'Warehouse', help="Technical field depicting the warehouse to consider for the route selection on the next procurement (if any).",
+        domain="[('company_id', '=', company_id)]")
     has_tracking = fields.Selection(related='product_id.tracking', string='Product with Tracking')
     quantity_done = fields.Float('Quantity Done', compute='_quantity_done_compute', digits='Product Unit of Measure', inverse='_quantity_done_set')
     show_operations = fields.Boolean(related='picking_id.picking_type_id.show_operations', readonly=False)
@@ -164,7 +181,9 @@ class StockMove(models.Model):
     is_quantity_done_editable = fields.Boolean('Is quantity done editable', compute='_compute_is_quantity_done_editable')
     reference = fields.Char(compute='_compute_reference', string="Reference", store=True)
     has_move_lines = fields.Boolean(compute='_compute_has_move_lines')
-    package_level_id = fields.Many2one('stock.package_level', 'Package Level')
+    package_level_id = fields.Many2one(
+        'stock.package_level', 'Package Level',
+        domain="[('company_id', '=', company_id)]")
     picking_type_entire_packs = fields.Boolean(related='picking_type_id.show_entire_packs', readonly=True)
     display_assign_serial = fields.Boolean(compute='_compute_display_assign_serial')
     next_serial = fields.Char('First SN')
@@ -934,6 +953,7 @@ class StockMove(models.Model):
         for moves in to_assign.values():
             moves._assign_picking()
         self._push_apply()
+        self._company_consistency_check()
         if merge:
             return self._merge_moves(merge_into=merge_into)
         return self
@@ -1282,6 +1302,7 @@ class StockMove(models.Model):
 
             moves_todo |= move._create_extra_move()
 
+        moves_todo._company_consistency_check()
         # Split moves where necessary and move quants
         for move in moves_todo:
             # To know whether we need to create a backorder or not, round to the general product's
@@ -1468,3 +1489,16 @@ class StockMove(models.Model):
                 move.procure_method = rules.procure_method
             else:
                 move.procure_method = 'make_to_stock'
+
+    def _company_consistency_m2o_required_cid_fields(self):
+        res = super(StockMove, self)._company_consistency_m2o_required_cid_fields()
+        return res + ['picking_id', 'picking_type_id', 'inventory_id', 'origin_returned_move_id', 'warehouse_id', 'package_level_id']
+
+    def _company_consistency_m2o_optional_cid_fields(self):
+        res = super(StockMove, self)._company_consistency_m2o_optional_cid_fields()
+        # FIXME `partner_id` should probably be in this list but it breaks intercompany moves
+        return res + ['product_id', 'location_id', 'location_dest_id', 'restrict_partner_id', 'rule_id']
+
+    def _company_consistency_m2m_optional_cid_fields(self):
+        res = super(StockMove, self)._company_consistency_m2m_optional_cid_fields()
+        return res + ['route_ids']
