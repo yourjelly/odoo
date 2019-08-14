@@ -13,11 +13,12 @@ class StockScrap(models.Model):
     _description = 'Scrap'
 
     def _get_default_scrap_location_id(self):
-        return self.env['stock.location'].search([('scrap_location', '=', True), ('company_id', 'in', [self.env.company.id, False])], limit=1).id
+        company_id = self.env.context.get('default_company_id') or self.env.company.id
+        return self.env['stock.location'].search([('scrap_location', '=', True), ('company_id', 'in', [company_id, False])], limit=1).id
 
     def _get_default_location_id(self):
-        company_user = self.env.company
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', company_user.id)], limit=1)
+        company_id = self.env.context.get('default_company_id') or self.env.company.id
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', company_id)], limit=1)
         if warehouse:
             return warehouse.lot_stock_id.id
         return None
