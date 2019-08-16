@@ -362,6 +362,7 @@ var KanbanRenderer = BasicRenderer.extend({
                 // dragoverBubble: true,
                 forceFallback: true,
                 fallbackClass: 'o_kanban_group_clone',
+                supportPointer: false,
                 onEnd: function (event) {
                     var ids = [];
                     self.$('.o_kanban_group').each(function (index, u) {

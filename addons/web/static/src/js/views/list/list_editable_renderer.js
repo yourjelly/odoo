@@ -821,6 +821,7 @@ ListRenderer.include({
                 draggable: 'tr.o_data_row',
                 // in testcase we are not getting scrollableParent.
                 scroll: $scrollableParent ? $scrollableParent[0] : true,
+                supportPointer: false,
                 onEnd: function (event, ui) {
                     // update currentID taking moved line into account
                     if (self.currentRow !== null) {

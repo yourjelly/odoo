@@ -119,6 +119,7 @@ var KanbanColumn = Widget.extend({
             forceFallback: true,
             fallbackClass: 'o_kanban_record_clone',
             rotateElement: 'o_kanban_record_clone', // just pass fallbackClass to rotate
+            supportPointer: false,
             scrollFn: config.device.isMobile ? function (offsetX, offsetY, originalEvent, touchEvt, hoverTargetEl) {
                 // rubaxa calls scrollFn on each 24 miliseconds, 24 seconds are fix we can not configure it
                 // we need to add such custom logic to increase delay

@@ -76,12 +76,12 @@ function dragAndDrop($el, $to, options) {
         // for example drag and drop from 1st stage to 3rd or 4th or any stage after 3rd stage
         // https://github.com/RubaXa/Sortable/issues/1303#issuecomment-379166526
         triggerPositionalMouseEvent(elementCenter.left, elementCenter.top, 'mouseenter', $el[0]);
-        triggerPositionalMouseEvent(elementCenter.left, elementCenter.top, 'pointerdown', $el[0]);
-        triggerPositionalMouseEvent(toOffset.left, toOffset.top , 'pointermove', $to[0]);
+        triggerPositionalMouseEvent(elementCenter.left, elementCenter.top, 'mousedown', $el[0]);
+        triggerPositionalMouseEvent(toOffset.left, toOffset.top , 'mousemove', $to[0]);
 
         var prom = new Promise(function (resolve) {
             concurrency.delay(50).then(function () {
-                triggerPositionalMouseEvent(toOffset.left, toOffset.top, 'pointerdown', $el[0]);
+                triggerPositionalMouseEvent(toOffset.left, toOffset.top, 'mouseup', $el[0]);
                 resolve();
             });
         });
