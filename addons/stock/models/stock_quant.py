@@ -15,6 +15,7 @@ _logger = logging.getLogger(__name__)
 
 class StockQuant(models.Model):
     _name = 'stock.quant'
+    _inherit = 'company.consistency.mixin'
     _description = 'Quants'
     _rec_name = 'product_id'
 
@@ -50,12 +51,15 @@ class StockQuant(models.Model):
         auto_join=True, ondelete='restrict', readonly=True, required=True)
     lot_id = fields.Many2one(
         'stock.production.lot', 'Lot/Serial Number',
+        domain="[('product_id', '=', product_id), ('company_id', '=', company_id)]",
         ondelete='restrict', readonly=True)
     package_id = fields.Many2one(
         'stock.quant.package', 'Package',
+        domain="[('location_id', '=', location_id)]",
         help='The package containing this quant', readonly=True, ondelete='restrict')
     owner_id = fields.Many2one(
         'res.partner', 'Owner',
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         help='This is the owner of the quant', readonly=True)
     quantity = fields.Float(
         'Quantity',
@@ -94,9 +98,9 @@ class StockQuant(models.Model):
             if diff_float_compared == 0:
                 continue
             elif diff_float_compared > 0:
-                move_vals = self._get_inventory_move_values(diff, self.product_id.property_stock_inventory, self.location_id)
+                move_vals = self._get_inventory_move_values(diff, self.product_id.with_context(force_company=quant.company_id.id or self.env.company.id).property_stock_inventory, self.location_id)
             else:
-                move_vals = self._get_inventory_move_values(-diff, self.location_id, self.product_id.property_stock_inventory, out=True)
+                move_vals = self._get_inventory_move_values(-diff, self.location_id, self.product_id.with_context(force_company=quant.company_id.id or self.env.company.id).property_stock_inventory, out=True)
             move = self.env['stock.move'].with_context(inventory_mode=False).create(move_vals)
             move._action_done()
 
@@ -125,7 +129,20 @@ class StockQuant(models.Model):
             # Set the `inventory_quantity` field to create the necessary move.
             quant.inventory_quantity = inventory_quantity
             return quant
-        return super(StockQuant, self).create(vals)
+        res = super(StockQuant, self).create(vals)
+        if self._is_inventory_mode():
+            res._company_consistency_check()
+        return res
+
+    @api.model
+    def _company_consistency_m2o_required_cid_fields(self):
+        res = super(StockQuant, self)._company_consistency_m2o_required_cid_fields()
+        return res + ['lot_id']
+
+    @api.model
+    def _company_consistency_m2o_optional_cid_fields(self):
+        res = super(StockQuant, self)._company_consistency_m2o_optional_cid_fields()
+        return res + ['product_id', 'owner_id', 'package_id']
 
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):

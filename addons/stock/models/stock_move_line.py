@@ -35,7 +35,7 @@ class StockMoveLine(models.Model):
     qty_done = fields.Float('Done', default=0.0, digits='Product Unit of Measure', copy=False)
     package_id = fields.Many2one(
         'stock.quant.package', 'Source Package', ondelete='restrict',
-        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+        domain="[('location_id', '=', location_id)]")
     package_level_id = fields.Many2one(
         'stock.package_level', 'Package Level',
         domain="[('company_id', '=', company_id)]")
@@ -46,6 +46,7 @@ class StockMoveLine(models.Model):
     result_package_id = fields.Many2one(
         'stock.quant.package', 'Destination Package',
         ondelete='restrict', required=False,
+        domain="['|', '|', ('location_id', '=', False), ('location_id', '=', location_dest_id), ('id', '=', package_id)]",
         help="If set, the operations are packed into this package")
     date = fields.Datetime('Date', default=fields.Datetime.now, required=True)
     owner_id = fields.Many2one(
