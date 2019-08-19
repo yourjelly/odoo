@@ -10,18 +10,23 @@ from odoo.tools.float_utils import float_round, float_compare, float_is_zero
 
 class StockMoveLine(models.Model):
     _name = "stock.move.line"
+    _inherit = "company.consistency.mixin"
     _description = "Product Moves (Stock Move Line)"
     _rec_name = "product_id"
     _order = "result_package_id desc, id"
 
     picking_id = fields.Many2one(
         'stock.picking', 'Stock Picking', auto_join=True,
+        domain="[('company_id', '=', company_id)]",
         help='The stock operation where the packing has been made')
     move_id = fields.Many2one(
         'stock.move', 'Stock Move',
+        domain="[('company_id', '=', company_id)]",
         help="Change to a better name", index=True)
     company_id = fields.Many2one('res.company', string='Company', related='move_id.company_id', store=True, readonly=True)
-    product_id = fields.Many2one('product.product', 'Product', ondelete="cascade")
+    product_id = fields.Many2one(
+        'product.product', 'Product', ondelete="cascade",
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     product_uom_id = fields.Many2one('uom.uom', 'Unit of Measure', required=True)
     product_qty = fields.Float(
         'Real Reserved Quantity', digits=0,
@@ -43,10 +48,18 @@ class StockMoveLine(models.Model):
         ondelete='restrict', required=False,
         help="If set, the operations are packed into this package")
     date = fields.Datetime('Date', default=fields.Datetime.now, required=True)
-    owner_id = fields.Many2one('res.partner', 'From Owner',
+    owner_id = fields.Many2one(
+        'res.partner', 'From Owner',
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         help="When validating the transfer, the products will be taken from this owner.")
-    location_id = fields.Many2one('stock.location', 'From', required=True)
-    location_dest_id = fields.Many2one('stock.location', 'To', required=True)
+    location_id = fields.Many2one(
+        'stock.location', 'From',
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        required=True)
+    location_dest_id = fields.Many2one(
+        'stock.location', 'To',
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        required=True)
     lots_visible = fields.Boolean(compute='_compute_lots_visible')
     picking_code = fields.Selection(related='picking_id.picking_type_id.code', readonly=True)
     picking_type_use_create_lots = fields.Boolean(related='picking_id.picking_type_id.use_create_lots', readonly=True)
@@ -427,6 +440,8 @@ class StockMoveLine(models.Model):
                 ml_to_delete |= ml
         ml_to_delete.unlink()
 
+        (self - ml_to_delete)._company_consistency_check()
+
         # Now, we can actually move the quant.
         done_ml = self.env['stock.move.line']
         for ml in self - ml_to_delete:
@@ -551,3 +566,12 @@ class StockMoveLine(models.Model):
     def _should_bypass_reservation(self, location):
         self.ensure_one()
         return location.should_bypass_reservation() or self.product_id.type != 'product'
+
+    def _company_consistency_m2o_required_cid_fields(self):
+        res = super(StockMoveLine, self)._company_consistency_m2o_required_cid_fields()
+        return res + ['picking_id', 'move_id', 'package_level_id', 'lot_id']
+
+    def _company_consistency_m2o_optional_cid_fields(self):
+        res = super(StockMoveLine, self)._company_consistency_m2o_optional_cid_fields()
+        return res + ['product_id', 'package_id', 'result_package_id', 'owner_id', 'location_id', 'location_dest_id']
+
