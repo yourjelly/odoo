@@ -19,7 +19,7 @@ http://ODOO-DB/pos_star_cloud
 And in POS config select this type of printing.
 Supported printer: All Star printer with "CloudPRNT" service and firmware 2.0
     """,
-    'depends': [],
+    'depends': ['point_of_sale'],
     'installable': True,
     'auto_install': False,
 }
