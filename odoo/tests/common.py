@@ -180,6 +180,20 @@ class TreeCase(unittest.TestCase):
         for c1, c2 in izip_longest(n1, n2):
             self.assertTreesEqual(c1, c2, msg)
 
+    def _callSetUp(self):
+        init_time=time.time()
+        super()._callSetUp()
+        _logger.info('exectime _callSetUp: %s', time.time()-init_time)
+
+    def _callTestMethod(self, method):
+        init_time=time.time()
+        super()._callTestMethod(method)
+        _logger.info('exectime _callTestMethod %s: %s', method ,time.time()-init_time)
+
+    def _callTearDown(self):
+        init_time=time.time()
+        super()._callTearDown()
+        _logger.info('exectime _callTearDown: %s', time.time()-init_time)
 
 class MetaCase(type):
     """ Metaclass of test case classes to assign default 'test_tags':
@@ -192,7 +206,6 @@ class MetaCase(type):
             cls.test_tags = {'standard', 'at_install'}
             cls.test_module = cls.__module__.split('.')[2]
             cls.test_class = cls.__name__
-
 
 class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
     """

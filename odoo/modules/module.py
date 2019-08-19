@@ -559,7 +559,6 @@ class OdooTestResult(unittest.result.TestResult):
                 return infos
             error_traceback = error_traceback.tb_next
 
-
 class OdooTestRunner(object):
     """A test runner class that displays results in in logger.
     Simplified verison of TextTestRunner(
@@ -579,12 +578,40 @@ class OdooTestRunner(object):
 
 current_test = None
 
+class OdooSuite(unittest.TestSuite):
+    def _handleClassSetUp(self, test, result):
+        itit_time = time.time()
+        super()._handleClassSetUp(test, result)
+        _logger.info('exectime setUpClass: %s', time.time()-init_time)
+
+    def _handleClassSetUp(self, test, result):
+        itit_time = time.time()
+        super()._handleClassSetUp(test, result)
+        _logger.info('exectime setUpClass: %s', time.time()-init_time)
+
+    def _tearDownPreviousClass(self, test, result):
+        itit_time = time.time()
+        super()._tearDownPreviousClass(test, result)
+        _logger.info('exectime tearDownClass: %s', time.time()-init_time)
+
+    def _handleModuleFixture(self, test, result):
+        itit_time = time.time()
+        super()._handleModuleFixture(test, result)
+        _logger.info('exectime setUpModule: %s', time.time()-init_time)
+
+    def _handleModuleTearDown(self, test, result):
+        itit_time = time.time()
+        super()._handleModuleTearDown(test, result)
+        _logger.info('exectime tearDownModule: %s', time.time()-init_time)
+
+    
 def run_unit_tests(module_name, position='at_install'):
     """
     :returns: ``True`` if all of ``module_name``'s tests succeeded, ``False``
               if any of them failed.
     :rtype: bool
     """
+    init_time = time.time()
     global current_test
     from odoo.tests.common import TagsSelector # Avoid import loop
     current_test = module_name
@@ -594,7 +621,9 @@ def run_unit_tests(module_name, position='at_install'):
     position_tag = TagsSelector(position)
     r = True
     for m in mods:
-        tests = unwrap_suite(unittest.TestLoader().loadTestsFromModule(m))
+        loader = unittest.TestLoader()
+        loader.suiteClass = OdooSuite
+        tests = unwrap_suite(loader.loadTestsFromModule(m))
         suite = unittest.TestSuite(t for t in tests if position_tag.check(t) and config_tags.check(t))
 
         if suite.countTestCases():
@@ -610,6 +639,8 @@ def run_unit_tests(module_name, position='at_install'):
 
     current_test = None
     threading.currentThread().testing = False
+
+    _logger.info('exectime run_unit_tests: %s', time.time()-init_time)
     return r
 
 def unwrap_suite(test):
