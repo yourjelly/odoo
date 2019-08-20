@@ -4132,7 +4132,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('resequence columns in grouped by m2o', async function (assert) {
-        assert.expect(6);
+        assert.expect(5);
         this.data.product.fields.sequence = {string: "Sequence", type: "integer"};
 
         var envIDs = [1, 3, 2, 4]; // the ids that should be in the environment during this test

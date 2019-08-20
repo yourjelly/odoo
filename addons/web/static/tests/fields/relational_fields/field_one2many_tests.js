@@ -661,7 +661,6 @@ QUnit.module('fields', {}, function () {
             var form = await createView({
                 View: FormView,
                 model: 'partner',
-                debug:1,
                 data: this.data,
                 arch: '<form string="Partners">' +
                     '<sheet>' +
@@ -685,7 +684,6 @@ QUnit.module('fields', {}, function () {
             testUtils.mock.intercept(form, "field_changed", function (event) {
                 assert.step(event.data.changes.turtles.data.turtle_int.toString());
             }, true);
-            debugger;
             assert.strictEqual(form.$('td.o_data_cell:not(.o_handle_cell)').text(), "yopblipkawa",
                 "should have the 3 rows in the correct order");
 
@@ -723,7 +721,7 @@ QUnit.module('fields', {}, function () {
 
             testUtils.mock.unpatch(ListRenderer);
             $view.remove();
-            // form.destroy();
+            form.destroy();
         });
 
         QUnit.test('onchange for embedded one2many in a one2many with a second page', async function (assert) {
@@ -1563,9 +1561,9 @@ QUnit.module('fields', {}, function () {
             form.destroy();
         });
 
-        QUnit.test('embedded one2many with handle widget with minimum setValue calls', async function (assert) {
+        QUnit.only('embedded one2many with handle widget with minimum setValue calls', async function (assert) {
             var done = assert.async();
-            assert.expect(20);
+            assert.expect(21);
 
 
             this.data.turtle.records[0].turtle_int = 6;
@@ -1616,11 +1614,10 @@ QUnit.module('fields', {}, function () {
             }, true);
 
             await testUtils.form.clickEdit(form);
-
             var positions = [
                 [6, 0, 'top', ['3', '6', '1', '2', '5', '7', '4']], // move the last to the first line
                 [5, 1, 'top', ['7', '6', '1', '2', '5']], // move the penultimate to the second line
-                [2, 6, 'center', ['1', '2', '5', '6']], // move the third to the penultimate line
+                [2, 6, 'center', ['1', '2', '5', '4', '6']], // move the third to the penultimate line
             ];
             async function dragAndDrop() {
                 var pos = positions.shift();
@@ -1646,8 +1643,8 @@ QUnit.module('fields', {}, function () {
                         { id: 1, turtle_foo: "yop", turtle_int: 4 },
                         { id: 2, turtle_foo: "blip", turtle_int: 5 },
                         { id: 5, turtle_foo: "a2", turtle_int: 6 },
-                        { id: 6, turtle_foo: "a3", turtle_int: 7 },
-                        { id: 4, turtle_foo: "a1", turtle_int: 8 }
+                        { id: 4, turtle_foo: "a1", turtle_int: 7 },
+                        { id: 6, turtle_foo: "a3", turtle_int: 8 }
                     ], "sequences must be apply correctly");
                     $view.remove();
                     form.destroy();

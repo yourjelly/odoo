@@ -82,7 +82,9 @@ function dragAndDrop($el, $to, options) {
         var prom = new Promise(function (resolve) {
             concurrency.delay(50).then(function () {
                 triggerPositionalMouseEvent(toOffset.left, toOffset.top, 'mouseup', $el[0]);
-                resolve();
+                concurrency.delay(0).then(function () {
+                    resolve();
+                });
             });
         });
     } else {
@@ -157,7 +159,6 @@ function triggerMouseEvent($el, type) {
 function triggerPositionalMouseEvent(x, y, type, el) {
     var ev = document.createEvent("MouseEvent");
     el = el || document.elementFromPoint(x, y);
-    console.log(">>>>el",type,x,y,el);
     ev.initMouseEvent(
         type,
         true /* bubble */,

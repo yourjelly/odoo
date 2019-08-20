@@ -4034,7 +4034,7 @@ QUnit.module('Views', {
                     if (moves === 2) {
                         assert.deepEqual(args, {
                             model: "foo",
-                            ids: [2, 4],
+                            ids: [2, 3, 4],
                             offset: 12,
                             field: "int_field",
                         });
@@ -4042,7 +4042,7 @@ QUnit.module('Views', {
                     if (moves === 3) {
                         assert.deepEqual(args, {
                             model: "foo",
-                            ids: [4, 2],
+                            ids: [3, 2],
                             offset: 12,
                             field: "int_field",
                         });
@@ -4078,7 +4078,7 @@ QUnit.module('Views', {
             list.$('tbody tr').eq(3),
             {position: 'bottom', nativeDragAndDrop: true}
         );
-        assert.deepEqual(list.$('tbody tr td.o_list_number').text(), '1243',
+        assert.deepEqual(list.$('tbody tr td.o_list_number').text(), '1234',
             "the int_field (sequence) should have been correctly updated");
 
         await testUtils.dom.dragAndDrop(
@@ -4086,7 +4086,7 @@ QUnit.module('Views', {
             list.$('tbody tr').eq(1),
             {position: 'top', nativeDragAndDrop: true}
         );
-        assert.deepEqual(list.$('tbody tr td.o_list_number').text(), '1423',
+        assert.deepEqual(list.$('tbody tr td.o_list_number').text(), '1324',
             "the int_field (sequence) should have been correctly updated");
         $view.remove();
         list.destroy();
