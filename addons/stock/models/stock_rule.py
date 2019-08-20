@@ -438,9 +438,14 @@ class ProcurementGroup(models.Model):
         result = False
         location = location_id
         while (not result) and location:
-            result = self._search_rule(values.get('route_ids', False), product_id, values.get('warehouse_id', False), [('location_id', '=', location.id), ('action', '!=', 'push')])
+            domain = self._get_rule_domain(location, values)
+            result = self._search_rule(values.get('route_ids', False), product_id, values.get('warehouse_id', False), domain)
             location = location.location_id
         return result
+
+    @api.model
+    def _get_rule_domain(self, location, values):
+        return [('location_id', '=', location.id), ('action', '!=', 'push')]
 
     def _merge_domain(self, values, rule, group_id):
         return [
