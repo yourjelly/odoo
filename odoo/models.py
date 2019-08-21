@@ -225,6 +225,17 @@ VALID_AGGREGATE_FUNCTIONS = {
     'bool_and', 'bool_or', 'max', 'min', 'avg', 'sum',
 }
 
+PYTHON_AGGREGATE_FUNCTIONS = {
+    # FIXME: ignore false
+    'count': len,
+    'count_distinct': lambda p: len(set(p)),
+    'bool_and': all,
+    'bool_or': any,
+    'max': max,
+    'min': min,
+    'avg': lambda p: sum(p)/len(p)
+}
+
 
 class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     """ Base class for Odoo models.
@@ -1828,7 +1839,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     def _read_group_prepare(self, orderby, aggregated_fields, annotated_groupbys, query):
         """
         Prepares the GROUP BY and ORDER BY terms for the read_group method. Adds the missing JOIN clause
-        to the query if order should be computed against m2o field. 
+        to the query if order should be computed against m2o field.
         :param orderby: the orderby definition in the form "%(field)s %(order)s"
         :param aggregated_fields: list of aggregated fields in the query
         :param annotated_groupbys: list of dictionaries returned by _read_group_process_groupby
@@ -1875,57 +1886,73 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         return groupby_terms, orderby_terms
 
     @api.model
-    def _read_group_process_groupby(self, gb, query):
+    def _read_group_process_groupby(self, query, groups, computed):
         """
             Helper method to collect important information about groupbys: raw
             field name, type, time information, qualified name, ...
         """
-        split = gb.split(':')
-        field_type = self._fields[split[0]].type
-        gb_function = split[1] if len(split) == 2 else None
-        temporal = field_type in ('date', 'datetime')
-        tz_convert = field_type == 'datetime' and self._context.get('tz') in pytz.all_timezones
-        qualified_field = self._inherits_join_calc(self._table, split[0], query)
-        if temporal:
-            display_formats = {
-                # Careful with week/year formats:
-                #  - yyyy (lower) must always be used, *except* for week+year formats
-                #  - YYYY (upper) must always be used for week+year format
-                #         e.g. 2006-01-01 is W52 2005 in some locales (de_DE),
-                #                         and W1 2006 for others
-                #
-                # Mixing both formats, e.g. 'MMM YYYY' would yield wrong results,
-                # such as 2006-01-01 being formatted as "January 2005" in some locales.
-                # Cfr: http://babel.pocoo.org/en/latest/dates.html#date-fields
-                'hour': 'hh:00 dd MMM',
-                'day': 'dd MMM yyyy', # yyyy = normal year
-                'week': "'W'w YYYY",  # w YYYY = ISO week-year
-                'month': 'MMMM yyyy',
-                'quarter': 'QQQ yyyy',
-                'year': 'yyyy',
-            }
-            time_intervals = {
-                'hour': dateutil.relativedelta.relativedelta(hours=1),
-                'day': dateutil.relativedelta.relativedelta(days=1),
-                'week': datetime.timedelta(days=7),
-                'month': dateutil.relativedelta.relativedelta(months=1),
-                'quarter': dateutil.relativedelta.relativedelta(months=3),
-                'year': dateutil.relativedelta.relativedelta(years=1)
-            }
-            if tz_convert:
-                qualified_field = "timezone('%s', timezone('UTC',%s))" % (self._context.get('tz', 'UTC'), qualified_field)
-            qualified_field = "date_trunc('%s', %s::timestamp)" % (gb_function or 'month', qualified_field)
-        if field_type == 'boolean':
-            qualified_field = "coalesce(%s,false)" % qualified_field
-        return {
-            'field': split[0],
-            'groupby': gb,
-            'type': field_type, 
-            'display_format': display_formats[gb_function or 'month'] if temporal else None,
-            'interval': time_intervals[gb_function or 'month'] if temporal else None,                
-            'tz_convert': tz_convert,
-            'qualified_field': qualified_field,
+        display_formats = {
+            # Careful with week/year formats:
+            #  - yyyy (lower) must always be used, *except* for week+year formats
+            #  - YYYY (upper) must always be used for week+year format
+            #         e.g. 2006-01-01 is W52 2005 in some locales (de_DE),
+            #                         and W1 2006 for others
+            #
+            # Mixing both formats, e.g. 'MMM YYYY' would yield wrong results,
+            # such as 2006-01-01 being formatted as "January 2005" in some locales.
+            # Cfr: http://babel.pocoo.org/en/latest/dates.html#date-fields
+            'hour': 'hh:00 dd MMM',
+            'day': 'dd MMM yyyy', # yyyy = normal year
+            'week': "'W'w YYYY",  # w YYYY = ISO week-year
+            'month': 'MMMM yyyy',
+            'quarter': 'QQQ yyyy',
+            'year': 'yyyy',
         }
+
+        time_intervals = {
+            'hour': dateutil.relativedelta.relativedelta(hours=1),
+            'day': dateutil.relativedelta.relativedelta(days=1),
+            'week': datetime.timedelta(days=7),
+            'month': dateutil.relativedelta.relativedelta(months=1),
+            'quarter': dateutil.relativedelta.relativedelta(months=3),
+            'year': dateutil.relativedelta.relativedelta(years=1)
+        }
+
+        stored_groups = []
+        computed_groups = []
+        for group in groups:
+            split = group.split(':')
+            fname = split[0]
+            func = split[1] if len(split) == 2 else None
+            field_type = self._fields[fname].type
+            temporal = field_type in ('date', 'datetime')
+            tz_convert = field_type == 'datetime' and self._context.get('tz') in pytz.all_timezones
+            qualified_field = None
+
+            if fname not in computed:
+                qualified_field = self._inherits_join_calc(self._table, fname, query)
+
+            if temporal:
+                if tz_convert:
+                    qualified_field = "timezone('%s', timezone('UTC',%s))" % (
+                        self._context.get('tz', 'UTC'), qualified_field)
+                qualified_field = "date_trunc('%s', %s::timestamp)" % (
+                    func or 'month', qualified_field)
+
+            if field_type == 'boolean':
+                qualified_field = "coalesce(%s,false)" % qualified_field
+
+            add = stored_groups.append if qualified_field else computed_groups.append
+            add({
+                'field': fname,
+                'groupby': group,
+                'type': field_type,
+                'display_format': display_formats[func or 'month'] if temporal else None,
+                'interval': time_intervals[func or 'month'] if temporal else None,
+                'tz_convert': tz_convert,
+                'qualified_field': qualified_field,
+            })
+        return stored_groups, computed_groups
 
     @api.model
     def _read_group_prepare_data(self, key, value, groupby_dict):
@@ -2071,55 +2098,51 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     @api.model
     def _read_group_raw(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         self.check_access_rights('read')
-        query = self._where_calc(domain)
         fields = fields or [f.name for f in self._fields.values() if f.store]
 
-        groupby = [groupby] if isinstance(groupby, str) else list(OrderedSet(groupby))
-        groupby_list = groupby[:1] if lazy else groupby
-        annotated_groupbys = [self._read_group_process_groupby(gb, query) for gb in groupby_list]
-        groupby_fields = [g['field'] for g in annotated_groupbys]
-        order = orderby or ','.join([g for g in groupby_list])
-        groupby_dict = {gb['groupby']: gb for gb in annotated_groupbys}
-
-        self._apply_ir_rules(query, 'read')
-        for gb in groupby_fields:
-            assert gb in self._fields, "Unknown field %r in 'groupby'" % gb
-            gb_field = self._fields[gb].base_field
-            assert gb_field.store and gb_field.column_type, "Fields in 'groupby' must be regular database-persisted fields (no function or related fields), or function fields with store=True"
+        fspecs = []
+        for fspec in fields:
+            match = regex_field_agg.match(fspec)
+            if not match:
+                raise UserError(_("Invalid field specification %r") % fspec)
+            fspecs.append(match.groups())
 
         aggregated_fields = []
         select_terms = []
+        computed_fspecs = {}
+        stored_fspecs = {}
 
-        for fspec in fields:
-            if fspec == 'sequence':
+        # TODO: do an array_agg by id if at least one groupby field is computed
+
+        for name, func, fname in fspecs:
+            if name == 'sequence':
                 continue
 
-            match = regex_field_agg.match(fspec)
-            if not match:
-                raise UserError(_("Invalid field specification %r.") % fspec)
-
-            name, func, fname = match.groups()
             if func:
                 # we have either 'name:func' or 'name:func(fname)'
                 fname = fname or name
                 field = self._fields[fname]
-                if not (field.base_field.store and field.base_field.column_type):
+                # FIXME: should this be kept? used to check if field was compute
+                if not field.base_field.column_type:
                     raise UserError(_("Cannot aggregate field %r.") % fname)
                 if func not in VALID_AGGREGATE_FUNCTIONS:
                     raise UserError(_("Invalid aggregation function %r.") % func)
             else:
                 # we have 'name', retrieve the aggregator on the field
                 field = self._fields.get(name)
-                if not (field and field.base_field.store and
-                        field.base_field.column_type and field.group_operator):
+                if not (field and field.base_field.column_type and field.group_operator):
                     continue
                 func, fname = field.group_operator, name
 
-            if fname in groupby_fields:
-                continue
             if name in aggregated_fields:
                 raise UserError(_("Output name %r is used twice.") % name)
             aggregated_fields.append(name)
+
+            if not field.base_field.store:
+                computed_fspecs[fname] = (name, func, fname)
+                continue
+            else:
+                stored_fspecs[fname] = (name, func, fname)
 
             expr = self._inherits_join_calc(self._table, fname, query)
             if func.lower() == 'count_distinct':
@@ -2128,10 +2151,26 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 term = '%s(%s) AS "%s"' % (func, expr, name)
             select_terms.append(term)
 
-        for gb in annotated_groupbys:
+        query = self._where_calc(domain)
+        groupby = [groupby] if isinstance(groupby, str) else list(OrderedSet(groupby))
+        groupby_list = groupby[:1] if lazy else groupby
+        stored_groups, computed_groups = self._read_group_process_groupby(
+            query, groupby_list, computed_fspecs.keys())
+        # TODO: factorize stored_groups + computed_groups
+        groupby_fields = [g['field'] for g in (stored_groups + computed_groups)]
+        aggregated_fields = [f for f in aggregated_fields if f not in groupby_fields]
+        order = orderby or ','.join([g for g in groupby_list])
+        groupby_dict = {gb['groupby']: gb for gb in (stored_groups + computed_groups)}
+
+        self._apply_ir_rules(query, 'read')
+        for gb in groupby_fields:
+            assert gb in self._fields, "Unknown field %r in 'groupby'" % gb
+
+        for gb in stored_groups:
             select_terms.append('%s as "%s" ' % (gb['qualified_field'], gb['groupby']))
 
-        groupby_terms, orderby_terms = self._read_group_prepare(order, aggregated_fields, annotated_groupbys, query)
+        groupby_terms, orderby_terms = self._read_group_prepare(
+            order, aggregated_fields, stored_groups, query)
         from_clause, where_clause, where_clause_params = query.get_sql()
         if lazy and (len(groupby_fields) >= 2 or not self._context.get('group_by_no_leaf')):
             count_field = groupby_fields[0] if len(groupby_fields) >= 1 else '_'
@@ -2167,23 +2206,27 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         if not groupby_fields:
             return fetched_data
 
-        self._read_group_resolve_many2one_fields(fetched_data, annotated_groupbys)
+        self._read_group_resolve_many2one_fields(fetched_data, stored_groups)
 
         data = [{k: self._read_group_prepare_data(k, v, groupby_dict) for k, v in r.items()} for r in fetched_data]
 
         if self.env.context.get('fill_temporal') and data:
             data = self._read_group_fill_temporal(data, groupby, aggregated_fields,
-                                                  annotated_groupbys)
+                (stored_groups + computed_groups))
 
-        result = [self._read_group_format_result(d, annotated_groupbys, groupby, domain) for d in data]
+        result = [
+            self._read_group_format_result(d, (stored_groups + computed_groups), groupby, domain)
+            for d in data
+        ]
 
+        # TODO: move laziness to its own method
         if lazy:
             # Right now, read_group only fill results in lazy mode (by default).
             # If you need to have the empty groups in 'eager' mode, then the
             # method _read_group_fill_results need to be completely reimplemented
-            # in a sane way 
+            # in a sane way
             result = self._read_group_fill_results(
-                domain, groupby_fields[0], groupby[len(annotated_groupbys):],
+                domain, groupby_fields[0], groupby[len(stored_groups + computed_groups):],
                 aggregated_fields, count_field, result, read_group_order=order,
             )
         return result

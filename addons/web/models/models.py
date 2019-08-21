@@ -105,6 +105,12 @@ class Base(models.AbstractModel):
         return groups
 
     @api.model
+    def read_progress_bar_v2(self, domain, groupby, progress_bar):
+        pg_field = progress_bar['field']
+        groups = self.read_group(domain, pg_field, [groupby, pg_field])
+        data = {}
+
+    @api.model
     def read_progress_bar(self, domain, group_by, progress_bar):
         """
         Gets the data needed for all the kanban column progressbars.
