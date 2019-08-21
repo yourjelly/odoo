@@ -10,6 +10,7 @@ $o-theme-navbar-logo-height: $nav-link-height !default;
 $o-portal-mobile-toolbar: true; // Enable/Disable custom design
 $o-portal-mobile-toolbar-border: $border-color;
 $o-portal-mobile-toolbar-bg: $gray-200;
+$o-attachment-image-size: 38px;
 
 // Portal Tables
 $o-portal-table-th-pt: map-get($spacers, 2) !default; // bts4 pt-2
@@ -451,18 +452,52 @@ img.o_we_custom_image {
         text-align: center;
     }
 
+    .o_attachment_wrap {
+        overflow: hidden;
+        position: relative;
+        border-bottom: 1px solid rgba(black, 0.1);
+        border-radius: 2px;
+        padding: 4px 6px 0 4px;
+        background-color: rgba(black, 0.05);
+
+       
+    }
+
+    &.o_attachment_editable .o_attachment_wrap  {
+        padding-right: 40px;
+    }
+
+        .o_image {
+        width: $o-attachment-image-size;
+        height: $o-attachment-image-size;
+        image-orientation: from-image; // Only supported in Firefox
+        &.o_hover {
+            @include o-hover-opacity($default-opacity: 1, $hover-opacity: 0.7);
+        }
+    }
+
+    .o_attachment_view {
+        cursor: zoom-in;
+    }
+
+    .caption {
+        @include o-text-overflow(block);
+
+        a {
+            @include o-hover-text-color($default-color: $o-main-text-color, $hover-color: $headings-color);
+        }
+    }
+
     .o_portal_chatter_attachment {
         .o_portal_chatter_attachment_name {
             word-wrap: break-word;
         }
 
         .o_portal_chatter_attachment_delete {
-            @include o-position-absolute($top: 0, $right: 0);
-            opacity: 0;
+            float: right;
+            cursor: pointer;
         }
-        &:hover .o_portal_chatter_attachment_delete {
-            opacity: 1;
-        }
+
     }
 }
 
