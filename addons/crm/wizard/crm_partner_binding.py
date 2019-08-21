@@ -22,17 +22,11 @@ class PartnerBinding(models.TransientModel):
         res = super(PartnerBinding, self).default_get(fields)
         partner_id = self._find_matching_partner()
 
-        if 'action' in fields and not res.get('action'):
-            res['action'] = 'exist' if partner_id else 'create'
         if 'partner_id' in fields:
             res['partner_id'] = partner_id
         return res
 
-    action = fields.Selection([
-        ('create', 'Create a new customer'),
-        ('exist', 'Link to an existing customer'),
-        ('nothing', 'Do not link to a customer')
-    ], 'Related Customer', required=True)
+    action = fields.Selection([], string='Related Customer', required=True)
     partner_id = fields.Many2one('res.partner', 'Customer')
 
     @api.model

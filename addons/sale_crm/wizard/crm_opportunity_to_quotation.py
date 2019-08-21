@@ -24,10 +24,10 @@ class Opportunity2Quotation(models.TransientModel):
             result['lead_id'] = active_id
         return result
 
-    action = fields.Selection([
+    action = fields.Selection(selection_add=[
         ('create', 'Create a new customer'),
         ('exist', 'Use an existing customer')
-    ], 'Quotation Customer', required=True)
+    ], string='Quotation Customer')
     lead_id = fields.Many2one('crm.lead', "Associated Lead", required=True)
 
     def action_apply(self):
