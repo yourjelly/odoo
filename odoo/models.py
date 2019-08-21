@@ -2106,6 +2106,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             if not match:
                 raise UserError(_("Invalid field specification %r") % fspec)
             fspecs.append(match.groups())
+        query = self._where_calc(domain)
 
         aggregated_fields = []
         select_terms = []
@@ -2151,7 +2152,6 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 term = '%s(%s) AS "%s"' % (func, expr, name)
             select_terms.append(term)
 
-        query = self._where_calc(domain)
         groupby = [groupby] if isinstance(groupby, str) else list(OrderedSet(groupby))
         groupby_list = groupby[:1] if lazy else groupby
         stored_groups, computed_groups = self._read_group_process_groupby(
