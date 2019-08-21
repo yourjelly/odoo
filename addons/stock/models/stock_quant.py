@@ -569,13 +569,20 @@ class StockQuant(models.Model):
         :param extend: If True, enables form, graph and pivot views. False by default.
         """
         self._quant_tasks()
+        context = dict(self.env.context or {})
+        if not self.env['stock.quant'].search([]) and (
+            context.get('search_default_locationgroup') and
+            context.get('search_default_productgroup')
+        ):
+            del context['search_default_productgroup'],
+            del context['search_default_locationgroup'],
         action = {
             'name': _('Update Quantity'),
             'view_type': 'tree',
             'view_mode': 'list',
             'res_model': 'stock.quant',
             'type': 'ir.actions.act_window',
-            'context': self.env.context,
+            'context': context,
             'domain': domain or [],
             'help': """
                 <p class="o_view_nocontent_empty_folder">No Stock On Hand</p>
