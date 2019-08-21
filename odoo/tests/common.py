@@ -181,19 +181,19 @@ class TreeCase(unittest.TestCase):
             self.assertTreesEqual(c1, c2, msg)
 
     def _callSetUp(self):
-        init_time=time.time()
-        super()._callSetUp()
-        _logger.info('exectime _callSetUp: %s', time.time()-init_time)
+        init_time = time.time()
+        super(TreeCase, self)._callSetUp()
+        _logger.info('exectime _callSetUp: %s', time.time() - init_time)
 
     def _callTestMethod(self, method):
-        init_time=time.time()
-        super()._callTestMethod(method)
-        _logger.info('exectime _callTestMethod %s: %s', method ,time.time()-init_time)
+        init_time = time.time()
+        super(TreeCase, self)._callTestMethod(method)
+        _logger.info('exectime _callTestMethod %s: %s', method, time.time() - init_time)
 
     def _callTearDown(self):
-        init_time=time.time()
-        super()._callTearDown()
-        _logger.info('exectime _callTearDown: %s', time.time()-init_time)
+        init_time = time.time()
+        super(TreeCase, self)._callTearDown()
+        _logger.info('exectime _callTearDown: %s', time.time() - init_time)
 
 class MetaCase(type):
     """ Metaclass of test case classes to assign default 'test_tags':

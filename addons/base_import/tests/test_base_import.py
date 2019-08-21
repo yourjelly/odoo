@@ -500,6 +500,8 @@ class test_convert_import_data(TransactionCase):
         ])
 
     def test_empty_rows(self):
+        import traceback
+        traceback.print_stack()
         import_wizard = self.env['base_import.import'].create({
             'res_model': 'base_import.tests.models.preview',
             'file': b'name,Some Value\n'

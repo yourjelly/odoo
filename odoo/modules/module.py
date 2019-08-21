@@ -580,31 +580,31 @@ current_test = None
 
 class OdooSuite(unittest.TestSuite):
     def _handleClassSetUp(self, test, result):
-        itit_time = time.time()
+        init_time = time.time()
         super()._handleClassSetUp(test, result)
         _logger.info('exectime setUpClass: %s', time.time()-init_time)
 
     def _handleClassSetUp(self, test, result):
-        itit_time = time.time()
+        init_time = time.time()
         super()._handleClassSetUp(test, result)
         _logger.info('exectime setUpClass: %s', time.time()-init_time)
 
     def _tearDownPreviousClass(self, test, result):
-        itit_time = time.time()
+        init_time = time.time()
         super()._tearDownPreviousClass(test, result)
         _logger.info('exectime tearDownClass: %s', time.time()-init_time)
 
     def _handleModuleFixture(self, test, result):
-        itit_time = time.time()
+        init_time = time.time()
         super()._handleModuleFixture(test, result)
         _logger.info('exectime setUpModule: %s', time.time()-init_time)
 
     def _handleModuleTearDown(self, test, result):
-        itit_time = time.time()
+        init_time = time.time()
         super()._handleModuleTearDown(test, result)
         _logger.info('exectime tearDownModule: %s', time.time()-init_time)
 
-    
+
 def run_unit_tests(module_name, position='at_install'):
     """
     :returns: ``True`` if all of ``module_name``'s tests succeeded, ``False``
