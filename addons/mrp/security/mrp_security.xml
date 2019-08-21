@@ -50,6 +50,13 @@
         <field name="domain_force">['|',('company_id', 'in', company_ids),('company_id','=',False)]</field>
     </record>
 
+    <record model="ir.rule" id="mrp_workorder_rule">
+        <field name="name">mrp_workorder multi-company</field>
+        <field name="model_id" search="[('model','=','mrp.workorder')]" model="ir.model"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
     <record model="ir.rule" id="mrp_bom_rule">
         <field name="name">mrp_bom multi-company</field>
         <field name="model_id" search="[('model','=','mrp.bom')]" model="ir.model"/>
@@ -69,6 +76,13 @@
         <field name="model_id" search="[('model','=','mrp.routing.workcenter')]" model="ir.model"/>
         <field name="global" eval="True"/>
         <field name="domain_force">['|',('company_id', 'in', company_ids),('company_id','=',False)]</field>
+    </record>
+
+    <record model="ir.rule" id="mrp_workcenter_productivity">
+        <field name="name">mrp_workcenter_productivity multi-company</field>
+        <field name="model_id" search="[('model','=','mrp.workcenter.productivity')]" model="ir.model"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">['|',('workcenter_id.company_id', 'in', company_ids),('workcenter_id.company_id','=',False)]</field>
     </record>
 
 </data>

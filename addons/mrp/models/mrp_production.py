@@ -15,40 +15,35 @@ class MrpProduction(models.Model):
     _name = 'mrp.production'
     _description = 'Production Order'
     _date_name = 'date_planned_start'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'company.consistency.mixin']
     _order = 'date_planned_start asc,id'
 
     @api.model
     def _get_default_picking_type(self):
+        company_id = self.env.context.get('default_company_id', self.env.company.id)
         return self.env['stock.picking.type'].search([
             ('code', '=', 'mrp_operation'),
-            ('warehouse_id.company_id', 'in', [self.env.context.get('company_id', self.env.company.id), False])],
-            limit=1).id
+            ('warehouse_id.company_id', '=', company_id),
+        ], limit=1).id
 
     @api.model
     def _get_default_location_src_id(self):
         location = False
-        if self._context.get('default_picking_type_id'):
+        company_id = self.env.context.get('default_company_id', self.env.company.id)
+        if self.env.context.get('default_picking_type_id'):
             location = self.env['stock.picking.type'].browse(self.env.context['default_picking_type_id']).default_location_src_id
         if not location:
-            location = self.env.ref('stock.stock_location_stock', raise_if_not_found=False)
-            try:
-                location.check_access_rule('read')
-            except (AttributeError, AccessError):
-                location = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1).lot_stock_id
+            location = self.env['stock.warehouse'].search([('company_id', '=', company_id)], limit=1).lot_stock_id
         return location and location.id or False
 
     @api.model
     def _get_default_location_dest_id(self):
         location = False
+        company_id = self.env.context.get('default_company_id', self.env.company.id)
         if self._context.get('default_picking_type_id'):
             location = self.env['stock.picking.type'].browse(self.env.context['default_picking_type_id']).default_location_dest_id
         if not location:
-            location = self.env.ref('stock.stock_location_stock', raise_if_not_found=False)
-            try:
-                location.check_access_rule('read')
-            except (AttributeError, AccessError):
-                location = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1).lot_stock_id
+            location = self.env['stock.warehouse'].search([('company_id', '=', company_id)], limit=1).lot_stock_id
         return location and location.id or False
 
     @api.model
@@ -65,7 +60,7 @@ class MrpProduction(models.Model):
 
     product_id = fields.Many2one(
         'product.product', 'Product',
-        domain=[('type', 'in', ['product', 'consu'])],
+        domain="[('type', 'in', ['product', 'consu']), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         readonly=True, required=True,
         states={'draft': [('readonly', False)]})
     product_tmpl_id = fields.Many2one('product.template', 'Product Template', related='product_id.product_tmpl_id')
@@ -81,17 +76,20 @@ class MrpProduction(models.Model):
     product_uom_qty = fields.Float(string='Total Quantity', compute='_compute_product_uom_qty', store=True)
     picking_type_id = fields.Many2one(
         'stock.picking.type', 'Operation Type',
+        domain="[('company_id', '=', company_id)]",
         default=_get_default_picking_type, required=True)
     location_src_id = fields.Many2one(
         'stock.location', 'Components Location',
         default=_get_default_location_src_id,
-        readonly=True,  required=True,
+        readonly=True, required=True,
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         states={'draft': [('readonly', False)]},
         help="Location where the system will look for components.")
     location_dest_id = fields.Many2one(
         'stock.location', 'Finished Products Location',
         default=_get_default_location_dest_id,
-        readonly=True,  required=True,
+        readonly=True, required=True,
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         states={'draft': [('readonly', False)]},
         help="Location where the system will stock the finished products.")
     date_planned_start = fields.Datetime(
@@ -116,6 +114,7 @@ class MrpProduction(models.Model):
     bom_id = fields.Many2one(
         'mrp.bom', 'Bill of Material',
         readonly=True, states={'draft': [('readonly', False)]},
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         help="Bill of Materials allow you to define the list of required components to make a finished product.")
     routing_id = fields.Many2one(
         'mrp.routing', 'Routing',
@@ -178,11 +177,12 @@ class MrpProduction(models.Model):
     post_visible = fields.Boolean(
         'Allowed to Post Inventory', compute='_compute_post_visible',
         help='Technical field to check when we can post')
-    user_id = fields.Many2one('res.users', 'Responsible', default=lambda self: self._uid)
+    user_id = fields.Many2one('res.users', 'Responsible',
+        domain=lambda self: [('groups_id', 'in', self.env.ref('mrp.group_mrp_user').id)],
+        default=lambda self: self.env.user)
     company_id = fields.Many2one(
-        'res.company', 'Company',
-        default=lambda self: self.env.company,
-        required=True)
+        'res.company', 'Company', default=lambda self: self.env.company,
+        index=True, required=True)
 
     qty_produced = fields.Float(compute="_get_produced_qty", string="Quantity Produced")
     procurement_group_id = fields.Many2one(
@@ -376,6 +376,11 @@ class MrpProduction(models.Model):
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per Company!'),
         ('qty_positive', 'check (product_qty > 0)', 'The quantity to produce must be positive!'),
     ]
+
+    @api.onchange('company_id')
+    def onchange_company_id(self):
+        if self.company_id and self.move_raw_ids:
+            self.move_raw_ids.update({'company_id': self.company_id})
 
     @api.onchange('product_id', 'picking_type_id', 'company_id')
     def onchange_product_id(self):
@@ -612,6 +617,7 @@ class MrpProduction(models.Model):
         return 'confirmed'
 
     def action_confirm(self):
+        self._company_consistency_check()
         for production in self:
             if not production.move_raw_ids:
                 raise UserError(_("Add some materials to consume before marking this MO as to do."))
@@ -873,6 +879,7 @@ class MrpProduction(models.Model):
 
     def button_mark_done(self):
         self.ensure_one()
+        self._company_consistency_check()
         for wo in self.workorder_ids:
             if wo.time_ids.filtered(lambda x: (not x.date_end) and (x.loss_type in ('productive', 'performance'))):
                 raise UserError(_('Work order %s is still running') % wo.name)
@@ -985,3 +992,11 @@ class MrpProduction(models.Model):
             return self.env.ref('mrp.exception_on_mo').render(values=values)
 
         self.env['stock.picking']._log_activity(_render_note_exception_quantity_mo, documents)
+
+    def _company_consistency_m2o_required_cid_fields(self):
+        res = super(MrpProduction, self)._company_consistency_m2o_required_cid_fields()
+        return res + ['user_id', 'picking_type_id']
+
+    def _company_consistency_m2o_optional_cid_fields(self):
+        res = super(MrpProduction, self)._company_consistency_m2o_optional_cid_fields()
+        return res + ['location_src_id', 'location_dest_id', 'product_id', 'bom_id', 'routing_id']
