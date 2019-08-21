@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- Index -->
+<template id="opt_index_topbar" inherit_id="website_event.index" active="True" customize_show="True" name="Topbar">
+    <xpath expr="//div[@id='oe_structure_we_index_1']" position="before">
+        <section id="o_we_topbar" class="navbar navbar-light border-top shadow-sm">
+            <div class="container justify-content-start">
+                <h4 class="navbar-brand my-0 mr-4">Events</h4>
+                <ul id="o_we_topbar_filters" class="nav"/>
+                <t t-call="website_event.search_box"/>
+            </div>
+        </section>
+    </xpath>
+</template>
+
+<!-- Topbar • Date Filters -->
+<template id="opt_time_filters" inherit_id="website_event.opt_index_topbar" active="True" customize_show="True" name="Filter by Date">
+    <xpath expr="//ul[@id='o_we_topbar_filters']" position="inside">
+        <li class="nav-item dropdown">
+            <a href="#" role="button" class="nav-link dropdown-toggle" data-toggle="dropdown">
+                <!-- TODO - Display the active filter instead of this hardcoded label -->
+                <i class="fa fa-calendar o_we_topbar_icon"/><span>Next Event</span>
+            </a>
+            <div class="dropdown-menu">
+                <t t-foreach="dates" t-as="date">
+                    <t t-if="date[3] or (date[0] in ('old','all'))">
+                        <a t-attf-href="/event?{{ keep_query('country', 'type', date=date[0]) }}" t-attf-class="dropdown-item d-flex align-items-center #{searches.get('date') == date[0] and ' active' or ''}"><t t-esc="date[1]"/>
+                            <span t-if="date[3]" class="badge badge-pill py-1 px-2 ml-auto"><t t-esc="date[3]"/></span>
+                        </a>
+                    </t>
+                </t>
+            </div>
+        </li>
+    </xpath>
+</template>
+
+<!-- Topbar • Category Filters -->
+<template id="opt_category_filters" inherit_id="website_event.opt_index_topbar" active="True" customize_show="True" name="Filter by Category">
+    <xpath expr="//ul[@id='o_we_topbar_filters']" position="inside">
+        <li class="nav-item dropdown">
+            <a href="#" role="button" class="nav-link dropdown-toggle" data-toggle="dropdown">
+                <!-- TODO - Display the active filter instead of this hardcoded label -->
+                <i class="fa fa-folder-open o_we_topbar_icon"/><span>All Categories</span>
+            </a>
+            <div class="dropdown-menu">
+                <t t-foreach="types" t-as="type">
+                    <t t-if="type['event_type_id']">
+                        <a t-attf-href="/event?{{ keep_query('country', 'date', type=type['event_type_id'][0]) }}" t-attf-class="dropdown-item d-flex align-items-center #{searches.get('type') == str(type['event_type_id'] and type['event_type_id'][0]) and ' active' or ''}"><t t-esc="type['event_type_id'][1]"/>
+                            <span class="badge badge-pill ml-auto"><t t-esc="type['event_type_id_count']"/></span></a>
+                    </t>
+                </t>
+            </div>
+        </li>
+    </xpath>
+</template>
+
+<!-- Topbar • Country Filters -->
+<template id="opt_location_filters" inherit_id="website_event.opt_index_topbar" active="True" customize_show="True" name="Filter by Country">
+    <xpath expr="//ul[@id='o_we_topbar_filters']" position="inside">
+        <li class="nav-item dropdown">
+            <a href="#" role="button" class="nav-link dropdown-toggle" data-toggle="dropdown">
+                <!-- TODO - Display the active filter instead of this hardcoded label -->
+                <i class="fa fa-map-marker o_we_topbar_icon"/><span>All countries</span>
+            </a>
+            <div class="dropdown-menu">
+                <t t-foreach="countries" t-as="country">
+                    <t t-if="country['country_id']">
+                        <a t-attf-href="/event?{{ keep_query('type', 'date', country=country['country_id'][0]) }}" t-attf-class="dropdown-item d-flex align-items-center #{searches.get('country') == str(country['country_id'] and country['country_id'][0]) and ' active' or ''}">
+                            <t t-esc="country['country_id'][1]"/>
+                            <span class="badge badge-pill ml-auto"><t t-esc="country['country_id_count']"/></span>
+                        </a>
+                    </t>
+                    <t t-if="not country['country_id']">
+                        <a t-attf-href="/event?{{ keep_query('type', 'date', country='online') }}" t-attf-class="dropdown-item d-flex align-items-center #{searches.get('country') == 'online' and ' active' or ''}">
+                            <span>Online Events</span>
+                            <span class="badge ml-auto"><t t-esc="country['country_id_count']"/></span>
+                        </a>
+                    </t>
+                </t>
+            </div>
+        </li>
+    </xpath>
+</template>
+
+<!-- Index Events • Layout • Columns -->
+<template id="opt_index_events_list_columns" inherit_id="website_event.events_list" active="True" customize_show="True" name="Layout • Columns">
+    <xpath expr="//t[@t-set='opt_events_list_columns']" position="attributes">
+        <attribute name="t-value">True</attribute>
+    </xpath>
+</template>
+
+<!-- Index Events • Style • Cards -->
+<template id="opt_index_events_list_cards" inherit_id="website_event.events_list" active="False" customize_show="True" name="Styles • Cards">
+    <xpath expr="//t[@t-set='opt_events_list_cards']" position="attributes">
+        <attribute name="t-value">True</attribute>
+    </xpath>
+</template>
+
+<!-- Index Events • Content • Images -->
+<template id="opt_index_events_list_images" inherit_id="website_event.events_list" active="True" customize_show="True" name="Content • Images">
+    <xpath expr="//t[@t-set='opt_events_list_images']" position="attributes">
+        <attribute name="t-value">True</attribute>
+    </xpath>
+</template>
+
+<!-- Index Events • Content • Speakers -->
+<template id="opt_index_events_list_speakers" inherit_id="website_event.events_list" active="False" customize_show="True" name="Content • Speakers">
+    <xpath expr="//t[@t-set='opt_events_list_speakers']" position="attributes">
+        <attribute name="t-value">True</attribute>
+    </xpath>
+</template>
+
+<!-- Sidebar -->
+<template id="opt_index_sidebar" inherit_id="website_event.index" active="True" customize_show="True" name="Right Sidebar">
+    <xpath expr="//t[@t-set='opt_index_sidebar']" position="attributes">
+        <attribute name="t-value">True</attribute>
+    </xpath>
+    <xpath expr="//div[@id='o_we_index_main_col']" position="after">
+        <div id="o_we_sidebar" class="col-lg-4 offset-xl-1"/>
+    </xpath>
+</template>
+
+<!-- Sidebar • About us -->
+<template id="opt_index_about_us" inherit_id="website_event.opt_index_sidebar" active="True" customize_show="True" name="About us">
+    <xpath expr="//div[@id='o_we_sidebar']" position="inside">
+        <t t-call="website_event.about_us"/>
+    </xpath>
+</template>
+
+<!-- Sidebar • Follow us -->
+<template id="opt_index_follow_us" inherit_id="website_event.opt_index_sidebar" active="True" customize_show="True" name="Follow us">
+    <xpath expr="//div[@id='o_we_sidebar']" position="inside">
+        <t t-call="website_event.follow_us"/>
+    </xpath>
+</template>
+
+<!-- Sidebar • Events in your Country -->
+<template id="country_event" inherit_id="website_event.opt_index_sidebar" active="True" customize_show="True" name="Country Events">
+    <xpath expr="//div[@id='o_we_sidebar']" position="inside">
+        <t t-call="website_event.s_country_events"/>
+    </xpath>
+</template>
+
+<!-- Event -->
+
+<!-- Sidebar -->
+<template id="opt_event_sidebar" inherit_id="website_event.event_description_full" active="True" customize_show="True" name="Right Sidebar">
+    <!-- <xpath expr="//t[@t-set='opt_event_sidebar']" position="attributes">
+        <attribute name="t-value">True</attribute>
+    </xpath> -->
+    <!-- <xpath expr="//div[@id='o_we_event_main_col']" position="after">
+        <t t-call="website_event.sidebar">
+            <t t-set="_classes" t-value="'bg-200'"/>
+        </t>
+    </xpath> -->
+</template>
+
+
+
+</odoo>

@@ -11,3 +11,93 @@
 .o_wevent_registration_list_attendees:nth-child(2n) {
     background-color: gray('200');
 }
+
+#o_we_search_box {
+    max-width: 30%;
+    flex: 0 0 30%;
+}
+
+.o_we_topbar_icon {
+    color: gray('800');
+    margin-right: 6px;
+}
+
+#o_we_topbar_filters {
+    .dropdown-toggle {
+        margin-right: 10px;
+        background-color: $dropdown-bg;
+        // color: $dropdown-link-color;
+        border: $dropdown-border-width solid $dropdown-border-color;
+
+        @include border-radius($dropdown-border-radius);
+
+        @include hover-focus {
+            color: $primary;
+            border-color: $primary;
+        }
+        &:after {
+            margin-left: 1.5em;
+            vertical-align: 0.2em;
+        }
+    }
+    .dropdown-menu {
+        min-width: 12rem;
+    }
+    .dropdown-item  {
+        padding: .25rem 1rem;
+        .badge {
+            background-color: $primary;
+            color: color-yiq($primary);
+        }
+        &.active .badge {
+            color: $primary;
+            background-color: color-yiq($primary);
+        }
+    }
+}
+
+.o_border_dashed {
+    border-right: 1px dashed $gray-400;
+}
+
+.o_event_wrapper header {
+    height: 200px;
+}
+
+// No card style
+.o_event_card { 
+    border: 0;
+    .card-footer { 
+        border: 0;
+    }
+}
+
+.card {
+
+    header {    
+        height: 200px;
+    }
+    .card-title {
+        color: $body-color;
+    }
+
+    .card-body {
+        flex: 1;
+    }
+    .card-img {
+        transition: all .5s;
+    }
+    a:hover .card-img {
+        transform: scale(1.1);
+    }
+
+}
+.o_speaker_img {
+    $width: 50px;
+    width: $width;
+    border: 5px solid #fff;
+    border-radius: $width/2;
+    @include o-position-absolute($top:-10px, $right: 20px);
+}
+
+
