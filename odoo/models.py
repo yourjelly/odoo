@@ -2101,9 +2101,10 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         self.check_access_rights('read')
 
         fields = fields or [f.name for f in self._fields.values() if f.store]
+        # TODO: check if groupby_list can just be groupby, if not, give it a better name
         groupby = [groupby] if isinstance(groupby, str) else list(OrderedSet(groupby))
         groupby_list = groupby[:1] if lazy else groupby
-        groupby_fields = [g.split(':')[0] for g in groupby]
+        groupby_fields = [g.split(':')[0] for g in groupby_list]
         order = orderby or ','.join([g for g in groupby_list])
         query = self._where_calc(domain)
 
