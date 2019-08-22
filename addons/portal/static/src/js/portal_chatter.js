@@ -89,6 +89,7 @@ var PortalComposer = publicWidget.Widget.extend({
             self._updateAttachments();
             self.$sendButton.prop('disabled', false);
         });
+
     },
     /**
      * @private
@@ -152,6 +153,7 @@ var PortalComposer = publicWidget.Widget.extend({
         this.$attachments.html(qweb.render('portal.Chatter.Attachments', {
             attachments: this.attachments,
             showDelete: true,
+            isDownload: true,
         }));
     },
 });
