@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+        <template id="report_hash_integrity_l10n_fr_inherit" inherit_id="account.report_hash_integrity">
+            <xpath expr="//div[@id='hash_last_div']" position="after">
+                <t t-if="company._is_accounting_unalterable()">
+                    <div class="row" style="page-break-before:always;">
+                        <div class="col-12">
+                            <h3>Contrôle du point de vente</h3>
+                            <br/>
+                            <t t-if="data['pos_result'] != 'None' and data['msg_alert'] == 'None'">
+                                <h5>
+                                    Toutes les ventes effectuées via le Point de Vente
+                                    sont bien dans la chaîne de hachage.
+                                </h5>
+                                <br/>
+                            </t>
+                        </div>
+                    </div>
+                    <t t-if="data['pos_result'] != 'None' and data['msg_alert'] == 'None'">
+                        <div class="row">
+                            <div class="col-12">
+                                <table class="table table-bordered"  style="table-layout: fixed">
+                                    <thead style="display: table-row-group">
+                                        <tr>
+                                            <th class="text-center" style="width: 25%" scope="col">First Hash</th>
+                                            <th class="text-center" style="width: 25%" scope="col">First Entry</th>
+                                            <th class="text-center" style="width: 25%" scope="col">Last Hash</th>
+                                            <th class="text-center" style="width: 25%" scope="col">Last Entry</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span t-esc="data['pos_result']['start_order_hash']"/></td>
+                                            <td>
+                                                <span t-esc="data['pos_result']['start_order_name']"/> <br/>
+                                                <span t-esc="data['pos_result']['start_order_date']"/>
+                                            </td>
+                                            <td><span t-esc="data['pos_result']['end_order_hash']"/></td>
+                                            <td>
+                                                <span t-esc="data['pos_result']['end_order_name']"/> <br/>
+                                                <span t-esc="data['pos_result']['end_order_date']"/>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <br/>
+                                <p>
+                                    Pour contrôler l’inaltérabilité des données, il vous suffit de prendre le hash imprimé sur le
+                                    ticket de caisse et de vérifier que, dans votre base de données, le même hash se trouve sur
+                                    la vente correspondante. Cela garantit que toutes les ventes antérieures à ce ticket n’ont
+                                    pas été altérées.
+                                </p>
+                                <br/>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div class="row">
+                            <div class="col-12">
+                                <div role="status" class="alert alert-info">
+                                    <span t-esc="data['msg_alert']"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </xpath>
+        </template>
+    </data>
+</odoo>
