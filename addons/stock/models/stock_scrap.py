@@ -13,11 +13,12 @@ class StockScrap(models.Model):
     _description = 'Scrap'
 
     def _get_default_scrap_location_id(self):
-        return self.env['stock.location'].search([('scrap_location', '=', True), ('company_id', 'in', [self.env.company.id, False])], limit=1).id
+        company_id = self.env.context.get('default_company_id') or self.env.company.id
+        return self.env['stock.location'].search([('scrap_location', '=', True), ('company_id', 'in', [company_id, False])], limit=1).id
 
     def _get_default_location_id(self):
-        company_user = self.env.company
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', company_user.id)], limit=1)
+        company_id = self.env.context.get('default_company_id') or self.env.company.id
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', company_id)], limit=1)
         if warehouse:
             return warehouse.lot_stock_id.id
         return None
@@ -29,8 +30,8 @@ class StockScrap(models.Model):
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company, required=True, readonly=True)
     origin = fields.Char(string='Source Document')
     product_id = fields.Many2one(
-        'product.product', 'Product', domain=[('type', 'in', ['product', 'consu'])],
-        required=True, states={'done': [('readonly', True)]})
+        'product.product', 'Product', domain="[('type', 'in', ['product', 'consu']), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        required=True, states={'done': [('readonly', True)]}, check_company=True)
     product_uom_id = fields.Many2one(
         'uom.uom', 'Unit of Measure',
         required=True, states={'done': [('readonly', True)]}, domain="[('category_id', '=', product_uom_category_id)]")
@@ -38,20 +39,19 @@ class StockScrap(models.Model):
     tracking = fields.Selection('Product Tracking', readonly=True, related="product_id.tracking")
     lot_id = fields.Many2one(
         'stock.production.lot', 'Lot/Serial',
-        states={'done': [('readonly', True)]}, domain="[('product_id', '=', product_id)]")
+        states={'done': [('readonly', True)]}, domain="[('product_id', '=', product_id), ('company_id', '=', company_id)]", check_company=True)
     package_id = fields.Many2one(
         'stock.quant.package', 'Package',
-        states={'done': [('readonly', True)]},
-        domain="[('company_id', '=', company_id)]")
-    owner_id = fields.Many2one('res.partner', 'Owner', states={'done': [('readonly', True)]})
-    move_id = fields.Many2one('stock.move', 'Scrap Move', readonly=True)
-    picking_id = fields.Many2one('stock.picking', 'Picking', states={'done': [('readonly', True)]}, domain="[('company_id', '=', company_id)]")
+        states={'done': [('readonly', True)]}, check_company=True)
+    owner_id = fields.Many2one('res.partner', 'Owner', states={'done': [('readonly', True)]}, check_company=True)
+    move_id = fields.Many2one('stock.move', 'Scrap Move', readonly=True, check_company=True)
+    picking_id = fields.Many2one('stock.picking', 'Picking', states={'done': [('readonly', True)]}, check_company=True)
     location_id = fields.Many2one(
         'stock.location', 'Source Location', domain="[('usage', '=', 'internal'), ('company_id', 'in', [company_id, False])]",
-        required=True, states={'done': [('readonly', True)]}, default=_get_default_location_id)
+        required=True, states={'done': [('readonly', True)]}, default=_get_default_location_id, check_company=True)
     scrap_location_id = fields.Many2one(
         'stock.location', 'Scrap Location', default=_get_default_scrap_location_id,
-        domain="[('scrap_location', '=', True), ('company_id', 'in', [company_id, False])]", required=True, states={'done': [('readonly', True)]})
+        domain="[('scrap_location', '=', True), ('company_id', 'in', [company_id, False])]", required=True, states={'done': [('readonly', True)]}, check_company=True)
     scrap_qty = fields.Float('Quantity', default=1.0, required=True, states={'done': [('readonly', True)]})
     state = fields.Selection([
         ('draft', 'Draft'),
@@ -113,6 +113,7 @@ class StockScrap(models.Model):
         }
 
     def do_scrap(self):
+        self._check_company()
         for scrap in self:
             scrap.name = self.env['ir.sequence'].next_by_code('stock.scrap') or _('New')
             move = self.env['stock.move'].create(scrap._prepare_move_values())
@@ -163,3 +164,4 @@ class StockScrap(models.Model):
                 },
                 'target': 'new'
             }
+
