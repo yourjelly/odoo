@@ -4,14 +4,8 @@
         <field name="model">res.config.settings</field>
         <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='company_id']" position="before">
-                <h2>Data Inalterability</h2>
-                <div>
-                    <div>
-                        <button name="%(l10n_fr_certification.action_check_hash_integrity)d" type="action" string="Data Inalterability Check" class="oe_link"/>
-                        <button name="%(l10n_fr_certification.odoo_french_certification)d" type="action" string="Get the certification now!" class="oe_link"/>
-                    </div>
-                </div>
+            <xpath expr="//button[@id='actionhashintegrity']" position="after">
+                <button name="%(l10n_fr_certification.odoo_french_certification)d" type="action" string="Get the certification now!" class="oe_link"/>
             </xpath>
         </field>
     </record>

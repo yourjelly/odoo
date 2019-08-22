@@ -111,6 +111,8 @@ Best Regards,'''))
     expense_accrual_account_id = fields.Many2one('account.account', help="Account used to move the period of an expense", domain=[('internal_group', '=', 'liability'), ('reconcile', '=', True)])
     revenue_accrual_account_id = fields.Many2one('account.account', help="Account used to move the period of a revenue", domain=[('internal_group', '=', 'asset'), ('reconcile', '=', True)])
     accrual_default_journal_id = fields.Many2one('account.journal', help="Journal used by default for moving the period of an entry", domain="[('type', '=', 'general')]")
+    
+    secure_sequence_id = fields.Many2one('ir.sequence', 'Sequence to use to ensure the securisation of data', readonly=True)
 
     @api.constrains('account_opening_move_id', 'fiscalyear_last_day', 'fiscalyear_last_month')
     def _check_fiscalyear_last_day(self):
@@ -289,6 +291,7 @@ Best Regards,'''))
 
         # Reflect the change on accounts
         for company in self:
+            company._create_secure_sequence(['secure_sequence_id'])
             if values.get('bank_account_code_prefix'):
                 new_bank_code = values.get('bank_account_code_prefix') or company.bank_account_code_prefix
                 company.reflect_code_prefix_change(company.bank_account_code_prefix, new_bank_code)
@@ -301,7 +304,13 @@ Best Regards,'''))
                 if self.env['account.move.line'].search([('company_id', '=', company.id)]):
                     raise UserError(_('You cannot change the currency of the company since some journal items already exist'))
 
-        return super(ResCompany, self).write(values)
+        res = super(ResCompany, self).write(values)
+               
+        # fiscalyear_lock_date can't be set to a prior date
+        if 'fiscalyear_lock_date' in values or 'period_lock_date' in values:
+            self._check_lock_dates(values)
+
+        return res
 
     @api.model
     def setting_init_bank_account_action(self):
@@ -555,3 +564,31 @@ Best Regards,'''))
                 "Please go to Account Configuration and select or install a fiscal localization.")
             raise RedirectWarning(msg, action.id, _("Go to the configuration panel"))
         return account
+
+    @api.model
+    def create(self, vals):
+        company = super(ResCompany, self).create(vals)
+        company._create_secure_sequence(['secure_sequence_id'])
+        return company
+
+    def _create_secure_sequence(self, sequence_fields):
+        """This function creates a no_gap sequence on each companies in self that will ensure
+        a unique number is given to all posted account.move in such a way that we can always
+        find the previous move of a journal entry.
+        """
+        for company in self:
+            vals_write = {}
+            for seq_field in sequence_fields:
+                if not company[seq_field]:
+                    vals = {
+                        'name': 'Securisation of ' + seq_field + ' - ' + company.name,
+                        'code': 'SECUR',
+                        'implementation': 'no_gap',
+                        'prefix': '',
+                        'suffix': '',
+                        'padding': 0,
+                        'company_id': company.id}
+                    seq = self.env['ir.sequence'].create(vals)
+                    vals_write[seq_field] = seq.id
+            if vals_write:
+                company.write(vals_write)

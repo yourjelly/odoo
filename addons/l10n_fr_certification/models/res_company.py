@@ -11,14 +11,14 @@ class ResCompany(models.Model):
 
     # To do in master : refactor to set sequences more generic
 
-    l10n_fr_secure_sequence_id = fields.Many2one('ir.sequence', 'Sequence to use to ensure the securisation of data', readonly=True)
+    secure_sequence_id = fields.Many2one('ir.sequence', 'Sequence to use to ensure the securisation of data', readonly=True)
 
     @api.model
     def create(self, vals):
         company = super(ResCompany, self).create(vals)
         #when creating a new french company, create the securisation sequence as well
         if company._is_accounting_unalterable():
-            sequence_fields = ['l10n_fr_secure_sequence_id']
+            sequence_fields = ['secure_sequence_id']
             company._create_secure_sequence(sequence_fields)
         return company
 
@@ -27,7 +27,7 @@ class ResCompany(models.Model):
         #if country changed to fr, create the securisation sequence
         for company in self:
             if company._is_accounting_unalterable():
-                sequence_fields = ['l10n_fr_secure_sequence_id']
+                sequence_fields = ['secure_sequence_id']
                 company._create_secure_sequence(sequence_fields)
         # fiscalyear_lock_date can't be set to a prior date
         if 'fiscalyear_lock_date' in vals or 'period_lock_date' in vals:

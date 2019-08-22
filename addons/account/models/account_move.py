@@ -10,6 +10,8 @@ from datetime import date
 from itertools import groupby, chain
 from stdnum.iso7064 import mod_97_10
 from itertools import zip_longest
+from hashlib import sha256
+from json import dumps
 
 import json
 import re
@@ -18,6 +20,9 @@ import psycopg2
 
 _logger = logging.getLogger(__name__)
 
+#forbidden fields
+MOVE_FIELDS = ['date', 'journal_id', 'company_id']
+LINE_FIELDS = ['debit', 'credit', 'account_id', 'partner_id']
 
 class AccountMove(models.Model):
     _name = "account.move"
@@ -250,6 +255,13 @@ class AccountMove(models.Model):
         help="Technical field used to display an alert on invoices if there is at least a matching amount in any supsense account.")
     # Technical field to hide Reconciled Entries stat button
     has_reconciled_entries = fields.Boolean(compute="_compute_has_reconciled_entries")
+
+    # ==== Hash Fields ==== 
+    restrict_mode_hash_table = fields.Boolean(related='journal_id.restrict_mode_hash_table')
+    has_been_posted_once = fields.Boolean(default=False, readonly=True)
+    secure_sequence_number = fields.Integer(string="Inalteralbility No Gap Sequence #", readonly=True, copy=False)
+    inalterable_hash = fields.Char(string="Inalterability Hash", readonly=True, copy=False)
+    string_to_hash = fields.Char(compute='_compute_string_to_hash', readonly=True, store=False)
 
     # -------------------------------------------------------------------------
     # ONCHANGE METHODS
@@ -1461,11 +1473,20 @@ class AccountMove(models.Model):
     def write(self, vals):
         not_paid_invoices = self.filtered(lambda move: move.is_invoice(include_receipts=True) and move.invoice_payment_state not in ('paid', 'in_payment'))
 
+        self._check_field_rules(vals)
+
         if self._move_autocomplete_invoice_lines_write(vals):
             res = True
         else:
             vals.pop('invoice_line_ids', None)
             res = super(AccountMove, self.with_context(check_move_validity=False)).write(vals)
+
+        if vals.get('state') == 'posted' and self.restrict_mode_hash_table:
+            for move in self.filtered(lambda m: not(m.secure_sequence_number or m.inalterable_hash)):
+                new_number = move.company_id.secure_sequence_id.next_by_id()
+                vals_hashing = {'secure_sequence_number': new_number,
+                                'inalterable_hash': move._get_new_hash(new_number)}
+                res |= super(AccountMove, move).write(vals_hashing)
 
         # Ensure the move is still well balanced.
         if 'line_ids' in vals and self._context.get('check_move_validity', True):
@@ -1479,6 +1500,8 @@ class AccountMove(models.Model):
 
     def unlink(self):
         for move in self:
+            if move.has_been_posted_once:
+                raise UserError(_("You cannot delete a move that has already been posted once."))
             # check the lock date + check if some entries are reconciled
             move.line_ids._update_check()
             move.line_ids.unlink()
@@ -1872,8 +1895,6 @@ class AccountMove(models.Model):
 
             move.message_subscribe([p.id for p in [move.partner_id, move.commercial_partner_id] if p not in move.message_partner_ids])
 
-            to_write = {'state': 'posted'}
-
             if move.name == '/':
                 # Get the journal's sequence.
                 sequence = move._get_sequence()
@@ -1881,9 +1902,9 @@ class AccountMove(models.Model):
                     raise UserError(_('Please define a sequence on your journal.'))
 
                 # Consume a new number.
-                to_write['name'] = sequence.next_by_id(sequence_date=move.date)
+                move.write({'name': sequence.next_by_id(sequence_date=move.date)})
 
-            move.write(to_write)
+            to_write = {}
 
             # Compute 'ref' for 'out_invoice'.
             if move.type == 'out_invoice' and not move.invoice_payment_ref:
@@ -1893,7 +1914,10 @@ class AccountMove(models.Model):
                 }
                 for line in move.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable')):
                     to_write['line_ids'].append((1, line.id, {'name': to_write['invoice_payment_ref']}))
-                move.write(to_write)
+
+            to_write['state'] = 'posted'
+            move.write(to_write)
+            move.has_been_posted_once = True
 
             if move == move.company_id.account_opening_move_id and not move.company_id.account_bank_reconciliation_start:
                 # For opening moves, we set the reconciliation date threshold
@@ -1954,8 +1978,8 @@ class AccountMove(models.Model):
             excluded_move_ids = AccountMoveLine.search(AccountMoveLine._get_suspense_moves_domain() + [('move_id', 'in', self.ids)]).mapped('move_id').ids
 
         for move in self:
-            if not move.journal_id.update_posted and move.id not in excluded_move_ids:
-                raise UserError(_('You cannot modify a posted entry of this journal.\nFirst you should set the journal to allow cancelling entries.'))
+            if move.restrict_mode_hash_table and move.id not in excluded_move_ids:
+                raise UserError(_('You cannot modify a posted entry of this journal.\nFirst you should set the journal to normal mode and not restrict mode.'))
             # We remove all the analytics entries for this journal
             move.mapped('line_ids.analytic_line_ids').unlink()
         if self.ids:
@@ -1996,6 +2020,141 @@ class AccountMove(models.Model):
             'target': 'new',
             'context': ctx,
         }
+
+    def _check_field_rules(self, vals):
+        for move in self:
+            if move.has_been_posted_once: # It is a check if the move has already been posted once. 
+                editable_fields = move._get_account_move_editable_field_rules()
+                for field_name in list(vals):
+                    if field_name in list(editable_fields):
+                        if editable_fields[field_name]: # The field rules are checked
+                            continue
+                        else:
+                            raise UserError(_('The field "%s" cannot be edited.') % field_name)
+
+    def _get_account_move_editable_field_rules(self):
+        editable_fields = {}
+        if self.is_sale_document(include_receipts=True):
+            # For 'out_invoice', 'out_refund' and 'out_receipt'
+            editable_fields.update({
+                'name': False,
+                'partner_id': self.state == 'draft' and not self.restrict_mode_hash_table and not self.has_reconciled_entries and not self.invoice_sent,
+                'invoice_payment_term_id': self.state == 'draft' and not self.restrict_mode_hash_table and not self.invoice_sent,
+                'journal_id': False,
+                'date': self.state == 'draft' and not self.restrict_mode_hash_table and not self.invoice_sent,
+                'invoice_date': self.state == 'draft' and not self.restrict_mode_hash_table and not self.invoice_sent,
+                'company_id': self.state == 'draft' and not self.restrict_mode_hash_table and not self.has_reconciled_entries,
+                'fiscal_position_id': self.state == 'draft' and not self.restrict_mode_hash_table and not self.has_reconciled_entries and not self.invoice_sent,
+                'invoice_payment_ref': self.state == 'draft',
+                'invoice_partner_bank_id': self.state == 'draft',
+            })
+        elif self.is_purchase_document(include_receipts=True):
+            # For 'in_invoice', 'in_refund' and 'in_receipt'
+            editable_fields.update({
+                'name': False,
+                'partner_id': self.state == 'draft' and not self.restrict_mode_hash_table and not self.has_reconciled_entries,
+                'invoice_payment_term_id': self.state == 'draft' and not self.restrict_mode_hash_table and not self.has_reconciled_entries,
+                'journal_id': False,
+                'date': self.state == 'draft' and not self.restrict_mode_hash_table,
+                'invoice_date': self.state == 'draft' and not self.restrict_mode_hash_table,
+                'fiscal_position_id': self.state == 'draft' and not self.restrict_mode_hash_table and not self.has_reconciled_entries,
+                'company_id': self.state == 'draft' and not self.restrict_mode_hash_table and not self.has_reconciled_entries,
+            })
+        else:
+            # For 'entry'
+            editable_fields.update({
+                'journal_id': False,
+                'date': self.state == 'draft' and not self.restrict_mode_hash_table,
+            })
+
+        return editable_fields
+        
+    def _get_new_hash(self, secure_seq_number):
+        """ Returns the hash to write on journal entries when they get posted"""
+        self.ensure_one()
+        #get the only one exact previous move in the securisation sequence
+        prev_move = self.search([('state', '=', 'posted'),
+                                 ('company_id', '=', self.company_id.id),
+                                 ('secure_sequence_number', '!=', 0),
+                                 ('secure_sequence_number', '=', int(secure_seq_number) - 1)])
+        if prev_move and len(prev_move) != 1:
+            raise UserError(
+               _('An error occured when computing the inalterability. Impossible to get the unique previous posted journal entry.'))
+
+        #build and return the hash
+        return self._compute_hash(prev_move.inalterable_hash if prev_move else u'')
+
+    def _compute_hash(self, previous_hash):
+        """ Computes the hash of the browse_record given as self, based on the hash
+        of the previous record in the company's securisation sequence given as parameter"""
+        self.ensure_one()
+        hash_string = sha256((previous_hash + self.string_to_hash).encode('utf-8'))
+        return hash_string.hexdigest()
+
+    def _compute_string_to_hash(self):
+        def _getattrstring(obj, field_str):
+            field_value = obj[field_str]
+            if obj._fields[field_str].type == 'many2one':
+                field_value = field_value.id
+            return str(field_value)
+
+        for move in self:
+            values = {}
+            for field in MOVE_FIELDS:
+                values[field] = _getattrstring(move, field)
+
+            for line in move.line_ids:
+                for field in LINE_FIELDS:
+                    k = 'line_%d_%s' % (line.id, field)
+                    values[k] = _getattrstring(line, field)
+            #make the json serialization canonical
+            #  (https://tools.ietf.org/html/draft-staykov-hu-json-canonical-form-00)
+            move.string_to_hash = dumps(values, sort_keys=True,
+                                                ensure_ascii=True, indent=None,
+                                                separators=(',',':'))
+
+    @api.model
+    def _check_hash_integrity(self, company_id):
+        """Checks that all posted moves have still the same data as when they were posted
+        and raises an error with the result.
+        """
+        def build_move_info(move):
+            entry_reference = _('(ref.: %s)')
+            move_reference_string = move.ref and entry_reference % move.ref or ''
+            return [move.name, move_reference_string]
+
+        moves = self.search([('state', '=', 'posted'),
+                             ('company_id', '=', company_id),
+                             ('secure_sequence_number', '!=', 0)],
+                            order="secure_sequence_number ASC")
+
+        if not moves:
+            raise UserError(_('There isn\'t any journal entry flagged for data inalterability yet for the company %s. This mechanism only runs for journal entries generated after the installation of the module France - Certification CGI 286 I-3 bis.') % self.env.company.name)
+        previous_hash = u''
+        start_move_info = []
+        for move in moves:
+            if move.inalterable_hash != move._compute_hash(previous_hash=previous_hash):
+                raise UserError(_('Corrupted data on journal entry with id %s.') % move.id)
+            if not previous_hash:
+                #save the date and sequence number of the first move hashed
+                start_move_info = build_move_info(move)
+            previous_hash = move.inalterable_hash
+        end_move_info = build_move_info(move)
+
+        report_dict = {'start_move_name': start_move_info[0],
+                       'start_move_ref': start_move_info[1],
+                       'end_move_name': end_move_info[0],
+                       'end_move_ref': end_move_info[1]}
+
+        # Raise on success
+        raise UserError(_('''Successful test !
+
+                         The journal entries are guaranteed to be in their original and inalterable state
+                         From: %(start_move_name)s %(start_move_ref)s
+                         To: %(end_move_name)s %(end_move_ref)s
+
+                         For this report to be legally meaningful, please download your certification from your customer account on Odoo.com (Only for Odoo Enterprise users).'''
+                         ) % report_dict)
 
     def action_invoice_print(self):
         """ Print the invoice and mark it as sent, so that we can see more
@@ -2796,6 +2955,17 @@ class AccountMoveLine(models.Model):
                       "Please change the journal entry date or the tax lock date set in the settings ({}) to proceed").format(
                         line.company_id.tax_lock_date or date.min))
 
+    def _check_field_rules(self, vals):
+        for line in self:
+            if line.move_id.has_been_posted_once: # It is a check if the move has already been posted once. 
+                editable_fields = line._get_account_move_line_editable_field_rules()
+                for field_name in list(vals):
+                    if field_name in list(editable_fields):
+                        if editable_fields[field_name]: # The field rules are checked
+                            continue
+                        else:
+                            raise UserError(_('The field "%s" cannot be edited.') % field_name)
+
     def _update_check(self):
         """ Raise Warning to cause rollback if the move is posted, some entries are reconciled or the move is older than the lock date"""
         move_ids = set()
@@ -2911,6 +3081,7 @@ class AccountMoveLine(models.Model):
         ACCOUNTING_FIELDS = ('debit', 'credit', 'amount_currency')
         BUSINESS_FIELDS = ('price_unit', 'quantity', 'discount', 'tax_ids')
 
+        self._check_field_rules(vals)
         if ('account_id' in vals) and self.env['account.account'].browse(vals['account_id']).deprecated:
             raise UserError(_('You cannot use a deprecated account.'))
         if any(key in vals for key in ('account_id', 'journal_id', 'date', 'move_id', 'debit', 'credit')):
@@ -2966,6 +3137,8 @@ class AccountMoveLine(models.Model):
         self._check_tax_lock_date2()
         move_ids = set()
         for line in self:
+            if line.move_id.has_been_posted_once:
+                raise UserError(_("You cannot delete a move line that has already been posted once."))
             if line.move_id.id not in move_ids:
                 move_ids.add(line.move_id.id)
         result = super(AccountMoveLine, self).unlink()
@@ -3581,7 +3754,51 @@ class AccountMoveLine(models.Model):
             ('full_reconcile_id', '=', False),
             ('statement_line_id', '!=', False),
         ]
+    
+    def _get_account_move_line_editable_field_rules(self):
+        editable_fields = {}
+        if self.move_id.is_sale_document(include_receipts=True):
+            # For 'out_invoice', 'out_refund' and 'out_receipt'
+            editable_fields.update({
+                'product_id': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table,
+                'name': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.invoice_sent,
+                'account_id': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries and not self.move_id.invoice_sent,
+                'analytic_account_id': False,
+                'intrastat_transaction_id': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table,
+                'intrastat_product_origin_country_id': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table,
+                'quantity': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries and not self.move_id.invoice_sent,
+                'price_unit': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries and not self.move_id.invoice_sent,
+                'tax_ids': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries and not self.move_id.invoice_sent,
+                'analytic_tag_ids': False,
+            })
+        elif self.move_id.is_purchase_document(include_receipts=True):
+            # For 'in_invoice', 'in_refund' and 'in_receipt'
+            editable_fields.update({
+                'product_id': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table,
+                'name': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table,
+                'is_landed_costs_line': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries,
+                'account_id': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries,
+                'analytic_account_id': False,
+                'intrastat_transaction_id': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table,
+                'quantity': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries,
+                'price_unit': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries,
+                'tax_ids': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries,
+                'intrastat_product_origin_country_id': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table,                
+                'analytic_tag_ids': False,
+            })
+        else:
+            # For 'entry'
+            editable_fields.update({
+                'name': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table,
+                'account_id': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries,
+                'analytic_account_id': False,
+                'debit': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries and not self.move_id.invoice_sent,
+                'credit': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries and not self.move_id.invoice_sent,
+                'date_maturity': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries,
+                'analytic_tag_ids': False,
+            })
 
+        return editable_fields
 
 class AccountPartialReconcile(models.Model):
     _name = "account.partial.reconcile"
