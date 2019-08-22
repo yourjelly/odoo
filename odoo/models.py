@@ -2213,6 +2213,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         if not groupby_fields:
             return fetched_data
 
+        # TODO: fetch computed fields right here, and then format them in _read_group_format_result
+
         self._read_group_resolve_many2one_fields(fetched_data, stored_groups)
 
         data = [{k: self._read_group_prepare_data(k, v, groupby_dict) for k, v in r.items()} for r in fetched_data]

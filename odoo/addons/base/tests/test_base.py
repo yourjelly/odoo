@@ -350,6 +350,13 @@ class TestBase(TransactionCase):
         user_ids = [res_users.create(vals).id for vals in test_users]
         domain = [('id', 'in', user_ids)]
 
+        # test multiple groupbys with lazy=False
+        groups_data = res_users.read_group(domain, fields=['name', 'color'], groupby=['name', 'color'], lazy=False)
+        self.assertEqual(['Alice', 'Alice', 'Bob', 'Eve', 'Nab', 'Nab'],
+            [g['name'] for g in groups_data], "Incorrect groupby with lazy=False")
+        self.assertEqual([0, 1, 2, 3, -3, 6], [g['color'] for g in groups_data],
+            "Incorrect groupby with lazy=False")
+
         # group on local char field without domain and without active_test (-> empty WHERE clause)
         groups_data = res_users.with_context(active_test=False).read_group([], fields=['login'], groupby=['login'], orderby='login DESC')
         self.assertGreater(len(groups_data), 6, "Incorrect number of results when grouping on a field")
