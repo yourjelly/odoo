@@ -1,6 +1,23 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import models, api, fields
+from odoo import models, api, fields, _
+from odoo.exceptions import UserError
+from datetime import datetime
+from odoo.fields import Datetime
+import pytz
+
+
+def ctx_tz(record, field):
+    res_lang = None
+    ctx = record._context
+    tz_name = pytz.timezone(ctx.get('tz') or record.env.user.tz)
+    timestamp = Datetime.from_string(record[field])
+    if ctx.get('lang'):
+        res_lang = record.env['res.lang']._lang_get(ctx['lang'])
+    if res_lang:
+        timestamp = pytz.utc.localize(timestamp, is_dst=False)
+        return datetime.strftime(timestamp.astimezone(tz_name), res_lang.date_format + ' ' + res_lang.time_format)
+    return Datetime.context_timestamp(record, timestamp)
 
 
 class ResCompany(models.Model):
@@ -25,3 +42,53 @@ class ResCompany(models.Model):
                 sequence_fields = ['l10n_fr_pos_cert_sequence_id']
                 company._create_secure_sequence(sequence_fields)
         return res
+
+    @api.model
+    def _check_hash_integrity(self):
+        """Checks that all posted or invoiced pos orders have still the same data as when they were posted
+        and raises an error with the result.
+        """
+        def build_order_info(order):
+            entry_reference = _('(Receipt ref.: %s)')
+            order_reference_string = order.pos_reference and entry_reference % order.pos_reference or ''
+            return [ctx_tz(order, 'date_order'), order.l10n_fr_hash, order.name, order_reference_string, ctx_tz(order, 'write_date')]
+
+        action = super(ResCompany, self)._check_hash_integrity()
+        hash_verified = True
+        msg_alert = ''
+        report_dict = {}
+        if self._is_accounting_unalterable():
+            orders = self.env['pos.order'].search([('state', 'in', ['paid', 'done', 'invoiced']), ('company_id', '=', self.id),
+                                        ('l10n_fr_secure_sequence_number', '!=', 0)], order="l10n_fr_secure_sequence_number ASC")
+
+            if not orders:
+                msg_alert = (_('There isn\'t any order flagged for data inalterability yet for the company %s. This mechanism only runs for point of sale orders generated after the installation of the module France - Certification CGI 286 I-3 bis. - POS') % self.env.company.name)
+                hash_verified = False
+
+            previous_hash = u''
+            start_order_info = []
+            for order in orders:
+                if order.l10n_fr_hash != order._compute_hash(previous_hash=previous_hash):
+                    msg_alert = (_('Corrupted data on point of sale order with id %s.') % order.id)
+                    hash_verified = False
+                    break
+                previous_hash = order.l10n_fr_hash
+
+            if hash_verified:
+                orders_sorted_date = orders.sorted(lambda o: o.date_order)
+                start_order_info = build_order_info(orders_sorted_date[0])
+                end_order_info = build_order_info(orders_sorted_date[-1])
+
+                report_dict.update({'start_order_name': start_order_info[2],
+                            'start_order_hash': start_order_info[1],
+                            'start_order_date': start_order_info[0],
+                            'end_order_name': end_order_info[2],
+                            'end_order_hash': end_order_info[1],
+                            'end_order_date': end_order_info[0]})
+
+        if action:
+            action.update({
+                'pos_result': hash_verified and report_dict or 'None',
+                'msg_alert': msg_alert or 'None',
+            })
+        return action

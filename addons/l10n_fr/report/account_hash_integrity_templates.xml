@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+        <template id="report_hash_integrity_l10n_fr_inherit" inherit_id="account.report_hash_integrity">
+            <xpath expr="//div[@id='hash_header']//h2" position="attributes">
+                <attribute name="t-if">not company._is_accounting_unalterable()</attribute>
+            </xpath>
+            <xpath expr="//div[@id='hash_header']//h2" position="after">
+                <h2 t-if="company._is_accounting_unalterable()">Résultat du test d'intégrité - <span t-esc="data['printing_date']"/></h2>
+            </xpath>
+            <xpath expr="//div[@id='hash_config_review']//h3" position="attributes">
+                <attribute name="t-if">not company._is_accounting_unalterable()</attribute>
+            </xpath>
+            <xpath expr="//div[@id='hash_config_review']//h3" position="after">
+                <h3 t-if="company._is_accounting_unalterable()">Analyse de la configuration</h3>
+            </xpath>
+            <xpath expr="//div[@id='hash_config_review']" position="inside">
+                <t t-if="company._is_accounting_unalterable()">
+                    <h6>
+                        Selon l’article 286 du code général des impôts français, toute livraison de bien ou prestation
+                        de services ne donnant pas lieu à facturation et étant enregistrée au moyen d’un logiciel ou
+                        d’un système de caisse doit satisfaire à des conditions d’inaltérabilité et de sécurisation des
+                        données en vue d’un contrôle de l’administration fiscale.
+                        <br/>
+                        <br/>
+                        Seuls les journaux ayant le contrôle d’inaltérabilité actif peuvent donc être utilisés pour
+                        enregistrer ce type d’opérations:
+                        <br/>
+                        <br/>
+                    </h6>
+                </t>
+            </xpath>
+            <xpath expr="//table[@id='hash_config_table']//thead//tr//th[1]" position="attributes">
+                <attribute name="t-if">not company._is_accounting_unalterable()</attribute>
+            </xpath>
+            <xpath expr="//table[@id='hash_config_table']//thead//tr//th[1]" position="after">
+                <th style="width: 20%" scope="col" t-if="company._is_accounting_unalterable()">Journaux</th>
+            </xpath>
+            <xpath expr="//table[@id='hash_config_table']//thead//tr//th[3]" position="attributes">
+                <attribute name="t-if">not company._is_accounting_unalterable()</attribute>
+            </xpath>
+            <xpath expr="//table[@id='hash_config_table']//thead//tr//th[3]" position="after">
+                <th style="width: 20%" scope="col" t-if="company._is_accounting_unalterable()">Contrôle d’inaltérabilité</th>
+            </xpath>
+            <xpath expr="//table[@id='hash_config_table']//thead//tr//th[5]" position="attributes">
+                <attribute name="t-if">not company._is_accounting_unalterable()</attribute>
+            </xpath>
+            <xpath expr="//table[@id='hash_config_table']//thead//tr//th[5]" position="after">
+                <th style="width: 50%" scope="col" t-if="company._is_accounting_unalterable()">Couverture</th>
+            </xpath>
+            <xpath expr="//div[@id='hash_data_consistency']//h3" position="attributes">
+                <attribute name="t-if">not company._is_accounting_unalterable()</attribute>
+            </xpath>
+            <xpath expr="//div[@id='hash_data_consistency']//h3" position="after">
+                <h3 t-if="company._is_accounting_unalterable()">Contrôle des données</h3>
+            </xpath>
+            <xpath expr="//div[@id='hash_chain_compliant']//h6" position="attributes">
+                <attribute name="t-if">not company._is_accounting_unalterable()</attribute>
+            </xpath>
+            <xpath expr="//div[@id='hash_chain_compliant']//h6" position="after">
+                <h6 t-if="company._is_accounting_unalterable()">
+                    La chaîne de hachage est conforme: il n’est pas possible d’altérer les données
+                    sans casser la chaîne de hachage pour les pièces ultérieures.
+                </h6>
+            </xpath>
+        </template>
+    </data>
+</odoo>
