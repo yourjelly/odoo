@@ -2083,6 +2083,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             if self._fields[f.split(':')[0]].type in ('date', 'datetime')    # e.g. 'date:month'
         ]
 
+        # FIXME: useless looping if no date/datetime fields
         # iterate on all results and replace the "full" date/datetime value
         # (range, label) by just the formatted label, in-place
         for group in result:
@@ -2098,7 +2099,13 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     @api.model
     def _read_group_raw(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         self.check_access_rights('read')
+
         fields = fields or [f.name for f in self._fields.values() if f.store]
+        groupby = [groupby] if isinstance(groupby, str) else list(OrderedSet(groupby))
+        groupby_list = groupby[:1] if lazy else groupby
+        groupby_fields = [g.split(':')[0] for g in groupby]
+        order = orderby or ','.join([g for g in groupby_list])
+        query = self._where_calc(domain)
 
         fspecs = []
         for fspec in fields:
@@ -2106,7 +2113,6 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             if not match:
                 raise UserError(_("Invalid field specification %r") % fspec)
             fspecs.append(match.groups())
-        query = self._where_calc(domain)
 
         aggregated_fields = []
         select_terms = []
@@ -2135,16 +2141,21 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                     continue
                 func, fname = field.group_operator, name
 
-            if name in aggregated_fields:
-                raise UserError(_("Output name %r is used twice.") % name)
-            aggregated_fields.append(name)
-
+            # FIXME: is this really needed?
             if not field.base_field.store:
                 computed_fspecs[fname] = (name, func, fname)
                 continue
             else:
                 stored_fspecs[fname] = (name, func, fname)
 
+            if fname in groupby_fields:
+                continue
+
+            if name in aggregated_fields:
+                raise UserError(_("Output name %r is used twice.") % name)
+            aggregated_fields.append(name)
+
+            # FIXME: should this really be done here?
             expr = self._inherits_join_calc(self._table, fname, query)
             if func.lower() == 'count_distinct':
                 term = 'COUNT(DISTINCT %s) AS "%s"' % (expr, name)
@@ -2152,14 +2163,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 term = '%s(%s) AS "%s"' % (func, expr, name)
             select_terms.append(term)
 
-        groupby = [groupby] if isinstance(groupby, str) else list(OrderedSet(groupby))
-        groupby_list = groupby[:1] if lazy else groupby
         stored_groups, computed_groups = self._read_group_process_groupby(
             query, groupby_list, computed_fspecs.keys())
         # TODO: factorize stored_groups + computed_groups
-        groupby_fields = [g['field'] for g in (stored_groups + computed_groups)]
-        aggregated_fields = [f for f in aggregated_fields if f not in groupby_fields]
-        order = orderby or ','.join([g for g in groupby_list])
         groupby_dict = {gb['groupby']: gb for gb in (stored_groups + computed_groups)}
 
         self._apply_ir_rules(query, 'read')
