@@ -579,30 +579,35 @@ class OdooTestRunner(object):
 current_test = None
 
 class OdooSuite(unittest.TestSuite):
-    def _handleClassSetUp(self, test, result):
-        init_time = time.time()
-        super()._handleClassSetUp(test, result)
-        _logger.info('exectime setUpClass: %s', time.time()-init_time)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        cls = type(self)
+        cls.__logger = logging.getLogger('%s.%s' % (cls.__module__, cls.__name__))
 
     def _handleClassSetUp(self, test, result):
         init_time = time.time()
         super()._handleClassSetUp(test, result)
-        _logger.info('exectime setUpClass: %s', time.time()-init_time)
+        self.__logger.info('exectime setUpClass: %s', time.time()-init_time)
+
+    def _handleClassSetUp(self, test, result):
+        init_time = time.time()
+        super()._handleClassSetUp(test, result)
+        self.__logger.info('exectime setUpClass: %s', time.time()-init_time)
 
     def _tearDownPreviousClass(self, test, result):
         init_time = time.time()
         super()._tearDownPreviousClass(test, result)
-        _logger.info('exectime tearDownClass: %s', time.time()-init_time)
+        self.__logger.info('exectime tearDownClass: %s', time.time()-init_time)
 
     def _handleModuleFixture(self, test, result):
         init_time = time.time()
         super()._handleModuleFixture(test, result)
-        _logger.info('exectime setUpModule: %s', time.time()-init_time)
+        self.__logger.info('exectime setUpModule: %s', time.time()-init_time)
 
     def _handleModuleTearDown(self, test, result):
         init_time = time.time()
         super()._handleModuleTearDown(test, result)
-        _logger.info('exectime tearDownModule: %s', time.time()-init_time)
+        self.__logger.info('exectime tearDownModule: %s', time.time()-init_time)
 
 
 def run_unit_tests(module_name, position='at_install'):
@@ -640,7 +645,8 @@ def run_unit_tests(module_name, position='at_install'):
     current_test = None
     threading.currentThread().testing = False
 
-    _logger.info('exectime run_unit_tests: %s', time.time()-init_time)
+    __logger = logging.getLogger('%s.%s' % (module_name, position))
+    __logger.info('exectime run_unit_tests: %s', time.time()-init_time)
     return r
 
 def unwrap_suite(test):

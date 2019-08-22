@@ -166,6 +166,10 @@ class TreeCase(unittest.TestCase):
         self.addTypeEqualityFunc(etree._Element, self.assertTreesEqual)
         self.addTypeEqualityFunc(html.HtmlElement, self.assertTreesEqual)
 
+        cls = type(self)
+        cls.__logger = logging.getLogger('%s.%s' % (cls.__module__, cls.__name__))
+
+
     def assertTreesEqual(self, n1, n2, msg=None):
         self.assertIsNotNone(n1, msg)
         self.assertIsNotNone(n2, msg)
@@ -180,20 +184,80 @@ class TreeCase(unittest.TestCase):
         for c1, c2 in izip_longest(n1, n2):
             self.assertTreesEqual(c1, c2, msg)
 
-    def _callSetUp(self):
-        init_time = time.time()
-        super(TreeCase, self)._callSetUp()
-        _logger.info('exectime _callSetUp: %s', time.time() - init_time)
+    def run(self, result=None):
+        orig_result = result
+        if result is None:
+            result = self.defaultTestResult()
+            startTestRun = getattr(result, 'startTestRun', None)
+            if startTestRun is not None:
+                startTestRun()
 
-    def _callTestMethod(self, method):
-        init_time = time.time()
-        super(TreeCase, self)._callTestMethod(method)
-        _logger.info('exectime _callTestMethod %s: %s', method, time.time() - init_time)
+        result.startTest(self)
 
-    def _callTearDown(self):
-        init_time = time.time()
-        super(TreeCase, self)._callTearDown()
-        _logger.info('exectime _callTearDown: %s', time.time() - init_time)
+        testMethod = getattr(self, self._testMethodName)
+        if (getattr(self.__class__, "__unittest_skip__", False) or
+            getattr(testMethod, "__unittest_skip__", False)):
+            # If the class or method was skipped.
+            try:
+                skip_why = (getattr(self.__class__, '__unittest_skip_why__', '')
+                            or getattr(testMethod, '__unittest_skip_why__', ''))
+                self._addSkip(result, self, skip_why)
+            finally:
+                result.stopTest(self)
+            return
+        expecting_failure_method = getattr(testMethod,
+                                           "__unittest_expecting_failure__", False)
+        expecting_failure_class = getattr(self,
+                                          "__unittest_expecting_failure__", False)
+        expecting_failure = expecting_failure_class or expecting_failure_method
+
+        outcome = unittest.case._Outcome(result)
+        try:
+            self._outcome = outcome
+            with outcome.testPartExecutor(self):
+                init_time = time.time()
+                self.setUp()
+                self.__logger.info('exectime setUp: %s', time.time() - init_time)
+            if outcome.success:
+                outcome.expecting_failure = expecting_failure
+                with outcome.testPartExecutor(self, isTest=True):
+                    init_time = time.time()
+                    testMethod()
+                    self.__logger.info('exectime testMethod: %s', time.time() - init_time)
+                outcome.expecting_failure = False
+                with outcome.testPartExecutor(self):
+                    init_time = time.time()
+                    self.tearDown()
+                    self.__logger.info('exectime tearDown: %s', time.time() - init_time)
+
+            self.doCleanups()
+            for test, reason in outcome.skipped:
+                self._addSkip(result, test, reason)
+            self._feedErrorsToResult(result, outcome.errors)
+            if outcome.success:
+                if expecting_failure:
+                    if outcome.expectedFailure:
+                        self._addExpectedFailure(result, outcome.expectedFailure)
+                    else:
+                        self._addUnexpectedSuccess(result)
+                else:
+                    result.addSuccess(self)
+            return result
+        finally:
+            result.stopTest(self)
+            if orig_result is None:
+                stopTestRun = getattr(result, 'stopTestRun', None)
+                if stopTestRun is not None:
+                    stopTestRun()
+
+            # explicitly break reference cycles:
+            # outcome.errors -> frame -> outcome -> outcome.errors
+            # outcome.expectedFailure -> frame -> outcome -> outcome.expectedFailure
+            outcome.errors.clear()
+            outcome.expectedFailure = None
+
+            # clear the outcome, no more needed
+            self._outcome = None
 
 class MetaCase(type):
     """ Metaclass of test case classes to assign default 'test_tags':
