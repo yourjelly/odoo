@@ -8,10 +8,10 @@
 </template>
 
 <template id="index" inherit_id="website_event.events_list" name="Event's Ticket">
-    <xpath expr="//article//footer" position="after">
+    <xpath expr="//article//footer" position="inside">
         <t t-if="event.state in ['draft', 'confirm'] and event.event_ticket_ids">
-            <span t-if="event.seats_availability == 'limited' and not event.seats_available" class="badge badge-danger float-right">Sold Out</span>
-            <span t-if="event.seats_availability ==  'limited' and event.seats_available and event.seats_available &lt;= ((event.seats_max or 0) / 4)" class="badge float-right badge-info">
+            <span t-if="event.seats_availability == 'limited' and not event.seats_available" class="badge badge-danger badge-pill py-2 px-3 my-n1 ml-2">Sold Out</span>
+            <span t-if="event.seats_availability == 'limited' and event.seats_available and event.seats_available &lt;= ((event.seats_max or 0) / 4)" class="badge float-right badge-info">
                 <t t-esc="event.seats_available"/> ticket(s) remaining
             </span>
         </t>

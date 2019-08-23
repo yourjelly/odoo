@@ -6,7 +6,7 @@
         <field name="event_id" ref="event.event_0"/>
         <field name="product_id" ref="product_product_event"/>
         <field name="deadline" eval="(DateTime.today() + timedelta(90)).strftime('%Y-%m-%d')"/>
-        <field name="price">1000.0</field>
+        <field name="price">1000.00</field>
         <field name="seats_max">50</field>
     </record>
 
@@ -15,25 +15,64 @@
         <field name="event_id" ref="event.event_0"/>
         <field name="product_id" ref="product_product_event"/>
         <field name="deadline" eval="(DateTime.today() + timedelta(60)).strftime('%Y-%m-%d')"/>
-        <field name="price">1500.0</field>
+        <field name="price">1500.00</field>
         <field name="seats_max">10</field>
     </record>
-    
+
+    <record id="event_1_ticket_1" model="event.event.ticket">
+        <field name="name">General admission</field>
+        <field name="event_id" ref="event.event_1"/>
+        <field name="product_id" ref="product_product_event"/>
+        <field name="price">0.00</field>
+        <field name="seats_max">200</field>
+    </record>
+
     <record id="event_2_ticket_1" model="event.event.ticket">
-        <field name="name">Standard</field>
+        <field name="name">General admission</field>
         <field name="event_id" ref="event.event_2"/>
         <field name="product_id" ref="product_product_event"/>
+        <field name="price">0.00</field>
+    </record>
+
+    <record id="event_3_ticket_1" model="event.event.ticket">
+        <field name="name">1-day Pass</field>
+        <field name="event_id" ref="event.event_3"/>
+        <field name="product_id" ref="product_product_event"/>
         <field name="deadline" eval="(DateTime.today() + timedelta(90)).strftime('%Y-%m-%d')"/>
-        <field name="price">1000.0</field>
+        <field name="price">100.00</field>
         <field name="seats_max">50</field>
     </record>
 
-    <record id="event_2_ticket_2" model="event.event.ticket">
-        <field name="name">VIP</field>
-        <field name="event_id" ref="event.event_2"/>
+    <record id="event_3_ticket_2" model="event.event.ticket">
+        <field name="name">3-days Pass</field>
+        <field name="event_id" ref="event.event_3"/>
         <field name="product_id" ref="product_product_event"/>
         <field name="deadline" eval="(DateTime.today() + timedelta(60)).strftime('%Y-%m-%d')"/>
-        <field name="price">1500.0</field>
+        <field name="price">150.00</field>
         <field name="seats_max">5</field>
     </record>
+
+    <record id="event_3_ticket_3" model="event.event.ticket">
+        <field name="name">Premium Pass</field>
+        <field name="event_id" ref="event.event_3"/>
+        <field name="product_id" ref="product_product_event"/>
+        <field name="deadline" eval="(DateTime.today() + timedelta(60)).strftime('%Y-%m-%d')"/>
+        <field name="price">450.00</field>
+        <field name="seats_max">5</field>
+    </record>
+
+    <record id="event_4_ticket_1" model="event.event.ticket">
+        <field name="name">General admission</field>
+        <field name="event_id" ref="event.event_4"/>
+        <field name="product_id" ref="product_product_event"/>
+        <field name="price">0.00</field>
+    </record>
+
+    <record id="event_5_ticket_1" model="event.event.ticket">
+        <field name="name">General admission</field>
+        <field name="event_id" ref="event.event_5"/>
+        <field name="product_id" ref="product_product_event"/>
+        <field name="price">0.00</field>
+    </record>
+
 </odoo>

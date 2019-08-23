@@ -2,12 +2,20 @@
 <odoo>
 
 <!-- Index -->
+<template id="opt_index_background" inherit_id="website_event.index" active="True" customize_show="True" name="Gray Background">
+    <xpath expr="//t[@t-set='opt_index_background']" position="attributes">
+        <attribute name="t-value">True</attribute>
+    </xpath>
+</template>
+
+
+<!-- Index -->
 <template id="opt_index_topbar" inherit_id="website_event.index" active="True" customize_show="True" name="Topbar">
     <xpath expr="//div[@id='oe_structure_we_index_1']" position="before">
         <section id="o_we_topbar" class="navbar navbar-light border-top shadow-sm">
-            <div class="container justify-content-start">
+            <div class="container">
                 <h4 class="navbar-brand my-0 mr-4">Events</h4>
-                <ul id="o_we_topbar_filters" class="nav"/>
+                <ul id="o_we_topbar_filters" class="nav align-items-center"/>
                 <t t-call="website_event.search_box"/>
             </div>
         </section>
@@ -18,9 +26,10 @@
 <template id="opt_time_filters" inherit_id="website_event.opt_index_topbar" active="True" customize_show="True" name="Filter by Date">
     <xpath expr="//ul[@id='o_we_topbar_filters']" position="inside">
         <li class="nav-item dropdown">
-            <a href="#" role="button" class="nav-link dropdown-toggle" data-toggle="dropdown">
+            <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
                 <!-- TODO - Display the active filter instead of this hardcoded label -->
-                <i class="fa fa-calendar o_we_topbar_icon"/><span>Next Event</span>
+                <i class="fa fa-calendar"/>
+                <span>Next Event</span>
             </a>
             <div class="dropdown-menu">
                 <t t-foreach="dates" t-as="date">
@@ -39,9 +48,10 @@
 <template id="opt_category_filters" inherit_id="website_event.opt_index_topbar" active="True" customize_show="True" name="Filter by Category">
     <xpath expr="//ul[@id='o_we_topbar_filters']" position="inside">
         <li class="nav-item dropdown">
-            <a href="#" role="button" class="nav-link dropdown-toggle" data-toggle="dropdown">
+            <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
                 <!-- TODO - Display the active filter instead of this hardcoded label -->
-                <i class="fa fa-folder-open o_we_topbar_icon"/><span>All Categories</span>
+                <i class="fa fa-folder-open"/>
+                <span>All Categories</span>
             </a>
             <div class="dropdown-menu">
                 <t t-foreach="types" t-as="type">
@@ -59,9 +69,10 @@
 <template id="opt_location_filters" inherit_id="website_event.opt_index_topbar" active="True" customize_show="True" name="Filter by Country">
     <xpath expr="//ul[@id='o_we_topbar_filters']" position="inside">
         <li class="nav-item dropdown">
-            <a href="#" role="button" class="nav-link dropdown-toggle" data-toggle="dropdown">
+            <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
                 <!-- TODO - Display the active filter instead of this hardcoded label -->
-                <i class="fa fa-map-marker o_we_topbar_icon"/><span>All countries</span>
+                <i class="fa fa-map-marker"/>
+                <span>All countries</span>
             </a>
             <div class="dropdown-menu">
                 <t t-foreach="countries" t-as="country">

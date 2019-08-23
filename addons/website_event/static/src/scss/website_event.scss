@@ -1,50 +1,42 @@
-.o_wevent_participating_container {
-    position: relative;
-
-    &::before {
-        content: "";
-        @include o-position-absolute(0, auto, 0, 0);
-        width: 3px;
-        background-color: theme-color('info');
-    }
-}
-.o_wevent_registration_list_attendees:nth-child(2n) {
-    background-color: gray('200');
-}
-
 #o_we_search_box {
-    max-width: 30%;
-    flex: 0 0 30%;
-}
-
-.o_we_topbar_icon {
-    color: gray('800');
-    margin-right: 6px;
+    flex: 0 0 33%;
+    max-width: 33%;
+    padding-left: 15px;
+    .form-control {
+        @include hover-focus {
+            border-color: $primary;
+            box-shadow: none;
+        }
+    }
 }
 
 #o_we_topbar_filters {
     .dropdown-toggle {
-        margin-right: 10px;
-        background-color: $dropdown-bg;
-        // color: $dropdown-link-color;
-        border: $dropdown-border-width solid $dropdown-border-color;
-
+        margin-right: .8em;
+        border: 1px solid #ced4da;
+        padding: .5rem .75rem;
+        background-color: #fff;
         @include border-radius($dropdown-border-radius);
-
+        color: #495057;
         @include hover-focus {
-            color: $primary;
             border-color: $primary;
+            color: $primary;
+            text-decoration: none;
         }
         &:after {
-            margin-left: 1.5em;
-            vertical-align: 0.2em;
+            margin-left: 1.2em;
+        }
+        .fa {
+            margin-right: .4em;
+            color: $primary;
         }
     }
     .dropdown-menu {
+        margin-top: .5em;
         min-width: 12rem;
     }
     .dropdown-item  {
-        padding: .25rem 1rem;
+        padding: .3rem 1rem;
         .badge {
             background-color: $primary;
             color: color-yiq($primary);
@@ -56,12 +48,15 @@
     }
 }
 
-.o_border_dashed {
-    border-right: 1px dashed $gray-400;
+#o_we_topbar {
+    .o_we_topbar_link .fa {
+        margin-right: .4em;
+        color: $primary;
+    }
 }
 
-.o_event_wrapper header {
-    height: 200px;
+.o_border_dashed {
+    border-right: 1px dashed $gray-400;
 }
 
 // No card style
@@ -72,26 +67,32 @@
     }
 }
 
-.card {
+article {
+    header {
 
-    header {    
-        height: 200px;
+    }
+    .card-img-overlay {
+        z-index: 1;
     }
     .card-title {
         color: $body-color;
     }
-
     .card-body {
         flex: 1;
+        background-color: rgba(0, 0, 0, 0);
     }
     .card-img {
-        transition: all .5s;
+        height: 180px;
+        transition: all .25s ease-in-out;
     }
     a:hover .card-img {
-        transform: scale(1.1);
+        transform: scale(1.05);
     }
-
+    .card-footer {
+        background-color: #fff;
+    }
 }
+
 .o_speaker_img {
     $width: 50px;
     width: $width;
@@ -100,4 +101,13 @@
     @include o-position-absolute($top:-10px, $right: 20px);
 }
 
+.shadow-sm {
+    box-shadow: 0 0.2rem 0.2rem rgba(0, 0, 0, 0.1) !important;
+}
 
+.o_we_ticket {
+    + .o_we_ticket { margin-top: 15px;}
+    .o_we_ticket_qty {
+        min-width: 5em;
+    }
+}
