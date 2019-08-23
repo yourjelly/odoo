@@ -226,14 +226,16 @@ VALID_AGGREGATE_FUNCTIONS = {
 }
 
 PYTHON_AGGREGATE_FUNCTIONS = {
-    # FIXME: ignore false
+    # FIXME: ignore false except for bool_*
+    # TODO: array_agg
     'count': len,
     'count_distinct': lambda p: len(set(p)),
     'bool_and': all,
     'bool_or': any,
     'max': max,
     'min': min,
-    'avg': lambda p: sum(p)/len(p)
+    'avg': lambda p: sum(p)/len(p),
+    'sum': sum,
 }
 
 
@@ -1856,6 +1858,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         self._check_qorder(orderby)
 
+        # TODO: just pass this in?
         # when a field is grouped as 'foo:bar', both orderby='foo' and
         # orderby='foo:bar' generate the clause 'ORDER BY "foo:bar"'
         groupby_fields = {
@@ -2105,7 +2108,6 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         groupby = [groupby] if isinstance(groupby, str) else list(OrderedSet(groupby))
         groupby_list = groupby[:1] if lazy else groupby
         groupby_fields = [g.split(':')[0] for g in groupby_list]
-        order = orderby or ','.join([g for g in groupby_list])
         query = self._where_calc(domain)
 
         fspecs = []
@@ -2120,8 +2122,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         computed_fspecs = {}
         stored_fspecs = {}
 
-        # TODO: do an array_agg by id if at least one groupby field is computed
-
+        # TODO: extract to its own function
         for name, func, fname in fspecs:
             if name == 'sequence':
                 continue
@@ -2144,7 +2145,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
             # FIXME: is this really needed?
             if not field.base_field.store:
-                computed_fspecs[fname] = (name, func, fname)
+                computed_fspecs[fname] = (name, PYTHON_AGGREGATE_FUNCTIONS[func], fname)
                 continue
             else:
                 stored_fspecs[fname] = (name, func, fname)
@@ -2164,10 +2165,12 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 term = '%s(%s) AS "%s"' % (func, expr, name)
             select_terms.append(term)
 
+        # TODO: factorize stored_groups + computed_groups
         stored_groups, computed_groups = self._read_group_process_groupby(
             query, groupby_list, computed_fspecs.keys())
-        # TODO: factorize stored_groups + computed_groups
         groupby_dict = {gb['groupby']: gb for gb in (stored_groups + computed_groups)}
+        # TODO: factorize, also what if a compute field is defined in the orderby?
+        order = orderby or ','.join([g for g in groupby_list if g.split(':')[0] not in computed_fspecs.keys()])
 
         self._apply_ir_rules(query, 'read')
         for gb in groupby_fields:
@@ -2188,8 +2191,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         prefix_terms = lambda prefix, terms: (prefix + " " + ",".join(terms)) if terms else ''
         prefix_term = lambda prefix, term: ('%s %s' % (prefix, term)) if term else ''
 
+        # TODO: rename id to ids?
         query = """
-            SELECT min("%(table)s".id) AS id, count("%(table)s".id) AS "%(count_field)s" %(extra_fields)s
+            SELECT array_agg("%(table)s".id) AS id, count("%(table)s".id) AS "%(count_field)s" %(extra_fields)s
             FROM %(from)s
             %(where)s
             %(groupby)s
@@ -2209,11 +2213,13 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         }
         self._cr.execute(query, where_clause_params)
         fetched_data = self._cr.dictfetchall()
+        # TODO: this should be returned in a "raw-data" method (public?)
 
         if not groupby_fields:
             return fetched_data
 
         # TODO: fetch computed fields right here, and then format them in _read_group_format_result
+        self._read_group_compute(fetched_data, computed_fspecs, computed_groups, groupby_fields, lazy=lazy)
 
         self._read_group_resolve_many2one_fields(fetched_data, stored_groups)
 
@@ -2239,6 +2245,14 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 aggregated_fields, count_field, result, read_group_order=order,
             )
         return result
+
+    def _read_group_compute(self, data, fspecs, groups, group_fields, lazy=True):
+        for d in data:
+            for name, func, fname in fspecs.values():
+                d[name] = func(self.browse(d['id']).mapped(fname))
+        # if lazy and group_fields[0] not in fspecs.keys():
+            # # if in lazy mode and the first group_field is not a computed field, return early
+            # return
 
     def _read_group_resolve_many2one_fields(self, data, fields):
         many2onefields = {field['field'] for field in fields if field['type'] == 'many2one'}
