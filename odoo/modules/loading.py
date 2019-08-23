@@ -119,6 +119,7 @@ def force_demo(cr):
 
 def load_module_graph(cr, graph, status=None, perform_checks=True,
                       skip_modules=None, report=None, models_to_check=None):
+    total_init_time = time.time()
     """Migrates+Updates or Installs all module nodes from ``graph``
        :param graph: graph of module nodes to load
        :param status: deprecated parameter, unused, left to avoid changing signature in 8.0
@@ -159,6 +160,8 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
 
     for index, package in enumerate(graph, 1):
         module_name = package.name
+
+        init_time = time.time()
         module_id = package.id
 
         if skip_modules and module_name in skip_modules:
@@ -248,7 +251,10 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
             cr.commit()
 
             if tools.config.options['test_enable']:
+                l_time = time.time()
                 report.record_result(load_test(idref, mode))
+                __logger = logging.getLogger('%s.%s' % (module_name, 'install'))
+                __logger.info('exectime load_test: %s', time.time()-l_time)
                 # Python tests
                 env['ir.http']._clear_routing_map()     # force routing map to be rebuilt
                 report.record_result(odoo.modules.module.run_unit_tests(module_name))
@@ -272,8 +278,15 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
 
         if package.name is not None:
             registry._init_modules.add(package.name)
+        
+        __logger = logging.getLogger('%s.%s' % (module_name, 'install'))
+        __logger.info('exectime load_module_graph: %s', time.time()-init_time)
 
     _logger.log(25, "%s modules loaded in %.2fs, %s queries", len(graph), time.time() - t0, odoo.sql_db.sql_counter - t0_sql)
+
+
+    __logger = logging.getLogger('%s.%s' % ('all_modules', 'install'))
+    __logger.info('exectime total_load_module_graph: %s', time.time()-total_init_time)
 
     return loaded_modules, processed_modules
 

@@ -185,6 +185,7 @@ class TreeCase(unittest.TestCase):
             self.assertTreesEqual(c1, c2, msg)
 
     def run(self, result=None):
+        total_time = time.time()
         orig_result = result
         if result is None:
             result = self.defaultTestResult()
@@ -213,22 +214,30 @@ class TreeCase(unittest.TestCase):
 
         outcome = unittest.case._Outcome(result)
         try:
+            classes = []
+            for cla in type(self).mro():
+                if cla == TreeCase:
+                    break
+                classes.append(cla.__name__)
+            stri_class = ','.join(classes)
+
             self._outcome = outcome
             with outcome.testPartExecutor(self):
                 init_time = time.time()
                 self.setUp()
-                self.__logger.info('exectime setUp: %s', time.time() - init_time)
+                self.__logger.info('exectime setUp (%s): %s', stri_class, time.time() - init_time)
+                
             if outcome.success:
                 outcome.expecting_failure = expecting_failure
                 with outcome.testPartExecutor(self, isTest=True):
                     init_time = time.time()
                     testMethod()
-                    self.__logger.info('exectime testMethod: %s', time.time() - init_time)
+                    self.__logger.info('exectime testMethod (%s): %s', stri_class, time.time() - init_time)
                 outcome.expecting_failure = False
                 with outcome.testPartExecutor(self):
                     init_time = time.time()
                     self.tearDown()
-                    self.__logger.info('exectime tearDown: %s', time.time() - init_time)
+                    self.__logger.info('exectime tearDown (%s): %s', stri_class, time.time() - init_time)
 
             self.doCleanups()
             for test, reason in outcome.skipped:
@@ -258,6 +267,7 @@ class TreeCase(unittest.TestCase):
 
             # clear the outcome, no more needed
             self._outcome = None
+        self.__logger.info('exectime runTest: %s', time.time() - init_time)
 
 class MetaCase(type):
     """ Metaclass of test case classes to assign default 'test_tags':
@@ -1058,12 +1068,12 @@ class HttpCase(TransactionCase):
 
         s_time = time.time()
         self.start_browser()
-        self._logger.info('exectime start_browser: %s', time.time()-s_time)
+        self._logger.info('exectime browser_js.start_browser: %s', time.time()-s_time)
         s_time = time.time()
         try:
             self.authenticate(login, login)
 
-            self._logger.info('exectime authenticate: %s', time.time()-s_time)
+            self._logger.info('exectime browser_js.authenticate: %s', time.time()-s_time)
             s_time = time.time()
             base_url = "http://%s:%s" % (HOST, PORT)
             ICP = self.env['ir.config_parameter']
@@ -1078,29 +1088,29 @@ class HttpCase(TransactionCase):
                 self._logger.info('Starting screencast')
                 self.browser.start_screencast()
 
-            self._logger.info('exectime setup: %s', time.time()-s_time)
+            self._logger.info('exectime browser_js.setup: %s', time.time()-s_time)
             s_time = time.time()
 
             self.browser.navigate_to(url, wait_stop=not bool(ready))
 
-            self._logger.info('exectime navigate_to: %s', time.time()-s_time)
+            self._logger.info('exectime browser_js.navigate_to: %s', time.time()-s_time)
             s_time = time.time()
             # Needed because tests like test01.js (qunit tests) are passing a ready
             # code = ""
             ready = ready or "document.readyState === 'complete'"
             self.assertTrue(self.browser._wait_ready(ready), 'The ready "%s" code was always falsy' % ready)
 
-            self._logger.info('exectime _wait_ready: %s', time.time()-s_time)
+            self._logger.info('exectime browser_js._wait_ready: %s', time.time()-s_time)
             s_time = time.time()
 
             error = False
             try:
                 self.browser._wait_code_ok(code, timeout)
-                self._logger.info('exectime _wait_code_ok: %s', time.time()-s_time)
+                self._logger.info('exectime browser_js._wait_code_ok: %s', time.time()-s_time)
                 s_time = time.time()
             except ChromeBrowserException as chrome_browser_exception:
                 error = chrome_browser_exception
-                self._logger.info('exectime _wait_code_ok_failure: %s (failure)', time.time()-s_time)
+                self._logger.info('exectime browser_js._wait_code_ok_failure: %s (failure)', time.time()-s_time)
                 s_time = time.time()
             if error:  # dont keep initial traceback, keep that outside of except
                 if code:
@@ -1113,10 +1123,10 @@ class HttpCase(TransactionCase):
             # clear browser to make it stop sending requests, in case we call
             # the method several times in a test method
             self.browser.clear()
-            self._logger.info('exectime browser_clear: %s', time.time()-s_time)
+            self._logger.info('exectime browser_js.browser_clear: %s', time.time()-s_time)
             s_time = time.time()
             self._wait_remaining_requests()
-            self._logger.info('exectime _wait_remaining_requests: %s', time.time()-s_time)
+            self._logger.info('exectime browser_js._wait_remaining_requests: %s', time.time()-s_time)
             s_time = time.time()
             self._logger.info('exectime browser_js: %s', time.time()-init_time)
 

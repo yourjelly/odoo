@@ -1115,6 +1115,8 @@ def preload_registries(dbnames):
     dbnames = dbnames or []
     rc = 0
     for dbname in dbnames:
+        init_time = time.time()
+        __logger = logging.getLogger('%s.%s' % ('all_module', 'install'))
         try:
             update_module = config['init'] or config['update']
             registry = Registry.new(dbname, update_module=update_module)
@@ -1133,6 +1135,7 @@ def preload_registries(dbnames):
 
             # run post-install tests
             if config['test_enable']:
+                t_time = time.time()
                 t0 = time.time()
                 t0_sql = odoo.sql_db.sql_counter
                 module_names = (registry.updated_modules if update_module else
@@ -1144,9 +1147,11 @@ def preload_registries(dbnames):
                         registry._assertion_report.record_result(result)
                 _logger.info("All post-tested in %.2fs, %s queries",
                              time.time() - t0, odoo.sql_db.sql_counter - t0_sql)
+                __logger.info('exectime preload_registeries_post_tests: %s', time.time()-t_time)
 
             if registry._assertion_report.failures:
                 rc += 1
+            __logger.info('exectime preload_registeries_post_tests: %s', time.time()-init_time)
         except Exception:
             _logger.critical('Failed to initialize database `%s`.', dbname, exc_info=True)
             return -1

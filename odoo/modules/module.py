@@ -579,34 +579,44 @@ class OdooTestRunner(object):
 current_test = None
 
 class OdooSuite(unittest.TestSuite):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, module=None, **kwargs):
         super().__init__(*args, **kwargs)
         cls = type(self)
-        cls.__logger = logging.getLogger('%s.%s' % (cls.__module__, cls.__name__))
+        self.__module = module
+        self.__logger = logging.getLogger('%s.%s' % (self.__module or cls.__module__, cls.__name__))
+
+    def striClass(self, klass):
+        classes = []
+        for cla in klass.mro():
+            if cla == odoo.tests.common.TreeCase:
+                break
+            classes.append(cla.__name__)
+        return ','.join(classes)
 
     def _handleClassSetUp(self, test, result):
         init_time = time.time()
         super()._handleClassSetUp(test, result)
-        self.__logger.info('exectime setUpClass: %s', time.time()-init_time)
-
-    def _handleClassSetUp(self, test, result):
-        init_time = time.time()
-        super()._handleClassSetUp(test, result)
-        self.__logger.info('exectime setUpClass: %s', time.time()-init_time)
+        cls = type(self)
+        __logger = logging.getLogger('%s.%s' % (self.__module or cls.__module__, type(test).__name__))
+        __logger.info('exectime setUpClass (%s): %s', self.striClass(type(test)), time.time()-init_time)
 
     def _tearDownPreviousClass(self, test, result):
         init_time = time.time()
+        previousClass = getattr(result, '_previousTestClass', None)
         super()._tearDownPreviousClass(test, result)
-        self.__logger.info('exectime tearDownClass: %s', time.time()-init_time)
+        if previousClass:
+            cls = type(self)
+            __logger = logging.getLogger('%s.%s' % (self.__module or cls.__module__, previousClass.__name__))
+            __logger.info('exectime tearDownClass (%s): %s', self.striClass(previousClass), time.time()-init_time)
 
     def _handleModuleFixture(self, test, result):
         init_time = time.time()
         super()._handleModuleFixture(test, result)
         self.__logger.info('exectime setUpModule: %s', time.time()-init_time)
 
-    def _handleModuleTearDown(self, test, result):
+    def _handleModuleTearDown(self, result):
         init_time = time.time()
-        super()._handleModuleTearDown(test, result)
+        super()._handleModuleTearDown(result)
         self.__logger.info('exectime tearDownModule: %s', time.time()-init_time)
 
 
@@ -617,6 +627,7 @@ def run_unit_tests(module_name, position='at_install'):
     :rtype: bool
     """
     init_time = time.time()
+    __logger = logging.getLogger('%s.%s' % (module_name, position))
     global current_test
     from odoo.tests.common import TagsSelector # Avoid import loop
     current_test = module_name
@@ -629,7 +640,7 @@ def run_unit_tests(module_name, position='at_install'):
         loader = unittest.TestLoader()
         loader.suiteClass = OdooSuite
         tests = unwrap_suite(loader.loadTestsFromModule(m))
-        suite = unittest.TestSuite(t for t in tests if position_tag.check(t) and config_tags.check(t))
+        suite = OdooSuite((t for t in tests if position_tag.check(t) and config_tags.check(t)), module=module_name)
 
         if suite.countTestCases():
             t0 = time.time()
@@ -645,7 +656,6 @@ def run_unit_tests(module_name, position='at_install'):
     current_test = None
     threading.currentThread().testing = False
 
-    __logger = logging.getLogger('%s.%s' % (module_name, position))
     __logger.info('exectime run_unit_tests: %s', time.time()-init_time)
     return r
 
