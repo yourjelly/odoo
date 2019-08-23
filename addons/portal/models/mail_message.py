@@ -1,11 +1,30 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, models
+from odoo import api, fields,models
+from odoo.osv import expression
 
 
 class MailMessage(models.Model):
     _inherit = 'mail.message'
+
+    @api.model
+    def default_get(self, fields_list):
+        defaults = super(MailMessage, self).default_get(fields_list)
+        # Note: explicitly implemented in default_get() instead of field default,
+        # to avoid setting to True for all existing messages during upgrades.
+        # TODO: this default should probably be dynamic according to the model
+        # on which the messages are attached, thus moved to create().
+        if 'website_published' in fields_list:
+            defaults.setdefault('website_published', True)
+
+        return defaults
+
+    website_published = fields.Boolean(string='Published', help="Visible on the website as a comment")
+
+    @api.model
+    def _non_employee_message_domain(self):
+        return [('subtype_id', '!=', False), ('subtype_id.internal', '=', False)]
 
     def portal_message_format(self):
         return self._portal_message_format([
@@ -25,6 +44,4 @@ class MailMessage(models.Model):
                     attachment['access_token'] = IrAttachmentSudo.browse(attachment['id']).generate_access_token()[0]
         return message_values
 
-    @api.model
-    def _non_employee_message_domain(self):
-        return ['&', ('subtype_id', '!=', False), ('subtype_id.internal', '=', False)]
+   
