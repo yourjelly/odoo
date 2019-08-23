@@ -22,6 +22,7 @@ var DebugManager = Widget.extend({
         this._events = null;
         var debug = odoo.debug;
         this.debug_mode = debug;
+        owl.config.mode = debug ? "dev" : "prod";
         this.debug_mode_help = debug && debug !== '1' ? ' (' + debug + ')' : '';
     },
     start: function () {
