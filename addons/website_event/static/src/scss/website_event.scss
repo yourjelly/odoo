@@ -11,3 +11,60 @@
 .o_wevent_registration_list_attendees:nth-child(2n) {
     background-color: gray('200');
 }
+
+#o_we_index_topbar_filters {
+    .dropdown-toggle {
+        margin-right: .8em;
+        border: 1px solid #ced4da;
+        padding: .5rem .75rem;
+        background-color: #fff;
+        @include border-radius($dropdown-border-radius);
+        color: #495057;
+        @include hover-focus {
+            border-color: $primary;
+            color: $primary;
+            text-decoration: none;
+        }
+        &:after {
+            margin-left: 1.2em;
+        }
+        .fa {
+            margin-right: .4em;
+            color: $primary;
+        }
+    }
+    .dropdown-menu {
+        margin-top: .5em;
+        min-width: 12rem;
+    }
+    .dropdown-item  {
+        padding: .3rem 1rem;
+        .badge {
+            background-color: $primary;
+            color: color-yiq($primary);
+        }
+        &.active .badge {
+            color: $primary;
+            background-color: color-yiq($primary);
+        }
+    }
+}
+
+
+// TODO • No way to set a class for a menu item?
+// Crappy way to makes Register link looks like a button.
+#o_we_event_submenu .nav-item:last-child {
+    @include media-breakpoint-up(md) {
+        margin-left: auto;
+    }
+    .nav-link {
+        padding: 0.5rem 2rem;
+        background-color: $primary;
+        border-radius: 4px;
+        color: #fff !important;
+        text-align: center;
+        @include media-breakpoint-down(md) {
+            width: 100%;
+        }
+    }
+}
