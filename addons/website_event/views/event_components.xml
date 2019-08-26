@@ -118,7 +118,7 @@
         <article class="card" itemscope="itemscope" itemtype="http://schema.org/Event">
             <div class="row no-gutters">
                 <!-- Images -->
-                <header t-attf-class="o_we_event_header bg-secondary #{'col-12 rounded-top' if opt_events_list_columns else 'col-sm-4 col-lg-3 rounded-left'}">
+                <header t-attf-class="o_we_event_header #{'col-12 rounded-top' if opt_events_list_columns else 'col-sm-4 col-lg-3 rounded-left'} #{events_cover_properties[event_index].get('background-color')}" t-attf-style="background-image: url('#{events_cover_properties[event_index].get('img_url')}'); background-size: cover; background-position: 50% 100%;">
                     <!-- Short Date -->
                     <div class="o_we_event_date position-absolute bg-white shadow-sm">
                         <span t-esc="event.with_context(tz=event.date_tz).date_begin.strftime('%b')" class="o_we_event_month"/>
