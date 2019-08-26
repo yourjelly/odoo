@@ -166,7 +166,6 @@
             </div>
         </article>
     </div>
-
     <!-- Pager -->
     <div class="form-inline justify-content-center my-3">
         <t t-call="website.pager"/>
