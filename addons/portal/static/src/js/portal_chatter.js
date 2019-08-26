@@ -22,9 +22,7 @@ var PortalComposer = publicWidget.Widget.extend({
         'change .o_portal_chatter_file_input': '_onFileInputChange',
         'click .o_portal_chatter_attachment_btn': '_onAttachmentButtonClick',
         'click .o_portal_chatter_attachment_delete': 'async _onAttachmentDeleteClick',
-        'click .o_portal_chatter_composer_btn': 'async _onSubmitButtonClick',
     },
-
     /**
      * @constructor
      */
@@ -52,6 +50,9 @@ var PortalComposer = publicWidget.Widget.extend({
         this.$attachmentTokens = this.$('.o_portal_chatter_attachment_tokens');
 
         return this._super.apply(this, arguments);
+
+
+
     },
 
     //--------------------------------------------------------------------------
@@ -63,7 +64,9 @@ var PortalComposer = publicWidget.Widget.extend({
      */
     _onAttachmentButtonClick: function () {
         this.$fileInput.click();
+
     },
+
     /**
      * @private
      * @param {Event} ev
@@ -136,9 +139,6 @@ var PortalComposer = publicWidget.Widget.extend({
      * @private
      * @returns {Promise}
      */
-    _onSubmitButtonClick: function () {
-        return new Promise(function (resolve, reject) {});
-    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -172,6 +172,7 @@ var PortalChatter = publicWidget.Widget.extend({
     xmlDependencies: ['/portal/static/src/xml/portal_chatter.xml'],
     events: {
         "click .o_portal_chatter_pager_btn": '_onClickPager',
+        "submit .o_portal_chatter_composer_form": '_onChatterFormSubmit',
     },
 
     /**
@@ -222,6 +223,9 @@ var PortalChatter = publicWidget.Widget.extend({
      */
     start: function () {
         // bind events
+        this.$attachments = this.$('.o_portal_chatter_composer_form .o_portal_chatter_attachments');
+        this.$attachmentIds = this.$('.o_portal_chatter_attachment_ids');
+        this.$attachmentTokens = this.$('.o_portal_chatter_attachment_tokens');
         this.on("change:messages", this, this._renderMessages);
         this.on("change:message_count", this, function () {
             this._renderMessageCount();
@@ -281,6 +285,16 @@ var PortalChatter = publicWidget.Widget.extend({
         return messages;
     },
 
+    reinitialize: function () {
+        var self = this;
+        this._chatterInit().then(function (result) {
+            self.renderElement();
+            if (self.options['display_composer']) {
+                self._composer = new PortalComposer(self, self.options);
+                self._composer.replace(self.$('.o_portal_chatter_composer'));
+            }
+        });
+    },
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -297,6 +311,8 @@ var PortalChatter = publicWidget.Widget.extend({
         }).then(function (result) {
             self.result = result;
             self.options = _.extend(self.options, self.result['options'] || {});
+            self.set('message_count', self.options['message_count']);
+            self.set('messages', self.preprocessMessages(result['messages']));
             return result;
         });
     },
@@ -395,6 +411,22 @@ var PortalChatter = publicWidget.Widget.extend({
             var p = self._currentPage;
             self.set('pager', self._pager(p));
         });
+    },
+
+    _onChatterFormSubmit: function (ev) {
+        ev.preventDefault();
+        var self = this;
+        var message = this.$el.find('textarea[name="message"]').val();
+        console.log('submitted form');
+        if (message) {
+            ajax.jsonRpc(ev.currentTarget.action, 'call', {'res_model': this.options.res_model, 'res_id': this.options.res_id, 'message': message, 'token': this.options.token})
+                .then(function () {
+                    // re-render widget after message post
+                    self.reinitialize();
+                    self.messageFetch();
+                });
+
+        }
     },
     /**
      * @private

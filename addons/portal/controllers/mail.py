@@ -88,7 +88,7 @@ class PortalChatter(http.Controller):
     def _portal_post_filter_params(self):
         return ['token', 'hash', 'pid']
 
-    @http.route(['/mail/chatter_post'], type='http', methods=['POST'], auth='public', website=True)
+    @http.route(['/mail/chatter_post'], type='json', methods=['POST'], auth='public', website=True)
     def portal_chatter_post(self, res_model, res_id, message, redirect=None, attachment_ids='', attachment_tokens='', **kw):
         """Create a new `mail.message` with the given `message` and/or
         `attachment_ids` and redirect the user to the newly created message.
