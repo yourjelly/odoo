@@ -99,6 +99,49 @@
     </form>
 </template>
 
+<template id="events_list" name="Events list">
+    <!-- No events -->
+    <t t-if="not event_ids">
+        <div class="h2 mb-3">No events found.</div>
+        <div class="alert alert-info text-center" groups="event.group_event_manager">
+            <p class="m-0">Use the top button '<b>+ New</b>' to create an event.</p>
+        </div>
+    </t>
+    <!-- List -->
+    <div t-foreach="event_ids" t-as="event" class="card w-100 mb-3" itemscope="itemscope" itemtype="http://schema.org/Event">
+        <div t-attf-class="card-body #{event.is_participating and 'o_wevent_participating_container' or ''}">
+            <span t-if="event.is_participating" class="badge badge-info o_we_badge">Participating</span>
+            <span t-if="event.is_online" class="badge badge-info o_we_badge">Online</span>
+            <span t-if="not event.website_published" class="badge badge-danger o_we_badge">unpublished</span>
+            <span class="badge badge-secondary float-right o_we_badge" t-if="event.event_type_id">
+                <!-- <i class="fa fa-folder-open mr-1" role="img" aria-label="Event type" title="Event type"/> -->
+                <span t-field="event.event_type_id"/>
+            </span>
+            <h4>
+                <a itemprop="url" t-att-class="event.state == 'done' and 'text-success'" t-attf-href="/event/#{ slug(event) }/#{(not event.menu_id) and 'register' or ''}"><b itemprop="name" t-field="event.name"/></a>
+            </h4>
+            <small t-if="event.organizer_id" class="text-muted">Organized by <span t-field="event.organizer_id" /></small>
+            <div>
+                <i class="fa fa-clock-o text-primary mx-1" role="img" aria-label="Start date" title="Start date"/>
+                <span itemprop="startDate" t-field="event.with_context(tz=event.date_tz).date_begin" t-options='{"hide_seconds":"True"}'></span>
+                <small>to</small>
+                <span itemprop="endDate" t-field="event.with_context(tz=event.date_tz).date_end" t-options='{"hide_seconds":"True"}'></span>
+            </div>
+            <hr/>
+            <t t-if="not event.is_online">
+                <div itemprop="location" t-field="event.address_id" t-options='{
+                    "widget": "contact",
+                    "fields": ["city"]
+                }'/>
+            </t>
+        </div>
+    </div>
+    <!-- Pager -->
+    <div class="form-inline justify-content-center my-3">
+        <t t-call="website.pager"/>
+    </div>
+</template>
+
 <!-- Index - Sidebar -->
 <template id="index_sidebar" name="Sidebar">
     <div id="o_we_index_sidebar" class="col-lg-4 offset-xl-1 my-5"/>
