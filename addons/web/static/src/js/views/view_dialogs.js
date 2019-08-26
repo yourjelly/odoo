@@ -375,6 +375,9 @@ var SelectCreateDialog = ViewDialog.extend({
         }));
         view.setController(selectCreateController);
         return view.getController(this).then(function (controller) {
+            if (controller.activeActions) {
+                controller.activeActions.create = !self.options.no_create;
+            }
             self.viewController = controller;
             // render the footer buttons
             self._prepareButtons();
