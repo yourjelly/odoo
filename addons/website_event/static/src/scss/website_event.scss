@@ -1,20 +1,11 @@
-.o_wevent_participating_container {
-    position: relative;
-
-    &::before {
-        content: "";
-        @include o-position-absolute(0, auto, 0, 0);
-        width: 3px;
-        background-color: theme-color('info');
-    }
-}
 .o_wevent_registration_list_attendees:nth-child(2n) {
     background-color: gray('200');
 }
 
 #o_we_index_topbar_filters {
     .dropdown-toggle {
-        margin-right: .8em;
+        display: block;
+        margin-right: $spacer * 0.5;
         border: 1px solid #ced4da;
         padding: .5rem .75rem;
         background-color: #fff;
@@ -113,4 +104,49 @@
     padding: ($spacer * .5) $spacer;
     border-radius: 10rem;
     font-weight: $font-weight-normal;
+}
+
+.o_we_event_header {
+    height: 200px;
+}
+
+.o_we_event_category {
+    top: -$spacer;
+    left: 0;
+    padding: ($card-spacer-y * .5) $card-spacer-x;
+    @include border-right-radius(10rem);
+    background-color: #fff;
+    > * {
+        vertical-align: middle;
+    }
+}
+
+.o_we_event_participating,
+.o_we_event_unpublished {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: $card-spacer-y $card-spacer-x;
+    text-align: right;
+}
+
+.o_we_event_date {
+    top: 1.125rem;
+    right: $card-spacer-x;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    @include size(4rem);
+    border-radius: 50%;
+    text-align: center;
+    .o_we_event_day {
+        font-size: 1.125rem;
+        font-weight: 300;
+        line-height: 1;
+    }
+    .o_we_event_month {
+        font-size: 0.75rem;
+        font-weight: $font-weight-bold;
+        text-transform: uppercase;
+    }
 }

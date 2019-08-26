@@ -33,7 +33,7 @@
                     </t> -->
                     <a t-att-href="event_dict['url']">
                         <i t-if="not event_dict['event'].website_published" class="fa fa-ban text-danger mr-1" role="img" aria-label="Unpublished" title="Unpublished"/>
-                        <t t-esc="event_dict['event'].name"/>
+                        <span t-esc="event_dict['event'].name" t-attf-class="#{'text-danger' if not event_dict['event'].website_published else ''}"/>
                     </a>
                     <span t-esc="event_dict['date']"/>
                 </li>
