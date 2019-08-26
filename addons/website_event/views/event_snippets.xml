@@ -2,52 +2,51 @@
 <odoo>
 
 <!-- Snippet - Country Events - Placeholder -->
-<!-- TODO - Why? Creating a flickering effect. -->
 <template id="s_country_events" name="Country Events">
-    <div t-attf-class="oe_country_events #{_classes or 'my-3'}">
-        <div class="country_events_list">
-            <h5>
-                <i class="fa fa-flag"/> Local Events
-            </h5>
-        </div>
-    </div>
+    <section t-attf-class="s_country_events_list oe_country_events #{_classes}">
+        <span class="country_events_list"/>
+    </section>
 </template>
 
 <!-- Snippet - Country Events - List -->
 <template id="country_events_list" name="Country Events List">
-    <t t-ignore="true">
-        <t t-if="events">
-            <div class="country_events_list">
+    <t t-if="events" t-ignore="true">
+        <header>
+            <h6 class="o_we_sidebar_title">
                 <t t-if="country">
+                    <i class="fa fa-flag mr-2"/>Events: <span t-esc="country.name"/>
                     <img class="img-fluid" t-att-src="website.image_url(country, 'image')" alt=""></img>
-                    <h4><b>Events: <span t-esc="country.name"></span></b></h4>
                 </t>
-                <t t-if="not country">
-                    <img class="img-fluid" src="/website_event/static/src/img/world_map.jpg" alt=""></img>
-                    <h4><b>Upcoming Events</b></h4>
+                <t t-else="">
+                    <i class="fa fa-globe mr-2"/>Upcoming Events
                 </t>
-                <div t-foreach="events[:5]" t-as="event_dict" class="oe_website_overflow_ellipsis mb8">
-                    <t t-if="not event_dict['event'].website_published">
-                        <span class="badge badge-danger" role="img" aria-label="Attention: not published" title="Not published"><i class="fa fa-ban"></i></span>
-                    </t>
-                    <t t-if="event_dict['event'].address_id">
+            </h6>
+        </header>
+        <main>
+            <ul class="list-group">
+                <li t-foreach="events[:5]" t-as="event_dict" class="list-group-item d-flex justify-content-between">
+                    <!-- <t t-if="event_dict['event'].address_id">
                         <i class="fa fa-map-marker" title="It is a physical event" role="img" aria-label="It is a physical event"></i>
-                    </t>
-                    <t t-if="not event_dict['event'].address_id">
+                    </t> -->
+                    <!-- <t t-if="not event_dict['event'].address_id">
                         <i class="fa fa-cloud" title="It is an online event" role="img" aria-label="It is an online event"></i>
-                    </t>
-                    <b><span t-esc="event_dict['date']"/>: <span><a t-att-href="event_dict['url']"><t t-esc="event_dict['event'].name"/></a></span></b>
-                </div>
-                <t t-if="len(events) &gt; 5">
-                    <div t-if="country">
-                        <b><a t-att-href="'/event?country='+str(country.id)">See all events from <span t-esc="country.name"></span></a></b>
-                    </div>
-                    <div t-if="not country">
-                        <b><a href="/event"> See all upcoming events </a></b>
-                    </div>
-                </t>
-            </div>
-        </t>
+                    </t> -->
+                    <a t-att-href="event_dict['url']">
+                        <i t-if="not event_dict['event'].website_published" class="fa fa-ban text-danger mr-1" role="img" aria-label="Unpublished" title="Unpublished"/>
+                        <t t-esc="event_dict['event'].name"/>
+                    </a>
+                    <span t-esc="event_dict['date']"/>
+                </li>
+            </ul>
+        </main>
+        <footer t-if="len(events) &gt; 5" class="mt-3">
+            <t t-if="country">
+                <a t-att-href="'/event?country='+str(country.id)">See all events from <span t-esc="country.name"></span></a>
+            </t>
+            <t t-else="">
+                <a href="/event" class="float-right small"><b>View all</b></a>
+            </t>
+        </footer>
     </t>
 </template>
 

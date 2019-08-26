@@ -99,40 +99,86 @@
     </form>
 </template>
 
-
-
-
 <!-- Index - Sidebar -->
 <template id="index_sidebar" name="Sidebar">
-    <div id="o_event_index_sidebar" class="col-lg-3 oe_structure"/>
+    <div id="o_we_index_sidebar" class="col-lg-4 offset-xl-1 my-5"/>
+</template>
+
+<!-- Index - Sidebar - About us -->
+<template id="index_sidebar_about_us" inherit_id="website_event.index_sidebar" active="True" customize_show="True" name="About us">
+    <xpath expr="//div[@id='o_we_index_sidebar']" position="inside">
+        <div class="o_we_sidebar_block">
+            <h6 class="o_we_sidebar_title">About us</h6>
+            <p>Use this paragrah to write a short text about your events or your company.<br/> <a href="/aboutus">Read more</a></p>
+        </div>
+        <div id="oe_structure_website_event_about_us_1" class="oe_structure"/>
+    </xpath>
+</template>
+
+<!-- Index - Sidebar - Follow us -->
+<template id="index_sidebar_follow_us" inherit_id="website_event.index_sidebar" active="True" customize_show="True" name="Follow us">
+    <xpath expr="//div[@id='o_we_index_sidebar']" position="inside">
+        <div class="o_we_sidebar_block">
+            <h6 class="o_we_sidebar_title">Follow Us</h6>
+            <div class="o_we_sidebar_social d-flex justify-content-between">
+                <a t-if="website.social_facebook" t-att-href="website.social_facebook" class="o_we_sidebar_social_link"><i class="fa fa-facebook text-facebook" aria-label="Facebook" title="Facebook"/></a>
+                <a t-if="website.social_twitter" t-att-href="website.social_twitter" class="o_we_sidebar_social_link"><i class="fa fa-twitter text-twitter" aria-label="Twitter" title="Twitter"/></a>
+                <a t-if="website.social_linkedin" t-att-href="website.social_linkedin" class="o_we_sidebar_social_link"><i class="fa fa-linkedin text-linkedin" aria-label="LinkedIn" title="LinkedIn"/></a>
+                <a t-if="website.social_youtube" t-att-href="website.social_youtube" class="o_we_sidebar_social_link"><i class="fa fa-youtube-play text-youtube" aria-label="Youtube" title="Youtube"/></a>
+                <a t-if="website.social_github" t-att-href="website.social_github" class="o_we_sidebar_social_link"><i class="fa fa-github text-github" aria-label="Github" title="Github"/></a>
+                <a t-if="website.social_instagram" t-att-href="website.social_instagram" class="o_we_sidebar_social_link"><i class="fa fa-instagram text-instagram" aria-label="Instagram" title="Instagram"/></a>
+            </div>
+            <t t-call="website_mail.follow" t-if="event">
+                <t t-set="email" t-value="user_id.email"/>
+                <t t-set="object" t-value="blog"/>
+                <t t-set="div_class" t-value="'pt-2'"/>
+            </t>
+        </div>
+        <div id="oe_structure_website_event_follow_us_1" class="oe_structure"/>
+    </xpath>
 </template>
 
 <!-- Index - Sidebar - Photos -->
-<template id="event_right_photos" inherit_id="website_event.index_sidebar" active="True" customize_show="True" name="Photos">
-    <xpath expr="//div[@id='o_event_index_sidebar']" position="inside">
-        <figure class="figure o_figure_relative_layout w-100">
-            <img class="figure-img img-fluid" src="/website_event/static/src/img/openerp_enterprise_of_the_year.png" alt=""/>
-            <figcaption class="figure-caption text-center"><a href="/event">Photos of Past Events</a></figcaption>
-        </figure>
-        <figure class="figure o_figure_relative_layout w-100">
-            <img class="figure-img img-fluid" src="/website_event/static/src/img/training.jpg" alt=""/>
-            <figcaption class="figure-caption text-center"><a href="/event">Our Trainings</a></figcaption>
-        </figure>
+<template id="index_sidebar_photos" inherit_id="website_event.index_sidebar" active="True" customize_show="True" name="Photos">
+    <xpath expr="//div[@id='o_we_index_sidebar']" position="inside">
+        <h6 class="o_we_sidebar_title">Photos</h6>
+        <a href="/event">
+            <figure class="o_we_sidebar_block o_we_sidebar_figure figure">
+                <img class="figure-img img-fluid rounded" src="/website_event/static/src/img/event_past_0.jpg" alt=""/>
+                <figcaption class="figure-caption">Past event</figcaption>
+            </figure>
+        </a>
+        <a href="/event">
+            <figure class="o_we_sidebar_block o_we_sidebar_figure figure">
+                <img class="figure-img img-fluid rounded" src="/website_event/static/src/img/event_training_0.jpg" alt=""/>
+                <figcaption class="figure-caption">Our Trainings</figcaption>
+            </figure>
+        </a>
+    </xpath>
+</template>
+
+<!-- Index - Sidebar - Categories -->
+<template id="index_sidebar_categories" inherit_id="website_event.index_sidebar" active="True" customize_show="True" name="Categories">
+    <xpath expr="//div[@id='o_we_index_sidebar']" position="inside">
+        <div class="o_we_sidebar_block">
+            <h6 class="o_we_sidebar_title">Categories</h6>
+            <t t-foreach="types" t-as="type">
+                <t t-if="type['event_type_id']">
+                    <a t-attf-href="/event?{{ keep_query('country', 'date', type=type['event_type_id'][0]) }}" class="badge badge-secondary o_we_badge mb-2"><t t-esc="type['event_type_id'][1]"/></a>
+                </t>
+            </t>
+        </div>
     </xpath>
 </template>
 
 <!-- Index - Sidebar - Quotes -->
-<template id="event_right_quotes" inherit_id="website_event.index_sidebar" active="True" customize_show="True" name="Quotes">
-    <xpath expr="//div[@id='o_event_index_sidebar']" position="inside">
-        <div class="card mb-3 bg-secondary">
+<template id="index_sidebar_quotes" inherit_id="website_event.index_sidebar" active="True" customize_show="True" name="Quotes">
+    <xpath expr="//div[@id='o_we_index_sidebar']" position="inside">
+        <div class="o_we_sidebar_block card">
             <div class="card-body">
-                <blockquote class="m-0">
-                    <p>
-                        <i>Write here a quote from one of your attendees.
-                        It gives confidence in your
-                        events.</i>
-                    </p>
-                    <small>Author</small>
+                <blockquote class="blockquote mb-0">
+                    <p><em>Write here a quote from one of your attendees. It gives confidence in your events.</em></p>
+                    <footer class="blockquote-footer">Author</footer>
                 </blockquote>
             </div>
         </div>
@@ -140,15 +186,12 @@
 </template>
 
 <!-- Index - Sidebar - Snippet - Country Events -->
-<template id="event_right_country_event" inherit_id="website_event.index_sidebar" active="True" customize_show="True" name="Country Events">
-    <xpath expr="//div[@id='o_event_index_sidebar']" position="inside">
-        <div class="card mb-3">
-            <t t-call="website_event.s_country_events">
-                <t t-set="_classes" t-value="'card-body'"/>
-            </t>
+<template id="index_sidebar_country_event" inherit_id="website_event.index_sidebar" active="True" customize_show="True" name="Country Events">
+    <xpath expr="//div[@id='o_we_index_sidebar']" position="inside">
+        <div class="o_we_sidebar_block">
+            <t t-call="website_event.s_country_events"/>
         </div>
     </xpath>
 </template>
-
 
 </odoo>
