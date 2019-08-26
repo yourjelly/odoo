@@ -1668,6 +1668,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             for name, field in self._fields.items()
             if name not in values
             if not (field.inherited and field.related_field.model_name in avoid_models)
+            if (not field.company_dependent)
         }
 
         if not missing_defaults:
