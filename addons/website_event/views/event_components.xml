@@ -99,7 +99,13 @@
     </form>
 </template>
 
+<!-- Index - Events list -->
 <template id="events_list" name="Events list">
+    <!-- Options -->
+    <t t-set="opt_events_list_columns" t-value="False"/>
+    <t t-set="opt_index_sidebar" t-value="request.website.viewref('website_event.opt_index_sidebar').active"/>
+    <t t-if="opt_events_list_columns" t-set="opt_event_size" t-value="'col-12 col-lg-6' if opt_index_sidebar else 'col-12 col-md-6 col-lg-4'"/>
+    <t t-else="" t-set="opt_event_size" t-value="'col-12' if opt_index_sidebar else 'col-xl-10 offset-xl-1'"/>
     <!-- No events -->
     <t t-if="not event_ids">
         <div class="h2 mb-3">No events found.</div>
@@ -108,43 +114,75 @@
         </div>
     </t>
     <!-- List -->
-    <div t-foreach="event_ids" t-as="event" class="card w-100 mb-3" itemscope="itemscope" itemtype="http://schema.org/Event">
-        <div t-attf-class="card-body #{event.is_participating and 'o_wevent_participating_container' or ''}">
-            <span t-if="event.is_participating" class="badge badge-info o_we_badge">Participating</span>
-            <span t-if="event.is_online" class="badge badge-info o_we_badge">Online</span>
-            <span t-if="not event.website_published" class="badge badge-danger o_we_badge">unpublished</span>
-            <span class="badge badge-secondary float-right o_we_badge" t-if="event.event_type_id">
-                <!-- <i class="fa fa-folder-open mr-1" role="img" aria-label="Event type" title="Event type"/> -->
-                <span t-field="event.event_type_id"/>
-            </span>
-            <h4>
-                <a itemprop="url" t-att-class="event.state == 'done' and 'text-success'" t-attf-href="/event/#{ slug(event) }/#{(not event.menu_id) and 'register' or ''}"><b itemprop="name" t-field="event.name"/></a>
-            </h4>
-            <small t-if="event.organizer_id" class="text-muted">Organized by <span t-field="event.organizer_id" /></small>
-            <div>
-                <i class="fa fa-clock-o text-primary mx-1" role="img" aria-label="Start date" title="Start date"/>
-                <span itemprop="startDate" t-field="event.with_context(tz=event.date_tz).date_begin" t-options='{"hide_seconds":"True"}'></span>
-                <small>to</small>
-                <span itemprop="endDate" t-field="event.with_context(tz=event.date_tz).date_end" t-options='{"hide_seconds":"True"}'></span>
+    <div t-foreach="event_ids" t-as="event" t-attf-class="#{opt_event_size} mb-4">
+        <article class="card" itemscope="itemscope" itemtype="http://schema.org/Event">
+            <div class="row no-gutters">
+                <!-- Images -->
+                <header t-attf-class="o_we_event_header bg-secondary #{'col-12 rounded-top' if opt_events_list_columns else 'col-sm-4 col-lg-3 rounded-left'}">
+                    <!-- Short Date -->
+                    <div class="o_we_event_date position-absolute bg-white shadow-sm">
+                        <span t-esc="event.with_context(tz=event.date_tz).date_begin.strftime('%b')" class="o_we_event_month"/>
+                        <span t-esc="event.with_context(tz=event.date_tz).date_begin.strftime('%d')" class="o_we_event_day"/>
+                    </div>
+                    <small t-if="event.is_participating" class="o_we_event_participating bg-success">
+                        <i class="fa fa-check mr-2"/>Registered
+                    </small>
+                    <!-- Unpublished -->
+                    <small t-if="not event.website_published" class="o_we_event_unpublished bg-danger">
+                        <i class="fa fa-ban mr-2"/>Unpublished
+                    </small>
+                </header>
+                <div t-attf-class="d-flex flex-column #{'col-md-12' if opt_events_list_columns else 'col'}">
+                    <!-- Body -->
+                    <main class="card-body">
+                        <!-- Category -->
+                        <span t-attf-class="small #{'o_we_event_category position-absolute shadow-sm' if opt_events_list_columns else 'float-right mt-n2 mr-n1'}" t-if="event.event_type_id">
+                            <i class="fa fa-folder-open fa-fw" role="img" aria-label="Event type" title="Event type"/>
+                            <span class="text-600" t-field="event.event_type_id"/>
+                        </span>
+                        <!-- Title -->
+                        <a t-attf-href="/event/#{ slug(event) }/#{(not event.menu_id) and 'register' or ''}" class="text-nowrap text-truncate" itemprop="url">
+                            <h5 t-attf-class="card-title mt-2 mb-0 #{'text-danger' if not event.website_published else ''}" itemprop="name" t-field="event.name"/>
+                        </a>
+                        <!-- Organizer -->
+                        <div t-if="event.organizer_id" class="text-muted text-nowrap text-truncate mb-3">
+                            <small>Organizer: <span t-field="event.organizer_id" itemprop="organizer"/></small>
+                        </div>
+                        <!-- Location -->
+                        <div t-if="event.is_online">Online</div>
+                        <div t-else="" itemprop="location" t-field="event.address_id" t-options='{
+                            "widget": "contact",
+                            "fields": ["city"],
+                            "no_marker": "true",
+                        }'/>
+                        <!-- Start Date & Time -->
+                        <time itemprop="startDate" t-field="event.with_context(tz=event.date_tz).date_begin" t-options="{'format': 'MMMM d, yyyy - hh:mm'}" t-att-datetime="event.date_begin"/>
+                    </main>
+                    <!-- Footer -->
+                    <footer class="card-footer small">
+                        <b>PRICE</b>
+                    </footer>
+                </div>
             </div>
-            <hr/>
-            <t t-if="not event.is_online">
-                <div itemprop="location" t-field="event.address_id" t-options='{
-                    "widget": "contact",
-                    "fields": ["city"]
-                }'/>
-            </t>
-        </div>
+        </article>
     </div>
+
     <!-- Pager -->
     <div class="form-inline justify-content-center my-3">
         <t t-call="website.pager"/>
     </div>
 </template>
 
+<!-- Index - Events list - Columns -->
+<template id="opt_index_events_list_columns" inherit_id="website_event.events_list" active="True" customize_show="True" name="Layout • Columns">
+    <xpath expr="//t[@t-set='opt_events_list_columns']" position="attributes">
+        <attribute name="t-value">True</attribute>
+    </xpath>
+</template>
+
 <!-- Index - Sidebar -->
 <template id="index_sidebar" name="Sidebar">
-    <div id="o_we_index_sidebar" class="col-lg-4 offset-xl-1 my-5"/>
+    <div id="o_we_index_sidebar" class="col-md-4 ml-lg-3 ml-xl-5 my-5"/>
 </template>
 
 <!-- Index - Sidebar - About us -->
