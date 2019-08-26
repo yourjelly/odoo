@@ -680,13 +680,15 @@ var FormController = BasicController.extend({
      * @private
      * @param {OdooEvent} ev
      */
-    _onOpenOne2ManyRecord: function (ev) {
+    _onOpenOne2ManyRecord: async function (ev) {
         ev.stopPropagation();
         var data = ev.data;
         var record;
         if (data.id) {
             record = this.model.get(data.id, {raw: true});
         }
+
+        await this.model.mutex.getUnlockedDef();
 
         new dialogs.FormViewDialog(this, {
             context: data.context,
