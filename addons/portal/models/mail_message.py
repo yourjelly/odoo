@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields,models
-from odoo.osv import expression
-
+from odoo import api, fields, models 
 
 class MailMessage(models.Model):
     _inherit = 'mail.message'
+
+    def portal_message_format(self):
+        return self._portal_message_format([
+            'id', 'body', 'date', 'author_id', 'email_from',  # base message fields
+            'message_type', 'subtype_id', 'subject',  # message specific
+            'model', 'res_id', 'record_name',  # document related
+        ])
+
 
     @api.model
     def default_get(self, fields_list):
@@ -17,13 +23,18 @@ class MailMessage(models.Model):
         # on which the messages are attached, thus moved to create().
         if 'website_published' in fields_list:
             defaults.setdefault('website_published', True)
-
         return defaults
 
     website_published = fields.Boolean(string='Published', help="Visible on the website as a comment")
 
     @api.model
     def _non_employee_message_domain(self):
+        return [('subtype_id', '!=', False), ('subtype_id.internal', '=', False)]
+
+    def _portal_message_format(self, fields_list):
+        message_values = self.read(fields_list)
+        message_tree = dict((m.id, m) for m in self.sudo())
+        self._message_read_dsage_domain(self)
         return [('subtype_id', '!=', False), ('subtype_id.internal', '=', False)]
 
     def portal_message_format(self):
