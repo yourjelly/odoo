@@ -50,7 +50,6 @@
     }
 }
 
-
 // TODO • No way to set a class for a menu item?
 // Crappy way to makes Register link looks like a button.
 #o_we_event_submenu .nav-item:last-child {
@@ -67,4 +66,50 @@
             width: 100%;
         }
     }
+}
+
+.o_we_sidebar_block {
+    margin: 0 0 ($spacer * 2.5) 0;
+}
+
+.o_we_sidebar_title {
+    margin: 0 0 ($spacer * 1.5) 0;
+    border-bottom: $border-width solid $border-color;
+    padding: 0 0 ($spacer * .5) 0;
+    font-weight: $font-weight-bold;
+    text-transform: uppercase;
+}
+
+.o_we_sidebar_social_link {
+    $o_link_size: 50px;
+    display: block;
+    @include size($o_link_size);
+    line-height: $o_link_size;
+    border: $border-width solid $border-color;
+    border-radius: 50%;
+    text-align: center;
+    @include hover-focus {
+        border-color: $primary;
+    }
+}
+
+.o_we_sidebar_figure {
+    position: relative;
+    .figure-img {
+        margin-bottom: 0;
+    }
+    .figure-caption {
+        @include o-position-absolute($left: 0, $bottom: 0);
+        width: 100%;
+        padding: $spacer;
+        background-color: rgba($color: #000, $alpha: 0.5);
+        @include border-bottom-radius($border-radius);
+        color: #fff;
+    }
+}
+
+.o_we_badge {
+    padding: ($spacer * .5) $spacer;
+    border-radius: 10rem;
+    font-weight: $font-weight-normal;
 }

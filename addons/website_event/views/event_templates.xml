@@ -31,7 +31,7 @@
             <main id="o_we_index">
                 <div class="container" id="o_event_list_container">
                     <div class="row">
-                        <div class="col" id="middle_column">
+                        <div id="o_we_index_main_col" class="col">
                             <div class="text-center text-muted" t-if="not event_ids">
                                 <h1>No event found</h1>
                                 <p groups="event.group_event_manager">Use the top menu <i>'Content'</i> to create your first event.</p>
@@ -79,7 +79,7 @@
 
 <!-- Index - OPTION - Sidebar -->
 <template id="opt_index_sidebar" inherit_id="website_event.index" active="True" customize_show="True" name="Sidebar">
-    <xpath expr="//div[@id='middle_column']" position="after">
+    <xpath expr="//div[@id='o_we_index_main_col']" position="after">
         <t t-call="website_event.index_sidebar"/>
     </xpath>
 </template>
