@@ -49,6 +49,7 @@ import odoo
 from . import SUPERUSER_ID
 from . import api
 from . import tools
+import time
 from .exceptions import AccessError, MissingError, ValidationError, UserError
 from .osv.query import Query
 from .tools import frozendict, lazy_classproperty, lazy_property, ormcache, \
@@ -3132,7 +3133,7 @@ Fields:
         """
         if not self:
             return True
-
+        init_time=time.time()
         self.check_access_rights('unlink')
         self._check_concurrency()
 
@@ -3208,6 +3209,7 @@ Fields:
         # auditing: deletions are infrequent and leave no trace in the database
         _unlink.info('User #%s deleted %s records with IDs: %r', self._uid, self._name, self.ids)
 
+        _logger.info('exectime crud unlink (%s): %s', self._name, time.time() - init_time)
         return True
 
     def write(self, vals):
@@ -3290,6 +3292,7 @@ Fields:
         """
         if not self:
             return True
+        init_time = time.time()
 
         self.check_access_rights('write')
         self.check_field_access_rights('write', vals.keys())
@@ -3386,6 +3389,7 @@ Fields:
             # validate inversed fields
             real_recs._validate_fields(inverse_fields)
 
+        _logger.info('exectime crud write (%s): %s', self._name, time.time() - init_time)
         return True
 
     def _write(self, vals):
@@ -3470,6 +3474,7 @@ Fields:
         if not vals_list:
             return self.browse()
 
+        init_time = time.time()
         self = self.browse()
         self.check_access_rights('create')
 
@@ -3574,6 +3579,8 @@ Fields:
         for data in data_list:
             data['record']._validate_fields(set(data['inversed']) - set(data['stored']))
 
+
+        _logger.info('exectime crud create (%s): %s', self._name, time.time() - init_time)
         return records
 
     @api.model

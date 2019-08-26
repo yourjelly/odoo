@@ -1151,7 +1151,7 @@ def preload_registries(dbnames):
 
             if registry._assertion_report.failures:
                 rc += 1
-            __logger.info('exectime preload_registeries_post_tests: %s', time.time()-init_time)
+            __logger.info('exectime preload_registeries: %s', time.time()-init_time)
         except Exception:
             _logger.critical('Failed to initialize database `%s`.', dbname, exc_info=True)
             return -1
