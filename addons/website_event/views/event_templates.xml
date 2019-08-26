@@ -28,45 +28,17 @@
             <!-- Drag/Drop Area -->
             <div id="oe_structure_we_index_1" class="oe_structure"/>
 
-            <main id="o_we_index">
-                <div class="container" id="o_event_list_container">
+            <!-- Options -->
+            <t t-set="opt_index_background" t-value="False"/>
+
+            <main id="o_we_index" t-attf-class="#{'bg-200' if opt_index_background else ''}">
+                <div class="container">
                     <div class="row">
-                        <div id="o_we_index_main_col" class="col">
-                            <div class="text-center text-muted" t-if="not event_ids">
-                                <h1>No event found</h1>
-                                <p groups="event.group_event_manager">Use the top menu <i>'Content'</i> to create your first event.</p>
-                            </div>
-                            <div t-foreach="event_ids" t-as="event" class="card mb-3" itemscope="itemscope" itemtype="http://schema.org/Event">
-                                <div t-attf-class="card-body #{event.is_participating and 'o_wevent_participating_container' or ''}">
-                                    <span t-if="event.is_participating" class="badge badge-info">Participating</span>
-                                    <span t-if="event.is_online" class="badge badge-info">Online</span>
-                                    <span t-if="not event.website_published" class="badge badge-danger">unpublished</span>
-                                    <small class="badge badge-primary float-right" t-if="event.event_type_id">
-                                        <i class="fa fa-ticket" role="img" aria-label="Event type" title="Event type"/> <span t-field="event.event_type_id"/>
-                                    </small>
-                                    <h4>
-                                        <a itemprop="url" t-att-class="event.state == 'done' and 'text-success'" t-attf-href="/event/#{ slug(event) }/#{(not event.menu_id) and 'register' or ''}"><b itemprop="name" t-field="event.name"/></a>
-                                    </h4>
-                                    <small t-if="event.organizer_id" class="text-muted">Organized by <span t-field="event.organizer_id" /></small>
-                                    <div>
-                                        <i class="fa fa-clock-o text-primary mx-1" role="img" aria-label="Start date" title="Start date"/>
-                                        <span itemprop="startDate" t-field="event.with_context(tz=event.date_tz).date_begin" t-options='{"hide_seconds":"True"}'></span>
-                                        <small>to</small>
-                                        <span itemprop="endDate" t-field="event.with_context(tz=event.date_tz).date_end" t-options='{"hide_seconds":"True"}'></span>
-                                    </div>
-                                    <hr/>
-                                    <t t-if="not event.is_online">
-                                        <div itemprop="location" t-field="event.address_id" t-options='{
-                                            "widget": "contact",
-                                            "fields": ["city"]
-                                        }'/>
-                                    </t>
-                                </div>
+                        <div id="o_we_index_main_col" class="col my-5">
+                            <div class="row">
+                                <t t-call="website_event.events_list"/>
                             </div>
                         </div>
-                    </div>
-                    <div class="form-inline justify-content-center my-3">
-                        <t t-call="website.pager"/>
                     </div>
                 </div>
             </main>
@@ -75,6 +47,13 @@
             <div id="oe_structure_we_index_2" class="oe_structure"/>
         </div>
     </t>
+</template>
+
+<!-- Index - OPTION - Light Gray background -->
+<template id="opt_index_background" inherit_id="website_event.index" active="True" customize_show="True" name="Gray Background">
+    <xpath expr="//t[@t-set='opt_index_background']" position="attributes">
+        <attribute name="t-value">True</attribute>
+    </xpath>
 </template>
 
 <!-- Index - OPTION - Sidebar -->
