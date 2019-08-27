@@ -46,6 +46,12 @@ class Event(models.Model):
         else:
             self.is_participating = False
 
+    def is_one_day(self):
+        self.ensure_one()
+        date_begin = self.with_context(tz=self.date_tz).date_begin
+        date_end = self.with_context(tz=self.date_tz).date_end
+        return (date_begin.date() == date_end.date())
+
     @api.depends('name')
     def _compute_website_url(self):
         super(Event, self)._compute_website_url()
