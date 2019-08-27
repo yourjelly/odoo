@@ -59,19 +59,8 @@
     }
 }
 
-.o_we_sidebar_block {
-    margin: 0 0 ($spacer * 2.5) 0;
-}
-
-.o_we_sidebar_title {
-    margin: 0 0 ($spacer * 1.5) 0;
-    border-bottom: $border-width solid $border-color;
-    padding: 0 0 ($spacer * .5) 0;
-    font-weight: $font-weight-bold;
-    text-transform: uppercase;
-}
-
-.o_we_sidebar_social_link {
+// Generic
+.o_we_social_link {
     $o_link_size: 50px;
     display: block;
     @include size($o_link_size);
@@ -85,68 +74,103 @@
     }
 }
 
-.o_we_sidebar_figure {
-    position: relative;
-    .figure-img {
-        margin-bottom: 0;
-    }
-    .figure-caption {
-        @include o-position-absolute($left: 0, $bottom: 0);
-        width: 100%;
-        padding: $spacer;
-        background-color: rgba($color: #000, $alpha: 0.5);
-        @include border-bottom-radius($border-radius);
-        color: #fff;
-    }
-}
-
 .o_we_badge {
     padding: ($spacer * .5) $spacer;
     border-radius: 10rem;
     font-weight: $font-weight-normal;
 }
 
-.o_we_event_header {
-    height: 200px;
-}
-
-.o_we_event_category {
-    top: -$spacer;
-    left: 0;
-    padding: ($card-spacer-y * .5) $card-spacer-x;
-    @include border-right-radius(10rem);
-    background-color: #fff;
-    > * {
-        vertical-align: middle;
+// Index
+.o_we_index {
+    // Events List
+    .o_we_events_list {
+        header {
+            height: 200px;
+        }
+        .o_we_event_category {
+            top: -$spacer;
+            left: 0;
+            padding: ($card-spacer-y * .5) $card-spacer-x;
+            @include border-right-radius(10rem);
+            background-color: #fff;
+            > * {
+                vertical-align: middle;
+            }
+        }
+        .o_we_event_date {
+            top: 1.125rem;
+            right: $card-spacer-x;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            @include size(4rem);
+            border-radius: 50%;
+            text-align: center;
+            .o_we_event_day {
+                font-size: 1.125rem;
+                font-weight: 300;
+                line-height: 1;
+            }
+            .o_we_event_month {
+                font-size: 0.75rem;
+                font-weight: $font-weight-bold;
+                text-transform: uppercase;
+            }
+        }
+        .o_we_event_participating,
+        .o_we_event_unpublished {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: $card-spacer-y $card-spacer-x;
+            text-align: right;
+        }
     }
-}
-
-.o_we_event_participating,
-.o_we_event_unpublished {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    padding: $card-spacer-y $card-spacer-x;
-    text-align: right;
-}
-
-.o_we_event_date {
-    top: 1.125rem;
-    right: $card-spacer-x;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    @include size(4rem);
-    border-radius: 50%;
-    text-align: center;
-    .o_we_event_day {
-        font-size: 1.125rem;
-        font-weight: 300;
-        line-height: 1;
-    }
-    .o_we_event_month {
-        font-size: 0.75rem;
+    // Sidebar
+    .o_we_sidebar_title {
+        margin: 0 0 ($spacer * 1.5) 0;
+        border-bottom: $border-width solid $border-color;
+        padding: 0 0 ($spacer * .5) 0;
         font-weight: $font-weight-bold;
         text-transform: uppercase;
     }
+    .o_we_sidebar_block {
+        margin: 0 0 ($spacer * 2.5) 0;
+    }
+    .o_we_sidebar_figure {
+        position: relative;
+        .figure-img {
+            margin-bottom: 0;
+        }
+        .figure-caption {
+            @include o-position-absolute($left: 0, $bottom: 0);
+            width: 100%;
+            padding: $spacer;
+            background-color: rgba($color: #000, $alpha: 0.5);
+            @include border-bottom-radius($border-radius);
+            color: #fff;
+        }
+    }
 }
+
+// Event
+.o_we_event {
+    .o_we_sidebar_title {
+        margin-bottom: $spacer;
+        opacity: .5;
+        text-transform: uppercase;
+    }
+    .o_we_sidebar_block {
+        padding: $spacer * 3;
+        border-bottom: $border-width solid $border-color;
+        &:last-child {
+            border-bottom: 0;
+        }
+    }
+}
+
+
+
+
+
+
