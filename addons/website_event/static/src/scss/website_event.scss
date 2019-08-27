@@ -94,12 +94,28 @@
     font-weight: $font-weight-normal;
 }
 
+.o_we_border_dashed {
+    border-right: $border-width dashed $border-color;
+}
+
+// .shadow-sm {
+//     box-shadow: 0 0.2rem 0.2rem rgba(0, 0, 0, 0.1) !important;
+// }
+
+
 // Index
 .o_we_index {
     // Events List
     .o_we_events_list {
         header {
             height: 200px;
+            overflow: hidden;
+            a {
+                transition: all .25s ease-in-out;
+                @include hover-focus {
+                    transform: scale(1.05);
+                }
+            }
         }
         .o_we_event_category {
             top: -$spacer;
@@ -139,6 +155,12 @@
             padding: $card-spacer-y $card-spacer-x;
             text-align: right;
         }
+        .card-title {
+            color: $body-color;
+        }
+        // .card-footer {
+        //     background-color: #fff;
+        // }
     }
     // Sidebar
     .o_we_sidebar_title {
@@ -182,9 +204,3 @@
         }
     }
 }
-
-
-
-
-
-

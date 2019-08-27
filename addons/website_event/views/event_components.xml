@@ -117,20 +117,24 @@
     <div t-foreach="event_ids" t-as="event" t-attf-class="mb-4 #{opt_event_size}">
         <article class="card" itemscope="itemscope" itemtype="http://schema.org/Event">
             <div class="row no-gutters">
-                <!-- Images -->
-                <header t-attf-class="#{'col-12 rounded-top' if opt_events_list_columns else 'col-sm-4 col-lg-3 rounded-left'} #{events_cover_properties[event_index].get('background-color')}" t-attf-style="background-image: url('#{events_cover_properties[event_index].get('img_url')}'); background-size: cover; background-position: 50% 100%;">
-                    <!-- Short Date -->
-                    <div class="o_we_event_date position-absolute bg-white shadow-sm">
-                        <span t-esc="event.with_context(tz=event.date_tz).date_begin.strftime('%b')" class="o_we_event_month"/>
-                        <span t-esc="event.with_context(tz=event.date_tz).date_begin.strftime('%d')" class="o_we_event_day"/>
-                    </div>
-                    <small t-if="event.is_participating" class="o_we_event_participating bg-success">
-                        <i class="fa fa-check mr-2"/>Registered
-                    </small>
-                    <!-- Unpublished -->
-                    <small t-if="not event.website_published" class="o_we_event_unpublished bg-danger">
-                        <i class="fa fa-ban mr-2"/>Unpublished
-                    </small>
+                <!-- Header -->
+                <header t-attf-class="#{'col-12 rounded-top' if opt_events_list_columns else 'col-sm-4 col-lg-3 rounded-left'} #{events_cover_properties[event_index].get('background-color')}">
+                    <!-- Image + Link -->
+                    <a t-attf-href="/event/#{ slug(event) }/#{(not event.menu_id) and 'register' or ''}" class="d-block h-100 w-100" t-attf-style="background-image: url('#{events_cover_properties[event_index].get('img_url')}'); background-size: cover; background-position: 50% 100%;">
+                        <!-- Short Date -->
+                        <div class="o_we_event_date position-absolute bg-white shadow-sm">
+                            <span t-esc="event.with_context(tz=event.date_tz).date_begin.strftime('%b')" class="o_we_event_month"/>
+                            <span t-esc="event.with_context(tz=event.date_tz).date_begin.strftime('%d')" class="o_we_event_day"/>
+                        </div>
+                        <!-- Participating -->
+                        <small t-if="event.is_participating" class="o_we_event_participating bg-success">
+                            <i class="fa fa-check mr-2"/>Registered
+                        </small>
+                        <!-- Unpublished -->
+                        <small t-if="not event.website_published" class="o_we_event_unpublished bg-danger">
+                            <i class="fa fa-ban mr-2"/>Unpublished
+                        </small>
+                    </a>
                 </header>
                 <div t-attf-class="d-flex flex-column #{'col-md-12' if opt_events_list_columns else 'col'}">
                     <!-- Body -->
