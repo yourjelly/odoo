@@ -434,7 +434,7 @@ class SaleOrderLine(models.Model):
     # and then add the depends @api.depends('discount_line_product_id.order_line_ids'),
     # but I am not sure this will as efficient as the below.
     def modified(self, fnames, create=False):
-        super(SaleOrderLine, self).modified(fnames)
+        super(SaleOrderLine, self).modified(fnames, create)
         if 'product_id' in fnames:
             Program = self.env['sale.coupon.program']
             field_order_count = Program._fields['order_count']

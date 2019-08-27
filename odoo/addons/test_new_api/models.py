@@ -617,7 +617,7 @@ class Attachment(models.Model):
             record = comodel.browse(self.res_id)
             self.env.cache.invalidate([(field, record._ids)])
             record.modified(['attachment_ids'])
-        return super(Attachment, self).modified(fnames)
+        return super(Attachment, self).modified(fnames, create)
 
 
 class AttachmentHost(models.Model):
