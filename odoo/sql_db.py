@@ -235,7 +235,8 @@ class Cursor(object):
 
         if self.sql_log:
             encoding = psycopg2.extensions.encodings[self.connection.encoding]
-            _logger.debug("query: %s", self._obj.mogrify(query, params).decode(encoding, 'replace'))
+            msg = self._obj.mogrify(query, params).decode(encoding, 'replace')
+            _logger.debug("query: %s", msg)
         now = time.time()
         try:
             params = params or None
