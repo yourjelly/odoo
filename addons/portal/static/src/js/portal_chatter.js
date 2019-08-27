@@ -22,6 +22,7 @@ var PortalComposer = publicWidget.Widget.extend({
         'change .o_portal_chatter_file_input': '_onFileInputChange',
         'click .o_portal_chatter_attachment_btn': '_onAttachmentButtonClick',
         'click .o_portal_chatter_attachment_delete': 'async _onAttachmentDeleteClick',
+        'click .o_portal_chatter_composer_btn': '_onChatterSubmit'
     },
     /**
      * @constructor
@@ -67,6 +68,30 @@ var PortalComposer = publicWidget.Widget.extend({
 
     },
 
+    _onChatterSubmit: function (ev) {
+        ev.preventDefault();
+        var self = this;
+        var message = this.$el.find('textarea[name="message"]').val();
+
+        var attachment_ids = new Array(this.$attachmentIds.val());
+        var attachment_tokens = new Array(this.$attachmentTokens.val());
+        var render = new PortalChatter(self,self.options);
+
+        return this._rpc({
+            route: '/mail/chatter_post',
+            params: {
+                'res_id': self.options.res_id,
+                'res_model': self.options.res_model,
+                'message': message,
+                'attachment_ids': this.$attachmentIds.val(),
+                'attachment_tokens': this.$attachmentTokens.val()
+            },
+        }).then(function () {
+            render.reinitialize();
+            render.messageFetch();
+
+        });
+    },
     /**
      * @private
      * @param {Event} ev
@@ -172,7 +197,6 @@ var PortalChatter = publicWidget.Widget.extend({
     xmlDependencies: ['/portal/static/src/xml/portal_chatter.xml'],
     events: {
         "click .o_portal_chatter_pager_btn": '_onClickPager',
-        "submit .o_portal_chatter_composer_form": '_onChatterFormSubmit',
     },
 
     /**
@@ -223,9 +247,6 @@ var PortalChatter = publicWidget.Widget.extend({
      */
     start: function () {
         // bind events
-        this.$attachments = this.$('.o_portal_chatter_composer_form .o_portal_chatter_attachments');
-        this.$attachmentIds = this.$('.o_portal_chatter_attachment_ids');
-        this.$attachmentTokens = this.$('.o_portal_chatter_attachment_tokens');
         this.on("change:messages", this, this._renderMessages);
         this.on("change:message_count", this, function () {
             this._renderMessageCount();
@@ -413,21 +434,7 @@ var PortalChatter = publicWidget.Widget.extend({
         });
     },
 
-    _onChatterFormSubmit: function (ev) {
-        ev.preventDefault();
-        var self = this;
-        var message = this.$el.find('textarea[name="message"]').val();
-        console.log('submitted form');
-        if (message) {
-            ajax.jsonRpc(ev.currentTarget.action, 'call', {'res_model': this.options.res_model, 'res_id': this.options.res_id, 'message': message, 'token': this.options.token})
-                .then(function () {
-                    // re-render widget after message post
-                    self.reinitialize();
-                    self.messageFetch();
-                });
 
-        }
-    },
     /**
      * @private
      * @param {MouseEvent} event
