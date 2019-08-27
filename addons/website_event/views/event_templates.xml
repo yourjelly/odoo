@@ -129,7 +129,7 @@
     <t t-call="website_event.layout">
         <div itemscope="itemscope" itemtype="http://schema.org/Event">
             <!-- Cover -->
-            <section id="o_we_event_cover" t-attf-class="s_parallax parallax s_parallax_is_fixed position-relative #{event_cover_properties.get('img_url')}" data-scroll-background-ratio="1">
+            <section id="o_we_event_cover" t-attf-class="s_parallax parallax s_parallax_is_fixed #{event_cover_properties.get('img_url')}" data-scroll-background-ratio="1">
                 <!-- Image -->
                 <span class="s_parallax_bg oe_img_bg oe_custom_bg" t-attf-style="background-image: url('#{event_cover_properties.get('img_url')}'); background-size: cover; background-position: 50% 50%;"/>
                 <!-- Color Overlay -->
@@ -147,6 +147,7 @@
                     <t t-call="website_event.registration_template"/>
                 </div>
             </section>
+            <t t-call="website_event.registration_modal"/>
             <!-- Body -->
             <t t-raw="0"/>
         </div>
@@ -287,102 +288,111 @@
 <template id="registration_template" name="Event Registration">
     <t t-set="tickets_available" t-value="event.seats_available or event.seats_availability == 'unlimited'"/>
     <t t-set="buy" t-value="tickets_available and event.state == 'confirm'"/>
-    <div itemscope="itemscope" itemprop="offers" itemtype="http://schema.org/AggregateOffer">
-        <form id="registration_form" t-attf-action="/event/#{slug(event)}/registration/new" method="post" class="card shadow" t-if="buy">
-            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-            <div class="card-header d-none d-lg-block bg-primary">
-                <div class="row">
-                    <div class="col-lg-4">
-                        <h5><b>Ticket Type</b></h5>
-                    </div>
-                    <div class="col-lg-4">
-                        <h5><b>End of Registration</b></h5>
-                    </div>
-                    <div class="col-lg-2">
-                        <h5><b>Price</b></h5>
-                    </div>
-                    <div class="col-lg-2">
-                        <h5><b>Quantity</b></h5>
-                    </div>
-                </div>
+
+        <div t-if="buy" class="d-flex align-items-center rounded shadow-sm bg-white">
+            <div class="p-3 d-inline-block o_we_border_dashed">
+                <b>PRICE</b>
             </div>
-            <t t-id="tickets" t-call="website_event.ticket">
-                <t t-set="name">
-                    <span itemprop="name">Event Registration</span>
+            <div class="p-3 d-inline-block o_we_border_dashed">
+                <!-- TODO: Early-bird / Late-bird option -->
+                <t t-if="event.date_begin">
+                    Sales end on <span t-esc="event.with_context(tz=event.date_tz).date_end.strftime('%b %d, %Y')"/>
                 </t>
-                <t t-set="registration_end">
-                    <t t-if="event.date_begin">
-                        <span t-esc="event.date_begin_located"/>
-                    </t>
-                    <t t-if="not event.date_begin">
-                        <span>Unlimited</span>
-                    </t>
-                </t>
-                <t t-set="price">
-                    <span itemprop="price" content="0">
-                        Free
-                    </span>
-                </t>
-                <t t-set="quantity">
-                    <select name="nb_register-0" class="form-control">
-                        <t t-foreach="range(0, (event.seats_availability == 'unlimited' or event.seats_available &gt; 9) and 10 or event.seats_available+1)" t-as="nb">
-                            <option t-esc="nb" t-att-selected="nb == 1 and 'selected'"/>
-                        </t>
-                    </select>
-                </t>
-            </t>
-            <div class="card-footer">
-                <button type="submit" class="btn btn-primary a-submit float-right" t-attf-id="#{event.id}">Register Now</button>
             </div>
-        </form>
-        <div t-if="not buy" class="alert alert-info" role="status">
+            <div class="p-2 d-inline-block ml-auto mr-3">
+                <!-- TODO: sum all tickets left -->
+                <em class="text-muted">12 ticket(s) left</em>
+            </div>
+            <a href="#" class="btn btn-primary btn-lg btn-block mr-1" style="width:33%;" data-toggle="modal" data-target="#o_we_event_registration">Register</a>
+        </div>
+
+        <div t-else="" class="alert alert-info w-100 d-flex justify-content-between" role="status">
             <span t-if="event.state == 'draft'" itemprop="availability" content="http://schema.org/OutOfStock">
                 Event registration not yet started.
             </span>
             <span t-if="event.state != 'draft'" itemprop="availability" content="http://schema.org/Discontinued">
-                Event registration is closed.
+                Event registration is now closed.
             </span>
-            <t t-if="request.env.user.has_group('event.group_event_manager')">
+            <span t-if="request.env.user.has_group('event.group_event_manager')">
+                <i class="fa fa-cog" role="img" aria-label="Create" title="Create"/>
                 <a t-attf-href="/web#id=#{event.id}&amp;view_type=form&amp;model=event.event">
-                    <em><i class="fa fa-plus-circle" role="img" aria-label="Create" title="Create"></i>
-                    Configure and Launch Event Registration</em>
+                    Configure Event Registration
                 </a>
-            </t>
+            </span>
         </div>
+</template>
+
+<template id="registration_modal" name="Event Registration Modal">
+    <t t-set="tickets_available" t-value="event.seats_available or event.seats_availability == 'unlimited'"/>
+    <t t-set="buy" t-value="tickets_available and event.state == 'confirm'"/>
+
+    <div itemscope="itemscope" itemprop="offers" itemtype="http://schema.org/AggregateOffer" class="modal fade" id="o_we_event_registration" tabindex="-1" role="dialog">
+        <form id="registration_form" t-attf-action="/event/#{slug(event)}/registration/new" method="post" class="modal-dialog modal-lg" role="document">
+            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Select your ticket(s)</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span>&amp;times;</span></button>
+                </div> 
+                <div class="modal-body bg-200">
+                    <t t-id="tickets" t-call="website_event.ticket">
+                        <t t-set="name">
+                            <h5 class="m-0" itemprop="name">Event Registration</h5>
+                        </t>
+                        <t t-set="registration_end">
+                            <t t-if="event.date_begin">
+                                <span t-esc="event.date_begin_located"/>
+                            </t>
+                        </t>
+                        <t t-set="price">
+                            <span itemprop="price" content="0">FREE</span>
+                        </t>
+                        <t t-set="quantity">
+                            <select name="nb_register-0" class="custom-select">
+                                <t t-foreach="range(0, (event.seats_availability == 'unlimited' or event.seats_available &gt; 9) and 10 or event.seats_available+1)" t-as="nb">
+                                    <option t-esc="nb" t-att-selected="nb == 1 and 'selected'"/>
+                                </t>
+                            </select>
+                        </t>
+                    </t>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <div class="steps">
+                        <i class="fa fa-circle text-600"/>
+                        <i class="fa fa-circle text-300"/>
+                    </div>
+                    <button type="submit" class="btn btn-primary a-submit float-right" t-attf-id="#{event.id}">Continue</button>
+                </div>
+            </div>
+        </form>
     </div>
 </template>
 
 <template id="ticket" name="Ticket">
-    <div class="d-lg-none card-header bg-primary">
-        <h5><strong>Ticket Type:</strong> <t t-raw="name"/></h5>
-        <small t-if="description">
-            <t t-raw="description"/>
-        </small>
-    </div>
-    <div class="card-body">
-        <div class="row" itemscope="itemscope" itemtype="http://schema.org/Offer">
-            <div class="col-lg-4 d-none d-lg-block" t-raw="name"/>
-            <div class="col-6 d-lg-none border-sm-bottom pb-1">
-                <h6>End of Registration</h6>
+    <div class="o_we_ticket card shadow-sm" itemscope="itemscope" itemtype="http://schema.org/Offer">
+        <div class="card-body row align-items-center">
+            <!-- Name + Registration end -->
+            <div class="o_we_ticket_desc col">
+                <h5 t-raw="name" class="mb-0"/>
+                <small t-if="registration_end" class="text-muted" itemprop="availabilityEnds">Sales end on - <t t-raw="registration_end"/></small>
             </div>
-            <div class="col-6 col-lg-4" itemprop="availabilityEnds" t-raw="registration_end"/>
-            <div class="col-6 d-lg-none">
-                <h6>Price</h6>
-            </div>
-            <div class="col-6 col-lg-2" t-raw="price"/>
-            <div class="col-6 d-lg-none">
-                <h6>Quantity</h6>
-            </div>
-            <div class="col-6 col-lg-2">
+            <!-- Price -->
+            <div t-raw="price" class="o_we_ticket_price col-2 text-right ml-auto"/>
+            <!-- Quantity -->
+            <div class="o_we_ticket_qty col-2">
                 <t t-if="tickets_available">
                     <link itemprop="availability" content="http://schema.org/InStock"/>
                     <t t-raw="quantity"/>
                 </t>
                 <t t-else="">
-                    <span itemprop="availability" content="http://schema.org/SoldOut">
-                        Sold Out
-                    </span>
+                    <span itemprop="availability" content="http://schema.org/SoldOut">Sold Out</span>
                 </t>
+            </div>
+            <!-- Description -->
+            <div t-if="description" class="col-12">
+                <hr/>
+                <p class="mb-0" t-raw="description"/>
             </div>
         </div>
     </div>
@@ -395,66 +405,71 @@
                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                 <div class="modal-content">
                     <header class="modal-header">
-                        <h4 class="modal-title" id="myModalLabel"><strong>Attendees</strong></h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">x</button>
+                        <h4 class="modal-title">Attendees</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span>&amp;times;</span></button>
                     </header>
-                    <main class="modal-body">
-                        <div class="container">
-                            <t t-set="counter_type" t-value="1"/>
-                            <t t-set="counter" t-value="0"/>
-                            <t t-foreach="tickets" t-as="ticket">
-                                <h4 class="o_page_header">
-                                    <strong>
-                                        Ticket Type: <t t-esc="ticket['name']"/>
-                                        <t t-if="ticket['price'] == 0">(Free)</t>
-                                    </strong>
-                                </h4>
+                    <main class="modal-body bg-200">
+                        <t t-set="counter_type" t-value="1"/>
+                        <t t-set="counter" t-value="0"/>
+                        <div t-foreach="tickets" t-as="ticket" class="card">
+                            <h5 class="card-header">
+                                Ticket type - <t t-esc="ticket['name']"/>
+                                <small  class="float-right text-muted">
+                                    <t t-if="ticket['price'] == 0">Free</t>
+                                    <t t-else="" t-esc="ticket['price']"/>
+                                </small>
+                            </h5>
+                            <div class="card-body">
                                 <div class="row d-none d-lg-flex">
-                                    <div class="col-md">
-                                        <strong>Name</strong>
-                                    </div>
-                                    <div class="col-md">
-                                        <strong>Email</strong>
-                                    </div>
-                                    <div class="col-md">
-                                        <strong>Phone <small class='lbl_optional'>(optional)</small></strong>
-                                    </div>
+                                    <label class="col-md">Name <small class="text-danger">- Required</small></label>
+                                    <label class="col-md"> Email <small class="text-danger">- Required</small></label>
+                                    <label class="col-md">Phone <small class="text-muted">- Optional</small></label>
                                 </div>
                                 <t t-foreach="range(1, ticket['quantity'] + 1)" t-as="att_counter" name="attendee_loop">
                                     <t t-set="counter" t-value="counter + 1"/>
-                                    <div class="row py-2 o_wevent_registration_list_attendees">
+                                    <div class="row mb-2">
                                         <div class="col-md">
-                                            <div class="mb-1 d-lg-none">
-                                                <strong>Name</strong>
-                                            </div>
-                                            <t t-set="attendee_placeholder">Attendee #%s</t>
-                                            <input class='form-control' type='text' t-attf-name="#{counter}-name" required="This field is required" t-att-placeholder="attendee_placeholder %counter"/>
-                                        </div>
-
-                                        <div class="col-md">
-                                            <div class="mt-1 d-lg-none">
-                                                <strong>Email</strong>
-                                            </div>
-                                            <div>
-                                                <input class='form-control' type='email' t-attf-name="#{counter}-email" required="This field is required"/>
+                                            <label class="mb-1 d-lg-none">Name</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <i class="fa fa-user input-group-text text-600"/>
+                                                </div>
+                                                <t t-set="attendee_placeholder">Attendee #%s</t>
+                                                <input class="form-control" type="text" t-attf-name="#{counter}-name" required="This field is required" t-att-placeholder="attendee_placeholder %counter"/>
                                             </div>
                                         </div>
                                         <div class="col-md">
-                                            <div class="mt-1 d-lg-none">
-                                                <strong>Phone <small class='lbl_optional'>(optional)</small></strong>
+                                            <label class="mt-1 d-lg-none">Email</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <i class="fa fa-envelope input-group-text text-600"/>
+                                                </div>
+                                                <input class="form-control" type="email" t-attf-name="#{counter}-email" required="This field is required"/>
                                             </div>
-                                            <input class='form-control' type='tel' t-attf-name="#{counter}-phone"/>
                                         </div>
-                                        <input class='d-none' type='text' t-attf-name="#{counter}-ticket_id" t-attf-value="#{ticket['id']}"/>
+                                        <div class="col-md">
+                                            <label class="mt-1 d-lg-none">Phone <small>- optional</small></label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <i class="fa fa-phone input-group-text text-600"/>
+                                                </div>
+                                                <input class="form-control" type="tel" t-attf-name="#{counter}-phone"/>
+                                            </div>
+                                        </div>
+                                        <input class="d-none" type="text" t-attf-name="#{counter}-ticket_id" t-attf-value="#{ticket['id']}"/>
                                     </div>
                                 </t>
                                 <t t-set="counter_type" t-value="counter_type + 1"/>
-                            </t>
+                            </div>
                         </div>
                     </main>
-                    <footer class="modal-footer">
+                    <footer class="modal-footer justify-content-between">
                         <button type="button" class="btn btn-secondary js_goto_event" data-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Continue Registration</button>
+                        <div class="steps">
+                            <i class="fa fa-circle text-300"/>
+                            <i class="fa fa-circle text-600"/>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Continue</button>
                     </footer>
                 </div>
             </form>
