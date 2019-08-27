@@ -244,6 +244,7 @@ class AccountReconcileModel(models.Model):
             'analytic_tag_ids': [(6, 0, self.analytic_tag_ids.ids)],
             'debit': line_balance > 0 and line_balance or 0,
             'credit': line_balance < 0 and -line_balance or 0,
+            'reconcile_model_id': self.id,
         }
         new_aml_dicts.append(writeoff_line)
 
@@ -266,6 +267,7 @@ class AccountReconcileModel(models.Model):
                 'analytic_tag_ids': [(6, 0, self.second_analytic_tag_ids.ids)],
                 'debit': line_balance > 0 and line_balance or 0,
                 'credit': line_balance < 0 and -line_balance or 0,
+                'reconcile_model_id': self.id,
             }
             new_aml_dicts.append(second_writeoff_line)
 
