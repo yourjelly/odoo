@@ -57,7 +57,7 @@ var EventRegistrationForm = Widget.extend({
 });
 
 publicWidget.registry.EventRegistrationFormInstance = publicWidget.Widget.extend({
-    selector: '#registration_form',
+    selector: '#o_we_event_registration',
 
     /**
      * @override
