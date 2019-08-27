@@ -184,6 +184,10 @@ var LinkDialog = Dialog.extend({
 
         if (url.indexOf('@') >= 0 && url.indexOf('mailto:') < 0 && !url.match(/^http[s]?/i)) {
             url = ('mailto:' + url);
+        }else if (!url.startsWith('//')) {
+            if (!url.startsWith('http')) {
+                url = ('//' + url);
+            }
         }
         var allWhitespace = /\s+/gi;
         var allStartAndEndSpace = /^\s+|\s+$/gi;
