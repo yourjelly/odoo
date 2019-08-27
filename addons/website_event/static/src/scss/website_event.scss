@@ -2,6 +2,20 @@
     background-color: gray('200');
 }
 
+// TODO: Improve this part
+#o_we_search_box {
+    flex: 0 0 33%;
+    max-width: 33%;
+    padding-left: 15px;
+    .form-control {
+        @include hover-focus {
+            border-color: $primary;
+            box-shadow: none;
+        }
+    }
+}
+
+// TODO: Improve this part
 #o_we_index_topbar_filters {
     .dropdown-toggle {
         display: block;
