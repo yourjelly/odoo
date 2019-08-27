@@ -357,9 +357,15 @@ class TestBase(TransactionCase):
         self.assertEqual([0, 1, 2, 3, -3, 6], [g['color'] for g in groups_data],
             "Incorrect groupby with lazy=False")
 
-        # test compute
+        # test compute lazy=False
         groups_data = res_users.read_group(domain, fields=['name', 'companies_count'],
             groupby=['name', 'companies_count'], lazy=False)
+        self.assertEqual(['Alice', 'Alice', 'Bob', 'Eve', 'Nab', 'Nab'], [g['name'] for g in groups_data], "Incorrect groupby with compute field")
+        self.assertEqual([1, 1, 1, 1, 1, 1], [g['companies_count'] for g in groups_data], "Incorrect groupby with compute field")
+
+        # test compute lazy=True
+        groups_data = res_users.read_group(domain, fields=['name', 'companies_count'],
+            groupby=['name', 'companies_count'])
         self.assertEqual(['Alice', 'Bob', 'Eve', 'Nab'], [g['name'] for g in groups_data], "Incorrect groupby with compute field")
         self.assertEqual([2, 1, 1, 2], [g['companies_count'] for g in groups_data], "Incorrect groupby with compute field")
 

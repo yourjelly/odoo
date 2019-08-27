@@ -227,7 +227,7 @@ VALID_AGGREGATE_FUNCTIONS = {
 
 PYTHON_AGGREGATE_FUNCTIONS = {
     # FIXME: ignore false except for bool_*
-    # TODO: array_agg
+    'array_agg': lambda p: p,
     'count': len,
     'count_distinct': lambda p: len(set(p)),
     'bool_and': all,
@@ -2219,11 +2219,11 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             return fetched_data
 
         # TODO: fetch computed fields right here, and then format them in _read_group_format_result
-        self._read_group_compute(fetched_data, computed_fspecs, computed_groups, groupby_fields, lazy=lazy)
+        data = self._read_group_compute(fetched_data, computed_fspecs, computed_groups, groupby_fields, lazy=lazy)
 
-        self._read_group_resolve_many2one_fields(fetched_data, stored_groups)
+        self._read_group_resolve_many2one_fields(data, stored_groups)
 
-        data = [{k: self._read_group_prepare_data(k, v, groupby_dict) for k, v in r.items()} for r in fetched_data]
+        data = [{k: self._read_group_prepare_data(k, v, groupby_dict) for k, v in r.items()} for r in data]
 
         if self.env.context.get('fill_temporal') and data:
             data = self._read_group_fill_temporal(data, groupby, aggregated_fields,
@@ -2246,13 +2246,31 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             )
         return result
 
-    def _read_group_compute(self, data, fspecs, groups, group_fields, lazy=True):
-        for d in data:
-            for name, func, fname in fspecs.values():
-                d[name] = func(self.browse(d['id']).mapped(fname))
-        # if lazy and group_fields[0] not in fspecs.keys():
-            # # if in lazy mode and the first group_field is not a computed field, return early
-            # return
+    def _read_group_compute(self, data, fspecs, groups, group_fields, lazy=True, countvar='__count'):
+        # TODO: shortcircuit if possible
+        if lazy:
+            for d in data:
+                for name, func, fname in fspecs.values():
+                    d[name] = func(self.browse(d['id']).mapped(fname))
+        else:
+            buffer = defaultdict(list)
+            # XXX: maybe it's easier to just not do an SQL groupby if not lazy and at least one field is computed?
+            # separate grouped records
+            for i, d in enumerate(data):
+                grouped = len(d['id'])
+                if grouped > 1:
+                    for id in d['id']:
+                        buffer[i].append(dict(d, **{countvar: 1, 'id': [id]}))
+            # replace the grouped records by the separated records
+            for i in sorted(list(buffer.keys()), reverse=True):
+                # pop and add in reverse order so as to not affect the indexes of the other parts
+                data.pop(i)
+                data = data[:i] + buffer[i] + data[i:]
+            # add the computed field results for each record
+            for d, rec in zip(data, self.browse(list(itertools.chain.from_iterable(d['id'] for d in data)))):
+                for name, _, fname in fspecs.values():
+                    d[name] = rec[fname]
+        return data
 
     def _read_group_resolve_many2one_fields(self, data, fields):
         many2onefields = {field['field'] for field in fields if field['type'] == 'many2one'}
