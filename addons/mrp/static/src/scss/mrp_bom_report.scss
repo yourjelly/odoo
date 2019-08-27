@@ -17,12 +17,15 @@
                 cursor: pointer;
             }
         }
-        thead tr th {
+        thead tr{
             padding-left: 10px;
         }
         tbody, tfoot {
             & > tr > td ~ td > span {
                 margin-left: 10px;
+                .o_mrp_show_attachment_action{
+                    padding-left: 55px;
+                }
             }
             tr {
                 .o_mrp_bom_no_fold {
