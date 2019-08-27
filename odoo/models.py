@@ -2247,7 +2247,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         return result
 
     def _read_group_compute(self, data, fspecs, groups, group_fields, lazy=True, countvar='__count'):
-        # TODO: shortcircuit if possible
+        if not fspecs:
+            return data
         if lazy:
             for d in data:
                 for name, func, fname in fspecs.values():
