@@ -1902,18 +1902,19 @@ class AccountMove(models.Model):
                 move.company_id.account_bank_reconciliation_start = move.date
 
         for move in self:
-            if not move.partner_id: continue
+            if not move.partner_id:
+                continue
             if move.type.startswith('out_'):
-                field='customer_rank'
+                field = 'customer_rank'
             elif move.type.startswith('in_'):
-                field='supplier_rank'
+                field = 'supplier_rank'
             else:
                 continue
             try:
                 with self.env.cr.savepoint():
-                    self.env.cr.execute("SELECT "+field+" FROM res_partner WHERE ID=%s FOR UPDATE NOWAIT", (move.partner_id.id,))
-                    self.env.cr.execute("UPDATE res_partner SET "+field+"="+field+"+1 WHERE ID=%s", (move.partner_id.id,))
-                    self.env.cache.remove(move.partner_id, move.partner_id._fields[field])
+                    self.env.cr.execute("SELECT " + field + " FROM res_partner WHERE ID=%s FOR UPDATE NOWAIT", (move.partner_id.id,), log_exceptions=False)
+                    partner_rank = self.env.cr.fetchone()[0]
+                    self.env.cache.update(move.partner_id, move.partner_id._fields[field], [partner_rank + 1])
             except psycopg2.DatabaseError as e:
                 if e.pgcode == '55P03':
                     _logger.debug('Another transaction already locked partner rows. Cannot update partner ranks.')
