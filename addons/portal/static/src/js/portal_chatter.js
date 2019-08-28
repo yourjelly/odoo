@@ -72,9 +72,6 @@ var PortalComposer = publicWidget.Widget.extend({
         ev.preventDefault();
         var self = this;
         var message = this.$el.find('textarea[name="message"]').val();
-
-        var attachment_ids = new Array(this.$attachmentIds.val());
-        var attachment_tokens = new Array(this.$attachmentTokens.val());
         var render = new PortalChatter(self,self.options);
 
         return this._rpc({
@@ -89,7 +86,6 @@ var PortalComposer = publicWidget.Widget.extend({
         }).then(function () {
             render.reinitialize();
             render.messageFetch();
-
         });
     },
     /**
@@ -309,9 +305,9 @@ var PortalChatter = publicWidget.Widget.extend({
     reinitialize: function () {
         var self = this;
         this._chatterInit().then(function (result) {
+            self._composer = new PortalComposer(self, self.options);
             self.renderElement();
             if (self.options['display_composer']) {
-                self._composer = new PortalComposer(self, self.options);
                 self._composer.replace(self.$('.o_portal_chatter_composer'));
             }
         });

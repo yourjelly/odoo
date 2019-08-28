@@ -124,6 +124,7 @@ class PortalChatter(http.Controller):
             }
             post_values.update((fname, kw.get(fname)) for fname in self._portal_post_filter_params())
             message = _message_post_helper(**post_values)
+        return url
 
 
     @http.route('/mail/chatter_init', type='json', auth='public', website=True)
