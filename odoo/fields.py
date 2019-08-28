@@ -546,7 +546,7 @@ class Field(MetaField('DummyField', (object,), {})):
         if self.depends is None:
             self.depends = ('.'.join(self.related),)
         self.compute = self._compute_related
-        if not (self.readonly or field.readonly):
+        if not (self.readonly or field.readonly or (('max_width' in self._slots) and self.store)):
             self.inverse = self._inverse_related
         if field._description_searchable:
             # allow searching on self only if the related field is searchable
@@ -1975,31 +1975,64 @@ class Image(Binary):
         'max_width': 0,
         'max_height': 0,
     }
+    def __init__(self, string=Default, **kwargs):
+        super(Image, self).__init__(string, **kwargs)
+        if kwargs.get('related', False):
+            self.inverse=None
 
     def create(self, record_values):
+        # if self.name=='image_256':
+        #     import pudb
+        #     pudb.set_trace()
+        if self.related:
+            for record, value in record_values:
+                if len(self.related)>1:
+                    record = record.mapped('.'.join(self.related[:-1]))
+                record[self.related[-1]] = value
+
+        # Could be removed?
         new_record_values = []
         for record, value in record_values:
-            # strange behavior when setting related image field, when `self`
-            # does not resize the same way as its related field
             new_value = self._image_process(value)
             new_record_values.append((record, new_value))
-            record.env.cache.update(record, self, [value if self.related else new_value] * len(record))
+            record.env.cache.update(record, self, [new_value] * len(record))
         super(Image, self).create(new_record_values)
 
-    def write(self, records, value):
+    def write(self, records, value, setoriginal=True):
+        if setoriginal and self.related:
+            final_recs = records
+            if len(self.related)>1:
+                final_recs = final_recs.mapped('.'.join(self.related[:-1]))
+            final_recs[self.related[-1]] = value
         new_value = self._image_process(value)
         super(Image, self).write(records, new_value)
-        records.env.cache.update(records, self, [value if self.related else new_value] * len(records))
+
+    def _compute_related(self, records):
+        values = list(records)
+        for name in self.related[:-1]:
+            values = [first(value[name]) for value in values]
+        for record, value in zip(records, values):
+            self.write(record, value[self.related_field.name], setoriginal=False)
+
+    def _inverse_related(self, records):
+        return super(Image, self)._inverse_related(records)
+
+        pass
+        """ Inverse the related field ``self`` on ``records``. """
+        # store record values, otherwise they may be lost by cache invalidation!
+        record_value = {record: record[self.name] for record in records}
+        for record in records:
+            target, field = self.traverse_related(record)
+            # update 'target' only if 'record' and 'target' are both real or
+            # both new (see `test_base_objects.py`, `test_basic`)
+            if target and bool(target.id) == bool(record.id):
+                target[field.name] = record_value[record]
+
 
     def _image_process(self, value):
         if value and (self.max_width or self.max_height):
             value = image_process(value, size=(self.max_width, self.max_height))
         return value
-
-    def _compute_related(self, records):
-        super(Image, self)._compute_related(records)
-        for record in records:
-            record[self.name] = self._image_process(record[self.name])
 
 
 class Selection(Field):

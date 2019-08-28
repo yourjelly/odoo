@@ -3471,6 +3471,9 @@ Fields:
         if not vals_list:
             return self.browse()
 
+        if 'image_256' in vals_list[0]:
+            import pudb
+            pudb.set_trace()
         self = self.browse()
         self.check_access_rights('create')
 
@@ -3574,7 +3577,6 @@ Fields:
         # check Python constraints for non-stored inversed fields
         for data in data_list:
             data['record']._validate_fields(set(data['inversed']) - set(data['stored']))
-
         return records
 
     @api.model

@@ -1458,11 +1458,13 @@ class TestFields(common.TransactionCase):
             'name': 'image',
             'image_512': image_w,
         })
+        record.flush()
         record.invalidate_cache(fnames=['image_512'], ids=record.ids)
         self.assertEqual(Image.open(io.BytesIO(base64.b64decode(record.image_512))).size, (512, 256))
         self.assertEqual(Image.open(io.BytesIO(base64.b64decode(record.image))).size, (4000, 2000))
         self.assertEqual(Image.open(io.BytesIO(base64.b64decode(record.image_256))).size, (256, 128))
         # test write inverse store
+
         record.write({
             'image_512': image_h,
         })
@@ -1472,6 +1474,9 @@ class TestFields(common.TransactionCase):
         self.assertEqual(Image.open(io.BytesIO(base64.b64decode(record.image_256))).size, (128, 256))
 
         # test create inverse no store
+        import pudb
+        pudb.set_trace()
+
         record = self.env['test_new_api.model_image'].create({
             'name': 'image',
             'image_256': image_w,
