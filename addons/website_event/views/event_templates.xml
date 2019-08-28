@@ -55,7 +55,7 @@
 </template>
 
 <!-- Index - OPTION - Sidebar -->
-<template id="opt_index_sidebar" inherit_id="website_event.index" active="True" customize_show="True" name="Sidebar">
+<template id="opt_index_sidebar" inherit_id="website_event.index" active="True" customize_show="True" name="Show Sidebar">
     <xpath expr="//div[@id='o_we_index_main_col']" position="after">
         <t t-call="website_event.index_sidebar"/>
     </xpath>
