@@ -2214,7 +2214,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         self._cr.execute(query, where_clause_params)
         return {
             'data': self._cr.dictfetchall(),
-            'gb_fields': groupby_fields,
+            'groupby_fields': groupby_fields,
             'computed_groups': computed_groups,
             'computed_fspecs': computed_fspecs,
             'stored_groups': stored_groups,
