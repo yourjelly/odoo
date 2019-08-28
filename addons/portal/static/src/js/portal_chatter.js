@@ -22,7 +22,6 @@ var PortalComposer = publicWidget.Widget.extend({
         'change .o_portal_chatter_file_input': '_onFileInputChange',
         'click .o_portal_chatter_attachment_btn': '_onAttachmentButtonClick',
         'click .o_portal_chatter_attachment_delete': 'async _onAttachmentDeleteClick',
-        'click .o_portal_chatter_composer_btn': '_onChatterSubmit'
     },
     /**
      * @constructor
@@ -68,26 +67,7 @@ var PortalComposer = publicWidget.Widget.extend({
 
     },
 
-    _onChatterSubmit: function (ev) {
-        ev.preventDefault();
-        var self = this;
-        var message = this.$el.find('textarea[name="message"]').val();
-        var render = new PortalChatter(self,self.options);
-
-        return this._rpc({
-            route: '/mail/chatter_post',
-            params: {
-                'res_id': self.options.res_id,
-                'res_model': self.options.res_model,
-                'message': message,
-                'attachment_ids': this.$attachmentIds.val(),
-                'attachment_tokens': this.$attachmentTokens.val()
-            },
-        }).then(function () {
-            render.reinitialize();
-            render.messageFetch();
-        });
-    },
+    
     /**
      * @private
      * @param {Event} ev
@@ -193,6 +173,7 @@ var PortalChatter = publicWidget.Widget.extend({
     xmlDependencies: ['/portal/static/src/xml/portal_chatter.xml'],
     events: {
         "click .o_portal_chatter_pager_btn": '_onClickPager',
+        'click .o_portal_chatter_composer_btn': '_onChatterSubmit'
     },
 
     /**
@@ -266,7 +247,26 @@ var PortalChatter = publicWidget.Widget.extend({
 
         return Promise.all(defs);
     },
+    
+    _onChatterSubmit: function (ev) {
+        ev.preventDefault();
+        var self = this;
+        var message = this.$el.find('textarea[name="message"]').val();
+        var render = new PortalChatter(self,self.options);
 
+        return this._rpc({
+            route: '/mail/chatter_post',
+            params: {
+                'res_id': self.options.res_id,
+                'res_model': self.options.res_model,
+                'message': message,
+                'attachment_ids': this._composer.$attachmentIds.val(),
+                'attachment_tokens': this._composer.$attachmentTokens.val()
+            },
+        }).then(function () {
+            self.reinitialize();
+        });
+    },
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
