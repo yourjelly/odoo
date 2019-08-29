@@ -728,3 +728,94 @@ class TestBoM(TestMrpCommon):
         report_values = self.env['report.mrp.report_bom_structure']._get_report_data(bom_id=bom_finished.id, searchQty=80)
 
         self.assertAlmostEqual(report_values['lines']['total'], 2.92)
+
+    def test_23_loop_in_structure(self):
+        """
+        Test a simple loop in the BOM structure
+        PRODUCT 1 -> PRODUCT 2 -> PRODUCT 1 -> ...
+        """
+
+        product_1 = self.env['product.product'].create({
+            'name': 'Product 1 | LOOP TEST'
+        })
+
+        product_2 = self.env['product.product'].create({
+            'name': 'Product 2 | LOOP TEST'
+        })
+
+        bom_2 = self.env['mrp.bom'].create({
+            'product_tmpl_id': product_2.product_tmpl_id.id,
+            'product_id': product_2.id,
+            'product_qty': 1.0,
+            'type': 'phantom'
+        })
+
+        self.env['mrp.bom.line'].create({
+            'bom_id': bom_2.id,
+            'product_id': product_1.id,
+            'product_qty': 3,
+        })
+
+        bom_assembly = Form(self.env['mrp.bom'])
+        bom_assembly.product_id = product_1
+        bom_assembly.product_tmpl_id = product_1.product_tmpl_id
+        bom_assembly.product_qty = 5
+
+        with bom_assembly.bom_line_ids.new() as line:
+            line.product_id = product_2
+            line.product_qty = 4
+
+        with self.assertRaises(exceptions.ValidationError):
+            bom_assembly = bom_assembly.save()
+
+    def test_24_deep_loop_in_structure(self):
+        """
+        Test a deep loop in the BOM structure
+        PRODUCT 1 -> PRODUCT 2 -> PRODUCT 3 -> ... -> PRODUCT 1
+        """
+        LOOP_DEPTH = 25
+
+        product_root = self.env['product.product'].create({
+            'name': 'Product root | DEEP LOOP TEST'
+        })
+
+        bom = self.env['mrp.bom'].create({
+            'product_tmpl_id': product_root.product_tmpl_id.id,
+            'product_id': product_root.id,
+            'product_qty': 1.0,
+            'type': 'phantom'
+        })
+
+        previous_bom = bom
+
+        for i in range(LOOP_DEPTH):
+            product = self.env['product.product'].create({
+                'name': 'Product %i | DEEP LOOP TEST' % i
+            })
+
+            self.env['mrp.bom.line'].create({
+                'bom_id': previous_bom.id,
+                'product_id': product.id,
+                'product_qty': 3,
+            })
+
+            sub_bom = self.env['mrp.bom'].create({
+                'product_tmpl_id': product.product_tmpl_id.id,
+                'product_id': product.id,
+                'product_qty': 1.0,
+                'type': 'phantom'
+            })
+
+            previous_bom = sub_bom
+
+        bom_assembly = Form(self.env['mrp.bom'])
+        bom_assembly.product_id = product
+        bom_assembly.product_tmpl_id = product.product_tmpl_id
+        bom_assembly.product_qty = 5
+
+        with bom_assembly.bom_line_ids.new() as line:
+            line.product_id = product_root
+            line.product_qty = 4
+
+        with self.assertRaises(exceptions.ValidationError):
+            bom_assembly = bom_assembly.save()
