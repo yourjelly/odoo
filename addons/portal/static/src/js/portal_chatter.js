@@ -306,6 +306,8 @@ var PortalChatter = publicWidget.Widget.extend({
         var self = this;
         this._chatterInit().then(function (result) {
             self._composer = new PortalComposer(self, self.options);
+            self.set('message_count', self.options['message_count']);
+            self.set('messages', self.preprocessMessages(result['messages']));
             self.renderElement();
             if (self.options['display_composer']) {
                 self._composer.replace(self.$('.o_portal_chatter_composer'));
@@ -328,8 +330,6 @@ var PortalChatter = publicWidget.Widget.extend({
         }).then(function (result) {
             self.result = result;
             self.options = _.extend(self.options, self.result['options'] || {});
-            self.set('message_count', self.options['message_count']);
-            self.set('messages', self.preprocessMessages(result['messages']));
             return result;
         });
     },
