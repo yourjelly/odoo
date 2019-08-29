@@ -735,11 +735,6 @@ class AccountJournal(models.Model):
     def _onchange_type(self):
         self.refund_sequence = self.type in ('sale', 'purchase')
 
-    # @api.onchange('restrict_mode_hash_table')
-    # def _onchange_restrict_mode_hash_table(self):
-    #     if self.restrict_mode_hash_table and not self.company_id.secure_sequence_id:
-    #         self.company_id._create_secure_sequence(['secure_sequence_id'])
-
     def _get_alias_values(self, type, alias_name=None):
         if not alias_name:
             alias_name = self.name

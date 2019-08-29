@@ -486,7 +486,7 @@
                         <button name="action_duplicate" string="Duplicate" type="object" groups="account.group_account_invoice"
                                 attrs="{'invisible': [('type', '!=', 'entry')]}"/>
                         <!-- Cancel -->
-                        <button name="button_cancel" string="Cancel Entry" type="object" groups="account.group_account_invoice" 
+                        <button name="button_cancel" string="Cancel Entry" type="object" groups="account.group_account_invoice"
                                 attrs="{'invisible' : ['|', ('restrict_mode_hash_table', '=', True), ('state', '!=', 'posted')]}"/>
                         <button name="button_draft" string="Reset to Draft" type="object" groups="account.group_account_invoice"
                                 attrs="{'invisible' : ['|', ('restrict_mode_hash_table', '=', True), ('state', '!=', 'cancel')]}"/>

@@ -111,7 +111,7 @@ Best Regards,'''))
     expense_accrual_account_id = fields.Many2one('account.account', help="Account used to move the period of an expense", domain=[('internal_group', '=', 'liability'), ('reconcile', '=', True)])
     revenue_accrual_account_id = fields.Many2one('account.account', help="Account used to move the period of a revenue", domain=[('internal_group', '=', 'asset'), ('reconcile', '=', True)])
     accrual_default_journal_id = fields.Many2one('account.journal', help="Journal used by default for moving the period of an entry", domain="[('type', '=', 'general')]")
-    
+
     secure_sequence_id = fields.Many2one('ir.sequence', 'Sequence to use to ensure the securisation of data', readonly=True)
 
     @api.constrains('account_opening_move_id', 'fiscalyear_last_day', 'fiscalyear_last_month')
@@ -305,7 +305,7 @@ Best Regards,'''))
                     raise UserError(_('You cannot change the currency of the company since some journal items already exist'))
 
         res = super(ResCompany, self).write(values)
-               
+
         # fiscalyear_lock_date can't be set to a prior date
         if 'fiscalyear_lock_date' in values or 'period_lock_date' in values:
             self._check_lock_dates(values)

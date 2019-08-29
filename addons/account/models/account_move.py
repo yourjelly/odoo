@@ -2023,7 +2023,7 @@ class AccountMove(models.Model):
 
     def _check_field_rules(self, vals):
         for move in self:
-            if move.has_been_posted_once: # It is a check if the move has already been posted once. 
+            if move.has_been_posted_once: # It is a check if the move has already been posted once.
                 editable_fields = move._get_account_move_editable_field_rules()
                 for field_name in list(vals):
                     if field_name in list(editable_fields):
@@ -2068,7 +2068,7 @@ class AccountMove(models.Model):
             })
 
         return editable_fields
-        
+
     def _get_new_hash(self, secure_seq_number):
         """ Returns the hash to write on journal entries when they get posted"""
         self.ensure_one()
@@ -2146,15 +2146,27 @@ class AccountMove(models.Model):
                        'end_move_name': end_move_info[0],
                        'end_move_ref': end_move_info[1]}
 
-        # Raise on success
-        raise UserError(_('''Successful test !
+        string_result = ('''<p>
+                    <h2 style="font-weight: bold;">Successful test !</h2>
+                    <br/>
+                    <br/>
+                    The journal entries are guaranteed to be in their original and inalterable state<br/>
+                    From: %(start_move_name)s %(start_move_ref)s <br/>
+                    To: %(end_move_name)s %(end_move_ref)s <br/>
+                    <br/>
+                    For this report to be legally meaningful, please download your certification from <br/>
+                    your customer account on Odoo.com (Only for Odoo Enterprise users). <br/>
+                    </p>'''
+                ) % report_dict
 
-                         The journal entries are guaranteed to be in their original and inalterable state
-                         From: %(start_move_name)s %(start_move_ref)s
-                         To: %(end_move_name)s %(end_move_ref)s
-
-                         For this report to be legally meaningful, please download your certification from your customer account on Odoo.com (Only for Odoo Enterprise users).'''
-                         ) % report_dict)
+        return {
+            "name": "Hash Integrity Test Result",
+            "type": "ir.actions.act_window",
+            "res_model": "account.move.hash.integrity.result.wizard",
+            "views": [[False, "form"]],
+            "target": "new",
+            "context": {'hash_integrity_result': string_result,},
+        }
 
     def action_invoice_print(self):
         """ Print the invoice and mark it as sent, so that we can see more
@@ -2957,7 +2969,7 @@ class AccountMoveLine(models.Model):
 
     def _check_field_rules(self, vals):
         for line in self:
-            if line.move_id.has_been_posted_once: # It is a check if the move has already been posted once. 
+            if line.move_id.has_been_posted_once: # It is a check if the move has already been posted once.
                 editable_fields = line._get_account_move_line_editable_field_rules()
                 for field_name in list(vals):
                     if field_name in list(editable_fields):
@@ -3754,7 +3766,7 @@ class AccountMoveLine(models.Model):
             ('full_reconcile_id', '=', False),
             ('statement_line_id', '!=', False),
         ]
-    
+
     def _get_account_move_line_editable_field_rules(self):
         editable_fields = {}
         if self.move_id.is_sale_document(include_receipts=True):
@@ -3783,7 +3795,7 @@ class AccountMoveLine(models.Model):
                 'quantity': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries,
                 'price_unit': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries,
                 'tax_ids': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries,
-                'intrastat_product_origin_country_id': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table,                
+                'intrastat_product_origin_country_id': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table,
                 'analytic_tag_ids': False,
             })
         else:
