@@ -2774,7 +2774,7 @@ class AccountMoveLine(models.Model):
     @api.constrains('tax_ids', 'tax_line_id')
     def _check_tax_lock_date1(self):
         for line in self:
-            if line.date <= (line.company_id.tax_lock_date or date.min):
+            if line.date and line.date <= (line.company_id.tax_lock_date or date.min):
                 raise ValidationError(
                     _("The operation is refused as it would impact an already issued tax statement. " +
                       "Please change the journal entry date or the tax lock date set in the settings ({}) to proceed").format(
