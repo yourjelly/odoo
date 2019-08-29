@@ -43,7 +43,7 @@
     </record>
 
     <record id="event.event_1" model="event.event">
-        <field name="name">Great Ballon Race</field>
+        <field name="name">Great Reno Ballon Race</field>
         <field name="user_id" ref="base.user_admin"/>
         <field eval="(DateTime.today()+ timedelta(days=100)).strftime('%Y-%m-%d 20:15:00')" name="date_begin"/>
         <field eval="(DateTime.today()+ timedelta(days=101)).strftime('%Y-%m-%d 00:30:00')" name="date_end"/>
