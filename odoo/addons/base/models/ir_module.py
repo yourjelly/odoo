@@ -917,7 +917,7 @@ class ModuleDependency(models.Model):
 
     # the module corresponding to the dependency, and its status
     depend_id = fields.Many2one('ir.module.module', 'Dependency',
-                                compute='_compute_depend', search='_search_depend')
+                                compute='_compute_depend', store=True)
     state = fields.Selection(DEP_STATES, string='Status', compute='_compute_state')
 
     auto_install_required = fields.Boolean(
@@ -935,11 +935,6 @@ class ModuleDependency(models.Model):
         name_mod = dict((mod.name, mod) for mod in mods)
         for dep in self:
             dep.depend_id = name_mod.get(dep.name)
-
-    def _search_depend(self, operator, value):
-        assert operator == 'in'
-        modules = self.env['ir.module.module'].browse(set(value))
-        return [('name', 'in', modules.mapped('name'))]
 
     @api.depends('depend_id.state')
     def _compute_state(self):
@@ -959,7 +954,7 @@ class ModuleExclusion(models.Model):
 
     # the module corresponding to the exclusion, and its status
     exclusion_id = fields.Many2one('ir.module.module', 'Exclusion Module',
-                                   compute='_compute_exclusion', search='_search_exclusion')
+                                   compute='_compute_exclusion', store=True)
     state = fields.Selection(DEP_STATES, string='Status', compute='_compute_state')
 
     @api.depends('name')
@@ -972,11 +967,6 @@ class ModuleExclusion(models.Model):
         name_mod = {mod.name: mod for mod in mods}
         for excl in self:
             excl.exclusion_id = name_mod.get(excl.name)
-
-    def _search_exclusion(self, operator, value):
-        assert operator == 'in'
-        modules = self.env['ir.module.module'].browse(set(value))
-        return [('name', 'in', modules.mapped('name'))]
 
     @api.depends('exclusion_id.state')
     def _compute_state(self):
