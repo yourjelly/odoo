@@ -256,7 +256,7 @@ class AccountMove(models.Model):
     # Technical field to hide Reconciled Entries stat button
     has_reconciled_entries = fields.Boolean(compute="_compute_has_reconciled_entries")
 
-    # ==== Hash Fields ==== 
+    # ==== Hash Fields ====
     restrict_mode_hash_table = fields.Boolean(related='journal_id.restrict_mode_hash_table')
     has_been_posted_once = fields.Boolean(default=False, readonly=True)
     secure_sequence_number = fields.Integer(string="Inalteralbility No Gap Sequence #", readonly=True, copy=False)
@@ -1473,7 +1473,7 @@ class AccountMove(models.Model):
     def write(self, vals):
         not_paid_invoices = self.filtered(lambda move: move.is_invoice(include_receipts=True) and move.invoice_payment_state not in ('paid', 'in_payment'))
 
-        self._check_field_rules(vals)
+        #self._check_field_rules(vals) TODO OCO
 
         if self._move_autocomplete_invoice_lines_write(vals):
             res = True
@@ -2021,7 +2021,7 @@ class AccountMove(models.Model):
             'context': ctx,
         }
 
-    def _check_field_rules(self, vals):
+    """def _check_field_rules(self, vals): TODO OCO
         for move in self:
             if move.has_been_posted_once: # It is a check if the move has already been posted once.
                 editable_fields = move._get_account_move_editable_field_rules()
@@ -2030,7 +2030,7 @@ class AccountMove(models.Model):
                         if editable_fields[field_name]: # The field rules are checked
                             continue
                         else:
-                            raise UserError(_('The field "%s" cannot be edited.') % field_name)
+                            raise UserError(_('The field "%s" cannot be edited.') % field_name)"""
 
     def _get_account_move_editable_field_rules(self):
         editable_fields = {}
@@ -2967,7 +2967,7 @@ class AccountMoveLine(models.Model):
                       "Please change the journal entry date or the tax lock date set in the settings ({}) to proceed").format(
                         line.company_id.tax_lock_date or date.min))
 
-    def _check_field_rules(self, vals):
+    """def _check_field_rules(self, vals): TODO OCO
         for line in self:
             if line.move_id.has_been_posted_once: # It is a check if the move has already been posted once.
                 editable_fields = line._get_account_move_line_editable_field_rules()
@@ -2976,7 +2976,7 @@ class AccountMoveLine(models.Model):
                         if editable_fields[field_name]: # The field rules are checked
                             continue
                         else:
-                            raise UserError(_('The field "%s" cannot be edited.') % field_name)
+                            raise UserError(_('The field "%s" cannot be edited.') % field_name)"""
 
     def _update_check(self):
         """ Raise Warning to cause rollback if the move is posted, some entries are reconciled or the move is older than the lock date"""
@@ -3093,8 +3093,11 @@ class AccountMoveLine(models.Model):
         ACCOUNTING_FIELDS = ('debit', 'credit', 'amount_currency')
         BUSINESS_FIELDS = ('price_unit', 'quantity', 'discount', 'tax_ids')
 
-        self._check_field_rules(vals)
-        if ('account_id' in vals) and self.env['account.account'].browse(vals['account_id']).deprecated:
+        field_edition_rules = self._get_account_move_line_editable_field_rules()
+
+        edition_values_before = self.retrieve_edition_rule_values(field_edition_rules)
+
+        if ('acco-unt_id' in vals) and self.env['account.account'].browse(vals['account_id']).deprecated:
             raise UserError(_('You cannot use a deprecated account.'))
         if any(key in vals for key in ('account_id', 'journal_id', 'date', 'move_id', 'debit', 'credit')):
             self._update_check()
@@ -3142,7 +3145,25 @@ class AccountMoveLine(models.Model):
         if self._context.get('check_move_validity', True) and any(key in vals for key in ('account_id', 'journal_id', 'date', 'move_id', 'debit', 'credit')):
             self.env['account.move'].browse(self.mapped('move_id.id'))._check_move_consistency()
 
+        edition_values_after = self.retrieve_edition_rule_values(field_edition_rules)
+        self.check_edition_rules(field_edition_rules, edition_values_before, edition_values_after)
+
         return result
+
+    def retrieve_edition_rule_values(self, field_edition_rules): #TODO OCO DOC
+        rslt = {}
+        for record in self:
+            rslt[record.id] = {field_name: getattr(record, field_name) for field_name in field_edition_rules.keys()}
+        return rslt
+
+    def check_edition_rules(self, field_edition_rules, edition_values_before, edition_values_after):
+        for record in self.filtered(lambda x: x.move_id.has_been_posted_once):
+            for field_name, rule in field_edition_rules.items():
+                print(field_name)
+                if edition_values_before[record.id][field_name] != edition_values_after[record.id][field_name] and not rule: #TODO OCO à voir avec les champs relationnels
+                    field_display_name = self.env['ir.model.fields'].search([('model', '=', self._name), ('name', '=', field_name)]).field_description
+                    #TODO OCO : le problème avec ça, c'est que si le champ a un nom différent dans la vue, on n'aura pas le nom de la vue. => price_unit
+                    raise UserError(_("Field %s cannot be edited.") % (_(field_display_name)))
 
     def unlink(self):
         self._update_check()
@@ -3767,7 +3788,8 @@ class AccountMoveLine(models.Model):
             ('statement_line_id', '!=', False),
         ]
 
-    def _get_account_move_line_editable_field_rules(self):
+    def _get_account_move_line_editable_field_rules(self): #TODO OCO +DOC: order of the dict matters !!
+        #TODO OCO mieux gérer exclude_from_invoice_tab ? Implicite chaque fois ? (sans doute pas)
         editable_fields = {}
         if self.move_id.is_sale_document(include_receipts=True):
             # For 'out_invoice', 'out_refund' and 'out_receipt'
@@ -3776,10 +3798,10 @@ class AccountMoveLine(models.Model):
                 'name': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.invoice_sent,
                 'account_id': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries and not self.move_id.invoice_sent,
                 'analytic_account_id': False,
-                'intrastat_transaction_id': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table,
-                'intrastat_product_origin_country_id': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table,
+                #'intrastat_transaction_id': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table, TODO OCO
+                #'intrastat_product_origin_country_id': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table, #TODO OCO
                 'quantity': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries and not self.move_id.invoice_sent,
-                'price_unit': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries and not self.move_id.invoice_sent,
+                'price_unit': self.exclude_from_invoice_tab or (self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries and not self.move_id.invoice_sent),
                 'tax_ids': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries and not self.move_id.invoice_sent,
                 'analytic_tag_ids': False,
             })
@@ -3791,11 +3813,11 @@ class AccountMoveLine(models.Model):
                 'is_landed_costs_line': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries,
                 'account_id': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries,
                 'analytic_account_id': False,
-                'intrastat_transaction_id': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table,
+                #'intrastat_transaction_id': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table,
                 'quantity': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries,
                 'price_unit': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries,
                 'tax_ids': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table and not self.move_id.has_reconciled_entries,
-                'intrastat_product_origin_country_id': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table,
+                #'intrastat_product_origin_country_id': self.move_id.state == 'draft' and not self.move_id.restrict_mode_hash_table, TODO OCO
                 'analytic_tag_ids': False,
             })
         else:

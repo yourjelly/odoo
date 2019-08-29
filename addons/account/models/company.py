@@ -576,7 +576,7 @@ Best Regards,'''))
         a unique number is given to all posted account.move in such a way that we can always
         find the previous move of a journal entry.
         """
-        for company in self:
+        """for company in self:
             vals_write = {}
             for seq_field in sequence_fields:
                 if not company[seq_field]:
@@ -591,4 +591,5 @@ Best Regards,'''))
                     seq = self.env['ir.sequence'].create(vals)
                     vals_write[seq_field] = seq.id
             if vals_write:
-                company.write(vals_write)
+                company.write(vals_write)"""
+        pass
