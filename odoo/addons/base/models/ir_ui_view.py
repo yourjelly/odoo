@@ -371,11 +371,17 @@ actual arch.
                     _logger.warning("The group %s defined in view %s does not exist!", group, view_name)
 
     @api.constrains('arch_db')
+    def _check_xml_constrains(self):
+        init_time = time.time()
+        self._check_xml()
+        _logger.info('exectime _check_xml_constrains (%s): %s', self.ids, time.time() - init_time)
+
     def _check_xml(self):
         # Sanity checks: the view should not break anything upon rendering!
         # Any exception raised below will cause a transaction rollback.
         self = self.with_context(check_field_names=True)
         for view in self:
+            init_time = time.time()
             view_arch = etree.fromstring(view.arch.encode('utf-8'))
             view._valid_inheritance(view_arch)
             view_def = view.read_combined(['arch'])
@@ -397,6 +403,7 @@ actual arch.
                         raise ValidationError(_('Invalid view %s definition in %s') % (view_name, view.arch_fs))
                     if check == "Warning":
                         _logger.warning(_('Invalid view %s definition in %s \n%s'), view_name, view.arch_fs, view.arch)
+            _logger.info('exectime _check_xml(%s): %s', view.id, time.time() - init_time)
         return True
 
     @api.constrains('type', 'groups_id')
@@ -438,6 +445,8 @@ actual arch.
 
     @api.model_create_multi
     def create(self, vals_list):
+
+        init_time = time.time()
         for values in vals_list:
             if not values.get('type'):
                 if values.get('inherit_id'):
@@ -463,9 +472,12 @@ actual arch.
             values.update(self._compute_defaults(values))
 
         self.clear_caches()
+
+        _logger.info('exectime view_create_add: %s', time.time() - init_time)
         return super(View, self).create(vals_list)
 
     def write(self, vals):
+        init_time = time.time()
         # Keep track if view was modified. That will be useful for the --dev mode
         # to prefer modified arch over file arch.
         if ('arch' in vals or 'arch_base' in vals) and 'install_filename' not in self._context:
@@ -480,6 +492,8 @@ actual arch.
         self.clear_caches()
         if 'arch_db' in vals and not self.env.context.get('no_save_prev'):
             vals['arch_prev'] = self.arch_db
+        
+        _logger.info('exectime view_write_add: %s', time.time() - init_time)
         return super(View, self).write(self._compute_defaults(vals))
 
     def unlink(self):
@@ -666,6 +680,7 @@ actual arch.
           .. note:: ``arch`` is always added to the fields list even if not
                     requested (similar to ``id``)
         """
+        init_time = time.time()
         # introduce check_view_ids in context
         if 'check_view_ids' not in self._context:
             self = self.with_context(check_view_ids=[])
@@ -705,6 +720,7 @@ actual arch.
         # and apply inheritance
         arch = self.apply_view_inheritance(arch_tree, root.id, self.model)
 
+        _logger.info('exectime read_combined (%s): %s', self.id, time.time() - init_time)
         return dict(view_data, arch=etree.tostring(arch, encoding='unicode'))
 
     def _apply_group(self, model, node, modifiers, fields):
@@ -911,6 +927,7 @@ actual arch.
             string and fields is the description of all the fields.
 
         """
+        init_time = time.time()
         fields = {}
         if model not in self.env:
             self.raise_view_error(_('Model not found: %(model)s') % dict(model=model), view_id)
@@ -961,6 +978,7 @@ actual arch.
                     msg_lines.append(line_fmt % line)
             self.raise_view_error("\n".join(msg_lines), view_id)
 
+        _logger.info('exectime postprocess_and_fields (%s): %s', self.id, time.time() - init_time)
         return arch, fields
 
     def _postprocess_access_rights(self, model, node):
