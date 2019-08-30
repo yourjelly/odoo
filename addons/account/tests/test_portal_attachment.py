@@ -125,13 +125,13 @@ class TestUi(tests.HttpCase):
             'attachment_tokens': 'false',
             'csrf_token': http.WebRequest.csrf_token(self),
         }
-        res = self.url_open(url=post_url, data=post_data)
+        res = self.opener.post(url=post_url, json={'params': post_data})
         self.assertEqual(res.status_code, 400)
         self.assertIn("The attachment %s does not exist or you do not have the rights to access it." % attachment.id, res.text)
 
         # Test attachment can't be associated if no main document token
         post_data['attachment_tokens'] = attachment.access_token
-        res = self.url_open(url=post_url, data=post_data)
+        res = self.opener.post(url=post_url, json={'params': post_data})
         self.assertEqual(res.status_code, 403)
         self.assertIn("Sorry, you are not allowed to access documents of type 'Journal Entries' (account.move).", res.text)
 
@@ -139,7 +139,7 @@ class TestUi(tests.HttpCase):
         post_data['token'] = invoice._portal_ensure_token()
         self.assertFalse(invoice.message_ids)
         attachment.write({'res_model': 'model'})
-        res = self.url_open(url=post_url, data=post_data)
+        res = self.opener.post(url=post_url, json={'params': post_data})
         self.assertEqual(res.status_code, 200)
         invoice.invalidate_cache(fnames=['message_ids'], ids=invoice.ids)
         self.assertEqual(len(invoice.message_ids), 1)
@@ -149,7 +149,7 @@ class TestUi(tests.HttpCase):
         # Test attachment can't be associated if not correct user
         attachment.write({'res_model': 'mail.compose.message'})
         post_data['message'] = "test message 2"
-        res = self.url_open(url=post_url, data=post_data)
+        res = self.opener.post(url=post_url, json={'params': post_data})
         self.assertEqual(res.status_code, 200)
         invoice.invalidate_cache(fnames=['message_ids'], ids=invoice.ids)
         self.assertEqual(len(invoice.message_ids), 2)
@@ -166,7 +166,7 @@ class TestUi(tests.HttpCase):
         post_data['message'] = "test message 3"
         post_data['attachment_ids'] = create_res['id']
         post_data['attachment_tokens'] = create_res['access_token']
-        res = self.url_open(url=post_url, data=post_data)
+        res = self.opener.post(url=post_url, json={'params': post_data})
         self.assertEqual(res.status_code, 200)
         invoice.invalidate_cache(fnames=['message_ids'], ids=invoice.ids)
         self.assertEqual(len(invoice.message_ids), 3)
