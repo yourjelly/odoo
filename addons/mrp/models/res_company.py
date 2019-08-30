@@ -16,7 +16,7 @@ class Company(models.Model):
         for company in self:
             unbuild_vals.append({
                 'name': 'Unbuild',
-                'code': 'stock.unbuild',
+                'code': 'mrp.unbuild',
                 'company_id': company.id,
                 'prefix': 'UB/',
                 'padding': 5,
