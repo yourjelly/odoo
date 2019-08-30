@@ -189,8 +189,7 @@ class MrpWorkcenter(models.Model):
     def create(self, vals):
         # resource_type is 'human' by default. As we are not living in
         # /r/latestagecapitalism, workcenters are 'material'
-        records = super(MrpWorkcenter, self.with_context({
-            'default_resource_type': 'material'})).create(vals)
+        records = super(MrpWorkcenter, self.with_context(default_resource_type='material')).create(vals)
         return records
 
     def write(self, vals):
