@@ -100,7 +100,7 @@ class MrpBom(models.Model):
                 for bom_line in current_bom.bom_line_ids:
                     if bom_line.product_id.product_tmpl_id == bom.product_tmpl_id:
                         # work even if no variant is set for the product of the current BOM
-                        raise ValidationError(_("Component [%s] is at the same time component of [%s] and finished product manufactured from [%s]. This configuration isn\'t allowed") % (bom_line.product_id.name, bom.product_tmpl_id.name, bom.product_tmpl_id.name))
+                        raise ValidationError(_("Component [%s] is at the same time component of [%s] and finished product manufactured from [%s]. This configuration isn\'t allowed.") % (current_bom.product_tmpl_id.name, bom.product_tmpl_id.name, bom.product_tmpl_id.name))
 
                     for sub_bom in bom_line.product_id.bom_ids:
                         _explore_bom_products(sub_bom)
