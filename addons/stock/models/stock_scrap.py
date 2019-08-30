@@ -27,7 +27,7 @@ class StockScrap(models.Model):
         'Reference',  default=lambda self: _('New'),
         copy=False, readonly=True, required=True,
         states={'done': [('readonly', True)]})
-    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company, required=True, readonly=True)
+    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company, required=True, states={'done': [('readonly', True)]})
     origin = fields.Char(string='Source Document')
     product_id = fields.Many2one(
         'product.product', 'Product', domain="[('type', 'in', ['product', 'consu']), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
@@ -64,7 +64,7 @@ class StockScrap(models.Model):
             self.location_id = (self.picking_id.state == 'done') and self.picking_id.location_dest_id.id or self.picking_id.location_id.id
 
     @api.onchange('product_id')
-    def onchange_product_id(self):
+    def _onchange_product_id(self):
         if self.product_id:
             self.product_uom_id = self.product_id.uom_id.id
             # Check if we can get a more precise location instead of
@@ -75,6 +75,19 @@ class StockScrap(models.Model):
                     if move_line.product_id == self.product_id:
                         self.location_id = move_line.location_id if move_line.state != 'done' else move_line.location_dest_id
                         break
+
+    @api.onchange('company_id')
+    def _onchange_company_id(self):
+        if self.company_id:
+            warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.company_id.id)], limit=1)
+            self.location_id = warehouse.lot_stock_id
+            self.scrap_location_id = self.env['stock.location'].search([
+                ('scrap_location', '=', True),
+                ('company_id', 'in', [self.company_id.id, False]),
+            ], limit=1)
+        else:
+            self.location_id = False
+            self.scrap_location_id = False
 
     def unlink(self):
         if 'done' in self.mapped('state'):
