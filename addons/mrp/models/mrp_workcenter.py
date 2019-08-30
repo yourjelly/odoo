@@ -266,8 +266,7 @@ class MrpWorkcenterProductivity(models.Model):
     workorder_id = fields.Many2one('mrp.workorder', 'Work Order', check_company=True)
     user_id = fields.Many2one(
         'res.users', "User",
-        default=lambda self: self.env.uid,
-        check_company=True)
+        default=lambda self: self.env.uid)
     loss_id = fields.Many2one(
         'mrp.workcenter.productivity.loss', "Loss Reason",
         ondelete='restrict', required=True)
