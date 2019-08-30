@@ -1,7 +1,7 @@
 /**!
  * Sortable 1.10.0-rc3
- * @author  RubaXa   <trash@rubaxa.org>
- * @author  owenm    <owen23355@gmail.com>
+ * @author	RubaXa   <trash@rubaxa.org>
+ * @author	owenm    <owen23355@gmail.com>
  * @license MIT
  */
 (function (global, factory) {
@@ -2702,7 +2702,7 @@
         // Firefox and Chrome are good
 
         if (fallback || Edge || IE11OrLess || Safari) {
-          autoScroll(evt, this.sortable.options, elem, fallback); // Listener for pointer element change
+          autoScroll(evt, this.options, elem, fallback); // Listener for pointer element change
 
           var ogElemScroller = getParentAutoScrollElement(elem, true);
 
@@ -2717,7 +2717,7 @@
                 clearAutoScrolls();
               }
 
-              autoScroll(evt, _this.sortable.options, newElem, fallback);
+              autoScroll(evt, _this.options, newElem, fallback);
             }, 10);
             lastAutoScrollX = x;
             lastAutoScrollY = y;
@@ -2729,7 +2729,7 @@
             return;
           }
 
-          autoScroll(evt, this.sortable.options, getParentAutoScrollElement(elem, false), false);
+          autoScroll(evt, this.options, getParentAutoScrollElement(elem, false), false);
         }
       }
     };
@@ -2815,7 +2815,7 @@
         autoScrolls[layersOut].vy = vy;
         clearInterval(autoScrolls[layersOut].pid);
 
-        if (vx !== 0 || vy !== 0) {
+        if (vx != 0 || vy != 0) {
           scrollThisInstance = true;
           /* jshint loopfunc:true */
 
@@ -3371,7 +3371,7 @@
           // Do not "unfold" after around dragEl if reverted
           if ((parentEl[expando].options.sort || parentEl !== rootEl) && multiDragElements.length > 1) {
             var dragRect = getRect(dragEl$1),
-                multiDragIndex = index(dragEl$1, ':not(.' + sortable.options.selectedClass + ')');
+                multiDragIndex = index(dragEl$1, ':not(.' + this.options.selectedClass + ')');
             if (!initialFolding && options.animation) dragEl$1.thisAnimationDuration = null;
             toSortable.captureAnimationState();
 
