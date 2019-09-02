@@ -84,6 +84,9 @@
     border: $border-width solid $border-color;
     border-radius: 50%;
     text-align: center;
+    @include hover-focus {
+        background-color: gray('300');
+    }
 }
 
 .o_we_badge {
