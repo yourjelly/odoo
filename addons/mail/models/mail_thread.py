@@ -899,7 +899,7 @@ class MailThread(models.AbstractModel):
 
         # 0. Handle bounce: verify whether this is a bounced email and use it to collect bounce data and update notifications for customers
         #    Bounce regex: typical form of bounce is bounce_alias+128-crm.lead-34@domain
-        #       group(1) = the mail ID; group(2) = the model (if any); group(3) = the record ID 
+        #       group(1) = the mail ID; group(2) = the model (if any); group(3) = the record ID
         #    Bounce message (not alias)
         #       See http://datatracker.ietf.org/doc/rfc3462/?include_text=1
         #        As all MTA does not respect this RFC (googlemail is one of them),
@@ -1678,7 +1678,7 @@ class MailThread(models.AbstractModel):
             m2m_attachment_ids += [(4, id) for id in filtered_attachment_ids.ids]
         # Handle attachments parameter, that is a dictionary of attachments
 
-        if attachments: # generate 
+        if attachments: # generate
             cids_in_body = set()
             names_in_body = set()
             cid_list = []
@@ -1765,7 +1765,7 @@ class MailThread(models.AbstractModel):
             :param str body: body of the message, usually raw HTML that will
                 be sanitized
             :param str subject: subject of the message
-            :param str message_type: see mail_message.message_type field. Can be anything but 
+            :param str message_type: see mail_message.message_type field. Can be anything but
                 user_notification, reserved for message_notify
             :param int parent_id: handle thread formation
             :param int subtype_id: subtype_id of the message, mainly use fore
@@ -1803,7 +1803,7 @@ class MailThread(models.AbstractModel):
         record_name = record_name or self.display_name
 
         partner_ids = set(partner_ids or [])
-        channel_ids = set(channel_ids or [])
+        channel_ids = set(*channel_ids or []) - {False}
 
         if any(not isinstance(pc_id, int) for pc_id in partner_ids | channel_ids):
             raise ValueError('message_post partner_ids and channel_ids must be integer list, not commands')
@@ -1945,7 +1945,7 @@ class MailThread(models.AbstractModel):
 
     def message_notify(self, partner_ids=False, parent_id=False, model=False, res_id=False,
                        author_id=None, email_from=None, body='', subject=False, **kwargs):
-        """ Shortcut allowing to notify partners of messages that shouldn't be 
+        """ Shortcut allowing to notify partners of messages that shouldn't be
         displayed on a document. It pushes notifications on inbox or by email depending
         on the user configuration, like other notifications. """
         if self:
@@ -2518,7 +2518,7 @@ class MailThread(models.AbstractModel):
             'button_access': {'title': 'View Simple Chatter Model',
                             'url': '/mail/view?model=mail.test.simple&res_id=1497'},
             'has_button_access': False,
-            'recipients': [4, 5, 6] 
+            'recipients': [4, 5, 6]
         },
         {
             'actions': [],
@@ -2878,7 +2878,7 @@ class MailThread(models.AbstractModel):
         in case of a mail redirection to the record. To avoid multi
         company issues when clicking on a link sent by email, this
         could be called to try setting the most suited company on
-        the allowed_company_ids in the context. This method can be 
+        the allowed_company_ids in the context. This method can be
         overridden, for example on the hr.leave model, where the
         most suited company is the company of the leave type, as
         specified by the ir.rule.
