@@ -250,33 +250,22 @@
                         <!-- Social -->
                         <div class="o_we_sidebar_block">
                             <h6 class="o_we_sidebar_title">SHARE</h6>
-                            <div class="o_we_sidebar_social mx-n1">
-                                <!-- TODO - Fix URL -->
+                            <div class="o_we_sidebar_social s_share mx-n1">
+                                <!-- TODO - Fix Facebook & Linkedin URL -->
                                 <a href="https://www.facebook.com/sharer/sharer.php?u={url}" class="s_share_facebook o_we_social_link" aria-label="Facebook" title="Facebook"><i class="fa fa-facebook text-facebook"/></a>
                                 <a href="https://twitter.com/intent/tweet?text={title}&amp;url={url}" class="s_share_twitter o_we_social_link" aria-label="Twitter" title="Twitter"><i class="fa fa-twitter text-twitter"/></a>
                                 <a href="http://www.linkedin.com/shareArticle?mini=true&amp;url={url}&amp;title={title}&amp;" class="s_share_linkedin o_we_social_link" aria-label="Linkedin" title="Linkedin"><i class="fa fa-linkedin text-linkedin"/></a>
-                                <a href="" class="s_share_email o_we_social_link" aria-label="Email" title="Email"><i class="fa fa-envelope text-primary"/></a>
+                                <a href="mailto:?body={url}&amp;subject={title}" class="s_share_email o_we_social_link" aria-label="Email" title="Email"><i class="fa fa-envelope"/></a>
                                 <span t-if="event.twitter_hashtag"/>
-                                <!-- <a t-att-href="'http://twitter.com/search?q=%23'+event.twitter_hashtag" target="_blank">
-                                    <b>#<span t-field="event.twitter_hashtag"/></b>
-                                </a> -->
                             </div>
+                            <!-- TODO: Keep it? -->
+                            <!-- <t t-call="website_mail.follow"><t t-set="object" t-value="event"/></t>
+                            <div t-if="event.twitter_hashtag">
+                                <p><b>Participate on Twitter</b></p>
+                                <p class="text-muted">Find out what people see and say about this event, and join the conversation.</p>
+                                <p>Use this hashtag: <a t-att-href="'http://twitter.com/search?q=%23'+event.twitter_hashtag" target="_blank">#<span t-field="event.twitter_hashtag"/></a></p>
+                            </div> -->
                         </div>
-                        <!-- <h4 class="card-header">Social Stream</h4>
-                        <div class="card-body">
-                            <t t-call="website_mail.follow"><t t-set="object" t-value="event"/></t>
-                            <div t-if="event.twitter_hashtag" class="mt16">
-                                <p><strong>Participate on Twitter</strong></p>
-                                <p class="text-muted">
-                                    Find out what people see and say about this event,
-                                    and join the conversation.
-                                </p>
-                                <p>
-                                    <strong>Use this tag:</strong>
-                                    <a t-att-href="'http://twitter.com/search?q=%23'+event.twitter_hashtag" target="_blank" class="badge badge-primary">#<span t-field="event.twitter_hashtag"/></a>
-                                </p>
-                            </div>
-                        </div> -->
                     </div>
                 </div>
             </div>
