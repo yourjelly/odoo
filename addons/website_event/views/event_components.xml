@@ -102,10 +102,10 @@
 <!-- Index - Events list -->
 <template id="events_list" name="Events list">
     <!-- Options -->
-    <t t-set="opt_events_list_columns" t-value="False"/>
     <t t-set="opt_index_sidebar" t-value="request.website.viewref('website_event.opt_index_sidebar').active"/>
-    <t t-if="opt_events_list_columns" t-set="opt_event_size" t-value="'col-12 col-lg-6' if opt_index_sidebar else 'col-12 col-md-6 col-lg-4'"/>
-    <t t-else="" t-set="opt_event_size" t-value="'col-12' if opt_index_sidebar else 'col-xl-10 offset-xl-1'"/>
+
+    <t t-if="opt_events_list_columns" t-set="opt_event_size" t-value="'col-lg-6' if opt_index_sidebar else 'col-md-6 col-lg-4' if opt_events_list_columns else ''"/>
+    <!-- <t t-else="" t-set="opt_event_size" t-value="'col-xl-10 offset-xl-1' if opt_index_sidebar else ''"/> -->
     <!-- No events -->
     <t t-if="not event_ids">
         <div class="h2 mb-3">No events found.</div>
@@ -114,11 +114,11 @@
         </div>
     </t>
     <!-- List -->
-    <div t-foreach="event_ids" t-as="event" t-attf-class="mb-4 #{opt_event_size}">
-        <article class="card" itemscope="itemscope" itemtype="http://schema.org/Event">
+    <div t-foreach="event_ids" t-as="event" t-attf-class="col-12 #{opt_event_size} mb-4">
+        <article t-attf-class="#{'card border-0 shadow-sm' if opt_events_list_cards else ''}" itemscope="itemscope" itemtype="http://schema.org/Event">
             <div class="row no-gutters">
                 <!-- Header -->
-                <header t-attf-class="#{'col-12 rounded-top' if opt_events_list_columns else 'col-sm-4 col-lg-3 rounded-left'} #{events_cover_properties[event_index].get('background-color')}">
+                <header t-attf-class="overflow-hidden #{'col-12 rounded-top' if opt_events_list_columns else 'col-sm-4 col-lg-3 rounded-left'} #{'rounded shadow' if not opt_events_list_cards else ''} #{'rounded-top' if (not opt_events_list_cards and not opt_events_list_columns) else ''} #{events_cover_properties[event_index].get('background-color')}">
                     <!-- Image + Link -->
                     <a t-attf-href="/event/#{ slug(event) }/#{(not event.menu_id) and 'register' or ''}" class="d-block h-100 w-100" t-attf-style="background-image: url('#{events_cover_properties[event_index].get('img_url')}'); background-size: cover; background-position: 50% 100%;">
                         <!-- Short Date -->
@@ -136,21 +136,18 @@
                         </small>
                     </a>
                 </header>
-                <div t-attf-class="d-flex flex-column #{'col-md-12' if opt_events_list_columns else 'col'}">
+                <div t-attf-class="#{'col-12' if opt_events_list_columns else 'col'}">
                     <!-- Body -->
-                    <main class="card-body">
-                        <!-- Category -->
-                        <span t-attf-class="small #{'o_we_event_category position-absolute shadow-sm' if opt_events_list_columns else 'float-right mt-n2 mr-n1'}" t-if="event.event_type_id">
-                            <i class="fa fa-folder-open fa-fw" role="img" aria-label="Event type" title="Event type"/>
-                            <span class="text-600" t-field="event.event_type_id"/>
-                        </span>
+                    <main t-attf-class="#{'card-body' if opt_events_list_cards else ('py-3' if opt_events_list_columns else 'px-4')}">
                         <!-- Title -->
-                        <a t-attf-href="/event/#{ slug(event) }/#{(not event.menu_id) and 'register' or ''}" class="text-nowrap text-truncate" itemprop="url">
-                            <h5 t-attf-class="card-title mt-2 mb-0 #{'text-danger' if not event.website_published else ''}" itemprop="name" t-field="event.name"/>
-                        </a>
+                        <h5 t-attf-class="card-title mt-2 mb-0 text-truncate #{'text-danger' if not event.website_published else ''}">
+                            <a t-attf-href="/event/#{ slug(event) }/#{(not event.menu_id) and 'register' or ''}" class="text-reset text-decoration-none" itemprop="url">
+                                <span t-field="event.name" itemprop="name"/>
+                            </a>
+                        </h5>
                         <!-- Organizer -->
-                        <div t-if="event.organizer_id" class="text-muted text-nowrap text-truncate mb-3">
-                            <small>Organizer: <span t-field="event.organizer_id" itemprop="organizer"/></small>
+                        <div t-if="event.organizer_id" class="mb-3">
+                            <small class="text-muted text-truncate">Organizer: <span t-field="event.organizer_id" itemprop="organizer"/></small>
                         </div>
                         <!-- Location -->
                         <div t-if="event.is_online">Online</div>
@@ -163,7 +160,7 @@
                         <time itemprop="startDate" t-field="event.with_context(tz=event.date_tz).date_begin" t-options="{'format': 'MMMM d, yyyy - hh:mm'}" t-att-datetime="event.date_begin"/>
                     </main>
                     <!-- Footer -->
-                    <footer class="card-footer small">
+                    <footer t-attf-class="small #{'card-footer' if opt_events_list_cards else ('border-top mx-4 mt-auto pt-2' if not opt_events_list_columns else 'border-top py-2')}">
                         <b>PRICE</b>
                     </footer>
                 </div>
@@ -176,10 +173,13 @@
     </div>
 </template>
 
-<!-- Index - Events list - Columns -->
-<template id="opt_index_events_list_columns" inherit_id="website_event.events_list" active="True" customize_show="True" name="Layout • Columns">
-    <xpath expr="//t[@t-set='opt_events_list_columns']" position="attributes">
-        <attribute name="t-value">True</attribute>
+<template id="opt_events_list_columns" inherit_id="website_event.events_list" active="True" customize_show="True" name="Layout • Columns"/>
+
+<template id="opt_events_list_cards" inherit_id="website_event.events_list" active="False" customize_show="True" name="'Cards' Design"/>
+
+<template id="opt_events_list_categories" inherit_id="website_event.events_list" active="False" customize_show="True" name="Show categories">
+    <xpath expr="//main" position="before">
+        <a t-if="event.event_type_id" t-attf-href="/event?type=#{event.event_type_id.id}" t-attf-class="badge bg-secondary o_we_badge #{'o_we_badge_event' if opt_events_list_columns else 'float-right mt-3 mr-3'}" t-field="event.event_type_id"/>
     </xpath>
 </template>
 
