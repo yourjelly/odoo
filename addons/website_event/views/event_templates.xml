@@ -250,7 +250,7 @@
                         <!-- Social -->
                         <div class="o_we_sidebar_block">
                             <h6 class="o_we_sidebar_title">SHARE</h6>
-                            <div class="o_we_sidebar_social d-flex justify-content-between">
+                            <div class="o_we_sidebar_social mx-n1">
                                 <!-- TODO - Fix URL -->
                                 <a href="https://www.facebook.com/sharer/sharer.php?u={url}" class="s_share_facebook o_we_social_link" aria-label="Facebook" title="Facebook"><i class="fa fa-facebook text-facebook"/></a>
                                 <a href="https://twitter.com/intent/tweet?text={title}&amp;url={url}" class="s_share_twitter o_we_social_link" aria-label="Twitter" title="Twitter"><i class="fa fa-twitter text-twitter"/></a>

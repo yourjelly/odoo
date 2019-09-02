@@ -75,17 +75,15 @@
 
 // Generic
 .o_we_social_link {
-    $o_link_size: 50px;
-    display: block;
+    $o_link_size: 3em;
+    display: inline-block;
     @include size($o_link_size);
+    margin: 0 ($spacer * .25) ($spacer * .5) ($spacer * .25);
     line-height: $o_link_size;
-    background-color: #fff;
+    background-color: gray('100');
     border: $border-width solid $border-color;
     border-radius: 50%;
     text-align: center;
-    @include hover-focus {
-        border-color: $primary;
-    }
 }
 
 .o_we_badge {
