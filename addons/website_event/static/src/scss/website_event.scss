@@ -115,18 +115,24 @@
                 }
             }
         }
-        .o_we_event_category {
-            top: -$spacer;
-            left: 0;
-            padding: ($card-spacer-y * .5) $card-spacer-x;
-            @include border-right-radius(10rem);
-            background-color: #fff;
-            > * {
-                vertical-align: middle;
+        &.opt_event_list_cards_bg {
+            @if (color('body') == #FCFCFC) {
+                @extend .bg-200;
             }
         }
+        .opt_events_list_columns {
+            header {
+                height: 200px;
+            }
+        }
+        .o_we_badge_event {
+            @include o-position-absolute($top: 0, $left: 0);
+            @include border-left-radius(0);
+            padding: ($spacer * .5) $card-spacer-x;
+            transform: translateY(-50%);
+        }
         .o_we_event_date {
-            top: 1.125rem;
+            top: $card-spacer-x;
             right: $card-spacer-x;
             display: flex;
             flex-direction: column;

@@ -23,16 +23,17 @@
     <t t-call="website.layout">
         <div id="wrap" class="o_we_index">
             <!-- Options -->
-            <t t-set="opt_index_background" t-value="False"/>
+            <t t-set="opt_events_list_cards" t-value="request.website.viewref('website_event.opt_events_list_cards').active"/>
+            <t t-set="opt_events_list_columns" t-value="request.website.viewref('website_event.opt_events_list_columns').active"/>
             <!-- Topbar -->
             <t t-call="website_event.index_topbar"/>
             <!-- Drag/Drop Area -->
             <div id="oe_structure_we_index_1" class="oe_structure"/>
             <!-- Content -->
-            <main t-attf-class="#{'bg-200' if opt_index_background else ''}">
+            <main t-attf-class="o_we_events_list #{'opt_event_list_cards_bg' if opt_events_list_cards else ''}">
                 <div class="container">
                     <div class="row">
-                        <div id="o_we_index_main_col" class="o_we_events_list col my-5">
+                        <div id="o_we_index_main_col" t-attf-class="col my-5 #{'opt_events_list_columns' if opt_events_list_columns else ''}">
                             <div class="row">
                                 <!-- Events List -->
                                 <t t-call="website_event.events_list"/>
@@ -45,13 +46,6 @@
             <div id="oe_structure_we_index_2" class="oe_structure"/>
         </div>
     </t>
-</template>
-
-<!-- Index - OPTION - Light Gray background -->
-<template id="opt_index_background" inherit_id="website_event.index" active="True" customize_show="True" name="Gray Background">
-    <xpath expr="//t[@t-set='opt_index_background']" position="attributes">
-        <attribute name="t-value">True</attribute>
-    </xpath>
 </template>
 
 <!-- Index - OPTION - Sidebar -->
