@@ -8,14 +8,11 @@ import re
 
 _logger = logging.getLogger(__name__)
 try:
-    import vatnumber
+    import stdnum.eu.vat as vatnumber
 except ImportError:
-    _logger.warning("VAT validation partially unavailable because the `vatnumber` Python library cannot be found. "
-                    "Install it to support more countries, for example with `easy_install vatnumber`.")
+    _logger.warning("VAT validation partially unavailable because the `python-stdnum` Python library cannot be found. "
+                    "Install it to support more countries, for example with `pip3 install python-stdnum`.")
     vatnumber = None
-
-# Although stdnum is a dependency of vatnumber, the import of the latter is surrounded by a try/except
-# if it is not installed. Therefore, we cannot be sure stdnum is installed in all cases.
 try:
     import stdnum
 except ImportError:
