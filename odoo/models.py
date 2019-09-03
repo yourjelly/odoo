@@ -2078,7 +2078,10 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         :raise AccessError: * if user has no read rights on the requested object
                             * if user tries to bypass access rules for read on the requested object
         """
-        result = self._read_group_raw(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+        data = self._parse_read_group(self, domain, fields, groupby, offset=offset,
+            limit=limit, orderby=orderby, lazy=lazy)
+        self._read_group(data, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+        result = self._read_group_raw(domain, data, groupby, lazy=lazy)
 
         groupby = [groupby] if isinstance(groupby, str) else list(OrderedSet(groupby))
         dt = [
@@ -2100,7 +2103,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         return result
 
     @api.model
-    def _read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+    def _parse_read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         self.check_access_rights('read')
 
         fields = fields or [f.name for f in self._fields.values() if f.store]
@@ -2165,6 +2168,30 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 term = '%s(%s) AS "%s"' % (func, expr, name)
             select_terms.append(term)
 
+        return {
+            # 'data': self._cr.dictfetchall(),
+            'groupby_fields': groupby_fields,
+            # 'computed_groups': computed_groups,
+            'computed_fspecs': computed_fspecs,
+            # 'stored_groups': stored_groups,
+            'stored_fspecs': stored_fspecs,
+            # 'all_groups': stored_groups + computed_groups,
+            # 'groupby_dict': groupby_dict,
+            'aggregated_fields': aggregated_fields,
+            # 'order': order,
+            # 'count_field': count_field,
+            'groupby_fields': groupby_fields,
+            'select_terms': select_terms,
+        }
+
+    @api.model
+    def _read_group(self, data, offset=0, limit=None, orderby=False, lazy=True):
+        groupby_list = data['groupby_list']
+        computed_fspecs = data['computed_fspecs']
+        stored_fspecs = data['stored_fspecs']
+        aggregated_fields = data['aggregated_fields']
+        groupby_fields = data['groupby_fields']
+        select_terms = data['select_terms']
         # TODO: factorize stored_groups + computed_groups
         stored_groups, computed_groups = self._read_group_process_groupby(
             query, groupby_list, computed_fspecs.keys())
@@ -2212,45 +2239,36 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             'offset': prefix_term('OFFSET', int(offset) if limit else None),
         }
         self._cr.execute(query, where_clause_params)
-        return {
-            'data': self._cr.dictfetchall(),
-            'groupby_fields': groupby_fields,
-            'computed_groups': computed_groups,
-            'computed_fspecs': computed_fspecs,
-            'stored_groups': stored_groups,
-            'stored_fspecs': stored_fspecs,
-            'all_groups': stored_groups + computed_groups,
-            'groupby_dict': groupby_dict,
-            'aggregated_fields': aggregated_fields,
-            'order': order,
-            'count_field': count_field,
-        }
+        data['data'] = self._cr.dictfetchall()
+        data['computed_groups'] = computed_groups
+        data['stored_groups'] = stored_groups
+        data['groupby_dict'] = groupby_dict
+        data['order'] = order
 
     @api.model
-    def _read_group_raw(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
-        rg = self._read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
-        if not rg['groupby_fields']:
-            return rg['data']
+    def _read_group_raw(self, domain, data, groupby, lazy=True):
+        if not data['groupby_fields']:
+            return data['data']
 
         data = self._read_group_compute(
-            rg['data'], rg['computed_fspecs'], rg['computed_groups'],
-            rg['groupby_fields'], lazy=lazy
+            data['data'], data['computed_fspecs'], data['computed_groups'],
+            data['groupby_fields'], lazy=lazy
         )
 
-        self._read_group_resolve_many2one_fields(data, rg['stored_groups'])
+        self._read_group_resolve_many2one_fields(data, data['stored_groups'])
 
         data = [{
-            k: self._read_group_prepare_data(k, v, rg['groupby_dict'])
+            k: self._read_group_prepare_data(k, v, data['groupby_dict'])
             for k, v in r.items()
         } for r in data]
 
         if self.env.context.get('fill_temporal') and data:
             data = self._read_group_fill_temporal(
-                data, groupby, rg['aggregated_fields'], rg['all_groups']
+                data, groupby, data['aggregated_fields'], data['all_groups']
             )
 
         result = [
-            self._read_group_format_result(d, rg['all_groups'], groupby, domain)
+            self._read_group_format_result(d, data['all_groups'], groupby, domain)
             for d in data
         ]
 
@@ -2261,8 +2279,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             # method _read_group_fill_results need to be completely reimplemented
             # in a sane way
             result = self._read_group_fill_results(
-                domain, rg['groupby_fields'][0], groupby[len(rg['all_groups']):],
-                rg['aggregated_fields'], rg['count_field'], result, read_group_order=rg['order'],
+                domain, data['groupby_fields'][0], groupby[len(data['all_groups']):],
+                data['aggregated_fields'], data['count_field'], result, read_group_order=data['order'],
             )
         return result
 
