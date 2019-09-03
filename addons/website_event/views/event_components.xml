@@ -21,7 +21,10 @@
             <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
                 <!-- TODO - Display the active filter instead of this hardcoded label -->
                 <i class="fa fa-calendar"/>
-                <span>Next Event</span>
+                <span>
+                    <t t-if='current_date'><t t-esc='current_date'/></t>
+                    <t t-else="">Next Event</t>
+                </span>
             </a>
             <div class="dropdown-menu">
                 <t t-foreach="dates" t-as="date">
@@ -43,7 +46,10 @@
             <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
                 <!-- TODO - Display the active filter instead of this hardcoded label -->
                 <i class="fa fa-folder-open"/>
-                <span>All Categories</span>
+                <span>
+                    <t t-if='current_type'><t t-esc='current_type.name'/></t>
+                    <t t-else="">All Categories</t>
+                </span>
             </a>
             <div class="dropdown-menu">
                 <t t-foreach="types" t-as="type">
@@ -64,7 +70,10 @@
             <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
                 <!-- TODO - Display the active filter instead of this hardcoded label -->
                 <i class="fa fa-map-marker"/>
-                <span>All countries</span>
+                <span>
+                    <t t-if='current_country'><t t-esc='current_country.name'/></t>
+                    <t t-else="">All countries</t>
+                </span>
             </a>
             <div class="dropdown-menu">
                 <t t-foreach="countries" t-as="country">
@@ -123,8 +132,8 @@
                     <a t-attf-href="/event/#{ slug(event) }/#{(not event.menu_id) and 'register' or ''}" class="d-block h-100 w-100" t-attf-style="background-image: url('#{events_cover_properties[event_index].get('img_url')}'); background-size: cover; background-position: 50% 100%;">
                         <!-- Short Date -->
                         <div class="o_we_event_date position-absolute bg-white shadow-sm">
-                            <span t-esc="event.with_context(tz=event.date_tz).date_begin.strftime('%b')" class="o_we_event_month"/>
-                            <span t-esc="event.with_context(tz=event.date_tz).date_begin.strftime('%d')" class="o_we_event_day"/>
+                            <span t-esc="event.with_context(tz=event.date_tz).date_begin" t-options='{"widget": "date", "format": "LLL"}' class="o_we_event_month"/>
+                            <span t-esc="event.with_context(tz=event.date_tz).date_begin" t-options='{"widget": "date", "format": "dd"}' class="o_we_event_day"/>
                         </div>
                         <!-- Participating -->
                         <small t-if="event.is_participating" class="o_we_event_participating bg-success">
@@ -157,11 +166,11 @@
                             "no_marker": "true",
                         }'/>
                         <!-- Start Date & Time -->
-                        <time itemprop="startDate" t-field="event.with_context(tz=event.date_tz).date_begin" t-options="{'format': 'MMMM d, yyyy - hh:mm'}" t-att-datetime="event.date_begin"/>
+                        <time itemprop="startDate" t-field="event.with_context(tz=event.date_tz).date_begin" t-options="{'widget':'date', 'format': 'long'}" t-att-datetime="event.date_begin"/> - <time itemprop="startDate" t-field="event.with_context(tz=event.date_tz).date_begin" t-options='{"time_only": True, "format": "short"}' t-att-datetime="event.date_begin" />
                     </main>
                     <!-- Footer -->
                     <footer t-attf-class="small #{'card-footer' if opt_events_list_cards else ('border-top mx-4 mt-auto pt-2' if not opt_events_list_columns else 'border-top py-2')}">
-                        <b>PRICE</b>
+                        PRICE
                     </footer>
                 </div>
             </div>
