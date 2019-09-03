@@ -1240,28 +1240,142 @@ class TestFields(common.TransactionCase):
         self.assertFalse(message.exists())
 
     def test_70_x2many_write(self):
-        discussion = self.env.ref('test_new_api.discussion_0')
-        Message = self.env['test_new_api.message']
-        # There must be 3 messages, 0 important
-        self.assertEqual(len(discussion.messages), 3)
+        discussion = self.env['test_new_api.discussion'].create({
+            'name': 'Foo',
+            'participants': [(6, 0, self.env.user.ids)],
+        })
+
+        # There must be no message at all
+        self.assertEqual(len(discussion.messages), 0)
         self.assertEqual(len(discussion.important_messages), 0)
         self.assertEqual(len(discussion.very_important_messages), 0)
-        discussion.important_messages = [(0, 0, {
-            'body': 'What is the answer?',
-            'important': True,
-        })]
-        # There must be 4 messages, 1 important
-        self.assertEqual(len(discussion.messages), 4)
+
+        # add a message in messages
+        discussion.messages = [(0, 0, {'body': 'A'})]
+        self.assertEqual(len(discussion.messages), 1)
+        self.assertEqual(len(discussion.important_messages), 0)
+        self.assertEqual(len(discussion.very_important_messages), 0)
+
+        discussion.messages = [(0, 0, {'body': 'B', 'important': True})]
+        self.assertEqual(len(discussion.messages), 2)
         self.assertEqual(len(discussion.important_messages), 1)
         self.assertEqual(len(discussion.very_important_messages), 1)
-        discussion.very_important_messages |= Message.new({
-            'body': '42',
-            'important': True,
-        })
-        # There must be 5 messages, 2 important
+
+        # add a message in important_messages
+        discussion.important_messages = [(0, 0, {'body': 'C'})]
+        self.assertEqual(len(discussion.messages), 3)
+        self.assertEqual(len(discussion.important_messages), 1)
+        self.assertEqual(len(discussion.very_important_messages), 1)
+
+        discussion.important_messages = [(0, 0, {'body': 'D', 'important': True})]
+        self.assertEqual(len(discussion.messages), 4)
+        self.assertEqual(len(discussion.important_messages), 2)
+        self.assertEqual(len(discussion.very_important_messages), 2)
+
+        # add a message in very_important_messages
+        discussion.important_messages = [(0, 0, {'body': 'E'})]
         self.assertEqual(len(discussion.messages), 5)
         self.assertEqual(len(discussion.important_messages), 2)
         self.assertEqual(len(discussion.very_important_messages), 2)
+
+        discussion.important_messages = [(0, 0, {'body': 'F', 'important': True})]
+        self.assertEqual(len(discussion.messages), 6)
+        self.assertEqual(len(discussion.important_messages), 3)
+        self.assertEqual(len(discussion.very_important_messages), 3)
+
+        # remove messages from messages
+        self.assertFalse(discussion.messages[0].important)
+        discussion.messages = [(2, discussion.messages[0].id)]
+        self.assertEqual(len(discussion.messages), 5)
+        self.assertEqual(len(discussion.important_messages), 3)
+        self.assertEqual(len(discussion.very_important_messages), 3)
+
+        self.assertTrue(discussion.messages[0].important)
+        discussion.messages = [(2, discussion.messages[0].id)]
+        self.assertEqual(len(discussion.messages), 4)
+        self.assertEqual(len(discussion.important_messages), 2)
+        self.assertEqual(len(discussion.very_important_messages), 2)
+
+        # remove a message from important_messages
+        discussion.important_messages = [(2, discussion.important_messages[0].id)]
+        self.assertEqual(len(discussion.messages), 3)
+        self.assertEqual(len(discussion.important_messages), 1)
+        self.assertEqual(len(discussion.very_important_messages), 1)
+
+        # remove a message from very_important_messages
+        discussion.very_important_messages = [(2, discussion.very_important_messages[0].id)]
+        self.assertEqual(len(discussion.messages), 2)
+        self.assertEqual(len(discussion.important_messages), 0)
+        self.assertEqual(len(discussion.very_important_messages), 0)
+
+    def test_70_x2many_new(self):
+        discussion = self.env['test_new_api.discussion'].new({
+            'name': 'Foo',
+            'participants': [(6, 0, self.env.user.ids)],
+        })
+
+        # There must be no message at all
+        self.assertEqual(len(discussion.messages), 0)
+        self.assertEqual(len(discussion.important_messages), 0)
+        self.assertEqual(len(discussion.very_important_messages), 0)
+
+        # add a message in messages
+        discussion.messages = [(0, 0, {'body': 'A'})]
+        self.assertEqual(len(discussion.messages), 1)
+        self.assertEqual(len(discussion.important_messages), 0)
+        self.assertEqual(len(discussion.very_important_messages), 0)
+
+        discussion.messages = [(0, 0, {'body': 'B', 'important': True})]
+        self.assertEqual(len(discussion.messages), 2)
+        self.assertEqual(len(discussion.important_messages), 1)
+        self.assertEqual(len(discussion.very_important_messages), 1)
+
+        # add a message in important_messages
+        discussion.important_messages = [(0, 0, {'body': 'C'})]
+        self.assertEqual(len(discussion.messages), 3)
+        self.assertEqual(len(discussion.important_messages), 1)
+        self.assertEqual(len(discussion.very_important_messages), 1)
+
+        discussion.important_messages = [(0, 0, {'body': 'D', 'important': True})]
+        self.assertEqual(len(discussion.messages), 4)
+        self.assertEqual(len(discussion.important_messages), 2)
+        self.assertEqual(len(discussion.very_important_messages), 2)
+
+        # add a message in very_important_messages
+        discussion.important_messages = [(0, 0, {'body': 'E'})]
+        self.assertEqual(len(discussion.messages), 5)
+        self.assertEqual(len(discussion.important_messages), 2)
+        self.assertEqual(len(discussion.very_important_messages), 2)
+
+        discussion.important_messages = [(0, 0, {'body': 'F', 'important': True})]
+        self.assertEqual(len(discussion.messages), 6)
+        self.assertEqual(len(discussion.important_messages), 3)
+        self.assertEqual(len(discussion.very_important_messages), 3)
+
+        # remove messages from messages
+        self.assertFalse(discussion.messages[0].important)
+        discussion.messages = [(2, discussion.messages[0].id)]
+        self.assertEqual(len(discussion.messages), 5)
+        self.assertEqual(len(discussion.important_messages), 3)
+        self.assertEqual(len(discussion.very_important_messages), 3)
+
+        self.assertTrue(discussion.messages[0].important)
+        discussion.messages = [(2, discussion.messages[0].id)]
+        self.assertEqual(len(discussion.messages), 4)
+        self.assertEqual(len(discussion.important_messages), 2)
+        self.assertEqual(len(discussion.very_important_messages), 2)
+
+        # remove a message from important_messages
+        discussion.important_messages = [(2, discussion.important_messages[0].id)]
+        self.assertEqual(len(discussion.messages), 3)
+        self.assertEqual(len(discussion.important_messages), 1)
+        self.assertEqual(len(discussion.very_important_messages), 1)
+
+        # remove a message from very_important_messages
+        discussion.very_important_messages = [(2, discussion.very_important_messages[0].id)]
+        self.assertEqual(len(discussion.messages), 2)
+        self.assertEqual(len(discussion.important_messages), 0)
+        self.assertEqual(len(discussion.very_important_messages), 0)
 
     def test_70_relational_inverse(self):
         """ Check the consistency of relational fields with inverse(s). """
