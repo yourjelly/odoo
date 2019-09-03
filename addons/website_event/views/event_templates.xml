@@ -391,68 +391,63 @@
                         <h4 class="modal-title">Attendees</h4>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span>&amp;times;</span></button>
                     </header>
-                    <main class="modal-body bg-200">
-                        <t t-set="counter_type" t-value="1"/>
-                        <t t-set="counter" t-value="0"/>
-                        <div t-foreach="tickets" t-as="ticket" class="card">
-                            <h5 class="card-header">
-                                Ticket type - <t t-esc="ticket['name']"/>
-                                <small  class="float-right text-muted">
-                                    <t t-if="ticket['price'] == 0">Free</t>
-                                    <t t-else="" t-esc="ticket['price']"/>
-                                </small>
-                            </h5>
-                            <div class="card-body">
+                    <main class="modal-body">
+                        <div class="container">
+                            <t t-set="counter_type" t-value="1"/>
+                            <t t-set="counter" t-value="0"/>
+                            <t t-foreach="tickets" t-as="ticket">
+                                <h4 class="o_page_header">
+                                    <strong>
+                                        Ticket Type: <t t-esc="ticket['name']"/>
+                                        <t t-if="ticket['price'] == 0">(Free)</t>
+                                    </strong>
+                                </h4>
                                 <div class="row d-none d-lg-flex">
-                                    <label class="col-md">Name <small class="text-danger">- Required</small></label>
-                                    <label class="col-md"> Email <small class="text-danger">- Required</small></label>
-                                    <label class="col-md">Phone <small class="text-muted">- Optional</small></label>
+                                    <div class="col-md">
+                                        <strong>Name</strong>
+                                    </div>
+                                    <div class="col-md">
+                                        <strong>Email</strong>
+                                    </div>
+                                    <div class="col-md">
+                                        <strong>Phone <small class='lbl_optional'>(optional)</small></strong>
+                                    </div>
                                 </div>
                                 <t t-foreach="range(1, ticket['quantity'] + 1)" t-as="att_counter" name="attendee_loop">
                                     <t t-set="counter" t-value="counter + 1"/>
-                                    <div class="row mb-2">
+                                    <div class="row py-2 o_wevent_registration_list_attendees">
                                         <div class="col-md">
-                                            <label class="mb-1 d-lg-none">Name</label>
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <i class="fa fa-user input-group-text text-600"/>
-                                                </div>
-                                                <t t-set="attendee_placeholder">Attendee #%s</t>
-                                                <input class="form-control" type="text" t-attf-name="#{counter}-name" required="This field is required" t-att-placeholder="attendee_placeholder %counter"/>
+                                            <div class="mb-1 d-lg-none">
+                                                <strong>Name</strong>
+                                            </div>
+                                            <t t-set="attendee_placeholder">Attendee #%s</t>
+                                            <input class='form-control' type='text' t-attf-name="#{counter}-name" required="This field is required" t-att-placeholder="attendee_placeholder %counter"/>
+                                        </div>
+
+                                        <div class="col-md">
+                                            <div class="mt-1 d-lg-none">
+                                                <strong>Email</strong>
+                                            </div>
+                                            <div>
+                                                <input class='form-control' type='email' t-attf-name="#{counter}-email" required="This field is required"/>
                                             </div>
                                         </div>
                                         <div class="col-md">
-                                            <label class="mt-1 d-lg-none">Email</label>
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <i class="fa fa-envelope input-group-text text-600"/>
-                                                </div>
-                                                <input class="form-control" type="email" t-attf-name="#{counter}-email" required="This field is required"/>
+                                            <div class="mt-1 d-lg-none">
+                                                <strong>Phone <small class='lbl_optional'>(optional)</small></strong>
                                             </div>
+                                            <input class='form-control' type='tel' t-attf-name="#{counter}-phone"/>
                                         </div>
-                                        <div class="col-md">
-                                            <label class="mt-1 d-lg-none">Phone <small>- optional</small></label>
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <i class="fa fa-phone input-group-text text-600"/>
-                                                </div>
-                                                <input class="form-control" type="tel" t-attf-name="#{counter}-phone"/>
-                                            </div>
-                                        </div>
-                                        <input class="d-none" type="text" t-attf-name="#{counter}-ticket_id" t-attf-value="#{ticket['id']}"/>
+                                        <input class='d-none' type='text' t-attf-name="#{counter}-ticket_id" t-attf-value="#{ticket['id']}"/>
                                     </div>
                                 </t>
                                 <t t-set="counter_type" t-value="counter_type + 1"/>
-                            </div>
+                            </t>
                         </div>
                     </main>
-                    <footer class="modal-footer justify-content-between">
+                    <footer class="modal-footer">
                         <button type="button" class="btn btn-secondary js_goto_event" data-dismiss="modal">Cancel</button>
-                        <div class="steps">
-                            <i class="fa fa-circle text-300"/>
-                            <i class="fa fa-circle text-600"/>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Continue</button>
+                        <button type="submit" class="btn btn-primary">Continue Registration</button>
                     </footer>
                 </div>
             </form>
