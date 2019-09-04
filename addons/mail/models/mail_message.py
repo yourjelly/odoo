@@ -388,7 +388,7 @@ class Message(models.Model):
     def message_fetch_failed(self):
         messages = self.search([
             ('has_error', '=', True),
-            ('author_id.id', '=', self.env.user.partner_id.id), 
+            ('author_id.id', '=', self.env.user.partner_id.id),
             ('res_id', '!=', 0),
             ('model', '!=', False),
             ('message_type', '!=', 'user_notification')

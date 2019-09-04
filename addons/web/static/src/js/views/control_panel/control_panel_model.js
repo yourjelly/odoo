@@ -417,7 +417,7 @@ var ControlPanelModel = mvc.Model.extend({
                         }
                         if (filter.currentOptionIds) {
                             filter.currentOptionIds.clear();
-                        }   
+                        }
                     })
                     group.activeFilterIds = [];
                 });
@@ -456,7 +456,7 @@ var ControlPanelModel = mvc.Model.extend({
                     acc.push(y.optionId);
                 }
                 return acc;
-            }, 
+            },
             []
         );
 
@@ -723,8 +723,8 @@ var ControlPanelModel = mvc.Model.extend({
         return pyUtils.assembleDomains(domains, 'AND');
     },
     /**
-     * Return an array containing 'facets' used to create the content of the search bar. 
-     * 
+     * Return an array containing 'facets' used to create the content of the search bar.
+     *
      * @returns {Object}
      */
     _getFacets: function () {
@@ -1158,7 +1158,7 @@ var ControlPanelModel = mvc.Model.extend({
     _saveQuery: function (favorite) {
         var self = this;
         var userContext = session.user_context;
-        var controllerQueryParams;
+        var controllerQueryParams = controllerQueryParams ? controllerQueryParams : {};
         this.trigger_up('get_controller_query_params', {
             callback: function (state) {
                 controllerQueryParams = state;
