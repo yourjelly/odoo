@@ -2078,7 +2078,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         :raise AccessError: * if user has no read rights on the requested object
                             * if user tries to bypass access rules for read on the requested object
         """
-        data = self._parse_read_group(self, domain, fields, groupby, offset=offset,
+        data = self._parse_read_group(domain, fields, groupby, offset=offset,
             limit=limit, orderby=orderby, lazy=lazy)
         self._read_group(data, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
         result = self._read_group_raw(domain, data, groupby, lazy=lazy)
