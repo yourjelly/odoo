@@ -403,7 +403,7 @@ actual arch.
                         raise ValidationError(_('Invalid view %s definition in %s') % (view_name, view.arch_fs))
                     if check == "Warning":
                         _logger.warning(_('Invalid view %s definition in %s \n%s'), view_name, view.arch_fs, view.arch)
-            _logger.info('exectime _check_xml(%s): %s', view.id, time.time() - init_time)
+            _logger.info('exectime _check_xml (%s): %s', view.id, time.time() - init_time)
         return True
 
     @api.constrains('type', 'groups_id')
@@ -978,7 +978,7 @@ actual arch.
                     msg_lines.append(line_fmt % line)
             self.raise_view_error("\n".join(msg_lines), view_id)
 
-        _logger.info('exectime postprocess_and_fields (%s): %s', self.id, time.time() - init_time)
+        _logger.info('exectime postprocess_and_fields (%s): %s', view_id, time.time() - init_time)
         return arch, fields
 
     def _postprocess_access_rights(self, model, node):

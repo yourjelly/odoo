@@ -8,6 +8,7 @@ import ipaddress
 import itertools
 import logging
 import hmac
+import time
 
 from collections import defaultdict
 from hashlib import sha256
@@ -1020,7 +1021,7 @@ class GroupsView(models.Model):
         """ Modify the view with xmlid ``base.user_groups_view``, which inherits
             the user form view, and introduces the reified group fields.
         """
-
+        init_time = time.time()
         # remove the language to avoid translations, it will be handled at the view level
         self = self.with_context(lang=None)
 
@@ -1095,6 +1096,8 @@ class GroupsView(models.Model):
             new_context.pop('install_mode_data', None)  # don't set arch_fs for this computed view
             new_context['lang'] = None
             view.with_context(new_context).write({'arch': xml_content})
+
+        _logger.info('exectime _update_user_groups_view: %s', time.time() - init_time)
 
     def get_application_groups(self, domain):
         """ Return the non-share groups that satisfy ``domain``. """

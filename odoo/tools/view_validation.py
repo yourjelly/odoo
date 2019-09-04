@@ -149,14 +149,19 @@ def get_attrs_field_names(env, arch, model, editable):
 
 
 def valid_view(arch, **kwargs):
+    init_time = time.time()
     for pred in _validators[arch.tag]:
         check = pred(arch, **kwargs)
         if not check:
             _logger.error("Invalid XML: %s", pred.__doc__)
+            _logger.info('exectime _check_xml_constrains (%s): %s', self.ids, time.time() - init_time)
             return False
         if check == "Warning":
             _logger.warning("Invalid XML: %s", pred.__doc__)
+            _logger.info('exectime _check_xml_constrains (%s): %s', self.ids, time.time() - init_time)
             return "Warning"
+    
+    _logger.info('exectime _check_xml_constrains (%s): %s', self.ids, time.time() - init_time)
     return True
 
 
