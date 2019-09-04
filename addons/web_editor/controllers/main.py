@@ -36,7 +36,7 @@ class Web_Editor(http.Controller):
             model=model,
             res_id=res_id,
             field=field,
-            datarecord=json.loads(kwargs['datarecord']),
+            # datarecord=json.loads(kwargs['datarecord']),
             debug=request.debug)
 
         for k in kwargs:
