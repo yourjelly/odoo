@@ -19,18 +19,16 @@
     <xpath expr="//ul[@id='o_we_index_topbar_filters']" position="inside">
         <li class="nav-item dropdown">
             <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
-                <!-- TODO - Display the active filter instead of this hardcoded label -->
                 <i class="fa fa-calendar"/>
-                <span>
-                    <t t-if='current_date'><t t-esc='current_date'/></t>
-                    <t t-else="">Next Event</t>
-                </span>
+                <t t-if="current_date" t-esc="current_date"/>
+                <t t-else="">Next Events</t>
             </a>
             <div class="dropdown-menu">
                 <t t-foreach="dates" t-as="date">
                     <t t-if="date[3] or (date[0] in ('old','all'))">
-                        <a t-attf-href="/event?{{ keep_query('country', 'type', date=date[0]) }}" t-attf-class="dropdown-item d-flex align-items-center #{searches.get('date') == date[0] and ' active' or ''}"><t t-esc="date[1]"/>
-                            <span t-if="date[3]" class="badge badge-pill py-1 px-2 ml-auto"><t t-esc="date[3]"/></span>
+                        <a t-attf-href="/event?{{ keep_query('country', 'type', date=date[0]) }}" t-attf-class="dropdown-item d-flex align-items-center justify-content-between #{searches.get('date') == date[0] and ' active' or ''}">
+                            <t t-esc="date[1]"/>
+                            <span t-if="date[3]" t-esc="date[3]" class="badge badge-pill ml-3"/>
                         </a>
                     </t>
                 </t>
@@ -44,18 +42,17 @@
     <xpath expr="//ul[@id='o_we_index_topbar_filters']" position="inside">
         <li class="nav-item dropdown">
             <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
-                <!-- TODO - Display the active filter instead of this hardcoded label -->
                 <i class="fa fa-folder-open"/>
-                <span>
-                    <t t-if='current_type'><t t-esc='current_type.name'/></t>
-                    <t t-else="">All Categories</t>
-                </span>
+                <t t-if="current_type" t-esc="current_type.name"/>
+                <t t-else="">All Categories</t>
             </a>
             <div class="dropdown-menu">
                 <t t-foreach="types" t-as="type">
                     <t t-if="type['event_type_id']">
-                        <a t-attf-href="/event?{{ keep_query('country', 'date', type=type['event_type_id'][0]) }}" t-attf-class="dropdown-item d-flex align-items-center #{searches.get('type') == str(type['event_type_id'] and type['event_type_id'][0]) and ' active' or ''}"><t t-esc="type['event_type_id'][1]"/>
-                            <span class="badge badge-pill ml-auto"><t t-esc="type['event_type_id_count']"/></span></a>
+                        <a t-attf-href="/event?{{ keep_query('country', 'date', type=type['event_type_id'][0]) }}" t-attf-class="dropdown-item d-flex align-items-center justify-content-between #{searches.get('type') == str(type['event_type_id'] and type['event_type_id'][0]) and ' active' or ''}">
+                            <t t-esc="type['event_type_id'][1]"/>
+                            <span t-esc="type['event_type_id_count']" class="badge badge-pill ml-3"/>
+                        </a>
                     </t>
                 </t>
             </div>
@@ -68,25 +65,22 @@
     <xpath expr="//ul[@id='o_we_index_topbar_filters']" position="inside">
         <li class="nav-item dropdown">
             <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
-                <!-- TODO - Display the active filter instead of this hardcoded label -->
                 <i class="fa fa-map-marker"/>
-                <span>
-                    <t t-if='current_country'><t t-esc='current_country.name'/></t>
-                    <t t-else="">All countries</t>
-                </span>
+                <t t-if="current_country" t-esc="current_country.name"/>
+                <t t-else="">All countries</t>
             </a>
             <div class="dropdown-menu">
                 <t t-foreach="countries" t-as="country">
                     <t t-if="country['country_id']">
-                        <a t-attf-href="/event?{{ keep_query('type', 'date', country=country['country_id'][0]) }}" t-attf-class="dropdown-item d-flex align-items-center #{searches.get('country') == str(country['country_id'] and country['country_id'][0]) and ' active' or ''}">
+                        <a t-attf-href="/event?{{ keep_query('type', 'date', country=country['country_id'][0]) }}" t-attf-class="dropdown-item d-flex align-items-center justify-content-between #{searches.get('country') == str(country['country_id'] and country['country_id'][0]) and ' active' or ''}">
                             <t t-esc="country['country_id'][1]"/>
-                            <span class="badge badge-pill ml-auto"><t t-esc="country['country_id_count']"/></span>
+                            <span t-esc="country['country_id_count']" class="badge badge-pill ml-auto"/>
                         </a>
                     </t>
                     <t t-if="not country['country_id']">
                         <a t-attf-href="/event?{{ keep_query('type', 'date', country='online') }}" t-attf-class="dropdown-item d-flex align-items-center #{searches.get('country') == 'online' and ' active' or ''}">
                             <span>Online Events</span>
-                            <span class="badge ml-auto"><t t-esc="country['country_id_count']"/></span>
+                            <span t-esc="country['country_id_count']" class="badge badge-pill ml-3"/>
                         </a>
                     </t>
                 </t>
