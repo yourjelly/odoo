@@ -2248,6 +2248,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         data['groupby_dict'] = groupby_dict
         data['order'] = order
         data['all_groups'] = computed_groups + stored_groups
+        data['count_field'] = count_field
 
     @api.model
     def _read_group_raw(self, domain, data, groupby, lazy=True):
