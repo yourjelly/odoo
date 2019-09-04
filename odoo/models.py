@@ -2183,6 +2183,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             'groupby_fields': groupby_fields,
             'select_terms': select_terms,
             'groupby_list': groupby_list,
+            'query': query,
         }
 
     @api.model
@@ -2193,6 +2194,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         aggregated_fields = data['aggregated_fields']
         groupby_fields = data['groupby_fields']
         select_terms = data['select_terms']
+        query = data['query']
         # TODO: factorize stored_groups + computed_groups
         stored_groups, computed_groups = self._read_group_process_groupby(
             query, groupby_list, computed_fspecs.keys())
