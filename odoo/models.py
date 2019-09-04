@@ -2182,6 +2182,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             # 'count_field': count_field,
             'groupby_fields': groupby_fields,
             'select_terms': select_terms,
+            'groupby_list': groupby_list,
         }
 
     @api.model
