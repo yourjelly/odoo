@@ -5807,9 +5807,14 @@ Record ids: %(records)s
                     elif cmd[0] == 6:
                         line_ids.update(cmd[2])
                 # build corresponding new lines, and prefetch fields
-                new_lines = self[name].browse(NewId(id_) for id_ in line_ids)
+                comodel = self.browse()[name]
+                lines = comodel.browse(NewId(id_) for id_ in line_ids)
                 for subname in subnames:
-                    new_lines.mapped(subname)
+                    subfield = comodel._fields[subname]
+                    self.env.cache.update(lines, subfield, [
+                        subfield.convert_to_cache(line._origin[subname], line)
+                        for line in lines
+                    ])
 
         # Isolate changed values, to handle inconsistent data sent from the
         # client side: when a form view contains two one2many fields that
