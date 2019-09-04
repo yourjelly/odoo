@@ -7,6 +7,10 @@
     height: 100%;
     overflow: hidden;
 
+    .o_attachment_delete_cross {
+        display: none;
+    }
+
     .o_mail_discuss_sidebar {
         width: $o-mail-chat-sidebar-width;
         height: 100%;
