@@ -2247,32 +2247,33 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         data['stored_groups'] = stored_groups
         data['groupby_dict'] = groupby_dict
         data['order'] = order
+        data['all_groups'] = computed_groups + stored_groups
 
     @api.model
     def _read_group_raw(self, domain, data, groupby, lazy=True):
         if not data['groupby_fields']:
             return data['data']
 
-        data = self._read_group_compute(
+        _data = self._read_group_compute(
             data['data'], data['computed_fspecs'], data['computed_groups'],
             data['groupby_fields'], lazy=lazy
         )
 
-        self._read_group_resolve_many2one_fields(data, data['stored_groups'])
+        self._read_group_resolve_many2one_fields(_data, data['stored_groups'])
 
-        data = [{
+        _data = [{
             k: self._read_group_prepare_data(k, v, data['groupby_dict'])
             for k, v in r.items()
-        } for r in data]
+        } for r in _data]
 
-        if self.env.context.get('fill_temporal') and data:
-            data = self._read_group_fill_temporal(
-                data, groupby, data['aggregated_fields'], data['all_groups']
+        if self.env.context.get('fill_temporal') and _data:
+            _data = self._read_group_fill_temporal(
+                _data, groupby, data['aggregated_fields'], data['all_groups']
             )
 
         result = [
             self._read_group_format_result(d, data['all_groups'], groupby, domain)
-            for d in data
+            for d in _data
         ]
 
         # TODO: move laziness to its own method
