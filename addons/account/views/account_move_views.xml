@@ -537,11 +537,11 @@
 
                         <!-- Invisible fields -->
                         <field name="id" invisible="1"/>
-                        <field name="type" invisible="1"/>
+                        <field name="type" invisible="1" force_save="1"/>
                         <field name="invoice_payment_state" invisible="1" force_save="1"/>
                         <field name="invoice_filter_type_domain" invisible="1"/>
                         <field name="company_currency_id" invisible="1"/>
-                        <field name="commercial_partner_id" invisible="1"/>
+                        <field name="commercial_partner_id" invisible="1" force_save="1"/>
                         <field name="bank_partner_id" invisible="1"/>
 
                         <field name="invoice_has_outstanding" invisible="1"/>
@@ -880,7 +880,8 @@
                                            attrs="{'invisible': [('type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'))]}">
                                         <field name="invoice_payment_ref"/>
                                         <field name="invoice_partner_bank_id"
-                                               domain="[('partner_id', '=', bank_partner_id)]"/>
+                                               domain="[('partner_id', '=', bank_partner_id)]"
+                                               attrs="{'readonly': [('state', '!=', 'draft')]}"/>
                                     </group>
                                 </group>
                             </page>
