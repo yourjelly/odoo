@@ -50,9 +50,6 @@ var PortalComposer = publicWidget.Widget.extend({
         this.$attachmentTokens = this.$('.o_portal_chatter_attachment_tokens');
 
         return this._super.apply(this, arguments);
-
-
-
     },
 
     //--------------------------------------------------------------------------
@@ -64,10 +61,7 @@ var PortalComposer = publicWidget.Widget.extend({
      */
     _onAttachmentButtonClick: function () {
         this.$fileInput.click();
-
     },
-
-    
     /**
      * @private
      * @param {Event} ev
@@ -95,6 +89,7 @@ var PortalComposer = publicWidget.Widget.extend({
         });
 
     },
+
     /**
      * @private
      * @returns {Promise}
@@ -429,8 +424,6 @@ var PortalChatter = publicWidget.Widget.extend({
             self.set('pager', self._pager(p));
         });
     },
-
-
     /**
      * @private
      * @param {MouseEvent} event

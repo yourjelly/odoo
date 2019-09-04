@@ -458,15 +458,11 @@ img.o_we_custom_image {
         border-bottom: 1px solid rgba(black, 0.1);
         border-radius: 2px;
         padding: 4px 6px 0 4px;
-        background-color: rgba(black, 0.05);
-
-       
+        background-color: rgba(black, 0.05);   
     }
-
     &.o_attachment_editable .o_attachment_wrap  {
         padding-right: 40px;
     }
-
         .o_image {
         width: $o-attachment-image-size;
         height: $o-attachment-image-size;
@@ -497,7 +493,6 @@ img.o_we_custom_image {
             float: right;
             cursor: pointer;
         }
-
     }
 }
 
