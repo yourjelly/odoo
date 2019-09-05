@@ -1957,6 +1957,8 @@ class Image(Binary):
         super(Image, self).create(new_record_values)
 
     def write(self, records, value):
+        if not value:
+            records = records.filtered(lambda r: records.env.cache.get(r, self, True))
         new_value = self._image_process(value)
         super(Image, self).write(records, new_value)
         records.env.cache.update(records, self, [value if self.related else new_value] * len(records))
