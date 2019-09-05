@@ -252,8 +252,6 @@ var PortalChatter = publicWidget.Widget.extend({
         ev.preventDefault();
         var self = this;
         var message = this.$el.find('textarea[name="message"]').val();
-        var render = new PortalChatter(self,self.options);
-
         return this._rpc({
             route: '/mail/chatter_post',
             params: {
@@ -306,8 +304,7 @@ var PortalChatter = publicWidget.Widget.extend({
         var self = this;
         this._chatterInit().then(function (result) {
             self._composer = new PortalComposer(self, self.options);
-            self.set('message_count', self.options['message_count']);
-            self.set('messages', self.preprocessMessages(result['messages']));
+            self.messageFetch();
             self.renderElement();
             if (self.options['display_composer']) {
                 self._composer.replace(self.$('.o_portal_chatter_composer'));
