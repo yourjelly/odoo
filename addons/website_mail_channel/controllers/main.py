@@ -17,26 +17,22 @@ class MailGroup(http.Controller):
 
     def _get_archives(self, group_id):
         MailMessage = request.env['mail.message']
-        groups = MailMessage._read_group_raw(
-            [('model', '=', 'mail.channel'), ('res_id', '=', group_id), ('message_type', '!=', 'notification')],
-            ['subject', 'date'],
+        domain = [
+            ('model', '=', 'mail.channel'),
+            ('res_id', '=', group_id),
+            ('message_type', '!=', 'notification')
+        ]
+        raw_data = MailMessage._parse_read_group(domain, ['subject', 'date'],
             groupby=["date"], orderby="date desc")
+        MailMessage._read_group(raw_data, orderby="date desc")
+        groups = MailMessage._read_group_raw(domain, raw_data, groupby=['date'])
         for group in groups:
             (r, label) = group['date']
             start, end = r.split('/')
             group['date'] = label
-            group['date_begin'] = self._to_date(start)
-            group['date_end'] = self._to_date(end)
+            group['date_begin'] = fields.Date.to_string(start)
+            group['date_end'] = fields.Date.to_string(end)
         return groups
-
-    def _to_date(self, dt):
-        """ date is (of course) a datetime so start and end are datetime
-        strings, but we just want date strings
-        """
-        return (datetime
-            .strptime(dt, tools.DEFAULT_SERVER_DATETIME_FORMAT)
-            .date() # may be unnecessary?
-            .strftime(tools.DEFAULT_SERVER_DATE_FORMAT))
 
     @http.route("/groups", type='http', auth="public", website=True)
     def view(self, **post):

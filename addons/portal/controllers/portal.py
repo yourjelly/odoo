@@ -128,16 +128,17 @@ class CustomerPortal(Controller):
             domain = []
         if fields is None:
             fields = ['name', 'create_date']
-        groups = []
-        for group in request.env[model]._read_group_raw(domain, fields=fields, groupby=groupby, orderby=order):
-            dates, label = group[groupby]
+        raw_data = request.env[model]._parse_read_group(
+            domain, fields=fields, groupby=groupby, orderby=order)
+        request.env[model]._read_group(raw_data, orderby='date desc')
+        groups = request.env[model]._read_group_raw(domain, raw_data, groupby=groupby)
+        for group in groups:
+            (dates, label) = group[groupby]
             date_begin, date_end = dates.split('/')
-            groups.append({
-                'date_begin': odoo_fields.Date.to_string(odoo_fields.Date.from_string(date_begin)),
-                'date_end': odoo_fields.Date.to_string(odoo_fields.Date.from_string(date_end)),
-                'name': label,
-                'item_count': group[groupby + '_count']
-            })
+            group['date_begin'] = odoo_fields.Date.to_string(date_begin),
+            group['date_end'] = odoo_fields.Date.to_string(date_end),
+            group['name'] = label,
+            group['item_count'] = group[groupby + '_count']
         return groups
 
     def _prepare_portal_layout_values(self):

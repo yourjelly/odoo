@@ -2104,6 +2104,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
     @api.model
     def _parse_read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+        # TODO: also add domain, fields, etc. to the data dict
         self.check_access_rights('read')
 
         fields = fields or [f.name for f in self._fields.values() if f.store]
@@ -2169,17 +2170,10 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             select_terms.append(term)
 
         return {
-            # 'data': self._cr.dictfetchall(),
             'groupby_fields': groupby_fields,
-            # 'computed_groups': computed_groups,
             'computed_fspecs': computed_fspecs,
-            # 'stored_groups': stored_groups,
             'stored_fspecs': stored_fspecs,
-            # 'all_groups': stored_groups + computed_groups,
-            # 'groupby_dict': groupby_dict,
             'aggregated_fields': aggregated_fields,
-            # 'order': order,
-            # 'count_field': count_field,
             'groupby_fields': groupby_fields,
             'select_terms': select_terms,
             'groupby_list': groupby_list,
