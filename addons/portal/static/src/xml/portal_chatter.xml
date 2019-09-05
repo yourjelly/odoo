@@ -66,38 +66,39 @@
         </div>
     </t>
 
-    <t t-name="portal.Chatter.Attachments">     
-        <div t-if="attachments.length" class="row">
-            <div t-foreach="attachments" t-as="attachment" class="col-lg-4 col-md-6 col-sm-12">
+    <t t-name="portal.Chatter.Attachments">
+        <div class="o_attachments_list">
+            <t t-foreach="attachments" t-as="attachment">
                 <t t-set="type" t-value="attachment.mimetype and attachment.mimetype.split('/').shift()"/>
                 <t t-set="ext" t-value="attachment.name.split('.').pop()"/>
+                <div class="o_attachment">
+                    <div class="o_attachment_wrap">
+                        <div class="o_portal_chatter_attachment mb-2 position-relative" t-att-data-id="attachment.id">
+                            <button t-if="showDelete" class="btn btn-sm fa fa-times o_attachment_delete_cross" title="Delete">
+                            </button>
+                            <div t-attf-class="o_image_box float-left" t-att-data-id="attachment.id">
+                                <a t-attf-href="/web/content/#{attachment.id}?download=true&amp;access_token=#{attachment.access_token}" target="_blank">
+                                    <div
+                                     class="o_image o_hover"
+                                     t-att-style="type == 'image' ? 'background-image:url(/web/image/' + attachment.id + '/38x38/?crop=true' : '' "
+                                     t-att-data-mimetype="attachment.mimetype"></div>
+                                </a>
+                            </div>
 
-                <div class="o_attachment_wrap">
-                    <div class="o_portal_chatter_attachment mb-2 position-relative" t-att-data-id="attachment.id">
-                        <button t-if="showDelete" class="btn btn-sm fa fa-times o_portal_chatter_attachment_delete" title="Delete">
-                        </button>
-                        <div t-attf-class="o_image_box float-left" t-att-data-id="attachment.id">
-                            <a t-attf-href="/web/content/#{attachment.id}?download=true&amp;access_token=#{attachment.access_token}" target="_blank">
-                                <div
-                                 class="o_image o_hover"
-                                 t-att-style="type == 'image' ? 'background-image:url(/web/image/' + attachment.id + '/38x38/?crop=true' : '' "
-                                 t-att-data-mimetype="attachment.mimetype"></div>
-                            </a>
+                            <div class="caption">
+                                <a class="ml4" t-attf-href="/web/content/#{attachment.id}?download=true&amp;access_token=#{attachment.access_token}" target="_blank"  t-att-title="'Download ' + attachment.name"><t t-esc='attachment.name'/></a>
+                            </div>
+
+                            <div class="caption small">
+                                <a class="ml4 small text-uppercase" t-attf-href="/web/content/#{attachment.id}?download=true&amp;access_token=#{attachment.access_token}" target="_blank" t-att-title="'Download ' + attachment.name"><b><t t-esc='ext'/></b></a>
+
+                                <a t-if="!isDownload" class="ml4 caption small o_attachment_download float-right" t-att-title="'Download ' + attachment.name" t-attf-href="/web/content/#{attachment.id}?download=true&amp;access_token=#{attachment.access_token}" target="_blank"><i t-attf-class="fa fa-download" role="img" aria-label="Download"/>
+                                </a>
+                            </div>
                         </div>
-
-                        <div class="caption">
-                            <a class="ml4" t-attf-href="/web/content/#{attachment.id}?download=true&amp;access_token=#{attachment.access_token}" target="_blank"  t-att-title="'Download ' + attachment.name"><t t-esc='attachment.name'/></a>
-                        </div>
-
-                        <div class="caption small">
-                            <a class="ml4 small text-uppercase" t-attf-href="/web/content/#{attachment.id}?download=true&amp;access_token=#{attachment.access_token}" target="_blank" t-att-title="'Download ' + attachment.name"><b><t t-esc='ext'/></b></a>
-                            
-                            <a t-if="!isDownload" class="ml4 caption small o_attachment_download float-right" t-att-title="'Download ' + attachment.name" t-attf-href="/web/content/#{attachment.id}?download=true&amp;access_token=#{attachment.access_token}" target="_blank"><i t-attf-class="fa fa-download" role="img" aria-label="Download"/>
-                            </a>
-                        </div>                    
                     </div>
                 </div>
-            </div>
+            </t>
         </div>
     </t>
 

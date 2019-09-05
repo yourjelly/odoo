@@ -21,8 +21,9 @@ var PortalComposer = publicWidget.Widget.extend({
     events: {
         'change .o_portal_chatter_file_input': '_onFileInputChange',
         'click .o_portal_chatter_attachment_btn': '_onAttachmentButtonClick',
-        'click .o_portal_chatter_attachment_delete': 'async _onAttachmentDeleteClick',
+        'click .o_attachment_delete_cross': 'async _onAttachmentDeleteClick',
     },
+
     /**
      * @constructor
      */
@@ -87,9 +88,7 @@ var PortalComposer = publicWidget.Widget.extend({
             self._updateAttachments();
             self.$sendButton.prop('disabled', false);
         });
-
     },
-
     /**
      * @private
      * @returns {Promise}
@@ -242,7 +241,13 @@ var PortalChatter = publicWidget.Widget.extend({
 
         return Promise.all(defs);
     },
-    
+    /*
+     * Submits form data manually when message is published from chatter
+     * also re-render widget once message is posted
+     *
+     * @private
+     * @param {Event} ev
+     */
     _onChatterSubmit: function (ev) {
         ev.preventDefault();
         var self = this;
