@@ -70,9 +70,9 @@
     
     <p>For any additional information, please contact us at <a href="mailto:events@odoo.com">events@odoo.com</a></p>
         
-    <section class="s_we_speaker bg-200 p-3 mb-4" itemprop="performer" itemscope="itemscope" itemtype="http://schema.org/Person">
-        <span class="badge o_we_badge bg-white float-right">SPEAKER <i class="fa fa-user ml-1 text-violet-dark"/></span>
-        <img src="/website_event/static/src/img/speaker.jpg" width="70" class="img-fluid rounded float-left mr-3" alt="">
+    <section class="s_we_speaker bg-200 p-3 mb-4" itemscope="itemscope" itemtype="http://schema.org/Person" itemprop="performer">
+        <span class="badge badge-secondary o_we_badge float-right">SPEAKER</span>
+        <img src="/mail/static/src/img/odoobot.png" width="70" class="img-fluid rounded-circle float-left mr-3" alt=""/>
         <div class="overflow-hidden">
             <h4 class="mt-3 mb-1" itemprop="name">John DOE</h4>
             <h6 class="mb-4">Company</h6>
