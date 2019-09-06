@@ -21,6 +21,11 @@
 <template id="ticket">
     <t t-call="website_event.ticket">
         <t t-set="name"><span t-field="ticket.name"/></t>
+        <t t-set="registration_end">
+            <t t-if="ticket.deadline">
+               Sales end on <span itemprop="priceValidUntil" t-field="ticket.deadline"/>
+            </t>
+        </t>
         <t t-set="price">
             <t t-if="ticket.price or editable">
                 <t t-if="(ticket.price-website.get_current_pricelist().currency_id._convert(ticket.price_reduce, event.company_id.sudo().currency_id, event.company_id, datetime.date.today())) &gt; 1
@@ -46,10 +51,15 @@
                 <span>Free</span>
             </t>
         </t>
-        <t t-set="registration_end">
-            <t t-if="ticket.deadline">
-               Sales end on <span itemprop="priceValidUntil" t-field="ticket.deadline"/>
-            </t>
+        <t t-set="quantity">
+            <select t-attf-name="nb_register-#{ticket.id}" class="custom-select">
+                <t t-set="seats_max_ticket" t-value="(ticket.seats_availability == 'unlimited' or ticket.seats_available &gt; 9) and 10 or ticket.seats_available + 1"/>
+                <t t-set="seats_max_event" t-value="(event.seats_availability == 'unlimited' or event.seats_available &gt; 9) and 10 or event.seats_available + 1"/>
+                <t t-set="seats_max" t-value="min(seats_max_ticket, seats_max_event)"/>
+                <t t-foreach="range(0, seats_max)" t-as="nb">
+                    <option t-esc="nb" t-att-selected="len(ticket) == 1 and nb == 1 and 'selected'"/>
+                </t>
+            </select>
         </t>
     </t>
 </template>

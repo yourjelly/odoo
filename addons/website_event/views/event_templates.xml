@@ -280,6 +280,14 @@
                     </t>
                 </t>
                 <t t-set="price"><span content="0" itemprop="price" class="text-uppercase">Free</span></t>
+                <t t-set="quantity">
+                    <select name="nb_register-0" class="custom-select">
+                        <t t-foreach="range(0, (event.seats_availability == 'unlimited' or event.seats_available &gt; 9) and 10 or event.seats_available+1)" t-as="nb">
+                            <option t-esc="nb" t-att-selected="nb == 1 and 'selected'"/>
+                        </t>
+                    </select>
+                </t>
+                
             </t>
             <div class="col-4 py-2 pl-0 pr-2">
                 <button type="submit" class="btn btn-primary btn-block text-uppercase a-submit" t-attf-id="#{event.id}">Register</button>
@@ -309,11 +317,7 @@
         <div class="ml-auto">
             <t t-if="tickets_available">
                 <link itemprop="availability" content="http://schema.org/InStock"/>
-                <select name="nb_register-0" class="custom-select">
-                    <t t-foreach="range(0, (event.seats_availability == 'unlimited' or event.seats_available &gt; 9) and 10 or event.seats_available+1)" t-as="nb">
-                        <option t-esc="nb" t-att-selected="nb == 1 and 'selected'"/>
-                    </t>
-                </select>
+                <t t-raw="quantity"/>
             </t>
             <t t-else="">
                 <span itemprop="availability" content="http://schema.org/SoldOut">Sold Out</span>
