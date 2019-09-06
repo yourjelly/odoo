@@ -141,7 +141,6 @@
                     <t t-call="website_event.registration_template"/>
                 </div>
             </section>
-            <t t-call="website_event.registration_modal"/>
             <!-- Body -->
             <t t-raw="0"/>
         </div>
@@ -267,115 +266,63 @@
 </template>
 
 <!-- Event - Registration -->
-<template id="registration_template" name="Event Registration">
+<template id="registration_template">
     <t t-set="tickets_available" t-value="event.seats_available or event.seats_availability == 'unlimited'"/>
     <t t-set="buy" t-value="tickets_available and event.state == 'confirm'"/>
-
-        <!-- NMI2 move in event_sale -->
-        <div t-if="buy" class="d-flex align-items-center rounded shadow-sm bg-white">
-            <div class="p-3 d-inline-block o_we_border_dashed">
-                <b>Join us</b>
-            </div>
-            <div class="p-3 d-inline-block o_we_border_dashed">
-                <!-- TODO: Early-bird / Late-bird option -->
-                <span t-field="event.with_context(tz=event.date_tz).date_begin" t-options='{"widget": "date", "format": "long"}'/>
-            </div>
-            <div class="p-2 d-inline-block ml-auto mr-3">
-                NMI2 DO WHAT YOU WNAT HERE + input qty
-            </div>
-            <a href="#" class="btn btn-primary btn-lg btn-block mr-1" style="width:33%;" data-toggle="modal" data-target="#o_we_event_registration">Register</a>
-        </div>
-
-        <div t-else="" class="alert alert-info w-100 d-flex justify-content-between" role="status">
-            <span t-if="event.state == 'draft'" itemprop="availability" content="http://schema.org/OutOfStock">
-                Event registration not yet started.
-            </span>
-            <span t-if="event.state != 'draft'" itemprop="availability" content="http://schema.org/Discontinued">
-                Event registration is now closed.
-            </span>
-            <span t-if="request.env.user.has_group('event.group_event_manager')">
-                <i class="fa fa-cog" role="img" aria-label="Create" title="Create"/>
-                <a t-attf-href="/web#id=#{event.id}&amp;view_type=form&amp;model=event.event">
-                    Configure Event Registration
-                </a>
-            </span>
-        </div>
-</template>
-
-<template id="registration_modal" name="Event Registration Modal">
-    <t t-set="tickets_available" t-value="event.seats_available or event.seats_availability == 'unlimited'"/>
-    <t t-set="buy" t-value="tickets_available and event.state == 'confirm'"/>
-
-    <div itemscope="itemscope" itemprop="offers" itemtype="http://schema.org/AggregateOffer" class="modal fade" id="o_we_event_registration" tabindex="-1" role="dialog">
-        <form id="registration_form" t-attf-action="/event/#{slug(event)}/registration/new" method="post" class="modal-dialog modal-lg" role="document">
-            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Select your ticket(s)</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span>&amp;times;</span></button>
-                </div> 
-                <div class="modal-body bg-200">
-                    <t t-id="tickets" t-call="website_event.ticket">
-                        <t t-set="name">
-                            <h5 class="m-0" itemprop="name">Event Registration</h5>
-                        </t>
-                        <t t-set="registration_end">
-                            <t t-if="event.date_begin">
-                                <span t-esc="event.date_begin_located"/>
-                            </t>
-                        </t>
-                        <t t-set="price">
-                            <span itemprop="price" content="0">FREE</span>
-                        </t>
-                        <t t-set="quantity">
-                            <select name="nb_register-0" class="custom-select">
-                                <t t-foreach="range(0, (event.seats_availability == 'unlimited' or event.seats_available &gt; 9) and 10 or event.seats_available+1)" t-as="nb">
-                                    <option t-esc="nb" t-att-selected="nb == 1 and 'selected'"/>
-                                </t>
-                            </select>
-                        </t>
+    <form t-if="buy" id="registration_form" t-attf-action="/event/#{slug(event)}/registration/new" method="post" itemscope="itemscope" itemprop="offer" itemtype="http://schema.org/AggregateOffer" class="bg-white rounded shadow-sm">
+        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+        <div id="o_we_tickets" class="row">
+            <t t-call="website_event.ticket">
+                <t t-set="name">Event Registration</t>
+                <t t-set="registration_end">
+                    <t t-if="event.date_begin">
+                        - Registration end on <span t-field="event.with_context(tz=event.date_tz).date_begin" t-options="{'widget': 'date', 'format': 'medium'}"/>
                     </t>
-                </div>
-                <div class="modal-footer justify-content-between">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <div class="steps">
-                        <i class="fa fa-circle text-600"/>
-                        <i class="fa fa-circle text-300"/>
-                    </div>
-                    <button type="submit" class="btn btn-primary a-submit float-right" t-attf-id="#{event.id}">Continue</button>
-                </div>
+                </t>
+                <t t-set="price"><span content="0" itemprop="price" class="text-uppercase">Free</span></t>
+            </t>
+            <div class="col-4 py-2 pl-0 pr-2">
+                <button type="submit" class="btn btn-primary btn-block text-uppercase a-submit" t-attf-id="#{event.id}">Register</button>
             </div>
-        </form>
+        </div>
+    </form>
+    <div t-if="not buy" class="alert alert-info" role="status">
+        <span t-if="event.state == 'draft'" itemprop="availability" content="http://schema.org/OutOfStock">
+            <b>Event registration not yet started.</b>
+        </span>
+        <span t-if="event.state != 'draft'" itemprop="availability" content="http://schema.org/Discontinued">
+            <b>Event registration is closed.</b>
+        </span>
+        <a t-if="request.env.user.has_group('event.group_event_manager')" t-attf-href="/web#id=#{event.id}&amp;view_type=form&amp;model=event.event" class="float-right">
+            <i class="fa fa-pencil mr-2" role="img" aria-label="Create" title="Create"/><em>Configure Event Registration</em>
+        </a>
     </div>
 </template>
 
-<template id="ticket" name="Ticket">
-    <div class="o_we_ticket card shadow-sm" itemscope="itemscope" itemtype="http://schema.org/Offer">
-        <div class="card-body row align-items-center">
-            <!-- Name + Registration end -->
-            <div class="o_we_ticket_desc col">
-                <h5 t-raw="name" class="mb-0"/>
-                <small t-if="registration_end" class="text-muted" itemprop="availabilityEnds">Sales end on - <t t-raw="registration_end"/></small>
-            </div>
-            <!-- Price -->
-            <div t-raw="price" class="o_we_ticket_price col-2 text-right ml-auto"/>
-            <!-- Quantity -->
-            <div class="o_we_ticket_qty col-2">
-                <t t-if="tickets_available">
-                    <link itemprop="availability" content="http://schema.org/InStock"/>
-                    <t t-raw="quantity"/>
-                </t>
-                <t t-else="">
-                    <span itemprop="availability" content="http://schema.org/SoldOut">Sold Out</span>
-                </t>
-            </div>
-            <!-- Description -->
-            <div t-if="description" class="col-12">
-                <hr/>
-                <p class="mb-0" t-raw="description"/>
-            </div>
+<template id="ticket" name="Ticket offer template">
+    <div class="col d-flex align-items-center" itemscope="itemscope" itemtype="http://schema.org/Offer">
+        <h6 t-raw="name" itemprop="name" class="my-0 mr-2"/>
+        <small t-raw="registration_end" class="text-muted" itemprop="availabilityEnds"/>
+    </div>
+    <div class="col-4 d-flex justify-content-between align-items-center">
+        <t t-raw="price"/>
+        <div class="ml-auto">
+            <t t-if="tickets_available">
+                <link itemprop="availability" content="http://schema.org/InStock"/>
+                <select name="nb_register-0" class="custom-select">
+                    <t t-foreach="range(0, (event.seats_availability == 'unlimited' or event.seats_available &gt; 9) and 10 or event.seats_available+1)" t-as="nb">
+                        <option t-esc="nb" t-att-selected="nb == 1 and 'selected'"/>
+                    </t>
+                </select>
+            </t>
+            <t t-else="">
+                <span itemprop="availability" content="http://schema.org/SoldOut">Sold Out</span>
+            </t>
         </div>
     </div>
+    <!-- <div class="col-12 bg-light">
+        <p class="small" t-if="description" t-raw="description"/>
+    </div> -->
 </template>
 
 <template id="registration_attendee_details" name="Registration Attendee Details">

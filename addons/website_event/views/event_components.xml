@@ -163,7 +163,7 @@
                     </main>
                     <!-- Footer -->
                     <footer t-attf-class="small #{'card-footer' if opt_events_list_cards else ('border-top mx-4 mt-auto pt-2' if not opt_events_list_columns else 'border-top py-2')}">
-                        PRICE
+                         <span itemprop="price" content="0" class="font-weight-bold text-uppercase">Free</span>
                     </footer>
                 </div>
             </div>
