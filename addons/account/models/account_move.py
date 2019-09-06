@@ -142,8 +142,8 @@ class AccountMove(models.Model):
              "now and 50% in one month, but if you want to force a due date, make sure that the payment "
              "term is not set on the invoice. If you keep the Payment terms and the due date empty, it "
              "means direct payment.")
-    invoice_payment_ref = fields.Char(string='Payment Reference', index=True, copy=False, readonly=True,
-        states={'draft': [('readonly', False)]},
+    invoice_payment_ref = fields.Char(string='Payment Reference',
+        index=True, copy=False,
         help="The payment reference to set on journal items.")
     invoice_sent = fields.Boolean(readonly=True, default=False, copy=False,
         help="It indicates that the invoice has been sent.")
@@ -255,6 +255,12 @@ class AccountMove(models.Model):
     # ONCHANGE METHODS
     # -------------------------------------------------------------------------
 
+    @api.onchange('invoice_payment_ref')
+    def _onchange_invoice_payment_ref(self):
+        for line in self.line_ids:
+            if line.account_id.internal_type in ('receivable', 'payable'):
+                line.name = self.invoice_payment_ref
+
     @api.onchange('invoice_vendor_bill_id')
     def _onchange_invoice_vendor_bill(self):
         if self.invoice_vendor_bill_id:
@@ -292,8 +298,6 @@ class AccountMove(models.Model):
         'currency_id',
         'invoice_date_due',
         'invoice_cash_rounding_id',
-        'invoice_vendor_bill_id',
-        'invoice_date_due',
     )
     def _onchange_recompute_dynamic_lines(self):
         self._recompute_dynamic_lines()
@@ -2088,7 +2092,6 @@ class AccountMoveLine(models.Model):
         help="Technical field holding the debit - credit in order to open meaningful graph views from reports")
     amount_currency = fields.Monetary(string='Balance in Currency',
         store=True, readonly=False, copy=True,
-        currency_field='company_currency_id',
         compute='_compute_accounting_fields',
         inverse='_inverse_amount_currency',
         help="The amount expressed in an optional other currency if it is a multi-currency entry.")
@@ -2376,8 +2379,12 @@ class AccountMoveLine(models.Model):
             else:
                 line.product_uom_id = False
 
-    @api.depends('product_id', 'tax_line_id', 'partner_id.lang', 'move_id.journal_id.type')
+    @api.depends('product_id', 'tax_line_id')
     def _compute_name(self):
+        ''' Compute the default name of the journal items based on their product and tax.
+        This compute has limited dependencies since we want to avoid loosing custom names
+        set on the journal items with a change like changing the partner.
+        '''
         for line in self:
             move = line.move_id
             if move.is_invoice() and line.product_id:
@@ -2389,7 +2396,7 @@ class AccountMoveLine(models.Model):
                 else:
                     product = line.product_id
 
-                # Concat infos from product.
+                # Concat info from product.
                 values = []
                 if product.partner_ref:
                     values.append(product.partner_ref)
@@ -2477,6 +2484,13 @@ class AccountMoveLine(models.Model):
             
     def _compute_business_fields(self, balance):
         ''' Helper computing business fields from the balance. '''
+        def update_price_unit(total_amount, quantity):
+            # Helper used to avoid erasing the existing price_unit with a rounded version of itself.
+            # E.g. if the price_unit has a very tiny value like 0.0001, 0.00 must not be written.
+            currency = self.currency_id or self.move_id.company_id.currency_id
+            if currency.round(self.price_unit * quantity) != currency.round(total_amount):
+                self.price_unit = total_amount / quantity
+
         if self.move_id.is_outbound():
             sign = 1
         elif self.move_id.is_inbound():
@@ -2512,14 +2526,14 @@ class AccountMoveLine(models.Model):
         if balance and discount_factor:
             # discount != 100%
             self.quantity = self.quantity or 1.0
-            self.price_unit = balance / discount_factor / (self.quantity or 1.0)
+            update_price_unit(balance / discount_factor, self.quantity or 1.0)
         elif balance and not discount_factor:
             # discount == 100%
             self.quantity = self.quantity or 1.0
             self.discount = 0.0
-            self.price_unit = balance / (self.quantity or 1.0)
+            update_price_unit(balance, self.quantity or 1.0)
 
-    @api.depends('quantity', 'price_unit', 'discount', 'tax_ids', 'currency_id')
+    @api.depends('quantity', 'price_unit', 'discount', 'tax_ids', 'currency_id', 'date')
     def _compute_accounting_fields(self):
         for line in self:
             line._compute_price_total_subtotal()
@@ -2759,11 +2773,6 @@ class AccountMoveLine(models.Model):
     def write(self, vals):
         # OVERRIDE
         if any(key in vals for key in ('account_id', 'journal_id', 'date', 'move_id', 'debit', 'credit')):
-            self._update_check()
-        if not self._context.get('allow_amount_currency') and any(
-                key in vals for key in ('amount_currency', 'currency_id')):
-            # hackish workaround to write the amount_currency when assigning a payment to an invoice through the 'add' button
-            # this is needed to compute the correct amount_residual_currency and potentially create an exchange difference entry
             self._update_check()
         # when making a reconciliation on an existing liquidity journal item, mark the payment as reconciled
         for record in self:

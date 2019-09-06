@@ -878,7 +878,8 @@
                                     <group string="Payments"
                                            name="payments_info_group"
                                            attrs="{'invisible': [('type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'))]}">
-                                        <field name="invoice_payment_ref"/>
+                                        <field name="invoice_payment_ref"
+                                               attrs="{'readonly': [('state', '!=', 'draft')]}"/>
                                         <field name="invoice_partner_bank_id"
                                                domain="[('partner_id', '=', bank_partner_id)]"
                                                attrs="{'readonly': [('state', '!=', 'draft')]}"/>

@@ -311,119 +311,119 @@ class TestAccountMoveOutInvoiceOnchanges(InvoiceTestCommon):
             'amount_total': 3550.0,
         })
 
-    # def test_out_invoice_line_onchange_partner_1(self):
-    #     move_form = Form(self.invoice)
-    #     move_form.partner_id = self.partner_b
-    #     move_form.invoice_payment_ref = 'turlututu'
-    #     move_form.save()
-    #
-    #     self.assertInvoiceValues(self.invoice, [
-    #         {
-    #             **self.product_line_vals_1,
-    #             'partner_id': self.partner_b.id,
-    #         },
-    #         {
-    #             **self.product_line_vals_2,
-    #             'partner_id': self.partner_b.id,
-    #         },
-    #         {
-    #             **self.tax_line_vals_1,
-    #             'partner_id': self.partner_b.id,
-    #         },
-    #         {
-    #             **self.tax_line_vals_2,
-    #             'partner_id': self.partner_b.id,
-    #         },
-    #         {
-    #             **self.term_line_vals_1,
-    #             'name': 'turlututu',
-    #             'partner_id': self.partner_b.id,
-    #             'price_unit': -423.0,
-    #             'price_subtotal': -423.0,
-    #             'price_total': -423.0,
-    #             'debit': 423.0,
-    #         },
-    #         {
-    #             **self.term_line_vals_1,
-    #             'name': 'turlututu',
-    #             'partner_id': self.partner_b.id,
-    #             'price_unit': -987.0,
-    #             'price_subtotal': -987.0,
-    #             'price_total': -987.0,
-    #             'debit': 987.0,
-    #             'date_maturity': fields.Date.from_string('2019-02-28'),
-    #         },
-    #     ], {
-    #         **self.move_vals,
-    #         'partner_id': self.partner_b.id,
-    #         'invoice_payment_ref': 'turlututu',
-    #         'fiscal_position_id': self.fiscal_pos_a.id,
-    #         'invoice_payment_term_id': self.pay_terms_b.id,
-    #         'amount_untaxed': 1200.0,
-    #         'amount_tax': 210.0,
-    #         'amount_total': 1410.0,
-    #     })
-    #
-    #     # Remove lines and recreate them to apply the fiscal position.
-    #     move_form = Form(self.invoice)
-    #     move_form.invoice_line_ids.remove(0)
-    #     move_form.invoice_line_ids.remove(0)
-    #     with move_form.invoice_line_ids.new() as line_form:
-    #         line_form.product_id = self.product_a
-    #     with move_form.invoice_line_ids.new() as line_form:
-    #         line_form.product_id = self.product_b
-    #     move_form.save()
-    #
-    #     self.assertInvoiceValues(self.invoice, [
-    #         {
-    #             **self.product_line_vals_1,
-    #             'account_id': self.product_b.property_account_income_id.id,
-    #             'partner_id': self.partner_b.id,
-    #             'tax_ids': self.tax_sale_b.ids,
-    #         },
-    #         {
-    #             **self.product_line_vals_2,
-    #             'partner_id': self.partner_b.id,
-    #             'price_total': 230.0,
-    #             'tax_ids': self.tax_sale_b.ids,
-    #         },
-    #         {
-    #             **self.tax_line_vals_1,
-    #             'name': self.tax_sale_b.name,
-    #             'partner_id': self.partner_b.id,
-    #             'tax_line_id': self.tax_sale_b.id,
-    #         },
-    #         {
-    #             **self.term_line_vals_1,
-    #             'name': 'turlututu',
-    #             'account_id': self.partner_b.property_account_receivable_id.id,
-    #             'partner_id': self.partner_b.id,
-    #             'price_unit': -414.0,
-    #             'price_subtotal': -414.0,
-    #             'price_total': -414.0,
-    #             'debit': 414.0,
-    #         },
-    #         {
-    #             **self.term_line_vals_1,
-    #             'name': 'turlututu',
-    #             'account_id': self.partner_b.property_account_receivable_id.id,
-    #             'partner_id': self.partner_b.id,
-    #             'price_unit': -966.0,
-    #             'price_subtotal': -966.0,
-    #             'price_total': -966.0,
-    #             'debit': 966.0,
-    #             'date_maturity': fields.Date.from_string('2019-02-28'),
-    #         },
-    #     ], {
-    #         **self.move_vals,
-    #         'partner_id': self.partner_b.id,
-    #         'invoice_payment_ref': 'turlututu',
-    #         'fiscal_position_id': self.fiscal_pos_a.id,
-    #         'invoice_payment_term_id': self.pay_terms_b.id,
-    #         'amount_untaxed': 1200.0,
-    #         'amount_tax': 180.0,
-    #         'amount_total': 1380.0,
-    #     })
+    def test_out_invoice_line_onchange_partner_1(self):
+        move_form = Form(self.invoice)
+        move_form.partner_id = self.partner_b
+        move_form.invoice_payment_ref = 'turlututu'
+        move_form.save()
+
+        self.assertInvoiceValues(self.invoice, [
+            {
+                **self.product_line_vals_1,
+                'partner_id': self.partner_b.id,
+            },
+            {
+                **self.product_line_vals_2,
+                'partner_id': self.partner_b.id,
+            },
+            {
+                **self.tax_line_vals_1,
+                'partner_id': self.partner_b.id,
+            },
+            {
+                **self.tax_line_vals_2,
+                'partner_id': self.partner_b.id,
+            },
+            {
+                **self.term_line_vals_1,
+                'name': 'turlututu',
+                'partner_id': self.partner_b.id,
+                'price_unit': -423.0,
+                'price_subtotal': -423.0,
+                'price_total': -423.0,
+                'debit': 423.0,
+            },
+            {
+                **self.term_line_vals_1,
+                'name': 'turlututu',
+                'partner_id': self.partner_b.id,
+                'price_unit': -987.0,
+                'price_subtotal': -987.0,
+                'price_total': -987.0,
+                'debit': 987.0,
+                'date_maturity': fields.Date.from_string('2019-02-28'),
+            },
+        ], {
+            **self.move_vals,
+            'partner_id': self.partner_b.id,
+            'invoice_payment_ref': 'turlututu',
+            'fiscal_position_id': self.fiscal_pos_a.id,
+            'invoice_payment_term_id': self.pay_terms_b.id,
+            'amount_untaxed': 1200.0,
+            'amount_tax': 210.0,
+            'amount_total': 1410.0,
+        })
+
+        # Remove lines and recreate them to apply the fiscal position.
+        move_form = Form(self.invoice)
+        move_form.invoice_line_ids.remove(0)
+        move_form.invoice_line_ids.remove(0)
+        with move_form.invoice_line_ids.new() as line_form:
+            line_form.product_id = self.product_a
+        with move_form.invoice_line_ids.new() as line_form:
+            line_form.product_id = self.product_b
+        move_form.save()
+
+        self.assertInvoiceValues(self.invoice, [
+            {
+                **self.product_line_vals_1,
+                'account_id': self.product_b.property_account_income_id.id,
+                'partner_id': self.partner_b.id,
+                'tax_ids': self.tax_sale_b.ids,
+            },
+            {
+                **self.product_line_vals_2,
+                'partner_id': self.partner_b.id,
+                'price_total': 230.0,
+                'tax_ids': self.tax_sale_b.ids,
+            },
+            {
+                **self.tax_line_vals_1,
+                'name': self.tax_sale_b.name,
+                'partner_id': self.partner_b.id,
+                'tax_line_id': self.tax_sale_b.id,
+            },
+            {
+                **self.term_line_vals_1,
+                'name': 'turlututu',
+                'account_id': self.partner_b.property_account_receivable_id.id,
+                'partner_id': self.partner_b.id,
+                'price_unit': -414.0,
+                'price_subtotal': -414.0,
+                'price_total': -414.0,
+                'debit': 414.0,
+            },
+            {
+                **self.term_line_vals_1,
+                'name': 'turlututu',
+                'account_id': self.partner_b.property_account_receivable_id.id,
+                'partner_id': self.partner_b.id,
+                'price_unit': -966.0,
+                'price_subtotal': -966.0,
+                'price_total': -966.0,
+                'debit': 966.0,
+                'date_maturity': fields.Date.from_string('2019-02-28'),
+            },
+        ], {
+            **self.move_vals,
+            'partner_id': self.partner_b.id,
+            'invoice_payment_ref': 'turlututu',
+            'fiscal_position_id': self.fiscal_pos_a.id,
+            'invoice_payment_term_id': self.pay_terms_b.id,
+            'amount_untaxed': 1200.0,
+            'amount_tax': 180.0,
+            'amount_total': 1380.0,
+        })
 
     def test_out_invoice_line_onchange_taxes_1(self):
         move_form = Form(self.invoice)
@@ -521,320 +521,321 @@ class TestAccountMoveOutInvoiceOnchanges(InvoiceTestCommon):
             'amount_total': 1730.0,
         })
 
-    # def test_out_invoice_line_onchange_cash_rounding_1(self):
-    #     move_form = Form(self.invoice)
-    #     # Add a cash rounding having 'add_invoice_line'.
-    #     move_form.invoice_cash_rounding_id = self.cash_rounding_a
-    #     move_form.save()
-    #
-    #     # The cash rounding does nothing as the total is already rounded.
-    #     self.assertInvoiceValues(self.invoice, [
-    #         self.product_line_vals_1,
-    #         self.product_line_vals_2,
-    #         self.tax_line_vals_1,
-    #         self.tax_line_vals_2,
-    #         self.term_line_vals_1,
-    #     ], self.move_vals)
-    #
-    #     move_form = Form(self.invoice)
-    #     with move_form.invoice_line_ids.edit(0) as line_form:
-    #         line_form.price_unit = 999.99
-    #     move_form.save()
-    #
-    #     self.assertInvoiceValues(self.invoice, [
-    #         {
-    #             'name': 'add_invoice_line',
-    #             'product_id': False,
-    #             'account_id': self.cash_rounding_a.account_id.id,
-    #             'partner_id': self.partner_a.id,
-    #             'product_uom_id': False,
-    #             'quantity': 1.0,
-    #             'discount': 0.0,
-    #             'price_unit': 0.01,
-    #             'price_subtotal': 0.01,
-    #             'price_total': 0.01,
-    #             'tax_ids': [],
-    #             'tax_line_id': False,
-    #             'currency_id': False,
-    #             'amount_currency': 0.0,
-    #             'debit': 0.0,
-    #             'credit': 0.01,
-    #             'date_maturity': False,
-    #             'tax_exigible': True,
-    #         },
-    #         {
-    #             **self.product_line_vals_1,
-    #             'price_unit': 999.99,
-    #             'price_subtotal': 999.99,
-    #             'price_total': 1149.99,
-    #             'credit': 999.99,
-    #         },
-    #         self.product_line_vals_2,
-    #         self.tax_line_vals_1,
-    #         self.tax_line_vals_2,
-    #         self.term_line_vals_1,
-    #     ], self.move_vals)
-    #
-    #     move_form = Form(self.invoice)
-    #     # Change the cash rounding to one having 'biggest_tax'.
-    #     move_form.invoice_cash_rounding_id = self.cash_rounding_b
-    #     move_form.save()
-    #
-    #     self.assertInvoiceValues(self.invoice, [
-    #         {
-    #             **self.product_line_vals_1,
-    #             'price_unit': 999.99,
-    #             'price_subtotal': 999.99,
-    #             'price_total': 1149.99,
-    #             'credit': 999.99,
-    #         },
-    #         self.product_line_vals_2,
-    #         self.tax_line_vals_1,
-    #         self.tax_line_vals_2,
-    #         {
-    #             'name': '%s (rounding)' % self.tax_sale_a.name,
-    #             'product_id': False,
-    #             'account_id': self.company_data['default_account_tax_sale'].id,
-    #             'partner_id': self.partner_a.id,
-    #             'product_uom_id': False,
-    #             'quantity': 1.0,
-    #             'discount': 0.0,
-    #             'price_unit': -0.04,
-    #             'price_subtotal': -0.04,
-    #             'price_total': -0.04,
-    #             'tax_ids': [],
-    #             'tax_line_id': self.tax_sale_a.id,
-    #             'currency_id': False,
-    #             'amount_currency': 0.0,
-    #             'debit': 0.04,
-    #             'credit': 0.0,
-    #             'date_maturity': False,
-    #             'tax_exigible': True,
-    #         },
-    #         {
-    #             **self.term_line_vals_1,
-    #             'price_unit': -1409.95,
-    #             'price_subtotal': -1409.95,
-    #             'price_total': -1409.95,
-    #             'debit': 1409.95,
-    #         },
-    #     ], {
-    #         **self.move_vals,
-    #         'amount_untaxed': 1199.99,
-    #         'amount_tax': 209.96,
-    #         'amount_total': 1409.95,
-    #     })
-    #
-    # def test_out_invoice_line_onchange_currency_1(self):
-    #     # New journal having a foreign currency set.
-    #     journal = self.company_data['default_journal_sale'].copy()
-    #     journal.currency_id = self.currency_data['currency']
-    #
-    #     move_form = Form(self.invoice)
-    #     move_form.journal_id = journal
-    #     move_form.save()
-    #
-    #     self.assertInvoiceValues(self.invoice, [
-    #         {
-    #             **self.product_line_vals_1,
-    #             'currency_id': journal.currency_id.id,
-    #             'amount_currency': -1000.0,
-    #             'credit': 500.0,
-    #         },
-    #         {
-    #             **self.product_line_vals_2,
-    #             'currency_id': journal.currency_id.id,
-    #             'amount_currency': -200.0,
-    #             'credit': 100.0,
-    #         },
-    #         {
-    #             **self.tax_line_vals_1,
-    #             'currency_id': journal.currency_id.id,
-    #             'amount_currency': -180.0,
-    #             'credit': 90.0,
-    #         },
-    #         {
-    #             **self.tax_line_vals_2,
-    #             'currency_id': journal.currency_id.id,
-    #             'amount_currency': -30.0,
-    #             'credit': 15.0,
-    #         },
-    #         {
-    #             **self.term_line_vals_1,
-    #             'currency_id': journal.currency_id.id,
-    #             'amount_currency': 1410.0,
-    #             'debit': 705.0,
-    #         },
-    #     ], {
-    #         **self.move_vals,
-    #         'currency_id': journal.currency_id.id,
-    #         'journal_id': journal.id,
-    #     })
-    #
-    #     move_form = Form(self.invoice)
-    #     # Change the date to get another rate: 1/3 instead of 1/2.
-    #     move_form.date = fields.Date.from_string('2016-01-01')
-    #     move_form.save()
-    #
-    #     self.assertInvoiceValues(self.invoice, [
-    #         {
-    #             **self.product_line_vals_1,
-    #             'currency_id': journal.currency_id.id,
-    #             'amount_currency': -1000.0,
-    #             'credit': 333.33,
-    #         },
-    #         {
-    #             **self.product_line_vals_2,
-    #             'currency_id': journal.currency_id.id,
-    #             'amount_currency': -200.0,
-    #             'credit': 66.67,
-    #         },
-    #         {
-    #             **self.tax_line_vals_1,
-    #             'currency_id': journal.currency_id.id,
-    #             'amount_currency': -180.0,
-    #             'credit': 60.0,
-    #         },
-    #         {
-    #             **self.tax_line_vals_2,
-    #             'currency_id': journal.currency_id.id,
-    #             'amount_currency': -30.0,
-    #             'credit': 10.0,
-    #         },
-    #         {
-    #             **self.term_line_vals_1,
-    #             'currency_id': journal.currency_id.id,
-    #             'amount_currency': 1410.0,
-    #             'debit': 470.0,
-    #         },
-    #     ], {
-    #         **self.move_vals,
-    #         'currency_id': journal.currency_id.id,
-    #         'journal_id': journal.id,
-    #         'date': fields.Date.from_string('2016-01-01'),
-    #     })
-    #
-    #     move_form = Form(self.invoice)
-    #     with move_form.invoice_line_ids.edit(0) as line_form:
-    #         # 0.045 * 0.1 = 0.0045. As the foreign currency has a 0.001 rounding,
-    #         # the result should be 0.005 after rounding.
-    #         line_form.quantity = 0.1
-    #         line_form.price_unit = 0.045
-    #     move_form.save()
-    #
-    #     self.assertInvoiceValues(self.invoice, [
-    #         {
-    #             **self.product_line_vals_1,
-    #             'quantity': 0.1,
-    #             'price_unit': 0.05,
-    #             'price_subtotal': 0.005,
-    #             'price_total': 0.006,
-    #             'currency_id': journal.currency_id.id,
-    #             'amount_currency': -0.005,
-    #             'credit': 0.0,
-    #         },
-    #         {
-    #             **self.product_line_vals_2,
-    #             'currency_id': journal.currency_id.id,
-    #             'amount_currency': -200.0,
-    #             'credit': 66.67,
-    #         },
-    #         {
-    #             **self.tax_line_vals_1,
-    #             'price_unit': 30.0,
-    #             'price_subtotal': 30.001,
-    #             'price_total': 30.001,
-    #             'currency_id': journal.currency_id.id,
-    #             'amount_currency': -30.001,
-    #             'credit': 10.0,
-    #         },
-    #         {
-    #             **self.tax_line_vals_2,
-    #             'currency_id': journal.currency_id.id,
-    #             'amount_currency': -30.0,
-    #             'credit': 10.0,
-    #         },
-    #         {
-    #             **self.term_line_vals_1,
-    #             'currency_id': journal.currency_id.id,
-    #             'price_unit': -260.01,
-    #             'price_subtotal': -260.006,
-    #             'price_total': -260.006,
-    #             'amount_currency': 260.006,
-    #             'debit': 86.67,
-    #         },
-    #     ], {
-    #         **self.move_vals,
-    #         'currency_id': journal.currency_id.id,
-    #         'journal_id': journal.id,
-    #         'date': fields.Date.from_string('2016-01-01'),
-    #         'amount_untaxed': 200.005,
-    #         'amount_tax': 60.001,
-    #         'amount_total': 260.006,
-    #     })
-    #
-    #     move_form = Form(self.invoice)
-    #     move_form.currency_id = self.company_data['currency']
-    #     move_form.save()
-    #
-    #     self.assertInvoiceValues(self.invoice, [
-    #         {
-    #             **self.product_line_vals_1,
-    #             'quantity': 0.1,
-    #             'price_unit': 0.1,
-    #             'price_subtotal': 0.01,
-    #             'price_total': 0.01,
-    #             'credit': 0.01,
-    #         },
-    #         self.product_line_vals_2,
-    #         {
-    #             **self.tax_line_vals_1,
-    #             'price_unit': 30.0,
-    #             'price_subtotal': 30.0,
-    #             'price_total': 30.0,
-    #             'credit': 30.0,
-    #         },
-    #         self.tax_line_vals_2,
-    #         {
-    #             **self.term_line_vals_1,
-    #             'price_unit': -260.01,
-    #             'price_subtotal': -260.01,
-    #             'price_total': -260.01,
-    #             'debit': 260.01,
-    #         },
-    #     ], {
-    #         **self.move_vals,
-    #         'currency_id': self.company_data['currency'].id,
-    #         'journal_id': journal.id,
-    #         'date': fields.Date.from_string('2016-01-01'),
-    #         'amount_untaxed': 200.01,
-    #         'amount_tax': 60.0,
-    #         'amount_total': 260.01,
-    #     })
-    #
-    # def test_out_invoice_onchange_sequence_number_1(self):
-    #     self.assertRecordValues(self.invoice, [{
-    #         'invoice_sequence_number_next': '0001',
-    #         'invoice_sequence_number_next_prefix': 'INV/2019/',
-    #     }])
-    #
-    #     move_form = Form(self.invoice)
-    #     move_form.invoice_sequence_number_next = '0042'
-    #     move_form.save()
-    #
-    #     self.assertRecordValues(self.invoice, [{
-    #         'invoice_sequence_number_next': '0042',
-    #         'invoice_sequence_number_next_prefix': 'INV/2019/',
-    #     }])
-    #
-    #     self.invoice.post()
-    #
-    #     self.assertRecordValues(self.invoice, [{'name': 'INV/2019/0042'}])
-    #
-    #     invoice_copy = self.invoice.copy()
-    #     invoice_copy.post()
-    #
-    #     self.assertRecordValues(invoice_copy, [{'name': 'INV/2019/0043'}])
+    def test_out_invoice_line_onchange_cash_rounding_1(self):
+        move_form = Form(self.invoice)
+        # Add a cash rounding having 'add_invoice_line'.
+        move_form.invoice_cash_rounding_id = self.cash_rounding_a
+        move_form.save()
+
+        # The cash rounding does nothing as the total is already rounded.
+        self.assertInvoiceValues(self.invoice, [
+            self.product_line_vals_1,
+            self.product_line_vals_2,
+            self.tax_line_vals_1,
+            self.tax_line_vals_2,
+            self.term_line_vals_1,
+        ], self.move_vals)
+
+        move_form = Form(self.invoice)
+        with move_form.invoice_line_ids.edit(0) as line_form:
+            line_form.price_unit = 999.99
+        move_form.save()
+
+        self.assertInvoiceValues(self.invoice, [
+            {
+                'name': 'add_invoice_line',
+                'product_id': False,
+                'account_id': self.cash_rounding_a.account_id.id,
+                'partner_id': self.partner_a.id,
+                'product_uom_id': False,
+                'quantity': 1.0,
+                'discount': 0.0,
+                'price_unit': 0.01,
+                'price_subtotal': 0.01,
+                'price_total': 0.01,
+                'tax_ids': [],
+                'tax_line_id': False,
+                'currency_id': False,
+                'amount_currency': 0.0,
+                'debit': 0.0,
+                'credit': 0.01,
+                'date_maturity': False,
+                'tax_exigible': True,
+            },
+            {
+                **self.product_line_vals_1,
+                'price_unit': 999.99,
+                'price_subtotal': 999.99,
+                'price_total': 1149.99,
+                'credit': 999.99,
+            },
+            self.product_line_vals_2,
+            self.tax_line_vals_1,
+            self.tax_line_vals_2,
+            self.term_line_vals_1,
+        ], self.move_vals)
+
+        move_form = Form(self.invoice)
+        # Change the cash rounding to one having 'biggest_tax'.
+        move_form.invoice_cash_rounding_id = self.cash_rounding_b
+        move_form.save()
+
+        self.assertInvoiceValues(self.invoice, [
+            {
+                **self.product_line_vals_1,
+                'price_unit': 999.99,
+                'price_subtotal': 999.99,
+                'price_total': 1149.99,
+                'credit': 999.99,
+            },
+            self.product_line_vals_2,
+            self.tax_line_vals_1,
+            self.tax_line_vals_2,
+            {
+                'name': '%s (rounding)' % self.tax_sale_a.name,
+                'product_id': False,
+                'account_id': self.company_data['default_account_tax_sale'].id,
+                'partner_id': self.partner_a.id,
+                'product_uom_id': False,
+                'quantity': 1.0,
+                'discount': 0.0,
+                'price_unit': -0.04,
+                'price_subtotal': -0.04,
+                'price_total': -0.04,
+                'tax_ids': [],
+                'tax_line_id': self.tax_sale_a.id,
+                'currency_id': False,
+                'amount_currency': 0.0,
+                'debit': 0.04,
+                'credit': 0.0,
+                'date_maturity': False,
+                'tax_exigible': True,
+            },
+            {
+                **self.term_line_vals_1,
+                'price_unit': -1409.95,
+                'price_subtotal': -1409.95,
+                'price_total': -1409.95,
+                'debit': 1409.95,
+            },
+        ], {
+            **self.move_vals,
+            'amount_untaxed': 1199.99,
+            'amount_tax': 209.96,
+            'amount_total': 1409.95,
+        })
+
+    def test_out_invoice_line_onchange_currency_1(self):
+        # New journal having a foreign currency set.
+        journal = self.company_data['default_journal_sale'].copy()
+        journal.currency_id = self.currency_data['currency']
+
+        move_form = Form(self.invoice)
+        move_form.journal_id = journal
+        move_form.save()
+
+        self.assertInvoiceValues(self.invoice, [
+            {
+                **self.product_line_vals_1,
+                'currency_id': journal.currency_id.id,
+                'amount_currency': -1000.0,
+                'credit': 500.0,
+            },
+            {
+                **self.product_line_vals_2,
+                'currency_id': journal.currency_id.id,
+                'amount_currency': -200.0,
+                'credit': 100.0,
+            },
+            {
+                **self.tax_line_vals_1,
+                'currency_id': journal.currency_id.id,
+                'amount_currency': -180.0,
+                'credit': 90.0,
+            },
+            {
+                **self.tax_line_vals_2,
+                'currency_id': journal.currency_id.id,
+                'amount_currency': -30.0,
+                'credit': 15.0,
+            },
+            {
+                **self.term_line_vals_1,
+                'currency_id': journal.currency_id.id,
+                'amount_currency': 1410.0,
+                'debit': 705.0,
+            },
+        ], {
+            **self.move_vals,
+            'currency_id': journal.currency_id.id,
+            'journal_id': journal.id,
+        })
+
+        move_form = Form(self.invoice)
+        # Change the date to get another rate: 1/3 instead of 1/2.
+        move_form.date = fields.Date.from_string('2016-01-01')
+        move_form.save()
+
+        self.assertInvoiceValues(self.invoice, [
+            {
+                **self.product_line_vals_1,
+                'currency_id': journal.currency_id.id,
+                'amount_currency': -1000.0,
+                'credit': 333.33,
+            },
+            {
+                **self.product_line_vals_2,
+                'currency_id': journal.currency_id.id,
+                'amount_currency': -200.0,
+                'credit': 66.67,
+            },
+            {
+                **self.tax_line_vals_1,
+                'currency_id': journal.currency_id.id,
+                'amount_currency': -180.0,
+                'credit': 60.0,
+            },
+            {
+                **self.tax_line_vals_2,
+                'currency_id': journal.currency_id.id,
+                'amount_currency': -30.0,
+                'credit': 10.0,
+            },
+            {
+                **self.term_line_vals_1,
+                'currency_id': journal.currency_id.id,
+                'amount_currency': 1410.0,
+                'debit': 470.0,
+            },
+        ], {
+            **self.move_vals,
+            'currency_id': journal.currency_id.id,
+            'journal_id': journal.id,
+            'date': fields.Date.from_string('2016-01-01'),
+        })
+
+        self.env.ref('product.decimal_price').digits = 3
+        move_form = Form(self.invoice)
+        with move_form.invoice_line_ids.edit(0) as line_form:
+            # 0.045 * 0.1 = 0.0045. As the foreign currency has a 0.001 rounding,
+            # the result should be 0.005 after rounding.
+            line_form.quantity = 0.1
+            line_form.price_unit = 0.045
+        move_form.save()
+
+        self.assertInvoiceValues(self.invoice, [
+            {
+                **self.product_line_vals_1,
+                'quantity': 0.1,
+                'price_unit': 0.045,
+                'price_subtotal': 0.005,
+                'price_total': 0.006,
+                'currency_id': journal.currency_id.id,
+                'amount_currency': -0.005,
+                'credit': 0.0,
+            },
+            {
+                **self.product_line_vals_2,
+                'currency_id': journal.currency_id.id,
+                'amount_currency': -200.0,
+                'credit': 66.67,
+            },
+            {
+                **self.tax_line_vals_1,
+                'price_unit': 30.001,
+                'price_subtotal': 30.001,
+                'price_total': 30.001,
+                'currency_id': journal.currency_id.id,
+                'amount_currency': -30.001,
+                'credit': 10.0,
+            },
+            {
+                **self.tax_line_vals_2,
+                'currency_id': journal.currency_id.id,
+                'amount_currency': -30.0,
+                'credit': 10.0,
+            },
+            {
+                **self.term_line_vals_1,
+                'currency_id': journal.currency_id.id,
+                'price_unit': -260.006,
+                'price_subtotal': -260.006,
+                'price_total': -260.006,
+                'amount_currency': 260.006,
+                'debit': 86.67,
+            },
+        ], {
+            **self.move_vals,
+            'currency_id': journal.currency_id.id,
+            'journal_id': journal.id,
+            'date': fields.Date.from_string('2016-01-01'),
+            'amount_untaxed': 200.005,
+            'amount_tax': 60.001,
+            'amount_total': 260.006,
+        })
+
+        move_form = Form(self.invoice)
+        move_form.currency_id = self.company_data['currency']
+        move_form.save()
+
+        self.assertInvoiceValues(self.invoice, [
+            {
+                **self.product_line_vals_1,
+                'quantity': 0.1,
+                'price_unit': 0.045,
+                'price_subtotal': 0.0,
+                'price_total': 0.0,
+                'credit': 0.0,
+            },
+            self.product_line_vals_2,
+            {
+                **self.tax_line_vals_1,
+                'price_unit': 30.001,
+                'price_subtotal': 30.0,
+                'price_total': 30.0,
+                'credit': 30.0,
+            },
+            self.tax_line_vals_2,
+            {
+                **self.term_line_vals_1,
+                'price_unit': -260.00,
+                'price_subtotal': -260.00,
+                'price_total': -260.00,
+                'debit': 260.00,
+            },
+        ], {
+            **self.move_vals,
+            'currency_id': self.company_data['currency'].id,
+            'journal_id': journal.id,
+            'date': fields.Date.from_string('2016-01-01'),
+            'amount_untaxed': 200.00,
+            'amount_tax': 60.0,
+            'amount_total': 260.00,
+        })
+
+    def test_out_invoice_onchange_sequence_number_1(self):
+        self.assertRecordValues(self.invoice, [{
+            'invoice_sequence_number_next': '0001',
+            'invoice_sequence_number_next_prefix': 'INV/2019/',
+        }])
+
+        move_form = Form(self.invoice)
+        move_form.invoice_sequence_number_next = '0042'
+        move_form.save()
+
+        self.assertRecordValues(self.invoice, [{
+            'invoice_sequence_number_next': '0042',
+            'invoice_sequence_number_next_prefix': 'INV/2019/',
+        }])
+
+        self.invoice.post()
+
+        self.assertRecordValues(self.invoice, [{'name': 'INV/2019/0042'}])
+
+        invoice_copy = self.invoice.copy()
+        invoice_copy.post()
+
+        self.assertRecordValues(invoice_copy, [{'name': 'INV/2019/0043'}])
 
     def test_out_invoice_create_draft_refund(self):
         self.invoice.post()
