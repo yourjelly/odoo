@@ -2773,7 +2773,19 @@ class AccountMoveLine(models.Model):
                         lambda r: r.id != record.id and r.account_id.internal_type == 'liquidity')):
                     record.payment_id.state = 'reconciled'
 
-        result = super(AccountMoveLine, self).write(vals)
+        result = True
+        for line in self:
+            line_vals = vals.copy()
+            for k, v in vals.items():
+                field = line._fields[k]
+                if field.relational:
+                    if field.type == 'many2one' and k != 'account_id':
+                        if line[k].id == v:
+                            line_vals.pop(k)
+                    elif field.type == 'many2many':
+                        if set(line[k].ids) == set(r['id'] for r in line.resolve_2many_commands(k, v, fields=['id'])):
+                            line_vals.pop(k)
+            result = super(AccountMoveLine, line).write(line_vals)
 
         if self._context.get('check_move_validity', True) and any(key in vals for key in ('account_id', 'journal_id', 'date', 'move_id', 'debit', 'credit')):
             self.env['account.move'].browse(self.mapped('move_id.id'))._check_move_consistency()
