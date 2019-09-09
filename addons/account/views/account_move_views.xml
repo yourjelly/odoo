@@ -659,7 +659,7 @@
                             <page id="invoice_tab"
                                   string="Invoice Lines"
                                   attrs="{'invisible': [('type', '=', 'entry')], 'readonly': [('state', '!=', 'draft')]}">
-                                <field name="invoice_line_ids" context="{'default_partner_id': commercial_partner_id}">
+                                <field name="invoice_line_ids" widget="section_and_note_one2many" context="{'default_partner_id': commercial_partner_id}">
                                     <tree editable="bottom" string="Journal Items" default_order="sequence, date desc, move_name desc, id">
                                         <control>
                                             <create name="add_line_control" string="Add a line"/>

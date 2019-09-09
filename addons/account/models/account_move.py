@@ -68,7 +68,9 @@ class AccountMove(models.Model):
     currency_id = fields.Many2one('res.currency', string='Currency',
         store=True, readonly=False, tracking=True, required=True, copy=True,
         compute='_compute_from_journal')
-    line_ids = fields.One2many('account.move.line', 'move_id', string='Journal Items', copy=True, readonly=False)
+    line_ids = fields.One2many('account.move.line', 'move_id', string='Journal Items',
+        copy=True, readonly=False, store=True,
+        compute='_compute_line_ids')
     partner_id = fields.Many2one('res.partner', readonly=True, tracking=True,
         states={'draft': [('readonly', False)]},
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
@@ -157,8 +159,9 @@ class AccountMove(models.Model):
              "The payment terms may compute several due dates, for example 50% now, 50% in one month.")
     # /!\ invoice_line_ids is just a subset of line_ids.
     invoice_line_ids = fields.One2many('account.move.line', 'move_id', string='Invoice lines',
-        copy=False, readonly=False,
-        domain=[('exclude_from_invoice_tab', '=', False)])
+        copy=False, readonly=False, store=False,
+        domain=[('exclude_from_invoice_tab', '=', False)],
+        compute='_compute_invoice_line_ids')
     invoice_partner_bank_id = fields.Many2one('res.partner.bank', string='Bank Account',
         store=True, readonly=False,
         compute='_compute_invoice_partner_bank_id',
@@ -287,17 +290,22 @@ class AccountMove(models.Model):
         if others_lines and current_invoice_lines - self.invoice_line_ids:
             others_lines[0].recompute_tax_line = True
         self.line_ids = others_lines + self.invoice_line_ids
-        self._onchange_recompute_dynamic_lines()
+        self._compute_line_ids()
 
-    @api.onchange(
-        'line_ids',
+    @api.depends('line_ids')
+    def _compute_invoice_line_ids(self):
+        for move in self:
+            move.invoice_line_ids = move.line_ids.filtered_domain(self._fields['invoice_line_ids'].domain)
+
+    @api.depends(
         'date',
-        'partner_id',
         'currency_id',
+        'line_ids',
+        'invoice_payment_term_id',
         'invoice_date_due',
         'invoice_cash_rounding_id',
     )
-    def _onchange_recompute_dynamic_lines(self):
+    def _compute_line_ids(self):
         self._recompute_dynamic_lines()
 
     @api.model
@@ -756,12 +764,6 @@ class AccountMove(models.Model):
                 # Only synchronize one2many in onchange.
                 if invoice != invoice._origin:
                     invoice.invoice_line_ids = invoice.line_ids.filtered(lambda line: not line.exclude_from_invoice_tab)
-
-    def onchange(self, values, field_name, field_onchange):
-        # OVERRIDE
-        # As the dynamic lines in this model are quite complex, we need to ensure some computations are done exactly
-        # at the beginning / at the end of the onchange mechanism. So, the onchange recursivity is disabled.
-        return super(AccountMove, self.with_context(recursive_onchanges=False)).onchange(values, field_name, field_onchange)
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
