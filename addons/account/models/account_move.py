@@ -68,8 +68,7 @@ class AccountMove(models.Model):
     currency_id = fields.Many2one('res.currency', string='Currency',
         store=True, readonly=False, tracking=True, required=True, copy=True,
         compute='_compute_from_journal')
-    line_ids = fields.One2many('account.move.line', 'move_id', string='Journal Items', copy=True, readonly=True,
-        states={'draft': [('readonly', False)]})
+    line_ids = fields.One2many('account.move.line', 'move_id', string='Journal Items', copy=True, readonly=False)
     partner_id = fields.Many2one('res.partner', readonly=True, tracking=True,
         states={'draft': [('readonly', False)]},
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
@@ -158,9 +157,8 @@ class AccountMove(models.Model):
              "The payment terms may compute several due dates, for example 50% now, 50% in one month.")
     # /!\ invoice_line_ids is just a subset of line_ids.
     invoice_line_ids = fields.One2many('account.move.line', 'move_id', string='Invoice lines',
-        copy=False, readonly=True,
-        domain=[('exclude_from_invoice_tab', '=', False)],
-        states={'draft': [('readonly', False)]})
+        copy=False, readonly=False,
+        domain=[('exclude_from_invoice_tab', '=', False)])
     invoice_partner_bank_id = fields.Many2one('res.partner.bank', string='Bank Account',
         store=True, readonly=False,
         compute='_compute_invoice_partner_bank_id',

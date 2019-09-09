@@ -658,7 +658,7 @@
                         <notebook>
                             <page id="invoice_tab"
                                   string="Invoice Lines"
-                                  attrs="{'invisible': [('type', '=', 'entry')]}">
+                                  attrs="{'invisible': [('type', '=', 'entry')], 'readonly': [('state', '!=', 'draft')]}">
                                 <field name="invoice_line_ids" context="{'default_partner_id': commercial_partner_id}">
                                     <tree editable="bottom" string="Journal Items" default_order="sequence, date desc, move_name desc, id">
                                         <control>
@@ -750,7 +750,9 @@
                                 <field name="narration" placeholder="Add an internal note..." nolabel="1" height="50"/>
                             </page>
                             <page id="aml_tab" string="Journal Items" groups="account.group_account_user">
-                                <field name="line_ids" context="{'default_partner_id': commercial_partner_id}">
+                                <field name="line_ids"
+                                       context="{'default_partner_id': commercial_partner_id}"
+                                       attrs="{'readonly': [('state', '!=', 'draft')]}">
                                     <tree editable="bottom" string="Journal Items" decoration-muted="display_type in ('line_section', 'line_note')" default_order="sequence, date desc, move_name desc, id">
                                         <!-- Displayed fields -->
                                         <field name="account_id"
