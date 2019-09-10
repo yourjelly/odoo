@@ -6,9 +6,9 @@
     <nav class="navbar navbar-light border-top shadow-sm d-print-none">
         <div class="container">
             <span class="navbar-brand h4 my-0 mr-4">Events</span>
-            <ul id="o_we_index_topbar_filters" class="nav"/>
+            <ul id="o_we_index_topbar_filters" class="nav mr-n2"/>
             <t t-call="website_event.search_box">
-                <t t-set="_classes" t-value="'form-inline ml-auto'"/>
+                <t t-set="_classes" t-value="'form-inline ml-auto pl-lg-3'"/>
             </t>
         </div>
     </nav>
@@ -17,7 +17,7 @@
 <!-- Filter - Date -->
 <template id="event_time" inherit_id="website_event.index_topbar" customize_show="True" name="Filter by Date">
     <xpath expr="//ul[@id='o_we_index_topbar_filters']" position="inside">
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown mr-2 my-1 my-lg-0">
             <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
                 <i class="fa fa-calendar"/>
                 <t t-if="current_date" t-esc="current_date"/>
@@ -40,7 +40,7 @@
 <!-- Filter - Category -->
 <template id="event_category" inherit_id="website_event.index_topbar" active="True" customize_show="True" name="Filter by Category">
     <xpath expr="//ul[@id='o_we_index_topbar_filters']" position="inside">
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown mr-2 my-1 my-lg-0">
             <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
                 <i class="fa fa-folder-open"/>
                 <t t-if="current_type" t-esc="current_type.name"/>
@@ -63,7 +63,7 @@
 <!-- Filter - Location -->
 <template id="event_location" inherit_id="website_event.index_topbar" active="True" customize_show="True" name="Filter by Country">
     <xpath expr="//ul[@id='o_we_index_topbar_filters']" position="inside">
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown mr-2 my-1 my-lg-0">
             <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
                 <i class="fa fa-map-marker"/>
                 <t t-if="current_country" t-esc="current_country.name"/>
@@ -92,7 +92,7 @@
 <!-- Search Box -->
 <!-- TODO - Make it works -->
 <template id="search_box" name="Search box">
-    <form id="o_we_search_box" t-attf-class="#{_classes}">
+    <form id="o_we_search_box" t-attf-class="#{_classes} my-1 my-lg-0">
         <div class="input-group w-100">
             <input class="form-control" type="search" placeholder="Search" aria-label="Search"/>
             <div class="input-group-append">
@@ -107,8 +107,8 @@
     <!-- Options -->
     <t t-set="opt_index_sidebar" t-value="request.website.viewref('website_event.opt_index_sidebar').active"/>
 
-    <t t-if="opt_events_list_columns" t-set="opt_event_size" t-value="'col-lg-6' if opt_index_sidebar else 'col-md-6 col-lg-4' if opt_events_list_columns else ''"/>
-    <!-- <t t-else="" t-set="opt_event_size" t-value="'col-xl-10 offset-xl-1' if opt_index_sidebar else ''"/> -->
+    <t t-if="opt_events_list_columns" t-set="opt_event_size" t-value="'col-md-6' if opt_index_sidebar else 'col-md-6 col-lg-4'"/>
+    <t t-else="" t-set="opt_event_size" t-value="'col-12' if opt_index_sidebar else 'col-xl-10 offset-xl-1'"/>
     <!-- No events -->
     <t t-if="not event_ids">
         <div class="h2 mb-3">No events found.</div>
@@ -117,13 +117,13 @@
         </div>
     </t>
     <!-- List -->
-    <div t-foreach="event_ids" t-as="event" t-attf-class="col-12 #{opt_event_size} mb-4">
+    <div t-foreach="event_ids" t-as="event" t-attf-class=" #{opt_event_size} mb-4">
         <article t-attf-class="#{'card border-0 shadow-sm' if opt_events_list_cards else ''}" itemscope="itemscope" itemtype="http://schema.org/Event">
             <div class="row no-gutters">
                 <!-- Header -->
                 <header t-attf-class="overflow-hidden #{'col-12 rounded-top' if opt_events_list_columns else 'col-sm-4 col-lg-3 rounded-left'} #{'rounded shadow' if not opt_events_list_cards else ''} #{'rounded-top' if (not opt_events_list_cards and not opt_events_list_columns) else ''} #{events_cover_properties[event_index].get('background-color')}">
                     <!-- Image + Link -->
-                    <a t-attf-href="/event/#{ slug(event) }/#{(not event.menu_id) and 'register' or ''}" class="d-block h-100 w-100" t-attf-style="background-image: url('#{events_cover_properties[event_index].get('img_url')}'); background-size: cover; background-position: 50% 100%;">
+                    <a t-attf-href="/event/#{ slug(event) }/#{(not event.menu_id) and 'register' or ''}" class="d-block h-100 w-100" t-attf-style="background-image: url('#{events_cover_properties[event_index].get('img_url')}'); background-size: cover; background-position: 50% 50%;">
                         <!-- Short Date -->
                         <div class="o_we_event_date position-absolute bg-white shadow-sm">
                             <span t-esc="event.with_context(tz=event.date_tz).date_begin" t-options="{'widget': 'date', 'format': 'LLL'}" class="o_we_event_month"/>
@@ -163,7 +163,8 @@
                     </main>
                     <!-- Footer -->
                     <footer t-attf-class="small #{'card-footer' if opt_events_list_cards else ('border-top mx-4 mt-auto pt-2' if not opt_events_list_columns else 'border-top py-2')}">
-                         <span itemprop="price" content="0" class="font-weight-bold text-uppercase">Free</span>
+                        <!-- TODO -->
+                        <div itemprop="price"><span content="0" class="font-weight-bold text-uppercase">Free</span></div>
                     </footer>
                 </div>
             </div>
@@ -177,7 +178,7 @@
 
 <template id="opt_events_list_columns" inherit_id="website_event.events_list" active="True" customize_show="True" name="Layout • Columns"/>
 
-<template id="opt_events_list_cards" inherit_id="website_event.events_list" active="False" customize_show="True" name="'Cards' Design"/>
+<template id="opt_events_list_cards" inherit_id="website_event.events_list" active="True" customize_show="True" name="'Cards' Design"/>
 
 <template id="opt_events_list_categories" inherit_id="website_event.events_list" active="False" customize_show="True" name="Show categories">
     <xpath expr="//main" position="before">
@@ -187,7 +188,7 @@
 
 <!-- Index - Sidebar -->
 <template id="index_sidebar" name="Sidebar">
-    <div id="o_we_index_sidebar" class="col-md-4 ml-lg-3 ml-xl-5 my-5"/>
+    <div id="o_we_index_sidebar" class="col-lg-4 ml-lg-3 ml-xl-5 my-5"/>
 </template>
 
 <!-- Index - Sidebar - About us -->
