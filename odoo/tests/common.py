@@ -1151,6 +1151,13 @@ ref_re = re.compile(r"""
 # close with same quote as opening
 \3
 """, re.VERBOSE)
+
+VIRTUAL_COUNTER = itertools.count()
+
+def virtualid():
+    return "virtualid_%s" % next(VIRTUAL_COUNTER)
+
+
 class Form(object):
     """ Server-side form view implementation (partial)
 
@@ -1333,7 +1340,13 @@ class Form(object):
         def cleanup(k, v):
             if fields[k]['type'] == 'one2many':
                 # o2m default gets a (6) at the start, makes no sense
-                return [c for c in v if c[0] != 6]
+                cs = []
+                for c in v:
+                    if c[0] == 0:
+                        cs.append((0, virtualid(), c[2]))
+                    elif c[0] != 6:
+                        cs.append(c)
+                return cs
             elif fields[k]['type'] == 'datetime' and isinstance(v, datetime):
                 return odoo.fields.Datetime.to_string(v)
             elif fields[k]['type'] == 'date' and isinstance(v, date):
@@ -1696,7 +1709,7 @@ class O2MForm(Form):
         commands = proxy._parent._values[proxy._field]
         values = self._values_to_save()
         if self._index is None:
-            commands.append((0, 0, values))
+            commands.append((0, virtualid(), values))
         else:
             index = proxy._command_index(self._index)
             (c, id_, vs) = commands[index]
