@@ -2947,9 +2947,9 @@ class One2many(_RelationalMulti):
                         browse([command[1]])[inverse] = recs[-1]
                     elif command[0] in (5, 6):
                         # assign the given lines to the last record only
-                        cache.update(recs, self, [()] * len(recs))
+                        recs[self.name][inverse] = False
                         lines = comodel.browse(command[2] if command[0] == 6 else [])
-                        cache.set(recs[-1], self, lines._ids)
+                        lines[inverse] = recs[-1]
 
         else:
             def link(record, lines):
