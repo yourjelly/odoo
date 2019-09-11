@@ -523,6 +523,39 @@ class TestOnChange(common.TransactionCase):
 
         self.assertFalse(called[0], "discussion.messages has been read")
 
+    def test_onchange_several_one2many(self):
+        """ Test the behavior of several one2many fields with the same inverse. """
+        model = self.env['test_new_api.discussion']
+        form = common.Form(model, view='test_new_api.discussion_form_4')
+        form.name = "Foo"
+        self.assertEqual(len(form.messages), 0)
+        self.assertEqual(len(form.important_messages), 0)
+
+        # add a line in messages
+        with form.messages.new() as line:
+            line.body = "A"
+        self.assertEqual(len(form.messages), 1)
+        self.assertEqual(len(form.important_messages), 0)
+
+        # add a line in important_messages
+        with form.important_messages.new() as line:
+            line.body = "B"
+        self.assertEqual(len(form.messages), 2)
+        self.assertEqual(len(form.important_messages), 1)
+
+        # add another line in messages
+        with form.messages.new() as line:
+            line.body = "C"
+        self.assertEqual(len(form.messages), 3)
+        self.assertEqual(len(form.important_messages), 1)
+
+        # remove a line from messages: this currently does not work
+        with form.messages.edit(1) as line:
+            self.assertEqual(line.body, "B")
+        form.messages.remove(1)
+        self.assertEqual(len(form.messages), 2)
+        self.assertEqual(len(form.important_messages), 1)
+
 
 class TestComputeOnchange(common.TransactionCase):
 

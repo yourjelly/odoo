@@ -178,6 +178,36 @@
             </field>
         </record>
 
+        <!-- Discussion form view with embedded list -->
+        <record id="discussion_form_4" model="ir.ui.view">
+            <field name="name">discussion form view</field>
+            <field name="model">test_new_api.discussion</field>
+            <field name="priority" eval="11"/>
+            <field name="arch" type="xml">
+                <form string="Discussion">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                        </group>
+                        <group>
+                            <field name="messages">
+                                <tree string="Messages" editable="bottom">
+                                    <field name="body"/>
+                                    <field name="important"/>
+                                </tree>
+                            </field>
+                            <field name="important_messages" context="{'default_important': True}">
+                                <tree string="Important messages" editable="bottom">
+                                    <field name="body"/>
+                                    <field name="important"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
         <record id="action_discussions_3" model="ir.actions.act_window">
             <field name="name">Discussions 3</field>
             <field name="res_model">test_new_api.discussion</field>
