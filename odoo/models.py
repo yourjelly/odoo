@@ -5509,17 +5509,21 @@ Record ids: %(records)s
                     records = self - self.env.protected(field)
                     if not records:
                         continue
-                    # Dont force the recomputation of compute fields which are
-                    # not stored as this is not really necessary.
                     recursive = not create and field.recursive
                     if field.compute and field.store:
                         if recursive:
                             added = self.env.not_to_compute(field, records)
                         self.env.add_to_compute(field, records)
-                    else:
+                    elif field.compute:
                         if recursive:
                             added = self & self.env.cache.get_records(self, field)
+                        # do not force recomputation of non-stored fields
                         self.env.cache.invalidate([(field, records._ids)])
+                    else:
+                        if recursive:
+                            added = self.browse()
+                        # x2many fields with domains: only invalidate real records
+                        self.env.cache.invalidate([(field, filter(None, records._ids))])
                     # recursively trigger recomputation of field's dependents
                     if recursive:
                         added.modified([field.name])
