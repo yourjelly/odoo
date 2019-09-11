@@ -263,12 +263,12 @@ exports.PosModel = Backbone.Model.extend({
         domain: function(self){ return [['id','=', self.config_id]]; },
         loaded: function(self,configs){
             self.config = configs[0];
-            self.config.use_proxy = self.config.iface_payment_terminal ||
+            self.config.use_proxy = self.config.is_posbox && (
+                                    self.config.iface_payment_terminal ||
                                     self.config.iface_electronic_scale ||
                                     self.config.iface_print_via_proxy  ||
                                     self.config.iface_scan_via_proxy   ||
-                                    self.config.iface_cashdrawer       ||
-                                    self.config.iface_customer_facing_display;
+                                    self.config.iface_customer_facing_display);
 
             self.db.set_uuid(self.config.uuid);
             self.set_cashier(self.get_cashier());
@@ -652,6 +652,7 @@ exports.PosModel = Backbone.Model.extend({
         var order = new exports.Order({},{pos:this});
         this.get('orders').add(order);
         this.set('selectedOrder', order);
+        this.send_current_order_to_customer_facing_display();
         return order;
     },
     /**
@@ -2252,9 +2253,6 @@ exports.Order = Backbone.Model.extend({
         this.paymentlines.on('remove', function(){ this.save_to_db("paymentline:rem"); }, this);
 
         if (this.pos.config.iface_customer_facing_display) {
-            this.orderlines.on('change', this.pos.send_current_order_to_customer_facing_display, this.pos);
-            // removing last orderline does not trigger change event
-            this.orderlines.on('remove',   this.pos.send_current_order_to_customer_facing_display, this.pos);
             this.paymentlines.on('change', this.pos.send_current_order_to_customer_facing_display, this.pos);
             // removing last paymentline does not trigger change event
             this.paymentlines.on('remove', this.pos.send_current_order_to_customer_facing_display, this.pos);
@@ -2655,6 +2653,8 @@ exports.Order = Backbone.Model.extend({
         if(line.has_product_lot){
             this.display_lot_popup();
         }
+
+        this.pos.send_current_order_to_customer_facing_display();
     },
     get_selected_orderline: function(){
         return this.selected_orderline;

@@ -289,6 +289,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
     _needaction = False         # whether the model supports "need actions" (see mail)
     _translate = True           # False disables translations export for this model
+    _check_company_auto = False
 
     # default values for _transient_vacuum()
     _transient_check_count = 0
@@ -2586,10 +2587,17 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         # 4. initialize more field metadata
         cls._field_computed = {}            # fields computed with the same method
         cls._field_inverses = Collector()   # inverse fields for related fields
-        cls._field_triggers = {}            # {depfield: {depfield: {...}, None: [compute_fields]}}
-        cls._field_triggers_create = {}     # {depfield: {depfield: {...}, None: [compute_fields]}}
 
         cls._setup_done = True
+
+        # 5. determine and validate rec_name
+        if cls._rec_name:
+            assert cls._rec_name in cls._fields, \
+                "Invalid rec_name %s for model %s" % (cls._rec_name, cls._name)
+        elif 'name' in cls._fields:
+            cls._rec_name = 'name'
+        elif 'x_name' in cls._fields:
+            cls._rec_name = 'x_name'
 
     @api.model
     def _setup_fields(self):
@@ -2615,6 +2623,12 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             del cls._fields[name]
             delattr(cls, name)
 
+        # fix up _rec_name
+        if 'x_name' in bad_fields and cls._rec_name == 'x_name':
+            cls._rec_name = None
+            field = cls._fields['display_name']
+            field.depends = tuple(name for name in field.depends if name != 'x_name')
+
         # map each field to the fields computed with the same method
         groups = defaultdict(list)
         for field in cls._fields.values():
@@ -2632,32 +2646,29 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         """ Setup recomputation triggers, and complete the model setup. """
         cls = type(self)
 
-        if isinstance(self, Model):
-            # set up field triggers (on database-persisted models only)
-            for field in cls._fields.values():
-                # dependencies of custom fields may not exist; ignore that case
-                exceptions = (Exception,) if field.manual else ()
-                with tools.ignore(*exceptions):
-                    field.setup_triggers(self)
+        # The triggers of a field F is a tree that contains the fields that
+        # depend on F, together with the fields to inverse to find out which
+        # records to recompute.
+        #
+        # For instance, assume that G depends on F, H depends on X.F, I depends
+        # on W.X.F, and J depends on Y.F. The triggers of F will be the tree:
+        #
+        #                              [G]
+        #                            X/   \Y
+        #                          [H]     [J]
+        #                        W/
+        #                      [I]
+        #
+        # This tree provides perfect support for the trigger mechanism:
+        # when F is # modified on records,
+        #  - mark G to recompute on records,
+        #  - mark H to recompute on inverse(X, records),
+        #  - mark I to recompute on inverse(W, inverse(X, records)),
+        #  - mark J to recompute on inverse(Y, records).
+        cls._field_triggers = cls.pool.field_triggers
 
         # register constraints and onchange methods
         cls._init_constraints_onchanges()
-
-        # validate rec_name
-        if cls._rec_name:
-            assert cls._rec_name in cls._fields, \
-                "Invalid rec_name %s for model %s" % (cls._rec_name, cls._name)
-        elif 'name' in cls._fields:
-            cls._rec_name = 'name'
-        elif 'x_name' in cls._fields:
-            cls._rec_name = 'x_name'
-
-        if cls._rec_name:
-            rec_name_field = cls._fields[cls._rec_name]
-            if rec_name_field.translate:
-                # display_name depends on context['lang'] (`test_lp1071710`)
-                display_name_field = cls._fields['display_name']
-                display_name_field.depends_context = (display_name_field.depends_context or ()) + ('lang',)
 
     @api.model
     def fields_get(self, allfields=None, attributes=None):
@@ -3029,6 +3040,61 @@ Fields:
                 # mention the first one only to keep the error message readable
                 raise ValidationError(_('A document was modified since you last viewed it (%s:%d)') % (self._description, res[0]))
 
+    def _check_company(self, fnames=None):
+        """ Check the companies of the values of the given field names. """
+        if fnames is None:
+            fnames = self._fields
+
+        regular_fields = []
+        property_fields = []
+        for name in fnames:
+            field = self._fields[name]
+            if field.relational and field.check_company and \
+                    'company_id' in self.env[field.comodel_name]:
+                if not field.company_dependent:
+                    regular_fields.append(name)
+                else:
+                    property_fields.append(name)
+
+        if not (regular_fields or property_fields):
+            return
+
+        inconsistent_fields = set()
+        inconsistent_recs = self.browse()
+        for record in self:
+            company = record.company_id if record._name != 'res.company' else record
+            # The first part of the check verifies that all records linked via relation fields are compatible
+            # with the company of the origin document, i.e. `self.account_id.company_id == self.company_id`
+            for name in regular_fields:
+                if not (record[name].company_id <= company):
+                    inconsistent_fields.add(name)
+                    inconsistent_recs |= record
+            # The second part of the check (for property / company-dependent fields) verifies that the records
+            # linked via those relation fields are compatible with the company that owns the property value, i.e.
+            # the company for which the value is being assigned, i.e:
+            #      `self.property_account_payable_id.company_id == self.env.context['force_company']`
+            if self.env.context.get('force_company'):
+                company = self.env['res.company'].browse(self.env.context['force_company'])
+            else:
+                company = self.env.company
+            for name in property_fields:
+                if not (record[name].company_id <= company):
+                    inconsistent_fields.add(name)
+                    inconsistent_recs |= record
+
+        if inconsistent_fields:
+            message = _("""Some records are incompatible with the company of the %(document_descr)s.
+
+Incompatibilities:
+Fields: %(fields)s
+Record ids: %(records)s
+""")
+            raise UserError(message % {
+                'document_descr': self.env['ir.model']._get(self._name).name,
+                'fields': ', '.join(sorted(inconsistent_fields)),
+                'records': ', '.join([str(a) for a in inconsistent_recs.ids[:6]]),
+            })
+
     @api.model
     def check_access_rights(self, operation, raise_exception=True):
         """ Verifies that the operation given by ``operation`` is allowed for
@@ -3306,6 +3372,7 @@ Fields:
         records_to_inverse = {}                     # {field: records}
         relational_names = []
         protected = set()
+        check_company = False
         for fname in vals:
             field = self._fields[fname]
             if field.inverse:
@@ -3315,7 +3382,10 @@ Fields:
                 records_to_inverse[field] = self.filtered('id')
             if field.relational or self._field_inverses[field]:
                 relational_names.append(fname)
-            protected.update(self._field_computed.get(field, [field]))
+            if field.compute and not field.readonly:
+                protected.update(self._field_computed.get(field, [field]))
+            if fname == 'company_id' or (field.relational and field.check_company):
+                check_company = True
 
         # protect fields being written against recomputation
         with env.protecting(protected, self):
@@ -3386,6 +3456,8 @@ Fields:
             # validate inversed fields
             real_recs._validate_fields(inverse_fields)
 
+        if check_company and self._check_company_auto:
+            self._check_company()
         return True
 
     def _write(self, vals):
@@ -3516,11 +3588,8 @@ Fields:
                 elif field.inverse:
                     inversed[key] = val
                     inversed_fields.add(field)
-                # ignore the protection of compute fields which do not have an
-                # inverse, otherwise their computation are not correctly
-                # performed, neither the fields which are computed in the same
-                # compute method (`test_validation_error`)
-                if not field.compute or field.inverse:
+                # protect non-readonly computed fields against (re)computation
+                if field.compute and not field.readonly:
                     protected.update(self._field_computed.get(field, [field]))
 
             data_list.append(data)
@@ -3583,6 +3652,8 @@ Fields:
         for data in data_list:
             data['record']._validate_fields(set(data['inversed']) - set(data['stored']))
 
+        if self._check_company_auto:
+            records._check_company()
         return records
 
     @api.model
@@ -5409,63 +5480,57 @@ Fields:
                [(invf, None) for f in fields for invf in self._field_inverses[f]]
         self.env.cache.invalidate(spec)
 
-    def modified(self, fnames, modified=None, create=False):
+    def modified(self, fnames, create=False):
         """ Notify that fields have been modified on ``self``. This invalidates
             the cache, and prepares the recomputation of stored function fields
             (new-style fields only).
 
             :param fnames: iterable of field names that have been modified on
                 records ``self``
-            :param modified: don't use this
             :param create: whether modified is called in the context of record creation
         """
         if not self or not fnames:
             return
-        field_triggers = self._field_triggers if not create else self._field_triggers_create
         if len(fnames) == 1:
-            tree = field_triggers.get(self._fields[next(iter(fnames))])
+            tree = self._field_triggers.get(self._fields[next(iter(fnames))])
         else:
             # merge dependency trees to evaluate all triggers at once
             tree = {}
             for fname in fnames:
-                node = field_triggers.get(self._fields[fname])
+                node = self._field_triggers.get(self._fields[fname])
                 if node:
                     trigger_tree_merge(tree, node)
         if tree:
-            self.sudo()._modified_triggers(tree, modified=modified)
+            self.sudo()._modified_triggers(tree, create)
 
-    def _modified_triggers(self, tree, modified=None):
+    def _modified_triggers(self, tree, create=False):
         """ Process a tree of field triggers on ``self``. """
         if not self:
             return
         for key, val in tree.items():
             if key is None:
                 # val is a list of fields to mark as todo
-                todo = defaultdict(list)
-                modified = modified or {}
                 for field in val:
                     records = self - self.env.protected(field)
-                    if modified and field in modified:
-                        records -= modified[field]
                     if not records:
                         continue
                     # Dont force the recomputation of compute fields which are
                     # not stored as this is not really necessary.
+                    recursive = not create and field.recursive
                     if field.compute and field.store:
-                        records_to_invalidate = records.filtered(lambda r: not r.id)
-                        self.env.add_to_compute(field, records - records_to_invalidate)
-                        self.env.cache.invalidate([(field, records_to_invalidate._ids)])
+                        if recursive:
+                            added = self.env.not_to_compute(field, records)
+                        self.env.add_to_compute(field, records)
                     else:
+                        if recursive:
+                            added = self & self.env.cache.get_records(self, field)
                         self.env.cache.invalidate([(field, records._ids)])
                     # recursively trigger recomputation of field's dependents
-                    todo[records].append(field.name)
-                for records, fieldnames in todo.items():
-                    for fname in fieldnames:
-                        if records._fields[fname] in modified:
-                            modified[records._fields[fname]] += records
-                        else:
-                            modified[records._fields[fname]] = records
-                    records.modified(fieldnames, modified=modified)
+                    if recursive:
+                        added.modified([field.name])
+            elif create and key.type in ('many2one', 'many2one_reference'):
+                # upon creation, no other record has a reference to self
+                continue
             else:
                 # val is another tree of dependencies
                 model = self.env[key.model_name]
@@ -5480,9 +5545,9 @@ Fields:
                             records = model.browse(rec_ids)
                         else:
                             try:
-                                records = self.mapped(invf.name)
+                                records = self[invf.name]
                             except MissingError:
-                                records = self.exists().mapped(invf.name)
+                                records = self.exists()[invf.name]
 
                         # TODO: find a better fix
                         if key.model_name == records._name:
@@ -5496,7 +5561,7 @@ Fields:
                     if new_records:
                         cache_records = self.env.cache.get_records(model, key)
                         records |= cache_records.filtered(lambda r: set(r[key.name]._ids) & set(self._ids))
-                records._modified_triggers(val, modified=modified)
+                records._modified_triggers(val)
 
     @api.model
     def recompute(self, fnames=None, records=None):
@@ -5553,7 +5618,7 @@ Fields:
                     yield from val
                 else:
                     yield from traverse(val)
-        return traverse(self._field_triggers_create.get(field, {}))
+        return traverse(self._field_triggers.get(field, {}))
 
     def _has_onchange(self, field, other_fields):
         """ Return whether ``field`` should trigger an onchange event in the

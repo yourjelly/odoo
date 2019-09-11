@@ -94,7 +94,7 @@ class MailThread(models.AbstractModel):
         domain=lambda self: [('message_type', '!=', 'user_notification')], auto_join=True)
     message_unread = fields.Boolean(
         'Unread Messages', compute='_get_message_unread',
-        help="If checked new messages require your attention.")
+        help="If checked, new messages require your attention.")
     message_unread_counter = fields.Integer(
         'Unread Messages Counter', compute='_get_message_unread',
         help="Number of unread messages")
@@ -108,7 +108,7 @@ class MailThread(models.AbstractModel):
         'Message Delivery error', compute='_compute_message_has_error', search='_search_message_has_error',
         help="If checked, some messages have a delivery error.")
     message_has_error_counter = fields.Integer(
-        'Number of error', compute='_compute_message_has_error',
+        'Number of errors', compute='_compute_message_has_error',
         help="Number of messages with delivery error")
     message_attachment_count = fields.Integer('Attachment Count', compute='_compute_message_attachment_count', groups="base.group_user")
     message_main_attachment_id = fields.Many2one(string="Main Attachment", comodel_name='ir.attachment', index=True, copy=False)
@@ -1507,8 +1507,7 @@ class MailThread(models.AbstractModel):
         domain = [('email_normalized', 'in', normalized_emails)]
         if extra_domain:
             domain = expression.AND(domain, extra_domain)
-        Users = self.env['res.users'].sudo()
-        partners = Users.search(domain).mapped('partner_id')
+        partners = self.env['res.users'].sudo().search(domain, order='name ASC').mapped('partner_id')
         # return a search on partner to filter results current user should not see (multi company for example)
         return self.env['res.partner'].search([('id', 'in', partners.ids)])
 
@@ -1563,7 +1562,7 @@ class MailThread(models.AbstractModel):
             return matching_user
 
         if not matching_user:
-            std_users = self.env['res.users'].sudo().search([('email_normalized', '=', normalized_email)], limit=1)
+            std_users = self.env['res.users'].sudo().search([('email_normalized', '=', normalized_email)], limit=1, order='name ASC')
             matching_user = std_users[0] if std_users else self.env['res.users']
         if matching_user:
             return matching_user

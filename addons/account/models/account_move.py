@@ -1482,7 +1482,11 @@ class AccountMove(models.Model):
         result = []
         for move in self:
             if self._context.get('name_groupby') and not (move.type == 'entry' and move.state == 'draft'):
-                name = '**%s**, %s       %s' % (format_date(self.env, move.date), move.name, move.partner_id.name or '')
+                name = '**%s**, %s' % (format_date(self.env, move.date), move.name or '')
+                if move.ref:
+                    name += '     (%s)' % move.ref
+                if move.partner_id.name:
+                    name += ' - %s' % move.partner_id.name
             elif move.type == 'entry':
                 # Miscellaneous operation.
                 if move.state == 'draft':
@@ -2123,14 +2127,14 @@ class AccountMove(models.Model):
 class AccountMoveLine(models.Model):
     _name = "account.move.line"
     _description = "Journal Item"
-    _order = "sequence, date desc, move_name desc, id"
+    _order = "date desc, move_name desc, id"
 
     # ==== Business fields ====
     move_id = fields.Many2one('account.move', string='Journal Entry',
         index=True, required=True, auto_join=True, ondelete="cascade",
         help="The move of this entry line.")
     move_name = fields.Char(string='Number', related='move_id.name', store=True, index=True)
-    date = fields.Date(related='move_id.date', store=True, readonly=True, index=True, copy=False)
+    date = fields.Date(related='move_id.date', store=True, readonly=True, index=True, copy=False, group_operator='min')
     ref = fields.Char(related='move_id.ref', store=True, copy=False, index=True, readonly=False)
     parent_state = fields.Selection(related='move_id.state', store=True, readonly=True)
     journal_id = fields.Many2one(related='move_id.journal_id', store=True, readonly=False, index=True, copy=False)
@@ -2142,6 +2146,7 @@ class AccountMoveLine(models.Model):
         index=True, ondelete="cascade",
         domain=[('deprecated', '=', False)])
     account_internal_type = fields.Selection(related='account_id.user_type_id.type', string="Internal Type", store=True, readonly=True)
+    account_root_id = fields.Many2one(related='account_id.root_id', string="Account Root", store=True, readonly=True)
     sequence = fields.Integer(default=10)
     name = fields.Char(string='Label')
     quantity = fields.Float(string='Quantity',
@@ -2189,14 +2194,14 @@ class AccountMoveLine(models.Model):
     tax_group_id = fields.Many2one(related='tax_line_id.tax_group_id', string='Originator tax group',
         readonly=True, store=True,
         help='technical field for widget tax-group-custom-field')
-    tax_base_amount = fields.Monetary(string="Base Amount", store=True,
+    tax_base_amount = fields.Monetary(string="Base Amount", store=True, readonly=True,
         currency_field='company_currency_id')
-    tax_exigible = fields.Boolean(string='Appears in VAT report', default=True,
+    tax_exigible = fields.Boolean(string='Appears in VAT report', default=True, readonly=True,
         help="Technical field used to mark a tax line as exigible in the vat report or not (only exigible journal items"
              " are displayed). By default all new journal items are directly exigible, but with the feature cash_basis"
              " on taxes, some will become exigible only when the payment is recorded.")
     tax_repartition_line_id = fields.Many2one(comodel_name='account.tax.repartition.line',
-        string="Originator Tax Repartition Line", ondelete='restrict',
+        string="Originator Tax Repartition Line", ondelete='restrict', readonly=True,
         help="Tax repartition line that caused the creation of this move line, if any")
     tag_ids = fields.Many2many(string="Tags", comodel_name='account.account.tag', ondelete='restrict',
         help="Tags assigned to this line by the tax creating it, if any. It determines its impact on financial reports.")
@@ -2211,7 +2216,7 @@ class AccountMoveLine(models.Model):
     amount_residual_currency = fields.Monetary(string='Residual Amount in Currency', store=True,
         compute='_amount_residual',
         help="The residual amount on a journal item expressed in its currency (possibly not the company currency).")
-    full_reconcile_id = fields.Many2one('account.full.reconcile', string="Matching Number", copy=False, index=True)
+    full_reconcile_id = fields.Many2one('account.full.reconcile', string="Matching #", copy=False, index=True)
     matched_debit_ids = fields.One2many('account.partial.reconcile', 'credit_move_id', string='Matched Debits',
         help='Debit journal items that are matched with this journal item.')
     matched_credit_ids = fields.One2many('account.partial.reconcile', 'debit_move_id', string='Matched Credits',
