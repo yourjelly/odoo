@@ -116,6 +116,12 @@ class Discussion(models.Model):
     def _onchange_messages(self):
         self.message_concat = "\n".join(["%s:%s" % (m.name, m.body) for m in self.messages])
 
+    @api.onchange('important_messages')
+    def _onchange_important_messages(self):
+        # trigger an onchange on 'important_messages' to adapt 'message' with
+        # the corresponding lines
+        pass
+
 
 class Message(models.Model):
     _name = 'test_new_api.message'
