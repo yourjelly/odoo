@@ -2432,7 +2432,7 @@ class Many2one(_Relational):
         record_ids = set(records._ids)
         for invf in records._field_inverses[self]:
             corecords = records.env[self.comodel_name].browse(
-                id_ for id_ in cache.get_values(records, self)
+                id_ for id_ in cache.get_values(records, self) if id_ is not None
             )
             for corecord in corecords:
                 ids0 = cache.get(corecord, invf, None)
