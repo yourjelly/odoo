@@ -416,3 +416,30 @@ $o-wslides-fs-side-width: 300px;
 .oe_show_footer {
     z-index: $MAX-Z-INDEX; // Looks terrible but seems necessary due to fullscreen & canvas in PDFSlidesViewer
 }
+
+@media(min-width:780px)
+{
+    .o_wslide_top
+    {
+        height: 9rem;
+        width: 9rem;
+    }
+}
+
+@media(min-width:480px) and (max-width:779px)
+{
+    .o_wslide_top
+    {
+        height: 7rem;
+        width: 7rem;
+    }
+}
+
+@media(max-width:479px)
+{
+    .o_wslide_top
+    {
+        height: 6rem;
+        width: 6rem;
+    }
+}
