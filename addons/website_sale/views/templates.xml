@@ -450,7 +450,7 @@
         </xpath>
     </template>
 
-    <template id="products_list_view" inherit_id="website_sale.products" active="False" customize_show="True" name="List View (by default)">
+    <template id="products_list_view" inherit_id="website_sale.products" active="False" customize_show="True" name="List View">
         <xpath expr="//div[@id='products_grid']" position="after">
             <!-- Nothing to do, this view is only meant to allow the server -->
             <!-- to know if the list view layout should be used -->
