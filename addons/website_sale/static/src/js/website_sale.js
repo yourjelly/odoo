@@ -12,7 +12,10 @@ publicWidget.registry.websiteSaleCartLink = publicWidget.Widget.extend({
     events: {
         'mouseenter': '_onMouseEnter',
         'mouseleave': '_onMouseLeave',
+        'click': '_onClick',
     },
+    popoverRpc: false,
+    timeout: false,
 
     /**
      * @override
@@ -44,11 +47,11 @@ publicWidget.registry.websiteSaleCartLink = publicWidget.Widget.extend({
         var self = this;
         clearTimeout(timeout);
         $(this.selector).not(ev.currentTarget).popover('hide');
-        timeout = setTimeout(function () {
+        this.timeout = setTimeout(function () {
             if (!self.$el.is(':hover') || $('.mycart-popover:visible').length) {
                 return;
             }
-            $.get("/shop/cart", {
+            self.popoverRpc = $.get("/shop/cart", {
                 type: 'popover',
             }).then(function (data) {
                 self.$el.data("bs.popover").config.content = data;
@@ -57,7 +60,7 @@ publicWidget.registry.websiteSaleCartLink = publicWidget.Widget.extend({
                     self.$el.trigger('mouseleave');
                 });
             });
-        }, 100);
+        }, 300);
     },
     /**
      * @private
@@ -73,6 +76,23 @@ publicWidget.registry.websiteSaleCartLink = publicWidget.Widget.extend({
                self.$el.popover('hide');
             }
         }, 1000);
+    },
+    /**
+     * Wait for the popover rpc to end before redirecting the user to the shop page.
+     * Prevent the /shop/cart route to be accessed twice at the same time resulting
+     * in a concurrent update if there are coupon to be computed.
+     * @private
+     * @param {Event} ev
+     */
+    _onClick: function (ev) {
+        if (!this.popoverRpc || this.popoverRpc.state() === 'resolved') {
+            return;
+        }
+        ev.preventDefault();
+        clearTimeout(this.timeout);
+        this.popoverRpc.then(function () {
+            window.location.href = ev.currentTarget.href;
+        });
     },
 });
 });
