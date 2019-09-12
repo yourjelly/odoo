@@ -56,6 +56,17 @@ var EventRegistrationForm = Widget.extend({
     },
 });
 
+publicWidget.registry.EventRegistrationBar = publicWidget.Widget.extend({
+    selector: '.o_we_event',
+    events: {
+        'click .o_we_registration_btn': '_onRegistrationBtnClick',
+    },
+    _onRegistrationBtnClick: function (ev) {
+        $(ev.currentTarget).toggleClass('btn-primary text-left pl-0');
+        $(ev.currentTarget).siblings().toggleClass('d-none');
+    },
+});
+
 publicWidget.registry.EventRegistrationFormInstance = publicWidget.Widget.extend({
     selector: '#registration_form',
 

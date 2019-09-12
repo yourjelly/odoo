@@ -50,7 +50,6 @@
     }
 }
 
-
 .o_we_social_link {
     $o_link_size: 3em;
     display: inline-block;
@@ -114,7 +113,6 @@
                 }
             }
         }
-            
         .o_we_badge_event {
             @include o-position-absolute($top: 0, $left: 0);
             @include border-left-radius(0);
@@ -197,31 +195,21 @@
 }
 
 .o_we_registration_btn {
-    display: flex;
-    justify-content: space-between;
-    span {
+    flex: 0 0 100%;
+    &.collapsed {
+        flex: 0 0 33%;
+
+        .close {
+            display: none;
+        }
+    }
+    .close {
         display: block;
-        padding: 0.375rem 0.75rem;
-        font-weight: bold;
-        transition: all .25s ease-in-out;
     }
-    .fa {
-        display: block;
-        font-size: 1.25em;
-    }
-}
-.collapsed {
-    span {
-        background-color: $primary;
-        border-radius: $border-radius;
-        color: #fff !important;
-        width: 33%;
-        text-align: center;
-        margin-left: auto;
-        font-weight: normal;
-    }
-    .fa {
-        display: none;
+    &:not(.collapsed) {
+        box-shadow: none;
+        font-weight: $font-weight-bold;
+        transition: none;
     }
 }
 
