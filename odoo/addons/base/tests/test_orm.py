@@ -221,7 +221,7 @@ class TestORM(TransactionCase):
             'groups_id': [(6, 0, [self.ref('base.group_partner_manager')])],
         })
         p1 = self.env['res.partner'].with_user(user).create({'name': 'Zorro'})
-        p1_prop = self.env['ir.property'].with_user(user).create({
+        p1_prop = self.env['ir.property'].create({
             'name': 'Slip en laine',
             'res_id': 'res.partner,{}'.format(p1.id),
             'fields_id': self.env['ir.model.fields'].search([

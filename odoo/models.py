@@ -3203,14 +3203,15 @@ Record ids: %(records)s
         self.modified(self._fields)
 
         # Check if the records are used as default properties.
+        Property = self.env['ir.property'].sudo()
         refs = ['%s,%s' % (self._name, i) for i in self.ids]
-        if self.env['ir.property'].search([('res_id', '=', False), ('value_reference', 'in', refs)]):
+        if Property.search([('res_id', '=', False), ('value_reference', 'in', refs)]):
             raise UserError(_('Unable to delete this document because it is used as a default property'))
 
         # Delete the records' properties.
         with self.env.norecompute():
             self.check_access_rule('unlink')
-            self.env['ir.property'].search([('res_id', 'in', refs)]).sudo().unlink()
+            Property.search([('res_id', 'in', refs)]).unlink()
 
             cr = self._cr
             Data = self.env['ir.model.data'].sudo().with_context({})
