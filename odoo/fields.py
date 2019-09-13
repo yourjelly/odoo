@@ -666,22 +666,14 @@ class Field(MetaField('DummyField', (object,), {})):
 
     def _compute_company_dependent(self, records):
         # read property as superuser, as the current user may not have access
-        context = records.env.context
-        if 'force_company' not in context:
-            company = records.env.company
-            context = dict(context, force_company=company.id)
-        Property = records.env(context=context, su=True)['ir.property']
+        Property = records.env['ir.property'].sudo()
         values = Property._get_multi(self.name, self.model_name, records.ids)
         for record in records:
             record[self.name] = values.get(record.id)
 
     def _inverse_company_dependent(self, records):
         # update property as superuser, as the current user may not have access
-        context = records.env.context
-        if 'force_company' not in context:
-            company = records.env.company
-            context = dict(context, force_company=company.id)
-        Property = records.env(context=context, su=True)['ir.property']
+        Property = records.env['ir.property'].sudo()
         values = {
             record.id: self.convert_to_write(record[self.name], record)
             for record in records
