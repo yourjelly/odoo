@@ -690,7 +690,7 @@ class Field(MetaField('DummyField', (object,), {})):
 
     def _search_company_dependent(self, records, operator, value):
         Property = records.env['ir.property']
-        return Property.search_multi(self.name, self.model_name, operator, value)
+        return Property._search_multi(self.name, self.model_name, operator, value)
 
     #
     # Cache key for context-dependent fields

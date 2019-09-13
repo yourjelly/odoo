@@ -336,8 +336,7 @@ class Property(models.Model):
                 })
         self.create(vals_list)
 
-    @api.model
-    def search_multi(self, name, model, operator, value):
+    def _search_multi(self, name, model, operator, value):
         """ Return a domain for the records that match the given condition. """
         default_matches = False
         include_zero = False
