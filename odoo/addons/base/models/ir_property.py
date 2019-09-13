@@ -185,7 +185,7 @@ class Property(models.Model):
     COMPANY_KEY = "self.env.context.get('force_company') or self.env.company.id"
     @ormcache(COMPANY_KEY, 'name', 'model')
     def _get_default_property(self, name, model):
-        prop = self._get_property(name, model, res_id=False)
+        prop = self.sudo()._get_property(name, model, res_id=False)
         if not prop:
             return None, False
         v = prop.get_by_record()
