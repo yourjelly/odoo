@@ -662,7 +662,7 @@ class Field(MetaField('DummyField', (object,), {})):
     #
 
     def _default_company_dependent(self, model):
-        return model.env['ir.property'].get(self.name, self.model_name)
+        return model.env['ir.property'].sudo().get(self.name, self.model_name)
 
     def _compute_company_dependent(self, records):
         # read property as superuser, as the current user may not have access
