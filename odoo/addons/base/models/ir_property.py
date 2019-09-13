@@ -274,8 +274,7 @@ class Property(models.Model):
             result[id] = clean(result.get(id, default))
         return result
 
-    @api.model
-    def set_multi(self, name, model, values, default_value=None):
+    def _set_multi(self, name, model, values, default_value=None):
         """ Assign the property field `name` for the records of model `model`
             with `values` (dictionary mapping record ids to their value).
             If the value for a given record is the same as the default
