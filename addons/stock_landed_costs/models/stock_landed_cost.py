@@ -28,7 +28,7 @@ class LandedCost(models.Model):
         if self.env.company.lc_journal_id:
             lc_journal = self.env.company.lc_journal_id
         else:
-            ir_property = self.env['ir.property'].search([
+            ir_property = self.env['ir.property'].sudo().search([
                 ('name', '=', 'property_stock_journal'),
                 ('company_id', '=', self.env.company.id)
             ], limit=1)

@@ -25,7 +25,7 @@ class HrExpense(models.Model):
 
     @api.model
     def _default_account_id(self):
-        return self.env['ir.property'].get('property_account_expense_categ_id', 'product.category')
+        return self.env['ir.property'].sudo().get('property_account_expense_categ_id', 'product.category')
 
     @api.model
     def _get_employee_id_domain(self):
@@ -320,7 +320,7 @@ class HrExpense(models.Model):
                 raise UserError(
                     _("No Expense account found for the product %s (or for its category), please configure one.") % (self.product_id.name))
         else:
-            account = self.env['ir.property'].with_context(force_company=self.company_id.id).get('property_account_expense_categ_id', 'product.category')
+            account = self.env['ir.property'].with_context(force_company=self.company_id.id).sudo().get('property_account_expense_categ_id', 'product.category')
             if not account:
                 raise UserError(_('Please configure Default Expense account for Product expense: `property_account_expense_categ_id`.'))
         return account
