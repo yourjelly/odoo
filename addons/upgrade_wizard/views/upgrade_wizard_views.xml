@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="upgrade_checks_view_list" model="ir.ui.view">
+        <field name="name">upgradewizard.check.list</field>
+        <field name="model">upgradewizard.check</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="state"/>
+                <field name="comments"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="upgrade_checks_view_form" model="ir.ui.view">
+        <field name="name">upgradewizard.check.form</field>
+        <field name="model">upgradewizard.check</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="run_check" class="oe_highlight" string="Run Check" type="object"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                        </group>
+                        <group>
+                            <field name="min_version"/>
+                            <field name="max_version"/>
+                            <field name="state"/>
+                            <field name="comments"/>
+                            <field name="choice"/>
+                            <field name="choices_info"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <menuitem id="menu_checks" name="Upgrade Checks" parent="base.menu_administration" sequence="110" groups="base.group_no_one"/>
+
+    <record model="ir.actions.act_window" id="action_check_list">
+        <field name="name">Checks list</field>
+        <field name="res_model">upgradewizard.check</field>
+        <field name="view_mode">tree,form,kanban</field>
+    </record>
+    <menuitem id="checks_list_menu" parent="menu_checks" action="action_check_list" sequence="15" groups="base.group_no_one"/>
+
+    <record model="ir.actions.act_window" id="action_choiceoption">
+        <field name="name">Choice options</field>
+        <field name="res_model">upgradewizard.choiceoption</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="choiceoption_list_menu" parent="menu_checks" action="action_choiceoption" sequence="30" groups="base.group_no_one"/>
+
+</odoo>

@@ -1,0 +1,3 @@
+id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
+access_upgradewizard_check,access_upgradewizard_check,model_upgradewizard_check,base.group_user,1,1,1,1
+access_upgradewizard_choiceoption,access_upgradewizard_choiceoption,model_upgradewizard_choiceoption,base.group_user,1,1,1,1

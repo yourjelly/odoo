@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="upgradewizard.check" id="company_country">
+        <field name="name">No company without country</field>
+        <field name="order">10</field>
+        <field name="code"><![CDATA[
+companies_missing_countries = []
+for company in self.env['res.company'].search([]):
+    if not company.country_id:
+        companies_missing_countries.append({'name': company.name, 'id': company.id})
+if companies_missing_countries:
+    self.comments = "The following companies needs to have a country set: %s" % companies_missing_countries
+else:
+    self.state = 'success'
+        ]]></field>
+    </record>
+
+    <record model="upgradewizard.check" id="size_stats">
+        <field name="name">Size stats</field>
+        <field name="order">20</field>
+        <field name="code"><![CDATA[
+comments = {}
+self.env.cr.execute("SELECT current_database()")
+current_db = self.env.cr.fetchone()[0]
+comments['current_db'] = current_db
+self.env.cr.execute("SELECT pg_size_pretty(pg_database_size('%s'))" % current_db)
+comments['db_size'] = self.env.cr.fetchone()[0]
+self.comments = str(comments)
+self.state = 'success'
+        ]]></field>
+    </record>
+
+    <record model="upgradewizard.check" id="max_version_fail">
+        <field name="name">Test with a max version, supposed to be skipped</field>
+        <field name="code"><![CDATA[assert False]]></field>
+        <field name="max_version">10</field>
+    </record>
+
+    <record model="upgradewizard.check" id="max_version_success">
+        <field name="name">Test with a max version, supposed to run</field>
+        <field name="code"><![CDATA[
+self.state = 'success'
+        ]]></field>
+        <field name="max_version">14</field>
+    </record>
+
+    <record model="upgradewizard.check" id="min_version_fail">
+        <field name="name">Test with a min version, supposed to be skipped</field>
+        <field name="code"><![CDATA[assert False]]></field>
+        <field name="min_version">14</field>
+    </record>
+
+    <record model="upgradewizard.check" id="min_version_success">
+        <field name="name">Test with a min version, supposed to run</field>
+        <field name="code"><![CDATA[
+self.state = 'success'
+        ]]></field>
+        <field name="min_version">10</field>
+    </record>
+
+    <record model="upgradewizard.check" id="user_types">
+        <field name="name">Check one user type</field>
+        <field name="order">25</field>
+        <field name="code"><![CDATA[
+users_to_fix = []
+users = self.env['res.users'].search([])
+for user in users:
+    try:
+        user._check_one_user_type()
+    except ValidationError:
+        self.state = 'fail'
+        users_to_fix.append(user)
+if not users_to_fix:
+    self.state = 'success'
+        ]]></field>
+    </record>
+
+    <record model="upgradewizard.check" id="choices_check_test_one">
+        <field name="name">Custom views containing errors</field>
+        <field name="order">100</field>
+        <field name="modules">crm</field>
+    </record>
+
+    <record model="upgradewizard.choiceoption" id="choice_one">
+        <field name="name">Keep</field>
+        <field name="description">I'll fix them myself</field>
+        <field name="check_id" ref='choices_check_test_one'/>
+    </record>
+
+    <record model="upgradewizard.choiceoption" id="choice_two">
+        <field name="name">Drop</field>
+        <field name="description">I'll redo them if I ever need them again</field>
+        <field name="check_id" ref='choices_check_test_one'/>
+    </record>
+
+
+    <record model="upgradewizard.check" id="choices_check_test_two">
+        <field name="name">Stock strategy</field>
+        <field name="user_message">Please choose a strategy for stock handling</field>
+        <field name="order">100</field>
+    </record>
+
+    <record model="upgradewizard.choiceoption" id="choice_three">
+        <field name="name">LIFO</field>
+        <field name="description">Last In First Out</field>
+        <field name="check_id" ref='choices_check_test_two' />
+    </record>
+
+    <record model="upgradewizard.choiceoption" id="choice_four">
+        <field name="name">FIFO</field>
+        <field name="description">First In First Out.</field>
+        <field name="check_id" ref='choices_check_test_two'/>
+    </record>
+
+    <record model="upgradewizard.check" id="check_triggers">
+        <field name="name">Check for postgresql triggers</field>
+        <field name="code"><![CDATA[
+self.env.cr.execute("""
+SELECT
+    count(*) AS trigger_count
+  FROM pg_trigger trg
+   JOIN pg_class tbl ON trg.tgrelid = tbl.oid
+   JOIN pg_namespace ns ON ns.oid = tbl.relnamespace
+  WHERE trg.tgname NOT LIKE 'RI_ConstraintTrigger%'
+    AND trg.tgname NOT LIKE 'pg_sync_pg%'
+""")
+triggers_count = self.env.cr.fetchone()[0]
+if triggers_count:
+    self.state = 'warning'
+    self.comments = 'Triggers have been found in your postgresql database. This might cause issues with the new v13 ORM.'
+else:
+    self.state = 'success'
+        ]]></field>
+    </record>
+
+</odoo>
