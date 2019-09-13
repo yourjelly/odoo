@@ -344,7 +344,8 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
         registry = odoo.registry(cr.dbname)
 
         if 'base' in tools.config['update'] or 'all' in tools.config['update']:
-            cr.execute("update ir_module_module set state=%s where name=%s and state=%s", ('to upgrade', 'base', 'installed'))
+            cr.execute("update ir_module_module set state=%s, write_uid=1, write_date=NOW() AT TIME ZONE 'UTC' where name=%s and state=%s",
+                ('to upgrade', 'base', 'installed'))
 
         # STEP 1: LOAD BASE (must be done before module dependencies can be computed for later steps)
         graph = odoo.modules.graph.Graph()
@@ -390,7 +391,8 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
                 if modules:
                     modules.button_upgrade()
 
-            cr.execute("update ir_module_module set state=%s where name=%s", ('installed', 'base'))
+            cr.execute("update ir_module_module set state=%s, write_uid=1, write_date=NOW() AT TIME ZONE 'UTC' where name=%s",
+                ('installed', 'base'))
             Module.invalidate_cache(['state'])
             Module.flush()
 
