@@ -202,12 +202,11 @@ class Property(models.Model):
         return self.browse(())
 
     def _get_domain(self, prop_name, model):
-        self._cr.execute("SELECT id FROM ir_model_fields WHERE name=%s AND model=%s", (prop_name, model))
-        res = self._cr.fetchone()
-        if not res:
+        field_id = self.env['ir.model.fields']._get(model, prop_name).id
+        if not field_id:
             return None
         company_id = self._context.get('force_company') or self.env.company.id
-        return [('fields_id', '=', res[0]), ('company_id', 'in', [company_id, False])]
+        return [('fields_id', '=', field_id), ('company_id', 'in', [company_id, False])]
 
     def _get_multi(self, name, model, ids):
         """ Read the property field `name` for the records of model `model` with
@@ -298,8 +297,7 @@ class Property(models.Model):
             default_value = clean(self.get(name, model))
 
         # retrieve the properties corresponding to the given record ids
-        self._cr.execute("SELECT id FROM ir_model_fields WHERE name=%s AND model=%s", (name, model))
-        field_id = self._cr.fetchone()[0]
+        field_id = self.env['ir.model.fields']._get(model, name).id
         company_id = self.env.context.get('force_company') or self.env.company.id
         refs = {('%s,%s' % (model, id)): id for id in values}
         props = self.search([
