@@ -42,17 +42,24 @@ class ResPartnerBank(models.Model):
         """ Overridden method enabling the recognition of swiss postal bank
         account numbers.
         """
-        if _is_l10n_ch_postal(acc_number):
+        acc_number2 = ""
+        if acc_number and " " in acc_number:
+            acc_number2 = acc_number.split(" ")[0]
+        if _is_l10n_ch_postal(acc_number) or (acc_number2 and _is_l10n_ch_postal(acc_number2)):
             return 'postal'
         else:
             return super(ResPartnerBank, self).retrieve_acc_type(acc_number)
 
-    @api.onchange('acc_number')
+    @api.onchange('acc_number', 'partner_id', 'acc_type')
     def _onchange_set_l10n_ch_postal(self):
         if self.acc_type == 'iban':
             self.l10n_ch_postal = self._retrieve_l10n_ch_postal(self.sanitized_acc_number)
-        else:
-            self.l10n_ch_postal = self.sanitized_acc_number
+        elif self.acc_type == 'postal':
+            if self.acc_number and " " in self.acc_number:
+                self.l10n_ch_postal = self.acc_number.split(" ")[0]
+            else:
+                self.l10n_ch_postal = self.sanitized_acc_number
+                self.acc_number = self.sanitized_acc_number + '  ' + self.partner_id.name
 
     @api.model
     def _retrieve_l10n_ch_postal(self, iban):
