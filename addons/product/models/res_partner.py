@@ -23,17 +23,18 @@ class Partner(models.Model):
             p.property_product_pricelist = res.get(p.id)
 
     def _inverse_product_pricelist(self):
+        Property = self.env['ir.property'].sudo()
         for partner in self:
             pls = self.env['product.pricelist'].search(
                 [('country_group_ids.country_ids.code', '=', partner.country_id and partner.country_id.code or False)],
                 limit=1
             )
             default_for_country = pls and pls[0]
-            actual = self.env['ir.property'].get('property_product_pricelist', 'res.partner', 'res.partner,%s' % partner.id)
+            actual = Property.get('property_product_pricelist', 'res.partner', 'res.partner,%s' % partner.id)
             # update at each change country, and so erase old pricelist
             if partner.property_product_pricelist or (actual and default_for_country and default_for_country.id != actual.id):
                 # keep the company of the current user before sudo
-                self.env['ir.property'].with_context(force_company=self._context.get('force_company', self.env.company.id)).sudo()._set_multi(
+                Property.with_context(force_company=self._context.get('force_company', self.env.company.id))._set_multi(
                     'property_product_pricelist',
                     partner._name,
                     {partner.id: partner.property_product_pricelist or default_for_country.id},
