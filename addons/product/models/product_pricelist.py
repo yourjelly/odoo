@@ -334,7 +334,7 @@ class Pricelist(models.Model):
         pl_domain = self._get_partner_pricelist_multi_search_domain_hook()
 
         # if no specific property, try to find a fitting pricelist
-        result = Property.get_multi('property_product_pricelist', Partner._name, partner_ids)
+        result = Property._get_multi('property_product_pricelist', Partner._name, partner_ids)
 
         remaining_partner_ids = [pid for pid, val in result.items() if not val or
                                  not val._get_partner_pricelist_multi_filter_hook()]

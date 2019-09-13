@@ -209,8 +209,7 @@ class Property(models.Model):
         company_id = self._context.get('force_company') or self.env.company.id
         return [('fields_id', '=', res[0]), ('company_id', 'in', [company_id, False])]
 
-    @api.model
-    def get_multi(self, name, model, ids):
+    def _get_multi(self, name, model, ids):
         """ Read the property field `name` for the records of model `model` with
             the given `ids`, and return a dictionary mapping `ids` to their
             corresponding value.

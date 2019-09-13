@@ -671,7 +671,7 @@ class Field(MetaField('DummyField', (object,), {})):
             company = records.env.company
             context = dict(context, force_company=company.id)
         Property = records.env(context=context, su=True)['ir.property']
-        values = Property.get_multi(self.name, self.model_name, records.ids)
+        values = Property._get_multi(self.name, self.model_name, records.ids)
         for record in records:
             record[self.name] = values.get(record.id)
 
