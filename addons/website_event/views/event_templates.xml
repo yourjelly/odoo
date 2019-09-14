@@ -631,7 +631,7 @@
 
 <template id="registration_attendee_details" name="Registration Attendee Details">
     <div id="modal_attendees_registration" class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <form id="attendee_registration" t-attf-action="/event/#{slug(event)}/registration/confirm" method="post" class="js_website_submit_form">
                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                 <div class="modal-content">
@@ -645,17 +645,17 @@
                     <t t-foreach="range(1, ticket['quantity'] + 1)" t-as="att_counter" name="attendee_loop">
                         <t t-set="counter" t-value="counter + 1"/>
                             <div class="modal-body bg-light border-bottom">
-                                <h5 class="pb-2 border-bottom">Ticket #<span t-esc="counter"/> <small class="text-muted">- <span t-esc="ticket['name']"/></small></h5>
-                                <div class="row my-1">
-                                    <div class="col-sm">
+                                <h5 class="mt-1 pb-2 border-bottom">Ticket #<span t-esc="counter"/> <small class="text-muted">- <span t-esc="ticket['name']"/></small></h5>
+                                <div class="row">
+                                    <div class="col-lg my-2">
                                         <label>Name</label>
                                         <input class="form-control" type="text" t-attf-name="#{counter}-name" required="This field is required"/>
                                     </div>
-                                    <div class="col-sm">
+                                    <div class="col-lg my-2">
                                         <label>Email</label>
                                         <input class="form-control" type="email" t-attf-name="#{counter}-email" required="This field is required"/>
                                     </div>
-                                    <div class="col-sm">
+                                    <div class="col-lg my-2">
                                         <label>Phone <small>(Optional)</small></label>
                                         <input class="form-control" type="tel" t-attf-name="#{counter}-phone"/>
                                     </div>
