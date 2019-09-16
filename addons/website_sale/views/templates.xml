@@ -969,21 +969,23 @@
           Your cart is empty!
         </div>
         <t t-if="website_sale_order and website_sale_order.website_order_line">
-            <t t-foreach="website_sale_order.website_order_line" t-as="line">
-                <div class="row mb8 cart_line">
-                    <div class="col-3 text-center">
-                        <span t-field="line.product_id.image_64" t-options="{'widget': 'image', 'class': 'rounded'}" />
-                    </div>
-                    <div class="col-9">
-                        <div>
-                            <t t-call="website_sale.cart_line_product_link">
-                                <span class="h6" t-esc="line.name_short" />
-                            </t>
+            <div class="o_wsale_cart_popover_product_lines">
+                <t t-foreach="website_sale_order.website_order_line" t-as="line">
+                    <div class="row mb8 cart_line">
+                        <div class="col-3 text-center">
+                            <span t-field="line.product_id.image_64" t-options="{'widget': 'image', 'class': 'rounded'}" />
                         </div>
-                        Qty: <t t-esc="int(line.product_uom_qty) == line.product_uom_qty and int(line.product_uom_qty) or line.product_uom_qty" />
+                        <div class="col-9">
+                            <div>
+                                <t t-call="website_sale.cart_line_product_link">
+                                    <span class="h6" t-esc="line.name_short" />
+                                </t>
+                            </div>
+                            Qty: <t t-esc="int(line.product_uom_qty) == line.product_uom_qty and int(line.product_uom_qty) or line.product_uom_qty" />
+                        </div>
                     </div>
-                </div>
-            </t>
+                </t>
+            </div>
             <div class="text-center">
                 <span class="h6">
                     <t t-call="website_sale.total">
