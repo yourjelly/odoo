@@ -330,6 +330,9 @@ class WebsiteSale(http.Controller):
 
         pricelist = request.website.get_current_pricelist()
 
+        domain = self._get_search_domain(search, category, attrib_values)
+        product_count = request.env['product.template'].search_count(domain)
+
         if not product_context.get('pricelist'):
             product_context['pricelist'] = pricelist.id
             product = product.with_context(product_context)
@@ -339,6 +342,7 @@ class WebsiteSale(http.Controller):
 
         return {
             'search': search,
+            'search_count': product_count,
             'category': category,
             'pricelist': pricelist,
             'attrib_values': attrib_values,
