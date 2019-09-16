@@ -652,7 +652,9 @@ exports.PosModel = Backbone.Model.extend({
         var order = new exports.Order({},{pos:this});
         this.get('orders').add(order);
         this.set('selectedOrder', order);
-        this.send_current_order_to_customer_facing_display();
+        if (this.config.iface_customer_facing_display) {
+            this.send_current_order_to_customer_facing_display();
+        }
         return order;
     },
     /**
@@ -2680,8 +2682,9 @@ exports.Order = Backbone.Model.extend({
         if(line.has_product_lot){
             this.display_lot_popup();
         }
-
-        this.pos.send_current_order_to_customer_facing_display();
+        if (this.config.iface_customer_facing_display) {
+            this.pos.send_current_order_to_customer_facing_display();
+        }
     },
     get_selected_orderline: function(){
         return this.selected_orderline;
