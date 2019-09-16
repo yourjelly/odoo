@@ -511,7 +511,7 @@ class IrActionsReport(models.Model):
         if values is None:
             values = {}
 
-        context = dict(self.env.context, inherit_branding=values.get('enable_editor'))
+        context = dict(self.env.context, inherit_branding=False)
 
         # Browse the user instead of using the sudo self.env.user
         user = self.env['res.users'].browse(self.env.uid)
@@ -525,7 +525,6 @@ class IrActionsReport(models.Model):
         values.update(
             time=time,
             context_timestamp=lambda t: fields.Datetime.context_timestamp(self.with_context(tz=user.tz), t),
-            editable=values.get('enable_editor'),
             user=user,
             res_company=user.company_id,
             website=website,
@@ -622,27 +621,27 @@ class IrActionsReport(models.Model):
         if len(streams) == 1:
             result = streams[0].getvalue()
         else:
-            writer = PdfFileWriter()
-            for stream in streams:
-                reader = PdfFileReader(stream)
-                writer.appendPagesFromReader(reader)
-            result_stream = io.BytesIO()
-            streams.append(result_stream)
-            writer.write(result_stream)
-            result = result_stream.getvalue()
+            result = self._merge_pdfs(streams)
 
         # We have to close the streams after PdfFileWriter's call to write()
         close_streams(streams)
         return result
+
+    def _merge_pdfs(self, streams):
+        writer = PdfFileWriter()
+        for stream in streams:
+            reader = PdfFileReader(stream)
+            writer.appendPagesFromReader(reader)
+        result_stream = io.BytesIO()
+        streams.append(result_stream)
+        writer.write(result_stream)
+        return result_stream.getvalue()
 
     @api.multi
     def render_qweb_pdf(self, res_ids=None, data=None):
         if not data:
             data = {}
         data.setdefault('report_type', 'pdf')
-
-        # remove editor feature in pdf generation
-        data.update(enable_editor=False)
 
         # In case of test environment without enough workers to perform calls to wkhtmltopdf,
         # fallback to render_html.
@@ -728,7 +727,7 @@ class IrActionsReport(models.Model):
             set_viewport_size=context.get('set_viewport_size'),
         )
         if res_ids:
-            _logger.info('The PDF report has been generated for records %s.' % (str(res_ids)))
+            _logger.info('The PDF report has been generated for model: %s, records %s.' % (self.model, str(res_ids)))
             return self._post_pdf(save_in_attachment, pdf_content=pdf_content, res_ids=html_ids), 'pdf'
         return pdf_content, 'pdf'
 

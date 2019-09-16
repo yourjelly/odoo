@@ -3,8 +3,8 @@
 # * website_hr
 # 
 # Translators:
-# Ralf Hilgenstock <rh@dialoge.info>, 2018
-# Martin Trigaux, 2018
+# Ralf Hilgenstock <rh@dialoge.info>, 2017
+# Martin Trigaux, 2019
 # Chris Egal <sodaswed@web.de>, 2019
 # 
 msgid ""
@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-09-18 09:49+0000\n"
-"PO-Revision-Date: 2018-08-24 09:34+0000\n"
+"PO-Revision-Date: 2016-08-05 13:12+0000\n"
 "Last-Translator: Chris Egal <sodaswed@web.de>, 2019\n"
 "Language-Team: German (https://www.transifex.com/odoo/teams/41243/de/)\n"
 "MIME-Version: 1.0\n"
@@ -40,7 +40,7 @@ msgstr "Unser Team"
 #. module: website_hr
 #: model:ir.model.fields,field_description:website_hr.field_hr_employee__public_info
 msgid "Public Info"
-msgstr "Öffentliche Informationen"
+msgstr "Öffentliche Info"
 
 #. module: website_hr
 #: model:ir.model.fields,help:website_hr.field_hr_employee__website_id

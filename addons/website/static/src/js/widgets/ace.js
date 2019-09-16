@@ -2,7 +2,6 @@ odoo.define("website.ace", function (require) {
 "use strict";
 
 var AceEditor = require('web_editor.ace');
-var weContext = require('web_editor.context');
 
 /**
  * Extends the default view editor so that the URL hash is updated with view ID
@@ -47,7 +46,12 @@ var WebsiteAceEditor = AceEditor.extend({
                 // specific or because its parent was edited too and the view
                 // got copy/unlink).
                 var selectedView = _.findWhere(this.views, {id: this._getSelectedResource()});
-                var context = weContext.get();
+                var context;
+                this.trigger_up('context_get', {
+                    callback: function (ctx) {
+                        context = ctx;
+                    },
+                });
                 defs.push(this._rpc({
                     model: 'ir.ui.view',
                     method: 'search_read',
@@ -59,9 +63,9 @@ var WebsiteAceEditor = AceEditor.extend({
                     }
                 }).bind(this)));
             }
-            return $.when.apply($, defs).then((function () {
+            return Promise.all(defs).then((function () {
                 window.location.reload();
-                return $.Deferred();
+                return new Promise(function () {});
             }));
         }).bind(this));
     },
@@ -71,7 +75,7 @@ var WebsiteAceEditor = AceEditor.extend({
     _resetResource: function () {
         return this._super.apply(this, arguments).then((function () {
             window.location.reload();
-            return $.Deferred();
+            return new Promise(function () {});
         }).bind(this));
     },
     /**

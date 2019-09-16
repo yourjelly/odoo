@@ -3,19 +3,16 @@
 # * web_settings_dashboard
 # 
 # Translators:
-# William Surya Permana <zarambie_game@yahoo.com>, 2019
-# Martin Trigaux, 2019
-# Wahyu Setiawan <wahyusetiaaa@gmail.com>, 2019
-# Febrasari Almania <febrasari.almania@gmail.com>, 2019
-# Ryanto The <ry.the77@gmail.com>, 2019
-# 
+# William Surya Permana <zarambie_game@yahoo.com>, 2017
+# Wahyu Setiawan <wahyusetiaaa@gmail.com>, 2017
+# Ryanto The <ry.the77@gmail.com>, 2017
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~11.5\n"
+"Project-Id-Version: Odoo Server 10.saas~18\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-09-18 09:49+0000\n"
-"PO-Revision-Date: 2018-08-24 09:33+0000\n"
-"Last-Translator: Ryanto The <ry.the77@gmail.com>, 2019\n"
+"POT-Creation-Date: 2017-09-20 09:54+0000\n"
+"PO-Revision-Date: 2017-09-20 09:54+0000\n"
+"Last-Translator: Ryanto The <ry.the77@gmail.com>, 2017\n"
 "Language-Team: Indonesian (https://www.transifex.com/odoo/teams/41243/id/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -25,79 +22,76 @@ msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:113
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:96
+#, python-format
+msgid ""
+"%\n"
+"                Implementation"
+msgstr ""
+"%\n"
+"                Implementasi"
+
+#. module: web_settings_dashboard
+#. openerp-web
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:156
 #, python-format
 msgid "(Community Edition)"
 msgstr ""
 
 #. module: web_settings_dashboard
-#: code:addons/web_settings_dashboard/controllers/main.py:16
-#, python-format
-msgid "Access Denied"
-msgstr "Akses Ditolak"
-
-#. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:58
-#, python-format
-msgid "Access rights"
-msgstr ""
-
-#. module: web_settings_dashboard
-#. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:126
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:172
 #, python-format
 msgid "Activate the developer mode"
 msgstr "Aktifkan mode pengembang"
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:128
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:174
 #, python-format
 msgid "Activate the developer mode (with assets)"
 msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:64
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:62
 #, python-format
 msgid "Active User"
 msgstr "Pengguna Aktif"
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:65
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:63
 #, python-format
 msgid "Active Users"
 msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:40
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:48
 #, python-format
 msgid "App store"
 msgstr "Toko Aplikasi"
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:24
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:37
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:45
 #, python-format
 msgid "Browse Apps"
 msgstr "Jelajahi Aplikasi"
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:167
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:108
 #, python-format
-msgid "Company"
-msgstr "Perusahaan"
+msgid "Browse the documentation."
+msgstr "Jelajahi dokumentasi"
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:120
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:163
 #, python-format
-msgid "Copyright © 2004"
+msgid "Copyright © 2004-2016"
 msgstr ""
 
 #. module: web_settings_dashboard
@@ -108,42 +102,43 @@ msgstr "Dasbor"
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:130
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:176
 #, python-format
 msgid "Deactivate the developer mode"
 msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:74
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:72
 #, python-format
-msgid "Enter e-mail addresses"
+msgid "Enter e-mail addresses (one per line)"
+msgstr "Masukkan alamat e-mail (satu per baris)"
+
+#. module: web_settings_dashboard
+#. openerp-web
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:100
+#, python-format
+msgid "Follow these implementation guides to get the most out of Odoo."
 msgstr ""
+"Ikuti petunjuk implementasi berikut ini untuk memanfaatkan Odoo sepenuhnya."
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:103
-#, python-format
-msgid "Facebook"
-msgstr "Facebook"
-
-#. module: web_settings_dashboard
-#. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:120
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:163
 #, python-format
 msgid "GNU LGPL Licensed"
 msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:140
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:187
 #, python-format
 msgid "Get more features with the Enterprise Edition!"
 msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:97
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:140
 #, python-format
 msgid "Help us spread the word: Share Odoo's awesomeness with your friends!"
 msgstr ""
@@ -152,84 +147,77 @@ msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:29
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:37
 #, python-format
 msgid "Installed App"
 msgstr "Aplikasi Terpasang"
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:30
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:38
 #, python-format
 msgid "Installed Apps"
 msgstr "Aplikasi Terpasang"
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:75
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:73
 #, python-format
 msgid "Invite"
 msgstr "Undang"
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:73
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:71
 #, python-format
 msgid "Invite new users:"
 msgstr "Undang pengguna baru:"
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:104
-#, python-format
-msgid "LinkedIn"
-msgstr ""
-
-#. module: web_settings_dashboard
-#. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:160
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:208
 #, python-format
 msgid "Load a Translation"
 msgstr "Muat Terjemahan"
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:132
-#, python-format
-msgid "Load demo data"
-msgstr ""
-
-#. module: web_settings_dashboard
-#. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:69
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:67
 #, python-format
 msgid "Manage access rights"
 msgstr "Kelola hak akses"
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:32
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:107
+#, python-format
+msgid "Need more help?"
+msgstr "Butuh bantuan lainnya?"
+
+#. module: web_settings_dashboard
+#. openerp-web
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:40
 #, python-format
 msgid "No app installed"
 msgstr "Tidak ada aplikasi terpasang"
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:112
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:155
 #, python-format
 msgid "Odoo"
 msgstr "Odoo"
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:139
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:186
 #, python-format
 msgid "Odoo Enterprise"
 msgstr "Odoo Enterprise"
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:120
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:163
 #, python-format
 msgid "Odoo S.A."
 msgstr "Odoo S.A."
@@ -243,14 +231,14 @@ msgstr "Undangan tertunda:"
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:52
+#: code:addons/web_settings_dashboard/static/src/js/dashboard.js:116
 #, python-format
-msgid "Remove Email"
-msgstr ""
+msgid "Please provide valid email addresses"
+msgstr "Harap sediakan alamat email yang sah"
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:155
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:203
 #, python-format
 msgid ""
 "Send your documents in your partner's language or set up a language for your"
@@ -259,89 +247,57 @@ msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:177
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:225
 #, python-format
 msgid "Set Up"
 msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:172
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:220
 #, python-format
 msgid "Set up your company information"
 msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:94
-#, python-format
-msgid "Share"
-msgstr "Bagikan"
-
-#. module: web_settings_dashboard
-#. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:95
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:138
 #, python-format
 msgid "Share the Love"
 msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/js/dashboard.js:116
-#, python-format
-msgid "The following email addresses already exist: %s."
-msgstr ""
-
-#. module: web_settings_dashboard
-#. openerp-web
-#: code:addons/web_settings_dashboard/static/src/js/dashboard.js:105
-#, python-format
-msgid "The following email addresses are invalid: %s."
-msgstr ""
-
-#. module: web_settings_dashboard
-#. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:41
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:49
 #, python-format
 msgid "Theme store"
 msgstr "Toko tema"
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:150
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:151
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:199
 #, python-format
 msgid "Translations"
 msgstr "Terjemahan"
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:102
-#, python-format
-msgid "Twitter"
-msgstr "Twitter"
-
-#. module: web_settings_dashboard
-#. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:143
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:190
 #, python-format
 msgid "Upgrade Now"
 msgstr ""
 
 #. module: web_settings_dashboard
-#. openerp-web
-#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:141
-#, python-format
-msgid "Upgrade to enterprise"
-msgstr ""
+#: model:ir.model,name:web_settings_dashboard.model_res_users
+msgid "Users"
+msgstr "Pengguna"
 
 #. module: web_settings_dashboard
 #. openerp-web
-#: code:addons/web_settings_dashboard/static/src/js/dashboard.js:176
-#: model:ir.model,name:web_settings_dashboard.model_res_users
+#: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:115
 #, python-format
-msgid "Users"
-msgstr "Pengguna"
+msgid "You need to install some apps first."
+msgstr "Anda perlu memasang beberapa aplikasi terlebih dahulu."
 
 #. module: web_settings_dashboard
 #. openerp-web

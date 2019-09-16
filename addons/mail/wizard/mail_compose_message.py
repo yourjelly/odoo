@@ -5,7 +5,6 @@ import base64
 import re
 
 from odoo import _, api, fields, models, SUPERUSER_ID, tools
-from odoo.tools import pycompat
 from odoo.tools.safe_eval import safe_eval
 
 
@@ -288,17 +287,14 @@ class MailComposer(models.TransientModel):
             reply_to_value = self.env['mail.thread']._notify_get_reply_to_on_records(default=self.email_from, records=records)
 
         blacklisted_rec_ids = []
-        if mass_mail_mode and hasattr(self.env[self.model], "_primary_email"):
+        if mass_mail_mode and issubclass(type(self.env[self.model]), self.pool['mail.blacklist.mixin']):
             BL_sudo = self.env['mail.blacklist'].sudo()
             blacklist = set(BL_sudo.search([]).mapped('email'))
             if blacklist:
-                [email_field] = self.env[self.model]._primary_email
-                targets = self.env[self.model].browse(res_ids).read([email_field])
+                targets = self.env[self.model].browse(res_ids).read(['email_normalized'])
                 # First extract email from recipient before comparing with blacklist
-                for target in targets:
-                    sanitized_email = self.env['mail.blacklist']._sanitize_email(target.get(email_field))
-                    if sanitized_email and sanitized_email in blacklist:
-                        blacklisted_rec_ids.append(target['id'])
+                blacklisted_rec_ids.extend([target['id'] for target in targets
+                                            if target['email_normalized'] and target['email_normalized'] in blacklist])
 
         for res_id in res_ids:
             # static wizard (mail.message) values
@@ -467,7 +463,7 @@ class MailComposer(models.TransientModel):
         """
         self.ensure_one()
         multi_mode = True
-        if isinstance(res_ids, pycompat.integer_types):
+        if isinstance(res_ids, int):
             multi_mode = False
             res_ids = [res_ids]
 
@@ -517,7 +513,7 @@ class MailComposer(models.TransientModel):
         """ Call email_template.generate_email(), get fields relevant for
             mail.compose.message, transform email_cc and email_to into partner_ids """
         multi_mode = True
-        if isinstance(res_ids, pycompat.integer_types):
+        if isinstance(res_ids, int):
             multi_mode = False
             res_ids = [res_ids]
 

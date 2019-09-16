@@ -294,7 +294,7 @@ class IrModel(models.Model):
     def _instanciate(self, model_data):
         """ Return a class for the custom model given by parameters ``model_data``. """
         class CustomModel(models.Model):
-            _name = pycompat.to_native(model_data['model'])
+            _name = pycompat.to_text(model_data['model'])
             _description = model_data['name']
             _module = False
             _custom = True
@@ -361,7 +361,7 @@ class IrModelFields(models.Model):
     domain = fields.Char(default="[]", help="The optional domain to restrict possible values for relationship fields, "
                                             "specified as a Python expression defining a list of triplets. "
                                             "For example: [('color','=','red')]")
-    groups = fields.Many2many('res.groups', 'ir_model_fields_group_rel', 'field_id', 'group_id')
+    groups = fields.Many2many('res.groups', 'ir_model_fields_group_rel', 'field_id', 'group_id') # CLEANME unimplemented field (empty table)
     selectable = fields.Boolean(default=True)
     modules = fields.Char(compute='_in_modules', string='In Apps', help='List of modules in which the field is defined')
     relation_table = fields.Char(help="Used for custom many2many fields to define a custom relation table name")
@@ -745,7 +745,7 @@ class IrModelFields(models.Model):
                 if vals.get('name', item.name) != item.name:
                     # We need to rename the field
                     item._prepare_update()
-                    if item.ttype in ('one2many', 'many2many'):
+                    if item.ttype in ('one2many', 'many2many', 'binary'):
                         # those field names are not explicit in the database!
                         pass
                     else:
@@ -1155,6 +1155,7 @@ class IrModelRelation(models.Model):
 class IrModelAccess(models.Model):
     _name = 'ir.model.access'
     _description = 'Model Access'
+    _order = 'model_id,group_id,name,id'
 
     name = fields.Char(required=True, index=True)
     active = fields.Boolean(default=True, help='If you uncheck the active field, it will disable the ACL without deleting it (if you delete a native ACL, it will be re-created when you reload the module).')
@@ -1188,7 +1189,7 @@ class IrModelAccess(models.Model):
         else:
             model_name = model
 
-        if isinstance(group_ids, pycompat.integer_types):
+        if isinstance(group_ids, int):
             group_ids = [group_ids]
 
         query = """ SELECT 1 FROM ir_model_access a
@@ -1206,13 +1207,17 @@ class IrModelAccess(models.Model):
            :rtype: list
         """
         assert access_mode in ('read', 'write', 'create', 'unlink'), 'Invalid access mode'
-        self._cr.execute("""SELECT c.name, g.name
-                            FROM ir_model_access a
-                                JOIN ir_model m ON (a.model_id=m.id)
-                                JOIN res_groups g ON (a.group_id=g.id)
-                                LEFT JOIN ir_module_category c ON (c.id=g.category_id)
-                            WHERE m.model=%s AND a.active IS TRUE AND a.perm_""" + access_mode,
-                         (model_name,))
+        self._cr.execute("""
+            SELECT c.name, g.name
+              FROM ir_model_access a
+              JOIN ir_model m ON (a.model_id = m.id)
+              JOIN res_groups g ON (a.group_id = g.id)
+         LEFT JOIN ir_module_category c ON (c.id = g.category_id)
+             WHERE m.model = %%s
+               AND a.active = TRUE
+               AND a.perm_%s = TRUE
+          ORDER BY c.name, g.name NULLS LAST
+        """ % access_mode, [model_name])
         return [('%s/%s' % x) if x[0] else x[1] for x in self._cr.fetchall()]
 
     # The context parameter is useful when the method translates error messages.
@@ -1226,7 +1231,7 @@ class IrModelAccess(models.Model):
             # User root have all accesses
             return True
 
-        assert isinstance(model, pycompat.string_types), 'Not a model name: %s' % (model,)
+        assert isinstance(model, str), 'Not a model name: %s' % (model,)
         assert mode in ('read', 'write', 'create', 'unlink'), 'Invalid access mode'
 
         # TransientModel records have no access rights, only an implicit access rule
@@ -1258,20 +1263,23 @@ class IrModelAccess(models.Model):
             r = self._cr.fetchone()[0]
 
         if not r and raise_exception:
-            groups = '\n\t'.join('- %s' % g for g in self.group_names_with_access(model, mode))
+            groups = '\n'.join('\t- %s' % g for g in self.group_names_with_access(model, mode))
             msg_heads = {
                 # Messages are declared in extenso so they are properly exported in translation terms
-                'read': _("Sorry, you are not allowed to access this document."),
-                'write':  _("Sorry, you are not allowed to modify this document."),
-                'create': _("Sorry, you are not allowed to create this kind of document."),
-                'unlink': _("Sorry, you are not allowed to delete this document."),
+                'read': _("Sorry, you are not allowed to access documents of type '%(document_kind)s' (%(document_model)s)."),
+                'write':  _("Sorry, you are not allowed to modify documents of type '%(document_kind)s' (%(document_model)s)."),
+                'create': _("Sorry, you are not allowed to create documents of type '%(document_kind)s' (%(document_model)s)."),
+                'unlink': _("Sorry, you are not allowed to delete documents of type '%(document_kind)s' (%(document_model)s)."),
+            }
+            msg_params = {
+                'document_kind': self.env['ir.model']._get(model).name or model,
+                'document_model': model,
             }
             if groups:
-                msg_tail = _("Only users with the following access level are currently allowed to do that") + ":\n%s\n\n(" + _("Document model") + ": %s)"
-                msg_params = (groups, model)
+                msg_tail = _("This operation is allowed for the groups:\n%(groups_list)s")
+                msg_params['groups_list'] = groups
             else:
-                msg_tail = _("Please contact your system administrator if you think this is an error.") + "\n\n(" + _("Document model") + ": %s)"
-                msg_params = (model,)
+                msg_tail = _("No group currently allows this operation.")
             msg_tail += u' - ({} {}, {} {})'.format(_('Operation:'), mode, _('User:'), self._uid)
             _logger.info('Access Denied by ACLs for operation: %s, uid: %s, model: %s', mode, self._uid, model)
             msg = '%s %s' % (msg_heads[mode], msg_tail)

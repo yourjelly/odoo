@@ -62,18 +62,20 @@ var KanbanRecord = Widget.extend({
      * @override
      */
     start: function () {
-        return $.when(this._super.apply(this, arguments), this._render());
+        return Promise.all([this._super.apply(this, arguments), this._render()]);
     },
     /**
      * Called each time the record is attached to the DOM.
      */
     on_attach_callback: function () {
+        this.isInDOM = true;
         _.invoke(this.subWidgets, 'on_attach_callback');
     },
     /**
      * Called each time the record is detached from the DOM.
      */
     on_detach_callback: function () {
+        this.isInDOM = false;
         _.invoke(this.subWidgets, 'on_detach_callback');
     },
 
@@ -85,7 +87,7 @@ var KanbanRecord = Widget.extend({
      * Re-renders the record with a new state
      *
      * @param {Object} state
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     update: function (state) {
         // detach the widgets because the record will empty its $el, which will
@@ -147,7 +149,7 @@ var KanbanRecord = Widget.extend({
         }
         if (typeof variable === 'string') {
             var index = 0;
-            for (var i = 0 ; i < variable.length ; i++) {
+            for (var i = 0; i < variable.length; i++) {
                 index += variable.charCodeAt(i);
             }
             return index % NB_KANBAN_RECORD_COLORS;
@@ -182,24 +184,30 @@ var KanbanRecord = Widget.extend({
      */
     _getImageURL: function (model, field, id, cache, options) {
         options = options || {};
+        id = (_.isArray(id) ? id[0] : id) || false;
+        field = options.preview_image || field;
+        var isCurrentRecord = this.modelName === model && this.recordData.id === id;
         var url;
-        if (this.record[field] && this.record[field].value && !utils.is_bin_size(this.record[field].value)) {
+        if (isCurrentRecord && this.record[field] && this.record[field].raw_value && !utils.is_bin_size(this.record[field].raw_value)) {
             // Use magic-word technique for detecting image type
-            url = 'data:image/' + this.file_type_magic_word[this.record[field].value[0]] + ';base64,' + this.record[field].value;
-        } else if (this.record[field] && ! this.record[field].value) {
+            url = 'data:image/' + this.file_type_magic_word[this.record[field].raw_value[0]] + ';base64,' + this.record[field].raw_value;
+        } else if (!model || !field || !id || (isCurrentRecord && this.record[field] && !this.record[field].raw_value)) {
             url = "/web/static/src/img/placeholder.png";
         } else {
-            if (_.isArray(id)) { id = id[0]; }
-            if (!id) { id = undefined; }
-            if (options.preview_image)
-                field = options.preview_image;
-            var unique = this.record.__last_update && this.record.__last_update.value.replace(/[^0-9]/g, '');
             var session = this.getSession();
-            url = session.url('/web/image', {model: model, field: field, id: id, unique: unique});
+            var params = {
+                model: model,
+                field: field,
+                id: id
+            };
+            if (isCurrentRecord) {
+                params.unique = this.record.__last_update && this.record.__last_update.value.replace(/[^0-9]/g, '');
+            }
             if (cache !== undefined) {
                 // Set the cache duration in seconds.
-                url += '&cache=' + parseInt(cache, 10);
+                params.cache = parseInt(cache, 10);
             }
+            url = session.url('/web/image', params);
         }
         return url;
     },
@@ -254,6 +262,9 @@ var KanbanRecord = Widget.extend({
                     // a widget already exists for that field, so reset it with the new state
                     widget.reset(self.state);
                     $field.replaceWith(widget.$el);
+                    if (self.isInDOM && widget.on_attach_callback) {
+                        widget.on_attach_callback();
+                    }
                 }
             } else {
                 self._processField($field, field_name);
@@ -309,14 +320,13 @@ var KanbanRecord = Widget.extend({
             }
             attrs[key] = value;
         });
-        var options = _.extend({}, this.options, {attrs: attrs});
+        var options = _.extend({}, this.options, { attrs: attrs });
         var widget = new Widget(this, field_name, this.state, options);
-        var def = widget.replace($field).then(function () {
+        var def = widget.replace($field);
+        this.defs.push(def);
+        def.then(function () {
             self._setFieldDisplay(widget.$el, field_name);
         });
-        if (def.state() === 'pending') {
-            this.defs.push(def);
-        }
         return widget;
     },
     _processWidgets: function () {
@@ -326,24 +336,26 @@ var KanbanRecord = Widget.extend({
             var Widget = widgetRegistry.get($field.attr('name'));
             var widget = new Widget(self, self.state);
 
-            var def = widget._widgetRenderAndInsert(function () {}).then(function () {
-                widget.$el.addClass('o_widget');
+            var def = widget._widgetRenderAndInsert(function () { });
+            self.defs.push(def);
+            def.then(function () {
                 $field.replaceWith(widget.$el);
+                widget.$el.addClass('o_widget');
             });
-            if (def.state() === 'pending') {
-                self.defs.push(def);
-            }
         });
     },
     /**
      * Renders the record
      *
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _render: function () {
         this.defs = [];
+        // call 'on_detach_callback' on each subwidget as they will be removed
+        // from the DOM at the next line
+        _.invoke(this.subWidgets, 'on_detach_callback');
         this._replaceElement(this.qweb.render('kanban-box', this.qweb_context));
-        this.$el.addClass('o_kanban_record').attr("tabindex",0);
+        this.$el.addClass('o_kanban_record').attr("tabindex", 0);
         this.$el.attr('role', 'article');
         this.$el.data('record', this);
         if (this.$el.hasClass('oe_kanban_global_click') ||
@@ -360,9 +372,9 @@ var KanbanRecord = Widget.extend({
         this._attachTooltip();
 
         // We use boostrap tooltips for better and faster display
-        this.$('span.o_tag').tooltip({delay: {'show': 50}});
+        this.$('span.o_tag').tooltip({ delay: { 'show': 50 } });
 
-        return $.when.apply(this, this.defs);
+        return Promise.all(this.defs);
     },
     /**
      * Sets particular classnames on a field $el according to the
@@ -398,6 +410,7 @@ var KanbanRecord = Widget.extend({
         this.recordData = recordState.data;
         this.record = this._transformRecord(recordState.data);
         this.qweb_context = {
+            context: this.state.getContext(),
             kanban_image: this._getImageURL.bind(this),
             kanban_color: this._getColorClassname.bind(this),
             kanban_getcolor: this._getColorID.bind(this),
@@ -421,7 +434,7 @@ var KanbanRecord = Widget.extend({
             var colorHelp = _.str.sprintf(_t("Card color: %s"), this._getColorname(this.recordData[color_field]));
             var colorClass = this._getColorClassname(this.recordData[color_field]);
             this.$el.addClass(colorClass);
-            this.$el.prepend('<span title="' + colorHelp + '" aria-label="' + colorHelp +'" role="img" class="oe_kanban_color_help"/>');
+            this.$el.prepend('<span title="' + colorHelp + '" aria-label="' + colorHelp + '" role="img" class="oe_kanban_color_help"/>');
         }
     },
     /**
@@ -456,7 +469,7 @@ var KanbanRecord = Widget.extend({
                 r.raw_value = value.toDate();
             } else if (r.type === 'one2many' || r.type === 'many2many') {
                 r.raw_value = value.count ? value.res_ids : [];
-            } else if (r.type === 'many2one' ) {
+            } else if (r.type === 'many2one') {
                 r.raw_value = value && value.res_id || false;
             } else {
                 r.raw_value = value;
@@ -556,13 +569,13 @@ var KanbanRecord = Widget.extend({
 
         switch (type) {
             case 'edit':
-                this.trigger_up('open_record', {id: this.db_id, mode: 'edit'});
+                this.trigger_up('open_record', { id: this.db_id, mode: 'edit' });
                 break;
             case 'open':
-                this.trigger_up('open_record', {id: this.db_id});
+                this.trigger_up('open_record', { id: this.db_id });
                 break;
             case 'delete':
-                this.trigger_up('kanban_record_delete', {id: this.db_id, record: this});
+                this.trigger_up('kanban_record_delete', { id: this.db_id, record: this });
                 break;
             case 'action':
             case 'object':

@@ -3,15 +3,16 @@
 # * purchase_stock
 # 
 # Translators:
-# Martin Trigaux, 2018
+# Bohdan Lisnenko, 2018
+# Martin Trigaux, 2019
 # Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server saas~12.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-09 10:31+0000\n"
-"PO-Revision-Date: 2018-08-24 09:24+0000\n"
+"POT-Creation-Date: 2019-01-16 07:59+0000\n"
+"PO-Revision-Date: 2018-08-02 11:17+0000\n"
 "Last-Translator: Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019\n"
 "Language-Team: Ukrainian (https://www.transifex.com/odoo/teams/41243/uk/)\n"
 "MIME-Version: 1.0\n"
@@ -35,12 +36,23 @@ msgid "<span class=\"o_stat_text\">Purchase Orders</span>"
 msgstr "<span class=\"o_stat_text\">Замовлення на купівлю</span>"
 
 #. module: purchase_stock
+#: model:ir.model.fields,help:purchase_stock.field_purchase_order_line__qty_received_method
+msgid ""
+"According to product configuration, the recieved quantity can be automatically computed by mechanism :\n"
+"  - Manual: the quantity is set manually on the line\n"
+"  - Stock Moves: the quantity comes from confirmed pickings\n"
+msgstr ""
+"Відповідно до налаштування товару, отримана кількість може автоматично обчислюватися за допомогою механізму:\n"
+"  - Вручну: кількість встановлена вручну на рядку\n"
+"  - Складські переміщення: кількість надходить з підтверджених комплектувань\n"
+
+#. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_stock_rule__action
 msgid "Action"
 msgstr "Дія"
 
 #. module: purchase_stock
-#: code:addons/purchase_stock/models/stock.py:127
+#: code:addons/purchase_stock/models/stock.py:117
 #: model_terms:ir.ui.view,arch_db:purchase_stock.purchase_report_stock_rule
 #: model:stock.location.route,name:purchase_stock.route_warehouse0_buy
 #: selection:stock.rule,action:0
@@ -71,16 +83,18 @@ msgstr "Створено рядок замовлення на купівлю"
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_purchase_order__picking_type_id
 msgid "Deliver To"
-msgstr "Доставити до"
+msgstr "Доставити на"
 
 #. module: purchase_stock
+#: model:ir.model.fields,help:purchase_stock.field_product_product__route_ids
 #: model:ir.model.fields,help:purchase_stock.field_product_template__route_ids
 msgid ""
 "Depending on the modules installed, this will allow you to define the route "
-"of the product: whether it will be bought, manufactured, MTO, etc."
+"of the product: whether it will be bought, manufactured, replenished on "
+"order, etc."
 msgstr ""
 "Залежно від встановлених модулів, це дозволить вам визначити маршрут товару:"
-" чи буде він купуватися, виготовлятися, на замовлення і т.д."
+" чи буде він купуватися, виготовлятися, поповнюватися на замовлення і т.д."
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_purchase_order__default_location_dest_id_usage
@@ -120,7 +134,7 @@ msgstr "Вхідні поставки"
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_purchase_order__incoterm_id
 msgid "Incoterm"
-msgstr "Інкотерм"
+msgstr "Інкотермс"
 
 #. module: purchase_stock
 #: model:ir.model.fields,help:purchase_stock.field_purchase_order__incoterm_id
@@ -128,8 +142,8 @@ msgid ""
 "International Commercial Terms are a series of predefined commercial terms "
 "used in international transactions."
 msgstr ""
-"Міжнародні комерційні умови - серія міжнародних правил з тлумачення найбільш"
-" широко використовуваних торговельних термінів у галузі міжнародної "
+"Міжнародні комерційні умови, комплект міжнародних правил з тлумачення "
+"найбільш широко використовуваних торговельних термінів в галузі міжнародної "
 "торгівлі."
 
 #. module: purchase_stock
@@ -158,6 +172,11 @@ msgid "Lot/Serial"
 msgstr "Партія/Серійний номер"
 
 #. module: purchase_stock
+#: selection:purchase.order.line,qty_received_method:0
+msgid "Manual"
+msgstr "Вручну"
+
+#. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.exception_on_po
 msgid "Manual actions may be needed."
 msgstr "Можуть бути необхідні дії вручну."
@@ -182,7 +201,7 @@ msgstr ""
 #. module: purchase_stock
 #: model:ir.model,name:purchase_stock.model_stock_warehouse_orderpoint
 msgid "Minimum Inventory Rule"
-msgstr "Правило мінімального запасу"
+msgstr "Правило мінімальних запасів"
 
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.res_config_settings_view_form_stock
@@ -268,6 +287,11 @@ msgid "Receive Products"
 msgstr "Отримати товари"
 
 #. module: purchase_stock
+#: model:ir.model.fields,field_description:purchase_stock.field_purchase_order_line__qty_received_method
+msgid "Received Qty Method"
+msgstr "Метод отриманої кількості"
+
+#. module: purchase_stock
 #: model:ir.actions.act_window,name:purchase_stock.purchase_open_picking
 #: model:ir.model.fields,field_description:purchase_stock.field_purchase_order__picking_ids
 msgid "Receptions"
@@ -289,6 +313,7 @@ msgid "Return Picking"
 msgstr "Повернути комплектування"
 
 #. module: purchase_stock
+#: model:ir.model.fields,field_description:purchase_stock.field_product_product__route_ids
 #: model:ir.model.fields,field_description:purchase_stock.field_product_template__route_ids
 msgid "Routes"
 msgstr "Маршрути"
@@ -305,8 +330,9 @@ msgstr "Складське переміщення "
 
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.purchase_order_line_view_form_inherit
+#: selection:purchase.order.line,qty_received_method:0
 msgid "Stock Moves"
-msgstr "Складські переміщення"
+msgstr "Переміщення запасів"
 
 #. module: purchase_stock
 #: model:ir.model,name:purchase_stock.model_stock_rule
@@ -325,7 +351,7 @@ msgstr ""
 "Технічне поле, що використовується для відображення адреси прямої доставки"
 
 #. module: purchase_stock
-#: code:addons/purchase_stock/models/purchase.py:265
+#: code:addons/purchase_stock/models/purchase.py:290
 #, python-format
 msgid ""
 "The quantities on your purchase order indicate less than billed. You should "
@@ -362,7 +388,7 @@ msgstr ""
 #. module: purchase_stock
 #: model:ir.model.fields,help:purchase_stock.field_purchase_order__picking_type_id
 msgid "This will determine operation type of incoming shipment"
-msgstr "Це визначатиме тип операції вхідної доставки"
+msgstr "Це визначатиме тип операції вхідної відправки"
 
 #. module: purchase_stock
 #: model:ir.model,name:purchase_stock.model_stock_picking
@@ -401,7 +427,7 @@ msgstr ""
 "створюється для виконання необхідності."
 
 #. module: purchase_stock
-#: code:addons/purchase_stock/models/purchase.py:257
+#: code:addons/purchase_stock/models/purchase.py:282
 #, python-format
 msgid ""
 "You cannot decrease the ordered quantity below the received quantity.\n"

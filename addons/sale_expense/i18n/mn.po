@@ -3,15 +3,17 @@
 # * sale_expense
 # 
 # Translators:
-# Martin Trigaux, 2018
+# Onii Onii <onii0223@yahoo.com>, 2018
+# Martin Trigaux, 2019
+# Baskhuu Lodoikhuu <baskhuujacara@gmail.com>, 2019
 # nurbakhit nurka <nurbakhit@bumanit.mn>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~11.5\n"
+"Project-Id-Version: Odoo Server saas~12.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-09-18 09:49+0000\n"
-"PO-Revision-Date: 2018-08-24 09:24+0000\n"
+"POT-Creation-Date: 2018-12-24 10:58+0000\n"
+"PO-Revision-Date: 2016-08-05 13:09+0000\n"
 "Last-Translator: nurbakhit nurka <nurbakhit@bumanit.mn>, 2019\n"
 "Language-Team: Mongolian (https://www.transifex.com/odoo/teams/41243/mn/)\n"
 "MIME-Version: 1.0\n"
@@ -38,7 +40,7 @@ msgstr "емайлээр зардал илгээлтийг идэвхижүүл�
 #. module: sale_expense
 #: model:ir.model,name:sale_expense.model_account_analytic_line
 msgid "Analytic Line"
-msgstr "Шинжилгээний Мөр"
+msgstr "Шинжилгээний мөр"
 
 #. module: sale_expense
 #: model:ir.model,name:sale_expense.model_hr_expense
@@ -58,14 +60,19 @@ msgid "Invoicing"
 msgstr "Нэхэмжлэх"
 
 #. module: sale_expense
-#: model:ir.model,name:sale_expense.model_sale_order
-msgid "Quotation"
-msgstr "Үнийн санал"
+#: model:ir.model,name:sale_expense.model_product_template
+msgid "Product Template"
+msgstr "Барааны үлгэр"
 
 #. module: sale_expense
 #: model:ir.model.fields,field_description:sale_expense.field_hr_expense__sale_order_id
 msgid "Sale Order"
 msgstr "Борлуулах захиалга"
+
+#. module: sale_expense
+#: model:ir.model,name:sale_expense.model_sale_order
+msgid "Sales Order"
+msgstr "Борлуулалтын Захиалга"
 
 #. module: sale_expense
 #: model_terms:digest.tip,tip_description:sale_expense.digest_tip_sale_expense_0

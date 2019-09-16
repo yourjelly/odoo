@@ -15,8 +15,13 @@ description into a live application, able to interact with every model and
 records in the database.  It is even possible to use the web client to modify
 the interface of the web client.
 
-.. note:: An html version of all js docstrings in Odoo is available at:
-      :ref:`JS API <api/js>`
+.. note:: An html version of all docstrings in Odoo is available at:
+
+    .. toctree::
+        :maxdepth: 2
+
+        javascript_api
+
 
 Overview
 =========
@@ -124,9 +129,8 @@ Here is what happens when a template is rendered by the server with these direct
       be replaced by a list of script tags pointing to the js files
 
 - if we are not in *debug=assets* mode,
-    - the css files will be concatenated and minified, then splits into files
-      with no more than 4096 rules (to get around an old limitation of IE9). Then,
-      we generate as many stylesheet tags as necessary
+    - the css files will be concatenated and minified, then a stylesheet tag is
+      generated
     - the js files are concatenated and minified, then a script tag is generated
 
 Note that the assets files are cached, so in theory, a browser should only load
@@ -295,6 +299,17 @@ The *odoo.define* method is given three arguments:
   extract them from the function by calling toString on it, then using a regexp
   to find all *require* statements.
 
+.. code-block:: javascript
+
+      odoo.define('module.Something', ['web.ajax'], function (require) {
+        "use strict";
+
+        var ajax = require('web.ajax');
+
+        // some code here
+        return something;
+    });
+
 - finally, the last argument is a function which defines the module. Its return
   value is the value of the module, which may be passed to other modules requiring
   it.  Note that there is a small exception for asynchronous modules, see the
@@ -308,7 +323,7 @@ If an error happens, it will be logged (in debug mode) in the console:
 * ``Failed modules``:
   A javascript error is detected
 * ``Rejected modules``:
-  The module returns a rejected deferred. It (and its dependent modules) is not
+  The module returns a rejected Promise. It (and its dependent modules) is not
   loaded.
 * ``Rejected linked modules``:
   Modules who depend on a rejected module
@@ -322,12 +337,12 @@ Asynchronous modules
 
 It can happen that a module needs to perform some work before it is ready.  For
 example, it could do a rpc to load some data.  In that case, the module can
-simply return a deferred (promise).  In that case, the module system will simply
-wait for the deferred to complete before registering the module.
+simply return a promise.  In that case, the module system will simply
+wait for the promise to complete before registering the module.
 
 .. code-block:: javascript
 
-    odoo.define('module.Something', ['web.ajax'], function (require) {
+    odoo.define('module.Something', function (require) {
         "use strict";
 
         var ajax = require('web.ajax');
@@ -347,11 +362,11 @@ Best practices
 - declare all your dependencies at the top of the module. Also, they should be
   sorted alphabetically by module name. This makes it easier to understand your module.
 - declare all exported values at the end
-- try to avoid exporting too much things from one module.  It is usually better
+- try to avoid exporting too many things from one module.  It is usually better
   to simply export one thing in one (small/smallish) module.
-- asynchronous modules can be used to simplify some use cases.  For example,
-  the *web.dom_ready* module returns a deferred which will be resolved when the
-  dom is actually ready.  So, another module that needs the DOM could simply have
+- asynchronous modules can be used to simplify some use cases. For example,
+  the *web.dom_ready* module returns a promise which will be resolved when the
+  dom is actually ready. So, another module that needs the DOM could simply have
   a *require('web.dom_ready')* statement somewhere, and the code will only be
   executed when the DOM is ready.
 - try to avoid defining more than one module in one file.  It may be convenient
@@ -558,7 +573,7 @@ rendering takes place, then *start* and finally *destroy*.
 
     this method will be called once by the framework when a widget is created
     and in the process of being appended to the DOM.  The *willStart* method is a
-    hook that should return a deferred.  The JS framework will wait for this deferred
+    hook that should return a promise.  The JS framework will wait for this promise
     to complete before moving on to the rendering step.  Note that at this point,
     the widget does not have a DOM root element.  The *willStart* hook is mostly
     useful to perform some asynchronous work, such as fetching data from the server
@@ -581,9 +596,9 @@ rendering takes place, then *start* and finally *destroy*.
     the *start* method.  This is useful to perform some specialized post-rendering
     work.  For example, setting up a library.
 
-    Must return a deferred to indicate when its work is done.
+    Must return a promise to indicate when its work is done.
 
-    :returns: deferred object
+    :returns: promise
 
 .. function:: Widget.destroy()
 
@@ -751,7 +766,7 @@ Inserting a widget in the DOM
     uses `.insertBefore()`_
 
 All of these methods accept whatever the corresponding jQuery method accepts
-(CSS selectors, DOM nodes or jQuery objects). They all return a deferred_
+(CSS selectors, DOM nodes or jQuery objects). They all return a promise
 and are charged with three tasks:
 
 * rendering the widget's root element via
@@ -801,6 +816,34 @@ Widget Guidelines
   or intercepting DOM events) must inherit from :class:`~Widget`
   and correctly implement and use its API and life cycle.
 
+* Make sure to wait for start to be finished before using $el e.g.:
+
+    .. code-block:: javascript
+
+        var Widget = require('web.Widget');
+
+        var AlmostCorrectWidget = Widget.extend({
+            start: function () {
+                this.$el.hasClass(....) // in theory, $el is already set, but you don't know what the parent will do with it, better call super first
+                return this._super.apply(arguments);
+            },
+        });
+
+        var IncorrectWidget = Widget.extend({
+            start: function () {
+                this._super.apply(arguments); // the parent promise is lost, nobody will wait for the start of this widget
+                this.$el.hasClass(....)
+            },
+        });
+
+        var CorrectWidget = Widget.extend({
+            start: function () {
+                var self = this;
+                return this._super.apply(arguments).then(function() {
+                    self.$el.hasClass(....) // this works, no promise is lost and the code executes in a controlled order: first super, then our code.
+                });
+            },
+        });
 
 .. _reference/javascript_reference/qweb:
 
@@ -875,7 +918,7 @@ Here is an example on how this event system could be used:
             this.counter = new Counter(this);
             this.counter.on('valuechange', this, this._onValueChange);
             var def = this.counter.appendTo(this.$el);
-            return $.when(def, this._super.apply(this, arguments);
+            return Promise.all([def, this._super.apply(this, arguments)]);
         },
         _onValueChange: function (val) {
             // do something with val
@@ -922,7 +965,7 @@ The previous example can be updated to use the custom event system:
         start: function () {
             this.counter = new Counter(this);
             var def = this.counter.appendTo(this.$el);
-            return $.when(def, this._super.apply(this, arguments);
+            return Promise.all([def, this._super.apply(this, arguments)]);
         },
         _onValueChange: function(event) {
             // do something with event.data.val
@@ -1378,7 +1421,7 @@ the AbstractView, AbstractController, AbstractRenderer and AbstractModel classes
 .. raw:: html
 
     <svg width="550" height="173">
-        <!-- Created with Method Draw - https://github.com/duopixel/Method-Draw/ -->
+        <!-- Created with Method Draw - http://github.com/duopixel/Method-Draw/ -->
         <path id="svg_1" d="m147.42498,79.79206c0.09944,-8.18859 -0.06363,-16.38812 0.81774,-24.5623c21.65679,2.68895 43.05815,7.08874 64.35,11.04543c1.14304,-4.01519 0.60504,-7.34585 1.59817,-11.05817c13.67878,7.81176 27.23421,15.73476 40.23409,24.03505c-12.47212,9.41539 -26.77809,17.592 -40.82272,25.96494c-0.4548,-3.89916 -0.90967,-7.79828 -1.36448,-11.69744c-20.69972,3.77225 -42.59036,7.6724 -63.42391,11.12096c-1.41678,-7.95741 -1.37514,-16.62327 -1.38888,-24.84846z" stroke-width="1.5" stroke="#000" fill="#fff"/>
         <rect id="svg_3" height="41" width="110" y="57.5" x="7" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="#fff"/>
         <rect stroke="#000" id="svg_5" height="41" width="135" y="20.5" x="328" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" fill="#fff"/>
@@ -1423,8 +1466,6 @@ the AbstractView, AbstractController, AbstractRenderer and AbstractModel classes
     The JS code for the views has been designed to be usable outside of the
     context of a view manager/action manager.  They could be used in a client action,
     or, they could be displayed in the public website (with some work on the assets).
-
-.. _reference/js/widgets:
 
 Field Widgets
 =============
@@ -1868,6 +1909,7 @@ order.
 
     Options:
 
+    - title: title of the bar, displayed on top of the bar options
     - editable: boolean if value is editable
     - current_value: get the current_value from the field that must be present in the view
     - max_value: get the max_value from the field that must be present in the view
@@ -1999,6 +2041,17 @@ Relational fields
     Specialization of many2one field for list views.  The main reason is that we
     need to render many2one fields (in readonly mode) as a text, which does not
     allow opening the related records.
+
+    - Supported field types: *many2one*
+
+- many2one_barcode (FieldMany2OneBarcode)
+    Widget for many2one fields allows to open the camera from a mobile device (Android/iOS) to scan a barcode.
+
+    Specialization of many2one field where the user is allowed to use the native camera to scan a barcode.
+    Then it uses name_search to search this value.
+
+    If this widget is set and user is not using the mobile application,
+    it will fallback to regular many2one (FieldMany2One)
 
     - Supported field types: *many2one*
 
@@ -2211,20 +2264,18 @@ do that, several steps should be done.
 For more information, look into the *control_panel.js* file.
 
 .. _.appendTo():
-    https://api.jquery.com/appendTo/
+    http://api.jquery.com/appendTo/
 
 .. _.prependTo():
-    https://api.jquery.com/prependTo/
+    http://api.jquery.com/prependTo/
 
 .. _.insertAfter():
-    https://api.jquery.com/insertAfter/
+    http://api.jquery.com/insertAfter/
 
 .. _.insertBefore():
-    https://api.jquery.com/insertBefore/
+    http://api.jquery.com/insertBefore/
 
 .. _event delegation:
-    https://api.jquery.com/delegate/
+    http://api.jquery.com/delegate/
 
 .. _datepicker: https://github.com/Eonasdan/bootstrap-datetimepicker
-
-.. _deferred: https://api.jquery.com/category/deferred-object/

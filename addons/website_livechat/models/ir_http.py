@@ -12,4 +12,3 @@ class IrHttp(models.AbstractModel):
     def _get_translation_frontend_modules_domain(cls):
         domain = super(IrHttp, cls)._get_translation_frontend_modules_domain()
         return expression.OR([domain, [('name', '=', 'im_livechat')]])
-

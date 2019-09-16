@@ -4,17 +4,19 @@
 # 
 # Translators:
 # Yaroslav Molochko <onorua@gmail.com>, 2018
+# Zoriana Zaiats, 2018
 # Bohdan Lisnenko, 2018
 # ТАрас <tratatuta@i.ua>, 2018
-# Martin Trigaux, 2018
+# Olga Lugova <trolka.olug@gmail.com>, 2018
+# Martin Trigaux, 2019
 # Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server saas~12.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-08 06:49+0000\n"
-"PO-Revision-Date: 2018-08-24 09:34+0000\n"
+"POT-Creation-Date: 2019-03-20 13:50+0000\n"
+"PO-Revision-Date: 2016-08-05 13:12+0000\n"
 "Last-Translator: Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019\n"
 "Language-Team: Ukrainian (https://www.transifex.com/odoo/teams/41243/uk/)\n"
 "MIME-Version: 1.0\n"
@@ -117,7 +119,7 @@ msgid ""
 "<strong>Lightning Talks</strong>. These are 30 minutes talks on many\n"
 "                                    different topics. Most topics are accepted in lightning talks."
 msgstr ""
-"<strong>Блискавичні виступи</strong>. Це 30 хвилин виступів на\n"
+"<strong>Блискавичні виступи</strong>. Це 30 хвилин розмов на\n"
 "різні теми. Більшість тем приймаються в блискавичних виступах."
 
 #. module: website_event_track
@@ -131,14 +133,14 @@ msgid ""
 "<strong>Regular Talks</strong>. These are standard talks with slides,\n"
 "                                    alocated in slots of 60 minutes."
 msgstr ""
-"<strong>Регулярні виступи</strong>. Це стандартні виступи зі слайдами,\n"
-"                                    виділені в інтервали по 60 хвилин."
+"<strong>Регулярні виступи</strong>. Це стандартні розмови зі слайдами,\n"
+"                                    виділені в слоти по 60 хвилин."
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_track7
 msgid "A technical explanation of how to use computer design apps"
 msgstr ""
-"Технічне пояснення того, як використовувати додатки для комп'ютерного "
+"Технічне пояснення того, як використовувати програми для комп'ютерного "
 "дизайну"
 
 #. module: website_event_track
@@ -150,9 +152,9 @@ msgid ""
 " * Green indicates the track is ready to be pulled to the next stage"
 msgstr ""
 "Етап доріжки канбану вказує на особливі ситуації, що впливають на неї:\n"
-"* Сірий - типова ситуація\n"
-"* Червоний означає, що щось перешкоджає просуванню цієї доріжки\n"
-"* Зелений показує, що доріжка готова до перетягування на наступний етап"
+"  * Сірий - типова ситуація\n"
+"  * Червоний означає, що щось перешкоджає просуванню цієї доріжки\n"
+"  * Зелений показує, що доріжка готова дотягнути до наступного етапу"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.track_view
@@ -167,7 +169,7 @@ msgstr "Прийнятий етап"
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__message_needaction
 msgid "Action Needed"
-msgstr "Дія необхідна"
+msgstr "Необхідна дія"
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__active
@@ -198,7 +200,7 @@ msgstr "Додати нове відстеження"
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_track19
 msgid "Advanced lead management : tips and tricks from the fields"
-msgstr "Удосконалене управління лідами: поради та рекомендації з полів"
+msgstr "Удосконалене управління лідами: поради та рекомендації з практики"
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_track13
@@ -206,7 +208,7 @@ msgid "Advanced reporting"
 msgstr "Розширене звітування"
 
 #. module: website_event_track
-#: code:addons/website_event_track/models/event.py:97
+#: code:addons/website_event_track/models/event.py:94
 #, python-format
 msgid "Agenda"
 msgstr "Порядок денний"
@@ -261,6 +263,11 @@ msgid "Call for Proposals"
 msgstr "Зателефонуйте для пропозицій"
 
 #. module: website_event_track
+#: model:ir.model.fields,field_description:website_event_track.field_event_track__can_publish
+msgid "Can publish"
+msgstr "Можна публікувати"
+
+#. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track_stage__is_cancel
 msgid "Canceled Stage"
 msgstr "Закритий етап"
@@ -284,7 +291,7 @@ msgstr "Конференція"
 #. module: website_event_track
 #: model:mail.template,subject:website_event_track.mail_template_data_track_confirmation
 msgid "Confirmation of ${object.name}"
-msgstr "ПІдтвердження ${object.name}"
+msgstr "Підтвердження ${object.name}"
 
 #. module: website_event_track
 #: model:event.track.stage,name:website_event_track.event_track_stage1
@@ -329,7 +336,7 @@ msgstr ""
 "Визначте кроки, які будуть використовуватися в події зі\n"
 "                 створення відстеження, аж до його закриття.\n"
 "                 Ви будете використовувати ці етапи для відстеження прогресу\n"
-"                 виконання відстеження події."
+"                 вирішення подій."
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_kanban
@@ -526,7 +533,7 @@ msgstr "Підписники (Партнери)"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_search
 msgid "Future Activities"
-msgstr "Майбутня діяльність"
+msgstr "Майбутні дії"
 
 #. module: website_event_track
 #: model:event.sponsor.type,name:website_event_track.event_sponsor_type3
@@ -577,7 +584,7 @@ msgstr "Як спілкуватися з вашою спільнотою"
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_track1
 msgid "How to design a new piece of furniture"
-msgstr "Як створити новий предмет меблів"
+msgstr "Як створити новий елемент меблів"
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_track4
@@ -597,7 +604,7 @@ msgstr "Як поліпшити якість процесів"
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_track2
 msgid "How to integrate hardware materials in your pieces of furniture"
-msgstr "Як інтегрувати матеріали обладнання в меблі"
+msgstr "Як інтегрувати апаратні матеріали в меблі"
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_track8
@@ -623,7 +630,7 @@ msgstr "Якщо позначено, то повідомленя потребу�
 #. module: website_event_track
 #: model:ir.model.fields,help:website_event_track.field_event_track__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "Якщо відмічено, то нові повідомлення будуть потребувати вашої уваги."
+msgstr "Якщо позначено, то нові повідомлення будуть потребувати вашої уваги."
 
 #. module: website_event_track
 #: model:ir.model.fields,help:website_event_track.field_event_track__message_has_error
@@ -647,7 +654,7 @@ msgstr "Зображення"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
 msgid "Introduction"
-msgstr "Загальний огляд"
+msgstr "Вступ"
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__message_is_follower
@@ -751,8 +758,8 @@ msgid ""
 "or some kanban views."
 msgstr ""
 "Середній розмір зображення цього контакту. Воно автоматично змінюється у "
-"вигляді зображення 128x128 пікселів із збереженим форматом зображення. "
-"Використовуйте це поле у вигляді переглядів або деяких переглядів kanban."
+"вигляді зображення 128x128 пікселів зі збереженим форматом зображення. "
+"Використовуйте це поле у формі переглядів або деяких переглядів канбану."
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_website_event_menu__menu_id
@@ -777,7 +784,7 @@ msgstr "Повідомлення"
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_track22
 msgid "Minimal but efficient design"
-msgstr "Мінімальний, але ефективний дизайн"
+msgstr "Мінімальна, але ефективна конструкція"
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_track30
@@ -927,7 +934,7 @@ msgid ""
 "                            it's implemented."
 msgstr ""
 "Поставте тут список документів, таких як слайди\n"
-"презентації. Видаліть вищевказаний t-if, коли\n"
+"презентації. Видаліть вищевказане t-if, коли\n"
 "він реалізований."
 
 #. module: website_event_track
@@ -1085,7 +1092,7 @@ msgid ""
 "Planned: Future activities."
 msgstr ""
 "Етап заснований на діях\n"
-"Протермінований: термін виконання вже минув\n"
+"Протерміновано: термін виконання вже минув\n"
 "Сьогодні: дата дії сьогодні\n"
 "Заплановано: майбутні дії."
 
@@ -1121,7 +1128,7 @@ msgid "Talk Introduction"
 msgstr "Вступ виступу"
 
 #. module: website_event_track
-#: code:addons/website_event_track/models/event.py:102
+#: code:addons/website_event_track/models/event.py:99
 #, python-format
 msgid "Talk Proposals"
 msgstr "Пропозиції виступу"
@@ -1129,18 +1136,18 @@ msgstr "Пропозиції виступу"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
 msgid "Talk Title"
-msgstr "Заголовок розмови"
+msgstr "Заголовок виступу"
 
 #. module: website_event_track
-#: code:addons/website_event_track/models/event.py:96
+#: code:addons/website_event_track/models/event.py:93
 #, python-format
 msgid "Talks"
-msgstr "Розмови"
+msgstr "Виступи"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
 msgid "Talks Types"
-msgstr "Типи розмов"
+msgstr "Типи виступів"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal_success
@@ -1150,7 +1157,7 @@ msgstr "Дякуємо за вашу пропозицію."
 #. module: website_event_track
 #: model:ir.model.fields,help:website_event_track.field_event_track__website_url
 msgid "The full URL to access the document through the website."
-msgstr "URL-адреса повністю, для доступу до документації через сайт"
+msgstr "URL-адреса повністю, для доступу до документації через сайт."
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_track17
@@ -1239,7 +1246,7 @@ msgstr "Відстеження готове"
 #. module: website_event_track
 #: model:mail.message.subtype,description:website_event_track.mt_track_ready
 msgid "Track Ready for Next Stage"
-msgstr "Доріжка готова до наступного етапу"
+msgstr "Відстеження готове до наступного етапу"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_stage_view_form
@@ -1416,12 +1423,12 @@ msgstr "наприклад, Натхненна ділова дискусія"
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_form
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_kanban
 msgid "hours"
-msgstr "години"
+msgstr "годин"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.agenda
 msgid "talks"
-msgstr "розмови"
+msgstr "виступи"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.agenda

@@ -3,17 +3,15 @@
 # * mass_mailing_crm
 # 
 # Translators:
+# Luigi Di Naro <gigidn@gmail.com>, 2018
 # Paolo Valier, 2018
-# Léonie Bouchat <lbo@odoo.com>, 2019
-# Sergio Zanchetta <primes2h@gmail.com>, 2019
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-10-08 06:49+0000\n"
-"PO-Revision-Date: 2018-08-24 09:20+0000\n"
-"Last-Translator: Sergio Zanchetta <primes2h@gmail.com>, 2019\n"
+"PO-Revision-Date: 2018-10-08 06:49+0000\n"
+"Last-Translator: Paolo Valier, 2018\n"
 "Language-Team: Italian (https://www.transifex.com/odoo/teams/41243/it/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -24,23 +22,23 @@ msgstr ""
 #. module: mass_mailing_crm
 #: model:ir.model.fields,field_description:mass_mailing_crm.field_mail_mass_mailing__crm_lead_count
 msgid "Lead Count"
-msgstr "Totale contatti"
+msgstr ""
 
 #. module: mass_mailing_crm
 #: model:mail.mass_mailing,name:mass_mailing_crm.mass_mail_lead_0
 #: model:utm.source,name:mass_mailing_crm.mass_mail_lead_0_utm_source
 msgid "Lead Newsletter"
-msgstr "Newsletter contatto"
+msgstr ""
 
 #. module: mass_mailing_crm
 #: model_terms:ir.ui.view,arch_db:mass_mailing_crm.mail_mass_mailing_view_form
 msgid "Leads"
-msgstr "Contatti"
+msgstr "Leads"
 
 #. module: mass_mailing_crm
 #: model:ir.model,name:mass_mailing_crm.model_mail_mass_mailing
 msgid "Mass Mailing"
-msgstr "Invio massivo e-mail"
+msgstr "Mass Mailing"
 
 #. module: mass_mailing_crm
 #: model_terms:ir.ui.view,arch_db:mass_mailing_crm.mail_mass_mailing_view_form
@@ -50,9 +48,9 @@ msgstr "Opportunità"
 #. module: mass_mailing_crm
 #: model:ir.model.fields,field_description:mass_mailing_crm.field_mail_mass_mailing__crm_opportunities_count
 msgid "Opportunities Count"
-msgstr "Totale opportunità"
+msgstr ""
 
 #. module: mass_mailing_crm
 #: model:ir.model.fields,field_description:mass_mailing_crm.field_mail_mass_mailing__crm_lead_activated
 msgid "Use Leads"
-msgstr "Usa contatti"
+msgstr ""

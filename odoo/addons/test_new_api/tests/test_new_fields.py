@@ -6,7 +6,7 @@ from datetime import date, datetime, time
 from odoo import fields
 from odoo.exceptions import AccessError, UserError
 from odoo.tests import common
-from odoo.tools import mute_logger, float_repr, pycompat
+from odoo.tools import mute_logger, float_repr
 from odoo.tools.date_utils import add, subtract, start_of, end_of
 
 
@@ -18,8 +18,8 @@ class TestFields(common.TransactionCase):
         discussion = self.env.ref('test_new_api.discussion_0')
 
         # read field as a record attribute or as a record item
-        self.assertIsInstance(discussion.name, pycompat.string_types)
-        self.assertIsInstance(discussion['name'], pycompat.string_types)
+        self.assertIsInstance(discussion.name, str)
+        self.assertIsInstance(discussion['name'], str)
         self.assertEqual(discussion['name'], discussion.name)
 
         # read it with method read()
@@ -1162,6 +1162,18 @@ class TestFields(common.TransactionCase):
 
 
 class TestX2many(common.TransactionCase):
+    def test_definition_many2many(self):
+        """ Test the definition of inherited many2many fields. """
+        field = self.env['test_new_api.multi.line']._fields['tags']
+        self.assertEqual(field.relation, 'test_new_api_multi_line_test_new_api_multi_tag_rel')
+        self.assertEqual(field.column1, 'test_new_api_multi_line_id')
+        self.assertEqual(field.column2, 'test_new_api_multi_tag_id')
+
+        field = self.env['test_new_api.multi.line2']._fields['tags']
+        self.assertEqual(field.relation, 'test_new_api_multi_line2_test_new_api_multi_tag_rel')
+        self.assertEqual(field.column1, 'test_new_api_multi_line2_id')
+        self.assertEqual(field.column2, 'test_new_api_multi_tag_id')
+
     def test_search_many2many(self):
         """ Tests search on many2many fields. """
         tags = self.env['test_new_api.multi.tag']
@@ -1493,3 +1505,25 @@ class TestParentStore(common.TransactionCase):
         """ Move multiple nodes to create a cycle. """
         with self.assertRaises(UserError):
             self.cats(1, 3).write({'parent': self.cats(9).id})
+
+
+class TestRequiredMany2one(common.TransactionCase):
+
+    def test_explicit_ondelete(self):
+        field = self.env['test_new_api.req_m2o']._fields['foo']
+        self.assertEqual(field.ondelete, 'cascade')
+
+    def test_implicit_ondelete(self):
+        field = self.env['test_new_api.req_m2o']._fields['bar']
+        self.assertEqual(field.ondelete, 'restrict')
+
+    def test_explicit_set_null(self):
+        Model = self.env['test_new_api.req_m2o']
+        field = Model._fields['foo']
+
+        # invalidate registry to redo the setup afterwards
+        self.registry.registry_invalidated = True
+        self.patch(field, 'ondelete', 'set null')
+
+        with self.assertRaises(ValueError):
+            field._setup_regular_base(Model)

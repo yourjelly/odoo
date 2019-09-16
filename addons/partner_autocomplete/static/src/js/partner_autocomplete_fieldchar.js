@@ -4,7 +4,7 @@ odoo.define('partner.autocomplete.fieldchar', function (require) {
 var basic_fields = require('web.basic_fields');
 var core = require('web.core');
 var field_registry = require('web.field_registry');
-var Autocomplete = require('partner.autocomplete.core');
+var AutocompleteMixin = require('partner.autocomplete.Mixin');
 
 var QWeb = core.qweb;
 
@@ -15,7 +15,7 @@ var FieldChar = basic_fields.FieldChar;
  * name on a res.partner view (indeed, it is designed to change the "name",
  * "website" and "image" fields of records of this model).
  */
-var FieldAutocomplete = FieldChar.extend({
+var FieldAutocomplete = FieldChar.extend(AutocompleteMixin, {
     className: 'o_field_partner_autocomplete',
     debounceSuggestions: 400,
     resetOnAnyFieldChange: true,
@@ -112,7 +112,7 @@ var FieldAutocomplete = FieldChar.extend({
      */
     _selectCompany: function (company) {
         var self = this;
-        Autocomplete.getCreateData(company).then(function (data) {
+        this._getCreateData(company).then(function (data) {
             if (data.logo) {
                 var logoField = self.model === 'res.partner' ? 'image' : 'logo';
                 data.company[logoField] = data.logo;
@@ -135,14 +135,15 @@ var FieldAutocomplete = FieldChar.extend({
             self.trigger_up('field_changed', {
                 dataPointID: self.dataPointID,
                 changes: data.company,
+                onSuccess: function () {
+                    // update the input's value directly
+                    if (self.onlyVAT)
+                        self.$input.val(self._formatValue(company.vat));
+                    else
+                        self.$input.val(self._formatValue(company.name));
+                },
             });
         });
-
-        // update the input's value directly
-        if (this.onlyVAT)
-            this.$input.val(this._formatValue(company.vat));
-        else
-            this.$input.val(this._formatValue(company.name));
         this._removeDropdown();
     },
 
@@ -190,8 +191,8 @@ var FieldAutocomplete = FieldChar.extend({
      */
     _suggestCompanies: function (value) {
         var self = this;
-        if (Autocomplete.validateSearchTerm(value, this.onlyVAT) && Autocomplete.isOnline()) {
-            return Autocomplete.autocomplete(value).then(function (suggestions) {
+        if (this._validateSearchTerm(value, this.onlyVAT) && this._isOnline()) {
+            return this._autocomplete(value).then(function (suggestions) {
                 if (suggestions && suggestions.length) {
                     self.suggestions = suggestions;
                     self._showDropdown();

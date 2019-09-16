@@ -3,11 +3,10 @@
 # * contacts
 # 
 # Translators:
-# Tamás Dombos, 2018
-# Martin Trigaux, 2018
-# krnkris, 2018
-# gezza <geza.nagy@oregional.hu>, 2018
-# Kovács Tibor <kovika@gmail.com>, 2018
+# Kovács Tibor <kovika@gmail.com>, 2017
+# Martin Trigaux, 2017
+# Tamás Dombos, 2017
+# krnkris, 2019
 # Ákos Nagy <akos.nagy@oregional.hu>, 2019
 # 
 msgid ""
@@ -15,7 +14,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-09-18 09:49+0000\n"
-"PO-Revision-Date: 2018-08-24 09:17+0000\n"
+"PO-Revision-Date: 2016-08-05 12:57+0000\n"
 "Last-Translator: Ákos Nagy <akos.nagy@oregional.hu>, 2019\n"
 "Language-Team: Hungarian (https://www.transifex.com/odoo/teams/41243/hu/)\n"
 "MIME-Version: 1.0\n"
@@ -38,7 +37,7 @@ msgstr "Bankok"
 #. module: contacts
 #: model:ir.ui.menu,name:contacts.res_partner_menu_config
 msgid "Configuration"
-msgstr "Konfiguráció"
+msgstr "Beállítások"
 
 #. module: contacts
 #: model:ir.ui.menu,name:contacts.menu_partner_category_form
@@ -48,7 +47,7 @@ msgstr "Kapcsolat címkék"
 #. module: contacts
 #: model:ir.ui.menu,name:contacts.menu_partner_title_contact
 msgid "Contact Titles"
-msgstr "Kapcsolat megszólítások"
+msgstr "Megszólítások"
 
 #. module: contacts
 #: model:ir.actions.act_window,name:contacts.action_contacts

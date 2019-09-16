@@ -5,7 +5,7 @@ from collections import defaultdict
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.tools import float_compare, float_round, float_is_zero, pycompat
+from odoo.tools import float_compare, float_round, float_is_zero
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -24,11 +24,10 @@ class StockInventory(models.Model):
     def post_inventory(self):
         acc_inventories = self.filtered(lambda inventory: inventory.accounting_date)
         for inventory in acc_inventories:
-            res = super(StockInventory, inventory.with_context(force_period_date=inventory.accounting_date)).post_inventory()
+            super(StockInventory, inventory.with_context(force_period_date=inventory.accounting_date)).post_inventory()
         other_inventories = self - acc_inventories
         if other_inventories:
-            res = super(StockInventory, other_inventories).post_inventory()
-        return res
+            super(StockInventory, other_inventories).post_inventory()
 
 
 class StockLocation(models.Model):
@@ -136,7 +135,7 @@ class StockMoveLine(models.Model):
 class StockMove(models.Model):
     _inherit = "stock.move"
 
-    to_refund = fields.Boolean(string="To Refund (update SO/PO)", copy=False,
+    to_refund = fields.Boolean(string="Update quantities on SO/PO", copy=False,
                                help='Trigger a decrease of the delivered/received quantity in the associated Sale Order/Purchase Order')
     value = fields.Float(copy=False)
     remaining_qty = fields.Float(copy=False)
@@ -395,9 +394,9 @@ class StockMove(models.Model):
             })
         return value_to_return
 
-    def _action_done(self):
+    def _action_done(self, cancel_backorder=False):
         self.product_price_update_before_done()
-        res = super(StockMove, self)._action_done()
+        res = super(StockMove, self)._action_done(cancel_backorder=cancel_backorder)
         for move in res:
             # Apply restrictions on the stock move to be able to make
             # consistent accounting entries.
@@ -521,8 +520,6 @@ class StockMove(models.Model):
     def _run_fifo_vacuum(self):
         # Call `_fifo_vacuum` on concerned moves
         fifo_valued_products = self.env['product.product']
-        fifo_valued_products |= self.env['product.template'].search([('property_cost_method', '=', 'fifo')]).mapped(
-            'product_variant_ids')
         fifo_valued_categories = self.env['product.category'].search([('property_cost_method', '=', 'fifo')])
         fifo_valued_products |= self.env['product.product'].search([('categ_id', 'child_of', fifo_valued_categories.ids)])
         moves_to_vacuum = self.search(
@@ -733,6 +730,13 @@ class StockMove(models.Model):
 class StockReturnPicking(models.TransientModel):
     _inherit = "stock.return.picking"
 
+    @api.model
+    def default_get(self, default_fields):
+        res = super(StockReturnPicking, self).default_get(default_fields)
+        for i, k, vals in res.get('product_return_moves', []):
+            vals.update({'to_refund': True})
+        return res
+
     @api.multi
     def _create_returns(self):
         new_picking_id, pick_type_id = super(StockReturnPicking, self)._create_returns()
@@ -747,7 +751,7 @@ class StockReturnPicking(models.TransientModel):
 class StockReturnPickingLine(models.TransientModel):
     _inherit = "stock.return.picking.line"
 
-    to_refund = fields.Boolean(string="To Refund (update SO/PO)", help='Trigger a decrease of the delivered/received quantity in the associated Sale Order/Purchase Order')
+    to_refund = fields.Boolean(string="Update quantities on SO/PO", help='Trigger a decrease of the delivered/received quantity in the associated Sale Order/Purchase Order')
 
 
 class ProcurementGroup(models.Model):

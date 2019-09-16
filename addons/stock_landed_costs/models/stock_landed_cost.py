@@ -18,14 +18,14 @@ class StockMove(models.Model):
 class LandedCost(models.Model):
     _name = 'stock.landed.cost'
     _description = 'Stock Landed Cost'
-    _inherit = 'mail.thread'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(
         'Name', default=lambda self: _('New'),
-        copy=False, readonly=True, track_visibility='always')
+        copy=False, readonly=True, tracking=True)
     date = fields.Date(
         'Date', default=fields.Date.context_today,
-        copy=False, required=True, states={'done': [('readonly', True)]}, track_visibility='onchange')
+        copy=False, required=True, states={'done': [('readonly', True)]}, tracking=True)
     picking_ids = fields.Many2many(
         'stock.picking', string='Transfers',
         copy=False, states={'done': [('readonly', True)]})
@@ -39,12 +39,12 @@ class LandedCost(models.Model):
         'Item Description', states={'done': [('readonly', True)]})
     amount_total = fields.Float(
         'Total', compute='_compute_total_amount',
-        digits=0, store=True, track_visibility='always')
+        digits=0, store=True, tracking=True)
     state = fields.Selection([
         ('draft', 'Draft'),
         ('done', 'Posted'),
         ('cancel', 'Cancelled')], 'State', default='draft',
-        copy=False, readonly=True, track_visibility='onchange')
+        copy=False, readonly=True, tracking=True)
     account_move_id = fields.Many2one(
         'account.move', 'Journal Entry',
         copy=False, readonly=True)
@@ -73,7 +73,7 @@ class LandedCost(models.Model):
     @api.multi
     def _track_subtype(self, init_values):
         if 'state' in init_values and self.state == 'done':
-            return 'stock_landed_costs.mt_stock_landed_cost_open'
+            return self.env.ref('stock_landed_costs.mt_stock_landed_cost_open')
         return super(LandedCost, self)._track_subtype(init_values)
 
     @api.multi

@@ -3,21 +3,22 @@
 # * base_sparse_field
 # 
 # Translators:
+# Mustafa Rawi <mustafa@cubexco.com>, 2018
 # amrnegm <amrnegm.01@gmail.com>, 2018
+# Martin Trigaux, 2018
+# Osoul <baruni@osoul.ly>, 2018
 # Mohammed Albasha <m.albasha.ma@gmail.com>, 2018
 # Ghaith Gammar <g.gammar@saharaifs.net>, 2018
 # Osama Ahmaro <osamaahmaro@gmail.com>, 2018
 # Shaima Safar <shaima.safar@open-inside.com>, 2018
 # Yihya Hugirat <hugirat@gmail.com>, 2018
-# Mustafa Rawi <mustafa@cubexco.com>, 2019
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-09-21 13:17+0000\n"
-"PO-Revision-Date: 2018-08-24 09:16+0000\n"
-"Last-Translator: Mustafa Rawi <mustafa@cubexco.com>, 2019\n"
+"PO-Revision-Date: 2018-09-21 13:17+0000\n"
+"Last-Translator: Yihya Hugirat <hugirat@gmail.com>, 2018\n"
 "Language-Team: Arabic (https://www.transifex.com/odoo/teams/41243/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -28,18 +29,18 @@ msgstr ""
 #. module: base_sparse_field
 #: model:ir.model.fields,field_description:base_sparse_field.field_sparse_fields_test__boolean
 msgid "Boolean"
-msgstr "قيمة منطقية"
+msgstr "بولياني (قيمة منطقية)"
 
 #. module: base_sparse_field
 #: code:addons/base_sparse_field/models/models.py:25
 #, python-format
 msgid "Changing the storing system for field \"%s\" is not allowed."
-msgstr "غير مسموح تغيير نظام التخزين للحقل \"%s\"."
+msgstr "Changing the storing system for field \"%s\" is not allowed."
 
 #. module: base_sparse_field
 #: model:ir.model.fields,field_description:base_sparse_field.field_sparse_fields_test__char
 msgid "Char"
-msgstr "محارف"
+msgstr "حرف"
 
 #. module: base_sparse_field
 #: model:ir.model.fields,field_description:base_sparse_field.field_sparse_fields_test__create_uid
@@ -54,12 +55,12 @@ msgstr "أنشئ في"
 #. module: base_sparse_field
 #: model:ir.model.fields,field_description:base_sparse_field.field_sparse_fields_test__data
 msgid "Data"
-msgstr "بيانات"
+msgstr "البيانات"
 
 #. module: base_sparse_field
 #: model:ir.model.fields,field_description:base_sparse_field.field_sparse_fields_test__display_name
 msgid "Display Name"
-msgstr "الاسم المعروض"
+msgstr "اسم العرض"
 
 #. module: base_sparse_field
 #: model:ir.model.fields,field_description:base_sparse_field.field_ir_model_fields__ttype
@@ -74,7 +75,7 @@ msgstr "الحقول"
 #. module: base_sparse_field
 #: model:ir.model.fields,field_description:base_sparse_field.field_sparse_fields_test__float
 msgid "Float"
-msgstr "فاصلة عائمة"
+msgstr "عشري"
 
 #. module: base_sparse_field
 #: model:ir.model.fields,field_description:base_sparse_field.field_sparse_fields_test__id
@@ -88,8 +89,9 @@ msgid ""
 "serialization field, instead of having its own database column. This cannot "
 "be changed after creation."
 msgstr ""
-"إذا حُدد هذا الحقل، سيتم تخزين قيمته في بنية حقل التسلسل التناثرية، بدلًا من"
-" أن يُخصص لها عمود في قاعدة البيانات. لا يمكن تغيير هذا بعد الإنشاء."
+"If set, this field will be stored in the sparse structure of the "
+"serialization field, instead of having its own database column. This cannot "
+"be changed after creation."
 
 #. module: base_sparse_field
 #: model:ir.model.fields,field_description:base_sparse_field.field_sparse_fields_test__integer
@@ -114,7 +116,7 @@ msgstr "آخر تحديث في"
 #. module: base_sparse_field
 #: selection:sparse_fields.test,selection:0
 msgid "One"
-msgstr "واحد"
+msgstr ""
 
 #. module: base_sparse_field
 #: model:ir.model.fields,field_description:base_sparse_field.field_sparse_fields_test__partner
@@ -125,108 +127,108 @@ msgstr "الشريك"
 #: code:addons/base_sparse_field/models/models.py:27
 #, python-format
 msgid "Renaming sparse field \"%s\" is not allowed"
-msgstr "إعادة تسمية حقل التناثر \"%s\" غير مسموحة"
+msgstr "إعادة تسمية الحقل \"%s\" غير مسموحة"
 
 #. module: base_sparse_field
 #: model:ir.model.fields,field_description:base_sparse_field.field_sparse_fields_test__selection
 msgid "Selection"
-msgstr "قائمة خيارات"
+msgstr "الاختيار"
 
 #. module: base_sparse_field
 #: model:ir.model.fields,field_description:base_sparse_field.field_ir_model_fields__serialization_field_id
 msgid "Serialization Field"
-msgstr "حقل مسلسل"
+msgstr "مجال التسلسل"
 
 #. module: base_sparse_field
 #: code:addons/base_sparse_field/models/models.py:39
 #, python-format
 msgid "Serialization field `%s` not found for sparse field `%s`!"
-msgstr "لم يتم العثور على حقل التسلسل `%s` في حقل التناثر `%s`!"
+msgstr "Serialization field `%s` not found for sparse field `%s`!"
 
 #. module: base_sparse_field
 #: model:ir.model,name:base_sparse_field.model_sparse_fields_test
 msgid "Sparse fields Test"
-msgstr "اختبار حقول التناثر"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:sparse_fields.test,selection:0
 msgid "Two"
-msgstr "اثنان"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "binary"
-msgstr "بيانات ثنائية"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "boolean"
-msgstr "قيمة منطقية"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "char"
-msgstr "محارف"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "date"
-msgstr "تاريخ"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "datetime"
-msgstr "التاريخ والوقت"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "float"
-msgstr "فاصلة عائمة"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "html"
-msgstr "html"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "integer"
-msgstr "عدد صحيح"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "many2many"
-msgstr "علاقة متعدد لمتعدد"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "many2one"
-msgstr "علاقة متعدد لواحد"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "monetary"
-msgstr "قيمة نقدية"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "one2many"
-msgstr "علاقة واحد لمتعدد"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "reference"
-msgstr "المرجع"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "selection"
-msgstr "قائمة خيارات"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "serialized"
-msgstr "مسلسل"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0

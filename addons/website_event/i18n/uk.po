@@ -5,16 +5,16 @@
 # Translators:
 # Yaroslav Molochko <onorua@gmail.com>, 2018
 # Bohdan Lisnenko, 2018
-# ТАрас <tratatuta@i.ua>, 2018
-# Martin Trigaux, 2018
+# Martin Trigaux, 2019
+# ТАрас <tratatuta@i.ua>, 2019
 # Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server saas~12.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-09 10:32+0000\n"
-"PO-Revision-Date: 2018-08-24 09:34+0000\n"
+"POT-Creation-Date: 2019-03-20 13:51+0000\n"
+"PO-Revision-Date: 2016-08-05 13:12+0000\n"
 "Last-Translator: Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019\n"
 "Language-Team: Ukrainian (https://www.transifex.com/odoo/teams/41243/uk/)\n"
 "MIME-Version: 1.0\n"
@@ -63,15 +63,6 @@ msgid "<b>Upcoming Events</b>"
 msgstr "<b>Найближчі події</b>"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_description_full
-msgid ""
-"<br/>\n"
-"                    <i class=\"fa fa-clock-o\"/> To"
-msgstr ""
-"<br/>\n"
-"<i class=\"fa fa-clock-o\"/> До"
-
-#. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_template
 msgid ""
 "<em><i class=\"fa fa-plus-circle\" role=\"img\" aria-label=\"Create\" title=\"Create\"/>\n"
@@ -81,20 +72,41 @@ msgstr ""
 "                    Налаштування та запуск реєстрації подій</em>"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_details
 #: model_terms:ir.ui.view,arch_db:website_event.index
+msgid ""
+"<i class=\"fa fa-clock-o text-primary mx-1\" role=\"img\" aria-label=\"Start"
+" date\" title=\"Start date\"/>"
+msgstr ""
+"<i class=\"fa fa-clock-o text-primary mx-1\" role=\"img\" aria-label=\"Start"
+" date\" title=\"Start date\"/>"
+
+#. module: website_event
+#: model_terms:ir.ui.view,arch_db:website_event.event_details
 #: model_terms:ir.ui.view,arch_db:website_event.registration_complete
 msgid ""
-"<i class=\"fa fa-clock-o\" role=\"img\" aria-label=\"Start date\" "
-"title=\"Start date\"/>"
+"<i class=\"fa fa-clock-o text-primary\" role=\"img\" aria-label=\"Start "
+"date\" title=\"Start date\"/>"
 msgstr ""
-"<i class=\"fa fa-clock-o\" role=\"img\" aria-label=\"Start date\" "
-"title=\"Start date\"/>"
+"<i class=\"fa fa-clock-o text-primary\" role=\"img\" aria-label=\"Start "
+"date\" title=\"Start date\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
-msgid "<i class=\"fa fa-clock-o\"/> From"
-msgstr "<i class=\"fa fa-clock-o\"/> Від"
+msgid ""
+"<i class=\"fa fa-clock-o\"/>\n"
+"                    <span>From</span>"
+msgstr ""
+"<i class=\"fa fa-clock-o\"/>\n"
+"                    <span>Від</span>"
+
+#. module: website_event
+#: model_terms:ir.ui.view,arch_db:website_event.event_description_full
+msgid ""
+"<i class=\"fa fa-clock-o\"/>\n"
+"                    <span>To</span>"
+msgstr ""
+"<i class=\"fa fa-clock-o\"/>\n"
+"                    <span>До</span>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.country_events_list
@@ -107,36 +119,27 @@ msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_complete
-msgid "<i class=\"fa fa-envelope\" role=\"img\" aria-label=\"Email\" title=\"Email\"/>"
-msgstr "<i class=\"fa fa-envelope\" role=\"img\" aria-label=\"Email\" title=\"Email\"/>"
+msgid ""
+"<i class=\"fa fa-envelope text-primary\" role=\"img\" aria-label=\"Email\" "
+"title=\"Email\"/>"
+msgstr ""
+"<i class=\"fa fa-envelope text-primary\" role=\"img\" aria-label=\"Email\" "
+"title=\"Email\"/>"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.country_events
-msgid ""
-"<i class=\"fa fa-flag fa-5x text-muted\" title=\"Local Events\" role=\"img\""
-" aria-label=\"Local Events\"/>"
-msgstr ""
-"<i class=\"fa fa-flag fa-5x text-muted\" title=\"Local Events\" role=\"img\""
-" aria-label=\"Local Events\"/>"
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_right_country_event
-msgid ""
-"<i class=\"fa fa-flag fa-5x\"/>\n"
-"                            Events from Your Country"
-msgstr ""
-"<i class=\"fa fa-flag fa-5x\"/>\n"
-"                            Події у вашій країні"
+#: model_terms:ir.ui.view,arch_db:website_event.s_country_events
+msgid "<i class=\"fa fa-flag\"/> Events from Your Country"
+msgstr "<i class=\"fa fa-flag\"/> Події у вашій країні"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_complete
-msgid "<i class=\"fa fa-fw fa-arrow-right\"/>Add to Google Calendar"
-msgstr "<i class=\"fa fa-fw fa-arrow-right\"/>Додати до Google Calendar"
+msgid "<i class=\"fa fa-fw fa-calendar\"/> Add to Google Calendar"
+msgstr "<i class=\"fa fa-fw fa-calendar\"/> Додати до Google Календаря"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_complete
-msgid "<i class=\"fa fa-fw fa-arrow-right\"/>Add to iCal/Outlook"
-msgstr "<i class=\"fa fa-fw fa-arrow-right\"/>Додати до iCal/Outlook"
+msgid "<i class=\"fa fa-fw fa-calendar\"/> Add to iCal/Outlook"
+msgstr "<i class=\"fa fa-fw fa-calendar\"/> Додати до iCal/Outlook"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.country_events_list
@@ -149,24 +152,40 @@ msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_complete
-msgid "<i class=\"fa fa-phone\" role=\"img\" aria-label=\"Phone\" title=\"Phone\"/>"
-msgstr "<i class=\"fa fa-phone\" role=\"img\" aria-label=\"Phone\" title=\"Phone\"/>"
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.index
-msgid "<i class=\"fa fa-tag\" role=\"img\" aria-label=\"Event type\" title=\"Event type\"/>"
-msgstr "<i class=\"fa fa-tag\" role=\"img\" aria-label=\"Event type\" title=\"Event type\"/>"
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.registration_complete
-msgid "<i class=\"fa fa-user\" role=\"img\" aria-label=\"Name\" title=\"Name\"/>"
-msgstr "<i class=\"fa fa-user\" role=\"img\" aria-label=\"Name\" title=\"Name\"/>"
+msgid ""
+"<i class=\"fa fa-phone text-primary \" role=\"img\" aria-label=\"Phone\" "
+"title=\"Phone\"/>"
+msgstr ""
+"<i class=\"fa fa-phone text-primary \" role=\"img\" aria-label=\"Phone\" "
+"title=\"Phone\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index
 #: model_terms:ir.ui.view,arch_db:website_event.registration_complete
-msgid "<i>to</i>"
-msgstr " <i>до</i>"
+msgid ""
+"<i class=\"fa fa-ticket\" role=\"img\" aria-label=\"Event type\" "
+"title=\"Event type\"/>"
+msgstr ""
+"<i class=\"fa fa-ticket\" role=\"img\" aria-label=\"Event type\" "
+"title=\"Event type\"/>"
+
+#. module: website_event
+#: model_terms:ir.ui.view,arch_db:website_event.registration_complete
+msgid "<i class=\"fa fa-user text-primary\" role=\"img\" aria-label=\"Name\" title=\"Name\"/>"
+msgstr ""
+"<i class=\"fa fa-user text-primary\" role=\"img\" aria-label=\"Name\" "
+"title=\"Name\"/>"
+
+#. module: website_event
+#: model_terms:ir.ui.view,arch_db:website_event.event_right_quotes
+msgid ""
+"<i>Write here a quote from one of your attendees.\n"
+"                        It gives confidence in your\n"
+"                        events.</i>"
+msgstr ""
+"<i>Напишіть тут цитату від одного з ваших учасників.\n"
+"                       Це додасть впевненості вашим\n"
+"                        подіям.</i>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_right_quotes
@@ -174,6 +193,12 @@ msgid "<small>Author</small>"
 msgstr "<small>Автор</small>"
 
 #. module: website_event
+#: model_terms:ir.ui.view,arch_db:website_event.index
+#: model_terms:ir.ui.view,arch_db:website_event.registration_complete
+msgid "<small>to</small>"
+msgstr "<small>до</small>"
+
+#. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.country_events_list
 msgid ""
 "<span class=\"badge badge-danger\" role=\"img\" aria-label=\"Attention: not "
@@ -181,11 +206,6 @@ msgid ""
 msgstr ""
 "<span class=\"badge badge-danger\" role=\"img\" aria-label=\"Attention: not "
 "published\" title=\"Not published\"><i class=\"fa fa-ban\"/></span>"
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.country_events
-msgid "<span class=\"oe_snippet_thumbnail_title\">Local Events</span>"
-msgstr "<span class=\"oe_snippet_thumbnail_title\">Локальні події</span>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.ticket
@@ -211,7 +231,7 @@ msgid ""
 "                    </span>"
 msgstr ""
 "<span itemprop=\"price\" content=\"0\">\n"
-"                        Безкоштовно\n"
+"                        Вільно\n"
 "                    </span>"
 
 #. module: website_event
@@ -222,7 +242,7 @@ msgstr "<span>Онлайн-події</span>"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_template
 msgid "<span>Unlimited</span>"
-msgstr "<span>Необмежено</span>"
+msgstr "<span>Необмежений</span>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_attendee_details
@@ -246,9 +266,8 @@ msgstr "<strong>Взяти участь у Twitter</strong>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_attendee_details
-msgid "<strong>Phone</strong> <span class=\"text-muted\">(Optional)</span>"
-msgstr ""
-"<strong>Телефон</strong> <span class=\"text-muted\">(Необов'язково)</span>"
+msgid "<strong>Phone <small>(optional)</small></strong>"
+msgstr "<strong>Телефон <small>(необов'язково)</small></strong>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.ticket
@@ -280,7 +299,7 @@ msgstr "Всі події"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.res_config_settings_view_form
 msgid "Ask questions to attendees when registering online"
-msgstr "Поставте запитання учасникам при реєстрації онлайн"
+msgstr "Поставте запитання учасникам при реєстрації в Інтернеті"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_attendee_details
@@ -289,8 +308,8 @@ msgstr "Учасник №%s"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_attendee_details
-msgid "Cancel Registration"
-msgstr "Скасувати реєстрацію"
+msgid "Cancel"
+msgstr "Скасувати"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_type_view_form_inherit_website
@@ -298,7 +317,7 @@ msgid ""
 "Check this option to have menus for your event on the\n"
 "                                website: registrations, schedule, map, ..."
 msgstr ""
-"Позначте цей параметр, щоби мати меню для вашої події на\n"
+"Позначте цей параметр, щоб мати меню для вашої події на\n"
 "                                 сайті: реєстрації, розклад, карта, ..."
 
 #. module: website_event
@@ -336,8 +355,8 @@ msgstr "Закрити"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_attendee_details
-msgid "Continue"
-msgstr "Далі"
+msgid "Continue Registration"
+msgstr "Продовжити реєстрацію"
 
 #. module: website_event
 #. openerp-web
@@ -356,7 +375,8 @@ msgid ""
 "Creates menus Introduction, Location and Register on the page  of the event "
 "on the website."
 msgstr ""
-"Створює меню Вступ, Розташування та Реєстрація на сторінці події на сайті."
+"Створює меню Передмова, Розташування та Реєстрація на сторінці події на "
+"сайті."
 
 #. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_event_event__website_menu
@@ -403,7 +423,7 @@ msgstr "Деталі події"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.template_intro
 msgid "Event Introduction"
-msgstr "Вступ події"
+msgstr "Передмова до події"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.template_location
@@ -455,11 +475,6 @@ msgid "Events"
 msgstr "Події"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.country_events
-msgid "Events in visitor's country"
-msgstr "Події у країні відвідувача"
-
-#. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.country_events_list
 msgid "Events:"
 msgstr "Події:"
@@ -479,10 +494,10 @@ msgid "Google Maps"
 msgstr "Google Maps"
 
 #. module: website_event
-#: code:addons/website_event/models/event.py:70
+#: code:addons/website_event/models/event.py:61
 #, python-format
 msgid "Introduction"
-msgstr "Загальний огляд"
+msgstr "Передмова"
 
 #. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_event_event__is_participating
@@ -495,7 +510,7 @@ msgid "Is published"
 msgstr "Опубліковано"
 
 #. module: website_event
-#: code:addons/website_event/models/event.py:71
+#: code:addons/website_event/models/event.py:62
 #, python-format
 msgid "Location"
 msgstr "Розташування"
@@ -537,12 +552,6 @@ msgid "Next month"
 msgstr "Наступного місяця"
 
 #. module: website_event
-#: code:addons/website_event/models/event.py:150
-#, python-format
-msgid "No date has been specified for the event, no file will be generated."
-msgstr "Дата не вказана для події, файл не буде створено."
-
-#. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index
 msgid "No event found"
 msgstr "Не знайдено жодної події"
@@ -566,8 +575,8 @@ msgstr "Онлайн"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index
-msgid "Organized by:"
-msgstr "Організовано:"
+msgid "Organized by"
+msgstr "Організовано"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
@@ -608,7 +617,7 @@ msgstr "Фото з попередніх подій"
 
 #. module: website_event
 #. openerp-web
-#: code:addons/website_event/static/src/js/website_event.js:55
+#: code:addons/website_event/static/src/js/website_event.js:37
 #, python-format
 msgid "Please select at least one ticket."
 msgstr "Будь ласка, виберіть принаймні один квиток."
@@ -644,7 +653,7 @@ msgid "Reference"
 msgstr "Референс"
 
 #. module: website_event
-#: code:addons/website_event/models/event.py:72
+#: code:addons/website_event/models/event.py:63
 #, python-format
 msgid "Register"
 msgstr "Зареєструватися"
@@ -677,7 +686,7 @@ msgstr "Переглянути всі найближчі події"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
 msgid "Social Stream"
-msgstr "Трансляція у соціальних мережах"
+msgstr "Соціальний потік"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.404
@@ -698,8 +707,8 @@ msgstr "Цього місяця"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_attendee_details
-msgid "Ticket Type #"
-msgstr "Тип квитка #"
+msgid "Ticket Type:"
+msgstr "Тип квитка:"
 
 #. module: website_event
 #: code:addons/website_event/controllers/main.py:40
@@ -708,15 +717,15 @@ msgid "Today"
 msgstr "Сьогодні"
 
 #. module: website_event
+#: model_terms:ir.ui.view,arch_db:website_event.layout
+msgid "Toggle navigation"
+msgstr "Управління перемикачем"
+
+#. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index
 msgid "Use the top menu <i>'Content'</i> to create your first event."
 msgstr ""
-"Виберіть <i>'Контент'</i> у верхньому меню щоб створити свою першу подію."
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_description_full
-msgid "Visualize on Google Maps"
-msgstr "Відобразити на Google картах"
+"Виберіть <i>'Контент'</i> у верхньому меню, щоб створити свою першу подію."
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_complete
@@ -744,17 +753,6 @@ msgid "Where"
 msgstr "Де"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_right_quotes
-msgid ""
-"Write here a quote from one of your attendees.\n"
-"                        It gives confidence in your\n"
-"                        events."
-msgstr ""
-"Напишіть тут відгук одного з учасників.\n"
-"Це покаже довіру до ваших \n"
-"подій."
-
-#. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_complete
 msgid "Your registration"
 msgstr "Ваша реєстрація"
@@ -767,7 +765,7 @@ msgstr "конструктор веб-сайту з відкритим кодо�
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_details
 msgid "to"
-msgstr "по"
+msgstr "до"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index

@@ -6,26 +6,26 @@
         <field name="model">hr.leave.allocation</field>
         <field name="arch" type="xml">
             <search string="Search allocations">
+                <field name="employee_id"/>
                 <field name="name"/>
                 <field name="accrual"/>
                 <filter domain="[('state','in',('confirm', 'validate1'))]" string="To Approve" name="approve"/>
                 <filter string="Approved Allocations" domain="[('state', '=', 'validate')]" name="validated"/>
                 <filter string="Accrual Allocations" domain="[('accrual', '=', True)]" name="accrual_allocation"/>
                 <separator/>
-                <filter name="active_types" string="Active Types" domain="[('holiday_status_id.active', '=', True)]" help="Filters only on allocations that belong to an leave type that is 'active' (active field is True)"/>
+                <filter name="active_types" string="Active Types" domain="[('holiday_status_id.active', '=', True)]" help="Filters only on allocations that belong to an time off type that is 'active' (active field is True)"/>
                 <separator/>
                 <filter string="Unread Messages" name="message_needaction" domain="[('message_needaction','=',True)]"/>
                 <separator/>
-                <filter string="My Department Leaves" name="department" domain="[('department_id.member_ids.user_id', '=', uid)]" help="My Department Leaves"/>
-                <filter string="My Team Leaves" name="my_team_leaves" domain="[('employee_id.parent_id.user_id', '=', uid)]" groups="hr_holidays.group_hr_holidays_manager" help="Leaves of Your Team Member"/>
+                <filter string="My Department Time Off" name="department" domain="[('department_id.member_ids.user_id', '=', uid)]" help="My Department Time Off"/>
+                <filter string="My Team Time Off" name="my_team_leaves" domain="[('employee_id.parent_id.user_id', '=', uid)]" groups="hr_holidays.group_hr_holidays_manager" help="Time Off of Your Team Member"/>
                 <separator/>
                 <filter name="year" string="Current Year"
                     domain="[('holiday_status_id.active', '=', True)]" help="Active Allocations"/>
                 <separator/>
                 <filter string="My Allocations" name="my_leaves" domain="[('employee_id.user_id', '=', uid)]"/>
                 <separator/>
-                <field name="employee_id"/>
-                <field name="department_id"/>
+                <field name="department_id" operator="child_of"/>
                 <field name="holiday_status_id"/>
                 <separator/>
                 <filter string="Late Activities" name="activities_overdue"
@@ -68,7 +68,7 @@
                             <field name="type_request_unit" invisible="1"/>
                             <field name="name" attrs="{'readonly': [('state', 'not in', ('draft', 'confirm'))]}"/>
                             <field name="holiday_status_id" context="{'employee_id':employee_id}"
-                                domain="[('valid', '=', True), ('allocation_type', 'in', ['fixed_allocation', 'no'])]"/>
+                                domain="[('valid', '=', True), ('allocation_type', '=', 'fixed_allocation')]"/>
 
                             <field name="number_of_days" invisible="1"/>
                             <label for="number_of_days" string="Duration"/>
@@ -153,7 +153,7 @@
                             attrs="{'required': [('accrual', '=', True)]}"/>
                         <field name="unit_per_interval"
                             attrs="{'required': [('accrual', '=', True)]}"/>
-                        <span class="ml8">of leaves every</span>
+                        <span class="ml8">of time off every</span>
                         <field name="interval_number" class="ml8"
                             attrs="{'required': [('accrual', '=', True)]}"/>
                         <field name="interval_unit"
@@ -172,7 +172,7 @@
             <tree decoration-danger="state == 'refuse'" decoration-info="state == 'draft'" string="Allocation Requests"
                    decoration-bf="message_needaction == True">
                 <field name="employee_id"/>
-                <field name="department_id" invisible="1"/>
+                <field name="department_id"/>
                 <field name="holiday_status_id"/>
                 <field name="name"/>
                 <field name="duration_display"/>
@@ -202,6 +202,9 @@
         <field name="priority">32</field>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='employee_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='department_id']" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>
             <xpath expr="//button[@name='action_approve']" position="attributes">
@@ -273,7 +276,10 @@
         <field name="view_mode">tree,kanban,form,activity</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Create a new leave allocation request
+                Create a new time off allocation request
+            </p><p>
+                Time Off Officers allocate time off days to employees (e.g. paid time off).<br/>
+                Employees request allocations to Time Off Officers (e.g. recuperation days).
             </p>
         </field>
         <field name="context">{}</field>
@@ -301,7 +307,10 @@
         <field name="domain">[]</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Create a new leave allocation request
+                Create a new time off allocation request
+            </p><p>
+                Time Off Officers allocate time off days to employees (e.g. paid time off).<br/>
+                Employees request allocations to Time Off Officers (e.g. recuperation days).
             </p>
         </field>
     </record>
@@ -315,14 +324,17 @@
         <field name="domain">[]</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Create a new leave allocation
+                Create a new time off allocation
+            </p><p>
+                Time Off Officers allocate time off days to employees (e.g. paid time off).<br/>
+                Employees request allocations to Time Off Officers (e.g. recuperation days).
             </p>
         </field>
     </record>
 
     <menuitem
         id="menu_open_allocation"
-        name="Allocations Requests"
+        name="Allocation Requests"
         parent="menu_hr_holidays_my_leaves"
         action="hr_leave_allocation_action_my"
         sequence="6"/>

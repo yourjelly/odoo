@@ -3,31 +3,42 @@
 # * website_sale
 # 
 # Translators:
-# Vladimir Lukianov <lvm.mobile@gmail.com>, 2018
-# Максим Дронь <dronmax@gmail.com>, 2018
-# Sergey Vilizhanin, 2018
+# Vladimir Lukianov <lvm.mobile@gmail.com>, 2017
+# Denis Trepalin <zekarious@gmail.com>, 2017
+# Evgeny <transingularity@gmail.com>, 2017
+# Max Belyanin <maxbelyanin@gmail.com>, 2017
+# Denis Baranov <baranov@itlibertas.com>, 2017
+# Masha Koc <mariya.kos.ua@gmail.com>, 2017
 # Viktor Pogrebniak <vp@aifil.ru>, 2018
-# sergeiruzkiicode <sergei.ruzki@icode.by>, 2018
-# Martin Trigaux, 2018
-# Collex100, 2018
-# Dmitry sky <d.v.selitsky@gmail.com>, 2018
+# Sergey Vilizhanin, 2018
+# Василий Коробатов <boxat@mail.ru>, 2018
+# Максим Дронь <dronmax@gmail.com>, 2019
+# Dmitry sky <d.v.selitsky@gmail.com>, 2019
+# sergeiruzkiicode <sergei.ruzki@icode.by>, 2019
 # Dinar <gabbasov@it-projects.info>, 2019
-# Oleg Kuryan <oleg@ventor.tech>, 2019
 # Vasiliy Korobatov <korobatov@gmail.com>, 2019
+# Martin Trigaux, 2019
+# Collex100, 2019
+# Oleg Kuryan <oleg@ventor.tech>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server saas~12.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-29 10:09+0000\n"
-"PO-Revision-Date: 2018-08-24 09:35+0000\n"
-"Last-Translator: Vasiliy Korobatov <korobatov@gmail.com>, 2019\n"
+"POT-Creation-Date: 2019-03-20 13:49+0000\n"
+"PO-Revision-Date: 2016-08-05 13:14+0000\n"
+"Last-Translator: Oleg Kuryan <oleg@ventor.tech>, 2019\n"
 "Language-Team: Russian (https://www.transifex.com/odoo/teams/41243/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: ru\n"
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
+
+#. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.products
+msgid "\" category."
+msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.option_collapse_categories_recursive
@@ -50,14 +61,29 @@ msgstr ""
 "                #1"
 
 #. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.cart_summary
-msgid "/shop/payment"
+#: model_terms:ir.ui.view,arch_db:website_sale.address
+msgid "/shop/address"
+msgstr ""
+
+#. module: website_sale
+#: model:ir.model.fields,help:website_sale.field_product_image__image
+msgid "1024px * 1024px"
+msgstr ""
+
+#. module: website_sale
+#: model:ir.model.fields,help:website_sale.field_product_image__image_medium
+msgid "128px * 128px"
 msgstr ""
 
 #. module: website_sale
 #: model:product.template.attribute.value,name:website_sale.product_template_attribute_value_1
 msgid "2 year"
 msgstr "2 года"
+
+#. module: website_sale
+#: model:ir.model.fields,help:website_sale.field_product_image__image_large
+msgid "256px * 256px"
+msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product
@@ -69,6 +95,11 @@ msgstr ""
 "30-дневная гарантия возврата денег<br/>\n"
 "                            Бесплатная доставка в США<br/>\n"
 "                            Купите сейчас, вы получите через 2 дня"
+
+#. module: website_sale
+#: model:ir.model.fields,help:website_sale.field_product_image__image_small
+msgid "64px * 64px"
+msgstr ""
 
 #. module: website_sale
 #: model:mail.template,body_html:website_sale.mail_template_sale_cart_recovery
@@ -109,7 +140,7 @@ msgid ""
 "                            <table width=\"100%\">\n"
 "                                <tr>\n"
 "                                    <td style=\"padding: 10px; width:150px;\">\n"
-"                                        <img src=\"/web/image/product.product/${line.product_id.id}/image\" height=\"100px\" width=\"100px\" alt=\"Product image\"/>\n"
+"                                        <img src=\"/web/image/product.product/${line.product_id.id}/image_medium\" height=\"100px\" width=\"100px\" alt=\"Product image\"/>\n"
 "                                    </td>\n"
 "                                    <td>\n"
 "                                        <strong>${line.product_id.display_name}</strong><br/>${line.name}\n"
@@ -236,7 +267,7 @@ msgstr ""
 "                    Моя корзина"
 
 #. module: website_sale
-#: code:addons/website_sale/models/crm_team.py:58
+#: code:addons/website_sale/models/crm_team.py:54
 #, python-format
 msgid ""
 "<p class=\"o_view_nocontent_smiling_face\">\n"
@@ -274,10 +305,9 @@ msgid ""
 msgstr ""
 
 #. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.product
 #: model_terms:ir.ui.view,arch_db:website_sale.shop_product_carousel
 msgid ""
-"<span class=\"fa fa-chevron-left\" role=\"img\" aria-label=\"Previous\" "
+"<span class=\"fa fa-chevron-left p-2\" role=\"img\" aria-label=\"Previous\" "
 "title=\"Previous\"/>"
 msgstr ""
 
@@ -301,9 +331,10 @@ msgid "<span class=\"fa fa-chevron-left\"/> Previous"
 msgstr ""
 
 #. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.product
 #: model_terms:ir.ui.view,arch_db:website_sale.shop_product_carousel
-msgid "<span class=\"fa fa-chevron-right\" role=\"img\" aria-label=\"Next\" title=\"Next\"/>"
+msgid ""
+"<span class=\"fa fa-chevron-right p-2\" role=\"img\" aria-label=\"Next\" "
+"title=\"Next\"/>"
 msgstr ""
 
 #. module: website_sale
@@ -357,11 +388,6 @@ msgstr ""
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.sort
 msgid "<span>Sort by</span>"
-msgstr ""
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.payment_confirmation_status
-msgid "<span>Your payment has been authorized.</span>"
 msgstr ""
 
 #. module: website_sale
@@ -461,7 +487,7 @@ msgstr "Заброшенные корзины"
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/models/crm_team.py:45
+#: code:addons/website_sale/models/crm_team.py:41
 #: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:19
 #: model:ir.actions.act_window,name:website_sale.action_abandoned_orders_ecommerce
 #: model:ir.actions.act_window,name:website_sale.action_view_abandoned_tree
@@ -488,6 +514,11 @@ msgid ""
 "Abandoned carts are all carts left unconfirmed by website visitors. You can "
 "find them in *Website > Orders > Abandoned Carts*. From there you can send "
 "recovery emails to visitors who entered their contact details."
+msgstr ""
+
+#. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.product_image_view_kanban
+msgid "Acceptable file size"
 msgstr ""
 
 #. module: website_sale
@@ -522,7 +553,7 @@ msgstr "Добавить в корзину"
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/js/website_sale_options.js:88
+#: code:addons/website_sale/static/src/js/website_sale_options.js:87
 #, python-format
 msgid "Add to cart"
 msgstr ""
@@ -547,6 +578,11 @@ msgstr "Разрешать покупателю сравнить продукт�
 #: model:ir.model.fields,help:website_sale.field_product_pricelist__selectable
 msgid "Allow the end user to choose this price list"
 msgstr "Разрешить конечному пользователю выбор этого прайс-листа"
+
+#. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.website_sale_pricelist_form_view
+msgid "Allow to use on"
+msgstr "Позволить использовать на"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_product__alternative_product_ids
@@ -574,7 +610,7 @@ msgstr ""
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.coupon_form
 msgid "Apply"
-msgstr "Применить"
+msgstr "Применить "
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
@@ -640,6 +676,11 @@ msgid "Best Sellers"
 msgstr "Лучшие продажи"
 
 #. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_image__image
+msgid "Big-sized Image"
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.confirmation
 #: model_terms:ir.ui.view,arch_db:website_sale.payment
 msgid "Billing"
@@ -674,6 +715,16 @@ msgstr ""
 #. module: website_sale
 #: model:product.public.category,name:website_sale.public_category_cabinets
 msgid "Cabinets"
+msgstr ""
+
+#. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_image__can_image_be_zoomed
+msgid "Can image be zoomed"
+msgstr ""
+
+#. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_image__can_image_raw_be_zoomed
+msgid "Can image raw be zoomed"
 msgstr ""
 
 #. module: website_sale
@@ -742,6 +793,11 @@ msgstr ""
 "экранов."
 
 #. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_public_category__website_description
+msgid "Category Description"
+msgstr ""
+
+#. module: website_sale
 #: model:product.public.category,name:website_sale.public_category_chairs
 msgid "Chairs"
 msgstr ""
@@ -781,14 +837,14 @@ msgstr "Нажмите сюда"
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:28
+#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:24
 #, python-format
 msgid "Click on <em>Continue</em> to create the product."
 msgstr "Нажмите <em>Далее</em> для создания продукта."
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:63
+#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:60
 #, python-format
 msgid "Click on this button so your customers can see it."
 msgstr "Нажмите на эту кнопку, чтобы ваши клиенты могли видеть это."
@@ -883,7 +939,7 @@ msgstr "Контакт"
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/js/website_sale_options.js:87
+#: code:addons/website_sale/static/src/js/website_sale_options.js:86
 #, python-format
 msgid "Continue Shopping"
 msgstr ""
@@ -1038,14 +1094,19 @@ msgstr "Сделано"
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:38
+#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:35
 #, python-format
 msgid "Double click here to set an image describing your product."
 msgstr ""
 
 #. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.products
+msgid "Drag building blocks here to customize the header for \""
+msgstr ""
+
+#. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:53
+#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:50
 #, python-format
 msgid "Drag this website block and drop it in your page."
 msgstr "Потяните блок веб-сайта и поместите на вашу страницу."
@@ -1077,7 +1138,7 @@ msgstr "Править"
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:32
+#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:29
 #, python-format
 msgid "Edit the price of this product by clicking on the amount."
 msgstr "Редактируйте цену этого продукта, кликая на сумму."
@@ -1104,7 +1165,7 @@ msgstr "Мастер составления эл. писем"
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:24
+#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:20
 #, python-format
 msgid "Enter a name for your new product"
 msgstr "Введите название вашего нового продукта"
@@ -1116,14 +1177,22 @@ msgid "Error ! You cannot create recursive categories."
 msgstr "Ошибка! Нельзя создавать рекурсивные категории."
 
 #. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.product_template_form_view
-msgid "Extra Images"
-msgstr ""
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.extra_info_option
 msgid "Extra Info"
 msgstr "Доп. инфо"
+
+#. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_product__product_template_image_ids
+#: model:ir.model.fields,field_description:website_sale.field_product_template__product_template_image_ids
+#: model_terms:ir.ui.view,arch_db:website_sale.product_template_form_view
+msgid "Extra Product Images"
+msgstr ""
+
+#. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_product__product_variant_image_ids
+#: model_terms:ir.ui.view,arch_db:website_sale.product_product_view_form_easy_inherit_website_sale
+msgid "Extra Variant Images"
+msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
@@ -1180,6 +1249,11 @@ msgid "HTTP Routing"
 msgstr "Маршрутизация HTTP"
 
 #. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.product_image_view_kanban
+msgid "Huge file size. The image should be optimized/reduced."
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.payment_sale_note
 msgid "I agree to the"
 msgstr "Я согласен с"
@@ -1227,7 +1301,6 @@ msgstr ""
 " снимать уведомления, полученные и вы снесут содержание."
 
 #. module: website_sale
-#: model:ir.model.fields,field_description:website_sale.field_product_image__image
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__image
 msgid "Image"
 msgstr "Изображение"
@@ -1238,10 +1311,9 @@ msgid "Image Name"
 msgstr "Название изображения"
 
 #. module: website_sale
-#: model:ir.model.fields,field_description:website_sale.field_product_product__product_image_ids
-#: model:ir.model.fields,field_description:website_sale.field_product_template__product_image_ids
-msgid "Images"
-msgstr "Изображения"
+#: model:ir.model.fields,help:website_sale.field_product_image__image_original
+msgid "Image in its original size, as it was uploaded."
+msgstr ""
 
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_res_config_settings__module_website_sale_stock
@@ -1249,7 +1321,7 @@ msgid "Installs the \"Website Delivery Information\" application"
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/controllers/main.py:521
+#: code:addons/website_sale/controllers/main.py:554
 #, python-format
 msgid "Invalid Email! Please enter a valid email address."
 msgstr ""
@@ -1282,7 +1354,7 @@ msgid "Issue invoices to customers"
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/models/sale_order.py:174
+#: code:addons/website_sale/models/sale_order.py:180
 #, python-format
 msgid "It is forbidden to modify a sales order which is not in draft status."
 msgstr ""
@@ -1300,6 +1372,11 @@ msgstr ""
 #. module: website_sale
 #: model:product.public.category,name:website_sale.public_category_lamps
 msgid "Lamps"
+msgstr ""
+
+#. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_image__image_large
+msgid "Large-sized Image"
 msgstr ""
 
 #. module: website_sale
@@ -1344,14 +1421,14 @@ msgstr ""
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:15
+#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:11
 #, python-format
 msgid "Let's create your first product."
 msgstr ""
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:67
+#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:64
 #, python-format
 msgid ""
 "Let's now take a look at your administration dashboard to get your eCommerce"
@@ -1377,6 +1454,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "Manage promotion &amp; coupon programs"
 msgstr "Управление акциями и скидками"
+
+#. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_image__image_medium
+msgid "Medium-sized Image"
+msgstr ""
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__image_medium
@@ -1438,7 +1520,7 @@ msgstr ""
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/controllers/main.py:993
+#: code:addons/website_sale/controllers/main.py:1027
 #: code:addons/website_sale/static/src/js/website_sale.editor.js:30
 #, python-format
 msgid "New Product"
@@ -1471,6 +1553,11 @@ msgid "No shipping management on website"
 msgstr "Нет управление доставки на вебсайте"
 
 #. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.website_sale_pricelist_form_view
+msgid "None website"
+msgstr "Ни один вебсайт"
+
+#. module: website_sale
 #: selection:res.company,website_sale_onboarding_payment_acquirer_state:0
 msgid "Not done"
 msgstr ""
@@ -1499,15 +1586,13 @@ msgstr "Odoo"
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:58
+#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:55
 #, python-format
 msgid "Once you click on <b>Save</b>, your product is updated."
 msgstr "Как только вы нажмете <b>Сохранить</b>, ваш продукт обновится."
 
 #. module: website_sale
-#: code:addons/website_sale/models/crm_team.py:39
 #: model:ir.ui.menu,name:website_sale.menu_report_sales
-#, python-format
 msgid "Online Sales"
 msgstr "Онлайн Заказы"
 
@@ -1528,13 +1613,20 @@ msgstr "Open Source eCommerce"
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:71
+#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:68
 #, python-format
 msgid "Open your website app here."
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/models/sale_order.py:236
+#: model_terms:ir.ui.view,arch_db:website_sale.product_image_view_kanban
+msgid ""
+"Optimization required! Reduce the image size or increase your compression "
+"settings."
+msgstr ""
+
+#. module: website_sale
+#: code:addons/website_sale/models/sale_order.py:294
 #, python-format
 msgid "Option for:"
 msgstr "Вариант для:"
@@ -1545,7 +1637,7 @@ msgid "Option not available"
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/models/sale_order.py:238
+#: code:addons/website_sale/models/sale_order.py:296
 #, python-format
 msgid "Option:"
 msgstr "Вариант:"
@@ -1622,6 +1714,11 @@ msgid "Orders/Day"
 msgstr "Заказы/День"
 
 #. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_image__image_original
+msgid "Original Image"
+msgstr ""
+
+#. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__parent_id
 msgid "Parent Category"
 msgstr "Категория предка"
@@ -1679,7 +1776,7 @@ msgstr ""
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_website_sale_payment_acquirer_onboarding_wizard__payment_method
 msgid "Payment Method"
-msgstr "Метод Оплаты"
+msgstr "Метод оплаты"
 
 #. module: website_sale
 #: model:ir.ui.menu,name:website_sale.menu_ecommerce_payment_transactions
@@ -1719,19 +1816,19 @@ msgid "Powered by"
 msgstr "На базе"
 
 #. module: website_sale
-#: code:addons/website_sale/controllers/backend.py:113
+#: code:addons/website_sale/controllers/backend.py:111
 #, python-format
 msgid "Previous Month"
 msgstr "Предыдущий месяц"
 
 #. module: website_sale
-#: code:addons/website_sale/controllers/backend.py:111
+#: code:addons/website_sale/controllers/backend.py:109
 #, python-format
 msgid "Previous Week"
 msgstr "Предыдущая неделя"
 
 #. module: website_sale
-#: code:addons/website_sale/controllers/backend.py:115
+#: code:addons/website_sale/controllers/backend.py:113
 #, python-format
 msgid "Previous Year"
 msgstr "Предыдущий год"
@@ -1771,7 +1868,7 @@ msgstr "Печать"
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/js/website_sale_options.js:86
+#: code:addons/website_sale/static/src/js/website_sale_options.js:85
 #, python-format
 msgid "Proceed to Checkout"
 msgstr ""
@@ -1809,7 +1906,7 @@ msgid "Product Image"
 msgstr "Изображения продукта "
 
 #. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.product_template_form_view
+#: model_terms:ir.ui.view,arch_db:website_sale.product_image_view_kanban
 #: model_terms:ir.ui.view,arch_db:website_sale.view_product_image_form
 msgid "Product Images"
 msgstr "Изображения продукта"
@@ -1836,8 +1933,14 @@ msgstr ""
 
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_product_template
+#: model:ir.model.fields,field_description:website_sale.field_product_image__product_tmpl_id
 msgid "Product Template"
 msgstr "Шаблон продукта"
+
+#. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_image__product_variant_id
+msgid "Product Variant"
+msgstr "Вариант продукта"
 
 #. module: website_sale
 #: model:ir.ui.menu,name:website_sale.product_catalog_variants
@@ -1918,6 +2021,31 @@ msgid "Quantity"
 msgstr "Количество"
 
 #. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_image__image_raw_big
+msgid "Raw Big-sized Image"
+msgstr ""
+
+#. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_image__image_raw_large
+msgid "Raw Large-sized Image"
+msgstr ""
+
+#. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_image__image_raw_medium
+msgid "Raw Medium-sized Image"
+msgstr ""
+
+#. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_image__image_raw_original
+msgid "Raw Original Image"
+msgstr ""
+
+#. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_image__image_raw_small
+msgid "Raw Small-sized Image"
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.view_sales_order_filter_ecommerce_abondand
 msgid "Recovery Email Sent"
 msgstr ""
@@ -1926,11 +2054,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_sale.view_sales_order_filter_ecommerce_abondand
 msgid "Recovery Email to Send"
 msgstr "Письмо для восстановления отослано"
-
-#. module: website_sale
-#: model:ir.model.fields,field_description:website_sale.field_product_image__product_tmpl_id
-msgid "Related Product"
-msgstr "Похожие продукты"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.cart_lines
@@ -1980,11 +2103,6 @@ msgid "Sale"
 msgstr "Продажа"
 
 #. module: website_sale
-#: model:ir.model,name:website_sale.model_sale_order
-msgid "Sale Order"
-msgstr "Заказ"
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.sale_report_view_graph_website
 msgid "Sale Report"
 msgstr "Отчет по продажам"
@@ -2009,6 +2127,11 @@ msgstr "Отчет по анализу продаж"
 #: model:ir.model,name:website_sale.model_crm_team
 msgid "Sales Channels"
 msgstr "Каналы продаж"
+
+#. module: website_sale
+#: model:ir.model,name:website_sale.model_sale_order
+msgid "Sales Order"
+msgstr "Заказ продаж"
 
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_sale_order_line
@@ -2053,7 +2176,7 @@ msgstr ""
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:20
+#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:16
 #, python-format
 msgid ""
 "Select <b>New Product</b> to create it and manage its properties to boost "
@@ -2105,7 +2228,9 @@ msgid "Send a recovery email when a cart is abandoned"
 msgstr ""
 
 #. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_image__sequence
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__sequence
+#: model_terms:ir.ui.view,arch_db:website_sale.view_product_image_form
 msgid "Sequence"
 msgstr "Нумерация"
 
@@ -2198,6 +2323,11 @@ msgid "Size Y"
 msgstr "Размер Y"
 
 #. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_image__image_small
+msgid "Small-sized Image"
+msgstr ""
+
+#. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__image_small
 msgid "Small-sized image"
 msgstr "Маленькое изображение"
@@ -2222,7 +2352,7 @@ msgid "Sold"
 msgstr "Продано"
 
 #. module: website_sale
-#: code:addons/website_sale/controllers/main.py:539
+#: code:addons/website_sale/controllers/main.py:572
 #, python-format
 msgid "Some required fields are empty."
 msgstr "Некоторые обязательные поля не заполнены."
@@ -2315,7 +2445,7 @@ msgstr "TIN / VAT"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.total
 msgid "Taxes:"
-msgstr "Налоги:"
+msgstr "Налоги"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.terms
@@ -2345,14 +2475,14 @@ msgid "The SEPA QR Code informations are not set correctly."
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/models/sale_order.py:198
+#: code:addons/website_sale/models/sale_order.py:204
 #, python-format
 msgid ""
 "The given combination does not exist therefore it cannot be added to cart."
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/models/sale_order.py:184
+#: code:addons/website_sale/models/sale_order.py:190
 #, python-format
 msgid "The given product does not exist therefore it cannot be added to cart."
 msgstr ""
@@ -2493,9 +2623,9 @@ msgstr ""
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:45
+#: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:42
 #, python-format
-msgid "Upload an image from your local library."
+msgid "Upload a file from your local library."
 msgstr ""
 
 #. module: website_sale
@@ -2524,7 +2654,6 @@ msgstr ""
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_website
 #: model:ir.model.fields,field_description:website_sale.field_account_invoice__website_id
-#: model:ir.model.fields,field_description:website_sale.field_product_pricelist__website_id
 #: model:ir.model.fields,field_description:website_sale.field_product_product__website_id
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__website_id
 #: model:ir.model.fields,field_description:website_sale.field_sale_order__website_id
@@ -2559,17 +2688,17 @@ msgstr "Сайт Магазина"
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__website_meta_description
 msgid "Website meta description"
-msgstr "Мета-описание веб-сайта"
+msgstr "Мета описание сайта"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__website_meta_keywords
 msgid "Website meta keywords"
-msgstr "Мета-ключевые слова веб-сайта"
+msgstr "Мета-ключевые слова сайта"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__website_meta_title
 msgid "Website meta title"
-msgstr "Мета-название Веб-сайта"
+msgstr "Мета заголовок сайта"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__website_meta_og_img
@@ -2685,6 +2814,11 @@ msgid "Your cart is empty!"
 msgstr "Ваша корзина пуста!"
 
 #. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.payment_confirmation_status
+msgid "Your payment has been authorized."
+msgstr "Ваш платеж был подтвержден."
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.cart
 msgid "Your previous cart has already been completed."
 msgstr "Ваша предыдущая корзина уже завершена"
@@ -2708,7 +2842,7 @@ msgstr "код..."
 #: model:ir.ui.menu,name:website_sale.menu_ecommerce_settings
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_form_view
 msgid "eCommerce"
-msgstr "eCommerce"
+msgstr "Интернет-магазин"
 
 #. module: website_sale
 #: model:ir.actions.act_window,name:website_sale.product_public_category_action
@@ -2756,12 +2890,6 @@ msgid "items)"
 msgstr "наименование)"
 
 #. module: website_sale
-#: model:product.product,weight_uom_name:website_sale.product_product_1
-#: model:product.template,weight_uom_name:website_sale.product_product_1_product_template
-msgid "kg"
-msgstr "кг"
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product
 #: model_terms:ir.ui.view,arch_db:website_sale.products
 msgid "ml-2"
@@ -2786,6 +2914,11 @@ msgstr "Правила и условия"
 #: model_terms:ir.ui.view,arch_db:website_sale.confirmation
 msgid "to follow your order."
 msgstr ""
+
+#. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_pricelist__website_id
+msgid "website"
+msgstr "веб-сайт"
 
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_website_sale_payment_acquirer_onboarding_wizard

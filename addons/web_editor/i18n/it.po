@@ -3,6 +3,7 @@
 # * web_editor
 # 
 # Translators:
+# Sergio Zanchetta <primes2h@gmail.com>, 2018
 # Cesare Cugnasco <cesare.cugnasco@gmail.com>, 2018
 # Simone Bernini <simone@aperturelabs.it>, 2018
 # SebastianoPistore <SebastianoPistore.info@protonmail.ch>, 2018
@@ -12,8 +13,7 @@
 # Martin Trigaux, 2018
 # Luigi Di Naro <gigidn@gmail.com>, 2018
 # Paolo Valier, 2018
-# Léonie Bouchat <lbo@odoo.com>, 2019
-# Sergio Zanchetta <primes2h@gmail.com>, 2019
+# Léonie Bouchat <lbo@odoo.com>, 2018
 # 
 msgid ""
 msgstr ""
@@ -21,7 +21,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-10-02 10:06+0000\n"
 "PO-Revision-Date: 2018-08-24 09:33+0000\n"
-"Last-Translator: Sergio Zanchetta <primes2h@gmail.com>, 2019\n"
+"Last-Translator: Léonie Bouchat <lbo@odoo.com>, 2018\n"
 "Language-Team: Italian (https://www.transifex.com/odoo/teams/41243/it/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -37,8 +37,6 @@ msgid ""
 "'Alt tag' specifies an alternate text for an image, if the image cannot be "
 "displayed (slow connection, missing image, screen reader ...)."
 msgstr ""
-"Il tag \"alt\" indica un testo alternativo per l'immagine se non può essere "
-"visualizzata (connessione lenta, immagine mancante, lettore a schermo...)."
 
 #. module: web_editor
 #. openerp-web
@@ -46,29 +44,27 @@ msgstr ""
 #, python-format
 msgid "'Title tag' is shown as a tooltip when you hover the picture."
 msgstr ""
-"Il tag \"title\" viene mostrato come suggerimento quando il mouse viene "
-"posizionato sull'immagine."
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:36
 #, python-format
 msgid "(ALT Tag)"
-msgstr "(tag ALT)"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:45
 #, python-format
 msgid "(TITLE Tag)"
-msgstr "(tag TITLE)"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:195
 #, python-format
 msgid "(URL or Embed)"
-msgstr "(URL o di incorporamento)"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -80,7 +76,7 @@ msgstr "(YouTube, Vimeo, Vine, Instagram, DailyMotion o Youku)"
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippets
 msgid "<i class=\"fa fa-th-large\"/> First Panel"
-msgstr "<i class=\"fa fa-th-large\"/> Primo pannello"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -90,15 +86,13 @@ msgid ""
 "A server error occured. Please check you correctly signed in and that the "
 "file you are saving is correctly formatted."
 msgstr ""
-"Errore del server. Controllare che l'accesso sia avvenuto correttamente e "
-"che il file da salvare abbia il formato corretto."
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:200
 #, python-format
 msgid "Accepts"
-msgstr "Accettati"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -119,7 +113,7 @@ msgstr "Aggiungi"
 #: code:addons/web_editor/static/src/xml/editor.xml:108
 #, python-format
 msgid "Add an image URL"
-msgstr "Aggiungere URL dell'immagine"
+msgstr "Aggiungi un URL a un immagine"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippets
@@ -131,7 +125,7 @@ msgstr "Aggiungi blocchi"
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1063
 #, python-format
 msgid "Align center"
-msgstr "Allinea al centro"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -145,28 +139,28 @@ msgstr "Allinea a sinistra"
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1064
 #, python-format
 msgid "Align right"
-msgstr "Allinea a destra"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:101
 #, python-format
 msgid "Alternate Upload"
-msgstr "Caricamento alternativo"
+msgstr "Upload alternativo"
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:331
 #, python-format
 msgid "Aspect Ratio"
-msgstr "Rapporto di forma"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:370
 #, python-format
 msgid "Assign a focal point that will always be visible"
-msgstr "Assegnare un punto focale che sia sempre visibile"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_attachment
@@ -176,14 +170,14 @@ msgstr "Allegato"
 #. module: web_editor
 #: model:ir.model.fields,field_description:web_editor.field_ir_attachment__local_url
 msgid "Attachment URL"
-msgstr "URL allegato"
+msgstr "URL Allegato"
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:197
 #, python-format
 msgid "Attention"
-msgstr "Attenzione"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -205,49 +199,49 @@ msgstr "Colore sfondo"
 #: code:addons/web_editor/static/src/js/editor/snippets.options.js:951
 #, python-format
 msgid "Background Image Sizing"
-msgstr "Dimensionamento immagine di sfondo"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:411
 #, python-format
 msgid "Background height"
-msgstr "Altezza sfondo"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:423
 #, python-format
 msgid "Background position"
-msgstr "Posizione sfondo"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:449
 #, python-format
 msgid "Background repeat"
-msgstr "Ripetizione sfondo"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:397
 #, python-format
 msgid "Background size"
-msgstr "Dimensione sfondo"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:400
 #, python-format
 msgid "Background width"
-msgstr "Larghezza sfondo"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/snippets.editor.js:255
 #, python-format
 msgid "Block"
-msgstr "Blocco"
+msgstr "Blocca"
 
 #. module: web_editor
 #. openerp-web
@@ -261,7 +255,7 @@ msgstr "Grassetto"
 #: code:addons/web_editor/static/src/js/widgets/ace.js:833
 #, python-format
 msgid "Careful !"
-msgstr "Attenzione !"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -275,14 +269,14 @@ msgstr "Centrato"
 #: code:addons/web_editor/static/src/js/widgets/widgets.js:81
 #, python-format
 msgid "Change media description and tooltip"
-msgstr "Modifica descrizione e suggerimento dell'elemento"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:197
 #, python-format
 msgid "Checked"
-msgstr "Verificato"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -306,7 +300,7 @@ msgstr "Codice"
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1056
 #, python-format
 msgid "Code View"
-msgstr "Vista codice"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -327,14 +321,14 @@ msgstr "Colonna"
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:82
 #, python-format
 msgid "Common colors"
-msgstr "Colori comuni"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:365
 #, python-format
 msgid "Contain"
-msgstr "Contenuto"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -348,14 +342,14 @@ msgstr "Contenuto da tradurre"
 #: code:addons/web_editor/static/src/xml/editor.xml:196
 #, python-format
 msgid "Copy-paste your URL or embed code here"
-msgstr "Copiare-incollare qui il codice URL o di incorporamento"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:364
 #, python-format
 msgid "Cover"
-msgstr "Copertina"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model.fields,field_description:web_editor.field_web_editor_converter_test_sub__create_uid
@@ -373,7 +367,7 @@ msgstr "Creato il"
 #: code:addons/web_editor/static/src/js/widgets/widgets.js:1628
 #, python-format
 msgid "Crop Image"
-msgstr "Ritaglia immagine"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -387,7 +381,7 @@ msgstr "Personalizzato"
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1068
 #, python-format
 msgid "Custom Color"
-msgstr "Colore personalizzato"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -401,7 +395,7 @@ msgstr "Personalizza"
 #: code:addons/web_editor/static/src/xml/editor.xml:200
 #, python-format
 msgid "Dailymotion"
-msgstr "Dailymotion"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -416,7 +410,7 @@ msgstr "Predefinito"
 #: code:addons/web_editor/static/src/xml/editor.xml:450
 #, python-format
 msgid "Define if/how the background image will be repeated"
-msgstr "Indicare se/come l'immagine di sfondo verrà ripetuta"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -435,7 +429,7 @@ msgstr "Descrizione"
 #: code:addons/web_editor/static/src/xml/editor.xml:138
 #, python-format
 msgid "Discard"
-msgstr "Abbandona"
+msgstr "Annulla"
 
 #. module: web_editor
 #: model:ir.model.fields,field_description:web_editor.field_web_editor_converter_test_sub__display_name
@@ -454,7 +448,7 @@ msgstr "Documento"
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1080
 #, python-format
 msgid "Document Style"
-msgstr "Stile documento"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -468,7 +462,7 @@ msgstr "Doppio clic per modificare"
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1009
 #, python-format
 msgid "Drag an image here"
-msgstr "Trascina qui un'immagine"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -482,7 +476,7 @@ msgstr "Trascina per spostare"
 #: code:addons/web_editor/static/src/xml/snippets.xml:19
 #, python-format
 msgid "Duplicate Container"
-msgstr "Duplica contenitore"
+msgstr "Duplica Container"
 
 #. module: web_editor
 #. openerp-web
@@ -511,63 +505,63 @@ msgstr "File / Immagine"
 #: code:addons/web_editor/static/src/xml/editor.xml:273
 #, python-format
 msgid "Flat"
-msgstr "Piatto"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:348
 #, python-format
 msgid "Flip Horizontal"
-msgstr "Riflessione orizzontale"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:349
 #, python-format
 msgid "Flip Vertical"
-msgstr "Riflessione verticale"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1006
 #, python-format
 msgid "Float Left"
-msgstr "Allinea a sinistra"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1008
 #, python-format
 msgid "Float None"
-msgstr "Nessun allineamento"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1007
 #, python-format
 msgid "Float Right"
-msgstr "Allinea a destra"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1070
 #, python-format
 msgid "Font Color"
-msgstr "Colore carattere"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:997
 #, python-format
 msgid "Font Family"
-msgstr "Famiglia carattere"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:998
 #, python-format
 msgid "Font Size"
-msgstr "Dimensione carattere"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -581,7 +575,7 @@ msgstr "Formato"
 #: code:addons/web_editor/static/src/js/widgets/widgets.js:1614
 #, python-format
 msgid "Free"
-msgstr "Libero"
+msgstr "Gratuito"
 
 #. module: web_editor
 #. openerp-web
@@ -595,12 +589,12 @@ msgstr "Schermo intero"
 #: code:addons/web_editor/static/src/xml/backend.xml:21
 #, python-format
 msgid "Fullscreen"
-msgstr "Schermo intero"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_http
 msgid "HTTP Routing"
-msgstr "Instradamento HTTP"
+msgstr "Routing HTTP"
 
 #. module: web_editor
 #. openerp-web
@@ -664,35 +658,35 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:221
 #, python-format
 msgid "Hide Dailymotion logo"
-msgstr "Nascondi logo Dailymotion"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:218
 #, python-format
 msgid "Hide Youtube logo"
-msgstr "Nascondi logo YouTube"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:215
 #, python-format
 msgid "Hide fullscreen button"
-msgstr "Nascondi pulsante schermo intero"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:212
 #, python-format
 msgid "Hide player controls"
-msgstr "Nascondi controlli di riproduzione"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:224
 #, python-format
 msgid "Hide sharing button"
-msgstr "Nascondi pulsante di condivisione"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -714,8 +708,8 @@ msgid ""
 "If you discard the current edition, all unsaved changes will be lost. You "
 "can cancel to return to the edition mode."
 msgstr ""
-"Se viene abbandonata la versione corrente, tutte le modifiche non salvate "
-"andranno perse. È possibile annullare per tornare alla modalità di modifica."
+"Se si scarta la versione corrente, tutte le modifiche non salvate andranno "
+"perse. È possibile annullare per tornare alla modalità di modifica."
 
 #. module: web_editor
 #. openerp-web
@@ -725,8 +719,6 @@ msgid ""
 "If you reset this file, all your customizations will be lost as it will be "
 "reverted to the default file."
 msgstr ""
-"Con il ripristino del file verranno perse tutte le personalizzazioni, sarà "
-"ripristinato a quello predefinito."
 
 #. module: web_editor
 #. openerp-web
@@ -779,7 +771,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1061
 #, python-format
 msgid "Indent"
-msgstr "Aumenta rientro"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -793,7 +785,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1002
 #, python-format
 msgid "Insert Image"
-msgstr "Inserisci immagine"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -807,7 +799,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1026
 #, python-format
 msgid "Insert Video"
-msgstr "Inserisci video"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -835,14 +827,14 @@ msgstr "Corsivo"
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1065
 #, python-format
 msgid "Justify full"
-msgstr "Giustificato"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1075
 #, python-format
 msgid "Keyboard shortcuts"
-msgstr "Scorciatoie da tastiera"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -855,24 +847,24 @@ msgstr "Grande"
 #. module: web_editor
 #: model:ir.model.fields,field_description:web_editor.field_web_editor_converter_test_sub____last_update
 msgid "Last Modified on"
-msgstr "Ultima modifica il"
+msgstr "Data di ultima modifica"
 
 #. module: web_editor
 #: model:ir.model.fields,field_description:web_editor.field_web_editor_converter_test_sub__write_uid
 msgid "Last Updated by"
-msgstr "Ultimo aggiornamento di"
+msgstr "Ultima modifica di"
 
 #. module: web_editor
 #: model:ir.model.fields,field_description:web_editor.field_web_editor_converter_test_sub__write_date
 msgid "Last Updated on"
-msgstr "Ultimo aggiornamento il"
+msgstr "Ultima modifica il"
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:996
 #, python-format
 msgid "Line Height"
-msgstr "Altezza riga"
+msgstr "Altezza Riga"
 
 #. module: web_editor
 #. openerp-web
@@ -886,21 +878,21 @@ msgstr "Collegamento"
 #: code:addons/web_editor/static/src/xml/editor.xml:244
 #, python-format
 msgid "Link Label"
-msgstr "Etichetta collegamento"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/widgets/widgets.js:1346
 #, python-format
 msgid "Link to"
-msgstr "Collegamento a"
+msgstr "Link a"
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:209
 #, python-format
 msgid "Loop"
-msgstr "Ciclo continuo"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -908,7 +900,7 @@ msgstr "Ciclo continuo"
 #: code:addons/web_editor/static/src/xml/editor.xml:260
 #, python-format
 msgid "Medium"
-msgstr "Medio"
+msgstr "Mezzo"
 
 #. module: web_editor
 #: model:ir.model.fields,field_description:web_editor.field_web_editor_converter_test_sub__name
@@ -927,7 +919,7 @@ msgstr "Successivo"
 #: code:addons/web_editor/static/src/xml/editor.xml:452
 #, python-format
 msgid "No repeat"
-msgstr "Nessuna ripetizione"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -958,7 +950,7 @@ msgstr "Ok"
 #: code:addons/web_editor/static/src/js/editor/translator.js:97
 #, python-format
 msgid "Ok, never show me this again"
-msgstr "Ok, non mostrare più"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -966,7 +958,7 @@ msgstr "Ok, non mostrare più"
 #: code:addons/web_editor/static/src/xml/editor.xml:299
 #, python-format
 msgid "Open in new window"
-msgstr "Apri in nuova finestra"
+msgstr "Apri in una nuova finestra"
 
 #. module: web_editor
 #. openerp-web
@@ -980,49 +972,49 @@ msgstr "Opzioni"
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1051
 #, python-format
 msgid "Ordered list"
-msgstr "Elenco ordinato"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1060
 #, python-format
 msgid "Outdent"
-msgstr "Riduci rientro"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:270
 #, python-format
 msgid "Outline"
-msgstr "Contorno"
+msgstr "Outline"
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:272
 #, python-format
 msgid "Outline-Rounded"
-msgstr "Contorno e arrotondato"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:154
 #, python-format
 msgid "Padding"
-msgstr "Padding"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1059
 #, python-format
 msgid "Paragraph"
-msgstr "Paragrafo"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1079
 #, python-format
 msgid "Paragraph formatting"
-msgstr "Formattazione paragrafo"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1062,57 +1054,57 @@ msgstr "Qweb"
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field
 msgid "Qweb Field"
-msgstr "Campo qweb"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_contact
 msgid "Qweb Field Contact"
-msgstr "Campo qweb contatto"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_date
 msgid "Qweb Field Date"
-msgstr "Campo qweb data"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_datetime
 msgid "Qweb Field Datetime"
-msgstr "Campo qweb data e ora"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_duration
 msgid "Qweb Field Duration"
-msgstr "Campo qweb durata"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_float
 msgid "Qweb Field Float"
-msgstr "Campo qweb float"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_html
 msgid "Qweb Field HTML"
-msgstr "Campo qweb HTML"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_image
 msgid "Qweb Field Image"
-msgstr "Campo qweb immagine"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_integer
 msgid "Qweb Field Integer"
-msgstr "Campo qweb intero"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_many2one
 msgid "Qweb Field Many to One"
-msgstr "Campo qweb molti a uno"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_monetary
 msgid "Qweb Field Monerary"
-msgstr "Campo qweb monetario"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_relative
@@ -1122,31 +1114,31 @@ msgstr ""
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_selection
 msgid "Qweb Field Selection"
-msgstr "Campo qweb selezione"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_text
 msgid "Qweb Field Text"
-msgstr "Campo qweb testo"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_qweb
 msgid "Qweb Field qweb"
-msgstr "Campo qweb qweb"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.js:326
 #, python-format
 msgid "Readonly field"
-msgstr "Campo sola lettura"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1084
 #, python-format
 msgid "Redo"
-msgstr "Ripeti"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1160,21 +1152,21 @@ msgstr "Rimuovi"
 #: code:addons/web_editor/static/src/xml/snippets.xml:20
 #, python-format
 msgid "Remove Block"
-msgstr "Rimuovi blocco"
+msgstr "Elimina Blocco"
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:995
 #, python-format
 msgid "Remove Font Style"
-msgstr "Rimuovi stile del carattere"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1012
 #, python-format
 msgid "Remove Image"
-msgstr "Rimuovi immagine"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1188,21 +1180,21 @@ msgstr "Ripeti"
 #: code:addons/web_editor/static/src/xml/editor.xml:453
 #, python-format
 msgid "Repeat both"
-msgstr "Ripeti in x e in y"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:454
 #, python-format
 msgid "Repeat x"
-msgstr "Ripeti in x"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:455
 #, python-format
 msgid "Repeat y"
-msgstr "Ripeti in y"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1216,7 +1208,7 @@ msgstr "Azzera"
 #: code:addons/web_editor/static/src/xml/editor.xml:352
 #, python-format
 msgid "Reset Image"
-msgstr "Ripristina immagine"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1230,35 +1222,35 @@ msgstr ""
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1003
 #, python-format
 msgid "Resize Full"
-msgstr "Ridimensiona al 100%"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1004
 #, python-format
 msgid "Resize Half"
-msgstr "Ridimensiona al 50%"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1005
 #, python-format
 msgid "Resize Quarter"
-msgstr "Ridimensiona al 25%"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:344
 #, python-format
 msgid "Rotate Left"
-msgstr "Ruota a sinistra"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:345
 #, python-format
 msgid "Rotate Right"
-msgstr "Ruota a destra"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1272,14 +1264,14 @@ msgstr "Arrotondato"
 #: code:addons/web_editor/static/src/xml/ace.xml:11
 #, python-format
 msgid "SCSS (CSS)"
-msgstr "SCSS (CSS)"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/widgets/ace.js:364
 #, python-format
 msgid "SCSS file: %s"
-msgstr "File SCSS: %s"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1304,21 +1296,21 @@ msgstr "Ricerca"
 #: code:addons/web_editor/static/src/xml/snippets.xml:42
 #, python-format
 msgid "Search Contact"
-msgstr "Ricerca contatto"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/snippets.xml:13
 #, python-format
 msgid "Select Parent Container"
-msgstr "Seleziona contenitore padre"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/widgets/widgets.js:1123
 #, python-format
 msgid "Select a Media"
-msgstr "Selezionare un contenuto"
+msgstr "Seleziona un Oggetto"
 
 #. module: web_editor
 #. openerp-web
@@ -1332,21 +1324,21 @@ msgstr "Seleziona un immagine"
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1010
 #, python-format
 msgid "Select from files"
-msgstr "Seleziona da file"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/widgets/ace.js:572
 #, python-format
 msgid "Server error"
-msgstr "Errore del server"
+msgstr "Errore Server"
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:424
 #, python-format
 msgid "Set the starting position of the background image."
-msgstr "Impostare la posizione iniziale dell'immagine di sfondo."
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1356,15 +1348,13 @@ msgid ""
 "Sets the width and height of the background image in percent of the parent "
 "element."
 msgstr ""
-"Impostare larghezza e altezza dell'immagine di sfondo in percentuale "
-"all'elemento base."
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:161
 #, python-format
 msgid "Shadow"
-msgstr "Ombra"
+msgstr "Ombreggiatura"
 
 #. module: web_editor
 #. openerp-web
@@ -1423,28 +1413,28 @@ msgstr ""
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1031
 #, python-format
 msgid "Table"
-msgstr "Tabella"
+msgstr "Tavolo"
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/widgets/ace.js:362
 #, python-format
 msgid "Template ID: %s"
-msgstr "ID modello: %s"
+msgstr "IDTemplate : %s"
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1077
 #, python-format
 msgid "Text formatting"
-msgstr "Formattazione testo"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1019
 #, python-format
 msgid "Text to display"
-msgstr "Testo da visualizzare"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1454,29 +1444,29 @@ msgid ""
 "The image could not be deleted because it is used in the\n"
 "               following pages or views:"
 msgstr ""
-"L'immagine non può essere eliminata, è utilizzata nelle\n"
-"               seguenti pagine o viste:"
+"L'immagine non può essere rimossa in quanto in uso nelle \n"
+"seguenti pagine o viste:"
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/widgets/widgets.js:1056
 #, python-format
 msgid "The provided url does not reference any supported video"
-msgstr "L'URL fornito non fa riferimento ad alcun video supportato"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/widgets/widgets.js:1050
 #, python-format
 msgid "The provided url is not valid"
-msgstr "L'URL fornito non è valido"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:74
 #, python-format
 msgid "Theme colors"
-msgstr "Colori del tema"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1505,7 +1495,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:320
 #, python-format
 msgid "This image is an external image"
-msgstr "Questa è un'immagine esterna"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1519,14 +1509,14 @@ msgstr ""
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1020
 #, python-format
 msgid "To what URL should this link go?"
-msgstr "A quale URL dovrebbe portare questo collegamento?"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:44
 #, python-format
 msgid "Tooltip"
-msgstr "Suggerimento"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1573,14 +1563,14 @@ msgstr "Trasparente"
 #: code:addons/web_editor/static/src/xml/editor.xml:250
 #, python-format
 msgid "URL or Email"
-msgstr "URL / E-mail"
+msgstr "Url o Email"
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:991
 #, python-format
 msgid "Underline"
-msgstr "Sottolineato"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1608,14 +1598,14 @@ msgstr ""
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1050
 #, python-format
 msgid "Unordered list"
-msgstr "Elenco non ordinato"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:99
 #, python-format
 msgid "Upload an image"
-msgstr "Carica immagine"
+msgstr "Carica un'immagine"
 
 #. module: web_editor
 #. openerp-web
@@ -1629,7 +1619,7 @@ msgstr "Carica immagine senza ottimizzazione"
 #: code:addons/web_editor/static/src/xml/editor.xml:437
 #, python-format
 msgid "Vertical"
-msgstr "Verticale"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1651,14 +1641,14 @@ msgstr ""
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1027
 #, python-format
 msgid "Video URL?"
-msgstr "URL video?"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:195
 #, python-format
 msgid "Video code"
-msgstr "Codice video"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_ui_view
@@ -1670,14 +1660,14 @@ msgstr "Vista"
 #: code:addons/web_editor/static/src/xml/editor.xml:200
 #, python-format
 msgid "Vimeo"
-msgstr "Vimeo"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:200
 #, python-format
 msgid "Vine.co"
-msgstr "Vine.co"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_web_editor_converter_test_sub
@@ -1695,14 +1685,14 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/ace.xml:10
 #, python-format
 msgid "XML (HTML)"
-msgstr "XML (HTML)"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:151
 #, python-format
 msgid "Xl"
-msgstr "Molto grande"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1716,28 +1706,28 @@ msgstr "Stai per entrare in modalità traduzione."
 #: code:addons/web_editor/static/src/xml/editor.xml:200
 #, python-format
 msgid "Youku"
-msgstr "Youku"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:200
 #, python-format
 msgid "Youtube"
-msgstr "YouTube"
+msgstr "Youtube"
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:340
 #, python-format
 msgid "Zoom In"
-msgstr "Zoom avanti"
+msgstr "Zoomare in avanti"
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:341
 #, python-format
 msgid "Zoom Out"
-msgstr "Zoom indietro"
+msgstr "Zoomare all'indietro"
 
 #. module: web_editor
 #. openerp-web
@@ -1754,7 +1744,7 @@ msgstr "e"
 #: code:addons/web_editor/static/src/xml/editor.xml:440
 #, python-format
 msgid "auto"
-msgstr "automatica"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1768,11 +1758,11 @@ msgstr "https://www.odoo.com/logo.png"
 #: code:addons/web_editor/static/src/xml/editor.xml:200
 #, python-format
 msgid "videos"
-msgstr "video"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:107
 #, python-format
 msgid "— or —"
-msgstr "— oppure —"
+msgstr "— o —"

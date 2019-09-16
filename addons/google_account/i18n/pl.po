@@ -3,11 +3,11 @@
 # * google_account
 # 
 # Translators:
-# Dariusz Żbikowski <darek@krokus.com.pl>, 2018
-# Piotr Szlązak <szlazakpiotr@gmail.com>, 2018
-# Marcin Młynarczyk <mlynarczyk@gmail.com>, 2018
-# Andrzej Donczew <a.donczew@hadron.eu.com>, 2018
 # Piotr Cierkosz <piotr.w.cierkosz@gmail.com>, 2019
+# Dariusz Żbikowski <darek@krokus.com.pl>, 2019
+# Piotr Szlązak <szlazakpiotr@gmail.com>, 2019
+# Marcin Młynarczyk <mlynarczyk@gmail.com>, 2019
+# Andrzej Donczew <a.donczew@hadron.eu.com>, 2019
 # Grażyna Grzelak <grazyna.grzelak@openglobe.pl>, 2019
 # 
 msgid ""
@@ -15,7 +15,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-09-21 13:17+0000\n"
-"PO-Revision-Date: 2018-08-24 09:18+0000\n"
+"PO-Revision-Date: 2016-08-05 12:58+0000\n"
 "Last-Translator: Grażyna Grzelak <grazyna.grzelak@openglobe.pl>, 2019\n"
 "Language-Team: Polish (https://www.transifex.com/odoo/teams/41243/pl/)\n"
 "MIME-Version: 1.0\n"
@@ -38,18 +38,6 @@ msgstr "Data utworzenia"
 #: model:ir.model.fields,field_description:google_account.field_google_service__display_name
 msgid "Display Name"
 msgstr "Nazwa wyświetlana"
-
-#. module: google_account
-#: code:addons/google_account/models/google_service.py:203
-#, python-format
-msgid "Error while requesting Google Services"
-msgstr ""
-
-#. module: google_account
-#: code:addons/google_account/models/google_service.py:199
-#, python-format
-msgid "Error while requesting Google Services: %s"
-msgstr ""
 
 #. module: google_account
 #: model:ir.model,name:google_account.model_google_service
@@ -113,16 +101,10 @@ msgstr ""
 "jest zły lub już obecnie wygasły [%s]"
 
 #. module: google_account
-#: code:addons/google_account/models/google_service.py:204
+#: code:addons/google_account/models/google_service.py:193
 #, python-format
 msgid "Something went wrong with your request to google"
 msgstr "Coś poszło nie tak z twoim zapytaniem do Google"
-
-#. module: google_account
-#: code:addons/google_account/models/google_service.py:200
-#, python-format
-msgid "Something went wrong with your request to google: %s"
-msgstr ""
 
 #. module: google_account
 #: code:addons/google_account/models/google_service.py:131

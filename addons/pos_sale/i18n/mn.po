@@ -3,18 +3,15 @@
 # * pos_sale
 # 
 # Translators:
-# Otgonbayar.A <gobi.mn@gmail.com>, 2018
 # Martin Trigaux, 2018
-# Baskhuu Lodoikhuu <baskhuujacara@gmail.com>, 2019
-# Baasansuren Sharavsuren <baasansuren@bumanit.mn>, 2019
-# 
+# Otgonbayar.A <gobi.mn@gmail.com>, 2018
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-09-21 13:16+0000\n"
-"PO-Revision-Date: 2018-08-24 09:23+0000\n"
-"Last-Translator: Baasansuren Sharavsuren <baasansuren@bumanit.mn>, 2019\n"
+"PO-Revision-Date: 2018-09-21 13:16+0000\n"
+"Last-Translator: Otgonbayar.A <gobi.mn@gmail.com>, 2018\n"
 "Language-Team: Mongolian (https://www.transifex.com/odoo/teams/41243/mn/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -81,7 +78,7 @@ msgstr ""
 #. module: pos_sale
 #: model:ir.actions.act_window,name:pos_sale.pos_session_action_from_crm_team
 msgid "Open Sessions"
-msgstr "Шинэ Сэшн"
+msgstr ""
 
 #. module: pos_sale
 #: model:ir.model.fields,field_description:pos_sale.field_crm_team__dashboard_graph_group_pos
@@ -117,7 +114,7 @@ msgstr "Борлуулалтын Цэгийн Сэшн"
 #. module: pos_sale
 #: model:ir.model.fields,field_description:pos_sale.field_crm_team__pos_config_ids
 msgid "Point of Sales"
-msgstr "Борлуулалтын цэг"
+msgstr ""
 
 #. module: pos_sale
 #: selection:sale.report,state:0
@@ -138,7 +135,7 @@ msgstr "Борлуулалт"
 #. module: pos_sale
 #: model:ir.model,name:pos_sale.model_sale_report
 msgid "Sales Analysis Report"
-msgstr "Борлуулалтын шинжилгээ тайлан"
+msgstr ""
 
 #. module: pos_sale
 #: model:ir.model,name:pos_sale.model_crm_team
@@ -175,7 +172,7 @@ msgstr "Борлуулагч"
 #. module: pos_sale
 #: model_terms:ir.ui.view,arch_db:pos_sale.crm_team_salesteams_view_kanban_inherit_pos_sale
 msgid "Session Running"
-msgstr "Явагдаж буй"
+msgstr ""
 
 #. module: pos_sale
 #: model:ir.model.fields,field_description:pos_sale.field_crm_team__pos_order_amount_total

@@ -3,7 +3,8 @@
 # * sale_management
 # 
 # Translators:
-# bb76cd9ac0cb7e20167a14728edb858b, 2018
+# Martin Trigaux, 2018
+# fr rev <e2ffr02@hotmail.com>, 2018
 # Maxime Chambreuil <mchambreuil@ursainfosystems.com>, 2018
 # Richard Mathot <rim@odoo.com>, 2018
 # Fabri Yohann <psn@fabri.pw>, 2018
@@ -12,22 +13,17 @@
 # Melanie Bernard <mbe@odoo.com>, 2018
 # Xavier Belmere <Info@cartmeleon.com>, 2018
 # Frédéric Fleurial Monfils <ffm@cetic.be>, 2018
-# Lucas Deliege <lud@openerp.com>, 2018
 # Eloïse Stilmant <est@odoo.com>, 2018
+# Lucas Deliege <lud@openerp.com>, 2018
 # Fred Gilson <fgi@odoo.com>, 2018
 # Marie Willemyns <mwi@odoo.com>, 2018
-# Martin Trigaux, 2018
-# Sébastien BÜHL <buhlsebastien@gmail.com>, 2019
-# gdp Odoo <gdp@odoo.com>, 2019
-# Cécile Collart <cco@odoo.com>, 2019
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-08 13:50+0000\n"
-"PO-Revision-Date: 2018-08-24 09:24+0000\n"
-"Last-Translator: Cécile Collart <cco@odoo.com>, 2019\n"
+"POT-Creation-Date: 2018-10-08 06:48+0000\n"
+"PO-Revision-Date: 2018-10-08 06:48+0000\n"
+"Last-Translator: Marie Willemyns <mwi@odoo.com>, 2018\n"
 "Language-Team: French (https://www.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -45,6 +41,17 @@ msgstr "% de remise"
 #: model:sale.order.template.line,name:sale_management.sale_order_template_line_1
 msgid "4 Person Desk"
 msgstr ""
+
+#. module: sale_management
+#: model_terms:ir.ui.view,arch_db:sale_management.res_config_settings_view_form
+msgid ""
+"<em attrs=\"{'invisible': "
+"[('module_sale_quotation_builder','=',False)]}\">Warning: this option will "
+"install the Website app.</em>"
+msgstr ""
+"<em attrs=\"{'invisible': "
+"[('module_sale_quotation_builder','=',False)]}\">Attention: cette option "
+"installera l'application Site Web.</em>"
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
@@ -113,16 +120,6 @@ msgid "Attributes"
 msgstr "Caractéristiques"
 
 #. module: sale_management
-#: code:addons/sale_management/models/sale_order_template.py:39
-#, python-format
-msgid ""
-"Before archiving \"%s\" please select another default template in the "
-"settings."
-msgstr ""
-"Avant d'archiver \"%s\" merci de sélectionner un autre modèle par défault "
-"dans les configurations."
-
-#. module: sale_management
 #: model:ir.model,name:sale_management.model_res_config_settings
 msgid "Config Settings"
 msgstr "Paramètres de config"
@@ -184,12 +181,8 @@ msgstr "Description"
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.res_config_settings_view_form
-msgid ""
-"Design your quotation templates using building blocks<br/>\n"
-"                            <em attrs=\"{'invisible': [('module_sale_quotation_builder','=',False)]}\">Warning: this option will install the Website app.</em>"
-msgstr ""
-"Editez vos modèles de devis en utilisant les blocs de fabrication<br/>\n"
-"                            <em attrs=\"{'invisible': [('module_sale_quotation_builder','=',False)]}\">Attention: cette option installera l'application Site Web.</em>"
+msgid "Design your quotation templates using building blocks<br/>"
+msgstr "Concevez vos modèles de devis en utilisant des blocs <br/>"
 
 #. module: sale_management
 #: model:ir.model,name:sale_management.model_digest_digest
@@ -235,8 +228,6 @@ msgstr ""
 #: model:ir.model.fields,help:sale_management.field_sale_order_option__sequence
 msgid "Gives the sequence order when displaying a list of optional products."
 msgstr ""
-"Donne la séquence d'ordre lors de l'affichage d'une liste de produits "
-"optionels."
 
 #. module: sale_management
 #: model:ir.model.fields,help:sale_management.field_sale_order_template_line__sequence
@@ -262,7 +253,7 @@ msgstr ""
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_digest_digest__kpi_all_sale_total_value
 msgid "Kpi All Sale Total Value"
-msgstr "Kpi Valeur Totale Des Ventes"
+msgstr ""
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_option____last_update
@@ -372,7 +363,7 @@ msgstr "Quantité"
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_res_config_settings__module_sale_quotation_builder
 msgid "Quotation Builder"
-msgstr "Constructeur de devis"
+msgstr ""
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__number_of_days
@@ -448,8 +439,6 @@ msgid ""
 "Request an online payment to the customer in order to confirm orders "
 "automatically."
 msgstr ""
-"Nécessite un payement en ligne de la part du client pour confirmer la "
-"commande automatiquement."
 
 #. module: sale_management
 #: model:ir.model,name:sale_management.model_sale_order_option
@@ -555,18 +544,10 @@ msgid ""
 msgstr ""
 
 #. module: sale_management
-#: code:addons/sale_management/models/sale_order.py:198
+#: code:addons/sale_management/models/sale_order.py:178
 #, python-format
 msgid "You cannot add options to a confirmed order."
 msgstr "Vous ne pouvez pas ajouter d'option sur une commande validée"
-
-#. module: sale_management
-#: code:addons/sale_management/models/sale_order_template.py:90
-#, python-format
-msgid ""
-"You cannot change the type of a sale quote line. Instead you should delete "
-"the current line and create a new line of the proper type."
-msgstr ""
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form

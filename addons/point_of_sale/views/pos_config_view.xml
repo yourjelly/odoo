@@ -42,6 +42,14 @@
                         <h1><field name="name"/></h1>
                     </div>
                     <div class="row mt16 o_settings_container">
+                        <div id="company" class="col-12 col-lg-6 o_setting_box" groups="base.group_multi_company">
+                            <div class="o_setting_right_pane">
+                                <label for="company_id"/>
+                                <div><field name="company_id"/></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt16 o_settings_container">
                       <div class="col-12 col-lg-6 o_setting_box">
                         <div class="o_setting_left_pane">
                           <field name="module_pos_restaurant"/>
@@ -51,10 +59,19 @@
                           <button string="Save" type="object" name="execute" class="oe_highlight" id="btn_use_pos_restaurant" attrs="{'invisible': [('module_pos_restaurant','=',False)]}" />
                         </div>
                       </div>
-                    </div>
-                    <div class="row mt16" id="company" groups="base.group_multi_company">
-                        <label for="company_id" class="col-lg-2"/>
-                        <field name="company_id"/>
+                        <div class="col-12 col-lg-6 o_setting_box"
+                             title="Employees can scan their badge or enter a PIN to log in to a PoS session. These credentials are configurable in the *HR Settings* tab of the employee form.">
+                            <div class="o_setting_left_pane">
+                                <field name="module_pos_hr"/>
+                            </div>
+                            <div class="o_setting_right_pane" id="login_with_employees">
+                                <span class="o_form_label">Log in with Employees</span>
+                                <div class="text-muted">
+                                    Use employee credentials to log in to the PoS session and switch cashier
+                                </div>
+                                <button string="Save" type="object" name="execute" class="oe_highlight" id="btn_use_employees" attrs="{'invisible': [('module_pos_hr','=',False)]}" />
+                            </div>
+                        </div>
                     </div>
                     <h2 name="order">Order Interface</h2>
                     <div class="row mt16 o_settings_container">
@@ -73,6 +90,7 @@
                             </div>
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box" >
+                            <field name="iface_start_categ_domain_ids" invisible="1"/>
                             <div class="o_setting_left_pane">
                                 <field name="start_category"/>
                             </div>
@@ -82,7 +100,21 @@
                                     Start selling from a default product category
                                 </div>
                                 <div class="content-group mt16" attrs="{'invisible': [('start_category', '=', False)]}">
-                                    <field name="iface_start_categ_id"/>
+                                    <field name="iface_start_categ_id" domain="[('id', 'in', iface_start_categ_domain_ids)]"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box" >
+                            <div class="o_setting_left_pane">
+                                <field name="limit_categories"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="limit_categories"/>
+                                <div class="text-muted">
+                                    Available Product Categories
+                                </div>
+                                <div class="content-group mt16" attrs="{'invisible': [('limit_categories', '=', False)]}">
+                                    <field name="iface_available_categ_ids" widget="many2many_tags"/>
                                 </div>
                             </div>
                         </div>
@@ -149,7 +181,10 @@
                                     <div class="text-muted" attrs="{'invisible' : ['|', ('iface_customer_facing_display', '=', False), '&amp;', ('id', '!=', False), ('customer_facing_display_html', '!=', '')]}">Save this configuration to see and edit the customer display</div>
                                     <div class="row mt16 o_settings_container" attrs="{'invisible' : ['|', '|',('iface_customer_facing_display', '=', False), ('id', '=', False), ('customer_facing_display_html', '=', '')]}">
                                         <div class="col-12 col-lg-6 o_setting_box">
-                                        <field name="customer_facing_display_html" widget="html_frame" nolabel="1" options="{'editor_url': '/point_of_sale/field/customer_facing_display_template'}"/>
+                                        <field name="customer_facing_display_html" widget="html" nolabel="1" options="{
+                                                'snippets': 'point_of_sale.customer_facing_display_snippets',
+                                                'cssEdit': 'point_of_sale.wysiwyg_iframe_css_assets'
+                                            }"/>
                                         </div>
                                     </div>
                                 </div>
@@ -157,30 +192,29 @@
                         </div>
                         <div id="barcode_scanner" class="col-12 col-lg-6 o_setting_box">
                             <div class="o_setting_left_pane">
-                                <field name="barcode_scanner"/>
                             </div>
                             <div class="o_setting_right_pane">
-                                <label for="barcode_scanner" string="Barcode Scanner"/>
+                                <span class="o_form_label">Barcode Scanner</span>
                                 <div class="text-muted">
                                     Set barcodes to scan products, customer cards, etc.
                                 </div>
-                                <div class="content-group row mt16" attrs="{'invisible': [('barcode_scanner', '=', False)]}">
+                                <div class="content-group mt16 row">
                                     <label for="barcode_nomenclature_id" string="Barcode Nomenclature" class="col-lg-3 o_light_label"/>
-                                    <field name="barcode_nomenclature_id" attrs="{'required': [('barcode_scanner', '=', True)]}"/>
+                                    <field name="barcode_nomenclature_id"/>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <h2>Taxes</h2>
                     <div class="row mt16 o_settings_container">
-                        <div class="col-12 col-lg-6 o_setting_box" title="Choose a specific tax regime at the order depending on the kind of customer (tax exempt, onsite vs. takeaway, etc.).">
+                        <div class="col-12 col-lg-6 o_setting_box" title="Choose a specific fiscal position at the order depending on the kind of customer (tax exempt, onsite vs. takeaway, etc.).">
                             <div class="o_setting_left_pane">
                                 <field name="tax_regime_selection"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="tax_regime_selection" string="Fiscal Position per Order"/>
                                 <div class="text-muted">
-                                    Choose among several tax regimes when processing an order
+                                    Choose among fiscal positions when processing an order
                                 </div>
                                 <div class="content-group" attrs="{'invisible': [('tax_regime_selection', '=', False)]}">
                                     <div class="mt16">
@@ -210,7 +244,7 @@
                         </div>
                     </div>
                     <h2>Pricing</h2>
-                    <div class="row mt16 o_settings_container">
+                    <div class="row mt16 o_settings_container" id="pricing">
                         <div class="col-xs-12 col-lg-6 o_setting_box" id="product_prices"> 
                             <div class="o_setting_right_pane"> 
                                 <label for="iface_tax_included" string="Product Prices"/>  
@@ -278,17 +312,6 @@
                                     <div class="mt16" id="btn_use_pos_loyalty">
                                         <button string="Save" type="object" name="execute" class="oe_highlight"/>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12 col-lg-6 o_setting_box" title="Only users with Manager access rights for PoS app can modify the product prices on orders.">
-                            <div class="o_setting_left_pane">
-                                <field name="restrict_price_control"/>
-                            </div>
-                            <div class="o_setting_right_pane">
-                                <label for="restrict_price_control" string="Price Control"/>
-                                <div class="text-muted">
-                                    Restrict price modification to managers
                                 </div>
                             </div>
                         </div>
@@ -452,7 +475,7 @@
                         </div>
                     </div>
                     <h2>Accounting</h2>
-                    <div class="row mt16 o_settings_container">
+                    <div class="row mt16 o_settings_container" id="accounting_section">
                         <div class="col-12 col-lg-6 o_setting_box">
                             <div class="o_setting_right_pane">
                                 <span class="o_form_label">Journal Entries</span>

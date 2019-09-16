@@ -3,20 +3,27 @@
 # * base_import
 # 
 # Translators:
-# Fabien Pinckaers <fp@openerp.com>, 2018
-# Eloïse Stilmant <est@odoo.com>, 2018
-# Martin Trigaux, 2018
+# Xavier Belmere <Info@cartmeleon.com>, 2016
+# Maxime Chambreuil <mchambreuil@ursainfosystems.com>, 2016
+# Fabrice Henrion, 2016
+# Olivier Lenoir <olivier.lenoir@free.fr>, 2016
+# Adriana Ierfino <adriana.ierfino@savoirfairelinux.com>, 2017
+# Xavier Brochard <xavier@alternatif.org>, 2017
+# Lionel Sausin <ls@numerigraphe.com>, 2017
+# Richard Mathot <rim@odoo.com>, 2017
+# e2f <projects@e2f.com>, 2018
 # Olivier ANDRE <frsw194@gmail.com>, 2018
-# Guillaume Piens <gup@odoo.com>, 2019
-# Mélanie Botty <bom@odoo.com>, 2019
+# Fabien Pinckaers <fp@openerp.com>, 2019
+# Eloïse Stilmant <est@odoo.com>, 2019
+# Martin Trigaux, 2019
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-10-02 10:05+0000\n"
-"PO-Revision-Date: 2018-08-24 09:16+0000\n"
-"Last-Translator: Mélanie Botty <bom@odoo.com>, 2019\n"
+"PO-Revision-Date: 2016-08-05 12:56+0000\n"
+"Last-Translator: Martin Trigaux, 2019\n"
 "Language-Team: French (https://www.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -72,12 +79,12 @@ msgstr "Base"
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_import
 msgid "Base Import"
-msgstr "Base d'import"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_mapping
 msgid "Base Import Mapping"
-msgstr "Mapping d'importation de base"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
@@ -127,7 +134,7 @@ msgstr ""
 #: code:addons/base_import/static/src/xml/base_import.xml:108
 #, python-format
 msgid "Create if doesn't exist"
-msgstr "Créer si inexistant"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__create_uid
@@ -180,10 +187,6 @@ msgid ""
 "Note that the value in the column will be used as the new record's 'name', "
 "and assumes this is sufficient to create the record."
 msgstr ""
-"Crée de nouveaux enregistrements s'ils ne peuvent pas être trouvés (au lieu "
-"d'échouer à importer). Notez que la valeur dans la colonne sera utilisée "
-"comme nouveau \"nom\" sera considérée comme suffisante pour créer de "
-"nouveaux enregistrements. "
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_complex__currency_id
@@ -271,7 +274,7 @@ msgstr "Télécharger"
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_complex__dt
 msgid "Dt"
-msgstr "Dt"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
@@ -443,9 +446,6 @@ msgid ""
 "parent / child relation occurs on every line, and lead to a slower import."
 "                     Defering it can speed up import."
 msgstr ""
-"Si le modèle utilise des relations parent / enfant, le calcul de la relation"
-" parent / enfant s'effectue sur chaque ligne et entraîne une importation "
-"plus lente. Le reporter peut accélérer l’importation."
 
 #. module: base_import
 #. openerp-web
@@ -492,10 +492,6 @@ msgid ""
 "may be too big for the system's configuration, try to split it (import less "
 "records per file)."
 msgstr ""
-"L'importation a expiré. Veuillez réessayer. Si vous rencontrez toujours ce "
-"problème, le fichier est peut-être trop volumineux pour la configuration du "
-"système. Essayez de le scinder (importez moins d'enregistrements par "
-"fichier)."
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import____last_update
@@ -572,7 +568,7 @@ msgstr "Choisir un fichier"
 #: code:addons/base_import/static/src/js/import_action.js:364
 #, python-format
 msgid "Load New File"
-msgstr "Charger un nouveau fichier"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
@@ -698,63 +694,62 @@ msgstr "Test d'importation"
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_preview
 msgid "Tests : Base Import Model Preview"
-msgstr "Tests: Aperçu du modèle d'importation de base"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_char
 msgid "Tests : Base Import Model, Character"
-msgstr "Aperçu du modèle d'importation de base, caractère "
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_char_noreadonly
 msgid "Tests : Base Import Model, Character No readonly"
-msgstr "Aperçu du modèle d'importation de base, caractère sans lecture seule"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_char_readonly
 msgid "Tests : Base Import Model, Character readonly"
-msgstr "Tests: Modèle d'importation de base, Caractère lecture seule"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_char_required
 msgid "Tests : Base Import Model, Character required"
-msgstr "Tests: Modèle d'importation de base, Caractère requis"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_char_states
 msgid "Tests : Base Import Model, Character states"
-msgstr "Tests: Modèle d'importation de base, Etat du caractère"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_char_stillreadonly
 msgid "Tests : Base Import Model, Character still readonly"
 msgstr ""
-"Tests: Modèle d'importation de base, Caractère toujours en lecture seule"
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_m2o
 msgid "Tests : Base Import Model, Many to One"
-msgstr "Tests: Modèle d'importation de base, Plusieurs à un"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_m2o_related
 msgid "Tests : Base Import Model, Many to One related"
-msgstr "Tests: Modèle d'importation de base, Plusieurs à un relatif"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_m2o_required
 msgid "Tests : Base Import Model, Many to One required"
-msgstr "Tests: Modèle d'importation de base, Plusieurs à un requis"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_m2o_required_related
 msgid "Tests : Base Import Model, Many to One required related"
-msgstr "Tests: Modèle d'importation de base, Plusieurs à un requis relatif"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_o2m
 msgid "Tests : Base Import Model, One to Many"
-msgstr "Tests: Modèle d'importation de base, Un à plusieurs"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_o2m_child

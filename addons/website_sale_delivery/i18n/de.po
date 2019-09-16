@@ -3,20 +3,21 @@
 # * website_sale_delivery
 # 
 # Translators:
-# e2f <projects@e2f.com>, 2018
-# Felix Schubert <felix.schubert@go-erp.com>, 2018
-# Wolfgang Taferner, 2018
-# Mathias Neef <mn@copado.de>, 2018
-# Martin Trigaux, 2018
-# Johannes Croe <jcr@odoo.com>, 2018
+# Felix Schubert <felix.schubert@go-erp.com>, 2017
+# Wolfgang Taferner, 2017
+# Renzo Meister, 2017
+# Mathias Neef <mn@copado.de>, 2017
+# Johannes Croe <jcr@odoo.com>, 2019
+# e2f <projects@e2f.com>, 2019
+# Martin Trigaux, 2019
 # Chris Egal <sodaswed@web.de>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server saas~12.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-29 10:10+0000\n"
-"PO-Revision-Date: 2018-08-24 09:35+0000\n"
+"POT-Creation-Date: 2019-03-20 13:50+0000\n"
+"PO-Revision-Date: 2016-08-05 13:14+0000\n"
 "Last-Translator: Chris Egal <sodaswed@web.de>, 2019\n"
 "Language-Team: German (https://www.transifex.com/odoo/teams/41243/de/)\n"
 "MIME-Version: 1.0\n"
@@ -72,12 +73,12 @@ msgstr "Auslieferungsmethoden"
 #: model_terms:ir.ui.view,arch_db:website_sale_delivery.cart_delivery
 msgid "Delivery will be updated after choosing a new delivery method"
 msgstr ""
-"Die Lieferung wird nach Auswahl einer neuen Liefermethode aktualisiert"
+"Die Zustellung wird nach Auswahl einer neuen Zustellmethode aktualisiert"
 
 #. module: website_sale_delivery
 #: model_terms:ir.ui.view,arch_db:website_sale_delivery.cart_delivery
 msgid "Delivery:"
-msgstr "Lieferung:"
+msgstr "Lieferung\\:"
 
 #. module: website_sale_delivery
 #: model_terms:ir.ui.view,arch_db:website_sale_delivery.view_delivery_carrier_form_website_delivery
@@ -106,21 +107,11 @@ msgstr "FedEx Liefermethoden"
 
 #. module: website_sale_delivery
 #. openerp-web
-#: code:addons/website_sale_delivery/static/src/js/website_sale_delivery.js:29
+#: code:addons/website_sale_delivery/static/src/js/website_sale_delivery.js:56
 #: model_terms:ir.ui.view,arch_db:website_sale_delivery.payment_delivery_methods
 #, python-format
 msgid "Free"
 msgstr "Verfügbar"
-
-#. module: website_sale_delivery
-#: model:ir.model.fields,help:website_sale_delivery.field_sale_order__has_delivery
-msgid "Has an order line set for delivery"
-msgstr "Auftragszeile für Lieferung vorhanden"
-
-#. module: website_sale_delivery
-#: model:ir.model.fields,field_description:website_sale_delivery.field_sale_order__has_delivery
-msgid "Has delivery"
-msgstr "Lieferung vorhanden"
 
 #. module: website_sale_delivery
 #: code:addons/website_sale_delivery/controllers/main.py:44
@@ -140,7 +131,7 @@ msgstr "Veröffentlicht"
 
 #. module: website_sale_delivery
 #: model:ir.model,name:website_sale_delivery.model_sale_order
-msgid "Sale Order"
+msgid "Sales Order"
 msgstr "Verkaufsauftrag"
 
 #. module: website_sale_delivery

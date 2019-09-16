@@ -3,17 +3,20 @@
 # * base_automation
 # 
 # Translators:
-# Cas Vissers <casvissers@brahoo.nl>, 2018
-# Martin Trigaux, 2019
+# Melroy van den Berg <webmaster1989@gmail.com>, 2017
+# Eric Geens <ericgeens@yahoo.com>, 2018
+# e2f_nl_c4 <e2f_nl_c4@hotmail.com>, 2018
+# Cas Vissers <casvissers@brahoo.nl>, 2019
 # Yenthe Van Ginneken <yenthespam@gmail.com>, 2019
+# Martin Trigaux, 2019
 # Erwin van der Ploeg <erwin@odooexperts.nl>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server saas~12.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-29 10:09+0000\n"
-"PO-Revision-Date: 2018-08-24 09:16+0000\n"
+"POT-Creation-Date: 2019-03-20 13:49+0000\n"
+"PO-Revision-Date: 2017-02-15 10:48+0000\n"
 "Last-Translator: Erwin van der Ploeg <erwin@odooexperts.nl>, 2019\n"
 "Language-Team: Dutch (https://www.transifex.com/odoo/teams/41243/nl/)\n"
 "MIME-Version: 1.0\n"
@@ -28,20 +31,6 @@ msgid "<div>Email automation</div>"
 msgstr "<div>E-mail automatisering</div>"
 
 #. module: base_automation
-#: model:ir.model.fields,help:base_automation.field_base_automation__website_published
-msgid ""
-"A code server action can be executed from the website, using a dedicated "
-"controller. The address is <base>/website/action/<website_path>. Set this "
-"field as True to allow users to run this action. If it is set to False the "
-"action cannot be run through the website."
-msgstr ""
-"Een code server actie kan worden uitgevoerd vanaf de website, met behulp van"
-" een speciale controller. Het adres is <base>/website/action/<website_path>."
-" Stel dit veld in als Waar om gebruikers in staat te stellen om deze actie "
-"uit te voeren. Als deze is ingesteld op Onwaar kan de de actie niet worden "
-"uitgevoerd via de website."
-
-#. module: base_automation
 #: model:ir.model.fields,field_description:base_automation.field_base_automation__help
 msgid "Action Description"
 msgstr "Actieomschrijving"
@@ -54,7 +43,7 @@ msgstr "Naam actie"
 #. module: base_automation
 #: model:ir.model.fields,field_description:base_automation.field_base_automation__state
 msgid "Action To Do"
-msgstr "Uit te voeren actie"
+msgstr "Actie Te doen"
 
 #. module: base_automation
 #: model:ir.model.fields,field_description:base_automation.field_base_automation__type
@@ -123,11 +112,6 @@ msgstr "Automatische regeltest"
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_tree
 msgid "Automation"
 msgstr "Automatisering"
-
-#. module: base_automation
-#: model:ir.model.fields,field_description:base_automation.field_base_automation__website_published
-msgid "Available on the Website"
-msgstr "Beschikbaar op de website"
 
 #. module: base_automation
 #: model:ir.actions.server,name:base_automation.ir_cron_data_base_automation_check_ir_actions_server
@@ -214,7 +198,7 @@ msgid ""
 "Check this box if this contact is a customer. It can be selected in sales "
 "orders."
 msgstr ""
-"Selecteer als dit contact een klant is. Welke kan worden geselecteerd in "
+"Selecteer als dit contact een klant is. Deze kan worden geselecteerd in "
 "verkooporders."
 
 #. module: base_automation
@@ -300,7 +284,7 @@ msgstr "Demo"
 #: model:ir.model.fields,field_description:base_automation.field_base_automation_lead_test__display_name
 #: model:ir.model.fields,field_description:base_automation.field_base_automation_line_test__display_name
 msgid "Display Name"
-msgstr "Weergavenaam"
+msgstr "Weergave naam"
 
 #. module: base_automation
 #: model:ir.model.fields,field_description:base_automation.field_base_automation__activity_date_deadline_range
@@ -333,11 +317,6 @@ msgstr "Uren"
 #: model:ir.model.fields,field_description:base_automation.field_base_automation_line_test__id
 msgid "ID"
 msgstr "ID"
-
-#. module: base_automation
-#: model:ir.model.fields,help:base_automation.field_base_automation__xml_id
-msgid "ID of the action if defined in a XML file"
-msgstr "ID van de actie indien gedefinieerd in een XML bestand"
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__filter_domain
@@ -602,11 +581,6 @@ msgstr ""
 "  \"%(state_value)s\" actie type"
 
 #. module: base_automation
-#: model:ir.model.fields,help:base_automation.field_base_automation__website_url
-msgid "The full URL to access the server action through the website."
-msgstr "De volledige URL om toegang tot de server te krijgen via de website."
-
-#. module: base_automation
 #: model:ir.model.fields,field_description:base_automation.field_base_automation__trigger
 msgid "Trigger Condition"
 msgstr "Trigger conditie"
@@ -668,10 +642,10 @@ msgid ""
 "                trigger an automatic reminder email."
 msgstr ""
 "Gebruik geautomatiseerde acties om acties automatisch te activeren\n"
-"                 voor verschillende schermen. Voorbeeld: een lead gemaakt door een specifieke gebruiker kan\n"
-"                 automatisch worden ingesteld op een specifiek verkoopteam, of een\n"
-"                 propsect die na 14 dagen nog een status in behandeling heeft\n"
-"                 triggert een automatische herinneringsmail."
+"voor verschillende schermen. Voorbeeld: een lead gemaakt door een specifieke gebruiker kan\n"
+"automatisch worden ingesteld op een specifiek verkoopteam, of een\n"
+"prospect die na 14 dagen nog een status in behandeling heeft\n"
+"triggert een automatische herinneringsmail."
 
 #. module: base_automation
 #: model:ir.model.fields,field_description:base_automation.field_base_automation_line_test__user_id
@@ -693,16 +667,6 @@ msgstr "Waarde verdeling"
 #, python-format
 msgid "Warning"
 msgstr "Waarschuwing"
-
-#. module: base_automation
-#: model:ir.model.fields,field_description:base_automation.field_base_automation__website_path
-msgid "Website Path"
-msgstr "Website pad"
-
-#. module: base_automation
-#: model:ir.model.fields,field_description:base_automation.field_base_automation__website_url
-msgid "Website Url"
-msgstr "Website url"
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__trg_date_calendar_id

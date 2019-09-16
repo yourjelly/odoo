@@ -3,17 +3,17 @@
 # * bus
 # 
 # Translators:
-# Martin Trigaux, 2018
-# krnkris, 2018
-# Ákos Nagy <akos.nagy@oregional.hu>, 2018
+# Martin Trigaux, 2016
+# krnkris, 2017
+# Ákos Nagy <akos.nagy@oregional.hu>, 2019
 # gezza <geza.nagy@oregional.hu>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server saas~12.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-19 08:20+0000\n"
-"PO-Revision-Date: 2018-08-24 09:17+0000\n"
+"POT-Creation-Date: 2018-12-24 10:58+0000\n"
+"PO-Revision-Date: 2016-08-05 12:57+0000\n"
 "Last-Translator: gezza <geza.nagy@oregional.hu>, 2019\n"
 "Language-Team: Hungarian (https://www.transifex.com/odoo/teams/41243/hu/)\n"
 "MIME-Version: 1.0\n"
@@ -25,7 +25,7 @@ msgstr ""
 #. module: bus
 #: sql_constraint:bus.presence:0
 msgid "A user can only have one IM status."
-msgstr "Egy felhasználónak csak egy üzenetküldési állapota lehet."
+msgstr "Egy felhasználónak csak egy üzenőküldési állapota lehet."
 
 #. module: bus
 #: model:ir.model,name:bus.model_ir_autovacuum
@@ -35,7 +35,7 @@ msgstr "Automatikus kiürítés"
 #. module: bus
 #: selection:bus.presence,status:0
 msgid "Away"
-msgstr "Távol"
+msgstr "Távollét"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__channel
@@ -55,7 +55,7 @@ msgstr "Kapcsolat"
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__create_uid
 msgid "Created by"
-msgstr "Létrehozta"
+msgstr "Készítette"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__create_date
@@ -72,20 +72,20 @@ msgstr "Megjelenített név"
 #: model:ir.model.fields,field_description:bus.field_bus_bus__id
 #: model:ir.model.fields,field_description:bus.field_bus_presence__id
 msgid "ID"
-msgstr "Azonosító"
+msgstr "Azonosító ID"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_presence__status
 #: model:ir.model.fields,field_description:bus.field_res_partner__im_status
 #: model:ir.model.fields,field_description:bus.field_res_users__im_status
 msgid "IM Status"
-msgstr "Üzenetküldési állapot"
+msgstr "Üzenetküldő-állapot"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus____last_update
 #: model:ir.model.fields,field_description:bus.field_bus_presence____last_update
 msgid "Last Modified on"
-msgstr "Frissítve"
+msgstr "Utoljára frissítve ekkor"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_presence__last_poll
@@ -100,12 +100,12 @@ msgstr "Utolsó jelenlét"
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__write_uid
 msgid "Last Updated by"
-msgstr "Frissítette"
+msgstr "Utoljára frissítette"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__write_date
 msgid "Last Updated on"
-msgstr "Frissítve "
+msgstr "Utoljára frissítve "
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__message
@@ -125,7 +125,7 @@ msgstr "Online"
 #. module: bus
 #: model:ir.model,name:bus.model_bus_presence
 msgid "User Presence"
-msgstr "Felhasználói jelenlét"
+msgstr "Felhasználó jelenlét"
 
 #. module: bus
 #: model:ir.model,name:bus.model_res_users
@@ -134,7 +134,7 @@ msgid "Users"
 msgstr "Felhasználók"
 
 #. module: bus
-#: code:addons/bus/controllers/main.py:41
+#: code:addons/bus/controllers/main.py:39
 #, python-format
 msgid "bus.Bus not available in test mode"
 msgstr "bus.Bus nem elérhető tesztelési módban"

@@ -3,15 +3,23 @@
 # * purchase_stock
 # 
 # Translators:
-# Martin Trigaux, 2018
+# Максим Дронь <dronmax@gmail.com>, 2018
+# Gennady Marchenko <gennadym@gmail.com>, 2018
+# Collex100, 2018
+# Sergey Vilizhanin, 2018
+# Viktor Pogrebniak <vp@aifil.ru>, 2018
+# Vladimir Lukianov <lvm.mobile@gmail.com>, 2018
+# Mekan Bash <tmbashimov@gmail.com>, 2018
+# sergeiruzkiicode <sergei.ruzki@icode.by>, 2018
+# Martin Trigaux, 2019
 # Vasiliy Korobatov <korobatov@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server saas~12.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-09 10:31+0000\n"
-"PO-Revision-Date: 2018-08-24 09:24+0000\n"
+"POT-Creation-Date: 2019-01-16 07:59+0000\n"
+"PO-Revision-Date: 2018-08-02 11:17+0000\n"
 "Last-Translator: Vasiliy Korobatov <korobatov@gmail.com>, 2019\n"
 "Language-Team: Russian (https://www.transifex.com/odoo/teams/41243/ru/)\n"
 "MIME-Version: 1.0\n"
@@ -35,12 +43,20 @@ msgid "<span class=\"o_stat_text\">Purchase Orders</span>"
 msgstr ""
 
 #. module: purchase_stock
+#: model:ir.model.fields,help:purchase_stock.field_purchase_order_line__qty_received_method
+msgid ""
+"According to product configuration, the recieved quantity can be automatically computed by mechanism :\n"
+"  - Manual: the quantity is set manually on the line\n"
+"  - Stock Moves: the quantity comes from confirmed pickings\n"
+msgstr ""
+
+#. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_stock_rule__action
 msgid "Action"
 msgstr "Действие"
 
 #. module: purchase_stock
-#: code:addons/purchase_stock/models/stock.py:127
+#: code:addons/purchase_stock/models/stock.py:117
 #: model_terms:ir.ui.view,arch_db:purchase_stock.purchase_report_stock_rule
 #: model:stock.location.route,name:purchase_stock.route_warehouse0_buy
 #: selection:stock.rule,action:0
@@ -74,10 +90,12 @@ msgid "Deliver To"
 msgstr "Доставить"
 
 #. module: purchase_stock
+#: model:ir.model.fields,help:purchase_stock.field_product_product__route_ids
 #: model:ir.model.fields,help:purchase_stock.field_product_template__route_ids
 msgid ""
 "Depending on the modules installed, this will allow you to define the route "
-"of the product: whether it will be bought, manufactured, MTO, etc."
+"of the product: whether it will be bought, manufactured, replenished on "
+"order, etc."
 msgstr ""
 
 #. module: purchase_stock
@@ -153,6 +171,11 @@ msgstr "Логистика"
 #: model:ir.model,name:purchase_stock.model_stock_production_lot
 msgid "Lot/Serial"
 msgstr "Партия/Серия"
+
+#. module: purchase_stock
+#: selection:purchase.order.line,qty_received_method:0
+msgid "Manual"
+msgstr "Вручную"
 
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.exception_on_po
@@ -264,6 +287,11 @@ msgid "Receive Products"
 msgstr "Приход ТМЦ"
 
 #. module: purchase_stock
+#: model:ir.model.fields,field_description:purchase_stock.field_purchase_order_line__qty_received_method
+msgid "Received Qty Method"
+msgstr ""
+
+#. module: purchase_stock
 #: model:ir.actions.act_window,name:purchase_stock.purchase_open_picking
 #: model:ir.model.fields,field_description:purchase_stock.field_purchase_order__picking_ids
 msgid "Receptions"
@@ -285,6 +313,7 @@ msgid "Return Picking"
 msgstr "Разукомплектовать"
 
 #. module: purchase_stock
+#: model:ir.model.fields,field_description:purchase_stock.field_product_product__route_ids
 #: model:ir.model.fields,field_description:purchase_stock.field_product_template__route_ids
 msgid "Routes"
 msgstr "Маршруты"
@@ -301,6 +330,7 @@ msgstr "Перемещение запасов"
 
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.purchase_order_line_view_form_inherit
+#: selection:purchase.order.line,qty_received_method:0
 msgid "Stock Moves"
 msgstr "Движения запасов"
 
@@ -320,7 +350,7 @@ msgid "Technical field used to display the Drop Ship Address"
 msgstr "Техническое поле используется для показа Адрес Дроп-Шиппинг доставки"
 
 #. module: purchase_stock
-#: code:addons/purchase_stock/models/purchase.py:265
+#: code:addons/purchase_stock/models/purchase.py:290
 #, python-format
 msgid ""
 "The quantities on your purchase order indicate less than billed. You should "
@@ -394,7 +424,7 @@ msgid ""
 msgstr ""
 
 #. module: purchase_stock
-#: code:addons/purchase_stock/models/purchase.py:257
+#: code:addons/purchase_stock/models/purchase.py:282
 #, python-format
 msgid ""
 "You cannot decrease the ordered quantity below the received quantity.\n"

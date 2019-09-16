@@ -5,15 +5,13 @@
 # Translators:
 # Sengtha Chay <sengtha@gmail.com>, 2018
 # Chan Nath <channath@gmail.com>, 2018
-# Lux Sok <sok.lux@gmail.com>, 2019
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-09-21 13:17+0000\n"
-"PO-Revision-Date: 2018-08-24 09:16+0000\n"
-"Last-Translator: Lux Sok <sok.lux@gmail.com>, 2019\n"
+"PO-Revision-Date: 2018-09-21 13:17+0000\n"
+"Last-Translator: Chan Nath <channath@gmail.com>, 2018\n"
 "Language-Team: Khmer (https://www.transifex.com/odoo/teams/41243/km/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -25,25 +23,25 @@ msgstr ""
 #: code:addons/barcodes/models/barcodes.py:204
 #, python-format
 msgid " '*' is not a valid Regex Barcode Pattern. Did you mean '.*' ?"
-msgstr "មិនមែនជាលំនាំដើមកូដ Regex Barcode ត្រឹមត្រូវទេ។ តើអ្នកចង់មានន័យ"
+msgstr ""
 
 #. module: barcodes
 #: code:addons/barcodes/models/barcodes.py:202
 #, python-format
 msgid ": a rule can only contain one pair of braces."
-msgstr ": ក្បួនអាចមានតែមួយវង់"
+msgstr ""
 
 #. module: barcodes
 #: code:addons/barcodes/models/barcodes.py:198
 #, python-format
 msgid ": braces can only contain N's followed by D's."
-msgstr ": ដង្កៀបអាចមានតែរបស់ N ធ្វើតាមដោយ D's ។"
+msgstr ""
 
 #. module: barcodes
 #: code:addons/barcodes/models/barcodes.py:200
 #, python-format
 msgid ": empty braces."
-msgstr "នយោជិក"
+msgstr ""
 
 #. module: barcodes
 #: model_terms:ir.ui.view,arch_db:barcodes.view_barcode_nomenclature_form
@@ -53,56 +51,49 @@ msgid ""
 "                                pattern. The pattern syntax is that of regular expression, and a barcode is matched\n"
 "                                if the regular expression matches a prefix of the barcode."
 msgstr ""
-"<i>លំដាប់ឈ្មោះកូដសម្ងាត់កំណត់របៀបដែលកូដសម្ងាត់ត្រូវបានទទួលស្គាល់និងចាត់ថ្នាក់។"
-"   </i>                              "
-"នៅពេលស្កេនកូដត្រូវបានស្កេនវាត្រូវបានភ្ជាប់ជាមួយក្បួនដំបូងដែលផ្គូរផ្គង"
-"                                 <i>នាំ។ "
-"វាក្យសម្ព័ន្ធលំនាំ</i>ដើមគឺកន្សោមធម្មតានិងលេខកូដត្រូវបានផ្គូផ្គង"
-"                                 "
-"ប្រសិនបើកន្សោមធម្មតាផ្គូផ្គងបុព្វបទនៃកូដបាកូដ។"
 
 #. module: barcodes
 #: model_terms:ir.actions.act_window,help:barcodes.action_barcode_nomenclature_form
 msgid ""
 "A barcode nomenclature defines how the point of sale identify and interprets"
 " barcodes"
-msgstr "តារាងឈ្មោះបារកូដកំណត់របៀបដែលចំណុចនៃការលក់កំណត់និងបកប្រែលេខកូដ"
+msgstr ""
 
 #. module: barcodes
 #: model_terms:ir.actions.act_window,help:barcodes.action_barcode_nomenclature_form
 msgid "Add a new barcode nomenclature"
-msgstr "បន្ថែមតារាងនាមលេខកូដថ្មី"
+msgstr ""
 
 #. module: barcodes
 #: selection:barcode.rule,type:0
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__alias
 msgid "Alias"
-msgstr "មោះក្លែងក្លាយ"
+msgstr ""
 
 #. module: barcodes
 #: selection:barcode.nomenclature,upc_ean_conv:0
 msgid "Always"
-msgstr "តែងតែ"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcode_rule__name
 msgid "An internal identification for this barcode nomenclature rule"
-msgstr "ការកំណត់អត្តសញ្ញាណផ្ទៃក្នុងសម្រាប់ក្បួនតនានាមលេខកូដ"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcode_nomenclature__name
 msgid "An internal identification of the barcode nomenclature"
-msgstr "ការកំណត់អត្តសញ្ញាណផ្ទៃក្នុងនៃតារាងនាមកូដកម្ម"
+msgstr ""
 
 #. module: barcodes
 #: selection:barcode.rule,encoding:0
 msgid "Any"
-msgstr "បន្ថែមទៀត"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model,name:barcodes.model_barcodes_barcode_events_mixin
 msgid "Barcode Event Mixin"
-msgstr "ព្រឹត្តិការណ៍ Barcode Mixin"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model,name:barcodes.model_barcode_nomenclature
@@ -110,39 +101,39 @@ msgstr "ព្រឹត្តិការណ៍ Barcode Mixin"
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__barcode_nomenclature_id
 #: model_terms:ir.ui.view,arch_db:barcodes.view_barcode_nomenclature_form
 msgid "Barcode Nomenclature"
-msgstr "តារាងលេខកូដ"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.actions.act_window,name:barcodes.action_barcode_nomenclature_form
 #: model_terms:ir.ui.view,arch_db:barcodes.view_barcode_nomenclature_tree
 msgid "Barcode Nomenclatures"
-msgstr "តារាងកូដ"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__pattern
 msgid "Barcode Pattern"
-msgstr "លំនាំលេខកូដ"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model,name:barcodes.model_barcode_rule
 #: model_terms:ir.ui.view,arch_db:barcodes.view_barcode_rule_form
 msgid "Barcode Rule"
-msgstr "លក្ខណលេខកូដ"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcodes_barcode_events_mixin___barcode_scanned
 msgid "Barcode Scanned"
-msgstr "បារកូដបានស្កេន"
+msgstr ""
 
 #. module: barcodes
 #: selection:barcode.rule,type:0
 msgid "Cashier"
-msgstr "អ្នកគិតលុយ"
+msgstr ""
 
 #. module: barcodes
 #: selection:barcode.rule,type:0
 msgid "Client"
-msgstr "អតិថិជន"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model,name:barcodes.model_res_company
@@ -164,7 +155,7 @@ msgstr "បង្កើតនៅ"
 #. module: barcodes
 #: selection:barcode.rule,type:0
 msgid "Credit Card"
-msgstr "បណ្ណ័ឥណទា"
+msgstr ""
 
 #. module: barcodes
 #. openerp-web
@@ -176,7 +167,7 @@ msgstr "បោះបង់"
 #. module: barcodes
 #: selection:barcode.rule,type:0
 msgid "Discounted Product"
-msgstr "ផលិតផលបញ្ជុះតំលៃ"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature__display_name
@@ -188,43 +179,43 @@ msgstr "ឈ្មោះសំរាប់បង្ហាញ"
 #. module: barcodes
 #: selection:barcode.rule,encoding:0
 msgid "EAN-13"
-msgstr "EAN-13"
+msgstr ""
 
 #. module: barcodes
 #: selection:barcode.nomenclature,upc_ean_conv:0
 msgid "EAN-13 to UPC-A"
-msgstr "EAN-13 to UPC-A"
+msgstr ""
 
 #. module: barcodes
 #: selection:barcode.rule,encoding:0
 msgid "EAN-8"
-msgstr "EAN-8"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__encoding
 msgid "Encoding"
-msgstr "ការអ៊ិនកូដ"
+msgstr ""
 
 #. module: barcodes
 #. openerp-web
 #: code:addons/barcodes/static/src/js/barcode_form_view.js:326
 #, python-format
 msgid "Error: Barcode command is undefined"
-msgstr "កំហុស: ពាក្យបញ្ជាកូដទិន្នន័យមិនត្រូវបានកំណត់"
+msgstr ""
 
 #. module: barcodes
 #. openerp-web
 #: code:addons/barcodes/static/src/js/barcode_form_view.js:63
 #, python-format
 msgid "Error: Document not editable"
-msgstr "កំហុស: ឯកសារមិនអាចកែបាន"
+msgstr ""
 
 #. module: barcodes
 #. openerp-web
 #: code:addons/barcodes/static/src/js/barcode_form_view.js:362
 #, python-format
 msgid "Error: No last scanned barcode"
-msgstr "កំហុស: គ្មានបារកូដស្កេនចុងក្រោយទេ"
+msgstr ""
 
 #. module: barcodes
 #. openerp-web
@@ -234,12 +225,12 @@ msgstr "កំហុស: គ្មានបារកូដស្កេនចុ�
 #: code:addons/barcodes/static/src/js/barcode_form_view.js:139
 #, python-format
 msgid "Error: Pager not available"
-msgstr "កំហុស: គ្មានបារកូដស្កេនចុងក្រោយទេ"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model,name:barcodes.model_ir_http
 msgid "HTTP Routing"
-msgstr "HTTP ជុំវិញ"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature__id
@@ -270,27 +261,27 @@ msgstr "ផ្លាស់ប្តូរចុងក្រោយ"
 #. module: barcodes
 #: selection:barcode.rule,type:0
 msgid "Location"
-msgstr "តំបន់"
+msgstr ""
 
 #. module: barcodes
 #: selection:barcode.rule,type:0
 msgid "Lot"
-msgstr "ច្រើន"
+msgstr ""
 
 #. module: barcodes
 #: selection:barcode.nomenclature,upc_ean_conv:0
 msgid "Never"
-msgstr "មិននែរ"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_res_company__nomenclature_id
 msgid "Nomenclature"
-msgstr "កត្តានាមត្រកូល"
+msgstr ""
 
 #. module: barcodes
 #: selection:barcode.rule,type:0
 msgid "Package"
-msgstr "កញ្ជប់"
+msgstr ""
 
 #. module: barcodes
 #: model_terms:ir.ui.view,arch_db:barcodes.view_barcode_nomenclature_form
@@ -302,37 +293,28 @@ msgid ""
 "                                the barcode field on the associated records <i>must</i> show these digits as \n"
 "                                zeroes."
 msgstr ""
-"លំនាំក៏អាចកំណត់ពីរបៀបដែលតម្លៃជាលេខដូចជាទម្ងន់ឬតម្លៃអាចជា"
-"                                 បានអ៊ិនកូដចូលទៅក្នុងលេខកូដ។ "
-"ពួកវាត្រូវបានបង្ហាញដោយ {NNN} ដែលជាកន្លែងរបស់ N"
-"                                 កំណត់កន្លែងដែលលេខរបស់លេខត្រូវបានអ៊ិនកូដ។ "
-"floats ក៏ត្រូវបានគាំទ្រដោយ                                 "
-"ទសភាគបង្ហាញដោយដឺដូចជា {NNNDD} ។ នៅក្នុងករណីទាំងនេះ,"
-"                                 "
-"វាលលេខកូដឌីជីថលនៅលើកំណត់ត្រាដែលពាក់ព័ន្ធត្រូវបង្ហាញតួលេខទាំងនេះជា"
-"                                 សូន្យ។"
 
 #. module: barcodes
 #: selection:barcode.rule,type:0
 msgid "Priced Product"
-msgstr "ផលិតផលមានតម្លៃ"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__name
 msgid "Rule Name"
-msgstr "ឈ្មោះច្បាប់"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature__rule_ids
 msgid "Rules"
-msgstr "ច្បាប់"
+msgstr ""
 
 #. module: barcodes
 #. openerp-web
 #: code:addons/barcodes/static/src/js/barcode_form_view.js:382
 #, python-format
 msgid "Select"
-msgstr "ជ្រើសរើស"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__sequence
@@ -344,27 +326,27 @@ msgstr "លំដាប់"
 #: code:addons/barcodes/static/src/js/barcode_form_view.js:381
 #, python-format
 msgid "Set quantity"
-msgstr "កំណត់បរិមាណ"
+msgstr ""
 
 #. module: barcodes
 #: model_terms:ir.ui.view,arch_db:barcodes.view_barcode_nomenclature_form
 msgid "Tables"
-msgstr "តារាង"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcode_rule__pattern
 msgid "The barcode matching pattern"
-msgstr "គំរូផ្គូផ្គងលេខកូដ"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcode_nomenclature__rule_ids
 msgid "The list of barcode rules"
-msgstr "បញ្ជីនៃច្បាប់កូដសៀគ្វី"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcode_rule__alias
 msgid "The matched pattern will alias to this barcode"
-msgstr "លំនាំដែលផ្គូផ្គងនឹងឈ្មោះក្លែងក្លាយទៅកូដនេះ"
+msgstr ""
 
 #. module: barcodes
 #: code:addons/barcodes/models/barcodes.py:198
@@ -372,7 +354,7 @@ msgstr "លំនាំដែលផ្គូផ្គងនឹងឈ្មោះ
 #: code:addons/barcodes/models/barcodes.py:202
 #, python-format
 msgid "There is a syntax error in the barcode pattern "
-msgstr "មានកំហុសវាក្យសម្ព័ន្ធក្នុងលំនាំកូដឌីជីថល"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcode_rule__encoding
@@ -380,21 +362,20 @@ msgid ""
 "This rule will apply only if the barcode is encoded with the specified "
 "encoding"
 msgstr ""
-"ច្បាប់នេះនឹងអនុវត្តបានតែក្នុងករណីដែលកូដត្រូវបានអ៊ិនកូដជាមួយការអ៊ិនកូដដែលបានបញ្ជាក់"
 
 #. module: barcodes
 #. openerp-web
 #: code:addons/barcodes/static/src/js/barcode_form_view.js:64
 #, python-format
 msgid "To modify this document, please first start edition."
-msgstr "ដើម្បីកែប្រែឯកសារនេះជាដំបូងសូមចាប់ផ្តើមបោះពុម្ពផ្សាយ។"
+msgstr ""
 
 #. module: barcodes
 #. openerp-web
 #: code:addons/barcodes/static/src/js/barcode_form_view.js:363
 #, python-format
 msgid "To set the quantity please scan a barcode first."
-msgstr "ដើម្បីកំណត់បរិមាណសូមស្កែនលេខកូដឌីជីថលមុន។"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__type
@@ -408,43 +389,39 @@ msgid ""
 "setting determines if a UPC/EAN barcode should be automatically converted in"
 " one way or another when trying to match a rule with the other encoding."
 msgstr ""
-"លេខកូដ UPC អាចត្រូវបានបម្លែងទៅ EAN ដោយដាក់បុព្វបទដោយលេខសូន្យ។ "
-"ការកំណត់នេះកំណត់ថាតើកូដ bar UPC / EAN "
-"គួរត្រូវបានបម្លែងដោយស្វ័យប្រវត្តិក្នុងវិធីមួយឬវិធីផ្សេងនៅពេលដែលផ្គូផ្គងក្បួនដោយការអ៊ិនកូដផ្សេងទៀត។"
 
 #. module: barcodes
 #: selection:barcode.rule,encoding:0
 msgid "UPC-A"
-msgstr "UPC-A"
+msgstr ""
 
 #. module: barcodes
 #: selection:barcode.nomenclature,upc_ean_conv:0
 msgid "UPC-A to EAN-13"
-msgstr "UPC-A to EAN-13"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature__upc_ean_conv
 msgid "UPC/EAN Conversion"
-msgstr "ការផ្លាស់ប្តូរ UPC / EAN"
+msgstr ""
 
 #. module: barcodes
 #: selection:barcode.rule,type:0
 msgid "Unit Product"
-msgstr "ផលិតផលឯកតា"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcode_rule__sequence
 msgid ""
 "Used to order rules such that rules with a smaller sequence match first"
 msgstr ""
-"ត្រូវបានប្រើដើម្បីបញ្ជាក្បួនច្បាប់បែបនោះដែលផ្គូរផ្គងជាមួយការផ្គូផ្គងលំដាប់តូចជាងមុន"
 
 #. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcodes_barcode_events_mixin___barcode_scanned
 msgid "Value of the last barcode scanned."
-msgstr "តម្លៃនៃកូដឌីតចុងក្រោយត្រូវបានស្កេន។"
+msgstr ""
 
 #. module: barcodes
 #: selection:barcode.rule,type:0
 msgid "Weighted Product"
-msgstr "ផលិតផលទម្ងន់"
+msgstr ""

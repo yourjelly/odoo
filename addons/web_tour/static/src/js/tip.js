@@ -304,7 +304,7 @@ Tip.getConsumeEventType = function ($element) {
     })) {
         return "input";
     }
-    return "mousedown";
+    return "click";
 };
 
 return Tip;

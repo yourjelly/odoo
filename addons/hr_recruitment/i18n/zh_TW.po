@@ -3,18 +3,22 @@
 # * hr_recruitment
 # 
 # Translators:
-# Martin Trigaux, 2018
+# Michael Yeung, 2018
+# Bill Hsu <hcm86@icloud.com>, 2018
 # sejun huang <sejun.huang@gmail.com>, 2018
-# 敬雲 林 <chingyun@yuanchih-consult.com>, 2018
-# Ying Chang <acc.tou@gmail.com>, 2019
+# Kulius Ray <kulius@gmail.com>, 2018
+# Andy Cheng <andy.cheng@richsoda.com>, 2019
+# Ying <acc.tou@gmail.com>, 2019
+# Martin Trigaux, 2019
+# 敬雲 林 <chingyun@yuanchih-consult.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server saas~12.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-09 10:31+0000\n"
-"PO-Revision-Date: 2018-08-24 09:19+0000\n"
-"Last-Translator: Ying Chang <acc.tou@gmail.com>, 2019\n"
+"POT-Creation-Date: 2019-03-20 13:49+0000\n"
+"PO-Revision-Date: 2016-08-05 12:59+0000\n"
+"Last-Translator: 敬雲 林 <chingyun@yuanchih-consult.com>, 2019\n"
 "Language-Team: Chinese (Taiwan) (https://www.transifex.com/odoo/teams/41243/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -558,7 +562,7 @@ msgstr "活動類型"
 #. module: hr_recruitment
 #: model_terms:ir.actions.act_window,help:hr_recruitment.action_hr_job_no_employee
 msgid "Add a new employee"
-msgstr "添加一個新的員工"
+msgstr "添加新員工"
 
 #. module: hr_recruitment
 #: model_terms:ir.actions.act_window,help:hr_recruitment.hr_job_stage_act
@@ -619,6 +623,11 @@ msgid "Applicant created"
 msgstr "申請已創建"
 
 #. module: hr_recruitment
+#: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__email_from
+msgid "Applicant email"
+msgstr ""
+
+#. module: hr_recruitment
 #: model:mail.message.subtype,description:hr_recruitment.mt_applicant_hired
 msgid "Applicant hired"
 msgstr "已聘請申請人"
@@ -664,6 +673,7 @@ msgid ""
 msgstr "申請人可以將簡歷發送到這個電子信件地址，<br/>它將自動創建一個新的申請"
 
 #. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__application_count
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__application_count
 msgid "Application Count"
 msgstr "應用數量"
@@ -684,13 +694,21 @@ msgid "Application(s)"
 msgstr "申請"
 
 #. module: hr_recruitment
+#: code:addons/hr_recruitment/models/hr_recruitment.py:345
 #: model:ir.actions.act_window,name:hr_recruitment.action_hr_job_applications
 #: model:ir.actions.act_window,name:hr_recruitment.crm_case_categ0_act_job
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__application_ids
 #: model:ir.ui.menu,name:hr_recruitment.menu_crm_case_categ0_act_job
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.crm_case_form_view_job
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_survey
+#, python-format
 msgid "Applications"
 msgstr "應用"
+
+#. module: hr_recruitment
+#: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__application_count
+msgid "Applications with the same email"
+msgstr ""
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__job_id
@@ -715,7 +733,7 @@ msgstr "已分派"
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__message_attachment_count
 msgid "Attachment Count"
-msgstr "附件計數"
+msgstr "附件數"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__attachment_ids
@@ -741,11 +759,19 @@ msgstr "本科"
 #. module: hr_recruitment
 #: code:addons/hr_recruitment/models/hr_recruitment.py:65
 #: model:hr.applicant,legend_blocked:hr_recruitment.hr_case_advertisement
+#: model:hr.applicant,legend_blocked:hr_recruitment.hr_case_dev0
+#: model:hr.applicant,legend_blocked:hr_recruitment.hr_case_dev1
+#: model:hr.applicant,legend_blocked:hr_recruitment.hr_case_dev2
+#: model:hr.applicant,legend_blocked:hr_recruitment.hr_case_dev3
 #: model:hr.applicant,legend_blocked:hr_recruitment.hr_case_financejob0
+#: model:hr.applicant,legend_blocked:hr_recruitment.hr_case_financejob1
 #: model:hr.applicant,legend_blocked:hr_recruitment.hr_case_fresher0
 #: model:hr.applicant,legend_blocked:hr_recruitment.hr_case_marketingjob0
+#: model:hr.applicant,legend_blocked:hr_recruitment.hr_case_mkt0
+#: model:hr.applicant,legend_blocked:hr_recruitment.hr_case_mkt1
 #: model:hr.applicant,legend_blocked:hr_recruitment.hr_case_programmer
 #: model:hr.applicant,legend_blocked:hr_recruitment.hr_case_salesman0
+#: model:hr.applicant,legend_blocked:hr_recruitment.hr_case_salesman1
 #: model:hr.applicant,legend_blocked:hr_recruitment.hr_case_traineemca0
 #: model:hr.applicant,legend_blocked:hr_recruitment.hr_case_traineemca1
 #: model:hr.applicant,legend_blocked:hr_recruitment.hr_case_yrsexperienceinphp0
@@ -825,14 +851,14 @@ msgid "Configuration"
 msgstr "配置"
 
 #. module: hr_recruitment
-#: code:addons/hr_recruitment/models/hr_recruitment.py:371
+#: code:addons/hr_recruitment/models/hr_recruitment.py:391
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__partner_id
 #, python-format
 msgid "Contact"
 msgstr "聯絡人"
 
 #. module: hr_recruitment
-#: code:addons/hr_recruitment/models/hr_recruitment.py:373
+#: code:addons/hr_recruitment/models/hr_recruitment.py:393
 #, python-format
 msgid "Contact Email"
 msgstr "聯繫電郵"
@@ -1026,7 +1052,7 @@ msgstr "文件數"
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_survey
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_kanban_view_applicant
 msgid "Documents"
-msgstr "文件"
+msgstr "文檔"
 
 #. module: hr_recruitment
 #: model_terms:ir.actions.act_window,help:hr_recruitment.hr_recruitment_stage_act
@@ -1267,11 +1293,19 @@ msgstr "如果「有效」字段設為否，它允許您對信息進行隱藏但
 #. module: hr_recruitment
 #: code:addons/hr_recruitment/models/hr_recruitment.py:69
 #: model:hr.applicant,legend_normal:hr_recruitment.hr_case_advertisement
+#: model:hr.applicant,legend_normal:hr_recruitment.hr_case_dev0
+#: model:hr.applicant,legend_normal:hr_recruitment.hr_case_dev1
+#: model:hr.applicant,legend_normal:hr_recruitment.hr_case_dev2
+#: model:hr.applicant,legend_normal:hr_recruitment.hr_case_dev3
 #: model:hr.applicant,legend_normal:hr_recruitment.hr_case_financejob0
+#: model:hr.applicant,legend_normal:hr_recruitment.hr_case_financejob1
 #: model:hr.applicant,legend_normal:hr_recruitment.hr_case_fresher0
 #: model:hr.applicant,legend_normal:hr_recruitment.hr_case_marketingjob0
+#: model:hr.applicant,legend_normal:hr_recruitment.hr_case_mkt0
+#: model:hr.applicant,legend_normal:hr_recruitment.hr_case_mkt1
 #: model:hr.applicant,legend_normal:hr_recruitment.hr_case_programmer
 #: model:hr.applicant,legend_normal:hr_recruitment.hr_case_salesman0
+#: model:hr.applicant,legend_normal:hr_recruitment.hr_case_salesman1
 #: model:hr.applicant,legend_normal:hr_recruitment.hr_case_traineemca0
 #: model:hr.applicant,legend_normal:hr_recruitment.hr_case_traineemca1
 #: model:hr.applicant,legend_normal:hr_recruitment.hr_case_yrsexperienceinphp0
@@ -1306,7 +1340,7 @@ msgid "Is Follower"
 msgstr "是訂閱者"
 
 #. module: hr_recruitment
-#: code:addons/hr_recruitment/models/hr_job.py:94
+#: code:addons/hr_recruitment/models/hr_job.py:98
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.crm_case_form_view_job
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.view_crm_case_jobs_filter
 #, python-format
@@ -1453,7 +1487,7 @@ msgstr "晚活動"
 #: model_terms:ir.actions.act_window,help:hr_recruitment.action_hr_job
 #: model_terms:ir.actions.act_window,help:hr_recruitment.action_hr_job_config
 msgid "Let's create a job position."
-msgstr "讓我們創建一個工作職位"
+msgstr "讓我們建立一個工作職位"
 
 #. module: hr_recruitment
 #. openerp-web
@@ -1471,7 +1505,7 @@ msgstr "主要附件"
 #. module: hr_recruitment
 #: model:res.groups,name:hr_recruitment.group_hr_recruitment_manager
 msgid "Manager"
-msgstr "經理"
+msgstr "管理員"
 
 #. module: hr_recruitment
 #: model:hr.recruitment.degree,name:hr_recruitment.degree_licenced
@@ -1486,7 +1520,7 @@ msgstr "媒體"
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__message_has_error
 msgid "Message Delivery error"
-msgstr "信件傳遞錯誤"
+msgstr "郵件傳遞錯誤"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__message_ids
@@ -1540,7 +1574,7 @@ msgid "New Applications"
 msgstr "新的申請"
 
 #. module: hr_recruitment
-#: code:addons/hr_recruitment/models/hr_recruitment.py:447
+#: code:addons/hr_recruitment/models/hr_recruitment.py:467
 #, python-format
 msgid "New Employee %s Hired"
 msgstr "被僱傭的新員工%s"
@@ -1593,7 +1627,7 @@ msgid "Next Activity Type"
 msgstr "下一活動類型"
 
 #. module: hr_recruitment
-#: code:addons/hr_recruitment/models/hr_recruitment.py:389
+#: code:addons/hr_recruitment/models/hr_recruitment.py:409
 #, python-format
 msgid "No Subject"
 msgstr "無主題"
@@ -1642,7 +1676,7 @@ msgstr "需要行動消息的數量"
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "發送錯誤的信件數"
+msgstr "發送錯誤的郵件數"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__message_unread_counter
@@ -1729,11 +1763,19 @@ msgstr "在網站上發佈空缺職位"
 #. module: hr_recruitment
 #: code:addons/hr_recruitment/models/hr_recruitment.py:67
 #: model:hr.applicant,legend_done:hr_recruitment.hr_case_advertisement
+#: model:hr.applicant,legend_done:hr_recruitment.hr_case_dev0
+#: model:hr.applicant,legend_done:hr_recruitment.hr_case_dev1
+#: model:hr.applicant,legend_done:hr_recruitment.hr_case_dev2
+#: model:hr.applicant,legend_done:hr_recruitment.hr_case_dev3
 #: model:hr.applicant,legend_done:hr_recruitment.hr_case_financejob0
+#: model:hr.applicant,legend_done:hr_recruitment.hr_case_financejob1
 #: model:hr.applicant,legend_done:hr_recruitment.hr_case_fresher0
 #: model:hr.applicant,legend_done:hr_recruitment.hr_case_marketingjob0
+#: model:hr.applicant,legend_done:hr_recruitment.hr_case_mkt0
+#: model:hr.applicant,legend_done:hr_recruitment.hr_case_mkt1
 #: model:hr.applicant,legend_done:hr_recruitment.hr_case_programmer
 #: model:hr.applicant,legend_done:hr_recruitment.hr_case_salesman0
+#: model:hr.applicant,legend_done:hr_recruitment.hr_case_salesman1
 #: model:hr.applicant,legend_done:hr_recruitment.hr_case_traineemca0
 #: model:hr.applicant,legend_done:hr_recruitment.hr_case_traineemca1
 #: model:hr.applicant,legend_done:hr_recruitment.hr_case_yrsexperienceinphp0
@@ -1751,7 +1793,7 @@ msgstr "下一階段就緒"
 #: model_terms:ir.actions.act_window,help:hr_recruitment.action_hr_job
 #: model_terms:ir.actions.act_window,help:hr_recruitment.action_hr_job_config
 msgid "Ready to recruit more efficiently?"
-msgstr "準備更有效地招聘？"
+msgstr "準備好更有效地招聘？"
 
 #. module: hr_recruitment
 #: model:ir.ui.menu,name:hr_recruitment.menu_hr_recruitment_root
@@ -1851,7 +1893,7 @@ msgstr "負責"
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__activity_user_id
 msgid "Responsible User"
-msgstr "責任使用者"
+msgstr "責任用戶"
 
 #. module: hr_recruitment
 #: model:ir.actions.act_window,name:hr_recruitment.hr_applicant_resumes
@@ -2063,11 +2105,6 @@ msgid ""
 msgstr "這些郵箱地址將添加到所有接收和發送信件的抄送字段。用逗號分隔多個信件地址。"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__email_from
-msgid "These people will receive email."
-msgstr "這些人將收到電子信件。"
-
-#. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__campaign_id
 msgid ""
 "This is a name that helps you keep track of your different campaign efforts,"
@@ -2211,7 +2248,7 @@ msgid ""
 msgstr ""
 "隨著Odoo員工的螢幕上只是一個快速瀏覽，您\n"
 "可以很容易地找到您所需要的每個人\n"
-"的信息、聯絡人數據、工作崗位、可用性等。"
+"的信息、聯繫人數據、工作崗位、可用性等。"
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_recruitment_stage_form
@@ -2223,10 +2260,10 @@ msgstr ""
 "        預設的標籤。"
 
 #. module: hr_recruitment
-#: code:addons/hr_recruitment/models/hr_recruitment.py:450
+#: code:addons/hr_recruitment/models/hr_recruitment.py:470
 #, python-format
 msgid "You must define an Applied Job and a Contact Name for this applicant."
-msgstr "您必須定義此應聘者的應聘崗位和聯絡人姓名。"
+msgstr "您必須定義此應聘者的應聘崗位和聯繫人姓名。"
 
 #. module: hr_recruitment
 #: model:mail.template,subject:hr_recruitment.email_template_data_applicant_congratulations
@@ -2241,7 +2278,7 @@ msgid "e.g. Sales Manager"
 msgstr "例如：銷售經理"
 
 #. module: hr_recruitment
-#: code:addons/hr_recruitment/models/hr_recruitment.py:295
+#: code:addons/hr_recruitment/models/hr_recruitment.py:304
 #, python-format
 msgid "job applicant"
 msgstr "應聘"

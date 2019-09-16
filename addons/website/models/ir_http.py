@@ -182,7 +182,7 @@ class Http(models.AbstractModel):
 
         redirect = cls._serve_redirect()
         if redirect:
-            return request.redirect(_build_url_w_params(redirect.url_to, request.params), code=redirect.type)
+            return request.redirect(_build_url_w_params(redirect.url_to, request.params), code=redirect.redirect_type)
 
         return False
 
@@ -250,41 +250,29 @@ class Http(models.AbstractModel):
                 if code == 500:
                     logger.error("500 Internal Server Error:\n\n%s", values['traceback'])
                     View = env["ir.ui.view"]
-                    values['views'] = View
+                    values['view'] = View
                     if 'qweb_exception' in values:
-                        if 'load could not load template' in exception.args:
-                            # When t-calling an inexisting template, we don't have reference to
-                            # the view that did the t-call. We need to find it.
-                            values['views'] = View.search([
-                                ('type', '=', 'qweb'),
-                                '|',
-                                ('arch_db', 'ilike', 't-call="%s"' % exception.name),
-                                ('arch_db', 'ilike', "t-call='%s'" % exception.name)
-                            ], order='write_date desc', limit=1)
+                        try:
+                            # exception.name might be int, string
+                            exception_template = int(exception.name)
+                        except:
+                            exception_template = exception.name
+                        view = View._view_obj(exception_template)
+                        if exception.html and exception.html in view.arch:
+                            values['view'] = view
                         else:
-                            try:
-                                # exception.name might be int, string
-                                exception_template = int(exception.name)
-                            except:
-                                exception_template = exception.name
-                            view = View._view_obj(exception_template)
-                            if exception.html in view.arch:
-                                values['views'] = view
-                            else:
-                                # There might be 2 cases where the exception code can't be found
-                                # in the view, either the error is in a child view or the code
-                                # contains branding (<div t-att-data="request.browse('ok')"/>).
-                                et = etree.fromstring(view.with_context(inherit_branding=False).read_combined(['arch'])['arch'])
-                                node = et.find(exception.path.replace('/templates/t/', './'))
-                                line = node is not None and etree.tostring(node, encoding='unicode')
-                                if line:
-                                    values['views'] = View._views_get(exception_template).filtered(
-                                        lambda v: line in v.arch
-                                    )
-                        # Keep only views that we can reset
-                        values['views'] = values['views'].filtered(
-                            lambda view: view._get_original_view().arch_fs or 'oe_structure' in view.key
-                        )
+                            # There might be 2 cases where the exception code can't be found
+                            # in the view, either the error is in a child view or the code
+                            # contains branding (<div t-att-data="request.browse('ok')"/>).
+                            et = etree.fromstring(view.with_context(inherit_branding=False).read_combined(['arch'])['arch'])
+                            node = et.xpath(exception.path)
+                            line = node is not None and etree.tostring(node[0], encoding='unicode')
+                            if line:
+                                values['view'] = View._views_get(exception_template).filtered(
+                                    lambda v: line in v.arch
+                                )
+                                values['view'] = values['view'] and values['view'][0]
+
                         # Needed to show reset template on translated pages (`_prepare_qcontext` will set it for main lang)
                         values['editable'] = request.uid and request.website.is_publisher()
                 elif code == 403:
@@ -296,25 +284,22 @@ class Http(models.AbstractModel):
 
             return werkzeug.wrappers.Response(html, status=code, content_type='text/html;charset=utf-8')
 
-    @classmethod
-    def binary_content(cls, xmlid=None, model='ir.attachment', id=None, field='datas',
+    def binary_content(self, xmlid=None, model='ir.attachment', id=None, field='datas',
                        unique=False, filename=None, filename_field='datas_fname', download=False,
                        mimetype=None, default_mimetype='application/octet-stream',
-                       access_token=None, related_id=None, access_mode=None, env=None):
-        env = env or request.env
+                       access_token=None):
         obj = None
         if xmlid:
-            obj = cls._xmlid_to_obj(env, xmlid)
-        elif id and model in env:
-            obj = env[model].browse(int(id))
+            obj = self._xmlid_to_obj(self.env, xmlid)
+        elif id and model in self.env:
+            obj = self.env[model].browse(int(id))
         if obj and 'website_published' in obj._fields:
-            if env[obj._name].sudo().search([('id', '=', obj.id), ('website_published', '=', True)]):
-                env = env(user=SUPERUSER_ID)
-        return super(Http, cls).binary_content(
+            if self.env[obj._name].sudo().search([('id', '=', obj.id), ('website_published', '=', True)]):
+                self = self.sudo()
+        return super(Http, self).binary_content(
             xmlid=xmlid, model=model, id=id, field=field, unique=unique, filename=filename,
             filename_field=filename_field, download=download, mimetype=mimetype,
-            default_mimetype=default_mimetype, access_token=access_token, related_id=related_id,
-            access_mode=access_mode, env=env)
+            default_mimetype=default_mimetype, access_token=access_token)
 
     @classmethod
     def _xmlid_to_obj(cls, env, xmlid):

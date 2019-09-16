@@ -34,7 +34,6 @@ class Location(models.Model):
         ('internal', 'Internal Location'),
         ('customer', 'Customer Location'),
         ('inventory', 'Inventory Loss'),
-        ('procurement', 'Procurement'),
         ('production', 'Production'),
         ('transit', 'Transit Location')], string='Location Type',
         default='internal', index=True, required=True,
@@ -43,14 +42,12 @@ class Location(models.Model):
              "\n* Internal Location: Physical locations inside your own warehouses,"
              "\n* Customer Location: Virtual location representing the destination location for products sent to your customers"
              "\n* Inventory Loss: Virtual location serving as counterpart for inventory operations used to correct stock levels (Physical inventories)"
-             "\n* Procurement: Virtual location serving as temporary counterpart for procurement operations when the source (vendor or production) is not known yet. This location should be empty when the procurement scheduler has finished running."
              "\n* Production: Virtual counterpart location for production operations: this location consumes the raw material and produces finished products"
              "\n* Transit Location: Counterpart location that should be used in inter-company or inter-warehouses operations")
     location_id = fields.Many2one(
         'stock.location', 'Parent Location', index=True, ondelete='cascade',
         help="The parent location that includes this location. Example : The 'Dispatch Zone' is the 'Gate 1' parent location.")
     child_ids = fields.One2many('stock.location', 'location_id', 'Contains')
-    partner_id = fields.Many2one('res.partner', 'Owner', help="Owner of the location if not internal")
     comment = fields.Text('Additional Information')
     posx = fields.Integer('Corridor (X)', default=0, help="Optional localization details, for information purpose only")
     posy = fields.Integer('Shelves (Y)', default=0, help="Optional localization details, for information purpose only")
@@ -63,7 +60,7 @@ class Location(models.Model):
     scrap_location = fields.Boolean('Is a Scrap Location?', default=False, help='Check this box to allow using this location to put scrapped/damaged goods.')
     return_location = fields.Boolean('Is a Return Location?', help='Check this box to allow using this location as a return location.')
     removal_strategy_id = fields.Many2one('product.removal', 'Removal Strategy', help="Defines the default method used for suggesting the exact location (shelf) where to take the products from, which lot etc. for this location. This method can be enforced at the product category level, and a fallback is made on the parent locations if none is set here.")
-    putaway_strategy_id = fields.Many2one('product.putaway', 'Put Away Strategy', help="Allows to suggest the exact location (shelf) where to store the product.")
+    putaway_rule_ids = fields.One2many('stock.putaway.rule', 'location_in_id', 'Putaway Rules')
     barcode = fields.Char('Barcode', copy=False, oldname='loc_barcode')
     quant_ids = fields.One2many('stock.quant', 'location_id')
 
@@ -77,6 +74,11 @@ class Location(models.Model):
             self.complete_name = '%s/%s' % (self.location_id.complete_name, self.name)
         else:
             self.complete_name = self.name
+
+    @api.onchange('usage')
+    def _onchange_usage(self):
+        if self.usage not in ('internal', 'inventory'):
+            self.scrap_location = False
 
     def write(self, values):
         if 'usage' in values and values['usage'] == 'view':
@@ -97,6 +99,24 @@ class Location(models.Model):
                     " location as there are products reserved in this location."
                     " Please unreserve the products first."
                 ))
+        if 'active' in values:
+            if values['active'] == False:
+                for location in self:
+                    warehouses = self.env['stock.warehouse'].search([('active', '=', True), '|', ('lot_stock_id', '=', location.id), ('view_location_id', '=', location.id)])
+                    if warehouses:
+                        raise UserError(_("You cannot archive the location %s as it is"
+                        " used by your warehouse %s") % (location.display_name, warehouses[0].display_name))
+
+            if not self.env.context.get('do_not_check_quant'):
+                children_location = self.env['stock.location'].with_context(active_test=False).search([('id', 'child_of', self.ids)])
+                internal_children_locations = children_location.filtered(lambda l: l.usage == 'internal')
+                children_quants = self.env['stock.quant'].search([('quantity', '!=', 0), ('reserved_quantity', '!=', 0), ('location_id', 'in', internal_children_locations.ids)])
+                if children_quants and values['active'] == False:
+                    raise UserError(_('You still have some product in locations %s') %
+                        (','.join(children_quants.mapped('location_id.name'))))
+                else:
+                    super(Location, children_location - self).with_context({'do_not_check_quant': True}).write(values)
+
         return super(Location, self).write(values)
 
     def name_get(self):
@@ -123,13 +143,24 @@ class Location(models.Model):
         location_ids = self._search(expression.AND([domain, args]), limit=limit, access_rights_uid=name_get_uid)
         return self.browse(location_ids).name_get()
 
-    def get_putaway_strategy(self, product):
+    def _get_putaway_strategy(self, product):
         ''' Returns the location where the product has to be put, if any compliant putaway strategy is found. Otherwise returns None.'''
         current_location = self
         putaway_location = self.env['stock.location']
         while current_location and not putaway_location:
-            if current_location.putaway_strategy_id:
-                putaway_location = current_location.putaway_strategy_id.putaway_apply(product)
+            # Looking for a putaway about the product.
+            putaway_rules = self.putaway_rule_ids.filtered(lambda x: x.product_id == product)
+            if putaway_rules:
+                putaway_location = putaway_rules[0].location_out_id
+            # If not product putaway found, we're looking with category so.
+            else:
+                categ = product.categ_id
+                while categ:
+                    putaway_rules = self.putaway_rule_ids.filtered(lambda x: x.category_id == categ)
+                    if putaway_rules:
+                        putaway_location = putaway_rules[0].location_out_id
+                        break
+                    categ = categ.parent_id
             current_location = current_location.location_id
         return putaway_location
 

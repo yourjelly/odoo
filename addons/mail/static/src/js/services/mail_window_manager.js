@@ -96,6 +96,7 @@ MailManager.include({
      *   fold state of the thread
      * @param {boolean} [options.skipCrossTabSync=false] if set, thread
      *   should not notify other tabs from new document thread chat window state.
+     * @returns {Promise}
      */
     openThreadWindow: function (threadID, options) {
         var self = this;
@@ -107,17 +108,17 @@ MailManager.include({
             // This may happen due to concurrent calls to this method from
             // messaging menu preview click and handling of longpolling chat
             // window state.
-            return;
+            return Promise.resolve();
         }
         var threadWindow = this._getThreadWindow(threadID);
-        var def = $.when();
+        var prom = Promise.resolve();
         if (!threadWindow) {
             thread.isCreatingWindow = true;
-            def = thread.fetchMessages().then(function () {
+            prom = thread.fetchMessages().then(function () {
                 threadWindow = self._makeNewThreadWindow(thread, options);
-                self._placeNewThreadWindow(threadWindow, options.passively);
                 return threadWindow.appendTo($(self.THREAD_WINDOW_APPENDTO));
             }).then(function () {
+                self._placeNewThreadWindow(threadWindow, options.passively);
                 self._repositionThreadWindows();
                 threadWindow.render();
                 threadWindow.scrollToBottom();
@@ -128,18 +129,18 @@ MailManager.include({
                 ) {
                     thread.markAsRead();
                 }
-            }).fail(function () {
+                thread.isCreatingWindow = false;
+            }).guardedCatch(function () {
                 // thread window could not be open, which may happen due to
                 // access error while fetching messages to the document.
                 // abort opening the thread window in this case.
                 thread.close({
                     skipCrossTabSync: true,
                 });
-            }).always(function () {
                 thread.isCreatingWindow = false;
             });
         }
-        def.then(function () {
+        return prom.then(function () {
             threadWindow.updateVisualFoldState();
         });
     },
@@ -155,14 +156,16 @@ MailManager.include({
      */
     updateThreadWindow: function (threadID, options) {
         var thread = this.getThread(threadID);
+        var prom = Promise.resolve();
         if (thread) {
             if (thread.isDetached()) {
                 _.extend(options, { keepFoldState: true });
-                this.openThreadWindow(threadID, options);
+                prom = this.openThreadWindow(threadID, options);
             } else {
                 this._closeThreadWindow(threadID);
             }
         }
+        return prom;
     },
 
     //--------------------------------------------------------------------------
@@ -344,9 +347,9 @@ MailManager.include({
             .on('new_channel', this, this._onNewChannel)
             .on('is_thread_bottom_visible', this, this._onIsThreadBottomVisible)
             .on('unsubscribe_from_channel', this, this._onUnsubscribeFromChannel)
-            .on('update_thread_unread_counter', this, this._onUpdateThreadUnreadCounter)
-            .on('update_dm_presence', this, this._onUpdateDmPresence)
-            .on('update_typing_partners', this, this._onTypingPartnersUpdated);
+            .on('updated_im_status', this, this._onUpdatedImStatus)
+            .on('updated_out_of_office', this, this._onUpdatedOutOfOffice)
+            .on('update_thread_unread_counter', this, this._onUpdateThreadUnreadCounter);
 
         core.bus.on('resize', this, _.debounce(this._repositionThreadWindows.bind(this), 100));
     },
@@ -430,7 +433,7 @@ MailManager.include({
      *
      * @private
      * @param {integer} partnerID
-     * @returns {$.Promise<integer>} resolved with ID of the DM chat
+     * @returns {Promise<integer>} resolved with ID of the DM chat
      */
     _openAndDetachDMChat: function (partnerID) {
         return this._rpc({
@@ -648,10 +651,16 @@ MailManager.include({
      *
      * @private
      * @param {mail.model.Channel} channel
+     * @param {Promise[]} proms used to synchronize async operations on the
+     *   channel (like the rendering of its window)
      */
-    _onNewChannel: function (channel) {
+    _onNewChannel: function (channel, proms) {
         if (channel.isDetached()) {
-            this.openThreadWindow(channel.getID(), { keepFoldState: true, passively: true });
+            var prom = this.openThreadWindow(channel.getID(), {
+                keepFoldState: true,
+                passively: true,
+            });
+            proms.push(prom);
         } else {
             this._closeThreadWindow(channel.getID());
         }
@@ -666,23 +675,6 @@ MailManager.include({
         this._updateThreadWindowsFromMessage(message, { keepBottom: true, passively: true });
     },
     /**
-     * @private
-     * @param {integer|string} threadID
-     */
-    _onTypingPartnersUpdated: function (threadID) {
-        var threadWindow = this._getThreadWindow(threadID);
-        if (!threadWindow) {
-            return;
-        }
-        var thread = this.getThread(threadID);
-        if (thread.isChannel()) {
-            // call getMentionpartnerSuggestions in order to correctly fetch members
-            thread.getMentionPartnerSuggestions().then(function () {
-                threadWindow.renderTypingNotificationBar();
-            });
-        }
-    },
-    /**
      * Close the thread window when unsusbscribe from a channel.
      *
      * @private
@@ -690,6 +682,40 @@ MailManager.include({
      */
     _onUnsubscribeFromChannel: function (channelID) {
         this._closeThreadWindow(channelID);
+    },
+    /**
+     * Called when there is a change of the im status of the partner.
+     * The header of the thread window should be updated accordingly,
+     * in order to display the correct new im status of this users.
+     *
+     * @private
+     * @param {integer} partnerID
+     */
+    _onUpdatedImStatus: function (partnerIDs) {
+        var self = this;
+        _.each(partnerIDs, function (partnerID) {
+            var thread = self.getDMChatFromPartnerID(partnerID);
+            if (! thread) {
+                return;
+            }
+            var threadWindow = self._getThreadWindow(thread.getID());
+            if (!threadWindow) {
+                return;
+            }
+            threadWindow.renderHeader();
+        });
+    },
+    /**
+     * @private
+     * @param {Object} data
+     * @param {integer} data.threadID
+     */
+    _onUpdatedOutOfOffice: function (data) {
+        var threadWindow = this._getThreadWindow(data.threadID);
+        if (!threadWindow) {
+            return;
+        }
+        threadWindow.renderOutOfOffice();
     },
     /**
      * Called when a thread has its unread counter that has changed.
@@ -717,21 +743,6 @@ MailManager.include({
                 this._renderHiddenThreadWindowsDropdown().html());
             this._repositionHiddenWindowsDropdown();
         }
-    },
-    /**
-     * Called when there is a change of the im status of the user linked to
-     * DMs. The header of the thread window should be updated accordingly,
-     * in order to display the correct new im status of this users.
-     *
-     * @private
-     * @param {mail.model.Thread} thread
-     */
-    _onUpdateDmPresence: function (thread) {
-        _.each(this._threadWindows, function (threadWindow) {
-            if (thread.getID() === threadWindow.getID()) {
-                threadWindow.renderHeader();
-            }
-        });
     },
     /**
      * Called when a message has been updated.

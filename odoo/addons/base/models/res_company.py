@@ -39,7 +39,7 @@ class Company(models.Model):
     logo = fields.Binary(related='partner_id.image', default=_get_logo, string="Company Logo", readonly=False)
     # logo_web: do not store in attachments, since the image is retrieved in SQL for
     # performance reasons (see addons/web/controllers/main.py, Binary.company_logo)
-    logo_web = fields.Binary(compute='_compute_logo_web', store=True)
+    logo_web = fields.Binary(compute='_compute_logo_web', store=True, attachment=False)
     currency_id = fields.Many2one('res.currency', string='Currency', required=True, default=lambda self: self._get_user_currency())
     user_ids = fields.Many2many('res.users', 'res_company_users_rel', 'cid', 'user_id', string='Accepted Users')
     account_no = fields.Char(string='Account No.')
@@ -248,19 +248,15 @@ class Company(models.Model):
         return self.env['res.config.settings'].open_company()
 
     @api.multi
-    def write_company_and_print_report(self, values):
-        res = self.write(values)
-
-        report_name = values.get('default_report_name')
-        active_ids = values.get('active_ids')
-        active_model = values.get('active_model')
+    def write_company_and_print_report(self):
+        context = self.env.context
+        report_name = context.get('default_report_name')
+        active_ids = context.get('active_ids')
+        active_model = context.get('active_model')
         if report_name and active_ids and active_model:
             docids = self.env[active_model].browse(active_ids)
             return (self.env['ir.actions.report'].search([('report_name', '=', report_name)], limit=1)
-                        .with_context(values)
                         .report_action(docids))
-        else:
-            return res
 
     @api.model
     def action_open_base_onboarding_company(self):

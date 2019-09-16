@@ -5,18 +5,17 @@
 # Translators:
 # Fishfur A Banter <fishfurbanter@gmail.com>, 2018
 # ExcaliberX <excaliberx@gmail.com>, 2018
+# yacov mosbacher (‫יעקב מוסבכר‬‎) <ymosba@gmail.com>, 2018
 # Yihya Hugirat <hugirat@gmail.com>, 2018
-# דודי מלכה <Dudimalka6@gmail.com>, 2019
-# hed shefetr <hed@laylinetech.com>, 2019
-# ZVI BLONDER <ZVIBLONDER@gmail.com>, 2019
+# hed shefetr <hed@laylinetech.com>, 2018
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-29 10:09+0000\n"
+"POT-Creation-Date: 2018-09-21 13:17+0000\n"
 "PO-Revision-Date: 2018-08-24 09:25+0000\n"
-"Last-Translator: ZVI BLONDER <ZVIBLONDER@gmail.com>, 2019\n"
+"Last-Translator: hed shefetr <hed@laylinetech.com>, 2018\n"
 "Language-Team: Hebrew (https://www.transifex.com/odoo/teams/41243/he/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -29,22 +28,22 @@ msgstr ""
 #: code:addons/stock_account/models/product.py:152
 #, python-format
 msgid "%s changed cost from %s to %s - %s"
-msgstr "%s עלות שונתה מ %s ל %s - %s"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_account_chart_template
 msgid "Account Chart Template"
-msgstr "תבנית תרשים חשבון"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_move__account_move_ids
 msgid "Account Move"
-msgstr "תנועת החשבון"
+msgstr ""
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.view_category_property_form
 msgid "Account Stock Properties"
-msgstr "מאפייני חשבון מלאי"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_inventory__accounting_date
@@ -59,7 +58,7 @@ msgstr "רשומות חשבונאיות"
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.view_location_form_inherit
 msgid "Accounting Information"
-msgstr "מידע חשבונאי"
+msgstr "פרטי הנהלת חשבונות"
 
 #. module: stock_account
 #: model:ir.model.fields,help:stock_account.field_res_config_settings__module_stock_landed_costs
@@ -68,8 +67,6 @@ msgid ""
 "Affect landed costs on reception operations and split them among products to"
 " update their cost price."
 msgstr ""
-"להשפיע על נחת עלויות פעולות הקבלה ולפצל אותם בין מוצרים כדי לעדכן את מחיר "
-"העלות שלהם."
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.view_inventory_valuation_search
@@ -79,13 +76,18 @@ msgstr "התווסף לארכיון"
 #. module: stock_account
 #: selection:product.category,property_valuation:0
 msgid "Automated"
-msgstr "אוטומטי"
+msgstr ""
+
+#. module: stock_account
+#: model_terms:ir.ui.view,arch_db:stock_account.view_inventory_valuation_search
+msgid "Available Products"
+msgstr ""
 
 #. module: stock_account
 #: selection:product.category,property_cost_method:0
 #: selection:product.template,property_cost_method:0
 msgid "Average Cost (AVCO)"
-msgstr "עלות ממוצעת "
+msgstr ""
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.view_change_standard_price
@@ -100,8 +102,6 @@ msgid ""
 "Cannot find a stock input account for the product %s. You must define one on"
 " the product category, or on the location, before processing this operation."
 msgstr ""
-"לא ניתן למצוא חשבון קלט מלאי עבור המוצר %s. עליך להגדיר אחד בקטגוריה של "
-"המוצר, או  במיקום, לפני עיבוד פעולה זו."
 
 #. module: stock_account
 #: code:addons/stock_account/models/stock.py:512
@@ -111,8 +111,6 @@ msgid ""
 "on the product category, or on the location, before processing this "
 "operation."
 msgstr ""
-"לא ניתן למצוא חשבון פלט מלאי עבור המוצר %s. עליך להגדיר אחד בקטגוריה של "
-"המוצר,או במיקום, לפני עיבוד פעולה זו."
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.view_inventory_valuation_search
@@ -122,14 +120,14 @@ msgstr "קטגוריה"
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.view_change_standard_price
 msgid "Change Price"
-msgstr "שנה מחיר"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.actions.act_window,name:stock_account.action_view_change_standard_price
 #: model:ir.model,name:stock_account.model_stock_change_standard_price
 #: model_terms:ir.ui.view,arch_db:stock_account.view_change_standard_price
 msgid "Change Standard Price"
-msgstr "שנה את מחיר הסטנדרט"
+msgstr ""
 
 #. module: stock_account
 #: code:addons/stock_account/models/product.py:405
@@ -138,13 +136,11 @@ msgid ""
 "Changing your cost method is an important change that will impact your "
 "inventory valuation. Are you sure you want to make that change?"
 msgstr ""
-"שינוי שיטת העלות שלך הוא שינוי חשוב שישפיע על הערכת המלאי שלך. האם אתה בטוח "
-"שברצונך לבצע שינוי זה?"
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.view_stock_quantity_history
 msgid "Choose your date"
-msgstr "בחר את התאריך שלך"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_res_config_settings
@@ -158,8 +154,6 @@ msgid ""
 "Configuration error. Please configure the price difference account on the "
 "product or its category to process this operation."
 msgstr ""
-"שגיאת תצורה. אנא הגדר את חשבון ההפרש במחיר המוצר או בקטגוריה שלו כדי לעבד את"
-" הפעולה."
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.view_change_standard_price
@@ -170,34 +164,34 @@ msgstr "עלות"
 #: model:ir.model.fields,field_description:stock_account.field_product_product__cost_method
 #: model:ir.model.fields,field_description:stock_account.field_product_template__cost_method
 msgid "Cost Method"
-msgstr "שיטת העלות"
+msgstr ""
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.res_config_settings_view_form
 msgid "Costing"
-msgstr "תמחור"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_product_category__property_cost_method
 #: model:ir.model.fields,field_description:stock_account.field_product_product__property_cost_method
 #: model:ir.model.fields,field_description:stock_account.field_product_template__property_cost_method
 msgid "Costing Method"
-msgstr "שיטת התמחור"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_change_standard_price__counterpart_account_id
 msgid "Counter-Part Account"
-msgstr "חשבון נגדי"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_change_standard_price__counterpart_account_id_required
 msgid "Counter-Part Account Required"
-msgstr "דרוש חשבון נגדי"
+msgstr ""
 
 #. module: stock_account
 #: model_terms:ir.actions.act_window,help:stock_account.product_valuation_action
 msgid "Create a new product valuation"
-msgstr "צור הערכת מוצר חדשה"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_change_standard_price__create_uid
@@ -213,10 +207,8 @@ msgstr "נוצר ב-"
 #: model:ir.model.fields,help:stock_account.field_stock_inventory__accounting_date
 msgid ""
 "Date at which the accounting entries will be created in case of automated "
-"inventory valuation. If empty, the inventory date will be used."
+"inventory valuation. If empty, the inventoy date will be used."
 msgstr ""
-"תאריך שבו שהרישומים החשבונאיים נוצרו במקרה של הערכת שווי מלאי אוטומטית. אם "
-"ריק, תאריך המלאי יהיה בשימוש."
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_change_standard_price__display_name
@@ -224,15 +216,20 @@ msgid "Display Name"
 msgstr "השם המוצג"
 
 #. module: stock_account
+#: model_terms:ir.ui.view,arch_db:stock_account.view_inventory_valuation_search
+msgid "Exhausted Stock"
+msgstr ""
+
+#. module: stock_account
 #: selection:product.category,property_cost_method:0
 #: selection:product.template,property_cost_method:0
 msgid "First In First Out (FIFO)"
-msgstr "ראשון נכנס - ראשון יוצא (FIFO)"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_change_standard_price__id
 msgid "ID"
-msgstr "תעודה מזהה"
+msgstr "מזהה"
 
 #. module: stock_account
 #: model:ir.model.fields,help:stock_account.field_stock_change_standard_price__new_price
@@ -240,18 +237,16 @@ msgid ""
 "If cost price is increased, stock variation account will be debited and stock output account will be credited with the value = (difference of amount * quantity available).\n"
 "If cost price is decreased, stock variation account will be creadited and stock input account will be debited."
 msgstr ""
-"אם מחיר המחיר יגדל, חשבון וריאציה של מלאי יחויב ומלאי הפלט חשבון יזוכה עם ערך = (ההפרש כמות * כמות זמין).\n"
-"אם מחיר העלות ירד, מלאי וריאציה החשבון יהיה מזוכה וחשבון קלט המלאי יחויבו..."
 
 #. module: stock_account
 #: model_terms:ir.actions.act_window,help:stock_account.product_valuation_action
 msgid "If there are products, you will see its name and valuation."
-msgstr "אם יש מוצרים, תראה את שמו ואת הערכת השווי."
+msgstr ""
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.res_config_settings_view_form
 msgid "Include landed costs in product cost"
-msgstr "מחיר המוצר כולל את העלויות הנלוות"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_stock_inventory
@@ -261,7 +256,7 @@ msgstr "מלאי"
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_stock_location
 msgid "Inventory Locations"
-msgstr "מקומות המלאי"
+msgstr "מקומות מלאי"
 
 #. module: stock_account
 #: code:addons/stock_account/wizard/stock_quantity_history.py:25
@@ -275,7 +270,7 @@ msgstr "מקומות המלאי"
 #: model_terms:ir.ui.view,arch_db:stock_account.view_inventory_valuation_search
 #, python-format
 msgid "Inventory Valuation"
-msgstr "הערכת המלאי"
+msgstr "הערכת מלאי"
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_account_invoice
@@ -290,17 +285,17 @@ msgstr "שורה בחשבונית"
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_account_move
 msgid "Journal Entries"
-msgstr "רשומות יומן"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_res_config_settings__module_stock_landed_costs
 msgid "Landed Costs"
-msgstr "נתח עלויות"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_change_standard_price____last_update
 msgid "Last Modified on"
-msgstr "שינוי אחרון ב"
+msgstr "תאריך שינוי אחרון"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_change_standard_price__write_uid
@@ -310,7 +305,7 @@ msgstr "עודכן לאחרונה על ידי"
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_change_standard_price__write_date
 msgid "Last Updated on"
-msgstr "עדכון אחרון ב"
+msgstr "תאריך עדכון אחרון"
 
 #. module: stock_account
 #: selection:product.category,property_valuation:0
@@ -324,8 +319,6 @@ msgid ""
 "Manual: The accounting entries to value the inventory are not posted automatically.\n"
 "        Automated: An accounting entry is automatically created to value the inventory when a product enters or leaves the company."
 msgstr ""
-"ידני: הרישומים החשבונאיים להערכת המלאי אינם מתפרסמים באופן אוטומטי.\n"
-"אוטומטי: רישום חשבונאי נוצר באופן אוטומטי כדי להעריך את המלאי כאשר מוצר נכנס או עוזב את החברה."
 
 #. module: stock_account
 #: model:ir.model.fields,help:stock_account.field_product_category__property_valuation
@@ -334,24 +327,27 @@ msgid ""
 "        Automated: An accounting entry is automatically created to value the inventory when a product enters or leaves the company.\n"
 "        "
 msgstr ""
-"ידני: הרישומים החשבונאיים להערכת המלאי אינם מתפרסמים באופן אוטומטי.\n"
-"אוטומטי: רישום חשבונאי נוצר באופן אוטומטי כדי להעריך את המלאי כאשר מוצר נכנס או עוזב את החברה."
 
 #. module: stock_account
-#: code:addons/stock_account/models/product.py:129
+#: model_terms:ir.ui.view,arch_db:stock_account.view_inventory_valuation_search
+msgid "Negative Stock"
+msgstr ""
+
+#. module: stock_account
+#: code:addons/stock_account/models/product.py:128
 #, python-format
 msgid "No difference between the standard price and the new price."
-msgstr "אין הבדל בין המחיר הסטנדרטי לבין המחיר החדש."
+msgstr ""
 
 #. module: stock_account
 #: selection:product.template,property_valuation:0
 msgid "Periodic (manual)"
-msgstr "תקופתית (ידנית)"
+msgstr ""
 
 #. module: stock_account
 #: selection:product.template,property_valuation:0
 msgid "Perpetual (automated)"
-msgstr "תמידי (אוטומטי)"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_change_standard_price__new_price
@@ -365,9 +361,8 @@ msgstr "קבוצת רכישה"
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_product_product
-#: model_terms:ir.ui.view,arch_db:stock_account.view_inventory_valuation_search
 msgid "Product"
-msgstr "מצור"
+msgstr "פריט"
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_product_category
@@ -377,12 +372,12 @@ msgstr "קטגורית מוצר"
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_stock_move_line
 msgid "Product Moves (Stock Move Line)"
-msgstr "תנועות המוצר (תנועת קו האחסון)"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_product_template
 msgid "Product Template"
-msgstr "תבנית למוצר"
+msgstr "תבנית לפריט"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_product_product__qty_at_date
@@ -398,33 +393,33 @@ msgstr "הפניה"
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_move__remaining_qty
 msgid "Remaining Qty"
-msgstr "כמות שנותרה"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_move__remaining_value
 msgid "Remaining Value"
-msgstr "ערך הנותרים"
+msgstr ""
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.view_stock_quantity_history
 msgid "Retrieve the inventory valuation"
-msgstr "אחזר את שווי המלאי"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_stock_return_picking
 msgid "Return Picking"
-msgstr "החזר בחירה"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_stock_return_picking_line
 msgid "Return Picking Line"
-msgstr "החזר בחירת קו"
+msgstr ""
 
 #. module: stock_account
 #: selection:product.category,property_cost_method:0
 #: selection:product.template,property_cost_method:0
 msgid "Standard Price"
-msgstr "מחיר סטנדרטי"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,help:stock_account.field_product_product__property_cost_method
@@ -434,9 +429,6 @@ msgid ""
 "        Average Cost (AVCO): The products are valued at weighted average cost.\n"
 "        First In First Out (FIFO): The products are valued supposing those that enter the company first will also leave it first."
 msgstr ""
-"מחיר סטנדרטי: המוצרים מוערכים לפי העלות הסטנדרטית המוגדרת על המוצר.\n"
-"עלות ממוצעת (AVCO): המוצרים מוערכים בעלות הממוצעת המשוקללת.\n"
-"ראשון נכנס ראשון יוצא (FIFO): המוצרים מוערכים נניח כי אלה שנכנסו לחברה הראשונה גם לעזוב אותו תחילה."
 
 #. module: stock_account
 #: model:ir.model.fields,help:stock_account.field_product_category__property_cost_method
@@ -446,26 +438,23 @@ msgid ""
 "        First In First Out (FIFO): The products are valued supposing those that enter the company first will also leave it first.\n"
 "        "
 msgstr ""
-"מחיר סטנדרטי: המוצרים מוערכים לפי העלות הסטנדרטית המוגדרת על המוצר.\n"
-"עלות ממוצעת (AVCO): המוצרים מוערכים בעלות הממוצעת המשוקללת.\n"
-"ראשית בהתחלה (FIFO): המוצרים מוערכים נניח כי אלה שנכנסו לחברה הראשונה גם לעזוב אותו תחילה."
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_product_product__stock_fifo_manual_move_ids
 msgid "Stock Fifo Manual Move"
-msgstr "העבר ידנית מלאי FIFO "
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_product_product__stock_fifo_real_time_aml_ids
 msgid "Stock Fifo Real Time Aml"
-msgstr "מלאי בזמן אמת לפי פיפו AML"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_product_category__property_stock_account_input_categ_id
 #: model:ir.model.fields,field_description:stock_account.field_product_product__property_stock_account_input
 #: model:ir.model.fields,field_description:stock_account.field_product_template__property_stock_account_input
 msgid "Stock Input Account"
-msgstr "חשבון מלאי נכנס"
+msgstr ""
 
 #. module: stock_account
 #: code:addons/stock_account/__init__.py:26
@@ -474,73 +463,66 @@ msgstr "חשבון מלאי נכנס"
 #: model:ir.model.fields,field_description:stock_account.field_product_category__property_stock_journal
 #, python-format
 msgid "Stock Journal"
-msgstr "יומן מלאי"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_stock_move
 #: model:ir.model.fields,field_description:stock_account.field_account_move__stock_move_id
 msgid "Stock Move"
-msgstr "תנועת מלאי"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_product_category__property_stock_account_output_categ_id
 #: model:ir.model.fields,field_description:stock_account.field_product_product__property_stock_account_output
 #: model:ir.model.fields,field_description:stock_account.field_product_template__property_stock_account_output
 msgid "Stock Output Account"
-msgstr "חשבון מלאי יוצא"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_stock_quantity_history
 msgid "Stock Quantity History"
-msgstr "היסטורית כמות מלאי "
+msgstr ""
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.view_move_tree_valuation_at_date
 #: model_terms:ir.ui.view,arch_db:stock_account.view_stock_product_tree2
 #: model_terms:ir.ui.view,arch_db:stock_account.view_template_property_form
 msgid "Stock Valuation"
-msgstr "הערכת שווי מלאי "
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_product_category__property_stock_valuation_account_id
 msgid "Stock Valuation Account"
-msgstr "חשבון הערכת שווי מלאי "
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_location__valuation_in_account_id
 msgid "Stock Valuation Account (Incoming)"
-msgstr "חשבון הערכת שווי מלאי (נכנס)"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_location__valuation_out_account_id
 msgid "Stock Valuation Account (Outgoing)"
-msgstr "חשבון הערכת שווי מלאי (יוצא)"
+msgstr ""
 
 #. module: stock_account
-#: model:ir.model.fields,field_description:stock_account.field_product_product__stock_value_currency_id
-msgid "Stock Value Currency"
-msgstr "מטבע ערך המלאי"
-
-#. module: stock_account
-#: code:addons/stock_account/models/stock.py:540
+#: code:addons/stock_account/models/stock.py:536
 #, python-format
 msgid ""
 "The cost of %s is currently equal to 0. Change the cost or the configuration"
 " of your product to avoid an incorrect valuation."
 msgstr ""
-"המחיר של %s הוא כעת שווה 0. לשנות את העלות או את התצורה של המוצר שלך, כדי "
-"למנוע הערכה שגויה."
 
 #. module: stock_account
-#: code:addons/stock_account/models/stock.py:364
+#: code:addons/stock_account/models/stock.py:358
 #, python-format
 msgid ""
 "The move lines are not in a consistent state: some are entering and other "
 "are leaving the company."
-msgstr "קווי המעבר אינם נמצאים במצב עקבי: חלקם נכנסים ואחרים עוזבים את החברה."
+msgstr ""
 
 #. module: stock_account
-#: code:addons/stock_account/models/stock.py:375
+#: code:addons/stock_account/models/stock.py:369
 #, python-format
 msgid ""
 "The move lines are not in a consistent states: they are doing an "
@@ -549,18 +531,18 @@ msgid ""
 msgstr ""
 
 #. module: stock_account
-#: code:addons/stock_account/models/stock.py:373
+#: code:addons/stock_account/models/stock.py:367
 #, python-format
 msgid ""
 "The move lines are not in a consistent states: they do not share the same "
 "origin or destination company."
-msgstr "קווי המעבר אינם במצב עקבי: הם אינם חולקים את אותו מקור או יעד."
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_move__to_refund
 #: model:ir.model.fields,field_description:stock_account.field_stock_return_picking_line__to_refund
 msgid "To Refund (update SO/PO)"
-msgstr "להחזיר תשלום (לעדכן הזמנת מכירה / הזמנת רכש)"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,help:stock_account.field_stock_move__to_refund
@@ -568,7 +550,7 @@ msgstr "להחזיר תשלום (לעדכן הזמנת מכירה / הזמנת �
 msgid ""
 "Trigger a decrease of the delivered/received quantity in the associated Sale"
 " Order/Purchase Order"
-msgstr "הפעלה ירודה בכמות הנשלחת / שהתקבלה הקשורות בהזמנת הלקוח / הזמנת הרכש"
+msgstr ""
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.view_move_tree_valuation_at_date
@@ -579,7 +561,7 @@ msgstr "יחידת מידה"
 #: model_terms:ir.ui.view,arch_db:stock_account.product_variant_easy_edit_view_inherit
 #: model_terms:ir.ui.view,arch_db:stock_account.view_template_property_form
 msgid "Update Cost"
-msgstr "עדכון עלות"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,help:stock_account.field_stock_location__valuation_in_account_id
@@ -590,9 +572,6 @@ msgid ""
 "generic Stock Output Account set on the product. This has no effect for "
 "internal locations."
 msgstr ""
-"ממשמש עבור הערכת מלאי בזמן אמת. כאשר מוגדר מיקום וירטואלי (סוג שאינו פנימי),"
-" חשבון זה משמש להחזיק את ערך המוצרים המועברים ממיקום פנימי למיקום זה, במקום "
-"בחשבון המלאי הכללי שנקבע עבור המוצר. אין לכך השפעה על מיקומים פנימיים."
 
 #. module: stock_account
 #: model:ir.model.fields,help:stock_account.field_stock_location__valuation_out_account_id
@@ -603,23 +582,19 @@ msgid ""
 "the generic Stock Output Account set on the product. This has no effect for "
 "internal locations."
 msgstr ""
-"משמש עבור הערכת מלאי בזמן אמת. כאשר הוא מוגדר במיקום וירטואלי (סוג שאינו "
-"פנימי), חשבון זה ישמש לשמירה על ערך המוצרים שמועברים מחוץ למיקום זה ולמיקומו"
-" הפנימי, במקום בחשבון הפלט הכללי של המלאי שמוגדר למוצר. אין לכך השפעה על "
-"מיקומים פנימיים."
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_product_product__valuation
 #: model:ir.model.fields,field_description:stock_account.field_product_template__valuation
 #: model_terms:ir.ui.view,arch_db:stock_account.view_stock_product_tree2
 msgid "Valuation"
-msgstr "הערכת שווי"
+msgstr ""
 
 #. module: stock_account
 #: code:addons/stock_account/models/product.py:246
 #, python-format
 msgid "Valuation at date"
-msgstr "הערכת שווי במועד"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_product_product__stock_value
@@ -643,10 +618,6 @@ msgid ""
 "value for all products in this category. It can also directly be set on each"
 " product"
 msgstr ""
-"בעת ביצוע הערכת מלאי בזמן אמת, פריטי היומן המקבילים עבור כל תנועות המלאי "
-"הנכנסות יפורסמו בחשבון זה, אלא אם כן קיים חשבון הערכה ספציפי במיקום המקור. "
-"זהו ערך ברירת המחדל עבור כל המוצרים בקטגוריה זו. זה גם יכול להיות מוגדר "
-"ישירות על כל מוצר"
 
 #. module: stock_account
 #: model:ir.model.fields,help:stock_account.field_product_product__property_stock_account_input
@@ -657,9 +628,6 @@ msgid ""
 "specific valuation account set on the source location. When not set on the "
 "product, the one from the product category is used."
 msgstr ""
-"בעת ביצוע הערכת מלאי בזמן אמת, פריטי היומן המקבילים עבור כל תנועות המלאי "
-"הנכנסות יפורסמו בחשבון זה, אלא אם כן קיים חשבון הערכה ספציפי במיקום המקור. "
-"כאשר לא מוגדר על מוצר, אחד מקטגוריות המוצר בשימוש."
 
 #. module: stock_account
 #: model:ir.model.fields,help:stock_account.field_product_category__property_stock_account_output_categ_id
@@ -670,10 +638,6 @@ msgid ""
 "default value for all products in this category. It can also directly be set"
 " on each product"
 msgstr ""
-"בעת ביצוע הערכת מלאי בזמן אמת, פריטי היומן עבור כל תנועות המלאי היוצאות "
-"יפורסמו בחשבון זה, אלא אם כן קיים חשבון הערכה ספציפי במיקום היעד. זהו ערך "
-"ברירת המחדל עבור כל המוצרים בקטגוריה זו. זה גם יכול להיות מוגדר ישירות על כל"
-" מוצר"
 
 #. module: stock_account
 #: model:ir.model.fields,help:stock_account.field_product_product__property_stock_account_output
@@ -684,9 +648,6 @@ msgid ""
 "specific valuation account set on the destination location. When not set on "
 "the product, the one from the product category is used."
 msgstr ""
-"בעת ביצוע הערכת מלאי בזמן אמת, פריטי היומן עבור כל תנועות המלאי היוצאות "
-"יפורסמו בחשבון זה, אלא אם כן קיים חשבון הערכה ספציפי במיקום היעד. כאשר לא "
-"מוגדר על המוצר, אחד מקטגוריות המוצר בשימוש."
 
 #. module: stock_account
 #: model:ir.model.fields,help:stock_account.field_product_category__property_stock_journal
@@ -694,8 +655,6 @@ msgid ""
 "When doing real-time inventory valuation, this is the Accounting Journal in "
 "which entries will be automatically posted when stock moves are processed."
 msgstr ""
-"בעת ביצוע הערכת מלאי בזמן אמת, זהו יומן חשבונאות שבו רשומות יפורסמו באופן "
-"אוטומטי כאשר תנועות מלאי שבוצעו."
 
 #. module: stock_account
 #: model:ir.model.fields,help:stock_account.field_product_category__property_stock_valuation_account_id
@@ -703,8 +662,6 @@ msgid ""
 "When real-time inventory valuation is enabled on a product, this account "
 "will hold the current value of the products."
 msgstr ""
-"בעת ביצוע הערכת מלאי בזמן אמת פעולת על מוצר, חשבון זה יחזיק את הערך הנוכחי "
-"של המוצרים."
 
 #. module: stock_account
 #: code:addons/stock_account/models/stock.py:508
@@ -713,8 +670,6 @@ msgid ""
 "You don't have any stock journal defined on your product category, check if "
 "you have installed a chart of accounts."
 msgstr ""
-"אין תיעוד ביומן המלאי המוגדר בקטגוריית המוצרים שלך, בדוק אם התקנת טבלת "
-"חשבונות."
 
 #. module: stock_account
 #: code:addons/stock_account/models/product.py:130
@@ -724,10 +679,8 @@ msgid ""
 "You don't have any stock valuation account defined on your product category."
 " You must define one before processing this operation."
 msgstr ""
-"אין לך חשבון הערכה של מלאי המוגדר בקטגוריית המוצרים שלך. עליך להגדיר אחד "
-"לפני עיבוד פעולה זו."
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.view_change_standard_price
 msgid "_Apply"
-msgstr "_הגשה "
+msgstr ""

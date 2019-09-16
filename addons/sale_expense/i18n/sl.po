@@ -1,25 +1,20 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # * sale_expense
-# 
-# Translators:
-# Martin Trigaux, 2019
-# Matjaž Mozetič <m.mozetic@matmoz.si>, 2019
-# Vida Potočnik <vida.potocnik@mentis.si>, 2019
-# 
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~11.5\n"
+"Project-Id-Version: Odoo Server 10.saas~18\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-09-18 09:49+0000\n"
-"PO-Revision-Date: 2018-08-24 09:24+0000\n"
-"Last-Translator: Vida Potočnik <vida.potocnik@mentis.si>, 2019\n"
+"POT-Creation-Date: 2019-06-12 12:24+0000\n"
+"PO-Revision-Date: 2017-09-20 09:53+0000\n"
 "Language-Team: Slovenian (https://www.transifex.com/odoo/teams/41243/sl/)\n"
+"Language: sl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: sl\n"
-"Plural-Forms: nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n"
+"%100==4 ? 2 : 3);\n"
 
 #. module: sale_expense
 #: model:ir.model.fields,field_description:sale_expense.field_sale_order__expense_count
@@ -35,11 +30,6 @@ msgstr ""
 #: model_terms:digest.tip,tip_description:sale_expense.digest_tip_sale_expense_0
 msgid "Activate Expense Emails"
 msgstr ""
-
-#. module: sale_expense
-#: model:ir.model,name:sale_expense.model_account_analytic_line
-msgid "Analytic Line"
-msgstr "Analitična postavka"
 
 #. module: sale_expense
 #: model:ir.model,name:sale_expense.model_hr_expense
@@ -59,9 +49,14 @@ msgid "Invoicing"
 msgstr "Obračun"
 
 #. module: sale_expense
-#: model:ir.model,name:sale_expense.model_sale_order
-msgid "Quotation"
-msgstr "Ponudba"
+#: model:ir.model,name:sale_expense.model_account_move_line
+msgid "Journal Item"
+msgstr ""
+
+#. module: sale_expense
+#: model:ir.model,name:sale_expense.model_product_template
+msgid "Product Template"
+msgstr ""
 
 #. module: sale_expense
 #: model:ir.model.fields,field_description:sale_expense.field_hr_expense__sale_order_id
@@ -69,7 +64,11 @@ msgid "Sale Order"
 msgstr "Prodajni nalog"
 
 #. module: sale_expense
+#: model:ir.model,name:sale_expense.model_sale_order
+msgid "Sales Order"
+msgstr ""
+
+#. module: sale_expense
 #: model_terms:digest.tip,tip_description:sale_expense.digest_tip_sale_expense_0
-msgid ""
-"Take a snapshot of your expenses and submit your expenses by email.<br>"
+msgid "Take a snapshot of your expenses and submit your expenses by email.<br>"
 msgstr ""

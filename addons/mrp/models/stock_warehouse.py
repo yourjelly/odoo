@@ -59,9 +59,7 @@ class StockWarehouse(models.Model):
 
     @api.model
     def _get_production_location(self):
-        location = self.env.ref('stock.location_production', raise_if_not_found=False)
-        if not location:
-            location = self.env['stock.location'].search([('usage', '=', 'production')], limit=1)
+        location = self.env['stock.location'].with_context(force_company=self.company_id.id).search([('usage', '=', 'production'), ('company_id', '=', self.company_id.id)], limit=1)
         if not location:
             raise UserError(_('Can\'t find any production location.'))
         return location
@@ -166,11 +164,11 @@ class StockWarehouse(models.Model):
         })
         return rules
 
-    def _get_locations_values(self, vals):
-        values = super(StockWarehouse, self)._get_locations_values(vals)
+    def _get_locations_values(self, vals, code=False):
+        values = super(StockWarehouse, self)._get_locations_values(vals, code=code)
         def_values = self.default_get(['manufacture_steps'])
         manufacture_steps = vals.get('manufacture_steps', def_values['manufacture_steps'])
-        code = vals.get('code') or self.code
+        code = vals.get('code') or code
         code = code.replace(' ', '').upper()
         company_id = vals.get('company_id', self.company_id.id)
         values.update({
@@ -256,17 +254,8 @@ class StockWarehouse(models.Model):
         return routes
 
     def _update_location_manufacture(self, new_manufacture_step):
-        switch_warehouses = self.filtered(lambda wh: wh.manufacture_steps != new_manufacture_step)
-        loc_warehouse = switch_warehouses.filtered(lambda wh: not wh._location_used(wh.pbm_loc_id))
-        if loc_warehouse:
-            loc_warehouse.mapped('pbm_loc_id').write({'active': False})
-        loc_warehouse = switch_warehouses.filtered(lambda wh: not wh._location_used(wh.sam_loc_id))
-        if loc_warehouse:
-            loc_warehouse.mapped('sam_loc_id').write({'active': False})
-        if new_manufacture_step != 'mrp_one_step':
-            self.mapped('pbm_loc_id').write({'active': True})
-        if new_manufacture_step == 'pbm_sam':
-            self.mapped('sam_loc_id').write({'active': True})
+        self.mapped('pbm_loc_id').write({'active': new_manufacture_step != 'mrp_one_step'})
+        self.mapped('sam_loc_id').write({'active': new_manufacture_step == 'pbm_sam'})
 
     @api.multi
     def _update_name_and_code(self, name=False, code=False):

@@ -1,14 +1,14 @@
 odoo.define('website_sale.tour_shop_mail', function (require) {
 'use strict';
 
-var base = require('web_editor.base');
 var rpc = require('web.rpc');
 var tour = require('web_tour.tour');
+
+require('web.dom_ready');
 
 tour.register('shop_mail', {
     test: true,
     url: '/',
-    wait_for: base.ready(),
 },
 [
     {
@@ -34,7 +34,7 @@ tour.register('shop_mail', {
                     'domain': "https://domain-not-used.fr",
                 }],
             });
-            $.when(def1, def2).then(function (data) {
+            Promise.all([def1, def2]).then(function (data) {
                 window.location.href = '/shop?search=Acoustic Bloc Screens';
             });
         },
@@ -94,12 +94,12 @@ tour.register('shop_mail', {
     },
     {
         content: "click on the first email",
-        trigger: '.o_data_cell:contains("YourCompany Order")',
+        trigger: '.o_data_cell:contains("(Ref SO")',
     },
     {
         content: "check it's the correct email, and the URL is correct too",
-        trigger: 'iframe p:contains("Here is"):contains("the order")',
-        extra_trigger: 'iframe a[href^="http://my-test-domain.com"]',
+        trigger: 'div.oe_form_field_html[name="body_html"] p:contains("Here is"):contains("the order")',
+        extra_trigger: 'div.oe_form_field_html[name="body_html"] a[href^="http://my-test-domain.com"]',
     },
 ]);
 });

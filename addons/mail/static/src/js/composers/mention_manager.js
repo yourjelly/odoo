@@ -75,7 +75,7 @@ var MentionManager = Widget.extend({
     detectDelimiter: function () {
         var self = this;
         var textVal = this._composer.$input.val();
-        var cursorPosition = this._getSelectionPositions().start;
+        var cursorPosition = this._getComposerSelectionPositions().start;
         var leftString = textVal.substring(0, cursorPosition);
 
         function validateKeyword(delimiter, beginningOnly) {
@@ -114,7 +114,7 @@ var MentionManager = Widget.extend({
 
         if (this._activeListener) {
             var mentionWord = this._mentionWord;
-            $.when(this._activeListener.fetchCallback(mentionWord))
+            Promise.resolve(this._activeListener.fetchCallback(mentionWord))
                 .then(function (suggestions) {
                     if (mentionWord === self._mentionWord) {
                         // update suggestions only if mentionWord didn't change
@@ -287,9 +287,8 @@ var MentionManager = Widget.extend({
      * @private
      * @returns a current cursor position
     */
-    _getSelectionPositions: function () {
-        var InputElement = this._composer.$input.get(0);
-        return InputElement ? dom.getSelectionRange(InputElement) : { start: 0, end: 0 };
+    _getComposerSelectionPositions: function () {
+        return this._composer.getSelectionPositions();
     },
     /**
      * @private
@@ -313,7 +312,10 @@ var MentionManager = Widget.extend({
         }
         if (suggestions.length) {
             this.$el.html(QWeb.render(this._activeListener.suggestionTemplate, {
-                suggestions: suggestions,
+                suggestions: _.map(suggestions, function (suggestion) {
+                    // mention manager stores escaped suggestion names
+                    return _.extend({}, suggestion, { name: _.unescape(suggestion.name) });
+                })
             }));
             this.$el
                 .addClass('show')
@@ -382,8 +384,9 @@ var MentionManager = Widget.extend({
         if (!substitution) {
             // no substitution string given, so use the mention name instead
             // replace white spaces with non-breaking spaces to facilitate
-            // mentions detection in text
-            selectedSuggestion.name = selectedSuggestion.name.replace(/ /g, NON_BREAKING_SPACE);
+            // mentions detection in text.
+            // mention manager stores escaped suggestion names
+            selectedSuggestion.name = _.unescape(selectedSuggestion.name.replace(/ /g, NON_BREAKING_SPACE));
             substitution = this._activeListener.delimiter + selectedSuggestion.name;
         }
         var getMentionIndex = function (matches, cursorPosition) {
@@ -399,14 +402,14 @@ var MentionManager = Widget.extend({
         if (this._activeListener.selection.length) {
             // get mention matches (ordered by index in the text)
             var matches = this._getMatch(textInput, this._activeListener);
-            var index = getMentionIndex(matches, this._getSelectionPositions().start);
+            var index = getMentionIndex(matches, this._getComposerSelectionPositions().start);
             this._activeListener.selection.splice(index, 0, selectedSuggestion);
         } else {
             this._activeListener.selection.push(selectedSuggestion);
         }
 
         // update input text, and reset dropdown
-        var cursorPosition = this._getSelectionPositions().start;
+        var cursorPosition = this._getComposerSelectionPositions().start;
         var textLeft = textInput.substring(0, cursorPosition-(this._mentionWord.length+1));
         var textRight = textInput.substring(cursorPosition, textInput.length);
         var textInputNew = textLeft + substitution + ' ' + textRight;

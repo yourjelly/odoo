@@ -8,7 +8,6 @@ from difflib import get_close_matches
 from odoo import api, fields, models, tools, SUPERUSER_ID, _
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.modules import get_module_path, get_module_resource
-from odoo.tools import pycompat
 
 _logger = logging.getLogger(__name__)
 
@@ -416,10 +415,10 @@ class IrTranslation(models.Model):
         # always pass unicode so we can remove the string encoding/decoding.
         if not lang:
             return tools.ustr(source or '')
-        if isinstance(types, pycompat.string_types):
+        if isinstance(types, str):
             types = (types,)
         if res_id:
-            if isinstance(res_id, pycompat.integer_types):
+            if isinstance(res_id, int):
                 res_id = (res_id,)
             else:
                 res_id = tuple(res_id)
@@ -492,7 +491,7 @@ class IrTranslation(models.Model):
             translations_to_match = []
 
             for translation in translations:
-                if translation.src == translation.value:
+                if not translation.value:
                     discarded += translation
                     # consider it done to avoid being matched against another term
                     done.add((translation.src, translation.lang))
@@ -627,8 +626,8 @@ class IrTranslation(models.Model):
         external_ids = records.get_external_id()  # if no xml_id, empty string
         if callable(field.translate):
             # insert missing translations for each term in src
-            query = """ INSERT INTO ir_translation (lang, type, name, res_id, src, value, module)
-                        SELECT l.code, 'model_terms', %(name)s, %(res_id)s, %(src)s, %(src)s, %(module)s
+            query = """ INSERT INTO ir_translation (lang, type, name, res_id, src, module, state)
+                        SELECT l.code, 'model_terms', %(name)s, %(res_id)s, %(src)s, %(module)s, 'to_translate'
                         FROM res_lang l
                         WHERE l.active AND l.translatable AND NOT EXISTS (
                             SELECT 1 FROM ir_translation
@@ -648,8 +647,8 @@ class IrTranslation(models.Model):
                     })
         else:
             # insert missing translations for src
-            query = """ INSERT INTO ir_translation (lang, type, name, res_id, src, value, module)
-                        SELECT l.code, 'model', %(name)s, %(res_id)s, %(src)s, %(src)s, %(module)s
+            query = """ INSERT INTO ir_translation (lang, type, name, res_id, src, module, state)
+                        SELECT l.code, 'model', %(name)s, %(res_id)s, %(src)s, %(module)s, 'to_translate'
                         FROM res_lang l
                         WHERE l.active AND l.translatable AND l.code != 'en_US' AND NOT EXISTS (
                             SELECT 1 FROM ir_translation

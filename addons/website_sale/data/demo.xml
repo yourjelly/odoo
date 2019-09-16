@@ -5,11 +5,6 @@
             <field name="salesteam_id" ref="sales_team.salesteam_website_sales"/>
         </record>
 
-        <record id="sale.product_product_1_product_template" model="product.template">
-            <field name="website_sequence">100</field>
-            <field name="website_published" eval="True"/>
-        </record>
-
         <record id="product.product_product_24" model="product.product">
             <field name="website_published" eval="True"/>
         </record>
@@ -300,7 +295,7 @@
 
         <record id="website_sale_order_line_1" model="sale.order.line">
             <field name="order_id" ref="website_sale_order_1"/>
-            <field name="name">Large Cabinet</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_6').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_6"/>
             <field name="product_uom_qty">1</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -322,7 +317,7 @@
 
         <record id="website_sale_order_line_2" model="sale.order.line">
             <field name="order_id" ref="website_sale_order_2"/>
-            <field name="name">Customizable Desk</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_4').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_4"/>
             <field name="product_uom_qty">1</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -344,7 +339,7 @@
 
         <record id="website_sale_order_line_3" model="sale.order.line">
             <field name="order_id" ref="website_sale_order_3"/>
-            <field name="name">Customizable Desk</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_4').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_4"/>
             <field name="product_uom_qty">1</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -366,7 +361,7 @@
 
         <record id="website_sale_order_line_4" model="sale.order.line">
             <field name="order_id" ref="website_sale_order_4"/>
-            <field name="name">Large Desk</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_8').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_8"/>
             <field name="product_uom_qty">1</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -388,7 +383,7 @@
 
         <record id="website_sale_order_line_5" model="sale.order.line">
             <field name="order_id" ref="website_sale_order_5"/>
-            <field name="name">Customizable Desk</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_4').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_4"/>
             <field name="product_uom_qty">3</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -410,7 +405,7 @@
 
         <record id="website_sale_order_line_6" model="sale.order.line">
             <field name="order_id" ref="website_sale_order_6"/>
-            <field name="name">Large Desk</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_8').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_8"/>
             <field name="product_uom_qty">1</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -432,7 +427,7 @@
 
         <record id="website_sale_order_line_7" model="sale.order.line">
             <field name="order_id" ref="website_sale_order_7"/>
-            <field name="name">Large Desk</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_8').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_8"/>
             <field name="product_uom_qty">1</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -453,7 +448,7 @@
 
         <record id="website_sale_order_line_8" model="sale.order.line">
             <field name="order_id" ref="website_sale_order_8"/>
-            <field name="name">Large Desk</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_8').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_8"/>
             <field name="product_uom_qty">1</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -472,7 +467,7 @@
 
         <record id="website_sale_order_line_9" model="sale.order.line">
             <field name="order_id" ref="website_sale_order_9"/>
-            <field name="name">Laptop E5023</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_25').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_25"/>
             <field name="product_uom_qty">1</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -481,7 +476,7 @@
 
         <record id="website_sale_order_line_10" model="sale.order.line">
             <field name="order_id" ref="website_sale_order_9"/>
-            <field name="name">Mouse, Wireless</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_12').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_12"/>
             <field name="product_uom_qty">1</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -501,7 +496,7 @@
 
         <record id="website_sale_order_line_11" model="sale.order.line">
             <field name="order_id" ref="website_sale_order_10"/>
-            <field name="name">Conference Chair</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_11').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_11"/>
             <field name="product_uom_qty">2</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -521,7 +516,7 @@
 
         <record id="website_sale_order_line_12" model="sale.order.line">
             <field name="order_id" ref="website_sale_order_11"/>
-            <field name="name">Pedal Bin</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_9').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_9"/>
             <field name="product_uom_qty">1</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -543,7 +538,7 @@
 
         <record id="website_sale_order_line_14" model="sale.order.line">
             <field name="order_id" ref="website_sale_order_13"/>
-            <field name="name">Large Desk</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_8').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_8"/>
             <field name="product_uom_qty">1</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -562,7 +557,7 @@
 
         <record id="website_sale_order_line_15" model="sale.order.line">
             <field name="order_id" ref="website_sale_order_14"/>
-            <field name="name">Computer Case</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_16').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_16"/>
             <field name="product_uom_qty">1</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -584,7 +579,7 @@
 
         <record id="website_sale_order_line_16" model="sale.order.line">
             <field name="order_id" ref="website_sale_order_16"/>
-            <field name="name">Large Desk</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_8').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_8"/>
             <field name="product_uom_qty">2</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -605,7 +600,7 @@
 
         <record id="website_sale_order_line_17" model="sale.order.line">
             <field name="order_id" ref="website_sale_order_17"/>
-            <field name="name">Pedal Bin</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_9').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_9"/>
             <field name="product_uom_qty">7</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -627,7 +622,7 @@
 
         <record id="website_sale_order_line_18" model="sale.order.line">
             <field name="order_id" ref="website_sale_order_18"/>
-            <field name="name">Pedal Bin</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_9').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_9"/>
             <field name="product_uom_qty">3</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -652,6 +647,7 @@
             <field name="description_sale">Warranty, issued to the purchaser of an article by its manufacturer, promising to repair or replace it if necessary within a specified period of time.</field>
             <field name="attribute_value_ids" eval="[(6,0,[ref('product.product_attribute_value_5')])]"/>
             <field name="categ_id" ref="product.product_category_3"/>
+            <field name="invoice_policy">delivery</field>
         </record>
         <record id="product_template_attribute_line_1" model="product.template.attribute.line">
             <field name="product_tmpl_id" ref="product_product_1_product_template"/>
@@ -661,9 +657,6 @@
         <record id="product_product_1_product_template" model="product.template">
             <field name="attribute_line_ids" eval="[(6,0,[ref('product_template_attribute_line_1')])]"/>
             <field name="public_categ_ids" eval="[(6,0,[ref('website_sale.services')])]"/>
-        </record>
-        <record id="product.product_product_4_product_template" model="product.template">
-            <field name="optional_product_ids" eval="[(6,0,[ref('product.product_product_11_product_template'), ref('product_product_1_product_template')])]"/>
         </record>
 
         <!-- Handle automatically created product.template.attribute.value -->

@@ -45,10 +45,10 @@ var PivotModel = AbstractModel.extend({
 
     /**
      * Close a header. This method is actually synchronous, but returns a
-     * deferred.
+     * promise.
      *
      * @param {any} headerID
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     closeHeader: function (headerID) {
         var header = this.data.headers[headerID];
@@ -58,7 +58,7 @@ var PivotModel = AbstractModel.extend({
         header.root.groupbys.splice(newGroupbyLength);
     },
     /**
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     expandAll: function () {
         return this._loadData();
@@ -118,8 +118,8 @@ var PivotModel = AbstractModel.extend({
                     });
             }));
         }
-        return $.when.apply(null, defs).then(function () {
-            var results = Array.prototype.slice.call(arguments);
+        return Promise.all(defs).then(function () {
+            var results = Array.prototype.slice.call(arguments[0]);
             var data = [];
             var comparisonData = [];
             _.each(results, function (result) {
@@ -316,12 +316,18 @@ var PivotModel = AbstractModel.extend({
             return {
                 has_data: false,
                 colGroupBys: this.data.main_col.root.groupbys,
+                // colGroupBys: this.data.main_col.groupbys,
+                // colGroupBys: this.data.colGroupBys,
                 rowGroupBys:  this.data.main_row.root.groupbys,
+                // rowGroupBys:  this.data.main_row.groupbys,
+                // rowGroupBys: this.data.groupedBy,
                 measures: this.data.measures,
             };
         }
         return {
             colGroupBys: this.data.main_col.root.groupbys,
+            // colGroupBys: this.data.main_col.groupbys,
+            // colGroupBys: this.data.colGroupBys,
             context: this.data.context,
             domain: this.data.domain,
             compare: this.data.compare,
@@ -332,6 +338,8 @@ var PivotModel = AbstractModel.extend({
             measures: this.data.measures,
             rows: !isRaw && this._computeRows(),
             rowGroupBys: this.data.main_row.root.groupbys,
+            // rowGroupBys: this.data.main_row.groupbys,
+            // rowGroupBys: this.data.groupedBy,
             sortedColumn: this.data.sorted_column,
         };
     },
@@ -358,7 +366,7 @@ var PivotModel = AbstractModel.extend({
      * @param {string[]} params.compare
      * @param {Object} params.fields
      * @param {string} params.default_order
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     load: function (params) {
         var self = this;
@@ -394,7 +402,7 @@ var PivotModel = AbstractModel.extend({
      * @override
      * @param {any} handle this parameter is ignored
      * @param {Object} params
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     reload: function (handle, params) {
         var self = this;
@@ -422,6 +430,7 @@ var PivotModel = AbstractModel.extend({
         }
         if ('domain' in params) {
             this.data.domain = params.domain;
+            this.initialDomain = params.domain;
         } else {
             this.data.domain = this.initialDomain;
         }
@@ -505,14 +514,14 @@ var PivotModel = AbstractModel.extend({
      * Toggle the active state for a given measure, then reload the data.
      *
      * @param {string} field
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     toggleMeasure: function (field) {
         if (_.contains(this.data.measures, field)) {
             this.data.measures = _.without(this.data.measures, field);
             // in this case, we already have all data in memory, no need to
             // actually reload a lesser amount of information
-            return $.when();
+            return Promise.resolve();
         } else {
             this.data.measures.push(field);
         }
@@ -703,7 +712,7 @@ var PivotModel = AbstractModel.extend({
         return result;
     },
     /**
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _loadData: function () {
         var self = this;
@@ -753,8 +762,7 @@ var PivotModel = AbstractModel.extend({
             }));
         }
 
-        return this._loadDataDropPrevious.add($.when.apply(null, defs)).then(function () {
-            var results = Array.prototype.slice.call(arguments);
+        return this._loadDataDropPrevious.add(Promise.all(defs)).then(function (results) {
             var data = [];
             var comparisonData = [];
             _.each(results, function (result) {

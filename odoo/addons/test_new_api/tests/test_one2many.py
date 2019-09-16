@@ -166,3 +166,58 @@ class One2manyCase(TransactionCase):
         self.assertEqual(model1.pArTneR_321_id, p1)
         self.assertTrue(model2.exists())
         self.assertEqual(model2.pArTneR_321_id, p1)
+
+    def test_cache_invalidation(self):
+        """ Cache invalidation for one2many with integer inverse. """
+        record = self.env['test_new_api.attachment.host'].create({})
+        with self.assertQueryCount(2):
+            self.assertFalse(record.attachment_ids, "inconsistent cache")
+
+        # creating attachment must compute name and invalidate attachment_ids
+        attachment = self.env['test_new_api.attachment'].create({
+            'res_model': record._name,
+            'res_id': record.id,
+        })
+        with self.assertQueryCount(1):
+            self.assertEqual(attachment.name, record.display_name,
+                             "field should be computed")
+        with self.assertQueryCount(2):
+            self.assertEqual(record.attachment_ids, attachment, "inconsistent cache")
+
+        # creating a host should not attempt to recompute attachment.name
+        with self.assertQueryCount(1):
+            record = self.env['test_new_api.attachment.host'].create({})
+        with self.assertQueryCount(0):
+            # field res_id should not have been invalidated
+            attachment.res_id
+        with self.assertQueryCount(2):
+            self.assertFalse(record.attachment_ids, "inconsistent cache")
+
+        # writing on res_id must recompute name and invalidate attachment_ids
+        attachment.res_id = record.id
+        with self.assertQueryCount(1):
+            self.assertEqual(attachment.name, record.display_name,
+                             "field should be recomputed")
+        with self.assertQueryCount(2):
+            self.assertEqual(record.attachment_ids, attachment, "inconsistent cache")
+
+    def test_recompute(self):
+        """ test recomputation of fields that indirecly depend on one2many """
+        discussion = self.env.ref('test_new_api.discussion_0')
+        self.assertTrue(discussion.messages)
+
+        # detach message from discussion
+        message = discussion.messages[0]
+        message.discussion = False
+
+        # writing on the one2many and actually modifying the relation must
+        # trigger recomputation of fields that depend on its inverse many2one
+        self.assertNotIn(message, discussion.messages)
+        discussion.with_context(compute_name='X').write({'messages': [(4, message.id)]})
+        self.assertEqual(message.name, 'X')
+
+        # writing on the one2many without modifying the relation should not
+        # trigger recomputation of fields that depend on its inverse many2one
+        self.assertIn(message, discussion.messages)
+        discussion.with_context(compute_name='Y').write({'messages': [(4, message.id)]})
+        self.assertEqual(message.name, 'X')

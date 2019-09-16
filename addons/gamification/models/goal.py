@@ -7,7 +7,6 @@ from datetime import date, datetime, timedelta
 
 from odoo import api, fields, models, _, exceptions
 from odoo.osv import expression
-from odoo.tools import pycompat
 from odoo.tools.safe_eval import safe_eval
 
 _logger = logging.getLogger(__name__)
@@ -158,9 +157,9 @@ class Goal(models.Model):
              "to generate goals with a value in this field.")
     start_date = fields.Date("Start Date", default=fields.Date.today)
     end_date = fields.Date("End Date")  # no start and end = always active
-    target_goal = fields.Float('To Reach', required=True, track_visibility='always')
+    target_goal = fields.Float('To Reach', required=True, tracking=True)
 # no goal = global index
-    current = fields.Float("Current Value", required=True, default=0, track_visibility='always')
+    current = fields.Float("Current Value", required=True, default=0, tracking=True)
     completeness = fields.Float("Completeness", compute='_get_completion')
     state = fields.Selection([
         ('draft', "Draft"),
@@ -168,7 +167,7 @@ class Goal(models.Model):
         ('reached', "Reached"),
         ('failed', "Failed"),
         ('canceled', "Canceled"),
-    ], default='draft', string='State', required=True, track_visibility='always')
+    ], default='draft', string='State', required=True, tracking=True)
     to_update = fields.Boolean('To update')
     closed = fields.Boolean('Closed goal', help="These goals will not be recomputed.")
 
@@ -196,7 +195,7 @@ class Goal(models.Model):
                 if goal.current >= goal.target_goal:
                     goal.completeness = 100.0
                 else:
-                    goal.completeness = round(100.0 * goal.current / goal.target_goal, 2)
+                    goal.completeness = round(100.0 * goal.current / goal.target_goal, 2) if goal.target_goal else 0
             elif goal.current < goal.target_goal:
                 # a goal 'lower than' has only two values possible: 0 or 100%
                 goal.completeness = 100.0
@@ -285,7 +284,7 @@ class Goal(models.Model):
                     safe_eval(code, cxt, mode="exec", nocopy=True)
                     # the result of the evaluated codeis put in the 'result' local variable, propagated to the context
                     result = cxt.get('result')
-                    if result is not None and isinstance(result, (float, pycompat.integer_types)):
+                    if isinstance(result, (float, int)):
                         goals_to_write.update(goal._get_write_values(result))
                     else:
                         _logger.error(
@@ -326,7 +325,7 @@ class Goal(models.Model):
                         for goal in [g for g in goals if g.id in query_goals]:
                             for user_value in user_values:
                                 queried_value = field_name in user_value and user_value[field_name] or False
-                                if isinstance(queried_value, tuple) and len(queried_value) == 2 and isinstance(queried_value[0], pycompat.integer_types):
+                                if isinstance(queried_value, tuple) and len(queried_value) == 2 and isinstance(queried_value[0], int):
                                     queried_value = queried_value[0]
                                 if queried_value == query_goals[goal.id]:
                                     new_value = user_value.get(field_name+'_count', goal.current)

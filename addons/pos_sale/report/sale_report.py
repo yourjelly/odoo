@@ -43,6 +43,7 @@ class SaleReport(models.Model):
             config.crm_team_id AS team_id,
             p.product_tmpl_id,
             partner.country_id AS country_id,
+            partner.industry_id AS industry_id,
             partner.commercial_partner_id AS commercial_partner_id,
             (select sum(t.weight*l.qty/u.factor) from pos_order_line l
                join product_product p on (l.product_id=p.id)
@@ -89,11 +90,11 @@ class SaleReport(models.Model):
             pos.pricelist_id,
             p.product_tmpl_id,
             partner.country_id,
+            partner.industry_id,
             partner.commercial_partner_id,
             u.factor,
             config.crm_team_id
         '''
-
         current = '(SELECT %s FROM %s GROUP BY %s)' % (select_, from_, groupby_)
 
         return '%s UNION ALL %s' % (res, current)

@@ -46,22 +46,7 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
         Mixins.EventDispatcherMixin.init.call(this, arguments);
         this.setParent(parent);
 
-        this._customerEmailData = data.customer_email_data || [];
-        this._customerEmailStatus = data.customer_email_status;
-        this._documentModel = data.model;
-        this._documentName = data.record_name;
-        this._documentID = data.res_id;
-        this._emailFrom = data.email_from;
-        this._info = data.info;
-        this._moduleIcon = data.module_icon;
-        this._needactionPartnerIDs = data.needaction_partner_ids || [];
-        this._starredPartnerIDs = data.starred_partner_ids || [];
-        this._subject = data.subject;
-        this._subtypeDescription = data.subtype_description;
-        this._threadIDs = data.channel_ids || [];
-        this._trackingValueIDs = data.tracking_value_ids;
-
-        this._moderationStatus = data.moderation_status || 'accepted';
+        this._setInitialData(data);
 
         this._processBody(emojis);
         this._processMailboxes();
@@ -79,6 +64,16 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
      */
     addCustomerEmailData: function (data) {
         this._customerEmailData.push(data);
+    },
+    /**
+     * @override
+     * @return {string|undefined}
+     */
+    getAuthorImStatus: function () {
+        if (!this.hasAuthor()) {
+            return undefined;
+        }
+        return this.call('mail_service', 'getImStatus', { partnerID: this.getAuthorID() });
     },
     /**
      * Get the name of the author of this message
@@ -516,7 +511,7 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
      * @see {mail.Manager.Notification} for the receipt of 'toggle_star'
      *   notification after this rpc.
      *
-     * @return {$.Promise}
+     * @return {Promise}
      */
     toggleStarStatus: function () {
         return this._rpc({
@@ -583,7 +578,8 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
      * @return {boolean}
      */
     _isOdoobotAuthor: function () {
-        return this._serverAuthorID === this.call('mail_service', 'getOdoobotID');
+        return this._serverAuthorID &&
+            this._serverAuthorID[0] === this.call('mail_service', 'getOdoobotID')[0];
     },
     /**
      * State whether the message is transient or not
@@ -730,6 +726,44 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
         }
     },
     /**
+     * @private
+     * @param {Object} data
+     * @param {string} [data.body = ""]
+     * @param {(string|integer)[]} [data.channel_ids]
+     * @param {Object[]} [data.customer_email_data]
+     * @param {string} [data.customer_email_status]
+     * @param {string} [data.email_from]
+     * @param {string} [data.info]
+     * @param {string} [data.model]
+     * @param {string} [data.moderation_status='accepted']
+     * @param {string} [data.module_icon]
+     * @param {Array} [data.needaction_partner_ids = []]
+     * @param {string} [data.record_name]
+     * @param {integer} [data.res_id]
+     * @param {Array} [data.starred_partner_ids = []]
+     * @param {string} [data.subject]
+     * @param {string} [data.subtype_description]
+     * @param {Object[]} [data.tracking_value_ids]
+     */
+    _setInitialData: function (data){
+        this._customerEmailData = data.customer_email_data || [];
+        this._customerEmailStatus = data.customer_email_status;
+        this._documentModel = data.model;
+        this._documentName = data.record_name;
+        this._documentID = data.res_id;
+        this._emailFrom = data.email_from;
+        this._info = data.info;
+        this._moduleIcon = data.module_icon;
+        this._needactionPartnerIDs = data.needaction_partner_ids || [];
+        this._starredPartnerIDs = data.starred_partner_ids || [];
+        this._subject = data.subject;
+        this._subtypeDescription = data.subtype_description;
+        this._threadIDs = data.channel_ids || [];
+        this._trackingValueIDs = data.tracking_value_ids;
+
+        this._moderationStatus = data.moderation_status || 'accepted';
+    },
+    /**
      * Set whether the message is moderated by current user or not.
      * If it is moderated by the current user, the message is moved to the
      * "Moderation" mailbox. Note that this function only applies it locally,
@@ -766,6 +800,7 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
     _warnMessageModerated: function () {
         var mailBus = this.call('mail_service', 'getMailBus');
         if (this.needsModerationByUser()) {
+            this._setModeratedByUser(false);
             var moderationBox = this.call('mail_service', 'getMailbox', 'moderation');
             moderationBox.decrementMailboxCounter();
             moderationBox.removeMessage(this.getID());

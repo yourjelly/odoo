@@ -7,15 +7,13 @@
 # Matus Krnac <matus.krnac@gmail.com>, 2018
 # Jaroslav Bosansky <jaro.bosansky@ekoenergo.sk>, 2018
 # gebri <gebri@inmail.sk>, 2018
-# Jan Prokop, 2019
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-09-18 09:49+0000\n"
-"PO-Revision-Date: 2018-08-24 09:33+0000\n"
-"Last-Translator: Jan Prokop, 2019\n"
+"PO-Revision-Date: 2018-09-18 09:49+0000\n"
+"Last-Translator: gebri <gebri@inmail.sk>, 2018\n"
 "Language-Team: Slovak (https://www.transifex.com/odoo/teams/41243/sk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -41,7 +39,7 @@ msgstr "Prístup zamietnutý"
 #: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:58
 #, python-format
 msgid "Access rights"
-msgstr "Prístupové práva"
+msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
@@ -55,7 +53,7 @@ msgstr "Aktivovať vývojárský režim"
 #: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:128
 #, python-format
 msgid "Activate the developer mode (with assets)"
-msgstr "Aktivovať vývojárský režim (so zdrojmi)"
+msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
@@ -69,7 +67,7 @@ msgstr "Aktívny používateľ"
 #: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:65
 #, python-format
 msgid "Active Users"
-msgstr "Aktívni používatelia"
+msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
@@ -98,7 +96,7 @@ msgstr "Spoločnost"
 #: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:120
 #, python-format
 msgid "Copyright © 2004"
-msgstr "Copyright © 2004"
+msgstr ""
 
 #. module: web_settings_dashboard
 #: model:ir.actions.client,name:web_settings_dashboard.web_settings_dashboard_action
@@ -111,14 +109,14 @@ msgstr "Nástenka"
 #: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:130
 #, python-format
 msgid "Deactivate the developer mode"
-msgstr "Deaktivovať vývojárský režim"
+msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
 #: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:74
 #, python-format
 msgid "Enter e-mail addresses"
-msgstr "Zadajte emailové adresy "
+msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
@@ -132,7 +130,7 @@ msgstr "Facebook"
 #: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:120
 #, python-format
 msgid "GNU LGPL Licensed"
-msgstr "GNU LGPL Licensed"
+msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
@@ -146,9 +144,7 @@ msgstr "Získajte viac funkcií s Podnikateľskou edíciou!"
 #: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:97
 #, python-format
 msgid "Help us spread the word: Share Odoo's awesomeness with your friends!"
-msgstr ""
-"Pomôžte nám šíriť informáciu: zdieľajte vaše skúsenosti s Odoo s vašimi "
-"priateľmi!"
+msgstr "Pomôžte nám šíriť slovo: zdielajte Odoo úžasnosť s vašimi priateľmi!"
 
 #. module: web_settings_dashboard
 #. openerp-web
@@ -183,7 +179,7 @@ msgstr "Pozvite nových používateľov:"
 #: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:104
 #, python-format
 msgid "LinkedIn"
-msgstr "LinkedIn"
+msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
@@ -197,7 +193,7 @@ msgstr "Nahrať preklad"
 #: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:132
 #, python-format
 msgid "Load demo data"
-msgstr "Nahrať vzorové dáta"
+msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
@@ -225,7 +221,7 @@ msgstr "Odoo"
 #: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:139
 #, python-format
 msgid "Odoo Enterprise"
-msgstr "Odoo Enterprise"
+msgstr "Odoo Podnikanie"
 
 #. module: web_settings_dashboard
 #. openerp-web
@@ -246,7 +242,7 @@ msgstr "Čakajúce pozvánky:"
 #: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:52
 #, python-format
 msgid "Remove Email"
-msgstr "Odstrániť email"
+msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
@@ -256,22 +252,20 @@ msgid ""
 "Send your documents in your partner's language or set up a language for your"
 " users"
 msgstr ""
-"Posielať dokumenty v jazyku vašich partnerov alebo nastaviť jazyk pre vašich"
-" užívateľov"
 
 #. module: web_settings_dashboard
 #. openerp-web
 #: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:177
 #, python-format
 msgid "Set Up"
-msgstr "Nastaviť"
+msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
 #: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:172
 #, python-format
 msgid "Set up your company information"
-msgstr "Nastavte dáta vašej spoločnosti"
+msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
@@ -285,21 +279,21 @@ msgstr "Zdieľať"
 #: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:95
 #, python-format
 msgid "Share the Love"
-msgstr "Zdieľajte!"
+msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
 #: code:addons/web_settings_dashboard/static/src/js/dashboard.js:116
 #, python-format
 msgid "The following email addresses already exist: %s."
-msgstr "Nasledovná emailová adresa už existuje: %s."
+msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
 #: code:addons/web_settings_dashboard/static/src/js/dashboard.js:105
 #, python-format
 msgid "The following email addresses are invalid: %s."
-msgstr "Nasledovná emailová adresa je neplatná: %s."
+msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web
@@ -335,7 +329,7 @@ msgstr "Aktualizovať teraz"
 #: code:addons/web_settings_dashboard/static/src/xml/dashboard.xml:141
 #, python-format
 msgid "Upgrade to enterprise"
-msgstr "Aktualizovať na Enterprise"
+msgstr ""
 
 #. module: web_settings_dashboard
 #. openerp-web

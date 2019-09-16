@@ -3,15 +3,16 @@
 # * base_import
 # 
 # Translators:
-# Ayhan KIZILTAN <akiziltan76@hotmail.com>, 2018
-# Martin Trigaux, 2018
-# Levent Karakaş <levent@mektup.at>, 2018
-# Güven YILMAZ <guvenyilmaz@outlook.com.tr>, 2018
-# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2018
-# Cem Uygur <cemuygur.beb@gmail.com>, 2018
-# Gökhan Erdoğdu <gokhan.erdogdu@mechsoft.com.tr>, 2018
-# Murat Kaplan <muratk@projetgrup.com>, 2018
+# Ahmet Altinisik <aaltinisik@altinkaya.com.tr>, 2017
+# Ramiz Deniz Öner <deniz@denizoner.com>, 2017
+# Gökhan Erdoğdu <gokhan.erdogdu@mechsoft.com.tr>, 2017
+# gezgin biri <gezginbiri@hotmail.com>, 2017
+# Cem Uygur <cemuygur.beb@gmail.com>, 2017
+# Martin Trigaux, 2019
+# Murat Kaplan <muratk@projetgrup.com>, 2019
+# Güven YILMAZ <guvenyilmaz@outlook.com.tr>, 2019
 # Ediz Duman <neps1192@gmail.com>, 2019
+# Ayhan KIZILTAN <akiziltan76@hotmail.com>, 2019
 # Umur Akın <umura@projetgrup.com>, 2019
 # 
 msgid ""
@@ -19,7 +20,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-10-02 10:05+0000\n"
-"PO-Revision-Date: 2018-08-24 09:16+0000\n"
+"PO-Revision-Date: 2016-08-05 12:56+0000\n"
 "Last-Translator: Umur Akın <umura@projetgrup.com>, 2019\n"
 "Language-Team: Turkish (https://www.transifex.com/odoo/teams/41243/tr/)\n"
 "MIME-Version: 1.0\n"
@@ -170,7 +171,7 @@ msgstr "Oluşturan"
 #: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m_child__create_date
 #: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_preview__create_date
 msgid "Created on"
-msgstr "Oluşturulma"
+msgstr "Oluşturulma zamanı"
 
 #. module: base_import
 #. openerp-web
@@ -224,7 +225,7 @@ msgstr "Ondalık Ayırıcı:"
 #: code:addons/base_import/static/src/xml/base_import.xml:56
 #, python-format
 msgid "Defer parent/child computation"
-msgstr "Üst/Alt hesaplamasını ertele"
+msgstr "Ebeveyn/çocuk hesabı ertele"
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__display_name
@@ -252,7 +253,7 @@ msgstr "Görünüm Adı"
 #: code:addons/base_import/static/src/js/import_action.js:445
 #, python-format
 msgid "Don't import"
-msgstr " İçeri Aktarma İptal"
+msgstr " İçeri Aktarma"
 
 #. module: base_import
 #. openerp-web
@@ -311,7 +312,7 @@ msgstr "Alan biçimlendirme otomatik olduğu için Excel dosyaları önerilir."
 #: code:addons/base_import/models/base_import.py:206
 #, python-format
 msgid "External ID"
-msgstr "Harici Kimlik"
+msgstr "Dış ID"
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__field_name
@@ -379,7 +380,7 @@ msgstr "Olası değerler:"
 #: code:addons/base_import/static/src/xml/base_import.xml:138
 #, python-format
 msgid "Here is the start of the file we could not import:"
-msgstr "İçe aktaramadığımız dosyanın başlangıcı:"
+msgstr "İçeaktaramadığımız dosyanın başı:"
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__id
@@ -476,7 +477,7 @@ msgstr "İçe aktarım tamamlandı"
 #: code:addons/base_import/static/src/xml/base_import.xml:136
 #, python-format
 msgid "Import preview failed due to:"
-msgstr "İçe aktarma hatasının nedeni:"
+msgstr "İçeaktarma hatasının nedeni<:"
 
 #. module: base_import
 #. openerp-web
@@ -580,7 +581,7 @@ msgstr "Model"
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_preview__name
 msgid "Name"
-msgstr "Adı"
+msgstr "İsim"
 
 #. module: base_import
 #. openerp-web
@@ -618,7 +619,7 @@ msgstr "Üst"
 #: code:addons/base_import/static/src/js/import_action.js:514
 #, python-format
 msgid "Relation Fields"
-msgstr "İlişkili Alanlar"
+msgstr "İlişki Alanları"
 
 #. module: base_import
 #. openerp-web
@@ -694,7 +695,7 @@ msgstr "Testler: Temel İçe Aktarım Modeli Önizlemesi"
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_char
 msgid "Tests : Base Import Model, Character"
-msgstr "Testler: İçe Aktarım Modeli, Character"
+msgstr "Testler: İçe Aktarım Modeli, Karakter"
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_char_noreadonly
@@ -775,7 +776,7 @@ msgstr "Metin Sınırlayıcı:"
 msgid ""
 "The first row\n"
 "                 contains the label of the column"
-msgstr "Dosyanın ilk satırı sütunun adını içerir"
+msgstr "İlk satır sütun başlığını içerir"
 
 #. module: base_import
 #. openerp-web
@@ -796,7 +797,7 @@ msgstr "İçeaktarma sırasında geçmişi izle"
 #, python-format
 msgid "Unable to load \"{extension}\" file: requires Python module \"{modname}\""
 msgstr ""
-"\"{extension}\" dosyası yüklenemiyor: \"{modname}\" Python modülü "
+"\"{Extension}\" dosyası yüklenemiyor: \"{modname}\" Python modülü "
 "gerektiriyor"
 
 #. module: base_import
@@ -847,7 +848,7 @@ msgstr ""
 #: code:addons/base_import/models/base_import.py:631
 #, python-format
 msgid "You must configure at least one field to import"
-msgstr "İçeri aktarım yapabilmek için en az bir alanı yapılandırmalısınız."
+msgstr "İçeaktarma yapabilmek için enaz bir alanı yapılandırmalısınız"
 
 #. module: base_import
 #. openerp-web

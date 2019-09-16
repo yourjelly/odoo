@@ -61,7 +61,7 @@ class Repair(models.Model):
         ('2binvoiced', 'To be Invoiced'),
         ('invoice_except', 'Invoice Exception'),
         ('done', 'Repaired')], string='Status',
-        copy=False, default='draft', readonly=True, track_visibility='onchange',
+        copy=False, default='draft', readonly=True, tracking=True,
         help="* The \'Draft\' status is used when a user is encoding a new and unconfirmed repair order.\n"
              "* The \'Confirmed\' status is used when a user confirms the repair order.\n"
              "* The \'Ready to Repair\' status is used to start to repairing, user can start repairing only after repair order is confirmed.\n"
@@ -96,10 +96,10 @@ class Repair(models.Model):
         help='Selecting \'Before Repair\' or \'After Repair\' will allow you to generate invoice before or after the repair is done respectively. \'No invoice\' means you don\'t want to generate invoice for this repair order.')
     invoice_id = fields.Many2one(
         'account.invoice', 'Invoice',
-        copy=False, readonly=True, track_visibility="onchange")
+        copy=False, readonly=True, tracking=True)
     move_id = fields.Many2one(
         'stock.move', 'Move',
-        copy=False, readonly=True, track_visibility="onchange",
+        copy=False, readonly=True, tracking=True,
         help="Move created by the repair order")
     fees_lines = fields.One2many(
         'repair.fee', 'repair_id', 'Operations',
@@ -159,7 +159,8 @@ class Repair(models.Model):
     @api.onchange('product_id')
     def onchange_product_id(self):
         self.guarantee_limit = False
-        self.lot_id = False
+        if (self.product_id and self.lot_id and self.lot_id.product_id != self.product_id) or not self.product_id:
+            self.lot_id = False
         if self.product_id:
             self.product_uom = self.product_id.uom_id.id
 
@@ -274,7 +275,7 @@ class Repair(models.Model):
 
     def action_repair_invoice_create(self):
         for repair in self:
-            repair.action_invoice_create()
+            repair._create_invoices()
             if repair.invoice_method == 'b4repair':
                 repair.action_repair_ready()
             elif repair.invoice_method == 'after_repair':
@@ -282,7 +283,7 @@ class Repair(models.Model):
         return True
 
     @api.multi
-    def action_invoice_create(self, group=False):
+    def _create_invoices(self, group=False):
         """ Creates invoice(s) for repair order.
         @param group: It is set to true when group invoice is to be generated.
         @return: Invoice Ids.

@@ -3,17 +3,17 @@
 # * website_form
 # 
 # Translators:
-# Martin Trigaux, 2018
 # Bohdan Lisnenko, 2018
 # ТАрас <tratatuta@i.ua>, 2018
+# Martin Trigaux, 2019
 # Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server saas~12.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-09 10:32+0000\n"
-"PO-Revision-Date: 2018-08-24 09:34+0000\n"
+"POT-Creation-Date: 2019-01-16 08:00+0000\n"
+"PO-Revision-Date: 2016-08-05 13:12+0000\n"
 "Last-Translator: Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019\n"
 "Language-Team: Ukrainian (https://www.transifex.com/odoo/teams/41243/uk/)\n"
 "MIME-Version: 1.0\n"
@@ -143,7 +143,7 @@ msgstr "Будь ласка, заповніть форму вірно."
 #: model:ir.model.fields,help:website_form.field_ir_model__website_form_default_field_id
 msgid ""
 "Specify the field which will contain meta and custom form fields datas."
-msgstr "Вкажіть поле, яке буде містити мету і спеціальні  дані поля форми."
+msgstr "Вкажіть поле, яке буде містити мету і спеціальні поля форми даних."
 
 #. module: website_form
 #. openerp-web
@@ -168,8 +168,7 @@ msgstr "Форму успішно надіслано."
 #. module: website_form
 #: model_terms:ir.ui.view,arch_db:website_form.res_config_settings_view_form
 msgid "Track metadata (IP, User Agent, ...) on your Website Forms"
-msgstr ""
-"Відслідковуйте метадані (IP, Агент користувача, ...) на формі веб-сайту"
+msgstr "Відслідковуйте метадані (IP, User Agent, ...) на формі веб-сайту"
 
 #. module: website_form
 #: model:ir.model,name:website_form.model_website

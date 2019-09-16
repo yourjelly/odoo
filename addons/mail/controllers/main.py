@@ -9,10 +9,9 @@ import werkzeug
 from werkzeug import url_encode
 
 from odoo import api, http, registry, SUPERUSER_ID, _
-from odoo.addons.web.controllers.main import binary_content
 from odoo.exceptions import AccessError
 from odoo.http import request
-from odoo.tools import consteq, pycompat
+from odoo.tools import consteq
 
 _logger = logging.getLogger(__name__)
 
@@ -137,6 +136,7 @@ class MailController(http.Controller):
                 'res_id': follower.partner_id.id or follower.channel_id.id,
                 'is_editable': is_editable,
                 'is_uid': is_uid,
+                'active': follower.partner_id.active or bool(follower.channel_id),
             })
         return {
             'followers': followers,
@@ -192,7 +192,7 @@ class MailController(http.Controller):
                 model, res_id = message.model, message.res_id
         # ==============================================================================================
 
-        if res_id and isinstance(res_id, pycompat.string_types):
+        if res_id and isinstance(res_id, str):
             res_id = int(res_id)
         return self._redirect_to_record(model, res_id, access_token, **kwargs)
 
@@ -216,7 +216,8 @@ class MailController(http.Controller):
                 # if the current user has access to the document, get the partner avatar as sudo()
                 request.env[res_model].browse(res_id).check_access_rule('read')
                 if partner_id in request.env[res_model].browse(res_id).sudo().exists().message_ids.mapped('author_id').ids:
-                    status, headers, _content = binary_content(model='res.partner', id=partner_id, field='image_medium', default_mimetype='image/png', env=request.env(user=SUPERUSER_ID))
+                    status, headers, _content = request.env['ir.http'].sudo().binary_content(
+                        model='res.partner', id=partner_id, field='image_medium', default_mimetype='image/png')
                     # binary content return an empty string and not a placeholder if obj[field] is False
                     if _content != '':
                         content = _content

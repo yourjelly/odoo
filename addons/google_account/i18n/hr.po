@@ -3,7 +3,8 @@
 # * google_account
 # 
 # Translators:
-# Đurđica Žarković <durdica.zarkovic@storm.hr>, 2019
+# Đurđica Žarković <durdica.zarkovic@storm.hr>, 2017
+# Martin Trigaux, 2017
 # Bole <bole@dajmi5.com>, 2019
 # 
 msgid ""
@@ -11,7 +12,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-09-21 13:17+0000\n"
-"PO-Revision-Date: 2018-08-24 09:18+0000\n"
+"PO-Revision-Date: 2016-08-05 12:58+0000\n"
 "Last-Translator: Bole <bole@dajmi5.com>, 2019\n"
 "Language-Team: Croatian (https://www.transifex.com/odoo/teams/41243/hr/)\n"
 "MIME-Version: 1.0\n"
@@ -28,24 +29,12 @@ msgstr "Kreirao"
 #. module: google_account
 #: model:ir.model.fields,field_description:google_account.field_google_service__create_date
 msgid "Created on"
-msgstr "Kreirano"
+msgstr "Datum kreiranja"
 
 #. module: google_account
 #: model:ir.model.fields,field_description:google_account.field_google_service__display_name
 msgid "Display Name"
 msgstr "Naziv za prikaz"
-
-#. module: google_account
-#: code:addons/google_account/models/google_service.py:203
-#, python-format
-msgid "Error while requesting Google Services"
-msgstr ""
-
-#. module: google_account
-#: code:addons/google_account/models/google_service.py:199
-#, python-format
-msgid "Error while requesting Google Services: %s"
-msgstr ""
 
 #. module: google_account
 #: model:ir.model,name:google_account.model_google_service
@@ -109,16 +98,10 @@ msgstr ""
 "Autorizacije već istekao [%s]."
 
 #. module: google_account
-#: code:addons/google_account/models/google_service.py:204
+#: code:addons/google_account/models/google_service.py:193
 #, python-format
 msgid "Something went wrong with your request to google"
 msgstr "Nešto je pogrešno u vašem zahtjevu prema Google-u"
-
-#. module: google_account
-#: code:addons/google_account/models/google_service.py:200
-#, python-format
-msgid "Something went wrong with your request to google: %s"
-msgstr ""
 
 #. module: google_account
 #: code:addons/google_account/models/google_service.py:131

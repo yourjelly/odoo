@@ -26,8 +26,7 @@
     </template>
 
     <template id="product_attributes_body" inherit_id="website_sale.product" customize_show="True" active="True" name="Product attributes table">
-        <xpath expr="//hr[@id='hr_product_attributes_simple']" position="replace"/>
-        <xpath expr="//p[@id='product_attributes_simple']" position="replace"/>
+        <xpath expr="//div[@id='product_attributes_simple']" position="replace"/>
         <xpath expr="//div[@id='product_full_description']" position="after">
             <section class="container" id="product_full_spec">
                 <t t-set="atts" t-value="product.get_variant_groups()"/>
@@ -93,7 +92,7 @@
                                         <strong class='float-right'>x</strong>
                                     </a>
                                     <a t-att-href="'/shop/product/%s' % slug(product.product_tmpl_id)">
-                                        <img t-attf-src="/web/image/product.product/#{product.id}/image/200x150" class="img img-fluid" style="margin:auto;" alt="Product image"/>
+                                        <img t-attf-src="/web/image/product.product/#{product.id}/image_large" class="img img-fluid" style="margin:auto;" alt="Product image"/>
                                     </a>
                                     <div class='product_summary'>
                                         <a class="o_product_comparison_table" t-attf-href="/shop/product/#{ slug(product.product_tmpl_id) }">

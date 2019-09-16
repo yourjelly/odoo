@@ -13,8 +13,6 @@ from docutils import nodes
 from sphinx import addnodes, util, builders
 from sphinx.locale import admonitionlabels
 
-from odoo.tools import pycompat
-
 
 def _parents(node):
     while node.parent:
@@ -71,7 +69,7 @@ class BootstrapTranslator(nodes.NodeVisitor, object):
         self.param_separator = ','
 
     def encode(self, text):
-        return pycompat.text_type(text).translate({
+        return str(text).translate({
             ord('&'): u'&amp;',
             ord('<'): u'&lt;',
             ord('"'): u'&quot;',
@@ -80,7 +78,7 @@ class BootstrapTranslator(nodes.NodeVisitor, object):
         })
 
     def starttag(self, node, tagname, **attributes):
-        tagname = pycompat.text_type(tagname).lower()
+        tagname = str(tagname).lower()
 
         # extract generic attributes
         attrs = {name.lower(): value for name, value in attributes.items()}
@@ -115,7 +113,7 @@ class BootstrapTranslator(nodes.NodeVisitor, object):
     # only "space characters" SPACE, CHARACTER TABULATION, LINE FEED,
     # FORM FEED and CARRIAGE RETURN should be collapsed, not al White_Space
     def attval(self, value, whitespace=re.compile(u'[ \t\n\f\r]+')):
-        return self.encode(whitespace.sub(u' ', pycompat.text_type(value)))
+        return self.encode(whitespace.sub(' ', str(value)))
 
     def astext(self):
         return u''.join(self.body)

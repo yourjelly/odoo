@@ -4,17 +4,16 @@
 # 
 # Translators:
 # Martin Trigaux, 2018
-# RGB Consulting <odoo@rgbconsulting.com>, 2018
-# Quim - eccit <quim@eccit.com>, 2018
-# M Palau <mpalau@tda.ad>, 2019
+# RGB Consulting <odoo@rgbconsulting.com>, 2019
+# Quim - eccit <quim@eccit.com>, 2019
 # Arnau Ros, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server saas~12.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-29 10:10+0000\n"
-"PO-Revision-Date: 2018-08-24 09:34+0000\n"
+"POT-Creation-Date: 2019-03-20 13:50+0000\n"
+"PO-Revision-Date: 2016-08-05 13:12+0000\n"
 "Last-Translator: Arnau Ros, 2019\n"
 "Language-Team: Catalan (https://www.transifex.com/odoo/teams/41243/ca/)\n"
 "MIME-Version: 1.0\n"
@@ -25,42 +24,42 @@ msgstr ""
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/xml/website.gengo.xml:144
+#: code:addons/website_gengo/static/src/xml/website.gengo.xml:120
 #, python-format
 msgid "- Enable if you using testing account"
-msgstr "- Activa si estàs utilitzant un compte de prova"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/xml/website.gengo.xml:138
+#: code:addons/website_gengo/static/src/xml/website.gengo.xml:114
 #, python-format
 msgid "- Jobs are Automatically Approved by Gengo."
-msgstr "- Treballs són automàticament aprovats per Gengo."
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/xml/website.gengo.xml:118
+#: code:addons/website_gengo/static/src/xml/website.gengo.xml:94
 #, python-format
 msgid "1. Go To your"
-msgstr "1. Ves al teu"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/xml/website.gengo.xml:119
+#: code:addons/website_gengo/static/src/xml/website.gengo.xml:95
 #, python-format
 msgid "2. Then paste generated keys in given form"
-msgstr "2. Llavors enganxa les claus generades tal i com les han donat"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/xml/website.gengo.xml:29
+#: code:addons/website_gengo/static/src/xml/website.gengo.xml:18
 #, python-format
 msgid "Already translated content"
-msgstr "Contingut ja traduït"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/xml/website.gengo.xml:137
+#: code:addons/website_gengo/static/src/xml/website.gengo.xml:113
 #, python-format
 msgid "Auto Approve Translation"
 msgstr "Aprovar traducció automàticament"
@@ -70,7 +69,7 @@ msgstr "Aprovar traducció automàticament"
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:4
 #, python-format
 msgid "Auto Translate"
-msgstr "Traduït automàticament"
+msgstr ""
 
 #. module: website_gengo
 #: model:ir.model,name:website_gengo.model_base_gengo_translations
@@ -82,14 +81,14 @@ msgstr "Traduccions Base de Gengo"
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:43
 #, python-format
 msgid "By Machine (Free)"
-msgstr "Per màquina (gratis)"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:52
 #, python-format
 msgid "Cancel"
-msgstr "Cancel·lar"
+msgstr "Cancel·la"
 
 #. module: website_gengo
 #. openerp-web
@@ -107,28 +106,28 @@ msgstr "Tancar"
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:12
 #, python-format
 msgid "Content to translate or you can post them to"
-msgstr "Contingut a traduir o pots publicar-lo a"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/js/website_gengo.js:85
+#: code:addons/website_gengo/static/src/js/website_gengo.js:90
 #, python-format
 msgid "Could not Post translation"
-msgstr "No pot publicar la traducció"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/js/website_gengo.js:192
+#: code:addons/website_gengo/static/src/js/website_gengo.js:206
 #, python-format
 msgid "Could not submit ! Try Again"
-msgstr "No s'ha pogut enviar! Intenta-ho de nou"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:7
 #, python-format
 msgid "Count Words"
-msgstr "Comptar paraules"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
@@ -142,42 +141,42 @@ msgstr "Gengo"
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:89
 #, python-format
 msgid "Gengo API is not configured"
-msgstr "L'API de Gengo no ha estat configurada"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:70
 #, python-format
 msgid "Gengo Dashboard"
-msgstr "Panell de control de Gengo"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:70
 #, python-format
 msgid "Gengo Statistics"
-msgstr "Estadístiques de Gengo"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:94
 #, python-format
 msgid "Gengo account"
-msgstr "Compte de Gengo"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:108
 #, python-format
 msgid "Paste private key here"
-msgstr "Enganxa la clau privada aquí"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:101
 #, python-format
 msgid "Paste public key here"
-msgstr "Enganxa la clau pública aquí"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
@@ -191,49 +190,49 @@ msgstr "Missatge"
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:106
 #, python-format
 msgid "Private key"
-msgstr "Clau privada"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:45
 #, python-format
 msgid "Pro - $"
-msgstr "Pro - $"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:99
 #, python-format
 msgid "Public key"
-msgstr "Clau pública"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:119
 #, python-format
 msgid "Sandbox"
-msgstr "Sandbox"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:37
 #, python-format
 msgid "Select Gengo Translation Service Level"
-msgstr "Selecciona el nivell del servei de traducció de Gengo"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:44
 #, python-format
 msgid "Standard - $"
-msgstr "Estàndard - $"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:93
 #, python-format
 msgid "Steps for configure Gengo"
-msgstr "Passos per configurar Gengo"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
@@ -247,7 +246,7 @@ msgstr "Publicar"
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:74
 #, python-format
 msgid "Translated words"
-msgstr "Paraules traduïdes "
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
@@ -258,63 +257,63 @@ msgstr "Traducció en curs"
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/xml/website.gengo.xml:26
+#: code:addons/website_gengo/static/src/xml/website.gengo.xml:15
 #, python-format
 msgid "Translation in process (Gengo)"
-msgstr "Traducció en progrés (Gengo)"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/xml/website.gengo.xml:89
+#: code:addons/website_gengo/static/src/xml/website.gengo.xml:64
 #, python-format
 msgid "Translator statistics for this page"
-msgstr "Estadístiques del traductor per aquesta pàgina"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/xml/website.gengo.xml:70
+#: code:addons/website_gengo/static/src/xml/website.gengo.xml:46
 #, python-format
 msgid "Ultra - $"
-msgstr "Ultra - $"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:5
 #, python-format
 msgid "Wait"
-msgstr "Espera"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:73
 #, python-format
 msgid "Words in progress"
-msgstr "Paraules en progrés"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:72
 #, python-format
 msgid "Words posted for translate"
-msgstr "Paraules publicades per traduir"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:94
 #, python-format
 msgid "and generate API Keys."
-msgstr "i generar claus API"
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:13
 #, python-format
 msgid "for translation."
-msgstr "per traduir."
+msgstr ""
 
 #. module: website_gengo
 #. openerp-web
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:69
 #, python-format
 msgid "new words found on this page."
-msgstr "noves paraules trobades en aquesta pàgina"
+msgstr ""

@@ -3,21 +3,21 @@
 # * event_sale
 # 
 # Translators:
-# Kristoffer Grundström <hamnisdude@gmail.com>, 2019
-# Martin Trigaux, 2019
+# Kristoffer Grundström <hamnisdude@gmail.com>, 2018
+# Martin Trigaux, 2018
+# Martin Wilderoth <martin.wilderoth@linserv.se>, 2018
+# 03992e16f8df6e39b9d1cc0ff635887e, 2018
+# Egils Verkstad <egils@riseup.net>, 2018
+# Chrille Hedberg <hedberg.chrille@gmail.com>, 2018
 # Anders Wallenquist <anders.wallenquist@vertel.se>, 2019
-# Martin Wilderoth <martin.wilderoth@linserv.se>, 2019
-# Lord Cobol, 2019
-# Egils Verkstad <egils@riseup.net>, 2019
-# Chrille Hedberg <hedberg.chrille@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server saas~12.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-08 06:49+0000\n"
-"PO-Revision-Date: 2018-08-24 09:17+0000\n"
-"Last-Translator: Chrille Hedberg <hedberg.chrille@gmail.com>, 2019\n"
+"POT-Creation-Date: 2019-03-20 13:49+0000\n"
+"PO-Revision-Date: 2016-08-05 12:57+0000\n"
+"Last-Translator: Anders Wallenquist <anders.wallenquist@vertel.se>, 2019\n"
 "Language-Team: Swedish (https://www.transifex.com/odoo/teams/41243/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -165,7 +165,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_product_template_form
 #: model:product.category,name:event_sale.product_category_events
 msgid "Events"
-msgstr "Evenemang"
+msgstr "Arrangemang"
 
 #. module: event_sale
 #: code:addons/event_sale/models/event.py:254
@@ -181,6 +181,7 @@ msgid "ID"
 msgstr "ID"
 
 #. module: event_sale
+#: model:ir.model.fields,help:event_sale.field_product_product__event_ok
 #: model:ir.model.fields,help:event_sale.field_product_template__event_ok
 #: model:ir.model.fields,help:event_sale.field_sale_order_line__event_ok
 msgid ""
@@ -199,6 +200,7 @@ msgid "Is Expired"
 msgstr "Är utgången"
 
 #. module: event_sale
+#: model:ir.model.fields,field_description:event_sale.field_product_product__event_ok
 #: model:ir.model.fields,field_description:event_sale.field_product_template__event_ok
 #: model:ir.model.fields,field_description:event_sale.field_sale_order_line__event_ok
 msgid "Is an Event Ticket"
@@ -275,7 +277,7 @@ msgstr ""
 #: code:addons/event_sale/models/event.py:259
 #, python-format
 msgid "Paid"
-msgstr "Betalad"
+msgstr "Betald"
 
 #. module: event_sale
 #: code:addons/event_sale/models/event.py:260
@@ -345,16 +347,12 @@ msgid "Reserved Seats"
 msgstr "Reserverade platser"
 
 #. module: event_sale
-#: model:ir.model,name:event_sale.model_sale_order
-msgid "Sale Order"
-msgstr "Kundorder"
-
-#. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_ticket__deadline
 msgid "Sales End"
 msgstr "Försäljning avslutad"
 
 #. module: event_sale
+#: model:ir.model,name:event_sale.model_sale_order
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor__sale_order_id
 msgid "Sales Order"
 msgstr "Kundorder"
@@ -455,12 +453,6 @@ msgstr "Obegränsad"
 #: model:event.event.ticket,name:event_sale.event_2_ticket_2
 msgid "VIP"
 msgstr ""
-
-#. module: event_sale
-#: model:product.product,weight_uom_name:event_sale.product_product_event
-#: model:product.template,weight_uom_name:event_sale.product_product_event_product_template
-msgid "kg"
-msgstr "kg"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.view_event_registration_editor_form

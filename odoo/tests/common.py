@@ -33,7 +33,6 @@ from lxml import etree, html
 
 from odoo.models import BaseModel
 from odoo.osv.expression import normalize_domain
-from odoo.tools import pycompat
 from odoo.tools import single_email_re
 from odoo.tools.misc import find_in_path
 from odoo.tools.safe_eval import safe_eval
@@ -373,10 +372,9 @@ class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
         doc = self._testMethodDoc
         return doc and ' '.join(l.strip() for l in doc.splitlines() if not l.isspace()) or None
 
-    if not pycompat.PY2:
-        # turns out this thing may not be quite as useful as we thought...
-        def assertItemsEqual(self, a, b, msg=None):
-            self.assertCountEqual(a, b, msg=None)
+    # turns out this thing may not be quite as useful as we thought...
+    def assertItemsEqual(self, a, b, msg=None):
+        self.assertCountEqual(a, b, msg=None)
 
 
 class TransactionCase(BaseCase):
@@ -465,7 +463,7 @@ class SavepointCase(SingleTransactionCase):
 class ChromeBrowser():
     """ Helper object to control a Chrome headless process. """
 
-    def __init__(self, logger):
+    def __init__(self, logger, window_size):
         self._logger = logger
         if websocket is None:
             self._logger.warning("websocket-client module is not installed")
@@ -477,6 +475,7 @@ class ChromeBrowser():
         self.user_data_dir = tempfile.mkdtemp(suffix='_chrome_odoo')
         self.chrome_process = None
         self.screencast_frames = []
+        self.window_size = window_size
         self._chrome_start()
         self._find_websocket()
         self._logger.info('Websocket url found: %s', self.ws_url)
@@ -547,7 +546,7 @@ class ChromeBrowser():
             '--disable-extensions': '',
             '--user-data-dir': self.user_data_dir,
             '--disable-translate': '',
-            '--window-size': '1366x768',
+            '--window-size': self.window_size,
             '--remote-debugging-address': HOST,
             '--remote-debugging-port': str(self.devtools_port),
             '--no-sandbox': '',
@@ -755,26 +754,25 @@ class ChromeBrowser():
                 if res.get('result', {}).get('result').get('subtype', '') == 'error':
                     self._logger.error("Running code returned an error")
                     return False
-            elif res and res.get('method') == 'Runtime.consoleAPICalled' and res.get('params', {}).get('type') in ('log', 'error'):
+            elif res and res.get('method') == 'Runtime.exceptionThrown':
+                exception_details = res.get('params', {}).get('exceptionDetails', {})
+                self._logger.error(exception_details)
+                self.take_screenshot()
+                self._save_screencast()
+                return False
+            elif res and res.get('method') in 'Runtime.consoleAPICalled' and res.get('params', {}).get('type') in ('log', 'error', 'trace'):
                 logs = res.get('params', {}).get('args')
                 log_type = res.get('params', {}).get('type')
                 content = " ".join([str(log.get('value', '')) for log in logs])
                 if log_type == 'error':
                     self._logger.error(content)
-                    logged_error = True
+                    self.take_screenshot()
+                    self._save_screencast()
+                    return False
                 else:
                     self._logger.info('console log: %s', content)
-                for log in logs:
-                    if log.get('type', '') == 'string' and log.get('value', '').lower() == 'ok':
-                        # it is possible that some tests returns ok while an error was shown in logs.
-                        # since runbot should always be red in this case, better explicitly fail.
-                        if logged_error:
-                            return False
+                    if 'test successful' in content:
                         return True
-                    elif log.get('type', '') == 'string' and log.get('value', '').lower().startswith('error'):
-                        self.take_screenshot()
-                        self._save_screencast()
-                        return False
             elif res and res.get('method') == 'Page.screencastFrame':
                 self.screencast_frames.append(res.get('params'))
             elif res:
@@ -810,6 +808,7 @@ class HttpCase(TransactionCase):
     """
     registry_test_mode = True
     browser = None
+    browser_size = '1366x768'
 
     def __init__(self, methodName='runTest'):
         super(HttpCase, self).__init__(methodName)
@@ -825,7 +824,7 @@ class HttpCase(TransactionCase):
     def start_browser(cls, logger):
         # start browser on demand
         if cls.browser is None:
-            cls.browser = ChromeBrowser(logger)
+            cls.browser = ChromeBrowser(logger, cls.browser_size)
 
     @classmethod
     def tearDownClass(cls):
@@ -849,12 +848,12 @@ class HttpCase(TransactionCase):
         self.opener = requests.Session()
         self.opener.cookies['session_id'] = self.session_id
 
-    def url_open(self, url, data=None, timeout=10):
+    def url_open(self, url, data=None, timeout=10, headers=None):
         if url.startswith('/'):
             url = "http://%s:%s%s" % (HOST, PORT, url)
         if data:
-            return self.opener.post(url, data=data, timeout=timeout)
-        return self.opener.get(url, timeout=timeout)
+            return self.opener.post(url, data=data, timeout=timeout, headers=headers)
+        return self.opener.get(url, timeout=timeout, headers=headers)
 
     def _wait_remaining_requests(self):
         t0 = int(time.time())
@@ -912,10 +911,10 @@ class HttpCase(TransactionCase):
         - eval(code) inside the page
 
         To signal success test do:
-        console.log('ok')
+        console.log('test successful')
 
         To signal failure do:
-        console.log('error')
+        console.error('test failed')
 
         If neither are done before timeout test fails.
         """
@@ -1113,7 +1112,7 @@ class Form(object):
         if isinstance(view, BaseModel):
             assert view._name == 'ir.ui.view', "the view parameter must be a view id, xid or record, got %s" % view
             view_id = view.id
-        elif isinstance(view, pycompat.string_types):
+        elif isinstance(view, str):
             view_id = env.ref(view).id
         else:
             view_id = view or False

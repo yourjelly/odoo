@@ -3,17 +3,15 @@
 # * google_account
 # 
 # Translators:
+# ExcaliberX <excaliberx@gmail.com>, 2018
 # Yihya Hugirat <hugirat@gmail.com>, 2018
-# דודי מלכה <Dudimalka6@gmail.com>, 2019
-# ExcaliberX <excaliberx@gmail.com>, 2019
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-09-21 13:17+0000\n"
-"PO-Revision-Date: 2018-08-24 09:18+0000\n"
-"Last-Translator: ExcaliberX <excaliberx@gmail.com>, 2019\n"
+"PO-Revision-Date: 2018-09-21 13:17+0000\n"
+"Last-Translator: Yihya Hugirat <hugirat@gmail.com>, 2018\n"
 "Language-Team: Hebrew (https://www.transifex.com/odoo/teams/41243/he/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -37,18 +35,6 @@ msgid "Display Name"
 msgstr "השם המוצג"
 
 #. module: google_account
-#: code:addons/google_account/models/google_service.py:203
-#, python-format
-msgid "Error while requesting Google Services"
-msgstr ""
-
-#. module: google_account
-#: code:addons/google_account/models/google_service.py:199
-#, python-format
-msgid "Error while requesting Google Services: %s"
-msgstr ""
-
-#. module: google_account
 #: model:ir.model,name:google_account.model_google_service
 msgid "Google Service"
 msgstr ""
@@ -56,12 +42,12 @@ msgstr ""
 #. module: google_account
 #: model:ir.model.fields,field_description:google_account.field_google_service__id
 msgid "ID"
-msgstr "תעודה מזהה"
+msgstr "מזהה"
 
 #. module: google_account
 #: model:ir.model.fields,field_description:google_account.field_google_service____last_update
 msgid "Last Modified on"
-msgstr "שונה לאחרונה ב"
+msgstr "תאריך שינוי אחרון"
 
 #. module: google_account
 #: model:ir.model.fields,field_description:google_account.field_google_service__write_uid
@@ -71,7 +57,7 @@ msgstr "עודכן לאחרונה על ידי"
 #. module: google_account
 #: model:ir.model.fields,field_description:google_account.field_google_service__write_date
 msgid "Last Updated on"
-msgstr "עדכון אחרון ב"
+msgstr "תאריך עדכון אחרון"
 
 #. module: google_account
 #: code:addons/google_account/models/google_service.py:172
@@ -107,16 +93,10 @@ msgstr ""
 "תוקפו [%s]"
 
 #. module: google_account
-#: code:addons/google_account/models/google_service.py:204
+#: code:addons/google_account/models/google_service.py:193
 #, python-format
 msgid "Something went wrong with your request to google"
 msgstr "אירעה שגיאה בבקשה שלך לגוגל"
-
-#. module: google_account
-#: code:addons/google_account/models/google_service.py:200
-#, python-format
-msgid "Something went wrong with your request to google: %s"
-msgstr ""
 
 #. module: google_account
 #: code:addons/google_account/models/google_service.py:131

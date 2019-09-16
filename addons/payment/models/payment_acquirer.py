@@ -151,15 +151,14 @@ class PaymentAcquirer(models.Model):
     module_state = fields.Selection(selection=ir_module.STATES, string='Installation State', related='module_id.state', readonly=False)
 
     image = fields.Binary(
-        "Image", attachment=True,
-        help="This field holds the image used for this provider, limited to 1024x1024px")
+        "Image", help="This field holds the image used for this provider, limited to 1024x1024px")
     image_medium = fields.Binary(
-        "Medium-sized image", attachment=True,
+        "Medium-sized image",
         help="Medium-sized image of this provider. It is automatically "
              "resized as a 128x128px image, with aspect ratio preserved. "
              "Use this field in form views or some kanban views.")
     image_small = fields.Binary(
-        "Small-sized image", attachment=True,
+        "Small-sized image",
         help="Small-sized image of this provider. It is automatically "
              "resized as a 64x64px image, with aspect ratio preserved. "
              "Use this field anywhere a small image is required.")
@@ -503,8 +502,7 @@ class PaymentIcon(models.Model):
     name = fields.Char(string='Name')
     acquirer_ids = fields.Many2many('payment.acquirer', string="Acquirers", help="List of Acquirers supporting this payment icon.")
     image = fields.Binary(
-        "Image", attachment=True,
-        help="This field holds the image used for this payment icon, limited to 1024x1024px")
+        "Image", help="This field holds the image used for this payment icon, limited to 1024x1024px")
 
     image_payment_form = fields.Binary(
         "Image displayed on the payment form", attachment=True)
@@ -582,7 +580,7 @@ class PaymentTransaction(models.Model):
                             help='Internal reference of the TX')
     acquirer_reference = fields.Char(string='Acquirer Reference', readonly=True, help='Reference of the TX as stored in the acquirer database')
     # duplicate partner / transaction data to store the values at transaction time
-    partner_id = fields.Many2one('res.partner', 'Customer', track_visibility='onchange')
+    partner_id = fields.Many2one('res.partner', 'Customer', tracking=True)
     partner_name = fields.Char('Partner Name')
     partner_lang = fields.Selection(_lang_get, 'Language', default=lambda self: self.env.lang)
     partner_email = fields.Char('Email')
@@ -678,6 +676,9 @@ class PaymentTransaction(models.Model):
             message_vals.append(self.payment_id._get_payment_chatter_link())
         elif self.state == 'cancel' and self.state_message:
             message = _('The transaction %s with %s for %s has been cancelled with the following message: %s')
+            message_vals.append(self.state_message)
+        elif self.state == 'error' and self.state_message:
+            message = _('The transaction %s with %s for %s has return failed with the following error message: %s')
             message_vals.append(self.state_message)
         else:
             message = _('The transaction %s with %s for %s has been cancelled.')
@@ -777,6 +778,7 @@ class PaymentTransaction(models.Model):
             'date': datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT),
             'state_message': msg,
         })
+        self._log_payment_transaction_received()
 
     @api.multi
     def _post_process_after_done(self):

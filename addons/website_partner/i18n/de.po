@@ -3,8 +3,9 @@
 # * website_partner
 # 
 # Translators:
-# Martin Trigaux, 2018
-# Ermin Trevisan <trevi@twanda.com>, 2018
+# Ermin Trevisan <trevi@twanda.com>, 2017
+# Tina Rittmüller <tr@ife.de>, 2017
+# Martin Trigaux, 2019
 # Chris Egal <sodaswed@web.de>, 2019
 # 
 msgid ""
@@ -12,7 +13,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-09-18 09:49+0000\n"
-"PO-Revision-Date: 2018-08-24 09:35+0000\n"
+"PO-Revision-Date: 2016-08-05 13:13+0000\n"
 "Last-Translator: Chris Egal <sodaswed@web.de>, 2019\n"
 "Language-Team: German (https://www.transifex.com/odoo/teams/41243/de/)\n"
 "MIME-Version: 1.0\n"
@@ -60,13 +61,13 @@ msgstr "Auf der aktuellen Website sichtbar"
 #: model:ir.model.fields,field_description:website_partner.field_res_partner__website_description
 #: model:ir.model.fields,field_description:website_partner.field_res_users__website_description
 msgid "Website Partner Full Description"
-msgstr "Website Partnerbeschreibung"
+msgstr "Website ausführliche Partnerbeschreibung"
 
 #. module: website_partner
 #: model:ir.model.fields,field_description:website_partner.field_res_partner__website_short_description
 #: model:ir.model.fields,field_description:website_partner.field_res_users__website_short_description
 msgid "Website Partner Short Description"
-msgstr "Website Partnerkurzbeschreibung"
+msgstr "Website kurze Partnerbeschreibung"
 
 #. module: website_partner
 #: model:ir.model.fields,field_description:website_partner.field_res_partner__website_url

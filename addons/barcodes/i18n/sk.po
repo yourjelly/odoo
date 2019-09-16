@@ -8,15 +8,13 @@
 # Pavol Krnáč <pavol.krnac@ekoenergo.sk>, 2018
 # Jaroslav Bosansky <jaro.bosansky@ekoenergo.sk>, 2018
 # gebri <gebri@inmail.sk>, 2018
-# Jan Prokop, 2019
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-09-21 13:17+0000\n"
-"PO-Revision-Date: 2018-08-24 09:16+0000\n"
-"Last-Translator: Jan Prokop, 2019\n"
+"PO-Revision-Date: 2018-09-21 13:17+0000\n"
+"Last-Translator: gebri <gebri@inmail.sk>, 2018\n"
 "Language-Team: Slovak (https://www.transifex.com/odoo/teams/41243/sk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -73,7 +71,7 @@ msgstr ""
 #. module: barcodes
 #: model_terms:ir.actions.act_window,help:barcodes.action_barcode_nomenclature_form
 msgid "Add a new barcode nomenclature"
-msgstr "Pridaj nové názvoslovie čiarového kódu"
+msgstr ""
 
 #. module: barcodes
 #: selection:barcode.rule,type:0
@@ -104,7 +102,7 @@ msgstr "Ktorýkoľvek"
 #. module: barcodes
 #: model:ir.model,name:barcodes.model_barcodes_barcode_events_mixin
 msgid "Barcode Event Mixin"
-msgstr "Udalosť čiarového kódu mixin"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model,name:barcodes.model_barcode_nomenclature
@@ -190,7 +188,7 @@ msgstr "Zobrazovaný Názov"
 #. module: barcodes
 #: selection:barcode.rule,encoding:0
 msgid "EAN-13"
-msgstr "EAN-13"
+msgstr ""
 
 #. module: barcodes
 #: selection:barcode.nomenclature,upc_ean_conv:0
@@ -200,7 +198,7 @@ msgstr "EAN-13 na UPC-A"
 #. module: barcodes
 #: selection:barcode.rule,encoding:0
 msgid "EAN-8"
-msgstr "EAN-8"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__encoding
@@ -212,21 +210,21 @@ msgstr "Zakódovanie"
 #: code:addons/barcodes/static/src/js/barcode_form_view.js:326
 #, python-format
 msgid "Error: Barcode command is undefined"
-msgstr "Chyba: nedefinovaný čiarový kód"
+msgstr ""
 
 #. module: barcodes
 #. openerp-web
 #: code:addons/barcodes/static/src/js/barcode_form_view.js:63
 #, python-format
 msgid "Error: Document not editable"
-msgstr "Chyba : Dokument neupraviteľný"
+msgstr ""
 
 #. module: barcodes
 #. openerp-web
 #: code:addons/barcodes/static/src/js/barcode_form_view.js:362
 #, python-format
 msgid "Error: No last scanned barcode"
-msgstr "Chyba: žiadny posledne skenovaný čiarový kód"
+msgstr ""
 
 #. module: barcodes
 #. openerp-web
@@ -236,12 +234,12 @@ msgstr "Chyba: žiadny posledne skenovaný čiarový kód"
 #: code:addons/barcodes/static/src/js/barcode_form_view.js:139
 #, python-format
 msgid "Error: Pager not available"
-msgstr "Chyba: pager nedostupný"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model,name:barcodes.model_ir_http
 msgid "HTTP Routing"
-msgstr "HTTP smerovanie"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature__id
@@ -287,7 +285,7 @@ msgstr "Nikdy"
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_res_company__nomenclature_id
 msgid "Nomenclature"
-msgstr "Názvoslovie"
+msgstr ""
 
 #. module: barcodes
 #: selection:barcode.rule,type:0
@@ -415,7 +413,7 @@ msgstr ""
 #. module: barcodes
 #: selection:barcode.rule,encoding:0
 msgid "UPC-A"
-msgstr "UPC-A"
+msgstr ""
 
 #. module: barcodes
 #: selection:barcode.nomenclature,upc_ean_conv:0

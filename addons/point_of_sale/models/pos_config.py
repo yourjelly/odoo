@@ -63,6 +63,13 @@ class PosConfig(models.Model):
     def _compute_default_customer_html(self):
         return self.env['ir.qweb'].render('point_of_sale.customer_facing_display_html')
 
+    @api.depends('limit_categories', 'iface_available_categ_ids')
+    def _compute_iface_start_categ_domain_ids(self):
+        if self.limit_categories:
+            self.iface_start_categ_domain_ids =  self.iface_available_categ_ids
+        else:
+            self.iface_start_categ_domain_ids = self.env['pos.category'].search([])
+
     name = fields.Char(string='Point of Sale Name', index=True, required=True, help="An internal identification of the point of sale.")
     is_installed_account_accountant = fields.Boolean(string="Is the Full Accounting Installed",
         compute="_compute_is_installed_account_accountant")
@@ -103,6 +110,10 @@ class PosConfig(models.Model):
     iface_tax_included = fields.Selection([('subtotal', 'Tax-Excluded Price'), ('total', 'Tax-Included Price')], string="Tax Display", default='subtotal', required=True)
     iface_start_categ_id = fields.Many2one('pos.category', string='Initial Category',
         help='The point of sale will display this product category by default. If no category is specified, all available products will be shown.')
+    iface_available_categ_ids = fields.Many2many('pos.category', string='Available Category Tree',
+        help='The point of sale will only display products which are within one of the selected category trees. If no category is specified, all available products will be shown')
+    iface_start_categ_domain_ids = fields.Many2many('pos.category', compute='_compute_iface_start_categ_domain_ids', store=False,
+        help='Technical field used as a domain for iface_start_categ_id.')
     iface_display_categ_images = fields.Boolean(string='Display Category Pictures',
         help="The product categories will be displayed with pictures.")
     restrict_price_control = fields.Boolean(string='Restrict Price Modifications to Managers',
@@ -137,7 +148,8 @@ class PosConfig(models.Model):
         help="Make several pricelists available in the Point of Sale. You can also apply a pricelist to specific customers from their contact form (in Sales tab). To be valid, this pricelist must be listed here as an available pricelist. Otherwise the default pricelist will apply.")
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.user.company_id)
     barcode_nomenclature_id = fields.Many2one('barcode.nomenclature', string='Barcode Nomenclature',
-        help='Defines what kind of barcodes are available and how they are assigned to products, customers and cashiers.')
+        help='Defines what kind of barcodes are available and how they are assigned to products, customers and cashiers.',
+        default=lambda self: self.env.user.company_id.nomenclature_id, required=True)
     group_pos_manager_id = fields.Many2one('res.groups', string='Point of Sale Manager Group', default=_get_group_pos_manager,
         help='This field is there to pass the id of the pos manager group to the point of sale client.')
     group_pos_user_id = fields.Many2one('res.groups', string='Point of Sale User Group', default=_get_group_pos_user,
@@ -152,8 +164,8 @@ class PosConfig(models.Model):
     use_pricelist = fields.Boolean("Use a pricelist.")
     tax_regime = fields.Boolean("Tax Regime")
     tax_regime_selection = fields.Boolean("Tax Regime Selection value")
-    barcode_scanner = fields.Boolean("Barcode Scanner")
     start_category = fields.Boolean("Set Start Category")
+    limit_categories = fields.Boolean("Restrict Available Product Categories")
     module_account = fields.Boolean(string='Invoicing', help='Enables invoice generation from the Point of Sale.')
     module_pos_restaurant = fields.Boolean("Is a Bar/Restaurant")
     module_pos_discount = fields.Boolean("Global Discounts")
@@ -162,6 +174,7 @@ class PosConfig(models.Model):
     module_pos_reprint = fields.Boolean(string="Reprint Receipt")
     is_posbox = fields.Boolean("PosBox")
     is_header_or_footer = fields.Boolean("Header & Footer")
+    module_pos_hr = fields.Boolean(help="Show employee login screen")
 
     def _compute_is_installed_account_accountant(self):
         account_accountant = self.env['ir.module.module'].sudo().search([('name', '=', 'account_accountant'), ('state', '=', 'installed')])
@@ -282,20 +295,6 @@ class PosConfig(models.Model):
         if self.pricelist_id not in self.available_pricelist_ids:
             self.pricelist_id = False
 
-    @api.onchange('iface_scan_via_proxy')
-    def _onchange_iface_scan_via_proxy(self):
-        if self.iface_scan_via_proxy:
-            self.barcode_scanner = True
-        else:
-            self.barcode_scanner = False
-
-    @api.onchange('barcode_scanner')
-    def _onchange_barcode_scanner(self):
-        if self.barcode_scanner:
-            self.barcode_nomenclature_id = self.env.user.company_id.nomenclature_id
-        else:
-            self.barcode_nomenclature_id = False
-
     @api.onchange('is_posbox')
     def _onchange_is_posbox(self):
         if not self.is_posbox:
@@ -319,6 +318,13 @@ class PosConfig(models.Model):
     @api.onchange('start_category')
     def _onchange_start_category(self):
         if not self.start_category:
+            self.iface_start_categ_id = False
+
+    @api.onchange('limit_categories', 'iface_available_categ_ids', 'iface_start_categ_id')
+    def _onchange_limit_categories(self):
+        if not self.limit_categories:
+            self.iface_available_categ_ids = False
+        elif self.iface_start_categ_id not in self.iface_available_categ_ids:
             self.iface_start_categ_id = False
 
     @api.onchange('is_header_or_footer')
@@ -440,6 +446,11 @@ class PosConfig(models.Model):
         """
         self.ensure_one()
         if not self.current_session_id:
+            self._check_company_location()
+            self._check_company_journal()
+            self._check_company_invoice_journal()
+            self._check_company_payment()
+            self._check_currencies()
             self.current_session_id = self.env['pos.session'].create({
                 'user_id': self.env.uid,
                 'config_id': self.id

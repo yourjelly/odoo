@@ -8,12 +8,11 @@ from odoo.addons import decimal_precision as dp
 from odoo import api, fields, models, tools, _
 from odoo.exceptions import ValidationError, RedirectWarning, UserError
 from odoo.osv import expression
-from odoo.tools import pycompat
 
 
 class ProductTemplate(models.Model):
     _name = "product.template"
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'image.mixin']
     _description = "Product Template"
     _order = "name"
 
@@ -32,6 +31,12 @@ class ProductTemplate(models.Model):
 
     def _get_default_uom_id(self):
         return self.env["uom.uom"].search([], limit=1, order='id').id
+
+    def _get_default_weight_uom(self):
+        return self._get_weight_uom_name_from_ir_config_parameter()
+
+    def _get_default_volume_uom(self):
+        return self._get_volume_uom_name_from_ir_config_parameter()
 
     name = fields.Char('Name', index=True, required=True, translate=True)
     sequence = fields.Integer('Sequence', default=1, help='Gives the sequence order when displaying a product list')
@@ -67,7 +72,7 @@ class ProductTemplate(models.Model):
         digits=dp.get_precision('Product Price'))
     # list_price: catalog price, user defined
     list_price = fields.Float(
-        'Sales Price', default=1.0,
+        'Sale Price', default=1.0,
         digits=dp.get_precision('Product Price'),
         help="Price at which the product is sold to customers.")
     # lst_price: catalog price for template, but including extra for variants
@@ -81,14 +86,12 @@ class ProductTemplate(models.Model):
         help = "Cost used for stock valuation in standard price and as a first price to set in average/FIFO.")
 
     volume = fields.Float(
-        'Volume', compute='_compute_volume', inverse='_set_volume',
-        help="The volume in m3.", store=True)
+        'Volume', compute='_compute_volume', inverse='_set_volume', digits=dp.get_precision('Volume'), store=True)
+    volume_uom_name = fields.Char(string='Volume unit of measure label', compute='_compute_volume_uom_name', default=_get_default_volume_uom)
     weight = fields.Float(
         'Weight', compute='_compute_weight', digits=dp.get_precision('Stock Weight'),
-        inverse='_set_weight', store=True,
-        help="The weight of the contents in Kg, not including any packaging, etc.")
-    weight_uom_id = fields.Many2one('uom.uom', string='Weight Unit of Measure', compute='_compute_weight_uom_id')
-    weight_uom_name = fields.Char(string='Weight unit of measure label', related='weight_uom_id.name', readonly=True)
+        inverse='_set_weight', store=True)
+    weight_uom_name = fields.Char(string='Weight unit of measure label', compute='_compute_weight_uom_name', readonly=True, default=_get_default_weight_uom)
 
     sale_ok = fields.Boolean('Can be Sold', default=True)
     purchase_ok = fields.Boolean('Can be Purchased', default=True)
@@ -154,21 +157,6 @@ class ProductTemplate(models.Model):
 
     item_ids = fields.One2many('product.pricelist.item', 'product_tmpl_id', 'Pricelist Items')
 
-    # image: all image fields are base64 encoded and PIL-supported
-    image = fields.Binary(
-        "Image", attachment=True,
-        help="This field holds the image used as image for the product, limited to 1024x1024px.")
-    image_medium = fields.Binary(
-        "Medium-sized image", attachment=True,
-        help="Medium-sized image of the product. It is automatically "
-             "resized as a 128x128px image, with aspect ratio preserved, "
-             "only when the image exceeds one of those sizes. Use this field in form views or some kanban views.")
-    image_small = fields.Binary(
-        "Small-sized image", attachment=True,
-        help="Small-sized image of the product. It is automatically "
-             "resized as a 64x64px image, with aspect ratio preserved. "
-             "Use this field anywhere a small image is required.")
-
     @api.depends('product_variant_ids')
     def _compute_product_variant_id(self):
         for p in self:
@@ -203,11 +191,11 @@ class ProductTemplate(models.Model):
             quantity = self.env.context.get('quantity', 1.0)
 
             # Support context pricelists specified as display_name or ID for compatibility
-            if isinstance(pricelist_id_or_name, pycompat.string_types):
+            if isinstance(pricelist_id_or_name, str):
                 pricelist_data = self.env['product.pricelist'].name_search(pricelist_id_or_name, operator='=', limit=1)
                 if pricelist_data:
                     pricelist = self.env['product.pricelist'].browse(pricelist_data[0][0])
-            elif isinstance(pricelist_id_or_name, pycompat.integer_types):
+            elif isinstance(pricelist_id_or_name, int):
                 pricelist = self.env['product.pricelist'].browse(pricelist_id_or_name)
 
             if pricelist:
@@ -282,10 +270,27 @@ class ProductTemplate(models.Model):
         else:
             return self.env.ref('uom.product_uom_kgm')
 
-    def _compute_weight_uom_id(self):
-        weight_uom_id = self._get_weight_uom_id_from_ir_config_parameter()
-        for product_template in self:
-            product_template.weight_uom_id = weight_uom_id
+    @api.model
+    def _get_weight_uom_name_from_ir_config_parameter(self):
+        return self._get_weight_uom_id_from_ir_config_parameter().display_name
+
+    def _compute_weight_uom_name(self):
+        for template in self:
+            template.weight_uom_name = self._get_weight_uom_name_from_ir_config_parameter()
+
+    @api.model
+    def _get_volume_uom_name_from_ir_config_parameter(self):
+        """ Get the unit of measure to interpret the `volume` field. By default, we consider
+        that volumes are expressed in cubic meters. Users can configure to express them in cubic feet
+        by adding an ir.config_parameter record with "product.volume_in_cubic_feet" as key
+        and "1" as value.
+        """
+        get_param = self.env['ir.config_parameter'].sudo().get_param
+        return "ft³" if get_param('product.volume_in_cubic_feet') == '1' else "m³"
+
+    def _compute_volume_uom_name(self):
+        for template in self:
+            template.volume_uom_name = self._get_volume_uom_name_from_ir_config_parameter()
 
     @api.one
     def _set_weight(self):
@@ -339,18 +344,20 @@ class ProductTemplate(models.Model):
         if self.uom_id:
             self.uom_po_id = self.uom_id.id
 
+    @api.onchange('type')
+    def _onchange_type(self):
+        # Do nothing but needed for inheritance
+        return {}
+
     @api.model_create_multi
     def create(self, vals_list):
         ''' Store the initial standard price in order to be able to retrieve the cost of a product template for a given date'''
-        # TDE FIXME: context brol
-        for vals in vals_list:
-            tools.image_resize_images(vals)
         templates = super(ProductTemplate, self).create(vals_list)
         if "create_product_product" not in self._context:
             templates.with_context(create_from_tmpl=True).create_variant_ids()
 
         # This is needed to set given values to first variant after creation
-        for template, vals in pycompat.izip(templates, vals_list):
+        for template, vals in zip(templates, vals_list):
             related_vals = {}
             if vals.get('barcode'):
                 related_vals['barcode'] = vals['barcode']
@@ -372,7 +379,6 @@ class ProductTemplate(models.Model):
 
     @api.multi
     def write(self, vals):
-        tools.image_resize_images(vals)
         res = super(ProductTemplate, self).write(vals)
         if 'attribute_line_ids' in vals or vals.get('active'):
             self.create_variant_ids()
@@ -423,9 +429,23 @@ class ProductTemplate(models.Model):
             if (not products and not current_round_templates) or (limit and (len(templates) > limit)):
                 break
 
+        searched_ids = set(templates.ids)
+        # some product.templates do not have product.products yet (dynamic variants configuration),
+        # we need to add the base _name_search to the results
+        # FIXME awa: this is really not performant at all but after discussing with the team
+        # we don't see another way to do it
+        if not limit or len(searched_ids) < limit:
+            searched_ids |= set([template_id[0] for template_id in
+                super(ProductTemplate, self)._name_search(
+                    name,
+                    args=args,
+                    operator=operator,
+                    limit=limit,
+                    name_get_uid=name_get_uid)])
+
         # re-apply product.template order + name_get
         return super(ProductTemplate, self)._name_search(
-            '', args=[('id', 'in', list(set(templates.ids)))],
+            '', args=[('id', 'in', list(searched_ids))],
             operator='ilike', limit=limit, name_get_uid=name_get_uid)
 
     @api.multi
@@ -692,29 +712,15 @@ class ProductTemplate(models.Model):
         return self.product_variant_ids.filtered(lambda p: p._is_variant_possible(parent_combination))
 
     @api.multi
-    def get_filtered_variants(self, reference_product=None):
-        """deprecated, use _get_possible_variants instead"""
-        self.ensure_one()
-
-        parent_combination = self.env['product.template.attribute.value']
-
-        if reference_product:
-            # append the reference_product if provided
-            parent_combination |= reference_product.product_template_attribute_value_ids
-            if reference_product.env.context.get('no_variant_attribute_values'):
-                # Add "no_variant" attribute values' exclusions
-                # They are kept in the context since they are not linked to this product variant
-                parent_combination |= reference_product.env.context.get('no_variant_attribute_values')
-        return self._get_possible_variants(parent_combination)
-
-    @api.multi
-    def _get_attribute_exclusions(self, parent_combination=None):
+    def _get_attribute_exclusions(self, parent_combination=None, parent_name=None):
         """Return the list of attribute exclusions of a product.
 
         :param parent_combination: the combination from which
             `self` is an optional or accessory product. Indeed exclusions
             rules on one product can concern another product.
         :type parent_combination: recordset `product.template.attribute.value`
+        :param parent_name: the name of the parent product combination.
+        :type parent_name: str
 
         :return: dict of exclusions
             - exclusions: from this product itself
@@ -724,25 +730,49 @@ class ProductTemplate(models.Model):
             - existing_combinations: deprecated
             - has_dynamic_attributes: deprecated
             - no_variant_product_template_attribute_value_ids: deprecated
+           - parent_product_name: the name of the parent product if any, used in the interface
+               to explain why some combinations are not available.
+               (e.g: Not available with Customizable Desk (Legs: Steel))
+           - mapped_attribute_names: the name of every attribute values based on their id,
+               used to explain in the interface why that combination is not available
+               (e.g: Not available with Color: Black)
         """
         self.ensure_one()
         parent_combination = parent_combination or self.env['product.template.attribute.value']
         return {
-            'exclusions': self._get_own_attribute_exclusions(),
+            'exclusions': self._complete_inverse_exclusions(self._get_own_attribute_exclusions()),
             'parent_exclusions': self._get_parent_attribute_exclusions(parent_combination),
             'parent_combination': parent_combination.ids,
             'archived_combinations': [],
             'has_dynamic_attributes': self.has_dynamic_attributes(),
             'existing_combinations': [],
             'no_variant_product_template_attribute_value_ids': [],
+            'parent_product_name': parent_name,
+            'mapped_attribute_names': self._get_mapped_attribute_names(parent_combination),
         }
+
+    @api.model
+    def _complete_inverse_exclusions(self, exclusions):
+        """Will complete the dictionnary of exclusions with their respective inverse
+        e.g: Black excludes XL and L
+        -> XL excludes Black
+        -> L excludes Black"""
+        result = dict(exclusions)
+        for key, value in exclusions.items():
+            for exclusion in value:
+                if exclusion in result and key not in result[exclusion]:
+                    result[exclusion].append(key)
+                else:
+                    result[exclusion] = [key]
+
+        return result
 
     @api.multi
     def _get_own_attribute_exclusions(self):
         """Get exclusions coming from the current template.
 
-        Dictionnary, each ptav is a key, and for each of them the value is
-        an array with the other ptav that they exclude (empty if no exclusion).
+        Dictionnary, each product template attribute value is a key, and for each of them
+        the value is an array with the other ptav that they exclude (empty if no exclusion).
         """
         self.ensure_one()
         product_template_attribute_values = self._get_valid_product_template_attribute_lines().mapped('product_template_value_ids')
@@ -760,30 +790,27 @@ class ProductTemplate(models.Model):
     def _get_parent_attribute_exclusions(self, parent_combination):
         """Get exclusions coming from the parent combination.
 
-        Array, each element is a ptav that is excluded because of the parent.
+        Dictionnary, each parent's ptav is a key, and for each of them the value is
+        an array with the other ptav that are excluded because of the parent.
         """
         self.ensure_one()
         if not parent_combination:
-            return []
+            return {}
 
-        # Search for exclusions without attribute value. This means that the template is not
-        # compatible with the parent combination. If such an exclusion is found, it means that all
-        # attribute values are excluded.
-        if parent_combination:
-            exclusions = self.env['product.template.attribute.exclusion'].search([
-                ('product_tmpl_id', '=', self.id),
-                ('value_ids', '=', False),
-                ('product_template_attribute_value_id', 'in', parent_combination.ids),
-            ], limit=1)
-            if exclusions:
-                return self.mapped('attribute_line_ids.product_template_value_ids').ids
-
-        return [
-            value_id
-            for filter_line in parent_combination.mapped('exclude_for').filtered(
+        result = {}
+        for product_attribute_value in parent_combination:
+            for filter_line in product_attribute_value.exclude_for.filtered(
                 lambda filter_line: filter_line.product_tmpl_id == self
-            ) for value_id in filter_line.value_ids.ids
-        ]
+            ):
+                # Some exclusions don't have attribute value. This means that the template is not
+                # compatible with the parent combination. If such an exclusion is found, it means that all
+                # attribute values are excluded.
+                if filter_line.value_ids:
+                    result[product_attribute_value.id] = filter_line.value_ids.ids
+                else:
+                    result[product_attribute_value.id] = filter_line.product_tmpl_id.mapped('attribute_line_ids.product_template_value_ids').ids
+
+        return result
 
     @api.multi
     def _get_archived_combinations(self):
@@ -807,6 +834,25 @@ class ProductTemplate(models.Model):
         return product_template_attribute_values.filtered(
             lambda v: v.attribute_id.create_variant == 'no_variant'
         ).ids
+
+    @api.multi
+    def _get_mapped_attribute_names(self, parent_combination=None):
+        """ The name of every attribute values based on their id,
+        used to explain in the interface why that combination is not available
+        (e.g: Not available with Color: Black).
+
+        It contains both attribute value names from this product and from
+        the parent combination if provided.
+        """
+        self.ensure_one()
+        all_product_attribute_values = self._get_valid_product_template_attribute_lines().mapped('product_template_value_ids')
+        if parent_combination:
+            all_product_attribute_values |= parent_combination
+
+        return {
+            attribute_value.id: attribute_value.display_name
+            for attribute_value in all_product_attribute_values
+        }
 
     @api.multi
     def _is_combination_possible(self, combination, parent_combination=None):
@@ -869,9 +915,12 @@ class ProductTemplate(models.Model):
 
         parent_exclusions = self._get_parent_attribute_exclusions(parent_combination)
         if parent_exclusions:
-            for exclusion in parent_exclusions:
-                if exclusion in combination.ids:
-                    return False
+            # parent_exclusion are mapped by ptav but here we don't need to know
+            # where the exclusion comes from so we loop directly on the dict values
+            for exclusions_values in parent_exclusions.values():
+                for exclusion in exclusions_values:
+                    if exclusion in combination.ids:
+                        return False
 
         return True
 

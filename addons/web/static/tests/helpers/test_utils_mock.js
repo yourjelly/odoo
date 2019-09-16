@@ -11,7 +11,6 @@ odoo.define('web.test_utils_mock', function (require) {
  */
 
 var basic_fields = require('web.basic_fields');
-var BasicModel = require('web.BasicModel');
 var config = require('web.config');
 var core = require('web.core');
 var dom = require('web.dom');
@@ -70,6 +69,7 @@ function removeSrcAttribute(el, widget) {
             if (widget) {
                 widget._rpc({ route: src });
             }
+            $(node).trigger('load');
         }
     }
 }
@@ -124,7 +124,7 @@ function removeSrcAttribute(el, widget) {
  *   is completely removed by default.
  *
  * @returns {MockServer} the instance of the mock server, created by this
- *   function. It is necessary for createAsyncView so that method can call some
+ *   function. It is necessary for createView so that method can call some
  *   other methods on it.
  */
 function addMockEnvironment(widget, params) {
@@ -192,11 +192,6 @@ function addMockEnvironment(widget, params) {
             return func;
         };
     }
-    // FORWARDPORT THIS UP TO 12.2, NOT FURTHER
-    var initialDisableBatchedRPCs = BasicModel.prototype.disableBatchedRPCs;
-    if (!params.enableBasicModelBachedRPCs) {
-        BasicModel.prototype.disableBatchedRPCs = true;
-    }
 
     var widgetDestroy = widget.destroy;
     widget.destroy = function () {
@@ -204,10 +199,11 @@ function addMockEnvironment(widget, params) {
         // widget is destroyed, at the end of each test to avoid collisions
         core.bus.trigger('clear_cache');
 
-        _(services).chain()
-            .compact() // services can be defined but null (e.g. ajax)
-            .reject(function (s) { return s.isDestroyed(); })
-            .invoke('destroy');
+        Object.keys(services).forEach(function(s) {
+            var service = services[s];
+            if (service && !service.isDestroyed())
+                service.destroy();
+        });
 
         DebouncedField.prototype.DEBOUNCE = initialDebounceValue;
         dom.DEBOUNCE = initialDOMDebounceValue;
@@ -237,12 +233,9 @@ function addMockEnvironment(widget, params) {
             }
             _.extend(core._t.database.parameters, initialParameters);
         }
-        // FORWARDPORT THIS UP TO 12.2, NOT FURTHER
-        if (!params.enableBasicModelBachedRPCs) {
-            BasicModel.prototype.disableBatchedRPCs = initialDisableBatchedRPCs;
-        }
 
         $('body').off('DOMNodeInserted.removeSRC');
+        $('body').removeClass('debug');
         $('.blockUI').remove();
 
         widgetDestroy.call(this);
@@ -551,6 +544,25 @@ function unpatch(target) {
     delete target.__patchID;
 }
 
+window.originalSetTimeout = window.setTimeout;
+function patchSetTimeout() {
+    var original = window.setTimeout;
+    var self = this;
+    window.setTimeout = function (handler, delay) {
+        console.log("calling setTimeout on " + (handler.name || "some function") + "with delay of " + delay);
+        console.trace();
+        var handlerArguments = Array.prototype.slice.call(arguments, 1);
+        return original(function () {
+            handler.bind(self, handlerArguments)();
+            console.log('after doing the action of the setTimeout');
+        }, delay);
+    };
+
+    return function () {
+        window.setTimeout = original;
+    };
+}
+
 
 return {
     addMockEnvironment: addMockEnvironment,
@@ -559,6 +571,7 @@ return {
     patchDate: patchDate,
     patch: patch,
     unpatch: unpatch,
+    patchSetTimeout: patchSetTimeout,
 };
 
 });

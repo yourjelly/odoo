@@ -10,7 +10,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import fields, http, _
 from odoo.addons.http_routing.models.ir_http import slug
-from odoo.http import content_disposition, request
+from odoo.http import request
 
 
 class WebsiteEventController(http.Controller):
@@ -148,14 +148,15 @@ class WebsiteEventController(http.Controller):
 
         values = {
             'event': event,
-            'main_object': event
         }
 
         if '.' not in page:
             page = 'website_event.%s' % page
 
         try:
-            request.website.get_template(page)
+            # Every event page view should have its own SEO.
+            values['seo_object'] = request.website.get_template(page)
+            values['main_object'] = event
         except ValueError:
             # page not found
             values['path'] = re.sub(r"^website_event\.", '', page)
@@ -283,15 +284,3 @@ class WebsiteEventController(http.Controller):
             'google_url': urls.get('google_url'),
             'iCal_url': urls.get('iCal_url')
         })
-
-    @http.route(['''/event/<model("event.event", "[('website_id', 'in', (False, current_website_id))]"):event>/ics'''], type='http', auth="public", website=True)
-    def make_event_ics_file(self, event, **kwargs):
-        if not event or not event.registration_ids:
-            return request.not_found()
-        files = event._get_ics_file()
-        content = files[event.id]
-        return request.make_response(content, [
-            ('Content-Type', 'application/octet-stream'),
-            ('Content-Length', len(content)),
-            ('Content-Disposition', content_disposition('%s.ics' % event.name))
-        ])

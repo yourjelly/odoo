@@ -1034,7 +1034,9 @@ at runtime) but less power: using the :attr:`~odoo.models.Model._inherits`
 a model *delegates* the lookup of any field not found on the current model
 to "children" models. The delegation is performed via
 :class:`~odoo.fields.Reference` fields automatically set up on the parent
-model:
+model. The main difference is in the meaning. When using Delegation, the model
+**has one** instead of **is one**, turning the relationship in a composition
+instead of inheritance:
 
 .. literalinclude:: ../../odoo/addons/test_documentation_examples/delegation.py
     :language: python
@@ -1121,7 +1123,7 @@ A domain is a list of criteria, each criterion being a triple (either a
 
         Takes the semantics of the model into account (i.e following the
         relationship field named by
-        :attr:`~odoo.models.Model._parent_name`). 
+        :attr:`~odoo.models.Model._parent_name`).
 
 ``value``
     variable type, must be comparable (through ``operator``) to the named

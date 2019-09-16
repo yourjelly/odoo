@@ -6,15 +6,13 @@
 # Sengtha Chay <sengtha@gmail.com>, 2018
 # Chan Nath <channath@gmail.com>, 2018
 # Samkhann Seang <seangsamkhann@gmail.com>, 2018
-# Lux Sok <sok.lux@gmail.com>, 2019
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-10-02 10:05+0000\n"
-"PO-Revision-Date: 2018-08-24 09:16+0000\n"
-"Last-Translator: Lux Sok <sok.lux@gmail.com>, 2019\n"
+"PO-Revision-Date: 2018-10-02 10:05+0000\n"
+"Last-Translator: Samkhann Seang <seangsamkhann@gmail.com>, 2018\n"
 "Language-Team: Khmer (https://www.transifex.com/odoo/teams/41243/km/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -27,14 +25,14 @@ msgstr ""
 #: code:addons/base_import/static/src/js/import_action.js:612
 #, python-format
 msgid "%d records were successfully imported"
-msgstr "%dកំណត់ត្រាត្រូវបាននាំចូលដោយជោគជ័យ"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:647
 #, python-format
 msgid "(%d more)"
-msgstr "(%dd បន្ថែម)"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
@@ -44,7 +42,6 @@ msgid ""
 "A single column was found in the file, this often means the file separator "
 "is incorrect"
 msgstr ""
-"ជួរឈរតែមួយត្រូវបានរកឃើញក្នុងឯកសារនេះមានន័យថាអ្នកបំបែកឯកសារគឺមិនត្រឹមត្រូវ"
 
 #. module: base_import
 #. openerp-web
@@ -56,25 +53,21 @@ msgid ""
 " transient. If the issue still occurs, try to split the file rather than "
 "import it at once."
 msgstr ""
-"បញ្ហាមិនស្គាល់មួយបានកើតឡើងកំឡុងពេលនាំចូល "
-"(ប្រហែលជាការបាត់បង់ការតភ្ជាប់ដែនកំណត់ទិន្នន័យលើសពីដែនកំណត់សតិ) ។ "
-"សូមព្យាយាមម្តងទៀតក្នុងករណីបញ្ហានេះមានភាពយឺតយ៉ាវ។ "
-"ប្រសិនបើបញ្ហានៅតែកើតឡើងសូមព្យាយាមបំបែកឯកសារជាជាងនាំចូលវាភ្លាមៗ។"
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base
 msgid "Base"
-msgstr "មូលដ្ឋាន"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_import
 msgid "Base Import"
-msgstr "ការនំាចូលមូលដ្ឋា​ន"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_mapping
 msgid "Base Import Mapping"
-msgstr "ផែនទីនាំចូលមូលដ្ឋាន"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
@@ -87,18 +80,18 @@ msgstr "លុបចោល"
 #: code:addons/base_import/models/base_import.py:693
 #, python-format
 msgid "Column %s contains incorrect values (value: %s)"
-msgstr "ជួរឈរ%sមានតម្លៃមិនត្រឹមត្រូវ (តម្លៃ:%s)"
+msgstr ""
 
 #. module: base_import
 #: code:addons/base_import/models/base_import.py:788
 #, python-format
 msgid "Column %s contains incorrect values. Error in line %d: %s"
-msgstr "ជួរឈរ%sមានតម្លៃមិនត្រឹមត្រូវ។ %dកំហុសក្នុងបន្ទាត់:%s"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__column_name
 msgid "Column Name"
-msgstr "ឈ្មោះជួរឈរ"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
@@ -106,7 +99,7 @@ msgstr "ឈ្មោះជួរឈរ"
 #: code:addons/base_import/static/src/js/import_action.js:228
 #, python-format
 msgid "Comma"
-msgstr "សញ្ញាក្បៀស"
+msgstr ""
 
 #. module: base_import
 #: code:addons/base_import/models/base_import.py:825
@@ -114,14 +107,14 @@ msgstr "សញ្ញាក្បៀស"
 msgid ""
 "Could not retrieve URL: %(url)s [%(field_name)s: L%(line_number)d]: "
 "%(error)s"
-msgstr "មិនអាចរកឃើញ URL:%(url)s [: %(field_name)sL]:%(line_number)d:%(error)s"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/xml/base_import.xml:108
 #, python-format
 msgid "Create if doesn't exist"
-msgstr "បង្កើតប្រសិនបើមិនមាន"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__create_uid
@@ -174,9 +167,6 @@ msgid ""
 "Note that the value in the column will be used as the new record's 'name', "
 "and assumes this is sufficient to create the record."
 msgstr ""
-"បង្កើតកំណត់ត្រាថ្មីប្រសិនបើមិនអាចរកឃើញ (ជំនួសឱ្យបរាជ័យក្នុងការនាំចូល) ។ "
-"ចំណាំថាតម្លៃនៅក្នុងជួរឈរនឹងត្រូវបានប្រើជាឈ្មោះ 'ឈ្មោះ' "
-"របស់កំណត់ត្រាថ្មីហើយសន្មត់ថាវាគ្រប់គ្រាន់ដើម្បីបង្កើតកំណត់ត្រា។"
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_complex__currency_id
@@ -189,35 +179,35 @@ msgstr "រូបិយវត្ថុ"
 #: code:addons/base_import/models/base_import.py:212
 #, python-format
 msgid "Database ID"
-msgstr "លេខសម្គាល់មូលដ្ឋានទិន្នន័យ"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:83
 #, python-format
 msgid "Date Format:"
-msgstr "ទ្រង់ទ្រាយកាលបរិច្ឆេទ:"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:84
 #, python-format
 msgid "Datetime Format:"
-msgstr "ទ្រង់ទ្រាយកាលបរិច្ឆេទ:"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:88
 #, python-format
 msgid "Decimal Separator:"
-msgstr "សញ្ញាបំបែកទសភាគ:"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/xml/base_import.xml:56
 #, python-format
 msgid "Defer parent/child computation"
-msgstr "ពន្យាគណនាមាតាបិតា / កូន"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__display_name
@@ -245,14 +235,14 @@ msgstr "ឈ្មោះសំរាប់បង្ហាញ"
 #: code:addons/base_import/static/src/js/import_action.js:445
 #, python-format
 msgid "Don't import"
-msgstr "កុំនាំចូល"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:229
 #, python-format
 msgid "Dot"
-msgstr "Dot"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
@@ -264,33 +254,33 @@ msgstr "ទាញយក"
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_complex__dt
 msgid "Dt"
-msgstr "Dt"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:78
 #, python-format
 msgid "Encoding:"
-msgstr "ការអ៊ិនកូដ:"
+msgstr ""
 
 #. module: base_import
 #: code:addons/base_import/models/base_import.py:790
 #, python-format
 msgid "Error Parsing Date [%s:L%d]: %s"
-msgstr "កំហុសក្នុងការញែកកាលបរិច្ឆេទ [:%s%d L]:%s"
+msgstr ""
 
 #. module: base_import
 #: code:addons/base_import/models/base_import.py:289
 #, python-format
 msgid "Error cell found while reading XLS/XLSX file: %s"
-msgstr "ក្រឡាកំហុសត្រូវបានរកឃើញខណៈពេលកំពុងអានឯកសារ XLS / XLSX:%s"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:624
 #, python-format
 msgid "Everything seems valid."
-msgstr "អ្វីគ្រប់យ៉ាងហាក់ដូចជាត្រឹមត្រូវ។"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
@@ -298,81 +288,80 @@ msgstr "អ្វីគ្រប់យ៉ាងហាក់ដូចជាត្
 #, python-format
 msgid "Excel files are recommended as fields formatting is automatic."
 msgstr ""
-"ឯកសារ Excel ត្រូវបានផ្ដល់អនុសាសន៍ថាជាការធ្វើទ្រង់ទ្រាយវាលដោយស្វ័យប្រវត្តិ។"
 
 #. module: base_import
 #: code:addons/base_import/models/base_import.py:169
 #: code:addons/base_import/models/base_import.py:206
 #, python-format
 msgid "External ID"
-msgstr "អត្តលេខខាងក្រៅ"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__field_name
 msgid "Field Name"
-msgstr "ឈ្មោះវាល"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__file
 msgid "File"
-msgstr "ឯកសារ"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__file_name
 msgid "File Name"
-msgstr "ឈ្មោះឯកសារ"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__file_type
 msgid "File Type"
-msgstr "ប្រភេទឯកសារ"
+msgstr ""
 
 #. module: base_import
 #: code:addons/base_import/models/base_import.py:808
 #: code:addons/base_import/models/base_import.py:814
 #, python-format
 msgid "File size exceeds configured maximum (%s bytes)"
-msgstr "ទំហំឯកសារលើសពីអតិបរមាដែលបានកំណត់រចនាសម្ព័ន្ធ (%sបៃ)"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model.fields,help:base_import.field_base_import_import__file
 msgid "File to check and/or import, raw binary (not base64)"
-msgstr "ឯកសារដែលត្រូវត្រួតពិនិត្យនិង / ឬនាំចូល, គោលពីរឆៅ (មិនមូលដ្ឋាន 64)"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/xml/base_import.xml:137
 #, python-format
 msgid "For CSV files, you may need to select the correct separator."
-msgstr "សម្រាប់ឯកសារ CSV អ្នកអាចត្រូវការសញ្ញាបំបែកត្រឹមត្រូវ។"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/xml/base_import.xml:13
 #, python-format
 msgid "Formatting Options…"
-msgstr "ជម្រើសទ្រង់ទ្រាយ ."
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:671
 #, python-format
 msgid "Get all possible values"
-msgstr "ទទួលបានតម្លៃដែលអាចធ្វើបានទាំងអស់"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:658
 #, python-format
 msgid "Here are the possible values:"
-msgstr "នេះគឺជាតម្លៃដែលអាចធ្វើបាន:"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/xml/base_import.xml:138
 #, python-format
 msgid "Here is the start of the file we could not import:"
-msgstr "នេះគឺជាការចាប់ផ្តើមនៃឯកសារដែលយើងមិនអាចនាំចូលបាន:"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__id
@@ -405,9 +394,6 @@ msgid ""
 "                field corresponding to the column. This makes imports\n"
 "                simpler especially when the file has many columns."
 msgstr ""
-"ប្រសិនបើឯកសារមាន                 ឈ្មោះជួរឈរ, Odoo អាចសាកល្បងដោយស្វ័យប្រវត្តិ"
-"                 វាលដែលត្រូវគ្នានឹងជួរឈរ។ នេះធ្វើឱ្យការនាំចូល"
-"                 ងាយស្រួលជាពិសេសនៅពេលឯកសារមានជួរឈរច្រើន។"
 
 #. module: base_import
 #. openerp-web
@@ -418,8 +404,6 @@ msgid ""
 "will set up subscriptions and send notifications"
 "                             during the import, but lead to a slower import."
 msgstr ""
-"ប្រសិនបើគំរូប្រើ openchatter "
-"ការតាមដានប្រវត្តិនឹងបង្កើតការជាវប្រចាំនិងការជូនដំណឹងក្នុងអំឡុងពេលនាំចូលប៉ុន្តែនាំឱ្យមានការនាំចូលយឺត។"
 
 #. module: base_import
 #. openerp-web
@@ -430,9 +414,6 @@ msgid ""
 "parent / child relation occurs on every line, and lead to a slower import."
 "                     Defering it can speed up import."
 msgstr ""
-"ប្រសិនបើម៉ូដែលប្រើទំនាក់ទំនងរវាងឪពុកម្តាយ / "
-"កូនការគណនាទំនាក់ទំនងរវាងឪពុកម្តាយ / "
-"កូនកើតលើគ្រប់បន្ទាត់ហើយនាំឱ្យមានការនាំចូលយឺត។ ការការពារវាអាចបង្កើនការនាំចូល។"
 
 #. module: base_import
 #. openerp-web
@@ -440,35 +421,35 @@ msgstr ""
 #: code:addons/base_import/static/src/xml/base_import.xml:169
 #, python-format
 msgid "Import"
-msgstr "ការដាក់បញ្ជូលរបាយការណ៌"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/xml/base_import.xml:91
 #, python-format
 msgid "Import FAQ"
-msgstr "សំណួរដែលនាំចូល"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:140
 #, python-format
 msgid "Import a File"
-msgstr "នាំចូលឯកសារ"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:612
 #, python-format
 msgid "Import completed"
-msgstr "បានបញ្ចប់ការនាំចូល"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/xml/base_import.xml:136
 #, python-format
 msgid "Import preview failed due to:"
-msgstr "នាំចូលការមើលជាមុនបានបរាជ័យដោយសារ:"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
@@ -479,9 +460,6 @@ msgid ""
 "may be too big for the system's configuration, try to split it (import less "
 "records per file)."
 msgstr ""
-"ការនាំចូលបានអស់ពេល។ សូមព្យាយាមម្តងទៀត។ "
-"ប្រសិនបើអ្នកនៅតែជួបប្រទះបញ្ហានេះឯកសារអាចធំពេកសម្រាប់ការកំណត់រចនាសម្ព័ន្ធរបស់ប្រព័ន្ធព្យាយាមបំបែកវា"
-" (នាំចូលកំណត់ត្រាតិចជាងមួយឯកសារ) ។"
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import____last_update
@@ -551,26 +529,26 @@ msgstr "ផ្លាស់ប្តូរចុងក្រោយ"
 #: code:addons/base_import/static/src/xml/base_import.xml:101
 #, python-format
 msgid "Load File"
-msgstr "ផ្ទុកឯកសារ"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:364
 #, python-format
 msgid "Load New File"
-msgstr "ផ្ទុកឯកសារថ្មី"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/xml/base_import.xml:41
 #, python-format
 msgid "Map your columns to import"
-msgstr "ដាក់ផែនទីជួរឈររបស់អ្នកដើម្បីនាំចូល"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__res_model
 msgid "Model"
-msgstr "ម៉ូដែល"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_preview__name
@@ -582,186 +560,186 @@ msgstr "ឈ្មោះ"
 #: code:addons/base_import/static/src/xml/base_import.xml:85
 #, python-format
 msgid "Need Help?"
-msgstr "ត្រូវការជំនួយ"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:231
 #, python-format
 msgid "No Separator"
-msgstr "មិនត្រូវការបំបែក"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:513
 #, python-format
 msgid "Normal Fields"
-msgstr "ឯកសារធម្មតា"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_preview__othervalue
 msgid "Other Variable"
-msgstr "អថេរផ្សេងទៀត"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m_child__parent_id
 msgid "Parent"
-msgstr "ឪពុកម្តាយ"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:514
 #, python-format
 msgid "Relation Fields"
-msgstr "វាលទំនាក់ទំនង"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/xml/base_import.xml:100
 #, python-format
 msgid "Reload File"
-msgstr "ដំណើរការឯកសារឡើងវិញ"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__res_model
 msgid "Res Model"
-msgstr "Res ម៉ូដែល"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/xml/base_import.xml:79
 #, python-format
 msgid "Select a CSV or Excel file to import."
-msgstr "ជ្រើសឯកសារ CSV ឬ Excel ដើម្បីនាំចូល។"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:212
 #, python-format
 msgid "Semicolon"
-msgstr "សញ្ញាតិ"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:79
 #, python-format
 msgid "Separator:"
-msgstr "បំបែក"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/xml/base_import.xml:66
 #, python-format
 msgid "Show fields of relation fields (advanced)"
-msgstr "បង្ហាញវាលនៃវាលទំនាក់ទំនង (កម្រិតខ្ពស់)"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_preview__somevalue
 msgid "Some Value"
-msgstr "គុណតំលៃខ្លះ"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:214
 #, python-format
 msgid "Space"
-msgstr "ចន្លះ"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:213
 #, python-format
 msgid "Tab"
-msgstr "ថេប"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/xml/base_import.xml:99
 #, python-format
 msgid "Test Import"
-msgstr "សាកល្បងការនាំចូល"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_preview
 msgid "Tests : Base Import Model Preview"
-msgstr "ការធ្វើតេស្ត: ការមើលជាមុនគំរូមូលដ្ឋាន"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_char
 msgid "Tests : Base Import Model, Character"
-msgstr "ការធ្វើតេស្ត: គំរូនាំចូលមូលដ្ឋាន, តួអក្សរ"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_char_noreadonly
 msgid "Tests : Base Import Model, Character No readonly"
-msgstr "ការធ្វើតេស្ត: ម៉ូដែលនាំចូលមូលដ្ឋាន, តួអក្សរគ្មានអានតែប៉ុណ្ណោះ"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_char_readonly
 msgid "Tests : Base Import Model, Character readonly"
-msgstr "ការធ្វើតេស្ត: គំរូនាំចូលមូលដ្ឋាន, តួអក្សរបានតែអាន"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_char_required
 msgid "Tests : Base Import Model, Character required"
-msgstr "ការធ្វើតេស្ត: ម៉ូដែលនាំចូលមូលដ្ឋាន, តួអក្សរត្រូវបានទាមទារ"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_char_states
 msgid "Tests : Base Import Model, Character states"
-msgstr "ការធ្វើតេស្ត: ម៉ូដែលនាំចូលមូលដ្ឋាន, តួអក្សរ"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_char_stillreadonly
 msgid "Tests : Base Import Model, Character still readonly"
-msgstr "ការធ្វើតេស្ត: គំរូនាំចូលមូលដ្ឋាន, តួអង្គនៅតែអាន"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_m2o
 msgid "Tests : Base Import Model, Many to One"
-msgstr "ការធ្វើតេស្ត: គំរូនាំចូលមូលដ្ឋាន, ច្រើនទៅមួយ"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_m2o_related
 msgid "Tests : Base Import Model, Many to One related"
-msgstr "ការធ្វើតេស្ត: គំរូនាំចូលមូលដ្ឋាន, ច្រើនទៅមួយដែលពាក់ព័ន្ធ"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_m2o_required
 msgid "Tests : Base Import Model, Many to One required"
-msgstr "ការធ្វើតេស្ត: គំរូនាំចូលមូលដ្ឋាន, ច្រើនទៅមួយតម្រូវ"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_m2o_required_related
 msgid "Tests : Base Import Model, Many to One required related"
-msgstr "ការធ្វើតេស្ត: គំរូនាំចូលមូលដ្ឋាន, ច្រើនទៅមួយតម្រូវ"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_o2m
 msgid "Tests : Base Import Model, One to Many"
-msgstr "ការធ្វើតេស្ត: ម៉ូដែលនាំចូលមូលដ្ឋានមួយទៅច្រើន"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_o2m_child
 msgid "Tests : Base Import Model, One to Many child"
-msgstr "ការធ្វើតេស្ត: គំរូនាំចូលមូលដ្ឋាន, ពីមួយទៅច្រើន"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_complex
 msgid "Tests: Base Import Model Complex"
-msgstr "ការធ្វើតេស្ត: មូលដ្ឋានគ្រឹះម៉ូឌែលស្ទូបស្មីត"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_tests_models_float
 msgid "Tests: Base Import Model Float"
-msgstr "ការធ្វើតេស្ត: ការនាំចូលគំរូម៉ូឌែល"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:80
 #, python-format
 msgid "Text Delimiter:"
-msgstr "អ្នកកំណត់ព្រំដែនអត្ថបទ:"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
@@ -771,28 +749,26 @@ msgid ""
 "The first row\n"
 "                 contains the label of the column"
 msgstr ""
-"ជួរដេកដំបូង\n"
-"                 មានស្លាករបស់ជួរឈរ"
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:87
 #, python-format
 msgid "Thousands Separator:"
-msgstr "មនុស្សរាប់ពាន់នាក់បំបែក:"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/xml/base_import.xml:47
 #, python-format
 msgid "Track history during import"
-msgstr "តាមដានប្រវត្តិក្នុងអំឡុងពេលនាំចូល"
+msgstr ""
 
 #. module: base_import
 #: code:addons/base_import/models/base_import.py:254
 #, python-format
 msgid "Unable to load \"{extension}\" file: requires Python module \"{modname}\""
-msgstr "មិនអាចផ្ទុកឯកសារ \"{extension}\" : តម្រូវឱ្យមានម៉ូឌុល Python \" {ឈ្មោះ}\""
+msgstr ""
 
 #. module: base_import
 #: code:addons/base_import/models/base_import.py:255
@@ -800,8 +776,6 @@ msgstr "មិនអាចផ្ទុកឯកសារ \"{extension}\" : ត�
 msgid ""
 "Unsupported file format \"{}\", import only supports CSV, ODS, XLS and XLSX"
 msgstr ""
-"ទ្រង់ទ្រាយឯកសារដែលមិនបានគាំទ្រ \"{}\", ការនាំចូលគាំទ្រតែ CSV, ODS, XLS និង "
-"XLSX ប៉ុណ្ណោះ"
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_res_users
@@ -823,12 +797,12 @@ msgstr "អ្នកប្រើ"
 #: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m__value
 #: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m_child__value
 msgid "Value"
-msgstr "តំលៃ"
+msgstr ""
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_float__value2
 msgid "Value2"
-msgstr "គុណតំលៃValue2"
+msgstr ""
 
 #. module: base_import
 #: code:addons/base_import/models/base_import.py:760
@@ -837,25 +811,23 @@ msgid ""
 "You can not import images via URL, check with your administrator or support "
 "for the reason."
 msgstr ""
-"នកមិនអាចនាំចូលរូបភាពតាមរយៈ URL "
-"ពិនិត្យជាមួយអ្នកគ្រប់គ្រងឬការគាំទ្ររបស់អ្នកសម្រាប់ហេតុផល។"
 
 #. module: base_import
 #: code:addons/base_import/models/base_import.py:631
 #, python-format
 msgid "You must configure at least one field to import"
-msgstr "អ្នកត្រូវកំណត់រចនាសម្ព័ន្ធយ៉ាងហោចណាស់វាលមួយដើម្បីនាំចូល"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:641
 #, python-format
 msgid "at row %d"
-msgstr "នៅជួរដេក%d"
+msgstr ""
 
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:643
 #, python-format
 msgid "between rows %d and %d"
-msgstr "ចន្លោះជួរនិង%dហើយនិង%d"
+msgstr ""

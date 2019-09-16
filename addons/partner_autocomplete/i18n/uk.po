@@ -3,15 +3,15 @@
 # * partner_autocomplete
 # 
 # Translators:
-# Martin Trigaux, 2018
+# Martin Trigaux, 2019
 # Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~11.5\n"
+"Project-Id-Version: Odoo Server saas~12.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-02 10:06+0000\n"
-"PO-Revision-Date: 2018-09-21 14:23+0000\n"
+"POT-Creation-Date: 2019-03-20 13:50+0000\n"
+"PO-Revision-Date: 2019-03-20 14:58+0000\n"
 "Last-Translator: Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019\n"
 "Language-Team: Ukrainian (https://www.transifex.com/odoo/teams/41243/uk/)\n"
 "MIME-Version: 1.0\n"
@@ -23,25 +23,7 @@ msgstr ""
 #. module: partner_autocomplete
 #: model_terms:ir.ui.view,arch_db:partner_autocomplete.additional_info_template
 msgid "(Time Now)"
-msgstr "(Тепер)"
-
-#. module: partner_autocomplete
-#: model_terms:ir.ui.view,arch_db:partner_autocomplete.res_config_settings_view_form
-msgid ""
-"<i class=\"fa fa-arrow-right\"/>\n"
-"                        Buy more credits"
-msgstr ""
-"<i class=\"fa fa-arrow-right\"/>\n"
-"                        Отримати більше кредитів"
-
-#. module: partner_autocomplete
-#: model_terms:ir.ui.view,arch_db:partner_autocomplete.res_config_settings_view_form
-msgid ""
-"<i class=\"fa fa-exclamation-triangle text-warning\"/> &amp;nbsp; You don't "
-"have credits to auto-complete companies' data anymore."
-msgstr ""
-"<i class=\"fa fa-exclamation-triangle text-warning\"/> &amp;nbsp; Ви більше "
-"не маєте кредитів для автозаповнення даних компанії."
+msgstr "(Час зараз)"
 
 #. module: partner_autocomplete
 #: model_terms:ir.ui.view,arch_db:partner_autocomplete.additional_info_template
@@ -134,19 +116,17 @@ msgstr ""
 "                <b>Співробітники:</b>"
 
 #. module: partner_autocomplete
-#: model_terms:ir.ui.view,arch_db:partner_autocomplete.res_config_settings_view_form
-msgid "<span>&amp;times;</span>"
-msgstr "<span>&amp;times;</span>"
-
-#. module: partner_autocomplete
 #: model:ir.model.fields,field_description:partner_autocomplete.field_res_partner__additional_info
+#: model:ir.model.fields,field_description:partner_autocomplete.field_res_users__additional_info
 msgid "Additional info"
 msgstr "Додаткова інформація"
 
 #. module: partner_autocomplete
-#: model_terms:ir.ui.view,arch_db:partner_autocomplete.res_config_settings_view_form
-msgid "Close"
-msgstr "Закрити"
+#. openerp-web
+#: code:addons/partner_autocomplete/static/src/xml/partner_autocomplete.xml:21
+#, python-format
+msgid "Buy more credits"
+msgstr "Отримати більше кредитів"
 
 #. module: partner_autocomplete
 #: model:ir.model,name:partner_autocomplete.model_res_company
@@ -156,6 +136,7 @@ msgstr "Компанії"
 #. module: partner_autocomplete
 #: model:ir.model.fields,field_description:partner_autocomplete.field_res_company__partner_gid
 #: model:ir.model.fields,field_description:partner_autocomplete.field_res_partner__partner_gid
+#: model:ir.model.fields,field_description:partner_autocomplete.field_res_users__partner_gid
 msgid "Company database ID"
 msgstr "ID бази даних компанії"
 
@@ -172,7 +153,7 @@ msgstr "Контакт"
 #. module: partner_autocomplete
 #: model:ir.model.fields,field_description:partner_autocomplete.field_res_partner_autocomplete_sync__create_uid
 msgid "Created by"
-msgstr "Створив"
+msgstr "Створено"
 
 #. module: partner_autocomplete
 #: model:ir.model.fields,field_description:partner_autocomplete.field_res_partner_autocomplete_sync__create_date
@@ -202,7 +183,7 @@ msgstr "Синхронізовано"
 #. module: partner_autocomplete
 #: model:ir.model.fields,field_description:partner_autocomplete.field_res_partner_autocomplete_sync____last_update
 msgid "Last Modified on"
-msgstr "Остання модифікація"
+msgstr "Останні зміни на"
 
 #. module: partner_autocomplete
 #: model:ir.model.fields,field_description:partner_autocomplete.field_res_partner_autocomplete_sync__write_uid
@@ -213,6 +194,13 @@ msgstr "Востаннє оновив"
 #: model:ir.model.fields,field_description:partner_autocomplete.field_res_partner_autocomplete_sync__write_date
 msgid "Last Updated on"
 msgstr "Останнє оновлення"
+
+#. module: partner_autocomplete
+#. openerp-web
+#: code:addons/partner_autocomplete/static/src/js/partner_autocomplete_core.js:371
+#, python-format
+msgid "Not enough credits for Partner Autocomplete"
+msgstr "Недостатньо кредитів для автозавершення партнера"
 
 #. module: partner_autocomplete
 #: model:ir.model.fields,field_description:partner_autocomplete.field_res_partner_autocomplete_sync__partner_id

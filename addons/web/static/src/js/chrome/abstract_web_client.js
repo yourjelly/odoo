@@ -62,10 +62,11 @@ var AbstractWebClient = Widget.extend(ServiceProviderMixin, KeyboardNavigationMi
         },
         load_filters: function (event) {
             return data_manager
-                .load_filters(event.data.dataset, event.data.action_id)
+                .load_filters(event.data)
                 .then(event.data.on_success);
         },
         create_filter: '_onCreateFilter',
+        delete_filter: '_onDeleteFilter',
         push_state: '_onPushState',
         show_effect: '_onShowEffect',
         // session
@@ -79,7 +80,7 @@ var AbstractWebClient = Widget.extend(ServiceProviderMixin, KeyboardNavigationMi
                 if (event.data.on_success) {
                     event.data.on_success(result);
                 }
-            }).fail(function (result) {
+            }).guardedCatch(function (result) {
                 if (event.data.on_fail) {
                     event.data.on_fail(result);
                 }
@@ -117,17 +118,17 @@ var AbstractWebClient = Widget.extend(ServiceProviderMixin, KeyboardNavigationMi
             .then(function () {
                 self.$el.toggleClass('o_rtl', _t.database.parameters.direction === "rtl");
                 self.bind_events();
-                return $.when(
+                return Promise.all([
                     self.set_action_manager(),
                     self.set_loading()
-                );
+                ]);
             }).then(function () {
                 if (session.session_is_valid()) {
                     return self.show_application();
                 } else {
                     // database manager needs the webclient to keep going even
                     // though it has no valid session
-                    return $.when();
+                    return Promise.resolve();
                 }
             }).then(function () {
                 // Listen to 'scroll' event and propagate it on main bus
@@ -146,12 +147,13 @@ var AbstractWebClient = Widget.extend(ServiceProviderMixin, KeyboardNavigationMi
         this.$el.on('mouseenter', '.oe_systray > div:not([data-toggle=tooltip])', function () {
             $(this).attr('data-toggle', 'tooltip').tooltip().trigger('mouseenter');
         });
+        // TODO: this handler seems useless since 11.0, should be removed
         this.$el.on('click', '.oe_dropdown_toggle', function (ev) {
             ev.preventDefault();
             var $toggle = $(this);
             var doc_width = $(document).width();
             var $menu = $toggle.siblings('.oe_dropdown_menu');
-            $menu = $menu.size() >= 1 ? $menu : $toggle.find('.oe_dropdown_menu');
+            $menu = $menu.length >= 1 ? $menu : $toggle.find('.oe_dropdown_menu');
             var state = $menu.is('.oe_opened');
             setTimeout(function () {
                 // Do not alter propagation
@@ -224,7 +226,7 @@ var AbstractWebClient = Widget.extend(ServiceProviderMixin, KeyboardNavigationMi
         this.action_manager = new ActionManager(this, session.user_context);
         var fragment = document.createDocumentFragment();
         return this.action_manager.appendTo(fragment).then(function () {
-            dom.append(self.$('.o_main_content'), fragment, {
+            dom.append(self.$el, fragment, {
                 in_DOM: true,
                 callbacks: [{widget: self.action_manager}],
             });
@@ -381,6 +383,18 @@ var AbstractWebClient = Widget.extend(ServiceProviderMixin, KeyboardNavigationMi
     _onCreateFilter: function (e) {
         data_manager
             .create_filter(e.data.filter)
+            .then(e.data.on_success);
+    },
+    /**
+     * @private
+     * @param {OdooEvent} e
+     * @param {Object} e.data.filter the filter description
+     * @param {function} e.data.on_success called when the RPC succeeds with its
+     *   returned value as argument
+     */
+    _onDeleteFilter: function (e) {
+        data_manager
+            .delete_filter(e.data.filterId)
             .then(e.data.on_success);
     },
     /**

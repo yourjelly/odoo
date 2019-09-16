@@ -54,7 +54,7 @@ class TestStockValuation(TransactionCase):
         purchase order before validating the receipt, the value of the received goods should be set
         according to the last unit cost.
         """
-        self.product1.product_tmpl_id.cost_method = 'average'
+        self.product1.product_tmpl_id.categ_id.property_cost_method = 'average'
         po1 = self.env['purchase.order'].create({
             'partner_id': self.partner_id.id,
             'order_line': [
@@ -97,7 +97,7 @@ class TestStockValuation(TransactionCase):
         purchase order and the standard price of the product before validating the receipt, the
         value of the received goods should be set according to the last standard price.
         """
-        self.product1.product_tmpl_id.cost_method = 'standard'
+        self.product1.product_tmpl_id.categ_id.property_cost_method = 'standard'
 
         # set a standard price
         self.product1.product_tmpl_id.standard_price = 10
@@ -151,7 +151,7 @@ class TestStockValuation(TransactionCase):
 
         eur_currency = self.env.ref('base.EUR')
 
-        self.product1.product_tmpl_id.cost_method = 'average'
+        self.product1.product_tmpl_id.categ_id.property_cost_method = 'average'
 
         # default currency is USD, create a purchase order in EUR
         po1 = self.env['purchase.order'].create({
@@ -214,7 +214,7 @@ class TestStockValuation(TransactionCase):
         """ Check that the extra move when over processing a receipt is correctly merged back in
         the original move.
         """
-        self.product1.product_tmpl_id.cost_method = 'fifo'
+        self.product1.product_tmpl_id.categ_id.property_cost_method = 'fifo'
         po1 = self.env['purchase.order'].create({
             'partner_id': self.partner_id.id,
             'order_line': [
@@ -248,7 +248,7 @@ class TestStockValuation(TransactionCase):
         """ Check that the backordered move when under processing a receipt correctly keep the
         price unit of the original move.
         """
-        self.product1.product_tmpl_id.cost_method = 'fifo'
+        self.product1.product_tmpl_id.categ_id.property_cost_method = 'fifo'
         po1 = self.env['purchase.order'].create({
             'partner_id': self.partner_id.id,
             'order_line': [
@@ -331,8 +331,8 @@ class TestStockValuationWithCOA(AccountingTestCase):
 
     def test_fifo_anglosaxon_return(self):
         self.env.user.company_id.anglo_saxon_accounting = True
-        self.product1.product_tmpl_id.cost_method = 'fifo'
-        self.product1.product_tmpl_id.valuation = 'real_time'
+        self.product1.product_tmpl_id.categ_id.property_cost_method = 'fifo'
+        self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
         self.product1.product_tmpl_id.invoice_policy = 'delivery'
         self.product1.property_account_creditor_price_difference = self.price_diff_account
 
@@ -396,9 +396,10 @@ class TestStockValuationWithCOA(AccountingTestCase):
         self.assertEqual(self.product1.stock_value, 300)
 
         # return the second po
-        stock_return_picking = self.env['stock.return.picking']\
-            .with_context(active_ids=receipt_po2.ids, active_id=receipt_po2.ids[0])\
-            .create({})
+        stock_return_picking_form = Form(self.env['stock.return.picking']
+            .with_context(active_ids=receipt_po2.ids, active_id=receipt_po2.ids[0],
+            active_model='stock.picking'))
+        stock_return_picking = stock_return_picking_form.save()
         stock_return_picking.product_return_moves.quantity = 10
         stock_return_picking_action = stock_return_picking.create_returns()
         return_pick = self.env['stock.picking'].browse(stock_return_picking_action['res_id'])
@@ -426,8 +427,8 @@ class TestStockValuationWithCOA(AccountingTestCase):
 
     def test_anglosaxon_valuation(self):
         self.env.user.company_id.anglo_saxon_accounting = True
-        self.product1.product_tmpl_id.cost_method = 'fifo'
-        self.product1.product_tmpl_id.valuation = 'real_time'
+        self.product1.product_tmpl_id.categ_id.property_cost_method = 'fifo'
+        self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
         self.product1.product_tmpl_id.invoice_policy = 'delivery'
         self.product1.property_account_creditor_price_difference = self.price_diff_account
 
@@ -468,6 +469,44 @@ class TestStockValuationWithCOA(AccountingTestCase):
         self.assertAlmostEquals(sum(input_aml.mapped('debit')), 10, "Total debit value on stock input account should be equal to the original PO price of the product.")
         self.assertAlmostEquals(sum(input_aml.mapped('credit')), 10, "Total credit value on stock input account should be equal to the original PO price of the product.")
 
+    def test_valuation_from_increasing_tax(self):
+        """ Check that a tax without account will increment the stock value.
+        """
+
+        tax_with_no_account = self.env['account.tax'].create({
+            'name': "Tax with no account",
+            'amount_type': 'fixed',
+            'amount': 5,
+            'sequence': 8,
+        })
+
+        self.product1.product_tmpl_id.cost_method = 'fifo'
+        self.product1.product_tmpl_id.valuation = 'real_time'
+
+
+        # Receive 10@10 ; create the vendor bill
+        po1 = self.env['purchase.order'].create({
+            'partner_id': self.partner_id.id,
+            'order_line': [
+                (0, 0, {
+                    'name': self.product1.name,
+                    'product_id': self.product1.id,
+                    'taxes_id': [(4, tax_with_no_account.id)],
+                    'product_qty': 10.0,
+                    'product_uom': self.product1.uom_po_id.id,
+                    'price_unit': 10.0,
+                    'date_planned': datetime.today().strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                }),
+            ],
+        })
+        po1.button_confirm()
+        receipt_po1 = po1.picking_ids[0]
+        receipt_po1.move_lines.quantity_done = 10
+        receipt_po1.button_validate()
+
+        # valuation of product1 should be 15 as the tax with no account set
+        # has gone to the stock account, and must be reflected in inventory valuation
+        self.assertEqual(self.product1.stock_value, 150)
     def test_average_realtime_anglo_saxon_valuation_multicurrency_same_date(self):
         """
         The PO and invoice are in the same foreign currency.
@@ -561,14 +600,14 @@ class TestStockValuationWithCOA(AccountingTestCase):
         """
         company = self.env.user.company_id
         company.anglo_saxon_accounting = True
+        self.product1.product_tmpl_id.categ_id.property_cost_method = 'average'
+        self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
 
         date_po = '2019-01-01'
         date_invoice = '2019-01-16'
 
         # SetUp product Average
         self.product1.product_tmpl_id.write({
-            'cost_method': 'average',
-            'valuation': 'real_time',
             'purchase_method': 'purchase',
             'property_account_creditor_price_difference': self.price_diff_account.id,
         })
@@ -577,8 +616,15 @@ class TestStockValuationWithCOA(AccountingTestCase):
         # SetUp product Standard
         # should have bought at 60 USD
         # actually invoiced at 70 EUR > 35 USD
+        product_categ_standard = self.product1.product_tmpl_id.categ_id.copy({
+            'property_cost_method': 'standard',
+            'property_stock_account_input_categ_id': self.stock_input_account.id,
+            'property_stock_account_output_categ_id': self.stock_output_account.id,
+            'property_stock_valuation_account_id': self.stock_valuation_account.id,
+            'property_stock_journal': self.stock_journal.id,
+        })
         product_standard = self.product1.product_tmpl_id.copy({
-            'cost_method': 'standard',
+            'categ_id': product_categ_standard.id,
             'name': 'Standard Val',
             'standard_price': 60,
             'property_account_creditor_price_difference': self.price_diff_account.id
@@ -730,15 +776,15 @@ class TestStockValuationWithCOA(AccountingTestCase):
         """
         company = self.env.user.company_id
         company.anglo_saxon_accounting = True
+        self.product1.product_tmpl_id.categ_id.property_cost_method = 'average'
+        self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
 
         date_po = '2019-01-01'
         date_delivery = '2019-01-08'
         date_invoice = '2019-01-16'
 
         product_avg = self.product1.product_tmpl_id.copy({
-            'valuation': 'real_time',
             'purchase_method': 'purchase',
-            'cost_method': 'average',
             'name': 'AVG',
             'standard_price': 60,
             'property_account_creditor_price_difference': self.price_diff_account.id
@@ -898,10 +944,10 @@ class TestStockValuationWithCOA(AccountingTestCase):
         date_invoice = '2019-01-16'
         date_invoice1 = '2019-01-20'
 
+        self.product1.categ_id.property_valuation = 'real_time'
+        self.product1.categ_id.property_cost_method = 'average'
         product_avg = self.product1.product_tmpl_id.copy({
-            'valuation': 'real_time',
             'purchase_method': 'purchase',
-            'cost_method': 'average',
             'name': 'AVG',
             'standard_price': 0,
             'property_account_creditor_price_difference': self.price_diff_account.id
@@ -969,6 +1015,7 @@ class TestStockValuationWithCOA(AccountingTestCase):
         po = self.env['purchase.order'].create({
             'currency_id': self.eur_currency.id,
             'partner_id': self.partner_id.id,
+            'date_order': date_po,
             'order_line': [
                 (0, 0, {
                     'name': product_avg.name,
@@ -1136,8 +1183,8 @@ class TestStockValuationWithCOA(AccountingTestCase):
              discount:    10
         """
         self.env.user.company_id.anglo_saxon_accounting = True
-        self.product1.product_tmpl_id.cost_method = 'fifo'
-        self.product1.product_tmpl_id.valuation = 'real_time'
+        self.product1.categ_id.property_cost_method = 'fifo'
+        self.product1.categ_id.property_valuation = 'real_time'
         self.product1.product_tmpl_id.invoice_policy = 'delivery'
         self.product1.property_account_creditor_price_difference = self.price_diff_account
 
@@ -1186,8 +1233,8 @@ class TestStockValuationWithCOA(AccountingTestCase):
              discount:    10
         """
         self.env.user.company_id.anglo_saxon_accounting = True
-        self.product1.product_tmpl_id.cost_method = 'fifo'
-        self.product1.product_tmpl_id.valuation = 'real_time'
+        self.product1.categ_id.property_cost_method = 'fifo'
+        self.product1.categ_id.property_valuation = 'real_time'
         self.product1.product_tmpl_id.invoice_policy = 'delivery'
         self.product1.property_account_creditor_price_difference = self.price_diff_account
 
@@ -1235,8 +1282,8 @@ class TestStockValuationWithCOA(AccountingTestCase):
              discount:    10
         """
         self.env.user.company_id.anglo_saxon_accounting = True
-        self.product1.product_tmpl_id.cost_method = 'fifo'
-        self.product1.product_tmpl_id.valuation = 'real_time'
+        self.product1.categ_id.property_cost_method = 'fifo'
+        self.product1.categ_id.property_valuation = 'real_time'
         self.product1.product_tmpl_id.invoice_policy = 'delivery'
         self.product1.property_account_creditor_price_difference = self.price_diff_account
 

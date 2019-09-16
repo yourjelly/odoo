@@ -6,6 +6,7 @@
 # Sebastiano Pistore <SebastianoPistore.info@protonmail.ch>, 2018
 # Paolo Valier, 2018
 # Alessandro Forte <a.forte1010@gmail.com>, 2018
+# Léonie Bouchat <lbo@odoo.com>, 2018
 # Sergio Zanchetta <primes2h@gmail.com>, 2018
 # 
 msgid ""
@@ -171,12 +172,12 @@ msgstr "Stripe"
 #. module: payment_stripe
 #: model:ir.model.fields,field_description:payment_stripe.field_payment_acquirer__stripe_publishable_key
 msgid "Stripe Publishable Key"
-msgstr "Chiave pubblica Stripe"
+msgstr "Chiave pubblicabile Stripe"
 
 #. module: payment_stripe
 #: model:ir.model.fields,field_description:payment_stripe.field_payment_acquirer__stripe_secret_key
 msgid "Stripe Secret Key"
-msgstr "Chiave privata Stripe"
+msgstr "Chiave segreta Stripe"
 
 #. module: payment_stripe
 #: code:addons/payment_stripe/models/payment.py:172
@@ -195,12 +196,6 @@ msgstr "Stripe: trovati %s ordini per il riferimento %s"
 #, python-format
 msgid "Stripe: no order found for reference %s"
 msgstr "Stripe: nessun ordine trovato per il riferimento %s"
-
-#. module: payment_stripe
-#: code:addons/payment_stripe/models/payment.py:260
-#, python-format
-msgid "Stripe: no payment token was provided or the token creation failed."
-msgstr ""
 
 #. module: payment_stripe
 #: code:addons/payment_stripe/models/payment.py:170

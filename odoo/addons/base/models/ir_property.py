@@ -3,7 +3,7 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.tools import pycompat, ormcache
+from odoo.tools import ormcache
 
 TYPE2FIELD = {
     'char': 'value_text',
@@ -42,7 +42,7 @@ class Property(models.Model):
     value_float = fields.Float()
     value_integer = fields.Integer()
     value_text = fields.Text()  # will contain (char, text)
-    value_binary = fields.Binary()
+    value_binary = fields.Binary(attachment=False)
     value_reference = fields.Char()
     value_datetime = fields.Datetime()
     type = fields.Selection([('char', 'Char'),
@@ -84,7 +84,7 @@ class Property(models.Model):
                 value = False
             elif isinstance(value, models.BaseModel):
                 value = '%s,%d' % (value._name, value.id)
-            elif isinstance(value, pycompat.integer_types):
+            elif isinstance(value, int):
                 field_id = values.get('fields_id')
                 if not field_id:
                     if not prop:

@@ -146,7 +146,7 @@ class TestLeaveRequests(TestHrHolidaysBase):
         """  Employee ask leav during a not valid validity time """
         with self.assertRaises(ValidationError):
             self.env['hr.leave'].sudo(self.user_employee_id).create({
-                'name': 'Sick Leave',
+                'name': 'Sick Time Off',
                 'employee_id': self.employee_emp_id,
                 'holiday_status_id': self.holidays_type_3.id,
                 'date_from': fields.Datetime.from_string('2017-07-03 06:00:00'),
@@ -175,3 +175,18 @@ class TestLeaveRequests(TestHrHolidaysBase):
         allocation_form = Form(self.env['hr.leave.allocation'].sudo(self.user_employee))
         allocation_form.holiday_status_id = self.holidays_type_1
         allocation = allocation_form.save()
+
+    @mute_logger('odoo.models.unlink', 'odoo.addons.mail.models.mail_mail')
+    def test_employee_is_absent(self):
+        """ Only the concerned employee should be considered absent """
+        self.env['hr.leave'].sudo(self.user_employee_id).create({
+            'name': 'Hol11',
+            'employee_id': self.employee_emp_id,
+            'holiday_status_id': self.holidays_type_1.id,
+            'date_from': (fields.Datetime.now() - relativedelta(days=1)),
+            'date_to': fields.Datetime.now() + relativedelta(days=1),
+            'number_of_days': 2,
+        })
+        (self.employee_emp | self.employee_hrmanager).mapped('is_absent')  # compute in batch
+        self.assertTrue(self.employee_emp.is_absent, "He should be considered absent")
+        self.assertFalse(self.employee_hrmanager.is_absent, "He should not be considered absent")

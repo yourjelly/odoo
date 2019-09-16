@@ -4,7 +4,6 @@
 
         <!-- We want to activate pay and sign by default for easier demoing. -->
         <record id="base.main_company" model="res.company">
-            <field name="portal_confirmation_sign" eval="True"/>
             <field name="portal_confirmation_pay" eval="True"/>
         </record>
 
@@ -17,10 +16,7 @@
         </record>
 
         <record model="crm.team" id="sales_team.crm_team_1">
-            <field name="use_quotations" eval="True"/>
-            <field name="use_invoices" eval="True"/>
             <field name="invoiced_target">40000</field>
-            <field name="dashboard_graph_model">sale.report</field>
         </record>
 
         <record id="sale_order_1" model="sale.order">
@@ -35,7 +31,7 @@
 
         <record id="sale_order_line_1" model="sale.order.line">
             <field name="order_id" ref="sale_order_1"/>
-            <field name="name">Acoustic Bloc Panel</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_25').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_25"/>
             <field name="product_uom_qty">3</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -44,7 +40,7 @@
 
         <record id="sale_order_line_2" model="sale.order.line">
             <field name="order_id" ref="sale_order_1"/>
-            <field name="name">Pen drive, 16GB</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_delivery_02').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_delivery_02"/>
             <field name="product_uom_qty">5</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -53,7 +49,7 @@
 
         <record id="sale_order_line_3" model="sale.order.line">
             <field name="order_id" ref="sale_order_1"/>
-            <field name="name">Headset USB</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_delivery_01').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_delivery_01"/>
             <field name="product_uom_qty">2</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -72,7 +68,7 @@
 
         <record id="sale_order_line_4" model="sale.order.line">
             <field name="order_id" ref="sale_order_2"/>
-            <field name="name">Service on demand</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_1').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_1"/>
             <field name="product_uom_qty">24</field>
             <field name="product_uom" ref="uom.product_uom_hour"/>
@@ -81,7 +77,7 @@
 
         <record id="sale_order_line_5" model="sale.order.line">
             <field name="order_id" ref="sale_order_2"/>
-            <field name="name">On Site Assistance</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_2').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_2"/>
             <field name="product_uom_qty">30</field>
             <field name="product_uom" ref="uom.product_uom_hour"/>
@@ -99,7 +95,7 @@
 
         <record id="sale_order_line_6" model="sale.order.line">
             <field name="order_id" ref="sale_order_3"/>
-            <field name="name">On Site Monitoring</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_1').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_1"/>
             <field name="product_uom_qty">10</field>
             <field name="product_uom" ref="uom.product_uom_hour"/>
@@ -108,7 +104,7 @@
 
         <record id="sale_order_line_7" model="sale.order.line">
             <field name="order_id" ref="sale_order_3"/>
-            <field name="name">Toner Cartridge</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_delivery_01').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_delivery_01"/>
             <field name="product_uom_qty">1</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -126,7 +122,7 @@
 
         <record id="sale_order_line_8" model="sale.order.line">
             <field name="order_id" ref="sale_order_4"/>
-            <field name="name">Service on demand</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_1').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_1"/>
             <field name="product_uom_qty">16</field>
             <field name="product_uom" ref="uom.product_uom_hour"/>
@@ -135,7 +131,7 @@
 
         <record id="sale_order_line_9" model="sale.order.line">
             <field name="order_id" ref="sale_order_4"/>
-            <field name="name">Webcam</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_delivery_02').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_delivery_02"/>
             <field name="product_uom_qty">10</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -144,7 +140,7 @@
 
         <record id="sale_order_line_10" model="sale.order.line">
             <field name="order_id" ref="sale_order_4"/>
-            <field name="name">Multimedia Speakers</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.consu_delivery_02').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.consu_delivery_02"/>
             <field name="product_uom_qty">3</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -153,7 +149,7 @@
 
         <record id="sale_order_line_11" model="sale.order.line">
             <field name="order_id" ref="sale_order_4"/>
-            <field name="name">Switch, 24 ports</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_delivery_01').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_delivery_01"/>
             <field name="product_uom_qty">2</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -172,7 +168,7 @@
 
         <record id="sale_order_line_12" model="sale.order.line">
             <field name="order_id" ref="sale_order_5"/>
-            <field name="name">External Hard disk</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_delivery_02').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_delivery_02"/>
             <field name="product_uom_qty">1</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -190,7 +186,7 @@
 
         <record id="sale_order_line_15" model="sale.order.line">
             <field name="order_id" ref="sale_order_6"/>
-            <field name="name">PC Assamble + 2GB RAM</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_4').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_4"/>
             <field name="product_uom_qty">1</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -208,7 +204,7 @@
 
         <record id="sale_order_line_16" model="sale.order.line">
             <field name="order_id" ref="sale_order_7"/>
-            <field name="name">Acoustic Bloc Panel</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_25').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_25"/>
             <field name="product_uom_qty">5</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -217,7 +213,7 @@
 
         <record id="sale_order_line_17" model="sale.order.line">
             <field name="order_id" ref="sale_order_7"/>
-            <field name="name">Three-Seat Sofa</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.consu_delivery_01').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.consu_delivery_01"/>
             <field name="product_uom_qty">1</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -226,7 +222,7 @@
 
         <record id="sale_order_line_18" model="sale.order.line">
             <field name="order_id" ref="sale_order_7"/>
-            <field name="name">Datacard</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_delivery_02').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_delivery_02"/>
             <field name="product_uom_qty">1</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -235,7 +231,7 @@
 
         <record id="sale_order_line_19" model="sale.order.line">
             <field name="order_id" ref="sale_order_7"/>
-            <field name="name">USB Adapter</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_delivery_01').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_delivery_01"/>
             <field name="product_uom_qty">1</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -254,7 +250,7 @@
 
         <record id="sale_order_line_20" model="sale.order.line">
             <field name="order_id" ref="sale_order_8"/>
-            <field name="name">Drawer</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_27').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_27"/>
             <field name="product_uom_qty">2</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -263,7 +259,7 @@
 
         <record id="sale_order_line_21" model="sale.order.line">
             <field name="order_id" ref="sale_order_8"/>
-            <field name="name">Mouse, Wireless</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_12').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_12"/>
             <field name="product_uom_qty">2</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -284,7 +280,7 @@
 
         <record id="sale_order_line_22" model="sale.order.line">
             <field name="order_id" ref="sale_order_9"/>
-            <field name="name">Drawer</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_27').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_27"/>
             <field name="product_uom_qty">3</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -293,7 +289,7 @@
 
         <record id="sale_order_line_23" model="sale.order.line">
             <field name="order_id" ref="sale_order_9"/>
-            <field name="name">Mouse, Wireless</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_12').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_12"/>
             <field name="product_uom_qty">3</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -312,7 +308,7 @@
 
         <record id="sale_order_line_24" model="sale.order.line">
             <field name="order_id" ref="sale_order_10"/>
-            <field name="name">Acoustic Bloc Screens</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_25').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_25"/>
             <field name="product_uom_qty">2</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -321,7 +317,7 @@
 
         <record id="sale_order_line_25" model="sale.order.line">
             <field name="order_id" ref="sale_order_10"/>
-            <field name="name">Mouse, Wireless</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_12').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_12"/>
             <field name="product_uom_qty">2</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -341,7 +337,7 @@
 
         <record id="sale_order_line_26" model="sale.order.line">
             <field name="order_id" ref="sale_order_11"/>
-            <field name="name">Acoustic Bloc Screens</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_25').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_25"/>
             <field name="product_uom_qty">3</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -350,7 +346,7 @@
 
         <record id="sale_order_line_27" model="sale.order.line">
             <field name="order_id" ref="sale_order_11"/>
-            <field name="name">Mouse, Wireless</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_12').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_12"/>
             <field name="product_uom_qty">3</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -369,7 +365,7 @@
 
         <record id="sale_order_line_28" model="sale.order.line">
             <field name="order_id" ref="sale_order_12"/>
-            <field name="name">Acoustic Bloc Screens</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_25').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_25"/>
             <field name="product_uom_qty">1</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -378,7 +374,7 @@
 
         <record id="sale_order_line_29" model="sale.order.line">
             <field name="order_id" ref="sale_order_12"/>
-            <field name="name">Mouse, Wireless</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_12').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_12"/>
             <field name="product_uom_qty">2</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -397,7 +393,7 @@
 
         <record id="sale_order_line_30" model="sale.order.line">
             <field name="order_id" ref="sale_order_13"/>
-            <field name="name">Acoustic Bloc Screens</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_25').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_25"/>
             <field name="product_uom_qty">1</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -406,7 +402,7 @@
 
         <record id="sale_order_line_31" model="sale.order.line">
             <field name="order_id" ref="sale_order_13"/>
-            <field name="name">Mouse, Wireless</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_12').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_12"/>
             <field name="product_uom_qty">1</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -425,7 +421,7 @@
 
         <record id="sale_order_line_32" model="sale.order.line">
             <field name="order_id" ref="sale_order_14"/>
-            <field name="name">Acoustic Bloc Screens</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_25').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_25"/>
             <field name="product_uom_qty">4</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -434,7 +430,7 @@
 
         <record id="sale_order_line_33" model="sale.order.line">
             <field name="order_id" ref="sale_order_14"/>
-            <field name="name">Mouse, Wireless</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_12').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_12"/>
             <field name="product_uom_qty">4</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -453,7 +449,7 @@
 
         <record id="sale_order_line_34" model="sale.order.line">
             <field name="order_id" ref="sale_order_15"/>
-            <field name="name">Acoustic Bloc Panel</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_25').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_25"/>
             <field name="product_uom_qty">4</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -462,7 +458,7 @@
 
         <record id="sale_order_line_35" model="sale.order.line">
             <field name="order_id" ref="sale_order_15"/>
-            <field name="name">Mouse, Wireless</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_12').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_12"/>
             <field name="product_uom_qty">3</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -481,7 +477,7 @@
 
         <record id="sale_order_line_36" model="sale.order.line">
             <field name="order_id" ref="sale_order_16"/>
-            <field name="name">Acoustic Bloc Panel</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_25').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_25"/>
             <field name="product_uom_qty">3</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -490,7 +486,7 @@
 
         <record id="sale_order_line_37" model="sale.order.line">
             <field name="order_id" ref="sale_order_16"/>
-            <field name="name">Mouse, Wireless</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_12').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_12"/>
             <field name="product_uom_qty">3</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -509,7 +505,7 @@
 
         <record id="sale_order_line_38" model="sale.order.line">
             <field name="order_id" ref="sale_order_17"/>
-            <field name="name">Acoustic Bloc Panel</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_25').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_25"/>
             <field name="product_uom_qty">2</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -518,7 +514,7 @@
 
         <record id="sale_order_line_39" model="sale.order.line">
             <field name="order_id" ref="sale_order_17"/>
-            <field name="name">Mouse, Wireless</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_12').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_12"/>
             <field name="product_uom_qty">2</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -537,7 +533,7 @@
 
         <record id="sale_order_line_40" model="sale.order.line">
             <field name="order_id" ref="sale_order_18"/>
-            <field name="name">Acoustic Bloc Panel</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_25').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_25"/>
             <field name="product_uom_qty">2</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -546,7 +542,7 @@
 
         <record id="sale_order_line_41" model="sale.order.line">
             <field name="order_id" ref="sale_order_18"/>
-            <field name="name">Mouse, Wireless</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_12').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_12"/>
             <field name="product_uom_qty">2</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -658,7 +654,7 @@ Thanks!</field>
 
         <record id="portal_sale_order_line_1" model="sale.order.line">
             <field name="order_id" ref="portal_sale_order_1"/>
-            <field name="name">Acoustic Bloc Panel</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_25').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_25"/>
             <field name="product_uom_qty">3</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -667,7 +663,7 @@ Thanks!</field>
 
         <record id="portal_sale_order_line_2" model="sale.order.line">
             <field name="order_id" ref="portal_sale_order_1"/>
-            <field name="name">Pen drive, 16GB</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_delivery_02').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_delivery_02"/>
             <field name="product_uom_qty">5</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -676,7 +672,7 @@ Thanks!</field>
 
         <record id="portal_sale_order_line_3" model="sale.order.line">
             <field name="order_id" ref="portal_sale_order_1"/>
-            <field name="name">Headset USB</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_delivery_01').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_delivery_01"/>
             <field name="product_uom_qty">2</field>
             <field name="product_uom" ref="uom.product_uom_unit"/>
@@ -696,7 +692,7 @@ Thanks!</field>
 
         <record id="portal_sale_order_line_4" model="sale.order.line">
             <field name="order_id" ref="portal_sale_order_2"/>
-            <field name="name">Service on demand</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_1').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_1"/>
             <field name="product_uom_qty">24</field>
             <field name="product_uom" ref="uom.product_uom_hour"/>
@@ -705,7 +701,7 @@ Thanks!</field>
 
         <record id="portal_sale_order_line_5" model="sale.order.line">
             <field name="order_id" ref="portal_sale_order_2"/>
-            <field name="name">On Site Assistance</field>
+            <field name="name" model="sale.order.line" eval="obj().env.ref('product.product_product_2').get_product_multiline_description_sale()"/>
             <field name="product_id" ref="product.product_product_2"/>
             <field name="product_uom_qty">30</field>
             <field name="product_uom" ref="uom.product_uom_hour"/>
@@ -733,27 +729,6 @@ Thanks!</field>
             <field name="confirmation_date" eval="datetime.now() - relativedelta(months=1)"/>
         </record>
 
-        <function model="crm.team" name="message_unsubscribe"
-            eval="[ref('sales_team.team_sales_department'),ref('sales_team.salesteam_website_sales')], [ref('base.partner_root')]"/>
-        <function model="crm.team" name="message_subscribe"
-            eval="[ref('sales_team.team_sales_department'),ref('sales_team.salesteam_website_sales')], [ref('base.partner_root')]"/>
-
-        <record id="product_product_1_product_template" model="product.template">
-            <field name="name">Chair floor protection</field>
-            <field name="categ_id" ref="product.product_category_5"/>
-            <field name="list_price">12.0</field>
-            <field name="uom_id" ref="uom.product_uom_unit"/>
-            <field name="uom_po_id" ref="uom.product_uom_unit"/>
-            <field name="description_sale">Office chairs can harm your floor: protect it.</field>
-            <field name="image" type="base64" file="sale/static/img/floor_protection-image.png"/>
-        </record>
-        <record id="product.product_product_4_product_template" model="product.template">
-            <field name="optional_product_ids" eval="[(6,0,[ref('product.product_product_11_product_template')])]"/>
-        </record>
-        <record id="product.product_product_11_product_template" model="product.template">
-            <field name="optional_product_ids" eval="[(6,0,[ref('product_product_1_product_template')])]"/>
-        </record>
-
         <record id="product_attribute_value_7" model="product.attribute.value">
             <field name="name">Custom</field>
             <field name="attribute_id" ref="product.product_attribute_1"/>
@@ -767,12 +742,14 @@ Thanks!</field>
 
         <record id="product_product_4e" model="product.product">
             <field name="default_code">DESK0005</field>
+            <field name="weight">0.01</field>
             <field name="product_tmpl_id" ref="product.product_product_4_product_template"/>
             <field name="attribute_value_ids" eval="[(6,0,[ref('product_attribute_value_7'), ref('product.product_attribute_value_3')])]"/>
         </record>
 
         <record id="product_product_4f" model="product.product">
             <field name="default_code">DESK0006</field>
+            <field name="weight">0.01</field>
             <field name="product_tmpl_id" ref="product.product_product_4_product_template"/>
             <field name="attribute_value_ids" eval="[(6,0,[ref('product_attribute_value_7'), ref('product.product_attribute_value_4')])]"/>
         </record>

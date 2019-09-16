@@ -3,17 +3,16 @@
 # * pos_restaurant
 # 
 # Translators:
-# Bole <bole@dajmi5.com>, 2018
 # Martin Trigaux, 2018
-# Boško Stojaković <bluesoft83@gmail.com>, 2019
-# 
+# Boško Stojaković <bluesoft83@gmail.com>, 2018
+# Bole <bole@dajmi5.com>, 2018
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-09 10:31+0000\n"
-"PO-Revision-Date: 2018-08-24 09:23+0000\n"
-"Last-Translator: Boško Stojaković <bluesoft83@gmail.com>, 2019\n"
+"POT-Creation-Date: 2018-10-08 06:48+0000\n"
+"PO-Revision-Date: 2018-10-08 06:48+0000\n"
+"Last-Translator: Bole <bole@dajmi5.com>, 2018\n"
 "Language-Team: Bosnian (https://www.transifex.com/odoo/teams/41243/bs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -39,13 +38,6 @@ msgstr ""
 #. module: pos_restaurant
 #: model_terms:pos.config,customer_facing_display_html:pos_restaurant.pos_config_restaurant
 msgid "$ 8.50"
-msgstr ""
-
-#. module: pos_restaurant
-#: model_terms:ir.ui.view,arch_db:pos_restaurant.pos_config_view_form_inherit_restaurant
-msgid ""
-"<span class=\"fa fa-lg fa-cutlery\" title=\"For bars and restaurants\" "
-"role=\"img\" aria-label=\"For bars and restaurants\"/>"
 msgstr ""
 
 #. module: pos_restaurant
@@ -244,7 +236,7 @@ msgstr "Razdvajanje računa"
 #: code:addons/pos_restaurant/static/src/xml/floors.xml:150
 #, python-format
 msgid "Blue"
-msgstr "Plavo"
+msgstr ""
 
 #. module: pos_restaurant
 #. openerp-web
@@ -388,7 +380,7 @@ msgstr ""
 #: code:addons/pos_restaurant/static/src/xml/floors.xml:149
 #, python-format
 msgid "Green"
-msgstr "Zelena"
+msgstr ""
 
 #. module: pos_restaurant
 #. openerp-web
@@ -556,7 +548,7 @@ msgstr "U redu"
 #: code:addons/pos_restaurant/static/src/xml/floors.xml:151
 #, python-format
 msgid "Orange"
-msgstr "Narandžasto"
+msgstr ""
 
 #. module: pos_restaurant
 #. openerp-web
@@ -664,7 +656,7 @@ msgstr "IP adresa proxy"
 #: code:addons/pos_restaurant/static/src/xml/floors.xml:153
 #, python-format
 msgid "Purple"
-msgstr "Ljubičasto"
+msgstr ""
 
 #. module: pos_restaurant
 #: model_terms:pos.config,customer_facing_display_html:pos_restaurant.pos_config_restaurant
@@ -677,7 +669,7 @@ msgstr "Količina"
 #: code:addons/pos_restaurant/static/src/xml/floors.xml:148
 #, python-format
 msgid "Red"
-msgstr "Crveno"
+msgstr ""
 
 #. module: pos_restaurant
 #. openerp-web
@@ -990,7 +982,7 @@ msgstr "Sa"
 #: code:addons/pos_restaurant/static/src/xml/floors.xml:152
 #, python-format
 msgid "Yellow"
-msgstr "Žuta"
+msgstr ""
 
 #. module: pos_restaurant
 #. openerp-web

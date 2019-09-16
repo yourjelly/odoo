@@ -6,7 +6,7 @@
 # Martin Trigaux, 2018
 # Jan Horzinka <jan.horzinka@centrum.cz>, 2018
 # Michal Veselý <michal@veselyberanek.net>, 2018
-# trendspotter <j.podhorecky@volny.cz>, 2019
+# J. Podhorecky <j.podhorecky@volny.cz>, 2018
 # 
 msgid ""
 msgstr ""
@@ -14,7 +14,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-09-18 09:49+0000\n"
 "PO-Revision-Date: 2018-08-24 09:33+0000\n"
-"Last-Translator: trendspotter <j.podhorecky@volny.cz>, 2019\n"
+"Last-Translator: J. Podhorecky <j.podhorecky@volny.cz>, 2018\n"
 "Language-Team: Czech (https://www.transifex.com/odoo/teams/41243/cs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -40,7 +40,7 @@ msgstr "Přidat novou kategorii měrné jednotky"
 #. module: uom
 #: model:ir.model.fields,field_description:uom.field_uom_uom__factor_inv
 msgid "Bigger Ratio"
-msgstr "Větší poměr"
+msgstr ""
 
 #. module: uom
 #: selection:uom.uom,uom_type:0
@@ -100,8 +100,6 @@ msgid ""
 "How many times this Unit of Measure is bigger than the reference Unit of "
 "Measure in this category: 1 * (this unit) = ratio * (reference unit)"
 msgstr ""
-"Kolikrát je tato měrná jednotka větší než referenční měrná jednotka v této "
-"kategorii: 1 * (tato jednotka) = poměr * (referenční jednotka)"
 
 #. module: uom
 #: model:ir.model.fields,help:uom.field_uom_uom__factor
@@ -109,9 +107,6 @@ msgid ""
 "How much bigger or smaller this unit is compared to the reference Unit of "
 "Measure for this category: 1 * (reference unit) = ratio * (this unit)"
 msgstr ""
-"O kolik větší nebo menší je tato jednotka ve srovnání s referenční měrnou "
-"jednotkou pro tuto kategorii: 1 * (referenční jednotka) = poměr * (tato "
-"jednotka)"
 
 #. module: uom
 #: model:ir.model.fields,field_description:uom.field_uom_category__id
@@ -165,7 +160,7 @@ msgstr "Měrná jednotka výrobku"
 #. module: uom
 #: model:ir.model,name:uom.model_uom_category
 msgid "Product UoM Categories"
-msgstr "Kategorie měrné jednotky produktu"
+msgstr ""
 
 #. module: uom
 #: model:ir.model.fields,field_description:uom.field_uom_uom__factor
@@ -220,10 +215,6 @@ msgid ""
 "the unit of measure defined on the order line or on the product, they should"
 " belong to the same category."
 msgstr ""
-"Měrná jednotka %s definovaná na řádku objednávky nepatří do stejné kategorie"
-" než měrná jednotka %s definovaná na produktu. Opravte měrnou jednotku "
-"definovanou na objednávkové řádce nebo na produktu, která by měla patřit do "
-"stejné kategorie."
 
 #. module: uom
 #: selection:uom.category,measure_type:0
@@ -238,12 +229,12 @@ msgstr "Typ"
 #. module: uom
 #: model:ir.model.fields,field_description:uom.field_uom_category__measure_type
 msgid "Type of Measure"
-msgstr "typ měřítka"
+msgstr ""
 
 #. module: uom
 #: model:ir.model.fields,field_description:uom.field_uom_uom__measure_type
 msgid "Type of measurement category"
-msgstr "Typ kategorie měření"
+msgstr ""
 
 #. module: uom
 #: model:ir.model.fields,help:uom.field_uom_uom__active
@@ -271,7 +262,7 @@ msgstr "Kategorie měrných jednotek"
 #. module: uom
 #: model:ir.model.fields,field_description:uom.field_uom_category__name
 msgid "Unit of Measure Category"
-msgstr "Kateorie měrných jednotek"
+msgstr ""
 
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_unit
@@ -303,10 +294,6 @@ msgid ""
 "            <i>'Time'</i>, you will have the following units of measure:\n"
 "            Hours, Days."
 msgstr ""
-"Měrné jednotky patřící do stejné kategorie mohou být\n"
-"převedeny mezi sebou. Například v kategorii\n"
-"<i>„Čas“</i>, budete mít následující měrné jednotky:\n"
-"Hodiny, dny."
 
 #. module: uom
 #: code:addons/uom/models/uom_uom.py:93
@@ -315,17 +302,12 @@ msgid ""
 "UoM category %s should have a reference unit of measure. If you just created"
 " a new category, please record the 'reference' unit first."
 msgstr ""
-"Kategorie měrných jednotek %s by měla mít referenční měrnou jednotku. Pokud "
-"jste právě vytvořili novou kategorii, nejprve si poznamenejte „referenční“ "
-"jednotku."
 
 #. module: uom
 #: code:addons/uom/models/uom_uom.py:95
 #, python-format
 msgid "UoM category %s should only have one reference unit of measure."
 msgstr ""
-"Kategorie měrných jednotek %s by měla mít pouze jednu referenční měrnou "
-"jednotku."
 
 #. module: uom
 #: selection:uom.category,measure_type:0
@@ -347,14 +329,13 @@ msgstr "Pracovní čas"
 #. module: uom
 #: sql_constraint:uom.category:0
 msgid "You can have only one category per measurement type."
-msgstr "Pro každý typ měření můžete mít pouze jednu kategorii."
+msgstr ""
 
 #. module: uom
 #: code:addons/uom/models/uom_uom.py:28
 #, python-format
 msgid "You cannot delete this UoM Category as it is used by the system."
 msgstr ""
-"Tuto kategorii měrných jednotek nemůžete smazat, protože ji používá systém."
 
 #. module: uom
 #: code:addons/uom/models/uom_uom.py:115
@@ -363,8 +344,6 @@ msgid ""
 "You cannot delete this UoM as it is used by the system. You should rather "
 "archive it."
 msgstr ""
-"Tuto měrnou jednotku nemůžete smazat, protože ji používá systém. Radši byste"
-" ji měli archivovat."
 
 #. module: uom
 #: model_terms:ir.actions.act_window,help:uom.product_uom_form_action
@@ -372,8 +351,6 @@ msgid ""
 "You must define a conversion rate between several Units of\n"
 "            Measure within the same category."
 msgstr ""
-"Musíte definovat konverzní poměr mezi několika měrnými jednotkami v rámci "
-"stejné kategorie."
 
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_cm
@@ -393,17 +370,17 @@ msgstr "např.: 1 * (tato jednotka) = poměr * (referenční jednotka)"
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_floz
 msgid "fl oz"
-msgstr "fl oz"
+msgstr ""
 
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_foot
 msgid "foot(ft)"
-msgstr "foot(ft)"
+msgstr ""
 
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_gal
 msgid "gal(s)"
-msgstr "gal(s)"
+msgstr ""
 
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_inch
@@ -428,14 +405,14 @@ msgstr "lb(s)"
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_mile
 msgid "mile(s)"
-msgstr "míle(e)"
+msgstr ""
 
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_oz
 msgid "oz(s)"
-msgstr "oz(s)"
+msgstr ""
 
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_qt
 msgid "qt"
-msgstr "qt"
+msgstr ""

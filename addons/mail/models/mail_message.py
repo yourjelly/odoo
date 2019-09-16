@@ -351,14 +351,16 @@ class Message(models.Model):
         message_to_tracking = dict()
         tracking_tree = dict.fromkeys(tracking_values.ids, False)
         for tracking in tracking_values:
-            message_to_tracking.setdefault(tracking.mail_message_id.id, list()).append(tracking.id)
-            tracking_tree[tracking.id] = {
-                'id': tracking.id,
-                'changed_field': tracking.field_desc,
-                'old_value': tracking.get_old_display_value()[0],
-                'new_value': tracking.get_new_display_value()[0],
-                'field_type': tracking.field_type,
-            }
+            groups = tracking.groups
+            if not groups or self.user_has_groups(groups):
+                message_to_tracking.setdefault(tracking.mail_message_id.id, list()).append(tracking.id)
+                tracking_tree[tracking.id] = {
+                    'id': tracking.id,
+                    'changed_field': tracking.field_desc,
+                    'old_value': tracking.get_old_display_value()[0],
+                    'new_value': tracking.get_new_display_value()[0],
+                    'field_type': tracking.field_type,
+                }
 
         # 4. Update message dictionaries
         for message_dict in messages:
@@ -488,14 +490,7 @@ class Message(models.Model):
                     'moderation_status': 'pending_moderation'
                 }
         """
-        message_values = self.read([
-            'id', 'body', 'date', 'author_id', 'email_from',  # base message fields
-            'message_type', 'subtype_id', 'subject',  # message specific
-            'model', 'res_id', 'record_name',  # document related
-            'channel_ids', 'partner_ids',  # recipients
-            'starred_partner_ids',  # list of partner ids for whom the message is starred
-            'moderation_status',
-        ])
+        message_values = self.read(self._get_message_format_fields())
         message_tree = dict((m.id, m) for m in self.sudo())
         self._message_read_dict_postprocess(message_values, message_tree)
 
@@ -526,6 +521,17 @@ class Message(models.Model):
             if message['model'] and self.env[message['model']]._original_module:
                 message['module_icon'] = modules.module.get_module_icon(self.env[message['model']]._original_module)
         return message_values
+
+    @api.multi
+    def _get_message_format_fields(self):
+        return [
+            'id', 'body', 'date', 'author_id', 'email_from',  # base message fields
+            'message_type', 'subtype_id', 'subject',  # message specific
+            'model', 'res_id', 'record_name',  # document related
+            'channel_ids', 'partner_ids',  # recipients
+            'starred_partner_ids',  # list of partner ids for whom the message is starred
+            'moderation_status',
+        ]
 
     @api.multi
     def _format_mail_failures(self):
@@ -907,7 +913,7 @@ class Message(models.Model):
         res_id = values.get('res_id', self.env.context.get('default_res_id'))
         if not model or not res_id or model not in self.env:
             return False
-        return self.env[model].sudo().browse(res_id).name_get()[0][1]
+        return self.env[model].sudo().browse(res_id).display_name
 
     @api.model
     def _get_reply_to(self, values):

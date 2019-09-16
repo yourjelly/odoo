@@ -5,15 +5,13 @@
 # Translators:
 # Sengtha Chay <sengtha@gmail.com>, 2018
 # Chan Nath <channath@gmail.com>, 2018
-# Lux Sok <sok.lux@gmail.com>, 2019
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-09-21 13:18+0000\n"
-"PO-Revision-Date: 2018-08-24 09:35+0000\n"
-"Last-Translator: Lux Sok <sok.lux@gmail.com>, 2019\n"
+"PO-Revision-Date: 2018-09-21 13:18+0000\n"
+"Last-Translator: Chan Nath <channath@gmail.com>, 2018\n"
 "Language-Team: Khmer (https://www.transifex.com/odoo/teams/41243/km/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -27,8 +25,6 @@ msgid ""
 "<i class=\"fa fa-arrow-right\"/>\n"
 "                                Show me how to obtain the Twitter API key and Twitter API secret"
 msgstr ""
-"<i class=\"fa fa-arrow-right\"/>\n"
-"                                បង្ហាញខ្ញុំពីរបៀបទទួលបាន សោរTwitter API និង ការសំងាត់ Twitter API"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
@@ -36,40 +32,38 @@ msgid ""
 "<span class=\"o_form_label\">Twitter Roller</span>\n"
 "                        <span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-specific.\" groups=\"website.group_multi_website\"/>"
 msgstr ""
-"<span class=\"o_form_label\">រូឡឺ Twitter</span>\n"
-"<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-specific.\" groups=\"website.group_multi_website\"/>"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "<strong>Callback URL: </strong>Leave blank"
-msgstr "<strong>URLហៅត្រលប់វិញ: </strong>ទុកទំនេរ"
+msgstr ""
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "<strong>Description: </strong> Odoo Twitter Integration"
-msgstr "<strong>ការពណ៌នា: </strong> ការខិតចូល គណីយOdoo Twitter"
+msgstr ""
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "<strong>Name: </strong> Odoo Twitter Integration"
-msgstr "<strong>ឈ្មោះ: </strong> ការខិតចូលជិតគណីយOdoo Twitter"
+msgstr ""
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "<strong>Website: </strong>"
-msgstr "<strong>វិបសាយ: </strong>"
+msgstr ""
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_res_config_settings__twitter_api_key
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "API Key"
-msgstr "សោរAPI"
+msgstr ""
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_res_config_settings__twitter_api_secret
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "API secret"
-msgstr "ការសំងាត់API"
+msgstr ""
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
@@ -77,8 +71,6 @@ msgid ""
 "Accept terms of use and click on the Create your Twitter application button "
 "at the bottom"
 msgstr ""
-"ទទួលយកពាក្យប្រើប្រាស់និងចុចលើ "
-"ប៊ូតុងបង្កើតពាក្យសុំបង្កើតគណីយTwitterនៅខាងក្រោម"
 
 #. module: website_twitter
 #: code:addons/website_twitter/models/res_config_settings.py:16
@@ -87,13 +79,11 @@ msgid ""
 "Authentication credentials were missing or incorrect. Maybe screen name "
 "tweets are protected."
 msgstr ""
-"ព័ត៌មានបញ្ជាក់អត្តសញ្ញាណបានបាត់ឬមិនត្រឹមត្រូវ។ "
-"ប្រហែលជាឈ្មោះអេក្រង់ត្រូវបានការពារ។"
 
 #. module: website_twitter
 #: model:ir.model,name:website_twitter.model_res_config_settings
 msgid "Config Settings"
-msgstr "កំណត់រចនាសម្ព័ន្ធ"
+msgstr ""
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
@@ -101,12 +91,11 @@ msgid ""
 "Copy/Paste Consumer Key (API Key) and Consumer Secret (API Secret) keys "
 "below."
 msgstr ""
-"ថត/ចម្លង សោរអតិថិជន (សោរ API)និងសោរការសំងាត់អតិថិជន(ការសំងាត់API)ខាងក្រោម"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Create a new Twitter application on"
-msgstr "បង្កើតពាក្យសុំធ្វើគណីយ Twitter ថ្មីមួយលើ"
+msgstr ""
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__create_uid
@@ -127,34 +116,34 @@ msgstr "ឈ្មោះសំរាប់បង្ហាញ"
 #: model:ir.model.fields,field_description:website_twitter.field_res_config_settings__twitter_screen_name
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Favorites From"
-msgstr "ចំណូលចិត្តមកពី"
+msgstr ""
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website__twitter_screen_name
 msgid "Get favorites from this screen name"
-msgstr "ទទួលការចូលចិត្តពីឈ្មោះលើអេក្រង់នេះ"
+msgstr ""
 
 #. module: website_twitter
 #: code:addons/website_twitter/models/res_config_settings.py:48
 #, python-format
 msgid "HTTP Error: Something is misconfigured"
-msgstr "កំហុស HTTP: មានអ្វីមួយមិនត្រឹមត្រូវ។"
+msgstr ""
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "How to configure the Twitter API access"
-msgstr "របៀបកំណត់រចនាសម្ព័ន្ធការចូលប្រើ Twitter API ។"
+msgstr ""
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__id
 msgid "ID"
-msgstr "អត្តសញ្ញាណ"
+msgstr "ID"
 
 #. module: website_twitter
 #: code:addons/website_twitter/models/res_config_settings.py:59
 #, python-format
 msgid "Internet connection refused"
-msgstr "ការភ្ជាប់អិនធើនិតបានបដិសេធ"
+msgstr ""
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet____last_update
@@ -176,7 +165,7 @@ msgstr "ផ្លាស់ប្តូរចុងក្រោយ"
 #: code:addons/website_twitter/models/res_config_settings.py:62
 #, python-format
 msgid "Please double-check your Twitter API Key and Secret!"
-msgstr "សូមពិនិត្យទ្វេដងនិងលេខសំងាត់ Twitter API របស់អ្នក! "
+msgstr ""
 
 #. module: website_twitter
 #: code:addons/website_twitter/controllers/main.py:27
@@ -185,21 +174,19 @@ msgid ""
 "Please set a Twitter screen name to load favorites from, in the Website "
 "Settings (it does not have to be yours)"
 msgstr ""
-"សូមកំណត់ឈ្មោះលើអេក្រង់ Twitter ដើម្បីផ្ទុកចំណូលចិត្តនៅក្នុងការកំណត់គេហទំព័រ "
-"(វាមិនចាំបាច់ជារបស់អ្នកទេ) "
 
 #. module: website_twitter
 #: code:addons/website_twitter/controllers/main.py:23
 #, python-format
 msgid "Please set the Twitter API Key and Secret in the Website Settings."
-msgstr "សូមកំណត់ Twitter API និងអាថ៌កំបាំងនៅក្នុងការកំណត់គេហទំព័រ។ "
+msgstr ""
 
 #. module: website_twitter
 #. openerp-web
 #: code:addons/website_twitter/static/src/js/website.twitter.editor.js:21
 #, python-format
 msgid "Reload"
-msgstr "ផ្ទុកឡើងវិញ"
+msgstr ""
 
 #. module: website_twitter
 #: code:addons/website_twitter/models/res_config_settings.py:18
@@ -207,12 +194,12 @@ msgstr "ផ្ទុកឡើងវិញ"
 msgid ""
 "Request cannot be served due to the applications rate limit having been "
 "exhausted for the resource."
-msgstr "មិនអាចស្នើសុំបានទេដោយសារកំរិតអត្រាពាក្យសុំបានអស់កំលាំង។ "
+msgstr ""
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__screen_name
 msgid "Screen Name"
-msgstr "ឈ្មោះ​អេក្រង់ "
+msgstr ""
 
 #. module: website_twitter
 #: model:ir.model.fields,help:website_twitter.field_res_config_settings__twitter_screen_name
@@ -220,13 +207,11 @@ msgid ""
 "Screen Name of the Twitter Account from which you want to load favorites.It "
 "does not have to match the API Key/Secret."
 msgstr ""
-"ឈ្មោះអេក្រង់នៃគណនី Twitter ដែលអ្នកចង់ផ្ទុកចំនូលចិត្ត។ "
-"វាមិនចាំបាច់ត្រូវនឹងសោរ API / សំងាត់ទេ។ "
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Switch to the API Keys tab: <br/>"
-msgstr "ប្តូរទៅផ្ទាំង API គ្រាប់ចុច៖<br/> "
+msgstr ""
 
 #. module: website_twitter
 #: code:addons/website_twitter/models/res_config_settings.py:21
@@ -234,8 +219,6 @@ msgstr "ប្តូរទៅផ្ទាំង API គ្រាប់ចុច�
 msgid ""
 "The Twitter servers are up, but overloaded with requests. Try again later."
 msgstr ""
-"ម៉ាស៊ីនមេTwitterបានកើនឡើងប៉ុន្តែផ្ទុកលើសចំណុះ។ ព្យាយាម​ម្តង​ទៀត​នៅ​ពេលក្រោយ។"
-" "
 
 #. module: website_twitter
 #: code:addons/website_twitter/models/res_config_settings.py:22
@@ -244,8 +227,6 @@ msgid ""
 "The Twitter servers are up, but the request could not be serviced due to "
 "some failure within our stack. Try again later."
 msgstr ""
-"ម៉ាស៊ីនមេម៉ាស៊ីនមេTwitterបានកើនឡើងប៉ុន្តែការស្នើសុំមិនអាចត្រូវបានផ្តល់ជូនដោយសារតែការបរាជ័យមួយចំនួននៅក្នុងសំណុំរបស់យើង។"
-" ព្យាយាម​ម្តង​ទៀត​នៅ​ពេលក្រោយ។ "
 
 #. module: website_twitter
 #: code:addons/website_twitter/models/res_config_settings.py:17
@@ -254,8 +235,6 @@ msgid ""
 "The request is understood, but it has been refused or access is not allowed."
 " Please check your Twitter API Key and Secret."
 msgstr ""
-"ការស្នើសុំត្រូវបានយល់ប៉ុន្តែវាត្រូវបានបដិសេធឬចូលតែមិនត្រូវបានអនុញ្ញាតទេ។ "
-"សូមពិនិត្យលេខកូដ Twitter និងគន្លឹះសម្ងាត់ក្នុង Twitter របស់អ្នក។ "
 
 #. module: website_twitter
 #: code:addons/website_twitter/models/res_config_settings.py:15
@@ -264,81 +243,76 @@ msgid ""
 "The request was invalid or cannot be otherwise served. Requests without "
 "authentication are considered invalid and will yield this response."
 msgstr ""
-"សំណើមិនមានសុពលភាពឬមិនអាចត្រូវបានផ្តល់ជូនផ្សេងទៀត។ "
-"សំណើដោយគ្មានការផ្ទៀងផ្ទាត់ត្រូវបានចាត់ទុកថាមិនត្រឹមត្រូវហើយនឹងផ្តល់នូវការឆ្លើយតបនេះ។"
-" "
 
 #. module: website_twitter
 #: code:addons/website_twitter/models/res_config_settings.py:14
 #, python-format
 msgid "There was no new data to return."
-msgstr "មិនមានទិន្នន័យថ្មីត្រូវត្រឡប់មកវិញទេ។ "
+msgstr ""
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__tweet_id
 msgid "Tweet ID"
-msgstr "លេខសម្គាល់ Tweet "
+msgstr ""
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__tweet
 msgid "Tweets"
-msgstr "Tweets"
+msgstr ""
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Twitter API Credentials"
-msgstr "លិខិតសម្គាល់ Twitter API "
+msgstr ""
 
 #. module: website_twitter
 #: model:ir.model.fields,help:website_twitter.field_website__twitter_api_key
 msgid "Twitter API Key"
-msgstr "Twitter API Key"
+msgstr ""
 
 #. module: website_twitter
 #: model:ir.model.fields,help:website_twitter.field_website__twitter_api_secret
 msgid "Twitter API Secret"
-msgstr "Twitter API Secret"
+msgstr ""
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website__twitter_api_key
 msgid "Twitter API key"
-msgstr "លេខកូដ Twitter API "
+msgstr ""
 
 #. module: website_twitter
 #: model:ir.model.fields,help:website_twitter.field_res_config_settings__twitter_api_key
 msgid "Twitter API key you can get it from https://apps.twitter.com/"
-msgstr "កូដ Twitter API អ្នកអាចយកវាពី ​https://apps.twitter.com/"
+msgstr ""
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website__twitter_api_secret
 msgid "Twitter API secret"
-msgstr "Twitter API សម្ងាត់"
+msgstr ""
 
 #. module: website_twitter
 #: model:ir.model.fields,help:website_twitter.field_res_config_settings__twitter_api_secret
 msgid "Twitter API secret you can get it from https://apps.twitter.com/"
 msgstr ""
-"Twitter API សម្ងាត់អ្នកអាចទទួលបានពី ​ \n"
-"https://apps.twitter.com/"
 
 #. module: website_twitter
 #. openerp-web
 #: code:addons/website_twitter/static/src/xml/website.twitter.xml:40
 #, python-format
 msgid "Twitter Configuration"
-msgstr "កំណត់រចនាសម្ព័ន្ធ Twitter "
+msgstr ""
 
 #. module: website_twitter
 #: code:addons/website_twitter/models/res_config_settings.py:62
 #, python-format
 msgid "Twitter authorization error!"
-msgstr "កំហុសក្នុងការអនុញ្ញាតក្នុង Twitter! "
+msgstr ""
 
 #. module: website_twitter
 #: code:addons/website_twitter/models/res_config_settings.py:20
 #, python-format
 msgid "Twitter is down or being upgraded."
-msgstr "Twitter កំពុងធ្លាក់ចុះឬកំពុងត្រូវបានធ្វើឱ្យប្រសើរ។ "
+msgstr ""
 
 #. module: website_twitter
 #: code:addons/website_twitter/models/res_config_settings.py:19
@@ -347,18 +321,16 @@ msgid ""
 "Twitter seems broken. Please retry later. You may consider posting an issue "
 "on Twitter forums to get help."
 msgstr ""
-"Twitter ហាក់ដូចជាខូច។ សូមព្យាយាមម្តងទៀតនៅពេលក្រោយ។ "
-"អ្នកអាចពិចារណាប្រកាសបញ្ហានៅលើវេទិការ Twitter ដើម្បីទទួលបានជំនួយ។"
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_res_config_settings__twitter_server_uri
 msgid "Twitter server uri"
-msgstr "ម៉ាស៊ីនបម្រើTwitterយូរី "
+msgstr ""
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Twitter tutorial"
-msgstr "ការបង្រៀនតាម Twitter "
+msgstr ""
 
 #. module: website_twitter
 #: code:addons/website_twitter/controllers/main.py:37
@@ -367,29 +339,27 @@ msgid ""
 "Twitter user @%(username)s has less than 12 favorite tweets. Please add more"
 " or choose a different screen name."
 msgstr ""
-"អ្នកប្រើ Twitter @ %(username)sមានធ្វីតដែលចូលចិត្តជាង 12 ។ "
-"សូមបន្ថែមថែមទៀតឬជ្រើសរើសឈ្មោះអេក្រង់ផ្សេង។ "
 
 #. module: website_twitter
 #. openerp-web
 #: code:addons/website_twitter/static/src/xml/website.twitter.xml:6
 #, python-format
 msgid "Twitter's user"
-msgstr "អ្នកប្រើប្រាស់ Twitter "
+msgstr ""
 
 #. module: website_twitter
 #: model:ir.actions.server,name:website_twitter.ir_cron_twitter_actions_ir_actions_server
 #: model:ir.cron,cron_name:website_twitter.ir_cron_twitter_actions
 #: model:ir.cron,name:website_twitter.ir_cron_twitter_actions
 msgid "Twitter: Fetch new favorites"
-msgstr "Twitter: ទាញយកចំណូលចិត្តថ្មីៗ "
+msgstr ""
 
 #. module: website_twitter
 #: code:addons/website_twitter/models/res_config_settings.py:58
 #: code:addons/website_twitter/models/res_config_settings.py:59
 #, python-format
 msgid "We failed to reach a twitter server."
-msgstr "យើងបរាជ័យក្នុងការចូលទៅកន្លែងបម្រើtwitter"
+msgstr ""
 
 #. module: website_twitter
 #: model:ir.model,name:website_twitter.model_website
@@ -400,14 +370,19 @@ msgstr "វែបសាយ"
 #. module: website_twitter
 #: model:ir.model,name:website_twitter.model_website_twitter_tweet
 msgid "Website Twitter"
-msgstr "គេហទំព័រ Twitter "
+msgstr ""
+
+#. module: website_twitter
+#: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
+msgid "api_key.png"
+msgstr ""
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "https://apps.twitter.com/app/new"
-msgstr "https://apps.twitter.com/app/new"
+msgstr ""
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "with the following values:"
-msgstr "ជាមួយនឹងតម្លៃខាងក្រោម:"
+msgstr ""

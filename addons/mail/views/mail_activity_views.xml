@@ -16,8 +16,8 @@
                         <h1><field name="name"/></h1>
                     </div>
                     <group>
-                        <group>
-                            <field name="category" invisible="1"/>
+                        <group name="activity_details">
+                            <field name="category"/>
                             <field name="res_model_id" groups="base.group_no_one"/>
                             <field name="res_model_change" invisible="1"/>
                             <field name="initial_res_model_id" invisible="1"/>
@@ -33,11 +33,11 @@
                                 <field name="delay_from"/>
                             </div>
                         </group>
-                        <group>
+                        <group name="activity_planning">
                             <field name="force_next"/>
                             <field name="default_next_type_id" attrs="{'required': [('force_next', '=', True)]}" context="{'default_res_model_id': res_model_id}"/>
                             <field name="next_type_ids" widget="many2many_tags"
-                                attrs="{'invisible': [('force_next', '=', True)]}" context="{'default_res_model_id': res_model_id}"/>
+                                attrs="{'invisible': ['|', ('force_next', '=', True), ('category', '=', 'upload_file')]}" context="{'default_res_model_id': res_model_id}"/>
                             <field name="mail_template_ids" widget="many2many_tags"
                                 domain="[('model_id', '=', res_model_id)]"
                                 attrs="{'invisible': [('res_model_id', '=', False)]}"
@@ -127,8 +127,11 @@
                     </group>
                     <field name="note" placeholder="Log a note..."/>
                     <footer>
-                        <button string="Schedule" name="action_close_dialog"
-                            type="object" class="btn-primary"/>
+                        <field name="id" invisible="1"/>
+                        <button string="Schedule" name="action_close_dialog" type="object" class="btn-primary"
+                            attrs="{'invisible': [('id', '!=', False)]}"/>
+                        <button string="Save" name="action_close_dialog" type="object" class="btn-primary"
+                            attrs="{'invisible': [('id', '=', False)]}"/>
                         <button attrs="{'invisible': [('force_next', '=', True)]}" string="Mark as Done" name="action_done"
                             type="object" class="btn-secondary"
                             context="{'mail_activity_quick_update': True}"/>
@@ -168,7 +171,7 @@
                 <separator/>
                 <group expand="0" string="Group By">
                     <filter string="Deadline" name="date_deadline" context="{'group_by': 'date_deadline'}"/>
-                    <filter string="Created By" name="createdby" context="{'group_by': 'create_user_id'}"/>
+                    <filter string="Created By" name="createdby" context="{'group_by': 'create_uid'}"/>
                     <filter string="Activity Type" name="activittype" context="{'group_by': 'activity_type_id'}"/>
                 </group>
             </search>

@@ -3,21 +3,21 @@
 # * website_event_track
 # 
 # Translators:
-# Kristoffer Grundström <hamnisdude@gmail.com>, 2019
-# Haojun Zou <apollo_zhj@msn.com>, 2019
-# Martin Wilderoth <martin.wilderoth@linserv.se>, 2019
-# Robert Frykelius <robert.frykelius@linserv.se>, 2019
-# Chrille Hedberg <hedberg.chrille@gmail.com>, 2019
+# Kristoffer Grundström <hamnisdude@gmail.com>, 2018
+# Christelle Wehbe <libanon_cristelle@hotmail.com>, 2018
+# Haojun Zou <apollo_zhj@msn.com>, 2018
+# Martin Wilderoth <martin.wilderoth@linserv.se>, 2018
+# Robert Frykelius <robert.frykelius@linserv.se>, 2018
 # Martin Trigaux, 2019
 # Kim Asplund <kim.asplund@gmail.com>, 2019
 # Anders Wallenquist <anders.wallenquist@vertel.se>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server saas~12.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-08 06:49+0000\n"
-"PO-Revision-Date: 2018-08-24 09:34+0000\n"
+"POT-Creation-Date: 2019-03-20 13:50+0000\n"
+"PO-Revision-Date: 2016-08-05 13:12+0000\n"
 "Last-Translator: Anders Wallenquist <anders.wallenquist@vertel.se>, 2019\n"
 "Language-Team: Swedish (https://www.transifex.com/odoo/teams/41243/sv/)\n"
 "MIME-Version: 1.0\n"
@@ -180,7 +180,7 @@ msgid "Advanced reporting"
 msgstr ""
 
 #. module: website_event_track
-#: code:addons/website_event_track/models/event.py:97
+#: code:addons/website_event_track/models/event.py:94
 #, python-format
 msgid "Agenda"
 msgstr "Agenda"
@@ -230,6 +230,11 @@ msgstr ""
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
 msgid "Call for Proposals"
+msgstr ""
+
+#. module: website_event_track
+#: model:ir.model.fields,field_description:website_event_track.field_event_track__can_publish
+msgid "Can publish"
 msgstr ""
 
 #. module: website_event_track
@@ -492,12 +497,12 @@ msgstr "Följare (kontakter)"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_search
 msgid "Future Activities"
-msgstr "Framtida aktivieteter"
+msgstr ""
 
 #. module: website_event_track
 #: model:event.sponsor.type,name:website_event_track.event_sponsor_type3
 msgid "Gold"
-msgstr "Guld"
+msgstr "Or"
 
 #. module: website_event_track
 #: selection:event.track,kanban_state:0
@@ -512,7 +517,7 @@ msgstr ""
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_search
 msgid "Group By"
-msgstr "Gruppera efter"
+msgstr "Gruppera på"
 
 #. module: website_event_track
 #: selection:event.track,priority:0
@@ -669,7 +674,7 @@ msgstr "Senast uppdaterad"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_search
 msgid "Late Activities"
-msgstr "Försenade aktiviteter"
+msgstr ""
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_track12
@@ -748,7 +753,7 @@ msgstr "Förmiddagspaus"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_search
 msgid "My Activities"
-msgstr "Mina aktivieteter"
+msgstr ""
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_track27
@@ -935,7 +940,7 @@ msgstr "Sekvens"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_search
 msgid "Show all records which has next action date is before today"
-msgstr "Visa ella poster som har nästa händelse före idag"
+msgstr ""
 
 #. module: website_event_track
 #: model:event.sponsor.type,name:website_event_track.event_sponsor_type2
@@ -1056,7 +1061,7 @@ msgstr "Lämna in förslag"
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track_tag__name
 msgid "Tag"
-msgstr "Tagg"
+msgstr "Etikett"
 
 #. module: website_event_track
 #: sql_constraint:event.track.tag:0
@@ -1075,7 +1080,7 @@ msgid "Talk Introduction"
 msgstr "Föreläsningsintroduktion"
 
 #. module: website_event_track
-#: code:addons/website_event_track/models/event.py:102
+#: code:addons/website_event_track/models/event.py:99
 #, python-format
 msgid "Talk Proposals"
 msgstr "Föreläsningsförslag"
@@ -1086,7 +1091,7 @@ msgid "Talk Title"
 msgstr "Föreläsningstitel"
 
 #. module: website_event_track
-#: code:addons/website_event_track/models/event.py:96
+#: code:addons/website_event_track/models/event.py:93
 #, python-format
 msgid "Talks"
 msgstr "Föreläsningar"
@@ -1149,7 +1154,7 @@ msgstr "Idag"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_search
 msgid "Today Activities"
-msgstr "Dagens aktiviteter"
+msgstr ""
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_form

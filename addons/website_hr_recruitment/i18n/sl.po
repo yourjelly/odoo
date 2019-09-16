@@ -1,24 +1,20 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # * website_hr_recruitment
-# 
-# Translators:
-# Martin Trigaux, 2019
-# Matjaz Mozetic <m.mozetic@matmoz.si>, 2019
-# 
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server 10.saas~18\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-09 10:32+0000\n"
-"PO-Revision-Date: 2018-08-24 09:34+0000\n"
-"Last-Translator: Matjaz Mozetic <m.mozetic@matmoz.si>, 2019\n"
+"POT-Creation-Date: 2019-06-12 12:25+0000\n"
+"PO-Revision-Date: 2017-09-20 09:54+0000\n"
 "Language-Team: Slovenian (https://www.transifex.com/odoo/teams/41243/sl/)\n"
+"Language: sl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: sl\n"
-"Plural-Forms: nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n"
+"%100==4 ? 2 : 3);\n"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -43,7 +39,9 @@ msgstr ""
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.thankyou_ir_ui_view
 #: model_terms:website.page,arch_db:website_hr_recruitment.thankyou
-msgid "<br/><i class=\"fa fa-phone\" role=\"img\" aria-label=\"Phone\" title=\"Phone\"/>"
+msgid ""
+"<br/><i class=\"fa fa-phone\" role=\"img\" aria-label=\"Phone\" title=\"Phone"
+"\"/>"
 msgstr ""
 
 #. module: website_hr_recruitment
@@ -56,7 +54,9 @@ msgstr ""
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.thankyou_ir_ui_view
 #: model_terms:website.page,arch_db:website_hr_recruitment.thankyou
-msgid "<i class=\"fa fa-envelope\" role=\"img\" aria-label=\"Email\" title=\"Email\"/>"
+msgid ""
+"<i class=\"fa fa-envelope\" role=\"img\" aria-label=\"Email\" title=\"Email"
+"\"/>"
 msgstr ""
 
 #. module: website_hr_recruitment
@@ -120,8 +120,10 @@ msgstr ""
 #: model_terms:website.page,arch_db:website_hr_recruitment.thankyou
 msgid ""
 "<span>\n"
-"                                            We usually reply between one and three days.<br/>\n"
-"                                            Feel free to contact him/her if you have further questions.\n"
+"                                            We usually reply between one and "
+"three days.<br/>\n"
+"                                            Feel free to contact him/her if "
+"you have further questions.\n"
 "                                        </span>"
 msgstr ""
 
@@ -228,8 +230,8 @@ msgstr ""
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid ""
-"Direct coordination with functional consultants for qualification and follow"
-" ups"
+"Direct coordination with functional consultants for qualification and follow "
+"ups"
 msgstr ""
 
 #. module: website_hr_recruitment
@@ -240,8 +242,8 @@ msgstr "Celotni prodajni cikel"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid ""
-"Healthcare, dental, vision, life insurance, Flexible Spending Account (FSA),"
-" Health Savings Account (HSA)"
+"Healthcare, dental, vision, life insurance, Flexible Spending Account (FSA), "
+"Health Savings Account (HSA)"
 msgstr ""
 
 #. module: website_hr_recruitment
@@ -266,6 +268,11 @@ msgid "Job Complexity:"
 msgstr ""
 
 #. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.hr_job_website_inherit
+msgid "Job Description"
+msgstr ""
+
+#. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.detail
 msgid "Job Detail"
 msgstr "Podrobnosti zaposlitve"
@@ -281,7 +288,7 @@ msgid "Job Security:"
 msgstr ""
 
 #. module: website_hr_recruitment
-#: code:addons/website_hr_recruitment/controllers/main.py:77
+#: code:addons/website_hr_recruitment/controllers/main.py:79
 #, python-format
 msgid "Job Title"
 msgstr "Naziv delovnega mesta"
@@ -301,11 +308,13 @@ msgstr "Pridružite se nam in nam pomagajte razbiti podjetniški trg!"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid ""
 "Join us, we offer you an extraordinary chance to learn, to\n"
-"                                    develop and to be part of an exciting experience and\n"
+"                                    develop and to be part of an exciting "
+"experience and\n"
 "                                    team."
 msgstr ""
 "Pridružite se nam, ponujamo vam neverjetno priložnost\n"
-"                                    učenja, razvoja in biti del razburljive izkušnje in\n"
+"                                    učenja, razvoja in biti del razburljive "
+"izkušnje in\n"
 "                                    ekipe."
 
 #. module: website_hr_recruitment
@@ -373,6 +382,11 @@ msgid "Profitable"
 msgstr ""
 
 #. module: website_hr_recruitment
+#: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_applicant__residence_country
+msgid "Residence Country"
+msgstr ""
+
+#. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid "Resume"
 msgstr "Nadaljevanje"
@@ -391,7 +405,8 @@ msgstr "Kratek uvod"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid ""
 "Short summary of the job: A sales job for smart people and can\n"
-"                learn quickly new industries management practices. You will be\n"
+"                learn quickly new industries management practices. You will "
+"be\n"
 "                in charge of the full sales cycle from the opportunity\n"
 "                qualification to the negotiation, going through astonishing\n"
 "                product demos."
@@ -449,11 +464,6 @@ msgid "Variability of the Job:"
 msgstr ""
 
 #. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.hr_job_website_inherit
-msgid "Website Editor"
-msgstr ""
-
-#. module: website_hr_recruitment
 #: model:ir.actions.act_url,name:website_hr_recruitment.action_open_website
 msgid "Website Recruitment Form"
 msgstr "Spletni obrazec zaposlovanja"
@@ -489,6 +499,11 @@ msgstr "Vaše ime"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid "Your Phone Number"
 msgstr "Vaša telefonska številka"
+
+#. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
+msgid "Your Residence Country"
+msgstr ""
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.thankyou_ir_ui_view

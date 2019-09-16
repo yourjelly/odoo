@@ -41,20 +41,26 @@ class SaleOrder(models.Model):
             order.only_services = all(l.product_id.type in ('service', 'digital') for l in order.website_order_line)
 
     @api.multi
-    @api.depends('team_id.team_type', 'date_order', 'order_line', 'state', 'partner_id')
+    @api.depends('website_id', 'date_order', 'order_line', 'state', 'partner_id')
     def _compute_abandoned_cart(self):
         for order in self:
-            abandoned_delay = order.website_id and order.website_id.cart_abandoned_delay or 1.0
-            abandoned_datetime = datetime.utcnow() - relativedelta(hours=abandoned_delay)
-            domain = order.date_order and order.date_order <= abandoned_datetime and order.team_id.team_type == 'website' and order.state == 'draft' and order.partner_id.id != self.env.ref('base.public_partner').id and order.order_line
-            order.is_abandoned_cart = bool(domain)
+            # a quotation can be considered as an abandonned cart if it is linked to a website,
+            # is in the 'draft' state and has an expiration date
+            if order.website_id and order.state == 'draft' and order.date_order:
+                public_partner_id = order.website_id.user_id.partner_id
+                # by default the expiration date is 1 hour if not specified on the website configuration
+                abandoned_delay = order.website_id.cart_abandoned_delay or 1.0
+                abandoned_datetime = datetime.utcnow() - relativedelta(hours=abandoned_delay)
+                order.is_abandoned_cart = bool(order.date_order <= abandoned_datetime and order.partner_id != public_partner_id and order.order_line)
+            else:
+                order.is_abandoned_cart = False
 
     def _search_abandoned_cart(self, operator, value):
         abandoned_delay = self.website_id and self.website_id.cart_abandoned_delay or 1.0
         abandoned_datetime = fields.Datetime.to_string(datetime.utcnow() - relativedelta(hours=abandoned_delay))
         abandoned_domain = expression.normalize_domain([
             ('date_order', '<=', abandoned_datetime),
-            ('team_id.team_type', '=', 'website'),
+            ('website_id', '!=', False),
             ('state', '=', 'draft'),
             ('partner_id', '!=', self.env.ref('base.public_partner').id),
             ('order_line', '!=', False)
@@ -89,17 +95,8 @@ class SaleOrder(models.Model):
 
         if line_id:
             return lines
-        linked_line_id = kwargs.get('linked_line_id', False)
-        optional_product_ids = set(kwargs.get('optional_product_ids', []))
 
-        lines = lines.filtered(lambda line: line.linked_line_id.id == linked_line_id)
-        if optional_product_ids:
-            # only match the lines with the same chosen optional products on the existing lines
-            lines = lines.filtered(lambda line: optional_product_ids == set(line.mapped('option_line_ids.product_id.id')))
-        else:
-            lines = lines.filtered(lambda line: not line.option_line_ids)
-
-        return lines
+        return self.env['sale.order.line']
 
     @api.multi
     def _website_product_id_change(self, order_id, product_id, qty=0):
@@ -146,28 +143,6 @@ class SaleOrder(models.Model):
             'price_unit': pu,
             'discount': discount,
         }
-
-    @api.multi
-    def _get_line_description(self, order_id, product_id, no_variant_attribute_values=None, custom_values=None):
-        """Deprecated, use `get_sale_order_line_multiline_description_sale`"""
-        order = self.sudo().browse(order_id)
-        product_context = dict(self.env.context)
-        product_context.setdefault('lang', order.partner_id.lang)
-        product = self.env['product.product'].with_context(product_context).browse(product_id)
-
-        name = product.display_name
-
-        if product.description_sale:
-            name += '\n%s' % (product.description_sale)
-
-        if no_variant_attribute_values:
-            name += ''.join(['\n%s: %s' % (attribute_value['attribute_name'], attribute_value['attribute_value_name'])
-                for attribute_value in no_variant_attribute_values])
-
-        if custom_values:
-            name += ''.join(['\n%s: %s' % (custom_value['attribute_value_name'], custom_value['custom_value']) for custom_value in custom_values])
-
-        return name
 
     @api.multi
     def _cart_update(self, product_id=None, line_id=None, add_qty=0, set_qty=0, **kwargs):

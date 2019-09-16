@@ -106,7 +106,7 @@ var DocumentThread = Thread.extend({
      * @param {Object} options
      * @param {boolean} [options.forceFetch] if true, fetch anyway, as user
      *   clicked on 'load more'.
-     * @returns {$.Promise<mail.model.Message[]>}
+     * @returns {Promise<mail.model.Message[]>}
      */
     fetchMessages: function (options) {
         var self = this;
@@ -196,17 +196,6 @@ var DocumentThread = Thread.extend({
         this._mustFetchMessageIDs = false;
         this._messageIDs = messageIDs;
     },
-    /**
-     * Set the name of this document thread
-     *
-     * This is useful if the name of the document related to the document thread
-     * has changed
-     *
-     * @param {string} newName
-     */
-    setName: function (newName) {
-        this._name = newName;
-    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -248,14 +237,14 @@ var DocumentThread = Thread.extend({
      * Get most up to date messageIDs
      *
      * @private
-     * @returns {$.Promise} resolved when message IDs have been fetched and set
+     * @returns {Promise} resolved when message IDs have been fetched and set
      *   in the model
      */
     _fetchMessageIDs: function () {
         var self = this;
         var resID = this.getDocumentID();
         if (!resID || !this._mustFetchMessageIDs) {
-            return $.when();
+            return Promise.resolve();
         }
         return this._rpc({
             model: this.getDocumentModel(),
@@ -270,7 +259,7 @@ var DocumentThread = Thread.extend({
      * @private
      * @param {Object} options
      * @param {boolean} [options.forceFetch]
-     * @returns {$.Promise} resolved when messages have been fetched + document
+     * @returns {Promise} resolved when messages have been fetched + document
      *   thread has updated messages
      */
     _fetchMessages: function (options) {
@@ -304,7 +293,7 @@ var DocumentThread = Thread.extend({
                         });
                     });
             } else {
-                return $.when();
+                return Promise.resolve();
             }
 
         });
@@ -315,7 +304,7 @@ var DocumentThread = Thread.extend({
      *
      * @override
      * @private
-     * @returns {$.Promise} resolved when messages have been marked as read on
+     * @returns {Promise} resolved when messages have been marked as read on
      *   the server.
      */
     _markAsRead: function () {
@@ -330,7 +319,7 @@ var DocumentThread = Thread.extend({
      * @override
      * @private
      * @param {Object} data data related to the new message
-     * @return {$.Promise<Object>} resolved when the message has been sent to
+     * @return {Promise<Object>} resolved when the message has been sent to
      *   the server, with the object message that has been sent to the server.
      */
     _postMessage: function (data) {

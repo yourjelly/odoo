@@ -18,14 +18,14 @@ class FleetVehicle(models.Model):
         return state if state and state.id else False
 
     name = fields.Char(compute="_compute_vehicle_name", store=True)
-    active = fields.Boolean('Active', default=True, track_visibility="onchange")
+    active = fields.Boolean('Active', default=True, tracking=True)
     company_id = fields.Many2one('res.company', 'Company')
-    license_plate = fields.Char(track_visibility="onchange",
+    license_plate = fields.Char(tracking=True,
         help='License plate number of the vehicle (i = plate number for a car)')
     vin_sn = fields.Char('Chassis Number', help='Unique number written on the vehicle motor (VIN/SN number)', copy=False)
-    driver_id = fields.Many2one('res.partner', 'Driver', track_visibility="onchange", help='Driver of the vehicle', copy=False, auto_join=True)
+    driver_id = fields.Many2one('res.partner', 'Driver', tracking=True, help='Driver of the vehicle', copy=False, auto_join=True)
     model_id = fields.Many2one('fleet.vehicle.model', 'Model',
-        track_visibility="onchange", required=True, help='Model of the vehicle')
+        tracking=True, required=True, help='Model of the vehicle')
     brand_id = fields.Many2one('fleet.vehicle.model.brand', 'Brand', related="model_id.brand_id", store=True, readonly=False)
     log_drivers = fields.One2many('fleet.vehicle.assignation.log', 'vehicle_id', string='Assignation Logs')
     log_fuel = fields.One2many('fleet.vehicle.log.fuel', 'vehicle_id', 'Fuel Logs')
@@ -42,7 +42,7 @@ class FleetVehicle(models.Model):
     color = fields.Char(help='Color of the vehicle')
     state_id = fields.Many2one('fleet.vehicle.state', 'State',
         default=_get_default_state, group_expand='_read_group_stage_ids',
-        track_visibility="onchange",
+        tracking=True,
         help='Current state of the vehicle', ondelete="set null")
     location = fields.Char(help='Location of the vehicle (garage, ...)')
     seats = fields.Integer('Seats Number', help='Number of seats of the vehicle')
@@ -116,13 +116,15 @@ class FleetVehicle(models.Model):
 
     @api.depends('log_contracts')
     def _compute_contract_reminder(self):
+        params = self.env['ir.config_parameter'].sudo()
+        delay_alert_contract = int(params.get_param('hr_fleet.delay_alert_contract', default=30))
         for record in self:
             overdue = False
             due_soon = False
             total = 0
             name = ''
             for element in record.log_contracts:
-                if element.state in ('open', 'expired') and element.expiration_date:
+                if element.state in ('open', 'diesoon', 'expired') and element.expiration_date:
                     current_date_str = fields.Date.context_today(record)
                     due_time_str = element.expiration_date
                     current_date = fields.Date.from_string(current_date_str)
@@ -131,13 +133,13 @@ class FleetVehicle(models.Model):
                     if diff_time < 0:
                         overdue = True
                         total += 1
-                    if diff_time < 15 and diff_time >= 0:
-                            due_soon = True
-                            total += 1
+                    if diff_time < delay_alert_contract:
+                        due_soon = True
+                        total += 1
                     if overdue or due_soon:
                         log_contract = self.env['fleet.vehicle.log.contract'].search([
                             ('vehicle_id', '=', record.id),
-                            ('state', 'in', ('open', 'expired'))
+                            ('state', 'in', ('open', 'diesoon', 'expired'))
                             ], limit=1, order='expiration_date asc')
                         if log_contract:
                             # we display only the name of the oldest overdue/due soon contract
@@ -149,6 +151,8 @@ class FleetVehicle(models.Model):
             record.contract_renewal_name = name
 
     def _search_contract_renewal_due_soon(self, operator, value):
+        params = self.env['ir.config_parameter'].sudo()
+        delay_alert_contract = int(params.get_param('hr_fleet.delay_alert_contract', default=30))
         res = []
         assert operator in ('=', '!=', '<>') and value in (True, False), 'Operation not supported'
         if (operator == '=' and value is True) or (operator in ('<>', '!=') and value is False):
@@ -157,7 +161,7 @@ class FleetVehicle(models.Model):
             search_operator = 'not in'
         today = fields.Date.context_today(self)
         datetime_today = fields.Datetime.from_string(today)
-        limit_date = fields.Datetime.to_string(datetime_today + relativedelta(days=+15))
+        limit_date = fields.Datetime.to_string(datetime_today + relativedelta(days=+delay_alert_contract))
         self.env.cr.execute("""SELECT cost.vehicle_id,
                         count(contract.id) AS contract_number
                         FROM fleet_vehicle_cost cost
@@ -165,7 +169,7 @@ class FleetVehicle(models.Model):
                         WHERE contract.expiration_date IS NOT NULL
                           AND contract.expiration_date > %s
                           AND contract.expiration_date < %s
-                          AND contract.state IN ('open', 'expired')
+                          AND contract.state IN ('open', 'diesoon', 'expired')
                         GROUP BY cost.vehicle_id""", (today, limit_date))
         res_ids = [x[0] for x in self.env.cr.fetchall()]
         res.append(('id', search_operator, res_ids))
@@ -185,7 +189,7 @@ class FleetVehicle(models.Model):
                         LEFT JOIN fleet_vehicle_log_contract contract ON contract.cost_id = cost.id
                         WHERE contract.expiration_date IS NOT NULL
                           AND contract.expiration_date < %s
-                          AND contract.state IN ('open', 'expired')
+                          AND contract.state IN ('open', 'diesoon', 'expired')
                         GROUP BY cost.vehicle_id ''', (today,))
         res_ids = [x[0] for x in self.env.cr.fetchall()]
         res.append(('id', search_operator, res_ids))
@@ -266,7 +270,7 @@ class FleetVehicle(models.Model):
     def _track_subtype(self, init_values):
         self.ensure_one()
         if 'driver_id' in init_values:
-            return 'fleet.mt_fleet_driver_updated'
+            return self.env.ref('fleet.mt_fleet_driver_updated')
         return super(FleetVehicle, self)._track_subtype(init_values)
 
     def open_assignation_logs(self):

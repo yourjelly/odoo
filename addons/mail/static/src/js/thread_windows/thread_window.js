@@ -8,6 +8,7 @@ var ExtendedComposer = require('mail.composer.Extended');
 var config = require('web.config');
 var core = require('web.core');
 
+var QWeb = core.qweb;
 var _t = core._t;
 
 /**
@@ -23,6 +24,7 @@ var ThreadWindow = AbstractThreadWindow.extend({
         'click .o_mail_thread': '_onThreadWindowFocus',
         'click .o_thread_composer': '_onThreadWindowFocus',
         'click .o_thread_window_expand': '_onClickExpand',
+        'click .o_out_of_office_read_more_less_button': '_onClickOutOfOfficeReadMoreLess',
     }),
     /**
      * Version of thread window that supports {mail.model.Thread}
@@ -57,6 +59,10 @@ var ThreadWindow = AbstractThreadWindow.extend({
 
         var superDef = this._super().then(this._listenThreadWidget.bind(this));
 
+        this.call('mail_service', 'getMailBus')
+            .on('update_typing_partners', this, this._onUpdateTypingPartners)
+            .on('update_channel', this, this._onUpdateChannel);
+
         var composerDef;
         if (!this.hasThread()) {
             this._startWithoutThread();
@@ -86,8 +92,9 @@ var ThreadWindow = AbstractThreadWindow.extend({
                 self.$input = self.$('.o_composer_text_field');
             });
         }
+        this._updateOutOfOfficeReadMoreLessButton();
 
-        return $.when(superDef, composerDef);
+        return Promise.all([superDef, composerDef]);
     },
 
     //--------------------------------------------------------------------------
@@ -138,6 +145,23 @@ var ThreadWindow = AbstractThreadWindow.extend({
      */
     removePassive: function () {
         this._passive = false;
+    },
+    renderOutOfOffice: function () {
+        var $outOfOffice = this.$('.o_out_of_office');
+        if (!this.getOutOfOfficeInfo() && !this.getOutOfOfficeMessage()) {
+            if ($outOfOffice.length) {
+                $outOfOffice.remove();
+            }
+            return;
+        }
+        var $newOutOfOffice = $(QWeb.render('mail.thread_window.OutOfOffice', {
+            widget: this,
+        }));
+        if ($outOfOffice.length) {
+            $outOfOffice.replaceWith($newOutOfOffice);
+        } else {
+            $newOutOfOffice.insertAfter(this.$('.o_thread_window_header'));
+        }
     },
     /**
      * Update this thread window
@@ -224,9 +248,10 @@ var ThreadWindow = AbstractThreadWindow.extend({
         this.$el.addClass('o_thread_less');
         this.$('.o_thread_search_input input')
             .autocomplete({
+                autoFocus: true,
                 source: function (request, response) {
                     self.call('mail_service', 'searchPartner', request.term, 10)
-                        .done(response);
+                        .then(response);
                 },
                 select: function (event, ui) {
                     // remember partner ID so that we can replace this window
@@ -237,6 +262,19 @@ var ThreadWindow = AbstractThreadWindow.extend({
                 },
             })
             .focus();
+    },
+    /**
+     * @private
+     */
+    _updateOutOfOfficeReadMoreLessButton: function () {
+        var $readMore = this.$('.o_out_of_office_text');
+        var isOverflowing = $readMore.prop('scrollWidth') > $readMore.width();
+        var isOverflowShown = !$readMore.hasClass('o_text_wrap');
+        if (isOverflowing || isOverflowShown) {
+            var $button = this.$('.o_out_of_office_read_more_less_button');
+            $button.show();
+            $button.text(isOverflowing ? _t('Read more') : _t('Read less'));
+        }
     },
 
     //--------------------------------------------------------------------------
@@ -276,6 +314,15 @@ var ThreadWindow = AbstractThreadWindow.extend({
             });
         }
     }, 1000, true),
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickOutOfOfficeReadMoreLess: function (ev) {
+        ev.preventDefault();
+        this.$('.o_out_of_office_text').toggleClass('o_text_wrap');
+        this._updateOutOfOfficeReadMoreLessButton();
+    },
     /**
      * @override
      * @private
@@ -347,7 +394,32 @@ var ThreadWindow = AbstractThreadWindow.extend({
         var message = this.call('mail_service', 'getMessage', messageID);
         message.toggleStarStatus();
     },
-
+    /**
+     * @private
+     * @param {integer|string} threadID
+     */
+    _onUpdateTypingPartners: function (threadID) {
+        if (!this.hasThread()) {
+            return;
+        }
+        if (this._thread.getID() !== threadID) {
+            return;
+        }
+        this.renderHeader();
+    },
+    /**
+     * @private
+     * @param {integer} channelID
+     */
+    _onUpdateChannel: function (channelID) {
+        if (!this.hasThread()) {
+            return;
+        }
+        if (this._thread.getID() !== channelID) {
+            return;
+        }
+        this.render();
+    },
 });
 
 return ThreadWindow;

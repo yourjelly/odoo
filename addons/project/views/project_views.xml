@@ -18,7 +18,7 @@
                <search string="Tasks">
                     <field name="name" string="Tasks"/>
                     <field name="tag_ids"/>
-                    <field name="partner_id"/>
+                    <field name="partner_id" operator="child_of"/>
                     <field name="project_id"/>
                     <field name="user_id"/>
                     <field name="stage_id"/>
@@ -27,6 +27,8 @@
                     <filter string="Unassigned" name="unassigned" domain="[('user_id', '=', False)]"/>
                     <separator/>
                     <filter string="Starred" name="starred" domain="[('priority','in',[1, 2])]"/>
+                    <separator/>
+                    <filter string="Opened" name="opened" domain="[('stage_id.fold','=',False)]"/>
                     <separator/>
                     <filter string="Unread Messages" name="message_needaction" domain="[('message_needaction','=',True)]"/>
                     <filter string="Archived" name="inactive" domain="[('active','=',False)]"/>
@@ -99,10 +101,10 @@
                             name="%(act_project_project_2_project_task_all)d" icon="fa-tasks">
                             <field string="Tasks" name="task_count" widget="statinfo" options="{'label_field': 'label_tasks'}"/>
                         </button>
-                        <button name="action_view_all_rating" type="object" attrs="{'invisible': ['|', '|', ('rating_status', '=', 'no'), ('percentage_satisfaction_task', '=', -1)]}" class="oe_stat_button oe_percent" icon="fa-smile-o" groups="project.group_project_rating">
+                        <button name="action_view_all_rating" type="object" attrs="{'invisible': ['|', '|', ('rating_status', '=', 'no'), ('rating_percentage_satisfaction', '=', -1)]}" class="oe_stat_button oe_percent" icon="fa-smile-o" groups="project.group_project_rating">
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_value">
-                                    <field name="percentage_satisfaction_task" nolabel="1"/>
+                                    <field name="rating_percentage_satisfaction" nolabel="1"/>
                                 </span>
                                 <span class="o_stat_text">
                                     % On <field readonly="1" name="label_tasks" options="{'label_field': 'label_tasks'}" />
@@ -130,28 +132,32 @@
                     <notebook>
                         <page name="settings" string="Settings">
                             <group>
-                                <field name="user_id" string="Project Manager"
+                                <group>
+                                    <field name="user_id" string="Project Manager"
                                         attrs="{'readonly':[('active','=',False)]}"/>
-                                <field name="privacy_visibility" widget="radio"/>
-                                <field name="partner_id" string="Customer"/>
-                                <label for="rating_status" groups="project.group_project_rating"/>
-                                <div groups="project.group_project_rating">
-                                    <field name="rating_status" widget="radio"/>
-                                    <p attrs="{'invisible': [('rating_status','not in',('periodic','stage'))]}" class="text-muted oe_edit_only">
-                                        Edit project's stages and set an email template on the stages on which you want to activate the rating.
-                                    </p>
-                                </div>
-                                <field name="rating_status_period"  class="oe_inline" attrs="{'required': [('rating_status','=','periodic')], 'invisible': [('rating_status','!=','periodic')]}" groups="project.group_project_rating"/>
-                                <field name="portal_show_rating" attrs="{'invisible': [('rating_status','==','no')]}" groups="project.group_project_rating"/>
-                                <field name="subtask_project_id" groups="project.group_subtask_project"/>
+                                    <field name="privacy_visibility" widget="radio"/>
+                                    <field name="partner_id" string="Customer"/>
+                                    <label for="rating_status" groups="project.group_project_rating"/>
+                                    <div groups="project.group_project_rating">
+                                        <field name="rating_status" widget="radio"/>
+                                        <p attrs="{'invisible': [('rating_status','not in',('periodic','stage'))]}" class="text-muted oe_edit_only">
+                                            Edit project's stages and set an email template on the stages on which you want to activate the rating.
+                                        </p>
+                                    </div>
+                                    <field name="rating_status_period"  class="oe_inline" attrs="{'required': [('rating_status','=','periodic')], 'invisible': [('rating_status','!=','periodic')]}" groups="project.group_project_rating"/>
+                                    <field name="portal_show_rating" attrs="{'invisible': [('rating_status','==','no')]}" groups="project.group_project_rating"/>
+                                    <field name="subtask_project_id" groups="project.group_subtask_project"/>
+                                </group>
+                                <group name="extra_settings">
+                                </group>
                             </group>
                             <group name="misc">
                                 <group string="Configuration" groups="base.group_no_one" name="configuration">
                                     <field name="sequence" groups="base.group_no_one"/>
                                     <field name="company_id" groups="base.group_multi_company"/>
                                 </group>
-                                <group string="Time Scheduling" groups="base.group_no_one">
-                                    <field name="resource_calendar_id" groups="base.group_no_one"/>
+                                <group string="Time Scheduling">
+                                    <field name="resource_calendar_id"/>
                                 </group>
                             </group>
                         </page>
@@ -292,7 +298,7 @@
                     <field name="alias_name"/>
                     <field name="alias_domain"/>
                     <field name="is_favorite"/>
-                    <field name="percentage_satisfaction_project"/>
+                    <field name="rating_percentage_satisfaction"/>
                     <field name="rating_status"/>
                     <templates>
                         <t t-name="kanban-box">
@@ -311,12 +317,12 @@
                                             </div>
                                             <div t-if="record.rating_status.raw_value != 'no'" class="mt8 text-primary" title="Percentage of happy ratings over the past 30 days. Get rating details from the More menu." groups="project.group_project_rating">
                                                 <b>
-                                                    <t t-if="record.percentage_satisfaction_project.value == -1">
+                                                    <t t-if="record.rating_percentage_satisfaction.value == -1">
                                                         <i class="fa fa-smile-o"/> No rating yet
                                                     </t>
-                                                    <t t-if="record.percentage_satisfaction_project.value != -1">
+                                                    <t t-if="record.rating_percentage_satisfaction.value != -1">
                                                         <a name="action_view_all_rating" type="object" context="{'search_default_rating_last_30_days':1}">
-                                                            <i class="fa fa-smile-o" role="img" aria-label="Percentage of satisfaction" title="Percentage of satisfaction"/> <t t-esc="record.percentage_satisfaction_project.value"/>%
+                                                            <i class="fa fa-smile-o" role="img" aria-label="Percentage of satisfaction" title="Percentage of satisfaction"/> <t t-esc="record.rating_percentage_satisfaction.value"/>%
                                                         </a>
                                                     </t>
                                                 </b>
@@ -413,7 +419,6 @@
                     <header>
                         <button name="action_assign_to_me" string="Assign to Me" type="object" class="oe_highlight"
                             attrs="{'invisible' : [('user_id', '!=', False)]}"/>
-                        <button name="%(portal.portal_share_action)d" string="Share" type="action" class="oe_highlight oe_read_only"/>
                         <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}"/>
                     </header>
                     <sheet string="Task">
@@ -442,7 +447,7 @@
                     </div>
                     <group>
                         <group>
-                            <field name="project_id" domain="[('active', '=', True)]"/>
+                            <field name="project_id" domain="[('active', '=', True)]" options="{'no_create': True}"/>
                             <field name="user_id"
                                 class="o_task_user_field"
                                 options='{"no_open": True}'/>
@@ -465,7 +470,7 @@
                                 <group>
                                     <field name="sequence" groups="base.group_no_one"/>
                                     <field name="partner_id" attrs="{'readonly': [('parent_id', '!=', False)]}"/>
-                                    <field name="email_from" attrs="{'readonly': [('parent_id', '!=', False)]}"/>
+                                    <field name="email_from" attrs="{'readonly': [('parent_id', '!=', False)]}" groups="base.group_no_one"/>
                                     <field name="email_cc" groups="base.group_no_one"/>
                                     <field name="parent_id" attrs="{'invisible' : [('subtask_count', '>', 0)]}" groups="project.group_subtask_project"/>
                                     <field name="child_ids" invisible="1" />
@@ -498,6 +503,16 @@
             </field>
         </record>
 
+        <act_window
+            id="portal_share_action"
+            name="Share"
+            res_model="portal.share"
+            src_model="project.task"
+            view_type="form"
+            view_mode="form"
+            target="new"
+        />
+
         <record id="quick_create_task_form" model="ir.ui.view">
             <field name="name">project.task.form.quick_create</field>
             <field name="model">project.task</field>
@@ -520,7 +535,7 @@
                 <kanban default_group_by="stage_id" class="o_kanban_small_column o_kanban_project_tasks" on_create="quick_create" quick_create_view="project.quick_create_task_form" examples="project">
                     <field name="color"/>
                     <field name="priority"/>
-                    <field name="stage_id" options='{"group_by_tooltip": {"description": "Stage Description", "legend_priority": "Use of stars"}}'/>
+                    <field name="stage_id" options='{"group_by_tooltip": {"legend_priority": "Use of stars"}}'/>
                     <field name="user_id"/>
                     <field name="sequence"/>
                     <field name="date_deadline"/>
@@ -862,17 +877,21 @@
                 </search>
             </field>
         </record>
+
         <record model="ir.ui.view" id="project_tags_form_view">
             <field name="name">Tags</field>
             <field name="model">project.tags</field>
             <field name="arch" type="xml">
                 <form string="Tags">
-                    <group>
-                        <field name="name"/>
-                    </group>
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                        </group>
+                    </sheet>
                 </form>
             </field>
         </record>
+
         <record id="project_tags_action" model="ir.actions.act_window">
             <field name="name">Tags</field>
             <field name="res_model">project.tags</field>

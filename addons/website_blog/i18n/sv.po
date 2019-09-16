@@ -3,22 +3,21 @@
 # * website_blog
 # 
 # Translators:
-# Kristoffer Grundström <hamnisdude@gmail.com>, 2019
+# Kristoffer Grundström <hamnisdude@gmail.com>, 2018
+# lasch a <bmail440@gmail.com>, 2018
+# Martin Wilderoth <martin.wilderoth@linserv.se>, 2018
+# Robert Frykelius <robert.frykelius@linserv.se>, 2018
 # Martin Trigaux, 2019
-# lasch a <bmail440@gmail.com>, 2019
-# Martin Wilderoth <martin.wilderoth@linserv.se>, 2019
-# Robert Frykelius <robert.frykelius@linserv.se>, 2019
-# Chrille Hedberg <hedberg.chrille@gmail.com>, 2019
 # Christelle Wehbe <libanon_cristelle@hotmail.com>, 2019
 # Kim Asplund <kim.asplund@gmail.com>, 2019
 # Anders Wallenquist <anders.wallenquist@vertel.se>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server saas~12.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-09 10:32+0000\n"
-"PO-Revision-Date: 2018-08-24 09:33+0000\n"
+"POT-Creation-Date: 2019-03-20 13:51+0000\n"
+"PO-Revision-Date: 2016-08-05 13:11+0000\n"
 "Last-Translator: Anders Wallenquist <anders.wallenquist@vertel.se>, 2019\n"
 "Language-Team: Swedish (https://www.transifex.com/odoo/teams/41243/sv/)\n"
 "MIME-Version: 1.0\n"
@@ -311,7 +310,7 @@ msgstr "Antal bilagor"
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__author_id
 #: model_terms:ir.ui.view,arch_db:website_blog.view_blog_post_search
 msgid "Author"
-msgstr "Författare"
+msgstr "Upphovsman"
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__author_avatar
@@ -415,6 +414,11 @@ msgstr "Blå"
 #: model:blog.post,subtitle:website_blog.blog_post_2
 msgid "Building your company's website and selling your products online easy."
 msgstr "Bygga ditt företags hemsida och sälja dina produkter online enkelt."
+
+#. module: website_blog
+#: model:ir.model.fields,field_description:website_blog.field_blog_post__can_publish
+msgid "Can publish"
+msgstr ""
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag__category_id
@@ -621,7 +625,7 @@ msgstr "Grön"
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.view_blog_post_search
 msgid "Group By"
-msgstr "Gruppera efter"
+msgstr "Gruppera på"
 
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_1

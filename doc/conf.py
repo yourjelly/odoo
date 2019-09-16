@@ -9,7 +9,7 @@ DIR = os.path.dirname(__file__)
 sys.path.insert(0,
     os.path.abspath(
         os.path.join(DIR, '_extensions')))
-# autodoc
+# put current odoo's source on PYTHONPATH for autodoc
 sys.path.insert(0, os.path.abspath(os.path.join(DIR, '..')))
 
 # -- General configuration -----------------------------------------------------

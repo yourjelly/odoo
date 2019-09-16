@@ -1,27 +1,21 @@
 odoo.define('website_sale_delivery.tour', function (require) {
 'use strict';
 
-var base = require('web_editor.base');
 var tour = require("web_tour.tour");
 
 tour.register('check_free_delivery', {
         test: true,
-        url: '/shop?search=conference chair',
-        wait_for: base.ready(),
+        url: '/shop?search=office chair black',
 },
     [
+        // Part 1: Check free delivery
         {
-            content: "select conference chair",
-            trigger: '.oe_product_cart:first a:contains("Conference Chair")',
+            content: "select office chair black",
+            trigger: '.oe_product_cart:first a:contains("Office Chair Black")',
         },
         {
             content: "click on add to cart",
-            extra_trigger: 'label:contains(Steel) input:propChecked',
-            trigger: '#product_detail form[action^="/shop/cart/update"] .btn-primary',
-        },
-        {
-            content: "click in modal on 'Proceed to checkout' button",
-            trigger: 'button:contains("Proceed to Checkout")',
+            trigger: '#product_details #add_to_cart',
         },
         {
             content: "go to checkout",
@@ -30,7 +24,24 @@ tour.register('check_free_delivery', {
         },
         {
             content: "Check Free Delivery value to be zero",
+            extra_trigger: '#delivery_carrier label:containsExact("Delivery Now Free Over 10")',
             trigger: "#delivery_carrier span:contains('0.0')"
         },
+        // Part 2: check multiple delivery & price loaded asynchronously
+        {
+            content: "Ensure price was loaded asynchronously",
+            extra_trigger: '#delivery_carrier input[name="delivery_type"]:checked',
+            trigger: '#delivery_method .o_delivery_carrier_select:contains("20.0"):contains("The Poste")',
+            run: function () {}, // it's a check
+        },
+        {
+            content: "Click on Pay Now",
+            trigger: 'button[id="o_payment_form_pay"]:visible:not(:disabled)',
+        },
+        {
+            content: "Confirmation page should be shown",
+            trigger: '#oe_structure_website_sale_confirmation_1',
+            run: function () {}, // it's a check
+        }
     ]);
 });

@@ -68,32 +68,6 @@ var ScreenWidget = PosBaseWidget.extend({
             this.barcode_error_action(code);
         }
     },
-
-    // what happens when a cashier id barcode is scanned.
-    // the default behavior is the following : 
-    // - if there's a user with a matching barcode, put it as the active 'cashier', go to cashier mode, and return true
-    // - else : do nothing and return false. You probably want to extend this to show and appropriate error popup... 
-    barcode_cashier_action: function(code){
-        var self = this;
-        var users = this.pos.users;
-        for(var i = 0, len = users.length; i < len; i++){
-            if(users[i].barcode === code.code){
-                if (users[i].id !== this.pos.get_cashier().id && users[i].pos_security_pin) {
-                    return this.gui.ask_password(users[i].pos_security_pin).then(function(){
-                        self.pos.set_cashier(users[i]);
-                        self.chrome.widget.username.renderElement();
-                        return true;
-                    });
-                } else {
-                    this.pos.set_cashier(users[i]);
-                    this.chrome.widget.username.renderElement();
-                    return true;
-                }
-            }
-        }
-        this.barcode_error_action(code);
-        return false;
-    },
     
     // what happens when a client id barcode is scanned.
     // the default behavior is the following : 
@@ -142,7 +116,6 @@ var ScreenWidget = PosBaseWidget.extend({
         }
 
         this.pos.barcode_reader.set_action_callback({
-            'cashier': _.bind(self.barcode_cashier_action, self),
             'product': _.bind(self.barcode_product_action, self),
             'weight': _.bind(self.barcode_product_action, self),
             'price': _.bind(self.barcode_product_action, self),
@@ -1082,6 +1055,7 @@ var ProductScreenWidget = ScreenWidget.extend({
         if (_.size(this.action_buttons)) {
             this.$('.control-buttons').removeClass('oe_hidden');
         }
+        this._onKeypadKeyDown = this._onKeypadKeyDown.bind(this);
     },
 
     click_product: function(product) {
@@ -1101,12 +1075,41 @@ var ProductScreenWidget = ScreenWidget.extend({
         if (this.pos.config.iface_vkeyboard && this.chrome.widget.keyboard) {
             this.chrome.widget.keyboard.connect($(this.el.querySelector('.searchbox input')));
         }
+        $(document).on('keydown.productscreen', this._onKeypadKeyDown);
     },
-
     close: function(){
         this._super();
         if(this.pos.config.iface_vkeyboard && this.chrome.widget.keyboard){
             this.chrome.widget.keyboard.hide();
+        }
+        $(document).off('keydown.productscreen', this._onKeypadKeyDown);
+    },
+
+    _onKeypadKeyDown: function (ev) {
+        //prevent input and textarea keydown event
+        if(!_.contains(["INPUT", "TEXTAREA"], $(ev.target).prop('tagName'))) {
+            if ((ev.key >= "0" && ev.key <= "9") || ev.key === "."){
+                this.numpad.state.appendNewChar(ev.key)
+            }
+            else {
+                switch (ev.key){
+                    case "Backspace":
+                        this.numpad.state.deleteLastChar();
+                        break;
+                    case "Delete":
+                        this.numpad.state.resetValue();
+                        break;
+                    case ",":
+                        this.numpad.state.appendNewChar(".");
+                        break;
+                    case "+":
+                        this.numpad.state.positiveSign();
+                        break;
+                    case "-":
+                        this.numpad.state.negativeSign();
+                        break;
+                }
+            }
         }
     },
 });
@@ -1162,7 +1165,7 @@ var ClientListScreenWidget = ScreenWidget.extend({
             this.display_client_details('show',this.old_client,0);
         }
 
-        this.$('.client-list-contents').delegate('.client-line','click',function(event){
+        this.$('.client-list-contents').on('click', '.client-line', function(event){
             self.line_select(event,$(this),parseInt($(this).data('id')));
         });
 
@@ -1372,11 +1375,16 @@ var ClientListScreenWidget = ScreenWidget.extend({
                 contents.on('click','.button.save',function(){ self.save_client_details(partner); });
             });
     },
-    
+
     // what happens when we've just pushed modifications for a partner of id partner_id
-    saved_client_details: function(partner_id){
+    saved_client_details: function (partner_id) {
         var self = this;
-        return this.reload_partners().then(function(){
+        var always = function () {
+            $(".client-details-contents").on('click', '.button.save', function () {
+                self.save_client_details(partner);
+            });
+        };
+        return this.reload_partners().then( function() {
             var partner = self.pos.db.get_partner_by_id(partner_id);
             if (partner) {
                 self.new_client = partner;
@@ -1384,12 +1392,10 @@ var ClientListScreenWidget = ScreenWidget.extend({
                 self.display_client_details('show',partner);
             } else {
                 // should never happen, because create_from_ui must return the id of the partner it
-                // has created, and reload_partner() must have loaded the newly created partner. 
+                // has created, and reload_partner() must have loaded the newly created partner.
                 self.display_client_details('hide');
             }
-        }).always(function(){
-            $(".client-details-contents").on('click','.button.save',function(){ self.save_client_details(partner); });
-        });
+        }).then(always, always);
     },
 
     // resizes an image, keeping the aspect ratio intact,
@@ -1717,9 +1723,9 @@ var ReceiptScreenWidget = ScreenWidget.extend({
             var invoiced = self.pos.push_and_invoice_order(order);
             self.invoicing = true;
 
-            invoiced.fail(self._handleFailedPushForInvoice.bind(self, order, true)); // refresh
+            invoiced.catch(self._handleFailedPushForInvoice.bind(self, order, true)); // refresh
 
-            invoiced.done(function(){
+            invoiced.then(function(){
                 self.invoicing = false;
                 self.gui.show_screen('receipt', {button_print_invoice: false}, true); // refresh
             });
@@ -2161,9 +2167,9 @@ var PaymentScreenWidget = ScreenWidget.extend({
             var invoiced = this.pos.push_and_invoice_order(order);
             this.invoicing = true;
 
-            invoiced.fail(this._handleFailedPushForInvoice.bind(this, order, false));
+            invoiced.catch(this._handleFailedPushForInvoice.bind(this, order, false));
 
-            invoiced.done(function(){
+            invoiced.then(function () {
                 self.invoicing = false;
                 self.gui.show_screen('receipt');
             });
@@ -2212,7 +2218,7 @@ var set_fiscal_position_button = ActionButtonWidget.extend({
 
         var selection_list = no_fiscal_position.concat(fiscal_positions);
         self.gui.show_popup('selection',{
-            title: _t('Select tax'),
+            title: _t('Select Fiscal Position'),
             list: selection_list,
             confirm: function (fiscal_position) {
                 var order = self.pos.get_order();
@@ -2307,7 +2313,7 @@ define_action_button({
     'name': 'set_pricelist',
     'widget': set_pricelist_button,
     'condition': function(){
-        return this.pos.pricelists.length > 1;
+        return this.pos.config.use_pricelist && this.pos.pricelists.length > 1;
     },
 });
 

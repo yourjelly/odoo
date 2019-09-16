@@ -3,16 +3,16 @@
 # * mail_bot
 # 
 # Translators:
-# Martin Trigaux, 2018
 # Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019
+# Martin Trigaux, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~11.5\n"
+"Project-Id-Version: Odoo Server saas~12.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-02 10:05+0000\n"
-"PO-Revision-Date: 2018-08-24 09:20+0000\n"
-"Last-Translator: Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019\n"
+"POT-Creation-Date: 2019-03-20 13:49+0000\n"
+"PO-Revision-Date: 2019-03-20 14:57+0000\n"
+"Last-Translator: Martin Trigaux, 2019\n"
 "Language-Team: Ukrainian (https://www.transifex.com/odoo/teams/41243/uk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -42,7 +42,7 @@ msgstr "Відключено"
 
 #. module: mail_bot
 #: model:ir.model,name:mail_bot.model_mail_channel
-msgid "Discussion Channel"
+msgid "Discussion channel"
 msgstr "Канал обговорення"
 
 #. module: mail_bot
@@ -53,11 +53,11 @@ msgstr "Назва для відображення"
 #. module: mail_bot
 #: model:ir.model,name:mail_bot.model_mail_thread
 msgid "Email Thread"
-msgstr "Ланцюжки повідомлень"
+msgstr "Тема електронної пошти"
 
 #. module: mail_bot
 #. openerp-web
-#: code:addons/mail_bot/static/src/js/mailbot_service.js:42
+#: code:addons/mail_bot/static/src/js/mailbot_service.js:45
 #, python-format
 msgid "Enable desktop notifications to chat"
 msgstr "Увімкнути сповіщення на робочому столі в чаті"
@@ -70,7 +70,7 @@ msgid ""
 "cute dog..."
 msgstr ""
 "Чудово! 👍<br/>Тепер спробуйте <b>надіслати прикріплення</b>, наприклад, "
-"зображення вашо милої собаки..."
+"зображення вашої милої собаки..."
 
 #. module: mail_bot
 #: model:ir.model,name:mail_bot.model_ir_http
@@ -78,7 +78,7 @@ msgid "HTTP Routing"
 msgstr "Маршрутизація HTTP"
 
 #. module: mail_bot
-#: code:addons/mail_bot/models/mail_channel.py:38
+#: code:addons/mail_bot/models/mail_channel.py:26
 #, python-format
 msgid ""
 "Hello,<br/>Odoo's chat helps employees collaborate efficiently. I'm here to "
@@ -119,7 +119,7 @@ msgid ""
 "I'm not smart enough to answer your question.<br/>To follow my guide, ask"
 msgstr ""
 "Я не на стільки розумний, щоби відповісти на ваше запитання.<br/>Щоби "
-"слідувати за моїм керівництвом, запитайте"
+"слідкувати за моїм керівництвом, запитайте"
 
 #. module: mail_bot
 #: model:ir.model.fields,field_description:mail_bot.field_mail_bot__id
@@ -134,7 +134,7 @@ msgstr "Не задіяний"
 #. module: mail_bot
 #: model:ir.model.fields,field_description:mail_bot.field_mail_bot____last_update
 msgid "Last Modified on"
-msgstr "Остання модифікація"
+msgstr "Останні зміни на"
 
 #. module: mail_bot
 #: model:ir.model,name:mail_bot.model_mail_bot
@@ -174,21 +174,12 @@ msgid ""
 "Not sure wat you are doing. Please press / and wait for the propositions. "
 "Select \"help\" and press enter"
 msgstr ""
-"Не впевнений, що ви робите. Натисніть / і чекайте пропозицій. Виберіть "
-"\"допомога\" і натисніть клавішу enter"
+"Не впевнений у тому, що ви робите. Натисніть / і чекайте пропозицій. "
+"Виберіть \"допомога\" і натисніть клавішу enter"
 
 #. module: mail_bot
 #. openerp-web
-#: code:addons/mail_bot/static/src/js/systray_messaging_menu.js:64
-#, python-format
-msgid ""
-"Odoo has now the permission to send you native notifications on this device."
-msgstr ""
-"Тепер в Odoo є дозвіл надсилати вам рідні сповіщення на цьому пристрої."
-
-#. module: mail_bot
-#. openerp-web
-#: code:addons/mail_bot/static/src/js/systray_messaging_menu.js:61
+#: code:addons/mail_bot/static/src/js/systray_messaging_menu.js:62
 #, python-format
 msgid ""
 "Odoo will not have the permission to send native notifications on this "
@@ -202,7 +193,7 @@ msgstr "Статус OdooBot "
 
 #. module: mail_bot
 #. openerp-web
-#: code:addons/mail_bot/static/src/js/mailbot_service.js:39
+#: code:addons/mail_bot/static/src/js/mailbot_service.js:42
 #, python-format
 msgid "OdooBot has a request"
 msgstr "OdooBot має запит"
@@ -210,12 +201,12 @@ msgstr "OdooBot має запит"
 #. module: mail_bot
 #: selection:res.users,odoobot_state:0
 msgid "Onboarding attachement"
-msgstr "Долучене прикріплення"
+msgstr "Вхідне прикріплення"
 
 #. module: mail_bot
 #: selection:res.users,odoobot_state:0
 msgid "Onboarding canned"
-msgstr "Долучено атоматично"
+msgstr "Вхідні автоматичні"
 
 #. module: mail_bot
 #: selection:res.users,odoobot_state:0
@@ -234,7 +225,7 @@ msgstr "Вбудовані ping"
 
 #. module: mail_bot
 #. openerp-web
-#: code:addons/mail_bot/static/src/js/systray_messaging_menu.js:60
+#: code:addons/mail_bot/static/src/js/systray_messaging_menu.js:61
 #, python-format
 msgid "Permission denied"
 msgstr "Дозвіл відхилено"
@@ -299,15 +290,8 @@ msgid ""
 "Wow you are a natural!<br/>Ping someone to grab its attention with "
 "@nameoftheuser. <b>Try to ping me using @OdooBot</b> in a sentence."
 msgstr ""
-"Вау, ви природні!<br/>Приверніть чиюсь увагу з @nameoftheuser. <b>Спробуйте "
+"Вау, ви справжні!<br/>Приверніть чиюсь увагу з @nameoftheuser. <b>Спробуйте "
 "покликати мене, використовуючи @OdooBot</b> у реченні."
-
-#. module: mail_bot
-#. openerp-web
-#: code:addons/mail_bot/static/src/js/systray_messaging_menu.js:63
-#, python-format
-msgid "Yay, push notifications are enabled!"
-msgstr "Так, push-сповіщення ввімкнено!"
 
 #. module: mail_bot
 #: code:addons/mail_bot/models/mail_bot.py:51
@@ -341,13 +325,13 @@ msgstr "допомога"
 #: code:addons/mail_bot/models/mail_bot.py:56
 #, python-format
 msgid "i love you"
-msgstr "я люблю тебе"
+msgstr "ти мені подобаєшся"
 
 #. module: mail_bot
 #: code:addons/mail_bot/models/mail_bot.py:56
 #, python-format
 msgid "love"
-msgstr "люблю"
+msgstr "подобається"
 
 #. module: mail_bot
 #: code:addons/mail_bot/models/mail_bot.py:52

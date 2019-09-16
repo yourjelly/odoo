@@ -1,26 +1,20 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # * iap
-# 
-# Translators:
-# Matjaz Mozetic <m.mozetic@matmoz.si>, 2019
-# Vida Potočnik <vida.potocnik@mentis.si>, 2019
-# laznikd <laznik@mentis.si>, 2019
-# matjaz k <matjaz@mentis.si>, 2019
-# 
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-08 13:34+0000\n"
-"PO-Revision-Date: 2018-08-24 09:19+0000\n"
-"Last-Translator: matjaz k <matjaz@mentis.si>, 2019\n"
+"POT-Creation-Date: 2019-06-12 12:24+0000\n"
+"PO-Revision-Date: 2017-10-10 11:35+0000\n"
 "Language-Team: Slovenian (https://www.transifex.com/odoo/teams/41243/sl/)\n"
+"Language: sl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: sl\n"
-"Plural-Forms: nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n"
+"%100==4 ? 2 : 3);\n"
 
 #. module: iap
 #: model_terms:ir.ui.view,arch_db:iap.iap_account_view_form
@@ -34,16 +28,16 @@ msgstr ""
 
 #. module: iap
 #. openerp-web
-#: code:addons/iap/static/src/js/crash_manager.js:23
+#: code:addons/iap/static/src/xml/iap_templates.xml:39
 #, python-format
-msgid "Buy credits at Odoo"
+msgid "Buy credits"
 msgstr ""
 
 #. module: iap
 #. openerp-web
-#: code:addons/iap/static/src/xml/iap_templates.xml:41
+#: code:addons/iap/static/src/js/crash_manager.js:23
 #, python-format
-msgid "Buy more credits"
+msgid "Buy credits at Odoo"
 msgstr ""
 
 #. module: iap
@@ -52,13 +46,6 @@ msgstr ""
 #, python-format
 msgid "Cancel"
 msgstr "Prekliči"
-
-#. module: iap
-#. openerp-web
-#: code:addons/iap/static/src/xml/iap_templates.xml:28
-#, python-format
-msgid "Checking remaining credit ..."
-msgstr ""
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__company_id
@@ -79,6 +66,13 @@ msgstr "Ustvarjeno"
 #: model:ir.model.fields,field_description:iap.field_iap_account__display_name
 msgid "Display Name"
 msgstr "Prikazni naziv"
+
+#. module: iap
+#. openerp-web
+#: code:addons/iap/static/src/xml/iap_templates.xml:32
+#, python-format
+msgid "Go to My Portal"
+msgstr ""
 
 #. module: iap
 #: model:ir.ui.menu,name:iap.iap_root_menu
@@ -105,7 +99,7 @@ msgstr "ID"
 
 #. module: iap
 #. openerp-web
-#: code:addons/iap/static/src/xml/iap_templates.xml:21
+#: code:addons/iap/static/src/xml/iap_templates.xml:28
 #, python-format
 msgid "In-App Purchases"
 msgstr ""
@@ -115,13 +109,6 @@ msgstr ""
 #: code:addons/iap/static/src/js/crash_manager.js:51
 #, python-format
 msgid "Insufficient Balance"
-msgstr ""
-
-#. module: iap
-#. openerp-web
-#: code:addons/iap/static/src/xml/iap_templates.xml:31
-#, python-format
-msgid "Insufficient credit"
 msgstr ""
 
 #. module: iap
@@ -147,13 +134,6 @@ msgid "Last Updated on"
 msgstr "Zadnjič posodobljeno"
 
 #. module: iap
-#. openerp-web
-#: code:addons/iap/static/src/xml/iap_templates.xml:34
-#, python-format
-msgid "Remaining :"
-msgstr ""
-
-#. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__service_name
 msgid "Service Name"
 msgstr ""
@@ -163,26 +143,4 @@ msgstr ""
 #: code:addons/iap/static/src/js/crash_manager.js:23
 #, python-format
 msgid "Start a Trial at Odoo"
-msgstr ""
-
-#. module: iap
-#. openerp-web
-#: code:addons/iap/static/src/xml/iap_templates.xml:37
-#, python-format
-msgid "Temporarily unavailable"
-msgstr ""
-
-#. module: iap
-#: code:addons/iap/models/iap.py:72
-#, python-format
-msgid ""
-"The url that this service requested returned an error. Please contact the "
-"author the app. The url it tried to contact was %s"
-msgstr ""
-
-#. module: iap
-#. openerp-web
-#: code:addons/iap/static/src/xml/iap_templates.xml:34
-#, python-format
-msgid "credits"
 msgstr ""

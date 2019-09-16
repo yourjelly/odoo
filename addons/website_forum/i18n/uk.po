@@ -5,19 +5,19 @@
 # Translators:
 # Yaroslav Molochko <onorua@gmail.com>, 2018
 # Zoriana Zaiats, 2018
-# Bohdan Lisnenko, 2018
-# ТАрас <tratatuta@i.ua>, 2018
 # zhanna shewchuk <zhanna_shewchuk@rambler.ru>, 2018
-# Martin Trigaux, 2018
-# Oleg Pikarevskyi <o@btegri.co>, 2018
+# ТАрас <tratatuta@i.ua>, 2019
+# Oleg Pikarevskyi <o@btegri.co>, 2019
+# Martin Trigaux, 2019
+# Bohdan Lisnenko, 2019
 # Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server saas~12.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-29 10:10+0000\n"
-"PO-Revision-Date: 2018-08-24 09:34+0000\n"
+"POT-Creation-Date: 2019-03-20 13:51+0000\n"
+"PO-Revision-Date: 2016-08-05 13:12+0000\n"
 "Last-Translator: Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019\n"
 "Language-Team: Ukrainian (https://www.transifex.com/odoo/teams/41243/uk/)\n"
 "MIME-Version: 1.0\n"
@@ -27,39 +27,9 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
 
 #. module: website_forum
-#. openerp-web
-#: code:addons/website_forum/static/src/js/website_forum.js:24
-#, python-format
-msgid ""
-" karma is required to perform this action. You can earn karma by having your"
-" answers upvoted by the community."
-msgstr ""
-"карма потрібна для виконання цієї дії. Ви можете заробити карму, отримавши "
-"вашу відповідь від спільноти."
-
-#. module: website_forum
-#: model:mail.template,subject:website_forum.validation_email
-msgid "${object.company_id.name} Forums validation"
-msgstr "${object.company_id.name} перевірка форумів"
-
-#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.tag
-msgid ""
-"&amp;nbsp;&amp;nbsp;<i class=\"fa fa-times\" title=\"Close\" role=\"img\" "
-"aria-label=\"Close\"/>&amp;nbsp;&amp;nbsp;"
-msgstr ""
-"&amp;nbsp;&amp;nbsp;<i class=\"fa fa-times\" title=\"Close\" role=\"img\" "
-"aria-label=\"Close\"/>&amp;nbsp;&amp;nbsp;"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
-msgid "&amp;times;"
-msgstr "&amp;times;"
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid "(The above section was adapted from Stackoverflow’s FAQ.)"
-msgstr "(Наведений вище розділ було адаптовано з FAQ Stackoverflow.)"
+msgid "&amp;nbsp;"
+msgstr "&amp;nbsp;"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.view_forum_forum_form
@@ -91,14 +61,14 @@ msgstr "/ (дні + 2) **"
 
 #. module: website_forum
 #. openerp-web
-#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:29
+#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:45
 #, python-format
 msgid "45% of questions shared"
 msgstr "45% спільних питань "
 
 #. module: website_forum
 #. openerp-web
-#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:30
+#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:46
 #, python-format
 msgid ""
 "65% more chance to get an\n"
@@ -127,143 +97,19 @@ msgid "<b> [Offensive]</b>"
 msgstr "<b> [Образливо]</b>"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.users
-msgid "<b> badges:</b>"
-msgstr "<b> значки:</b>"
+#: model_terms:ir.ui.view,arch_db:website_forum.header
+msgid "<b>About This Community</b>"
+msgstr "<b>Про цю спільноту</b>"
 
 #. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid ""
-"<b>Answers should not add or expand questions</b>. Instead\n"
-"    either edit the question or add a comment."
-msgstr ""
-"<b>Відповіді не повинні додавати або розгортати питання</b>. Замість цього\n"
-"будь-ласка, відредагуйте питання або додайте коментар."
+#: model_terms:ir.ui.view,arch_db:website_forum.header
+msgid "<b>Keep Informed</b>"
+msgstr "<b>Продовжити інформувати</b>"
 
 #. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid ""
-"<b>Answers should not add or expand questions</b>. Instead either edit the "
-"question or add a question comment."
-msgstr ""
-"<b>Відповіді не повинні додавати або розгортати питання</b>. Замість цього "
-"відредагуйте питання або додайте коментар до питання."
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid ""
-"<b>Answers should not comment other answers</b>. Instead\n"
-"    add a comment on the other answers."
-msgstr ""
-"<b>Відповіді не повинні коментувати інші відповіді</b>. Замість цього\n"
-"    додайте коментар на інші відповіді."
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid ""
-"<b>Answers should not comment other answers</b>. Instead add a comment on "
-"the other answers."
-msgstr ""
-"<b>Відповіді не повинні коментувати інші відповіді</b>. Замість цього "
-"додайте коментар на інші відповіді. "
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid ""
-"<b>Answers should not start debates</b>\n"
-"    This community Q&amp;A is not a discussion group. Please avoid holding debates in\n"
-"    your answers as they tend to dilute the essence of questions and answers. For\n"
-"    brief discussions please use commenting facility."
-msgstr ""
-"<b>Відповідь не повинна починати дебати</b>\n"
-"    Ця спільнота запитань та відповідей не є дискусійною групою. Будь ласка, уникайте проведення дебатів у\n"
-"ваших відповідях, оскільки вони, як правило, розбавляють суть питань та відповідей. Для\n"
-"коротких розмов, будь-ласка, використовуйте коментарі."
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid ""
-"<b>Answers shouldn't just point to other Questions</b>. Instead add a "
-"question comment indication \"Possible duplicate of...\". However, it's ok "
-"to include links to other questions or answers providing relevant additional"
-" information."
-msgstr ""
-"<b>Відповіді не повинні вказувати на інші питання</b>. Замість цього додайте"
-" запитання коментар \"Можливі копії...\". Однак, добре включити посилання на"
-" інші питання або відповіді, що надають відповідну додаткову інформацію."
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid ""
-"<b>Answers shouldn't just point to other questions</b>.\n"
-"    Instead add a comment indicating <i>\"Possible duplicate\n"
-"    of...\"</i>. However, it's fine to include links to other\n"
-"    questions or answers providing relevant additional\n"
-"    information."
-msgstr ""
-"<b>Відповіді не повинні вказувати на інші питання</b>.\n"
-"   Замість цього додайте коментар із зазначенням <i>\"Можливий дублікат...\"</i>. \n"
-"Однак, добре включити посилання на інші\n"
-"питання або відповіді, що надають відповідну додаткову\n"
-"інформацію."
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid ""
-"<b>Answers shouldn't just provide a\n"
-"    link a solution</b>. Instead provide the solution\n"
-"    description text in your answer, even if it's just a\n"
-"    copy/paste. Links are welcome, but should be complementary to\n"
-"    answer, referring sources or additional reading."
-msgstr ""
-"<b>Відповіді повинні не тільки забезпечувати\n"
-"пов'язане рішення</b>. Замість цього надайте опис тексту рішення\n"
-"у вашій відповіді, навіть якщо це просто \n"
-"копі-паст. Посилання вітається, але воно повинне доповнюватися\n"
-"відповіддю, посилання на джерела або додаткове читання."
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid ""
-"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the"
-" solution description text in your answer, even if it's just a copy/paste. "
-"Links are welcome, but should be complementary to answer, referring sources "
-"or additional reading."
-msgstr ""
-"<b>Відповіді повинні не тільки забезпечувати посилання на рішення</b>. "
-"Замість цього надайте текст опису рішення у відповідь, навіть якщо це просто"
-" копі-паст. Посилання є прийнятними, але воно повинне бути додатковим до "
-"відповіді, посилання на джерела або додаткове читання."
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid ""
-"<b>Before you ask - please make sure to search for a similar question.</b> You can\n"
-"    search questions by their title or tags.  It’s also OK to\n"
-"    answer your own question."
-msgstr ""
-"<b>Перш ніж запитати - будь ласка, обов'язково знайдіть подібне питання.</b> Ви можете\n"
-"    шукати запитання за тегами заголовків.  Це також прийнятно\n"
-"    відповідати на власне запитання."
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_badges
-msgid "<b>No badge yet!</b><br/>"
-msgstr "<b>Ще немає значків!</b><br/>"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_votes
-msgid "<b>No vote given by you yet!</b>"
-msgstr "<b>Ви ще не дали жодного голосу!</b>"
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid ""
-"<b>Please avoid asking questions that are too subjective\n"
-"    and argumentative</b> or not relevant to this community."
-msgstr ""
-"<b>Будь ласка, уникайте задавання питання, які є надто суб'єктивними\n"
-"і аргументаційними</b> або які не стосується цієї спільноти."
+#: model_terms:ir.ui.view,arch_db:website_forum.header
+msgid "<b>Moderation Tools</b>"
+msgstr "<b>Інструменти модерації</b>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_answer
@@ -279,9 +125,18 @@ msgstr ""
 "        - це справді допоможе обрати найкращі запитання та відповіді!"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.new_discussion
-msgid "<b>Share</b> Something Awesome."
-msgstr "<b>Поділитися</b> Щось неймовірне."
+#: model_terms:ir.ui.view,arch_db:website_forum.faq
+msgid ""
+"<b>Why can other people edit my questions/answers?</b> <i class=\"fa fa-"
+"caret-down float-right\"/>"
+msgstr ""
+"<b>Чому інші люди можуть редагувати мої запитання/відповіді?</b> <i "
+"class=\"fa fa-caret-down float-right\"/>"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.header
+msgid "<b>Writer</b>"
+msgstr "<b>Автор</b>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_display_post_answer
@@ -292,28 +147,172 @@ msgstr "<b>[Відповідь]</b>"
 #: model_terms:ir.ui.view,arch_db:website_forum.contact
 msgid ""
 "<b>|</b>\n"
-"                    <span class=\"fa fa-circle badge-gold\" role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
+"                    <span class=\"fa fa-trophy badge-gold ml-2\" role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
 msgstr ""
 "<b>|</b>\n"
-"                    <span class=\"fa fa-circle badge-gold\" role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
+"                    <span class=\"fa fa-trophy badge-gold ml-2\" role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
-msgid "<i class=\"fa fa-arrow-right\"/> Back to"
-msgstr "<i class=\"fa fa-arrow-right\"/> Повернутися до"
+#: model:forum.forum,faq:website_forum.forum_help
+msgid ""
+"<h1 class=\"o_page_header\">Guidelines</h1>\n"
+"\n"
+"<div id=\"accordion\">\n"
+"    <div class=\"card mb-2 bg-100\">\n"
+"        <a href=\"#collapseOne\" class=\"card-header\" id=\"headingOne\" data-toggle=\"collapse\" aria-expanded=\"false\" aria-controls=\"collapseOne\">\n"
+"            <b>What kinds of questions can I ask here?</b> <i class=\"fa fa-caret-down float-right\"/>\n"
+"        </a>\n"
+"        <div id=\"collapseOne\" class=\"collapse\" aria-labelledby=\"headingOne\" data-parent=\"#accordion\">\n"
+"            <div class=\"card-body\">\n"
+"                <p>This community is for professional and enthusiast users, partners and programmers. You can ask questions about:</p>\n"
+"                <ul>\n"
+"                    <li>how to install Odoo on a specific infrastructure,</li>\n"
+"                    <li>how to configure or customize Odoo to specific business needs,</li>\n"
+"                    <li>what's the best way to use Odoo for a specific business need,</li>\n"
+"                    <li>how to develop modules for your own need,</li>\n"
+"                    <li>specific questions about Odoo service offers, etc.</li>\n"
+"                </ul>\n"
+"                <p><b>Before you ask - please make sure to search for a similar question.</b> You can search questions by their title or tags. It’s also OK to answer your own question.</p>\n"
+"                <p><b>Please avoid asking questions that are too subjective and argumentative</b> or not relevant to this community.</p>\n"
+"            </div>\n"
+"        </div>\n"
+"    </div>\n"
+"  <div class=\"card mb-2 bg-100\">\n"
+"      <a href=\"#collapseTwo\" class=\"card-header\" id=\"headingTwo\" data-toggle=\"collapse\" aria-expanded=\"false\" aria-controls=\"collapseTwo\">\n"
+"          <b>What should I avoid in my questions?</b> <i class=\"fa fa-caret-down float-right\"/>\n"
+"      </a>\n"
+"      <div id=\"collapseTwo\" class=\"collapse\" aria-labelledby=\"headingTwo\" data-parent=\"#accordion\">\n"
+"          <div class=\"card-body\">\n"
+"              <p>You should only ask practical, answerable questions based on actual problems that you face. Chatty, open-ended questions diminish the usefulness of this site and push other questions off the front page.</p>\n"
+"              <p>To prevent your question from being flagged and possibly removed, avoid asking subjective questions where …</p>\n"
+"              <ul>\n"
+"                  <li>every answer is equally valid: “What’s your favorite ______?”</li>\n"
+"                  <li>your answer is provided along with the question, and you expect more answers: “I use ______ for ______, what do you use?”</li>\n"
+"                  <li>there is no actual problem to be solved: “I’m curious if other people feel like I do.”</li>\n"
+"                  <li>we are being asked an open-ended, hypothetical question: “What if ______ happened?”</li>\n"
+"                  <li>it is a rant disguised as a question: “______ sucks, am I right?”</li>\n"
+"              </ul>\n"
+"              <p>If you fit in one of these example or if your motivation for asking the question is “I would like to participate in a discussion about ______”, then you should not be asking here but on our mailing lists. However, if your motivation is “I would like others to explain ______ to me”, then you are probably OK.</p>\n"
+"              <p>(The above section was adapted from Stackoverflow’s FAQ.)</p>\n"
+"              <p>More over:</p>\n"
+"              <ul>\n"
+"                  <li><b>Answers should not add or expand questions</b>. Instead either edit the question or add a question comment.</li>\n"
+"                  <li><b>Answers should not comment other answers</b>. Instead add a comment on the other answers.</li>\n"
+"                  <li><b>Answers shouldn't just point to other Questions</b>. Instead add a question comment indication \"Possible duplicate of...\". However, it's ok to include links to other questions or answers providing relevant additional information.</li>\n"
+"                  <li><b>Answers shouldn't just provide a link a solution</b>. Instead provide the solution description text in your answer, even if it's just a copy/paste. Links are welcome, but should be complementary to answer, referring sources or additional reading.</li>\n"
+"              </ul>\n"
+"          </div>\n"
+"      </div>\n"
+"  </div>\n"
+"  <div class=\"card mb-2 bg-100\">\n"
+"      <a href=\"#collapseThree\" class=\"card-header\" id=\"headingThree\" data-toggle=\"collapse\" aria-expanded=\"false\" aria-controls=\"collapseThree\">\n"
+"          <b>What should I avoid in my answers?</b> <i class=\"fa fa-caret-down float-right\"/>\n"
+"      </a>\n"
+"      <div id=\"collapseThree\" class=\"collapse\" aria-labelledby=\"headingThree\" data-parent=\"#accordion\">\n"
+"          <div class=\"card-body\">\n"
+"              <p><b>Answers should not add or expand questions</b>. Insteadeither edit the question or add a comment.</p>\n"
+"              <p><b>Answers should not comment other answers</b>. Instead add a comment on the other answers.</p>\n"
+"              <p><b>Answers shouldn't just point to other questions</b>.Instead add a comment indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to include links to other questions or answers providing relevant additional information.</p>\n"
+"              <p> <b>Answers shouldn't just provide a link a solution</b>. Instead provide the solution description text in your answer, even if it's just a copy/paste. Links are welcome, but should be complementary to answer, referring sources or additional reading.</p>\n"
+"              <p><b>Answers should not start debates</b> This community Q&amp;A is not a discussion group. Please avoid holding debates in your answers as they tend to dilute the essence of questions and answers. For brief discussions please use commenting facility.</p>\n"
+"              <p>When a question or answer is upvoted, the user who posted them will gain some points, which are called \"karma points\". These points serve as a rough measure of the community trust to him/her. Various moderation tasks are gradually assigned to the users based on those points.</p>\n"
+"              <p>For example, if you ask an interesting question or give a helpful answer, your input will be upvoted. On the other hand if the answer is misleading - it will be downvoted. Each vote in favor will generate 10 points, each vote against will subtract 10 points. There is a limit of 200 points that can be accumulated for a question or answer per day. The table given at the end explains reputation point requirements for each type of moderation task.</p>\n"
+"          </div>\n"
+"      </div>\n"
+"  </div>\n"
+msgstr ""
+"<h1 class=\"o_page_header\">Рекомендації</h1>\n"
+"\n"
+"<div id=\"accordion\">\n"
+"    <div class=\"card mb-2 bg-100\">\n"
+"        <a href=\"#collapseOne\" class=\"card-header\" id=\"headingOne\" data-toggle=\"collapse\" aria-expanded=\"false\" aria-controls=\"collapseOne\">\n"
+"            <b>Про що я можу тут запитувати?</b> <i class=\"fa fa-caret-down float-right\"/>\n"
+"        </a>\n"
+"        <div id=\"collapseOne\" class=\"collapse\" aria-labelledby=\"headingOne\" data-parent=\"#accordion\">\n"
+"            <div class=\"card-body\">\n"
+"                <p>Ця спільнота для користувачів-професіоналів та ентузіастів, партнерів та програмістів. Ви можете ставити запитання про:</p>\n"
+"                <ul>\n"
+"                    <li>як встановити Odoo на конкретну інфраструктуру,</li>\n"
+"                    <li>як налаштувати кастомну Odoo відповідно до конкретних бізнес-потреб,</li>\n"
+"                    <li>у який спосіб найкраще використовувати Odoo для конкретних бізнес-потреб,</li>\n"
+"                    <li>як розробляти модулі для власних потреб,</li>\n"
+"                    <li>конкретні питання щодо пропозицій послуги Odoo тощо.</li>\n"
+"                </ul>\n"
+"                <p><b>Перед тим, як запитувати, спробуйте пошукати схожі запитання.</b> Ви можете знайти запитання за їхнім заголовком чи тегами.</p>\n"
+"                <p><b>Будь ласка, не задавайте питання, які є надто суб'єктивними і аргументованими</b> або які не відносяться до цієї спільноти.</p>\n"
+"            </div>\n"
+"        </div>\n"
+"    </div>\n"
+"  <div class=\"card mb-2 bg-100\">\n"
+"      <a href=\"#collapseTwo\" class=\"card-header\" id=\"headingTwo\" data-toggle=\"collapse\" aria-expanded=\"false\" aria-controls=\"collapseTwo\">\n"
+"          <b>Що слід уникати в моїх запитаннях?</b> <i class=\"fa fa-caret-down float-right\"/>\n"
+"      </a>\n"
+"      <div id=\"collapseTwo\" class=\"collapse\" aria-labelledby=\"headingTwo\" data-parent=\"#accordion\">\n"
+"          <div class=\"card-body\">\n"
+"              <p>Ви повинні задавати практичні, зпитання, на які можна дати віповідь, на основі актуальних проблем, з якими стикаєтеся. Чутливі, відкриті питання зменшують корисність цього сайту і виштовхують інші питання з першої сторінки.</p>\n"
+"              <p>Щоб запобігти відхиленню вашого запитання та, можливо, його усунення, уникайте задавати суб'єктивні питання, де …</p>\n"
+"              <ul>\n"
+"                  <li>кожна відповідь однаково дійсна: “Який ваш улюблений ______?”</li>\n"
+"                  <li>відповідь надається разом з питанням, і ви очікуєте більшої кількості відповідей: “Я використовую ______ для ______, що використовуєте ви?”</li>\n"
+"                  <li>фактичної проблеми не існує: “Мені цікаво, чи інші люди відчувають, що я це роблю.”</li>\n"
+"                  <li>нам задають відкриті, гіпотетичні питання: “Що станеться, якщо ______ ?”</li>\n"
+"                  <li>це напучування, замасковане під питання: “______ лайно, чи я не правий?”</li>\n"
+"              </ul>\n"
+"              <p>Якщо ви вписуєтеся в один із цих прикладів, або якщо ваша мотивація для запитання: «Я хотів би взяти участь у дискусії ______”, тоді ви не повинні запитувати тут, а в наших списках розсилки. Однак, якщо ваша мотивація “Я хотів би, щоб інші пояснили мені ______ ”, тоді це ОК.</p>\n"
+"              <p>(Вищезгаданий розділ був адаптований із запитань Stackoverflow.)</p>\n"
+"              <p>Більше:</p>\n"
+"              <ul>\n"
+"                  <li><b>Відповіді не повинні додавати або розширювати питання</b>. Замість цього відредагуйте запитання або додайте коментар до запитання.</li>\n"
+"                  <li><b>Відповіді не повинні коментувати інші відповіді</b>. Замість цього додайте коментар до інших відповідей.</li>\n"
+"                  <li><b>Відповіді не повинні просто вказувати на інші запитання</b>. Замість того, щоб додати коментар до запитання \"Можливий дублікат ...\". Тим не менш, це нормально, щоб включити посилання на інші запитання або відповіді, які надають відповідну додаткову інформацію.</li>\n"
+"                  <li><b>Відповіді не повинні просто надавати посилання на рішення</b>. Замість цього надайте текст опису рішення у відповіді, навіть якщо це просто копія/вставка. Посилання вітаються, але вони повинні доповнювати відповіді, посилаючись на джерела або додаткове читання.</li>\n"
+"              </ul>\n"
+"          </div>\n"
+"      </div>\n"
+"  </div>\n"
+"  <div class=\"card mb-2 bg-100\">\n"
+"      <a href=\"#collapseThree\" class=\"card-header\" id=\"headingThree\" data-toggle=\"collapse\" aria-expanded=\"false\" aria-controls=\"collapseThree\">\n"
+"          <b>Що слід уникати у своїх відповідях?</b> <i class=\"fa fa-caret-down float-right\"/>\n"
+"      </a>\n"
+"      <div id=\"collapseThree\" class=\"collapse\" aria-labelledby=\"headingThree\" data-parent=\"#accordion\">\n"
+"          <div class=\"card-body\">\n"
+"              <p><b>Відповіді не повинні додавати або розширювати питання</b>. Відредагуйте питання або додайте коментар.</p>\n"
+"              <p><b>Відповіді не повинні коментувати інші відповіді</b>. Замість цього додайте коментар до інших відповідей.</p>\n"
+"              <p><b>Відповіді не повинні просто вказувати на інші питання</b>. Замість цього додайте коментар <i>\"Можливе дублювання...\"</i>. Тим не менш, це добре, щоб включити посилання на інші запитання або відповіді, надаючи відповідну додаткову інформацію.</p>\n"
+"              <p> <b>Відповіді не повинні просто надавати посилання на рішення</b>. Замість цього надайте текст опису рішення у відповіді, навіть якщо це просто копіпаст. Посилання вітаються, але вони повинні доповнювати відповіді, посилаючись на джерела або додаткове читання.</p>\n"
+"              <p><b>Відповіді не повинні починати дебати</b> Ця спільнота запитань та відповідей не є дискусійним майданчиком. Будь ласка, уникайте дебатів у своїх відповідях, оскільки вони мають тенденцію розмивати суть питань і відповідей. Для коротких обговорень, будь ласка, використовуйте засоби коментування.</p>\n"
+"              <p>Коли питання або відповідь підвищено голосом, користувач, який їх опублікував, отримає деякі бали, які називаються \"кармічними балами\". Ці бали слугують грубою мірою довіри громади до нього. Різні завдання модерування поступово призначаються користувачам на основі цих балів.</p>\n"
+"              <p>Наприклад, якщо ви запитаєте цікаве запитання або дасте корисну відповідь, ваш внесок буде підвищений голосом. З іншого боку, якщо відповідь вводить в оману - вона буде знижена. Кожен голосуючий за це генеруватиме 10 балів, кожен голосуючий проти буде віднімати 10 балів. Існує ліміт у 200 балів, який можна накопичити за запитання або відповідь на день. Таблиця, наведена в кінці, пояснює вимоги до балів репутації для кожного типу завдання модерування.</p>\n"
+"          </div>\n"
+"      </div>\n"
+"  </div>\n"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
-msgid "<i class=\"fa fa-arrow-right\"/> Read Guidelines"
-msgstr "<i class=\"fa fa-arrow-right\"/> Прочитайте інструкції"
+#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
+msgid "<i class=\" fa fa-comment-o\"/> <b>Comment</b>"
+msgstr "<i class=\" fa fa-comment-o\"/> <b>Коментар</b>"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_detail_full
-msgid "<i class=\"fa fa-arrow-right\"/>Edit Your Profile"
-msgstr "<i class=\"fa fa-arrow-right\"/>Відредагуйте ваш профіль"
+#: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
+msgid "<i class=\"fa fa-bug\"/> Mark as spam"
+msgstr "<i class=\"fa fa-bug\"/> Позначити як спам"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
+#: model_terms:ir.ui.view,arch_db:website_forum.close_post
+msgid "<i class=\"fa fa-caret-left mr-2\"/>back to post"
+msgstr "<i class=\"fa fa-caret-left mr-2\"/>повернутися до публікації"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
+msgid ""
+"<i class=\"fa fa-check-circle text-success\"/> <b class=\"text-"
+"success\">Resolved</b>"
+msgstr ""
+"<i class=\"fa fa-check-circle text-success\"/> <b class=\"text-"
+"success\">Вирішено</b>"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.forum_nav_header
 msgid ""
 "<i class=\"fa fa-cog\" role=\"img\" aria-label=\"Dropdown menu\" "
 "title=\"Dropdown menu\"/>"
@@ -322,19 +321,70 @@ msgstr ""
 "title=\"Dropdown menu\"/>"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.edit_profile
-msgid "<i class=\"fa fa-pencil fa-1g float-left\" title=\"Edit\"/>"
-msgstr "<i class=\"fa fa-pencil fa-1g float-left\" title=\"Edit\"/>"
+#: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
+msgid ""
+"<i class=\"fa fa-flag ml-4 mr4\"/>\n"
+"                                    Flagged"
+msgstr ""
+"<i class=\"fa fa-flag ml-4 mr4\"/>\n"
+"                                    Позначено"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.badge
-msgid "<i class=\"text-muted\"> awarded users</i>"
-msgstr "<i class=\"text-muted\"> нагороджені користувачі</i>"
+#: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
+msgid ""
+"<i class=\"fa fa-flag ml-4 mr4\"/>\n"
+"                        Flagged"
+msgstr ""
+"<i class=\"fa fa-flag ml-4 mr4\"/>\n"
+"                        Позначено"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_badges
-msgid "<i class=\"text-muted\">awarded users</i>"
-msgstr "<i class=\"text-muted\">нагороджені користувачі</i>"
+#: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
+msgid "<i class=\"fa fa-flag\"/> Country"
+msgstr "<i class=\"fa fa-flag\"/> Країна"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
+msgid "<i class=\"fa fa-reply\"/> <b>Reply</b>"
+msgstr "<i class=\"fa fa-reply\"/> <b>Відповісти</b>"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.post_answers
+msgid "<i class=\"fa fa-share-alt text-primary\"/> Share"
+msgstr "<i class=\"fa fa-share-alt text-primary\"/> Поділитися"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
+msgid "<i class=\"fa fa-share-alt\"/> <b>Share</b>"
+msgstr "<i class=\"fa fa-share-alt\"/> <b>Поділитися</b>"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid ""
+"<i class=\"fa fa-thumbs-down text-danger ml-3\" role=\"img\" aria-"
+"label=\"Negative votes\" title=\"Negative votes\"/>"
+msgstr ""
+"<i class=\"fa fa-thumbs-down text-danger ml-3\" role=\"img\" aria-"
+"label=\"Negative votes\" title=\"Negative votes\"/>"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid ""
+"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive"
+" votes\" title=\"Positive votes\"/>"
+msgstr ""
+"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive"
+" votes\" title=\"Positive votes\"/>"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
+msgid "<i class=\"fa fa-user\"/> User"
+msgstr "<i class=\"fa fa-user\"/> Користувач"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid "<small class=\"font-weight-bold\">Votes</small>"
+msgstr "<small class=\"font-weight-bold\">Голоси</small>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_display_post_answer
@@ -344,81 +394,39 @@ msgid ""
 "                </small>"
 msgstr ""
 "<small class=\"text-muted\">\n"
-"                    Позначений\n"
+"                    Позначено\n"
 "                </small>"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_detail_full
-msgid "<small class=\"text-muted\">profile</small>"
-msgstr "<small class=\"text-muted\">профіль</small>"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.users
+#: model_terms:ir.ui.view,arch_db:website_forum.contact
 msgid ""
-"<span class=\"fa fa-circle badge-bronze ml8\" role=\"img\" aria-"
+"<span class=\"fa fa-trophy badge-bronze ml-2\" role=\"img\" aria-"
 "label=\"Bronze badge\" title=\"Bronze badge\"/>"
 msgstr ""
-"<span class=\"fa fa-circle badge-bronze ml8\" role=\"img\" aria-"
+"<span class=\"fa fa-trophy badge-bronze ml-2\" role=\"img\" aria-"
 "label=\"Bronze badge\" title=\"Bronze badge\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.contact
 msgid ""
-"<span class=\"fa fa-circle badge-bronze\" role=\"img\" aria-label=\"Bronze "
-"badge\" title=\"Bronze badge\"/>"
-msgstr ""
-"<span class=\"fa fa-circle badge-bronze\" role=\"img\" aria-label=\"Bronze "
-"badge\" title=\"Bronze badge\"/>"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.users
-msgid ""
-"<span class=\"fa fa-circle badge-gold\" role=\"img\" aria-label=\"Gold "
-"badge\" title=\"Gold badge\"/>"
-msgstr ""
-"<span class=\"fa fa-circle badge-gold\" role=\"img\" aria-label=\"Gold "
-"badge\" title=\"Gold badge\"/>"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.users
-msgid ""
-"<span class=\"fa fa-circle badge-silver ml8\" role=\"img\" aria-"
+"<span class=\"fa fa-trophy badge-silver ml-2\" role=\"img\" aria-"
 "label=\"Silver badge\" title=\"Silver badge\"/>"
 msgstr ""
-"<span class=\"fa fa-circle badge-silver ml8\" role=\"img\" aria-"
+"<span class=\"fa fa-trophy badge-silver ml-2\" role=\"img\" aria-"
 "label=\"Silver badge\" title=\"Silver badge\"/>"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.contact
-msgid ""
-"<span class=\"fa fa-circle badge-silver\" role=\"img\" aria-label=\"Silver "
-"badge\" title=\"Silver badge\"/>"
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid "<span class=\"font-weight-bold\">No answer posted yet.</span>"
 msgstr ""
-"<span class=\"fa fa-circle badge-silver\" role=\"img\" aria-label=\"Silver "
-"badge\" title=\"Silver badge\"/>"
+"<span class=\"font-weight-bold\">Ще не опубліковано жодної відповіді.</span>"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_detail_full
-msgid ""
-"<span class=\"fa fa-thumbs-down\" role=\"img\" aria-label=\"Negative votes\""
-" title=\"Negative votes\"/>"
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid "<span class=\"font-weight-bold\">No question posted yet.</span>"
 msgstr ""
-"<span class=\"fa fa-thumbs-down\" role=\"img\" aria-label=\"Negative votes\""
-" title=\"Negative votes\"/>"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_detail_full
-msgid ""
-"<span class=\"fa fa-thumbs-up\" role=\"img\" aria-label=\"Positive votes\" "
-"title=\"Positive votes\"/>"
-msgstr ""
-"<span class=\"fa fa-thumbs-up\" role=\"img\" aria-label=\"Positive votes\" "
-"title=\"Positive votes\"/>"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
-msgid "<span class=\"sr-only\">Select Post</span>"
-msgstr "<span class=\"sr-only\">Вибрати публікацію</span>"
+"<span class=\"font-weight-bold\">Ще не опубліковано жодного "
+"запитання.</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -429,226 +437,32 @@ msgstr ""
 "допускається)</span>"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_detail_full
-msgid "<span class=\"text-muted\">bio</span>"
-msgstr "<span class=\"text-muted\">біо</span>"
-
-#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.close_post
 msgid "<span class=\"text-muted\">or</span>"
 msgstr "<span class=\"text-muted\">або</span>"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_detail_full
-msgid "<span class=\"text-muted\">stats</span>"
-msgstr "<span class=\"text-muted\">статистика</span>"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
-msgid "<span> on </span>"
-msgstr "<span> на </span>"
-
-#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
+#: model_terms:ir.ui.view,arch_db:website_forum.post_answers
 msgid ""
-"<span> • </span>\n"
-"                Flagged"
+"<span title=\"Question has accepted answer\" role=\"img\" aria-"
+"label=\"Question has accepted answer\"><i class=\"fa fa-check-circle text-"
+"success bg-white\"/></span>"
 msgstr ""
-"<span> • </span>\n"
-"                Позначено"
+"<span title=\"Question has accepted answer\" role=\"img\" aria-"
+"label=\"Question has accepted answer\"><i class=\"fa fa-check-circle text-"
+"success bg-white\"/></span>"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
+msgid "<span>&amp;times;</span>"
+msgstr "<span>&amp;times;</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
-#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
+#: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
 msgid "<span>By </span>"
 msgstr "<span>Зроблено </span>"
-
-#. module: website_forum
-#: model:mail.template,body_html:website_forum.validation_email
-msgid ""
-"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: 16px; background-color: #F1F1F1; color: #454748; width: 100%; border-collapse:separate;\"><tr><td align=\"center\">\n"
-"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"padding: 16px; background-color: white; color: #454748; border-collapse:separate;\">\n"
-"<tbody>\n"
-"    <!-- HEADER -->\n"
-"    <tr>\n"
-"        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
-"                <tr>\n"
-"                    <td valign=\"middle\">\n"
-"                        <span style=\"font-size: 10px;\">Your Forum</span><br/>\n"
-"                        <span style=\"font-size: 20px; font-weight: bold;\">\n"
-"                            ${object.company_id.name} Forum validation\n"
-"                        </span>\n"
-"                    </td>\n"
-"                    <td valign=\"middle\" align=\"right\">\n"
-"                        <img src=\"/logo.png?company=${user.company_id.id}\" style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" alt=\"${user.company_id.name}\"/>\n"
-"                    </td>\n"
-"                </tr>\n"
-"                <tr>\n"
-"                    <td colspan=\"2\" style=\"text-align:center;\">\n"
-"                        <hr width=\"100%\" style=\"background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;\"/>\n"
-"                    </td>\n"
-"                </tr>\n"
-"            </table>\n"
-"        </td>\n"
-"    </tr>\n"
-"    <!-- CONTENT -->\n"
-"    <tr>\n"
-"        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
-"                <tr>\n"
-"                    <td valign=\"top\" style=\"font-size: 13px;\">\n"
-"                        <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"                            Hello ${object.name},<br/><br/>\n"
-"                            You have been invited to validate your email in order to get access to \"${object.company_id.name}\" Q/A Forums.\n"
-"                            To validate your email, please click on the following link:\n"
-"                            <div style=\"margin: 16px 0px 16px 0px;\">\n"
-"                                <a href=\"${ctx.get('token_url')}\" style=\"background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;\">\n"
-"                                    Validate my account\n"
-"                                </a>\n"
-"                            </div>\n"
-"                            Thanks for your participation!\n"
-"                        </p>\n"
-"                    </td>\n"
-"                </tr>\n"
-"                <tr>\n"
-"                    <td style=\"text-align:center;\">\n"
-"                        <hr width=\"100%\" style=\"background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
-"                    </td>\n"
-"                </tr>\n"
-"            </table>\n"
-"        </td>\n"
-"    </tr>\n"
-"    <!-- FOOTER -->\n"
-"    <tr>\n"
-"        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\" font-family: 'Verdana Regular'; color: #454748; min-width: 590px; background-color: white; font-size: 11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
-"                <tr>\n"
-"                    <td valign=\"middle\" align=\"left\">\n"
-"                         ${user.company_id.name}\n"
-"                    </td>\n"
-"                    <td valign=\"middle\" align=\"right\" style=\"opacity: 0.7;\">\n"
-"                        ${user.company_id.phone}\n"
-"                        % if user.company_id.email:\n"
-"                            | <a href=\"'mailto:%s' % ${user.company_id.email}\" style=\"text-decoration:none; color: #454748;\">\n"
-"                                ${user.company_id.email}\n"
-"                            </a>\n"
-"                        % endif\n"
-"                        % if user.company_id.website:\n"
-"                            | <a href=\"${user.company_id.website}\" style=\"text-decoration:none; color: #454748;\">\n"
-"                                ${user.company_id.website}\n"
-"                            </a>\n"
-"                        % endif\n"
-"                    </td>\n"
-"                </tr>\n"
-"            </table>\n"
-"        </td>\n"
-"    </tr>\n"
-"</tbody>\n"
-"</table>\n"
-"</td></tr>\n"
-"<!-- POWERED BY -->\n"
-"<tr><td align=\"center\" style=\"min-width: 590px;\">\n"
-"    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;\">\n"
-"        <tr><td style=\"text-align: center; font-size: 13px;\">\n"
-"            Powered by <a target=\"_blank\" href=\"https://www.odoo.com?utm_source=db&amp;utm_medium=forum\" style=\"color: #875A7B;\">Odoo</a>\n"
-"        </td></tr>\n"
-"    </table>\n"
-"</td></tr>\n"
-"</table>\n"
-"            "
-msgstr ""
-"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: 16px; background-color: #F1F1F1; color: #454748; width: 100%; border-collapse:separate;\"><tr><td align=\"center\">\n"
-"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"padding: 16px; background-color: white; color: #454748; border-collapse:separate;\">\n"
-"<tbody>\n"
-"    <!-- HEADER -->\n"
-"    <tr>\n"
-"        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
-"                <tr>\n"
-"                    <td valign=\"middle\">\n"
-"                        <span style=\"font-size: 10px;\">Ваш форум</span><br/>\n"
-"                        <span style=\"font-size: 20px; font-weight: bold;\">\n"
-"                            ${object.company_id.name} Перевірка форуму\n"
-"                        </span>\n"
-"                    </td>\n"
-"                    <td valign=\"middle\" align=\"right\">\n"
-"                        <img src=\"/logo.png?company=${user.company_id.id}\" style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" alt=\"${user.company_id.name}\"/>\n"
-"                    </td>\n"
-"                </tr>\n"
-"                <tr>\n"
-"                    <td colspan=\"2\" style=\"text-align:center;\">\n"
-"                        <hr width=\"100%\" style=\"background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;\"/>\n"
-"                    </td>\n"
-"                </tr>\n"
-"            </table>\n"
-"        </td>\n"
-"    </tr>\n"
-"    <!-- CONTENT -->\n"
-"    <tr>\n"
-"        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
-"                <tr>\n"
-"                    <td valign=\"top\" style=\"font-size: 13px;\">\n"
-"                        <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"                            Вітаємо ${object.name},<br/><br/>\n"
-"                            Ви отримали запрошення підтвердити свою електронну пошту, щоби отримати доступ до \"${object.company_id.name}\" Q/A форумів.\n"
-"                            Щоб підтвердити вашу електронну пошту, натисніть на наведене нижче посилання:\n"
-"                            <div style=\"margin: 16px 0px 16px 0px;\">\n"
-"                                <a href=\"${ctx.get('token_url')}\" style=\"background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;\">\n"
-"                                    Перевірити мій обліковий запис\n"
-"                                </a>\n"
-"                            </div>\n"
-"                           Дякуємо за вашу участь!\n"
-"                        </p>\n"
-"                    </td>\n"
-"                </tr>\n"
-"                <tr>\n"
-"                    <td style=\"text-align:center;\">\n"
-"                        <hr width=\"100%\" style=\"background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
-"                    </td>\n"
-"                </tr>\n"
-"            </table>\n"
-"        </td>\n"
-"    </tr>\n"
-"    <!-- FOOTER -->\n"
-"    <tr>\n"
-"        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\" font-family: 'Verdana Regular'; color: #454748; min-width: 590px; background-color: white; font-size: 11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
-"                <tr>\n"
-"                    <td valign=\"middle\" align=\"left\">\n"
-"                         ${user.company_id.name}\n"
-"                    </td>\n"
-"                    <td valign=\"middle\" align=\"right\" style=\"opacity: 0.7;\">\n"
-"                        ${user.company_id.phone}\n"
-"                        % if user.company_id.email:\n"
-"                            | <a href=\"'mailto:%s' % ${user.company_id.email}\" style=\"text-decoration:none; color: #454748;\">\n"
-"                                ${user.company_id.email}\n"
-"                            </a>\n"
-"                        % endif\n"
-"                        % if user.company_id.website:\n"
-"                            | <a href=\"${user.company_id.website}\" style=\"text-decoration:none; color: #454748;\">\n"
-"                                ${user.company_id.website}\n"
-"                            </a>\n"
-"                        % endif\n"
-"                    </td>\n"
-"                </tr>\n"
-"            </table>\n"
-"        </td>\n"
-"    </tr>\n"
-"</tbody>\n"
-"</table>\n"
-"</td></tr>\n"
-"<!-- POWERED BY -->\n"
-"<tr><td align=\"center\" style=\"min-width: 590px;\">\n"
-"    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;\">\n"
-"        <tr><td style=\"text-align: center; font-size: 13px;\">\n"
-"            Зроблено <a target=\"_blank\" href=\"https://www.odoo.com?utm_source=db&amp;utm_medium=forum\" style=\"color: #875A7B;\">Odoo</a>\n"
-"        </td></tr>\n"
-"    </table>\n"
-"</td></tr>\n"
-"</table>\n"
-"            "
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_template_new_answer
@@ -673,11 +487,6 @@ msgstr ""
 "знайти та відповісти на ваше запитання. (Наведіть курсор миші, щоб додати/забрати тег(-и))"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
-msgid "About This Community"
-msgstr "Про цю спільноту"
-
-#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid "Accept <i class=\"fa fa-check\"/>"
 msgstr "Прийняти<i class=\"fa fa-check\"/>"
@@ -691,11 +500,6 @@ msgstr "Прийняти відповідь на власні запитання
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_answer_accept_all
 msgid "Accept an answer to all questions"
 msgstr "Прийміть відповідь на всі запитання"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.post_answers
-msgid "Accept answer"
-msgstr "Прийняти відповідь"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.view_forum_post_search
@@ -712,7 +516,7 @@ msgstr "Приймаю відповідь"
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__message_needaction
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__message_needaction
 msgid "Action Needed"
-msgstr "Дія необхідна"
+msgstr "Необхідна дія"
 
 #. module: website_forum
 #: selection:forum.post,state:0
@@ -722,18 +526,18 @@ msgid "Active"
 msgstr "Активно"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_detail_full
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid "Activities"
+msgstr "Дії"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 msgid "Activity"
 msgstr "Дія"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.post_answer
-msgid "Add a Comment"
-msgstr "Додати коментар"
-
-#. module: website_forum
 #. openerp-web
-#: code:addons/website_forum/static/src/js/website_forum.editor.js:45
+#: code:addons/website_forum/static/src/js/website_forum.editor.js:44
 #, python-format
 msgid "Add to menu"
 msgstr "Додати в меню"
@@ -749,7 +553,7 @@ msgstr ""
 "розповсюдження вмісту форуму в соціальній мережі."
 
 #. module: website_forum
-#: code:addons/website_forum/controllers/main.py:203
+#: code:addons/website_forum/controllers/main.py:179
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_index
 #, python-format
 msgid "All"
@@ -762,11 +566,12 @@ msgstr "Дозволити зіткнення"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
+#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid "Answer"
 msgstr "Відповідь"
 
 #. module: website_forum
-#: code:addons/website_forum/models/forum.py:521
+#: code:addons/website_forum/models/forum.py:469
 #: model:mail.message.subtype,description:website_forum.mt_answer_edit
 #: model:mail.message.subtype,name:website_forum.mt_answer_edit
 #, python-format
@@ -791,7 +596,7 @@ msgstr "Відповідь знижена"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_gen_answer_flagged
 msgid "Answer flagged"
-msgstr "Відповідь помічена"
+msgstr "Відповідь позначена"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_answer
@@ -846,7 +651,8 @@ msgstr "Відповів на власне запитання з принайм�
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__child_ids
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
-#: model_terms:ir.ui.view,arch_db:website_forum.user_detail_full
+#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 #: model_terms:ir.ui.view,arch_db:website_forum.view_forum_post_form
 #: model_terms:ir.ui.view,arch_db:website_forum.view_forum_post_search
 msgid "Answers"
@@ -864,11 +670,6 @@ msgid "Archived"
 msgstr "Заархівовано"
 
 #. module: website_forum
-#: selection:forum.post,post_type:0
-msgid "Article"
-msgstr "Стаття"
-
-#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid "Ask Your Question"
 msgstr "Задайте ваше запитання"
@@ -881,7 +682,7 @@ msgstr "Задайте запитання"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_ask
 msgid "Ask questions"
-msgstr "Зайте запитання"
+msgstr "Задайте запитання"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_post
@@ -926,11 +727,6 @@ msgid "Asked on"
 msgstr "Запитано на"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
-msgid "Asked:"
-msgstr "Запитано:"
-
-#. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_gen_question_new
 msgid "Asking a question"
 msgstr "Задавання питання"
@@ -953,11 +749,9 @@ msgid "Autobiographer"
 msgstr "Автобіограф"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.edit_profile
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_user_tooltip
+#: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
 #: model_terms:ir.ui.view,arch_db:website_forum.post_answers
-#: model_terms:ir.ui.view,arch_db:website_forum.user_detail_full
-#: model_terms:ir.ui.view,arch_db:website_forum.users
 msgid "Avatar"
 msgstr "Аватар"
 
@@ -968,47 +762,21 @@ msgstr ""
 "Уникайте непотрібних інтродукцій (Привіт ... Будь-ласка ... Спасибі ...),"
 
 #. module: website_forum
-#: code:addons/website_forum/controllers/main.py:343
-#: code:addons/website_forum/controllers/main.py:345
-#: code:addons/website_forum/controllers/main.py:414
+#: model_terms:ir.ui.view,arch_db:website_forum.header
+msgid "Back to"
+msgstr "Повернутися до"
+
+#. module: website_forum
+#: code:addons/website_forum/controllers/main.py:318
+#: code:addons/website_forum/controllers/main.py:386
 #, python-format
 msgid "Bad Request"
 msgstr "Поганий запит"
 
 #. module: website_forum
-#: model:ir.model.fields,field_description:website_forum.field_res_users__badge_ids
-#: model_terms:ir.ui.view,arch_db:website_forum.badge
-#: model_terms:ir.ui.view,arch_db:website_forum.header
-#: model_terms:ir.ui.view,arch_db:website_forum.user_detail_full
+#: model_terms:ir.ui.view,arch_db:website_forum.forum_nav_header
 msgid "Badges"
 msgstr "Значки"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.badge
-msgid ""
-"Besides gaining reputation with your questions and answers,\n"
-"            you receive badges for being especially helpful. Badges\n"
-"            appear on your profile page, and your posts."
-msgstr ""
-"Окрім набуття репутації своїми питаннями та відповідями,\n"
-"ви отримуєте значки за те, що це особливо корисно. Значки\n"
-"з'являються на вашій сторінці профілю та ваших публікаціях."
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.edit_profile
-msgid "Biography"
-msgstr "Біографія"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.badge
-#: model_terms:ir.ui.view,arch_db:website_forum.user_badges
-msgid "Bronze badge"
-msgstr "Бронзовий значок"
-
-#. module: website_forum
-#: model:ir.model.fields,field_description:website_forum.field_res_users__bronze_badge
-msgid "Bronze badges count"
-msgstr "Бронзові значки"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__bump_date
@@ -1017,10 +785,10 @@ msgstr "Вдарився об"
 
 #. module: website_forum
 #. openerp-web
-#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:34
+#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:50
 #, python-format
 msgid "By sharing you answer, you will get additional"
-msgstr "Поділившись відповіддю, ви отримаєте додаткове"
+msgstr "Поділившись відповіддю, ви отримаєте додатково"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__can_accept
@@ -1070,7 +838,7 @@ msgstr "Можна редагувати"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__can_flag
 msgid "Can Flag"
-msgstr "Можна помітити"
+msgstr "Можна позначити"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__can_moderate
@@ -1098,37 +866,22 @@ msgid "Change question tags"
 msgstr "Змінити теги запитання"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_badges
-msgid "Check available badges"
-msgstr "Відмітити доступні значки"
-
-#. module: website_forum
 #: model:ir.model.fields,help:website_forum.field_forum_forum__allow_bump
 msgid ""
 "Check this box to display a popup for posts older than 10 days without any "
 "given answer. The popup will offer to share it on social networks. When "
 "shared, a question is bumped at the top of the forum."
 msgstr ""
-"Поставте цей прапорець, щоб відобразити спливаюче вікно для повідомлень "
-"старше 10 днів без будь-якої відповіді. Спливаюче вікно запропонує "
-"поділитися ним у соціальних мережах. Коли ділитеся, у верхній частині форуму"
-" виникає запитання."
+"Позначте це, щоби відобразити спливаюче вікно для повідомлень старше 10 днів"
+" без будь-якої відповіді. Спливаюче вікно запропонує поділитися ним у "
+"соціальних мережах. Коли ділитеся, у верхній частині форуму виникає "
+"запитання."
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_p_4
 #: model:gamification.challenge,name:website_forum.challenge_chief_commentator
 msgid "Chief Commentator"
 msgstr "Головний коментатор"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.edit_profile
-msgid "City"
-msgstr "Місто"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.edit_profile
-msgid "Clear"
-msgstr "Очистити"
 
 #. module: website_forum
 #. openerp-web
@@ -1143,15 +896,6 @@ msgstr "Натисніть <em>Продовжити</em>, щоб створит�
 #, python-format
 msgid "Click here to accept this answer."
 msgstr "Натисніть тут, щоби прийняти цю відповідь."
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
-msgid ""
-"Click here to send a verification email allowing you to participate to the "
-"forum."
-msgstr ""
-"Натисніть тут, щоб надіслати перевірочний електронний лист, який дозволить "
-"вам взяти участь у форумі."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
@@ -1179,8 +923,8 @@ msgstr "Натисніть, щоб опублікувати ваше запит�
 
 #. module: website_forum
 #: selection:forum.post,state:0
-#: model_terms:ir.ui.view,arch_db:website_forum.header
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
+#: model_terms:ir.ui.view,arch_db:website_forum.tag
 msgid "Close"
 msgstr "Закрити"
 
@@ -1221,10 +965,8 @@ msgstr "Причина закриття"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post_answer
-#: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_display_post_answer
 #: model_terms:ir.ui.view,arch_db:website_forum.post_answers
-#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid "Comment"
 msgstr "Коментар"
 
@@ -1254,8 +996,8 @@ msgstr "Коментатор"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post_answer
-#: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_display_post_answer
+#: model_terms:ir.ui.view,arch_db:website_forum.post_answers
 msgid "Comments"
 msgstr "Коментар"
 
@@ -1272,15 +1014,6 @@ msgid "Completed own biography"
 msgstr "Заповнена власна біографія"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
-msgid ""
-"Congratulations! Your email has just been validated. You may now participate"
-" to our forums."
-msgstr ""
-"Вітаємо! Ваш електронний лист уже підтверджено. Тепер ви можете брати участь"
-" у наших форумах."
-
-#. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__content
 #: model_terms:ir.ui.view,arch_db:website_forum.view_forum_post_search
 msgid "Content"
@@ -1292,14 +1025,14 @@ msgid "Convert all answers to comments and vice versa"
 msgstr "Перетворіть всі відповіді на коментарі і навпаки"
 
 #. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.post_comment
+msgid "Convert as a answer"
+msgstr "Конвертувати у відповідь"
+
+#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_answers
 msgid "Convert as a comment"
 msgstr "Конвертувати як коментар"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.post_comment
-msgid "Convert as an answer"
-msgstr "Конвертувати як запитання"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__karma_accept
@@ -1320,16 +1053,6 @@ msgstr "Правильно"
 #: model:ir.model.fields,help:website_forum.field_forum_post__is_correct
 msgid "Correct answer or answer accepted"
 msgstr "Правильна відповідь або відповідь прийнята"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.edit_profile
-msgid "Country"
-msgstr "Країна"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.edit_profile
-msgid "Country..."
-msgstr "Країна..."
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_vote__create_date
@@ -1393,11 +1116,6 @@ msgid "Default Order"
 msgstr "Замовлення за замовчуванням"
 
 #. module: website_forum
-#: model:ir.model.fields,field_description:website_forum.field_forum_forum__default_post_type
-msgid "Default Post"
-msgstr "Публікація за замовчуванням "
-
-#. module: website_forum
 #: model:ir.model.fields,help:website_forum.field_gamification_challenge__category
 msgid "Define the visibility of the challenge through menus"
 msgstr "Визначте видимість завдання через меню"
@@ -1435,7 +1153,7 @@ msgid "Description"
 msgstr "Опис"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
+#: model_terms:ir.ui.view,arch_db:website_forum.forum_nav_header
 msgid "Design Welcome Message"
 msgstr "Дизайн Привітання"
 
@@ -1446,18 +1164,6 @@ msgstr "Дизайн Привітання"
 #: model:gamification.goal.definition,name:website_forum.definition_disciplined
 msgid "Disciplined"
 msgstr "Дисциплінований"
-
-#. module: website_forum
-#: selection:forum.forum,default_post_type:0 selection:forum.post,post_type:0
-#: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
-#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
-msgid "Discussion"
-msgstr "Обговорення"
-
-#. module: website_forum
-#: model:ir.model.fields,field_description:website_forum.field_forum_forum__allow_discussion
-msgid "Discussions"
-msgstr "Обговорення"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__display_name
@@ -1479,22 +1185,15 @@ msgid "Downvote"
 msgstr "Пониження голосу"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.edit_post
-#: model_terms:ir.ui.view,arch_db:website_forum.edit_profile
 #: model_terms:ir.ui.view,arch_db:website_forum.post_answers
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid "Edit"
 msgstr "Редагувати"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.edit_profile
-msgid "Edit Profile"
-msgstr "Редагувати профіль"
-
-#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
-msgid "Edit Your Previous Answer"
-msgstr "Відредагуйте вашу попередню відповідь"
+msgid "Edit Your Answer"
+msgstr "Відредагуйте вашу відповідь"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_edit_all
@@ -1508,13 +1207,13 @@ msgstr "Відредагуйте свою публікацію"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
-msgid "Edit reply"
-msgstr "Редагувати відповідь"
+msgid "Edit question"
+msgstr "Редагувати запитання"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.new_link
-msgid "Edit your Link"
-msgstr "Відредагуйте ваше посилання"
+#: model_terms:ir.ui.view,arch_db:website_forum.edit_post
+msgid "Edit reply"
+msgstr "Редагувати відповідь"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
@@ -1535,11 +1234,6 @@ msgid "Editor Features: image and links"
 msgstr "Функції редактора: зображення та посилання"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.edit_profile
-msgid "Email"
-msgstr "Ел. пошта"
-
-#. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_a_5
 #: model:gamification.challenge,name:website_forum.challenge_enlightened
 #: model:gamification.challenge.line,name:website_forum.line_enlightened
@@ -1555,15 +1249,15 @@ msgid "Enter a name for your new forum."
 msgstr "Введіть назву вашого нового форуму."
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
-msgid "External link"
-msgstr "Зовнішнє посилання"
-
-#. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_q_3
 #: model:gamification.challenge,name:website_forum.challenge_famous_question
 msgid "Famous Question"
 msgstr "Відоме запитання"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
+msgid "Favorite"
+msgstr "Закладка"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__favourite_count
@@ -1577,9 +1271,14 @@ msgid "Favorite Question"
 msgstr "Улюблене запитання"
 
 #. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
+msgid "Favorites"
+msgstr "Закладки"
+
+#. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__favourite_ids
 msgid "Favourite"
-msgstr "Улюблений"
+msgstr "Закладка"
 
 #. module: website_forum
 #: model:gamification.challenge.line,name:website_forum.line_favorite_question_1
@@ -1600,7 +1299,7 @@ msgid "Favourite Question (5)"
 msgstr "Улюблене запитання (5)"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_detail_full
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 msgid "Favourite Questions"
 msgstr "Улюблені запитання"
 
@@ -1635,7 +1334,6 @@ msgid "First upvote"
 msgstr "Перше підвищення голосу"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.post_answers
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid "Flag"
 msgstr "Позначка"
@@ -1649,8 +1347,6 @@ msgstr "Позначити публікацію як неприйнятну"
 #. module: website_forum
 #: selection:forum.post,state:0
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-#: model_terms:ir.ui.view,arch_db:website_forum.post_answers
-#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid "Flagged"
 msgstr "Позначений"
 
@@ -1665,7 +1361,7 @@ msgid "Followed"
 msgstr "Додано"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_detail_full
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 msgid "Followed Questions"
 msgstr "Додані запитання"
 
@@ -1691,23 +1387,6 @@ msgid "Followers (Partners)"
 msgstr "Підписники (Партнери)"
 
 #. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid ""
-"For example, if you ask an interesting question or give a helpful answer, your\n"
-"    input will be upvoted. On the other hand if the answer is misleading - it will\n"
-"    be downvoted. Each vote in favor will generate 10 points, each vote against\n"
-"    will subtract 10 points. There is a limit of 200 points that can be accumulated\n"
-"    for a question or answer per day. The table given at the end explains reputation point\n"
-"    requirements for each type of moderation task."
-msgstr ""
-"Наприклад, якщо ви запитуєте цікаве питання або даєте корисну відповідь, то ваш\n"
-"вхід буде привласнений. З іншого боку, якщо відповідь вводить в оману - буде\n"
-"знижено. Кожен голос на користь отримає 10 балів, кожен голос проти\n"
-"буде віднімати 10 балів. Є межа 200 балів, які можна накопичити\n"
-"за питання чи відповідь на день. Наведена в кінці таблиця пояснює рівень вимог репутації\n"
-"до кожного типу модерації завдання."
-
-#. module: website_forum
 #: model:ir.actions.act_url,name:website_forum.action_open_forum
 #: model:ir.model,name:website_forum.model_forum_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__forum_id
@@ -1724,12 +1403,6 @@ msgid "Forum"
 msgstr "Форум"
 
 #. module: website_forum
-#: model:ir.model.fields,field_description:website_forum.field_gamification_badge__level
-#: model:ir.model.fields,field_description:website_forum.field_gamification_badge_user__level
-msgid "Forum Badge Level"
-msgstr "Значок рівня форуму"
-
-#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.res_users_view_form_preference
 #: model_terms:ir.ui.view,arch_db:website_forum.view_users_form_forum
 msgid "Forum Karma"
@@ -1737,7 +1410,7 @@ msgstr "Карма форуму"
 
 #. module: website_forum
 #. openerp-web
-#: code:addons/website_forum/static/src/js/website_forum.editor.js:34
+#: code:addons/website_forum/static/src/js/website_forum.editor.js:33
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__name
 #, python-format
 msgid "Forum Name"
@@ -1756,7 +1429,7 @@ msgid "Forum Posts"
 msgstr "Публікації форуму"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
+#: model_terms:ir.ui.view,arch_db:website_forum.forum_nav_header
 msgid "Forum Settings"
 msgstr "Налаштування форуму"
 
@@ -1773,19 +1446,9 @@ msgid "Forums"
 msgstr "Форуми"
 
 #. module: website_forum
-#: model:ir.model,name:website_forum.model_gamification_badge
-msgid "Gamification Badge"
-msgstr "Геміфікація значка"
-
-#. module: website_forum
 #: model:ir.model,name:website_forum.model_gamification_challenge
 msgid "Gamification Challenge"
 msgstr "Геміфікація випробування"
-
-#. module: website_forum
-#: model:ir.model,name:website_forum.model_gamification_badge_user
-msgid "Gamification User Badge"
-msgstr "Геміфікація користувацького значка"
 
 #. module: website_forum
 #. openerp-web
@@ -1793,17 +1456,6 @@ msgstr "Геміфікація користувацького значка"
 #, python-format
 msgid "Give your question title."
 msgstr "Дайте заголовок вашому запитанню."
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.badge
-#: model_terms:ir.ui.view,arch_db:website_forum.user_badges
-msgid "Gold badge"
-msgstr "Золотий значок"
-
-#. module: website_forum
-#: model:ir.model.fields,field_description:website_forum.field_res_users__gold_badge
-msgid "Gold badges count"
-msgstr "Підрахунок золотих значків"
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_a_3
@@ -1852,10 +1504,9 @@ msgid "Group By"
 msgstr "Групувати за"
 
 #. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__faq
 msgid "Guidelines"
-msgstr "Керівні принципи"
+msgstr "Рекомендації"
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_a_6
@@ -1920,7 +1571,7 @@ msgstr "Якщо позначено, то повідомленя потребу�
 #: model:ir.model.fields,help:website_forum.field_forum_post__message_needaction
 #: model:ir.model.fields,help:website_forum.field_forum_tag__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "Якщо відмічено, то нові повідомлення будуть потребувати вашої уваги."
+msgstr "Якщо позначено, то нові повідомлення будуть потребувати вашої уваги."
 
 #. module: website_forum
 #: model:ir.model.fields,help:website_forum.field_forum_forum__message_has_error
@@ -1936,13 +1587,13 @@ msgid ""
 msgstr "Якщо у автора недостатньо карми, до посилань доданий атрибут nofollow"
 
 #. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
+#: model_terms:ir.ui.view,arch_db:website_forum.faq
 msgid ""
-"If this approach is not for you, please respect the community and use Google+\n"
-"    communities instead."
+"If this approach is not for you, please respect the community and use "
+"Google+ communities instead."
 msgstr ""
-"Якщо цей підхід не для вас, будь ласка, поважайте спільноту та використовуйте Google+\n"
-"замість цього."
+"Якщо цей підхід не для вас, будь ласка, поважайте спільноту та "
+"використовуйте спільноти Google+."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.close_post
@@ -1956,28 +1607,13 @@ msgstr ""
 "модерування."
 
 #. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid ""
-"If you fit in one of these example or if your motivation for asking the\n"
-"    question is “I would like to participate in a discussion about ______”, then\n"
-"    you should not be asking here but on our mailing lists.\n"
-"    However, if your motivation is “I would like others to explain ______ to me”,\n"
-"    then you are probably OK."
-msgstr ""
-"Якщо ви вписуєтесь в один із цих прикладів або якщо ви маєте мотивацію задати\n"
-"питання: \"Я хотів би взяти участь у дискусії про ______\", потім\n"
-"ви не повинні питати тут, крім наших списків розсилки.\n"
-"Однак, якщо ваша мотивація - \"Я б хотів, щоб інші пояснили мені ______\"\n"
-"то все ок."
-
-#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.close_post
 msgid ""
 "If you mark this post as offensive, it will be hidden for most users. Only\n"
 "            users having a high karma can see offensive posts to moderate\n"
 "            them."
 msgstr ""
-"Якщо ви помітите цю публікацію як образливу, вона буде прихована для більшості користувачів. Тільки\n"
+"Якщо ви позначите цю публікацію як образливу, вона буде прихована для більшості користувачів. Тільки\n"
 "користувачі з високою кармою можуть бачити образливі повідомлення для їх\n"
 "модерування."
 
@@ -2000,7 +1636,7 @@ msgstr ""
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__user_favourite
 msgid "Is Favourite"
-msgstr "Є найкращим"
+msgstr "Це закладка"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__message_is_follower
@@ -2020,22 +1656,16 @@ msgid "Is the author's biography visible from his post"
 msgstr "Чи є біографія автора видимою з його поста"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
-msgid "It appears your email has not been verified."
-msgstr "Здається, вашу електронну пошту не підтверджено"
+#: code:addons/website_forum/models/forum.py:897
+#, python-format
+msgid "It is not allowed to modify someone else's vote."
+msgstr "Не дозволяється змінювати чужий голос."
 
 #. module: website_forum
-#: code:addons/website_forum/models/forum.py:890
-#: code:addons/website_forum/models/forum.py:910
+#: code:addons/website_forum/models/forum.py:894
 #, python-format
 msgid "It is not allowed to vote for its own post."
 msgstr "Не дозволяється голосувати за власну публікацію."
-
-#. module: website_forum
-#: model:ir.model.fields,field_description:website_forum.field_res_users__karma
-#: model_terms:ir.ui.view,arch_db:website_forum.user_detail_full
-msgid "Karma"
-msgstr "Карма"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.view_forum_forum_form
@@ -2073,11 +1703,6 @@ msgid "Karma to unlink"
 msgstr "Карма для роз'єднання "
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
-msgid "Keep Informed"
-msgstr "Продовжуйте інформувати"
-
-#. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum____last_update
 #: model:ir.model.fields,field_description:website_forum.field_forum_post____last_update
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_reason____last_update
@@ -2110,30 +1735,12 @@ msgstr "Останнє оновлення"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_index
 msgid "Last activity date"
-msgstr "Остання дата дії"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
-msgid "Last updated:"
-msgstr "Останнє оновлення:"
+msgstr "Дата останньої дії"
 
 #. module: website_forum
 #: model:gamification.badge,description:website_forum.badge_25
 msgid "Left 10 answers with score of 10 or more"
-msgstr "Залишені 10 відповідей з рахунком 10 або більше"
-
-#. module: website_forum
-#: selection:forum.forum,default_post_type:0
-#: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
-#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
-msgid "Link"
-msgstr "Посилання"
-
-#. module: website_forum
-#: model:ir.model.fields,field_description:website_forum.field_forum_forum__allow_link
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_index
-msgid "Links"
-msgstr "Посилання"
+msgstr "Залишені 10 відповідей з оцінкою 10 або більше"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__message_main_attachment_id
@@ -2146,7 +1753,12 @@ msgstr "Основне прикріплення"
 #: model_terms:ir.ui.view,arch_db:website_forum.close_post
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
 msgid "Mark as offensive"
-msgstr "Позначте як неприйнятний"
+msgstr "Позначити як неприйнятний"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
+msgid "Mark as spam"
+msgstr "Позначити як спам"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__message_has_error
@@ -2168,16 +1780,6 @@ msgid "Moderate posts"
 msgstr "Модерувати публікації"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
-msgid "Moderation Tools"
-msgstr "Інструменти модерації"
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid "More over:"
-msgstr "Більше:"
-
-#. module: website_forum
 #: selection:forum.forum,default_order:0
 msgid "Most Voted"
 msgstr "Найбільше голосів"
@@ -2190,11 +1792,11 @@ msgstr "Більшість має відповіді"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_index
 msgid "Most voted"
-msgstr "Більшість проголосовано"
+msgstr "Більшість проголосавані"
 
 #. module: website_forum
 #. openerp-web
-#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:47
+#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:63
 #, python-format
 msgid ""
 "Move this question to the top of the list by sharing it on social networks."
@@ -2205,7 +1807,7 @@ msgstr ""
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__user_vote
 msgid "My Vote"
-msgstr "Мої голоси"
+msgstr "Мій голос"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__name
@@ -2227,13 +1829,8 @@ msgid "New Answer"
 msgstr "Нова відповідь"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
-msgid "New Discussion"
-msgstr "Нове обговорення"
-
-#. module: website_forum
 #. openerp-web
-#: code:addons/website_forum/static/src/js/website_forum.editor.js:33
+#: code:addons/website_forum/static/src/js/website_forum.editor.js:32
 #, python-format
 msgid "New Forum"
 msgstr "Новий форум"
@@ -2246,14 +1843,9 @@ msgid "New Question"
 msgstr "Нове запитання"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.new_discussion
-msgid "New Topic"
-msgstr "Нова тема"
-
-#. module: website_forum
 #: selection:forum.forum,default_order:0
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_index
-#: model_terms:ir.ui.view,arch_db:website_forum.header
+#: model_terms:ir.ui.view,arch_db:website_forum.forum_nav_header
 msgid "Newest"
 msgstr "Найновіші"
 
@@ -2276,9 +1868,19 @@ msgid "Nice Question"
 msgstr "Хороше запитання"
 
 #. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.display_activities
+msgid "No activities yet!"
+msgstr "Ще немає жодної дії!"
+
+#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_all
 msgid "No forum post yet."
 msgstr "Ще немає публікацій форуму."
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.user_votes
+msgid "No vote given by you yet!"
+msgstr "Ви ще не надали жодного голосу!"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_dofollow
@@ -2286,7 +1888,19 @@ msgid "Nofollow links"
 msgstr "Недодані посилання"
 
 #. module: website_forum
-#: code:addons/website_forum/models/forum.py:511
+#: code:addons/website_forum/models/forum.py:802
+#, python-format
+msgid "Not enough karma to comment"
+msgstr "Недостатньо карми для голосування"
+
+#. module: website_forum
+#: code:addons/website_forum/models/forum.py:583
+#, python-format
+msgid "Not enough karma to refuse a post"
+msgstr "Недостатньо карми, щоби відмовити у публікації"
+
+#. module: website_forum
+#: code:addons/website_forum/models/forum.py:459
 #, python-format
 msgid "Not enough karma to retag."
 msgstr "Недостатньо карми для видалення тегу."
@@ -2369,13 +1983,8 @@ msgid "Offensive Post"
 msgstr "Образлива публікація "
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.post_answers
-msgid "On"
-msgstr "Увімкнути"
-
-#. module: website_forum
 #. openerp-web
-#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:29
+#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:45
 #, python-format
 msgid "On average,"
 msgstr "В середньому,"
@@ -2409,7 +2018,7 @@ msgid "Pending"
 msgstr "В очікуванні"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
+#: model_terms:ir.ui.view,arch_db:website_forum.forum_nav_header
 msgid "People"
 msgstr "Людина"
 
@@ -2422,15 +2031,6 @@ msgstr "Простий зміст"
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 msgid "Please enter a descriptive question (should finish by a '?')"
 msgstr "Будь ласка, введіть описове запитання (повинне завершуватися з '?')"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.edit_profile
-msgid ""
-"Please enter a valid email address in order to receive notifications from "
-"answers or comments."
-msgstr ""
-"Будь ласка, введіть дійсну електронну адресу, щоб отримувати сповіщення від "
-"відповідей або коментарів."
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_q_1
@@ -2464,7 +2064,6 @@ msgstr "Позитивний голос"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_vote__post_id
-#: model_terms:ir.ui.view,arch_db:website_forum.new_link
 #: model_terms:ir.ui.view,arch_db:website_forum.post_comment
 #: model_terms:ir.ui.view,arch_db:website_forum.view_forum_post_search
 msgid "Post"
@@ -2482,22 +2081,6 @@ msgid "Post Closing Reason"
 msgstr "Причина закриття публікації"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.post_answer
-#: model_terms:ir.ui.view,arch_db:website_forum.post_reply
-msgid "Post Comment"
-msgstr "Опублікуйте коментар"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.new_link
-msgid "Post Title"
-msgstr "Заголовок публікації"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.view_forum_forum_form
-msgid "Post Types"
-msgstr "Типи публікації"
-
-#. module: website_forum
 #: model:ir.model,name:website_forum.model_forum_post_vote
 msgid "Post Vote"
 msgstr "Опублікувати голос"
@@ -2506,11 +2089,6 @@ msgstr "Опублікувати голос"
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid "Post Your Question"
 msgstr "Опублікуйте ваше запитання"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.new_discussion
-msgid "Post Your Topic"
-msgstr "Опублікуйте вашу тему"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.close_post
@@ -2528,7 +2106,7 @@ msgid "Posted 100 comments"
 msgstr "Опубліковано 100 коментарів"
 
 #. module: website_forum
-#: code:addons/website_forum/models/forum.py:448
+#: code:addons/website_forum/models/forum.py:407
 #, python-format
 msgid "Posting answer on a [Deleted] or [Closed] question is not possible."
 msgstr ""
@@ -2537,7 +2115,6 @@ msgstr ""
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__post_ids
 #: model:ir.ui.menu,name:website_forum.menu_forum_posts
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_index
 msgid "Posts"
 msgstr "Дописи"
 
@@ -2547,17 +2124,12 @@ msgid "Provide enough details and, if possible, give an example."
 msgstr "Надайте достатньо деталей і, якщо можливо, наведіть приклад."
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.edit_profile
-msgid "Public profile"
-msgstr "Публічний профіль"
-
-#. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_25
 #: model:gamification.challenge,name:website_forum.challenge_pundit
 #: model:gamification.challenge.line,name:website_forum.line_pundit
 #: model:gamification.goal.definition,name:website_forum.definition_pundit
 msgid "Pundit"
-msgstr "Pundit"
+msgstr "Експерт"
 
 #. module: website_forum
 #. openerp-web
@@ -2574,15 +2146,14 @@ msgid "Put your question here."
 msgstr "Вставте ваше запитання сюди."
 
 #. module: website_forum
-#: selection:forum.forum,default_post_type:0 selection:forum.post,post_type:0
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__parent_id
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
-#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
+#: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
 msgid "Question"
 msgstr "Запитання"
 
 #. module: website_forum
-#: code:addons/website_forum/models/forum.py:524
+#: code:addons/website_forum/models/forum.py:472
 #: model:mail.message.subtype,description:website_forum.mt_question_edit
 #: model:mail.message.subtype,name:website_forum.mt_question_edit
 #, python-format
@@ -2595,7 +2166,7 @@ msgid "Question downvoted"
 msgstr "Запитання понижене голосуванням"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
+#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid "Question has accepted answer"
 msgstr "Питання прийняло відповідь"
 
@@ -2620,15 +2191,10 @@ msgid "Question set as favorite by 5 users"
 msgstr "Питання встановлене як найкраще 5 користувачами"
 
 #. module: website_forum
-#: code:addons/website_forum/controllers/main.py:345
+#: code:addons/website_forum/controllers/main.py:319
 #, python-format
 msgid "Question should not be empty."
 msgstr "Питання не повинно бути порожнім."
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
-msgid "Question tools"
-msgstr "Інструменти запитання"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_gen_question_upvote
@@ -2651,28 +2217,27 @@ msgid "Question voted up 6 times"
 msgstr "Запитання підняте голосуванням 6 разів"
 
 #. module: website_forum
-#: model:ir.model.fields,field_description:website_forum.field_forum_forum__allow_question
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_index
-#: model_terms:ir.ui.view,arch_db:website_forum.user_detail_full
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 #: model_terms:ir.ui.view,arch_db:website_forum.view_forum_post_search
 msgid "Questions"
 msgstr "Запитання"
 
 #. module: website_forum
-#: code:addons/website_forum/models/forum.py:542
+#: model:ir.ui.menu,name:website_forum.menu_forum_rank_global
+msgid "Ranks"
+msgstr "Звання"
+
+#. module: website_forum
+#: code:addons/website_forum/models/forum.py:490
 #, python-format
 msgid "Re: %s"
 msgstr "Відповідь: %s"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
-msgid "Reactivate"
-msgstr "Реактивувати"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.edit_profile
-msgid "Real name"
-msgstr "Справжнє ім’я"
+#: model_terms:ir.ui.view,arch_db:website_forum.header
+msgid "Read Guidelines"
+msgstr "Прочитайте рекомендації"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__closed_reason_id
@@ -2695,11 +2260,6 @@ msgid "Received at least 3 upvote for an answer for the first time"
 msgstr "Отримано щонайменше 3 голоси для відповіді вперше"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
-msgid "Redirect to external link"
-msgstr "Переадресація на зовнішнє посилання"
-
-#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
 msgid "Refuse"
 msgstr "Відхилити"
@@ -2707,7 +2267,7 @@ msgstr "Відхилити"
 #. module: website_forum
 #: model_terms:forum.forum,welcome_message:website_forum.forum_help
 msgid "Register"
-msgstr "Зареєструватися"
+msgstr "Зареєструйтеся"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -2732,10 +2292,10 @@ msgid "Reopen"
 msgstr "Відновити"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.post_answers
-#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
-msgid "Reply"
-msgstr "Відповісти"
+#: code:addons/website_forum/controllers/main.py:319
+#, python-format
+msgid "Reply should not be empty."
+msgstr "Відповідь не може бути пустою."
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__self_reply
@@ -2749,8 +2309,12 @@ msgid "Restrict publishing to this website."
 msgstr "Обмеження публікації на цьому веб-сайті."
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.404
 #: model_terms:ir.ui.view,arch_db:website_forum.private_profile
+msgid "Return to the forum."
+msgstr "Поверніться до форуму."
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.404
 msgid "Return to the question list."
 msgstr "Повернутися до списку запитань."
 
@@ -2785,6 +2349,11 @@ msgid "Search in Post"
 msgstr "Шукати в публікації"
 
 #. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
+msgid "Search..."
+msgstr "Пошук..."
+
+#. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__relevancy_time_decay
 msgid "Second Relevance Parameter"
 msgstr "Другий параметр відповідності"
@@ -2800,9 +2369,9 @@ msgid "See question"
 msgstr "Побачити запитання"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
-msgid "Seen:"
-msgstr "Видно:"
+#: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
+msgid "Select All"
+msgstr "Вибрати всі"
 
 #. module: website_forum
 #. openerp-web
@@ -2839,24 +2408,8 @@ msgid "Settings / Gamification Tools"
 msgstr "Параметри/Інструменти геміфікації"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
-msgid "Share"
-msgstr "Поділитися"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.new_link
-msgid ""
-"Share an awesome link. Your post will appear in the 'Newest' top-menu.\n"
-"            If the community vote on your post, it will get traction by being promoted\n"
-"            in the homepage."
-msgstr ""
-"Поділіться вражаючим посиланням. Ваше повідомлення з'явиться у верхньому меню \"Найновіше\".\n"
-"Якщо громада проголосує за вашу публікацію, вона буде отримувати голоси за рахунок просування\n"
-"на домашній сторінці."
-
-#. module: website_forum
 #. openerp-web
-#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:39
+#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:55
 #, python-format
 msgid ""
 "Share this content to increase your chances to be featured on the front page"
@@ -2868,43 +2421,32 @@ msgstr ""
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__allow_share
 msgid "Sharing Options"
-msgstr "Поширення функцій"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.badge
-#: model_terms:ir.ui.view,arch_db:website_forum.user_badges
-msgid "Silver badge"
-msgstr "Срібний значок"
-
-#. module: website_forum
-#: model:ir.model.fields,field_description:website_forum.field_res_users__silver_badge
-msgid "Silver badges count"
-msgstr "Підрахунок срібних значків"
+msgstr "Поширення фенкцій"
 
 #. module: website_forum
 #. openerp-web
-#: code:addons/website_forum/static/src/js/website_forum.js:26
+#: code:addons/website_forum/static/src/js/website_forum.js:188
 #, python-format
 msgid "Sorry you must be logged in to perform this action"
 msgstr "Вибачте, ви повинні увійти в систему, щоб виконати цю дію"
 
 #. module: website_forum
 #. openerp-web
-#: code:addons/website_forum/static/src/js/website_forum.js:101
+#: code:addons/website_forum/static/src/js/website_forum.js:287
 #, python-format
 msgid "Sorry you must be logged to flag a post"
 msgstr "Вибачте, ви повинні бути зареєстровані, щоб позначити публікацію"
 
 #. module: website_forum
 #. openerp-web
-#: code:addons/website_forum/static/src/js/website_forum.js:150
+#: code:addons/website_forum/static/src/js/website_forum.js:347
 #, python-format
 msgid "Sorry you must be logged to vote"
 msgstr "Вибачте, ви повинні бути зареєстровані, щоби голосувати"
 
 #. module: website_forum
 #. openerp-web
-#: code:addons/website_forum/static/src/js/website_forum.js:200
+#: code:addons/website_forum/static/src/js/website_forum.js:402
 #, python-format
 msgid "Sorry, anonymous users cannot choose correct answer."
 msgstr "На жаль, анонімні користувачі не можуть вибрати правильну відповідь."
@@ -2916,7 +2458,7 @@ msgstr "На жаль, це запитання більше не доступн�
 
 #. module: website_forum
 #. openerp-web
-#: code:addons/website_forum/static/src/js/website_forum.js:145
+#: code:addons/website_forum/static/src/js/website_forum.js:342
 #, python-format
 msgid "Sorry, you cannot vote for your own posts"
 msgstr "На жаль, ви не можете голосувати за вашу публікацію."
@@ -2927,9 +2469,14 @@ msgid "Sort by"
 msgstr "Сортувати за"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
-msgid "Stats"
-msgstr "Статистика"
+#: model_terms:ir.ui.view,arch_db:website_forum.forum_nav_header
+msgid "Spam"
+msgstr "Спам"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
+msgid "Spam all post"
+msgstr "Позначити як спам усі публікації"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__state
@@ -2949,10 +2496,9 @@ msgid "Student"
 msgstr "Студент"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
-#: model_terms:ir.ui.view,arch_db:website_forum.new_link
-msgid "Submit a Link"
-msgstr "Надіслати посилання"
+#: model_terms:ir.ui.view,arch_db:website_forum.tag
+msgid "Subscribe"
+msgstr "Підписатися"
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_31
@@ -2967,6 +2513,7 @@ msgstr "Підтримувач"
 #: model:ir.ui.menu,name:website_forum.menu_forum_tag_global
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_tag_view_form
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_tag_view_list
+#: model_terms:ir.ui.view,arch_db:website_forum.header
 #: model_terms:ir.ui.view,arch_db:website_forum.view_forum_post_search
 msgid "Tag"
 msgstr "Мітка"
@@ -2980,9 +2527,8 @@ msgstr "Така мітка вже існує!"
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__tag_ids
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_index
+#: model_terms:ir.ui.view,arch_db:website_forum.forum_nav_header
 #: model_terms:ir.ui.view,arch_db:website_forum.header
-#: model_terms:ir.ui.view,arch_db:website_forum.new_discussion
-#: model_terms:ir.ui.view,arch_db:website_forum.new_link
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 #: model_terms:ir.ui.view,arch_db:website_forum.tag
 msgid "Tags"
@@ -3018,61 +2564,38 @@ msgstr ""
 
 #. module: website_forum
 #. openerp-web
-#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:6
+#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:7
 #, python-format
 msgid "Thanks for posting!"
 msgstr "Дякуємо за публікацію!"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
-msgid "The"
-msgstr "В"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "The flagged queue is empty."
-msgstr "Позначена черга порожня."
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
+#: model_terms:ir.ui.view,arch_db:website_forum.faq
 msgid ""
-"The goal of this site is create a relevant knowledge base that would answer\n"
-"    questions related to Odoo."
+"The goal of this site is create a relevant knowledge base that would answer "
+"questions related to Odoo."
 msgstr ""
-"Мета цього сайту - створити відповідну базу знань, яка відповідатиме на\n"
+"Мета цього сайту - створити відповідну базу знань, яка відповідатиме на "
 "питання, пов'язані з Odoo."
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "The offensive queue is empty."
-msgstr "Неприйнятна черга порожня."
+#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
+msgid "The question has been closed"
+msgstr "Запитання закрите"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "The validation queue is empty."
-msgstr "Черга перевірки порожня."
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
+#: model_terms:ir.ui.view,arch_db:website_forum.faq
 msgid ""
-"Therefore questions and answers can be edited like wiki pages by experienced users of\n"
-"    this site in order to improve the overall quality of the knowledge base content.\n"
-"    Such privileges are granted based on user karma level: you will be able to do the same\n"
-"    once your karma gets high enough."
+"Therefore questions and answers can be edited like wiki pages by experienced"
+" users of this site in order to improve the overall quality of the knowledge"
+" base content. Such privileges are granted based on user karma level: you "
+"will be able to do the same once your karma gets high enough."
 msgstr ""
-"Тому питання та відповіді можуть бути відредаговані як вікі сторінки досвідчених користувачів\n"
-"цього сайту, щоби покращити загальну якість змісту бази знань.\n"
-"Такі пільги надаються на основі рівня карми користувача: ви зможете робити те ж саме\n"
-"як тільки ваша карма стане досить високою."
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid ""
-"This community is for professional and enthusiast users,\n"
-"    partners and programmers. You can ask questions about:"
-msgstr ""
-"Ця спільнота призначена для користувачів професіоналів та ентузіастів,\n"
-"партнерів та програмістів. Ви можете задавати питання про:"
+"Тому питання та відповіді можуть бути відредаговані як вікі-сторінки "
+"досвідченими користувачами цього сайту з метою покращення загальної якості "
+"вмісту бази знань. Такі привілеї надаються на основі рівня карми "
+"користувача: ви зможете зробити те ж саме, щойно ваша карма буде достатньо "
+"високою."
 
 #. module: website_forum
 #: model_terms:forum.forum,welcome_message:website_forum.forum_help
@@ -3081,10 +2604,10 @@ msgid ""
 "                                        <br>Share and discuss the best content and new marketing ideas, build your professional profile and become a better marketer together."
 msgstr ""
 "Ця спільнота призначена для професіоналів та ентузіастів наших товарів і послуг.\n"
-"                                        <br>Поділіться і обговоріть найкращий вміст і нові маркетингові ідеї, побудуйте свій професійний профіль і станьте кращим маркетологом разом."
+"                                        <br>Поділіться і обговоріть найкращий вміст і нові маркетингові ідеї, побудуйте свій професійний профіль і станьте кращим маркетологом разом з нами."
 
 #. module: website_forum
-#: code:addons/website_forum/models/forum.py:51
+#: code:addons/website_forum/models/forum.py:35
 #: model:forum.forum,description:website_forum.forum_help
 #, python-format
 msgid ""
@@ -3109,26 +2632,20 @@ msgstr ""
 "моменту створення публікації"
 
 #. module: website_forum
-#: code:addons/website_forum/models/forum.py:411
-#, python-format
-msgid "This forum does not allow %s"
-msgstr "Цей форум не дозволяє %s"
-
-#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.header
 msgid "This forum has been archived."
 msgstr "Цей форум заархівовано."
 
 #. module: website_forum
 #. openerp-web
-#: code:addons/website_forum/static/src/js/website_forum.js:111
+#: code:addons/website_forum/static/src/js/website_forum.js:302
 #, python-format
 msgid "This post can not be flagged"
 msgstr "Ця публікація не може бути позначена"
 
 #. module: website_forum
 #. openerp-web
-#: code:addons/website_forum/static/src/js/website_forum.js:106
+#: code:addons/website_forum/static/src/js/website_forum.js:294
 #, python-format
 msgid "This post is already flagged"
 msgstr "Ця публікація позначена"
@@ -3139,18 +2656,8 @@ msgid ""
 "This post is currently awaiting moderation and not yet published... Do you "
 "want <i>Accept</i> or <i>Reject</i> this post ?"
 msgstr ""
-"Цей пост в даний час очікує модерації і ще не опубліковано... Ви "
+"Цей пост в даний час очікує модерації і ще не опубліковано ... Ви "
 "хочете<i>Прийняти</i> або <i>Відхилити</i> цю публікацію?"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.private_profile
-msgid "This profile is private!"
-msgstr "Цей профіль є приватним!"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_index
-msgid "Threads"
-msgstr "Зв'язки"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__name
@@ -3164,8 +2671,7 @@ msgid "Title must not be empty"
 msgstr "Заголовок не може бути порожнім"
 
 #. module: website_forum
-#: code:addons/website_forum/controllers/main.py:343
-#: code:addons/website_forum/controllers/main.py:414
+#: code:addons/website_forum/controllers/main.py:387
 #, python-format
 msgid "Title should not be empty."
 msgstr "Заголовок не повинен бути пустим."
@@ -3173,16 +2679,7 @@ msgstr "Заголовок не повинен бути пустим."
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_vote__recipient_id
 msgid "To"
-msgstr "По"
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid ""
-"To prevent your question from being flagged and possibly removed, avoid asking\n"
-"    subjective questions where …"
-msgstr ""
-"Щоб запобігти виникненню вашого запитання та, можливо, його видаленню, уникайте задавання\n"
-"суб'єктивних питань, де..."
+msgstr "До"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -3195,34 +2692,19 @@ msgid "Total Votes"
 msgstr "Сума голосів"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
+#: model_terms:ir.ui.view,arch_db:website_forum.forum_nav_header
 msgid "Trending"
 msgstr "Тенденції"
-
-#. module: website_forum
-#: model:ir.model.fields,field_description:website_forum.field_forum_post__post_type
-msgid "Type"
-msgstr "Тип"
-
-#. module: website_forum
-#: model:ir.model.fields,field_description:website_forum.field_forum_post__content_link
-msgid "URL"
-msgstr "URL"
-
-#. module: website_forum
-#: model:ir.model.fields,help:website_forum.field_forum_post__content_link
-msgid "URL of Link Articles"
-msgstr "URL-адреса посилання статей"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.new_link
-msgid "URL to Share"
-msgstr "URL-адреса для поширення"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_index
 msgid "Unanswered"
 msgstr "Без відповіді"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
+msgid "Undelete"
+msgstr "Відновити"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_comment_unlink_all
@@ -3247,11 +2729,6 @@ msgstr "Непрочитані повідомлення"
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__message_unread_counter
 msgid "Unread Messages Counter"
 msgstr "Кількість непрочитаних повідомлень"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.edit_profile
-msgid "Update"
-msgstr "Оновити"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__write_date
@@ -3303,16 +2780,8 @@ msgid "Users"
 msgstr "Користувачі"
 
 #. module: website_forum
-#: model:ir.model.fields,help:website_forum.field_forum_forum__allow_question
-msgid ""
-"Users can answer only once per question. Contributors can edit answers and "
-"mark the right ones."
-msgstr ""
-"Користувачі можуть відповідати лише один раз на питання. Автори можуть "
-"редагувати відповіді та позначати правильні."
-
-#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
+#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid "Validate"
 msgstr "Підтвердити"
 
@@ -3327,11 +2796,6 @@ msgid "View"
 msgstr "Перегляд"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
-msgid "View Your Badges"
-msgstr "Перегляньте ваші значки"
-
-#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
 msgid "Views"
 msgstr "Переглядів"
@@ -3342,8 +2806,13 @@ msgid "Vote"
 msgstr "Голос"
 
 #. module: website_forum
+#: sql_constraint:forum.post.vote:0
+msgid "Vote already exists !"
+msgstr "Голосування вже існує !"
+
+#. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__vote_ids
-#: model_terms:ir.ui.view,arch_db:website_forum.user_detail_full
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 msgid "Votes"
 msgstr "Голоси"
 
@@ -3363,18 +2832,8 @@ msgid "Waiting post"
 msgstr "Очікування публікації"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.new_link
-msgid ""
-"We keep a high level of quality in showcased posts, around 20% of the submited\n"
-"            posts will be featured."
-msgstr ""
-"Ми зберігаємо високий рівень якості в представлених публікаціях, приблизно 20% відправлених повідомлень \n"
-"буде представлено."
-
-#. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__website_id
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__website_id
-#: model_terms:ir.ui.view,arch_db:website_forum.edit_profile
 msgid "Website"
 msgstr "Веб-сайт"
 
@@ -3382,6 +2841,11 @@ msgstr "Веб-сайт"
 #: selection:gamification.challenge,category:0
 msgid "Website / Forum"
 msgstr "Веб-сайт/Форум"
+
+#. module: website_forum
+#: selection:gamification.challenge,category:0
+msgid "Website / Slides"
+msgstr "Веб-сайт / Відео"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__website_message_ids
@@ -3428,50 +2892,12 @@ msgstr "Зображення веб-сайту opengraph"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__welcome_message
 msgid "Welcome Message"
-msgstr "Привітальне повідомлення"
+msgstr "Привітальне пвідомлення"
 
 #. module: website_forum
 #: model_terms:forum.forum,welcome_message:website_forum.forum_help
 msgid "Welcome!"
 msgstr "Вітаємо!"
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid "What kinds of questions can I ask here?"
-msgstr "Які запитання я можу тут запитувати?"
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid "What should I avoid in my answers?"
-msgstr "Що слід уникати у моїх відповідях?"
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid "What should I avoid in my questions?"
-msgstr "Чого слід уникати у моїх запитаннях?"
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid ""
-"When a question or answer is upvoted, the user who posted them will gain some\n"
-"    points, which are called \"karma points\". These points serve as a rough\n"
-"    measure of the community trust to him/her. Various moderation tasks are\n"
-"    gradually assigned to the users based on those points."
-msgstr ""
-"Коли питання або відповідь виправдовуються, користувач, який опублікував їх, отримає деякі\n"
-"бали, які називаються \"бали карми\". Ці бали\n"
-"вимірюванням суспільної довіри. Різні завдання модерації\n"
-"поступово призначаються користувачам на основі цих балів."
-
-#. module: website_forum
-#: model:ir.model.fields,help:website_forum.field_forum_forum__allow_link
-msgid "When clicking on the post, it redirects to an external link"
-msgstr "Натискаючи на публікацію, це переспрямовується на зовнішнє посилання"
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid "Why can other people edit my questions/answers?"
-msgstr "Чому інші люди можуть редагувати мої запитання/відповіді?"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
@@ -3483,19 +2909,10 @@ msgstr ""
 "Будь ласка, зачекайте, поки модератор підтвердить попередній пост, перш ніж продовжувати."
 
 #. module: website_forum
-#: code:addons/website_forum/models/forum.py:139
-#, python-format
-msgid ""
-"You cannot choose %s as default post since the forum does not allow it."
-msgstr ""
-"Ви не можете обрати %s як публікацію за замовчуванням поки форум не "
-"дозволить це."
-
-#. module: website_forum
-#: code:addons/website_forum/models/forum.py:438
+#: code:addons/website_forum/models/forum.py:397
 #, python-format
 msgid "You cannot create recursive forum posts."
-msgstr "Ви не можете створити рекурсивні повідомлення форуму."
+msgstr "Ви не можете створювати рекурсивні повідомлення форуму."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_answer
@@ -3503,33 +2920,15 @@ msgid "You cannot post an empty answer"
 msgstr "Ви не можете опублікувати пусту відповідь"
 
 #. module: website_forum
-#: code:addons/website_forum/models/forum.py:953
+#: code:addons/website_forum/models/forum.py:940
 #, python-format
 msgid "You don't have enough karma to create a new Tag."
 msgstr "У вас не вистачає карми для створення нового тега."
 
 #. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid ""
-"You should only ask practical, answerable questions based\n"
-"    on actual problems that you face. Chatty, open-ended\n"
-"    questions diminish the usefulness of this site and push\n"
-"    other questions off the front page."
-msgstr ""
-"Ви повинні задавати лише практичні, незрозумілі питання на основі\n"
-"актуальних проблем, з якими часто стикаються. Чат, відкриті\n"
-"запитання зменшують корисність цього сайту та понижують\n"
-"інші питання з першої сторінки."
-
-#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_answer
 msgid "Your Answer"
 msgstr "Ваша відповідь"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.new_discussion
-msgid "Your Discussion Title..."
-msgstr "Заголовок вашого обговорення..."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
@@ -3552,19 +2951,9 @@ msgid "and"
 msgstr "і"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.close_post
-msgid "back to post"
-msgstr "повернутися до публікації"
-
-#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid "bad examples"
 msgstr "погані приклади"
-
-#. module: website_forum
-#: selection:gamification.badge,level:0
-msgid "bronze"
-msgstr "бронзовий"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -3632,24 +3021,14 @@ msgid "duplicate post"
 msgstr "дублікат публікації"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.new_link
-msgid "e.g. https://www.odoo.com"
-msgstr "наприклад, https://www.odoo.com"
-
-#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.faq
 msgid "edit any post, view offensive flags"
 msgstr "відредагуйте будь-який пост, перегляньте неприйнятні позначки"
 
 #. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid "every answer is equally valid: “What’s your favorite ______?”"
-msgstr "кожна відповідь однаково справедлива: \"Який твій улюблений ______?\""
-
-#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.faq
 msgid "flag offensive, close own questions"
-msgstr "позначте неприйнятно, закрийте свої запитання "
+msgstr "позначте як неприйнятно, закрийте свої запитання "
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.header
@@ -3667,19 +3046,9 @@ msgid "for reason:"
 msgstr "для причини:"
 
 #. module: website_forum
-#: selection:gamification.badge,level:0
-msgid "gold"
-msgstr "золотий"
-
-#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid "good examples"
 msgstr "хороші приклади"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
-msgid "has been closed"
-msgstr "було закрито"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_template_validation
@@ -3702,29 +3071,14 @@ msgstr "опубліковано. Натисніть тут, щоб отрима
 
 #. module: website_forum
 #. openerp-web
-#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:36
+#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:52
 #, python-format
 msgid "here"
 msgstr "тут"
 
 #. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid "how to configure or customize Odoo to specific business needs,"
-msgstr "як налаштувати Odoo для конкретних бізнес-потреб,"
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid "how to develop modules for your own need,"
-msgstr "як розробляти модулі для власної потреби"
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid "how to install Odoo on a specific infrastructure,"
-msgstr "як встановити Odoo на певну інфраструктуру,"
-
-#. module: website_forum
 #. openerp-web
-#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:34
+#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:50
 #, python-format
 msgid ""
 "if your\n"
@@ -3741,7 +3095,7 @@ msgstr "невідповідні та неприйнятні заяви"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.faq
 msgid "insert text link, upload files"
-msgstr "вставте текстове посилання, завантажте файли"
+msgstr "вставити текстове посилання, завантажте файли"
 
 #. module: website_forum
 #: model:forum.post.reason,name:website_forum.reason_11
@@ -3749,36 +3103,22 @@ msgid "insulting and offensive language"
 msgstr "образлива та неприйнятна мова"
 
 #. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid "it is a rant disguised as a question: “______ sucks, am I right?”"
-msgstr "це неприйнятне питання, таке як: “______ чортівня, чи я не правий?”"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_detail_full
-msgid "karma"
-msgstr "карма"
+#. openerp-web
+#: code:addons/website_forum/static/src/js/website_forum.js:186
+#, python-format
+msgid ""
+"karma is required to perform this action. You can earn karma by having your "
+"answers upvoted by the community."
+msgstr ""
+"карма потрібна для виконання цієї дії. Ви можете заробити карму, якщо ваші "
+"відповіді будуть підняті вгору спільнотою."
 
 #. module: website_forum
 #. openerp-web
-#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:34
+#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:50
 #, python-format
 msgid "karma points"
 msgstr "бали карми"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_detail_full
-msgid "last connection"
-msgstr "останнє з'єднання"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_detail_full
-msgid "location"
-msgstr "місцезнаходження"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_detail_full
-msgid "member since"
-msgstr "учасник з"
 
 #. module: website_forum
 #: model:forum.post.reason,name:website_forum.reason_4
@@ -3798,21 +3138,20 @@ msgstr "поза темою або нерелевантний"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_template_new_question
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_template_validation
-#: model_terms:ir.ui.view,arch_db:website_forum.post_comment
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid "on"
 msgstr "на"
 
 #. module: website_forum
 #. openerp-web
-#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:29
+#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:45
 #, python-format
 msgid ""
 "on social networks get an answer within\n"
 "        5 hours. Questions shared on two social networks have"
 msgstr ""
 "в соціальних мережах отримує відповідь у межах\n"
-"5 годин. Питання, що надсилаються у двох соціальних мережах, є"
+"5 годин. Питання, що надсилаються в двох соціальних мережах, є"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.header
@@ -3825,43 +3164,14 @@ msgid "racist and hate speech"
 msgstr "расистське та ненависне висловлювання"
 
 #. module: website_forum
-#: selection:gamification.badge,level:0
-msgid "silver"
-msgstr "срібний"
-
-#. module: website_forum
 #: model:forum.post.reason,name:website_forum.reason_8
 msgid "spam or advertising"
 msgstr "спам або реклама"
 
 #. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid "specific questions about Odoo service offers, etc."
-msgstr "конкретні питання про послуги Odoo та ін."
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid ""
-"there is no actual problem to be solved: “I’m curious if other people feel "
-"like I do.”"
-msgstr ""
-"немає реальної проблеми, яку потрібно вирішити: \"Мені цікаво, якщо інші "
-"люди відчувають, що я роблю\"."
-
-#. module: website_forum
 #: model:forum.post.reason,name:website_forum.reason_14
 msgid "threatening language"
 msgstr "загрозлива мова"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
-msgid "time"
-msgstr "час"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.header
-msgid "times"
-msgstr "часи"
 
 #. module: website_forum
 #: model:forum.post.reason,name:website_forum.reason_9
@@ -3876,7 +3186,7 @@ msgstr "занадто суб'єктивний і аргументаційний
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.faq
 msgid "upvote, add comments"
-msgstr "підвищення голосів, додати коментарі"
+msgstr "проголосувати за, додати коментарі"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -3889,45 +3199,16 @@ msgid "violent language"
 msgstr "насильницька мова"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_detail_full
-msgid "votes"
-msgstr "голоси"
-
-#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.header
 msgid "waiting for validation"
 msgstr "очікування перевірки"
 
 #. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid ""
-"we are being asked an open-ended, hypothetical question: “What if ______ "
-"happened?”"
-msgstr ""
-"нас запитують відкрите, гіпотетичне питання: \"Що робити, якщо ______ "
-"сталося?\""
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_detail_full
-msgid "website"
-msgstr "веб-сайт"
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid "what's the best way to use Odoo for a specific business need,"
-msgstr ""
-"який найкращий спосіб використовувати Odoo для конкретної бізнес-потреби,"
-
-#. module: website_forum
-#: model_terms:forum.forum,faq:website_forum.forum_help
-msgid ""
-"your answer is provided along with the question, and you expect more "
-"answers: “I use ______ for ______, what do you use?”"
-msgstr ""
-"ваша відповідь надається разом із питанням, і ви очікуєте більше відповідей:"
-" \"Я використовую ______ для ______, що ви використовуєте?\""
-
-#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.faq
 msgid "your biography can be seen as tooltip"
 msgstr "ваша біографія може розглядатися як підказка"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
+msgid "圾 Typical Character"
+msgstr "圾 типовий символ"

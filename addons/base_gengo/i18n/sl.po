@@ -1,28 +1,20 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # * base_gengo
-# 
-# Translators:
-# Martin Trigaux, 2019
-# Matjaz Mozetic <m.mozetic@matmoz.si>, 2019
-# Vida Potočnik <vida.potocnik@mentis.si>, 2019
-# laznikd <laznik@mentis.si>, 2019
-# matjaz k <matjaz@mentis.si>, 2019
-# Boris Kodelja <boris@hbs.si>, 2019
-# 
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server 10.saas~18\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-22 11:11+0000\n"
-"PO-Revision-Date: 2018-08-24 09:16+0000\n"
-"Last-Translator: Boris Kodelja <boris@hbs.si>, 2019\n"
+"POT-Creation-Date: 2019-06-12 12:24+0000\n"
+"PO-Revision-Date: 2017-09-20 09:53+0000\n"
 "Language-Team: Slovenian (https://www.transifex.com/odoo/teams/41243/sl/)\n"
+"Language: sl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: sl\n"
-"Plural-Forms: nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n"
+"%100==4 ? 2 : 3);\n"
 
 #. module: base_gengo
 #: model_terms:ir.ui.view,arch_db:base_gengo.base_gengo_translation_wizard_from
@@ -314,8 +306,8 @@ msgstr ""
 #: model:ir.model.fields,help:base_gengo.field_res_company__gengo_comment
 #: model:ir.model.fields,help:base_gengo.field_res_config_settings__gengo_comment
 msgid ""
-"This comment will be automatically be enclosed in each an every request sent"
-" to Gengo"
+"This comment will be automatically be enclosed in each an every request sent "
+"to Gengo"
 msgstr "Ta komentar bo dodan vsakemu zahtevku"
 
 #. module: base_gengo

@@ -6,6 +6,7 @@
 # Martin Trigaux, 2018
 # Morten Schou <ms@msteknik.dk>, 2018
 # Jesper Carstensen <jc@danodoo.dk>, 2018
+# Ejner Sønniksen <ejner@vkdata.dk>, 2018
 # lhmflexerp <lhm@flexerp.dk>, 2018
 # Sanne Kristensen <sanne@vkdata.dk>, 2018
 # 
@@ -43,8 +44,8 @@ msgstr "Deaktiveret"
 
 #. module: mail_bot
 #: model:ir.model,name:mail_bot.model_mail_channel
-msgid "Discussion Channel"
-msgstr ""
+msgid "Discussion channel"
+msgstr "Diskussionskanal"
 
 #. module: mail_bot
 #: model:ir.model.fields,field_description:mail_bot.field_mail_bot__display_name

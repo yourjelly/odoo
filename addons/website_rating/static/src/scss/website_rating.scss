@@ -16,7 +16,7 @@ $o-w-rating-star-color: #FACC2E;
         overflow: visible;
 
         .o_website_rating_table_star_num{
-            min-width: 30px;
+            min-width: 50px;
         }
         .o_website_rating_select[style*="opacity: 1"] {
             cursor: pointer;
@@ -67,4 +67,20 @@ $o-w-rating-star-color: #FACC2E;
     .rate_text{
         display: inline-block;
     }
+}
+
+/* Rating Popup Composer */
+.o_rating_popup_composer {
+
+    .o_rating_clickable {
+        cursor: pointer;
+    }
+
+    .o_portal_chatter_avatar {
+        margin-right: 10px;
+    }
+}
+
+.o_rating_popup_composer_label {
+    color: color-yiq(white);
 }

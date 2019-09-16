@@ -3,17 +3,15 @@
 # * base_sparse_field
 # 
 # Translators:
-# Martin Trigaux, 2019
-# Anders Wallenquist <anders.wallenquist@vertel.se>, 2019
-# Chrille Hedberg <hedberg.chrille@gmail.com>, 2019
-# 
+# Martin Trigaux, 2018
+# Anders Wallenquist <anders.wallenquist@vertel.se>, 2018
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~11.5\n"
+"Project-Id-Version: Odoo Server saas~11.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-09-21 13:17+0000\n"
-"PO-Revision-Date: 2018-08-24 09:16+0000\n"
-"Last-Translator: Chrille Hedberg <hedberg.chrille@gmail.com>, 2019\n"
+"POT-Creation-Date: 2018-08-02 09:55+0000\n"
+"PO-Revision-Date: 2018-08-02 09:55+0000\n"
+"Last-Translator: Anders Wallenquist <anders.wallenquist@vertel.se>, 2018\n"
 "Language-Team: Swedish (https://www.transifex.com/odoo/teams/41243/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -24,7 +22,7 @@ msgstr ""
 #. module: base_sparse_field
 #: model:ir.model.fields,field_description:base_sparse_field.field_sparse_fields_test__boolean
 msgid "Boolean"
-msgstr "Boolskt"
+msgstr "Boolean"
 
 #. module: base_sparse_field
 #: code:addons/base_sparse_field/models/models.py:25
@@ -113,7 +111,7 @@ msgstr ""
 #. module: base_sparse_field
 #: model:ir.model.fields,field_description:base_sparse_field.field_sparse_fields_test__partner
 msgid "Partner"
-msgstr "Samarbetspartner"
+msgstr "Företag"
 
 #. module: base_sparse_field
 #: code:addons/base_sparse_field/models/models.py:27
@@ -138,11 +136,6 @@ msgid "Serialization field `%s` not found for sparse field `%s`!"
 msgstr ""
 
 #. module: base_sparse_field
-#: model:ir.model,name:base_sparse_field.model_sparse_fields_test
-msgid "Sparse fields Test"
-msgstr ""
-
-#. module: base_sparse_field
 #: selection:sparse_fields.test,selection:0
 msgid "Two"
 msgstr ""
@@ -150,27 +143,27 @@ msgstr ""
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "binary"
-msgstr "binär"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "boolean"
-msgstr "boolskt"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "char"
-msgstr "tecken"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "date"
-msgstr "datum"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "datetime"
-msgstr "datumtid"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
@@ -180,42 +173,42 @@ msgstr ""
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "html"
-msgstr "html"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "integer"
-msgstr "heltal"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "many2many"
-msgstr "many2many"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "many2one"
-msgstr "many2one"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "monetary"
-msgstr "monetär"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "one2many"
-msgstr "one2many"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "reference"
-msgstr "referens"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "selection"
-msgstr "val"
+msgstr ""
 
 #. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
@@ -223,6 +216,11 @@ msgid "serialized"
 msgstr ""
 
 #. module: base_sparse_field
+#: model:ir.model,name:base_sparse_field.model_sparse_fields_test
+msgid "sparse_fields.test"
+msgstr ""
+
+#. module: base_sparse_field
 #: selection:ir.model.fields,ttype:0
 msgid "text"
-msgstr "text"
+msgstr ""

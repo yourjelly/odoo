@@ -4,16 +4,16 @@
 # 
 # Translators:
 # Yaroslav Molochko <onorua@gmail.com>, 2018
-# Martin Trigaux, 2018
 # Bohdan Lisnenko, 2018
+# ТАрас <tratatuta@i.ua>, 2018
 # Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server saas~12.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-29 10:10+0000\n"
-"PO-Revision-Date: 2018-08-24 09:34+0000\n"
+"POT-Creation-Date: 2019-03-20 13:50+0000\n"
+"PO-Revision-Date: 2016-08-05 13:12+0000\n"
 "Last-Translator: Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019\n"
 "Language-Team: Ukrainian (https://www.transifex.com/odoo/teams/41243/uk/)\n"
 "MIME-Version: 1.0\n"
@@ -24,42 +24,42 @@ msgstr ""
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/xml/website.gengo.xml:144
+#: code:addons/website_gengo/static/src/xml/website.gengo.xml:120
 #, python-format
 msgid "- Enable if you using testing account"
-msgstr "- Ввімкніть якщо використовуєте тестовий обліковий запис"
+msgstr "- Увімкніть, якщо використовуєте тестовий обліковий запис"
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/xml/website.gengo.xml:138
+#: code:addons/website_gengo/static/src/xml/website.gengo.xml:114
 #, python-format
 msgid "- Jobs are Automatically Approved by Gengo."
 msgstr "- Робота автоматично схвалюється Gengo."
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/xml/website.gengo.xml:118
+#: code:addons/website_gengo/static/src/xml/website.gengo.xml:94
 #, python-format
 msgid "1. Go To your"
 msgstr "1. Перейдіть до вашого"
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/xml/website.gengo.xml:119
+#: code:addons/website_gengo/static/src/xml/website.gengo.xml:95
 #, python-format
 msgid "2. Then paste generated keys in given form"
 msgstr "2. Вставте сгенеровані ключі у відповідну форму"
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/xml/website.gengo.xml:29
+#: code:addons/website_gengo/static/src/xml/website.gengo.xml:18
 #, python-format
 msgid "Already translated content"
 msgstr "Повністю перекладений зміст"
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/xml/website.gengo.xml:137
+#: code:addons/website_gengo/static/src/xml/website.gengo.xml:113
 #, python-format
 msgid "Auto Approve Translation"
 msgstr "Автоматичне затвердження перекладу"
@@ -110,14 +110,14 @@ msgstr "Вміст для перекладу або ви можете опубл
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/js/website_gengo.js:85
+#: code:addons/website_gengo/static/src/js/website_gengo.js:90
 #, python-format
 msgid "Could not Post translation"
 msgstr "Не можливо опублікувати переклад"
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/js/website_gengo.js:192
+#: code:addons/website_gengo/static/src/js/website_gengo.js:206
 #, python-format
 msgid "Could not submit ! Try Again"
 msgstr "Не вдалося надіслати! Спробуй ще раз"
@@ -183,7 +183,7 @@ msgstr "Вставте публічний ключ тут"
 #: code:addons/website_gengo/static/src/xml/website.gengo.xml:51
 #, python-format
 msgid "Post"
-msgstr "Провести"
+msgstr "Опублікувати"
 
 #. module: website_gengo
 #. openerp-web
@@ -257,21 +257,21 @@ msgstr "Переклад у процесі"
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/xml/website.gengo.xml:26
+#: code:addons/website_gengo/static/src/xml/website.gengo.xml:15
 #, python-format
 msgid "Translation in process (Gengo)"
 msgstr "Перекладається (Gengo)"
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/xml/website.gengo.xml:89
+#: code:addons/website_gengo/static/src/xml/website.gengo.xml:64
 #, python-format
 msgid "Translator statistics for this page"
 msgstr "Статистика перекладу для цієї сторінки"
 
 #. module: website_gengo
 #. openerp-web
-#: code:addons/website_gengo/static/src/xml/website.gengo.xml:70
+#: code:addons/website_gengo/static/src/xml/website.gengo.xml:46
 #, python-format
 msgid "Ultra - $"
 msgstr "Ультра - $"

@@ -52,7 +52,7 @@ from . import tools
 from .exceptions import AccessError, MissingError, ValidationError, UserError
 from .osv.query import Query
 from .tools import frozendict, lazy_classproperty, lazy_property, ormcache, \
-                   Collector, LastOrderedSet, OrderedSet, pycompat, groupby
+                   Collector, LastOrderedSet, OrderedSet, groupby
 from .tools.config import config
 from .tools.func import frame_codeinfo
 from .tools.misc import CountingStream, clean_context, DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
@@ -182,7 +182,7 @@ class NewId(object):
         return False
     __nonzero__ = __bool__
 
-IdType = pycompat.integer_types + pycompat.string_types + (NewId,)
+IdType = (int, str, NewId)
 
 
 # maximum number of prefetched records
@@ -199,7 +199,6 @@ VALID_AGGREGATE_FUNCTIONS = {
 }
 
 
-@pycompat.implements_to_string
 class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     """ Base class for Odoo models.
 
@@ -424,7 +423,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         # determine inherited models
         parents = cls._inherit
-        parents = [parents] if isinstance(parents, pycompat.string_types) else (parents or [])
+        parents = [parents] if isinstance(parents, str) else (parents or [])
 
         # determine the model's name
         name = cls._name or (len(parents) == 1 and parents[0]) or cls.__name__
@@ -520,7 +519,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         cls._inherits = {}
         cls._depends = {}
         cls._constraints = {}
-        cls._sql_constraints = []
+        cls._sql_constraints = {}
 
         for base in reversed(cls.__bases__):
             if not getattr(base, 'pool', None):
@@ -541,10 +540,12 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 # cons may override a constraint with the same function name
                 cls._constraints[getattr(cons[0], '__name__', id(cons[0]))] = cons
 
-            cls._sql_constraints += base._sql_constraints
+            for cons in base._sql_constraints:
+                cls._sql_constraints[cons[0]] = cons
 
         cls._sequence = cls._sequence or (cls._table + '_id_seq')
         cls._constraints = list(cls._constraints.values())
+        cls._sql_constraints = list(cls._sql_constraints.values())
 
         # update _inherits_children of parent models
         for parent_name in cls._inherits:
@@ -988,7 +989,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
             # copy non-relational fields to record dict
             record = {fnames[0]: value
-                      for fnames, value in pycompat.izip(fields_, row)
+                      for fnames, value in zip(fields_, row)
                       if not is_relational(fnames[0])}
 
             # Get all following rows which have relational values attached to
@@ -1002,13 +1003,13 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
                 # get only cells for this sub-field, should be strictly
                 # non-empty, field path [None] is for name_get field
-                indices, subfields = pycompat.izip(*((index, fnames[1:] or [None])
+                indices, subfields = zip(*((index, fnames[1:] or [None])
                                            for index, fnames in enumerate(fields_)
                                            if fnames[0] == relfield))
 
                 # return all rows which have at least one value for the
                 # subfields of relfield
-                relfield_data = [it for it in pycompat.imap(itemgetter_tuple(indices), record_span) if any(it)]
+                relfield_data = [it for it in map(itemgetter_tuple(indices), record_span) if any(it)]
                 record[relfield] = [
                     subrecord
                     for subrecord, _subinfo in comodel._extract_records(subfields, relfield_data, log=log)
@@ -1041,7 +1042,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             # processing of response, but injects human readable in message
             exc_vals = dict(base, record=record, field=field_names[field])
             record = dict(base, type=type, record=record, field=field,
-                          message=pycompat.text_type(exception.args[0]) % exc_vals)
+                          message=str(exception.args[0]) % exc_vals)
             if len(exception.args) > 1 and exception.args[1]:
                 record.update(exception.args[1])
             log(record)
@@ -1536,7 +1537,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         provided domain <reference/orm/domains>`.
         """
         res = self.search(args, count=True)
-        return res if isinstance(res, pycompat.integer_types) else len(res)
+        return res if isinstance(res, int) else len(res)
 
     @api.model
     @api.returns('self',
@@ -1567,6 +1568,17 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
     @api.depends(lambda self: (self._rec_name,) if self._rec_name else ())
     def _compute_display_name(self):
+        """Compute the value of the `display_name` field.
+
+        In general `display_name` is equal to calling `name_get()[0][1]`.
+
+        In that case, it is recommended to use `display_name` to uniformize the
+        code and to potentially take advantage of prefetch when applicable.
+
+        However some models might override this method. For them, the behavior
+        might differ, and it is important to select which of `display_name` or
+        `name_get()[0][1]` to call depending on the desired result.
+        """
         names = dict(self.name_get())
         for record in self:
             record.display_name = names.get(record.id, False)
@@ -1681,7 +1693,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         # override defaults with the provided values, never allow the other way around
         defaults = self.default_get(list(missing_defaults))
         for name, value in defaults.items():
-            if self._fields[name].type == 'many2many' and value and isinstance(value[0], pycompat.integer_types):
+            if self._fields[name].type == 'many2many' and value and isinstance(value[0], int):
                 # convert a list of ids into a list of commands
                 defaults[name] = [(6, 0, value)]
             elif self._fields[name].type == 'one2many' and value and isinstance(value[0], dict):
@@ -1956,7 +1968,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         value = False if value is None else value
         gb = groupby_dict.get(key)
         if gb and gb['type'] in ('date', 'datetime') and value:
-            if isinstance(value, pycompat.string_types):
+            if isinstance(value, str):
                 dt_format = DEFAULT_SERVER_DATETIME_FORMAT if gb['type'] == 'datetime' else DEFAULT_SERVER_DATE_FORMAT
                 value = datetime.datetime.strptime(value, dt_format)
             if gb['tz_convert']:
@@ -2069,7 +2081,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         """
         result = self._read_group_raw(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
 
-        groupby = [groupby] if isinstance(groupby, pycompat.string_types) else list(OrderedSet(groupby))
+        groupby = [groupby] if isinstance(groupby, str) else list(OrderedSet(groupby))
         dt = [
             f for f in groupby
             if self._fields[f.split(':')[0]].type in ('date', 'datetime')    # e.g. 'date:month'
@@ -2093,7 +2105,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         query = self._where_calc(domain)
         fields = fields or [f.name for f in self._fields.values() if f.store]
 
-        groupby = [groupby] if isinstance(groupby, pycompat.string_types) else list(OrderedSet(groupby))
+        groupby = [groupby] if isinstance(groupby, str) else list(OrderedSet(groupby))
         groupby_list = groupby[:1] if lazy else groupby
         annotated_groupbys = [self._read_group_process_groupby(gb, query) for gb in groupby_list]
         groupby_fields = [g['field'] for g in annotated_groupbys]
@@ -2733,14 +2745,55 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             invalid_fields = {name for name in fields if not valid(name)}
             if invalid_fields:
                 _logger.info('Access Denied by ACLs for operation: %s, uid: %s, model: %s, fields: %s',
-                    operation, self._uid, self._name, ', '.join(invalid_fields))
-                raise AccessError(
-                    _(
-                        'The requested operation cannot be completed due to security restrictions. '
-                        'Please contact your system administrator.\n\n(Document type: %s, Operation: %s)'
-                    ) % (self._description, operation)
-                    + ' - ({} {}, {} {})'.format(_('User:'), self._uid, _('Fields:'), ', '.join(invalid_fields))
-                )
+                             operation, self._uid, self._name, ', '.join(invalid_fields))
+
+                description = self.env['ir.model']._get(self._name).name
+                if not self.env.user.has_group('base.group_no_one'):
+                    raise AccessError(
+                        _('The requested operation cannot be completed due to security restrictions. '
+                          'Please contact your system administrator.\n\n(Document type: %(document_kind)s (%(document_model)s), Operation: %(operation)s)') % {
+                        'document_kind': description,
+                        'document_model': self._name,
+                        'operation': operation,
+                    })
+
+                def format_groups(field):
+                    anyof = self.env['res.groups']
+                    noneof = self.env['res.groups']
+                    for g in field.groups.split(','):
+                        if g.startswith('!'):
+                            noneof |= self.env.ref(g[1:])
+                        else:
+                            anyof |= self.env.ref(g)
+                    strs = []
+                    if anyof:
+                        strs.append(_("allowed for groups %s") % ', '.join(
+                            anyof.sorted(lambda g: g.id)
+                                 .mapped(lambda g: repr(g.display_name))
+                        ))
+                    if noneof:
+                        strs.append(_("forbidden for groups %s") % ', '.join(
+                            noneof.sorted(lambda g: g.id)
+                                  .mapped(lambda g: repr(g.display_name))
+                        ))
+                    return '; '.join(strs)
+
+                raise AccessError(_("""The requested operation can not be completed due to security restrictions.
+
+Document type: %(document_kind)s (%(document_model)s)
+Operation: %(operation)s
+User: %(user)s
+Fields:
+%(fields_list)s""") % {
+                    'document_model': self._name,
+                    'document_kind': description or self._name,
+                    'operation': operation,
+                    'user': self._uid,
+                    'fields_list': '\n'.join(
+                        '- %s (%s)' % (f, format_groups(self._fields[f]))
+                        for f in sorted(invalid_fields)
+                    )
+                })
 
         return fields
 
@@ -2906,7 +2959,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             params[param_pos] = tuple(sub_ids)
             cr.execute(query_str, params)
             for row in cr.fetchall():
-                for values, val in pycompat.izip(field_values_list, row):
+                for values, val in zip(field_values_list, row):
                     values.append(val)
 
         ids = field_values_list.pop(0)
@@ -2915,7 +2968,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         if ids:
             # translate the fields if necessary
             if context.get('lang'):
-                for field, values in pycompat.izip(fields_pre, field_values_list):
+                for field, values in zip(fields_pre, field_values_list):
                     if not field.inherited and callable(field.translate):
                         name = field.name
                         translate = field.get_trans_func(fetched)
@@ -2924,7 +2977,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
             # store result in cache
             target = self.browse([], self._prefetch)
-            for field, values in pycompat.izip(fields_pre, field_values_list):
+            for field, values in zip(fields_pre, field_values_list):
                 convert = field.convert_to_cache
                 # Note that the target record passed to convert below is empty.
                 # This does not harm in practice, as it is only used in Monetary
@@ -2958,14 +3011,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             # mark non-existing records in missing
             forbidden = missing.exists()
             if forbidden:
-                _logger.info(
-                    _('The requested operation cannot be completed due to record rules: Document type: %s, Operation: %s, Records: %s, User: %s') % \
-                    (self._name, 'read', ','.join([str(r.id) for r in self][:6]), self._uid))
-                # store an access error exception in existing records
-                exc = AccessError(
-                    _('The requested operation cannot be completed due to security restrictions. Please contact your system administrator.\n\n(Document type: %s, Operation: %s)') % (self._description, 'read')
-                    + ' - ({} {}, {} {})'.format(_('Records:'), self.ids[:6], _('User:'), self._uid)
-                )
+                exc = self.env['ir.rule']._make_access_error('read', forbidden)
                 self.env.cache.set_failed(forbidden, self._fields.values(), exc)
 
     @api.multi
@@ -3052,14 +3098,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             # the invalid records are (partially) hidden by access rules
             if self.is_transient():
                 raise AccessError(_('For this kind of document, you may only access records you created yourself.\n\n(Document type: %s)') % (self._description,))
-            else:
-                _logger.info('Access Denied by record rules for operation: %s on record ids: %r, uid: %s, model: %s', operation, forbidden.ids, self._uid, self._name)
-                raise AccessError(
-                    _(
-                        'The requested operation cannot be completed due to security restrictions. Please contact your system administrator.\n\n(Document type: %s, Operation: %s)'
-                    ) % (self._description, operation)
-                    + ' - ({} {}, {} {})'.format(_('Records:'), invalid.ids[:6], _('User:'), self._uid)
-                )
+
+            raise self.env['ir.rule']._make_access_error(operation, forbidden)
 
         # If we get here, the invalid records are not in the database.
         if operation in ('read', 'unlink'):
@@ -3079,6 +3119,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     def _filter_access_rules(self, operation):
         """ Return the subset of ``self`` for which ``operation`` is allowed. """
         if self._uid == SUPERUSER_ID:
+            return self
+
+        if not self._ids:
             return self
 
         if self.is_transient():
@@ -3167,7 +3210,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 cr.execute(query, (self._name, sub_ids))
                 attachments = Attachment.browse([row[0] for row in cr.fetchall()])
                 if attachments:
-                    attachments.unlink()
+                    attachments.sudo().unlink()
 
             # invalidate the *whole* cache, since the orm does not handle all
             # changes made in the database, like cascading delete!
@@ -3317,7 +3360,17 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                     cr.execute(query, [sub_ids])
                     parent_ids.update(row[0] for row in cr.fetchall())
 
-                self.env[model_name].browse(parent_ids).write(parent_vals)
+                try:
+                    self.env[model_name].browse(parent_ids).write(parent_vals)
+                except AccessError as e:
+                    description = self.env['ir.model']._get(self._name).name
+                    raise AccessError(
+                        _("%(previous_message)s\n\nImplicitly accessed through '%(document_kind)s' (%(document_model)s).") % {
+                            'previous_message': e.args[0],
+                            'document_kind': description,
+                            'document_model': self._name,
+                        }
+                    )
 
             # write stored fields with (low-level) method _write
             if store_vals or inverse_vals or inherited_vals:
@@ -3335,7 +3388,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 # groups by dependence (in case they depend on each other)
                 field_groups = sorted(
                     (fields for _inv, fields in groupby(inverse_fields, attrgetter('inverse'))),
-                    key=lambda fields: min(pycompat.imap(self.pool.field_sequence, fields)),
+                    key=lambda fields: min(map(self.pool.field_sequence, fields)),
                 )
                 for fields in field_groups:
                     # If a field is not stored, its inverse method will probably
@@ -3559,7 +3612,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                     data['inherited'][model_name]
                     for data in parent_data_list
                 ])
-                for parent, data in pycompat.izip(parents, parent_data_list):
+                for parent, data in zip(parents, parent_data_list):
                     data['stored'][parent_name] = parent.id
 
         # create records with stored fields
@@ -3572,7 +3625,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             # by dependence (in case they depend on each other)
             field_groups = sorted(
                 (fields for _inv, fields in groupby(inversed_fields, attrgetter('inverse'))),
-                key=lambda fields: min(pycompat.imap(self.pool.field_sequence, fields)),
+                key=lambda fields: min(map(self.pool.field_sequence, fields)),
             )
             for fields in field_groups:
                 # determine which records to inverse for those fields
@@ -3668,7 +3721,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         # the new records
         records = self.browse(ids)
-        for data, record in pycompat.izip(data_list, records):
+        for data, record in zip(data_list, records):
             data['record'] = record
 
         # update parent_path
@@ -3687,7 +3740,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 for field in sorted(other_fields, key=attrgetter('_sequence')):
                     field.create([
                         (other, data['stored'][field.name])
-                        for other, data in pycompat.izip(others, data_list)
+                        for other, data in zip(others, data_list)
                         if field.name in data['stored']
                     ])
 
@@ -3869,7 +3922,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         # create records
         records = self._load_records_create([data['values'] for data in to_create])
-        for data, record in pycompat.izip(to_create, records):
+        for data, record in zip(to_create, records):
             data['record'] = record
 
         # create or update XMLIDs
@@ -4253,7 +4306,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 # foreseen in copy_data()
                 old_lines = old[name].sorted(key='id')
                 new_lines = new[name].sorted(key='id')
-                for (old_line, new_line) in pycompat.izip(old_lines, new_lines):
+                for (old_line, new_line) in zip(old_lines, new_lines):
                     # don't pass excluded as it is not about those lines
                     old_line.copy_translations(new_line)
 
@@ -4315,7 +4368,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         """
         ids, new_ids = [], []
         for i in self._ids:
-            (ids if isinstance(i, pycompat.integer_types) else new_ids).append(i)
+            (ids if isinstance(i, int) else new_ids).append(i)
         if not ids:
             return self
         query = """SELECT id FROM "%s" WHERE id IN %%s""" % self._table
@@ -4400,7 +4453,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     def _get_external_ids(self):
         """Retrieve the External ID(s) of any database record.
 
-        **Synopsis**: ``_get_xml_ids() -> { 'id': ['module.xml_id'] }``
+        **Synopsis**: ``_get_external_ids() -> { 'id': ['module.external_id'] }``
 
         :return: map of ids to the list of their fully qualified External IDs
                  in the form ``module.key``, or an empty list when there's no External
@@ -4867,7 +4920,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         """
         if not func:
             return self                 # support for an empty path of fields
-        if isinstance(func, pycompat.string_types):
+        if isinstance(func, str):
             recs = self
             for name in func.split('.'):
                 recs = recs._mapped_func(operator.itemgetter(name))
@@ -4895,7 +4948,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
             :param func: a function or a dot-separated sequence of field names
         """
-        if isinstance(func, pycompat.string_types):
+        if isinstance(func, str):
             name = func
             func = lambda rec: any(rec.mapped(name))
         return self.browse([rec.id for rec in self if func(rec)])
@@ -4912,7 +4965,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         if key is None:
             recs = self.search([('id', 'in', self.ids)])
             return self.browse(reversed(recs._ids)) if reverse else recs
-        if isinstance(key, pycompat.string_types):
+        if isinstance(key, str):
             key = itemgetter(key)
         return self.browse(item.id for item in sorted(self, key=key, reverse=reverse))
 
@@ -5000,7 +5053,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         """
         if isinstance(item, BaseModel) and self._name == item._name:
             return len(item) == 1 and item.id in self._ids
-        elif isinstance(item, pycompat.string_types):
+        elif isinstance(item, str):
             return item in self._fields
         else:
             raise TypeError("Mixing apples and oranges: %s in %s" % (item, self))
@@ -5118,7 +5171,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 rs = inst[10:20]            # subset of inst
                 nm = rs['name']             # name of first record in inst
         """
-        if isinstance(key, pycompat.string_types):
+        if isinstance(key, str):
             # important: one must call the field's getter
             return self._fields[key].__get__(self, type(self))
         elif isinstance(key, slice):

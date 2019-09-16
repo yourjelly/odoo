@@ -10,7 +10,6 @@ from odoo import tools
 from odoo.addons.http_routing.models.ir_http import url_for
 from odoo.osv import expression
 from odoo.http import request
-from odoo.tools import pycompat
 
 _logger = logging.getLogger(__name__)
 
@@ -219,7 +218,7 @@ class View(models.Model):
             :param view_id: either a string xml_id or an integer view_id
             :return: The view record or empty recordset
         '''
-        if isinstance(view_id, pycompat.string_types) or isinstance(view_id, pycompat.integer_types):
+        if isinstance(view_id, str) or isinstance(view_id, int):
             return self.env['website'].viewref(view_id)
         else:
             # It can already be a view object when called by '_views_get()' that is calling '_view_obj'
@@ -269,7 +268,7 @@ class View(models.Model):
         Archived views are ignored (unless the active_test context is set, but
         then the ormcache_context will not work as expected).
         """
-        if 'website_id' in self._context and not isinstance(xml_id, pycompat.integer_types):
+        if 'website_id' in self._context and not isinstance(xml_id, int):
             current_website = self.env['website'].browse(self._context.get('website_id'))
             domain = ['&', ('key', '=', xml_id)] + current_website.website_domain()
 

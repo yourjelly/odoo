@@ -5,7 +5,6 @@ import datetime
 
 from odoo import models, fields, api, _
 from odoo.exceptions import AccessError, ValidationError
-from odoo.tools import pycompat
 
 
 class Category(models.Model):
@@ -51,7 +50,7 @@ class Category(models.Model):
             categories.append(category[0])
         categories.append(self)
         # assign parents following sequence
-        for parent, child in pycompat.izip(categories, categories[1:]):
+        for parent, child in zip(categories, categories[1:]):
             if parent and child:
                 child.parent = parent
         # assign name of last category, and reassign display_name (to normalize it)
@@ -139,7 +138,11 @@ class Message(models.Model):
     @api.one
     @api.depends('author.name', 'discussion.name')
     def _compute_name(self):
-        self.name = "[%s] %s" % (self.discussion.name or '', self.author.name or '')
+        # one may force the value through the context
+        self.name = (
+            self._context.get('compute_name') or
+            "[%s] %s" % (self.discussion.name or '', self.author.name or '')
+        )
 
     @api.one
     @api.depends('author.name', 'discussion.name', 'body')
@@ -224,6 +227,11 @@ class MultiLine(models.Model):
     name = fields.Char()
     partner = fields.Many2one('res.partner')
     tags = fields.Many2many('test_new_api.multi.tag')
+
+
+class MultiLine2(models.Model):
+    _name = 'test_new_api.multi.line2'
+    _inherit = 'test_new_api.multi.line'
 
 
 class MultiTag(models.Model):
@@ -512,3 +520,35 @@ class FieldWithCaps(models.Model):
     _description = 'Model with field defined with capital letters'
 
     pArTneR_321_id = fields.Many2one('res.partner')
+
+
+class RequiredM2O(models.Model):
+    _name = 'test_new_api.req_m2o'
+    _description = 'Required Many2one'
+
+    foo = fields.Many2one('res.currency', required=True, ondelete='cascade')
+    bar = fields.Many2one('res.country', required=True)
+
+
+class Attachment(models.Model):
+    _name = 'test_new_api.attachment'
+    _description = 'Attachment'
+
+    res_model = fields.Char(required=True)
+    res_id = fields.Integer(required=True)
+    name = fields.Char(compute='_compute_name', compute_sudo=True, store=True)
+
+    @api.depends('res_model', 'res_id')
+    def _compute_name(self):
+        for rec in self:
+            rec.name = self.env[rec.res_model].browse(rec.res_id).display_name
+
+
+class AttachmentHost(models.Model):
+    _name = 'test_new_api.attachment.host'
+    _description = 'Attachment Host'
+
+    attachment_ids = fields.One2many(
+        'test_new_api.attachment', 'res_id', auto_join=True,
+        domain=lambda self: [('res_model', '=', self._name)],
+    )

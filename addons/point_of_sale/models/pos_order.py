@@ -158,10 +158,15 @@ class PosOrder(models.Model):
         '''This method is designed to be inherited in a custom module'''
         return False
 
-    def _create_account_move(self, dt, ref, journal_id, company_id):
-        date_tz_user = fields.Datetime.context_timestamp(self, fields.Datetime.from_string(dt))
+    def _create_account_move(self):
+        self.ensure_one()
+        date_tz_user = fields.Datetime.context_timestamp(self, fields.Datetime.from_string(self.session_id.start_at))
         date_tz_user = fields.Date.to_string(date_tz_user)
-        return self.env['account.move'].sudo().create({'ref': ref, 'journal_id': journal_id, 'date': date_tz_user})
+        return self.env['account.move'].sudo().create({
+            'ref': self.name,
+            'journal_id': self.sale_journal.id,
+            'date': date_tz_user
+        })
 
     def _prepare_invoice(self):
         """
@@ -221,7 +226,7 @@ class PosOrder(models.Model):
 
     def _action_create_invoice_line(self, line=False, invoice_id=False):
         InvoiceLine = self.env['account.invoice.line']
-        inv_name = line.product_id.name_get()[0][1]
+        inv_name = line.product_id.display_name
         inv_line = {
             'invoice_id': invoice_id,
             'product_id': line.product_id.id,
@@ -239,7 +244,7 @@ class PosOrder(models.Model):
         inv_line.update(price_unit=line.price_unit, discount=line.discount)
         return InvoiceLine.sudo().create(inv_line)
 
-    def _prepare_account_move_and_lines(self, session=None, move=None):
+    def _prepare_account_move_line(self, line, partner_id, current_company, currency_id, rounding_method):
         def _flatten_tax_and_children(taxes, group_done=None):
             children = self.env['account.tax']
             if group_done is None:
@@ -249,6 +254,88 @@ class PosOrder(models.Model):
                     group_done.add(tax.id)
                     children |= _flatten_tax_and_children(tax.children_tax_ids, group_done)
             return taxes + children
+        res = []
+        order = line.order_id
+        cur_company = order.company_id.currency_id
+        date_order = order.date_order.date() if order.date_order else fields.Date.today()
+        if currency_id != cur_company:
+            amount_subtotal = currency_id._convert(line.price_subtotal, cur_company, order.company_id, date_order)
+        else:
+            amount_subtotal = line.price_subtotal
+
+        # Search for the income account
+        if line.product_id.property_account_income_id.id:
+            income_account = line.product_id.property_account_income_id
+        elif line.product_id.categ_id.property_account_income_categ_id.id:
+            income_account = line.product_id.categ_id.property_account_income_categ_id
+        else:
+            raise UserError(_('Please define income '
+                              'account for this product: "%s" (id:%d).')
+                            % (line.product_id.name, line.product_id.id))
+        fpos = order.fiscal_position_id or order.partner_id.property_account_position_id
+        if fpos:
+            income_account = fpos.map_account(income_account)
+
+        name = line.product_id.name
+        if line.notice:
+            # add discount reason in move
+            name = name + ' (' + line.notice + ')'
+
+        # Create a move for the line for the order line
+        # Just like for invoices, a group of taxes must be present on this base line
+        # As well as its children
+        base_line_tax_ids = _flatten_tax_and_children(line.tax_ids_after_fiscal_position).filtered(lambda tax: tax.type_tax_use in ['sale', 'none'])
+        base_line_taxes_repartition = base_line_tax_ids.mapped(line.qty<0 and 'refund_repartition_line_ids' or 'invoice_repartition_line_ids')
+        base_line_tags = base_line_taxes_repartition.filtered(lambda x: x.repartition_type == 'base').mapped('tag_ids')
+        data = {
+            'name': name,
+            'quantity': line.qty,
+            'product_id': line.product_id.id,
+            'account_id': income_account.id,
+            'analytic_account_id': self._prepare_analytic_account(line),
+            'credit': ((amount_subtotal > 0) and amount_subtotal) or 0.0,
+            'debit': ((amount_subtotal < 0) and -amount_subtotal) or 0.0,
+            'tax_ids': [(6, 0, base_line_tax_ids.ids)],
+            'partner_id': partner_id,
+            'tag_ids': [(6, 0, base_line_tags.ids)],
+        }
+        if currency_id != cur_company:
+            data['currency_id'] = currency_id.id
+            data['amount_currency'] = -abs(line.price_subtotal) if data.get('credit') else abs(line.price_subtotal)
+        res.append({'data_type': 'product', 'values': data})
+
+        # Create the tax lines
+        taxes = line.tax_ids_after_fiscal_position.filtered(lambda t: t.company_id.id == current_company.id)
+        if taxes:
+            price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+            for tax in taxes.compute_all(price, currency_id, line.qty, is_refund=line.qty < 0)['taxes']:
+                if currency_id != cur_company:
+                    round_tax = False if rounding_method == 'round_globally' else True
+                    amount_tax = currency_id._convert(tax['amount'], cur_company, order.company_id, date_order, round=round_tax)
+                    # amount_tax = currency_id.with_context(date=date_order).compute(tax['amount'], cur_company, round=round_tax)
+                else:
+                    amount_tax = tax['amount']
+                data = {
+                    'name': _('Tax') + ' ' + tax['name'],
+                    'product_id': line.product_id.id,
+                    'quantity': line.qty,
+                    'account_id': tax['account_id'] or income_account.id,
+                    'credit': ((amount_tax > 0) and amount_tax) or 0.0,
+                    'debit': ((amount_tax < 0) and -amount_tax) or 0.0,
+                    'tax_line_id': tax['id'],
+                    'partner_id': partner_id,
+                    'order_id': order.id,
+                    'tax_repartition_line_id': tax['tax_repartition_line_id'],
+                    'tax_base_amount': tax['base'],
+                    'tag_ids': tax['tag_ids'],
+                }
+                if currency_id != cur_company:
+                    data['currency_id'] = currency_id.id
+                    data['amount_currency'] = -abs(tax['amount']) if data.get('credit') else abs(tax['amount'])
+                res.append({'data_type': 'tax', 'values': data})
+        return res
+
+    def _prepare_account_move_and_lines(self, session=None):
 
         # Tricky, via the workflow, we only have one id in the ids variable
         """Create a account move line of order grouped by products or not."""
@@ -296,19 +383,21 @@ class PosOrder(models.Model):
                             'debit': line2['debit'] or 0.0,
                             'partner_id': line2['partner_id']
                         })
-
+        move = False
         for order in self.filtered(lambda o: not o.account_move or o.state == 'paid'):
             current_company = order.sale_journal.company_id
             account_def = IrProperty.get(
                 'property_account_receivable_id', 'res.partner')
-            order_account = order.partner_id.property_account_receivable_id.id or account_def and account_def.id
+            order_account = order.partner_id.property_account_receivable_id or account_def
+            # If fiscal position, then map order account
+            fpos = order.fiscal_position_id or order.partner_id.property_account_position_id
+            if fpos:
+                order_account = fpos.map_account(order_account)
+
             partner_id = ResPartner._find_accounting_partner(order.partner_id).id or False
-            if move is None:
+            if not move:
                 # Create an entry for the sale
-                journal_id = self.env['ir.config_parameter'].sudo().get_param(
-                    'pos.closing.journal_id_%s' % current_company.id, default=order.sale_journal.id)
-                move = self._create_account_move(
-                    order.session_id.start_at, order.name, int(journal_id), order.company_id.id)
+                move = order._create_account_move()
 
             def insert_data(data_type, values):
                 # if have_to_group_by:
@@ -353,77 +442,11 @@ class PosOrder(models.Model):
             cur = order.pricelist_id.currency_id
             cur_company = order.company_id.currency_id
             amount_cur_company = 0.0
-            date_order = order.date_order.date() if order.date_order else fields.Date.today()
             for line in order.lines:
-                if cur != cur_company:
-                    amount_subtotal = cur._convert(line.price_subtotal, cur_company, order.company_id, date_order)
-                else:
-                    amount_subtotal = line.price_subtotal
-
-                # Search for the income account
-                if line.product_id.property_account_income_id.id:
-                    income_account = line.product_id.property_account_income_id.id
-                elif line.product_id.categ_id.property_account_income_categ_id.id:
-                    income_account = line.product_id.categ_id.property_account_income_categ_id.id
-                else:
-                    raise UserError(_('Please define income '
-                                      'account for this product: "%s" (id:%d).')
-                                    % (line.product_id.name, line.product_id.id))
-
-                name = line.product_id.name
-                if line.notice:
-                    # add discount reason in move
-                    name = name + ' (' + line.notice + ')'
-
-                # Create a move for the line for the order line
-                # Just like for invoices, a group of taxes must be present on this base line
-                # As well as its children
-                base_line_tax_ids = _flatten_tax_and_children(line.tax_ids_after_fiscal_position).filtered(lambda tax: tax.type_tax_use in ['sale', 'none'])
-                data = {
-                    'name': name,
-                    'quantity': line.qty,
-                    'product_id': line.product_id.id,
-                    'account_id': income_account,
-                    'analytic_account_id': self._prepare_analytic_account(line),
-                    'credit': ((amount_subtotal > 0) and amount_subtotal) or 0.0,
-                    'debit': ((amount_subtotal < 0) and -amount_subtotal) or 0.0,
-                    'tax_ids': [(6, 0, base_line_tax_ids.ids)],
-                    'partner_id': partner_id
-                }
-                if cur != cur_company:
-                    data['currency_id'] = cur.id
-                    data['amount_currency'] = -abs(line.price_subtotal) if data.get('credit') else abs(line.price_subtotal)
-                    amount_cur_company += data['credit'] - data['debit']
-                insert_data('product', data)
-
-                # Create the tax lines
-                taxes = line.tax_ids_after_fiscal_position.filtered(lambda t: t.company_id.id == current_company.id)
-                if not taxes:
-                    continue
-                price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
-                for tax in taxes.compute_all(price, cur, line.qty)['taxes']:
+                for move_line in self._prepare_account_move_line(line, partner_id, current_company, cur, rounding_method):
                     if cur != cur_company:
-                        round_tax = False if rounding_method == 'round_globally' else True
-                        amount_tax = cur._convert(tax['amount'], cur_company, order.company_id, date_order, round=round_tax)
-                        # amount_tax = cur.with_context(date=date_order).compute(tax['amount'], cur_company, round=round_tax)
-                    else:
-                        amount_tax = tax['amount']
-                    data = {
-                        'name': _('Tax') + ' ' + tax['name'],
-                        'product_id': line.product_id.id,
-                        'quantity': line.qty,
-                        'account_id': tax['account_id'] or income_account,
-                        'credit': ((amount_tax > 0) and amount_tax) or 0.0,
-                        'debit': ((amount_tax < 0) and -amount_tax) or 0.0,
-                        'tax_line_id': tax['id'],
-                        'partner_id': partner_id,
-                        'order_id': order.id
-                    }
-                    if cur != cur_company:
-                        data['currency_id'] = cur.id
-                        data['amount_currency'] = -abs(tax['amount']) if data.get('credit') else abs(tax['amount'])
-                        amount_cur_company += data['credit'] - data['debit']
-                    insert_data('tax', data)
+                        amount_cur_company += move_line['values']['credit'] - move_line['values']['debit']
+                    insert_data(move_line['data_type'], move_line['values'])
 
             # round tax lines per order
             if rounding_method == 'round_globally':
@@ -446,7 +469,7 @@ class PosOrder(models.Model):
                 amount_total = order.amount_total
             data = {
                 'name': _("Trade Receivables"),  # order.name,
-                'account_id': order_account,
+                'account_id': order_account.id,
                 'credit': ((amount_total < 0) and -amount_total) or 0.0,
                 'debit': ((amount_total > 0) and amount_total) or 0.0,
                 'partner_id': partner_id
@@ -466,8 +489,8 @@ class PosOrder(models.Model):
             'move': move,
         }
 
-    def _create_account_move_line(self, session=None, move=None):
-        vals = self._prepare_account_move_and_lines(session, move)
+    def _create_account_move_line(self, session=None):
+        vals = self._prepare_account_move_and_lines(session)
 
         grouped_data = vals['grouped_data']
         move = vals['move']
@@ -528,7 +551,7 @@ class PosOrder(models.Model):
     company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True, default=lambda self: self.env.user.company_id)
     date_order = fields.Datetime(string='Order Date', readonly=True, index=True, default=fields.Datetime.now)
     user_id = fields.Many2one(
-        comodel_name='res.users', string='Salesperson',
+        comodel_name='res.users', string='User',
         help="Person who uses the cash register. It can be a reliever, a student or an interim employee.",
         default=lambda self: self.env.uid,
         states={'done': [('readonly', True)], 'invoiced': [('readonly', True)]},
@@ -796,6 +819,7 @@ class PosOrder(models.Model):
                 picking_vals = {
                     'origin': order.name,
                     'partner_id': address.get('delivery', False),
+                    'user_id': False,
                     'date_done': order.date_order,
                     'picking_type_id': picking_type.id,
                     'company_id': order.company_id.id,
@@ -964,6 +988,30 @@ class PosOrder(models.Model):
         self.amount_paid = sum(payment.amount for payment in self.statement_ids)
         return args.get('statement_id', False)
 
+    def _prepare_refund_order_data(self, current_session=None):
+        """
+        Prepare data for the creation of refund order based on the current order's data. Inheritance may inject its own data here
+
+        @param current_session: the single pos.session record that presents the current session for refunding order.
+            If not passed, the last closed session of the same original order's sales person will be used
+        @type current_session: pos.session
+
+        @return: dictionary of default data for the creation of refund order
+        @rtype: dict
+        """
+        current_session = current_session or self.env['pos.session'].search([('state', '!=', 'closed'), ('user_id', '=', self.env.uid)], limit=1)
+        return {
+            # ot used, name forced by create
+            'name': self.name + _(' REFUND'),
+            'session_id': current_session.id,
+            'date_order': fields.Datetime.now(),
+            'pos_reference': self.pos_reference,
+            'lines': False,
+            'amount_tax': -self.amount_tax,
+            'amount_total': -self.amount_total,
+            'amount_paid': 0,
+            }
+
     @api.multi
     def refund(self):
         """Create a copy of order  for refund order"""
@@ -972,26 +1020,10 @@ class PosOrder(models.Model):
         if not current_session:
             raise UserError(_('To return product(s), you need to open a session that will be used to register the refund.'))
         for order in self:
-            clone = order.copy({
-                # ot used, name forced by create
-                'name': order.name + _(' REFUND'),
-                'session_id': current_session.id,
-                'date_order': fields.Datetime.now(),
-                'pos_reference': order.pos_reference,
-                'lines': False,
-                'amount_tax': -order.amount_tax,
-                'amount_total': -order.amount_total,
-                'amount_paid': 0,
-            })
+            data_for_copy = order._prepare_refund_order_data(current_session)
+            clone = order.copy(data_for_copy)
             for line in order.lines:
-                clone_line = line.copy({
-                    # required=True, copy=False
-                    'name': line.name + _(' REFUND'),
-                    'order_id': clone.id,
-                    'qty': -line.qty,
-                    'price_subtotal': -line.price_subtotal,
-                    'price_subtotal_incl': -line.price_subtotal_incl,
-                })
+                line.copy(line._prepare_refund_data(clone))
             PosOrder += clone
 
         return {
@@ -1042,6 +1074,26 @@ class PosOrderLine(models.Model):
     tax_ids = fields.Many2many('account.tax', string='Taxes', readonly=True)
     tax_ids_after_fiscal_position = fields.Many2many('account.tax', compute='_get_tax_ids_after_fiscal_position', string='Taxes to Apply')
     pack_lot_ids = fields.One2many('pos.pack.operation.lot', 'pos_order_line_id', string='Lot/serial Number')
+
+    @api.model
+    def _prepare_refund_data(self, refund_order_id):
+        """
+        This prepares data for refund order line. Inheritance may inject more data here
+
+        @param refund_order_id: the pre-created refund order
+        @type refund_order_id: pos.order
+
+        @return: dictionary of data which is for creating a refund order line from the original line
+        @rtype: dict
+        """
+        return {
+            # required=True, copy=False
+            'name': self.name + _(' REFUND'),
+            'qty': -self.qty,
+            'order_id': refund_order_id.id,
+            'price_subtotal': -self.price_subtotal,
+            'price_subtotal_incl': -self.price_subtotal_incl,
+            }
 
     @api.model
     def create(self, values):
@@ -1206,10 +1258,10 @@ class ReportSaleDetails(models.AbstractModel):
                 SELECT aj.name, sum(amount) total
                 FROM account_bank_statement_line AS absl,
                      account_bank_statement AS abs,
-                     account_journal AS aj 
+                     account_journal AS aj
                 WHERE absl.statement_id = abs.id
-                    AND abs.journal_id = aj.id 
-                    AND absl.id IN %s 
+                    AND abs.journal_id = aj.id
+                    AND absl.id IN %s
                 GROUP BY aj.name
             """, (tuple(st_line_ids),))
             payments = self.env.cr.dictfetchall()

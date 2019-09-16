@@ -3,22 +3,19 @@
 # * web_editor
 # 
 # Translators:
-# fanha99 <fanha99@hotmail.com>, 2018
-# Martin Trigaux, 2018
-# Support W360s <support@w360s.com>, 2018
+# thanh nguyen <thanhnguyen.icsc@gmail.com>, 2018
 # Duy BQ <duybq86@gmail.com>, 2018
+# Martin Trigaux, 2018
+# fanha99 <fanha99@hotmail.com>, 2018
+# Support W360s <support@w360s.com>, 2018
 # Minh Nguyen <ndminh210994@gmail.com>, 2018
-# Nancy Momoland <thanhnguyen.icsc@gmail.com>, 2019
-# Chinh Chinh <trinhttp@trobz.com>, 2019
-# Dao Nguyen <trucdao.uel@gmail.com>, 2019
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-10-02 10:06+0000\n"
-"PO-Revision-Date: 2018-08-24 09:33+0000\n"
-"Last-Translator: Dao Nguyen <trucdao.uel@gmail.com>, 2019\n"
+"PO-Revision-Date: 2018-10-02 10:06+0000\n"
+"Last-Translator: Minh Nguyen <ndminh210994@gmail.com>, 2018\n"
 "Language-Team: Vietnamese (https://www.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -502,7 +499,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:273
 #, python-format
 msgid "Flat"
-msgstr "Giá"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -591,7 +588,7 @@ msgstr ""
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_http
 msgid "HTTP Routing"
-msgstr "HTTP Routing"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -982,7 +979,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:270
 #, python-format
 msgid "Outline"
-msgstr "Mục lục"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1045,7 +1042,7 @@ msgstr "Trích dẫn"
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb
 msgid "Qweb"
-msgstr "Qweb"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field
@@ -1055,7 +1052,7 @@ msgstr ""
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_contact
 msgid "Qweb Field Contact"
-msgstr "Liên hệ lĩnh vực Qweb"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_date
@@ -1085,7 +1082,7 @@ msgstr ""
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_image
 msgid "Qweb Field Image"
-msgstr "Trường ảnh Qweb"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_integer
@@ -1253,7 +1250,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:271
 #, python-format
 msgid "Rounded"
-msgstr "Bo tròn"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1512,7 +1509,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:44
 #, python-format
 msgid "Tooltip"
-msgstr "Tooltip"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1623,7 +1620,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:59
 #, python-format
 msgid "Video"
-msgstr "Video"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web

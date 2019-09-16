@@ -95,8 +95,8 @@
 
     <record id="account_fiscal_position_non_uae_countries" model="account.fiscal.position.template">
         <field name="name">Non-UAE</field>
-        <field name="auto_apply" eval="True"/>
         <field name="sequence">20</field>
+        <field name="auto_apply" eval="True"/>
         <field name="chart_template_id" ref="uae_chart_template_standard"/>
     </record>
     <record id="acccount_fiscal_position_tax_non_uae_01" model="account.fiscal.position.tax.template">

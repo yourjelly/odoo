@@ -1,14 +1,12 @@
 odoo.define('website_sale.tour_shop_list_view_b2c', function (require) {
 'use strict';
 
-var base = require('web_editor.base');
 var rpc = require('web.rpc');
 var tour = require('web_tour.tour');
 
 tour.register('shop_list_view_b2c', {
     test: true,
     url: '/shop?search=Test Product',
-    wait_for: base.ready()
 },
     [
         {

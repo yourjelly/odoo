@@ -3,16 +3,17 @@
 # * note
 # 
 # Translators:
-# Martin Trigaux, 2018
+# Viktor Basso <viktor@voit.no>, 2018
 # Marius Stedjan <marius@stedjan.com>, 2019
+# Martin Trigaux, 2019
 # Jorunn D. Newth, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server saas~12.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-29 10:09+0000\n"
-"PO-Revision-Date: 2018-08-24 09:21+0000\n"
+"POT-Creation-Date: 2019-03-20 13:49+0000\n"
+"PO-Revision-Date: 2016-08-05 13:06+0000\n"
 "Last-Translator: Jorunn D. Newth, 2019\n"
 "Language-Team: Norwegian Bokmål (https://www.transifex.com/odoo/teams/41243/nb/)\n"
 "MIME-Version: 1.0\n"
@@ -103,7 +104,9 @@ msgstr "Etter notatkategori"
 
 #. module: note
 #: model:ir.model.fields,help:note.field_mail_activity_type__category
-msgid "Categories may trigger specific behavior like opening calendar view"
+msgid ""
+"Categories may trigger specific behavior like opening calendar view or "
+"automatically mark as done when a document is uploaded"
 msgstr ""
 
 #. module: note
@@ -375,11 +378,6 @@ msgid "Number of unread messages"
 msgstr "Antall uleste meldinger"
 
 #. module: note
-#: selection:mail.activity.type,category:0
-msgid "Other"
-msgstr "Annet"
-
-#. module: note
 #: selection:note.note,activity_state:0
 msgid "Overdue"
 msgstr "Forfalt"
@@ -482,6 +480,11 @@ msgid "Stages of Users"
 msgstr "Brukerstadier"
 
 #. module: note
+#: selection:mail.activity.type,category:0
+msgid "Standard"
+msgstr "Standard"
+
+#. module: note
 #: model:ir.model.fields,help:note.field_note_note__activity_state
 msgid ""
 "Status based on activities\n"
@@ -543,6 +546,11 @@ msgid "Unread Messages Counter"
 msgstr "Teller for uleste meldinger"
 
 #. module: note
+#: selection:mail.activity.type,category:0
+msgid "Upload Document"
+msgstr ""
+
+#. module: note
 #: model:ir.model.fields,help:note.field_note_stage__sequence
 msgid "Used to order the note stages"
 msgstr "Brukt for å holde orden på notatstadiene"
@@ -551,13 +559,3 @@ msgstr "Brukt for å holde orden på notatstadiene"
 #: model:ir.model,name:note.model_res_users
 msgid "Users"
 msgstr "Brukere"
-
-#. module: note
-#: model:ir.model.fields,field_description:note.field_note_note__website_message_ids
-msgid "Website Messages"
-msgstr "Nettstedmeldinger"
-
-#. module: note
-#: model:ir.model.fields,help:note.field_note_note__website_message_ids
-msgid "Website communication history"
-msgstr "Kommunikasjonshistorikk for nettsted"

@@ -55,6 +55,7 @@ var CalendarController = AbstractController.extend({
         this.readonlyFormViewId = params.readonlyFormViewId;
         this.mapping = params.mapping;
         this.context = params.context;
+        this.previousOpen = null;
         // The quickCreating attribute ensures that we don't do several create
         this.quickCreating = false;
     },
@@ -79,7 +80,7 @@ var CalendarController = AbstractController.extend({
      * @returns {string}
      */
     getTitle: function () {
-        return this.get('title');
+        return this._title;
     },
     /**
      * Render the buttons according to the CalendarView.buttons template and
@@ -147,7 +148,7 @@ var CalendarController = AbstractController.extend({
      *
      * @private
      * @param {string} to either 'prev', 'next' or 'today'
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _move: function (to) {
         this.model[to]();
@@ -157,10 +158,11 @@ var CalendarController = AbstractController.extend({
      * @private
      * @param {Object} record
      * @param {integer} record.id
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _updateRecord: function (record) {
-        return this.model.updateRecord(record).always(this.reload.bind(this));
+        var reload = this.reload.bind(this, {});
+        return this.model.updateRecord(record).then(reload, reload);
     },
 
     //--------------------------------------------------------------------------
@@ -270,7 +272,8 @@ var CalendarController = AbstractController.extend({
             title += ': ' + this.renderer.arch.attrs.string;
         }
         if (this.eventOpenPopup) {
-            new dialogs.FormViewDialog(self, {
+            if (this.previousOpen) { this.previousOpen.close(); }
+            this.previousOpen = new dialogs.FormViewDialog(self, {
                 res_model: this.modelName,
                 context: context,
                 title: title,
@@ -282,7 +285,8 @@ var CalendarController = AbstractController.extend({
                     }
                     self.reload();
                 },
-            }).open();
+            });
+            this.previousOpen.open();
         } else {
             this.do_action({
                 type: 'ir.actions.act_window',
@@ -307,7 +311,8 @@ var CalendarController = AbstractController.extend({
                 model: self.modelName,
                 method: 'get_formview_id',
                 //The event can be called by a view that can have another context than the default one.
-                args: [[id], event.context || self.context],
+                args: [[id]],
+                context: event.context || self.context,
             }).then(function (viewId) {
                 self.do_action({
                     type:'ir.actions.act_window',
@@ -395,18 +400,18 @@ var CalendarController = AbstractController.extend({
                 self.quick.destroy();
                 self.quick = null;
                 self.reload();
+                self.quickCreating = false;
             })
-            .fail(function (error, errorEvent) {
+            .guardedCatch(function (result) {
+                var errorEvent = result.event;
                 // This will occurs if there are some more fields required
                 // Preventdefaulting the error event will prevent the traceback window
                 errorEvent.preventDefault();
                 event.data.options.disableQuickCreate = true;
                 event.data.data.on_save = self.quick.destroy.bind(self.quick);
                 self._onOpenCreate(event.data);
-            })
-            .always(function () {
                 self.quickCreating = false;
-            });
+            })
     },
     /**
      * Called when we want to open or close the sidebar.
@@ -437,7 +442,7 @@ var CalendarController = AbstractController.extend({
             this.$buttons.find('.active').removeClass('active');
             this.$buttons.find('.o_calendar_button_' + this.mode).addClass('active');
         }
-        this.set({title: this.displayName + ' (' + event.data.title + ')'});
+        this._setTitle(this.displayName + ' (' + event.data.title + ')');
     },
 });
 

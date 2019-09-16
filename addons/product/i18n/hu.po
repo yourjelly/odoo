@@ -3,22 +3,21 @@
 # * product
 # 
 # Translators:
-# Tamás Dombos, 2018
-# krnkris, 2018
 # Kisrobert <kisrobi@gmail.com>, 2018
-# Kovács Tibor <kovika@gmail.com>, 2018
-# Tibor Kőnig <konig.tibor@evitalit.hu>, 2018
-# Martin Trigaux, 2018
+# gezza <geza.nagy@oregional.hu>, 2018
+# Kovács Tibor <kovika@gmail.com>, 2019
+# Tibor Kőnig <konig.tibor@evitalit.hu>, 2019
 # Ákos Nagy <akos.nagy@oregional.hu>, 2019
-# gezza <geza.nagy@oregional.hu>, 2019
+# Martin Trigaux, 2019
+# krnkris, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server saas~12.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-29 10:09+0000\n"
-"PO-Revision-Date: 2018-08-24 09:23+0000\n"
-"Last-Translator: gezza <geza.nagy@oregional.hu>, 2019\n"
+"POT-Creation-Date: 2019-03-20 13:50+0000\n"
+"PO-Revision-Date: 2016-08-05 13:08+0000\n"
+"Last-Translator: krnkris, 2019\n"
 "Language-Team: Hungarian (https://www.transifex.com/odoo/teams/41243/hu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -29,33 +28,33 @@ msgstr ""
 #. module: product
 #: selection:product.pricelist.item,applied_on:0
 msgid " Product Category"
-msgstr "Termék kategória"
+msgstr "Termékkategória"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__product_variant_count
 #: model:ir.model.fields,field_description:product.field_product_template__product_variant_count
 msgid "# Product Variants"
-msgstr "# Termékváltozat"
+msgstr "# Termékváltozatok"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_category__product_count
 msgid "# Products"
-msgstr "# Termék"
+msgstr "# Termékek"
 
 #. module: product
-#: code:addons/product/models/product_pricelist.py:462
+#: code:addons/product/models/product_pricelist.py:474
 #, python-format
 msgid "%s %% discount"
 msgstr "%s %% árengedmény"
 
 #. module: product
-#: code:addons/product/models/product_pricelist.py:464
+#: code:addons/product/models/product_pricelist.py:476
 #, python-format
 msgid "%s %% discount and %s surcharge"
-msgstr "%s %% árengedmény és %s felár"
+msgstr "%s %% árengedmény és %s pótdíj"
 
 #. module: product
-#: code:addons/product/models/product_template.py:357
+#: code:addons/product/models/product_template.py:381
 #, python-format
 msgid "%s (copy)"
 msgstr "%s (másolat)"
@@ -66,13 +65,25 @@ msgid "1 year"
 msgstr "1 év"
 
 #. module: product
+#: model:ir.model.fields,help:product.field_product_product__image
+#: model:ir.model.fields,help:product.field_product_template__image
+msgid "1024px * 1024px"
+msgstr ""
+
+#. module: product
+#: model:ir.model.fields,help:product.field_product_product__image_medium
+#: model:ir.model.fields,help:product.field_product_template__image_medium
+msgid "128px * 128px"
+msgstr ""
+
+#. module: product
 #: model:product.product,description_sale:product.product_product_4
 #: model:product.product,description_sale:product.product_product_4b
 #: model:product.product,description_sale:product.product_product_4c
 #: model:product.product,description_sale:product.product_product_4d
 #: model:product.template,description_sale:product.product_product_4b_product_template
 msgid "160x80cm, with large legs."
-msgstr "160x80cm, nagy lábakkal."
+msgstr ""
 
 #. module: product
 #: model:product.attribute.value,name:product.product_attribute_value_6
@@ -80,9 +91,21 @@ msgid "2 year"
 msgstr "2 év"
 
 #. module: product
+#: model:ir.model.fields,help:product.field_product_product__image_large
+#: model:ir.model.fields,help:product.field_product_template__image_large
+msgid "256px * 256px"
+msgstr ""
+
+#. module: product
+#: model:ir.model.fields,help:product.field_product_product__image_small
+#: model:ir.model.fields,help:product.field_product_template__image_small
+msgid "64px * 64px"
+msgstr ""
+
+#. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view_kanban
 msgid "<i class=\"fa fa-money\" role=\"img\" aria-label=\"Currency\" title=\"Currency\"/>"
-msgstr "<i class=\"fa fa-money\" role=\"img\" aria-label=\"Currency\" title=\"Currency\"/>"
+msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
@@ -104,10 +127,14 @@ msgstr "<span class=\"o_stat_text\"> Termékek</span>"
 #: model_terms:ir.ui.view,arch_db:product.report_simple_barcode
 #: model_terms:ir.ui.view,arch_db:product.report_simple_label
 msgid "<span class=\"text-muted\">No barcode available</span>"
-msgstr "<span class=\"text-muted\">Nincs vonalkód</span>"
+msgstr ""
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_template_form_view
+#: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
+msgid "<span>All general settings about this product are managed on</span>"
+msgstr ""
+
+#. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
 msgid "<span>m³</span>"
 msgstr "<span>m³</span>"
@@ -130,17 +157,17 @@ msgstr "<strong>Árlista neve</strong>:<br/>"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.report_simple_label
 msgid "<strong>Price:</strong>"
-msgstr "Ár:</strong>"
+msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.report_pricelist
 msgid "<strong>Print date</strong>:<br/>"
-msgstr "<strong>Nyomtatás dátuma</strong>:<br/>"
+msgstr "<strong>Dátum nyomtatás</strong>:<br/>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
 msgid "<strong>Qty: </strong>"
-msgstr "<strong>Menny.: </strong>"
+msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_only_form_view
@@ -149,9 +176,9 @@ msgid ""
 "                        will delete and recreate existing variants and lead\n"
 "                        to the loss of their possible customizations."
 msgstr ""
-"<strong>Vigyázat</strong>: tulajdonság törlése vagy hozzáadása\n"
-"                         törli és újra létrehozza a meglévő változatokat, emiatt \n"
-"                        elvesznek a változatokhoz kapcsolódó testreszabások is."
+"<strong>Vigyázat</strong>: tulajdonság törlés vagy hozzáadás\n"
+"                         letörli és felülírja a meglévő változókat és \n"
+"                        elveszti a személyre szabásának lehetőségét."
 
 #. module: product
 #: sql_constraint:product.product:0
@@ -166,9 +193,9 @@ msgid ""
 " This description will be copied to every Sales Order, Delivery Order and "
 "Customer Invoice/Credit Note"
 msgstr ""
-"A termék leírása, mely kommunikálásra kerül a vevők felé.  Ez a leírás kerül"
-" átmásolásra minden egyes vevői rendelésre, szállítási rendelésre és vevői "
-"számlára/jóváírásra."
+"Egy termék leírása, melyről beszélgetést szeretne fojtatni a vásárlókkal.  "
+"Ez a leírás lesz átmásolva minden egyes Vásárlói megrendelésre, szállítási "
+"megbízásra/szállítólevélre és vásárlói számlára/jóváírásra."
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_pricelist_action2
@@ -176,8 +203,6 @@ msgid ""
 "A price is a set of sales prices or rules to compute the price of sales order lines based on products, product categories, dates and ordered quantities.\n"
 "                This is the perfect tool to handle several pricings, seasonal discounts, etc."
 msgstr ""
-"Egy ár tulajdonléppen eladási árak vagy szabályok összessége, melyek segítségével kiszámítható az értékesítési rendelés sorok ára a termékek, termék kategóriák, dátumok és rendelt mennyiségek alapján.\n"
-"                Tökéletes eszköz többféle árazás, szezonális kedvezmények, stb kezelésére."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__type
@@ -187,21 +212,18 @@ msgid ""
 "A consumable product is a product for which stock is not managed.\n"
 "A service is a non-material product you provide."
 msgstr ""
-"A készletezett termék olyan materiális termék, mely készletre kerül. Ehhez telepíteni kell a Készlet app-ot.\n"
-"A fogyóeszköz termék olyan materiális termék, mely nem kerül készletre.\n"
-"A szolgálatás immateriális termék."
 
 #. module: product
 #: model:product.product,name:product.product_product_25
 #: model:product.template,name:product.product_product_25_product_template
 msgid "Acoustic Bloc Screens"
-msgstr "Akusztikus blokk képernyők"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__message_needaction
 #: model:ir.model.fields,field_description:product.field_product_template__message_needaction
 msgid "Action Needed"
-msgstr "Akció szükséges"
+msgstr "Művelet szükséges"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist__active
@@ -229,15 +251,10 @@ msgid "All"
 msgstr "Összes"
 
 #. module: product
-#: code:addons/product/models/product_pricelist.py:457
+#: code:addons/product/models/product_pricelist.py:469
 #, python-format
 msgid "All Products"
 msgstr "Összes termék"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
-msgid "All general settings about this product are managed on"
-msgstr "A termék összes általános beállításának kezelése itt"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_res_config_settings__group_sale_pricelist
@@ -245,15 +262,15 @@ msgid ""
 "Allows to manage different prices based on rules per category of customers.\n"
 "                Example: 10% for retailers, promotion of 5 EUR on this product, etc."
 msgstr ""
-"Lehetővé teszi vevői kategóriák szabályai szerinti különböző árak használatát.\n"
-"                Példa: 10% kiskereskedőknek, 5 EUR promóció a termékre, stb."
+"Lehetővé teszi a vásárlói kategóriák szabályai szerinti különböző árak használatát.\n"
+"                Példa: 10% a kiskereskedőknek, befektetésösztönzés 5 EUR ezen a terméken, stb."
 
 #. module: product
 #: model:product.attribute.value,name:product.product_attribute_value_2
 #: model:product.template.attribute.value,name:product.product_template_attribute_value_1
 #: model:product.template.attribute.value,name:product.product_template_attribute_value_2
 msgid "Aluminium"
-msgstr "Alumínium"
+msgstr ""
 
 #. module: product
 #: selection:product.attribute,create_variant:0
@@ -281,7 +298,7 @@ msgstr "Archivált"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__sequence
 msgid "Assigns the priority to the list of product vendor."
-msgstr "Termékbeszállító listájához rendeli a prioritást."
+msgstr "A beszállítói terméklistához rendeli a prioritást."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__message_attachment_count
@@ -301,19 +318,19 @@ msgstr "Tulajdonság"
 #: model_terms:ir.ui.view,arch_db:product.product_attribute_view_form
 #: model_terms:ir.ui.view,arch_db:product.product_template_attribute_line_form
 msgid "Attribute Name"
-msgstr "Tulajdonság neve"
+msgstr "Termékjellemző neve"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__price_extra
 msgid "Attribute Price Extra"
-msgstr "Tulajdonság felár"
+msgstr "Termékjellemző felár"
 
 #. module: product
 #: model:ir.model,name:product.model_product_attribute_value
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_exclusion__product_template_attribute_value_id
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__product_attribute_value_id
 msgid "Attribute Value"
-msgstr "Tulajdonság érték"
+msgstr ""
 
 #. module: product
 #: model:ir.actions.act_window,name:product.variants_action
@@ -322,13 +339,12 @@ msgstr "Tulajdonság érték"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__value_ids
 #: model_terms:ir.ui.view,arch_db:product.product_attribute_view_form
 msgid "Attribute Values"
-msgstr "Tulajdonság értékek"
+msgstr "Termékjellemző értékek"
 
 #. module: product
 #: model:ir.actions.act_window,name:product.attribute_action
 #: model_terms:ir.ui.view,arch_db:product.product_template_attribute_value_view_tree
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
-#: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
 msgid "Attributes"
 msgstr "Tulajdonságok"
 
@@ -355,8 +371,8 @@ msgid ""
 "Cost Price : The base price will be the cost price.\n"
 "Other Pricelist : Computation of the base price based on another Pricelist."
 msgstr ""
-"Alapár a számoláshoz. \n"
-"Nyilvános ár: Az alapár lesz az eladási/nyilvános ár. \n"
+"Alap ár a számoláshoz. \n"
+"Nyilvános ár: Az alapár lesz az értékesítési/nyilvános ár. \n"
 "Költség ár : Az alapár lesz a költség ár. \n"
 "Másik árlista : Az alapár kiszámítása másik árlistából."
 
@@ -367,8 +383,9 @@ msgstr "Alapján"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__image
-msgid "Big-sized image"
-msgstr "Nagyméretű kép"
+#: model:ir.model.fields,field_description:product.field_product_template__image
+msgid "Big-sized Image"
+msgstr ""
 
 #. module: product
 #: model:product.attribute.value,name:product.product_attribute_value_4
@@ -379,12 +396,12 @@ msgstr "Fekete"
 #: model:product.product,name:product.product_product_10
 #: model:product.template,name:product.product_product_10_product_template
 msgid "Cabinet with Doors"
-msgstr "Kabinet ajtókkal"
+msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.view_product_price_list
 msgid "Calculate Product Price per Unit Based on Pricelist Version."
-msgstr "Termékár számítás egységenként az árlista verzió alapján."
+msgstr "Kiszámítja a termékárat egységenként az árlista verziója alapján."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__purchase_ok
@@ -407,17 +424,29 @@ msgid "Can be Sold"
 msgstr "Értékesíthető"
 
 #. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__can_image_be_zoomed
+#: model:ir.model.fields,field_description:product.field_product_template__can_image_be_zoomed
+msgid "Can image be zoomed"
+msgstr ""
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__can_image_raw_be_zoomed
+#: model:ir.model.fields,field_description:product.field_product_template__can_image_raw_be_zoomed
+msgid "Can image raw be zoomed"
+msgstr ""
+
+#. module: product
 #: model_terms:ir.ui.view,arch_db:product.view_product_price_list
 msgid "Cancel"
-msgstr "Mégsem"
+msgstr "Mégse"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_category_form_view
 msgid "Category name"
-msgstr "Kategória név"
+msgstr "Kategórianév"
 
 #. module: product
-#: code:addons/product/models/product_pricelist.py:451
+#: code:addons/product/models/product_pricelist.py:463
 #, python-format
 msgid "Category: %s"
 msgstr "Kategória: %s"
@@ -425,7 +454,8 @@ msgstr "Kategória: %s"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__create_variant
 msgid "Check this if you want to create multiple variants for this attribute."
-msgstr "Jelölje be ha több változatot szeretne erre a tulajdonságra."
+msgstr ""
+"Jelölje be a négyzetet ha több változatot szeretne erre a tulajdonságra."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_category__child_id
@@ -435,7 +465,7 @@ msgstr "Alkategóriák"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
 msgid "Choose the unit to measure weight"
-msgstr "Válassza ki súly mértékegységet"
+msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
@@ -451,7 +481,7 @@ msgstr "Szín"
 #: model:ir.model.fields,field_description:product.field_product_product__color
 #: model:ir.model.fields,field_description:product.field_product_template__color
 msgid "Color Index"
-msgstr "Színjegyzék"
+msgstr "Szín jegyzék"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
@@ -489,7 +519,13 @@ msgstr "Ár számítása"
 #: model:product.product,name:product.product_product_11b
 #: model:product.template,name:product.product_product_11b_product_template
 msgid "Conference Chair"
-msgstr "Konferencia szék"
+msgstr ""
+
+#. module: product
+#: model:product.product,description_sale:product.consu_delivery_02
+#: model:product.template,description_sale:product.consu_delivery_02_product_template
+msgid "Conference room table"
+msgstr ""
 
 #. module: product
 #: model:ir.model,name:product.model_res_config_settings
@@ -499,7 +535,7 @@ msgstr "Konfigurációs beállítások"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Configure Variants"
-msgstr "Változatok konfigurálása"
+msgstr ""
 
 #. module: product
 #: model:product.category,name:product.product_category_consumable
@@ -510,29 +546,29 @@ msgstr "Fogyóeszköz"
 #. module: product
 #: model:ir.model,name:product.model_res_partner
 msgid "Contact"
-msgstr "Kapcsolattartó"
+msgstr "Kapcsolat"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_packaging__qty
 msgid "Contained Quantity"
-msgstr "Tartalmazott mennyiség"
+msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_packaging_form_view
 msgid "Contained quantity"
-msgstr "Tartalmazott mennyiség"
+msgstr ""
 
 #. module: product
 #: model:product.product,name:product.product_product_13
 #: model:product.template,name:product.product_product_13_product_template
 msgid "Corner Desk Black"
-msgstr "Fekete sarokasztal"
+msgstr ""
 
 #. module: product
 #: model:product.product,name:product.product_product_5
 #: model:product.template,name:product.product_product_5_product_template
 msgid "Corner Desk Right Sit"
-msgstr "Sarokasztal jobb oldali üléssel"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_price_history__cost
@@ -546,7 +582,7 @@ msgstr "Költség"
 #: model:ir.model.fields,field_description:product.field_product_product__cost_currency_id
 #: model:ir.model.fields,field_description:product.field_product_template__cost_currency_id
 msgid "Cost Currency"
-msgstr "Költség pénznem"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_template__standard_price
@@ -554,7 +590,6 @@ msgid ""
 "Cost used for stock valuation in standard price and as a first price to set "
 "in average/FIFO."
 msgstr ""
-"Készletértékeléshez használt költség alapár, átlagár/FIFO esetén az első ár."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__standard_price
@@ -563,14 +598,11 @@ msgid ""
 "in average/fifo. Also used as a base price for pricelists. Expressed in the "
 "default unit of measure of the product."
 msgstr ""
-"Készletértékeléshez használt költség alapár, átlagár/FIFO esetén az első ár."
-" Szintén alapárként kerül felhasználásra az árlistákhoz. A termék "
-"alapértelmezett mértékegységében kifejezve."
 
 #. module: product
 #: model:ir.model,name:product.model_res_country_group
 msgid "Country Group"
-msgstr "Országcsoport"
+msgstr "Ország csoport"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist__country_group_ids
@@ -580,12 +612,12 @@ msgstr "Országcsoportok"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__create_variant
 msgid "Create Variants"
-msgstr "Változatok létrehozása"
+msgstr ""
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_pricelist_action2
 msgid "Create a new pricelist"
-msgstr "Új árlista létrehozása"
+msgstr ""
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_template_action
@@ -598,7 +630,7 @@ msgstr "Új termék létrehozása"
 #: model_terms:ir.actions.act_window,help:product.product_normal_action_sell
 #: model_terms:ir.actions.act_window,help:product.product_variant_action
 msgid "Create a new product variant"
-msgstr "Új termékváltozat létrehozása"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__create_uid
@@ -616,7 +648,7 @@ msgstr "Új termékváltozat létrehozása"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__create_uid
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__create_uid
 msgid "Created by"
-msgstr "Létrehozta"
+msgstr "Készítette"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__create_date
@@ -634,7 +666,17 @@ msgstr "Létrehozta"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__create_date
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__create_date
 msgid "Created on"
-msgstr "Létrehozva"
+msgstr "Létrehozás dátuma"
+
+#. module: product
+#: selection:res.config.settings,product_volume_volume_in_cubic_feet:0
+msgid "Cubic Feet"
+msgstr ""
+
+#. module: product
+#: selection:res.config.settings,product_volume_volume_in_cubic_feet:0
+msgid "Cubic Meters"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist__currency_id
@@ -657,7 +699,7 @@ msgstr "Vevői hivatkozás"
 #: model:product.product,name:product.product_product_4d
 #: model:product.template,name:product.product_product_4b_product_template
 msgid "Customizable Desk"
-msgstr "Testreszabható asztal"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_price_history__datetime
@@ -679,14 +721,14 @@ msgstr "Tizedes pontosság"
 #: code:addons/product/models/res_company.py:59
 #, python-format
 msgid "Default %(currency)s pricelist for %(company)s"
-msgstr "Alapértelmezett %(currency)s árlista: %(company)s"
+msgstr "Alapértelmezett %(currency)s árlistája: %(company)s"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_packaging__product_uom_id
 #: model:ir.model.fields,help:product.field_product_product__uom_id
 #: model:ir.model.fields,help:product.field_product_template__uom_id
 msgid "Default unit of measure used for all stock operations."
-msgstr "Alapértelmezett mértékegység készletműveletekhez."
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__uom_po_id
@@ -695,15 +737,12 @@ msgid ""
 "Default unit of measure used for purchase orders. It must be in the same "
 "category as the default unit of measure."
 msgstr ""
-"Beszerzési rendelésekhez használt alapértelmezett mértékegység. Ugyanabban a"
-" mértékegység kategóriában kell lennie, mint az alapértelmezett "
-"mértékegységnek."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__seller_ids
 #: model:ir.model.fields,help:product.field_product_template__seller_ids
 msgid "Define vendor pricelists."
-msgstr "Szállítói árlisták megadása"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__delay
@@ -719,32 +758,42 @@ msgstr "Leírás"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Description for Customers"
-msgstr "Leírás vevők részére"
+msgstr "Leírás a vevő részére"
 
 #. module: product
 #: model:product.product,name:product.product_product_3
 #: model:product.template,name:product.product_product_3_product_template
 msgid "Desk Combination"
-msgstr "Asztal kombináció"
+msgstr ""
 
 #. module: product
 #: model:product.product,name:product.product_product_22
 #: model:product.template,name:product.product_product_22_product_template
 msgid "Desk Stand with Screen"
-msgstr "Asztal állvány képernyővel"
+msgstr ""
 
 #. module: product
 #: model:product.product,description_sale:product.product_product_3
 #: model:product.template,description_sale:product.product_product_3_product_template
 msgid "Desk combination, black-brown: chair + desk + drawer."
-msgstr "Asztal kombináció, fekete-barna: szék + asztal + fiók."
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__sequence
 #: model:ir.model.fields,help:product.field_product_attribute_value__sequence
 #: model:ir.model.fields,help:product.field_product_template_attribute_value__sequence
 msgid "Determine the display order"
-msgstr "Megjelenítési sorrend meghatározása"
+msgstr "Megjelenített értékek sorrendjének meghatározása"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_pricelist__discount_policy
+msgid "Discount Policy"
+msgstr "Árengedmény házirendje"
+
+#. module: product
+#: selection:product.pricelist,discount_policy:0
+msgid "Discount included in the price"
+msgstr "Árengedményt tartalmazza az ár"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__display_name
@@ -769,34 +818,24 @@ msgstr "Megjelenített név"
 #: model:product.product,name:product.product_product_27
 #: model:product.template,name:product.product_product_27_product_template
 msgid "Drawer"
-msgstr "Fiók"
+msgstr ""
 
 #. module: product
 #: model:product.product,name:product.product_product_16
 #: model:product.template,name:product.product_product_16_product_template
 msgid "Drawer Black"
-msgstr "Fekete fiók"
+msgstr ""
 
 #. module: product
 #: model:product.product,description:product.product_product_27
 #: model:product.template,description:product.product_product_27_product_template
 msgid "Drawer with two routing possiblities."
-msgstr "Fiók két irány lehetőséggel"
+msgstr ""
 
 #. module: product
 #: model:product.attribute,name:product.product_attribute_3
 msgid "Duration"
 msgstr "Időtartam"
-
-#. module: product
-#: model:product.product,description_sale:product.consu_delivery_03
-#: model:product.template,description_sale:product.consu_delivery_03_product_template
-msgid ""
-"Dvorak keyboard\n"
-"left-handed mouse"
-msgstr ""
-"Dvorak billentyűzet\n"
-"balkezes egér"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__date_end
@@ -812,10 +851,10 @@ msgstr "Beszálítói ár utolsó napja"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__date_end
 msgid "Ending valid for the pricelist item validation"
-msgstr "Befejező érvényesítés az árlista tétel jóváhagyásához"
+msgstr "Befejező érvényesítés az árlista tételének jóváhagyásához"
 
 #. module: product
-#: code:addons/product/models/product.py:300
+#: code:addons/product/models/product.py:287
 #, python-format
 msgid ""
 "Error! It is not allowed to choose more than one value for a given "
@@ -826,7 +865,7 @@ msgstr ""
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__exclude_for
 msgid "Exclude for"
-msgstr "Kizárás innen"
+msgstr ""
 
 #. module: product
 #: model:product.category,name:product.cat_expense
@@ -837,7 +876,7 @@ msgstr "Kiadások"
 #: model:ir.model.fields,help:product.field_product_pricelist_item__name
 #: model:ir.model.fields,help:product.field_product_pricelist_item__price
 msgid "Explicit rule name for this pricelist line."
-msgstr "Meghatározott szabály neve az árlista sorhoz."
+msgstr "Az alábbi árlista sort meghatározó szabály neve."
 
 #. module: product
 #: selection:product.pricelist.item,compute_price:0
@@ -853,7 +892,7 @@ msgstr "Rögzített ár"
 #: model:product.product,name:product.product_product_20
 #: model:product.template,name:product.product_product_20_product_template
 msgid "Flipover"
-msgstr "Flipover"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__message_follower_ids
@@ -879,19 +918,25 @@ msgid ""
 "For the rule to apply, bought/sold quantity must be greater than or equal to the minimum quantity specified in this field.\n"
 "Expressed in the default unit of measure of the product."
 msgstr ""
-"A szabály alkalmazásához, a beszerzési/értékesítési mennyiségnek nagyobbnak vagy egyenlőnek kell lennie az ebben a mezőben meghatározott minimum mennyiségnél.\n"
-"A termék alapértelmezett mértékegységében feltüntetve."
+"A szabály alkalmazásához, beszerzés/értékesítés mennyiségnek nagyobbnak vagy egyenlőnek kell lennie az ebben a mezőben minimum meghatározott mennyiségnél.\n"
+"A termék mértékegységében feltüntetve."
 
 #. module: product
 #: selection:product.pricelist.item,compute_price:0
 msgid "Formula"
-msgstr "Képlet"
+msgstr "Formula"
 
 #. module: product
 #: model:product.product,name:product.consu_delivery_03
 #: model:product.template,name:product.consu_delivery_03_product_template
 msgid "Four Person Desk"
-msgstr "Négyszemélyes asztal"
+msgstr ""
+
+#. module: product
+#: model:product.product,description_sale:product.consu_delivery_03
+#: model:product.template,description_sale:product.consu_delivery_03_product_template
+msgid "Four person modern office workstation"
+msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
@@ -907,13 +952,13 @@ msgstr "Általános információk"
 #: model:ir.model.fields,help:product.field_product_product__packaging_ids
 #: model:ir.model.fields,help:product.field_product_template__packaging_ids
 msgid "Gives the different ways to package the same product."
-msgstr "A termék különböző csomagolási módjait adja meg."
+msgstr "Ugyanannak a terméknek a különböző csomagolási módját adja."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__sequence
 #: model:ir.model.fields,help:product.field_product_template__sequence
 msgid "Gives the sequence order when displaying a product list"
-msgstr "A termék megjelenítése során alkalmazandó sorrendet adja meg."
+msgstr "Megadja a sorrendet, amikor a termékek listáját megjelenítjük."
 
 #. module: product
 #: selection:product.pricelist.item,applied_on:0
@@ -921,21 +966,22 @@ msgid "Global"
 msgstr "Globális"
 
 #. module: product
-#: code:addons/product/models/product_template.py:32
+#: code:addons/product/models/product_template.py:29
 #, python-format
 msgid "Go to Internal Categories"
-msgstr "Menjen a belső kategóriákhoz"
+msgstr "Menjen a belső hivatkozási kategóriához"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_search_view
+#: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 msgid "Group By"
-msgstr "Csoportosítás"
+msgstr "Csoportosítás ezzel"
 
 #. module: product
 #: model:product.product,name:product.expense_hotel
 #: model:product.template,name:product.expense_hotel_product_template
 msgid "Hotel Accommodation"
-msgstr "Hotel szállás"
+msgstr "Szállás elhelyezés"
 
 #. module: product
 #: model:product.product,uom_name:product.product_product_1
@@ -962,19 +1008,19 @@ msgstr "Óra"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__id
 #: model:ir.model.fields,field_description:product.field_report_product_report_pricelist__id
 msgid "ID"
-msgstr "Azonosító"
+msgstr "Azonosító ID"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__message_unread
 #: model:ir.model.fields,help:product.field_product_template__message_unread
 msgid "If checked new messages require your attention."
-msgstr "Ha be van jelölve, akkor az új üzenetek figyelmet igényelnek."
+msgstr "Ha be van jelölve, akkor figyelje az új üzeneteket."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__message_needaction
 #: model:ir.model.fields,help:product.field_product_template__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "Ha be van jelölve, akkor az új üzenetek figyelmet igényelnek."
+msgstr "Ha be van jelölve, akkor figyelje az új üzeneteket."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__message_has_error
@@ -988,8 +1034,6 @@ msgstr ""
 msgid ""
 "If not set, the vendor price will apply to all variants of this product."
 msgstr ""
-"Ha nincs beállítva, akkor a szállítói ár a termék összes változatára "
-"érvényes lesz."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist__active
@@ -1007,60 +1051,39 @@ msgstr ""
 "Ha nincs bejelölve, akkor eltüntetheti a terméket annak törlése nélkül."
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_template__image
-msgid "Image"
-msgstr "Kép"
-
-#. module: product
-#: model:ir.model.fields,help:product.field_product_product__image
-msgid ""
-"Image of the product variant (Big-sized image of product template if false)."
-" It is automatically resized as a 1024x1024px image, with aspect ratio "
-"preserved."
+#: model:ir.model.fields,help:product.field_product_product__image_original
+#: model:ir.model.fields,help:product.field_product_template__image_original
+msgid "Image in its original size, as it was uploaded."
 msgstr ""
-"A termékváltozat képe (Nagy-méretű kép a terméksablonról, ha nincs). "
-"Automatikusan átméretezve 1024x1024px képre, a képarány megtartása mellett."
 
 #. module: product
-#: model:ir.model.fields,help:product.field_product_product__image_medium
-msgid ""
-"Image of the product variant (Medium-sized image of product template if "
-"false)."
-msgstr ""
-"A termékváltozat képe (Közepes-méretű kép a terméksablonról, ha nincs)."
-
-#. module: product
-#: model:ir.model.fields,help:product.field_product_product__image_small
-msgid ""
-"Image of the product variant (Small-sized image of product template if "
-"false)."
-msgstr ""
-"A termékváltozat képe (Kis-méretű kép a terméksablonról, ha hamisra "
-"állítva)."
-
-#. module: product
-#: code:addons/product/models/product_pricelist.py:348
+#: code:addons/product/models/product_pricelist.py:357
 #, python-format
 msgid "Import Template for Pricelists"
-msgstr "Importálási sablon árlistákhoz"
+msgstr ""
 
 #. module: product
-#: code:addons/product/models/product_template.py:573
+#: code:addons/product/models/product_template.py:1062
 #, python-format
 msgid "Import Template for Products"
-msgstr "Importálási sablon termékekhez"
+msgstr ""
 
 #. module: product
-#: code:addons/product/models/product.py:665
+#: code:addons/product/models/product.py:743
 #, python-format
 msgid "Import Template for Vendor Pricelists"
-msgstr "Importálási sablon szállítói árlistákhoz"
+msgstr ""
+
+#. module: product
+#: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
+msgid "In which unit of measure do you manage your volumes"
+msgstr ""
 
 #. module: product
 #: model:product.product,name:product.product_product_24
 #: model:product.template,name:product.product_product_24_product_template
 msgid "Individual Workplace"
-msgstr "Egyedi munkatér"
+msgstr ""
 
 #. module: product
 #: model:product.category,name:product.product_category_2
@@ -1082,7 +1105,7 @@ msgstr "Belső hivatkozás"
 #: model:ir.model.fields,help:product.field_product_product__barcode
 #: model:ir.model.fields,help:product.field_product_template__barcode
 msgid "International Article Number used for product identification."
-msgstr "A termék azonosítására használt Nemzetközi Cikk Szám (IAN)."
+msgstr "Nemzetközi cikk szám melyet a termék azonosítására használnak."
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
@@ -1093,12 +1116,12 @@ msgstr "Készlet"
 #: model:ir.model.fields,field_description:product.field_product_product__message_is_follower
 #: model:ir.model.fields,field_description:product.field_product_template__message_is_follower
 msgid "Is Follower"
-msgstr "Követő"
+msgstr "Ő egy követő"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__is_product_variant
 msgid "Is Product Variant"
-msgstr "Termékváltozat"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_template__is_product_variant
@@ -1108,25 +1131,31 @@ msgstr "Ez egy termék változat"
 #. module: product
 #: selection:res.config.settings,product_weight_in_lbs:0
 msgid "Kilogram"
-msgstr "Kilogramm"
+msgstr ""
 
 #. module: product
 #: model:product.product,name:product.product_product_6
 #: model:product.template,name:product.product_product_6_product_template
 msgid "Large Cabinet"
-msgstr "Nagy kabinet"
+msgstr ""
 
 #. module: product
 #: model:product.product,name:product.product_product_8
 #: model:product.template,name:product.product_product_8_product_template
 msgid "Large Desk"
-msgstr "Nagy asztal"
+msgstr ""
 
 #. module: product
 #: model:product.product,name:product.consu_delivery_02
 #: model:product.template,name:product.consu_delivery_02_product_template
 msgid "Large Meeting Table"
-msgstr "Nagy értekezlet asztal"
+msgstr ""
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__image_large
+#: model:ir.model.fields,field_description:product.field_product_template__image_large
+msgid "Large-sized Image"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute____last_update
@@ -1145,7 +1174,7 @@ msgstr "Nagy értekezlet asztal"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value____last_update
 #: model:ir.model.fields,field_description:product.field_report_product_report_pricelist____last_update
 msgid "Last Modified on"
-msgstr "Legutóbb frissítve"
+msgstr "Utoljára frissítve ekkor"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__write_uid
@@ -1163,7 +1192,7 @@ msgstr "Legutóbb frissítve"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__write_uid
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__write_uid
 msgid "Last Updated by"
-msgstr "Legutóbb frissítette"
+msgstr "Utoljára frissítette"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__write_date
@@ -1181,7 +1210,7 @@ msgstr "Legutóbb frissítette"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__write_date
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__write_date
 msgid "Last Updated on"
-msgstr "Legutóbb frissítve "
+msgstr "Utoljára frissítve "
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
@@ -1195,22 +1224,23 @@ msgid ""
 "receipt of the products in your warehouse. Used by the scheduler for "
 "automatic computation of the purchase order planning."
 msgstr ""
-"A termékek beszerzési rendelésének visszaigazolása és az áruk "
-"raktárépületébe beérkezése közt eltelt idő napokban. A beszerzési rendelés "
-"tervezésének automatikus kiszámításához használja az ütemező."
+"A termékek beszerzési megrendelésének visszaigazolása és az áruk "
+"raktárépületébe beérkezése közt eltelt idő napokban. A beszerzési "
+"megrendelés tervezésének automatikus kiszámításához használja az ütemező."
 
 #. module: product
 #: model:product.attribute,name:product.product_attribute_1
 msgid "Legs"
-msgstr "Lábak"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__attribute_line_ids
 msgid "Lines"
-msgstr "Sorok"
+msgstr "Tételsorok"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
+#: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
 msgid "Logistics"
 msgstr "Logisztika"
 
@@ -1226,8 +1256,6 @@ msgid ""
 "Make this attribute value not compatible with\n"
 "        other values of the product or some attribute values of optional and accessory products."
 msgstr ""
-"Tegye ezt a tulajdonság értéket nem kompatibilissé\n"
-"        a termék más értékeivel vagy opcionális és kiegészítő termékek néhány tulajdonság értékével."
 
 #. module: product
 #: model:res.groups,name:product.group_pricelist_item
@@ -1237,7 +1265,7 @@ msgstr "Árlista elemek kezelése"
 #. module: product
 #: model:res.groups,name:product.group_stock_packaging
 msgid "Manage Product Packaging"
-msgstr "Termék csomagolás kezelése"
+msgstr "Termék csomagolás szervezése"
 
 #. module: product
 #: model:res.groups,name:product.group_product_variant
@@ -1257,19 +1285,8 @@ msgstr "Max. árrés"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__image_medium
 #: model:ir.model.fields,field_description:product.field_product_template__image_medium
-msgid "Medium-sized image"
-msgstr "Közepes méretű kép"
-
-#. module: product
-#: model:ir.model.fields,help:product.field_product_template__image_medium
-msgid ""
-"Medium-sized image of the product. It is automatically resized as a "
-"128x128px image, with aspect ratio preserved, only when the image exceeds "
-"one of those sizes. Use this field in form views or some kanban views."
+msgid "Medium-sized Image"
 msgstr ""
-"Közepes-méretű kép a termékről. Automatikusan át lesz méretezve 128x128px "
-"méretű képre a méretarányt megtartva akkor, ha a kép egyik mérete túllépi az"
-" értéket. Használja ezt a mezőt űrlap vagy kanban nézeteken."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__message_has_error
@@ -1325,7 +1342,7 @@ msgstr "Új ár ="
 #: model:ir.model.fields,field_description:product.field_product_product__activity_date_deadline
 #: model:ir.model.fields,field_description:product.field_product_template__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr "Következő tevékenység határideje"
+msgstr "Következő tevékenység-határidő"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__activity_summary
@@ -1337,19 +1354,19 @@ msgstr "Következő tevékenység összegzése"
 #: model:ir.model.fields,field_description:product.field_product_product__activity_type_id
 #: model:ir.model.fields,field_description:product.field_product_template__activity_type_id
 msgid "Next Activity Type"
-msgstr "Következő tevékenység típusa"
+msgstr "Következő tevékenységtípus"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__message_needaction_counter
 #: model:ir.model.fields,field_description:product.field_product_template__message_needaction_counter
 msgid "Number of Actions"
-msgstr "Akciók száma"
+msgstr "Műveletek száma"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__message_has_error_counter
 #: model:ir.model.fields,field_description:product.field_product_template__message_has_error_counter
 msgid "Number of error"
-msgstr "Hibák száma"
+msgstr "Hiba száma"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__message_needaction_counter
@@ -1373,35 +1390,41 @@ msgstr "Olvasatlan üzenetek száma"
 #: model:product.product,name:product.product_delivery_01
 #: model:product.template,name:product.product_delivery_01_product_template
 msgid "Office Chair"
-msgstr "Irodai szék"
+msgstr ""
 
 #. module: product
 #: model:product.product,name:product.product_product_12
 #: model:product.template,name:product.product_product_12_product_template
 msgid "Office Chair Black"
-msgstr "Fekete irodai szék"
+msgstr ""
 
 #. module: product
 #: model:product.product,name:product.product_order_01
 #: model:product.template,name:product.product_order_01_product_template
 msgid "Office Design Software"
-msgstr "Iroda tervező szoftver"
+msgstr ""
 
 #. module: product
 #: model:product.category,name:product.product_category_5
 msgid "Office Furniture"
-msgstr "Irodabútor"
+msgstr ""
 
 #. module: product
 #: model:product.product,name:product.product_delivery_02
 #: model:product.template,name:product.product_delivery_02_product_template
 msgid "Office Lamp"
-msgstr "Irodai lámpa"
+msgstr ""
 
 #. module: product
 #: selection:product.attribute,create_variant:0
 msgid "Only when the product is added to a sales order"
-msgstr "Csak amikor a termék hozzáadásra kerül a vevői rendeléshez"
+msgstr ""
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__image_original
+#: model:ir.model.fields,field_description:product.field_product_template__image_original
+msgid "Original Image"
+msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
@@ -1418,7 +1441,7 @@ msgstr "Másik árlista"
 #: selection:product.product,activity_state:0
 #: selection:product.template,activity_state:0
 msgid "Overdue"
-msgstr "Lejárt"
+msgstr "lejárt"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_packaging__name
@@ -1441,13 +1464,13 @@ msgstr "Szülő kategória"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_category__parent_path
 msgid "Parent Path"
-msgstr "Szülő útvonal"
+msgstr ""
 
 #. module: product
 #: model:product.product,name:product.product_product_9
 #: model:product.template,name:product.product_product_9_product_template
 msgid "Pedal Bin"
-msgstr "Pedálos szemetesláda"
+msgstr ""
 
 #. module: product
 #: selection:product.pricelist.item,compute_price:0
@@ -1468,7 +1491,7 @@ msgstr "Tervezett"
 #. module: product
 #: selection:res.config.settings,product_weight_in_lbs:0
 msgid "Pound"
-msgstr "Font"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__price
@@ -1498,8 +1521,6 @@ msgid ""
 "Price Extra: Extra price for the variant with\n"
 "        this attribute value on sale price. eg. 200 price extra, 1000 + 200 = 1200."
 msgstr ""
-"Felár: Extra ár a változat számára\n"
-"        ezen tulajdonság esetén az eladási árhoz képest, pld: 200 felár, 1000 + 200 = 1200."
 
 #. module: product
 #: model:ir.actions.act_window,name:product.action_product_price_list
@@ -1512,7 +1533,7 @@ msgstr "Árlista"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__price_round
 msgid "Price Rounding"
-msgstr "Ár kerekítése"
+msgstr "Árkerekítés"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__price_surcharge
@@ -1524,7 +1545,7 @@ msgstr "Felár"
 #: model:ir.model.fields,help:product.field_product_template__list_price
 #: model:ir.model.fields,help:product.field_product_template__lst_price
 msgid "Price at which the product is sold to customers."
-msgstr "Az ár amin a termék értékesítésre kerül vevők részére"
+msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_kanban_view
@@ -1553,12 +1574,12 @@ msgstr "Árlista"
 #: model:ir.model,name:product.model_product_pricelist_item
 #: model:ir.model.fields,field_description:product.field_product_product__pricelist_item_ids
 msgid "Pricelist Item"
-msgstr "Árlista tétel"
+msgstr "Árlista tételek"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__applied_on
 msgid "Pricelist Item applicable on selected option"
-msgstr "Kiválasztott kiegészítőre vonatkozó árlista tétel"
+msgstr "Kiválasztott kiegészítőre vonatkozó árlista"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist__item_ids
@@ -1570,12 +1591,12 @@ msgstr "Kiválasztott kiegészítőre vonatkozó árlista tétel"
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Pricelist Items"
-msgstr "Árlista tételek"
+msgstr "Árlista elemek"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist__name
 msgid "Pricelist Name"
-msgstr "Árlista neve"
+msgstr "Árlista név"
 
 #. module: product
 #: model:ir.actions.act_window,name:product.product_pricelist_action2
@@ -1591,13 +1612,13 @@ msgstr "Árlisták terméken"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.view_partner_property_form
 msgid "Pricelists are managed on"
-msgstr "Árlisták kezelése itt"
+msgstr "Az árlisták ez alapján kezelve"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
 msgid "Pricing"
-msgstr "Árazás"
+msgstr "Árképzés"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.view_product_price_list
@@ -1640,7 +1661,7 @@ msgstr "Terméktulajdonság érték"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__product_template_value_ids
 msgid "Product Attribute Values"
-msgstr "Terméktulajdonság értékek"
+msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_attribute_line_form
@@ -1651,20 +1672,20 @@ msgstr "Terméktulajdonság és értékek"
 #: model:ir.model.fields,field_description:product.field_product_product__attribute_line_ids
 #: model:ir.model.fields,field_description:product.field_product_template__attribute_line_ids
 msgid "Product Attributes"
-msgstr "Terméktulajdonságok"
+msgstr "Termék tulajdonságok"
 
 #. module: product
 #: model:ir.actions.report,name:product.report_product_product_barcode
 #: model:ir.actions.report,name:product.report_product_template_barcode
 msgid "Product Barcode (PDF)"
-msgstr "Termék vonalkód (PDF)"
+msgstr ""
 
 #. module: product
 #: model:ir.actions.act_window,name:product.product_category_action_form
 #: model_terms:ir.ui.view,arch_db:product.product_category_list_view
 #: model_terms:ir.ui.view,arch_db:product.product_category_search_view
 msgid "Product Categories"
-msgstr "Termék kategóriák"
+msgstr "Termékkategóriák"
 
 #. module: product
 #: model:ir.model,name:product.model_product_category
@@ -1673,14 +1694,15 @@ msgstr "Termék kategóriák"
 #: model:ir.model.fields,field_description:product.field_product_template__categ_id
 #: model_terms:ir.ui.view,arch_db:product.product_category_list_view
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
+#: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 msgid "Product Category"
-msgstr "Termék kategória"
+msgstr "Termékkategória"
 
 #. module: product
 #: model:ir.actions.report,name:product.report_product_label
 #: model:ir.actions.report,name:product.report_product_template_label
 msgid "Product Label (PDF)"
-msgstr "Termék címke (PDF)"
+msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
@@ -1703,29 +1725,29 @@ msgstr "Termék csomagolás"
 #. module: product
 #: model:ir.actions.report,name:product.report_product_packaging
 msgid "Product Packaging (PDF)"
-msgstr "Termék csomagolás (PDF)"
+msgstr ""
 
 #. module: product
 #: model:ir.actions.act_window,name:product.action_packaging_view
 #: model:ir.model.fields,field_description:product.field_res_config_settings__group_stock_packaging
 #: model_terms:ir.ui.view,arch_db:product.product_packaging_tree_view
 msgid "Product Packagings"
-msgstr "Termék csomagolások"
+msgstr ""
 
 #. module: product
 #: model:ir.model,name:product.model_product_price_history
 msgid "Product Price List History"
-msgstr "Termék árlista történet"
+msgstr ""
 
 #. module: product
 #: model:ir.model,name:product.model_report_product_report_pricelist
 msgid "Product Price List Report"
-msgstr "Termék árlista riport"
+msgstr ""
 
 #. module: product
 #: model:ir.model,name:product.model_product_price_list
 msgid "Product Price per Unit Based on Pricelist Version"
-msgstr "Termék ár egységenként árlista verzió alapján"
+msgstr ""
 
 #. module: product
 #: model:ir.model,name:product.model_product_template
@@ -1742,16 +1764,17 @@ msgstr "Terméksablon"
 #. module: product
 #: model:ir.model,name:product.model_product_template_attribute_exclusion
 msgid "Product Template Attribute Exclusion"
-msgstr "Terméksablon tulajdonság kizárás"
+msgstr ""
 
 #. module: product
 #: model:ir.model,name:product.model_product_template_attribute_line
 msgid "Product Template Attribute Line"
-msgstr "Terméksablon tulajdonság sor"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__type
 #: model:ir.model.fields,field_description:product.field_product_template__type
+#: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 msgid "Product Type"
 msgstr "Terméktípus"
 
@@ -1766,7 +1789,7 @@ msgstr "Termékváltozat"
 #. module: product
 #: model:ir.actions.act_window,name:product.product_attribute_value_action
 msgid "Product Variant Values"
-msgstr "Termékváltozat értékek"
+msgstr ""
 
 #. module: product
 #: model:ir.actions.act_window,name:product.product_normal_action
@@ -1789,7 +1812,7 @@ msgstr "Termékek"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view_search
 msgid "Products Price"
-msgstr "Termékek ára"
+msgstr "Termékek árai"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
@@ -1800,15 +1823,16 @@ msgstr "Termékek árlistája"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view_search
 msgid "Products Price Search"
-msgstr "Termékár keresés"
+msgstr "Termékár keresése"
 
 #. module: product
-#: code:addons/product/models/product.py:475
+#: code:addons/product/models/product.py:500
 #, python-format
 msgid "Products: "
 msgstr "Termékek: "
 
 #. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__lst_price
 #: model:ir.model.fields,field_description:product.field_product_template__lst_price
 #: selection:product.pricelist.item,base:0
 msgid "Public Price"
@@ -1828,13 +1852,18 @@ msgstr "Beszerzés"
 #: model:ir.model.fields,field_description:product.field_product_product__description_purchase
 #: model:ir.model.fields,field_description:product.field_product_template__description_purchase
 msgid "Purchase Description"
-msgstr "Beszerzési leírás"
+msgstr "Megrendelési leírás"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__uom_po_id
 #: model:ir.model.fields,field_description:product.field_product_template__uom_po_id
 msgid "Purchase Unit of Measure"
 msgstr "Beszerzés mértékegysége"
+
+#. module: product
+#: model:ir.model.fields,help:product.field_product_packaging__qty
+msgid "Quantity of products contained in the packaging."
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_price_list__qty1
@@ -1862,6 +1891,36 @@ msgid "Quantity-5"
 msgstr "Mennyiség - 5"
 
 #. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__image_raw_big
+#: model:ir.model.fields,field_description:product.field_product_template__image_raw_big
+msgid "Raw Big-sized Image"
+msgstr ""
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__image_raw_large
+#: model:ir.model.fields,field_description:product.field_product_template__image_raw_large
+msgid "Raw Large-sized Image"
+msgstr ""
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__image_raw_medium
+#: model:ir.model.fields,field_description:product.field_product_template__image_raw_medium
+msgid "Raw Medium-sized Image"
+msgstr ""
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__image_raw_original
+#: model:ir.model.fields,field_description:product.field_product_template__image_raw_original
+msgid "Raw Original Image"
+msgstr ""
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__image_raw_small
+#: model:ir.model.fields,field_description:product.field_product_template__image_raw_small
+msgid "Raw Small-sized Image"
+msgstr ""
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__code
 msgid "Reference"
 msgstr "Hivatkozás"
@@ -1876,7 +1935,7 @@ msgstr "Felelős felhasználó"
 #: model:product.product,name:product.expense_product
 #: model:product.template,name:product.expense_product_product_template
 msgid "Restaurant Expenses"
-msgstr "Éttermi költségek"
+msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
@@ -1890,7 +1949,8 @@ msgid "Sale Description"
 msgstr "Értékesítési leírás"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_product__lst_price
+#: model:ir.model.fields,field_description:product.field_product_product__list_price
+#: model:ir.model.fields,field_description:product.field_product_template__list_price
 msgid "Sale Price"
 msgstr "Eladási ár"
 
@@ -1898,20 +1958,18 @@ msgstr "Eladási ár"
 #: model:product.category,name:product.product_category_1
 #: model:product.category,name:product.product_category_6
 msgid "Saleable"
-msgstr "Értékesíthető"
+msgstr "Eladható"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Sales"
-msgstr "Értékesítés"
+msgstr "Értékesítések"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_product__list_price
-#: model:ir.model.fields,field_description:product.field_product_template__list_price
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_template_tree_view
 msgid "Sales Price"
-msgstr "Eladási ár"
+msgstr "Értékesítési ár"
 
 #. module: product
 #: model:res.groups,name:product.group_sale_pricelist
@@ -1922,7 +1980,7 @@ msgstr "Értékesítési árlista"
 #: model:ir.model.fields,help:product.field_product_product__categ_id
 #: model:ir.model.fields,help:product.field_product_template__categ_id
 msgid "Select category for the current product"
-msgstr "Válasszon ki egy kategóriát ehhez a termékhez."
+msgstr "Válasszon ki egy kategóriát az aktuális termékhez."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__sequence
@@ -1955,14 +2013,14 @@ msgid ""
 "To have prices that end in 9.99, set rounding 10, surcharge -0.01"
 msgstr ""
 "Úgy állítja be az árat, hogy az ennek az értéknek a többszöröse lesz.\n"
-"A kerekítés az árengedmény figyelembe vétele után és a felár\n"
+"A kerekítés az engedmény figyelembevétele után és a felár\n"
 "hozzáadása előtt kerül alkalmazásra. 9,99-re végződő ár\n"
 "készítéséhez 10-es kerekítést és -0,01 felárat használjon."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_res_config_settings__company_share_product
 msgid "Share product to all companies"
-msgstr "Termékek megosztása az összes vállalattal"
+msgstr "Ossza meg a termékeket az összes vállalattal"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_res_config_settings__company_share_product
@@ -1972,42 +2030,36 @@ msgid ""
 " * Unchecked : Each company can see only its product (product where company is defined). Product not related to a company are visible for all companies."
 msgstr ""
 "Ossza meg termékeit az összes meghatározott vállalata között.\n"
-" * Bejelölve: A termékek láthatóak mindegyik vállalatbanl, még akkor is, ha a a termék vállalatra definiált.\n"
-" * Nincs bejelölve: Mindegyik vállalat csak a saját termékeit látja  (termékek, melyek a vállalathoz kapcsoltak). Termékek, melyek egyik vállalathoz sem tartoznak az összes vállalat számára láthatóak."
+" * Bejelölt: Termékek láthatóak mindegyik vállalata részéről, még akkor is, ha a vállalat a termékre definiált.\n"
+" * Nem bejelölt: Mindegyik vállalat csak a saját termékeit látja  (termékek, melyek a vállalathoz kapcsoltak). Termékek, melyek egyik vállalathoz sem tartoznak azok az összes vállalat számára láthatóak."
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 msgid "Show all records which has next action date is before today"
 msgstr ""
-"Mutassa az összes olyan rekordot, melynél a következő akció dátuma a mai nap"
-" előtti"
+"Mutassa az összes rekordot melyre a következő műveleti dátum a mai nap "
+"előtti"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_res_config_settings__group_product_pricelist
 msgid "Show pricelists On Products"
-msgstr "Árlisták megjelenítése termékeken"
+msgstr "Jelenítse meg az árlistákat a termékeken"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_res_config_settings__group_pricelist_item
 msgid "Show pricelists to customers"
-msgstr "Árlisták megjelenítése vevőknek"
+msgstr "Jelenítse meg az árlistákat a vásárlóknak"
+
+#. module: product
+#: selection:product.pricelist,discount_policy:0
+msgid "Show public price & discount to the customer"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__image_small
 #: model:ir.model.fields,field_description:product.field_product_template__image_small
-msgid "Small-sized image"
-msgstr "Kis méretű kép"
-
-#. module: product
-#: model:ir.model.fields,help:product.field_product_template__image_small
-msgid ""
-"Small-sized image of the product. It is automatically resized as a 64x64px "
-"image, with aspect ratio preserved. Use this field anywhere a small image is"
-" required."
+msgid "Small-sized Image"
 msgstr ""
-"Kis-méretű kép a termékről. Automatikusan át lesz alakítva 64x64px méretre "
-"az arányt megtartva. Használja ezt a mezőt mindenhol, ahol kis képre van "
-"szükség."
 
 #. module: product
 #: model:product.category,name:product.product_category_4
@@ -2020,8 +2072,9 @@ msgid ""
 "Specify a product category if this rule only applies to products belonging "
 "to this category or its children categories. Keep empty otherwise."
 msgstr ""
-"Adjon meg egy termék kategóriát, ha ez a szabály csak a kategóriába vagy "
-"annak alkategóriáiba tartozó termékekre vonatkozik. Egyébként hagyja üresen."
+"Határozzon meg egy termék kategóriát ha ez a szabály csak a kategóriába vagy"
+" annak al-kategóriájába tartozó termékekre vonatkozik. Egyébként hagyja "
+"üressen."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__product_id
@@ -2029,8 +2082,8 @@ msgid ""
 "Specify a product if this rule only applies to one product. Keep empty "
 "otherwise."
 msgstr ""
-"Adjon meg egy terméket, ha ez a szabály csak egy termékre vonatkozik. "
-"Egyébként hagyja üresen."
+"Határozzon meg egy árut, ha ez a szabály csak egy áruhoz tartozik. Egyébként"
+" hagyja üresen."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__product_tmpl_id
@@ -2038,7 +2091,7 @@ msgid ""
 "Specify a template if this rule only applies to one product template. Keep "
 "empty otherwise."
 msgstr ""
-"Adjon meg egy terméksablont, ha ez a szabály csak egy terméksablonhoz "
+"Határozzon meg egy sablont, ha ez a szabály csak egy termék sablonhoz "
 "tartozik. Egyébként hagyja üresen."
 
 #. module: product
@@ -2047,19 +2100,18 @@ msgid ""
 "Specify the fixed amount to add or substract(if negative) to the amount "
 "calculated with the discount."
 msgstr ""
-"Adjon meg hozzáadandó vagy levonandó (ha negatív) fix összeget az "
-"árengedménnyel számított összeghez."
+"Határozza meg a hozzáadandó vagy levonandó(ha negatív) fix összeget ahhoz az"
+" összeghez amivel az árkedvezményt számítja."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__price_max_margin
 msgid "Specify the maximum amount of margin over the base price."
-msgstr "Adja meg az alapáron felül érvényesítedő árrés maximum összegét."
+msgstr "Határozza meg az alap áron érvényesíthető maximum árkülönbözetet."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__price_min_margin
 msgid "Specify the minimum amount of margin over the base price."
-msgstr ""
-"Határozza meg az alapáron felül érvényesíthető minimum árkülönbözetet."
+msgstr "Határozza meg az alapárra tehető minimum árkülönbözetet."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__date_start
@@ -2070,12 +2122,12 @@ msgstr "Kezdő dátum"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__date_start
 msgid "Start date for this vendor price"
-msgstr "Beszállítói ár kezdő dátum"
+msgstr "Beszállítói ár kezdő napja"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__date_start
 msgid "Starting date for the pricelist item validation"
-msgstr "Árlista tétel érvényesítés kezdető dátuma"
+msgstr "Érvényesítés kezdetének dátuma az árlista tételének jóváhagyásához"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__activity_state
@@ -2094,18 +2146,18 @@ msgstr ""
 #. module: product
 #: model:product.attribute.value,name:product.product_attribute_value_1
 msgid "Steel"
-msgstr "Fém"
+msgstr ""
 
 #. module: product
 #: selection:product.template,type:0
 msgid "Storable Product"
-msgstr "Készletezett termék"
+msgstr ""
 
 #. module: product
 #: model:product.product,name:product.product_product_7
 #: model:product.template,name:product.product_product_7_product_template
 msgid "Storage Box"
-msgstr "Tároló doboz"
+msgstr ""
 
 #. module: product
 #: model:ir.model,name:product.model_product_supplierinfo
@@ -2130,7 +2182,7 @@ msgstr "Szállítói árlista"
 #: model:ir.model.fields,help:product.field_product_template__valid_product_template_attribute_line_ids
 #: model:ir.model.fields,help:product.field_product_template__valid_product_template_attribute_line_wnva_ids
 msgid "Technical compute"
-msgstr "Technikai számítás"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__pricelist_id
@@ -2138,30 +2190,28 @@ msgstr "Technikai számítás"
 msgid ""
 "Technical field. Used for searching on pricelists, not stored in database."
 msgstr ""
-"Technikai mező. Az árlisták keresésére használt, nincs mentve az "
-"adatbázisban."
+"Műszaki mező. Az árlisták keresésére használt, nem mentett az adatbázisban."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__product_template_attribute_value_ids
 msgid "Template Attribute Values"
-msgstr "Sablon tulajdonság értékek"
+msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid ""
 "The computed price is expressed in the default Unit of Measure of the "
 "product."
-msgstr "A számított ár a termék alapértelmezett mértékegységében kifejezve."
+msgstr ""
+"A kiszámolt árakat a termék alapértelmezett mértékegységében tünteti fel."
 
 #. module: product
-#: code:addons/product/models/product_template.py:303
+#: code:addons/product/models/product_template.py:331
 #, python-format
 msgid ""
 "The default Unit of Measure and the purchase Unit of Measure must be in the "
 "same category."
 msgstr ""
-"Az alapértelmezett mértékegységnek és a beszerzési mértékegységnek ugyanabba"
-" a kategóriába kell tartoznia."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_packaging__sequence
@@ -2175,15 +2225,15 @@ msgid ""
 "Product Unit of Measure if not any, in the default unit of measure of the "
 "product otherwise."
 msgstr ""
-"A beszállítótól vásárolható minimum mennyiség a szállító mértékegységében "
-"(ha nincs, akkor az alapértelmezett mértékegységben)."
+"A beszállítótól vásárolható minimum mennyiség, ha nem üres, akkor "
+"meghatározva a termék beszállító mértékegységében, egyéb esetben az egység "
+"mértékegységébe alapján."
 
 #. module: product
-#: code:addons/product/models/product_pricelist.py:443
+#: code:addons/product/models/product_pricelist.py:455
 #, python-format
 msgid "The minimum margin should be lower than the maximum margin."
 msgstr ""
-"A minimális árrésnek alacsonyabbnak kell lennie, mint a maximális árrésnek."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_category__product_count
@@ -2195,7 +2245,7 @@ msgstr ""
 "tekintetbe)"
 
 #. module: product
-#: code:addons/product/models/product_template.py:480
+#: code:addons/product/models/product_template.py:517
 #, python-format
 msgid ""
 "The number of variants to generate is too high. You should either not "
@@ -2203,20 +2253,16 @@ msgid ""
 "sales order. To do so, open the form view of attributes and change the mode "
 "of *Create Variants*."
 msgstr ""
-"A generálandó változatok száma túl magas. Vagy ne generáljon változatot "
-"minden kombinációhoz, vagy generálja igény alapján az értékesítési "
-"rendelésről. Ehhez nyissa meg az űrlap nézetet és állítsa be a *Változatok "
-"létrehozása* módot."
 
 #. module: product
-#: code:addons/product/models/product_attribute.py:85
+#: code:addons/product/models/product_attribute.py:101
 #, python-format
 msgid ""
 "The operation cannot be completed:\n"
 "You are trying to delete an attribute value with a reference on a product variant."
 msgstr ""
 "A művelet nem végrehajtható:\n"
-"Olyan tulajdonság értéket próbál meg törölni, mely hivatkozik egy termékváltozatra."
+"Olyan tulajdonság értéket próbál meg törölni, melynek hivatkozása van egy termék változatra."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__price
@@ -2224,10 +2270,10 @@ msgid "The price to purchase a product"
 msgstr "Ár a termék beszerzéséhez"
 
 #. module: product
-#: code:addons/product/models/product_template.py:943
+#: code:addons/product/models/product_template.py:952
 #, python-format
 msgid "The product template is archived so no combination is possible."
-msgstr "A terméksablon archivált, így nem lehetséges kombinációk megadása."
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__lst_price
@@ -2235,42 +2281,24 @@ msgid ""
 "The sale price is managed from the product template. Click on the 'Configure"
 " Variants' button to set the extra attribute prices."
 msgstr ""
-"Az eladási ár a terméksablonok kerül kezelésre. Kattintson a 'Változatok "
-"konfigurálása' gombra tulajdonság felárak megadásához."
 
 #. module: product
-#: model:ir.model.fields,help:product.field_product_packaging__qty
-msgid "The total number of products you can have per pallet or box."
-msgstr "Raklapra vagy dobozba rakható termékek összes száma"
-
-#. module: product
-#: model:ir.model.fields,help:product.field_product_product__volume
-#: model:ir.model.fields,help:product.field_product_template__volume
-msgid "The volume in m3."
-msgstr "A térfogat köbméterben."
-
-#. module: product
-#: model:ir.model.fields,help:product.field_product_template__weight
-msgid "The weight of the contents in Kg, not including any packaging, etc."
-msgstr "A tartalom súlya kg-ban, csomagolás nélkül, stb."
-
-#. module: product
-#: code:addons/product/models/product_template.py:1010
+#: code:addons/product/models/product_template.py:1019
 #, python-format
 msgid "There are no possible combination."
-msgstr "Nincs lehetséges kombináció."
+msgstr ""
 
 #. module: product
-#: code:addons/product/models/product_template.py:1005
+#: code:addons/product/models/product_template.py:1014
 #, python-format
 msgid "There are no remaining closest combination."
-msgstr "Nincs fennmaradó legközelebbi kombináció."
+msgstr ""
 
 #. module: product
-#: code:addons/product/models/product_template.py:963
+#: code:addons/product/models/product_template.py:972
 #, python-format
 msgid "There are no remaining possible combination."
-msgstr "Nincs fennmaradó lehetséges kombináció."
+msgstr ""
 
 #. module: product
 #: sql_constraint:product.attribute.value:0
@@ -2280,40 +2308,24 @@ msgstr "Ez a tulajdonság érték már létezik!"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__product_uom
 msgid "This comes from the product form."
-msgstr "Ez a termék űrlapjáról származik."
-
-#. module: product
-#: model:ir.model.fields,help:product.field_product_product__image_variant
-msgid ""
-"This field holds the image used as image for the product variant, limited to"
-" 1024x1024px."
-msgstr ""
-"Ez a mező tartalmazza a termékváltozatra vonatkozó képet, lehatárolva "
-"1024x1024px méretre."
-
-#. module: product
-#: model:ir.model.fields,help:product.field_product_template__image
-msgid ""
-"This field holds the image used as image for the product, limited to "
-"1024x1024px."
-msgstr ""
-"Ez a mező képet tartalmaz, mely a termékről készült, limitálva 1024x1024px "
-"képpontra."
+msgstr "Ez a termék lapjáról való."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__price_extra
 msgid "This is the sum of the extra price of all attributes"
-msgstr "Az összes tulajdonság felárainak összege"
+msgstr ""
+"Ez a többlet költségek árainak összege, az összes kiegészítő jellemzőkre "
+"vonatkozólag"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "This note is only for internal purposes."
-msgstr "Ez a megjegyzés belső használatra szolgál."
+msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "This note will show up on sales orders & invoices."
-msgstr "Ez a megjegyzés megjelenik értékesítési rendeléseken & számlákon."
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,help:product.field_res_partner__property_product_pricelist
@@ -2331,8 +2343,8 @@ msgid ""
 "This vendor's product code will be used when printing a request for "
 "quotation. Keep empty to use the internal one."
 msgstr ""
-"Ez a szállítói termékkód kerül nyomtatásra az ajánlatkéréseken. Hagyja "
-"üresen a belső referencia használatához."
+"Ez a beszállítói termékkód kerül nyomtatásra az ajánlatkéréseken. Hagyja "
+"üresen a belső kód használatához."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__product_name
@@ -2340,14 +2352,20 @@ msgid ""
 "This vendor's product name will be used when printing a request for "
 "quotation. Keep empty to use the internal one."
 msgstr ""
-"Ez a szállítói terméknév kerül nyomtatásra az ajánlatkéréseken. Hagyja "
+"Ez a beszállítói terméknév kerül nyomtatásra az ajánlatkéréseken. Hagyja "
 "üresen a belső megnevezés használatához."
+
+#. module: product
+#: model:product.product,description_sale:product.consu_delivery_01
+#: model:product.template,description_sale:product.consu_delivery_01_product_template
+msgid "Three Seater Sofa with Lounger in Steel Grey Colour"
+msgstr ""
 
 #. module: product
 #: model:product.product,name:product.consu_delivery_01
 #: model:product.template,name:product.consu_delivery_01_product_template
 msgid "Three-Seat Sofa"
-msgstr "Három személyes szófa"
+msgstr ""
 
 #. module: product
 #: selection:product.product,activity_state:0
@@ -2372,7 +2390,7 @@ msgstr "Mértékegység"
 #: model:ir.model.fields,field_description:product.field_product_product__uom_name
 #: model:ir.model.fields,field_description:product.field_product_template__uom_name
 msgid "Unit of Measure Name"
-msgstr "Mértékegység név"
+msgstr ""
 
 #. module: product
 #: model:product.product,uom_name:product.consu_delivery_01
@@ -2450,7 +2468,7 @@ msgstr "Olvasatlan üzenetek számlálója"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_res_config_settings__group_sale_pricelist
 msgid "Use pricelists to adapt your price per customers"
-msgstr "Árlisták használata vevőnkénti árazás alkalmazásához"
+msgstr "Használja az árlistát a vevőnkénti ár átdolgozására"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
@@ -2461,51 +2479,49 @@ msgstr "Érvényes"
 #: model:ir.model.fields,field_description:product.field_product_product__valid_archived_variant_ids
 #: model:ir.model.fields,field_description:product.field_product_template__valid_archived_variant_ids
 msgid "Valid Archived Variants"
-msgstr "Valid archivált változatok"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__valid_existing_variant_ids
 #: model:ir.model.fields,field_description:product.field_product_template__valid_existing_variant_ids
 msgid "Valid Existing Variants"
-msgstr "Valid létező változatok"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__valid_product_template_attribute_line_ids
 #: model:ir.model.fields,field_description:product.field_product_template__valid_product_template_attribute_line_ids
 msgid "Valid Product Attribute Lines"
-msgstr "Valid terméktulajdonság sorok"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__valid_product_template_attribute_line_wnva_ids
 #: model:ir.model.fields,field_description:product.field_product_template__valid_product_template_attribute_line_wnva_ids
 msgid "Valid Product Attribute Lines Without No Variant Attributes"
 msgstr ""
-"Valid terméktulajdonság sorok nem megadott változat tulajdonságok nélkül"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__valid_product_attribute_value_ids
 #: model:ir.model.fields,field_description:product.field_product_template__valid_product_attribute_value_ids
 msgid "Valid Product Attribute Values"
-msgstr "Valid terméktulajdonság értékek"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__valid_product_attribute_value_wnva_ids
 #: model:ir.model.fields,field_description:product.field_product_template__valid_product_attribute_value_wnva_ids
 msgid "Valid Product Attribute Values Without No Variant Attributes"
 msgstr ""
-"Valid terméktulajdonság értékek nem megadott változat tulajdonságok nélkül"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__valid_product_attribute_ids
 #: model:ir.model.fields,field_description:product.field_product_template__valid_product_attribute_ids
 msgid "Valid Product Attributes"
-msgstr "Valid terméktulajdonságok"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__valid_product_attribute_wnva_ids
 #: model:ir.model.fields,field_description:product.field_product_template__valid_product_attribute_wnva_ids
 msgid "Valid Product Attributes Without No Variant Attributes"
-msgstr "Valid terméktulajdonságok nem megadott változat tulajdonságok nélkül"
+msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
@@ -2528,34 +2544,29 @@ msgstr "Értékek"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__product_variant_count
 msgid "Variant Count"
-msgstr "Változat számláló"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_product__image_variant
-msgid "Variant Image"
-msgstr "Változat kép"
+msgstr "Variáció számláló"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
 msgid "Variant Information"
-msgstr "Változat információ"
+msgstr "Termékváltozat információ"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__price_extra
 msgid "Variant Price Extra"
-msgstr "Változat felár"
+msgstr "Termékváltozat extra árak"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__variant_seller_ids
 #: model:ir.model.fields,field_description:product.field_product_template__variant_seller_ids
 msgid "Variant Seller"
-msgstr "Változat értékesítő"
+msgstr "Variáció értékesítője"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.attribute_tree_view
 #: model_terms:ir.ui.view,arch_db:product.variants_tree_view
 msgid "Variant Values"
-msgstr "Változat értékek"
+msgstr "Termékváltozat értékek"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_kanban_view
@@ -2566,63 +2577,63 @@ msgstr "Változatok"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_res_config_settings__group_product_variant
 msgid "Variants and Options"
-msgstr "Változatok és opciók"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__name
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_search_view
 msgid "Vendor"
-msgstr "Szállító"
+msgstr "Beszállító"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Vendor Bills"
-msgstr "Szállítói számlák"
+msgstr "Beszállítói számlák"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_tree_view
 msgid "Vendor Information"
-msgstr "Szállítói információ"
+msgstr "Beszállítói információ"
 
 #. module: product
 #: model:ir.actions.act_window,name:product.product_supplierinfo_type_action
 msgid "Vendor Pricelists"
-msgstr "Szállítói árlisták"
+msgstr "Beszállítói árlisták"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__product_code
 msgid "Vendor Product Code"
-msgstr "Szállítói termék kód"
+msgstr "Beszállító termékkódja"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__product_name
 msgid "Vendor Product Name"
-msgstr "Szállítói termék név"
+msgstr "Beszállító termékneve"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__name
 msgid "Vendor of this product"
-msgstr "Ezen termék szállítója"
+msgstr "Ezen termék beszállítója"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__seller_ids
 #: model:ir.model.fields,field_description:product.field_product_template__seller_ids
 msgid "Vendors"
-msgstr "Szállítók"
+msgstr "Beszállítók"
 
 #. module: product
 #: model:product.product,name:product.product_product_2
 #: model:product.template,name:product.product_product_2_product_template
 msgid "Virtual Home Staging"
-msgstr "Virtuális otthon bemutató"
+msgstr ""
 
 #. module: product
 #: model:product.product,name:product.product_product_1
 #: model:product.template,name:product.product_product_1_product_template
 msgid "Virtual Interior Design"
-msgstr "Virtuális belső dizájn"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__volume
@@ -2630,6 +2641,17 @@ msgstr "Virtuális belső dizájn"
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Volume"
 msgstr "Térfogat"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_res_config_settings__product_volume_volume_in_cubic_feet
+msgid "Volume unit of measure"
+msgstr ""
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__volume_uom_name
+#: model:ir.model.fields,field_description:product.field_product_template__volume_uom_name
+msgid "Volume unit of measure label"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__website_message_ids
@@ -2652,38 +2674,18 @@ msgstr "Súly"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
 msgid "Weight Measurement"
-msgstr "Súly kezelés"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_product__weight_uom_id
-#: model:ir.model.fields,field_description:product.field_product_template__weight_uom_id
-msgid "Weight Unit of Measure"
-msgstr "Súly mértékegység"
-
-#. module: product
-#: model:ir.model.fields,help:product.field_product_product__weight
-msgid ""
-"Weight of the product, packaging not included. The unit of measure can be "
-"changed in the general settings"
 msgstr ""
-"A termék súlya csomagolás nélkül. A mértékegység az általános beállításokban"
-" változtatható meg"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_res_config_settings__product_weight_in_lbs
 msgid "Weight unit of measure"
-msgstr "Súly mértékegység"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__weight_uom_name
 #: model:ir.model.fields,field_description:product.field_product_template__weight_uom_name
 msgid "Weight unit of measure label"
-msgstr "Súly mértékegység címke"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
-msgid "Weights"
-msgstr "Súlyok"
+msgstr ""
 
 #. module: product
 #: model:product.attribute.value,name:product.product_attribute_value_3
@@ -2697,8 +2699,6 @@ msgid ""
 "You are trying to change the type of an attribute value still referenced on "
 "at least one product template: %s"
 msgstr ""
-"Olyan tulajdonsság érték típusát próbálja megváltoztatni, amire még "
-"hivatkozik legalább egy terméksablon: %s"
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_pricelist_action2
@@ -2706,21 +2706,19 @@ msgid ""
 "You can assign pricelists to your customers or select one when creating a "
 "new sales quotation."
 msgstr ""
-"Hozzárendelhet árlistákat vevőkhöz, vagy kiválaszthat egyet értékesítési "
-"ajánlat létrehozása során."
 
 #. module: product
-#: code:addons/product/models/product_pricelist.py:442
+#: code:addons/product/models/product_pricelist.py:449
 #, python-format
 msgid ""
 "You cannot assign the Main Pricelist as Other Pricelist in PriceList Item"
-msgstr "Nem lehet megadni a fő árlistát másik árlistaként az árlista tételben"
+msgstr ""
 
 #. module: product
 #: code:addons/product/models/product.py:57
 #, python-format
 msgid "You cannot create recursive categories."
-msgstr "Nem lehet létrehozni rekurzív kategóriákat."
+msgstr ""
 
 #. module: product
 #: code:addons/product/models/decimal_precision.py:16
@@ -2729,172 +2727,94 @@ msgid ""
 "You cannot define the decimal precision of 'Account' as greater than the "
 "rounding factor of the company's main currency"
 msgstr ""
-"Nem lehet a vállalt pénznemének kerekítési pontosságánál nagyobb 'Könyvelés'"
-" tizedes pontosságot meghatározni"
+"Nem lehet decimális pontosságot meghatározni a 'Főkönyv. számlán' mivel az "
+"nagyobb mint a vállalat fő pénznemének a kerekítési értéke"
 
 #. module: product
-#: code:addons/product/models/product_template.py:332
-#, python-format
-msgid "You cannot define two attribute lines for the same attribute."
-msgstr "Nem lehet megadni két tulajdonság sort ugyanazon tulajdonsághoz."
-
-#. module: product
-#: code:addons/product/models/product_attribute.py:79
+#: code:addons/product/models/product_attribute.py:136
 #, python-format
 msgid "You cannot use this attribute with the following value."
-msgstr "Nem lehet használni ezt a tulajdonságot a következő értékkel."
+msgstr ""
 
 #. module: product
 #: code:addons/product/wizard/product_price_list.py:26
 #, python-format
 msgid "You have to set a logo or a layout for your company."
-msgstr "Meg kell adni egy logót vagy elrendezést a vállalathoz"
+msgstr "Meg kell adni egy logót vagy kinézetét a vállalkozásához"
 
 #. module: product
 #: code:addons/product/wizard/product_price_list.py:28
 #, python-format
 msgid "You have to set your reports's header and footer layout."
-msgstr "Meg kell adni a riport fejléc és lábjegyzet elrendezését."
+msgstr "Meg kell adni a jelentés fejléc és lábjegyzet kinézetét."
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_normal_action
 #: model_terms:ir.actions.act_window,help:product.product_template_action
 msgid ""
-"You must define a product for everything you purchase,\n"
-"                whether it's a physical product, a consumable or services."
+"You must define a product for everything you sell or purchase,\n"
+"                whether it's a storable product, a consumable or a service."
 msgstr ""
-"Meg kell adni terméket mindenhez, amit be szereztne szerezni,\n"
-"                akkor is, ha az készletezett termék, fogyóeszköz vagy szolgáltatás."
+
+#. module: product
+#: model_terms:ir.actions.act_window,help:product.product_variant_action
+msgid ""
+"You must define a product for everything you sell or purchase,\n"
+"                whether it's a storable product, a consumable or a service.\n"
+"                The product form contains information to simplify the sale process:\n"
+"                price, notes in the quotation, accounting data, procurement methods, etc."
+msgstr ""
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_normal_action_sell
-#: model_terms:ir.actions.act_window,help:product.product_variant_action
 msgid ""
 "You must define a product for everything you sell, whether it's a physical product,\n"
 "                a consumable or a service you offer to customers.\n"
 "                The product form contains information to simplify the sale process:\n"
 "                price, notes in the quotation, accounting data, procurement methods, etc."
 msgstr ""
-"Meg kell adni terméket mindenhez, amit értékesít, akkor is, ha az készletezett termék, \n"
-"                fogyóeszköz vagy vevőknek nyújtott szolgáltatás.\n"
-"                A termék űrlap tartalmazza az értékesítés egyszerűsítéséhez használható információkat:\n"
-"                árak, ajánlati megjegyzések, könyvelési adatok, beszerzési módszerek, stb."
 
 #. module: product
-#: code:addons/product/models/product_template.py:31
+#: code:addons/product/models/product_template.py:28
 #, python-format
 msgid ""
 "You must define at least one product category in order to be able to create "
 "products."
 msgstr ""
-"Legalább egy termék kategóriát létre kell hozni termékek létrehozásához."
+"Legalább egy termék kategória verziót kell megadnia a termék létrehozásához."
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_view_kanban
 msgid "days"
-msgstr "nap"
+msgstr "napok"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_category_form_view
 msgid "e.g. Lamps"
-msgstr "pld: Lámpák"
+msgstr "pl. Lámpák"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
 msgid "e.g. Odoo Enterprise Subscription"
-msgstr "pld: Odoo Enterprise feliratkozás"
+msgstr "pl. Odoo Enterprise feliratkozás"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
 msgid "e.g. USD Retailers"
-msgstr "pld: USD Kiskereskedők"
+msgstr "pl. USD Kiskereskedők"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "from"
-msgstr "innen"
+msgstr ""
 
 #. module: product
-#: model:product.product,weight_uom_name:product.consu_delivery_01
-#: model:product.product,weight_uom_name:product.consu_delivery_02
-#: model:product.product,weight_uom_name:product.consu_delivery_03
-#: model:product.product,weight_uom_name:product.expense_hotel
-#: model:product.product,weight_uom_name:product.expense_product
-#: model:product.product,weight_uom_name:product.product_delivery_01
-#: model:product.product,weight_uom_name:product.product_delivery_02
-#: model:product.product,weight_uom_name:product.product_order_01
-#: model:product.product,weight_uom_name:product.product_product_1
-#: model:product.product,weight_uom_name:product.product_product_10
-#: model:product.product,weight_uom_name:product.product_product_11
-#: model:product.product,weight_uom_name:product.product_product_11b
-#: model:product.product,weight_uom_name:product.product_product_12
-#: model:product.product,weight_uom_name:product.product_product_13
-#: model:product.product,weight_uom_name:product.product_product_16
-#: model:product.product,weight_uom_name:product.product_product_2
-#: model:product.product,weight_uom_name:product.product_product_20
-#: model:product.product,weight_uom_name:product.product_product_22
-#: model:product.product,weight_uom_name:product.product_product_24
-#: model:product.product,weight_uom_name:product.product_product_25
-#: model:product.product,weight_uom_name:product.product_product_27
-#: model:product.product,weight_uom_name:product.product_product_3
-#: model:product.product,weight_uom_name:product.product_product_4
-#: model:product.product,weight_uom_name:product.product_product_4b
-#: model:product.product,weight_uom_name:product.product_product_4c
-#: model:product.product,weight_uom_name:product.product_product_4d
-#: model:product.product,weight_uom_name:product.product_product_5
-#: model:product.product,weight_uom_name:product.product_product_6
-#: model:product.product,weight_uom_name:product.product_product_7
-#: model:product.product,weight_uom_name:product.product_product_8
-#: model:product.product,weight_uom_name:product.product_product_9
-#: model:product.template,weight_uom_name:product.consu_delivery_01_product_template
-#: model:product.template,weight_uom_name:product.consu_delivery_02_product_template
-#: model:product.template,weight_uom_name:product.consu_delivery_03_product_template
-#: model:product.template,weight_uom_name:product.expense_hotel_product_template
-#: model:product.template,weight_uom_name:product.expense_product_product_template
-#: model:product.template,weight_uom_name:product.product_delivery_01_product_template
-#: model:product.template,weight_uom_name:product.product_delivery_02_product_template
-#: model:product.template,weight_uom_name:product.product_order_01_product_template
-#: model:product.template,weight_uom_name:product.product_product_10_product_template
-#: model:product.template,weight_uom_name:product.product_product_11b_product_template
-#: model:product.template,weight_uom_name:product.product_product_12_product_template
-#: model:product.template,weight_uom_name:product.product_product_13_product_template
-#: model:product.template,weight_uom_name:product.product_product_16_product_template
-#: model:product.template,weight_uom_name:product.product_product_1_product_template
-#: model:product.template,weight_uom_name:product.product_product_20_product_template
-#: model:product.template,weight_uom_name:product.product_product_22_product_template
-#: model:product.template,weight_uom_name:product.product_product_24_product_template
-#: model:product.template,weight_uom_name:product.product_product_25_product_template
-#: model:product.template,weight_uom_name:product.product_product_27_product_template
-#: model:product.template,weight_uom_name:product.product_product_2_product_template
-#: model:product.template,weight_uom_name:product.product_product_3_product_template
-#: model:product.template,weight_uom_name:product.product_product_4b_product_template
-#: model:product.template,weight_uom_name:product.product_product_5_product_template
-#: model:product.template,weight_uom_name:product.product_product_6_product_template
-#: model:product.template,weight_uom_name:product.product_product_7_product_template
-#: model:product.template,weight_uom_name:product.product_product_8_product_template
-#: model:product.template,weight_uom_name:product.product_product_9_product_template
-msgid "kg"
-msgstr "kg"
-
-#. module: product
-#: code:addons/product/models/product.py:586
-#: code:addons/product/models/product_template.py:566
+#: code:addons/product/models/product.py:611
+#: code:addons/product/models/product_template.py:1055
 #, python-format
 msgid "product"
-msgstr "termék"
-
-#. module: product
-#: model:product.product,description_sale:product.consu_delivery_02
-#: model:product.template,description_sale:product.consu_delivery_02_product_template
-msgid "raid 1, 512ECC ram"
-msgstr "raid 1, 512ECC ram"
-
-#. module: product
-#: model:product.product,description_sale:product.consu_delivery_01
-#: model:product.template,description_sale:product.consu_delivery_01_product_template
-msgid "raid 10, 2048ECC ram"
-msgstr "raid 10, 2048ECC ram"
+msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.view_partner_property_form
@@ -2903,15 +2823,15 @@ msgstr "a szülő vállalat"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
-msgid "the product template"
-msgstr "a terméksablon"
+msgid "the product template."
+msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
 msgid "to"
-msgstr "eddig"
+msgstr "ig"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "until"
-msgstr "eddig"
+msgstr ""

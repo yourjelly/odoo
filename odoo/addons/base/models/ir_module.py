@@ -14,8 +14,6 @@ import zipfile
 
 import requests
 
-from odoo.tools import pycompat
-
 from docutils import nodes
 from docutils.core import publish_string
 from docutils.transforms import Transform, writer_aux
@@ -113,7 +111,6 @@ class ModuleCategory(models.Model):
             xml_ids[data['res_id']].append("%s.%s" % (data['module'], data['name']))
         for cat in self:
             cat.xml_id = xml_ids.get(cat.id, [''])[0]
-
 
 class MyFilterMessages(Transform):
     """
@@ -710,7 +707,7 @@ class Module(models.Model):
                 updated_values = {}
                 for key in values:
                     old = getattr(mod, key)
-                    updated = tools.ustr(values[key]) if isinstance(values[key], pycompat.string_types) else values[key]
+                    updated = tools.ustr(values[key]) if isinstance(values[key], str) else values[key]
                     if (old or updated) and updated != old:
                         updated_values[key] = values[key]
                 if terp.get('installable', True) and mod.state == 'uninstallable':

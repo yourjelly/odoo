@@ -2,12 +2,10 @@ odoo.define('website.test.html_editor', function (require) {
 'use strict';
 
 var tour = require('web_tour.tour');
-var base = require('web_editor.base');
 
 tour.register('html_editor_multiple_templates', {
     test: true,
     url: '/aboutus',
-    wait_for: base.ready(),
 },
     [
         // 1. Edit the page through Edit Mode, it will COW the view
@@ -23,7 +21,7 @@ tour.register('html_editor_multiple_templates', {
         },
         {
             content: "save the page",
-            extra_trigger: '#wrapwrap .s_cover',
+            extra_trigger: '#oe_structure_test_ui.o_dirty',
             trigger: "#web_editor-top-edit button[data-action=save]",
         },
         // 2. Edit generic aboutus view
@@ -77,7 +75,6 @@ tour.register('html_editor_multiple_templates', {
 tour.register('test_html_editor_scss', {
     test: true,
     url: '/aboutus',
-    wait_for: base.ready(),
 },
     [
         // 1. Open Html Editor and select a scss file
@@ -99,17 +96,17 @@ tour.register('test_html_editor_scss', {
             trigger: '.o_ace_type_switcher_choice[data-type="scss"]',
         },
         {
-            content: "select 'website.ui.scss'",
-            trigger: '#ace-scss-list',
+            content: "select 'user_custom_rules'",
+            trigger: 'body:has(#ace-scss-list option:contains("user_custom_rules"))',
             run: function () {
-                var scssId = $('#ace-scss-list option:contains("website.ui")').val();
+                var scssId = $('#ace-scss-list option:contains("user_custom_rules")').val();
                 $('#ace-scss-list').val(scssId).trigger('change');
             },
         },
         // 2. Edit that file and ensure it was saved then reset it
         {
             content: "add some scss content in the file",
-            trigger: 'div.ace_line .ace_variable:contains("body.o_connected_user")',
+            trigger: 'div.ace_line .ace_comment:contains("footer {")',
             run: function () {
                 ace.edit('ace-view-editor').getSession().insert({row: 2, column: 0}, '#wrap {display: none;}\n');
             },

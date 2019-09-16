@@ -5,29 +5,20 @@
 # Translators:
 # Ondřej Skuhravý <ondra.sk@volny.cz>, 2018
 # Michal Veselý <michal@veselyberanek.net>, 2018
-# trendspotter <j.podhorecky@volny.cz>, 2019
-# 
+# trendspotter, 2018
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-09-21 13:17+0000\n"
-"PO-Revision-Date: 2018-08-24 09:21+0000\n"
-"Last-Translator: trendspotter <j.podhorecky@volny.cz>, 2019\n"
+"PO-Revision-Date: 2018-09-21 13:17+0000\n"
+"Last-Translator: trendspotter, 2018\n"
 "Language-Team: Czech (https://www.transifex.com/odoo/teams/41243/cs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
-
-#. module: payment_authorize
-#: code:addons/payment_authorize/controllers/main.py:62
-#, python-format
-msgid ""
-" If you don't have any account, ask your salesperson to grant you a portal "
-"access. "
-msgstr ""
 
 #. module: payment_authorize
 #: model:ir.model.fields,field_description:payment_authorize.field_payment_acquirer__authorize_login
@@ -80,12 +71,12 @@ msgstr "Číslo platební karty"
 #. module: payment_authorize
 #: model_terms:ir.ui.view,arch_db:payment_authorize.authorize_s2s_form
 msgid "Cardholder name"
-msgstr "Jméno držitele karty"
+msgstr ""
 
 #. module: payment_authorize
 #: model_terms:ir.ui.view,arch_db:payment_authorize.authorize_s2s_form
 msgid "Expires (MM / YY)"
-msgstr "Platnost vyprší (MM / RR)"
+msgstr ""
 
 #. module: payment_authorize
 #: model_terms:ir.ui.view,arch_db:payment_authorize.acquirer_form_authorize
@@ -111,17 +102,17 @@ msgstr ""
 #. module: payment_authorize
 #: selection:payment.acquirer,provider:0
 msgid "Manual Configuration"
-msgstr "Ruční konfigurace"
+msgstr ""
 
 #. module: payment_authorize
 #: selection:payment.acquirer,provider:0
 msgid "Ogone"
-msgstr "Ogone"
+msgstr ""
 
 #. module: payment_authorize
 #: selection:payment.acquirer,provider:0
 msgid "PayUmoney"
-msgstr "PayUmoney"
+msgstr ""
 
 #. module: payment_authorize
 #: model:ir.model,name:payment_authorize.model_payment_acquirer
@@ -131,7 +122,7 @@ msgstr "Platební brána"
 #. module: payment_authorize
 #: model:ir.model,name:payment_authorize.model_payment_token
 msgid "Payment Token"
-msgstr "Platební token"
+msgstr ""
 
 #. module: payment_authorize
 #: model:ir.model,name:payment_authorize.model_payment_transaction
@@ -141,18 +132,18 @@ msgstr "Platební transakce"
 #. module: payment_authorize
 #: selection:payment.acquirer,provider:0
 msgid "Paypal"
-msgstr "Paypal"
+msgstr ""
 
 #. module: payment_authorize
 #: code:addons/payment_authorize/controllers/main.py:66
 #, python-format
 msgid "Please complete your profile. "
-msgstr "Vyplňte prosím svůj profil."
+msgstr ""
 
 #. module: payment_authorize
 #: code:addons/payment_authorize/controllers/main.py:61
 #, python-format
-msgid "Please sign in to complete the payment."
+msgid "Please sign in to complete your profile."
 msgstr ""
 
 #. module: payment_authorize
@@ -164,7 +155,7 @@ msgstr "Poskytovatel"
 #. module: payment_authorize
 #: model:ir.model.fields,field_description:payment_authorize.field_payment_token__save_token
 msgid "Save Cards"
-msgstr "Uložit kartu"
+msgstr ""
 
 #. module: payment_authorize
 #: selection:payment.acquirer,provider:0
@@ -189,8 +180,6 @@ msgid ""
 "The transaction cannot be processed because some contact details are missing"
 " or invalid: "
 msgstr ""
-"Transakci nelze zpracovat, protože některé kontaktní údaje chybí nebo jsou "
-"neplatné:"
 
 #. module: payment_authorize
 #: model:ir.model.fields,help:payment_authorize.field_payment_token__authorize_profile
@@ -198,8 +187,6 @@ msgid ""
 "This contains the unique reference for this partner/payment token "
 "combination in the Authorize.net backend"
 msgstr ""
-"Toto obsahuje jedinečný odkaz pro tuto kombinaci tokenů partnera / plateb v "
-"backendu Authorize.net"
 
 #. module: payment_authorize
 #: model:ir.model.fields,help:payment_authorize.field_payment_token__save_token
@@ -209,12 +196,8 @@ msgid ""
 " invoicing), you need it to automatically charge the customer when you issue"
 " an invoice."
 msgstr ""
-"Tato možnost umožňuje zákazníkům uložit kreditní kartu jako token platby a "
-"znovu ji použít pro pozdější nákup. Pokud spravujete předplatné (opakující "
-"se fakturace), musíte ji při vystavení faktury automaticky účtovat "
-"zákazníkovi."
 
 #. module: payment_authorize
 #: selection:payment.acquirer,provider:0
 msgid "Wire Transfer"
-msgstr "bankovní převod"
+msgstr ""

@@ -13,7 +13,7 @@ odoo.define('mass_mailing.unsubscribe', function (require) {
     var token = (location.search.split('token' + '=')[1] || '').split('&')[0];
 
     if (!$('.o_unsubscribe_form').length) {
-        return $.Deferred().reject("DOM doesn't contain '.o_unsubscribe_form'");
+        return Promise.reject("DOM doesn't contain '.o_unsubscribe_form'");
     }
     if (email != '' && email != undefined){
         ajax.jsonRpc('/mailing/blacklist/check', 'call', {'email': email, 'mailing_id': mailing_id, 'res_id': res_id, 'token': token})
@@ -35,7 +35,7 @@ odoo.define('mass_mailing.unsubscribe', function (require) {
                     $('#info_state').removeClass('alert-success').removeClass('alert-info').removeClass('alert-warning').addClass('alert-error');
                 }
             })
-            .fail(function () {
+            .guardedCatch(function () {
                 $('#subscription_info').html(_t('An error occured. Please try again later or contact us.'));
                 $('#info_state').removeClass('alert-success').removeClass('alert-info').removeClass('alert-warning').addClass('alert-error');
             });
@@ -83,7 +83,7 @@ odoo.define('mass_mailing.unsubscribe', function (require) {
                     $('#info_state').removeClass('alert-info').addClass('alert-warning');
                 }
             })
-            .fail(function () {
+            .guardedCatch(function () {
                 $('#subscription_info').html(_t('An error occurred. Your changes have not been saved, try again later.'));
                 $('#info_state').removeClass('alert-info').addClass('alert-warning');
             });
@@ -118,7 +118,7 @@ odoo.define('mass_mailing.unsubscribe', function (require) {
                     $('#unsubscribed_info').hide();
                 }
             })
-            .fail(function () {
+            .guardedCatch(function () {
                 $('#subscription_info').html(_t('An error occured. Please try again later or contact us.'));
                 $('#info_state').removeClass('alert-success').removeClass('alert-info').removeClass('alert-warning').addClass('alert-error');
             });
@@ -150,7 +150,7 @@ odoo.define('mass_mailing.unsubscribe', function (require) {
                     $('#unsubscribed_info').hide();
                 }
             })
-            .fail(function () {
+            .guardedCatch(function () {
                 $('#subscription_info').html(_t('An error occured. Please try again later or contact us.'));
                 $('#info_state').removeClass('alert-success').removeClass('alert-info').removeClass('alert-warning').addClass('alert-error');
             });
@@ -178,7 +178,7 @@ odoo.define('mass_mailing.unsubscribe', function (require) {
                     $('#info_state').removeClass('alert-success').removeClass('alert-info').removeClass('alert-error').addClass('alert-warning');
                 }
             })
-            .fail(function () {
+            .guardedCatch(function () {
                 $('#subscription_info').html(_t('An error occured. Please try again later or contact us.'));
                 $('#info_state').removeClass('alert-info').removeClass('alert-success').removeClass('alert-error').addClass('alert-warning');
             });

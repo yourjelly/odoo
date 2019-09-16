@@ -21,7 +21,7 @@ from odoo.exceptions import AccessDenied, AccessError, UserError, ValidationErro
 from odoo.http import request
 from odoo.osv import expression
 from odoo.service.db import check_super
-from odoo.tools import partition, pycompat, collections
+from odoo.tools import partition, collections
 
 _logger = logging.getLogger(__name__)
 
@@ -115,7 +115,7 @@ class Groups(models.Model):
     @api.depends('category_id.name', 'name')
     def _compute_full_name(self):
         # Important: value must be stored in environment of group, not group1!
-        for group, group1 in pycompat.izip(self, self.sudo()):
+        for group, group1 in zip(self, self.sudo()):
             if group1.category_id:
                 group.full_name = '%s / %s' % (group1.category_id.name, group1.name)
             else:
@@ -129,7 +129,7 @@ class Groups(models.Model):
                 return expression.AND(domains)
             else:
                 return expression.OR(domains)
-        if isinstance(operand, pycompat.string_types):
+        if isinstance(operand, str):
             lst = False
             operand = [operand]
         where = []
@@ -234,7 +234,7 @@ class Users(models.Model):
         help="If specified, this action will be opened at log on for this user, in addition to the standard menu.")
     groups_id = fields.Many2many('res.groups', 'res_groups_users_rel', 'uid', 'gid', string='Groups', default=_default_groups)
     log_ids = fields.One2many('res.users.log', 'create_uid', string='User log entries')
-    login_date = fields.Datetime(related='log_ids.create_date', string='Latest connection', readonly=False)
+    login_date = fields.Datetime(related='log_ids.create_date', string='Latest authentication', readonly=False)
     share = fields.Boolean(compute='_compute_share', compute_sudo=True, string='Share User', store=True,
          help="External user with limited access, created only for the purpose of sharing data.")
     companies_count = fields.Integer(compute='_compute_companies_count', string="Number of Companies", default=_companies_count)
@@ -256,6 +256,13 @@ class Users(models.Model):
     # access to the user but not its corresponding partner
     name = fields.Char(related='partner_id.name', inherited=True, readonly=False)
     email = fields.Char(related='partner_id.email', inherited=True, readonly=False)
+
+    accesses_count = fields.Integer('# Access Rights', help='Number of access rights that apply to the current user',
+                                    compute='_compute_accesses_count')
+    rules_count = fields.Integer('# Record Rules', help='Number of record rules that apply to the current user',
+                                 compute='_compute_accesses_count')
+    groups_count = fields.Integer('# Groups', help='Number of groups that apply to the current user',
+                                  compute='_compute_accesses_count')
 
     _sql_constraints = [
         ('login_key', 'UNIQUE (login)',  'You can not have two users with the same login !')
@@ -356,6 +363,14 @@ class Users(models.Model):
         for user in self:
             user.tz_offset = datetime.datetime.now(pytz.timezone(user.tz or 'GMT')).strftime('%z')
 
+    @api.depends('groups_id')
+    def _compute_accesses_count(self):
+        for user in self:
+            groups = user.groups_id
+            user.accesses_count = len(groups.mapped('model_access'))
+            user.rules_count = len(groups.mapped('rule_groups'))
+            user.groups_count = len(groups)
+
     @api.onchange('login')
     def on_change_login(self):
         if self.login and tools.single_email_re.match(self.login):
@@ -452,7 +467,7 @@ class Users(models.Model):
 
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
-        groupby_fields = set([groupby] if isinstance(groupby, pycompat.string_types) else groupby)
+        groupby_fields = set([groupby] if isinstance(groupby, str) else groupby)
         if groupby_fields.intersection(USER_PRIVATE_FIELDS):
             raise AccessError(_("Invalid 'group by' parameter"))
         return super(Users, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
@@ -573,9 +588,8 @@ class Users(models.Model):
         }
 
     @api.model
-    @api.returns('ir.actions.act_window', lambda record: record.id)
     def action_get(self):
-        return self.sudo().env.ref('base.action_res_users_my')
+        return self.sudo().env.ref('base.action_res_users_my').read()[0]
 
     def check_super(self, passwd):
         return check_super(passwd)
@@ -736,7 +750,7 @@ class Users(models.Model):
         :return: True if the current user is a member of the group with the
            given external ID (XML ID), else False.
         """
-        assert group_ext_id and '.' in group_ext_id, "External ID must be fully qualified"
+        assert group_ext_id and '.' in group_ext_id, "External ID '%s' must be fully qualified" % group_ext_id
         module, ext_id = group_ext_id.split('.')
         self._cr.execute("""SELECT 1 FROM res_groups_users_rel WHERE uid=%s AND gid IN
                             (SELECT res_id FROM ir_model_data WHERE module=%s AND name=%s)""",
@@ -744,6 +758,45 @@ class Users(models.Model):
         return bool(self._cr.fetchone())
     # for a few places explicitly clearing the has_group cache
     has_group.clear_cache = _has_group.clear_cache
+
+    def action_show_groups(self):
+        self.ensure_one()
+        return {
+            'name': _('Groups'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            'res_model': 'res.groups',
+            'type': 'ir.actions.act_window',
+            'context': {'create': False, 'delete': False},
+            'domain': [('id','in', self.groups_id.ids)],
+            'target': 'current',
+        }
+
+    def action_show_accesses(self):
+        self.ensure_one()
+        return {
+            'name': _('Access Rights'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            'res_model': 'ir.model.access',
+            'type': 'ir.actions.act_window',
+            'context': {'create': False, 'delete': False},
+            'domain': [('id', 'in', self.mapped('groups_id.model_access').ids)],
+            'target': 'current',
+        }
+
+    def action_show_rules(self):
+        self.ensure_one()
+        return {
+            'name': _('Record Rules'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            'res_model': 'ir.rule',
+            'type': 'ir.actions.act_window',
+            'context': {'create': False, 'delete': False},
+            'domain': [('id', 'in', self.mapped('groups_id.rule_groups').ids)],
+            'target': 'current',
+        }
 
     @api.multi
     def _is_public(self):
@@ -903,7 +956,7 @@ class GroupsImplied(models.Model):
     def create(self, vals_list):
         user_ids_list = [vals.pop('users', None) for vals in vals_list]
         groups = super(GroupsImplied, self).create(vals_list)
-        for group, user_ids in pycompat.izip(groups, user_ids_list):
+        for group, user_ids in zip(groups, user_ids_list):
             if user_ids:
                 # delegate addition of users to add implied groups
                 group.write({'users': user_ids})
@@ -1037,11 +1090,11 @@ class GroupsView(models.Model):
             group_no_one = view.env.ref('base.group_no_one')
             group_employee = view.env.ref('base.group_user')
             xml1, xml2, xml3 = [], [], []
+            xml_by_category = {}
             xml1.append(E.separator(string='User Type', colspan="2", groups='base.group_no_one'))
-            xml2.append(E.separator(string='Application Accesses', colspan="2"))
 
             user_type_field_name = ''
-            for app, kind, gs in self.get_groups_by_application():
+            for app, kind, gs, category_name in self.get_groups_by_application():
                 attrs = {}
                 # hide groups in categories 'Hidden' and 'Extra' (except for group_no_one)
                 if app.xml_id in ('base.module_category_hidden', 'base.module_category_extra', 'base.module_category_usability'):
@@ -1061,8 +1114,12 @@ class GroupsView(models.Model):
                 elif kind == 'selection':
                     # application name with a selection field
                     field_name = name_selection_groups(gs.ids)
-                    xml2.append(E.field(name=field_name, **attrs))
-                    xml2.append(E.newline())
+                    if category_name not in xml_by_category:
+                        xml_by_category[category_name] = []
+                        xml_by_category[category_name].append(E.newline())
+                    xml_by_category[category_name].append(E.field(name=field_name, **attrs))
+                    xml_by_category[category_name].append(E.newline())
+
                 else:
                     # application separator with boolean fields
                     app_name = app.name or 'Other'
@@ -1080,6 +1137,11 @@ class GroupsView(models.Model):
                 user_type_attrs = {'invisible': [(user_type_field_name, '!=', group_employee.id)]}
             else:
                 user_type_attrs = {}
+
+            for xml_cat in sorted(xml_by_category.keys(), key=lambda it: it[0]):
+                xml_cat_name = xml_cat[1]
+                master_category_name = (_(xml_cat_name))
+                xml2.append(E.group(*(xml_by_category[xml_cat]), col="2", string=master_category_name))
 
             xml = E.field(
                 E.group(*(xml1), col="2"),
@@ -1108,17 +1170,17 @@ class GroupsView(models.Model):
             order.  If ``kind`` is ``'selection'``, ``groups`` are given in
             reverse implication order.
         """
-        def linearize(app, gs):
+        def linearize(app, gs, category_name):
             # 'User Type' is an exception
             if app.xml_id == 'base.module_category_user_type':
-                return (app, 'selection', gs.sorted('id'))
+                return (app, 'selection', gs.sorted('id'), category_name)
             # determine sequence order: a group appears after its implied groups
             order = {g: len(g.trans_implied_ids & gs) for g in gs}
             # check whether order is total, i.e., sequence orders are distinct
             if len(set(order.values())) == len(gs):
-                return (app, 'selection', gs.sorted(key=order.get))
+                return (app, 'selection', gs.sorted(key=order.get), category_name)
             else:
-                return (app, 'boolean', gs)
+                return (app, 'boolean', gs, (100, 'Other'))
 
         # classify all groups by application
         by_app, others = defaultdict(self.browse), self.browse()
@@ -1130,9 +1192,13 @@ class GroupsView(models.Model):
         # build the result
         res = []
         for app, gs in sorted(by_app.items(), key=lambda it: it[0].sequence or 0):
-            res.append(linearize(app, gs))
+            if app.parent_id:
+                res.append(linearize(app, gs, (app.parent_id.sequence, app.parent_id.name)))
+            else:
+                res.append(linearize(app, gs, (100, 'Other')))
+
         if others:
-            res.append((self.env['ir.module.category'], 'boolean', others))
+            res.append((self.env['ir.module.category'], 'boolean', others, (100,'Other')))
         return res
 
 
@@ -1199,8 +1265,8 @@ class UsersView(models.Model):
         if 'groups_id' not in values and (add or rem):
             # remove group ids in `rem` and add group ids in `add`
             values1['groups_id'] = list(itertools.chain(
-                pycompat.izip(repeat(3), rem),
-                pycompat.izip(repeat(4), add)
+                zip(repeat(3), rem),
+                zip(repeat(4), add)
             ))
 
         return values1
@@ -1257,7 +1323,7 @@ class UsersView(models.Model):
     def fields_get(self, allfields=None, attributes=None):
         res = super(UsersView, self).fields_get(allfields, attributes=attributes)
         # add reified groups fields
-        for app, kind, gs in self.env['res.groups'].sudo().get_groups_by_application():
+        for app, kind, gs, category_name in self.env['res.groups'].sudo().get_groups_by_application():
             if kind == 'selection':
                 # 'User Type' should not be 'False'. A user is either 'employee', 'portal' or 'public' (required).
                 selection_vals = [(False, '')]

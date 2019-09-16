@@ -31,5 +31,5 @@ msgstr ""
 
 #. module: crm_livechat
 #: model:ir.model,name:crm_livechat.model_mail_channel
-msgid "Discussion Channel"
+msgid "Discussion channel"
 msgstr ""

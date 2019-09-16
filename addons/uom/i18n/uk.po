@@ -5,6 +5,7 @@
 # Translators:
 # Martin Trigaux, 2018
 # Bohdan Lisnenko, 2018
+# ТАрас <tratatuta@i.ua>, 2018
 # Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019
 # 
 msgid ""
@@ -12,7 +13,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-09-18 09:49+0000\n"
-"PO-Revision-Date: 2018-08-24 09:33+0000\n"
+"PO-Revision-Date: 2018-06-25 08:30+0000\n"
 "Last-Translator: Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019\n"
 "Language-Team: Ukrainian (https://www.transifex.com/odoo/teams/41243/uk/)\n"
 "MIME-Version: 1.0\n"
@@ -44,7 +45,7 @@ msgstr "Більший коефіцієнт"
 #. module: uom
 #: selection:uom.uom,uom_type:0
 msgid "Bigger than the reference Unit of Measure"
-msgstr "Більша за основну одиницю вимірювання категорії"
+msgstr "Більша за основну одиницю вимірювання"
 
 #. module: uom
 #: model:ir.model.fields,field_description:uom.field_uom_uom__category_id
@@ -100,9 +101,8 @@ msgid ""
 "How many times this Unit of Measure is bigger than the reference Unit of "
 "Measure in this category: 1 * (this unit) = ratio * (reference unit)"
 msgstr ""
-"Скільки разів ця одиниця вимірювання більша, ніж одиниця вимірювання "
-"референсу у цій категорії: 1 * (ця одиниця) = співвідношення * (контрольна "
-"одиниця)"
+"Скільки разів ця одиниця вимірювання більша, ніж основна одиниця виміру в "
+"цій категорії: 1 * (ця одиниця) = співвідношення * (контрольна одиниця)"
 
 #. module: uom
 #: model:ir.model.fields,help:uom.field_uom_uom__factor
@@ -110,9 +110,9 @@ msgid ""
 "How much bigger or smaller this unit is compared to the reference Unit of "
 "Measure for this category: 1 * (reference unit) = ratio * (this unit)"
 msgstr ""
-"Наскільки більшою чи меншою є ця одиниця, порівняно з одиницею вимірювання "
-"референсу для цієї категорії: 1 * (контрольна одиниця) = співвідношення * "
-"(ця одиниця)"
+"Наскільки більшою чи меншою є ця одиниця, порівняно з основною одиницею "
+"виміру для цієї категорії: 1 * (контрольна одиниця) = співвідношення * (ця "
+"одиниця)"
 
 #. module: uom
 #: model:ir.model.fields,field_description:uom.field_uom_category__id
@@ -200,7 +200,7 @@ msgstr ""
 #. module: uom
 #: sql_constraint:uom.uom:0
 msgid "The conversion ratio for a unit of measure cannot be 0!"
-msgstr "Коефіцієнт конверсії одиниці вимірювання не може бути 0!"
+msgstr "Коефіцієнт конверсії одиниці виміру не може бути 0!"
 
 #. module: uom
 #: sql_constraint:uom.uom:0
@@ -257,7 +257,7 @@ msgstr ""
 #. module: uom
 #: model:uom.category,name:uom.product_uom_categ_unit
 msgid "Unit"
-msgstr "Одиниця"
+msgstr "Одиниці"
 
 #. module: uom
 #: model:ir.model.fields,field_description:uom.field_uom_uom__name
@@ -277,7 +277,7 @@ msgstr "Категорія одиниць вимірювання"
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_unit
 msgid "Unit(s)"
-msgstr "Штука(и)"
+msgstr "Одиниця(і)"
 
 #. module: uom
 #: selection:uom.category,measure_type:0
@@ -294,7 +294,7 @@ msgstr "Одиниці вимірювання"
 #. module: uom
 #: model_terms:ir.ui.view,arch_db:uom.product_uom_categ_form_view
 msgid "Units of Measure categories"
-msgstr "Категорії одиниць вимірювання"
+msgstr "Категорії одиниць виміру"
 
 #. module: uom
 #: model_terms:ir.actions.act_window,help:uom.product_uom_categ_form_action
@@ -307,7 +307,7 @@ msgstr ""
 "Одиниці вимірювання, що належать до тієї ж категорії, можуть бути\n"
 "перетворені між собою. Наприклад, у категорії\n"
 "<i>'Час'</i>, у вас будуть такі одиниці вимірювання:\n"
-"Години, дні."
+"години, дні."
 
 #. module: uom
 #: code:addons/uom/models/uom_uom.py:93
@@ -384,7 +384,7 @@ msgstr "см"
 #. module: uom
 #: model_terms:ir.ui.view,arch_db:uom.product_uom_form_view
 msgid "e.g: 1 * (reference unit) = ratio * (this unit)"
-msgstr "приклад: 1 х (основна одиниця) = співвідношення х (ця одиниця)"
+msgstr "приклад: 1 х (ця одиниця) = співвідношення х (основна одиниця)"
 
 #. module: uom
 #: model_terms:ir.ui.view,arch_db:uom.product_uom_form_view
@@ -439,4 +439,4 @@ msgstr "унції(й)"
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_qt
 msgid "qt"
-msgstr "qt"
+msgstr "кварта"

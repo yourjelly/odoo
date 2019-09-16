@@ -83,6 +83,8 @@ var AbstractThreadWindow = Widget.extend({
             displayStars: this.options.displayStars,
         });
 
+        // animate the (un)folding of thread windows
+        this.$el.css({transition: 'height ' + this.FOLD_ANIMATION_DURATION + 'ms linear'});
         if (this.isFolded()) {
             this.$el.css('height', this.HEIGHT_FOLDED);
         } else if (this.options.autofocus) {
@@ -95,7 +97,7 @@ var AbstractThreadWindow = Widget.extend({
         var def = this._threadWidget.replace(this.$('.o_thread_window_content')).then(function () {
             self._threadWidget.$el.on('scroll', self, self._debouncedOnScroll);
         });
-        return $.when(this._super(), def);
+        return Promise.all([this._super(), def]);
     },
     /**
      * @override
@@ -137,6 +139,37 @@ var AbstractThreadWindow = Widget.extend({
      */
     getID: function () {
         return this._getThreadID();
+    },
+    /**
+     * @returns {mail.model.Thread|undefined}
+     */
+    getThread: function () {
+        if (!this.hasThread) {
+            return undefined;
+        }
+        return this._thread;
+    },
+    /**
+    *Get out of office info
+    *
+    * @returns {string|undefined}
+    */
+    getOutOfOfficeInfo: function () {
+        if (!this.hasThread()) {
+            return undefined;
+        }
+        return this._thread.getOutOfOfficeInfo();
+    },
+    /**
+     * Get out of office user text
+     *
+     * @returns {string|undefined}
+     */
+    getOutOfOfficeMessage: function () {
+        if (!this.hasThread()) {
+            return undefined;
+        }
+        return this._thread.getOutOfOfficeMessage();
     },
     /**
      * Get the status of the thread, such as the im status of a DM chat
@@ -257,14 +290,6 @@ var AbstractThreadWindow = Widget.extend({
             QWeb.render('mail.AbstractThreadWindow.HeaderContent', options));
     },
     /**
-     * Render the 'is typing...' notification bar text on the thread in this
-     * thread window. This is called when there is a change in the list of users
-     * currently typing something on this thread.
-     */
-    renderTypingNotificationBar: function () {
-        this._threadWidget.renderTypingNotificationBar(this._thread);
-    },
-    /**
      * Scroll to the bottom of the thread in the thread window
      */
     scrollToBottom: function () {
@@ -296,24 +321,14 @@ var AbstractThreadWindow = Widget.extend({
                 this._focusInput();
             }
         }
-        this._animateFold();
+        var height = this.isFolded() ? this.HEIGHT_FOLDED : this.HEIGHT_OPEN;
+        this.$el.css({height: height});
     },
 
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
-    /**
-     * Called when there is a change of the fold state of the thread window.
-     * This method animates the change of fold state of this thread window.
-     *
-     * @private
-     */
-    _animateFold: function () {
-        this.$el.animate({
-            height: this.isFolded() ? this.HEIGHT_FOLDED : this.HEIGHT_OPEN
-        }, this.FOLD_ANIMATION_DURATION);
-    },
     /**
      * Set the focus on the composer of the thread window. This operation is
      * ignored in mobile context.
@@ -339,6 +354,7 @@ var AbstractThreadWindow = Widget.extend({
     _getHeaderRenderingOptions: function () {
         return {
             status: this.getThreadStatus(),
+            thread: this.getThread(),
             title: this.getTitle(),
             unreadCounter: this.getUnreadCounter(),
             widget: this,

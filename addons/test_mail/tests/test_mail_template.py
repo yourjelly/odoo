@@ -263,14 +263,15 @@ class TestMailTemplate(BaseFunctionalTest, MockEmails, TestRecipients):
         })
 
         def patched_message_track_post_template(*args, **kwargs):
-            args[0].message_post_with_template(template.id)
+            if args[0]._name == "mail.test.track":
+                args[0].message_post_with_template(template.id)
             return True
 
         with patch('odoo.addons.mail.models.mail_thread.MailThread._message_track_post_template', patched_message_track_post_template):
             self.env['mail.test.track'].create({
                 'email_from': email_new_partner,
                 'company_id': company1.id,
-                'user_id': self.env.user.id,  # trigger tracking,
+                'user_id': self.env.user.id, # trigger track template
             })
 
         new_partner = Partner.search([('email', '=', email_new_partner)])

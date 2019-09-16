@@ -5,15 +5,13 @@
 # Translators:
 # Sengtha Chay <sengtha@gmail.com>, 2018
 # Chan Nath <channath@gmail.com>, 2018
-# Lux Sok <sok.lux@gmail.com>, 2019
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-10-02 10:06+0000\n"
-"PO-Revision-Date: 2018-08-24 09:33+0000\n"
-"Last-Translator: Lux Sok <sok.lux@gmail.com>, 2019\n"
+"PO-Revision-Date: 2018-10-02 10:06+0000\n"
+"Last-Translator: Chan Nath <channath@gmail.com>, 2018\n"
 "Language-Team: Khmer (https://www.transifex.com/odoo/teams/41243/km/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -91,7 +89,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1078
 #, python-format
 msgid "Action"
-msgstr "សកម្មភាព"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -157,7 +155,7 @@ msgstr ""
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_attachment
 msgid "Attachment"
-msgstr "ឯកសារ​ភ្ជាប់"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model.fields,field_description:web_editor.field_ir_attachment__local_url
@@ -184,7 +182,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/snippets.xml:28
 #, python-format
 msgid "Background Color"
-msgstr "ពណ៌ផ្ទៃខាងក្រោយ"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -299,7 +297,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:278
 #, python-format
 msgid "Color"
-msgstr "ព័ណ៍"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -366,7 +364,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:366
 #, python-format
 msgid "Custom"
-msgstr "អតិថជន"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -395,7 +393,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:269
 #, python-format
 msgid "Default"
-msgstr "លំនាំដើម។"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -476,7 +474,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1018
 #, python-format
 msgid "Edit"
-msgstr "កែសម្រួល"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -497,7 +495,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:273
 #, python-format
 msgid "Flat"
-msgstr "ផ្ទះ"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -560,21 +558,21 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/ace.xml:43
 #, python-format
 msgid "Format"
-msgstr "ទ្រង់ទ្រាយ"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/widgets/widgets.js:1614
 #, python-format
 msgid "Free"
-msgstr "ទំនេរ"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1055
 #, python-format
 msgid "Full Screen"
-msgstr "ពេញអេក្រង់"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -586,7 +584,7 @@ msgstr ""
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_http
 msgid "HTTP Routing"
-msgstr "HTTP ជុំវិញ"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -635,7 +633,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1054
 #, python-format
 msgid "Help"
-msgstr "ជំនួយ"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -795,7 +793,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:200
 #, python-format
 msgid "Instagram"
-msgstr "អ៊ីនស្តាក្រាម"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -831,7 +829,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:261
 #, python-format
 msgid "Large"
-msgstr "ធំ"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model.fields,field_description:web_editor.field_web_editor_converter_test_sub____last_update
@@ -860,7 +858,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1015
 #, python-format
 msgid "Link"
-msgstr "តំណ"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -901,7 +899,7 @@ msgstr "ឈ្មោះ"
 #: code:addons/web_editor/static/src/xml/editor.xml:69
 #, python-format
 msgid "Next"
-msgstr "បន្ទាប់"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -917,7 +915,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/snippets.xml:30
 #, python-format
 msgid "None"
-msgstr "គ្មាន"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -954,7 +952,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:203
 #, python-format
 msgid "Options"
-msgstr "ជម្រើស"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1026,7 +1024,7 @@ msgstr "ពីមុន"
 #: code:addons/web_editor/static/src/xml/editor.xml:68
 #, python-format
 msgid "Previous"
-msgstr "មុន"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1068,7 +1066,7 @@ msgstr ""
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_float
 msgid "Qweb Field Float"
-msgstr "Qweb Field Float"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_html
@@ -1078,7 +1076,7 @@ msgstr ""
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_image
 msgid "Qweb Field Image"
-msgstr "បណ្តាញរូបភាព Qweb"
+msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_integer
@@ -1134,7 +1132,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:196
 #, python-format
 msgid "Remove"
-msgstr "ដកចេញ"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1162,7 +1160,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:384
 #, python-format
 msgid "Repeat"
-msgstr "ធ្វើម្តងទៀត"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1190,7 +1188,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/ace.xml:42
 #, python-format
 msgid "Reset"
-msgstr "កំណត់ឡើងវិញ"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1270,7 +1268,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:13
 #, python-format
 msgid "Save"
-msgstr "រក្សាទុក"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1278,7 +1276,7 @@ msgstr "រក្សាទុក"
 #: code:addons/web_editor/static/src/xml/snippets.xml:44
 #, python-format
 msgid "Search"
-msgstr "ការស្រាវជ្រាវ"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1350,7 +1348,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:256
 #, python-format
 msgid "Size"
-msgstr "ទំហំ"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1402,7 +1400,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:1031
 #, python-format
 msgid "Table"
-msgstr "តារាង"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1503,14 +1501,14 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:44
 #, python-format
 msgid "Tooltip"
-msgstr "ពត៌មានជំនួយ"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/backend.xml:12
 #, python-format
 msgid "Translate"
-msgstr "បកប្រែ"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1529,7 +1527,7 @@ msgstr ""
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_translation
 msgid "Translation"
-msgstr "បកប្រែ"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1640,7 +1638,7 @@ msgstr ""
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_ui_view
 msgid "View"
-msgstr "មើល"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1721,7 +1719,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:200
 #, python-format
 msgid "and"
-msgstr "និង"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1738,14 +1736,14 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:110
 #, python-format
 msgid "https://www.odoo.com/logo.png"
-msgstr "https://www.odoo.com/logo.png"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:200
 #, python-format
 msgid "videos"
-msgstr "វីដេអូ"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web

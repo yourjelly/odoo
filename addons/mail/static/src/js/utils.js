@@ -89,30 +89,19 @@ function getTextToHTML(text) {
         .replace(/[\n\r]/g,'<br/>');
 }
 
-var accentedLettersMapping = {
-    'a': '[àáâãäå]',
-    'ae': 'æ',
-    'c': 'ç',
-    'e': '[èéêë]',
-    'i': '[ìíîï]',
-    'n': 'ñ',
-    'o': '[òóôõö]',
-    'oe': 'œ',
-    'u': '[ùúûűü]',
-    'y': '[ýÿ]',
-};
-function unaccent(str) {
-    _.each(accentedLettersMapping, function (value, key) {
-        str = str.replace(new RegExp(value, 'g'), key);
-    });
-    return str;
-}
-
 function timeFromNow(date) {
     if (moment().diff(date, 'seconds') < 45) {
         return _t("now");
     }
     return date.fromNow();
+}
+
+function o_clearTimeout(id) {
+    return clearTimeout(id);
+}
+
+function o_setTimeout(func, delay) {
+    return setTimeout(func, delay);
 }
 
 return {
@@ -124,7 +113,8 @@ return {
     parseEmail: parseEmail,
     stripHTML: stripHTML,
     timeFromNow: timeFromNow,
-    unaccent: unaccent,
+    clearTimeout: o_clearTimeout,
+    setTimeout: o_setTimeout,
 };
 
 });

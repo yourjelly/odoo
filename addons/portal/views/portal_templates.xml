@@ -24,7 +24,7 @@
 
             <t t-set="direction" t-value="request.env['res.lang'].search([('code', '=', request.env.lang)]).direction"/>
             <div id="wrapwrap" t-attf-class="#{pageName or ''} #{direction == 'rtl' and 'o_rtl' or ''} #{'o_portal' if is_portal else ''}">
-                <header>
+                <header id="top" data-anchor="true" t-if="not hide_header">
                     <nav class="navbar navbar-expand-md navbar-light bg-light">
                         <div class="container">
                             <a href="/" class="navbar-brand logo">
@@ -55,7 +55,7 @@
                 <main>
                     <t t-raw="0"/>
                 </main>
-                <footer class="bg-light o_footer">
+                <footer id="bottom" data-anchor="true" class="bg-light o_footer" t-if="not hide_footer">
                     <div class="container mt16 mb16" id="footer">
                         <div class="float-right mb16" t-ignore="true" t-if="not editable">
                             Powered by <a target="_blank" href="http://www.odoo.com?utm_source=db&amp;utm_medium=portal">Odoo</a>
@@ -370,10 +370,6 @@
                                 <label class="col-form-label" for="email">Email</label>
                                 <input type="email" name="email" t-attf-class="form-control #{error.get('email') and 'is-invalid' or ''}" t-att-value="email or partner.email" />
                             </div>
-                            <div t-attf-class="form-group #{error.get('phone') and 'o_has_error' or ''} col-xl-6">
-                                <label class="col-form-label" for="phone">Phone</label>
-                                <input type="tel" name="phone" t-attf-class="form-control #{error.get('phone') and 'is-invalid' or ''}" t-att-value="phone or partner.phone" />
-                            </div>
 
                             <div class="clearfix" />
                             <div t-attf-class="form-group #{error.get('company_name') and 'o_has_error' or ''} col-xl-6">
@@ -387,6 +383,10 @@
                             <div t-attf-class="form-group #{error.get('vat') and 'o_has_error' or ''} col-xl-6">
                                 <label class="col-form-label label-optional" for="vat">VAT Number</label>
                                 <input type="text" name="vat" t-attf-class="form-control #{error.get('vat') and 'is-invalid' or ''}" t-att-value="vat or partner.vat" t-att-readonly="None if partner.can_edit_vat() else '1'" t-att-title="None if partner.can_edit_vat() else 'Changing VAT number is not allowed once document(s) have been issued for your account. Please contact us directly for this operation.'" />
+                            </div>
+                            <div t-attf-class="form-group #{error.get('phone') and 'o_has_error' or ''} col-xl-6">
+                                <label class="col-form-label" for="phone">Phone</label>
+                                <input type="tel" name="phone" t-attf-class="form-control #{error.get('phone') and 'is-invalid' or ''}" t-att-value="phone or partner.phone" />
                             </div>
 
                             <div class="clearfix" />
@@ -476,6 +476,8 @@
             :token string (optional): if you want your chatter to be available for non-logged user,
                      you can use a token to verify the identity of the user;
                      the message will be posted with the identity of the partner_id of the object
+            :hash : signed token with the partner_id using `_sign_token` method (on mail.thread)
+            :pid : identifier of the partner signing the token
     -->
     <template id="message_thread">
         <div id="discussion" class="d-print-none o_portal_chatter o_not_editable p-0"
@@ -484,22 +486,33 @@
     </template>
 
     <!--
-        Container signature template for frontend
-        :partner-name string: customer name that signs
-        :res-model string: model of the signed document
-        :res-id stringied int: id of the signed document
-        :call-url string: url to call once clicking on the sign button
-        :access-token string: access token for customer portal
-    -->
+        Snippet to request user signature in the portal. The feature comes with
+        the JS file `portal_signature.js`.
 
-    <template id="portal_signature" name="Ask Signature">
-        <div t-att-class="'o_portal_signature_form'"
-            t-att-data-partner-name="partner_name"
-            t-att-data-res-model="object._name"
-            t-att-data-res-id="object.id"
-            t-att-data-call-url="callUrl"
-            t-att-data-sign-label="signLabel"
-            t-att-data-access-token="accessToken"/>
+        The following variable has to be set:
+            - {string} call_url: url where to send the name and signature by RPC
+                The url should contain a query string if additional parameters
+                have to be sent, such as an access token.
+
+        The following variables are optional:
+            - {string} default_name: the default name to display
+            - {string} mode: 'draw', 'auto', or 'load'
+            - {string} send_label: label of the send button
+            - {number} signature_ratio: ratio of the signature area
+            - {string} signature_type: 'signature' or 'initial'
+
+        For the default values and more information, see init() of the widgets
+        SignatureForm and NameAndSignature.
+    -->
+    <template id="portal.signature_form" name="Ask Signature">
+        <div class="o_portal_signature_form"
+            t-att-data-call-url="call_url"
+            t-att-data-default-name="default_name"
+            t-att-data-mode="mode"
+            t-att-data-send-label="send_label"
+            t-att-data-signature-ratio="signature_ratio"
+            t-att-data-signature-type="signature_type"
+            />
     </template>
 
     <template id="portal_sidebar" name="Sidebar">

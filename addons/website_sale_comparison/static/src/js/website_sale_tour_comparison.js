@@ -68,10 +68,14 @@ odoo.define('website_sale_comparison.tour_comparison', function (require) {
     {
         content: "select 2nd variant(Black Color)",
         trigger: '.variant_attribute[data-attribute_name="Color"] input[data-value_name="Black"]',
+        run: function (actions) {
+          $('img[class*="product_detail_img"]').attr('data-image-to-change', 1);
+          actions.click();
+        },
     },
     {
         content: "click on compare button to add in comparison list when variant changed",
-        extra_trigger: '.carousel-indicators li:eq(1)', // there are 2 images on the black variant
+        extra_trigger: 'img[class*="product_detail_img"]:not([data-image-to-change])',
         trigger: '.o_add_compare_dyn',
     },
     {
