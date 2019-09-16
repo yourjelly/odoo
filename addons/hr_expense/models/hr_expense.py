@@ -320,7 +320,8 @@ class HrExpense(models.Model):
                 raise UserError(
                     _("No Expense account found for the product %s (or for its category), please configure one.") % (self.product_id.name))
         else:
-            account = self.env['ir.property'].with_context(force_company=self.company_id.id).sudo().get('property_account_expense_categ_id', 'product.category')
+            Property = self.env['ir.property'].with_context(force_company=self.company_id.id).sudo()
+            account = Property.get('property_account_expense_categ_id', 'product.category')
             if not account:
                 raise UserError(_('Please configure Default Expense account for Product expense: `property_account_expense_categ_id`.'))
         return account
