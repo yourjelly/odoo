@@ -161,15 +161,14 @@ publicWidget.registry.ProductWishlist = publicWidget.Widget.extend(VariantMixin,
         var tr = $(e.currentTarget).parents('tr');
         var product = tr.data('product-id');
         $('.o_wsale_my_cart').removeClass('d-none');
-        wSaleUtils.animateClone($navButton, tr, 25, 40);
 
-        if ($('#b2b_wish').is(':checked')) {
-            return this._addToCart(product, tr.find('add_qty').val() || 1);
-        } else {
-            var adding_deffered = this._addToCart(product, tr.find('add_qty').val() || 1);
-            this._removeWish(e, adding_deffered);
-            return adding_deffered;
+        var animateDeffered = wSaleUtils.animateClone($navButton, tr, 25, 40);
+        var addingDeffered = this._addToCart(product, tr.find('add_qty').val() || 1);
+        var deffered = Promise.all([animateDeffered, addingDeffered]);
+        if (!$('#b2b_wish').is(':checked')) {
+            this._removeWish(e, deffered);
         }
+        return deffered;
     },
     /**
      * @private
