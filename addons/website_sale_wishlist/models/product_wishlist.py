@@ -37,7 +37,19 @@ class ProductWishlist(models.Model):
 
     @api.model
     def _add_to_wishlist(self, pricelist_id, currency_id, website_id, price, product_id, partner_id=False):
-        wish = self.env['product.wishlist'].create({
+        if partner_id:
+            wish = self.search([('partner_id', '=', partner_id), ('product_id', '=', product_id), '|', ('active', '=', False), ('active', '=', True)])
+            if wish:
+                wish.update({
+                    'active': True,
+                    'currency_id': currency_id,
+                    'pricelist_id': pricelist_id,
+                    'price': price,
+                    'website_id': website_id,
+                })
+                return wish
+
+        wish = self.create({
             'partner_id': partner_id,
             'product_id': product_id,
             'currency_id': currency_id,
@@ -51,11 +63,10 @@ class ProductWishlist(models.Model):
     def _check_wishlist_from_session(self):
         """Assign all wishlist withtout partner from this the current session"""
         session_wishes = self.sudo().search([('id', 'in', request.session.get('wishlist_ids', []))])
-        partner_wishes = self.sudo().search([("partner_id", "=", self.env.user.partner_id.id)])
-        partner_products = partner_wishes.mapped("product_id")
+        partner_wishes = self.sudo().search([("partner_id", "=", self.env.user.partner_id.id), '|', ('active', '=', False), ('active', '=', True)])
+        session_products = session_wishes.mapped("product_id")
         # Remove session products already present for the user
-        duplicated_wishes = session_wishes.filtered(lambda wish: wish.product_id <= partner_products)
-        session_wishes -= duplicated_wishes
+        duplicated_wishes = partner_wishes.filtered(lambda wish: wish.product_id <= session_products)
         duplicated_wishes.unlink()
         # Assign the rest to the user
         session_wishes.write({"partner_id": self.env.user.partner_id.id})
