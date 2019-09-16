@@ -110,6 +110,7 @@ var ProductComparison = publicWidget.Widget.extend(VariantMixin, {
                     return;
                 }
                 self._addNewProducts(productId).then(function () {
+                    $elem.prop('disabled', true).attr('disabled', true);
                     website_sale_utils.animateClone(
                         $('#comparelist .o_product_panel_header'),
                         $elem.closest('form'),
@@ -199,10 +200,14 @@ var ProductComparison = publicWidget.Widget.extend(VariantMixin, {
         this.guard.exec(this._removeFromComparelistImpl.bind(this, e));
     },
     _removeFromComparelistImpl: function (e) {
-        var target = $(e.target.closest('.o_comparelist_remove, .o_remove'));
-        this.comparelist_product_ids = _.without(this.comparelist_product_ids, target.data('product_product_id'));
-        target.parents('.o_product_row').remove();
+        var $target = $(e.target.closest('.o_comparelist_remove, .o_remove'));
+        var productId = $target.data('product_product_id');
+        this.comparelist_product_ids = _.without(this.comparelist_product_ids, productId);
+        $target.parents('.o_product_row').remove();
         this._updateCookie();
+        this.trigger_up('on_click_remove_compare', {
+            productId: productId,
+        });
         $('.o_comparelist_limit_warning').hide();
         this._updateContent('show');
     },
@@ -245,6 +250,9 @@ var ProductComparison = publicWidget.Widget.extend(VariantMixin, {
 
 publicWidget.registry.ProductComparison = publicWidget.Widget.extend({
     selector: '.oe_website_sale',
+    custom_events: {
+        on_click_remove_compare: '_onClickRemoveCompare',
+    },
     events: {
         'click .o_add_compare, .o_add_compare_dyn': '_onClickAddCompare',
         'click #o_comparelist_table tr': '_onClickComparelistTr',
@@ -256,6 +264,14 @@ publicWidget.registry.ProductComparison = publicWidget.Widget.extend({
     start: function () {
         var def = this._super.apply(this, arguments);
         this.productComparison = new ProductComparison(this);
+        var productIds = JSON.parse(utils.get_cookie('comparelist_product_ids') || '[]');
+        var compareButtons = this.$('.o_add_compare, .o_add_compare_dyn');
+        _.each(compareButtons, function (button) {
+            var productId = parseInt(button.dataset.productProductId, 10);
+            if (productIds.includes(productId)) {
+                $(button).prop('disabled', true).attr('disabled', true);
+            }
+        });
         return Promise.all([def, this.productComparison.appendTo(this.$el)]);
     },
 
@@ -269,6 +285,13 @@ publicWidget.registry.ProductComparison = publicWidget.Widget.extend({
      */
     _onClickAddCompare: function (ev) {
         this.productComparison.handleCompareAddition($(ev.currentTarget));
+    },
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onClickRemoveCompare: function (ev) {
+        $('.o_add_compare[data-product-product-id="' + ev.data.productId + '"]').prop('disabled', false).attr('disabled', false);
     },
     /**
      * @private
