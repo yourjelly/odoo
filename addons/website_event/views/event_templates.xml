@@ -639,11 +639,11 @@
                         <h4 class="modal-title">Attendees</h4>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span>&amp;times;</span></button>
                     </div>
-                    <t t-foreach="tickets" t-as="ticket">
                     <t t-set="counter_type" t-value="1"/>
                     <t t-set="counter" t-value="0"/>
-                    <t t-foreach="range(1, ticket['quantity'] + 1)" t-as="att_counter" name="attendee_loop">
-                        <t t-set="counter" t-value="counter + 1"/>
+                    <t t-foreach="tickets" t-as="ticket">
+                        <t t-foreach="range(1, ticket['quantity'] + 1)" t-as="att_counter" name="attendee_loop">
+                            <t t-set="counter" t-value="counter + 1"/>
                             <div class="modal-body bg-light border-bottom">
                                 <h5 class="mt-1 pb-2 border-bottom">Ticket #<span t-esc="counter"/> <small class="text-muted">- <span t-esc="ticket['name']"/></small></h5>
                                 <div class="row">
