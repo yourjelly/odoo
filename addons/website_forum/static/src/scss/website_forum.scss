@@ -133,35 +133,6 @@ $bronze: #eea91e;
         }
     }
 
-    .o_wforum_follow_toggler {
-        // Reduce size
-        button, input {
-            padding: $input-btn-padding-y-sm $input-btn-padding-x-sm;
-            font-size: $input-btn-font-size-sm;
-            line-height: $input-btn-line-height-sm;
-        }
-
-        // Hide button and show 'bell' icon for logged-in users that
-        // are not followers.
-        .o_connected_user & > div[data-follow="off"] > div {
-            &:before {
-                content: "\f0f3";
-                padding: 0 $input-btn-padding-x-sm;
-                font: normal normal normal 14px/1 FontAwesome;
-                color: $text-muted;
-            }
-
-            &:hover:before {
-                color: $body-color;
-            }
-
-            .btn.btn-primary.js_follow_btn {
-                opacity: 0;
-                @include o-position-absolute(0,0,0,0);
-            }
-        }
-    }
-
     .o_wforum_gold {
         color: $gold;
     }

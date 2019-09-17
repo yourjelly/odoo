@@ -1036,9 +1036,9 @@
                         <t t-set="show_date" t-value="True"/>
                     </div>
                     <div class="col-auto mb-2 order-sm-3">
-                        <div t-call="website_mail.follow" class="o_wforum_follow_toggler">
+                        <div t-call="website_mail.follow">
                             <t t-set="object" t-value="question"/>
-                            <t t-set="js_follow_class" t-value="'input-group-sm'"/>
+                            <t t-set="icons_design" t-value="True"/>
                         </div>
                     </div>
                     <div t-if="len(question.tag_ids) > 0" class="col-12 col-sm order-sm-2 o_wforum_index_entry_tags mb-1">
