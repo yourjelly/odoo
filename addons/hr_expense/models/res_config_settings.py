@@ -11,6 +11,7 @@ class ResConfigSettings(models.TransientModel):
                                      config_parameter='hr_expense.use_mailgateway')
 
     module_hr_payroll_expense = fields.Boolean(string='Reimburse Expenses in Payslip')
+    module_hr_expense_extract = fields.Boolean(string='Send bills to OCR to generate expenses')
 
     @api.model
     def get_values(self):

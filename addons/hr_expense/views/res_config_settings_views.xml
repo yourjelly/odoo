@@ -33,6 +33,17 @@
                                             <button type="action" name="base_setup.action_general_configuration" icon="fa-arrow-right" string="Setup your domain alias" class="btn-link"/>
                                         </div>
                                     </div>
+                                </div> 
+                            </div>
+                            <div class="col-xs-12 col-md-6 o_setting_box" title="use OCR to fill data from a picture of the bill">
+                                <div class="o_setting_left_pane">
+                                    <field name="module_hr_expense_extract"/>
+                                </div>
+                                <div class="o_setting_right_pane">
+                                    <label string="OCR" for="module_hr_expense_extract"/>
+                                    <div class="text-muted">
+                                        Send bills to OCR to generate expenses
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-lg-6 col-12 o_setting_box" id="hr_payroll_accountant">
