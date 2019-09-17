@@ -248,7 +248,7 @@
 <!-- Display a post -->
 <template id="display_post_question_block">
     <div class="o_wforum_index_entry_title">
-        <div t-attf-class="d-inline-block mb-0 #{'h6' if len(question.name) > 80 else 'h5'}">
+        <div class="d-inline-block mb-0 h5">
             <span t-if="question.has_validated_answer and filters != 'solved'"
                 title="Solved"
                 aria-label="Solved"
@@ -1003,14 +1003,13 @@
             </div>
             <section class="col">
                 <div class="row no-gutter">
-                    <t t-set="title_size" t-value="('h3' if len(question.name) > 60 else 'h2')"/>
-                    <header t-attf-class="o_wforum_post_header col mb-0 #{title_size}">
+                    <header class="o_wforum_post_header col mb-0 h2">
                         <i t-if="uid" aria-label="Toggle favorite status"
                             title="Toggle favorite status"
                             t-attf-data-href="/forum/#{slug(question.forum_id)}/question/#{slug(question)}/toggle_favourite"
                             t-attf-class="o_wforum_favourite_toggle no-decoration small mr-1 fa #{question.user_favourite and 'fa-star o_wforum_gold' or 'fa-star-o text-muted'}"/>
 
-                        <h1 t-attf-class="d-inline mb-0 #{title_size}" t-esc="question.name"/>
+                        <h1 class="d-inline mb-0 h2" t-esc="question.name"/>
 
                         <span t-if="not question.active" class="border rounded-pill h6 text-muted my-0 ml-2 px-2">
                             <t t-if="question.state!='offensive'">Deleted</t>
