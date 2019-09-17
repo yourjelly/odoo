@@ -19,6 +19,22 @@ class pos_config(models.Model):
                 config.current_session_id._check_session_timing()
         return super(pos_config, self).open_ui()
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        # OVERRIDE to ensure the restrict mode is enabled on the POS journals.
+        config = super().create(vals_list)
+        if config.journal_id and config.journal_id.company_id._is_accounting_unalterable():
+            config.journal_id.restrict_mode_hash_table = True
+        return config
+
+    def write(self, vals):
+        # OVERRIDE to ensure the restrict mode is enabled on the POS journals.
+        res = super().write(vals)
+        self.mapped('journal_id')\
+            .filtered(lambda journal: journal.company_id._is_accounting_unalterable() and not journal.restrict_mode_hash_table)\
+            .write({'restrict_mode_hash_table': True})
+        return res
+
 
 class pos_session(models.Model):
     _inherit = 'pos.session'
@@ -35,6 +51,16 @@ class pos_session(models.Model):
         for session in self.filtered(lambda s: s.config_id.company_id._is_accounting_unalterable()):
             session._check_session_timing()
         return super(pos_session, self).open_frontend_cb()
+
+    def _validate_session(self):
+        # OVERRIDE to prevent closing the seecion without the restrict mode enabled on the POS journals.
+        journals_wo_restrict = self\
+            .mapped('config_id.journal_id')\
+            .filtered(lambda journal: journal.company_id._is_accounting_unalterable() and not journal.restrict_mode_hash_table)
+        if journals_wo_restrict:
+            raise UserError(_("The 'Strict Mode By Hash Table' must be enabled on the following journals to be compliant with the french law: %s")
+                            % ', '.join(name[1] for name in journals_wo_restrict.name_get()))
+        return super()._validate_session()
 
 
 ORDER_FIELDS = ['date_order', 'user_id', 'lines', 'payment_ids', 'pricelist_id', 'partner_id', 'session_id', 'pos_reference', 'sale_journal', 'fiscal_position_id']
