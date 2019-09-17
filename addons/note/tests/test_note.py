@@ -7,8 +7,14 @@ class TestNote(common.TransactionCase):
 
     def test_bug_lp_1156215(self):
         """ ensure any users can create new users """
-        demo_user = self.env.ref('base.user_demo')
-        group_erp = self.env.ref('base.group_erp_manager')
+        demo_user = self.env['res.users'].create({
+            'name': 'Leo',
+            'login': 'demo2',
+            'password': 'demouser123',
+            })
+        group_erp = self.env['res.groups'].create({
+            'name': 'Access Rights'
+            })
 
         demo_user.write({
             'groups_id': [(4, group_erp.id)],
