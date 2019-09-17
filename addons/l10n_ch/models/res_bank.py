@@ -47,7 +47,7 @@ class ResPartnerBank(models.Model):
         account numbers.
         """
         acc_number2 = ""
-        if " " in acc_number:
+        if acc_number and " " in acc_number:
             acc_number2 = acc_number.split(" ")[0]
         if _is_l10n_ch_postal(acc_number) or (acc_number2 and _is_l10n_ch_postal(acc_number2)):
             return 'postal'
@@ -59,11 +59,12 @@ class ResPartnerBank(models.Model):
         if self.acc_type == 'iban':
             self.l10n_ch_postal = self._retrieve_l10n_ch_postal(self.sanitized_acc_number)
         elif self.acc_type == 'postal':
-            if " " in self.acc_number:
+            if self.acc_number and " " in self.acc_number:
                 self.l10n_ch_postal = self.acc_number.split(" ")[0]
             else:
                 self.l10n_ch_postal = self.sanitized_acc_number
-                self.acc_number = self.acc_number + ' for partner ' + self.partner_id.name
+                self.acc_number = self.acc_number + '  ' + self.partner_id.name
+        print(self.l10n_ch_postal, self.acc_number)
 
     @api.model
     def _retrieve_l10n_ch_postal(self, iban):
