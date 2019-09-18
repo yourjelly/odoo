@@ -34,9 +34,13 @@ class EventSaleTest(common.TransactionCase):
             'event_id': event.id,
         })
 
+        user = self.env['res.partner'].create({
+            'name': 'Deco Addict'
+        })
+
         # I create a sales order
         self.sale_order = self.env['sale.order'].create({
-            'partner_id': self.env.ref('base.res_partner_2').id,
+            'partner_id': user.id,
             'note': 'Invoice after delivery',
             'payment_term_id': self.env.ref('account.account_payment_term_end_following_month').id
         })
@@ -90,10 +94,15 @@ class EventSaleTest(common.TransactionCase):
         test_event.write({'event_ticket_ids': [(6, 0, [])]})
         self.assertEqual(test_event._is_event_registrable(), True)
 
+        product = self.env['product.product'].create({
+            'name':'product A',
+            'type':'service'
+        })
+
         test_event_ticket = self.env['event.event.ticket'].create({
             'name': 'TestTicket',
             'event_id': test_event.id,
-            'product_id': 1,
+            'product_id': product.id,
         })
         test_event_ticket.copy()
         test_event_ticket.product_id.active = False
