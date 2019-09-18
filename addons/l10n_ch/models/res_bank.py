@@ -63,8 +63,7 @@ class ResPartnerBank(models.Model):
                 self.l10n_ch_postal = self.acc_number.split(" ")[0]
             else:
                 self.l10n_ch_postal = self.sanitized_acc_number
-                self.acc_number = self.acc_number + '  ' + self.partner_id.name
-        print(self.l10n_ch_postal, self.acc_number)
+                self.acc_number = self.sanitized_acc_number + '  ' + self.partner_id.name
 
     @api.model
     def _retrieve_l10n_ch_postal(self, iban):
