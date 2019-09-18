@@ -2,6 +2,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import json
+import logging
+_logger = logging.getLogger(__name__)
 
 from odoo import http, tests
 from odoo.tools import mute_logger
@@ -9,6 +11,13 @@ from odoo.tools import mute_logger
 
 @tests.tagged('post_install', '-at_install')
 class TestUi(tests.HttpCase):
+
+    def setUp(self):
+        super(TestUi, self).setUp()
+        domain = [('company_id', '=', self.env.ref('base.main_company').id)]
+        if not self.env['account.account'].search_count(domain):
+            _logger.warning('Test skipped because there is no chart of account defined ...')
+            self.skipTest("No Chart of account found")
 
     @mute_logger('odoo.addons.website.models.ir_http', 'odoo.http')
     def test_01_portal_attachment(self):
