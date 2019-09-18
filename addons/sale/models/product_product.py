@@ -9,6 +9,7 @@ class ProductProduct(models.Model):
     _inherit = 'product.product'
 
     sales_count = fields.Float(compute='_compute_sales_count', string='Sold')
+    product_sol_quantity = fields.Integer(compute='_compute_product_sol_quantity', string='Sale Order Line Quantity')
 
     def _compute_sales_count(self):
         r = {}
@@ -33,6 +34,20 @@ class ProductProduct(models.Model):
             product.sales_count = float_round(r.get(product.id, 0), precision_rounding=product.uom_id.rounding)
         return r
 
+    def _compute_product_sol_quantity(self):
+        order_id = self._context.get("active_id")
+        if order_id:
+            order = self.env['sale.order'].browse(order_id)
+            product_map = {}
+            for sol in order.order_line:
+                if not product_map.get(sol.product_id.id):
+                    product_map[sol.product_id.id] = []
+                product_map[sol.product_id.id].append(sol.product_uom_qty)
+            for product in self:
+                product.product_sol_quantity = sum(product_map.get(product.id,[0]))
+        else:
+            self.product_sol_quantity = False
+
     def action_view_sales(self):
         action = self.env.ref('sale.report_all_channels_sales_action').read()[0]
         action['domain'] = [('product_id', 'in', self.ids)]
@@ -54,6 +69,38 @@ class ProductProduct(models.Model):
         """
         self.ensure_one()
         return self.product_tmpl_id._get_combination_info(self.product_template_attribute_value_ids, self.id, add_qty, pricelist, parent_combination)
+
+    def product_add_sol_quantity(self):
+        self.ensure_one()
+        order_id = self._context.get("active_id")
+        if order_id:
+            order_line = self.env['sale.order.line'].search([('order_id', '=', order_id), ('product_id', '=', self.id)], limit=1)
+            if not order_line: # Create new sale order line
+                vals = {
+                    'order_id': order_id,
+                    'product_id': self.id,
+                    'product_uom_qty': 1,
+                    'product_uom': self.uom_id.id,
+                }
+                order_line = self.env['sale.order.line'].create(vals)
+            else:   # increment sale order line quantities
+                vals = {
+                    'product_uom_qty': order_line.product_uom_qty + 1
+                }
+                order_line.write(vals)
+        return True
+
+    def product_remove_sol_quantity(self):
+        self.ensure_one()
+        order_id = self._context.get("active_id")
+        if order_id:
+            order_line = self.env['sale.order.line'].search([('order_id', '=', order_id), ('product_id', '=', self.id)], limit=1)
+            if order_line:
+                vals = {
+                    'product_uom_qty': order_line.product_uom_qty - 1
+                }
+                order_line.write(vals)
+        return True
 
 
 class ProductAttribute(models.Model):

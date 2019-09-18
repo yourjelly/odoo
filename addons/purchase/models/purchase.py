@@ -113,6 +113,7 @@ class PurchaseOrder(models.Model):
         default=lambda self: self.env.user, check_company=True)
     company_id = fields.Many2one('res.company', 'Company', required=True, index=True, states=READONLY_STATES, default=lambda self: self.env.company.id)
     currency_rate = fields.Float("Currency Rate", compute='_compute_currency_rate', compute_sudo=True, store=True, readonly=True, help='Ratio between the purchase order currency and the company currency')
+    purchase_line_product_count = fields.Integer(compute='_compute_purchase_line_products')
 
     @api.constrains('company_id', 'order_line')
     def _check_order_line_company_id(self):
@@ -126,6 +127,10 @@ class PurchaseOrder(models.Model):
         super(PurchaseOrder, self)._compute_access_url()
         for order in self:
             order.access_url = '/my/purchase/%s' % (order.id)
+
+    def _compute_purchase_line_products(self):
+        for order in self:
+            order.purchase_line_product_count = len(order.order_line.filtered(lambda l: l.product_uom_qty).mapped('product_id'))
 
     @api.model
     def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
@@ -347,6 +352,28 @@ class PurchaseOrder(models.Model):
 
     def button_done(self):
         self.write({'state': 'done'})
+
+    def action_purchase_view_material(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Products'),
+            'res_model': 'product.product',
+            'views': [(self.env.ref('purchase.view_product_product_kanban_purchase').id, 'kanban'), (False, 'form')],
+            'domain': [('purchase_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', self.company_id)],
+            'context': {
+                'company_id': self.company_id.id,
+                'create': self.env['product.template'].check_access_rights('create', raise_exception=False),
+                'pricelist': self.partner_id.property_product_pricelist.id if self.partner_id else False,
+                'partner': self.partner_id.id if self.partner_id else False,
+            },
+            'help': _("""<p class="o_view_nocontent_smiling_face">
+                            Create a new product
+                        </p><p>
+                            You must define a product for everything you sell or purchase,
+                            whether it's a storable product, a consumable or a service.
+                        </p>""")
+        }
 
     def _add_supplier_to_product(self):
         # Add the partner in the supplier list of the product if the supplier is not registered for

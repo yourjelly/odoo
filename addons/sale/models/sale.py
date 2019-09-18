@@ -195,6 +195,7 @@ class SaleOrder(models.Model):
                                        string='Transactions', copy=False, readonly=True)
     authorized_transaction_ids = fields.Many2many('payment.transaction', compute='_compute_authorized_transaction_ids',
                                                   string='Authorized Transactions', copy=False, readonly=True)
+    order_line_product_count = fields.Integer(compute='_compute_order_line_products')
 
     _sql_constraints = [
         ('date_order_conditional_required', "CHECK( (state IN ('sale', 'done') AND date_order IS NOT NULL) OR state NOT IN ('sale', 'done') )", "A confirmed sales order requires a confirmation date."),
@@ -256,6 +257,10 @@ class SaleOrder(models.Model):
     def _compute_authorized_transaction_ids(self):
         for trans in self:
             trans.authorized_transaction_ids = trans.transaction_ids.filtered(lambda t: t.state == 'authorized')
+
+    def _compute_order_line_products(self):
+        for order in self:
+            order.order_line_product_count = len(order.order_line.filtered(lambda l: l.product_uom_qty).mapped('product_id'))
 
     def _compute_amount_undiscounted(self):
         for order in self:
@@ -860,6 +865,28 @@ class SaleOrder(models.Model):
             'type': 'ir.actions.act_url',
             'target': 'self',
             'url': self.get_portal_url(),
+        }
+
+    def action_sale_view_material(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Products'),
+            'res_model': 'product.product',
+            'views': [(self.env.ref('sale.view_product_product_kanban_sale').id, 'kanban'), (False, 'form')],
+            'domain': [('sale_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', self.company_id)],
+            'context': {
+                'company_id': self.company_id.id,
+                'create': self.env['product.template'].check_access_rights('create', raise_exception=False),
+                'pricelist': self.partner_id.property_product_pricelist.id if self.partner_id else False,
+                'partner': self.partner_id.id if self.partner_id else False,
+            },
+            'help': _("""<p class="o_view_nocontent_smiling_face">
+                            Create a new product
+                        </p><p>
+                            You must define a product for everything you sell or purchase,
+                            whether it's a storable product, a consumable or a service.
+                        </p>""")
         }
 
     def _force_lines_to_invoice_policy_order(self):

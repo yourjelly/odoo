@@ -146,6 +146,13 @@
                             <field name="invoice_count" widget="statinfo" string="Vendor Bills"/>
                             <field name='invoice_ids' invisible="1"/>
                         </button>
+                        <button class="oe_stat_button" name="action_purchase_view_material" type="object" icon="fa-cart-plus" help="Add Products">
+                            <div class="o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="purchase_line_product_count" widget="statinfo" string="Products" class="mr-1"/>
+                                </span>
+                            </div>
+                        </button>
                     </div>
                     <div class="oe_title">
                         <span class="o_form_label" attrs="{'invisible': [('state','not in',('draft','sent'))]}">Request for Quotation </span>
