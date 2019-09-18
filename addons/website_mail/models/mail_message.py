@@ -10,6 +10,7 @@ from odoo.exceptions import AccessError
 class MailMessage(models.Model):
     _inherit = 'mail.message'
 
+
     @api.model
     def default_get(self, fields_list):
         defaults = super(MailMessage, self).default_get(fields_list)

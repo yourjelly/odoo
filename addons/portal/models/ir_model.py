@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from odoo import _, api, fields, models
-import pdb
+
 
 class IrModel(models.AbstractModel):
     _inherit = 'ir.model'
+
 
     is_portal_mixin = fields.Boolean(string="Poral Mixin", default=False,help="Whether this model supports messages and notifications of portal.",)
 

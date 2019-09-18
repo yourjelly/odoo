@@ -3,8 +3,10 @@
 
 from odoo import api, models
 
+
 class MailMessage(models.Model):
     _inherit = 'mail.message'
+
 
     def portal_message_format(self):
         return self._portal_message_format([
@@ -26,4 +28,4 @@ class MailMessage(models.Model):
 
     @api.model
     def _non_employee_message_domain(self):
-        return [('subtype_id', '!=', False), ('subtype_id.internal', '=', False)]
+        return ['&',('subtype_id', '!=', False), ('subtype_id.internal', '=', False)]
