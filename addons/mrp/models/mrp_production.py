@@ -659,7 +659,9 @@ class MrpProduction(models.Model):
                 })
             production._generate_finished_moves()
             production.move_raw_ids._adjust_procure_method()
-            (production.move_raw_ids | production.move_finished_ids)._action_confirm()
+            context = dict(self.env.context)
+            context['parent_mrp_production_id'] = self.id
+            (production.move_raw_ids | production.move_finished_ids).with_context(**context)._action_confirm()
         return True
 
     def action_assign(self):
