@@ -5,7 +5,6 @@ from odoo import _, api, fields, models
 class IrModel(models.AbstractModel):
     _inherit = 'ir.model'
 
-
     is_portal_mixin = fields.Boolean(string="Poral Mixin", default=False,help="Whether this model supports messages and notifications of portal.",)
 
     def write(self, vals):
@@ -24,7 +23,6 @@ class IrModel(models.AbstractModel):
         else:
             res = super(IrModel, self).write(vals)
         return res
-
 
     def _reflect_model_params(self, model):
         vals = super(IrModel, self)._reflect_model_params(model)
