@@ -57,6 +57,9 @@ odoo.define('website_slides.quiz', function (require) {
          * @override
          */
         willStart: function () {
+            if(this.slide.answerIds){
+                this._submitQuiz(this.slide.answerIds);
+            }
             var defs = [this._super.apply(this, arguments)];
             if (!this.quiz) {
                 defs.push(this._fetchQuiz());
@@ -128,7 +131,7 @@ odoo.define('website_slides.quiz', function (require) {
         _renderAnswers: function () {
             var self = this;
             this.$('input[type=radio]').each(function () {
-                $(this).prop('disabled', self.slide.readonly || self.slide.completed);
+                $(this).prop('disabled', self.slide.completed);
             });
         },
 
@@ -139,6 +142,7 @@ odoo.define('website_slides.quiz', function (require) {
         _renderAnswersHighlighting: function () {
             var self = this;
             this.$('a.o_wslides_quiz_answer').each(function () {
+                console.log("=D")
                 var $answer = $(this);
                 var answerId = $answer.data('answerId');
                 if (_.contains(self.quiz.goodAnswers, answerId)) {
@@ -231,7 +235,7 @@ odoo.define('website_slides.quiz', function (require) {
          */
         _onAnswerClick: function (ev) {
             ev.preventDefault();
-            if (! this.slide.readonly && ! this.slide.completed) {
+            if (!this.slide.completed) {
                 $(ev.currentTarget).find('input[type=radio]').prop('checked', true);
             }
             this._alertHide();
@@ -263,6 +267,17 @@ odoo.define('website_slides.quiz', function (require) {
 
             if (values.length === this.quiz.questions.length){
                 this._alertHide();
+                if (this.publicUser){
+                    if (window.location.href.indexOf("fullscreen") > -1) {
+                        this.redirectURL = encodeURIComponent(_.str.sprintf('%s&answerIds=%s', document.URL, values));
+                    }
+                    else {
+                        this.redirectURL = encodeURIComponent(_.str.sprintf('%s?answerIds=%s', document.URL, values));
+                    }
+                    var url = _.str.sprintf('/web/login?redirect=%s', this.redirectURL);
+                    window.location.href = url;
+                    return;
+                }
                 this._submitQuiz(values);
             } else {
                 this._alertShow();
@@ -293,11 +308,13 @@ odoo.define('website_slides.quiz', function (require) {
                 var slideData = $(this).data();
                 var channelData = self._extractChannelData(slideData);
                 slideData.quizData = {
+                    answerIds: slideData.answerIds || false,
                     questions: self._extractQuestionsAndAnswers(),
                     quizKarmaMax: slideData.quizKarmaMax,
                     quizKarmaWon: slideData.quizKarmaWon,
                     quizKarmaGain: slideData.quizKarmaGain,
                     quizAttemptsCount: slideData.quizAttemptsCount,
+
                 };
                 defs.push(new Quiz(self, slideData, channelData, slideData.quizData).attachTo($(this)));
             });

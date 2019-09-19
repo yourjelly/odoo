@@ -513,7 +513,7 @@ class WebsiteSlides(WebsiteProfile):
 
     @http.route(['/slides/channel/leave'], type='json', auth='user', website=True)
     def slide_channel_leave(self, channel_id):
-        request.env['slide.channel'].browse(channel_id)._remove_membership(request.env.user.partner_id)
+        request.env['slide.channel'].browse(channel_id)._remove_membership(request.env.user.partner_id.ids)
         return True
 
     @http.route(['/slides/channel/tag/search_read'], type='json', auth='user', methods=['POST'], website=True)
@@ -544,6 +544,9 @@ class WebsiteSlides(WebsiteProfile):
         self._set_viewed_slide(slide)
 
         values = self._get_slide_detail(slide)
+        if kwargs.get('answerIds'):
+            answers = [int(s) for s in kwargs.get('answerIds').split(',')]
+            values['answer_ids'] = json.dumps(answers)
         # quiz-specific: update with karma and quiz information
         if slide.question_ids:
             values.update(self._get_slide_quiz_data(slide))
@@ -564,7 +567,6 @@ class WebsiteSlides(WebsiteProfile):
         values.pop('channel', None)
 
         values['signup_allowed'] = request.env['res.users'].sudo()._get_signup_invitation_scope() == 'b2c'
-
         if kwargs.get('fullscreen') == '1':
             return request.render("website_slides.slide_fullscreen", values)
         return request.render("website_slides.slide_main", values)

@@ -427,9 +427,8 @@ odoo.define('website_slides.fullscreen', function (require) {
             } else {
                 slide = this.slides[0];
             }
-
+            
             this.set('slide', slide);
-
             this.sidebar = new Sidebar(this, this.slides, slide);
             this.shareButton = new ShareButton(this, slide);
             return result;
@@ -537,9 +536,14 @@ odoo.define('website_slides.fullscreen', function (require) {
             var url =  urlParts.join('/');
             this.$('.o_wslides_fs_exit_fullscreen').attr('href', url);
             var params = {'fullscreen': 1 };
+            var answerIds = $('.o_wslides_fs_main').data('answer-ids');
+            if(answerIds){
+                params.answerIds= answerIds.toString();
+            }
             if (this.get('slide').isQuiz){
                 params.quiz = 1;
             }
+
             var fullscreenUrl = _.str.sprintf('%s?%s', url, $.param(params));
             history.pushState(null, '', fullscreenUrl);
         },
