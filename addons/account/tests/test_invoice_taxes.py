@@ -48,7 +48,11 @@ class TestInvoiceTaxes(AccountingTestCase):
         '''
         self_ctx = self.env['account.move'].with_context(default_type=inv_type)
         invoice_form = Form(self_ctx)
-        invoice_form.partner_id = self.env.ref('base.partner_demo')
+        partner = self.env['res.partner'].create({
+            'name': 'Marc Demo',
+            'email': 'mark.brown23@example.com'
+        })
+        invoice_form.partner_id = partner
 
         for amount, taxes in taxes_per_line:
             with invoice_form.invoice_line_ids.new() as invoice_line_form:

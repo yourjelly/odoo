@@ -3,7 +3,9 @@
 import logging
 _logger = logging.getLogger(__name__)
 
+from odoo import tools
 from odoo.tests.common import HttpCase, tagged
+from odoo.modules.module import get_module_resource
 
 
 class AccountingTestCase(HttpCase):

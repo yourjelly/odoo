@@ -14,15 +14,16 @@ class TestPayment(AccountingTestCase):
         self.acc_bank_stmt_model = self.env['account.bank.statement']
         self.acc_bank_stmt_line_model = self.env['account.bank.statement.line']
 
-        self.partner_agrolait = self.env.ref("base.res_partner_2")
-        self.partner_china_exp = self.env.ref("base.res_partner_3")
+        Partner = self.env['res.partner']
+        self.partner_agrolait = Partner.create({'name': 'agrolait'})
+        self.partner_china_exp = Partner.create({'name': 'china_exp'})
         self.currency_chf_id = self.env.ref("base.CHF").id
         self.currency_usd_id = self.env.ref("base.USD").id
         self.currency_eur_id = self.env.ref("base.EUR").id
 
         company = self.env.ref('base.main_company')
         self.cr.execute("UPDATE res_company SET currency_id = %s WHERE id = %s", [self.currency_eur_id, company.id])
-        self.product = self.env.ref("product.product_product_4")
+        self.product = self.env['product.product'].create({'name': 'Customizable Desk'})
         self.payment_method_manual_in = self.env.ref("account.account_payment_method_manual_in")
         self.payment_method_manual_out = self.env.ref("account.account_payment_method_manual_out")
 
@@ -110,6 +111,11 @@ class TestPayment(AccountingTestCase):
 
     def test_internal_transfer_journal_usd_journal_eur(self):
         """ Create a transfer from a EUR journal to a USD journal """
+        # self.env['res.currency.rate'].create({
+        #     'rate': 1.5289,
+        #     'currency_id': self.currency_usd_id,
+        #     'name': time.strftime('%Y') + '-06-06'
+        # })
         payment = self.payment_model.create({
             'payment_date': time.strftime('%Y') + '-07-15',
             'payment_type': 'transfer',
