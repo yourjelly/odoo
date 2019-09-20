@@ -24,13 +24,26 @@ class TestQweb(TransactionCase):
             "cdn_url": "http://test.cdn"
         })
 
+        demo = self.env['res.users'].search([('login', '=', 'demo')])
+        if not demo:
+            company = self.env['res.company'].create({'name': 'Demo company'})
+            partner = self.env['res.partner'].create({
+                'name': 'Marc Demo'
+            })
+            user = self.env['res.users'].create({
+                'login': 'demo',
+                'company_id': company.id,
+                'company_ids': [(4, company.id)],
+                'partner_id': partner.id,
+            })
+
         demo = self.env['res.users'].search([('login', '=', 'demo')])[0]
         demo.write({"signature": '''<span class="toto">
                 span<span class="fa"></span><img src="/web/image/1"/>
             </span>'''})
 
         demo_env = self.env(user=demo)
-
+        
         html = demo_env['ir.qweb'].render('website.test_template', {"user": demo}, website_id= website.id)
         html = html.strip().decode('utf8')
         html = re.sub(r'\?unique=[^"]+', '', html).encode('utf8')

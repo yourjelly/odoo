@@ -72,12 +72,14 @@ class Crawler(odoo.tests.HttpCase):
     def test_20_crawl_demo(self):
         t0 = time.time()
         t0_sql = self.registry.test_cr.sql_log_count
-        self.authenticate('demo', 'demo')
-        seen = self.crawl('/', msg='demo')
-        count = len(seen)
-        duration = time.time() - t0
-        sql = self.registry.test_cr.sql_log_count - t0_sql
-        _logger.log(25, "demo crawled %s urls in %.2fs %s queries, %.3fs %.2fq per request", count, duration, sql, duration / count, float(sql) / count)
+        demo = self.env['res.users'].search([('login', '=', 'demo')])
+        if demo: 
+            self.authenticate('demo', 'demo')
+            seen = self.crawl('/', msg='demo')
+            count = len(seen)
+            duration = time.time() - t0
+            sql = self.registry.test_cr.sql_log_count - t0_sql
+            _logger.log(25, "demo crawled %s urls in %.2fs %s queries, %.3fs %.2fq per request", count, duration, sql, duration / count, float(sql) / count)
 
     def test_30_crawl_admin(self):
         t0 = time.time()

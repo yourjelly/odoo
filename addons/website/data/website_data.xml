@@ -114,7 +114,12 @@
             </field>
         </record>
     </data>
-
+    <data>
+        <record id="group_multi_website" model="res.groups">
+            <field name="name">Multi-website</field>
+            <field name="category_id" ref="base.module_category_hidden"/>
+        </record>
+    </data>
     <data noupdate="1">
         <record id="homepage_page" model="website.page">
             <field name="is_published">True</field>
@@ -159,6 +164,10 @@
             <field name="company_id" ref="base.main_company"/>
             <field name="user_id" ref="base.public_user"/>
             <field name="homepage_id" ref="homepage_page"/>
+        </record>
+        <record id="website2" model="website">
+            <field name="name">My Website 2</field>
+            <field name="domain"></field>
         </record>
 
         <!-- Open website on install -->
@@ -509,12 +518,6 @@
             <field name="name">s_mega_menu_menu_image_menu_default_image.png</field>
             <field name="type">url</field>
             <field name="url">/website/static/src/img/snippets_demo/s_references_5.png</field>
-        </record>
-    </data>
-    <data>
-        <record id="group_multi_website" model="res.groups">
-            <field name="name">Multi-website</field>
-            <field name="category_id" ref="base.module_category_hidden"/>
         </record>
     </data>
 </odoo>
