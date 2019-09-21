@@ -217,8 +217,8 @@ img.o_forum_avatar_big {
         }
     }
 
-    .o_wforum_bio_popover_info .css_editable_mode_hidden > .mt-2 {
-        margin-top: 0!important;
+    .o_wforum_bio_popover_info .css_editable_mode_hidden > div:last-child > .o_forum_tooltip_line {
+        margin-top: -0.5rem; // compensate parent 'mt-2' class
     }
 
     .o_wforum_bio_popover_bio p {
