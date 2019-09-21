@@ -444,9 +444,9 @@
             <div class="container pt-4 pb-5">
                 <div t-if="forums" class="row">
                     <div t-foreach="forums.with_context(bin_size=True)" t-as="forum"
-                        class="col-sm-6 col-lg-4 col-xl-3 mb-3 mg-lg-5">
+                        class="col-sm-6 col-lg-4 col-xl-3 mb-3 mb-lg-5">
                         <a t-attf-href="/forum/#{slug(forum)}" class="text-reset">
-                            <h1 class="h6" t-field="forum.name"/>
+                            <h2 class="h5" t-field="forum.name"/>
                             <div class="oe_img_bg rounded shadow-sm mb-2 py-5 o_wforum_forum_card_bg"
                                 t-attf-style="#{forum.image_256 and ('background-image: url(%s);' % website.image_url(forum, 'image_256'))} background-position: center;"/>
                         </a>
