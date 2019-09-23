@@ -47,6 +47,13 @@ class TestMassMailingShortener(common.TransactionCase):
         self.env['mailing.contact'].create({
             'name': 'User 3', 'email': 'user3@example.com', 'list_ids': [(4, mailing_list_A.id)]
         })
+        self.env['mailing.contact'].create({
+            'name': 'User 4', 'email': 'user4@example.com'
+        })
+
+        self.env['mail.blacklist'].create({
+            'email': 'user4@example.com', 'active': True
+        })
 
         mass_mailing = self.env['mailing.mailing'].create({
             "reply_to_mode": "email",
