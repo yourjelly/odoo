@@ -632,7 +632,7 @@ return AbstractRenderer.extend({
                                 trigger: 'hover',
                                 html: true,
                                 placement: 'top',
-                                title: filter.label,
+                                title: _.escape(filter.label),
                                 delay: {show: 300, hide: 0},
                                 content: function () {
                                     return $('<img>', {
@@ -727,7 +727,7 @@ return AbstractRenderer.extend({
             },
             trigger: 'manual',
             html: true,
-            title: eventData.record.display_name,
+            title: _.escape(eventData.record.display_name),
             template: qweb.render('CalendarView.event.popover.placeholder', {color: this.getColor(eventData.color_index)}),
             container: eventData.allDay ? '.fc-view' : '.fc-scroller',
         }
