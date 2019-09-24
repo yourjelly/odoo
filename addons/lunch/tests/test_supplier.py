@@ -55,8 +55,9 @@ class TestSupplier(TestsCommon):
 
         for value, rvalue, dayname in tests:
             with patch.object(fields.Datetime, 'now', return_value=value) as _:
+
                 assert Supplier._search_available_today('=', True) == ['&', '|', ('recurrency_end_date', '=', False),
-                        ('recurrency_end_date', '>', value.replace(tzinfo=pytz.UTC).astimezone(pytz.timezone(self.env.user.tz))),
+                        ('recurrency_end_date', '>', value.replace(tzinfo=pytz.UTC).astimezone(pytz.timezone(self.env.user.tz or 'UTC'))),
                         ('recurrency_%s' % (dayname), '=', True)],\
                         'Wrong domain generated for values (%s, %s)' % (value, rvalue)
 
