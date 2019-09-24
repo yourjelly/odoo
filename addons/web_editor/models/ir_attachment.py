@@ -22,14 +22,15 @@ class IrAttachment(models.Model):
             else:
                 attachment.local_url = '/web/image/%s?unique=%s' % (attachment.id, attachment.checksum)
 
-    @api.depends('mimetype', 'url', 'name')
+    @api.depends('mimetype', 'url', 'checksum', 'name')
     def _compute_image_src(self):
         for attachment in self:
             if attachment.mimetype not in ['image/gif', 'image/jpe', 'image/jpeg', 'image/jpg', 'image/gif', 'image/png', 'image/svg+xml']:
                 attachment.image_src = False
             else:
-                attachment.image_src = attachment.url or '/web/image/%s/%s' % (
+                attachment.image_src = attachment.url or '/web/image/%s-%s/%s' % (
                     attachment.id,
+                    attachment.checksum,
                     url_quote(attachment.name or ''),
                 )
 
