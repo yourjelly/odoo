@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- Snippet - Country Events - Placeholder -->
+<template id="s_country_events" name="Country Events">
+    <section t-attf-class="s_country_events_list oe_country_events #{_classes}">
+        <span class="country_events_list"/>
+    </section>
+</template>
+
+<!-- Snippet - Country Events - List -->
+<!-- TODO: To improve -->
+<template id="country_events_list" name="Country Events List">
+    <t t-if="events" t-ignore="true">
+        <header>
+            <h6 class="o_wevent_sidebar_title">
+                <t t-if="country">
+                    <i class="fa fa-flag mr-2"/>Events: <span t-esc="country.name"/>
+                    <img class="img-fluid" t-att-src="website.image_url(country, 'image')" alt=""/>
+                </t>
+                <t t-else="">
+                    <i class="fa fa-globe mr-2"/>Upcoming Events
+                </t>
+            </h6>
+        </header>
+        <main>
+            <ul class="list-group">
+                <li t-foreach="events[:5]" t-as="event_dict" class="list-group-item d-flex justify-content-between">
+                    <!-- <t t-if="event_dict['event'].address_id">
+                        <i class="fa fa-map-marker" title="It is a physical event" role="img" aria-label="It is a physical event"></i>
+                    </t> -->
+                    <!-- <t t-if="not event_dict['event'].address_id">
+                        <i class="fa fa-cloud" title="It is an online event" role="img" aria-label="It is an online event"></i>
+                    </t> -->
+                    <a t-att-href="event_dict['url']">
+                        <i t-if="not event_dict['event'].website_published" class="fa fa-ban text-danger mr-1" role="img" aria-label="Unpublished" title="Unpublished"/>
+                        <span t-esc="event_dict['event'].name" t-attf-class="#{(not event_dict['event'].website_published) and 'text-danger' or ''}"/>
+                    </a>
+                    <span t-esc="event_dict['date']"/>
+                </li>
+            </ul>
+        </main>
+        <footer t-if="len(events) &gt; 5" class="mt-3">
+            <t t-if="country">
+                <a t-att-href="'/event?country='+str(country.id)">See all events from <span t-esc="country.name"></span></a>
+            </t>
+            <t t-else="">
+                <a href="/event" class="float-right small"><b>View all</b></a>
+            </t>
+        </footer>
+    </t>
+</template>
+
+<!-- Replace snippet demo with actual snippet and options -->
+<template id="remove_external_snippets" inherit_id="website.external_snippets">
+    <xpath expr="//t[@t-install='website_event']" position="replace"/>
+</template>
+
+<template id="country_events" name="Country Events" inherit_id="website.snippets">
+    <xpath expr="//div[@id='snippet_content']//t[@t-snippet][last()]" position="after">
+        <t t-snippet="website_event.s_country_events" t-thumbnail="/website_event/static/src/img/world_map.jpg"/>
+    </xpath>
+    <xpath expr="//div[@id='snippet_options']" position="inside">
+        <div data-selector=".oe_country_events"
+            data-drop-near="p, h1, h2, h3, blockquote, .card"
+            data-drop-in=".content"/>
+    </xpath>
+</template>
+
+<!-- Snippet - Speaker Bio -->
+<template id="s_speaker_bio" name="Speaker Bio">
+    <hr class="o_event_separator mt-4 pb-4"/>
+    <div class="s_speaker_bio" itemscope="itemscope" itemtype="http://schema.org/Person" itemprop="performer">
+        <span class="badge badge-secondary o_wevent_badge">SPEAKER</span>
+        <img src="/mail/static/src/img/odoobot.png" width="70" class="img-fluid rounded-circle float-left mr-3" alt=""/>
+        <div class="overflow-hidden">
+            <h4 class="mt-3 mb-1" itemprop="name">John DOE</h4>
+            <h6 class="mb-4">Company</h6>
+            <p>At just 13 years old, John DOE was already starting to develop his first business applications for customers. After mastering civil engineering, he founded TinyERP. This was the first phase of OpenERP which would later became Odoo, the most installed open-source business software worldwide.</p>
+        </div>
+    </div>
+</template>
+
+</odoo>

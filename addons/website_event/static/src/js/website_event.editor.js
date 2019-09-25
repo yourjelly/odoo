@@ -1,4 +1,4 @@
-odoo.define('website_event.editor', function (require) {
+odoo.define('website_event.new_event', function (require) {
 "use strict";
 
 var core = require('web.core');
