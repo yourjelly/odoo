@@ -7,15 +7,15 @@
         <field name="arch" type="xml">
             <xpath expr="//div[@id='utm_statistics']" position="inside">
                 <field name="crm_lead_activated" invisible="1"/>
-                <div class="px-2 text-center" groups="sales_team.group_sale_salesman"
+                <div class="order-3 mr-3"
+                    groups="sales_team.group_sale_salesman"
                     attrs="{'invisible': [('crm_lead_activated', '=', False)]}">
-                    <small>Leads:</small>
-                    <small class="font-weight-bold"><field name="lead_count"/></small>
+                    <strong class="d-inline-block mr-1 text-800"><field name="lead_count"/></strong>Leads
                 </div>
-                <div class="px-2 text-center" groups="sales_team.group_sale_salesman"
+                <div class="order-3 mr-3"
+                    groups="sales_team.group_sale_salesman"
                     attrs="{'invisible': [('crm_lead_activated', '=', True)]}">
-                    <small>Opportunities:</small>
-                    <small class="font-weight-bold"><field name="opportunity_count"/></small>
+                    <strong class="d-inline-block mr-1 text-800"><field name="opportunity_count"/></strong>Opportunities
                 </div>
             </xpath>
         </field>

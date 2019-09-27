@@ -6,17 +6,13 @@
     <field name="inherit_id" ref="utm.utm_campaign_view_kanban"/>
     <field name="arch" type="xml">
         <xpath expr="//div[@id='utm_statistics']" position="inside">
-            <div class="px-2 text-center">
-                <small>Quotations:</small>
-                <small class="font-weight-bold">
-                    <field name="quotation_count"/>
-                </small>
+            <div class="order-2 mr-3">
+                <field name="currency_id" invisible="True"/>
+                <strong class="mr-1"><field name="invoiced_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/></strong>
+                Revenues
             </div>
-            <div class="px-2 text-center">
-                <small>Revenues:</small>
-                <small class="font-weight-bold">
-                    <field name="invoiced_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                </small>
+            <div class="order-4 mr-3">
+                <strong class="mr-1 d-inline-block text-800"><field name="quotation_count"/></strong>Quotations
             </div>
         </xpath>
     </field>
