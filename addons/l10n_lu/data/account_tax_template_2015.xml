@@ -4808,7 +4808,7 @@
 	</record>
 
 	<record id="lu_2015_tax_VB-PA-17" model="account.tax.template">
-		<field name="sequence">479</field>
+		<field name="sequence">502</field>
         <field name="description">17%</field>
         <field name="name">17-S-G</field>
         <field name="amount">17</field>
@@ -4990,7 +4990,7 @@
 	</record>
 
 	<record id="lu_2011_tax_VP-EC-0" model="account.tax.template">
-		<field name="sequence">502</field>
+		<field name="sequence">495</field>
         <field name="description">0%</field>
         <field name="name">0-EC-S-S</field>
         <field name="amount">0</field>
@@ -5159,7 +5159,7 @@
 	</record>
 
 	<record id="lu_2015_tax_VP-PA-17" model="account.tax.template">
-		<field name="sequence">495</field>
+		<field name="sequence">479</field>
         <field name="description">17%</field>
         <field name="name">17-S-S</field>
         <field name="amount">17</field>
