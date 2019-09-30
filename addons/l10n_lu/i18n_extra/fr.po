@@ -3223,6 +3223,11 @@ msgid "Rent"
 msgstr "Loyer"
 
 #. module: l10n_lu
+#: model:account.account.template,name:l10n_lu.lu_2020_account_703001
+msgid "Sale of Services"
+msgstr "Prestations de services"
+
+#. module: l10n_lu
 #: model:account.account.template,name:l10n_lu.lu_2020_account_70322
 msgid "Rental income from movable property"
 msgstr "Revenus de location mobilière"

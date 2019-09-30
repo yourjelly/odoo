@@ -590,6 +590,7 @@ lu_2020_account_7021,7021,Sales of finished goods,account.data_account_type_othe
 lu_2020_account_7022,7022,Sales of semi-finished goods,account.data_account_type_other_income,FALSE,lu_2011_chart_1
 lu_2020_account_7023,7023,Sales of residual products,account.data_account_type_other_income,FALSE,lu_2011_chart_1
 lu_2020_account_7029,7029,Sales of work in progress,account.data_account_type_other_income,FALSE,lu_2011_chart_1
+lu_2020_account_703001,703001,Sale of Services,account.data_account_type_other_income,FALSE,lu_2011_chart_1
 lu_2020_account_70311,70311,Concessions,account.data_account_type_other_income,FALSE,lu_2011_chart_1
 lu_2020_account_70312,70312,Patents,account.data_account_type_other_income,FALSE,lu_2011_chart_1
 lu_2020_account_70313,70313,Software licences,account.data_account_type_other_income,FALSE,lu_2011_chart_1
