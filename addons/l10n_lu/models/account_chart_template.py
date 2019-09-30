@@ -16,15 +16,7 @@ class AccountChartTemplate(models.Model):
     def _prepare_all_journals(self, acc_template_ref, company, journals_dict=None):
         journal_data = super(AccountChartTemplate, self)._prepare_all_journals(
             acc_template_ref, company, journals_dict)
-        account = self.env.ref('l10n_lu.lu_2020_account_703001')
         for journal in journal_data:
-            if company.country_id == self.env.ref('base.lu'):
-                if journal['type'] == 'sale':
-                    journal.update({
-                       'default_debit_account_id': account.id,
-                       'default_credit_account_id': account.id,
-                       'refund_sequence': True
-                    })
-                elif journal['type'] == 'purchase':
-                    journal.update({'refund_sequence': True})
+            if journal['type'] in ('sale', 'purchase') and company.country_id == self.env.ref('base.lu'):
+                journal.update({'refund_sequence': True})
         return journal_data
