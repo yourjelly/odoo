@@ -1678,8 +1678,8 @@ msgstr "II.E.1.a) taxe (462)"
 #. module: l10n_lu
 #: model:account.tax.report.line,name:l10n_lu.account_tax_report_line_2e_1_b_exempt
 #: model:account.tax.report.line,tag_name:l10n_lu.account_tax_report_line_2e_1_b_exempt
-msgid "II.E.1.b) exempt within the territory: exempt (445)"
-msgstr "II.E.1.b) exonérées à l'intérieur du pays: exonérées (445)"
+msgid "II.E.1.b) exempt within the territory: exempt (435)"
+msgstr "II.E.1.b) exonérées à l'intérieur du pays: exonérées (435)"
 
 #. module: l10n_lu
 #: model:account.tax.report.line,name:l10n_lu.account_tax_report_line_2e_2_base

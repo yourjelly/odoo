@@ -191,8 +191,8 @@
     </record>
 
     <record id="account_tax_report_line_2e_1_b_exempt" model="account.tax.report.line">
-      <field name="name">II.E.1.b) exempt within the territory: exempt (445)</field>
-      <field name="tag_name">II.E.1.b) exempt within the territory: exempt (445)</field>
+      <field name="name">II.E.1.b) exempt within the territory: exempt (435)</field>
+      <field name="tag_name">II.E.1.b) exempt within the territory: exempt (435)</field>
       <field name="sequence">10</field>
       <field name="code">LU_VAT_435</field>
       <field name="parent_id" ref="account_tax_report_line_2e_1_base"/>
