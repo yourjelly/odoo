@@ -333,7 +333,7 @@
         <field name="name">Retenciones IRPF (Trabajadores) dinerarios</field>
         <field name="refund_account_id" ref="l10n_es.account_common_4751"/>
         <field name="chart_template_id" ref="l10n_es.account_chart_template_common"/>
-        <field name="amount" eval="-21"/>
+        <field name="amount" eval="-15"/>
         <field name="amount_type">percent</field>
         <field name="tax_group_id" ref="tax_group_retenciones_21"/>
         <field name="tag_ids" eval="[(6, False, [ref('mod_111_02'), ref('mod_111_03')])]"/>
@@ -1216,10 +1216,10 @@
         <field name="description">P_IRPFT</field>
         <field name="type_tax_use">purchase</field>
         <field name="account_id" ref="l10n_es.account_common_4751"/>
-        <field name="name">Retenciones IRPF 21% (Trabajadores)</field>
+        <field name="name">Retenciones IRPF 15% (Trabajadores)</field>
         <field name="refund_account_id" ref="l10n_es.account_common_4751"/>
         <field name="chart_template_id" ref="l10n_es.account_chart_template_common"/>
-        <field name="amount" eval="-21"/>
+        <field name="amount" eval="-15"/>
         <field name="amount_type">percent</field>
         <field name="tax_group_id" ref="tax_group_retenciones_21"/>
         <field name="tag_ids" eval="[(6, False, [ref('mod_111_02'), ref('mod_111_03')])]"/>
@@ -1305,7 +1305,7 @@
         <field name="name">Retenciones IRPF (Trabajadores) en especie</field>
         <field name="refund_account_id" ref="l10n_es.account_common_4751"/>
         <field name="chart_template_id" ref="l10n_es.account_chart_template_common"/>
-        <field name="amount" eval="-21"/>
+        <field name="amount" eval="-15"/>
         <field name="amount_type">percent</field>
         <field name="tax_group_id" ref="tax_group_retenciones_21"/>
         <field name="tag_ids" eval="[(6, False, [ref('mod_111_05'), ref('mod_111_06')])]"/>
