@@ -670,19 +670,23 @@ var RTEWidget = Widget.extend({
                 $(document).off('mousedown.reactivate_contenteditable');
             });
         }
-
+        var lastTimerId = null;
         if (this && this.$last && (!$editable.length || this.$last[0] !== $editable[0])) {
             var $destroy = this.$last;
             history.splitNext();
 
-            _.delay(function () {
+            lastTimerId = _.delay(function () {
                 var id = $destroy.data('note-id');
                 $destroy.destroy().removeData('note-id').removeAttr('data-note-id');
                 $('#note-popover-'+id+', #note-handle-'+id+', #note-dialog-'+id+'').remove();
             }, 150); // setTimeout to remove flickering when change to editable zone (re-create an editor)
             this.$last = null;
+            // for special case when we open a dialog(BS modal) as the whole editor popup
+            // we need to clearTimeout for destroy the dialog(BS modal)
+            lastTimerId = $destroy.hasClass('modal-body') ? lastTimerId : null;
         }
         if ($editable.length && (!this.$last || this.$last[0] !== $editable[0])) {
+            lastTimerId ? clearTimeout(lastTimerId) : null;
             $editable.summernote(this._getConfig($editable));
 
             $editable.data('NoteHistory', history);
