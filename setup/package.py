@@ -458,7 +458,7 @@ class KVMWinTestExe(KVM):
         setupfile = setup_path.split('/')[-1]
         setupversion = setupfile.split('openerp-server-setup-')[1].split('.exe')[0]
 
-        self.rsync(['"%s"' % setup_path, '%s@127.0.0.1:' % self.login])
+        self.rsync(['%s' % setup_path, '%s@127.0.0.1:' % self.login])
         self.ssh("TEMP=/tmp ./%s /S" % setupfile)
         self.ssh('PGPASSWORD=openpgpwd /cygdrive/c/"Program Files"/"Odoo %s"/PostgreSQL/bin/createdb.exe -e -U openpg mycompany' % setupversion)
         self.ssh('netsh advfirewall set publicprofile state off')
