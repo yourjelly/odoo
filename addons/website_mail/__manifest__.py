@@ -14,6 +14,7 @@ It is responsible of comments moderation for published documents (forum, slides,
     'data': [
         'views/assets.xml',
         'views/website_mail_templates.xml',
+        'views/notify_user.xml',
         'security/website_mail_security.xml',
     ],
     'installable': True,

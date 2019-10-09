@@ -3,3 +3,4 @@
 
 from . import mail_message
 from . import update
+from . import notify_user

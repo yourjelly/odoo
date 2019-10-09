@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="notify_user_form" model="ir.ui.view">
+        <field name="name">notify.user.form</field>
+        <field name="model">notify.user</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="name"/>
+            </form>
+        </field>
+    </record>
+
+    <!-- action -->
+    <record id="notify_user_action_view" model="ir.actions.act_window">
+        <field name="name">Get User</field>
+        <field name="res_model">notify.user</field>
+        <field name="view_mode">form</field>
+    </record>
+
+    <!-- menuitem -->
+    <menuitem id="menu_website_mail"  name="Get User" parent="website.menu_website_configuration" action="notify_user_action_view"/>
+
+</odoo>
