@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="l10n_se_report_invoice_document_inherit" inherit_id="account.report_invoice_document">
+        <div t-if="o.partner_id.vat" position="after">
+            <t t-if="o.company_id.country_id.code == 'SE' and o.partner_id.l10n_se_corporate_identification" class="mt16">
+                <div>Corporate ID: <t t-esc="o.partner_id.l10n_se_corporate_identification"/></div>
+            </t>
+        </div>
+        <xpath expr="//tbody/t" position="before">
+            <tr t-if="o.fiscal_position_id and o.fiscal_position_id.country_group_id and o.fiscal_position_id.country_group_id.id == o.env.ref('base.europe').id">
+                <td colspan="99">REVERSE CHARGE, INTRA-COMMUNITY SUPPLY OF GOODS.</td>
+            </tr>
+        </xpath>
+    </template>
+</odoo>
