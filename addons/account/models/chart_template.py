@@ -182,8 +182,8 @@ class AccountChartTemplate(models.Model):
 
         existing_accounts = self.env['account.account'].search([('company_id', '=', company.id)])
         if existing_accounts:
-            # we tolerate switching from accounting package (localization module) as long as there isn't yet any accounting
-            # entries created for the company.
+            # we tolerate switching from accounting package (localization module) as long as there isn't yet any posted
+            # accounting entries, payments or bank statements created for the company.
             if self.existing_accounting(company):
                 raise UserError(_('Could not install new chart of account as there are already accounting entries existing.'))
 
@@ -196,8 +196,9 @@ class AccountChartTemplate(models.Model):
             if accounting_props:
                 accounting_props.sudo().unlink()
 
-            # delete account, journal, tax, fiscal position and reconciliation model
-            models_to_delete = ['account.reconcile.model', 'account.fiscal.position', 'account.tax', 'account.move', 'account.journal']
+            # delete account, journal, tax, fiscal position and reconciliation model, moves, payments and bank statements
+            models_to_delete = ['account.reconcile.model', 'account.fiscal.position', 'account.tax', 'account.move',
+                                'account.journal', 'account.payment', 'account.bank.statement']
             for model in models_to_delete:
                 res = self.env[model].search([('company_id', '=', company.id)])
                 if len(res):
@@ -244,14 +245,17 @@ class AccountChartTemplate(models.Model):
         return {}
 
     @api.model
-    def existing_accounting(self, company_id):
+    def existing_accounting(self, company_id, add_draft):
         """ Returns True iff some accounting entries have already been made for
         the provided company (meaning hence that its chart of accounts cannot
         be changed anymore).
         """
         model_to_check = ['account.move.line', 'account.invoice', 'account.payment', 'account.bank.statement']
         for model in model_to_check:
-            if self.env[model].sudo().search([('company_id', '=', company_id.id)], limit=1):
+            # TODO: not sure if it will not give a not in selection error as open only exists for bank statements
+            # TODO: existing moves/payments/... will be deleted on installation of the new CoA, need to check this too
+            if self.env[model].sudo().search([('company_id', '=', company_id.id),
+                                              ('state', 'not in', ['draft', 'open', 'cancelled'])], limit=1):
                 return True
         return False
 
