@@ -167,7 +167,15 @@ class ThreadedWSGIServerReloadable(LoggingBaseWSGIServerMixIn, werkzeug.serving.
         t.daemon = self.daemon_threads
         t.type = 'http'
         t.start_time = time.time()
-        t.start()
+        _logger.info('Number of threads before: %s', threading.active_count())
+        _logger.info('Percent CPU before: %s', psutil.cpu_percent(interval=None))
+        _logger.info('Memory before: %s', psutil.virtual_memory())
+        try:
+            t.start()
+        except:
+            _logger.error('Number of threads after crash: %s', threading.active_count())
+            _logger.error('Percent CPU after crash: %s', psutil.cpu_percent(interval=None))
+            _logger.error('Memory after crash: %s', psutil.virtual_memory())
 
     # TODO: Remove this method as soon as either of the revision
     # - python/cpython@8b1f52b5a93403acd7d112cd1c1bc716b31a418a for Python 3.6,
