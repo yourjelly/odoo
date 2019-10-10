@@ -172,15 +172,12 @@ class AccountInvoice(models.Model):
                             self.move_id.date or fields.Date.today()
                         )
                     elif self.currency_id != self.company_id.currency_id:
-                        # if a potential payment is not in a foreign currency, but the invoice is
-                        # then we must compute the amount in foreign currency of that payment
-                        # at the date of the payment !
                         currency = line.company_id.currency_id
                         amount_to_show = currency._convert(
                             abs(line.amount_residual),
                             self.currency_id,
                             self.company_id,
-                            line.date or fields.Date.today()
+                            self.move_id.date or fields.Date.today()
                         )
                     else:
                         amount_to_show = abs(line.amount_residual)
@@ -247,7 +244,7 @@ class AccountInvoice(models.Model):
                             partial_rec.amount,
                             self.currency_id,
                             payment.company_id,
-                            opposite_line.date or fields.Date.today()
+                            self.move_id.date or fields.Date.today()
                         )
                     else:
                         amount_to_show += partial_rec.amount
@@ -257,7 +254,7 @@ class AccountInvoice(models.Model):
                 elif only_one_foreign_currency and partial_rec.currency_id and partial_rec.currency_id != only_one_foreign_currency:
                     only_one_foreign_currency = False
 
-            if not only_one_foreign_currency:
+            if only_one_foreign_currency is False:
                 amount_to_show = amount
 
             if float_is_zero(amount_to_show, precision_rounding=self.currency_id.rounding):
@@ -1132,11 +1129,6 @@ class AccountInvoice(models.Model):
     def assign_outstanding_credit(self, credit_aml_id):
         self.ensure_one()
         credit_aml = self.env['account.move.line'].browse(credit_aml_id)
-        if not credit_aml.currency_id and self.currency_id != self.company_id.currency_id:
-            amount_currency = self.company_id.currency_id._convert(credit_aml.balance, self.currency_id, self.company_id, credit_aml.date or fields.Date.today())
-            credit_aml.with_context(allow_amount_currency=True, check_move_validity=False).write({
-                'amount_currency': amount_currency,
-                'currency_id': self.currency_id.id})
         if credit_aml.payment_id:
             credit_aml.payment_id.write({'invoice_ids': [(4, self.id, None)]})
         return self.register_payment(credit_aml)

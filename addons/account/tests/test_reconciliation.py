@@ -2233,12 +2233,16 @@ class TestReconciliationInvoiceWidgets(TestReconciliation):
         inv2_rec = self._get_receivable(self.inv2.move_id)
         refund1_rec = self._get_receivable(self.refund1.move_id)
         pay1_rec = self._get_receivable(self.payment1.move_line_ids)
-        pay2_rec = self._get_receivable(self.payment2.move_line_ids)
 
-        # Reconcile From F002 document F001
+        #########################################
+        # Reconcile Refund1 and Inv1            #
+        # Same Currency, no problem             #
+        #########################################
         refund1_outstanding = self._get_outstanding_or_assigned_amount(self.refund1, inv1_rec)
 
         self.refund1.assign_outstanding_credit(inv1_rec.id)
+        self.assertEqual(self.refund1.residual, 546.52)
+
         self.assertEqual(self.inv1.state, 'paid')
         self.assertEqual(inv1_rec.amount_residual, 0.00)
         self.assertEqual(inv1_rec.amount_residual_currency, 0.00)
@@ -2251,18 +2255,21 @@ class TestReconciliationInvoiceWidgets(TestReconciliation):
             refund1_outstanding, refund1_payment,
             'Amount in Outstanding Widget shall be equal to amount in Payment Widget')
 
-        # Reconcile From F003 document F002
+        #########################################
+        # Reconcile Inv2 and Refund1            #
+        # Currency is problematic               #
+        #########################################
         inv2_outstanding = self._get_outstanding_or_assigned_amount(self.inv2, refund1_rec)
 
         self.inv2.assign_outstanding_credit(refund1_rec.id)
-
-        self.assertEqual(inv1_rec.amount_residual, 0.00)
-        self.assertEqual(inv1_rec.amount_residual_currency, 0.00)
-
-        self.assertEqual(self.inv2.state, 'open')
-        self.assertEqual(self.inv2.residual, 1907.26)
+        # refund is in company currency, but invoice 2 is not
+        # So, the reconciliation will happen in company currency
+        # inv2: 1935.72 / 0.052686 = 36740.69
+        # reconciliation: 36740.69 - 546.52 = 36194.17
+        # Back in inv2's currency: 36194.17 * 0.052686 = 1906.93
+        self.assertEqual(self.inv2.residual, 1906.93)
         self.assertEqual(inv2_rec.amount_residual, 36194.17)
-        self.assertEqual(inv2_rec.amount_residual_currency, 1907.26)
+        self.assertEqual(inv2_rec.amount_residual_currency, 1906.93)
 
         inv2_payment = self._get_outstanding_or_assigned_amount(self.inv2, refund1_rec, False)
 
@@ -2272,36 +2279,28 @@ class TestReconciliationInvoiceWidgets(TestReconciliation):
             inv2_outstanding, inv2_payment,
             'Amount in Outstanding Widget shall be equal to amount in Payment Widget')
 
-        # /!\ NOTE: Refund has changed. The only way for this to happen is that
-        # `assign_outstanding_credit` method is used. Nor `reconcile()` neither
-        # `register_payment` produce this effect.
-        self.assertEqual(refund1_rec.amount_currency, -72.17)
-
-        # Reconcile From F003 document P001
+        #########################################
+        # Reconcile Inv2 and Payment1           #
+        # Same Foreign Currency                 #
+        #########################################
         inv2_outstanding = self._get_outstanding_or_assigned_amount(self.inv2, pay1_rec)
+        self.assertEqual(inv2_outstanding, 1907.17)
+        self.assertEqual(pay1_rec.amount_residual_currency, -inv2_outstanding)
+        self.assertEqual(pay1_rec.amount_residual, -36511.34)
+
         self.inv2.assign_outstanding_credit(pay1_rec.id)
-        self.assertEqual(self.inv2.state, 'open')
-        self.assertEqual(self.inv2.residual, 0.09)
-        self.assertEqual(inv2_rec.amount_residual, 0.00)
-        self.assertEqual(inv2_rec.amount_residual_currency, 0.09)
 
-        inv2_payment = self._get_outstanding_or_assigned_amount(self.inv2, pay1_rec, False)
-        self.assertEqual(
-            inv2_outstanding, inv2_payment,
-            'Amount in Outstanding Widget shall be equal to amount in Payment Widget')
-
-        # Reconcile From F003 document P002
-        inv2_outstanding = self._get_outstanding_or_assigned_amount(self.inv2, pay2_rec)
-        self.inv2.assign_outstanding_credit(pay2_rec.id)
-        self.assertEqual(self.inv2.state, 'paid')
+        # Inv: 1906.93  payment: 1907.17   0.24 on payment left
+        # All in the same currency
         self.assertEqual(self.inv2.residual, 0.00)
         self.assertEqual(inv2_rec.amount_residual, 0.00)
         self.assertEqual(inv2_rec.amount_residual_currency, 0.00)
 
-        inv2_payment = self._get_outstanding_or_assigned_amount(self.inv2, pay2_rec, False)
-        self.assertEqual(
-            inv2_outstanding, inv2_payment,
-            'Amount in Outstanding Widget shall be equal to amount in Payment Widget')
+        self.assertEqual(pay1_rec.amount_residual_currency, -0.24)
+        self.assertEqual(pay1_rec.amount_residual, -317.17)  # 36194.17 - (1907.17 / 0.052235)
+
+        inv2_payment = self._get_outstanding_or_assigned_amount(self.inv2, pay1_rec, False)
+        self.assertEqual(inv2_payment, 1906.93)
 
     def test_reconcile_assign_outstanding_case_02(self):
         inv1_rec = self._get_receivable(self.inv1.move_id)
@@ -2310,44 +2309,59 @@ class TestReconciliationInvoiceWidgets(TestReconciliation):
         pay1_rec = self._get_receivable(self.payment1.move_line_ids)
         pay2_rec = self._get_receivable(self.payment2.move_line_ids)
 
-        # Reconcile From F002 document F001
+        #########################################
+        # Reconcile Refund1 and Inv1            #
+        # Tested in case1 -- no problem         #
+        #########################################
         self.refund1.assign_outstanding_credit(inv1_rec.id)
-        self.assertEqual(self.inv1.state, 'paid')
-        self.assertEqual(inv1_rec.amount_residual, 0.00)
-        self.assertEqual(inv1_rec.amount_residual_currency, 0.00)
+        self.assertEqual(self.refund1.residual, 546.52)
 
-        # Reconcile From F003 document P001
+        #########################################
+        # Reconcile Inv2 and Payment1           #
+        # Same Foreign Currency                 #
+        #########################################
+
+        # Reconciled on their amount_currency:
+        # inv: 1935.72  payment: 1907.17
         self.inv2.assign_outstanding_credit(pay1_rec.id)
-        self.assertEqual(self.inv2.state, 'open')
         self.assertEqual(self.inv2.residual, 28.55)
         self.assertEqual(inv2_rec.amount_residual, 229.35)
         self.assertEqual(inv2_rec.amount_residual_currency, 28.55)
 
-        # Reconcile From F003 document F002
+        #########################################
+        # Reconcile Inv2 and Refund1            #
+        # Currency is Problematic               #
+        #########################################
         inv2_outstanding = self._get_outstanding_or_assigned_amount(self.inv2, refund1_rec)
+        # refund1 is now 546.52 in company currency
+        # which gives out 546.52 * 0.052686 = 28.79 in inv2's currency
+        self.assertEqual(inv2_outstanding, 28.45)  # or 28.45
 
+        #import pudb;pu.db
         self.inv2.assign_outstanding_credit(refund1_rec.id)
-        self.assertEqual(self.inv2.state, 'open')
+        self.assertEqual(inv2_rec.amount_residual, 0.0)
         self.assertEqual(self.inv2.residual, 0.09)
-        self.assertEqual(inv2_rec.amount_residual, 0.00)
+        self.assertEqual(inv2_rec.amount_residual, 0.0)
         self.assertEqual(inv2_rec.amount_residual_currency, 0.09)
+
+        self.assertEqual(self.refund1.residual, 317.17)
 
         inv2_payment = self._get_outstanding_or_assigned_amount(self.inv2, refund1_rec, False)
         self.assertEqual(
             inv2_outstanding, inv2_payment,
             'Amount in Outstanding Widget shall be equal to amount in Payment Widget for Invoice 2')
 
-        # /!\ NOTE: Refund has changed. The only way for this to happen is that
-        # `assign_outstanding_credit` method is used. Nor `reconcile()` neither
-        # `register_payment` produce this effect.
-        self.assertEqual(refund1_rec.amount_currency, -72.17)
-
-        # Reconcile From F003 document P002
+        #########################################
+        # Reconcile Inv2 and payment2           #
+        # Currency is Problematic               #
+        #########################################
         self.inv2.assign_outstanding_credit(pay2_rec.id)
-        self.assertEqual(self.inv2.state, 'paid')
         self.assertEqual(self.inv2.residual, 0.00)
         self.assertEqual(inv2_rec.amount_residual, 0.00)
         self.assertEqual(inv2_rec.amount_residual_currency, 0.00)
+
+        self.assertEqual(pay2_rec.amount_residual, 0.00)
+        self.assertEqual(pay2_rec.amount_residual_currency, 0.00)
 
     def test_reconcile_assign_outstanding_case_02_b(self):
         """"This test is repeated to test that the widget fails for the
@@ -2372,15 +2386,8 @@ class TestReconciliationInvoiceWidgets(TestReconciliation):
         self.assertEqual(refund1_residual, 546.52)
         self.assertEqual(refund1_outstanding, 548.28)
 
-        self.assertTrue(self.refund1.state, 'open')
-
         self.inv2.assign_outstanding_credit(refund1_rec.id)
-
         self.assertTrue(self.refund1.state, 'paid')
-        # /!\ NOTE: Refund has changed. The only way for this to happen is that
-        # `assign_outstanding_credit` method is used. Nor `reconcile()` neither
-        # `register_payment` produce this effect.
-        self.assertEqual(refund1_rec.amount_currency, -72.17)
 
         refund1_payment = self._get_outstanding_or_assigned_amount(self.refund1, inv2_rec, False)
 
@@ -2394,7 +2401,6 @@ class TestReconciliationInvoiceWidgets(TestReconciliation):
 
         # Reconcile From F003 document P002
         self.inv2.assign_outstanding_credit(pay2_rec.id)
-        self.assertEqual(self.inv2.state, 'paid')
         self.assertEqual(self.inv2.residual, 0.00)
         self.assertEqual(inv2_rec.amount_residual, 0.00)
         self.assertEqual(inv2_rec.amount_residual_currency, 0.00)
