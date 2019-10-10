@@ -34,5 +34,20 @@
                     t-att-value="cancel_return"/>
             </div>
         </template>
+        <template id="paypal_form_multiwebsite_support" inherit_id="paypal_form" active="False">
+            <data>
+                <xpath expr="//input[@t-if='paypal_return']" position="replace">
+                </xpath>
+                <xpath expr="//input[@t-if='acquirer.paypal_use_ipn']" position="replace">
+                </xpath>
+                <xpath expr="//input[@t-if='cancel_return']" position="replace">
+                    <t t-set="base_url" t-value="env['ir.config_parameter'].sudo().get_param('web.base.url')"/>
+                    <t t-set="base_url" t-value="('https://' + request.website.domain) if request.website.domain else base_url"/>
+                    <input t-if="paypal_return" type="hidden" name="return" t-att-value="base_url + '/payment/paypal/dpn/'"/>
+                    <input t-if="acquirer.paypal_use_ipn" type="hidden" name="notify_url" t-att-value="base_url + '/payment/paypal/ipn/'"/>
+                    <input t-if="cancel_return" type="hidden" name="cancel_return" t-att-value="base_url + '/payment/paypal/cancel/'"/>
+              </xpath>
+            </data>
+        </template>
     </data>
 </odoo>
