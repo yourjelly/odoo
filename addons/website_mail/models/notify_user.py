@@ -5,18 +5,16 @@ from odoo import api,fields,models
 class NotifyUser(models.Model):
 
     _name = 'notify.user'
+    _inherit = 'mail.thread'
 
-    current_user = fields.Many2one('res.users','Current User', default=lambda self: self.env.user.id)
-    name = fields.Char(string="name", default="xyz")
+    current_user = fields.Many2one('res.users',string='Current User', default=lambda self: self.env.uid)
+    name = fields.Char('name')
 
-    @api.model
-    def create(self,vals):
-        op=self._get_current_user()
+    @api.constrains('name')
+    def _check_notify(self):
+        self.env['mail.message'].create({'message_type':'notification',
+                                'subtype': self.env.ref('mail.mt_comment').id,
+                                'body':'Demo message','subject':'Message subject',
+                                'needaction_partner_ids':[(2)],})
 
-    @api.model
-    def get_current_user(self):
-        users = self.env['res.users'].search([])
-        for current_user in users:
-            get_current_login = self.env.user
-            if current_user == get_current_login:
-                self.processing_staff = current_login
+        self.message_post(subject = 'demo message',body = 'Demo message', partner_ids = [(2)])
