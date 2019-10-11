@@ -605,14 +605,7 @@
         <script type="text/javascript" src="/web/static/lib/ace/mode-xml.js"></script>
         <script type="text/javascript" src="/web/static/lib/ace/mode-js.js"></script>
 
-        <script type="text/javascript">
-            // define the 'web.web_client' module because some other modules require it
-            odoo.define('web.web_client', function (require) {
-                var WebClient = require('web.WebClient');
-                var web_client = new WebClient();
-                return web_client;
-            });
-        </script>
+        <script type="text/javascript" src="/web/static/tests/main_tests.js"></script>
 
         <style>
             body {
@@ -643,6 +636,7 @@
         <script type="text/javascript" src="/web/static/tests/helpers/test_utils_pivot.js"></script>
         <script type="text/javascript" src="/web/static/tests/helpers/test_utils.js"></script>
         <script type="text/javascript" src="/web/static/tests/helpers/mock_server.js"></script>
+        <script type="text/javascript" src="/web/static/tests/helpers/test_env.js"></script>
 
         <script type="text/javascript" src="/web/static/tests/component_extension_tests.js"></script>
         <script type="text/javascript" src="/web/static/tests/boot_tests.js"></script>
