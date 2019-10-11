@@ -303,8 +303,9 @@ class Repair(models.Model):
             currency = repair.pricelist_id.currency_id
             # Fallback on the user company as the 'company_id' is not required.
             company = repair.company_id or self.env.user.company_id
+            # VFE FIXME why user company and not environment company as fallback ?
 
-            journal = self.env['account.move'].with_context(default_company_id=company.id, type='out_invoice')._get_default_journal()
+            journal = self.env['account.move'].with_company(company).with_context(type='out_invoice')._get_default_journal()
             if not journal:
                 raise UserError(_('Please define an accounting sales journal for the company %s (%s).') % (self.company_id.name, self.company_id.id))
 
@@ -341,7 +342,7 @@ class Repair(models.Model):
                 else:
                     name = operation.name
 
-                account = operation.product_id.with_context(force_company=company.id).product_tmpl_id._get_product_accounts()['income']
+                account = operation.product_id.with_company(company).product_tmpl_id._get_product_accounts()['income']
                 if not account:
                     raise UserError(_('No account defined for product "%s".') % operation.product_id.name)
 
@@ -383,7 +384,7 @@ class Repair(models.Model):
                 if not fee.product_id:
                     raise UserError(_('No product defined on fees.'))
 
-                account = fee.product_id.product_tmpl_id.with_context(force_company=company.id)._get_product_accounts()['income']
+                account = fee.product_id.product_tmpl_id.with_company(company)._get_product_accounts()['income']
                 if not account:
                     raise UserError(_('No account defined for product "%s".') % fee.product_id.name)
 
@@ -423,7 +424,7 @@ class Repair(models.Model):
                 invoices_vals_list_per_company[company_id].append(invoice)
 
         for company_id, invoices_vals_list in invoices_vals_list_per_company.items():
-            self.env['account.move'].with_context(force_company=company_id, default_company_id=company_id, default_type='out_invoice').create(invoices_vals_list)
+            self.env['account.move'].with_company(company_id).with_context(default_company_id=company_id, default_type='out_invoice').create(invoices_vals_list)
 
         repairs.write({'invoiced': True})
         repairs.mapped('operations').filtered(lambda op: op.type == 'add').write({'invoiced': True})
@@ -503,7 +504,7 @@ class Repair(models.Model):
                     'location_id': operation.location_id.id,
                     'location_dest_id': operation.location_dest_id.id,
                     'move_line_ids': [(0, 0, {'product_id': operation.product_id.id,
-                                           'lot_id': operation.lot_id.id, 
+                                           'lot_id': operation.lot_id.id,
                                            'product_uom_qty': 0,  # bypass reservation here
                                            'product_uom_id': operation.product_uom.id,
                                            'qty_done': operation.product_uom_qty,
@@ -528,7 +529,7 @@ class Repair(models.Model):
                 'location_id': repair.location_id.id,
                 'location_dest_id': repair.location_id.id,
                 'move_line_ids': [(0, 0, {'product_id': repair.product_id.id,
-                                           'lot_id': repair.lot_id.id, 
+                                           'lot_id': repair.lot_id.id,
                                            'product_uom_qty': 0,  # bypass reservation here
                                            'product_uom_id': repair.product_uom.id or repair.product_id.uom_id.id,
                                            'qty_done': repair.product_qty,
