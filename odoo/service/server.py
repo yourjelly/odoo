@@ -167,7 +167,19 @@ class ThreadedWSGIServerReloadable(LoggingBaseWSGIServerMixIn, werkzeug.serving.
         t.daemon = self.daemon_threads
         t.type = 'http'
         t.start_time = time.time()
-        t.start()
+        _logger.info('Number of threads before: %s', threading.active_count())
+        _logger.info('Percent CPU before: %s', psutil.cpu_percent(interval=None))
+        _logger.info('Memory before: %s', psutil.virtual_memory())
+        _logger.info('Memory info before: %s', memory_info(psutil.Process(os.getpid())))
+        try:
+            t.start()
+        except:
+            _logger.error('Number of threads after crash: %s', threading.active_count())
+            _logger.error('Percent CPU after crash: %s', psutil.cpu_percent(interval=None))
+            _logger.error('Memory after crash: %s', psutil.virtual_memory())
+            _logger.info('Memory info after crash: %s', memory_info(psutil.Process(os.getpid())))
+            dumpstacks()
+            raise
 
     def _handle_request_noblock(self):
         """
