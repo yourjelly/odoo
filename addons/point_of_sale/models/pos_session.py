@@ -184,9 +184,9 @@ class PosSession(models.Model):
         # installation we do the minimal configuration. Impossible to do in
         # the .xml files as the CoA is not yet installed.
         pos_config = self.env['pos.config'].browse(config_id)
-        ctx = dict(self.env.context, company_id=pos_config.company_id.id)
 
-        pos_name = self.env['ir.sequence'].with_context(ctx).next_by_code('pos.session')
+        self = self.with_company(pos_config.company_id)
+        pos_name = self.env['ir.sequence'].next_by_code('pos.session')
         if values.get('name'):
             pos_name += ' ' + values['name']
 
@@ -195,14 +195,13 @@ class PosSession(models.Model):
         if self.user_has_groups('point_of_sale.group_pos_user'):
             statement_ids = statement_ids.sudo()
         for cash_journal in cash_payment_methods.mapped('cash_journal_id'):
-            ctx['journal_id'] = cash_journal.id if pos_config.cash_control and cash_journal.type == 'cash' else False
             st_values = {
                 'journal_id': cash_journal.id,
                 'user_id': self.env.user.id,
                 'name': pos_name,
                 'balance_start': self.env["account.bank.statement"]._get_opening_balance(cash_journal.id) if cash_journal.type == 'cash' else 0
             }
-            statement_ids |= statement_ids.with_context(ctx).create(st_values)
+            statement_ids |= statement_ids.create(st_values)
 
         values.update({
             'name': pos_name,
@@ -211,9 +210,9 @@ class PosSession(models.Model):
         })
 
         if self.user_has_groups('point_of_sale.group_pos_user'):
-            res = super(PosSession, self.with_context(ctx).sudo()).create(values)
+            res = super(PosSession, self.sudo()).create(values)
         else:
-            res = super(PosSession, self.with_context(ctx)).create(values)
+            res = super(PosSession, self).create(values)
         if not pos_config.cash_control:
             res.action_pos_session_open()
 

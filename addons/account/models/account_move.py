@@ -3795,9 +3795,7 @@ class AccountMoveLine(models.Model):
         if state and state.lower() != 'all':
             domain += [('move_id.state', '=', state)]
 
-        if context.get('company_id'):
-            domain += [('company_id', '=', context['company_id'])]
-        elif context.get('allowed_company_ids'):
+        if context.get('allowed_company_ids'):
             domain += [('company_id', 'in', self.env.companies.ids)]
         else:
             domain += [('company_id', '=', self.env.company.id)]

@@ -638,8 +638,7 @@ class PurchaseOrderLine(models.Model):
         product_lang = self.product_id.with_context(
             lang=self.partner_id.lang,
             partner_id=self.partner_id.id,
-            company_id=self.company_id.id,
-        )
+        ).with_company(self.company_id)
         self.name = self._get_product_purchase_description(product_lang)
 
         self._compute_tax_id()

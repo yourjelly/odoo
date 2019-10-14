@@ -142,8 +142,8 @@ class MrpBom(models.Model):
             raise UserError(_('You should provide either a product or a product template to search a BoM'))
         if picking_type:
             domain += ['|', ('picking_type_id', '=', picking_type.id), ('picking_type_id', '=', False)]
-        if company_id or self.env.context.get('company_id'):
-            domain = domain + ['|', ('company_id', '=', False), ('company_id', '=', company_id or self.env.context.get('company_id'))]
+        if company_id:
+            domain = domain + ['|', ('company_id', '=', False), ('company_id', '=', company_id)]
         if bom_type:
             domain += [('type', '=', bom_type)]
         # order to prioritize bom with product_id over the one without
