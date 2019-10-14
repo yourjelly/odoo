@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="account_ai_wizard_form_view" model="ir.ui.view">
+            <field name="name">account.ai.wizard.form</field>
+            <field name="model">account.ai.wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <button string="Raise Things" name="raisethings" type="object" class="oe_highlight"/>
+                </form>
+            </field>
+        </record>
+
+        <record id="account_ai_wizard_action" model="ir.actions.act_window">
+            <field name="name">Do AI things</field>
+            <field name="res_model">account.ai.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <menuitem id="menu_action_ai_things" parent="account.menu_finance_entries_actions" action="account_ai_wizard_action" sequence="25"/>
+    </data>
+</odoo>

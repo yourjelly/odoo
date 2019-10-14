@@ -3,6 +3,7 @@
 
 
 from . import account_accrual_accounting
+from . import account_ai
 from . import account_unreconcile
 from . import account_validate_account_move
 from . import pos_box
