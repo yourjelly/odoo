@@ -541,14 +541,17 @@ class AccountMoveLine(models.Model):
 
                 amount += sign_partial_line * partial_line.amount
                 #getting the date of the matched item to compute the amount_residual in currency
-                if line.currency_id and line.amount_currency:
+                opposite_line = partial_line.credit_move_id if line == partial_line.debit_move_id else partial_line.debit_move_id
+                if (line.currency_id and line.amount_currency) or (opposite_line.currency_id and opposite_line.amount_currency):
                     if partial_line.currency_id and partial_line.currency_id == line.currency_id:
                         amount_residual_currency += sign_partial_line * partial_line.amount_currency
                     else:
-                        if line.balance and line.amount_currency:
+                        if opposite_line.balance and opposite_line.amount_currency:
+                            rate = opposite_line.amount_currency / opposite_line.balance
+                        elif line.balance and line.amount_currency:
                             rate = line.amount_currency / line.balance
                         else:
-                            date = partial_line.credit_move_id.date if partial_line.debit_move_id == line else partial_line.debit_move_id.date
+                            date = opposite_line.date
                             rate = line.currency_id.with_context(date=date).rate
                         amount_residual_currency += sign_partial_line * line.currency_id.round(partial_line.amount * rate)
 
@@ -875,7 +878,9 @@ class AccountMoveLine(models.Model):
             temp_amount_residual_currency = 0
 
             partial_rec_currency = self.env['res.currency']
+            both_fields = False
             if debit_move.currency_id or credit_move.currency_id and not (debit_move.currency_id and credit_move.currency_id):
+                both_fields = True
                 partial_rec_currency = debit_move.currency_id or credit_move.currency_id
                 if debit_move.currency_id:
                     debit_amount_residual_currency = debit_move.amount_residual_currency
@@ -883,14 +888,14 @@ class AccountMoveLine(models.Model):
                         credit_move.amount_residual,
                         partial_rec_currency,
                         credit_move.company_id,
-                        credit_move.date,
+                        debit_move.date,
                     )
                 else:
                     debit_amount_residual_currency = company_currency._convert(
                         debit_move.amount_residual,
                         partial_rec_currency,
                         debit_move.company_id,
-                        debit_move.date,
+                        credit_move.date,
                     )
                     credit_amount_residual_currency = credit_move.amount_residual_currency
                 temp_amount_residual_currency = min(debit_amount_residual_currency, -credit_amount_residual_currency)
@@ -904,20 +909,20 @@ class AccountMoveLine(models.Model):
             # For optimization purpose, the creation of the partial_reconcile are done at the end,
             # therefore during the process of reconciling several move lines, there are actually no recompute performed by the orm
             # and thus the amount_residual are not recomputed, hence we have to do it manually.
-            if amount_reconcile == debit_move[field]:
+            if amount_reconcile == debit_move[field] or (both_fields and debit_move.currency_id and temp_amount_residual_currency == debit_move.amount_residual_currency):
                 debit_moves -= debit_move
             else:
                 debit_moves[0].amount_residual -= temp_amount_residual
                 debit_moves[0].amount_residual_currency -= temp_amount_residual_currency
 
-            if amount_reconcile == -credit_move[field]:
+            if amount_reconcile == -credit_move[field] or (both_fields and credit_move.currency_id and temp_amount_residual_currency == credit_move.amount_residual_currency):
                 credit_moves -= credit_move
             else:
                 credit_moves[0].amount_residual += temp_amount_residual
                 credit_moves[0].amount_residual_currency += temp_amount_residual_currency
 
             #Check for the currency and amount_currency we can set
-            amount_reconcile_currency = temp_amount_residual_currency if debit_move.currency_id or credit_move.currency_id and not (debit_move.currency_id and credit_move.currency_id) else 0
+            amount_reconcile_currency = temp_amount_residual_currency if both_fields else 0
             if field == 'amount_residual_currency':
                 partial_rec_currency = credit_move.currency_id
                 amount_reconcile = temp_amount_residual
