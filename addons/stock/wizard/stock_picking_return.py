@@ -3,7 +3,7 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.tools.float_utils import float_round
+from odoo.tools.float_utils import float_round, float_compare
 
 
 class ReturnPickingLine(models.TransientModel):
@@ -13,10 +13,18 @@ class ReturnPickingLine(models.TransientModel):
 
     product_id = fields.Many2one('product.product', string="Product", required=True, domain="[('id', '=', product_id)]")
     quantity = fields.Float("Quantity", digits='Product Unit of Measure', required=True)
+    returnable_qty = fields.Float("Quantity previously returned", digits='Product Unit of Measure')
     uom_id = fields.Many2one('uom.uom', string='Unit of Measure', related='move_id.product_uom', readonly=False)
     wizard_id = fields.Many2one('stock.return.picking', string="Wizard")
     move_id = fields.Many2one('stock.move', "Move")
 
+    @api.onchange('quantity')
+    def _onchange_quantity(self):
+
+        if float_compare(self.quantity, self.returnable_qty, precision_rounding=self.uom_id.rounding) == 1:
+            return {'warning': {
+                'message': _('The quantity you entered  for the product %(product)s is greater than the quantity still available for return') % {'product': self.product_id.name}
+            }}
 
 class ReturnPicking(models.TransientModel):
     _name = 'stock.return.picking'
@@ -78,6 +86,7 @@ class ReturnPicking(models.TransientModel):
         return {
             'product_id': stock_move.product_id.id,
             'quantity': quantity,
+            'returnable_qty': quantity,
             'move_id': stock_move.id,
             'uom_id': stock_move.product_id.uom_id.id,
         }
