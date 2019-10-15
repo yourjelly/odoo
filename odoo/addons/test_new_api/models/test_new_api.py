@@ -764,3 +764,10 @@ class InverseM2oRef(models.Model):
     def _compute_model_ids_count(self):
         for rec in self:
             rec.model_ids_count = len(rec.model_ids)
+
+
+class ModelUUIDField(models.Model):
+    _name = 'test_new_api.uuid_field'
+    _description = 'A model with an UUID field'
+
+    my_uuid = fields.UUID('my uuid field')

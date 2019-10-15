@@ -10,6 +10,7 @@ from datetime import date, datetime, time
 import io
 from PIL import Image
 import psycopg2
+import uuid
 
 from odoo import fields
 from odoo.addons.base.tests.common import TransactionCaseWithUserDemo
@@ -2211,3 +2212,41 @@ class TestMany2oneReference(common.TransactionCase):
         # fake record to emulate the unlink of a non-existant record
         foo = m.browse(1 if not ids[0] else (ids[0] + 1))
         self.assertTrue(foo.unlink())
+
+
+@common.tagged('uuid_field')
+class TestModelUUID(common.TransactionCase):
+
+    def test_create_record_default_uuid(self):
+        r = self.env['test_new_api.uuid_field'].create({})
+        self.assertTrue(r.my_uuid)
+
+    def test_create_record_explicit_uuid_obj(self):
+        r = self.env['test_new_api.uuid_field'].create({'my_uuid': uuid.uuid4()})
+        self.assertTrue(r.my_uuid)
+        self.assertIsInstance(r.my_uuid, str)
+
+    def test_create_record_explicit_uuid_str(self):
+        r = self.env['test_new_api.uuid_field'].create({'my_uuid': uuid.uuid4().hex})
+        self.assertTrue(r.my_uuid)
+        self.assertIsInstance(r.my_uuid, str)
+
+    def test_create_record_explicit_uuid_invalid(self):
+        with self.assertRaises(ValueError):
+            r = self.env['test_new_api.uuid_field'].create({'my_uuid': '1234'})
+
+    def test_copy(self):
+        r1 = self.env['test_new_api.uuid_field'].create({})
+        r2 = r1.copy()
+        self.assertNotEqual(r1.my_uuid, r2.my_uuid)
+
+    def test_write(self):
+        r = self.env['test_new_api.uuid_field'].create({})
+        _uuid = uuid.uuid4()
+        r.write({'my_uuid': _uuid})
+        self.assertEqual(r.my_uuid, _uuid.hex)
+
+    def test_write_bad(self):
+        r = self.env['test_new_api.uuid_field'].create({})
+        with self.assertRaises(ValueError):
+            r.write({'my_uuid': 'very obviously invalid uuid'})

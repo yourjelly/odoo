@@ -10,6 +10,7 @@ import itertools
 import logging
 import base64
 import binascii
+import uuid
 import pytz
 
 try:
@@ -1522,6 +1523,46 @@ class Char(_String):
         if value is None or value is False:
             return None
         return pycompat.to_text(value)[:self.size]
+
+
+class UUID(Field):
+    type = 'uuid'
+    column_type = ('uuid', 'uuid')
+    _slots = {
+        'index': True,
+        'default': lambda recs: uuid.uuid4(),
+        'copy': False,
+        'readonly': True,
+        'unique': True,
+    }
+
+    def convert_to_column(self, value, record, values=None, validate=True):
+        if value is None or value is False:
+            return None
+        elif isinstance(value, uuid.UUID):
+            return value.hex
+        elif isinstance(value, str):
+            # seems redundant but this basically validates the hex string as RFC 4122 compliant
+            return uuid.UUID(hex=value).hex
+        else:
+            raise ValueError(_(
+                "UUID fields accept either an uuid.UUID object or an uuid.UUID-compatible "
+                "hexadecimal string"
+            ))
+
+    def convert_to_cache(self, value, record, values=None, validate=True):
+        if value is None or value is False:
+            return None
+        elif isinstance(value, uuid.UUID):
+            return value.hex
+        elif isinstance(value, str):
+            # seems redundant but this basically validates the hex string as RFC 4122 compliant
+            return uuid.UUID(hex=value).hex
+        else:
+            raise ValueError(_(
+                "UUID fields accept either an uuid.UUID object or an uuid.UUID-compatible "
+                "hexadecimal string"
+            ))
 
 
 class Text(_String):
