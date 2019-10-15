@@ -71,11 +71,9 @@ class ReturnPicking(models.TransientModel):
 
     @api.model
     def _prepare_stock_return_picking_line_vals_from_move(self, stock_move):
-        quantity = stock_move.product_qty - sum(
-            stock_move.move_dest_ids
-            .filtered(lambda m: m.state in ['partially_available', 'assigned', 'done'])
-            .mapped('move_line_ids.product_qty')
-        )
+        outgoing_qties = stock_move.move_dest_ids.filtered(lambda m: m.state in ['partially_available', 'assigned', 'done']).mapped('move_line_ids.product_qty')
+        returned_qties = stock_move.returned_move_ids.filtered(lambda m: m.state not in ['draft', 'cancel']).mapped('move_line_ids.qty_done')
+        quantity = stock_move.product_qty - sum(outgoing_qties + returned_qties)
         quantity = float_round(quantity, precision_rounding=stock_move.product_uom.rounding)
         return {
             'product_id': stock_move.product_id.id,

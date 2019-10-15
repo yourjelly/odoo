@@ -1974,6 +1974,65 @@ class TestSinglePicking(TestStockCommon):
         self.assertEqual(receipt.location_dest_id.id, stock_location.id)
         self.assertEqual(receipt.move_line_ids.location_dest_id.id, shelf_location.id)
 
+    def test_returned_quantity(self):
+        """ check that the quantity suggested when making a return
+        are taking previous return in account.
+        """
+
+        product_a = self.env['product.product'].create({'name': 'Des grosses Houppes', 'type': 'product'})
+        wh = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+
+        # Receive 200 products
+        receipt = self.env['stock.picking'].create({
+            'location_id': self.supplier_location,
+            'location_dest_id': self.stock_location,
+            'picking_type_id': self.picking_type_in,
+        })
+        move = self.MoveObj.create({
+            'name': product_a.name,
+            'product_id': product_a.id,
+            'product_uom_qty': 200,
+            'product_uom': product_a.uom_id.id,
+            'picking_id': receipt.id,
+            'location_id': self.supplier_location,
+            'location_dest_id': self.stock_location,
+        })
+
+        receipt.action_confirm()
+        receipt.action_assign()
+        move.move_line_ids.qty_done = 200
+        receipt.button_validate()
+
+        # Return 20 product_a
+        return_picking_form_1 = Form(self.env['stock.return.picking'].with_context(
+            active_ids=[receipt.id],
+            active_id=receipt.id,
+            active_model='stock.picking'
+        ))
+        return_wiz_1 = return_picking_form_1.save()
+        return_wiz_1.product_return_moves.write({
+            'quantity': 20,
+        })
+        res = return_wiz_1.create_returns()
+        return_pick = self.env['stock.picking'].browse(res['res_id'])
+
+        # Process and validate the return picking
+        wiz_act = return_pick.button_validate()
+        wiz = self.env[wiz_act['res_model']].browse(wiz_act['res_id'])
+        wiz.process()
+
+        # We make a second return on the original receipt
+        return_picking_form_2 = Form(self.env['stock.return.picking'].with_context(
+            active_ids=[receipt.id],
+            active_id=receipt.id,
+            active_model='stock.picking'
+        ))
+        return_wiz_2 = return_picking_form_2.save()
+
+        # The return should take in account the 20 product_a already returned
+        self.assertEqual(180, return_wiz_2.product_return_moves.quantity)
+
+
 class TestStockUOM(TestStockCommon):
     def setUp(self):
         super(TestStockUOM, self).setUp()
