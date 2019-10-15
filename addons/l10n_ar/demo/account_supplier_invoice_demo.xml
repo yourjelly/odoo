@@ -9,7 +9,7 @@
         <field name="fiscal_position_id" model="account.fiscal.position" eval="obj().search([('company_id', '=', obj().env.ref('l10n_ar.company_ri').id), ('name', '=', 'Compras IVA no corresponde')], limit=1).id"/>
         <field name="invoice_user_id" ref="base.user_demo"/>
         <field name="invoice_payment_term_id" ref="account.account_payment_term_end_following_month"/>
-        <field name="type">in_invoice</field>
+        <field name="move_type">in_invoice</field>
         <field name="invoice_date" eval="time.strftime('%Y-%m')+'-01'"/>
         <field name="company_id" ref="company_ri"/>
         <field name="invoice_line_ids" eval="[
@@ -27,7 +27,7 @@
         <field name="partner_id" ref="res_partner_foreign"/>
         <field name="invoice_user_id" ref="base.user_demo"/>
         <field name="invoice_payment_term_id" ref="account.account_payment_term_end_following_month"/>
-        <field name="type">in_invoice</field>
+        <field name="move_type">in_invoice</field>
         <field name="invoice_date" eval="time.strftime('%Y-%m')+'-01'"/>
         <field name="company_id" ref="company_ri"/>
         <field name="invoice_line_ids" eval="[
@@ -42,7 +42,7 @@
         <field name="partner_id" ref="res_partner_foreign"/>
         <field name="invoice_user_id" ref="base.user_demo"/>
         <field name="invoice_payment_term_id" ref="account.account_payment_term_end_following_month"/>
-        <field name="type">in_invoice</field>
+        <field name="move_type">in_invoice</field>
         <field name="invoice_date" eval="time.strftime('%Y-%m')+'-11'"/>
         <field name="company_id" ref="company_ri"/>
         <field name="invoice_line_ids" eval="[
@@ -56,7 +56,7 @@
         <field name="partner_id" ref="res_partner_foreign"/>
         <field name="invoice_user_id" ref="base.user_demo"/>
         <field name="invoice_payment_term_id" ref="account.account_payment_term_end_following_month"/>
-        <field name="type">in_invoice</field>
+        <field name="move_type">in_invoice</field>
         <field name="invoice_date" eval="time.strftime('%Y-%m')+'-15'"/>
         <field name="company_id" ref="company_ri"/>
         <field name="invoice_line_ids" eval="[
@@ -70,7 +70,7 @@
         <field name="partner_id" ref="res_partner_foreign"/>
         <field name="invoice_user_id" ref="base.user_demo"/>
         <field name="invoice_payment_term_id" ref="account.account_payment_term_end_following_month"/>
-        <field name="type">in_invoice</field>
+        <field name="move_type">in_invoice</field>
         <field name="invoice_date" eval="time.strftime('%Y-%m')+'-18'"/>
         <field name="company_id" ref="company_ri"/>
         <field name="invoice_line_ids" eval="[
@@ -89,7 +89,7 @@
         <field name="invoice_user_id" ref="base.user_demo"/>
         <field name="fiscal_position_id" model="account.fiscal.position" eval="obj().search([('company_id', '=', obj().env.ref('l10n_ar.company_ri').id), ('name', '=', 'Compras / Ventas al exterior')], limit=1).id"/>
         <field name="invoice_payment_term_id" ref="account.account_payment_term_end_following_month"/>
-        <field name="type">in_invoice</field>
+        <field name="move_type">in_invoice</field>
         <field name="invoice_date" eval="time.strftime('%Y-%m')+'-26'"/>
         <field name="company_id" ref="company_ri"/>
         <field name="invoice_line_ids" eval="[
@@ -103,7 +103,7 @@
         <field name="invoice_user_id" ref="base.user_demo"/>
         <field name="fiscal_position_id" model="account.fiscal.position" eval="obj().search([('company_id', '=', obj().env.ref('l10n_ar.company_ri').id), ('name', '=', 'Compras / Ventas al exterior')], limit=1).id"/>
         <field name="invoice_payment_term_id" ref="account.account_payment_term_end_following_month"/>
-        <field name="type">in_invoice</field>
+        <field name="move_type">in_invoice</field>
         <field name="invoice_date" eval="time.strftime('%Y-%m')+'-27'"/>
         <field name="company_id" ref="company_ri"/>
         <field name="invoice_line_ids" eval="[
@@ -117,7 +117,7 @@
         <field name="partner_id" ref="l10n_ar.partner_afip"/>
         <field name="invoice_user_id" ref="base.user_demo"/>
         <field name="invoice_payment_term_id" ref="account.account_payment_term_end_following_month"/>
-        <field name="type">in_invoice</field>
+        <field name="move_type">in_invoice</field>
         <!-- as we create lines separatelly we need to set journal, if not, misc journal is selected -->
         <field name="journal_id" model="account.journal" search="[('type', '=', 'purchase'), ('company_id', '=', obj().env.company.id)]"/>
         <field name="invoice_date" eval="time.strftime('%Y-%m')+'-13'"/>

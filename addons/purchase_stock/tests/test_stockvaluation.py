@@ -569,7 +569,7 @@ class TestStockValuationWithCOA(AccountingTestCase):
         po.button_confirm()
 
         inv = self.env['account.move'].with_context(default_type='in_invoice').create({
-            'type': 'in_invoice',
+            'move_type': 'in_invoice',
             'invoice_date': date_po,
             'date': date_po,
             'currency_id': self.eur_currency.id,
@@ -700,7 +700,7 @@ class TestStockValuationWithCOA(AccountingTestCase):
         line_product_standard = po.order_line.filtered(lambda l: l.product_id == product_standard)
 
         inv = self.env['account.move'].with_context(default_type='in_invoice').create({
-            'type': 'in_invoice',
+            'move_type': 'in_invoice',
             'invoice_date': date_invoice,
             'date': date_invoice,
             'currency_id': self.eur_currency.id,
@@ -874,7 +874,7 @@ class TestStockValuationWithCOA(AccountingTestCase):
 
         today = date_invoice
         inv = self.env['account.move'].with_context(default_type='in_invoice').create({
-            'type': 'in_invoice',
+            'move_type': 'in_invoice',
             'invoice_date': date_invoice,
             'date': date_invoice,
             'currency_id': self.eur_currency.id,
@@ -1050,7 +1050,7 @@ class TestStockValuationWithCOA(AccountingTestCase):
 
         today = date_invoice
         inv = self.env['account.move'].with_context(default_type='in_invoice').create({
-            'type': 'in_invoice',
+            'move_type': 'in_invoice',
             'invoice_date': date_invoice,
             'date': date_invoice,
             'currency_id': self.eur_currency.id,
@@ -1080,7 +1080,7 @@ class TestStockValuationWithCOA(AccountingTestCase):
 
         today = date_invoice1
         inv1 = self.env['account.move'].with_context(default_type='in_invoice').create({
-            'type': 'in_invoice',
+            'move_type': 'in_invoice',
             'invoice_date': date_invoice1,
             'date': date_invoice1,
             'currency_id': self.eur_currency.id,

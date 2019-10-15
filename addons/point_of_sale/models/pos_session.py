@@ -583,7 +583,7 @@ class PosSession(models.Model):
             'account_id': account_id,
             'move_id': self.move_id.id,
             'tax_ids': [(6, 0, tax_ids)],
-            'tag_ids': [(6, 0, base_tags.ids)],
+            'tax_tag_ids': [(6, 0, base_tags.ids)],
         }
         return self._credit_amounts(partial_vals, amount, amount_converted)
 

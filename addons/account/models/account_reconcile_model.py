@@ -212,7 +212,7 @@ class AccountReconcileModel(models.Model):
                 'tax_exigible': tax_res['tax_exigibility'],
                 'tax_repartition_line_id': tax_res['tax_repartition_line_id'],
                 'tax_ids': tax_res['tax_ids'],
-                'tag_ids': tax_res['tag_ids']
+                'tax_tag_ids': tax_res['tag_ids']
             })
 
             # Handle price included taxes.

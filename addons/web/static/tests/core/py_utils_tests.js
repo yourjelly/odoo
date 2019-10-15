@@ -881,7 +881,7 @@ QUnit.module('core', function () {
         var result = pyUtils.eval('contexts', [{
             "__ref": "compound_context",
             "__contexts": [
-                {"__ref": "context", "__debug": "{'type':parent.type}",
+                {"__ref": "context", "__debug": "{'move_type':parent.move_type}",
                     "__id": "462b9dbed42f"}
             ],
             "__eval_context": {
@@ -889,7 +889,7 @@ QUnit.module('core', function () {
                 "__contexts": [{
                         "__ref": "compound_context",
                         "__contexts": [
-                            {"__ref": "context", "__debug": "{'type': type}",
+                            {"__ref": "context", "__debug": "{'move_type': move_type}",
                                 "__id": "16a04ed5a194"}
                         ],
                         "__eval_context": {
@@ -898,9 +898,9 @@ QUnit.module('core', function () {
                                 {"lang": "en_US", "tz": false, "uid": 1,
                                     "journal_type": "sale", "section_id": false,
                                     "default_type": "out_invoice",
-                                    "type": "out_invoice", "department_id": false},
+                                    "move_type": "out_invoice", "department_id": false},
                                 {"id": false, "journal_id": 10,
-                                    "number": false, "type": "out_invoice",
+                                    "number": false, "move_type": "out_invoice",
                                     "currency_id": 1, "partner_id": 4,
                                     "fiscal_position_id": false,
                                     "invoice_date": false, "date": false,
@@ -937,7 +937,7 @@ QUnit.module('core', function () {
                     "active_model": "account.move.line",
                     "parent": {
                         "id": false, "journal_id": 10, "number": false,
-                        "type": "out_invoice", "currency_id": 1,
+                        "move_type": "out_invoice", "currency_id": 1,
                         "partner_id": 4, "fiscal_position_id": false,
                         "invoice_date": false, "date": false,
                         "payment_term_id": false,
@@ -954,7 +954,7 @@ QUnit.module('core', function () {
             }
         }]);
 
-        assert.deepEqual(result, {type: 'out_invoice'});
+        assert.deepEqual(result, {move_type: 'out_invoice'});
     });
 
     QUnit.test('return-input-value', function (assert) {

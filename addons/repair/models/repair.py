@@ -89,7 +89,7 @@ class Repair(models.Model):
     invoice_id = fields.Many2one(
         'account.move', 'Invoice',
         copy=False, readonly=True, tracking=True,
-        domain=[('type', '=', 'out_invoice')])
+        domain=[('move_type', '=', 'out_invoice')])
     move_id = fields.Many2one(
         'stock.move', 'Move',
         copy=False, readonly=True, tracking=True, check_company=True,
@@ -314,7 +314,7 @@ class Repair(models.Model):
 
             if not group or len(current_invoices_list) == 0:
                 invoice_vals = {
-                    'type': 'out_invoice',
+                    'move_type': 'out_invoice',
                     'partner_id': partner_invoice.id,
                     'currency_id': currency.id,
                     'narration': narration,

@@ -35,7 +35,7 @@ class L10nInAccountInvoiceReport(models.Model):
     shipping_bill_date = fields.Date(string="Shipping Bill Date")
     shipping_port_code_id = fields.Many2one('l10n_in.port.code', string='Shipping port code')
     ecommerce_partner_id = fields.Many2one('res.partner', string="E-commerce")
-    move_type = fields.Selection(selection=[
+    type = fields.Selection(selection=[
         ('entry', 'Journal Entry'),
         ('out_invoice', 'Customer Invoice'),
         ('out_refund', 'Customer Credit Note'),
@@ -126,7 +126,7 @@ class L10nInAccountInvoiceReport(models.Model):
                 am.amount_total AS total,
                 am.journal_id,
                 aj.company_id,
-                am.type AS move_type,
+                am.move_type AS move_type,
                 am.reversed_entry_id AS reversed_entry_id,
                 p.vat AS partner_vat,
                 CASE WHEN rp.vat IS NULL THEN '' ELSE rp.vat END AS ecommerce_vat,
@@ -140,7 +140,7 @@ class L10nInAccountInvoiceReport(models.Model):
                     THEN concat(cps.l10n_in_tin,'-',cps.name)
                     ELSE ''
                     END) AS place_of_supply,
-                (CASE WHEN am.type in ('out_refund', 'in_refund') and refund_am.date <= to_date('2017-07-01', 'YYYY-MM-DD')
+                (CASE WHEN am.move_type in ('out_refund', 'in_refund') and refund_am.date <= to_date('2017-07-01', 'YYYY-MM-DD')
                     THEN 'Y'
                     ELSE 'N'
                     END) as is_pre_gst,
@@ -187,9 +187,9 @@ class L10nInAccountInvoiceReport(models.Model):
                     WHEN am.l10n_in_export_type = 'sez_without_igst'
                     THEN 'SEZ without IGST payment'
                     END) AS b2b_type,
-                (CASE WHEN am.type = 'out_refund'
+                (CASE WHEN am.move_type = 'out_refund'
                     THEN 'C'
-                    WHEN am.type = 'in_refund'
+                    WHEN am.move_type = 'in_refund'
                     THEN 'D'
                     ELSE ''
                     END) as refund_invoice_type,
@@ -232,7 +232,7 @@ class L10nInAccountInvoiceReport(models.Model):
                     THEN NULL
                     ELSE (CASE WHEN aml.tax_base_amount <> 0 THEN aml.tax_base_amount ELSE NULL END)
                     END AS price_total,
-                (CASE WHEN aj.type = 'sale' AND (am.type IS NULL OR am.type != 'out_refund') THEN -1 ELSE 1 END) AS amount_sign,
+                (CASE WHEN aj.type = 'sale' AND (am.move_type IS NULL OR am.move_type != 'out_refund') THEN -1 ELSE 1 END) AS amount_sign,
                 (CASE WHEN atr.parent_tax IS NOT NULL THEN atr.parent_tax
                     ELSE at.id END) AS tax_id,
                 (CASE WHEN atr.parent_tax IS NOT NULL THEN parent_at.amount
@@ -283,7 +283,7 @@ class L10nInAccountInvoiceReport(models.Model):
             sub.total,
             sub.journal_id,
             sub.company_id,
-            sub.move_type,
+            sub.type,
             sub.reversed_entry_id,
             sub.partner_vat,
             sub.ecommerce_vat,
