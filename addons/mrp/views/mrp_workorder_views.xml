@@ -81,9 +81,9 @@
         <field name="name">mrp.production.work.order.tree</field>
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
-            <tree string="Work Orders" delete="0" create="0" decoration-success="date_planned_start&gt;=current_date and state == 'ready'" decoration-muted="state in ('done','cancel')" decoration-danger="date_planned_start&lt;current_date and state in ('ready')">
+            <tree string="Work Orders" delete="0" create="0" decoration-success="date_start&gt;=current_date and state == 'ready'" decoration-muted="state in ('done','cancel')" decoration-danger="date_start&lt;current_date and state in ('ready')">
                 <field name="name"/>
-                <field name="date_planned_start"/>
+                <field name="date_start"/>
                 <field name="workcenter_id" widget="selection"/>
                 <field name="production_id"/>
                 <field name="product_id"/>
@@ -185,21 +185,14 @@
                 <page string="Time Tracking" groups="mrp.group_mrp_manager">
                     <group>
                         <group>
-                            <label for="date_planned_start" string="Planned Date"/>
+                            <label for="date_start" t-if="record.state not in ['progress', 'done']" string="Planned Date"/>
+                            <label for="date_start" t-if="record.state in ['progress', 'done']" string="Effective Date"/>
                             <div class="o_row">
-                                <field name="date_planned_start" class="mr8"/>
-                                <div attrs="{'invisible': [('date_planned_start', '=', False)]}" class="o_row">
-                                    <strong attrs="{'invisible': [('date_planned_finished', '=', False)]}" class="mr8">to</strong>
-                                    <strong class="oe_edit_only mr8" attrs="{'invisible': [('date_planned_finished', '!=', False)]}">to</strong>
-                                    <field name="date_planned_finished"/>
-                                </div>
-                            </div>
-                            <label for="date_start" string="Effective Date"/>
-                            <div class="o_row">
-                                <field name="date_start" readonly="1"/>
-                                <div  attrs="{'invisible': [('date_finished', '=', False)]}">
-                                    <strong class="mr8">to</strong>
-                                    <field name="date_finished" readonly="1"/>
+                                <field name="date_start" class="mr8"/>
+                                <div attrs="{'invisible': [('date_start', '=', False)]}" class="o_row">
+                                    <strong attrs="{'invisible': [('date_finished', '=', False)]}" class="mr8">to</strong>
+                                    <strong class="oe_edit_only mr8" attrs="{'invisible': [('date_finished', '!=', False)]}">to</strong>
+                                    <field name="date_finished"/>
                                 </div>
                             </div>
                         </group>
@@ -304,7 +297,7 @@
         <field name="name">mrp.production.work.order.calendar</field>
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
-            <calendar date_stop="date_planned_finished" date_start="date_planned_start" string="Operations" color="workcenter_id" event_limit="5">
+            <calendar date_stop="date_finished" date_start="date_start" string="Operations" color="workcenter_id" event_limit="5">
                 <field name="workcenter_id"/>
                 <field name="production_id"/>
                 <field name="state"/>
@@ -340,13 +333,13 @@
         <field name="name">mrp.production.work.order.gantt.production</field>
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
-            <gantt class="o_mrp_workorder_gantt" date_stop="date_planned_finished" date_start="date_planned_start" string="Operations" default_group_by="production_id" create="0"
+            <gantt class="o_mrp_workorder_gantt" date_stop="date_finished" date_start="date_start" string="Operations" default_group_by="production_id" create="0"
                 progress="progress" plan="0"
-                decoration-danger="date_planned_start &lt; current_date and state in ['pending', 'ready']"
+                decoration-danger="date_start &lt; current_date and state in ['pending', 'ready']"
                 decoration-success="state == 'done'"
                 decoration-warning="state == 'cancel'"
                 color="workcenter_id">
-                <field name="date_planned_start"/>
+                <field name="date_start"/>
                 <field name="state"/>
                 <field name="workcenter_id"/>
 
@@ -371,14 +364,14 @@
         <field name="name">mrp.workorder.view.gantt</field>
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
-            <gantt class="o_mrp_workorder_gantt" date_stop="date_planned_finished" date_start="date_planned_start" string="Operations" default_group_by="workcenter_id" create="0"
+            <gantt class="o_mrp_workorder_gantt" date_stop="date_finished" date_start="date_start" string="Operations" default_group_by="workcenter_id" create="0"
                 progress="progress" plan="0"
-                decoration-danger="date_planned_start &lt; current_date and state in ['pending', 'ready']"
+                decoration-danger="date_start &lt; current_date and state in ['pending', 'ready']"
                 decoration-success="state == 'done'"
                 decoration-warning="state == 'cancel'"
                 color="production_id">
 
-                <field name="date_planned_start"/>
+                <field name="date_start"/>
                 <field name="state"/>
                 <field name="workcenter_id"/>
 

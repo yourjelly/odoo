@@ -66,22 +66,22 @@ class MrpWorkorder(models.Model):
         check_company=True)
     date_planned_start = fields.Datetime(
         'Scheduled Date Start',
-        compute='_compute_dates_planned',
-        inverse='_set_dates_planned',
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
-        store=True)
+        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},)
     date_planned_finished = fields.Datetime(
         'Scheduled Date Finished',
+        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},)
+    date_start = fields.Datetime(
+        'Effective Start Date',
         compute='_compute_dates_planned',
         inverse='_set_dates_planned',
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
         store=True)
-    date_start = fields.Datetime(
-        'Effective Start Date',
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
     date_finished = fields.Datetime(
         'Effective End Date',
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
+        compute='_compute_dates_planned',
+        inverse='_set_dates_planned',
+        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
+        store=True)
 
     duration_expected = fields.Float(
         'Expected Duration', digits=(16, 2),
@@ -151,16 +151,24 @@ class MrpWorkorder(models.Model):
     @api.depends('leave_id')
     def _compute_dates_planned(self):
         for workorder in self:
-            workorder.date_planned_start = workorder.leave_id.date_from
-            workorder.date_planned_finished = workorder.leave_id.date_to
+            workorder.date_start = workorder.leave_id.date_from
+            workorder.date_finished = workorder.leave_id.date_to
 
     def _set_dates_planned(self):
-        date_from = self[0].date_planned_start
-        date_to = self[0].date_planned_finished
+        date_from = self[0].date_start
+        date_to = self[0].date_finished
         self.mapped('leave_id').write({
             'date_from': date_from,
             'date_to': date_to,
         })
+        for workorder in self:
+            date_values = {}
+            if workorder.state in ['pending', 'ready', 'progress']:
+                date_values['date_planned_start'] = date_from
+            elif workorder.state in ['pending', 'ready']:
+                date_values['date_planned_finished'] = date_to
+            if date_values:
+                workorder.write(date_values)
 
     @api.onchange('finished_lot_id')
     def _onchange_finished_lot_id(self):

@@ -759,8 +759,8 @@ class MrpProduction(models.Model):
             vals['leave_id'] = leave.id
             workorder.write(vals)
         self.with_context(force_date=True).write({
-            'date_planned_start': self.workorder_ids[0].date_planned_start,
-            'date_planned_finished': self.workorder_ids[-1].date_planned_finished
+            'date_planned_start': self.workorder_ids[0].date_start,
+            'date_planned_finished': self.workorder_ids[-1].date_finished
         })
 
     def button_unplan(self):
