@@ -1921,6 +1921,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 # such as 2006-01-01 being formatted as "January 2005" in some locales.
                 # Cfr: http://babel.pocoo.org/en/latest/dates.html#date-fields
                 'hour': 'hh:00 dd MMM',
+                'minute': 'HH:mm dd MMM', # HH = 24 hour
                 'day': 'dd MMM yyyy', # yyyy = normal year
                 'week': "'W'w YYYY",  # w YYYY = ISO week-year
                 'month': 'MMMM yyyy',
@@ -1929,6 +1930,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             }
             time_intervals = {
                 'hour': dateutil.relativedelta.relativedelta(hours=1),
+                'minute': dateutil.relativedelta.relativedelta(minutes=1),
                 'day': dateutil.relativedelta.relativedelta(days=1),
                 'week': datetime.timedelta(days=7),
                 'month': dateutil.relativedelta.relativedelta(months=1),
