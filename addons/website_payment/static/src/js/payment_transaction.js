@@ -57,7 +57,9 @@ var animation = require('web_editor.snippets.animation');
 var ajax = require('web.ajax');
 
 animation.registry.payment_form = animation.Class.extend({
-  selector: '.o_payment_form, #payment_message',
+  selector: 'div.row:has(select[name="pm_acquirer_id"]), #payment_message',
+  // DBO NOTE: this selector is complete garbage but there's nothing else I can anchor
+  // myself on in the dom of the website_payment.pay_methods template -_-
 
   start: function () {
       this._super();
