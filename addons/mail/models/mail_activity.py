@@ -6,6 +6,7 @@ import pytz
 
 from odoo import api, exceptions, fields, models, _
 
+from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
 
 class MailActivityType(models.Model):
     """ Activity Types are used to categorize activities. Each type is a different
