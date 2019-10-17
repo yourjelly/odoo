@@ -1092,7 +1092,9 @@ table.table_desc tr td {
     transition: margin-top 500ms ease 0s;
     @include media-breakpoint-down(sm) {
         .navbar-collapse {
-            max-height: 70vh;
+            @if o-website-value('header-template') != 'space' {
+                max-height: 70vh;
+            }
             overflow-y: auto;
         }
     }
@@ -1124,6 +1126,47 @@ table.table_desc tr td {
             padding: 0;
             border: none;
             box-shadow: none;
+        }
+    }
+}
+
+// Header templates
+header {
+    @if index(('showcase', 'space'), o-website-value('header-template')) {
+        .navbar-brand, .logo img {
+            margin: auto;
+        }
+        .navbar-nav {
+            margin-top: $spacer / 2;
+        }
+        @if o-website-value('header-template') == 'space' {
+            .container {
+                padding-top: $spacer;
+                padding-bottom: $spacer;
+
+                #top_menu.navbar-nav {
+                    height: 90vh;
+                    padding-top : 10vh;
+                }
+            }
+        }
+    } @else if index(('brand', 'pizza'), o-website-value('header-template')) {
+        .navbar-expand-md > .container {
+            flex-wrap: wrap;
+
+            .navbar-collapse {
+                flex-basis: 100%;
+            }
+            .navbar-brand, #top_menu.navbar-nav, .logo img {
+                margin: auto;
+            }
+        }
+        @if o-website-value('header-template') == 'pizza' {
+            .navbar-collapse {
+                @include media-breakpoint-up(md) {
+                    order: -1;
+                }
+            }
         }
     }
 }
