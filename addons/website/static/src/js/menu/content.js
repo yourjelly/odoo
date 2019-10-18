@@ -56,6 +56,15 @@ var PagePropertiesDialog = weWidgets.Dialog.extend({
             });
         }
         buttons.push({
+            text: _t("Duplicate Page"),
+            icon: 'fa-clone',
+            classes: 'btn-link float-right',
+            click: function (e) {
+                _onClonePageButtonClick.call(this, self.page_id);
+            },
+        });
+
+        buttons.push({
             text: _t("Delete Page"),
             icon: 'fa-trash',
             classes: 'btn-link float-right',
@@ -1000,6 +1009,15 @@ function _deletePage(pageId, fromPageManagement) {
     });
 }
 
+function _onClonePageButtonClick(pageId) {
+        this._rpc({
+            model: 'website.page',
+            method: 'clone_page',
+            args: [pageId],
+        }).then(function (path) {
+            window.location.href = path;
+        });
+}
 websiteNavbarData.websiteNavbarRegistry.add(ContentMenu, '#content-menu');
 websiteRootData.websiteRootRegistry.add(PageManagement, '#list_website_pages');
 
