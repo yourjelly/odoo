@@ -312,6 +312,8 @@ class MrpWorkorder(models.Model):
             for workorder in self:
                 start_date = fields.Datetime.to_datetime(values.get('date_planned_start')) or workorder.date_planned_start
                 end_date = fields.Datetime.to_datetime(values.get('date_planned_finished')) or workorder.date_planned_finished
+                print('start_date: ', start_date)
+                print('end_date: ', end_date)
                 if start_date and end_date and start_date > end_date:
                     raise UserError(_('The planned end date of the work order cannot be prior to the planned start date, please correct this to save the work order.'))
                 # Update MO dates if the start date of the first WO or the
