@@ -171,8 +171,12 @@
                         </div>
                         {% if manage %}
                             <div class="d-flex mt-2">
-                                <button type="button" data-toggle="modal" data-target=".o_database_create" class="btn btn-primary flex-grow-1">Create Database</button>
-                                <button type="button" data-toggle="modal" data-target=".o_database_restore" class="btn btn-primary flex-grow-1 ml-2">Restore Database</button>
+                                <button type="button"
+                                        {% if insecure %} disabled="True" title="Set a Master Password to Create a Database"{% endif %}
+                                        data-toggle="modal" data-target=".o_database_create" class="btn btn-primary flex-grow-1">Create Database</button>
+                                <button type="button"
+                                        {% if insecure %} disabled="True" title="Set a Master Password to Restore a Database"{% endif %}
+                                        data-toggle="modal" data-target=".o_database_restore" class="btn btn-primary flex-grow-1 ml-2">Restore Database</button>
                                 <button type="button" data-toggle="modal" data-target=".o_database_master" class="btn btn-primary flex-grow-1 ml-2">Set Master Password</button>
                             </div>
                         {% else %}
