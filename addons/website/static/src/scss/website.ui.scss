@@ -245,10 +245,10 @@ body .modal {
                 transition: 200ms;
                 display: inline-block;
                 padding: 23px 27px;
-                border: 2px dashed lighten(gray('600'), 30%);
+                border: 2px dashed lighten(gray('900'), 30%);
                 vertical-align: top;
                 cursor: pointer;
-                color: lighten(gray('600'), 30%);
+                color: lighten(gray('900'), 30%);
 
                 &:hover {
                     border-color: $o-brand-primary;
