@@ -613,7 +613,19 @@ class StockMove(models.Model):
                 else:
                     raise UserError(_('You cannot unreserve a stock move that has been set to \'Done\'.'))
             moves_to_unreserve |= move
-        moves_to_unreserve.mapped('move_line_ids').unlink()
+        ml_to_update = self.env['stock.move.line']
+        ml_to_unlink = self.env['stock.move.line']
+        for ml in moves_to_unreserve.move_line_ids:
+            if ml.qty_done:
+                ml_to_update |= ml
+            else:
+                ml_to_unlink |= ml
+        if ml_to_update:
+            ml_to_update.write({'product_uom_qty': 0})
+        if ml_to_unlink:
+            ml_to_unlink.unlink()
+        # FIXME: unlink already calls recompute_state
+        moves_to_unreserve._recompute_state()
         return True
 
     def _generate_serial_numbers(self, next_serial_count=False):
