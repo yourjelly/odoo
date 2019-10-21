@@ -143,12 +143,12 @@ class Page(models.Model):
         return super(Page, self).copy(default=default)
 
     @api.model
-    def clone_page(self, page_id, clone_menu=True):
+    def clone_page(self, page_id, name, clone_menu=True):
         """ Clone a page, given its identifier
             :param page_id : website.page identifier
         """
         page = self.browse(int(page_id))
-        new_page = page.copy(dict(name=page.name, website_id=self.env['website'].get_current_website().id))
+        new_page = page.copy(dict(name=name, website_id=self.env['website'].get_current_website().id))
         # Should not clone menu if the page was cloned from one website to another
         # Eg: Cloning a generic page (no website) will create a page with a website, we can't clone menu (not same container)
         if clone_menu and new_page.website_id == page.website_id:

@@ -953,13 +953,9 @@ var PageManagement = Widget.extend({
     },
     _onClonePageButtonClick: function (ev) {
         var pageId = $(ev.currentTarget).data('id');
-        this._rpc({
-            model: 'website.page',
-            method: 'clone_page',
-            args: [pageId],
-        }).then(function (path) {
-            window.location.href = path;
-        });
+        var moID = $(ev.currentTarget).data('id');
+        var dialog = new PagePropertiesDialog(this,moID, {'fromPageManagement': true}).open();
+        return dialog;
     },
     _onDeletePageButtonClick: function (ev) {
         var pageId = $(ev.currentTarget).data('id');
@@ -1010,10 +1006,11 @@ function _deletePage(pageId, fromPageManagement) {
 }
 
 function _onClonePageButtonClick(pageId) {
+        var name =this.$('input#page_name').val();
         this._rpc({
             model: 'website.page',
             method: 'clone_page',
-            args: [pageId],
+            args: [pageId,name],
         }).then(function (path) {
             window.location.href = path;
         });
