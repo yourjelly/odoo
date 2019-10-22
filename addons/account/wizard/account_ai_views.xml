@@ -6,7 +6,18 @@
             <field name="model">account.ai.wizard</field>
             <field name="arch" type="xml">
                 <form>
-                    <button string="Raise Things" name="raisethings" type="object" class="oe_highlight"/>
+                    <field name="company_id" invisible="1"/>
+                    <field name="line_ids">
+                        <tree>
+                            <field name="account_id"/>
+                            <field name="partner_id"/>
+                            <field name="date"/>
+                            <field name="range_down"/>
+                            <field name="range_up"/>
+                            <button name="action_open" type="object" icon="fa-expand" title="Open List" aria-label="Open" class="float-right"/>
+                            <button name="action_create" type="object" icon="fa-edit" title="Create" aria-label="Open" class="float-right"/>
+                        </tree>
+                    </field>
                 </form>
             </field>
         </record>
