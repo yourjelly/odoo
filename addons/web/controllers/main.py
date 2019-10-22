@@ -1086,6 +1086,8 @@ class Database(http.Controller):
     @http.route('/web/database/create', type='http', auth="none", methods=['POST'], csrf=False)
     def create(self, master_pwd, name, lang, password, **post):
         try:
+            if not master_pwd:
+                raise Exception(_('Master Password not provided. Setting a Master Password is required for database operations.'))
             if not re.match(DBNAME_PATTERN, name):
                 raise Exception(_('Invalid database name. Only alphanumerical characters, underscore, hyphen and dot are allowed.'))
             # country code could be = "False" which is actually True in python
@@ -1140,6 +1142,8 @@ class Database(http.Controller):
     def restore(self, master_pwd, backup_file, name, copy=False):
         try:
             data_file = None
+            if not master_pwd:
+                raise Exception(_('Master Password not provided. Setting a Master Password is required for database operations.'))
             db.check_super(master_pwd)
             with tempfile.NamedTemporaryFile(delete=False) as data_file:
                 backup_file.save(data_file)
