@@ -473,6 +473,9 @@ class configmanager(object):
             elif isinstance(self.options[arg], str) and self.casts[arg].type in optparse.Option.TYPE_CHECKER:
                 self.options[arg] = optparse.Option.TYPE_CHECKER[self.casts[arg].type](self.casts[arg], arg, self.options[arg])
 
+        die(self.options['db_name'] and self.options['list_db'] and self.verify_admin_password('admin'),
+            "No Master Password provided while accessing %r, use --no-database-list for single db only or specify a --db-filter" % self.options['db_name'])
+
         self.options['root_path'] = self._normalize(os.path.join(os.path.dirname(__file__), '..'))
         if not self.options['addons_path'] or self.options['addons_path']=='None':
             default_addons = []
