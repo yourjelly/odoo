@@ -23,6 +23,7 @@
                             <field name="quantity"/>
                             <field name="returnable_qty" invisible="1"/>
                             <field name="uom_id" readonly="1" groups="uom.group_uom"/>
+                            <field name="lot_id"/>
                             <field name="move_id" invisible="1"/>
                         </tree>
                     </field>

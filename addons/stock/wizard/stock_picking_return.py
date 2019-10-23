@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from collections import defaultdict
+
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.tools.float_utils import float_round, float_compare
+from odoo.tools.float_utils import float_round, float_compare, float_is_zero
 
 
 class ReturnPickingLine(models.TransientModel):
@@ -15,8 +17,9 @@ class ReturnPickingLine(models.TransientModel):
     quantity = fields.Float("Quantity", digits='Product Unit of Measure', required=True)
     returnable_qty = fields.Float("Quantity previously returned", digits='Product Unit of Measure')
     uom_id = fields.Many2one('uom.uom', string='Unit of Measure', related='move_id.product_uom', readonly=False)
-    wizard_id = fields.Many2one('stock.return.picking', string="Wizard")
+    wizard_id = fields.Many2one('stock.return.picking', string="Wizard", copy=False)
     move_id = fields.Many2one('stock.move', "Move")
+    lot_id = lot_id = fields.Many2one('stock.production.lot', string='Lot/Serial Number', help="Lot/Serial number concerned by the ticket", domain="[('product_id', '=', product_id)]")
 
     @api.onchange('quantity')
     def _onchange_quantity(self):
@@ -53,18 +56,14 @@ class ReturnPicking(models.TransientModel):
 
     @api.onchange('picking_id')
     def _onchange_picking_id(self):
-        move_dest_exists = False
-        product_return_moves = [(5,)]
         if self.picking_id and self.picking_id.state != 'done':
             raise UserError(_("You may only return Done pickings."))
-        for move in self.picking_id.move_lines:
-            if move.state == 'cancel':
-                continue
-            if move.scrapped:
-                continue
-            if move.move_dest_ids:
-                move_dest_exists = True
-            product_return_moves.append((0, 0, self._prepare_stock_return_picking_line_vals_from_move(move)))
+
+        moves = self.picking_id.move_lines.filtered(lambda m: not m.scrapped)
+        move_dest_exists = any(m.move_dest_ids for m in moves)
+        return_values = self._generate_return_lines(moves)
+        product_return_moves = self.env['stock.return.picking.line'].create(return_values)
+
         if self.picking_id and not product_return_moves:
             raise UserError(_("No products to return (only lines in Done state and not fully returned yet can be returned)."))
         if self.picking_id:
@@ -90,6 +89,101 @@ class ReturnPicking(models.TransientModel):
             'move_id': stock_move.id,
             'uom_id': stock_move.product_id.uom_id.id,
         }
+
+    def _generate_return_lines(self, moves):
+        return_values = []
+        initial_moves = moves
+        all_moves = initial_moves
+        while moves.mapped('returned_move_ids'):
+            all_moves |= moves.mapped('returned_move_ids')
+            moves = moves.mapped('returned_move_ids')
+        
+        # Keep only done moves
+        done_moves = all_moves.filtered(lambda m: m.state == 'done')
+
+        # Filter Incoming/Outgoing moves
+        moves_in = done_moves.filtered(lambda m: m.location_dest_id == self.picking_id.location_dest_id)
+        moves_out = done_moves - moves_in
+
+        # Get tracked move lines
+        lot_sml_in = moves_in.mapped('move_line_ids').filtered(lambda m: bool(m.lot_id) != False)
+        lot_sml_out = moves_out.mapped('move_line_ids').filtered(lambda m: bool(m.lot_id) != False)
+
+        # Get untracked moves
+        untracked_sml_in = (moves_in - lot_sml_in.mapped('move_id')).mapped('move_line_ids')
+        untracked_sml_out = (moves_out - lot_sml_out.mapped('move_id')).mapped('move_line_ids')
+
+        # Get returnable quantities per SN/LN 
+        qties_per_lot = defaultdict(lambda: 0)
+        for ml in lot_sml_out:
+            qties_per_lot[ml.lot_id] -= ml.product_uom_id._compute_quantity(ml.qty_done, ml.product_id.uom_id)
+        for ml in lot_sml_in:
+            qties_per_lot[ml.lot_id] += ml.product_uom_id._compute_quantity(ml.qty_done, ml.product_id.uom_id)
+
+        
+        for lot_id, qty in qties_per_lot.items():
+            if float_is_zero(qty, precision_rounding=lot_id.product_id.uom_id.rounding):
+                continue
+            return_values.append({
+                'product_id': lot_id.product_id.id,
+                'quantity': qty,
+                'returnable_qty': qty,
+                'lot_id': lot_id.id,
+                'move_id': self.picking_id.move_line_ids.filtered(lambda ml : ml.lot_id == lot_id).move_id.id,
+                'uom_id': lot_id.product_id.uom_id.id,
+            })
+
+        # Get returnable quantities for untracked product
+        qties_per_product = defaultdict(lambda: 0)
+        for ml in untracked_sml_out:
+            qties_per_product[ml.product_id] -= ml.product_uom_id._compute_quantity(ml.qty_done, ml.product_id.uom_id)
+        for ml in untracked_sml_in:
+            qties_per_product[ml.product_id] += ml.product_uom_id._compute_quantity(ml.qty_done, ml.product_id.uom_id)
+
+        for product_id, qty in qties_per_product.items():
+            if float_is_zero(qty, precision_rounding=product_id.uom_id.rounding):
+                continue
+            return_values.append({
+                'product_id': product_id.id,
+                'quantity': qty,
+                'returnable_qty': qty,
+                'lot_id': False,
+                'move_id': self.picking_id.move_line_ids.filtered(lambda ml : ml.id in untracked_sml_in.ids and ml.product_id == product_id).move_id.id,
+                'uom_id': product_id.uom_id.id,
+            })
+        
+        return return_values
+
+    def _generate_move_line_values(self, picking):
+            sml_vals = []
+            processed_rl = self.env['stock.return.picking.line']
+            for move in picking.move_lines:
+                unprocessed_rl = self.product_return_moves - processed_rl
+                for return_line in unprocessed_rl:
+                    if return_line.move_id == move.origin_returned_move_id:
+                        sml_vals.append({
+                            'picking_id': picking.id,
+                            'move_id': move.id,
+                            'product_id': move.product_id.id,
+                            'product_uom_id': move.product_uom.id,
+                            'location_id': move.location_id.id,
+                            'location_dest_id': move.location_dest_id.id,
+                            'lot_id': return_line.lot_id.id,
+                            'qty_done': return_line.quantity
+                        })
+                        processed_rl |= return_line
+            return sml_vals
+
+    def _get_summarized_rl(self):
+        srl_per_move = {}
+        for return_line in self.product_return_moves:
+            if return_line.move_id in srl_per_move:
+                srl_per_move[return_line.move_id].quantity += return_line.quantity
+            elif not return_line.move_id:
+                raise UserError(_("You have manually created product lines, please delete them to proceed."))
+            else:
+                srl_per_move[return_line.move_id] = return_line.copy()
+        return srl_per_move
 
     def _prepare_move_default_values(self, return_line, new_picking):
         vals = {
@@ -126,9 +220,8 @@ class ReturnPicking(models.TransientModel):
             values={'self': new_picking, 'origin': self.picking_id},
             subtype_id=self.env.ref('mail.mt_note').id)
         returned_lines = 0
-        for return_line in self.product_return_moves:
-            if not return_line.move_id:
-                raise UserError(_("You have manually created product lines, please delete them to proceed."))
+
+        for move, return_line in self._get_summarized_rl().items():
             # TODO sle: float_is_zero?
             if return_line.quantity:
                 returned_lines += 1
@@ -150,6 +243,8 @@ class ReturnPicking(models.TransientModel):
         if not returned_lines:
             raise UserError(_("Please specify at least one non-zero quantity."))
 
+        sml_vals = self._generate_move_line_values(new_picking)
+        self.env['stock.move.line'].create(sml_vals)
         new_picking.action_confirm()
         new_picking.action_assign()
         return new_picking.id, picking_type_id
