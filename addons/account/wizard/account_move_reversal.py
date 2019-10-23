@@ -11,7 +11,7 @@ class AccountMoveReversal(models.TransientModel):
     _description = 'Account Move Reversal'
 
     move_id = fields.Many2one('account.move', string='Journal Entry',
-        domain=[('state', '=', 'posted'), ('type', 'not in', ('out_refund', 'in_refund'))])
+        domain=[('state', '=', 'posted'), ('move_type', 'not in', ('out_refund', 'in_refund'))])
     date = fields.Date(string='Reversal date', default=fields.Date.context_today, required=True)
     reason = fields.Char(string='Reason')
     refund_method = fields.Selection(selection=[
@@ -31,10 +31,10 @@ class AccountMoveReversal(models.TransientModel):
     def default_get(self, fields):
         res = super(AccountMoveReversal, self).default_get(fields)
         move_ids = self.env['account.move'].browse(self.env.context['active_ids']) if self.env.context.get('active_model') == 'account.move' else self.env['account.move']
-        res['refund_method'] = (len(move_ids) > 1 or move_ids.type == 'entry') and 'cancel' or 'refund'
+        res['refund_method'] = (len(move_ids) > 1 or move_ids.move_type == 'entry') and 'cancel' or 'refund'
         res['residual'] = len(move_ids) == 1 and move_ids.amount_residual or 0
         res['currency_id'] = len(move_ids.currency_id) == 1 and move_ids.currency_id.id or False
-        res['move_type'] = len(move_ids) == 1 and move_ids.type or False
+        res['move_type'] = len(move_ids) == 1 and move_ids.move_type or False
         return res
 
     @api.depends('move_id')
@@ -43,7 +43,7 @@ class AccountMoveReversal(models.TransientModel):
         for record in self:
             record.residual = len(move_ids) == 1 and move_ids.amount_residual or 0
             record.currency_id = len(move_ids.currency_id) == 1 and move_ids.currency_id or False
-            record.move_type = len(move_ids) == 1 and move_ids.type or False
+            record.move_type = len(move_ids) == 1 and move_ids.move_type or False
 
     def reverse_moves(self):
         moves = self.env['account.move'].browse(self.env.context['active_ids']) if self.env.context.get('active_model') == 'account.move' else self.move_id

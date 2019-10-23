@@ -28,7 +28,7 @@ class UtmCampaign(models.Model):
                     INNER JOIN account_move move ON line.move_id = move.id
                     WHERE move.state not in ('draft', 'cancel')
                         AND move.campaign_id IN %s
-                        AND move.type IN ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')
+                        AND move.move_type IN ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')
                         AND line.account_id IS NOT NULL
                         AND NOT line.exclude_from_invoice_tab
                     GROUP BY move.campaign_id
@@ -61,7 +61,7 @@ class UtmCampaign(models.Model):
         }
         action['domain'] = [
             ('id', 'in', invoices.ids),
-            ('type', 'in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')),
+            ('move_type', 'in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')),
             ('state', 'not in', ['draft', 'cancel'])
         ]
         return action

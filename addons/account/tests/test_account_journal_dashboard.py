@@ -19,7 +19,7 @@ class TestAccountJournalDashboard(AccountTestUsers):
         })
 
         invoice = self.env['account.move'].create({
-            'type': 'out_invoice',
+            'move_type': 'out_invoice',
             'journal_id': journal.id,
             'partner_id': self.env.ref('base.res_partner_3').id,
             'invoice_date': date_invoice,
@@ -33,7 +33,7 @@ class TestAccountJournalDashboard(AccountTestUsers):
             })]
         })
         refund = self.env['account.move'].create({
-            'type': 'out_refund',
+            'move_type': 'out_refund',
             'journal_id': journal.id,
             'partner_id': self.env.ref('base.res_partner_3').id,
             'invoice_date': '2019-01-21',
