@@ -158,9 +158,65 @@
             <field name="res_model">event.type</field>
         </record>
 
+        <record model="ir.ui.view" id="view_event_stage_form">
+            <field name="name">event.stage.form</field>
+            <field name="model">event.stage</field>
+            <field name="arch" type="xml">
+                <form string="Events Stage">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="ended_stage"/>
+                            </group>
+                            <group>
+                                <field name="fold"/>
+                                <field name="sequence"/>
+                            </group>
+                        </group>
+                        <group string="Stage Description and Tooltips">
+                            <p class="text-muted" colspan="2">
+                                You can define here labels that will be displayed for the state instead
+                                of the default labels in the kanban view.
+                            </p>
+                            <label for="legend_normal" string=" " class="o_status " title="Task in progress. Click to block or set as done." aria-label="Task in progress. Click to block or set as done." role="img"/>
+                            <field name="legend_normal" nolabel="1"/>
+                            <label for="legend_blocked" string=" " class="o_status o_status_red" title="Task is blocked. Click to unblock or set as done." aria-label="Task is blocked. Click to unblock or set as done." role="img"/>
+                            <field name="legend_blocked" nolabel="1"/>
+                            <label for="legend_done" string=" " class="o_status o_status_green" title="This step is done. Click to block or set in progress." aria-label="This step is done. Click to block or set in progress." role="img"/>
+                            <field name="legend_done" nolabel="1"/>
+
+                            <p class="text-muted" colspan="2">
+                                You can also add a description to help your coworkers understand the meaning and purpose of the stage.
+                            </p>
+                            <field name="description" placeholder="Add a description..." nolabel="1" colspan="2"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_event_stage_tree">
+            <field name="name">event.stage.tree</field>
+            <field name="model">event.stage</field>
+            <field name="arch" type="xml">
+                <tree string="Events Stage">
+                    <field name="sequence" widget="handle"/>
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_event_stage">
+            <field name="name">Event Stages</field>
+            <field name="res_model">event.stage</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
         <menuitem id="menu_event_configuration" name="Configuration" parent="event_main_menu"
             sequence="100"/>
         <menuitem name="Event Categories" id="menu_event_type" action="action_event_type" parent="menu_event_configuration"/>
+        <menuitem name="Event Stages" id="menu_event_stage" action="action_event_stage" parent="menu_event_configuration"/>
 
         <!-- EVENT.REGISTRATION ACTIONS -->
         <record id="act_event_registration_from_event" model="ir.actions.act_window">
@@ -205,7 +261,11 @@
                                 <field name="seats_expected" widget="statinfo" string="Attendees"/>
                             </button>
                         </div>
+                        <field name="legend_blocked" invisible="1"/>
+                        <field name="legend_normal" invisible="1"/>
+                        <field name="legend_done" invisible="1"/>
                         <widget name="web_ribbon" text="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                        <field name="kanban_state" widget="state_selection" class="ml-auto"/>
                         <div class="oe_title">
                             <label for="name" class="oe_edit_only"/>
                             <h1><field name="name" placeholder="Event Name"/></h1>
@@ -303,8 +363,9 @@
             <field name="name">event.event.kanban</field>
             <field name="model">event.event</field>
             <field name="arch" type="xml">
-                <kanban class="o_event_kanban_view">
+                <kanban class="o_event_kanban_view" default_group_by="stage_id">
                     <field name="user_id"/>
+                    <field name="stage_id" options='{"group_by_tooltip": {"description": "Description"}}'/>
                     <field name="country_id"/>
                     <field name="date_begin"/>
                     <field name="date_end"/>
@@ -313,6 +374,9 @@
                     <field name="seats_used"/>
                     <field name="seats_expected"/>
                     <field name="color"/>
+                    <field name="legend_blocked"/>
+                    <field name="legend_normal"/>
+                    <field name="legend_done"/>
                     <templates>
                         <t t-name="kanban-box">
                             <div t-attf-class="{{!selection_mode ? 'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) : ''}} oe_kanban_card oe_kanban_global_click">
@@ -354,6 +418,10 @@
                                         </t>
                                     </h4>
                                 </div>
+                                <div class="o_event_bottom_right">
+                                    <field name="kanban_state" widget="state_selection" groups="base.group_user"/>
+                                    <img t-att-src="kanban_image('res.users', 'image_128', record.user_id.raw_value)" t-att-title="record.user_id.value" t-att-alt="record.user_id.value"/>
+                                </div>
                             </div>
                         </t>
                     </templates>
@@ -385,6 +453,7 @@
                     <field name="name" string="Event"/>
                     <field name="event_type_id"/>
                     <field name="user_id"/>
+                    <field name="stage_id"/>
                     <filter string="My Events" name="myevents" help="My Events" domain="[('user_id', '=', uid)]"/>
                     <filter string="Unread Messages" name="message_needaction" domain="[('message_needaction', '=', True)]"/>
                     <separator/>

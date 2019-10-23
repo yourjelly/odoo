@@ -85,6 +85,31 @@ class EventType(models.Model):
         return [(x, x) for x in pytz.all_timezones]
 
 
+class EventStage(models.Model):
+    """Event Stage"""
+    _name = 'event.stage'
+    _description = 'Event Stage'
+    _order = 'sequence, id, name'
+
+    name = fields.Char(string='Stage Name', required=True)
+    description = fields.Text()
+    sequence = fields.Integer('Sequence', default=1)
+    fold = fields.Boolean(string='Folded in Kanban', default=False, help='This stage is folded in the kanban view when there are no records in that stage to display.')
+    ended_stage = fields.Boolean(
+        string='Ended stage', default=False,
+        help='Events will be automatically be moved into this stage their are passed and event moved in the stage will be automatically greened')
+
+    legend_blocked = fields.Char(
+        'Red Kanban Label', default=lambda s: _('Blocked'), translate=True, required=True,
+        help='Override the default value displayed for the blocked state for kanban selection.')
+    legend_done = fields.Char(
+        'Green Kanban Label', default=lambda s: _('Ready for Next Stage'), translate=True, required=True,
+        help='Override the default value displayed for the done state for kanban selection.')
+    legend_normal = fields.Char(
+        'Grey Kanban Label', default=lambda s: _('In Progress'), translate=True, required=True,
+        help='Override the default value displayed for the normal state for kanban selection.')
+
+
 class EventEvent(models.Model):
     """Event"""
     _name = 'event.event'
@@ -164,6 +189,12 @@ class EventEvent(models.Model):
         ('confirm', 'Confirmed'), ('done', 'Done')],
         string='Status', default='draft', readonly=True, required=True, copy=False,
         help="If event is created, the status is 'Draft'. If event is confirmed for the particular dates the status is set to 'Confirmed'. If the event is over, the status is set to 'Done'. If event is cancelled the status is set to 'Cancelled'.")
+    kanban_state = fields.Selection([('normal', 'In Progress'), ('done', 'Ended Stage'), ('blocked', 'Blocked')])
+    kanban_state_label = fields.Char(compute='_compute_kanban_state_label', string='Kanban State Label', tracking=True)
+
+    legend_blocked = fields.Char(related='stage_id.legend_blocked', string='Kanban Blocked Explanation', readonly=True, related_sudo=False)
+    legend_done = fields.Char(related='stage_id.legend_done', string='Kanban Valid Explanation', readonly=True, related_sudo=False)
+    legend_normal = fields.Char(related='stage_id.legend_normal', string='Kanban Ongoing Explanation', readonly=True, related_sudo=False)
     auto_confirm = fields.Boolean(string='Autoconfirm Registrations')
     is_online = fields.Boolean('Online Event')
     address_id = fields.Many2one(
@@ -183,6 +214,25 @@ class EventEvent(models.Model):
     badge_innerleft = fields.Html(string='Badge Inner Left')
     badge_innerright = fields.Html(string='Badge Inner Right')
     event_logo = fields.Html(string='Event Logo')
+
+    def _get_default_stage_id(self):
+        return self.env['event.stage'].search([('name', '=', 'New')])
+
+    stage_id = fields.Many2one(
+        'event.stage', ondelete='restrict', default=_get_default_stage_id,
+        group_expand='_read_group_stage_ids', tracking=True)
+
+    @api.model
+    def _read_group_stage_ids(self, stages, domain, order):
+        return self.env['event.stage'].search([])
+
+    @api.constrains('stage_id')
+    def _compute_kanban_state(self):
+        for event in self:
+            if event.stage_id.ended_stage:
+                event.kanban_state = 'done'
+            else:
+                event.kanban_state = 'normal'
 
     @api.depends('seats_max', 'registration_ids.state')
     def _compute_seats(self):
@@ -212,6 +262,16 @@ class EventEvent(models.Model):
             if event.seats_max > 0:
                 event.seats_available = event.seats_max - (event.seats_reserved + event.seats_used)
             event.seats_expected = event.seats_unconfirmed + event.seats_reserved + event.seats_used
+
+    @api.depends('stage_id', 'kanban_state')
+    def _compute_kanban_state_label(self):
+        for event in self:
+            if event.kanban_state == 'normal':
+                event.kanban_state_label = event.legend_normal
+            elif event.kanban_state == 'blocked':
+                event.kanban_state_label = event.legend_blocked
+            else:
+                event.kanban_state_label = event.legend_done
 
     @api.model
     def _tz_get(self):

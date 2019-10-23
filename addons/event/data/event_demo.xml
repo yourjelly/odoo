@@ -116,6 +116,5 @@
         <field name="event_id" ref="event_2"/>
         <field name="partner_id" ref="base.res_partner_12"/>
     </record>
-
     </data>
 </odoo>
