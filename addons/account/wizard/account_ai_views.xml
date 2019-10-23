@@ -1,34 +1,137 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record id="account_ai_wizard_form_view" model="ir.ui.view">
-            <field name="name">account.ai.wizard.form</field>
-            <field name="model">account.ai.wizard</field>
+        <record id="account_ai_wizard_tree_form_view" model="ir.ui.view">
+            <field name="name">account.ai.finddate.line.tree</field>
+            <field name="model">account.ai.finddate.line</field>
+            <field name="arch" type="xml">
+                <tree create="0" edit="0">
+                    <field name="account_id"/>
+                    <field name="partner_id"/>
+                    <field name="date_str"/>
+                    <field name="range_down"/>
+                    <field name="range_up"/>
+                    <button name="action_open" type="object" icon="fa-expand" title="Open List" aria-label="Open" class="float-right"/>
+                    <button name="action_create" type="object" icon="fa-edit" title="Create" aria-label="Open" class="float-right"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_account_ai_wizard_line_search" model="ir.ui.view">
+            <field name="name">account.ai.finddate.line.search</field>
+            <field name="model">account.ai.finddate.line</field>
+            <field name="arch" type="xml">
+                <search string="Accounts">
+                    <field name="account_id"/>
+                    <field name="partner_id"/>
+                    <filter string="Date" name="date" date="date"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Account" name="group_by_account" domain="[]" context="{'group_by': 'account_id'}"/>
+                        <filter string="Partner" name="group_by_partner" domain="[]" context="{'group_by': 'partner_id'}"/>
+                        <filter string="Date" name="groupby_date" domain="[]" context="{'group_by': 'date'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="account_ai_config_form_view" model="ir.ui.view">
+            <field name="name">account.ai.config.form</field>
+            <field name="model">account.ai.config</field>
             <field name="arch" type="xml">
                 <form>
-                    <field name="company_id" invisible="1"/>
-                    <field name="line_ids">
-                        <tree>
-                            <field name="account_id"/>
-                            <field name="partner_id"/>
-                            <field name="date"/>
-                            <field name="range_down"/>
-                            <field name="range_up"/>
-                            <button name="action_open" type="object" icon="fa-expand" title="Open List" aria-label="Open" class="float-right"/>
-                            <button name="action_create" type="object" icon="fa-edit" title="Create" aria-label="Open" class="float-right"/>
-                        </tree>
-                    </field>
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only"/>
+                            <h1><field name="name" class="oe_inline"/></h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="find"/>
+                                <field name="action"/>
+                                <field name="account_ids" widget="many2many_tags"/>
+                                <field name="account_type_ids" widget="many2many_tags"/>
+                                <field name="generated_cron_id" attrs="{'invisible': ['|', ('generated_cron_id', '=', False), ('action', '=', 'manual')]}"/>
+                                <field name="company_id" groups="base.group_multi_company"/>
+                            </group>
+                            <group string="Find date Options" attrs="{'invisible': [('find', '!=', 'date')]}">
+                                <field name="amount_grouping" attrs="{'required': [('find', '=', 'date')]}"/>
+                            </group>
+                            <group string="AccountBot Options" attrs="{'invisible': [('action', '!=', 'accountbot')]}">
+                                <field name="partner_id" attrs="{'required': [('action', '=', 'accountbot')]}"/>
+                            </group>
+                        </group>
+                    </sheet>
                 </form>
+            </field>
+        </record>
+
+        <record id="account_ai_config_tree_view" model="ir.ui.view">
+            <field name="name">account.ai.config.tree</field>
+            <field name="model">account.ai.config</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="find"/>
+                    <field name="action"/>
+                    <field name="account_ids" widget="many2many_tags"/>
+                    <field name="account_type_ids" widget="many2many_tags"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="account_ai_config_kanban_view" model="ir.ui.view">
+            <field name="name">account.ai.config.kanban</field>
+            <field name="model">account.ai.config</field>
+            <field name="arch" type="xml">
+                <kanban>
+                    <field name="name"/>
+                    <field name="find"/>
+                    <field name="action"/>
+                    <field name="account_ids" widget="many2many_tags"/>
+                    <field name="account_type_ids" widget="many2many_tags"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div>
+                                <div class="o_kanban_card_header_title">
+                                    <div class="o_primary">
+                                        <a type="object" name="action_open"><field name="name"/></a>
+                                    </div>
+                                    <div class="o_secondary">
+                                        <field name="action"/>
+                                    </div>
+                                </div>
+                                <div class="container o_kanban_card_content">
+                                    <div class="row">
+                                        <button type="object" name="action_view_lines" class="btn btn-primary">
+                                            <span>Execute</span>
+                                        </button>
+                                        <field name="account_ids" widget="many2many_tags"/>
+                                        <field name="account_type_ids" widget="many2many_tags"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
             </field>
         </record>
 
         <record id="account_ai_wizard_action" model="ir.actions.act_window">
             <field name="name">Do AI things</field>
-            <field name="res_model">account.ai.wizard</field>
-            <field name="view_mode">form</field>
-            <field name="target">new</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">account.ai.config</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="view_id" ref="account_ai_config_kanban_view"/>
         </record>
 
         <menuitem id="menu_action_ai_things" parent="account.menu_finance_entries_actions" action="account_ai_wizard_action" sequence="25"/>
+
+        <record model="res.partner" id="account.partner_accountbot">
+            <field name="name">AccountBot</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="email">root@example.com</field>
+            <field name="image_1920" type="base64" file="mail/static/src/img/odoobot.png"/>
+            <field name="active" eval="False"/>
+        </record>
     </data>
 </odoo>

@@ -186,6 +186,18 @@
         <field name="domain_force">['|',('company_id','=',False),('company_id', 'in', company_ids)]</field>
     </record>
 
+    <record model="ir.rule" id="account_ai_config_comp_rule">
+        <field name="name">Account AI config company rule</field>
+        <field name="model_id" ref="model_account_ai_config"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record model="ir.rule" id="account_ai_finddate_line_comp_rule">
+        <field name="name">Account AI found date line company rule</field>
+        <field name="model_id" ref="model_account_ai_finddate_line"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
     <!-- Portal for invoice move and invoice move lines -->
     <record id="account_invoice_rule_portal" model="ir.rule">
         <field name="name">Portal Personal Account Invoices</field>
