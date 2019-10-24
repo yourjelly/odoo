@@ -81,6 +81,33 @@ ADAMEquipmentProtocol = ScaleProtocol(
     autoResetWeight=True,  # AZExtra will not return 0 after removing products
 )
 
+# The WeightOnlyProtocol with standard baudrate & bytesize : Scale with this protocol gives us continuous output of
+# Only Weight without sending any command to scale, output doesn't require to be parsed. We will identify
+# each new weight with outputTerminator.
+# Tested Scales: 1.) PointDigi Scale, Yes Yes Technologies (https://www.yesyestechnologies.com/007.php)
+#                2.) Essae Bench-scale (http://www.essae.com/ds-450ss-bench-scale)
+WeightOnlyProtocol = ScaleProtocol(
+    name='Weight Only Protocol',
+    baudrate=9600,
+    bytesize=serial.EIGHTBITS,
+    stopbits=serial.STOPBITS_ONE,
+    parity=serial.PARITY_NONE,
+    timeout=1,
+    writeTimeout=1,
+    measureRegexp=b"\s*([0-9.]+)",
+    statusRegexp=None,
+    commandTerminator=b'',
+    commandDelay=0.2,
+    measureDelay=0,
+    newMeasureDelay=0,
+    measureCommand=b'',
+    zeroCommand=b'',
+    tareCommand=b'',
+    clearCommand=None,
+    emptyAnswerValid=False,
+    autoResetWeight=False,
+)
+
 
 # Ensures compatibility with older versions of Odoo
 class ScaleReadOldRoute(http.Controller):
@@ -311,3 +338,70 @@ class AdamEquipmentDriver(ScaleDriver):
         except Exception:
             _logger.exception('Error while probing %s with protocol %s' % (device, protocol.name))
         return False
+
+
+class WeightOnlyDriver(ScaleDriver):
+    """Driver for the WeightOnly serial scale."""
+    _protocol = WeightOnlyProtocol
+
+    # scale return some unfamiliar character when weight is being read for the first time, which result in failed
+    # probing of protocol, yet after some result it gives stable perfect output, so to avoid failing of probing
+    # we try to connect same protocol by number of times defined in '_max_connection_try'
+    _max_connection_try = 3
+
+    def __init__(self, device):
+        super().__init__(device)
+        self._is_reading = False
+
+    @classmethod
+    def supported(cls, device):
+        """Checks whether the device, which port info is passed as argument, is supported by the driver.
+
+        :param device: path to the device
+        :type device: str
+        :return: whether the device is supported by the driver
+        :rtype: bool
+        """
+        protocol = cls._protocol
+        for i in range(cls._max_connection_try):
+            try:
+                with serial_connection(device['identifier'], protocol, is_probing=True) as connection:
+                    time.sleep(protocol.commandDelay)
+                    measure = cls._get_raw_response(connection)
+                    float(measure)
+                    return True
+            except (ValueError, TypeError, serial.serialutil.SerialTimeoutException):
+                pass
+            except Exception:
+                _logger.exception('Error while probing %s with protocol %s' % (device, protocol.name))
+        return False
+
+    @staticmethod
+    def _get_raw_response(connection):
+        """Gets raw bytes containing the updated value of the device.
+
+        :param connection: a connection to the device's serial port
+        :type connection: pyserial.Serial
+        :return: the raw response to a weight request
+        :rtype: str
+        """
+
+        answer = []
+        while True:
+            char = connection.read(1)
+            if not char or char == b'\r':
+                break
+            else:
+                answer.append(bytes(char))
+        return b''.join(answer)
+
+    def _take_measure(self):
+        """Reads the device's weight value, and pushes that value to the frontend."""
+
+        if self._is_reading:
+            with self._device_lock:
+                self._read_weight()
+                if self.data['value'] is not None or self._status['status'] == self.STATUS_ERROR:
+                    event_manager.device_changed(self)
+        else:
+            time.sleep(0.5)
