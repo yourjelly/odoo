@@ -39,12 +39,10 @@ class PaymentWizard(models.TransientModel):
     _payment_acquirer_onboarding_cache = {}
     _data_fetched = False
 
-    def _get_manual_payment_acquirer(self, env=None):
-        if env is None:
-            env = self.env
-        module_id = env.ref('base.module_payment_transfer').id
-        return env['payment.acquirer'].search([('module_id', '=', module_id),
-            ('company_id', '=', env.company.id)], limit=1)
+    def _get_manual_payment_acquirer(self):
+        module_id = self.env.ref('base.module_payment_transfer').id
+        return self.env['payment.acquirer'].search([('module_id', '=', module_id),
+            ('company_id', '=', self.env.company.id)], limit=1)
 
     def _get_default_payment_acquirer_onboarding_value(self, key):
         if not self.env.is_admin():
@@ -83,10 +81,9 @@ class PaymentWizard(models.TransientModel):
 
         return self._payment_acquirer_onboarding_cache.get(key, '')
 
-    def _install_module(self, module_name):
-        module = self.env['ir.module.module'].sudo().search([('name', '=', module_name)])
-        if module.state not in ('installed', 'to install', 'to upgrade'):
-            module.button_immediate_install()
+    def _install_modules(self, module_names):
+        modules = self.env['ir.module.module'].sudo().search([('name', 'in', module_names), ('state', 'not in', ('installed', 'to install', 'to upgrade'))])
+        modules.button_immediate_install()
 
     def _on_save_payment_acquirer(self):
         self._install_module('account_payment')
@@ -94,37 +91,39 @@ class PaymentWizard(models.TransientModel):
     def add_payment_methods(self):
         """ Install required payment acquiers, configure them and mark the
             onboarding step as done."""
+        modules_to_install = list()
 
         if self.payment_method == 'paypal':
-            self._install_module('payment_paypal')
+            modules_to_install.append('payment_paypal')
 
         if self.payment_method == 'stripe':
-            self._install_module('payment_stripe')
+            modules_to_install.append('payment_stripe')
 
         if self.payment_method  in ('paypal', 'stripe', 'manual', 'other'):
-
-            self._on_save_payment_acquirer()
-
-            self.env.company.payment_onboarding_payment_method = self.payment_method
+            modules_to_install.append('account_payment')
+            self._install_modules(modules_to_install)
 
             # create a new env including the freshly installed module(s)
             new_env = api.Environment(self.env.cr, self.env.uid, self.env.context)
+            self = self.with_env(new_env)
+
+            self.env.company.payment_onboarding_payment_method = self.payment_method
 
             if self.payment_method == 'paypal':
-                new_env.ref('payment.payment_acquirer_paypal').write({
+                self.env.ref('payment.payment_acquirer_paypal').write({
                     'paypal_email_account': self.paypal_email_account,
                     'paypal_seller_account': self.paypal_seller_account,
                     'paypal_pdt_token': self.paypal_pdt_token,
                     'state': 'enabled',
                 })
             if self.payment_method == 'stripe':
-                new_env.ref('payment.payment_acquirer_stripe').write({
+                self.env.ref('payment.payment_acquirer_stripe').write({
                     'stripe_secret_key': self.stripe_secret_key,
                     'stripe_publishable_key': self.stripe_publishable_key,
                     'state': 'enabled',
                 })
             if self.payment_method == 'manual':
-                manual_acquirer = self._get_manual_payment_acquirer(new_env)
+                manual_acquirer = self._get_manual_payment_acquirer()
                 if not manual_acquirer:
                     raise UserError(_(
                         'No manual payment method could be found for this company. ' +
