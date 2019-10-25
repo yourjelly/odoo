@@ -36,6 +36,7 @@ class TestBatchPicking(TransactionCase):
             'location_id': self.stock_location.id,
             'location_dest_id': self.customer_location.id,
         })
+        self.picking_client_1.action_confirm()
 
         self.picking_client_2 = self.env['stock.picking'].create({
             'location_id': self.stock_location.id,
@@ -53,6 +54,7 @@ class TestBatchPicking(TransactionCase):
             'location_id': self.stock_location.id,
             'location_dest_id': self.customer_location.id,
         })
+        self.picking_client_2.action_confirm()
 
         self.batch = self.env['stock.picking.batch'].create({
             'name': 'Batch 1',
