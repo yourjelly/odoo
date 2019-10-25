@@ -183,6 +183,7 @@ class EventEvent(models.Model):
     date_begin_located = fields.Char(string='Start Date Located', compute='_compute_date_begin_tz')
     date_end_located = fields.Char(string='End Date Located', compute='_compute_date_end_tz')
     is_one_day = fields.Boolean(compute='_compute_field_is_one_day')
+    duration_str = fields.Char(compute='_compute_duration_str')
 
     kanban_state = fields.Selection([('normal', 'In Progress'), ('done', 'Ended Stage'), ('blocked', 'Blocked')])
     kanban_state_label = fields.Char(compute='_compute_kanban_state_label', string='Kanban State Label', tracking=True)
@@ -210,6 +211,11 @@ class EventEvent(models.Model):
     badge_innerleft = fields.Html(string='Badge Inner Left')
     badge_innerright = fields.Html(string='Badge Inner Right')
     event_logo = fields.Html(string='Event Logo')
+
+    @api.depends('date_begin', 'date_end')
+    def _compute_duration_str(self):
+        for event in self:
+            event.duration_str = EventEvent._timedelta_2_biggest_uom_str(event.date_end - event.date_begin)
 
     def _get_default_stage_id(self):
         return self.env['event.stage'].search([('name', '=', 'New')])
@@ -408,6 +414,29 @@ class EventEvent(models.Model):
 
             result[event.id] = cal.serialize().encode('utf-8')
         return result
+
+    def _timedelta_2_biggest_uom_str(delta):
+        uom_converter = [
+            (3600 * 24 * 365, _('year'), _('years')),
+            (3600 * 24 * 30, _('month'), _('months')),
+            (3600 * 24 * 7, _('week'), _('weeks')),
+            (3600 * 24, _('day'), _('days')),
+            (3600, _('hour'), _('hours')),
+            (60, _('minute'), _('minutes')),
+            (0, _('second'), _('seconds'))
+        ]
+
+        total_seconds = delta.total_seconds()
+
+        for minimal_second, str_sing, str_plurial in uom_converter:
+            if total_seconds >= minimal_second:
+                unit = int(total_seconds // (minimal_second or 1))
+                if unit < 2:
+                    return str(unit) + ' ' + str_sing
+
+                return str(unit) + ' ' + str_plurial
+
+        return ''
 
 
 class EventRegistration(models.Model):

@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-from . import test_event_flow, test_mail_schedule
+from . import test_event_flow, test_mail_schedule, test_timedelta_convertion

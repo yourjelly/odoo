@@ -41,6 +41,15 @@ class Event(models.Model):
         'event.event.ticket', 'event_id', string='Event Ticket',
         copy=True)
 
+    sale_order_lines_ids = fields.One2many(
+        'sale.order.line', 'event_id',
+        string='All sale order lines pointing to this event')
+
+    sales_total_price = fields.Monetary(compute='_compute_sales_total_price')
+    currency_id = fields.Many2one(
+        'res.currency', string='Currency',
+        default=lambda self: self.env.company.currency_id.id, readonly=True)
+
     @api.onchange('event_type_id')
     def _onchange_type(self):
         super(Event, self)._onchange_type()
@@ -59,6 +68,18 @@ class Event(models.Model):
             return all(self.event_ticket_ids.with_context(active_test=False).mapped(lambda t: t.product_id.active))
         else:
             return False
+
+    @api.depends('sale_order_lines_ids')
+    def _compute_sales_total_price(self):
+        for event in self:
+            event.sales_total_price = sum([
+                event.currency_id._convert(
+                    sale_order_line_id.price_reduce_taxexcl,
+                    sale_order_line_id.currency_id,
+                    sale_order_line_id.company_id,
+                    sale_order_line_id.order_id.date_order)
+                for sale_order_line_id in event.sale_order_lines_ids
+            ])
 
 
 class EventTicket(models.Model):
