@@ -189,6 +189,9 @@ class WebsiteSale(ProductConfiguratorController):
 
         return domain
 
+    def _filter_products(self, products):
+        return products
+
     @http.route([
         '''/shop''',
         '''/shop/page/<int:page>''',
@@ -235,6 +238,7 @@ class WebsiteSale(ProductConfiguratorController):
         Category = request.env['product.public.category']
         search_categories = False
         search_product = Product.search(domain, order=self._get_search_order(post))
+        search_product = self._filter_products(search_product)
         if search:
             categories = search_product.mapped('public_categ_ids')
             search_categories = Category.search([('id', 'parent_of', categories.ids)] + request.website.website_domain())
@@ -255,7 +259,6 @@ class WebsiteSale(ProductConfiguratorController):
         pager = request.website.pager(url=url, total=product_count, page=page, step=ppg, scope=7, url_args=post)
         offset = pager['offset']
         products = search_product[offset: offset + ppg]
-
         ProductAttribute = request.env['product.attribute']
         if products:
             attributes = ProductAttribute.search([
