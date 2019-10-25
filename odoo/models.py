@@ -5060,6 +5060,12 @@ Record ids: %(records)s
             args[0]['allowed_company_ids'] = self._context.get('allowed_company_ids')
         if args and 'force_company' in args[0]:
             _logger.warning("Context key 'force_company' is no longer supported. Use with_company(company) instead.")
+        if args and 'company_id' in args[0]:
+            _logger.warning("Context key 'company_id' is no longer supported. Use with_company(company) instead.")
+            1/0
+        if args and 'company_ids' in args[0]:
+            _logger.warning("Context key 'company_ids' is no longer supported. Use with_company(company) instead.")
+            1/0
         if args and 'company' in args[0]:
             _logger.warning(
                 "Context key 'company' is not recommended, because "
