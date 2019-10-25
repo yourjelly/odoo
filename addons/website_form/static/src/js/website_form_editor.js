@@ -33,6 +33,19 @@ odoo.define('website_form_editor', function (require) {
                 }],
             }, options));
         },
+        /**
+         * @override
+         */
+        willStart: function () {
+            var self = this;
+            return this._super.apply(this, arguments).then(function () {
+                // Sets the focus on first available form input (or first footer button in case
+                // there is no form input) to ease the process with keyboard navigation
+                self.$modal.on('shown.bs.modal', function () {
+                    self.$modal.find('.modal-body .o_website_form_input, .modal-footer .btn').first().focus();
+                });
+            });
+        },
 
         //----------------------------------------------------------------------
         // Handlers
