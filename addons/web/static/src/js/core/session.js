@@ -294,7 +294,14 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
             url = self.url(url, null);
         }
 
-        return ajax.jsonRpc(url, "call", params, options);
+        var ret =  ajax.jsonRpc(url, "call", params, options);
+        ret.then((res) => {
+            if (params.kwargs) {
+                console.log("domain",params.kwargs.domain, "groupby",params.kwargs.groupby, "fields",params.kwargs.fields);
+                console.table(res);
+            }
+        });
+        return ret;
     },
     url: function (path, params) {
         params = _.extend(params || {});
