@@ -21,6 +21,14 @@ def compute_price(self, price_type, currency=None, uom=None, company=None, date=
 
     self = self.with_company(company)
 
+    fixed_price, fixed_price_currency = False, None
+    if price_type == 'list_price' and self.env.context.get('fixed_sales_price') and self.env.context.get('fixed_sales_currency'):
+        self.ensure_one()
+        assert self.is_product_variant, _("A fixed price cannot be given for a template.")
+        # Fixed prices should only be given for a fixed product
+        fixed_price = self.env.context.get('fixed_sales_price')
+        fixed_price_currency = self.env['res.currency'].browse(self.env.context.get('fixed_sales_currency'))
+
     ptavs = self.env['product.template.attribute.value'].browse(self.env.context.get('ptav_ids', []))
     targeted_product_id = self.env.context.get('p_id', None)
     if ptavs and targeted_product_id:
@@ -49,11 +57,16 @@ def compute_price(self, price_type, currency=None, uom=None, company=None, date=
     # VFE FIXME is this better for perf purposes ???
     prices = dict.fromkeys(self.ids, 0.0)
     for template in self:
-        # We should take lst_price if list_price :D
-        price = template[price_type] or 0.0
-        # yes, there can be attribute values for product template if it's not a variant YET
-        # (see field product.attribute create_variant)
-        price += ptav_extras
+        # template = product.product or product.template
+        if not fixed_price:
+            # We should take lst_price if list_price :D
+            price = template[price_type] or 0.0
+            if ptav_extras and targeted_product_id and template.id == targeted_product_id:
+                # yes, there can be attribute values for product template if it's not a variant YET
+                # (see field product.attribute create_variant)
+                price += ptav_extras
+        else:
+            price = fixed_price
 
         if uom and template.uom_id != uom:
             # Conversion to given uom
@@ -63,6 +76,8 @@ def compute_price(self, price_type, currency=None, uom=None, company=None, date=
         # This is right cause a field cannot be in more than one currency
         if currency:
             product_currency = template.cost_currency_id if price_type == 'standard_price' else template.currency_id
+            if fixed_price:
+                product_currency = fixed_price_currency
             # Conversion from product currency to given currency
             if currency != product_currency:
                 price = product_currency._convert(
