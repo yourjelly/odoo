@@ -675,7 +675,7 @@ class RepairLine(models.Model):
         partner = self.repair_id.partner_id
         pricelist = self.repair_id.pricelist_id
         if pricelist and self.product_id and self.type != 'remove':
-            price = pricelist.get_product_price(self.product_id, self.product_uom_qty, partner, uom_id=self.product_uom.id)
+            price = pricelist.get_product_price(self.product_id, self.product_uom_qty, uom_id=self.product_uom.id)
             if price is False:
                 warning = {
                     'title': _('No valid pricelist line found.'),
@@ -752,7 +752,7 @@ class RepairFee(models.Model):
         partner = self.repair_id.partner_id
         pricelist = self.repair_id.pricelist_id
         if pricelist and self.product_id:
-            price = pricelist.get_product_price(self.product_id, self.product_uom_qty, partner, uom_id=self.product_uom.id)
+            price = pricelist.get_product_price(self.product_id, self.product_uom_qty, uom_id=self.product_uom.id)
             if price is False:
                 warning = {
                     'title': _('No valid pricelist line found.'),
