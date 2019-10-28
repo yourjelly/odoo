@@ -243,7 +243,8 @@ class MultiLine(models.Model):
 
     multi = fields.Many2one('test_new_api.multi', ondelete='cascade')
     name = fields.Char()
-    partner = fields.Many2one('res.partner')
+    partner = fields.Many2one(related='multi.partner')
+    country = fields.Many2one(related='multi.partner.country_id')
     tags = fields.Many2many('test_new_api.multi.tag')
 
 

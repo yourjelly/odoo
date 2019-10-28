@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import unittest
 try:
     from unittest.mock import patch
 except ImportError:
@@ -675,3 +676,17 @@ class TestComputeOnchange(common.TransactionCase):
         form.foo = "foo6"
         self.assertEqual(form.bar, "foo6")
         self.assertEqual(form.baz, "baz5")
+
+    @unittest.skip("Not triggering the bug")
+    def test_compute_order(self):
+        partner = self.env['res.partner'].create({
+            'name': 'X',
+            'country_id': self.env.ref('base.be').id,
+        })
+        Multi = self.env['test_new_api.multi']
+        with common.Form(Multi.with_context(default_partner=partner.id)) as form:
+            self.assertEqual(form.partner, partner)
+            self.assertEqual(form.name, partner.name)
+            with form.lines.new() as line:
+                self.assertEqual(line.partner, partner)
+                self.assertEqual(line.country, partner.country_id)
