@@ -399,7 +399,7 @@ class EventRegistration(models.Model):
     event_end_date = fields.Datetime(string="Event End Date", related='event_id.date_end', readonly=True)
     company_id = fields.Many2one(
         'res.company', string='Company', related='event_id.company_id',
-        store=True, readonly=True, states={'draft': [('readonly', False)]})
+        store=True)
     state = fields.Selection([
         ('draft', 'Unconfirmed'), ('cancel', 'Cancelled'),
         ('open', 'Confirmed'), ('done', 'Attended')],

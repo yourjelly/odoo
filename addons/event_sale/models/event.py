@@ -64,6 +64,7 @@ class Event(models.Model):
 class EventTicket(models.Model):
     _name = 'event.event.ticket'
     _description = 'Event Ticket'
+    _check_company_auto = True
 
     def _default_product_id(self):
         return self.env.ref('event_sale.product_product_event', raise_if_not_found=False)
@@ -71,12 +72,15 @@ class EventTicket(models.Model):
     name = fields.Char(string='Name', required=True, translate=True)
     event_type_id = fields.Many2one('event.type', string='Event Category', ondelete='cascade')
     event_id = fields.Many2one('event.event', string="Event", ondelete='cascade')
-    company_id = fields.Many2one('res.company', related='event_id.company_id')
+    company_id = fields.Many2one('res.company', related='event_id.company_id', store=True, index=True)
     product_id = fields.Many2one('product.product', string='Product',
         required=True, domain=[("event_ok", "=", True)],
-        default=_default_product_id)
+        default=_default_product_id, check_company=True)
+    # VFE TODO 13.0 check_company
     registration_ids = fields.One2many('event.registration', 'event_ticket_id', string='Registrations')
-    price = fields.Float(string='Price', digits='Product Price')
+
+    price = fields.Monetary(string='Price')
+    currency_id = fields.Many2one('res.currency', compute="_compute_currency_id", store=True)
     deadline = fields.Date(string="Sales End")
     is_expired = fields.Boolean(string='Is Expired', compute='_compute_is_expired')
 
@@ -93,6 +97,11 @@ class EventTicket(models.Model):
     seats_unconfirmed = fields.Integer(string='Unconfirmed Seat Reservations', compute='_compute_seats', store=True)
     seats_used = fields.Integer(compute='_compute_seats', store=True)
 
+    @api.depends('company_id')
+    def _compute_currency_id(self):
+        for ticket in self:
+            ticket.currency_id = ticket.company_id.currency_id or self.env.company.currency_id
+
     def _compute_is_expired(self):
         for record in self:
             if record.deadline:
@@ -101,12 +110,19 @@ class EventTicket(models.Model):
             else:
                 record.is_expired = False
 
+    # VFE FIXME move that broll to website_event_sale, it isn't used in event_sale
+    # And don't use product.price anymore.
+    # (only in debug in one view, where the pricelist isn't in the context, thus having no utility).
+    @api.depends('product_id')
+    @api.depends_context('pricelist_id')
     def _compute_price_reduce(self):
         for record in self:
             product = record.product_id
             discount = product.lst_price and (product.lst_price - product.price) / product.lst_price or 0.0
             record.price_reduce = (1.0 - discount) * record.price
 
+    @api.depends('product_id', 'event_id')
+    @api.depends_context('pricelist_id')
     def _get_price_reduce_tax(self):
         for record in self:
             # sudo necessary here since the field is most probably accessed through the website
@@ -186,6 +202,8 @@ class EventRegistration(models.Model):
     # in addition to origin generic fields, add real relational fields to correctly
     # handle attendees linked to sales orders and their lines
     # TDE FIXME: maybe add an onchange on sale_order_id + origin
+    # VFE FIXME: make event registration origin generic (model_id and res_id ?)
+    # and sale_order_id related to sale_order_line_id ?
     sale_order_id = fields.Many2one('sale.order', string='Source Sales Order', ondelete='cascade')
     sale_order_line_id = fields.Many2one('sale.order.line', string='Sales Order Line', ondelete='cascade')
     campaign_id = fields.Many2one('utm.campaign', 'Campaign', related="sale_order_id.campaign_id", store=True)
