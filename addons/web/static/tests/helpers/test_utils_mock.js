@@ -11,6 +11,7 @@ odoo.define('web.test_utils_mock', function (require) {
  */
 
 var basic_fields = require('web.basic_fields');
+var concurrency = require('web.concurrency');
 var config = require('web.config');
 var core = require('web.core');
 var dom = require('web.dom');
@@ -18,6 +19,9 @@ var MockServer = require('web.MockServer');
 var session = require('web.session');
 
 var DebouncedField = basic_fields.DebouncedField;
+
+const originalRequestAnimationFrame = owl.Component.scheduler.requestAnimationFrame;
+const originalDelay = concurrency.delay;
 
 //------------------------------------------------------------------------------
 // Private functions
@@ -569,6 +573,22 @@ function patchSetTimeout() {
     };
 }
 
+function patchRequestAnimationFrame() {
+    owl.Component.scheduler.requestAnimationFrame = callback => {
+        setTimeout(callback);
+        return 1;
+    };
+    concurrency.delay = delay => {
+        return new Promise(resolve => {
+            setTimeout(() => setTimeout(() => resolve()), delay);
+        });
+    };
+}
+
+function unpatchRequestAnimationFrame() {
+    owl.Component.requestAnimationFrame = originalRequestAnimationFrame;
+    concurrency.delay = originalDelay;
+}
 
 return {
     addMockEnvironment: addMockEnvironment,
@@ -576,7 +596,9 @@ return {
     intercept: intercept,
     patchDate: patchDate,
     patch: patch,
+    patchRequestAnimationFrame: patchRequestAnimationFrame,
     unpatch: unpatch,
+    unpatchRequestAnimationFrame: unpatchRequestAnimationFrame,
     patchSetTimeout: patchSetTimeout,
 };
 

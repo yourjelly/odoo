@@ -12,7 +12,6 @@ var concurrency = require('web.concurrency');
  * testUtils file.
  */
 
-
 /**
  * simulate a drag and drop operation between 2 jquery nodes: $el and $to.
  * This is a crude simulation, with only the mousedown, mousemove and mouseup
@@ -23,8 +22,8 @@ var concurrency = require('web.concurrency');
  *   merged.  This is not the default as of now, because handlers are triggered
  *   synchronously, which is not the same as the 'reality'.
  *
- * @param {jqueryElement|HTMLElement} $el
- * @param {jqueryElement|HTMLElement} $to
+ * @param {jQuery|EventTarget} $el
+ * @param {jQuery|EventTarget} $to
  * @param {Object} [options]
  * @param {string|Object} [options.position='center'] target position:
  *   can either be one of {'top', 'bottom', 'left', 'right'} or
@@ -36,14 +35,14 @@ var concurrency = require('web.concurrency');
  * @param {boolean} [options.withTrailingClick=false] if true, this utility
  *   function will also trigger a click on the target after the mouseup event
  *   (this is actually what happens when a drag and drop operation is done)
- * @param {jQuery|HTMLElement} [options.mouseenterTarget=undefined] target of the mouseenter event
- * @param {jQuery|HTMLElement} [options.mousedownTarget=undefined] target of the mousedown event
- * @param {jQuery|HTMLElement} [options.mousemoveTarget=undefined] target of the mousemove event
- * @param {jQuery|HTMLElement} [options.mouseupTarget=undefined] target of the mouseup event
- * @param {jQuery|HTMLElement} [options.ctrlKey=undefined] if the ctrl key should be considered pressed at the time of mouseup
+ * @param {jQuery|EventTarget} [options.mouseenterTarget=undefined] target of the mouseenter event
+ * @param {jQuery|EventTarget} [options.mousedownTarget=undefined] target of the mousedown event
+ * @param {jQuery|EventTarget} [options.mousemoveTarget=undefined] target of the mousemove event
+ * @param {jQuery|EventTarget} [options.mouseupTarget=undefined] target of the mouseup event
+ * @param {jQuery|EventTarget} [options.ctrlKey=undefined] if the ctrl key should be considered pressed at the time of mouseup
  * @returns {Promise}
  */
-function dragAndDrop($el, $to, options) {
+async function dragAndDrop($el, $to, options) {
     let el = null;
     if ($el instanceof EventTarget) {
         el = $el;
@@ -114,7 +113,7 @@ function dragAndDrop($el, $to, options) {
         // being dragged. So it's necessary to finish the drop when the test is
         // over otherwise it's impossible for the next tests to drag and
         // drop elements.
-        $el.on('remove', function () {
+        $el.on('remove', async () => {
             triggerEvent($el, 'mouseup');
         });
     }
@@ -126,7 +125,7 @@ function dragAndDrop($el, $to, options) {
  * sometimes necessary because the basic way to trigger an event (such as
  * $el.trigger('mousemove')); ) is too crude for some uses.
  *
- * @param {jQuery|HTMLElement} $el
+ * @param {jQuery|EventTarget} $el
  * @param {string} type a mouse event type, such as 'mousedown' or 'mousemove'
  * @returns {Promise}
  */
@@ -180,7 +179,7 @@ function triggerPositionalMouseEvent(x, y, type) {
  */
 function triggerKeypressEvent(char) {
     var keycode;
-    if (char === "Enter") {
+    if (char === 'Enter') {
         keycode = $.ui.keyCode.ENTER;
     } else if (char === "Tab") {
         keycode = $.ui.keyCode.TAB;
@@ -188,6 +187,7 @@ function triggerKeypressEvent(char) {
         keycode = char.charCodeAt(0);
     }
     return triggerEvent(document.body, 'keypress', {
+        key: char,
         keyCode: keycode,
         which: keycode,
     });
@@ -197,24 +197,34 @@ function triggerKeypressEvent(char) {
  * Click on a specified element. If the option first or last is not specified,
  * this method also check the unicity and the visibility of the target.
  *
- * @param {string|NodeList|jQuery} el (if string: it is a (jquery) selector)
- * @param {Object} [options]
- * @param {boolean} [options.first=false] if true, clicks on the first element
- * @param {boolean} [options.last=false] if true, clicks on the last element
+ * @param {string|EventTarget|EventTarget[]} el (if string: it is a (jquery) selector)
+ * @param {boolean} [options={}] click options
  * @param {boolean} [options.allowInvisible=false] if true, clicks on the
  *   element event if it is invisible
- * @param {boolean} [options.shouldTriggerClick=false] if true, trigger the
- *   click event without calling the function click of jquery
+ * @param {boolean} [options.first=false] if true, clicks on the first element
+ * @param {boolean} [options.last=false] if true, clicks on the last element
  * @returns {Promise}
  */
-function click(el, options) {
-    options = options || {};
-    var matches = typeof el === 'string' ? $(el) : el;
-    var selectorMsg = typeof el === 'string' ? `(selector: ${el})` : '';
-    if (!matches.filter) { // it might be an array of dom elements
-        matches = $(matches);
+async function click(el, options={}) {
+    let matches, target;
+    let selectorMsg = "";
+    let jquery = false;
+    if (typeof el === 'string') {
+        el = $(el);
     }
-    var validMatches = options.allowInvisible ? matches : matches.filter(':visible');
+    if (el instanceof EventTarget) {
+        // EventTarget
+        matches = [el];
+    } else {
+        // Any other itterable object containing EventTarget objects (jQuery, HTMLCollection, etc.)
+        if (el instanceof jQuery) {
+            jquery = true;
+        }
+        matches = [...el];
+    }
+
+    const validMatches = options.allowInvisible ?
+        matches : matches.filter(t => $(t).is(':visible'));
 
     if (options.first) {
         if (validMatches.length === 1) {
@@ -222,24 +232,24 @@ function click(el, options) {
                 ' you are sure that there is exactly one target, please use the ' +
                 'click function instead of the clickFirst function');
         }
-        validMatches = validMatches.first();
+        target = validMatches[0];
     } else if (options.last) {
         if (validMatches.length === 1) {
             throw new Error(`There should be more than one visible target ${selectorMsg}.  If` +
                 ' you are sure that there is exactly one target, please use the ' +
                 'click function instead of the clickLast function');
         }
-        validMatches = validMatches.last();
+        target = validMatches[validMatches.length - 1];
+    } else if (validMatches.length !== 1) {
+        throw new Error(`Found ${validMatches.length} elements to click on, instead of 1 ${selectorMsg}`);
+    } else {
+        target = validMatches[0];
     }
     if (validMatches.length === 0 && matches.length > 0) {
         throw new Error(`Element to click on is not visible ${selectorMsg}`);
-    } else if (validMatches.length !== 1) {
-        throw new Error(`Found ${validMatches.length} elements to click on, instead of 1 ${selectorMsg}`);
     }
-    if (options.shouldTriggerClick) {
-        return triggerEvent(validMatches, 'click');
-    } else {
-        validMatches.click();
+    if (jquery) {
+        target = $(target);
     }
 
     return concurrency.delay(0);
@@ -250,11 +260,10 @@ function click(el, options) {
  * only one visible element, we trigger an error. In that case, it is better to
  * use the click helper instead.
  *
- * @param {string|NodeList|jQuery} el (if string: it is a (jquery) selector)
+ * @param {string|EventTarget|EventTarget[]} el (if string: it is a (jquery) selector)
+ * @param {boolean} [options={}] click options
  * @param {boolean} [options.allowInvisible=false] if true, clicks on the
  *   element event if it is invisible
- * @param {boolean} [options.shouldTriggerClick=false] if true, trigger the
- *   click event without calling the function click of jquery
  * @returns {Promise}
  */
 function clickFirst(el, options) {
@@ -266,11 +275,10 @@ function clickFirst(el, options) {
  * only one visible element, we trigger an error. In that case, it is better to
  * use the click helper instead.
  *
- * @param {string|NodeList|jQuery} el
+ * @param {string|EventTarget|EventTarget[]} el (if string: it is a (jquery) selector)
+ * @param {boolean} [options={}] click options
  * @param {boolean} [options.allowInvisible=false] if true, clicks on the
  *   element event if it is invisible
- * @param {boolean} [options.shouldTriggerClick=false] if true, trigger the
- *   click event without calling the function click of jquery
  * @returns {Promise}
  */
 function clickLast(el, options) {
@@ -278,50 +286,79 @@ function clickLast(el, options) {
 }
 
 /**
- * Trigger events on the specified target
- * @param {jQuery|HTMLElement} $el should target a single dom node
+ * Triggers multiple events on the specified element.
+ *
+ * @param {EventTarget|EventTarget[]} el
  * @param {string[]} events the events you want to trigger
  * @returns {Promise}
  */
-function triggerEvents($el, events) {
-    if ($el instanceof jQuery) {
-        if ($el.length !== 1) {
-            throw new Error(`target has length ${$el.length} instead of 1`);
+async function triggerEvents(el, events) {
+    if (el instanceof jQuery) {
+        if (el.length !== 1) {
+            throw new Error(`target has length ${el.length} instead of 1`);
         }
-    } else if (!($el instanceof EventTarget)) {
-        throw new Error(`target is neither a jQuery element nor an HTML element`);
     }
     if (typeof events === 'string') {
         events = [events];
     }
-    return events.reduce((previous, event) => {
-        return previous.then(() => triggerEvent($el, event));
-    }, Promise.resolve());
+
+    for (let e = 0; e < events.length; e ++) {
+        await triggerEvent(el, events[e], {});
+    }
 }
 
 /**
- * Trigger an event on the specified target.
- * This function will dispatch a native event to an HTMLElement or a
- * jQuery event to a jQuery object.
- * @param {jQuery|HTMLElement} $el event target.
- * @param {string} type event type
- * @param {Object} [options] event attributes
+ * Triggers an event on the specified target.
+ * This function will dispatch a native event to an EventTarget or a
+ * jQuery event to a jQuery object. This behaviour can be overriden by the
+ * jquery option.
+ *
+ * @param {EventTarget|EventTarget[]} el
+ * @param {string} eventType event type
+ * @param {Object} [eventAttrs] event attributes
+ *   on a jQuery element with the `$.fn.trigger` function
  * @returns {Promise}
  */
-function triggerEvent($el, type, options={}) {
-    if ($el instanceof EventTarget) {
-        const event = new Event(type);
-        Object.assign(event, options);
+async function triggerEvent(el, eventType, eventAttrs={}) {
+    let matches;
+    let selectorMsg = "";
+    let jquery = false;
+    if (el instanceof EventTarget) {
+        // EventTarget
+        matches = [el];
+    } else {
+        // Any other itterable object containing EventTarget objects (jQuery, HTMLCollection, etc.)
+        if (el instanceof jQuery) {
+            jquery = true;
+        }
+        matches = [...el];
+    }
+
+    if (matches.length !== 1) {
+        throw new Error(`Found ${matches.length} elements to trigger "${eventType}" on, instead of 1 ${selectorMsg}`);
+    }
+
+    const target = jquery ? $(matches[0]) : matches[0];
+
+    if (target[eventType] && !Object.keys(eventAttrs).length) {
+        // Calls the built-in EventTarget or jQuery prototype function
+        // e.g. click(), focus(), etc.
+        target[eventType]();
+    } else if (jquery) {
+        // Triggers a jQuery event
+        const event = Object.keys(eventAttrs).length ?
+            $.Event(eventType, eventAttrs) :
+            eventType;
+        target.trigger(event);
+    } else {
+        // Triggers a new native event
+        const event = new Event(eventType);
+        Object.assign(event, eventAttrs);
         Object.defineProperty(event, 'target', {
             writable: false,
-            value: $el,
+            value: target,
         });
-        $el.dispatchEvent(event);
-    } else {
-        const event = Object.keys(options).length ?
-            $.Event(type, options) :
-            type;
-        $el.trigger(event);
+        target.dispatchEvent(event);
     }
     return concurrency.delay(0);
 }

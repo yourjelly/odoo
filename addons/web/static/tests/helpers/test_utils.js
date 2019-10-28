@@ -122,7 +122,9 @@ return Promise.all([
             intercept: testUtilsMock.intercept,
             patch: testUtilsMock.patch,
             patchDate: testUtilsMock.patchDate,
+            patchRequestAnimationFrame: testUtilsMock.patchRequestAnimationFrame,
             unpatch: testUtilsMock.unpatch,
+            unpatchRequestAnimationFrame: testUtilsMock.unpatchRequestAnimationFrame,
             fieldsViewGet: testUtilsMock.fieldsViewGet,
             patchSetTimeout: testUtilsMock.patchSetTimeout,
         },
@@ -167,7 +169,7 @@ return Promise.all([
             many2one: {
                 clickOpenDropdown: testUtilsFields.clickOpenM2ODropdown,
                 clickHighlightedItem: testUtilsFields.clickM2OHighlightedItem,
-				clickItem: testUtilsFields.clickM2OItem,
+                clickItem: testUtilsFields.clickM2OItem,
                 searchAndClickItem: testUtilsFields.searchAndClickM2OItem,
             },
             editInput: testUtilsFields.editInput,
@@ -184,6 +186,7 @@ return Promise.all([
             dropFiles: testUtilsFile.dropFiles,
         },
 
+        cleanTarget: testUtilsCreate.cleanTarget,
         createActionManager: testUtilsCreate.createActionManager,
         createDebugManager: testUtilsCreate.createDebugManager,
         createAsyncView: testUtilsCreate.createView,
@@ -196,6 +199,8 @@ return Promise.all([
         makeTestPromiseWithAssert: makeTestPromiseWithAssert,
         nextMicrotaskTick: nextMicrotaskTick,
         nextTick: nextTick,
+        prepareTarget: testUtilsCreate.prepareTarget,
+        returnAfterNextAnimationFrame: testUtilsDom.returnAfterNextAnimationFrame,
 
         // backward-compatibility
         addMockEnvironment: deprecated(testUtilsMock.addMockEnvironment, 'mock'),
