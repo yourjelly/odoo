@@ -664,12 +664,13 @@ class PosOrderLine(models.Model):
     @api.onchange('product_id')
     def _onchange_product_id(self):
         if self.product_id:
+            # VFE TODO support no pricelist in pos also...
             if not self.order_id.pricelist_id:
                 raise UserError(
                     _('You have to select a pricelist in the sale form !\n'
                       'Please set one before choosing a product.'))
             price = self.order_id.pricelist_id.get_product_price(
-                self.product_id, self.qty or 1.0, self.order_id.partner_id)
+                self.product_id, self.qty or 1.0, self.product_uom_id)
             self._onchange_qty()
             self.tax_ids = self.product_id.taxes_id.filtered(lambda r: not self.company_id or r.company_id == self.company_id)
             tax_ids_after_fiscal_position = self.order_id.fiscal_position_id.map_tax(self.tax_ids, self.product_id, self.order_id.partner_id)

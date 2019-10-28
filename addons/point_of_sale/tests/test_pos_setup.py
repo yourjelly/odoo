@@ -45,7 +45,7 @@ class TestPoSSetup(TestPoSCommon):
 
     def test_product_price(self):
         def get_price(pricelist, product):
-            return pricelist.get_product_price(product, 1, self.customer)
+            return pricelist.get_product_price(product, 1, product.uom_id)
 
 
         # check usd pricelist
